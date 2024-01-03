@@ -181,13 +181,13 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
                 set_data_callback_(&state_, data_.data(), static_cast<int>(data_.size()));
               }
             },
-            [&effect_ptrs](EffectControlMessage& effect_control_message) noexcept {
+            [](EffectControlMessage& effect_control_message) noexcept {
               assert(effect_control_message.effect);
               effect_control_message.effect->SetControl(effect_control_message.index,
                                                         effect_control_message.value,
                                                         effect_control_message.slope_per_frame);
             },
-            [&effect_ptrs](EffectDataMessage& effect_data_message) noexcept {
+            [](EffectDataMessage& effect_data_message) noexcept {
               assert(effect_data_message.effect);
               effect_data_message.effect->SetData(effect_data_message.data);
             },

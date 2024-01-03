@@ -18,12 +18,9 @@ using ::barely::internal::Performer;
 using ::barely::internal::Task;
 
 // Effect.
-struct BarelyEffect {
+struct BarelyEffect : public Observer<Effect> {
   // Internal instrument.
   Instrument& instrument;
-
-  // Internal effect.
-  Observer<Effect> internal;
 
  private:
   // Ensures that the instance can only be managed via explicit API calls.
@@ -33,13 +30,18 @@ struct BarelyEffect {
                                                 BarelyEffectHandle* out_effect);
   friend BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
 
-  // Default constructor.
+  // Constructs `BarelyEffect` with `definition`, `instrument`, and `process_order`.
   BarelyEffect(Instrument& instrument, BarelyEffectDefinition definition,
                int process_order) noexcept
-      : instrument(instrument), internal(instrument.CreateEffect(definition, process_order)) {}
+      : instrument(instrument),
+        Observer<Effect>(instrument.CreateEffect(definition, process_order)) {}
 
-  // Default destructor.
-  ~BarelyEffect() noexcept = default;
+  // Destroys `BarelyEffect`.
+  ~BarelyEffect() noexcept {
+    if (*this) {
+      instrument.DestroyEffect(**this);
+    }
+  }
 
   // Non-copyable and non-movable.
   BarelyEffect(const BarelyEffect& other) noexcept = delete;
@@ -49,13 +51,7 @@ struct BarelyEffect {
 };
 
 // Instrument.
-struct BarelyInstrument {
-  // Internal engine.
-  Engine& engine;
-
-  // Internal instrument.
-  Observer<Instrument> internal;
-
+struct BarelyInstrument : public Observer<Instrument> {
  private:
   // Ensures that the instance can only be managed via explicit API calls.
   friend BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusicianHandle musician,
@@ -64,27 +60,30 @@ struct BarelyInstrument {
                                                     BarelyInstrumentHandle* out_instrument);
   friend BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 
-  // Constructs a new `BarelyInstrument` with a given `engine`, `definition`,
-  // and `frame_rate`.
+  // Constructs `BarelyInstrument` with `engine`, `definition`, and `frame_rate`.
   BarelyInstrument(Engine& engine, BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
-      : engine(engine), internal(engine.CreateInstrument(definition, frame_rate)) {}
+      : Observer<Instrument>(engine.CreateInstrument(definition, frame_rate)), engine_(engine) {}
 
-  // Default destructor.
-  ~BarelyInstrument() noexcept = default;
+  // Destroys `BarelyInstrument`.
+  ~BarelyInstrument() noexcept {
+    if (*this) {
+      engine_.DestroyInstrument(**this);
+    }
+  }
 
   // Non-copyable and non-movable.
   BarelyInstrument(const BarelyInstrument& other) noexcept = delete;
   BarelyInstrument& operator=(const BarelyInstrument& other) noexcept = delete;
   BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
   BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
+
+  // Internal engine.
+  Engine& engine_;
 };
 
 // Musician.
-struct BarelyMusician {
-  // Internal engine.
-  Engine engine;
-
+struct BarelyMusician : public Engine {
  private:
   // Ensures that the instance can only be managed via explicit API calls.
   friend BARELY_EXPORT bool BarelyMusician_Create(BarelyMusicianHandle* out_musician);
@@ -104,40 +103,38 @@ struct BarelyMusician {
 };
 
 // Performer.
-struct BarelyPerformer {
-  // Internal engine.
-  Engine& engine;
-
-  // Internal performer.
-  Observer<Performer> internal;
-
+struct BarelyPerformer : public Observer<Performer> {
  private:
   // Ensures that the instance can only be managed via explicit API calls.
   friend BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician,
                                                    BarelyPerformerHandle* out_performer);
   friend BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
 
-  // Constructs a new `BarelyPerformer` with a given `engine`.
+  // Constructs `BarelyPerformer` with `engine`.
   explicit BarelyPerformer(Engine& engine) noexcept
-      : engine(engine), internal(engine.CreatePerformer()) {}
+      : Observer<Performer>(engine.CreatePerformer()), engine_(engine) {}
 
-  // Default destructor.
-  ~BarelyPerformer() noexcept = default;
+  // Destroys `BarelyPerformer`.
+  ~BarelyPerformer() noexcept {
+    if (*this) {
+      engine_.DestroyPerformer(**this);
+    }
+  }
 
   // Non-copyable and non-movable.
   BarelyPerformer(const BarelyPerformer& other) noexcept = delete;
   BarelyPerformer& operator=(const BarelyPerformer& other) noexcept = delete;
   BarelyPerformer(BarelyPerformer&& other) noexcept = delete;
   BarelyPerformer& operator=(BarelyPerformer&& other) noexcept = delete;
+
+  // Internal engine.
+  Engine& engine_;
 };
 
 // Task.
-struct BarelyTask {
+struct BarelyTask : public Observer<Task> {
   // Internal performer.
   Performer& performer;
-
-  // Internal task.
-  Observer<Task> internal;
 
  private:
   // Ensures that the instance can only be managed via explicit API calls.
@@ -147,16 +144,20 @@ struct BarelyTask {
                                               BarelyTaskHandle* out_task);
   friend BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
 
-  // Constructs a new `BarelyTask` with a given `performer`, `definition`,
-  // `position`, `process_order`, and `user_data`.
+  // Constructs `BarelyTask` with `performer`, `definition`, `position`, `process_order`, and
+  // `user_data`.
   BarelyTask(Performer& performer, BarelyTaskDefinition definition, double position,
              int process_order, void* user_data) noexcept
       : performer(performer),
-        internal(performer.CreateTask(definition, /*is_one_off=*/false, position, process_order,
-                                      user_data)) {}
+        Observer<Task>(performer.CreateTask(definition, /*is_one_off=*/false, position,
+                                            process_order, user_data)) {}
 
-  // Default destructor.
-  ~BarelyTask() noexcept = default;
+  // Destroys `BarelyTask`.
+  ~BarelyTask() noexcept {
+    if (*this) {
+      performer.DestroyTask(**this);
+    }
+  }
 
   // Non-copyable and non-movable.
   BarelyTask(const BarelyTask& other) noexcept = delete;
@@ -167,27 +168,24 @@ struct BarelyTask {
 
 bool BarelyEffect_Create(BarelyInstrumentHandle instrument, BarelyEffectDefinition definition,
                          int32_t process_order, BarelyEffectHandle* out_effect) {
-  if (!instrument || !instrument->internal || !out_effect) return false;
+  if (!instrument || !(*instrument) || !out_effect) return false;
 
-  *out_effect = new BarelyEffect(*instrument->internal, definition, process_order);
+  *out_effect = new BarelyEffect(**instrument, definition, process_order);
   return true;
 }
 
 bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
   if (!effect) return false;
 
-  if (effect->internal) {
-    effect->instrument.DestroyEffect(*effect->internal);
-  }
   delete effect;
   return true;
 }
 
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* out_value) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
   if (!out_value) return false;
 
-  if (const auto* control = effect->instrument.GetEffectControl(*effect->internal, index)) {
+  if (const auto* control = effect->instrument.GetEffectControl(**effect, index)) {
     *out_value = control->GetValue();
     return true;
   }
@@ -196,10 +194,10 @@ bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* o
 
 bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
                                        BarelyControlDefinition* out_definition) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
   if (!out_definition) return false;
 
-  if (const auto* control = effect->instrument.GetEffectControl(*effect->internal, index)) {
+  if (const auto* control = effect->instrument.GetEffectControl(**effect, index)) {
     *out_definition = control->GetDefinition();
     return true;
   }
@@ -207,53 +205,53 @@ bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
 }
 
 bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect, int32_t* out_process_order) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
   if (!out_process_order) return false;
 
-  *out_process_order = effect->instrument.GetEffectProcessOrder(*effect->internal);
+  *out_process_order = effect->instrument.GetEffectProcessOrder(**effect);
   return true;
 }
 
 bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
 
-  effect->instrument.ResetAllEffectControls(*effect->internal);
+  effect->instrument.ResetAllEffectControls(**effect);
   return true;
 }
 
 bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t index) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
 
-  return effect->instrument.ResetEffectControl(*effect->internal, index);
+  return effect->instrument.ResetEffectControl(**effect, index);
 }
 
 bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
                              double slope_per_beat) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
 
-  return effect->instrument.SetEffectControl(*effect->internal, index, value, slope_per_beat);
+  return effect->instrument.SetEffectControl(**effect, index, value, slope_per_beat);
 }
 
 bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
                                   BarelyControlEventDefinition definition, void* user_data) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
 
-  effect->instrument.SetEffectControlEvent(*effect->internal, definition, user_data);
+  effect->instrument.SetEffectControlEvent(**effect, definition, user_data);
   return true;
 }
 
 bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
 
-  effect->instrument.SetEffectData(*effect->internal, {static_cast<const std::byte*>(data),
-                                                       static_cast<const std::byte*>(data) + size});
+  effect->instrument.SetEffectData(
+      **effect, {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
   return true;
 }
 
 bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order) {
-  if (!effect || !effect->internal) return false;
+  if (!effect || !(*effect)) return false;
 
-  effect->instrument.SetEffectProcessOrder(*effect->internal, process_order);
+  effect->instrument.SetEffectProcessOrder(**effect, process_order);
   return true;
 }
 
@@ -263,26 +261,23 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefi
   if (frame_rate <= 0) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = new BarelyInstrument(musician->engine, definition, frame_rate);
+  *out_instrument = new BarelyInstrument(*musician, definition, frame_rate);
   return true;
 }
 
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  if (instrument->internal) {
-    instrument->engine.DestroyInstrument(*instrument->internal);
-  }
   delete instrument;
   return true;
 }
 
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t index,
                                  double* out_value) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
   if (!out_value) return false;
 
-  if (const auto* control = instrument->internal->GetControl(index)) {
+  if (const auto* control = (*instrument)->GetControl(index)) {
     *out_value = control->GetValue();
     return true;
   }
@@ -291,10 +286,10 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t inde
 
 bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, int32_t index,
                                            BarelyControlDefinition* out_definition) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
   if (!out_definition) return false;
 
-  if (const auto* control = instrument->internal->GetControl(index)) {
+  if (const auto* control = (*instrument)->GetControl(index)) {
     *out_definition = control->GetDefinition();
     return true;
   }
@@ -303,10 +298,10 @@ bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, in
 
 bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
                                      double* out_value) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
   if (!out_value) return false;
 
-  if (const auto* note_control = instrument->internal->GetNoteControl(pitch, index)) {
+  if (const auto* note_control = (*instrument)->GetNoteControl(pitch, index)) {
     *out_value = note_control->GetValue();
     return true;
   }
@@ -316,10 +311,10 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double p
 bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument, double pitch,
                                                int32_t index,
                                                BarelyControlDefinition* out_definition) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
   if (!out_definition) return false;
 
-  if (const auto* note_control = instrument->internal->GetNoteControl(pitch, index)) {
+  if (const auto* note_control = (*instrument)->GetNoteControl(pitch, index)) {
     *out_definition = note_control->GetDefinition();
     return true;
   }
@@ -328,121 +323,122 @@ bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument
 
 bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
                                bool* out_is_note_on) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
   if (!out_is_note_on) return false;
 
-  *out_is_note_on = instrument->internal->IsNoteOn(pitch);
+  *out_is_note_on = (*instrument)->IsNoteOn(pitch);
   return true;
 }
 
 bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
                               int32_t output_channel_count, int32_t output_frame_count,
                               double timestamp) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  return instrument->internal->Process(output_samples, output_channel_count, output_frame_count,
-                                       timestamp);
+  return (*instrument)
+      ->Process(output_samples, output_channel_count, output_frame_count, timestamp);
 }
 
 bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  instrument->internal->ResetAllControls();
+  (*instrument)->ResetAllControls();
   return true;
 }
 
 bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument, double pitch) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  return instrument->internal->ResetAllNoteControls(pitch);
+  return (*instrument)->ResetAllNoteControls(pitch);
 }
 
 bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t index) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  return instrument->internal->ResetControl(index);
+  return (*instrument)->ResetControl(index);
 }
 
 bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument, double pitch,
                                        int32_t index) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  return instrument->internal->ResetNoteControl(pitch, index);
+  return (*instrument)->ResetNoteControl(pitch, index);
 }
 
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  instrument->internal->SetAllNotesOff();
+  (*instrument)->SetAllNotesOff();
   return true;
 }
 
 bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index, double value,
                                  double slope_per_beat) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  return instrument->internal->SetControl(index, value, slope_per_beat);
+  return (*instrument)->SetControl(index, value, slope_per_beat);
 }
 
 bool BarelyInstrument_SetControlEvent(BarelyInstrumentHandle instrument,
                                       BarelyControlEventDefinition definition, void* user_data) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  instrument->internal->SetControlEvent(definition, user_data);
+  (*instrument)->SetControlEvent(definition, user_data);
   return true;
 }
 
 bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* data, int32_t size) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
   if (size < 0 || (!data && size > 0)) return false;
 
-  instrument->internal->SetData(
-      {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
+  (*instrument)
+      ->SetData({static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
   return true;
 }
 
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
                                      double value, double slope_per_beat) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  return instrument->internal->SetNoteControl(pitch, index, value, slope_per_beat);
+  return (*instrument)->SetNoteControl(pitch, index, value, slope_per_beat);
 }
 
 bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle instrument,
                                           BarelyNoteControlEventDefinition definition,
                                           void* user_data) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  instrument->internal->SetNoteControlEvent(definition, user_data);
+  (*instrument)->SetNoteControlEvent(definition, user_data);
   return true;
 }
 
 bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  instrument->internal->SetNoteOff(pitch);
+  (*instrument)->SetNoteOff(pitch);
   return true;
 }
 
 bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
                                       BarelyNoteOffEventDefinition definition, void* user_data) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  instrument->internal->SetNoteOffEvent(definition, user_data);
+  (*instrument)->SetNoteOffEvent(definition, user_data);
   return true;
 }
 
 bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch, double intensity) {
-  if (!instrument) return false;
+  if (!instrument || !(*instrument)) return false;
 
-  instrument->internal->SetNoteOn(pitch, intensity);
+  (*instrument)->SetNoteOn(pitch, intensity);
   return true;
 }
 
 bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
                                      BarelyNoteOnEventDefinition definition, void* user_data) {
-  if (!instrument) return false;
-  instrument->internal->SetNoteOnEvent(definition, user_data);
+  if (!instrument || !(*instrument)) return false;
+
+  (*instrument)->SetNoteOnEvent(definition, user_data);
   return true;
 }
 
@@ -464,7 +460,7 @@ bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo) {
   if (!musician) return false;
   if (!out_tempo) return false;
 
-  *out_tempo = musician->engine.GetTempo();
+  *out_tempo = musician->GetTempo();
   return true;
 }
 
@@ -472,21 +468,21 @@ bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, double* out_time
   if (!musician) return false;
   if (!out_timestamp) return false;
 
-  *out_timestamp = musician->engine.GetTimestamp();
+  *out_timestamp = musician->GetTimestamp();
   return true;
 }
 
 bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo) {
   if (!musician) return false;
 
-  musician->engine.SetTempo(tempo);
+  musician->SetTempo(tempo);
   return true;
 }
 
 bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   if (!musician) return false;
 
-  musician->engine.Update(timestamp);
+  musician->Update(timestamp);
   return true;
 }
 
@@ -494,163 +490,155 @@ bool BarelyPerformer_Create(BarelyMusicianHandle musician, BarelyPerformerHandle
   if (!musician) return false;
   if (!out_performer) return false;
 
-  *out_performer = new BarelyPerformer(musician->engine);
+  *out_performer = new BarelyPerformer(*musician);
   return true;
 }
 
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  if (!performer->internal) {
-    performer->engine.DestroyPerformer(*performer->internal);
-  }
   delete performer;
   return true;
 }
 
 bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
                                           double* out_loop_begin_position) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
   if (!out_loop_begin_position) return false;
 
-  *out_loop_begin_position = performer->internal->GetLoopBeginPosition();
+  *out_loop_begin_position = (*performer)->GetLoopBeginPosition();
   return true;
 }
 
 bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer, double* out_loop_length) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
   if (!out_loop_length) return false;
 
-  *out_loop_length = performer->internal->GetLoopLength();
+  *out_loop_length = (*performer)->GetLoopLength();
   return true;
 }
 
 bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, double* out_position) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
   if (!out_position) return false;
 
-  *out_position = performer->internal->GetPosition();
+  *out_position = (*performer)->GetPosition();
   return true;
 }
 
 bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool* out_is_looping) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
   if (!out_is_looping) return false;
 
-  *out_is_looping = performer->internal->IsLooping();
+  *out_is_looping = (*performer)->IsLooping();
   return true;
 }
 
 bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
   if (!out_is_playing) return false;
 
-  *out_is_playing = performer->internal->IsPlaying();
+  *out_is_playing = (*performer)->IsPlaying();
   return true;
 }
 
 bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
                                         BarelyTaskDefinition definition, double position,
                                         int32_t process_order, void* user_data) {
-  if (!performer || !performer->internal) return false;
+  if (!performer || !(*performer)) return false;
 
-  if (position >= performer->internal->GetPosition()) {
-    performer->internal->CreateTask(definition, /*is_one_off=*/true, position, process_order,
-                                    user_data);
+  if (position >= (*performer)->GetPosition()) {
+    (*performer)->CreateTask(definition, /*is_one_off=*/true, position, process_order, user_data);
   }
   return true;
 }
 
 bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
                                           double loop_begin_position) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
 
-  performer->internal->SetLoopBeginPosition(loop_begin_position);
+  (*performer)->SetLoopBeginPosition(loop_begin_position);
   return true;
 }
 
 bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer, double loop_length) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
 
-  performer->internal->SetLoopLength(loop_length);
+  (*performer)->SetLoopLength(loop_length);
   return true;
 }
 
 bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
 
-  performer->internal->SetLooping(is_looping);
+  (*performer)->SetLooping(is_looping);
   return true;
 }
 
 bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
 
-  performer->internal->SetPosition(position);
+  (*performer)->SetPosition(position);
   return true;
 }
 
 bool BarelyPerformer_Start(BarelyPerformerHandle performer) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
 
-  performer->internal->Start();
+  (*performer)->Start();
   return true;
 }
 
 bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
-  if (!performer) return false;
+  if (!performer || !(*performer)) return false;
 
-  performer->internal->Stop();
+  (*performer)->Stop();
   return true;
 }
 
 bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
                        double position, int32_t process_order, void* user_data,
                        BarelyTaskHandle* out_task) {
-  if (!performer || !performer->internal) return false;
+  if (!performer || !(*performer)) return false;
   if (!out_task) return false;
 
-  (*out_task) =
-      new BarelyTask(*performer->internal, definition, position, process_order, user_data);
+  (*out_task) = new BarelyTask(**performer, definition, position, process_order, user_data);
   return true;
 }
 
 bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
-  if (task->internal) {
-    task->performer.DestroyTask(*task->internal);
-  }
   delete task;
   return true;
 }
 
 bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
-  if (!task || !task->internal) return false;
+  if (!task || !(*task)) return false;
   if (!out_position) return false;
 
-  *out_position = task->internal->GetPosition();
+  *out_position = (*task)->GetPosition();
   return true;
 }
 
 bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_order) {
-  if (!task || !task->internal) return false;
+  if (!task || !(*task)) return false;
   if (!out_process_order) return false;
 
-  *out_process_order = task->internal->GetProcessOrder();
+  *out_process_order = (*task)->GetProcessOrder();
   return true;
 }
 
 bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
-  if (!task || !task->internal) return false;
+  if (!task || !(*task)) return false;
 
-  task->performer.SetTaskPosition(*task->internal, position);
+  task->performer.SetTaskPosition(**task, position);
   return true;
 }
 
 bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t process_order) {
-  if (!task || !task->internal) return false;
+  if (!task || !(*task)) return false;
 
-  task->performer.SetTaskProcessOrder(*task->internal, process_order);
+  task->performer.SetTaskProcessOrder(**task, process_order);
   return true;
 }

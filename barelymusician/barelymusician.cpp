@@ -613,7 +613,7 @@ bool BarelyTask_Destroy(BarelyTaskHandle task) {
 }
 
 bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
-  if (!task || !task->performer) return false;
+  if (!task) return false;
   if (!out_position) return false;
 
   *out_position = (*task)->GetPosition();
@@ -621,7 +621,7 @@ bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
 }
 
 bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_order) {
-  if (!task || !task->performer) return false;
+  if (!task) return false;
   if (!out_process_order) return false;
 
   *out_process_order = (*task)->GetProcessOrder();

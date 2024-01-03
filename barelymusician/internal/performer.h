@@ -4,7 +4,7 @@
 #include <compare>
 #include <map>
 #include <optional>
-#include <unordered_map>
+#include <set>
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
@@ -120,53 +120,11 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
-  // Task map alias.
-  struct TaskKey {
-    // Position.
-    double position;
-
-    // Process order.
-    int process_order;
-
-    // Task.
-    Task* task;
-
-    // Default comparators.
-    // TODO(#111): Use the default `<=>` comparator instead.
-    bool operator<(const TaskKey& other) const noexcept {
-      return this->position == other.position ? (this->process_order == other.process_order
-                                                     ? this->task < other.task
-                                                     : this->process_order < other.process_order)
-                                              : this->position < other.position;
-    }
-    bool operator<=(const TaskKey& other) const noexcept {
-      return this->position == other.position ? (this->process_order == other.process_order
-                                                     ? this->task <= other.task
-                                                     : this->process_order <= other.process_order)
-                                              : this->position <= other.position;
-    }
-    bool operator==(const TaskKey& other) const noexcept {
-      return this->position == other.position && this->process_order == other.process_order &&
-             this->task == other.task;
-    }
-    bool operator!=(const TaskKey& other) const noexcept { return !(*this == other); }
-    bool operator>=(const TaskKey& other) const noexcept {
-      return this->position == other.position ? (this->process_order == other.process_order
-                                                     ? this->task >= other.task
-                                                     : this->process_order >= other.process_order)
-                                              : this->position >= other.position;
-    }
-    bool operator>(const TaskKey& other) const noexcept {
-      return this->position == other.position ? (this->process_order == other.process_order
-                                                     ? this->task > other.task
-                                                     : this->process_order > other.process_order)
-                                              : this->position > other.position;
-    }
-  };
-  using TaskMap = std::map<TaskKey, Task*>;
+  // Recurring task alias.
+  using RecurringTask = ::std::pair<std::pair<double, int>, Task*>;
 
   // Returns an iterator to the next recurring task to process.
-  [[nodiscard]] TaskMap::const_iterator GetNextRecurringTask() const noexcept;
+  [[nodiscard]] std::set<RecurringTask>::const_iterator GetNextRecurringTask() const noexcept;
 
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
@@ -191,10 +149,10 @@ class Performer {
 
   // Sorted map of tasks by task position-identifier pairs.
   std::multimap<std::pair<double, int>, Task> one_off_tasks_;
-  TaskMap recurring_tasks_;
+  std::set<RecurringTask> recurring_tasks_;
 
   // Last processed recurring task iterator.
-  std::optional<TaskMap::const_iterator> last_processed_recurring_task_it_;
+  std::optional<std::set<RecurringTask>::const_iterator> last_processed_recurring_task_it_;
 };
 
 }  // namespace barely::internal

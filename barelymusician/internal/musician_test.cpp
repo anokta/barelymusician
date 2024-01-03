@@ -164,9 +164,8 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
       [](void** state) { (*static_cast<std::function<void()>*>(*state))(); },
   };
 
-  // Create a task.
-  performer->CreateTask(definition,
-                        /*is_one_off=*/false, 1.0, kProcessOrder, &process_callback);
+  // Schedule a task.
+  performer->ScheduleOneOffTask(definition, 1.0, kProcessOrder, &process_callback);
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);

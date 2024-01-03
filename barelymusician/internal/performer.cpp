@@ -17,15 +17,13 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observer<Task> Performer::CreateTask(TaskDefinition definition, bool is_one_off, double position,
-                                     int process_order, void* user_data) noexcept {
-  assert(!is_one_off || position >= position_);
+Observable<Task> Performer::CreateTask(TaskDefinition definition, double position,
+                                       int process_order, void* user_data) noexcept {
   Observable<Task> task(definition, position, process_order, user_data);
-  [[maybe_unused]] const auto [it, success] =
-      (is_one_off ? one_off_tasks_ : recurring_tasks_)
-          .emplace(TaskKey{position, process_order, task.get()}, std::move(task));
+  [[maybe_unused]] const bool success =
+      recurring_tasks_.emplace(TaskKey{position, process_order, task.get()}, task.get()).second;
   assert(success);
-  return it->second.Observe();
+  return task;
 }
 
 void Performer::DestroyTask(Task& task) noexcept {
@@ -46,9 +44,8 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask() const n
     return std::nullopt;
   }
 
-  std::optional<TaskMap::key_type> next_task_key = std::nullopt;
-
   // Check recurring tasks.
+  std::optional<TaskMap::key_type> next_task_key = std::nullopt;
   if (const auto next_recurring_task = GetNextRecurringTask();
       next_recurring_task != recurring_tasks_.end()) {
     next_task_key = next_recurring_task->first;
@@ -67,8 +64,9 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask() const n
   // Check one-off tasks.
   if (const auto next_one_off_task = one_off_tasks_.begin();
       next_one_off_task != one_off_tasks_.end() &&
-      (!next_task_key || next_one_off_task->first <= *next_task_key)) {
-    next_task_key = next_one_off_task->first;
+      (!next_task_key || (next_one_off_task->first.first <= next_task_key->position &&
+                          next_one_off_task->first.second <= next_task_key->process_order))) {
+    return std::pair{next_one_off_task->first.first - position_, next_one_off_task->first.second};
   }
 
   if (next_task_key) {
@@ -92,9 +90,9 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     return;
   }
   if (const auto it = one_off_tasks_.begin();
-      it != one_off_tasks_.end() && it->first.position == position_) {
+      it != one_off_tasks_.end() && it->first.first == position_) {
     // Process the next one-off task.
-    it->second->Process();
+    it->second.Process();
     one_off_tasks_.erase(it);
     return;
   }
@@ -106,6 +104,15 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     it->second->Process();
     last_processed_recurring_task_it_ = it;
   }
+}
+
+void Performer::ScheduleOneOffTask(TaskDefinition definition, double position, int process_order,
+                                   void* user_data) noexcept {
+  if (position < position_) {
+    return;
+  }
+  one_off_tasks_.emplace(std::pair{position, process_order},
+                         Task(definition, position, process_order, user_data));
 }
 
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
@@ -154,16 +161,15 @@ void Performer::SetPosition(double position) noexcept {
   if (position_ == position) {
     return;
   }
-  one_off_tasks_.erase(
-      one_off_tasks_.begin(),
-      one_off_tasks_.lower_bound({position, std::numeric_limits<int>::lowest(), nullptr}));
+  one_off_tasks_.erase(one_off_tasks_.begin(),
+                       one_off_tasks_.lower_bound({position, std::numeric_limits<int>::lowest()}));
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_tasks_.empty()) {
       // Reset all remaining one-off tasks back to the beginning.
       for (auto it = one_off_tasks_.begin(); it != one_off_tasks_.end();) {
         auto current = it++;
         auto node = one_off_tasks_.extract(current);
-        node.key().position = std::max(node.key().position - loop_length_, loop_begin_position_);
+        node.key().first = std::max(node.key().first - loop_length_, loop_begin_position_);
         one_off_tasks_.insert(std::move(node));
       }
     }

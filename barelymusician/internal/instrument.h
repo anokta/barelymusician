@@ -46,7 +46,7 @@ class Instrument {
   /// @param process_order Effect process order.
   /// @return Effect.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Observer<Effect> CreateEffect(EffectDefinition definition, int process_order) noexcept;
+  Observable<Effect> CreateEffect(EffectDefinition definition, int process_order) noexcept;
 
   /// Destroys an effect.
   ///
@@ -253,7 +253,7 @@ class Instrument {
     std::vector<Control> controls;
 
     // Effect.
-    Observable<Effect> effect;
+    Effect* effect;
 
     // Process order.
     int process_order;

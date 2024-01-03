@@ -19,9 +19,9 @@ using ::barely::internal::Performer;
 using ::barely::internal::Task;
 
 // Effect.
-struct BarelyEffect : public Observer<Effect> {
+struct BarelyEffect : public Observable<Effect> {
   // Internal instrument.
-  Instrument& instrument;
+  Observer<Instrument> instrument;
 
  private:
   // Ensures that the instance can only be managed via explicit API calls.
@@ -32,15 +32,15 @@ struct BarelyEffect : public Observer<Effect> {
   friend BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
 
   // Constructs `BarelyEffect` with `definition`, `instrument`, and `process_order`.
-  BarelyEffect(Instrument& instrument, BarelyEffectDefinition definition,
+  BarelyEffect(const Observable<Instrument>& instrument, BarelyEffectDefinition definition,
                int process_order) noexcept
-      : Observer<Effect>(instrument.CreateEffect(definition, process_order)),
-        instrument(instrument) {}
+      : Observable<Effect>(instrument->CreateEffect(definition, process_order)),
+        instrument(instrument.Observe()) {}
 
   // Destroys `BarelyEffect`.
   ~BarelyEffect() noexcept {
-    if (*this) {
-      instrument.DestroyEffect(**this);
+    if (instrument) {
+      instrument->DestroyEffect(**this);
     }
   }
 
@@ -134,9 +134,9 @@ struct BarelyPerformer : public Observable<Performer> {
 };
 
 // Task.
-struct BarelyTask : public Observer<Task> {
+struct BarelyTask : public Observable<Task> {
   // Internal performer.
-  Performer& performer;
+  Observer<Performer> performer;
 
  private:
   // Ensures that the instance can only be managed via explicit API calls.
@@ -148,16 +148,15 @@ struct BarelyTask : public Observer<Task> {
 
   // Constructs `BarelyTask` with `performer`, `definition`, `position`, `process_order`, and
   // `user_data`.
-  BarelyTask(Performer& performer, BarelyTaskDefinition definition, double position,
-             int process_order, void* user_data) noexcept
-      : Observer<Task>(performer.CreateTask(definition, /*is_one_off=*/false, position,
-                                            process_order, user_data)),
-        performer(performer) {}
+  BarelyTask(const Observable<Performer>& performer, BarelyTaskDefinition definition,
+             double position, int process_order, void* user_data) noexcept
+      : Observable<Task>(performer->CreateTask(definition, position, process_order, user_data)),
+        performer(performer.Observe()) {}
 
   // Destroys `BarelyTask`.
   ~BarelyTask() noexcept {
-    if (*this) {
-      performer.DestroyTask(**this);
+    if (performer) {
+      performer->DestroyTask(**this);
     }
   }
 
@@ -172,7 +171,7 @@ bool BarelyEffect_Create(BarelyInstrumentHandle instrument, BarelyEffectDefiniti
                          int32_t process_order, BarelyEffectHandle* out_effect) {
   if (!instrument || !out_effect) return false;
 
-  *out_effect = new BarelyEffect(**instrument, definition, process_order);
+  *out_effect = new BarelyEffect(*instrument, definition, process_order);
   return true;
 }
 
@@ -184,10 +183,10 @@ bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
 }
 
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* out_value) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
   if (!out_value) return false;
 
-  if (const auto* control = effect->instrument.GetEffectControl(**effect, index)) {
+  if (const auto* control = effect->instrument->GetEffectControl(**effect, index)) {
     *out_value = control->GetValue();
     return true;
   }
@@ -196,10 +195,10 @@ bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* o
 
 bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
                                        BarelyControlDefinition* out_definition) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
   if (!out_definition) return false;
 
-  if (const auto* control = effect->instrument.GetEffectControl(**effect, index)) {
+  if (const auto* control = effect->instrument->GetEffectControl(**effect, index)) {
     *out_definition = control->GetDefinition();
     return true;
   }
@@ -207,53 +206,53 @@ bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
 }
 
 bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect, int32_t* out_process_order) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
   if (!out_process_order) return false;
 
-  *out_process_order = effect->instrument.GetEffectProcessOrder(**effect);
+  *out_process_order = effect->instrument->GetEffectProcessOrder(**effect);
   return true;
 }
 
 bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
 
-  effect->instrument.ResetAllEffectControls(**effect);
+  effect->instrument->ResetAllEffectControls(**effect);
   return true;
 }
 
 bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t index) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
 
-  return effect->instrument.ResetEffectControl(**effect, index);
+  return effect->instrument->ResetEffectControl(**effect, index);
 }
 
 bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
                              double slope_per_beat) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
 
-  return effect->instrument.SetEffectControl(**effect, index, value, slope_per_beat);
+  return effect->instrument->SetEffectControl(**effect, index, value, slope_per_beat);
 }
 
 bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
                                   BarelyControlEventDefinition definition, void* user_data) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
 
-  effect->instrument.SetEffectControlEvent(**effect, definition, user_data);
+  effect->instrument->SetEffectControlEvent(**effect, definition, user_data);
   return true;
 }
 
 bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
 
-  effect->instrument.SetEffectData(
+  effect->instrument->SetEffectData(
       **effect, {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
   return true;
 }
 
 bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order) {
-  if (!effect || !(*effect)) return false;
+  if (!effect || !effect->instrument) return false;
 
-  effect->instrument.SetEffectProcessOrder(**effect, process_order);
+  effect->instrument->SetEffectProcessOrder(**effect, process_order);
   return true;
 }
 
@@ -549,9 +548,7 @@ bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
                                         int32_t process_order, void* user_data) {
   if (!performer) return false;
 
-  if (position >= (*performer)->GetPosition()) {
-    (*performer)->CreateTask(definition, /*is_one_off=*/true, position, process_order, user_data);
-  }
+  (*performer)->ScheduleOneOffTask(definition, position, process_order, user_data);
   return true;
 }
 
@@ -604,7 +601,7 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition def
   if (!performer) return false;
   if (!out_task) return false;
 
-  (*out_task) = new BarelyTask(**performer, definition, position, process_order, user_data);
+  (*out_task) = new BarelyTask(*performer, definition, position, process_order, user_data);
   return true;
 }
 
@@ -616,7 +613,7 @@ bool BarelyTask_Destroy(BarelyTaskHandle task) {
 }
 
 bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
-  if (!task || !(*task)) return false;
+  if (!task || !task->performer) return false;
   if (!out_position) return false;
 
   *out_position = (*task)->GetPosition();
@@ -624,7 +621,7 @@ bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
 }
 
 bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_order) {
-  if (!task || !(*task)) return false;
+  if (!task || !task->performer) return false;
   if (!out_process_order) return false;
 
   *out_process_order = (*task)->GetProcessOrder();
@@ -632,15 +629,15 @@ bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_orde
 }
 
 bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
-  if (!task || !(*task)) return false;
+  if (!task || !task->performer) return false;
 
-  task->performer.SetTaskPosition(**task, position);
+  task->performer->SetTaskPosition(**task, position);
   return true;
 }
 
 bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t process_order) {
-  if (!task || !(*task)) return false;
+  if (!task || !task->performer) return false;
 
-  task->performer.SetTaskProcessOrder(**task, process_order);
+  task->performer->SetTaskProcessOrder(**task, process_order);
   return true;
 }

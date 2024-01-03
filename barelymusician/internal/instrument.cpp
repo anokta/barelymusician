@@ -72,23 +72,23 @@ Instrument::~Instrument() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observer<Effect> Instrument::CreateEffect(EffectDefinition definition, int process_order) noexcept {
+Observable<Effect> Instrument::CreateEffect(EffectDefinition definition,
+                                            int process_order) noexcept {
   Observable<Effect> effect(definition, frame_rate_);
-  Effect* effect_ptr = effect.get();
   auto [it, success] = effect_infos_.try_emplace(
-      effect_ptr,
+      effect.get(),
       EffectInfo{
           BuildControls(static_cast<const ControlDefinition*>(definition.control_definitions),
                         definition.control_definition_count),
-          std::move(effect), process_order});
+          effect.get(), process_order});
   assert(success);
   for (int index = 0; index < definition.control_definition_count; ++index) {
-    effect_ptr->SetControl(index, it->second.controls[index].GetValue(), 0.0);
+    effect->SetControl(index, it->second.controls[index].GetValue(), 0.0);
   }
-  success = ordered_effects_.emplace(process_order, effect_ptr).second;
+  success = ordered_effects_.emplace(process_order, effect.get()).second;
   assert(success);
   UpdateEffectReferences();
-  return it->second.effect.Observe();
+  return effect;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

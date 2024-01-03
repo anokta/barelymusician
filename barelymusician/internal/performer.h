@@ -19,14 +19,13 @@ class Performer {
   /// Creates a new task at position.
   ///
   /// @param definition Task definition.
-  /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   /// @return Task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Observer<Task> CreateTask(TaskDefinition definition, bool is_one_off, double position,
-                            int process_order, void* user_data) noexcept;
+  [[nodiscard]] Observable<Task> CreateTask(TaskDefinition definition, double position,
+                                            int process_order, void* user_data) noexcept;
 
   /// Destroys a task.
   ///
@@ -65,6 +64,15 @@ class Performer {
 
   /// Processes the next task at the current position.
   void ProcessNextTaskAtPosition() noexcept;
+
+  /// Schedules a one-off task.
+  ///
+  /// @param definition Task definition.
+  /// @param position Task position in beats.
+  /// @param process_order Task process order.
+  /// @param user_data Pointer to user data.
+  void ScheduleOneOffTask(TaskDefinition definition, double position, int process_order,
+                          void* user_data) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -155,7 +163,7 @@ class Performer {
                                               : this->position > other.position;
     }
   };
-  using TaskMap = std::map<TaskKey, Observable<Task>>;
+  using TaskMap = std::map<TaskKey, Task*>;
 
   // Returns an iterator to the next recurring task to process.
   [[nodiscard]] TaskMap::const_iterator GetNextRecurringTask() const noexcept;
@@ -182,7 +190,7 @@ class Performer {
   double position_ = 0.0;
 
   // Sorted map of tasks by task position-identifier pairs.
-  TaskMap one_off_tasks_;
+  std::multimap<std::pair<double, int>, Task> one_off_tasks_;
   TaskMap recurring_tasks_;
 
   // Last processed recurring task iterator.

@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <vector>
 
 #include "barelymusician/barelymusician.h"
 
@@ -52,6 +53,17 @@ bool Control::Update(double duration) noexcept {
 
 double Control::Clamp(double value) noexcept {
   return std::min(std::max(value, definition_.min_value), definition_.max_value);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+std::vector<Control> BuildControls(const ControlDefinition* definitions,
+                                   int definition_count) noexcept {
+  std::vector<Control> controls;
+  controls.reserve(definition_count);
+  for (int index = 0; index < definition_count; ++index) {
+    controls.emplace_back(definitions[index]);
+  }
+  return controls;
 }
 
 }  // namespace barely::internal

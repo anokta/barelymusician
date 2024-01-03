@@ -1,5 +1,7 @@
 #include "barelymusician/internal/control.h"
 
+#include <vector>
+
 #include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
@@ -123,6 +125,20 @@ TEST(ControlTest, Update) {
   EXPECT_FALSE(control.Update(1.0));
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 0.0);
+}
+
+// Tests that the controls are built from an array of control definitions as expected.
+TEST(ControlTest, BuildControls) {
+  const std::vector<ControlDefinition> control_definitions = {
+      ControlDefinition{1.0},
+      ControlDefinition{5.0},
+  };
+
+  const std::vector<Control> controls =
+      BuildControls(control_definitions.data(), static_cast<int>(control_definitions.size()));
+  ASSERT_EQ(controls.size(), 2);
+  EXPECT_DOUBLE_EQ(controls[0].GetValue(), 1.0);
+  EXPECT_DOUBLE_EQ(controls[1].GetValue(), 5.0);
 }
 
 }  // namespace

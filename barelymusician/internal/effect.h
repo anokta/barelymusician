@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/internal/control.h"
 
 namespace barely::internal {
 
@@ -15,7 +16,8 @@ class Effect {
   ///
   /// @param definition Effect definition.
   /// @param frame_rate Frame rate in hertz.
-  Effect(const EffectDefinition& definition, int frame_rate) noexcept;
+  /// @param process_order Process order.
+  Effect(const EffectDefinition& definition, int frame_rate, int process_order) noexcept;
 
   /// Destroys `Effect`.
   ~Effect() noexcept;
@@ -26,6 +28,22 @@ class Effect {
   Effect(Effect&& other) noexcept = delete;
   Effect& operator=(Effect&& other) noexcept = delete;
 
+  /// Returns all controls.
+  ///
+  /// @return Array of controls.
+  [[nodiscard]] std::vector<Control>& GetAllControls() noexcept;
+
+  /// Returns a control value.
+  ///
+  /// @param index Control index.
+  /// @return Pointer to control, or nullptr if not found.
+  [[nodiscard]] Control* GetControl(int index) noexcept;
+
+  /// Returns the process order.
+  ///
+  /// @return Process order.
+  [[nodiscard]] int GetProcessOrder() const noexcept;
+
   /// Processes the next output samples.
   ///
   /// @param output_samples Array of interleaved output samples.
@@ -33,18 +51,35 @@ class Effect {
   /// @param output_frame_count Number of output frames.
   void Process(double* output_samples, int output_channel_count, int output_frame_count) noexcept;
 
-  /// Sets a control value.
+  /// Processes a control event.
+  ///
+  /// @param index Control index.
+  void ProcessControlEvent(int index) noexcept;
+
+  /// Processes a control message.
   ///
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_frame Control slope in value change per frame.
   /// @return True if successful, false otherwise.
-  void SetControl(int index, double value, double slope_per_frame) noexcept;
+  void ProcessControlMessage(int index, double value, double slope_per_frame) noexcept;
 
-  /// Sets data.
+  /// Processes a data message.
   ///
   /// @param data Data.
-  void SetData(std::vector<std::byte>& data) noexcept;
+  void ProcessDataMessage(std::vector<std::byte>& data) noexcept;
+
+  /// Sets the control event callback.
+  ///
+  /// @param callback Control event definition.
+  /// @param user_data Pointer to user data.
+  void SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept;
+
+  /// Returns the process order.
+  ///
+  /// @param process_order Process order.
+  /// @return True if successful, false otherwise.
+  bool SetProcessOrder(int process_order) noexcept;
 
  private:
   // Destroy callback.
@@ -59,11 +94,20 @@ class Effect {
   // Set data callback.
   const EffectDefinition::SetDataCallback set_data_callback_;
 
-  // Data.
-  std::vector<std::byte> data_;
+  // Array of controls.
+  std::vector<Control> controls_;
+
+  // Control event.
+  Control::Event control_event_;
+
+  // Process order.
+  int process_order_ = 0;
 
   // State.
   void* state_ = nullptr;
+
+  // Data.
+  std::vector<std::byte> data_;
 };
 
 }  // namespace barely::internal

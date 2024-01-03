@@ -183,10 +183,10 @@ bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
 }
 
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* out_value) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect) return false;
   if (!out_value) return false;
 
-  if (const auto* control = effect->instrument->GetEffectControl(**effect, index)) {
+  if (const auto* control = (*effect)->GetControl(index)) {
     *out_value = control->GetValue();
     return true;
   }
@@ -195,10 +195,10 @@ bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* o
 
 bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
                                        BarelyControlDefinition* out_definition) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect) return false;
   if (!out_definition) return false;
 
-  if (const auto* control = effect->instrument->GetEffectControl(**effect, index)) {
+  if (const auto* control = (*effect)->GetControl(index)) {
     *out_definition = control->GetDefinition();
     return true;
   }
@@ -206,10 +206,10 @@ bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
 }
 
 bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect, int32_t* out_process_order) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect) return false;
   if (!out_process_order) return false;
 
-  *out_process_order = effect->instrument->GetEffectProcessOrder(**effect);
+  *out_process_order = (*effect)->GetProcessOrder();
   return true;
 }
 
@@ -235,9 +235,9 @@ bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double va
 
 bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
                                   BarelyControlEventDefinition definition, void* user_data) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect) return false;
 
-  effect->instrument->SetEffectControlEvent(**effect, definition, user_data);
+  (*effect)->SetControlEvent(definition, user_data);
   return true;
 }
 

@@ -60,19 +60,6 @@ class Instrument {
   /// @return Pointer to control, or nullptr if not found.
   [[nodiscard]] const Control* GetControl(int index) const noexcept;
 
-  /// Returns an effect control value.
-  ///
-  /// @param effect_id Effect.
-  /// @param index Effect control index.
-  /// @return Control.
-  [[nodiscard]] const Control* GetEffectControl(Effect& effect, int index) const noexcept;
-
-  /// Returns effect process order.
-  ///
-  /// @param effect_id Effect.
-  /// @return Process order.
-  [[nodiscard]] int GetEffectProcessOrder(Effect& effect) const noexcept;
-
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
@@ -163,14 +150,6 @@ class Instrument {
   /// @return True if successful, false otherwise.
   bool SetEffectControl(Effect& effect, int index, double value, double slope_per_beat) noexcept;
 
-  /// Sets the effect control event.
-  ///
-  /// @param effect Effect.
-  /// @param definition Effect control event definition.
-  /// @param user_data Pointer to user data.
-  void SetEffectControlEvent(Effect& effect, ControlEventDefinition definition,
-                             void* user_data) noexcept;
-
   /// Sets effect data.
   ///
   /// @param effect Effect.
@@ -235,9 +214,6 @@ class Instrument {
   void Update(double timestamp) noexcept;
 
  private:
-  // Control event alias.
-  using ControlEvent = Event<ControlEventDefinition, int, double>;
-
   // Note control event alias.
   using NoteControlEvent = Event<NoteControlEventDefinition, double, int, double>;
 
@@ -246,21 +222,6 @@ class Instrument {
 
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
-
-  // Effect info.
-  struct EffectInfo {
-    // Array of controls.
-    std::vector<Control> controls;
-
-    // Effect.
-    Effect* effect;
-
-    // Process order.
-    int process_order;
-
-    // Control event.
-    ControlEvent control_event;
-  };
 
   // Returns the corresponding slope per frame for a given `slope_per_beat`.
   [[nodiscard]] double GetSlopePerFrame(double slope_per_beat) const noexcept;
@@ -299,17 +260,14 @@ class Instrument {
   // Array of controls.
   std::vector<Control> controls_;
 
-  // Map of effect infos by their pointers.
-  std::unordered_map<Effect*, EffectInfo> effect_infos_;
-
   // Ordered set of effects.
-  std::set<std::pair<int, Effect*>> ordered_effects_;
+  std::set<std::pair<int, Effect*>> effects_;
 
   // Map of current note controls by note pitches.
   std::unordered_map<double, std::vector<Control>> note_controls_;
 
   // Control event.
-  ControlEvent control_event_;
+  Control::Event control_event_;
 
   // Note control event.
   NoteControlEvent note_control_event_;

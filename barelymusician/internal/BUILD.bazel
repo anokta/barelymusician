@@ -7,6 +7,7 @@ cc_library(
     srcs = ["control.cpp"],
     hdrs = ["control.h"],
     deps = [
+        ":event",
         "//barelymusician:barelymusician_headeronly",
     ],
 )
@@ -16,6 +17,7 @@ cc_library(
     srcs = ["effect.cpp"],
     hdrs = ["effect.h"],
     deps = [
+        ":control",
         "//barelymusician:barelymusician_headeronly",
     ],
 )

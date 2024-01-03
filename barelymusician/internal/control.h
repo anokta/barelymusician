@@ -1,13 +1,20 @@
 #ifndef BARELYMUSICIAN_INTERNAL_CONTROL_H_
 #define BARELYMUSICIAN_INTERNAL_CONTROL_H_
 
+#include <functional>
+#include <vector>
+
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/internal/event.h"
 
 namespace barely::internal {
 
 /// Class that wraps a control.
 class Control {
  public:
+  /// Event alias.
+  using Event = ::barely::internal::Event<ControlEventDefinition, int, double>;
+
   /// Constructs a new `Control`.
   ///
   /// @param definition Control definition.
@@ -59,6 +66,15 @@ class Control {
   // Slope in value change per beat.
   double slope_per_beat_ = 0.0;
 };
+
+/// Builds the corresponding controls for a given array of control `definitions`.
+///
+/// @param definitions Array of control definitions.
+/// @param definition_count Number of control definitions.
+/// @return Array of controls.
+// NOLINTNEXTLINE(bugprone-exception-escape)
+std::vector<Control> BuildControls(const ControlDefinition* definitions,
+                                   int definition_count) noexcept;
 
 }  // namespace barely::internal
 

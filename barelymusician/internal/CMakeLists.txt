@@ -5,6 +5,7 @@ add_library(
 )
 target_link_libraries(
   barely_internal_control
+  barely_internal_event
   barelymusician_headeronly
 )
 
@@ -15,6 +16,7 @@ add_library(
 )
 target_link_libraries(
   barely_internal_effect
+  barely_internal_control
   barelymusician_headeronly
 )
 

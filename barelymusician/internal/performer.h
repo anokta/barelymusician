@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/task.h"
 
 namespace barely::internal {
@@ -16,21 +15,11 @@ namespace barely::internal {
 /// Class that wraps a performer.
 class Performer {
  public:
-  /// Creates a new task at position.
-  ///
-  /// @param definition Task definition.
-  /// @param position Task position in beats.
-  /// @param process_order Task process order.
-  /// @param user_data Pointer to user data.
-  /// @return Task.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  [[nodiscard]] Observable<Task> CreateTask(TaskDefinition definition, double position,
-                                            int process_order, void* user_data) noexcept;
-
-  /// Destroys a task.
+  /// Adds a task.
   ///
   /// @param task Task.
-  void DestroyTask(Task& task) noexcept;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void AddTask(Task& task) noexcept;
 
   /// Returns the duration to next task.
   ///
@@ -64,6 +53,11 @@ class Performer {
 
   /// Processes the next task at the current position.
   void ProcessNextTaskAtPosition() noexcept;
+
+  /// Destroys a task.
+  ///
+  /// @param task Task.
+  void RemoveTask(Task& task) noexcept;
 
   /// Schedules a one-off task.
   ///

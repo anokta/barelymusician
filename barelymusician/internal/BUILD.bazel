@@ -38,7 +38,6 @@ cc_library(
         ":message",
         ":message_queue",
         ":mutable",
-        ":observable",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
@@ -92,7 +91,6 @@ cc_library(
     srcs = ["performer.cpp"],
     hdrs = ["performer.h"],
     deps = [
-        ":observable",
         ":task",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",

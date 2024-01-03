@@ -11,31 +11,15 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observable<Task> Performer::CreateTask(TaskDefinition definition, double position,
-                                       int process_order, void* user_data) noexcept {
-  Observable<Task> task(definition, position, process_order, user_data);
+void Performer::AddTask(Task& task) noexcept {
   [[maybe_unused]] const bool success =
-      recurring_tasks_.emplace(std::pair{position, process_order}, task.get()).second;
+      recurring_tasks_.emplace(std::pair{task.GetPosition(), task.GetProcessOrder()}, &task).second;
   assert(success);
-  return task;
-}
-
-void Performer::DestroyTask(Task& task) noexcept {
-  if (last_processed_recurring_task_it_ && (*last_processed_recurring_task_it_)->second == &task) {
-    const auto recurring_task_it = *last_processed_recurring_task_it_;
-    PrevLastProcessedRecurringTaskIt();
-    recurring_tasks_.erase(recurring_task_it);
-  } else {
-    [[maybe_unused]] const bool success =
-        recurring_tasks_.erase({{task.GetPosition(), task.GetProcessOrder()}, &task}) == 1;
-    assert(success);
-  }
 }
 
 std::optional<std::pair<double, int>> Performer::GetDurationToNextTask() const noexcept {
@@ -99,6 +83,18 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     // Process the next recurring task.
     it->second->Process();
     last_processed_recurring_task_it_ = it;
+  }
+}
+
+void Performer::RemoveTask(Task& task) noexcept {
+  if (last_processed_recurring_task_it_ && (*last_processed_recurring_task_it_)->second == &task) {
+    const auto recurring_task_it = *last_processed_recurring_task_it_;
+    PrevLastProcessedRecurringTaskIt();
+    recurring_tasks_.erase(recurring_task_it);
+  } else {
+    [[maybe_unused]] const bool success =
+        recurring_tasks_.erase({{task.GetPosition(), task.GetProcessOrder()}, &task}) == 1;
+    assert(success);
   }
 }
 

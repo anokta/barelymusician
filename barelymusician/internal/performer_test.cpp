@@ -34,7 +34,9 @@ TEST(PerformerTest, ProcessSingleTask) {
   };
 
   // Create a recurring task.
-  auto task = performer.CreateTask(definition, 0.25, 0, &task_process_count);
+  Task task(definition, 0.25, 0, &task_process_count);
+  performer.AddTask(task);
+
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
@@ -78,7 +80,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_count, 2);
 
   // Update the task position.
-  performer.SetTaskPosition(*task, 0.75);
+  performer.SetTaskPosition(task, 0.75);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.5, 0)));

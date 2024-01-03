@@ -14,7 +14,6 @@
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/message_queue.h"
 #include "barelymusician/internal/mutable.h"
-#include "barelymusician/internal/observable.h"
 
 namespace barely::internal {
 
@@ -40,25 +39,22 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
-  /// Creates a new effect.
-  ///
-  /// @param definition Effect definition.
-  /// @param process_order Effect process order.
-  /// @return Effect.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  Observable<Effect> CreateEffect(EffectDefinition definition, int process_order) noexcept;
-
-  /// Destroys an effect.
+  /// Adds an effect.
   ///
   /// @param effect Effect.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyEffect(Effect& effect) noexcept;
+  void AddEffect(Effect& effect) noexcept;
 
   /// Returns a control value.
   ///
   /// @param index Control index.
   /// @return Pointer to control, or nullptr if not found.
   [[nodiscard]] const Control* GetControl(int index) const noexcept;
+
+  /// Returns the frame rate.
+  ///
+  /// @return Frame rate in hz.
+  [[nodiscard]] int GetFrameRate() const noexcept;
 
   /// Returns a note control value.
   ///
@@ -83,6 +79,12 @@ class Instrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
+
+  /// Removes an effect.
+  ///
+  /// @param effect Effect.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void RemoveEffect(Effect& effect) noexcept;
 
   /// Resets all control values.
   void ResetAllControls() noexcept;

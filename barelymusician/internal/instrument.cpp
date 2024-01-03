@@ -14,7 +14,6 @@
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/message.h"
-#include "barelymusician/internal/observable.h"
 
 namespace barely::internal {
 
@@ -56,19 +55,8 @@ Instrument::~Instrument() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observable<Effect> Instrument::CreateEffect(EffectDefinition definition,
-                                            int process_order) noexcept {
-  Observable<Effect> effect(definition, frame_rate_, process_order);
-  [[maybe_unused]] const bool success = effects_.emplace(process_order, effect.get()).second;
-  assert(success);
-  UpdateEffectReferences();
-  return effect;
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::DestroyEffect(Effect& effect) noexcept {
-  [[maybe_unused]] const bool success =
-      effects_.erase({effect.GetProcessOrder(), const_cast<Effect*>(&effect)}) == 1;
+void Instrument::AddEffect(Effect& effect) noexcept {
+  [[maybe_unused]] const bool success = effects_.emplace(effect.GetProcessOrder(), &effect).second;
   assert(success);
   UpdateEffectReferences();
 }
@@ -79,6 +67,8 @@ const Control* Instrument::GetControl(int index) const noexcept {
   }
   return nullptr;
 }
+
+int Instrument::GetFrameRate() const noexcept { return frame_rate_; }
 
 const Control* Instrument::GetNoteControl(double pitch, int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
@@ -177,6 +167,14 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
     }
   }
   return true;
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Instrument::RemoveEffect(Effect& effect) noexcept {
+  [[maybe_unused]] const bool success =
+      effects_.erase({effect.GetProcessOrder(), const_cast<Effect*>(&effect)}) == 1;
+  assert(success);
+  UpdateEffectReferences();
 }
 
 void Instrument::ResetAllControls() noexcept {

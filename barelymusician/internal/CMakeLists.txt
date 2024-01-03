@@ -38,7 +38,6 @@ target_link_libraries(
   barely_internal_message
   barely_internal_message_queue
   barely_internal_mutable
-  barely_internal_observable
   barelymusician_headeronly
   barely_find_or_null
   barely_seconds
@@ -95,7 +94,6 @@ add_library(
 )
 target_link_libraries(
   barely_internal_performer
-  barely_internal_observable
   barely_internal_task
   barelymusician_headeronly
   barely_find_or_null

@@ -10,43 +10,36 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/instrument.h"
-#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observable<Instrument> Musician::CreateInstrument(InstrumentDefinition definition,
-                                                  int frame_rate) noexcept {
-  Observable<Instrument> instrument(definition, frame_rate, tempo_, timestamp_);
-  [[maybe_unused]] const bool success = instruments_.insert(instrument.get()).second;
-  assert(success);
-  return instrument;
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Observable<Performer> Musician::CreatePerformer() noexcept {
-  Observable<Performer> performer;
-  [[maybe_unused]] const bool success = performers_.insert(performer.get()).second;
-  assert(success);
-  return performer;
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::DestroyInstrument(const Observable<Instrument>& instrument) noexcept {
-  [[maybe_unused]] const bool success = instruments_.erase(instrument.get()) > 0;
+void Musician::AddInstrument(Instrument& instrument) noexcept {
+  [[maybe_unused]] const bool success = instruments_.insert(&instrument).second;
   assert(success);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::DestroyPerformer(const Observable<Performer>& performer) noexcept {
-  [[maybe_unused]] const bool success = performers_.erase(performer.get()) > 0;
+void Musician::AddPerformer(Performer& performer) noexcept {
+  [[maybe_unused]] const bool success = performers_.insert(&performer).second;
   assert(success);
 }
-
 double Musician::GetTempo() const noexcept { return tempo_; }
 
 double Musician::GetTimestamp() const noexcept { return timestamp_; }
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Musician::RemoveInstrument(Instrument& instrument) noexcept {
+  [[maybe_unused]] const bool success = instruments_.erase(&instrument) > 0;
+  assert(success);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Musician::RemovePerformer(Performer& performer) noexcept {
+  [[maybe_unused]] const bool success = performers_.erase(&performer) > 0;
+  assert(success);
+}
 
 void Musician::SetTempo(double tempo) noexcept {
   tempo = std::max(tempo, 0.0);

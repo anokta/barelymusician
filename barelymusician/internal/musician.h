@@ -8,7 +8,6 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/mutable.h"
-#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 
 namespace barely::internal {
@@ -16,32 +15,17 @@ namespace barely::internal {
 /// Class that wraps a musician.
 class Musician {
  public:
-  /// Creates a new instrument.
-  ///
-  /// @param definition Instrument definition.
-  /// @param frame_rate Frame rate in hertz.
-  /// @return Instrument.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  [[nodiscard]] Observable<Instrument> CreateInstrument(InstrumentDefinition definition,
-                                                        int frame_rate) noexcept;
-
-  /// Creates a new performer.
-  ///
-  /// @return Performer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  [[nodiscard]] Observable<Performer> CreatePerformer() noexcept;
-
-  /// Destroys instrument.
+  /// Adds an instrument.
   ///
   /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyInstrument(const Observable<Instrument>& instrument) noexcept;
+  void AddInstrument(Instrument& instrument) noexcept;
 
-  /// Destroys performer.
+  /// Adds a performer.
   ///
   /// @param performer Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyPerformer(const Observable<Performer>& performer) noexcept;
+  void AddPerformer(Performer& performer) noexcept;
 
   /// Returns tempo.
   ///
@@ -52,6 +36,18 @@ class Musician {
   ///
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
+
+  /// Destroys instrument.
+  ///
+  /// @param instrument Instrument.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void RemoveInstrument(Instrument& instrument) noexcept;
+
+  /// Destroys a performer.
+  ///
+  /// @param performer Performer.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void RemovePerformer(Performer& performer) noexcept;
 
   /// Sets the tempo.
   ///

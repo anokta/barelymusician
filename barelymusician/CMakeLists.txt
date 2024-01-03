@@ -18,7 +18,12 @@ target_compile_definitions(
 target_link_libraries(
   barelymusician
   barelymusician_headeronly
+  barely_internal_effect
+  barely_internal_instrument
   barely_internal_musician
+  barely_internal_observable
+  barely_internal_performer
+  barely_internal_task
 )
 
 add_library(

@@ -4,6 +4,7 @@
 
 #include <cstddef>
 
+#include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/musician.h"
 #include "barelymusician/internal/observable.h"
@@ -66,13 +67,16 @@ struct BarelyInstrument : public Observable<Instrument> {
   // Constructs `BarelyInstrument` with `musician`, `definition`, and `frame_rate`.
   BarelyInstrument(const Observable<Musician>& musician, BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
-      : Observable<Instrument>(musician->CreateInstrument(definition, frame_rate)),
-        musician_(musician.Observe()) {}
+      : Observable<Instrument>(definition, frame_rate, musician->GetTempo(),
+                               musician->GetTimestamp()),
+        musician_(musician.Observe()) {
+    musician->AddInstrument(**this);
+  }
 
   // Destroys `BarelyInstrument`.
   ~BarelyInstrument() noexcept {
     if (musician_) {
-      musician_->DestroyInstrument(*this);
+      musician_->RemoveInstrument(**this);
     }
   }
 
@@ -116,12 +120,14 @@ struct BarelyPerformer : public Observable<Performer> {
 
   // Constructs `BarelyPerformer` with `musician`.
   explicit BarelyPerformer(const Observable<Musician>& musician) noexcept
-      : Observable<Performer>(musician->CreatePerformer()), musician_(musician.Observe()) {}
+      : Observable<Performer>(), musician_(musician.Observe()) {
+    musician_->AddPerformer(**this);
+  }
 
   // Destroys `BarelyPerformer`.
   ~BarelyPerformer() noexcept {
     if (musician_) {
-      musician_->DestroyPerformer(*this);
+      musician_->RemovePerformer(**this);
     }
   }
 

@@ -71,7 +71,6 @@ target_link_libraries(
   barely_internal_musician
   barely_internal_instrument
   barely_internal_mutable
-  barely_internal_observable
   barely_internal_performer
   barelymusician_headeronly
   barely_seconds
@@ -171,7 +170,6 @@ if (ENABLE_TESTS)
     barely_internal_control
     barely_internal_instrument
     barely_internal_musician
-    barely_internal_observable
     barelymusician_headeronly
     gmock
     gtest_main

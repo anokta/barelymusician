@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//visibility:private"])
+package(default_visibility = ["//barelymusician:__pkg__"])
 
 cc_library(
     name = "control",
@@ -65,11 +65,9 @@ cc_library(
     name = "musician",
     srcs = ["musician.cpp"],
     hdrs = ["musician.h"],
-    visibility = ["//barelymusician:__pkg__"],
     deps = [
         ":instrument",
         ":mutable",
-        ":observable",
         ":performer",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:seconds",
@@ -165,7 +163,6 @@ cc_test(
         ":control",
         ":instrument",
         ":musician",
-        ":observable",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],

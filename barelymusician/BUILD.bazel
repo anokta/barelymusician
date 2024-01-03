@@ -8,7 +8,12 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":barelymusician_headeronly",
+        "//barelymusician/internal:effect",
+        "//barelymusician/internal:instrument",
         "//barelymusician/internal:musician",
+        "//barelymusician/internal:observable",
+        "//barelymusician/internal:performer",
+        "//barelymusician/internal:task",
     ],
     alwayslink = True,
 )

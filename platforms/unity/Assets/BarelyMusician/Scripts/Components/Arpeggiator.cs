@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices.ComTypes;
 using UnityEngine;
 
 namespace Barely {
@@ -14,15 +15,17 @@ namespace Barely {
     [InspectorName("Random")] RANDOM = 8,
   }
 
-  /// A represantion of a simple arpeggiator hat can be attached to a musical instrument to play
+  /// A represantion of a simple arpeggiator that can be attached to a musical instrument to play
   /// notes in sequence.
-  [RequireComponent(typeof(Instrument))]
   public class Arpeggiator : MonoBehaviour {
     public int ProcessOrder = 0;
 
     /// Gate ratio.
     [Range(0.0f, 1.0f)]
     public double GateRatio = 0.5;
+
+    // Instrument.
+    public Instrument Instrument = null;
 
     /// Rate.
     [Range(0.0f, 8.0f)]
@@ -64,21 +67,53 @@ namespace Barely {
       Musician.Internal.Arpeggiator_SetNoteOn(_handle, pitch);
     }
 
-    protected virtual void Update() {
-      if (_handle == IntPtr.Zero && GetComponent<Instrument>().enabled) {
-        Musician.Internal.Component_Create(
-            this, Instrument.Internal.GetInstrumentHandle(GetComponent<Instrument>()), ref _handle);
+    private void OnEnable() {
+      Musician.Internal.Component_Create(this, ref _handle);
+      UpdateInstrument();
+    }
+
+    private void OnDisable() {
+      if (_instrument != null) {
+        _instrument.OnInstrumentCreate -= OnInstrumentCreate;
+        _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
       }
+      Musician.Internal.Component_Destroy(this, ref _handle);
+    }
+
+    private void Update() {
       Musician.Internal.Arpeggiator_SetGateRatio(_handle, GateRatio);
       Musician.Internal.Arpeggiator_SetRate(_handle, Rate);
       Musician.Internal.Arpeggiator_SetStyle(_handle, Style);
+      if (_instrument != Instrument) {
+        UpdateInstrument();
+      }
     }
 
-    protected virtual void OnDisable() {
-      Musician.Internal.Component_Destroy(this, ref _handle);
+    private void UpdateInstrument() {
+      if (_instrument != null) {
+        _instrument.OnInstrumentCreate -= OnInstrumentCreate;
+        _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
+      }
+      _instrument = Instrument;
+      Musician.Internal.Arpeggiator_SetInstrument(_handle, _instrument);
+      if (_instrument != null) {
+        _instrument.OnInstrumentCreate += OnInstrumentCreate;
+        _instrument.OnInstrumentDestroy += OnInstrumentDestroy;
+      }
+    }
+
+    private void OnInstrumentCreate() {
+      Musician.Internal.Arpeggiator_SetInstrument(_handle, _instrument);
+    }
+
+    private void OnInstrumentDestroy() {
+      Musician.Internal.Arpeggiator_SetInstrument(_handle, null);
     }
 
     // Handle.
     private IntPtr _handle = IntPtr.Zero;
+
+    // Current instrument.
+    private Instrument _instrument = null;
   }
 }  // namespace Barely

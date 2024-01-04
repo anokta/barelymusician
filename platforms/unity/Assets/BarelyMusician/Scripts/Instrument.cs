@@ -52,6 +52,12 @@ namespace Barely {
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<float, float> {}
     public NoteOnEvent OnNoteOnEvent;
 
+    /// Instrument create callback.
+    public event Action OnInstrumentCreate;
+
+    /// Instrument destroy callback.
+    public event Action OnInstrumentDestroy;
+
     /// Returns a control value.
     ///
     /// @param index Control index.
@@ -155,7 +161,7 @@ namespace Barely {
     public static class Internal {
       /// Returns instrument handle.
       public static IntPtr GetInstrumentHandle(Instrument instrument) {
-        return instrument._handle;
+        return instrument ? instrument._handle : IntPtr.Zero;
       }
 
       /// Internal control event callback.
@@ -186,7 +192,7 @@ namespace Barely {
 
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
-      Source.clip = AudioClip.Create("Ones", 64, 1, AudioSettings.outputSampleRate, false);
+      Source.clip = AudioClip.Create("[DO NOT EDIT]", 64, 1, AudioSettings.outputSampleRate, false);
       float[] ones = new float[64];
       for (int i = 0; i < ones.Length; ++i) {
         ones[i] = 1.0f;
@@ -201,6 +207,7 @@ namespace Barely {
 
     protected virtual void OnEnable() {
       Musician.Internal.Instrument_Create(this, ref _handle);
+      OnInstrumentCreate?.Invoke();
       foreach (var effect in GetComponents<Effect>()) {
         Effect.Internal.ReEnable(_handle, effect);
       }
@@ -212,6 +219,7 @@ namespace Barely {
       foreach (var effect in GetComponents<Effect>()) {
         Effect.Internal.Disable(effect);
       }
+      OnInstrumentDestroy?.Invoke();
       Musician.Internal.Instrument_Destroy(ref _handle);
     }
 

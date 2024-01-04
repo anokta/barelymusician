@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tempo: 200
+  tempo: 150
 --- !u!850595691 &748775628
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -418,11 +418,11 @@ GameObject:
   - component: {fileID: 1737834382}
   - component: {fileID: 1737834381}
   - component: {fileID: 1737834380}
+  - component: {fileID: 1737834384}
   - component: {fileID: 1737834379}
   - component: {fileID: 1737834383}
-  - component: {fileID: 1737834384}
   m_Layer: 0
-  m_Name: InstrumentController
+  m_Name: ArpeggiatorController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -611,4 +611,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ProcessOrder: 0
+  GateRatio: 0.5
+  Instrument: {fileID: 1737834380}
+  Rate: 2
   Style: 0

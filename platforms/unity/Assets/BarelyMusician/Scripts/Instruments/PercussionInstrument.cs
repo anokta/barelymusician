@@ -74,7 +74,9 @@ namespace Barely {
     private int _padCount = 0;
 
     private void Update() {
-      UpdatePadData();
+      if (Pads != null) {
+        UpdatePadData();
+      }
       SetControl(0, Gain);
       SetControl(1, PadRelease);
     }

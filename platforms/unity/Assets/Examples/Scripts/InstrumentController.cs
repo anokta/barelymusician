@@ -2,11 +2,12 @@
 
 namespace Barely {
   namespace Examples {
-    // Instrument keyboard controller.
+    /// Instrument keyboard controller.
     public class InstrumentController : MonoBehaviour {
       // Instrument to control.
       public Instrument instrument = null;
 
+      // Arpeggiator to control.
       public Arpeggiator arpeggiator = null;
 
       // Root note pitch.
@@ -22,7 +23,7 @@ namespace Barely {
       public double noteIntensity = 1.0;
 
       // Ordered keys of one octave.
-      private KeyCode[] octaveKeys =
+      private KeyCode[] _octaveKeys =
           new KeyCode[] { KeyCode.A, KeyCode.W, KeyCode.S, KeyCode.E, KeyCode.D,
                           KeyCode.F, KeyCode.T, KeyCode.G, KeyCode.Y, KeyCode.H,
                           KeyCode.U, KeyCode.J, KeyCode.K, KeyCode.O, KeyCode.L };
@@ -32,14 +33,14 @@ namespace Barely {
         if (Input.GetKeyDown(KeyCode.Z)) {
           if (arpeggiator != null) {
             arpeggiator.SetAllNotesOff();
-          } else {
+          } else if (instrument != null) {
             instrument.SetAllNotesOff();
           }
           octaveOffset = Mathf.Max(octaveOffset - 1, -3);
         } else if (Input.GetKeyDown(KeyCode.X)) {
           if (arpeggiator != null) {
             arpeggiator.SetAllNotesOff();
-          } else {
+          } else if (instrument != null) {
             instrument.SetAllNotesOff();
           }
           octaveOffset = Mathf.Min(octaveOffset + 1, 3);
@@ -51,17 +52,17 @@ namespace Barely {
           noteIntensity = (double)Mathf.Min((float)noteIntensity + 0.2f, 1.0f);
         }
         // Play notes.
-        for (int i = 0; i < octaveKeys.Length; ++i) {
-          if (Input.GetKeyDown(octaveKeys[i])) {
+        for (int i = 0; i < _octaveKeys.Length; ++i) {
+          if (Input.GetKeyDown(_octaveKeys[i])) {
             if (arpeggiator != null) {
               arpeggiator.SetNoteOn(GetPitchFromKeyIndex(i));
-            } else {
+            } else if (instrument != null) {
               instrument.SetNoteOn(GetPitchFromKeyIndex(i), noteIntensity);
             }
-          } else if (Input.GetKeyUp(octaveKeys[i])) {
+          } else if (Input.GetKeyUp(_octaveKeys[i])) {
             if (arpeggiator != null) {
               arpeggiator.SetNoteOff(GetPitchFromKeyIndex(i));
-            } else {
+            } else if (instrument != null) {
               instrument.SetNoteOff(GetPitchFromKeyIndex(i));
             }
           }
@@ -69,9 +70,9 @@ namespace Barely {
         if (Application.platform == RuntimePlatform.Android ||
             Application.platform == RuntimePlatform.IPhonePlayer) {
           if (Input.GetMouseButtonDown(0)) {
-            instrument.SetNoteOn(0.0);
+            instrument?.SetNoteOn(0.0);
           } else if (Input.GetMouseButtonUp(0)) {
-            instrument.SetNoteOff(0.0);
+            instrument?.SetNoteOff(0.0);
           }
         }
       }

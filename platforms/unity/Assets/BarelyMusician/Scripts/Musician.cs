@@ -233,17 +233,14 @@ namespace Barely {
       /// Creates a new component.
       ///
       /// @param component Component.
-      /// @param instrumentHandle Instrument handle.
       /// @param componentHandle Component handle.
-      public static void Component_Create(Component component, IntPtr instrumentHandle,
-                                          ref IntPtr componentHandle) {
+      public static void Component_Create(Component component, ref IntPtr componentHandle) {
         if (Handle == IntPtr.Zero || componentHandle != IntPtr.Zero) {
           return;
         }
         switch (component) {
           case Arpeggiator arpeggiator:
-            if (BarelyArpeggiator_Create(_handle, arpeggiator.ProcessOrder, ref componentHandle) &&
-                BarelyArpeggiator_SetInstrument(componentHandle, instrumentHandle)) {
+            if (BarelyArpeggiator_Create(_handle, arpeggiator.ProcessOrder, ref componentHandle)) {
               return;
             }
             break;
@@ -262,17 +259,19 @@ namespace Barely {
         if (Handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
           return;
         }
+        bool success = true;
         switch (component) {
           case Arpeggiator arpeggiator:
-            if (BarelyArpeggiator_Destroy(componentHandle)) {
-              return;
-            }
+            success = BarelyArpeggiator_Destroy(componentHandle);
             break;
           default:
             Debug.LogError("Unsupported component type: " + component.GetType());
             return;
         }
-        Debug.LogError("Failed to destroy component '" + component.name + "'");
+        if (!success) {
+          Debug.LogError("Failed to destroy component '" + component.name + "'");
+        }
+        componentHandle = IntPtr.Zero;
       }
 
       /// Creates a new effect.
@@ -535,11 +534,11 @@ namespace Barely {
           }
           return;
         }
-        if (BarelyInstrument_Process(instrumentHandle, _outputSamples, outputChannelCount,
+        if (BarelyInstrument_Process(instrumentHandle, OutputSamples, outputChannelCount,
                                      outputSamples.Length / outputChannelCount,
                                      AudioSettings.dspTime)) {
           for (int i = 0; i < outputSamples.Length; ++i) {
-            outputSamples[i] *= (float)_outputSamples[i];
+            outputSamples[i] *= (float)OutputSamples[i];
           }
         } else {
           for (int i = 0; i < outputSamples.Length; ++i) {
@@ -1027,6 +1026,19 @@ namespace Barely {
         }
       }
 
+      /// Sets an arpeggiator instrument.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param instrument Instrument.
+      public static void Arpeggiator_SetInstrument(IntPtr arpeggiatorHandle,
+                                                   Instrument instrument) {
+        if (!BarelyArpeggiator_SetInstrument(arpeggiatorHandle,
+                                             Instrument.Internal.GetInstrumentHandle(instrument)) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set arpeggiator instrument '" + instrument.name + "'");
+        }
+      }
+
       /// Sets an arpeggiator note off.
       ///
       /// @param arpeggiatorHandle Arpeggiator handle.
@@ -1070,6 +1082,9 @@ namespace Barely {
           Debug.LogError("Failed to stop arpeggiator style " + style);
         }
       }
+
+      // Internal output samples.
+      public static double[] OutputSamples { get; private set; } = null;
 
       // Control event definition create callback.
       private delegate void ControlEventDefinition_CreateCallback(ref IntPtr state,
@@ -1352,9 +1367,6 @@ namespace Barely {
       // Latency in seconds.
       private static double _latency = 0.0;
 
-      // Internal output samples.
-      private static double[] _outputSamples = null;
-
       // Map of scheduled list of task callbacks by their timestamps.
       private static SortedDictionary<double, List<Action>> _scheduledTaskCallbacks = null;
 
@@ -1414,7 +1426,7 @@ namespace Barely {
           BarelyMusician_SetTempo(_handle, _tempo);
           var config = AudioSettings.GetConfiguration();
           _latency = (double)(2 * config.dspBufferSize) / (double)config.sampleRate;
-          _outputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
+          OutputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
           _effects = new Dictionary<IntPtr, Effect>();
           _instruments = new Dictionary<IntPtr, Instrument>();
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();

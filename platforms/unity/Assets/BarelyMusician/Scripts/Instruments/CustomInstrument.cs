@@ -92,17 +92,6 @@ namespace Barely {
     /// @return Array of note control definitions.
     protected abstract ControlDefinition[] GetNoteControlDefinitions();
 
-    protected override void OnEnable() {
-      var config = AudioSettings.GetConfiguration();
-      _outputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
-      base.OnEnable();
-    }
-
-    protected override void OnDisable() {
-      base.OnDisable();
-      _outputSamples = null;
-    }
-
     // Create callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_CreateCallback))]
     private static void OnCreate(ref IntPtr state, Int32 frameRate) {
@@ -124,8 +113,9 @@ namespace Barely {
     private static void OnProcess(ref IntPtr state, IntPtr outputSamples, Int32 outputChannelCount,
                                   Int32 outputFrameCount) {
       (GCHandle.FromIntPtr(state).Target as DefinitionType)
-          .OnProcess(_outputSamples, outputChannelCount, outputFrameCount);
-      Marshal.Copy(_outputSamples, 0, outputSamples, outputChannelCount * outputFrameCount);
+          .OnProcess(Musician.Internal.OutputSamples, outputChannelCount, outputFrameCount);
+      Marshal.Copy(Musician.Internal.OutputSamples, 0, outputSamples,
+                   outputChannelCount * outputFrameCount);
     }
 
     // Set control callback.
@@ -186,8 +176,5 @@ namespace Barely {
       }
       return definitionsPtr;
     }
-
-    // Internal output samples.
-    private static double[] _outputSamples = null;
   }
 }  // namespace Barely

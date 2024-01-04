@@ -1,6 +1,7 @@
 #include "barelymusician/instruments/percussion_instrument.h"
 
-#include <vector>
+#include <array>
+#include <cassert>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/instruments/custom_instrument.h"
@@ -21,14 +22,14 @@ constexpr double kDefaultPadRelease = 0.1;
 
 }  // namespace
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Gain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Pad release.
-      ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
-  };
+  static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
+      control_definitions = {
+          // Gain.
+          ControlDefinition{1.0, 0.0, 1.0},
+          // Pad release.
+          ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
+      };
   return CustomInstrument::GetDefinition<PercussionInstrument>(control_definitions, {});
 }
 
@@ -63,6 +64,9 @@ void PercussionInstrument::SetControl(int index, double value,
       for (auto& pad : pads_) {
         pad.voice.envelope().SetRelease(release_);
       }
+      break;
+    default:
+      assert(false);
       break;
   }
 }

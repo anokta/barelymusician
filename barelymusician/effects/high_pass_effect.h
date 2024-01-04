@@ -20,7 +20,6 @@ BARELY_EXPORT BarelyEffectDefinition BarelyHighPassEffect_GetDefinition();
 
 #ifdef __cplusplus
 #include <array>
-#include <vector>
 
 #include "barelymusician/dsp/one_pole_filter.h"
 #include "barelymusician/effects/custom_effect.h"
@@ -34,6 +33,8 @@ class HighPassEffect : public CustomEffect {
   enum class Control : int {
     /// Cutoff frequency.
     kCutoffFrequency = 0,
+    /// Number of controls.
+    kCount,
   };
 
   /// Returns the effect definition.

@@ -46,6 +46,8 @@ class SynthInstrument : public CustomInstrument {
     kRelease = 5,
     /// Number of voices.
     kVoiceCount = 6,
+    /// Number of controls.
+    kCount,
   };
 
   /// Returns the instrument definition.

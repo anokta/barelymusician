@@ -1,7 +1,8 @@
 #include "barelymusician/instruments/sampler_instrument.h"
 
+#include <array>
+#include <cassert>
 #include <cmath>
-#include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/instruments/custom_instrument.h"
@@ -19,26 +20,26 @@ constexpr int kMaxVoiceCount = 64;
 
 }  // namespace
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Gain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Root pitch.
-      ControlDefinition{0.0},
-      // Sample player loop.
-      ControlDefinition{false},
-      // Attack.
-      ControlDefinition{0.05, 0.0, 60.0},
-      // Decay.
-      ControlDefinition{0.0, 0.0, 60.0},
-      // Sustain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Release.
-      ControlDefinition{0.25, 0.0, 60.0},
-      // Number of voices.
-      ControlDefinition{8, 1, kMaxVoiceCount},
-  };
+  static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
+      control_definitions = {
+          // Gain.
+          ControlDefinition{1.0, 0.0, 1.0},
+          // Root pitch.
+          ControlDefinition{0.0},
+          // Sample player loop.
+          ControlDefinition{false},
+          // Attack.
+          ControlDefinition{0.05, 0.0, 60.0},
+          // Decay.
+          ControlDefinition{0.0, 0.0, 60.0},
+          // Sustain.
+          ControlDefinition{1.0, 0.0, 1.0},
+          // Release.
+          ControlDefinition{0.25, 0.0, 60.0},
+          // Number of voices.
+          ControlDefinition{8, 1, kMaxVoiceCount},
+      };
   return CustomInstrument::GetDefinition<SamplerInstrument>(control_definitions, {});
 }
 
@@ -85,6 +86,9 @@ void SamplerInstrument::SetControl(int index, double value, double /*slope*/) no
       break;
     case Control::kVoiceCount:
       voice_.Resize(static_cast<int>(value));
+      break;
+    default:
+      assert(false);
       break;
   }
 }

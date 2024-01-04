@@ -33,6 +33,8 @@ class LowPassEffect : public CustomEffect {
   enum class Control : int {
     /// Cutoff frequency.
     kCutoffFrequency = 0,
+    /// Number of controls.
+    kCount,
   };
 
   /// Returns the effect definition.

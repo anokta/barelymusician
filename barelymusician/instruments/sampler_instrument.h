@@ -46,8 +46,10 @@ class SamplerInstrument : public CustomInstrument {
     kSustain = 5,
     /// Envelope release.
     kRelease = 6,
-    /// Number of voices
+    /// Number of voices.
     kVoiceCount = 7,
+    /// Number of controls.
+    kCount,
   };
 
   /// Returns the instrument definition.

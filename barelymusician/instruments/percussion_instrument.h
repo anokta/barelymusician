@@ -37,6 +37,8 @@ class PercussionInstrument : public CustomInstrument {
     kGain = 0,
     /// Pad envelope release.
     kRelease = 1,
+    /// Number of controls.
+    kCount,
   };
 
   /// Returns the instrument definition.

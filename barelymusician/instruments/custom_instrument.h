@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 #include <cassert>
 #include <new>
-#include <vector>
+#include <span>
 
 namespace barely {
 
@@ -61,13 +61,13 @@ class CustomInstrument {
 
   /// Returns the definition for `CustomInstrumentType`.
   ///
-  /// @param control_definitions Array of control definitions.
-  /// @param note_control_definitions Array of note control definitions.
+  /// @param control_definitions Span of control definitions.
+  /// @param note_control_definitions Span of note control definitions.
   /// @return Instrument definition.
   template <typename CustomInstrumentType>
   static InstrumentDefinition GetDefinition(
-      const std::vector<ControlDefinition>& control_definitions,
-      const std::vector<ControlDefinition>& note_control_definitions) noexcept {
+      std::span<const ControlDefinition> control_definitions,
+      std::span<const ControlDefinition> note_control_definitions) noexcept {
     class PublicInstrument : public CustomInstrumentType {
      public:
       explicit PublicInstrument(int frame_rate) : CustomInstrumentType(frame_rate) {}

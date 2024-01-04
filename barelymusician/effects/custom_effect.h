@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 #include <cassert>
 #include <new>
-#include <vector>
+#include <span>
 
 namespace barely {
 
@@ -45,7 +45,7 @@ class CustomEffect {
   /// @return Effect definition.
   template <typename CustomEffectType>
   static EffectDefinition GetDefinition(
-      const std::vector<ControlDefinition>& control_definitions) noexcept {
+      std::span<const ControlDefinition> control_definitions) noexcept {
     class PublicEffect : public CustomEffectType {
      public:
       explicit PublicEffect(int frame_rate) : CustomEffectType(frame_rate) {}

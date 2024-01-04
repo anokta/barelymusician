@@ -15,8 +15,8 @@ struct BarelyArpeggiator : public barely::Arpeggiator {
             barely::Musician::Observer(musician).CreateComponent<barely::Arpeggiator>(
                 process_order)) {}
 
-  // Default destructor.
-  ~BarelyArpeggiator() noexcept = default;
+  // Destroys `BarelyArpeggiator`.
+  ~BarelyArpeggiator() noexcept { SetInstrument(nullptr); }
 
   // Optional instrument.
   std::optional<barely::Instrument::Observer> instrument = std::nullopt;
@@ -70,8 +70,15 @@ bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
                                      BarelyInstrumentHandle instrument) {
   if (!arpeggiator) return false;
 
-  arpeggiator->instrument.emplace(instrument);
-  arpeggiator->SetInstrument(&arpeggiator->instrument.value());
+  if (arpeggiator->instrument) {
+    arpeggiator->SetInstrument(nullptr);
+  }
+  if (instrument) {
+    arpeggiator->instrument.emplace(instrument);
+    arpeggiator->SetInstrument(&arpeggiator->instrument.value());
+  } else {
+    arpeggiator->instrument.reset();
+  }
   return true;
 }
 
@@ -179,6 +186,7 @@ void Arpeggiator::Update() noexcept {
 
 void Arpeggiator::Stop() noexcept {
   performer_.Stop();
+  performer_.CancelAllOneOffTasks();
   performer_.SetPosition(0.0);
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
@@ -199,8 +207,13 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
         }
         const double pitch = pitches_[index_];
         instrument_->SetNoteOn(pitch);
-        performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                                      gate_ratio_ * performer_.GetLoopLength(), process_order);
+        performer_.ScheduleOneOffTask(
+            [this, pitch]() {
+              if (instrument_ != nullptr) {
+                instrument_->SetNoteOff(pitch);
+              }
+            },
+            gate_ratio_ * performer_.GetLoopLength(), process_order);
       },
       0.0, process_order);
 }

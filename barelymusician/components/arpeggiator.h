@@ -124,6 +124,14 @@ class Arpeggiator {
   /// Destroys `Arpeggiator`.
   ~Arpeggiator() noexcept;
 
+  /// Non-copyable.
+  Arpeggiator(const Arpeggiator& other) noexcept = delete;
+  Arpeggiator& operator=(const Arpeggiator& other) noexcept = delete;
+
+  /// Movable.
+  Arpeggiator(Arpeggiator&& other) noexcept = default;
+  Arpeggiator& operator=(Arpeggiator&& other) noexcept = default;
+
   /// Returns whether a note is on or not.
   ///
   /// @return True if on, false otherwise.

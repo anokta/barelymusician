@@ -7,7 +7,6 @@
 #include <optional>
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
@@ -47,7 +46,7 @@ void Musician::SetTempo(double tempo) noexcept {
     return;
   }
   tempo_ = tempo;
-  for (auto& instrument : instruments_) {
+  for (const auto& instrument : instruments_) {
     instrument->SetTempo(tempo_);
   }
 }
@@ -75,7 +74,7 @@ void Musician::Update(double timestamp) noexcept {
         }
 
         timestamp_ += SecondsFromBeats(tempo_, update_duration.first);
-        for (auto& instrument : instruments_) {
+        for (const auto& instrument : instruments_) {
           assert(instrument);
           instrument->Update(timestamp_);
         }
@@ -89,7 +88,7 @@ void Musician::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      for (auto& instrument : instruments_) {
+      for (const auto& instrument : instruments_) {
         assert(instrument);
         instrument->Update(timestamp_);
       }

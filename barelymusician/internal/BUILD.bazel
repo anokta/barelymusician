@@ -69,7 +69,6 @@ cc_library(
         ":instrument",
         ":mutable",
         ":performer",
-        "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:seconds",
     ],
 )
@@ -91,7 +90,6 @@ cc_library(
     deps = [
         ":task",
         "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:find_or_null",
     ],
 )
 
@@ -163,6 +161,7 @@ cc_test(
         ":control",
         ":instrument",
         ":musician",
+        ":performer",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
@@ -191,6 +190,7 @@ cc_test(
     srcs = ["performer_test.cpp"],
     deps = [
         ":performer",
+        ":task",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],

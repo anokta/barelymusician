@@ -1,6 +1,9 @@
 #ifndef EXAMPLES_COMMON_INPUT_MANAGER_H_
 #define EXAMPLES_COMMON_INPUT_MANAGER_H_
 
+#include <functional>
+#include <unordered_set>
+
 #if defined(_WIN32) || defined(__CYGWIN__)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -9,9 +12,6 @@
 #elif defined(__APPLE__)
 #include <ApplicationServices/ApplicationServices.h>
 #endif  // defined(__APPLE__)
-
-#include <functional>
-#include <unordered_set>
 
 namespace barely::examples {
 

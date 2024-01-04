@@ -9,6 +9,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/performer.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -127,6 +128,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(std::make_unique<Instrument>(
           GetTestInstrumentDefinition(), kFrameRate, musician.GetTempo(), musician.GetTimestamp()));
+      musician.AddInstrument(*instruments[i]);
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
@@ -141,6 +143,11 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
       instruments[i]->SetNoteOff(static_cast<double>(i + 1));
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1.0, 2.0, 3.0));
+
+    // Remove instruments.
+    for (int i = 0; i < 3; ++i) {
+      musician.RemoveInstrument(*instruments[i]);
+    }
   }
 
   // Remaining active notes should be stopped once the musician goes out of scope.

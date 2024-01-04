@@ -72,7 +72,6 @@ target_link_libraries(
   barely_internal_instrument
   barely_internal_mutable
   barely_internal_performer
-  barelymusician_headeronly
   barely_seconds
 )
 
@@ -95,7 +94,6 @@ target_link_libraries(
   barely_internal_performer
   barely_internal_task
   barelymusician_headeronly
-  barely_find_or_null
 )
 
 add_library(
@@ -170,6 +168,7 @@ if (ENABLE_TESTS)
     barely_internal_control
     barely_internal_instrument
     barely_internal_musician
+    barely_internal_performer
     barelymusician_headeronly
     gmock
     gtest_main
@@ -206,6 +205,7 @@ if (ENABLE_TESTS)
   target_link_libraries(
     barely_internal_performer_test
     barely_internal_performer
+    barely_internal_task
     barelymusician_headeronly
     gmock
     gtest_main

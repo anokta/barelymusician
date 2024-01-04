@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/internal/task.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -156,6 +157,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
     expected_positions.push_back(expected_position);
     EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, 4 - i)));
 
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     performer.Update(performer.GetDurationToNextTask()->first);
     EXPECT_DOUBLE_EQ(performer.GetPosition(), expected_position);
 

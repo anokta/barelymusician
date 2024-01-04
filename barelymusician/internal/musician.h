@@ -1,11 +1,8 @@
 #ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 #define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
-#include <functional>
 #include <unordered_set>
-#include <utility>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/mutable.h"
 #include "barelymusician/internal/performer.h"

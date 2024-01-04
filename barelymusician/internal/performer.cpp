@@ -5,12 +5,11 @@
 #include <cmath>
 #include <iterator>
 #include <limits>
-#include <map>
 #include <optional>
+#include <set>
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/find_or_null.h"
 #include "barelymusician/internal/task.h"
 
 namespace barely::internal {
@@ -212,6 +211,7 @@ void Performer::Update(double duration) noexcept {
     return;
   }
   assert(duration >= 0.0 &&
+         // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
          (!GetDurationToNextTask().has_value() || duration <= GetDurationToNextTask()->first));
   if (const double next_position = position_ + duration; next_position > position_) {
     SetPosition(next_position);

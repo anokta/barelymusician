@@ -1,9 +1,7 @@
 #include "barelymusician/internal/instrument.h"
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <memory>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -363,7 +361,7 @@ void Instrument::SetTempo(double tempo) noexcept {
     }
   }
   // Update effect controls.
-  for (auto& [process_order, effect] : effects_) {
+  for (const auto& [process_order, effect] : effects_) {
     auto& effect_controls = effect->GetAllControls();
     for (int index = 0; index < static_cast<int>(effect_controls.size()); ++index) {
       if (const auto& effect_control = effect_controls[index];
@@ -399,7 +397,7 @@ void Instrument::Update(double timestamp) noexcept {
       }
     }
     // Update effect controls.
-    for (auto& [process_order, effect] : effects_) {
+    for (const auto& [process_order, effect] : effects_) {
       auto& effect_controls = effect->GetAllControls();
       for (int index = 0; index < static_cast<int>(effect_controls.size()); ++index) {
         if (auto& effect_control = effect_controls[index]; effect_control.Update(duration)) {

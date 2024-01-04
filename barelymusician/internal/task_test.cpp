@@ -1,9 +1,5 @@
 #include "barelymusician/internal/task.h"
 
-#include <functional>
-#include <utility>
-#include <vector>
-
 #include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 

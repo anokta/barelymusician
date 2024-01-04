@@ -10,13 +10,13 @@
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::Arpeggiator {
   // Constructs `BarelyArpeggiator` with `musician` and `process_order`.
-  BarelyArpeggiator(BarelyMusicianHandle musician, int process_order)
+  BarelyArpeggiator(BarelyMusicianHandle musician, int process_order) noexcept
       : barely::Arpeggiator(
             barely::Musician::Observer(musician).CreateComponent<barely::Arpeggiator>(
                 process_order)) {}
 
   // Default destructor.
-  ~BarelyArpeggiator() = default;
+  ~BarelyArpeggiator() noexcept = default;
 
   // Optional instrument.
   std::optional<barely::Instrument::Observer> instrument = std::nullopt;

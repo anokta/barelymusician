@@ -43,7 +43,7 @@ struct BarelyEffect : public Effect {
   BarelyEffect& operator=(BarelyEffect&& other) noexcept = delete;
 
   // Returns the instrument.
-  Instrument* instrument() const noexcept { return instrument_.get(); }
+  [[nodiscard]] Instrument* instrument() const noexcept { return instrument_.get(); }
 
  private:
   // Internal instrument.
@@ -98,7 +98,7 @@ struct BarelyMusician : public Observable<Musician> {
 struct BarelyPerformer : public Observable<Performer> {
   // Constructs `BarelyPerformer` with `musician`.
   explicit BarelyPerformer(const Observable<Musician>& musician) noexcept
-      : Observable<Performer>(), musician_(musician.Observe()) {
+      : musician_(musician.Observe()) {
     musician_->AddPerformer(*this);
   }
 
@@ -144,7 +144,7 @@ struct BarelyTask : public Task {
   BarelyTask& operator=(BarelyTask&& other) noexcept = delete;
 
   // Returns the performer.
-  Performer* performer() const noexcept { return performer_.get(); }
+  [[nodiscard]] Performer* performer() const noexcept { return performer_.get(); }
 
  private:
   // Internal performer.

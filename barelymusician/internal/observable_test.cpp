@@ -1,6 +1,7 @@
 #include "barelymusician/internal/observable.h"
 
 #include <memory>
+#include <string>
 
 #include "gtest/gtest.h"
 
@@ -10,26 +11,26 @@ namespace {
 // Tests that an observable value can be observed by a single observer as expected.
 TEST(ObservableTest, SingleObserver) {
   // Create an observable value.
-  Observable<int> observable{1};
-  EXPECT_EQ(*observable, 1);
+  Observable<std::string> observable{"1"};
+  EXPECT_EQ(observable, "1");
 
   // Mutate the observable value.
-  *observable = 5;
-  EXPECT_EQ(*observable, 5);
+  observable.append("2");
+  EXPECT_EQ(observable, "12");
 
   {
     // Create an observer.
-    Observer<int> observer = observable.Observe();
+    Observer<std::string> observer = observable.Observe();
     ASSERT_TRUE(observer);
-    EXPECT_EQ(*observer, 5);
+    EXPECT_EQ(*observer, "12");
 
     // Mutate the observable value with the observer.
-    *observer = 10;
-    EXPECT_EQ(*observable, 10);
-    EXPECT_EQ(*observer, 10);
+    observer->append("3");
+    EXPECT_EQ(observable, "123");
+    EXPECT_EQ(*observer, "123");
   }
 
-  EXPECT_EQ(*observable, 10);
+  EXPECT_EQ(observable, "123");
 }
 
 // Tests that an observable value can be observed by multiple observers as expected.
@@ -50,13 +51,13 @@ TEST(ObservableTest, MultipleObservers) {
   {
     // Create an observable value.
     Observable<TestData> observable;
-    EXPECT_EQ(observable->value, 0);
+    EXPECT_EQ(observable.value, 0);
     EXPECT_EQ(constructor_count, 1);
     EXPECT_EQ(destructor_count, 0);
 
     // Mutate the observable value.
-    observable->value = 20;
-    EXPECT_EQ(observable->value, 20);
+    observable.value = 20;
+    EXPECT_EQ(observable.value, 20);
     EXPECT_EQ(constructor_count, 1);
     EXPECT_EQ(destructor_count, 0);
 
@@ -71,7 +72,7 @@ TEST(ObservableTest, MultipleObservers) {
       // Mutate the observable value with the observer in the stack.
       observer_in_stack->value = 30;
       EXPECT_EQ(observer_in_stack->value, 30);
-      EXPECT_EQ(observable->value, 30);
+      EXPECT_EQ(observable.value, 30);
       EXPECT_EQ(constructor_count, 1);
       EXPECT_EQ(destructor_count, 0);
 
@@ -87,7 +88,7 @@ TEST(ObservableTest, MultipleObservers) {
       (*observer_in_heap)->value = 40;
       EXPECT_EQ((*observer_in_heap)->value, 40);
       EXPECT_EQ(observer_in_stack->value, 40);
-      EXPECT_EQ(observable->value, 40);
+      EXPECT_EQ(observable.value, 40);
       EXPECT_EQ(constructor_count, 1);
       EXPECT_EQ(destructor_count, 0);
     }
@@ -95,7 +96,7 @@ TEST(ObservableTest, MultipleObservers) {
     // Observer in the stack is out of scope.
     EXPECT_TRUE(*observer_in_heap);
     EXPECT_EQ((*observer_in_heap)->value, 40);
-    EXPECT_EQ(observable->value, 40);
+    EXPECT_EQ(observable.value, 40);
     EXPECT_EQ(constructor_count, 1);
     EXPECT_EQ(destructor_count, 0);
   }

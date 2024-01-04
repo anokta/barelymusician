@@ -18,7 +18,7 @@ namespace barely::internal {
 template <typename DataType>
 class Observer;
 template <typename DataType>
-class Observable {
+class Observable : public DataType {
  public:
   /// Constructs a new `Observable`.
   ///
@@ -29,18 +29,11 @@ class Observable {
   /// Destroys `Observable`.
   ~Observable() noexcept;
 
-  /// Non-copyable.
+  /// Non-copyable and non-movable.
   Observable(const Observable& other) noexcept = delete;
   Observable& operator=(const Observable& other) noexcept = delete;
-
-  /// Movable.
-  Observable(Observable&& other) noexcept;
-  Observable& operator=(Observable&& other) noexcept;
-
-  /// Member access operators.
-  DataType& operator*() const noexcept;
-  DataType* operator->() const noexcept;
-  DataType* get() const noexcept;
+  Observable(Observable&& other) noexcept = delete;
+  Observable& operator=(Observable&& other) noexcept = delete;
 
   /// Returns a new observer.
   ///
@@ -55,7 +48,7 @@ class Observable {
   // Observable view.
   struct View {
     // Raw data.
-    std::unique_ptr<DataType> data = nullptr;
+    DataType* data = nullptr;
 
     // Number of observers.
     std::unique_ptr<int> observer_count = nullptr;
@@ -81,7 +74,7 @@ class Observer {
   /// Member access operators.
   DataType& operator*() const noexcept;
   DataType* operator->() const noexcept;
-  DataType* get() const noexcept { return view_->data.get(); }
+  DataType* get() const noexcept { return view_->data; }
 
   /// Returns whether the observed data is valid or not.
   ///
@@ -106,50 +99,16 @@ class Observer {
 template <typename DataType>
 template <typename... Args>
 Observable<DataType>::Observable(Args... args) noexcept
-    : view_(new(std::nothrow) View{std::make_unique<DataType>(args...), std::make_unique<int>(0)}) {
-}
+    : DataType(args...), view_(new(std::nothrow) View{this, std::make_unique<int>(0)}) {}
 
 template <typename DataType>
 Observable<DataType>::~Observable() noexcept {
-  assert(!view_ || view_->data);
-  if (view_) {
-    view_->data.reset();
-    if (*view_->observer_count == 0) {
-      delete view_;
-      view_ = nullptr;
-    }
-  }
-}
-
-template <typename DataType>
-Observable<DataType>::Observable(Observable<DataType>&& other) noexcept
-    : view_(std::exchange(other.view_, nullptr)) {}
-
-template <typename DataType>
-Observable<DataType>& Observable<DataType>::operator=(Observable<DataType>&& other) noexcept {
-  if (*this != other) {
-    view_ = std::exchange(other.view_, nullptr);
-  }
-  return *this;
-}
-
-template <typename DataType>
-DataType& Observable<DataType>::operator*() const noexcept {
   assert(view_);
-  assert(view_->data);
-  return *view_->data;
-}
-
-template <typename DataType>
-DataType* Observable<DataType>::operator->() const noexcept {
-  assert(view_);
-  assert(view_->data);
-  return view_->data.get();
-}
-
-template <typename DataType>
-DataType* Observable<DataType>::get() const noexcept {
-  return view_ ? view_->data.get() : nullptr;
+  view_->data = nullptr;
+  if (*view_->observer_count == 0) {
+    delete view_;
+    view_ = nullptr;
+  }
 }
 
 template <typename DataType>
@@ -193,8 +152,7 @@ DataType& Observer<DataType>::operator*() const noexcept {
 template <typename DataType>
 DataType* Observer<DataType>::operator->() const noexcept {
   assert(view_);
-  assert(view_->data);
-  return view_->data.get();
+  return view_->data;
 }
 
 template <typename DataType>

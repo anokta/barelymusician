@@ -2204,6 +2204,12 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
     return *this;
   }
 
+  /// Cancels all one-off tasks.
+  void CancelAllOneOffTasks() noexcept {
+    [[maybe_unused]] const bool success = BarelyPerformer_CancelAllOneOffTasks(Get());
+    assert(success);
+  }
+
   /// Creates a new task.
   ///
   /// @param definition Task definition.

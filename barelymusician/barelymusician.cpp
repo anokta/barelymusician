@@ -503,6 +503,13 @@ bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   return true;
 }
 
+bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer) {
+  if (!performer) return false;
+
+  performer->CancelAllOneOffTasks();
+  return true;
+}
+
 bool BarelyPerformer_Create(BarelyMusicianHandle musician, BarelyPerformerHandle* out_performer) {
   if (!musician) return false;
   if (!out_performer) return false;

@@ -141,6 +141,11 @@ namespace Barely {
       Musician.Internal.Performer_Start(_handle);
     }
 
+    /// Cancels all one-off tasks.
+    public void CancelAllOneOffTasks() {
+      Musician.Internal.Performer_CancelAllOneOffTasks(_handle);
+    }
+
     /// Schedules a one-off task at a specific position.
     ///
     /// @param callback Task process callback.

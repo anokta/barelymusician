@@ -21,6 +21,9 @@ class Performer {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddTask(Task& task) noexcept;
 
+  /// Cancels all one-off tasks.
+  void CancelAllOneOffTasks() noexcept;
+
   /// Returns the duration to next task.
   ///
   /// @return Optional pair of duration in beats and process order.

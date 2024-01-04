@@ -718,6 +718,16 @@ namespace Barely {
         }
       }
 
+      /// Cancels all one-off tasks.
+      ///
+      /// @param performerHandle Performer handle.
+      public static void Performer_CancelAllOneOffTasks(IntPtr performerHandle) {
+        if (!BarelyPerformer_CancelAllOneOffTasks(performerHandle) &&
+            performerHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to cancel all one-off tasks");
+        }
+      }
+
       /// Creates a new performer.
       ///
       /// @param performer Performer.
@@ -1564,6 +1574,9 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Update")]
       private static extern bool BarelyMusician_Update(IntPtr musician, double timestamp);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_CancelAllOneOffTasks")]
+      private static extern bool BarelyPerformer_CancelAllOneOffTasks(IntPtr performer);
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Create")]
       private static extern bool BarelyPerformer_Create(IntPtr musician, ref IntPtr outPerformer);

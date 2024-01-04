@@ -39,6 +39,7 @@ VERS_1.0 {
     BarelyMusician_GetTimestamp;
     BarelyMusician_SetTempo;
     BarelyMusician_Update;
+    BarelyPerformer_CancelAllOneOffTasks;
     BarelyPerformer_Create;
     BarelyPerformer_Destroy;
     BarelyPerformer_GetLoopBeginPosition;

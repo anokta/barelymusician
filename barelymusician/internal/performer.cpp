@@ -22,6 +22,8 @@ void Performer::AddTask(Task& task) noexcept {
   assert(success);
 }
 
+void Performer::CancelAllOneOffTasks() noexcept { one_off_tasks_.clear(); }
+
 std::optional<std::pair<double, int>> Performer::GetDurationToNextTask() const noexcept {
   if (!is_playing_) {
     return std::nullopt;

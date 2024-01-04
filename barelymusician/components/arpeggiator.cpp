@@ -15,13 +15,11 @@ struct BarelyArpeggiator : public barely::Arpeggiator {
             barely::Musician::Observer(musician).CreateComponent<barely::Arpeggiator>(
                 process_order)) {}
 
+  // Default destructor.
+  ~BarelyArpeggiator() = default;
+
   // Optional instrument.
   std::optional<barely::Instrument::Observer> instrument = std::nullopt;
-
- private:
-  // Ensures that the instance can only be destroyed via explicit destroy call.
-  friend BARELY_EXPORT bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator);
-  ~BarelyArpeggiator() = default;
 };
 
 bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_order,

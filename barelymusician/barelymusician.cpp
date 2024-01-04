@@ -21,18 +21,6 @@ using ::barely::internal::Task;
 
 // Effect.
 struct BarelyEffect : public Effect {
- public:
-  // Returns the instrument.
-  Instrument* instrument() const noexcept { return instrument_.get(); }
-
- private:
-  // Ensures that the instance can only be managed via explicit API calls.
-  friend BARELY_EXPORT bool BarelyEffect_Create(BarelyInstrumentHandle instrument,
-                                                BarelyEffectDefinition definition,
-                                                int32_t process_order,
-                                                BarelyEffectHandle* out_effect);
-  friend BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
-
   // Constructs `BarelyEffect` with `definition`, `instrument`, and `process_order`.
   BarelyEffect(const Observable<Instrument>& instrument, BarelyEffectDefinition definition,
                int process_order) noexcept
@@ -54,20 +42,16 @@ struct BarelyEffect : public Effect {
   BarelyEffect(BarelyEffect&& other) noexcept = delete;
   BarelyEffect& operator=(BarelyEffect&& other) noexcept = delete;
 
+  // Returns the instrument.
+  Instrument* instrument() const noexcept { return instrument_.get(); }
+
+ private:
   // Internal instrument.
   Observer<Instrument> instrument_;
 };
 
 // Instrument.
 struct BarelyInstrument : public Observable<Instrument> {
- private:
-  // Ensures that the instance can only be managed via explicit API calls.
-  friend BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusicianHandle musician,
-                                                    BarelyInstrumentDefinition definition,
-                                                    int32_t frame_rate,
-                                                    BarelyInstrumentHandle* out_instrument);
-  friend BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
-
   // Constructs `BarelyInstrument` with `musician`, `definition`, and `frame_rate`.
   BarelyInstrument(const Observable<Musician>& musician, BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
@@ -90,17 +74,13 @@ struct BarelyInstrument : public Observable<Instrument> {
   BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
   BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
 
+ private:
   // Internal musician.
   Observer<Musician> musician_;
 };
 
 // Musician.
 struct BarelyMusician : public Observable<Musician> {
- private:
-  // Ensures that the instance can only be managed via explicit API calls.
-  friend BARELY_EXPORT bool BarelyMusician_Create(BarelyMusicianHandle* out_musician);
-  friend BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
-
   // Default constructor.
   BarelyMusician() noexcept = default;
 
@@ -116,12 +96,6 @@ struct BarelyMusician : public Observable<Musician> {
 
 // Performer.
 struct BarelyPerformer : public Observable<Performer> {
- private:
-  // Ensures that the instance can only be managed via explicit API calls.
-  friend BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician,
-                                                   BarelyPerformerHandle* out_performer);
-  friend BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
-
   // Constructs `BarelyPerformer` with `musician`.
   explicit BarelyPerformer(const Observable<Musician>& musician) noexcept
       : Observable<Performer>(), musician_(musician.Observe()) {
@@ -141,24 +115,13 @@ struct BarelyPerformer : public Observable<Performer> {
   BarelyPerformer(BarelyPerformer&& other) noexcept = delete;
   BarelyPerformer& operator=(BarelyPerformer&& other) noexcept = delete;
 
+ private:
   // Internal musician.
   Observer<Musician> musician_;
 };
 
 // Task.
 struct BarelyTask : public Task {
- public:
-  // Returns the performer.
-  Performer* performer() const noexcept { return performer_.get(); }
-
- private:
-  // Ensures that the instance can only be managed via explicit API calls.
-  friend BARELY_EXPORT bool BarelyTask_Create(BarelyPerformerHandle performer,
-                                              BarelyTaskDefinition definition, double position,
-                                              int32_t process_order, void* user_data,
-                                              BarelyTaskHandle* out_task);
-  friend BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
-
   // Constructs `BarelyTask` with `performer`, `definition`, `position`, `process_order`, and
   // `user_data`.
   BarelyTask(const Observable<Performer>& performer, BarelyTaskDefinition definition,
@@ -180,6 +143,10 @@ struct BarelyTask : public Task {
   BarelyTask(BarelyTask&& other) noexcept = delete;
   BarelyTask& operator=(BarelyTask&& other) noexcept = delete;
 
+  // Returns the performer.
+  Performer* performer() const noexcept { return performer_.get(); }
+
+ private:
   // Internal performer.
   Observer<Performer> performer_;
 };

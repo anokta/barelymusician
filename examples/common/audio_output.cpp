@@ -12,8 +12,7 @@ AudioOutput::AudioOutput() noexcept { Pa_Initialize(); }
 
 AudioOutput::~AudioOutput() noexcept { Pa_Terminate(); }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void AudioOutput::Start(int frame_rate, int channel_count, int frame_count) noexcept {
+void AudioOutput::Start(int frame_rate, int channel_count, int frame_count) {
   assert(frame_rate >= 0);
   assert(channel_count >= 0);
   assert(frame_count >= 0);

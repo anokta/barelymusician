@@ -33,8 +33,7 @@ class AudioOutput {
   /// @param frame_rate Frame rate in hertz.
   /// @param channel_count Number of output channels.
   /// @param frame_count Number of output frames per buffer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Start(int frame_rate, int channel_count, int frame_count) noexcept;
+  void Start(int frame_rate, int channel_count, int frame_count);
 
   /// Stops the audio processing routine.
   void Stop() noexcept;

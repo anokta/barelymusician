@@ -4,8 +4,7 @@
 
 namespace barely::examples {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-InputManager::InputManager() noexcept : key_down_callback_(nullptr), key_up_callback_(nullptr) {
+InputManager::InputManager() : key_down_callback_(nullptr), key_up_callback_(nullptr) {
 #if defined(_WIN32) || defined(__CYGWIN__)
   std_input_handle_ = GetStdHandle(STD_INPUT_HANDLE);
   if (std_input_handle_ == INVALID_HANDLE_VALUE) {
@@ -69,8 +68,7 @@ void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept {
   key_up_callback_ = std::move(key_up_callback);
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void InputManager::Update() noexcept {
+void InputManager::Update() {
 #if defined(_WIN32) || defined(__CYGWIN__)
   for (int i = 0; i < 128; ++i) {
     const Key key = static_cast<Key>(i);
@@ -86,8 +84,7 @@ void InputManager::Update() noexcept {
 #endif  // defined(__APPLE__)
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void InputManager::HandleKeyDown(const Key& key) noexcept {
+void InputManager::HandleKeyDown(const Key& key) {
   if (pressed_keys_.insert(key).second && key_down_callback_) {
     key_down_callback_(key);
   }

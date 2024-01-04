@@ -15,8 +15,7 @@ int WavFile::GetChannelCount() const noexcept { return channel_count_; }
 
 int WavFile::GetFrameRate() const noexcept { return frame_rate_; }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-bool WavFile::Load(const std::string& file_path) noexcept {
+bool WavFile::Load(const std::string& file_path) {
   // Read the file.
   unsigned int wav_channel_count;
   unsigned int wav_frame_rate;

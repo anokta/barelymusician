@@ -28,8 +28,7 @@ class WavFile {
   ///
   /// @param file_path Absolute file path.
   /// @return True if successful.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool Load(const std::string& file_path) noexcept;
+  bool Load(const std::string& file_path);
 
  private:
   // Number of audio channels.

@@ -48,8 +48,8 @@ instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
 //
 // @note Pitch values are normalized by octaves, where each 1.0 value change shifts one octave, and
 // 0.0 represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition. However,
-// this is not a strict rule, since `pitch`` and `intensity` can be interpreted in any desired way
-// by a custom instrument.
+// this is not a strict rule, since `pitch` and `intensity` can be interpreted in any desired way by
+// a custom instrument.
 const double a3_pitch = -1.0;
 instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
 

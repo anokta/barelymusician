@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
 using UnityEngine;
 
 namespace Barely {
@@ -17,15 +18,13 @@ namespace Barely {
 
   /// A represantion of a simple arpeggiator that can be attached to a musical instrument to play
   /// notes in sequence.
+  [RequireComponent(typeof(Instrument))]
   public class Arpeggiator : MonoBehaviour {
     public int ProcessOrder = 0;
 
     /// Gate ratio.
     [Range(0.0f, 1.0f)]
     public double GateRatio = 0.5;
-
-    // Instrument.
-    public Instrument Instrument = null;
 
     /// Rate.
     [Range(0.0f, 8.0f)]
@@ -69,37 +68,23 @@ namespace Barely {
 
     private void OnEnable() {
       Musician.Internal.Component_Create(this, ref _handle);
-      UpdateInstrument();
+      _instrument = GetComponent<Instrument>();
+      _instrument.OnInstrumentCreate += OnInstrumentCreate;
+      _instrument.OnInstrumentDestroy += OnInstrumentDestroy;
+      Musician.Internal.Arpeggiator_SetInstrument(_handle, _instrument);
     }
 
     private void OnDisable() {
-      if (_instrument != null) {
-        _instrument.OnInstrumentCreate -= OnInstrumentCreate;
-        _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
-      }
       Musician.Internal.Component_Destroy(this, ref _handle);
+      _instrument.OnInstrumentCreate -= OnInstrumentCreate;
+      _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
+      _instrument = null;
     }
 
     private void Update() {
       Musician.Internal.Arpeggiator_SetGateRatio(_handle, GateRatio);
       Musician.Internal.Arpeggiator_SetRate(_handle, Rate);
       Musician.Internal.Arpeggiator_SetStyle(_handle, Style);
-      if (_instrument != Instrument) {
-        UpdateInstrument();
-      }
-    }
-
-    private void UpdateInstrument() {
-      if (_instrument != null) {
-        _instrument.OnInstrumentCreate -= OnInstrumentCreate;
-        _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
-      }
-      _instrument = Instrument;
-      Musician.Internal.Arpeggiator_SetInstrument(_handle, _instrument);
-      if (_instrument != null) {
-        _instrument.OnInstrumentCreate += OnInstrumentCreate;
-        _instrument.OnInstrumentDestroy += OnInstrumentDestroy;
-      }
     }
 
     private void OnInstrumentCreate() {

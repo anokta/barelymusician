@@ -279,10 +279,13 @@ namespace Barely {
       /// @param instrumentHandle Instrument handle.
       /// @param effect Effect.
       /// @param effectHandle Effect handle.
-      public static void Effect_Create(IntPtr instrumentHandle, Effect effect,
+      public static void Effect_Create(Instrument instrument, Effect effect,
                                        ref IntPtr effectHandle) {
-        if (Handle == IntPtr.Zero || instrumentHandle == IntPtr.Zero ||
-            effectHandle != IntPtr.Zero) {
+        if (Handle == IntPtr.Zero || effectHandle != IntPtr.Zero) {
+          return;
+        }
+        IntPtr instrumentHandle = Instrument.Internal.GetInstrumentHandle(instrument);
+        if (instrumentHandle == IntPtr.Zero) {
           return;
         }
         EffectDefinition definition;

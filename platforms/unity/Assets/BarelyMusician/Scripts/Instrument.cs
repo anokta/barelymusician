@@ -208,17 +208,11 @@ namespace Barely {
     protected virtual void OnEnable() {
       Musician.Internal.Instrument_Create(this, ref _handle);
       OnInstrumentCreate?.Invoke();
-      foreach (var effect in GetComponents<Effect>()) {
-        Effect.Internal.ReEnable(_handle, effect);
-      }
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
-      foreach (var effect in GetComponents<Effect>()) {
-        Effect.Internal.Disable(effect);
-      }
       OnInstrumentDestroy?.Invoke();
       Musician.Internal.Instrument_Destroy(ref _handle);
     }

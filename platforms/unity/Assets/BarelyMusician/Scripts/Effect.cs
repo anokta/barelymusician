@@ -70,21 +70,6 @@ namespace Barely {
 
     /// Class that wraps the internal api.
     public static class Internal {
-      // Disables effect.
-      public static void Disable(Effect effect) {
-        if (effect.enabled) {
-          Musician.Internal.Effect_Destroy(ref effect._handle);
-        }
-      }
-
-      /// Re-enables effect.
-      public static void ReEnable(IntPtr instrumentHandle, Effect effect) {
-        if (effect.enabled) {
-          Musician.Internal.Effect_Destroy(ref effect._handle);
-          Musician.Internal.Effect_Create(instrumentHandle, effect, ref effect._handle);
-        }
-      }
-
       /// Internal control event callback.
       public static void OnControlEvent(Effect effect, int index, double value) {
         effect.OnControl?.Invoke(index, value);
@@ -93,15 +78,31 @@ namespace Barely {
     }
 
     protected virtual void OnEnable() {
-      Musician.Internal.Effect_Create(
-          Instrument.Internal.GetInstrumentHandle(GetComponent<Instrument>()), this, ref _handle);
+      _instrument = GetComponent<Instrument>();
+      _instrument.OnInstrumentCreate += OnInstrumentCreate;
+      _instrument.OnInstrumentDestroy += OnInstrumentDestroy;
+      Musician.Internal.Effect_Create(_instrument, this, ref _handle);
     }
 
     protected virtual void OnDisable() {
+      Musician.Internal.Effect_Destroy(ref _handle);
+      _instrument.OnInstrumentCreate -= OnInstrumentCreate;
+      _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
+      _instrument = null;
+    }
+
+    private void OnInstrumentCreate() {
+      Musician.Internal.Effect_Create(_instrument, this, ref _handle);
+    }
+
+    private void OnInstrumentDestroy() {
       Musician.Internal.Effect_Destroy(ref _handle);
     }
 
     // Handle.
     private IntPtr _handle = IntPtr.Zero;
+
+    // Instrument.
+    private Instrument _instrument = null;
   }
 }  // namespace Barely

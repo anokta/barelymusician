@@ -5,6 +5,7 @@ package(default_visibility = ["//visibility:public"])
 BARELYMUSICIAN_DEPS = [
     "//barelymusician",
     "//barelymusician/components:arpeggiator",
+    "//barelymusician/components:repeater",
     "//barelymusician/effects:low_pass_effect",
     "//barelymusician/effects:high_pass_effect",
     "//barelymusician/instruments:percussion_instrument",

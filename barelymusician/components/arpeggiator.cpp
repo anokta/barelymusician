@@ -26,7 +26,7 @@ bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_ord
                               BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!musician || !out_arpeggiator) return false;
 
-  *out_arpeggiator = new BarelyArpeggiator(musician, process_order);
+  *out_arpeggiator = new BarelyArpeggiator(musician, static_cast<int>(process_order));
   return true;
 }
 

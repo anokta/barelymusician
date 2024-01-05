@@ -30,6 +30,9 @@ namespace Barely {
       /// True if playing on awake, false otherwise.
       public bool playOnAwake = false;
 
+      /// True if auto, false otherwise.
+      public bool isAuto = true;
+
       /// Position.
       public double Position {
         get { return _performer.Position + _beat; }
@@ -116,6 +119,9 @@ namespace Barely {
       }
 
       private void Update() {
+        if (!isAuto) {
+          return;
+        }
         if (((Application.platform == RuntimePlatform.Android ||
               Application.platform == RuntimePlatform.IPhonePlayer) &&
              Input.GetMouseButtonDown(0)) ||

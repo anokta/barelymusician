@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "MidiEventList.h"
 #include "MidiFile.h"
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/intensity.h"

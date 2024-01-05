@@ -245,6 +245,11 @@ namespace Barely {
               return;
             }
             break;
+          case Repeater repeater:
+            if (BarelyRepeater_Create(_handle, repeater.ProcessOrder, ref componentHandle)) {
+              return;
+            }
+            break;
           default:
             Debug.LogError("Unsupported component type: " + component.GetType());
             return;
@@ -264,6 +269,9 @@ namespace Barely {
         switch (component) {
           case Arpeggiator arpeggiator:
             success = BarelyArpeggiator_Destroy(componentHandle);
+            break;
+          case Repeater repeater:
+            success = BarelyRepeater_Destroy(componentHandle);
             break;
           default:
             Debug.LogError("Unsupported component type: " + component.GetType());
@@ -1075,7 +1083,7 @@ namespace Barely {
       public static void Arpeggiator_SetRate(IntPtr arpeggiatorHandle, double rate) {
         if (!BarelyArpeggiator_SetRate(arpeggiatorHandle, rate) &&
             arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop arpeggiator rate " + rate);
+          Debug.LogError("Failed to set arpeggiator rate " + rate);
         }
       }
 
@@ -1086,7 +1094,92 @@ namespace Barely {
       public static void Arpeggiator_SetStyle(IntPtr arpeggiatorHandle, ArpeggiatorStyle style) {
         if (!BarelyArpeggiator_SetStyle(arpeggiatorHandle, style) &&
             arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop arpeggiator style " + style);
+          Debug.LogError("Failed to set arpeggiator style " + style);
+        }
+      }
+
+      /// Returns whether an repeater is playing or not.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @return True if playing, false otherwise.
+      public static bool Repeater_IsPlaying(IntPtr repeaterHandle) {
+        bool isPlaying = false;
+        if (!BarelyRepeater_IsPlaying(repeaterHandle, ref isPlaying) &&
+            repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get if repeater is playing");
+        }
+        return isPlaying;
+      }
+
+      /// Pops the last note from the end.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      public static void Repeater_Pop(IntPtr repeaterHandle) {
+        if (!BarelyRepeater_Pop(repeaterHandle) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to pop from repeater");
+        }
+      }
+
+      /// Pushes a new note to the end.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param pitchOr Note pitch or silence.
+      /// @param length Note length in beats.
+      public static void Repeater_Push(IntPtr repeaterHandle, double? pitchOr, int length) {
+        if ((pitchOr.HasValue && !BarelyRepeater_Push(repeaterHandle, pitchOr.Value, length)) ||
+            (!pitchOr.HasValue && !BarelyRepeater_PushSilence(repeaterHandle, length)) &&
+                repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to pop from repeater");
+        }
+      }
+
+      /// Sets an repeater instrument.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param instrument Instrument.
+      public static void Repeater_SetInstrument(IntPtr repeaterHandle, Instrument instrument) {
+        if (!BarelyRepeater_SetInstrument(repeaterHandle,
+                                          Instrument.Internal.GetInstrumentHandle(instrument)) &&
+            repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set repeater instrument '" + instrument.name + "'");
+        }
+      }
+
+      /// Sets an repeater rate.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param rate Rate in notes per beat.
+      public static void Repeater_SetRate(IntPtr repeaterHandle, double rate) {
+        if (!BarelyRepeater_SetRate(repeaterHandle, rate) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set repeater rate " + rate);
+        }
+      }
+
+      /// Sets an repeater style.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param style Style.
+      public static void Repeater_SetStyle(IntPtr repeaterHandle, RepeaterStyle style) {
+        if (!BarelyRepeater_SetStyle(repeaterHandle, style) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set repeater style " + style);
+        }
+      }
+
+      /// Starts a repeater.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      public static void Repeater_Start(IntPtr repeaterHandle, double pitchOffset) {
+        if (!BarelyRepeater_Start(repeaterHandle, pitchOffset) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to start repeater with pitch offset " + pitchOffset);
+        }
+      }
+
+      /// Stops a repeater.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      public static void Repeater_Stop(IntPtr repeaterHandle) {
+        if (!BarelyRepeater_Stop(repeaterHandle) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop repeater");
         }
       }
 
@@ -1682,6 +1775,46 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetStyle")]
       private static extern bool BarelyArpeggiator_SetStyle(IntPtr arpeggiator,
                                                             ArpeggiatorStyle style);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Clear")]
+      private static extern bool BarelyRepeater_Clear(IntPtr repeater);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Create")]
+      private static extern bool BarelyRepeater_Create(IntPtr musician, Int32 processOrder,
+                                                       ref IntPtr outRepeater);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Destroy")]
+      private static extern bool BarelyRepeater_Destroy(IntPtr repeater);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_IsPlaying")]
+      private static extern bool BarelyRepeater_IsPlaying(IntPtr repeater, ref bool outIsPlaying);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Pop")]
+      private static extern bool BarelyRepeater_Pop(IntPtr repeater);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Push")]
+      private static extern bool BarelyRepeater_Push(IntPtr repeater, double pitch, Int32 length);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_PushSilence")]
+      private static extern bool BarelyRepeater_PushSilence(IntPtr repeater, Int32 length);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_SetGateRatio")]
+      private static extern bool BarelyRepeater_SetGateRatio(IntPtr repeater, double gateRatio);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_SetInstrument")]
+      private static extern bool BarelyRepeater_SetInstrument(IntPtr repeater, IntPtr instrument);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_SetRate")]
+      private static extern bool BarelyRepeater_SetRate(IntPtr repeater, double rate);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_SetStyle")]
+      private static extern bool BarelyRepeater_SetStyle(IntPtr repeater, RepeaterStyle style);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Start")]
+      private static extern bool BarelyRepeater_Start(IntPtr repeater, double pitchShift);
+
+      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Stop")]
+      private static extern bool BarelyRepeater_Stop(IntPtr repeater);
 
       // Effects.
       [DllImport(pluginName, EntryPoint = "BarelyHighPassEffect_GetDefinition")]

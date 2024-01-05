@@ -16,7 +16,7 @@ namespace Barely {
     [InspectorName("Random")] RANDOM = 8,
   }
 
-  /// A represantion of a simple arpeggiator that can be attached to a musical instrument to play
+  /// A representation of a simple arpeggiator that can be attached to a musical instrument to play
   /// notes in sequence.
   [RequireComponent(typeof(Instrument))]
   public class Arpeggiator : MonoBehaviour {

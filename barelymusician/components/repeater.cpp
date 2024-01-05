@@ -1,8 +1,119 @@
 #include "barelymusician/components/repeater.h"
 
+#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
+
 #include <optional>
 
 #include "barelymusician/barelymusician.h"
+
+// Repeater.
+struct BarelyRepeater : public barely::Repeater {
+  // Constructs `BarelyRepeater` with `musician` and `process_order`.
+  BarelyRepeater(BarelyMusicianHandle musician, int process_order) noexcept
+      : barely::Repeater(
+            barely::Musician::Observer(musician).CreateComponent<barely::Repeater>(process_order)) {
+  }
+
+  // Destroys `BarelyRepeater`.
+  ~BarelyRepeater() noexcept { SetInstrument(nullptr); }
+
+  // Optional instrument.
+  std::optional<barely::Instrument::Observer> instrument = std::nullopt;
+};
+
+bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
+  if (!repeater) return false;
+
+  repeater->Clear();
+  return true;
+}
+
+bool BarelyRepeater_Create(BarelyMusicianHandle musician, int32_t process_order,
+                           BarelyRepeaterHandle* out_repeater) {
+  if (!musician || !out_repeater) return false;
+
+  *out_repeater = new BarelyRepeater(musician, static_cast<int>(process_order));
+  return true;
+}
+
+bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater) {
+  if (!repeater) return false;
+
+  delete repeater;
+  return true;
+}
+
+bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing) {
+  if (!repeater || !out_is_playing) return false;
+
+  *out_is_playing = repeater->IsPlaying();
+  return true;
+}
+
+bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater) {
+  if (!repeater) return false;
+
+  repeater->Pop();
+  return true;
+}
+
+bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length) {
+  if (!repeater) return false;
+
+  repeater->Push(pitch, static_cast<int>(length));
+  return true;
+}
+
+bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length) {
+  if (!repeater) return false;
+
+  repeater->Push(std::nullopt, static_cast<int>(length));
+  return true;
+}
+
+bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
+                                  BarelyInstrumentHandle instrument) {
+  if (!repeater) return false;
+
+  if (repeater->instrument) {
+    repeater->SetInstrument(nullptr);
+  }
+  if (instrument) {
+    repeater->instrument.emplace(instrument);
+    repeater->SetInstrument(&repeater->instrument.value());
+  } else {
+    repeater->instrument.reset();
+  }
+  return true;
+}
+
+bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate) {
+  if (!repeater) return false;
+
+  repeater->SetRate(rate);
+  return true;
+}
+
+bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style) {
+  if (!repeater) return false;
+
+  repeater->SetStyle(static_cast<barely::RepeaterStyle>(style));
+  return true;
+}
+
+bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_shift) {
+  if (!repeater) return false;
+
+  repeater->Start(pitch_shift);
+  return true;
+}
+
+bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater) {
+  if (!repeater) return false;
+
+  repeater->Stop();
+  return true;
+}
 
 namespace barely {
 

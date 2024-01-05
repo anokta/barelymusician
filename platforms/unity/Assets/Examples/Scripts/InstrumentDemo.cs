@@ -54,6 +54,9 @@ namespace Barely {
         int i = (int)((pitch - controller.octaveOffset - controller.rootPitch) * 12.0);
         int y = i / 4;
         int x = i - 4 * y;
+        if (x < 0 || x >= N || y < 0 || y >= N) {
+          return;
+        }
         _targetAlphas[x, N - 1 - y] = 1.0f;
         _activePitches.Add(pitch, new Vector2(x, N - 1 - y));
       }

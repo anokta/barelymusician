@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Barely {
   /// A representation of a musician that governs the tempo for all musical components.
@@ -314,8 +315,9 @@ namespace Barely {
           Debug.LogError("Failed to create effect '" + effect.name + "'");
           return;
         }
-        _effects?.Add(effectHandle, effect);
-        BarelyEffect_SetControlEvent(effectHandle, _effectControlEventDefinition, effectHandle);
+        GCHandle controlEventHandle = GCHandle.Alloc(effect);
+        BarelyEffect_SetControlEvent(effectHandle, _effectControlEventDefinition,
+                                     GCHandle.ToIntPtr(controlEventHandle));
       }
 
       /// Destroys an effect.
@@ -328,7 +330,6 @@ namespace Barely {
         if (!BarelyEffect_Destroy(effectHandle)) {
           Debug.LogError("Failed to destroy effect");
         }
-        _effects?.Remove(effectHandle);
         effectHandle = IntPtr.Zero;
       }
 
@@ -455,14 +456,18 @@ namespace Barely {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
         }
-        _instruments?.Add(instrumentHandle, instrument);
+        GCHandle controlEventHandle = GCHandle.Alloc(instrument);
         BarelyInstrument_SetControlEvent(instrumentHandle, _instrumentControlEventDefinition,
-                                         instrumentHandle);
+                                         GCHandle.ToIntPtr(controlEventHandle));
+        GCHandle noteControlEventHandle = GCHandle.Alloc(instrument);
         BarelyInstrument_SetNoteControlEvent(instrumentHandle, _noteControlEventDefinition,
-                                             instrumentHandle);
+                                             GCHandle.ToIntPtr(noteControlEventHandle));
+        GCHandle noteOffEventHandle = GCHandle.Alloc(instrument);
         BarelyInstrument_SetNoteOffEvent(instrumentHandle, _noteOffEventDefinition,
-                                         instrumentHandle);
-        BarelyInstrument_SetNoteOnEvent(instrumentHandle, _noteOnEventDefinition, instrumentHandle);
+                                         GCHandle.ToIntPtr(noteOffEventHandle));
+        GCHandle noteOnEventHandle = GCHandle.Alloc(instrument);
+        BarelyInstrument_SetNoteOnEvent(instrumentHandle, _noteOnEventDefinition,
+                                        GCHandle.ToIntPtr(noteOnEventHandle));
       }
 
       /// Destroys an instrument.
@@ -475,7 +480,6 @@ namespace Barely {
         if (!BarelyInstrument_Destroy(instrumentHandle)) {
           Debug.LogError("Failed to destroy instrument");
         }
-        _instruments?.Remove(instrumentHandle);
         instrumentHandle = IntPtr.Zero;
       }
 
@@ -1094,15 +1098,14 @@ namespace Barely {
                                                                   IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_CreateCallback))]
       private static void ControlEventDefinition_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
-        Marshal.WriteIntPtr(state, userData);
+        state = userData;
       }
 
       // Control event definition destroy callback.
       private delegate void ControlEventDefinition_DestroyCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_DestroyCallback))]
       private static void ControlEventDefinition_OnDestroy(ref IntPtr state) {
-        Marshal.DestroyStructure<IntPtr>(state);
+        GCHandle.FromIntPtr(state).Free();
       }
 
       // Control event definition process callback.
@@ -1111,18 +1114,14 @@ namespace Barely {
       [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
       private static void EffectControlEventDefinition_OnProcess(ref IntPtr state, int index,
                                                                  double value) {
-        Effect effect = null;
-        if (_effects.TryGetValue(Marshal.PtrToStructure<IntPtr>(state), out effect)) {
-          Effect.Internal.OnControlEvent(effect, index, value);
-        }
+        Effect effect = GCHandle.FromIntPtr(state).Target as Effect;
+        Effect.Internal.OnControlEvent(effect, index, value);
       }
       [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
       private static void InstrumentControlEventDefinition_OnProcess(ref IntPtr state, int index,
                                                                      double value) {
-        Instrument instrument = null;
-        if (_instruments.TryGetValue(Marshal.PtrToStructure<IntPtr>(state), out instrument)) {
-          Instrument.Internal.OnControlEvent(instrument, index, value);
-        }
+        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
+        Instrument.Internal.OnControlEvent(instrument, index, value);
       }
 
       // Control event definition.
@@ -1143,15 +1142,14 @@ namespace Barely {
                                                                       IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(NoteControlEventDefinition_CreateCallback))]
       private static void NoteControlEventDefinition_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
-        Marshal.WriteIntPtr(state, userData);
+        state = userData;
       }
 
       // Note control event definition destroy callback.
       private delegate void NoteControlEventDefinition_DestroyCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(NoteControlEventDefinition_DestroyCallback))]
       private static void NoteControlEventDefinition_OnDestroy(ref IntPtr state) {
-        Marshal.DestroyStructure<IntPtr>(state);
+        GCHandle.FromIntPtr(state).Free();
       }
 
       // Note control event definition process callback.
@@ -1161,10 +1159,8 @@ namespace Barely {
       [AOT.MonoPInvokeCallback(typeof(NoteControlEventDefinition_ProcessCallback))]
       private static void NoteControlEventDefinition_OnProcess(ref IntPtr state, double pitch,
                                                                int index, double value) {
-        Instrument instrument = null;
-        if (_instruments.TryGetValue(Marshal.PtrToStructure<IntPtr>(state), out instrument)) {
-          Instrument.Internal.OnNoteControlEvent(instrument, pitch, index, value);
-        }
+        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
+        Instrument.Internal.OnNoteControlEvent(instrument, pitch, index, value);
       }
 
       // Note control event definition.
@@ -1185,25 +1181,22 @@ namespace Barely {
                                                                   IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(NoteOffEventDefinition_CreateCallback))]
       private static void NoteOffEventDefinition_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
-        Marshal.WriteIntPtr(state, userData);
+        state = userData;
       }
 
       // Note off event definition destroy callback.
       private delegate void NoteOffEventDefinition_DestroyCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(NoteOffEventDefinition_DestroyCallback))]
       private static void NoteOffEventDefinition_OnDestroy(ref IntPtr state) {
-        Marshal.DestroyStructure<IntPtr>(state);
+        GCHandle.FromIntPtr(state).Free();
       }
 
       // Note off event definition process callback.
       private delegate void NoteOffEventDefinition_ProcessCallback(ref IntPtr state, double pitch);
       [AOT.MonoPInvokeCallback(typeof(NoteOffEventDefinition_ProcessCallback))]
       private static void NoteOffEventDefinition_OnProcess(ref IntPtr state, double pitch) {
-        Instrument instrument = null;
-        if (_instruments.TryGetValue(Marshal.PtrToStructure<IntPtr>(state), out instrument)) {
-          Instrument.Internal.OnNoteOffEvent(instrument, pitch);
-        }
+        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
+        Instrument.Internal.OnNoteOffEvent(instrument, pitch);
       }
 
       // Note off event definition.
@@ -1223,15 +1216,14 @@ namespace Barely {
       private delegate void NoteOnEventDefinition_CreateCallback(ref IntPtr state, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(NoteOnEventDefinition_CreateCallback))]
       private static void NoteOnEventDefinition_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
-        Marshal.WriteIntPtr(state, userData);
+        state = userData;
       }
 
       // Note on event definition destroy callback.
       private delegate void NoteOnEventDefinition_DestroyCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(NoteOnEventDefinition_DestroyCallback))]
       private static void NoteOnEventDefinition_OnDestroy(ref IntPtr state) {
-        Marshal.DestroyStructure<IntPtr>(state);
+        GCHandle.FromIntPtr(state).Free();
       }
 
       // Note on event definition process callback.
@@ -1240,10 +1232,8 @@ namespace Barely {
       [AOT.MonoPInvokeCallback(typeof(NoteOnEventDefinition_ProcessCallback))]
       private static void NoteOnEventDefinition_OnProcess(ref IntPtr state, double pitch,
                                                           double intensity) {
-        Instrument instrument = null;
-        if (_instruments.TryGetValue(Marshal.PtrToStructure<IntPtr>(state), out instrument)) {
-          Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
-        }
+        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
+        Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
       }
 
       // Note on event definition.
@@ -1358,12 +1348,6 @@ namespace Barely {
         processCallback = TaskDefinition_OnProcess,
       };
 
-      // Map of effects by their handles.
-      private static Dictionary<IntPtr, Effect> _effects = null;
-
-      // Map of instruments by their handles.
-      private static Dictionary<IntPtr, Instrument> _instruments = null;
-
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
 
@@ -1428,10 +1412,8 @@ namespace Barely {
           }
           BarelyMusician_SetTempo(_handle, _tempo);
           var config = AudioSettings.GetConfiguration();
-          _latency = (double)(2 * config.dspBufferSize) / (double)config.sampleRate;
           OutputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
-          _effects = new Dictionary<IntPtr, Effect>();
-          _instruments = new Dictionary<IntPtr, Instrument>();
+          _latency = (double)(2 * config.dspBufferSize) / (double)config.sampleRate;
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, AudioSettings.dspTime + _latency);
         }
@@ -1441,8 +1423,6 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
-          _effects = null;
-          _instruments = null;
           _scheduledTaskCallbacks = null;
         }
       }

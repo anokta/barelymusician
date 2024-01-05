@@ -336,7 +336,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 764115874}
-  m_Text: 'play the arpeggiator
+  m_Text: 'play the repeater
 
     using keyboard'
   m_OffsetZ: 0

@@ -740,6 +740,7 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
                                              bool* out_is_note_on);
 
 /// Processes instrument output samples at timestamp.
+/// @note This function is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
 ///
 /// @param instrument Instrument handle.
 /// @param output_samples Array of interleaved output samples.

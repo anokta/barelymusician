@@ -98,8 +98,10 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
       - name: build
+        shell: bash
         run: |
           chmod +x ./platforms/unity/build.sh
-          ./platforms/unity/build.sh
+          ./platforms/unity/build.sh \
+            $( [ ${{ matrix.os }} == 'ubuntu-latest' ] && echo '--android=true' )
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}

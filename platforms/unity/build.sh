@@ -4,6 +4,7 @@
 #
 # Options:
 #   -c=|--compilation_mode=[dbg|opt], default: opt
+#   -a=|--android=[true|false], default: false
 
 readonly WORKSPACE="$(bazel info workspace)"
 readonly BAZEL_BIN="${WORKSPACE}/bazel-bin"
@@ -33,12 +34,18 @@ readonly GREEN="\e[32m"
 
 parse_flags() {
   COMPILATION_MODE="opt"
+  ANDROID="false"
 
   for i in "$@"; do
     case $i in
     -c=* | --compilation_mode=*)
       # compilation mode.
       COMPILATION_MODE="${i#*=}"
+      shift
+      ;;
+    -a=* | --android=*)
+      # android.
+      ANDROID="${i#*=}"
       shift
       ;;
     *)
@@ -50,6 +57,7 @@ parse_flags() {
   done
 
   readonly COMPILATION_MODE
+  readonly ANDROID
 }
 
 main() {
@@ -83,8 +91,7 @@ main() {
   *) ;;
   esac
 
-  # TODO(#125): Disable Android build targets on MacOS.
-  if [ "$(uname -s)" != Darwin ]; then
+  if [ "${ANDROID}" == "true" ]; then
     echo "Building BarelyMusician Unity native Android-ARM32 plugin..."
     bazel build -c "${COMPILATION_MODE}" --noenable_platform_specific_config \
       --config=android_armeabi-v7a "//platforms/unity:libunity_android.so"

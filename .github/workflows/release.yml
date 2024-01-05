@@ -68,7 +68,8 @@ jobs:
         shell: bash
         run: |
           chmod +x ./platforms/unity/build.sh
-          ./platforms/unity/build.sh
+          ./platforms/unity/build.sh \
+            $( [ ${{ matrix.os }} == 'ubuntu-latest' ] && echo '--android=true' )
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       - uses: actions/upload-artifact@v3
@@ -110,6 +111,7 @@ jobs:
             ${{ github.workspace }}/artifacts/unity/barelymusician.unitypackage
           include-files: platforms/unity/meta
           project-folder: platforms/unity
+          working-folder: ${{ github.workspace }}
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-${{ github.sha }}

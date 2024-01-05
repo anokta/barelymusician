@@ -93,10 +93,10 @@ namespace Barely {
         instrument.Attack = 0.0;
         instrument.Release = 0.05;
         _performer = tempGameObject.AddComponent<Performer>();
-        _performer.playOnAwake = playOnAwake;
+        _performer.PlayOnAwake = playOnAwake;
         _performer.Loop = true;
         _performer.LoopLength = 1.0;
-        _performer.Tasks.Add(new Performer.Task(delegate() {
+        _performer.Tasks.Add(new Task(delegate() {
           int bar = _beat / beatCount;
           int beat = _beat % beatCount;
           double pitch = (beat == 0.0) ? barPitch : beatPitch;

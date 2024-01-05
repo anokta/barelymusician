@@ -27,6 +27,7 @@ namespace Barely {
         public bool muted;
       }
       public List<Note> notes = null;
+      private List<Note> _notes = null;
 
       public bool IsPlaying {
         get { return _performer.IsPlaying; }
@@ -52,7 +53,11 @@ namespace Barely {
       private void Awake() {
         _performer =
             new GameObject() { hideFlags = HideFlags.HideAndDontSave }.AddComponent<Performer>();
-        _performer.playOnAwake = playOnAwake;
+        _performer.PlayOnAwake = playOnAwake;
+      }
+
+      private void OnEnable() {
+        UpdateNotes();
       }
 
       private void OnDestroy() {
@@ -61,21 +66,28 @@ namespace Barely {
       }
 
       private void Update() {
+        if (_notes != notes) {
+          UpdateNotes();
+        }
+        _performer.Loop = loop;
+        _performer.LoopLength = loopLength;
+      }
+
+      private void UpdateNotes() {
+        _notes = notes;
         _performer.Tasks.Clear();
-        for (int i = 0; i < notes.Count; ++i) {
-          var note = notes[i];
+        for (int i = 0; i < _notes.Count; ++i) {
+          var note = _notes[i];
           if (note.muted) {
             continue;
           }
-          _performer.Tasks.Add(new Performer.Task(delegate() {
+          _performer.Tasks.Add(new Task(delegate() {
             var pitch = Musician.PitchFromMidiKey(note.key);
             instrument?.SetNoteOn(pitch, note.intensity);
             _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(pitch); },
                                           _performer.Position + note.duration, -1);
           }, note.position));
         }
-        _performer.Loop = loop;
-        _performer.LoopLength = loopLength;
       }
     }
   }  // namespace Examples

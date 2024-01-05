@@ -159,8 +159,8 @@ namespace Barely {
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Returns instrument handle.
-      public static IntPtr GetInstrumentHandle(Instrument instrument) {
+      /// Returns the handle.
+      public static IntPtr GetHandle(Instrument instrument) {
         return instrument ? instrument._handle : IntPtr.Zero;
       }
 

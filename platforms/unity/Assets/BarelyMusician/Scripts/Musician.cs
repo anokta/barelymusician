@@ -293,7 +293,7 @@ namespace Barely {
         if (Handle == IntPtr.Zero || effectHandle != IntPtr.Zero) {
           return;
         }
-        IntPtr instrumentHandle = Instrument.Internal.GetInstrumentHandle(instrument);
+        IntPtr instrumentHandle = Instrument.Internal.GetHandle(instrument);
         if (instrumentHandle == IntPtr.Zero) {
           return;
         }
@@ -1048,7 +1048,7 @@ namespace Barely {
       public static void Arpeggiator_SetInstrument(IntPtr arpeggiatorHandle,
                                                    Instrument instrument) {
         if (!BarelyArpeggiator_SetInstrument(arpeggiatorHandle,
-                                             Instrument.Internal.GetInstrumentHandle(instrument)) &&
+                                             Instrument.Internal.GetHandle(instrument)) &&
             arpeggiatorHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set arpeggiator instrument '" + instrument.name + "'");
         }
@@ -1139,7 +1139,7 @@ namespace Barely {
       /// @param instrument Instrument.
       public static void Repeater_SetInstrument(IntPtr repeaterHandle, Instrument instrument) {
         if (!BarelyRepeater_SetInstrument(repeaterHandle,
-                                          Instrument.Internal.GetInstrumentHandle(instrument)) &&
+                                          Instrument.Internal.GetHandle(instrument)) &&
             repeaterHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set repeater instrument '" + instrument.name + "'");
         }

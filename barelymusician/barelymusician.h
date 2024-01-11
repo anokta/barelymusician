@@ -239,6 +239,15 @@
 extern "C" {
 #endif  // __cplusplus
 
+/// Rational number.
+typedef struct BarelyRational {
+  /// Numerator.
+  int32_t numerator;
+
+  /// Denominator.
+  int32_t denominator;
+} BarelyRational;
+
 /// Control definition.
 typedef struct BarelyControlDefinition {
   /// Default value.
@@ -1093,6 +1102,18 @@ BARELY_EXPORT bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t pro
 #include <utility>
 
 namespace barely {
+
+/// Rational number.
+struct Rational : public BarelyRational {
+  /// Constructs a new `Rational`.
+  ///
+  /// @param numerator Numerator.
+  /// @param denominator Denominator.
+  Rational(int numerator = 0, int denominator = 1) noexcept
+      : BarelyRational{static_cast<int32_t>(numerator), static_cast<int32_t>(denominator)} {
+    assert(denominator != 0);
+  }
+};
 
 /// Control definition.
 struct ControlDefinition : public BarelyControlDefinition {

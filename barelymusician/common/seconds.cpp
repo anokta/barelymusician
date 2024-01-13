@@ -3,6 +3,9 @@
 
 #include <cassert>
 
+#include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
+
 namespace barely {
 
 namespace {
@@ -20,9 +23,9 @@ double BeatsFromSeconds(double tempo, double seconds) noexcept {
   return tempo * seconds * kMinutesFromSeconds;
 }
 
-int FramesFromSeconds(int frame_rate, double seconds) noexcept {
+int FramesFromSeconds(int frame_rate, Rational seconds) noexcept {
   assert(frame_rate > 0);
-  return static_cast<int>(seconds * static_cast<double>(frame_rate));
+  return static_cast<int>(seconds * frame_rate);
 }
 
 double SecondsFromBeats(double tempo, double beats) noexcept {
@@ -30,9 +33,9 @@ double SecondsFromBeats(double tempo, double beats) noexcept {
   return beats * kSecondsFromMinutes / tempo;
 }
 
-double SecondsFromFrames(int frame_rate, int frames) noexcept {
+Rational SecondsFromFrames(int frame_rate, int frames) noexcept {
   assert(frame_rate > 0);
-  return static_cast<double>(frames) / static_cast<double>(frame_rate);
+  return Rational(frames, frame_rate);
 }
 
 }  // namespace barely

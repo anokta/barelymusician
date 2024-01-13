@@ -40,6 +40,7 @@ cc_library(
         ":mutable",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
+        "//barelymusician/common:rational",
         "//barelymusician/common:seconds",
     ],
 )
@@ -58,6 +59,8 @@ cc_library(
     hdrs = ["message_queue.h"],
     deps = [
         ":message",
+        "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
     ],
 )
 
@@ -69,6 +72,8 @@ cc_library(
         ":instrument",
         ":mutable",
         ":performer",
+        "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
         "//barelymusician/common:seconds",
     ],
 )
@@ -150,6 +155,8 @@ cc_test(
     deps = [
         ":message",
         ":message_queue",
+        "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
         "@googletest//:gtest_main",
     ],
 )

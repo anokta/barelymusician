@@ -15,13 +15,13 @@ namespace Barely {
              Input.GetMouseButtonDown(0)) ||
             Input.GetKeyDown(KeyCode.Space)) {
           if (!source.isPlaying) {
-            source.PlayScheduled(Musician.Timestamp);
+            source.PlayScheduled((double)Musician.Timestamp);
             performer.Stop();
             performer.Position = 0.0;
             performer.Play();
           } else {
             performer.Stop();
-            source.SetScheduledEndTime(Musician.Timestamp);
+            source.SetScheduledEndTime((double)Musician.Timestamp);
           }
         }
         transform.rotation =

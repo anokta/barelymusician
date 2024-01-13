@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/seconds.h"
 
 namespace barely {
@@ -16,7 +17,7 @@ constexpr double kGainThreshold = 2e-5;
 constexpr double kUnityGain = 1.0;
 
 // Total ramp duration in seconds.
-constexpr double kUnityRampDurationSeconds = 0.05;
+constexpr Rational kUnityRampDurationSeconds = Rational(1, 20);
 
 // Applies constant `gain`.
 void ApplyConstantGain(double gain, double* buffer, int channel_count, int frame_count) noexcept {

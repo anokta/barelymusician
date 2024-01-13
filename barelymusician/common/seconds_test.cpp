@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -31,16 +33,16 @@ TEST(SecondsTest, FramesSecondsConversion) {
 
   constexpr int kValueCount = 4;
   constexpr std::array<int, kValueCount> kFrames = {0, 800, 4000, 32000};
-  constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.1, 0.5, 4.0};
+  constexpr std::array<Rational, kValueCount> kSeconds = {0, Rational(1, 10), Rational(1, 2), 4};
 
   for (int i = 0; i < kValueCount; ++i) {
     EXPECT_EQ(FramesFromSeconds(kFrameRate, kSeconds[i]), kFrames[i]);
-    EXPECT_DOUBLE_EQ(SecondsFromFrames(kFrameRate, kFrames[i]), kSeconds[i]);
+    EXPECT_EQ(SecondsFromFrames(kFrameRate, kFrames[i]), kSeconds[i]);
 
     // Verify that the back and forth conversions do not mutate the value.
     EXPECT_EQ(FramesFromSeconds(kFrameRate, SecondsFromFrames(kFrameRate, kFrames[i])), kFrames[i]);
-    EXPECT_DOUBLE_EQ(SecondsFromFrames(kFrameRate, FramesFromSeconds(kFrameRate, kSeconds[i])),
-                     kSeconds[i]);
+    EXPECT_EQ(SecondsFromFrames(kFrameRate, FramesFromSeconds(kFrameRate, kSeconds[i])),
+              kSeconds[i]);
   }
 }
 

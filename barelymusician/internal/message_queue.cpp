@@ -2,11 +2,13 @@
 
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/message.h"
 
 namespace barely::internal {
 
-bool MessageQueue::Add(double timestamp, Message message) noexcept {
+bool MessageQueue::Add(Rational timestamp, Message message) noexcept {
   const int index = write_index_;
   const int next_index = (index + 1) % kMaxMessageCount;
   if (next_index == read_index_) {
@@ -17,7 +19,7 @@ bool MessageQueue::Add(double timestamp, Message message) noexcept {
   return true;
 }
 
-std::pair<double, Message>* MessageQueue::GetNext(double end_timestamp) noexcept {
+std::pair<Rational, Message>* MessageQueue::GetNext(Rational end_timestamp) noexcept {
   const int index = read_index_;
   if (index == write_index_ || messages_[index].first >= end_timestamp) {
     return nullptr;

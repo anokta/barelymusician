@@ -26,6 +26,10 @@ cc_library(
     name = "seconds",
     srcs = ["seconds.cpp"],
     hdrs = ["seconds.h"],
+    deps = [
+        ":rational",
+        "//barelymusician:barelymusician_headeronly",
+    ],
 )
 
 cc_test(
@@ -60,7 +64,9 @@ cc_test(
     name = "seconds_test",
     srcs = ["seconds_test.cpp"],
     deps = [
+        ":rational",
         ":seconds",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )

@@ -3,6 +3,7 @@
 
 #include <unordered_set>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/mutable.h"
 #include "barelymusician/internal/performer.h"
@@ -32,7 +33,7 @@ class Musician {
   /// Returns timestamp.
   ///
   /// @return Timestamp in seconds.
-  [[nodiscard]] double GetTimestamp() const noexcept;
+  [[nodiscard]] Rational GetTimestamp() const noexcept;
 
   /// Destroys instrument.
   ///
@@ -55,7 +56,7 @@ class Musician {
   ///
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(double timestamp) noexcept;
+  void Update(Rational timestamp) noexcept;
 
   // Set of pointers to instruments.
   std::unordered_set<Instrument*> instruments_;
@@ -67,7 +68,7 @@ class Musician {
   double tempo_ = 120.0;
 
   // Timestamp in seconds.
-  double timestamp_ = 0.0;
+  Rational timestamp_ = 0;
 };
 
 }  // namespace barely::internal

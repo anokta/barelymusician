@@ -7,6 +7,8 @@
 #include <optional>
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
@@ -26,7 +28,7 @@ void Musician::AddPerformer(Performer& performer) noexcept {
 }
 double Musician::GetTempo() const noexcept { return tempo_; }
 
-double Musician::GetTimestamp() const noexcept { return timestamp_; }
+Rational Musician::GetTimestamp() const noexcept { return timestamp_; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::RemoveInstrument(Instrument& instrument) noexcept {
@@ -52,11 +54,13 @@ void Musician::SetTempo(double tempo) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::Update(double timestamp) noexcept {
-  while (timestamp_ < timestamp) {
-    if (tempo_ > 0.0) {
-      std::pair<double, int> update_duration = {BeatsFromSeconds(tempo_, timestamp - timestamp_),
-                                                std::numeric_limits<int>::max()};
+void Musician::Update(Rational timestamp) noexcept {
+  if (tempo_ > 0.0) {
+    while (timestamp_ < timestamp) {
+      std::pair<double, int> update_duration = {
+          // TODO(#107): Use `Rational` throughout.
+          BeatsFromSeconds(tempo_, static_cast<double>(timestamp - timestamp_)),
+          std::numeric_limits<int>::max()};
       bool has_tasks_to_process = false;
       for (const auto& performer : performers_) {
         assert(performer);
@@ -73,7 +77,12 @@ void Musician::Update(double timestamp) noexcept {
           performer->Update(update_duration.first);
         }
 
-        timestamp_ += SecondsFromBeats(tempo_, update_duration.first);
+        // TODO(#107): Use `Rational` throughout.
+        timestamp_ +=
+            Rational(std::max(static_cast<std::int64_t>(
+                                  192000.0 * SecondsFromBeats(tempo_, update_duration.first)),
+                              static_cast<std::int64_t>(1)),
+                     192000);
         for (const auto& instrument : instruments_) {
           assert(instrument);
           instrument->Update(timestamp_);
@@ -86,12 +95,12 @@ void Musician::Update(double timestamp) noexcept {
           performer->ProcessNextTaskAtPosition();
         }
       }
-    } else if (timestamp_ < timestamp) {
-      timestamp_ = timestamp;
-      for (const auto& instrument : instruments_) {
-        assert(instrument);
-        instrument->Update(timestamp_);
-      }
+    }
+  } else if (timestamp_ < timestamp) {
+    timestamp_ = timestamp;
+    for (const auto& instrument : instruments_) {
+      assert(instrument);
+      instrument->Update(timestamp_);
     }
   }
 }

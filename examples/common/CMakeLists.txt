@@ -3,6 +3,10 @@ add_library(
   audio_clock.cpp
   audio_clock.h
 )
+target_link_libraries(
+  barely_examples_audio_clock
+  barelymusician
+)
 
 add_library(
   barely_examples_audio_output

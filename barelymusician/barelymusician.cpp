@@ -317,7 +317,7 @@ bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
 
 bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
                               int32_t output_channel_count, int32_t output_frame_count,
-                              double timestamp) {
+                              BarelyRational timestamp) {
   if (!instrument) return false;
 
   return instrument->Process(output_samples, output_channel_count, output_frame_count, timestamp);
@@ -448,7 +448,7 @@ bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo) {
   return true;
 }
 
-bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, double* out_timestamp) {
+bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, BarelyRational* out_timestamp) {
   if (!musician) return false;
   if (!out_timestamp) return false;
 
@@ -463,7 +463,7 @@ bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo) {
   return true;
 }
 
-bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
+bool BarelyMusician_Update(BarelyMusicianHandle musician, BarelyRational timestamp) {
   if (!musician) return false;
 
   musician->Update(timestamp);

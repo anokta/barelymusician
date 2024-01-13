@@ -49,7 +49,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   }
 
   // Process samples.
-  instrument_ptr->Process(temp_samples.data(), kChannelCount, size, /*timestamp=*/0.0);
+  instrument_ptr->Process(temp_samples.data(), kChannelCount, size, /*timestamp=*/0);
   for (int channel = 0; channel < kChannelCount; ++channel) {
     for (int frame = 0; frame < static_cast<int>(size); ++frame) {
       out[channel][frame] = temp_samples[frame * kChannelCount + channel];

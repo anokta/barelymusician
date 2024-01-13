@@ -24,6 +24,11 @@ add_library(
   seconds.cpp
   seconds.h
 )
+target_link_libraries(
+  barely_seconds
+  barely_rational
+  barelymusician_headeronly
+)
 
 if (ENABLE_TESTS)
   add_executable(
@@ -66,7 +71,9 @@ if (ENABLE_TESTS)
   )
   target_link_libraries(
     barely_seconds_test
+    barely_rational
     barely_seconds
+    barelymusician_headeronly
     gtest_main
   )
   gtest_discover_tests(barely_seconds_test)

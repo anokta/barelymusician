@@ -97,26 +97,26 @@ Rational& operator/=(Rational& lhs, const Rational& rhs) noexcept {
 }
 
 Rational& operator+=(Rational& lhs, const int& rhs) noexcept {
-  lhs.numerator += rhs * lhs.denominator;
+  lhs.numerator += static_cast<std::int64_t>(rhs) * lhs.denominator;
   Normalize(lhs);
   return lhs;
 }
 
 Rational& operator-=(Rational& lhs, const int& rhs) noexcept {
-  lhs.numerator -= rhs * lhs.denominator;
+  lhs.numerator -= static_cast<std::int64_t>(rhs) * lhs.denominator;
   Normalize(lhs);
   return lhs;
 }
 
 Rational& operator*=(Rational& lhs, const int& rhs) noexcept {
-  lhs.numerator *= rhs;
+  lhs.numerator *= static_cast<std::int64_t>(rhs);
   Normalize(lhs);
   return lhs;
 }
 
 Rational& operator/=(Rational& lhs, const int& rhs) noexcept {
   assert(rhs != 0);
-  lhs.denominator *= rhs;
+  lhs.denominator *= static_cast<std::int64_t>(rhs);
   Normalize(lhs);
   return lhs;
 }

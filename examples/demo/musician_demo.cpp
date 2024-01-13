@@ -13,6 +13,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/duration.h"
 #include "barelymusician/composition/pitch.h"
@@ -35,6 +36,7 @@ using ::barely::OscillatorType;
 using ::barely::PercussionInstrument;
 using ::barely::Performer;
 using ::barely::Random;
+using ::barely::Rational;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -60,7 +62,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
-constexpr double kLookahead = 0.1;
+constexpr Rational kLookahead = Rational(1, 10);
 
 // Performer settings.
 constexpr double kTempo = 124.0;

@@ -2,6 +2,9 @@
 #define EXAMPLES_COMMON_AUDIO_CLOCK_H_
 
 #include <atomic>
+#include <cstdint>
+
+#include "barelymusician/barelymusician.h"
 
 namespace barely::examples {
 
@@ -16,7 +19,7 @@ class AudioClock {
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
-  double GetTimestamp() const noexcept;
+  Rational GetTimestamp() const noexcept;
 
   /// Updates the clock.
   ///
@@ -27,8 +30,8 @@ class AudioClock {
   // Frame rate in hertz.
   const int frame_rate_;
 
-  // Monothonic timestamp in seconds.
-  std::atomic<double> timestamp_;
+  // Monothonic tick in frames.
+  std::atomic<std::int64_t> tick_ = 0;
 };
 
 }  // namespace barely::examples

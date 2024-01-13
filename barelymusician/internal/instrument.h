@@ -28,7 +28,7 @@ class Instrument {
   /// @param initial_timestamp Initial timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
-             double initial_timestamp) noexcept;
+             Rational initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -78,7 +78,7 @@ class Instrument {
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept;
+               Rational timestamp) noexcept;
 
   /// Removes an effect.
   ///
@@ -213,7 +213,7 @@ class Instrument {
   /// Updates the instrument at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept;
+  void Update(Rational timestamp) noexcept;
 
  private:
   // Note control event alias.
@@ -284,7 +284,7 @@ class Instrument {
   double tempo_ = 120.0;
 
   // Timestamp in seconds.
-  double timestamp_ = 0;
+  Rational timestamp_ = 0;
 
   // State.
   void* state_ = nullptr;

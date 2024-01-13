@@ -42,6 +42,7 @@ cc_library(
     srcs = ["gain_processor.cpp"],
     hdrs = ["gain_processor.h"],
     deps = [
+        "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:seconds",
     ],
 )

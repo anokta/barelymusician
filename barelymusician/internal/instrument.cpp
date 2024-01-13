@@ -8,6 +8,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
@@ -17,7 +18,7 @@ namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
-                       double initial_timestamp) noexcept
+                       Rational initial_timestamp) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
       set_control_callback_(definition.set_control_callback),
@@ -84,14 +85,14 @@ bool Instrument::IsNoteOn(double pitch) const noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
-                         double timestamp) noexcept {
+                         Rational timestamp) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {
     return false;
   }
   int frame = 0;
   // Process *all* messages before the end timestamp.
-  const double end_timestamp = timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
+  const Rational end_timestamp = timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
   auto effect_ptrs = effect_ptrs_.GetScopedView();
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
@@ -384,12 +385,13 @@ void Instrument::SetTempo(double tempo) noexcept {
   }
 }
 
-void Instrument::Update(double timestamp) noexcept {
+void Instrument::Update(Rational timestamp) noexcept {
   if (timestamp_ >= timestamp) {
     return;
   }
   if (tempo_ > 0.0) {
-    const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
+    // TODO(#107): Use `Rational` throughout.
+    const double duration = BeatsFromSeconds(tempo_, static_cast<double>(timestamp - timestamp_));
     // Update controls.
     for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
       if (auto& control = controls_[index]; control.Update(duration)) {

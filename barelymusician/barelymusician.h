@@ -27,7 +27,7 @@
 ///   // changes. Therefore, this should typically be called from a main thread update callback,
 ///   // with an additional "lookahead", in order to avoid any potential thread synchronization
 ///   // issues that could occur in real-time audio applications.
-///   double timestamp = 1.0;
+///   Rational timestamp = 1;
 ///   musician.Update(timestamp);
 ///   @endcode
 ///
@@ -69,7 +69,7 @@
 ///   const int output_channel_count = 2;
 ///   const int output_frame_count = 1024;
 ///   std::vector<double> output_samples(output_channel_count * output_frame_count, 0.0);
-///   double timestamp = 0.0;
+///   Rational timestamp = 0;
 ///   instrument.Process(output_samples.data(), output_channel_count, output_frame_count,
 ///                      timestamp);
 ///   @endcode
@@ -117,7 +117,7 @@
 ///   // changes. Therefore, this should typically be called from a main thread update callback,
 ///   // with an additional "lookahead", in order to avoid any potential thread synchronization
 ///   // issues that could occur in real-time audio applications.
-///   double timestamp = 1.0;
+///   BarelyRational timestamp = {1, 1};
 ///   BarelyMusician_Update(musician, timestamp);
 ///
 ///   // Destroy.
@@ -165,7 +165,7 @@
 ///   double output_samples[2 * 1024];
 ///   int output_channel_count = 2;
 ///   int output_frame_count = 1024;
-///   double timestamp = 0.0;
+///   BarelyRational timestamp = {0, 1};
 ///   BarelyInstrument_Process(instrument, output_samples, output_channel_count, output_frame_count,
 ///                            timestamp);
 ///
@@ -759,7 +759,7 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
                                             double* output_samples, int32_t output_channel_count,
-                                            int32_t output_frame_count, double timestamp);
+                                            int32_t output_frame_count, BarelyRational timestamp);
 
 /// Resets all instrument control values.
 ///
@@ -909,7 +909,7 @@ BARELY_EXPORT bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double
 /// @param out_timestamp Output timestamp in seconds.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician,
-                                               double* out_timestamp);
+                                               BarelyRational* out_timestamp);
 
 /// Sets the tempo of a musician.
 ///
@@ -923,7 +923,7 @@ BARELY_EXPORT bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double
 /// @param musician Musician handle.
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp);
+BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, BarelyRational timestamp);
 
 /// Cancels all one-off performer tasks.
 ///
@@ -1109,7 +1109,7 @@ struct Rational : public BarelyRational {
   ///
   /// @param numerator Numerator.
   /// @param denominator Denominator.
-  Rational(int64_t numerator = 0, int64_t denominator = 1) noexcept
+  constexpr Rational(int64_t numerator = 0, int64_t denominator = 1) noexcept
       : BarelyRational{numerator, denominator} {
     assert(denominator != 0);
   }
@@ -1117,9 +1117,25 @@ struct Rational : public BarelyRational {
   /// Converts the rational number to `double`.
   ///
   /// @return Double value.
-  explicit operator double() const noexcept {
+  constexpr explicit operator double() const noexcept {
     assert(denominator != 0);
     return static_cast<double>(numerator) / static_cast<double>(denominator);
+  }
+
+  /// Converts the rational number to `int`.
+  ///
+  /// @return Integer value.
+  constexpr explicit operator int() const noexcept {
+    assert(denominator != 0);
+    return static_cast<int>(numerator / denominator);
+  }
+
+  /// Constructs a new `Rational` from a raw type.
+  ///
+  /// @param rational Raw rational.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  Rational(BarelyRational rational) noexcept : BarelyRational{rational} {
+    assert(rational.denominator != 0);
   }
 };
 
@@ -1929,7 +1945,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   void Process(double* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept {
+               Rational timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_Process(
         Get(), output_samples, output_channel_count, output_frame_count, timestamp);
     assert(success);
@@ -2485,8 +2501,8 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
-  [[nodiscard]] double GetTimestamp() const noexcept {
-    double timestamp = 0.0;
+  [[nodiscard]] Rational GetTimestamp() const noexcept {
+    Rational timestamp = 0;
     [[maybe_unused]] const bool success = BarelyMusician_GetTimestamp(Get(), &timestamp);
     assert(success);
     return timestamp;
@@ -2503,7 +2519,7 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// Updates the musician at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept {
+  void Update(Rational timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyMusician_Update(Get(), timestamp);
     assert(success);
   }

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
@@ -16,6 +17,7 @@ namespace {
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::Rational;
 using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::examples::AudioClock;
@@ -28,7 +30,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
-constexpr double kLookahead = 0.05;
+constexpr Rational kLookahead = Rational(1, 20);
 
 // Instrument settings.
 constexpr double kGain = 0.1;

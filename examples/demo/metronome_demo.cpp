@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -18,6 +19,7 @@ namespace {
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::Rational;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -29,7 +31,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
-constexpr double kLookahead = 0.1;
+constexpr Rational kLookahead = Rational(1, 10);
 
 // Metronome settings.
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;

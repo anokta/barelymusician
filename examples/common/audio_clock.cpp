@@ -1,15 +1,19 @@
 
 #include "examples/common/audio_clock.h"
 
+#include <cstdint>
+
+#include "barelymusician/barelymusician.h"
+
 namespace barely::examples {
 
-AudioClock::AudioClock(int frame_rate) noexcept : frame_rate_(frame_rate), timestamp_(0.0) {}
+AudioClock::AudioClock(int frame_rate) noexcept : frame_rate_(frame_rate) {}
 
-double AudioClock::GetTimestamp() const noexcept { return timestamp_; }
+Rational AudioClock::GetTimestamp() const noexcept { return Rational(tick_, frame_rate_); }
 
 void AudioClock::Update(int frame_count) noexcept {
   if (frame_rate_ > 0 && frame_count > 0) {
-    timestamp_ = timestamp_ + static_cast<double>(frame_count) / static_cast<double>(frame_rate_);
+    tick_ += static_cast<std::int64_t>(frame_count);
   }
 }
 

@@ -26,6 +26,8 @@ For background about this project, see the original research paper
 ```cpp
 // Import the core engine.
 #include "barelymusician/barelymusician.h"
+// Import the rational number operators.
+#include "barelymusician/common/rational.h"
 // Import `barely::LowPassEffect`.
 #include "barelymusician/effects/low_pass_effect.h"
 // Import `barely::SynthInstrument`.
@@ -70,8 +72,8 @@ effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.
 // To compensate, `Update` should typically be called from a main thread update callback, with an
 // additional "lookahead", in order to avoid any potential thread synchronization issues that could
 // occur in real-time audio applications.
-const double lookahead = 0.1;
-double timestamp = 0.0;
+const barely::Rational lookahead(1, 10);
+barely::Rational timestamp = 0;
 musician.Update(timestamp + lookahead);
 
 // Process the next output samples of the synth instrument.

@@ -5,6 +5,7 @@
 #include <atomic>
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/message.h"
 
 namespace barely::internal {
@@ -17,20 +18,20 @@ class MessageQueue {
   /// @param timestamp Timestamp in seconds.
   /// @param message Message.
   /// @return True if successful, false otherwise.
-  bool Add(double timestamp, Message message) noexcept;
+  bool Add(Rational timestamp, Message message) noexcept;
 
   /// Returns the next message before an end timestamp.
   ///
   /// @param end_timestamp End timestamp in seconds.
   /// @return Pointer to message if successful, `nullptr` otherwise.
-  std::pair<double, Message>* GetNext(double end_timestamp) noexcept;
+  std::pair<Rational, Message>* GetNext(Rational end_timestamp) noexcept;
 
  private:
   // Maximum number of messages.
   static constexpr int kMaxMessageCount = 4096;
 
   // List of messages with their timestamps.
-  std::array<std::pair<double, Message>, kMaxMessageCount> messages_;
+  std::array<std::pair<Rational, Message>, kMaxMessageCount> messages_;
 
   // Read index.
   std::atomic<int> read_index_ = 0;

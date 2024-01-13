@@ -8,6 +8,15 @@ cc_library(
 )
 
 cc_library(
+    name = "rational",
+    srcs = ["rational.cpp"],
+    hdrs = ["rational.h"],
+    deps = [
+        "//barelymusician:barelymusician_headeronly",
+    ],
+)
+
+cc_library(
     name = "random",
     srcs = ["random.cpp"],
     hdrs = ["random.h"],
@@ -33,6 +42,16 @@ cc_test(
     srcs = ["random_test.cpp"],
     deps = [
         ":random",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "rational_test",
+    srcs = ["rational_test.cpp"],
+    deps = [
+        ":rational",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )

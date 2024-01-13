@@ -1113,6 +1113,14 @@ struct Rational : public BarelyRational {
       : BarelyRational{static_cast<int32_t>(numerator), static_cast<int32_t>(denominator)} {
     assert(denominator != 0);
   }
+
+  /// Converts the rational number to `double`.
+  ///
+  /// @return Double value.
+  explicit operator double() const noexcept {
+    assert(denominator != 0);
+    return static_cast<double>(numerator) / static_cast<double>(denominator);
+  }
 };
 
 /// Control definition.

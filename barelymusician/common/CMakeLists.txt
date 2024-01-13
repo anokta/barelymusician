@@ -10,6 +10,16 @@ add_library(
 )
 
 add_library(
+  barely_internal_rational
+  rational.cpp
+  rational.h
+)
+target_link_libraries(
+  barely_internal_rational
+  barelymusician_headeronly
+)
+
+add_library(
   barely_seconds
   seconds.cpp
   seconds.h
@@ -37,6 +47,18 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_random_test)
+
+  add_executable(
+    barely_rational_test
+    rational_test.cpp
+  )
+  target_link_libraries(
+    barely_rational_test
+    barely_rational
+    barely_internal_rational
+    gtest_main
+  )
+  gtest_discover_tests(barely_rational_test)
 
   add_executable(
     barely_seconds_test

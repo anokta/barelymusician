@@ -21,7 +21,7 @@ cc_library(
 cc_library(
     name = "barelymusician_headeronly",
     hdrs = ["barelymusician.h"],
-    visibility = ["//barelymusician/internal:__subpackages__"],
+    visibility = ["//barelymusician:__subpackages__"],
 )
 
 cc_test(

@@ -242,10 +242,10 @@ extern "C" {
 /// Rational number.
 typedef struct BarelyRational {
   /// Numerator.
-  int32_t numerator;
+  int64_t numerator;
 
   /// Denominator.
-  int32_t denominator;
+  int64_t denominator;
 } BarelyRational;
 
 /// Control definition.
@@ -1109,8 +1109,8 @@ struct Rational : public BarelyRational {
   ///
   /// @param numerator Numerator.
   /// @param denominator Denominator.
-  Rational(int numerator = 0, int denominator = 1) noexcept
-      : BarelyRational{static_cast<int32_t>(numerator), static_cast<int32_t>(denominator)} {
+  Rational(int64_t numerator = 0, int64_t denominator = 1) noexcept
+      : BarelyRational{numerator, denominator} {
     assert(denominator != 0);
   }
 

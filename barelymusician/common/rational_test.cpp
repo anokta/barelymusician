@@ -3,10 +3,14 @@
 #include <sstream>
 
 #include "barelymusician/barelymusician.h"
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
+
+using ::testing::AllOf;
+using ::testing::Field;
 
 // Tests that arbitrary arithmetic operations for rational numbers are computed as expected.
 TEST(RationalTest, Arithmetic) {
@@ -160,6 +164,44 @@ TEST(RationalTest, ToString) {
   stream.clear();
   stream << Rational(-10, -2001);
   EXPECT_EQ(stream.str(), "10/2001");
+}
+
+// Tests that arbitrary rational numbers are normalized as expected.
+TEST(RationalTest, RationalNormalized) {
+  EXPECT_THAT(RationalNormalized(1, 3),
+              AllOf(Field(&Rational::numerator, 1), Field(&Rational::denominator, 3)));
+  EXPECT_THAT(RationalNormalized(-1, -3),
+              AllOf(Field(&Rational::numerator, 1), Field(&Rational::denominator, 3)));
+  EXPECT_THAT(RationalNormalized(2, 6),
+              AllOf(Field(&Rational::numerator, 1), Field(&Rational::denominator, 3)));
+  EXPECT_THAT(RationalNormalized(-2, -6),
+              AllOf(Field(&Rational::numerator, 1), Field(&Rational::denominator, 3)));
+  EXPECT_THAT(RationalNormalized(22, 66),
+              AllOf(Field(&Rational::numerator, 1), Field(&Rational::denominator, 3)));
+  EXPECT_THAT(RationalNormalized(-22, -66),
+              AllOf(Field(&Rational::numerator, 1), Field(&Rational::denominator, 3)));
+
+  EXPECT_THAT(RationalNormalized(-77, 1),
+              AllOf(Field(&Rational::numerator, -77), Field(&Rational::denominator, 1)));
+  EXPECT_THAT(RationalNormalized(77, -1),
+              AllOf(Field(&Rational::numerator, -77), Field(&Rational::denominator, 1)));
+  EXPECT_THAT(RationalNormalized(-154, 2),
+              AllOf(Field(&Rational::numerator, -77), Field(&Rational::denominator, 1)));
+  EXPECT_THAT(RationalNormalized(154, -2),
+              AllOf(Field(&Rational::numerator, -77), Field(&Rational::denominator, 1)));
+  EXPECT_THAT(RationalNormalized(-7700000, 100000),
+              AllOf(Field(&Rational::numerator, -77), Field(&Rational::denominator, 1)));
+  EXPECT_THAT(RationalNormalized(7700000, -100000),
+              AllOf(Field(&Rational::numerator, -77), Field(&Rational::denominator, 1)));
+
+  EXPECT_THAT(RationalNormalized(0, 1),
+              AllOf(Field(&Rational::numerator, 0), Field(&Rational::denominator, 1)));
+  EXPECT_THAT(RationalNormalized(0, -1),
+              AllOf(Field(&Rational::numerator, 0), Field(&Rational::denominator, 1)));
+  EXPECT_THAT(RationalNormalized(0, 1234),
+              AllOf(Field(&Rational::numerator, 0), Field(&Rational::denominator, 1)));
+  EXPECT_THAT(RationalNormalized(0, -1234),
+              AllOf(Field(&Rational::numerator, 0), Field(&Rational::denominator, 1)));
 }
 
 }  // namespace

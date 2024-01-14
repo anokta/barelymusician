@@ -15,10 +15,10 @@
 ///   #include "barelymusician/barelymusician.h"
 ///
 ///   // Create.
-///   barely::Musician musician;
+///   barely::Musician musician(/*frame_rate=*/48000);
 ///
 ///   // Set the tempo.
-///   musician.SetTempo(/*tempo=*/124.0);
+///   musician.SetTempo(124);
 ///
 ///   // Update the timestamp.
 ///   //
@@ -27,7 +27,7 @@
 ///   // changes. Therefore, this should typically be called from a main thread update callback,
 ///   // with an additional "lookahead", in order to avoid any potential thread synchronization
 ///   // issues that could occur in real-time audio applications.
-///   Rational timestamp = 1;
+///   std::int64_t timestamp = 4800;
 ///   musician.Update(timestamp);
 ///   @endcode
 ///
@@ -38,7 +38,7 @@
 ///   #include "barelymusician/instruments/synth_instrument.h"
 ///
 ///   // Create.
-///   auto instrument = musician.CreateInstrument<barely::SynthInstrument>(/*frame_rate=*/48000);
+///   auto instrument = musician.CreateInstrument<barely::SynthInstrument>();
 ///
 ///   // Set a note on.
 ///   //
@@ -69,7 +69,7 @@
 ///   const int output_channel_count = 2;
 ///   const int output_frame_count = 1024;
 ///   std::vector<double> output_samples(output_channel_count * output_frame_count, 0.0);
-///   Rational timestamp = 0;
+///   std::int64_t timestamp = 0;
 ///   instrument.Process(output_samples.data(), output_channel_count, output_frame_count,
 ///                      timestamp);
 ///   @endcode
@@ -105,10 +105,10 @@
 ///
 ///   // Create.
 ///   BarelyMusicianHandle musician;
-///   BarelyMusician_Create(&musician);
+///   BarelyMusician_Create(/*frame_rate=*/48000, &musician);
 ///
 ///   // Set the tempo.
-///   BarelyMusician_SetTempo(musician, /*tempo=*/124.0);
+///   BarelyMusician_SetTempo(musician, 124);
 ///
 ///   // Update the timestamp.
 ///   //
@@ -117,7 +117,7 @@
 ///   // changes. Therefore, this should typically be called from a main thread update callback,
 ///   // with an additional "lookahead", in order to avoid any potential thread synchronization
 ///   // issues that could occur in real-time audio applications.
-///   BarelyRational timestamp = {1, 1};
+///   int64_t timestamp = 4800;
 ///   BarelyMusician_Update(musician, timestamp);
 ///
 ///   // Destroy.
@@ -132,8 +132,7 @@
 ///
 ///   // Create.
 ///   BarelyInstrumentHandle instrument;
-///   BarelyInstrument_Create(musician, BarelySynthInstrument_GetDefinition(), /*frame_rate=*/48000,
-///                           &instrument);
+///   BarelyInstrument_Create(musician, BarelySynthInstrument_GetDefinition(), &instrument);
 ///
 ///   // Set a note on.
 ///   //
@@ -165,7 +164,7 @@
 ///   double output_samples[2 * 1024];
 ///   int output_channel_count = 2;
 ///   int output_frame_count = 1024;
-///   BarelyRational timestamp = {0, 1};
+///   int64_t timestamp = 0;
 ///   BarelyInstrument_Process(instrument, output_samples, output_channel_count, output_frame_count,
 ///                            timestamp);
 ///
@@ -685,12 +684,10 @@ BARELY_EXPORT bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32
 ///
 /// @param musician Musician handle.
 /// @param definition Instrument definition.
-/// @param frame_rate Frame rate in hertz.
 /// @param out_instrument Output instrument handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusicianHandle musician,
                                            BarelyInstrumentDefinition definition,
-                                           int32_t frame_rate,
                                            BarelyInstrumentHandle* out_instrument);
 
 /// Destroys an instrument.
@@ -755,11 +752,11 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
 /// @param output_samples Array of interleaved output samples.
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
-/// @param timestamp Timestamp in seconds.
+/// @param timestamp Timestamp in frames.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
                                             double* output_samples, int32_t output_channel_count,
-                                            int32_t output_frame_count, BarelyRational timestamp);
+                                            int32_t output_frame_count, int64_t timestamp);
 
 /// Resets all instrument control values.
 ///
@@ -886,9 +883,10 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instru
 
 /// Creates a new musician.
 ///
+/// @param frame_rate Frame rate in hertz.
 /// @param out_musician Output musician handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Create(BarelyMusicianHandle* out_musician);
+BARELY_EXPORT bool BarelyMusician_Create(int32_t frame_rate, BarelyMusicianHandle* out_musician);
 
 /// Destroys a musician.
 ///
@@ -901,29 +899,29 @@ BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
 /// @param musician Musician handle.
 /// @param out_tempo Output tempo in beats per minute.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo);
+BARELY_EXPORT bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, int32_t* out_tempo);
 
 /// Gets the timestamp of a musician.
 ///
 /// @param musician Musician handle.
-/// @param out_timestamp Output timestamp in seconds.
+/// @param out_timestamp Output Timestamp in frames.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician,
-                                               BarelyRational* out_timestamp);
+                                               int64_t* out_timestamp);
 
 /// Sets the tempo of a musician.
 ///
 /// @param musician Musician handle.
 /// @param tempo Tempo in beats per minute.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo);
+BARELY_EXPORT bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, int32_t tempo);
 
 /// Updates a musician at timestamp.
 ///
 /// @param musician Musician handle.
-/// @param timestamp Timestamp in seconds.
+/// @param timestamp Timestamp in frames.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, BarelyRational timestamp);
+BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, int64_t timestamp);
 
 /// Cancels all one-off performer tasks.
 ///
@@ -952,7 +950,7 @@ BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
 /// @param out_loop_begin_position Output loop begin position in beats.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
-                                                        double* out_loop_begin_position);
+                                                        BarelyRational* out_loop_begin_position);
 
 /// Gets the loop length of a performer.
 ///
@@ -960,7 +958,7 @@ BARELY_EXPORT bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle pe
 /// @param out_loop_length Output loop length.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer,
-                                                 double* out_loop_length);
+                                                 BarelyRational* out_loop_length);
 
 /// Gets the position of a performer.
 ///
@@ -968,7 +966,7 @@ BARELY_EXPORT bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer
 /// @param out_position Output position in beats.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer,
-                                               double* out_position);
+                                               BarelyRational* out_position);
 
 /// Gets whether a performer is looping or not.
 ///
@@ -994,8 +992,8 @@ BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bo
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
                                                       BarelyTaskDefinition definition,
-                                                      double position, int32_t process_order,
-                                                      void* user_data);
+                                                      BarelyRational position,
+                                                      int32_t process_order, void* user_data);
 
 /// Sets the loop begin position of a performer.
 ///
@@ -1003,7 +1001,7 @@ BARELY_EXPORT bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle perf
 /// @param loop_begin_position Loop begin position in beats.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
-                                                        double loop_begin_position);
+                                                        BarelyRational loop_begin_position);
 
 /// Sets the loop length of a performer.
 ///
@@ -1011,7 +1009,7 @@ BARELY_EXPORT bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle pe
 /// @param loop_length Loop length in beats.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer,
-                                                 double loop_length);
+                                                 BarelyRational loop_length);
 
 /// Sets whether a performer is looping or not.
 ///
@@ -1025,7 +1023,8 @@ BARELY_EXPORT bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, b
 /// @param performer Performer handle.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position);
+BARELY_EXPORT bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer,
+                                               BarelyRational position);
 
 /// Starts a performer.
 ///
@@ -1049,7 +1048,7 @@ BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyTask_Create(BarelyPerformerHandle performer,
-                                     BarelyTaskDefinition definition, double position,
+                                     BarelyTaskDefinition definition, BarelyRational position,
                                      int32_t process_order, void* user_data,
                                      BarelyTaskHandle* out_task);
 
@@ -1064,7 +1063,7 @@ BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
 /// @param task Task handle.
 /// @param out_position Output position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position);
+BARELY_EXPORT bool BarelyTask_GetPosition(BarelyTaskHandle task, BarelyRational* out_position);
 
 /// Gets the process order of a task.
 ///
@@ -1078,7 +1077,7 @@ BARELY_EXPORT bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* ou
 /// @param task Task handle.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
+BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTaskHandle task, BarelyRational position);
 
 /// Sets the process order of a task.
 ///
@@ -1110,9 +1109,7 @@ struct Rational : public BarelyRational {
   /// @param numerator Numerator.
   /// @param denominator Denominator.
   constexpr Rational(int64_t numerator = 0, int64_t denominator = 1) noexcept
-      : BarelyRational{numerator, denominator} {
-    assert(denominator != 0);
-  }
+      : Rational(BarelyRational{numerator, denominator}) {}
 
   /// Converts the rational number to `double`.
   ///
@@ -1125,16 +1122,16 @@ struct Rational : public BarelyRational {
   /// Converts the rational number to `int`.
   ///
   /// @return Integer value.
-  constexpr explicit operator int() const noexcept {
+  constexpr explicit operator int64_t() const noexcept {
     assert(denominator != 0);
-    return static_cast<int>(numerator / denominator);
+    return static_cast<int64_t>(numerator / denominator);
   }
 
   /// Constructs a new `Rational` from a raw type.
   ///
   /// @param rational Raw rational.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  Rational(BarelyRational rational) noexcept : BarelyRational{rational} {
+  constexpr Rational(BarelyRational rational) noexcept : BarelyRational{rational} {
     assert(rational.denominator != 0);
   }
 };
@@ -1943,9 +1940,9 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param output_samples Interleaved array of output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
+  /// @param timestamp Timestamp in frames.
   void Process(double* output_samples, int output_channel_count, int output_frame_count,
-               Rational timestamp) noexcept {
+               int64_t timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_Process(
         Get(), output_samples, output_channel_count, output_frame_count, timestamp);
     assert(success);
@@ -2180,8 +2177,8 @@ class Task : protected Wrapper<BarelyTaskHandle> {
   /// Returns the position.
   ///
   /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept {
-    double position = 0.0;
+  [[nodiscard]] Rational GetPosition() const noexcept {
+    Rational position = 0;
     [[maybe_unused]] const bool success = BarelyTask_GetPosition(Get(), &position);
     assert(success);
     return position;
@@ -2200,7 +2197,7 @@ class Task : protected Wrapper<BarelyTaskHandle> {
   /// Sets the position.
   ///
   /// @param position Position in beats.
-  void SetPosition(double position) noexcept {
+  void SetPosition(Rational position) noexcept {
     [[maybe_unused]] const bool success = BarelyTask_SetPosition(Get(), position);
     assert(success);
   }
@@ -2263,7 +2260,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   /// @return Task.
-  [[nodiscard]] Task CreateTask(TaskDefinition definition, double position, int process_order = 0,
+  [[nodiscard]] Task CreateTask(TaskDefinition definition, Rational position, int process_order = 0,
                                 void* user_data = nullptr) noexcept {
     BarelyTaskHandle task;
     [[maybe_unused]] const bool success =
@@ -2278,7 +2275,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @return Task.
-  [[nodiscard]] Task CreateTask(TaskDefinition::Callback callback, double position,
+  [[nodiscard]] Task CreateTask(TaskDefinition::Callback callback, Rational position,
                                 int process_order = 0) noexcept {
     return CreateTask(TaskDefinition::WithCallback(), position, process_order,
                       static_cast<void*>(&callback));
@@ -2287,8 +2284,8 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// Returns the loop begin position.
   ///
   /// @return Loop begin position in beats.
-  [[nodiscard]] double GetLoopBeginPosition() const noexcept {
-    double loop_begin_position = 0.0;
+  [[nodiscard]] Rational GetLoopBeginPosition() const noexcept {
+    Rational loop_begin_position = 0;
     [[maybe_unused]] const bool success =
         BarelyPerformer_GetLoopBeginPosition(Get(), &loop_begin_position);
     assert(success);
@@ -2298,8 +2295,8 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// Returns the loop length.
   ///
   /// @return Loop length in beats.
-  [[nodiscard]] double GetLoopLength() const noexcept {
-    double loop_length = 0.0;
+  [[nodiscard]] Rational GetLoopLength() const noexcept {
+    Rational loop_length = 0;
     [[maybe_unused]] const bool success = BarelyPerformer_GetLoopLength(Get(), &loop_length);
     assert(success);
     return loop_length;
@@ -2308,8 +2305,8 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// Returns the position.
   ///
   /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept {
-    double position = 0.0;
+  [[nodiscard]] Rational GetPosition() const noexcept {
+    Rational position = 0;
     [[maybe_unused]] const bool success = BarelyPerformer_GetPosition(Get(), &position);
     assert(success);
     return position;
@@ -2341,7 +2338,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  void ScheduleOneOffTask(TaskDefinition definition, double position, int process_order = 0,
+  void ScheduleOneOffTask(TaskDefinition definition, Rational position, int process_order = 0,
                           void* user_data = nullptr) noexcept {
     [[maybe_unused]] const bool success =
         BarelyPerformer_ScheduleOneOffTask(Get(), definition, position, process_order, user_data);
@@ -2353,7 +2350,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @param callback Task callback.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
-  void ScheduleOneOffTask(TaskDefinition::Callback callback, double position,
+  void ScheduleOneOffTask(TaskDefinition::Callback callback, Rational position,
                           int process_order = 0) noexcept {
     ScheduleOneOffTask(TaskDefinition::WithCallback(), position, process_order,
                        static_cast<void*>(&callback));
@@ -2362,7 +2359,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// Sets the loop begin position.
   ///
   /// @param loop_begin_position Loop begin position in beats.
-  void SetLoopBeginPosition(double loop_begin_position) noexcept {
+  void SetLoopBeginPosition(Rational loop_begin_position) noexcept {
     [[maybe_unused]] const bool success =
         BarelyPerformer_SetLoopBeginPosition(Get(), loop_begin_position);
     assert(success);
@@ -2371,7 +2368,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// Sets the loop length.
   ///
   /// @param loop_length Loop length in beats.
-  void SetLoopLength(double loop_length) noexcept {
+  void SetLoopLength(Rational loop_length) noexcept {
     [[maybe_unused]] const bool success = BarelyPerformer_SetLoopLength(Get(), loop_length);
     assert(success);
   }
@@ -2387,7 +2384,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// Sets the position.
   ///
   /// @param position Position in beats.
-  void SetPosition(double position) noexcept {
+  void SetPosition(Rational position) noexcept {
     [[maybe_unused]] const bool success = BarelyPerformer_SetPosition(Get(), position);
     assert(success);
   }
@@ -2412,9 +2409,11 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   using Observer = Observer<Musician>;
 
   /// Creates a new `Musician`.
-  Musician() noexcept {
+  ///
+  /// @param frame_rate Frame rate in hz.
+  explicit Musician(int frame_rate) noexcept {
     BarelyMusicianHandle musician = nullptr;
-    [[maybe_unused]] const bool success = BarelyMusician_Create(&musician);
+    [[maybe_unused]] const bool success = BarelyMusician_Create(frame_rate, &musician);
     assert(success);
     *this = Musician(musician);
   }
@@ -2460,8 +2459,8 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// @param frame_rate Frame rate in hertz.
   /// @return Instrument.
   template <class InstrumentType>
-  [[nodiscard]] Instrument CreateInstrument(int frame_rate) noexcept {
-    return CreateInstrument(InstrumentType::GetDefinition(), frame_rate);
+  [[nodiscard]] Instrument CreateInstrument() noexcept {
+    return CreateInstrument(InstrumentType::GetDefinition());
   }
 
   /// Creates a new instrument.
@@ -2469,11 +2468,9 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
   /// @return Instrument.
-  [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
-                                            int frame_rate) noexcept {
+  [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition) noexcept {
     BarelyInstrumentHandle instrument;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_Create(Get(), definition, frame_rate, &instrument);
+    [[maybe_unused]] const bool success = BarelyInstrument_Create(Get(), definition, &instrument);
     assert(success);
     return Instrument(instrument);
   }
@@ -2491,18 +2488,18 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// Returns the tempo.
   ///
   /// @return Tempo in beats per minute.
-  [[nodiscard]] double GetTempo() const noexcept {
-    double tempo = 0.0;
+  [[nodiscard]] int GetTempo() const noexcept {
+    int32_t tempo = 0;
     [[maybe_unused]] const bool success = BarelyMusician_GetTempo(Get(), &tempo);
     assert(success);
-    return tempo;
+    return static_cast<int>(tempo);
   }
 
   /// Returns the timestamp.
   ///
-  /// @return Timestamp in seconds.
-  [[nodiscard]] Rational GetTimestamp() const noexcept {
-    Rational timestamp = 0;
+  /// @return Timestamp in frames.
+  [[nodiscard]] int64_t GetTimestamp() const noexcept {
+    int64_t timestamp = 0;
     [[maybe_unused]] const bool success = BarelyMusician_GetTimestamp(Get(), &timestamp);
     assert(success);
     return timestamp;
@@ -2511,15 +2508,15 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept {
+  void SetTempo(int tempo) noexcept {
     [[maybe_unused]] const bool success = BarelyMusician_SetTempo(Get(), tempo);
     assert(success);
   }
 
   /// Updates the musician at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(Rational timestamp) noexcept {
+  /// @param timestamp Timestamp in frames.
+  void Update(int64_t timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyMusician_Update(Get(), timestamp);
     assert(success);
   }

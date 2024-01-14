@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <set>
@@ -25,10 +26,10 @@ class Instrument {
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
   /// @param initial_tempo Initial tempo in beats per minute.
-  /// @param initial_timestamp Initial timestamp in seconds.
+  /// @param initial_timestamp Initial Timestamp in frames.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
-             Rational initial_timestamp) noexcept;
+  Instrument(const InstrumentDefinition& definition, int frame_rate, int initial_tempo,
+             std::int64_t initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -74,11 +75,11 @@ class Instrument {
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
+  /// @param timestamp Timestamp in frames.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
-               Rational timestamp) noexcept;
+               std::int64_t timestamp) noexcept;
 
   /// Removes an effect.
   ///
@@ -208,12 +209,13 @@ class Instrument {
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept;
+  void SetTempo(int tempo) noexcept;
 
   /// Updates the instrument at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(Rational timestamp) noexcept;
+  /// @param timestamp Timestamp in frames.
+  /// @param duration Duration in beats.
+  void Update(std::int64_t timestamp, Rational duration) noexcept;
 
  private:
   // Note control event alias.
@@ -281,10 +283,10 @@ class Instrument {
   NoteOnEvent note_on_event_;
 
   // Tempo in beats per minute.
-  double tempo_ = 120.0;
+  int tempo_ = 120;
 
-  // Timestamp in seconds.
-  Rational timestamp_ = 0;
+  // Timestamp in frames.
+  std::int64_t timestamp_ = 0;
 
   // State.
   void* state_ = nullptr;

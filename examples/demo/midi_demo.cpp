@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <thread>
@@ -45,7 +46,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
-constexpr Rational kLookahead = Rational(1, 10);
+constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Instrument settings.
 constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
@@ -57,20 +58,17 @@ constexpr double kInstrumentGain = 1.0 / static_cast<double>(kInstrumentVoiceCou
 // Midi file name.
 constexpr char kMidiFileName[] = "midi/sample.mid";
 
-constexpr double kTempo = 132.0;
+constexpr int kTempo = 132;
 
 // Builds the score for the given `midi_events`.
 bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instrument& instrument,
                 Performer& performer) {
-  const auto get_position_fn = [ticks_per_beat](int tick) -> double {
-    return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
-  };
   bool has_notes = false;
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
-      const double position = get_position_fn(midi_event.tick);
-      const double duration = get_position_fn(midi_event.getTickDuration());
+      const Rational position = Rational(midi_event.tick, ticks_per_beat);
+      const Rational duration = Rational(midi_event.getTickDuration(), ticks_per_beat);
       const double pitch = PitchFromMidi(midi_event.getKeyNumber());
       const double intensity = IntensityFromMidi(midi_event.getVelocity());
       performer.ScheduleOneOffTask(
@@ -104,14 +102,13 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
 
   std::vector<std::pair<Instrument, Performer>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(musician.CreateInstrument<SynthInstrument>(kFrameRate),
-                        musician.CreatePerformer());
+    tracks.emplace_back(musician.CreateInstrument<SynthInstrument>(), musician.CreatePerformer());
     auto& [instrument, performer] = tracks.back();
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {

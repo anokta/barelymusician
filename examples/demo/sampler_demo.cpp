@@ -86,9 +86,9 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Musician musician;
+  Musician musician(kFrameRate);
 
-  auto instrument = musician.CreateInstrument<SamplerInstrument>(kFrameRate);
+  auto instrument = musician.CreateInstrument<SamplerInstrument>();
   instrument.SetControl(SamplerInstrument::Control::kGain, kGain);
   instrument.SetControl(SamplerInstrument::Control::kRootPitch, kRootPitch);
   instrument.SetControl(SamplerInstrument::Control::kLoop, kLoop);

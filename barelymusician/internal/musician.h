@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 #define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
+#include <cstdint>
 #include <unordered_set>
 
 #include "barelymusician/barelymusician.h"
@@ -13,6 +14,12 @@ namespace barely::internal {
 /// Class that wraps a musician.
 class Musician {
  public:
+  /// Constructs a new `Musician`.
+  ///
+  /// @param frame_rate Frame rate in hz.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  explicit Musician(int frame_rate) noexcept;
+
   /// Adds an instrument.
   ///
   /// @param instrument Instrument.
@@ -25,15 +32,20 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(Performer& performer) noexcept;
 
+  /// Returns frame rate.
+  ///
+  /// @return Frame rate in hz.
+  [[nodiscard]] int GetFrameRate() const noexcept;
+
   /// Returns tempo.
   ///
   /// @return Tempo in beats per minute.
-  [[nodiscard]] double GetTempo() const noexcept;
+  [[nodiscard]] int GetTempo() const noexcept;
 
   /// Returns timestamp.
   ///
-  /// @return Timestamp in seconds.
-  [[nodiscard]] Rational GetTimestamp() const noexcept;
+  /// @return Timestamp in frames.
+  [[nodiscard]] std::int64_t GetTimestamp() const noexcept;
 
   /// Destroys instrument.
   ///
@@ -50,25 +62,29 @@ class Musician {
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept;
+  void SetTempo(int tempo) noexcept;
 
   /// Updates the musician at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
+  /// @param timestamp Timestamp in frames.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(Rational timestamp) noexcept;
+  void Update(std::int64_t timestamp) noexcept;
 
+ private:
   // Set of pointers to instruments.
   std::unordered_set<Instrument*> instruments_;
 
   // Set of pointers to performers.
   std::unordered_set<Performer*> performers_;
 
-  // Tempo in beats per minute.
-  double tempo_ = 120.0;
+  // Frame rate in hz.
+  int frame_rate_ = 48000;
 
-  // Timestamp in seconds.
-  Rational timestamp_ = 0;
+  // Tempo in beats per minute.
+  int tempo_ = 120;
+
+  // Timestamp in frames.
+  std::int64_t timestamp_ = 0;
 };
 
 }  // namespace barely::internal

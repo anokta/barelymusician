@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::Arpeggiator {
@@ -59,7 +60,8 @@ bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator) {
   return true;
 }
 
-bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator, double gate_ratio) {
+bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
+                                    BarelyRational gate_ratio) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetGateRatio(gate_ratio);
@@ -96,7 +98,7 @@ bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, double pit
   return true;
 }
 
-bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate) {
+bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, BarelyRational rate) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetRate(rate);
@@ -131,8 +133,8 @@ void Arpeggiator::SetAllNotesOff() noexcept {
   }
 }
 
-void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
-  gate_ratio_ = std::min(std::max(gate_ratio, 0.0), 1.0);
+void Arpeggiator::SetGateRatio(Rational gate_ratio) noexcept {
+  gate_ratio_ = std::min(std::max(gate_ratio, Rational(0)), Rational(1));
 }
 
 void Arpeggiator::SetInstrument(Instrument* instrument) noexcept {
@@ -163,8 +165,8 @@ void Arpeggiator::SetNoteOn(double pitch) noexcept {
   }
 }
 
-void Arpeggiator::SetRate(double rate) noexcept {
-  const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
+void Arpeggiator::SetRate(Rational rate) noexcept {
+  const Rational length = (rate > 0) ? 1 / rate : 0;
   performer_.SetLoopLength(length);
 }
 
@@ -187,7 +189,7 @@ void Arpeggiator::Update() noexcept {
 void Arpeggiator::Stop() noexcept {
   performer_.Stop();
   performer_.CancelAllOneOffTasks();
-  performer_.SetPosition(0.0);
+  performer_.SetPosition(0);
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
@@ -198,7 +200,7 @@ void Arpeggiator::Stop() noexcept {
 Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
+  performer_.SetLoopLength(1);
   task_ = performer_.CreateTask(
       [this, process_order]() noexcept {
         Update();
@@ -215,7 +217,7 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
             },
             gate_ratio_ * performer_.GetLoopLength(), process_order);
       },
-      0.0, process_order);
+      0, process_order);
 }
 
 }  // namespace barely

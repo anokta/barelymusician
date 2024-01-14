@@ -1,10 +1,10 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <cstdint>
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -19,7 +19,6 @@ namespace {
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::Rational;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -31,7 +30,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
-constexpr Rational kLookahead = Rational(1, 10);
+constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Metronome settings.
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
@@ -44,8 +43,8 @@ constexpr double kBarPitch = barely::kPitchA4;
 constexpr double kBeatPitch = barely::kPitchA3;
 
 constexpr int kBeatCount = 4;
-constexpr double kInitialTempo = 120.0;
-constexpr double kTempoIncrement = 10.0;
+constexpr int kInitialTempo = 120;
+constexpr int kTempoIncrement = 10;
 
 }  // namespace
 
@@ -56,11 +55,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
@@ -94,7 +93,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetTempo();
+    int tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (metronome.IsPlaying()) {
@@ -116,10 +115,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
         tempo += kTempoIncrement;
         break;
       case '1':
-        tempo *= 0.5;
+        tempo /= 2;
         break;
       case '2':
-        tempo *= 2.0;
+        tempo *= 2;
         break;
       case 'R':
         tempo = kInitialTempo;
@@ -127,7 +126,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       default:
         return;
     }
-    tempo = std::clamp(tempo, 0.0, static_cast<double>(kFrameRate));
+    tempo = std::clamp(tempo, 0, kFrameRate);
     musician.SetTempo(tempo);
     ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
   };

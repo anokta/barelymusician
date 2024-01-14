@@ -3,9 +3,6 @@
 #include <algorithm>
 #include <cmath>
 
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/common/seconds.h"
-
 namespace barely {
 
 namespace {
@@ -17,7 +14,7 @@ constexpr double kGainThreshold = 2e-5;
 constexpr double kUnityGain = 1.0;
 
 // Total ramp duration in seconds.
-constexpr Rational kUnityRampDurationSeconds = Rational(1, 20);
+constexpr double kUnityRampDurationSeconds = 0.05;
 
 // Applies constant `gain`.
 void ApplyConstantGain(double gain, double* buffer, int channel_count, int frame_count) noexcept {
@@ -49,7 +46,8 @@ double ApplyLinearRamp(double gain, double target_gain, int ramp_frame_count, do
 }  // namespace
 
 GainProcessor::GainProcessor(int frame_rate) noexcept
-    : unity_ramp_frame_count_(FramesFromSeconds(frame_rate, kUnityRampDurationSeconds)) {}
+    : unity_ramp_frame_count_(
+          static_cast<int>(static_cast<double>(frame_rate) * kUnityRampDurationSeconds)) {}
 
 void GainProcessor::Process(double* buffer, int channel_count, int frame_count) noexcept {
   int frame = 0;

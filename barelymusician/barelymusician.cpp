@@ -53,9 +53,9 @@ struct BarelyEffect : public Effect {
 // Instrument.
 struct BarelyInstrument : public Observable<Instrument> {
   // Constructs `BarelyInstrument` with `musician`, `definition`, and `frame_rate`.
-  BarelyInstrument(const Observable<Musician>& musician, BarelyInstrumentDefinition definition,
-                   int32_t frame_rate) noexcept
-      : Observable<Instrument>(definition, frame_rate, musician.GetTempo(),
+  BarelyInstrument(const Observable<Musician>& musician,
+                   BarelyInstrumentDefinition definition) noexcept
+      : Observable<Instrument>(definition, musician.GetFrameRate(), musician.GetTempo(),
                                musician.GetTimestamp()),
         musician_(musician.Observe()) {
     musician_->AddInstrument(*this);
@@ -81,8 +81,8 @@ struct BarelyInstrument : public Observable<Instrument> {
 
 // Musician.
 struct BarelyMusician : public Observable<Musician> {
-  // Default constructor.
-  BarelyMusician() noexcept = default;
+  // Constructs `BarelyMusician` with `frame_rate`.
+  explicit BarelyMusician(int frame_rate) noexcept : Observable<Musician>(frame_rate) {}
 
   // Default destructor.
   ~BarelyMusician() noexcept = default;
@@ -125,7 +125,7 @@ struct BarelyTask : public Task {
   // Constructs `BarelyTask` with `performer`, `definition`, `position`, `process_order`, and
   // `user_data`.
   BarelyTask(const Observable<Performer>& performer, BarelyTaskDefinition definition,
-             double position, int process_order, void* user_data) noexcept
+             BarelyRational position, int process_order, void* user_data) noexcept
       : Task(definition, position, process_order, user_data), performer_(performer.Observe()) {
     performer_->AddTask(*this);
   }
@@ -241,12 +241,11 @@ bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_ord
 }
 
 bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefinition definition,
-                             int32_t frame_rate, BarelyInstrumentHandle* out_instrument) {
+                             BarelyInstrumentHandle* out_instrument) {
   if (!musician) return false;
-  if (frame_rate <= 0) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = new BarelyInstrument(*musician, definition, frame_rate);
+  *out_instrument = new BarelyInstrument(*musician, definition);
   return true;
 }
 
@@ -317,7 +316,7 @@ bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
 
 bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
                               int32_t output_channel_count, int32_t output_frame_count,
-                              BarelyRational timestamp) {
+                              int64_t timestamp) {
   if (!instrument) return false;
 
   return instrument->Process(output_samples, output_channel_count, output_frame_count, timestamp);
@@ -426,10 +425,11 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
   return true;
 }
 
-bool BarelyMusician_Create(BarelyMusicianHandle* out_musician) {
+bool BarelyMusician_Create(int32_t frame_rate, BarelyMusicianHandle* out_musician) {
+  if (frame_rate <= 0) return false;
   if (!out_musician) return false;
 
-  *out_musician = new BarelyMusician();
+  *out_musician = new BarelyMusician(frame_rate);
   return true;
 }
 
@@ -440,7 +440,7 @@ bool BarelyMusician_Destroy(BarelyMusicianHandle musician) {
   return true;
 }
 
-bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo) {
+bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, int32_t* out_tempo) {
   if (!musician) return false;
   if (!out_tempo) return false;
 
@@ -448,7 +448,7 @@ bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo) {
   return true;
 }
 
-bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, BarelyRational* out_timestamp) {
+bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, int64_t* out_timestamp) {
   if (!musician) return false;
   if (!out_timestamp) return false;
 
@@ -456,14 +456,14 @@ bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, BarelyRational* 
   return true;
 }
 
-bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo) {
+bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, int32_t tempo) {
   if (!musician) return false;
 
   musician->SetTempo(tempo);
   return true;
 }
 
-bool BarelyMusician_Update(BarelyMusicianHandle musician, BarelyRational timestamp) {
+bool BarelyMusician_Update(BarelyMusicianHandle musician, int64_t timestamp) {
   if (!musician) return false;
 
   musician->Update(timestamp);
@@ -493,7 +493,7 @@ bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
 }
 
 bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
-                                          double* out_loop_begin_position) {
+                                          BarelyRational* out_loop_begin_position) {
   if (!performer) return false;
   if (!out_loop_begin_position) return false;
 
@@ -501,7 +501,8 @@ bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
   return true;
 }
 
-bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer, double* out_loop_length) {
+bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer,
+                                   BarelyRational* out_loop_length) {
   if (!performer) return false;
   if (!out_loop_length) return false;
 
@@ -509,7 +510,7 @@ bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer, double* out_
   return true;
 }
 
-bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, double* out_position) {
+bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, BarelyRational* out_position) {
   if (!performer) return false;
   if (!out_position) return false;
 
@@ -534,7 +535,7 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
 }
 
 bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
-                                        BarelyTaskDefinition definition, double position,
+                                        BarelyTaskDefinition definition, BarelyRational position,
                                         int32_t process_order, void* user_data) {
   if (!performer) return false;
 
@@ -543,14 +544,14 @@ bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
 }
 
 bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
-                                          double loop_begin_position) {
+                                          BarelyRational loop_begin_position) {
   if (!performer) return false;
 
   performer->SetLoopBeginPosition(loop_begin_position);
   return true;
 }
 
-bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer, double loop_length) {
+bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer, BarelyRational loop_length) {
   if (!performer) return false;
 
   performer->SetLoopLength(loop_length);
@@ -564,7 +565,7 @@ bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping
   return true;
 }
 
-bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position) {
+bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, BarelyRational position) {
   if (!performer) return false;
 
   performer->SetPosition(position);
@@ -586,7 +587,7 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
 }
 
 bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
-                       double position, int32_t process_order, void* user_data,
+                       BarelyRational position, int32_t process_order, void* user_data,
                        BarelyTaskHandle* out_task) {
   if (!performer) return false;
   if (!out_task) return false;
@@ -602,7 +603,7 @@ bool BarelyTask_Destroy(BarelyTaskHandle task) {
   return true;
 }
 
-bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
+bool BarelyTask_GetPosition(BarelyTaskHandle task, BarelyRational* out_position) {
   if (!task) return false;
   if (!out_position) return false;
 
@@ -618,7 +619,7 @@ bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_orde
   return true;
 }
 
-bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
+bool BarelyTask_SetPosition(BarelyTaskHandle task, BarelyRational position) {
   if (!task || !task->performer()) return false;
 
   task->performer()->SetTaskPosition(*task, position);

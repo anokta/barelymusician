@@ -9,7 +9,7 @@ namespace Barely {
   /// A representation of a musician that governs the tempo for all musical components.
   public static class Musician {
     /// Tempo in beats per minute.
-    public static double Tempo {
+    public static int Tempo {
       get { return _tempo; }
       set {
         if (_tempo != value) {
@@ -18,10 +18,10 @@ namespace Barely {
         }
       }
     }
-    private static double _tempo = 120.0;
+    private static int _tempo = 120;
 
-    /// Timestamp in seconds.
-    public static Rational Timestamp {
+    /// Timestamp in frames.
+    public static Int64 Timestamp {
       get { return Internal.Musician_GetTimestamp(); }
     }
 
@@ -44,7 +44,7 @@ namespace Barely {
     ///
     /// @param callback Task process callback.
     /// @param dspTime Time in seconds.
-    public static void ScheduleTask(Action callback, Rational dspTime) {
+    public static void ScheduleTask(Action callback, double dspTime) {
       Internal.Musician_ScheduleTask(callback, dspTime);
     }
 
@@ -450,8 +450,7 @@ namespace Barely {
             Debug.LogError("Unsupported instrument type: " + instrument.GetType());
             return;
         }
-        bool success =
-            BarelyInstrument_Create(Handle, definition, _frameRate, ref instrumentHandle);
+        bool success = BarelyInstrument_Create(Handle, definition, ref instrumentHandle);
         if (instrument.GetType().IsSubclassOf(typeof(CustomInstrumentInterface))) {
           if (definition.controlDefinitionCount > 0) {
             Marshal.FreeHGlobal(definition.controlDefinitions);
@@ -549,10 +548,9 @@ namespace Barely {
           }
           return;
         }
-        if (BarelyInstrument_Process(
-                instrumentHandle, OutputSamples, outputChannelCount,
-                outputSamples.Length / outputChannelCount,
-                new Rational((Int64)(_frameRate * AudioSettings.dspTime), _frameRate))) {
+        if (BarelyInstrument_Process(instrumentHandle, OutputSamples, outputChannelCount,
+                                     outputSamples.Length / outputChannelCount,
+                                     (Int64)(_frameRate * AudioSettings.dspTime))) {
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] *= (float)OutputSamples[i];
           }
@@ -687,8 +685,8 @@ namespace Barely {
       /// Returns the tempo of a musician.
       ///
       /// @return Tempo in beats per minute.
-      public static double Musician_GetTempo() {
-        double tempo = 0.0;
+      public static int Musician_GetTempo() {
+        int tempo = 0;
         if (!BarelyMusician_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to get musician tempo");
         }
@@ -697,9 +695,9 @@ namespace Barely {
 
       /// Returns the timestamp of a musician.
       ///
-      /// @return Timestamp in seconds.
-      public static Rational Musician_GetTimestamp() {
-        Rational timestamp = new Rational();
+      /// @return Timestamp in frames.
+      public static Int64 Musician_GetTimestamp() {
+        Int64 timestamp = 0;
         if (!BarelyMusician_GetTimestamp(Handle, ref timestamp) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to get musician timestamp");
         }
@@ -709,8 +707,9 @@ namespace Barely {
       /// Schedules a new musician task.
       ///
       /// @param callback Task process callback.
-      /// @param timestamp Task timestamp in seconds.
-      public static void Musician_ScheduleTask(Action callback, Rational timestamp) {
+      /// @param dspTime Task time in seconds.
+      public static void Musician_ScheduleTask(Action callback, double dspTime) {
+        Int64 timestamp = (Int64)(_frameRate * dspTime);
         if (timestamp < Timestamp) {
           Debug.LogError("Failed to create musician task at " + timestamp);
           return;
@@ -727,7 +726,7 @@ namespace Barely {
       /// Sets the tempo of a musician.
       ///
       /// @param tempo Tempo in beats per minute.
-      public static void Musician_SetTempo(double tempo) {
+      public static void Musician_SetTempo(int tempo) {
         if (!BarelyMusician_SetTempo(Handle, tempo) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set musician tempo");
         }
@@ -1452,7 +1451,7 @@ namespace Barely {
       private static int _latency = 0;
 
       // Map of scheduled list of task callbacks by their timestamps.
-      private static SortedDictionary<Rational, List<Action>> _scheduledTaskCallbacks = null;
+      private static SortedDictionary<Int64, List<Action>> _scheduledTaskCallbacks = null;
 
       // Component that manages internal state.
       private class State : MonoBehaviour {
@@ -1483,9 +1482,9 @@ namespace Barely {
         }
 
         private void LateUpdate() {
-          Rational nextTimestamp = GetNextTimestamp();
+          Int64 nextTimestamp = GetNextTimestamp();
           while (_scheduledTaskCallbacks.Count > 0) {
-            Rational taskTimestamp = _scheduledTaskCallbacks.ElementAt(0).Key;
+            Int64 taskTimestamp = _scheduledTaskCallbacks.ElementAt(0).Key;
             if (taskTimestamp > nextTimestamp) {
               break;
             }
@@ -1501,17 +1500,17 @@ namespace Barely {
 
         // Initializes the native state.
         private void Initialize() {
+          var config = AudioSettings.GetConfiguration();
+          OutputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
+          _frameRate = config.sampleRate;
           _isShuttingDown = false;
-          if (!BarelyMusician_Create(ref _handle)) {
+          _latency = 2 * config.dspBufferSize;
+          if (!BarelyMusician_Create(_frameRate, ref _handle)) {
             Debug.LogError("Failed to initialize BarelyMusician");
             return;
           }
           BarelyMusician_SetTempo(_handle, _tempo);
-          var config = AudioSettings.GetConfiguration();
-          OutputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
-          _frameRate = config.sampleRate;
-          _latency = 2 * config.dspBufferSize;
-          _scheduledTaskCallbacks = new SortedDictionary<Rational, List<Action>>();
+          _scheduledTaskCallbacks = new SortedDictionary<Int64, List<Action>>();
           BarelyMusician_Update(_handle, GetNextTimestamp());
         }
 
@@ -1524,9 +1523,9 @@ namespace Barely {
         }
 
         // Returns the next timestamp to update.
-        private Rational GetNextTimestamp() {
+        private Int64 GetNextTimestamp() {
           int lookahead = Mathf.Max(_latency, (int)(_frameRate * Time.smoothDeltaTime));
-          return new Rational((Int64)(_frameRate * AudioSettings.dspTime) + lookahead, _frameRate);
+          return (Int64)(_frameRate * AudioSettings.dspTime) + lookahead;
         }
       }
 
@@ -1575,7 +1574,7 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Create")]
       private static extern bool BarelyInstrument_Create(IntPtr musician,
                                                          InstrumentDefinition definition,
-                                                         Int32 frameRate, ref IntPtr outInstrument);
+                                                         ref IntPtr outInstrument);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
@@ -1596,8 +1595,7 @@ namespace Barely {
       private static extern bool BarelyInstrument_Process(IntPtr instrument,
                                                           [In, Out] double[] outputSamples,
                                                           Int32 outputChannelCount,
-                                                          Int32 outputFrameCount,
-                                                          Rational timestamp);
+                                                          Int32 outputFrameCount, Int64 timestamp);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetAllControls")]
       private static extern bool BarelyInstrument_ResetAllControls(IntPtr instrument);
@@ -1656,23 +1654,23 @@ namespace Barely {
                                                                  IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
-      private static extern bool BarelyMusician_Create(ref IntPtr outMusician);
+      private static extern bool BarelyMusician_Create(Int32 frameRate, ref IntPtr outMusician);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern bool BarelyMusician_Destroy(IntPtr musician);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTempo")]
-      private static extern bool BarelyMusician_GetTempo(IntPtr musician, ref double outTempo);
+      private static extern bool BarelyMusician_GetTempo(IntPtr musician, ref Int32 outTempo);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTimestamp")]
       private static extern bool BarelyMusician_GetTimestamp(IntPtr musician,
-                                                             ref Rational outTimestamp);
+                                                             ref Int64 outTimestamp);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_SetTempo")]
-      private static extern bool BarelyMusician_SetTempo(IntPtr musician, double tempo);
+      private static extern bool BarelyMusician_SetTempo(IntPtr musician, Int32 tempo);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Update")]
-      private static extern bool BarelyMusician_Update(IntPtr musician, Rational timestamp);
+      private static extern bool BarelyMusician_Update(IntPtr musician, Int64 timestamp);
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_CancelAllOneOffTasks")]
       private static extern bool BarelyPerformer_CancelAllOneOffTasks(IntPtr performer);

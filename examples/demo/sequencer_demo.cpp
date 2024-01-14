@@ -1,5 +1,6 @@
 #include <cctype>
 #include <chrono>
+#include <cstdint>
 #include <thread>
 #include <unordered_map>
 #include <utility>
@@ -33,7 +34,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
-constexpr Rational kLookahead = Rational(1, 10);
+constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Instrument settings.
 constexpr double kGain = 0.1;
@@ -41,8 +42,8 @@ constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.1;
 
-constexpr double kInitialTempo = 120.0;
-constexpr double kTempoIncrement = 10.0;
+constexpr int kInitialTempo = 120;
+constexpr int kTempoIncrement = 10;
 
 }  // namespace
 
@@ -53,10 +54,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
@@ -67,10 +68,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto performer = musician.CreatePerformer();
   performer.SetLooping(true);
-  performer.SetLoopBeginPosition(3.0);
-  performer.SetLoopLength(5.0);
+  performer.SetLoopBeginPosition(3);
+  performer.SetLoopLength(5);
 
-  const auto play_note_fn = [&](double duration, double pitch) {
+  const auto play_note_fn = [&](Rational duration, double pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
       performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
@@ -78,16 +79,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
     };
   };
 
-  std::vector<std::pair<double, TaskDefinition::Callback>> score;
-  score.emplace_back(0.0, play_note_fn(1.0, barely::kPitchC4));
-  score.emplace_back(1.0, play_note_fn(1.0, barely::kPitchD4));
-  score.emplace_back(2.0, play_note_fn(1.0, barely::kPitchE4));
-  score.emplace_back(3.0, play_note_fn(1.0, barely::kPitchF4));
-  score.emplace_back(4.0, play_note_fn(1.0, barely::kPitchG4));
-  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, barely::kPitchG4));
-  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchA5));
-  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchB5));
-  score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
+  std::vector<std::pair<Rational, TaskDefinition::Callback>> score;
+  score.emplace_back(0, play_note_fn(1, barely::kPitchC4));
+  score.emplace_back(1, play_note_fn(1, barely::kPitchD4));
+  score.emplace_back(2, play_note_fn(1, barely::kPitchE4));
+  score.emplace_back(3, play_note_fn(1, barely::kPitchF4));
+  score.emplace_back(4, play_note_fn(1, barely::kPitchG4));
+  score.emplace_back(5, play_note_fn(Rational(1, 3), barely::kPitchG4));
+  score.emplace_back(5 + Rational(1, 3), play_note_fn(Rational(1, 3), barely::kPitchA5));
+  score.emplace_back(5 + Rational(2, 3), play_note_fn(Rational(1, 3), barely::kPitchB5));
+  score.emplace_back(6, play_note_fn(2, barely::kPitchC5));
 
   std::unordered_map<int, Task> tasks;
   int index = 0;
@@ -123,7 +124,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetTempo();
+    int tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (performer.IsPlaying()) {
@@ -146,7 +147,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
       case 'P':
         instrument.SetAllNotesOff();
-        performer.SetPosition(0.0);
+        performer.SetPosition(0);
         return;
       case '-':
         tempo -= kTempoIncrement;

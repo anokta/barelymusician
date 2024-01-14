@@ -59,9 +59,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Musician musician;
+  Musician musician(kFrameRate);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);

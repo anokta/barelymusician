@@ -15,13 +15,13 @@ class Task : public Event<TaskDefinition> {
   /// @param position Task position.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  Task(const TaskDefinition& definition, double position, int process_order,
+  Task(const TaskDefinition& definition, Rational position, int process_order,
        void* user_data) noexcept;
 
   /// Returns the position.
   ///
   /// @return Position in beats.
-  double GetPosition() const noexcept;
+  Rational GetPosition() const noexcept;
 
   /// Returns the process order.
   ///
@@ -31,18 +31,16 @@ class Task : public Event<TaskDefinition> {
   /// Sets the position.
   ///
   /// @param position Position in beats.
-  /// @return True if successful, false otherwise.
-  bool SetPosition(double position) noexcept;
+  void SetPosition(Rational position) noexcept;
 
   /// Returns the process order.
   ///
   /// @param process_order Process order.
-  /// @return True if successful, false otherwise.
-  bool SetProcessOrder(int process_order) noexcept;
+  void SetProcessOrder(int process_order) noexcept;
 
  private:
   // Position.
-  double position_;
+  Rational position_;
 
   // Process order.
   int process_order_;

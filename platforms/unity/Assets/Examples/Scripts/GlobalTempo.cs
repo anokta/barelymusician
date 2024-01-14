@@ -5,8 +5,8 @@ namespace Barely {
     [DisallowMultipleComponent]
     public class GlobalTempo : MonoBehaviour {
       /// Global tempo in beats.
-      [Range(30.0f, 960.0f)]
-      public double tempo = 120.0;
+      [Range(30, 960)]
+      public int tempo = 120;
 
       private void Start() {
         Musician.Tempo = tempo;

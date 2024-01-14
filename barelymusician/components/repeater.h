@@ -75,7 +75,7 @@ BARELY_EXPORT bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
 /// @param repeater Repeater handle.
 /// @param rate Rate in notes per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate);
+BARELY_EXPORT bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, BarelyRational rate);
 
 /// Sets the style of an repeater.
 ///
@@ -157,7 +157,7 @@ class Repeater {
   /// Sets the rate.
   ///
   /// @param rate Rate in notes per beat.
-  void SetRate(double rate) noexcept;
+  void SetRate(Rational rate) noexcept;
 
   /// Sets the style.
   ///

@@ -3,6 +3,7 @@
 #include <cctype>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <string>
@@ -62,10 +63,10 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
-constexpr Rational kLookahead = Rational(1, 10);
+constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Performer settings.
-constexpr double kTempo = 124.0;
+constexpr int kTempo = 124;
 constexpr int kBeatCount = 3;
 
 // Ensemble settings.
@@ -90,7 +91,7 @@ void InsertPadData(double pitch, const std::string& file_path, std::vector<doubl
 }
 
 // Schedules performer to play an instrument note.
-void ScheduleNote(double position, double duration, double pitch, double intensity,
+void ScheduleNote(Rational position, Rational duration, double pitch, double intensity,
                   Instrument& instrument, Performer& performer) {
   performer.ScheduleOneOffTask(
       [pitch, intensity, &instrument]() { instrument.SetNoteOn(pitch, intensity); }, position);
@@ -101,7 +102,7 @@ void ScheduleNote(double position, double duration, double pitch, double intensi
 
 void ComposeChord(double intensity, int harmonic, Instrument& instrument, Performer& performer) {
   const auto add_chord_note = [&](int index) {
-    ScheduleNote(0.0, 1.0, kRootNote + barely::PitchFromScale(barely::kPitchMajorScale, index),
+    ScheduleNote(0, 1, kRootNote + barely::PitchFromScale(barely::kPitchMajorScale, index),
                  intensity, instrument, performer);
   };
   add_chord_note(harmonic);
@@ -112,36 +113,34 @@ void ComposeChord(double intensity, int harmonic, Instrument& instrument, Perfor
 void ComposeLine(double octave_offset, double intensity, int bar, int beat, int beat_count,
                  int harmonic, Instrument& instrument, Performer& performer) {
   const int note_offset = beat;
-  const auto add_note = [&](double begin_position, double end_position, int index) {
+  const auto add_note = [&](Rational begin_position, Rational end_position, int index) {
     ScheduleNote(
         begin_position, end_position - begin_position,
         kRootNote + octave_offset + barely::PitchFromScale(barely::kPitchMajorScale, index),
         intensity, instrument, performer);
   };
   if (beat % 2 == 1) {
-    add_note(0.0, 0.33, harmonic);
-    add_note(0.33, 0.66, harmonic - note_offset);
-    add_note(0.66, 1.0, harmonic);
+    add_note(0, Rational(1, 3), harmonic);
+    add_note(Rational(1, 3), Rational(2, 3), harmonic - note_offset);
+    add_note(Rational(2, 3), 1, harmonic);
   } else {
-    add_note(0.0, 0.25, harmonic + note_offset);
+    add_note(0, Rational(1, 4), harmonic + note_offset);
   }
   if (beat % 2 == 0) {
-    add_note(0.0, 0.125, harmonic - note_offset);
-    add_note(0.5, 0.55, harmonic - 2 * note_offset);
+    add_note(0, Rational(1, 8), harmonic - note_offset);
+    add_note(Rational(1, 2), Rational(55, 100), harmonic - 2 * note_offset);
   }
   if (beat + 1 == beat_count && bar % 2 == 1) {
-    add_note(0.25, 0.375, harmonic + 2 * note_offset);
-    add_note(0.75, 0.875, harmonic - 2 * note_offset);
-    add_note(0.5, 0.75, harmonic + 2 * note_offset);
+    add_note(Rational(1, 4), Rational(3, 8), harmonic + 2 * note_offset);
+    add_note(Rational(3, 4), Rational(7, 8), harmonic - 2 * note_offset);
+    add_note(Rational(1, 2), Rational(3, 4), harmonic + 2 * note_offset);
   }
 }
 
 void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument& instrument,
                   Performer& performer) {
-  const auto get_beat = [](int step) {
-    return barely::GetPosition(step, barely::kSixteenthNotesPerBeat);
-  };
-  const auto add_note = [&](double begin_position, double end_position, double pitch,
+  const auto get_beat = [](int step) { return Rational(step, barely::kSixteenthNotesPerBeat); };
+  const auto add_note = [&](Rational begin_position, Rational end_position, double pitch,
                             double intensity) {
     ScheduleNote(begin_position, end_position - begin_position, pitch, intensity, instrument,
                  performer);
@@ -149,14 +148,14 @@ void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument&
 
   // Kick.
   if (beat % 2 == 0) {
-    add_note(get_beat(0), get_beat(2), barely::kPitchKick, 1.0);
+    add_note(get_beat(0), get_beat(2), barely::kPitchKick, 1);
     if (bar % 2 == 1 && beat == 0) {
-      add_note(get_beat(2), get_beat(4), barely::kPitchKick, 1.0);
+      add_note(get_beat(2), get_beat(4), barely::kPitchKick, 1);
     }
   }
   // Snare.
   if (beat % 2 == 1) {
-    add_note(get_beat(0), get_beat(2), barely::kPitchSnare, 1.0);
+    add_note(get_beat(0), get_beat(2), barely::kPitchSnare, 1);
   }
   if (beat + 1 == beat_count) {
     add_note(get_beat(2), get_beat(4), barely::kPitchSnare, 0.75);
@@ -192,7 +191,7 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
 
   // Note on callback.
@@ -213,7 +212,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain, double attack,
                                              double release) {
-    instruments.push_back(musician.CreateInstrument<SynthInstrument>(kFrameRate));
+    instruments.push_back(musician.CreateInstrument<SynthInstrument>());
     auto& instrument = instruments.back();
     instrument.SetControl(SynthInstrument::Control::kGain, gain);
     instrument.SetControl(SynthInstrument::Control::kOscillatorType, type);
@@ -254,7 +253,7 @@ int main(int /*argc*/, char* argv[]) {
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.push_back(musician.CreateInstrument<PercussionInstrument>(kFrameRate));
+  instruments.push_back(musician.CreateInstrument<PercussionInstrument>());
   auto& percussion = instruments.back();
   percussion.SetControl(PercussionInstrument::Control::kGain, 0.25);
   set_note_callbacks_fn(instruments.size(), percussion);
@@ -354,11 +353,12 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        musician.SetTempo(random.DrawUniform(0.5, 0.75) * musician.GetTempo());
+        musician.SetTempo(static_cast<int>(random.DrawUniform(0.5, 0.75) * musician.GetTempo()));
         ConsoleLog() << "Tempo changed to " << musician.GetTempo();
         break;
       case '2':
-        musician.SetTempo(random.DrawUniform(1.5, 2.0) * musician.GetTempo());
+        musician.SetTempo(std::min(
+            kFrameRate / 2, static_cast<int>(random.DrawUniform(1.5, 2.0) * musician.GetTempo())));
         ConsoleLog() << "Tempo changed to " << musician.GetTempo();
         break;
       case 'R':

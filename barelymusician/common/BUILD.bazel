@@ -20,12 +20,6 @@ cc_library(
     name = "random",
     srcs = ["random.cpp"],
     hdrs = ["random.h"],
-)
-
-cc_library(
-    name = "seconds",
-    srcs = ["seconds.cpp"],
-    hdrs = ["seconds.h"],
     deps = [
         ":rational",
         "//barelymusician:barelymusician_headeronly",
@@ -55,17 +49,6 @@ cc_test(
     srcs = ["rational_test.cpp"],
     deps = [
         ":rational",
-        "//barelymusician:barelymusician_headeronly",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "seconds_test",
-    srcs = ["seconds_test.cpp"],
-    deps = [
-        ":rational",
-        ":seconds",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],

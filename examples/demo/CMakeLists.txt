@@ -5,7 +5,6 @@ add_executable(
 target_link_libraries(
   barely_examples_arpeggiator_demo
   barelymusician
-  barely_rational
   barely_arpeggiator
   barely_pitch
   barely_oscillator
@@ -38,7 +37,6 @@ add_executable(
 target_link_libraries(
   barely_examples_metronome_demo
   barelymusician
-  barely_rational
   barely_metronome
   barely_pitch
   barely_oscillator
@@ -99,7 +97,6 @@ add_executable(
 target_link_libraries(
   barely_examples_repeater_demo
   barelymusician
-  barely_rational
   barely_repeater
   barely_pitch
   barely_oscillator

@@ -9,6 +9,7 @@ cc_library(
     deps = [
         "//barelymusician",
         "//barelymusician/common:random",
+        "//barelymusician/common:rational",
     ],
 )
 
@@ -28,5 +29,6 @@ cc_library(
     deps = [
         "//barelymusician",
         "//barelymusician/common:random",
+        "//barelymusician/common:rational",
     ],
 )

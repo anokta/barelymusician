@@ -57,7 +57,7 @@ BARELY_EXPORT bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpe
 /// @param gate_ratio Gate ratio.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
-                                                  double gate_ratio);
+                                                  BarelyRational gate_ratio);
 
 /// Sets the instrument of an arpeggiator.
 ///
@@ -84,7 +84,8 @@ BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiat
 /// @param arpeggiator Arpeggiator handle.
 /// @param rate Rate in notes per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate);
+BARELY_EXPORT bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator,
+                                             BarelyRational rate);
 
 /// Sets the style of an arpeggiator.
 ///
@@ -148,7 +149,7 @@ class Arpeggiator {
   /// Sets the gate ratio.
   ///
   /// @param gate Gate ratio.
-  void SetGateRatio(double gate_ratio) noexcept;
+  void SetGateRatio(Rational gate_ratio) noexcept;
 
   /// Sets the instrument.
   void SetInstrument(Instrument* instrument) noexcept;
@@ -168,7 +169,7 @@ class Arpeggiator {
   /// Sets the rate.
   ///
   /// @param rate Rate in notes per beat.
-  void SetRate(double rate) noexcept;
+  void SetRate(Rational rate) noexcept;
 
   /// Sets the style.
   ///
@@ -199,7 +200,7 @@ class Arpeggiator {
   std::vector<double> pitches_;
 
   // Gate ratio.
-  double gate_ratio_ = 1.0;
+  Rational gate_ratio_ = 1;
 
   // Style.
   ArpeggiatorStyle style_ = ArpeggiatorStyle::kUp;

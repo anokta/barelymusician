@@ -5,6 +5,7 @@
 #include <optional>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 
 // Repeater.
 struct BarelyRepeater : public barely::Repeater {
@@ -87,7 +88,7 @@ bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
   return true;
 }
 
-bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate) {
+bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, BarelyRational rate) {
   if (!repeater) return false;
 
   repeater->SetRate(rate);
@@ -153,8 +154,8 @@ void Repeater::SetInstrument(Instrument* instrument) noexcept {
   instrument_ = instrument;
 }
 
-void Repeater::SetRate(double rate) noexcept {
-  const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
+void Repeater::SetRate(Rational rate) noexcept {
+  const Rational length = (rate > 0) ? 1 / rate : 0;
   performer_.SetLoopLength(length);
 }
 
@@ -175,7 +176,7 @@ void Repeater::Stop() noexcept {
     return;
   }
   performer_.Stop();
-  performer_.SetPosition(0.0);
+  performer_.SetPosition(0);
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
@@ -206,7 +207,7 @@ bool Repeater::Update() noexcept {
 Repeater::Repeater(Musician& musician, int process_order) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
+  performer_.SetLoopLength(1);
   task_ = performer_.CreateTask(
       [this, process_order]() noexcept {
         if (pitches_.empty() || !Update() || instrument_ == nullptr) {
@@ -219,10 +220,9 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
         const double pitch = *pitches_[index_].first + pitch_shift_;
         instrument_->SetNoteOn(pitch);
         performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                                      static_cast<double>(length) * performer_.GetLoopLength(),
-                                      process_order);
+                                      length * performer_.GetLoopLength(), process_order);
       },
-      0.0, process_order);
+      0, process_order);
 }
 
 }  // namespace barely

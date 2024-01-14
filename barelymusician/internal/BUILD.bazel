@@ -9,6 +9,7 @@ cc_library(
     deps = [
         ":event",
         "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
     ],
 )
 
@@ -41,7 +42,6 @@ cc_library(
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:rational",
-        "//barelymusician/common:seconds",
     ],
 )
 
@@ -59,8 +59,6 @@ cc_library(
     hdrs = ["message_queue.h"],
     deps = [
         ":message",
-        "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:rational",
     ],
 )
 
@@ -74,7 +72,6 @@ cc_library(
         ":performer",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:rational",
-        "//barelymusician/common:seconds",
     ],
 )
 
@@ -95,6 +92,7 @@ cc_library(
     deps = [
         ":task",
         "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
     ],
 )
 
@@ -155,8 +153,6 @@ cc_test(
     deps = [
         ":message",
         ":message_queue",
-        "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:rational",
         "@googletest//:gtest_main",
     ],
 )
@@ -170,6 +166,7 @@ cc_test(
         ":musician",
         ":performer",
         "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
         "@googletest//:gtest_main",
     ],
 )
@@ -199,6 +196,7 @@ cc_test(
         ":performer",
         ":task",
         "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
         "@googletest//:gtest_main",
     ],
 )
@@ -209,6 +207,7 @@ cc_test(
     deps = [
         ":task",
         "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
         "@googletest//:gtest_main",
     ],
 )

@@ -1,6 +1,7 @@
 #include "barelymusician/internal/task.h"
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {
@@ -28,20 +29,20 @@ TEST(TaskTest, Process) {
   EXPECT_EQ(task_process_count, 0);
 
   {
-    Task task(definition, 1.0, 2, &task_process_count);
+    Task task(definition, 1, 2, &task_process_count);
 
     EXPECT_EQ(task_create_count, 1);
     EXPECT_EQ(task_destroy_count, 0);
     EXPECT_EQ(task_process_count, 0);
 
-    EXPECT_DOUBLE_EQ(task.GetPosition(), 1.0);
-    EXPECT_DOUBLE_EQ(task.GetProcessOrder(), 2);
+    EXPECT_EQ(task.GetPosition(), 1);
+    EXPECT_EQ(task.GetProcessOrder(), 2);
 
-    task.SetPosition(-1.0);
-    EXPECT_DOUBLE_EQ(task.GetPosition(), -1.0);
+    task.SetPosition(-1);
+    EXPECT_EQ(task.GetPosition(), -1);
 
     task.SetProcessOrder(10);
-    EXPECT_DOUBLE_EQ(task.GetProcessOrder(), 10);
+    EXPECT_EQ(task.GetProcessOrder(), 10);
 
     for (int i = 1; i <= 5; ++i) {
       task.Process();

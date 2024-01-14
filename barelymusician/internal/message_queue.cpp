@@ -1,14 +1,13 @@
 #include "barelymusician/internal/message_queue.h"
 
+#include <cstdint>
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/message.h"
 
 namespace barely::internal {
 
-bool MessageQueue::Add(Rational timestamp, Message message) noexcept {
+bool MessageQueue::Add(std::int64_t timestamp, Message message) noexcept {
   const int index = write_index_;
   const int next_index = (index + 1) % kMaxMessageCount;
   if (next_index == read_index_) {
@@ -19,7 +18,7 @@ bool MessageQueue::Add(Rational timestamp, Message message) noexcept {
   return true;
 }
 
-std::pair<Rational, Message>* MessageQueue::GetNext(Rational end_timestamp) noexcept {
+std::pair<std::int64_t, Message>* MessageQueue::GetNext(std::int64_t end_timestamp) noexcept {
   const int index = read_index_;
   if (index == write_index_ || messages_[index].first >= end_timestamp) {
     return nullptr;

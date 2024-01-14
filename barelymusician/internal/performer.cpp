@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <iterator>
 #include <limits>
 #include <optional>
@@ -10,6 +9,7 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/task.h"
 
 namespace barely::internal {
@@ -23,13 +23,13 @@ void Performer::AddTask(Task& task) noexcept {
 
 void Performer::CancelAllOneOffTasks() noexcept { one_off_tasks_.clear(); }
 
-std::optional<std::pair<double, int>> Performer::GetDurationToNextTask() const noexcept {
+std::optional<std::pair<Rational, int>> Performer::GetDurationToNextTask() const noexcept {
   if (!is_playing_) {
     return std::nullopt;
   }
 
   // Check recurring tasks.
-  std::optional<std::pair<double, int>> next_task_key = std::nullopt;
+  std::optional<std::pair<Rational, int>> next_task_key = std::nullopt;
   if (const auto next_recurring_task = GetNextRecurringTask();
       next_recurring_task != recurring_tasks_.end()) {
     next_task_key = next_recurring_task->first;
@@ -37,7 +37,7 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask() const n
                         (last_processed_recurring_task_it_ &&
                          *next_recurring_task <= **last_processed_recurring_task_it_))) {
       // Loop around.
-      if (loop_length_ > 0.0) {
+      if (loop_length_ > 0) {
         next_task_key->first += loop_length_;
       } else {
         next_task_key = std::nullopt;
@@ -57,11 +57,11 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask() const n
   return std::nullopt;
 }
 
-double Performer::GetLoopBeginPosition() const noexcept { return loop_begin_position_; }
+Rational Performer::GetLoopBeginPosition() const noexcept { return loop_begin_position_; }
 
-double Performer::GetLoopLength() const noexcept { return loop_length_; }
+Rational Performer::GetLoopLength() const noexcept { return loop_length_; }
 
-double Performer::GetPosition() const noexcept { return position_; }
+Rational Performer::GetPosition() const noexcept { return position_; }
 
 bool Performer::IsLooping() const noexcept { return is_looping_; }
 
@@ -99,7 +99,7 @@ void Performer::RemoveTask(Task& task) noexcept {
   }
 }
 
-void Performer::ScheduleOneOffTask(TaskDefinition definition, double position, int process_order,
+void Performer::ScheduleOneOffTask(TaskDefinition definition, Rational position, int process_order,
                                    void* user_data) noexcept {
   if (position < position_) {
     return;
@@ -108,27 +108,27 @@ void Performer::ScheduleOneOffTask(TaskDefinition definition, double position, i
                          Task(definition, position, process_order, user_data));
 }
 
-void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
+void Performer::SetLoopBeginPosition(Rational loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) {
     return;
   }
   loop_begin_position_ = loop_begin_position;
   if (is_looping_ && position_ > loop_begin_position_) {
-    if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
+    if (loop_length_ > 0 && position_ > loop_begin_position_ + loop_length_) {
       last_processed_recurring_task_it_ = std::nullopt;
     }
     position_ = LoopAround(position_);
   }
 }
 
-void Performer::SetLoopLength(double loop_length) noexcept {
-  loop_length = std::max(loop_length, 0.0);
+void Performer::SetLoopLength(Rational loop_length) noexcept {
+  loop_length = std::max(loop_length, Rational(0));
   if (loop_length_ == loop_length) {
     return;
   }
   loop_length_ = loop_length;
   if (is_looping_ && position_ > loop_begin_position_) {
-    if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
+    if (loop_length_ > 0 && position_ > loop_begin_position_ + loop_length_) {
       last_processed_recurring_task_it_ = std::nullopt;
     }
     position_ = LoopAround(position_);
@@ -141,7 +141,7 @@ void Performer::SetLooping(bool is_looping) noexcept {
   }
   is_looping_ = is_looping;
   if (is_looping_ && position_ > loop_begin_position_) {
-    if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
+    if (loop_length_ > 0 && position_ > loop_begin_position_ + loop_length_) {
       last_processed_recurring_task_it_ = std::nullopt;
     }
     position_ = LoopAround(position_);
@@ -149,7 +149,7 @@ void Performer::SetLooping(bool is_looping) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Performer::SetPosition(double position) noexcept {
+void Performer::SetPosition(Rational position) noexcept {
   last_processed_recurring_task_it_ = std::nullopt;
   if (position_ == position) {
     return;
@@ -172,7 +172,7 @@ void Performer::SetPosition(double position) noexcept {
   }
 }
 
-void Performer::SetTaskPosition(Task& task, double position) noexcept {
+void Performer::SetTaskPosition(Task& task, Rational position) noexcept {
   if (task.GetPosition() != position) {
     if (last_processed_recurring_task_it_ &&
         &task == (*last_processed_recurring_task_it_)->second) {
@@ -206,14 +206,14 @@ void Performer::Stop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Performer::Update(double duration) noexcept {
+void Performer::Update(Rational duration) noexcept {
   if (!is_playing_) {
     return;
   }
-  assert(duration >= 0.0 &&
+  assert(duration >= 0 &&
          // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
          (!GetDurationToNextTask().has_value() || duration <= GetDurationToNextTask()->first));
-  if (const double next_position = position_ + duration; next_position > position_) {
+  if (const Rational next_position = position_ + duration; next_position > position_) {
     SetPosition(next_position);
   }
 }
@@ -233,10 +233,9 @@ std::set<Performer::RecurringTask>::const_iterator Performer::GetNextRecurringTa
   return next_it;
 }
 
-double Performer::LoopAround(double position) const noexcept {
-  return loop_length_ > 0.0
-             ? loop_begin_position_ + std::fmod(position - loop_begin_position_, loop_length_)
-             : loop_begin_position_;
+Rational Performer::LoopAround(Rational position) const noexcept {
+  return loop_length_ > 0 ? loop_begin_position_ + (position - loop_begin_position_) % loop_length_
+                          : loop_begin_position_;
 }
 
 void Performer::PrevLastProcessedRecurringTaskIt() noexcept {

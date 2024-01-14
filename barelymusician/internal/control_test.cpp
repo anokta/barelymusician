@@ -65,14 +65,14 @@ TEST(ControlTest, Update) {
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 0.0);
 
-  EXPECT_FALSE(control.Update(1.0));
+  EXPECT_FALSE(control.Update(1));
 
   // Set the slope.
   EXPECT_TRUE(control.Set(15.0, 1.0));
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 1.0);
 
-  EXPECT_TRUE(control.Update(1.0));
+  EXPECT_TRUE(control.Update(1));
   EXPECT_DOUBLE_EQ(control.GetValue(), 16.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 1.0);
 
@@ -81,16 +81,16 @@ TEST(ControlTest, Update) {
   EXPECT_DOUBLE_EQ(control.GetValue(), 16.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 2.0);
 
-  EXPECT_TRUE(control.Update(1.0));
+  EXPECT_TRUE(control.Update(1));
   EXPECT_DOUBLE_EQ(control.GetValue(), 18.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 2.0);
 
   // Verify that the control value is clamped at the maximum value.
-  EXPECT_TRUE(control.Update(10.0));
+  EXPECT_TRUE(control.Update(10));
   EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 2.0);
 
-  EXPECT_FALSE(control.Update(10.0));
+  EXPECT_FALSE(control.Update(10));
   EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 2.0);
 
@@ -99,7 +99,7 @@ TEST(ControlTest, Update) {
   EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), -5.0);
 
-  EXPECT_TRUE(control.Update(1.0));
+  EXPECT_TRUE(control.Update(1));
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), -5.0);
 
@@ -109,11 +109,11 @@ TEST(ControlTest, Update) {
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), -10.0);
 
   // Verify that the control value is clamped at the minimum value.
-  EXPECT_TRUE(control.Update(1.0));
+  EXPECT_TRUE(control.Update(1));
   EXPECT_DOUBLE_EQ(control.GetValue(), 10.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), -10.0);
 
-  EXPECT_FALSE(control.Update(10.0));
+  EXPECT_FALSE(control.Update(10));
   EXPECT_DOUBLE_EQ(control.GetValue(), 10.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), -10.0);
 
@@ -122,7 +122,7 @@ TEST(ControlTest, Update) {
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 0.0);
 
-  EXPECT_FALSE(control.Update(1.0));
+  EXPECT_FALSE(control.Update(1));
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 0.0);
 }

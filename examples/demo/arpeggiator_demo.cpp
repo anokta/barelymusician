@@ -2,13 +2,13 @@
 #include <array>
 #include <cctype>
 #include <chrono>
+#include <cstdint>
 #include <iomanip>
 #include <iterator>
 #include <optional>
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/components/arpeggiator.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -36,7 +36,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
-constexpr Rational kLookahead = Rational(1, 10);
+constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Arpeggiator settings.
 constexpr double kGain = 0.125;
@@ -45,9 +45,9 @@ constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.05;
 constexpr int kVoiceCount = 16;
 
-constexpr double kInitialGateRatio = 0.5;
-constexpr double kInitialRate = 4.0;
-constexpr double kInitialTempo = 100.0;
+constexpr Rational kInitialGateRatio = Rational(1, 2);
+constexpr Rational kInitialRate = 4;
+constexpr int kInitialTempo = 100;
 constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kRandom;
 
 // Note settings.
@@ -75,10 +75,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);

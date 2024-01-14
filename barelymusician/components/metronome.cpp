@@ -10,7 +10,7 @@ bool Metronome::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 void Metronome::Reset() noexcept {
   performer_.Stop();
-  performer_.SetPosition(0.0);
+  performer_.SetPosition(0);
   beat_ = 0;
 }
 
@@ -24,7 +24,7 @@ void Metronome::Stop() noexcept { performer_.Stop(); }
 Metronome::Metronome(Musician& musician, int process_order) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
+  performer_.SetLoopLength(1);
   task_ = performer_.CreateTask(
       [this]() noexcept {
         if (callback_) {
@@ -32,7 +32,7 @@ Metronome::Metronome(Musician& musician, int process_order) noexcept
         }
         ++beat_;
       },
-      0.0, process_order);
+      0, process_order);
 }
 
 }  // namespace barely

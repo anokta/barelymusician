@@ -26,21 +26,19 @@ For background about this project, see the original research paper
 ```cpp
 // Import the core engine.
 #include "barelymusician/barelymusician.h"
-// Import the rational number operators.
-#include "barelymusician/common/rational.h"
 // Import `barely::LowPassEffect`.
 #include "barelymusician/effects/low_pass_effect.h"
 // Import `barely::SynthInstrument`.
 #include "barelymusician/instruments/synth_instrument.h"
 
 // Create a new musician.
-barely::Musician musician;
+barely::Musician musician(/*frame_rate=*/48000);
 
 // Set the global tempo to 124 beats per minute.
-musician.SetTempo(/*tempo=*/124.0);
+musician.SetTempo(/*tempo=*/124);
 
 // Create a synth instrument.
-auto instrument = musician.CreateInstrument<barely::SynthInstrument>(/*frame_rate=*/48000);
+auto instrument = musician.CreateInstrument<barely::SynthInstrument>();
 
 // Set the synth instrument gain to 0.5.
 instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
@@ -65,15 +63,15 @@ auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
                   /*slope_per_beat=*/100.0);
 
-// Update the musician timestamp in seconds.
+// Update the musician Timestamp in frames.
 //
 // @note Timestamp updates must happen prior to processing of instruments with respective
 // timestamps. Otherwise, such `Process` calls will be *late* to receive any relevant state changes.
 // To compensate, `Update` should typically be called from a main thread update callback, with an
 // additional "lookahead", in order to avoid any potential thread synchronization issues that could
 // occur in real-time audio applications.
-const barely::Rational lookahead(1, 10);
-barely::Rational timestamp = 0;
+const auto lookahead = 480;
+auto timestamp = 0;
 musician.Update(timestamp + lookahead);
 
 // Process the next output samples of the synth instrument.

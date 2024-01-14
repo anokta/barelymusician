@@ -69,9 +69,9 @@ int main(void) {
   midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  Musician musician;
+  Musician musician(kFrameRate);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);

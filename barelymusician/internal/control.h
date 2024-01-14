@@ -51,7 +51,7 @@ class Control {
   ///
   /// @param duration Duration in beats.
   /// @return True if changed, false otherwise.
-  bool Update(double duration) noexcept;
+  bool Update(Rational duration) noexcept;
 
  private:
   // Clamps a given `value`.

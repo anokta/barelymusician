@@ -6,30 +6,18 @@
 
 namespace barely::internal {
 
-Task::Task(const TaskDefinition& definition, double position, int process_order,
+Task::Task(const TaskDefinition& definition, Rational position, int process_order,
            void* user_data) noexcept
     : Event<TaskDefinition>(definition, user_data),
       position_(position),
       process_order_(process_order) {}
 
-double Task::GetPosition() const noexcept { return position_; }
+Rational Task::GetPosition() const noexcept { return position_; }
 
 int Task::GetProcessOrder() const noexcept { return process_order_; }
 
-bool Task::SetPosition(double position) noexcept {
-  if (position != position_) {
-    position_ = position;
-    return true;
-  }
-  return false;
-}
+void Task::SetPosition(Rational position) noexcept { position_ = position; }
 
-bool Task::SetProcessOrder(int process_order) noexcept {
-  if (process_order != process_order_) {
-    process_order_ = process_order;
-    return true;
-  }
-  return false;
-}
+void Task::SetProcessOrder(int process_order) noexcept { process_order_ = process_order; }
 
 }  // namespace barely::internal

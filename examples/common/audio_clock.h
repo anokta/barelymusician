@@ -4,8 +4,6 @@
 #include <atomic>
 #include <cstdint>
 
-#include "barelymusician/barelymusician.h"
-
 namespace barely::examples {
 
 /// Thread-safe audio dsp clock.
@@ -18,8 +16,8 @@ class AudioClock {
 
   /// Returns the timestamp.
   ///
-  /// @return Timestamp in seconds.
-  Rational GetTimestamp() const noexcept;
+  /// @return Timestamp in frames.
+  std::int64_t GetTimestamp() const noexcept;
 
   /// Updates the clock.
   ///
@@ -30,8 +28,8 @@ class AudioClock {
   // Frame rate in hertz.
   const int frame_rate_;
 
-  // Monothonic tick in frames.
-  std::atomic<std::int64_t> tick_ = 0;
+  // Monothonic timestamp in frames.
+  std::atomic<std::int64_t> timestamp_ = 0;
 };
 
 }  // namespace barely::examples

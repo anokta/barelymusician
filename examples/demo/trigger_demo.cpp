@@ -1,4 +1,5 @@
 #include <chrono>
+#include <cstdint>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -30,7 +31,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
-constexpr Rational kLookahead = Rational(1, 20);
+constexpr std::int64_t kLookahead = kFrameRate / 20;
 
 // Instrument settings.
 constexpr double kGain = 0.1;
@@ -38,7 +39,7 @@ constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.1;
 
-constexpr double kInitialTempo = 120.0;
+constexpr int kInitialTempo = 120;
 
 }  // namespace
 
@@ -49,10 +50,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
@@ -61,12 +62,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
     ConsoleLog() << "Note{" << barely::MidiFromPitch(pitch) << "}";
   });
 
-  std::vector<std::pair<double, double>> triggers;
+  std::vector<std::pair<Rational, Rational>> triggers;
   std::vector<Task> tasks;
 
   auto performer = musician.CreatePerformer();
 
-  const auto play_note_fn = [&](int scale_index, double duration) {
+  const auto play_note_fn = [&](int scale_index, Rational duration) {
     const double pitch =
         barely::kPitchD3 + barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
     return [&instrument, &performer, duration, pitch]() {
@@ -78,29 +79,29 @@ int main(int /*argc*/, char* /*argv*/[]) {
   };
 
   // Trigger 1.
-  triggers.emplace_back(0.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(0, 1.0), 0.0));
+  triggers.emplace_back(0, 1);
+  tasks.push_back(performer.CreateTask(play_note_fn(0, 1), 0));
   // Trigger 2.
-  triggers.emplace_back(1.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(1, 1.0), 1.0));
+  triggers.emplace_back(1, 1);
+  tasks.push_back(performer.CreateTask(play_note_fn(1, 1), 1));
   // Trigger 3.
-  triggers.emplace_back(2.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(2, 1.0), 2.0));
+  triggers.emplace_back(2, 1);
+  tasks.push_back(performer.CreateTask(play_note_fn(2, 1), 2));
   // Trigger 4.
-  triggers.emplace_back(3.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(3, 0.66), 3.0));
-  tasks.push_back(performer.CreateTask(play_note_fn(4, 0.34), 3.66));
+  triggers.emplace_back(3, 1);
+  tasks.push_back(performer.CreateTask(play_note_fn(3, Rational(2, 3)), 3));
+  tasks.push_back(performer.CreateTask(play_note_fn(4, Rational(1, 3)), 3 + Rational(2, 3)));
   // Trigger 5.
-  triggers.emplace_back(4.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(5, 0.33), 4.0));
-  tasks.push_back(performer.CreateTask(play_note_fn(6, 0.33), 4.33));
-  tasks.push_back(performer.CreateTask(play_note_fn(7, 0.34), 4.66));
+  triggers.emplace_back(4, 1);
+  tasks.push_back(performer.CreateTask(play_note_fn(5, Rational(1, 3)), 4));
+  tasks.push_back(performer.CreateTask(play_note_fn(6, Rational(1, 3)), 4 + Rational(1, 3)));
+  tasks.push_back(performer.CreateTask(play_note_fn(7, Rational(1, 3)), 4 + Rational(2, 3)));
   // Trigger 6.
-  triggers.emplace_back(5.0, 2.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(8, 2.0), 5.0));
+  triggers.emplace_back(5, 2);
+  tasks.push_back(performer.CreateTask(play_note_fn(8, 2), 5));
 
   // Stopper.
-  auto stopper = performer.CreateTask([&performer]() { performer.Stop(); }, 0.0,
+  auto stopper = performer.CreateTask([&performer]() { performer.Stop(); }, 0,
                                       /*process_order=*/-1);
 
   // Audio process callback.

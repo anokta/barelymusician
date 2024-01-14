@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 
 namespace barely::internal {
 
@@ -40,10 +41,12 @@ bool Control::Set(double value, double slope_per_beat) noexcept {
   return false;
 }
 
-bool Control::Update(double duration) noexcept {
-  assert(duration > 0.0);
+bool Control::Update(Rational duration) noexcept {
+  assert(duration > 0);
   if (slope_per_beat_ != 0.0) {
-    if (const double value = Clamp(value_ + slope_per_beat_ * duration); value_ != value) {
+    // TODO(#107): Use `Rational` throughout.
+    if (const double value = Clamp(value_ + slope_per_beat_ * static_cast<double>(duration));
+        value_ != value) {
       value_ = value;
       return true;
     }

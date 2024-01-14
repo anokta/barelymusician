@@ -1,7 +1,5 @@
 #include "barelymusician/internal/message_queue.h"
 
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -27,9 +25,10 @@ TEST(MessageQueueTest, AddSingleMessage) {
   messages.Add(1, NoteOffMessage{5.0});
   EXPECT_THAT(messages.GetNext(0), IsNull());
   EXPECT_THAT(messages.GetNext(1), IsNull());
-  EXPECT_THAT(messages.GetNext(10),
-              AllOf(NotNull(), Pointee(Pair(Rational(1), VariantWith<NoteOffMessage>(Field(
-                                                             &NoteOffMessage::pitch, 5.0))))));
+  EXPECT_THAT(
+      messages.GetNext(10),
+      AllOf(NotNull(),
+            Pointee(Pair(1, VariantWith<NoteOffMessage>(Field(&NoteOffMessage::pitch, 5.0))))));
 
   // Message is already returned.
   EXPECT_THAT(messages.GetNext(10), IsNull());
@@ -46,9 +45,8 @@ TEST(MessageQueueTest, AddMultipleMessages) {
   for (int i = 0; i < 10; ++i) {
     EXPECT_THAT(
         messages.GetNext(10),
-        AllOf(NotNull(),
-              Pointee(Pair(Rational(i), VariantWith<NoteOffMessage>(Field(
-                                            &NoteOffMessage::pitch, static_cast<double>(i)))))));
+        AllOf(NotNull(), Pointee(Pair(i, VariantWith<NoteOffMessage>(Field(
+                                             &NoteOffMessage::pitch, static_cast<double>(i)))))));
   }
 
   // All messages are already returned.

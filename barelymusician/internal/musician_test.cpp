@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
 #include "gmock/gmock-matchers.h"
@@ -61,7 +62,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr double kPitch = -1.25;
   constexpr double kIntensity = 0.75;
 
-  Musician musician;
+  Musician musician(kFrameRate);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
@@ -121,7 +122,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   std::vector<double> note_off_pitches;
 
   {
-    Musician musician;
+    Musician musician(kFrameRate);
 
     // Create instruments with note off callback.
     std::vector<std::unique_ptr<Instrument>> instruments;
@@ -158,14 +159,14 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 TEST(MusicianTest, CreateDestroySinglePerformer) {
   constexpr int kProcessOrder = 0;
 
-  Musician musician;
+  Musician musician(kFrameRate);
 
   // Create a performer.
   Performer performer;
   musician.AddPerformer(performer);
 
   // Create a task definition.
-  double task_position = 0.0;
+  Rational task_position = 0;
   std::function<void()> process_callback = [&]() { task_position = performer.GetPosition(); };
   auto definition = TaskDefinition{
       [](void** state, void* user_data) { *state = user_data; },
@@ -174,29 +175,29 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   };
 
   // Schedule a task.
-  performer.ScheduleOneOffTask(definition, 1.0, kProcessOrder, &process_callback);
+  performer.ScheduleOneOffTask(definition, 1, kProcessOrder, &process_callback);
 
   // Start the performer with a tempo of one beat per second.
-  musician.SetTempo(60.0);
-  EXPECT_DOUBLE_EQ(musician.GetTempo(), 60.0);
+  musician.SetTempo(60);
+  EXPECT_EQ(musician.GetTempo(), 60);
 
   EXPECT_FALSE(performer.IsPlaying());
   performer.Start();
   EXPECT_TRUE(performer.IsPlaying());
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, kProcessOrder)));
-  musician.Update(1);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
-  EXPECT_DOUBLE_EQ(task_position, 0.0);
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(Rational(1), kProcessOrder)));
+  musician.Update(kFrameRate);
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(Rational(0), kProcessOrder)));
+  EXPECT_EQ(performer.GetPosition(), 1);
+  EXPECT_EQ(task_position, 0);
 
   // Update the timestamp past the task, which should be triggered now.
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
-  musician.Update(Rational(3, 2));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(Rational(0), kProcessOrder)));
+  musician.Update(kFrameRate * 3 / 2);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.5);
-  EXPECT_DOUBLE_EQ(task_position, 1.0);
+  EXPECT_EQ(performer.GetPosition(), Rational(3, 2));
+  EXPECT_EQ(task_position, 1);
 
   // Remove the performer.
   musician.RemovePerformer(performer);
@@ -204,17 +205,17 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
 
 // Tests that the musician sets its tempo as expected.
 TEST(MusicianTest, SetTempo) {
-  Musician musician;
-  EXPECT_DOUBLE_EQ(musician.GetTempo(), 120.0);
+  Musician musician(kFrameRate);
+  EXPECT_EQ(musician.GetTempo(), 120);
 
-  musician.SetTempo(200.0);
-  EXPECT_DOUBLE_EQ(musician.GetTempo(), 200.0);
+  musician.SetTempo(200);
+  EXPECT_EQ(musician.GetTempo(), 200);
 
-  musician.SetTempo(0.0);
-  EXPECT_DOUBLE_EQ(musician.GetTempo(), 0.0);
+  musician.SetTempo(0);
+  EXPECT_EQ(musician.GetTempo(), 0);
 
-  musician.SetTempo(-100.0);
-  EXPECT_DOUBLE_EQ(musician.GetTempo(), 0.0);
+  musician.SetTempo(-100);
+  EXPECT_EQ(musician.GetTempo(), 0);
 }
 
 }  // namespace

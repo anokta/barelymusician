@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -22,7 +23,7 @@ constexpr int kFrameRate = 8000;
 constexpr int kChannelCount = 1;
 constexpr int kFrameCount = 4;
 
-constexpr double kTempo = 60.0;
+constexpr int kTempo = 60;
 
 // Returns a test instrument definition that produces constant output per note.
 InstrumentDefinition GetTestDefinition() {
@@ -115,7 +116,7 @@ TEST(InstrumentTest, GetNoteControl) {
 TEST(InstrumentTest, PlaySingleNote) {
   constexpr double kPitch = 32.0;
   constexpr double kIntensity = 0.5;
-  constexpr Rational kTimestamp = 20;
+  constexpr std::int64_t kTimestamp = 20;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, kTimestamp);
   std::vector<double> buffer(kChannelCount * kFrameCount);
@@ -173,7 +174,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   // Start a new note per each frame in the buffer.
   for (int i = 0; i < kFrameCount; ++i) {
     instrument.SetNoteOn(static_cast<double>(i), kIntensity);
-    instrument.Update(i + 1);
+    instrument.Update(i + 1, 0);
     instrument.SetNoteOff(static_cast<double>(i));
   }
 

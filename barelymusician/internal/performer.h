@@ -27,22 +27,22 @@ class Performer {
   /// Returns the duration to next task.
   ///
   /// @return Optional pair of duration in beats and process order.
-  [[nodiscard]] std::optional<std::pair<double, int>> GetDurationToNextTask() const noexcept;
+  [[nodiscard]] std::optional<std::pair<Rational, int>> GetDurationToNextTask() const noexcept;
 
   /// Returns loop begin position.
   ///
   /// @return Loop begin position in beats.
-  [[nodiscard]] double GetLoopBeginPosition() const noexcept;
+  [[nodiscard]] Rational GetLoopBeginPosition() const noexcept;
 
   /// Returns loop length.
   ///
   /// @return Loop length in beats.
-  [[nodiscard]] double GetLoopLength() const noexcept;
+  [[nodiscard]] Rational GetLoopLength() const noexcept;
 
   /// Returns position.
   ///
   /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept;
+  [[nodiscard]] Rational GetPosition() const noexcept;
 
   /// Returns whether performer is looping or not.
   ///
@@ -68,18 +68,18 @@ class Performer {
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  void ScheduleOneOffTask(TaskDefinition definition, double position, int process_order,
+  void ScheduleOneOffTask(TaskDefinition definition, Rational position, int process_order,
                           void* user_data) noexcept;
 
   /// Sets loop begin position.
   ///
   /// @param loop_begin_position Loop begin position in beats.
-  void SetLoopBeginPosition(double loop_begin_position) noexcept;
+  void SetLoopBeginPosition(Rational loop_begin_position) noexcept;
 
   /// Sets loop length.
   ///
   /// @param loop_length Loop length in beats.
-  void SetLoopLength(double loop_length) noexcept;
+  void SetLoopLength(Rational loop_length) noexcept;
 
   /// Sets whether performer should be looping or not.
   ///
@@ -90,13 +90,13 @@ class Performer {
   ///
   /// @param position Position in beats.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetPosition(double position) noexcept;
+  void SetPosition(Rational position) noexcept;
 
   /// Sets task position.
   ///
   /// @param task Task.
   /// @param position Task position.
-  void SetTaskPosition(Task& task, double position) noexcept;
+  void SetTaskPosition(Task& task, Rational position) noexcept;
 
   /// Sets task process order.
   ///
@@ -114,17 +114,17 @@ class Performer {
   ///
   /// @param duration Duration in beats.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(double duration) noexcept;
+  void Update(Rational duration) noexcept;
 
  private:
   // Recurring task alias.
-  using RecurringTask = ::std::pair<std::pair<double, int>, Task*>;
+  using RecurringTask = ::std::pair<std::pair<Rational, int>, Task*>;
 
   // Returns an iterator to the next recurring task to process.
   [[nodiscard]] std::set<RecurringTask>::const_iterator GetNextRecurringTask() const noexcept;
 
   // Loops around a given `position`.
-  [[nodiscard]] double LoopAround(double position) const noexcept;
+  [[nodiscard]] Rational LoopAround(Rational position) const noexcept;
 
   // Decremments the last processed recurring task iterator to its predecessor.
   void PrevLastProcessedRecurringTaskIt() noexcept;
@@ -136,16 +136,16 @@ class Performer {
   bool is_playing_ = false;
 
   // Loop begin position in beats.
-  double loop_begin_position_ = 0.0;
+  Rational loop_begin_position_ = 0;
 
   // Loop length in beats.
-  double loop_length_ = 1.0;
+  Rational loop_length_ = 1;
 
   // Position in beats.
-  double position_ = 0.0;
+  Rational position_ = 0;
 
   // Sorted map of tasks by task position-identifier pairs.
-  std::multimap<std::pair<double, int>, Task> one_off_tasks_;
+  std::multimap<std::pair<Rational, int>, Task> one_off_tasks_;
   std::set<RecurringTask> recurring_tasks_;
 
   // Last processed recurring task iterator.

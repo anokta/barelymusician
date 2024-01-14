@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -9,7 +10,6 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/rational.h"
-#include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/message.h"
@@ -17,8 +17,8 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
-                       Rational initial_timestamp) noexcept
+Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate, int initial_tempo,
+                       std::int64_t initial_timestamp) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
       set_control_callback_(definition.set_control_callback),
@@ -35,7 +35,7 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate, d
       tempo_(initial_tempo),
       timestamp_(initial_timestamp) {
   assert(frame_rate > 0);
-  assert(initial_tempo >= 0.0);
+  assert(initial_tempo >= 0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
@@ -85,18 +85,18 @@ bool Instrument::IsNoteOn(double pitch) const noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
-                         Rational timestamp) noexcept {
+                         std::int64_t timestamp) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {
     return false;
   }
   int frame = 0;
   // Process *all* messages before the end timestamp.
-  const Rational end_timestamp = timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
+  const std::int64_t end_timestamp = timestamp + output_frame_count;
   auto effect_ptrs = effect_ptrs_.GetScopedView();
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
-    if (const int message_frame = FramesFromSeconds(frame_rate_, message->first - timestamp);
+    if (const int message_frame = static_cast<int>(message->first - timestamp);
         frame < message_frame) {
       const int sample_offset = frame * output_channel_count;
       const int frame_count = message_frame - frame;
@@ -351,7 +351,7 @@ void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition, void* user_dat
   note_on_event_ = {definition, user_data};
 }
 
-void Instrument::SetTempo(double tempo) noexcept {
+void Instrument::SetTempo(int tempo) noexcept {
   assert(tempo_ != tempo);
   tempo_ = tempo;
   // Update controls.
@@ -385,13 +385,11 @@ void Instrument::SetTempo(double tempo) noexcept {
   }
 }
 
-void Instrument::Update(Rational timestamp) noexcept {
+void Instrument::Update(std::int64_t timestamp, Rational duration) noexcept {
   if (timestamp_ >= timestamp) {
     return;
   }
-  if (tempo_ > 0.0) {
-    // TODO(#107): Use `Rational` throughout.
-    const double duration = BeatsFromSeconds(tempo_, static_cast<double>(timestamp - timestamp_));
+  if (duration > 0) {
     // Update controls.
     for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
       if (auto& control = controls_[index]; control.Update(duration)) {
@@ -420,8 +418,9 @@ void Instrument::Update(Rational timestamp) noexcept {
 }
 
 double Instrument::GetSlopePerFrame(double slope_per_beat) const noexcept {
-  return tempo_ > 0.0 ? BeatsFromSeconds(tempo_, slope_per_beat) / static_cast<double>(frame_rate_)
-                      : 0.0;
+  // TODO(#107): Use `Rational` throughout.
+  const Rational slope(static_cast<std::int64_t>(192000.0 * slope_per_beat), 192000);
+  return tempo_ > 0 ? static_cast<double>(60 * tempo_ * slope / frame_rate_) : 0.0;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

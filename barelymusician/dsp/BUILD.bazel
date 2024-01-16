@@ -12,6 +12,9 @@ cc_library(
     name = "dsp_utils",
     srcs = ["dsp_utils.cpp"],
     hdrs = ["dsp_utils.h"],
+    deps = [
+        "//barelymusician:barelymusician_headeronly",
+    ],
 )
 
 cc_library(
@@ -71,6 +74,10 @@ cc_library(
 cc_library(
     name = "polyphonic_voice",
     hdrs = ["polyphonic_voice.h"],
+    deps = [
+        "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:rational",
+    ],
 )
 
 cc_library(
@@ -147,6 +154,7 @@ cc_test(
     deps = [
         ":polyphonic_voice",
         ":voice",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )

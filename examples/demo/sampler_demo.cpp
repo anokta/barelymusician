@@ -3,7 +3,6 @@
 #include <cassert>
 #include <cctype>
 #include <chrono>
-#include <iomanip>
 #include <iterator>
 #include <optional>
 #include <string>
@@ -11,6 +10,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/effects/low_pass_effect.h"
 #include "barelymusician/instruments/sampler_instrument.h"
@@ -24,6 +24,7 @@ namespace {
 
 using ::barely::LowPassEffect;
 using ::barely::Musician;
+using ::barely::Rational;
 using ::barely::SamplerInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -37,21 +38,21 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
 // Instrument settings.
-constexpr double kGain = 0.25;
+constexpr Rational kGain = Rational(1, 4);
 constexpr bool kLoop = true;
-constexpr double kAttack = 0.0125;
-constexpr double kRelease = 0.125;
+constexpr Rational kAttack = Rational(1, 80);
+constexpr Rational kRelease = Rational(1, 8);
 constexpr int kVoiceCount = 16;
 
 constexpr char kSamplePath[] = "audio/sample.wav";
 
-constexpr double kLowPassCutoffFrequency = 2000;
+constexpr Rational kLowPassCutoffFrequency = 2000;
 
 // Note settings.
-constexpr double kRootPitch = barely::kPitchC3;
+constexpr Rational kRootPitch = barely::kPitchC4;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kMaxOffsetOctaves = 3.0;
+constexpr int kMaxOffsetOctaves = 3;
 
 // Returns the sample data from a given `file_path`.
 std::vector<double> GetSampleData(const std::string& file_path) {
@@ -70,12 +71,12 @@ std::vector<double> GetSampleData(const std::string& file_path) {
 }
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(const InputManager::Key& key) {
+std::optional<Rational> PitchFromKey(const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  const double distance = static_cast<double>(std::distance(kOctaveKeys.begin(), it));
+  const Rational distance = std::distance(kOctaveKeys.begin(), it);
   return kRootPitch + distance / barely::kSemitoneCount;
 }
 
@@ -101,11 +102,11 @@ int main(int /*argc*/, char* argv[]) {
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
-  instrument.SetNoteOnEvent([](double pitch, double intensity) {
+  instrument.SetNoteOnEvent([](Rational pitch, Rational intensity) {
     ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", " << intensity << ")";
   });
   instrument.SetNoteOffEvent(
-      [](double pitch) { ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") "; });
+      [](Rational pitch) { ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
@@ -113,8 +114,8 @@ int main(int /*argc*/, char* argv[]) {
   });
 
   // Key down callback.
-  double intensity = 1.0;
-  double offset_octaves = 0.0;
+  Rational intensity = 1;
+  int offset_octaves = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -139,11 +140,11 @@ int main(int /*argc*/, char* argv[]) {
     if (upper_key == 'C' || upper_key == 'V') {
       // Change intensity.
       if (upper_key == 'C') {
-        intensity -= 0.25;
+        intensity -= Rational(1, 4);
       } else {
-        intensity += 0.25;
+        intensity += Rational(1, 4);
       }
-      intensity = std::clamp(intensity, 0.0, 1.0);
+      intensity = std::clamp(intensity, Rational(0), Rational(1));
       ConsoleLog() << "Note intensity set to " << intensity;
       return;
     }

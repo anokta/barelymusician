@@ -28,10 +28,10 @@ constexpr int kTempo = 60;
 // Returns a test instrument definition that produces constant output per note.
 InstrumentDefinition GetTestDefinition() {
   static const std::array<ControlDefinition, 1> control_definitions = {
-      ControlDefinition{15.0, 10.0, 20.0},
+      ControlDefinition{15, 10, 20},
   };
   static const std::array<ControlDefinition, 1> note_control_definitions = {
-      ControlDefinition{1.0, 0.0, 1.0},
+      ControlDefinition{1, 0, 1},
   };
   return InstrumentDefinition(
       [](void** state, int /*frame_rate*/) { *state = static_cast<void*>(new double{0.0}); },
@@ -41,15 +41,15 @@ InstrumentDefinition GetTestDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int32_t index, double value, double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(index + 1) * value;
+      [](void** state, int32_t index, BarelyRational value, BarelyRational /*slope_per_frame*/) {
+        *reinterpret_cast<double*>(*state) = static_cast<double>((index + 1) * value);
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {},
-      [](void** /*state*/, double /*pitch*/, int32_t /*index*/, double /*value*/,
-         double /*slope_per_frame*/) {},
-      [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
-      [](void** state, double pitch, double intensity) {
-        *reinterpret_cast<double*>(*state) = pitch * intensity;
+      [](void** /*state*/, BarelyRational /*pitch*/, int32_t /*index*/, BarelyRational /*value*/,
+         BarelyRational /*slope_per_frame*/) {},
+      [](void** state, BarelyRational /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
+      [](void** state, BarelyRational pitch, BarelyRational intensity) {
+        *reinterpret_cast<double*>(*state) = static_cast<double>(pitch * intensity);
       },
       control_definitions, note_control_definitions);
 }
@@ -57,30 +57,30 @@ InstrumentDefinition GetTestDefinition() {
 // Tests that the instrument returns a control value as expected.
 TEST(InstrumentTest, GetControl) {
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0);
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, Rational(15))));
 
-  EXPECT_TRUE(instrument.SetControl(0, 20.0, 0.0));
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 20.0)));
+  EXPECT_TRUE(instrument.SetControl(0, 20, 0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, Rational(20))));
 
   EXPECT_TRUE(instrument.ResetControl(0));
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, Rational(15))));
 
-  EXPECT_TRUE(instrument.SetControl(0, 50.0, 0.0));
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 20.0)));
+  EXPECT_TRUE(instrument.SetControl(0, 50, 0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, Rational(20))));
 
   instrument.ResetAllControls();
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, Rational(15))));
 
   // Control does not exist.
   EXPECT_THAT(instrument.GetControl(1), IsNull());
-  EXPECT_FALSE(instrument.SetControl(1, 2.0, 0.0));
+  EXPECT_FALSE(instrument.SetControl(1, 2, 0));
   EXPECT_FALSE(instrument.ResetControl(1));
 }
 
 // Tests that the instrument returns a note control value as expected.
 TEST(InstrumentTest, GetNoteControl) {
-  constexpr double kPitch = 1.0;
-  constexpr double kIntensity = 1.0;
+  constexpr Rational kPitch = 10;
+  constexpr Rational kIntensity = 1;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
@@ -88,23 +88,28 @@ TEST(InstrumentTest, GetNoteControl) {
 
   instrument.SetNoteOn(kPitch, kIntensity);
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0),
+              Pointee(Property(&Control::GetValue, Rational(1))));
 
-  EXPECT_TRUE(instrument.SetNoteControl(kPitch, 0, 0.25, 0.0));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 0.25)));
+  EXPECT_TRUE(instrument.SetNoteControl(kPitch, 0, Rational(1, 4), 0));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0),
+              Pointee(Property(&Control::GetValue, Rational(1, 4))));
 
   EXPECT_TRUE(instrument.ResetNoteControl(kPitch, 0));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0),
+              Pointee(Property(&Control::GetValue, Rational(1))));
 
-  EXPECT_TRUE(instrument.SetNoteControl(kPitch, 0, -10.0, 0.0));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 0.0)));
+  EXPECT_TRUE(instrument.SetNoteControl(kPitch, 0, -10, 0));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0),
+              Pointee(Property(&Control::GetValue, Rational(0))));
 
   instrument.ResetAllNoteControls(kPitch);
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0),
+              Pointee(Property(&Control::GetValue, Rational(1))));
 
   // Note control does not exist.
   EXPECT_THAT(instrument.GetNoteControl(kPitch, 1), IsNull());
-  EXPECT_FALSE(instrument.SetNoteControl(kPitch, 1, 0.25, 0.0));
+  EXPECT_FALSE(instrument.SetNoteControl(kPitch, 1, Rational(1, 4), 0));
   EXPECT_FALSE(instrument.ResetNoteControl(kPitch, 1));
 
   instrument.SetNoteOff(kPitch);
@@ -114,8 +119,8 @@ TEST(InstrumentTest, GetNoteControl) {
 
 // Tests that the instrument plays a single note as expected.
 TEST(InstrumentTest, PlaySingleNote) {
-  constexpr double kPitch = 32.0;
-  constexpr double kIntensity = 0.5;
+  constexpr Rational kPitch = 32;
+  constexpr Rational kIntensity = Rational(1, 2);
   constexpr std::int64_t kTimestamp = 20;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, kTimestamp);
@@ -138,7 +143,8 @@ TEST(InstrumentTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch * kIntensity);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
+                       static_cast<double>(kPitch * kIntensity));
     }
   }
 
@@ -157,7 +163,7 @@ TEST(InstrumentTest, PlaySingleNote) {
 
 // Tests that the instrument plays multiple notes as expected.
 TEST(InstrumentTest, PlayMultipleNotes) {
-  constexpr double kIntensity = 1.0;
+  constexpr Rational kIntensity = 1;
 
   Instrument instrument(GetTestDefinition(), 1, kTempo, 0);
   std::vector<double> buffer(kChannelCount * kFrameCount);
@@ -173,9 +179,9 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   // Start a new note per each frame in the buffer.
   for (int i = 0; i < kFrameCount; ++i) {
-    instrument.SetNoteOn(static_cast<double>(i), kIntensity);
+    instrument.SetNoteOn(i, kIntensity);
     instrument.Update(i + 1, 0);
-    instrument.SetNoteOff(static_cast<double>(i));
+    instrument.SetNoteOff(i);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -183,7 +189,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
-                       static_cast<double>(frame) * kIntensity);
+                       static_cast<double>(frame * kIntensity));
     }
   }
 
@@ -198,82 +204,82 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
 // Tests that the instrument triggers its note callbacks as expected.
 TEST(InstrumentTest, SetNoteCallbacks) {
-  constexpr double kPitch = 4.0;
-  constexpr double kIntensity = 0.25;
+  constexpr Rational kPitch = 4;
+  constexpr Rational kIntensity = Rational(1, 4);
 
   Instrument instrument(GetTestDefinition(), 1, kTempo, 0);
 
   // Trigger the note on callback.
-  double note_on_pitch = 0.0;
-  double note_on_intensity = 0.0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch, double intensity) {
+  Rational note_on_pitch = 0;
+  Rational note_on_intensity = 0;
+  NoteOnEventDefinition::Callback note_on_callback = [&](Rational pitch, Rational intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
   instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
                             static_cast<void*>(&note_on_callback));
-  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
+  EXPECT_EQ(note_on_pitch, 0);
+  EXPECT_EQ(note_on_intensity, 0);
 
   instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
+  EXPECT_EQ(note_on_pitch, kPitch);
+  EXPECT_EQ(note_on_intensity, kIntensity);
 
   // This should not trigger the callback since the note is already on.
-  note_on_pitch = 0.0;
-  note_on_intensity = 0.0;
+  note_on_pitch = 0;
+  note_on_intensity = 0;
   instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
+  EXPECT_EQ(note_on_pitch, 0);
+  EXPECT_EQ(note_on_intensity, 0);
 
   // Trigger the note on callback again with another note.
-  note_on_pitch = 0.0;
-  note_on_intensity = 0.0;
-  instrument.SetNoteOn(kPitch + 2.0, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_pitch, kPitch + 2.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
+  note_on_pitch = 0;
+  note_on_intensity = 0;
+  instrument.SetNoteOn(kPitch + 2, kIntensity);
+  EXPECT_EQ(note_on_pitch, kPitch + 2);
+  EXPECT_EQ(note_on_intensity, kIntensity);
 
   // Trigger the note off callback.
-  double note_off_pitch = 0.0;
-  NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
+  Rational note_off_pitch = 0;
+  NoteOffEventDefinition::Callback note_off_callback = [&](Rational pitch) {
     note_off_pitch = pitch;
   };
   instrument.SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
                              static_cast<void*>(&note_off_callback));
-  EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
+  EXPECT_EQ(note_off_pitch, 0);
 
   instrument.SetNoteOff(kPitch);
-  EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
+  EXPECT_EQ(note_off_pitch, kPitch);
 
   // This should not trigger the callback since the note is already off.
-  note_off_pitch = 0.0;
+  note_off_pitch = 0;
   instrument.SetNoteOff(kPitch);
-  EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
+  EXPECT_EQ(note_off_pitch, 0);
 
   // Finally, trigger the note off callback with the remaining note.
   instrument.SetAllNotesOff();
-  EXPECT_DOUBLE_EQ(note_off_pitch, kPitch + 2.0);
+  EXPECT_EQ(note_off_pitch, kPitch + 2);
 }
 
 // Tests that the instrument stops all notes as expected.
 TEST(InstrumentTest, SetAllNotesOff) {
-  constexpr std::array<double, 3> kPitches = {1.0, 2.0, 3.0};
-  constexpr double kIntensity = 1.0;
+  constexpr std::array<Rational, 3> kPitches = {1, 2, 3};
+  constexpr Rational kIntensity = 1;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0);
-  for (const double pitch : kPitches) {
+  for (const Rational pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }
 
   // Start multiple notes.
-  for (const double pitch : kPitches) {
+  for (const Rational pitch : kPitches) {
     instrument.SetNoteOn(pitch, kIntensity);
     EXPECT_TRUE(instrument.IsNoteOn(pitch));
   }
 
   // Stop all notes.
   instrument.SetAllNotesOff();
-  for (const double pitch : kPitches) {
+  for (const Rational pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }
 }

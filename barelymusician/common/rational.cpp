@@ -172,18 +172,18 @@ Rational operator%(Rational lhs, const std::int64_t& rhs) noexcept {
   return lhs;
 }
 
+Rational RationalNormalized(std::int64_t numerator, std::int64_t denominator) noexcept {
+  Rational rational(numerator, denominator);
+  Normalize(rational);
+  return rational;
+}
+
 std::ostream& operator<<(std::ostream& out_stream, const Rational& rational) {
   out_stream << (rational.denominator > 0 ? rational.numerator : -rational.numerator);
   if (rational.numerator != 0 && rational.denominator != 1) {
     out_stream << "/" << std::abs(rational.denominator);
   }
   return out_stream;
-}
-
-Rational RationalNormalized(std::int64_t numerator, std::int64_t denominator) noexcept {
-  Rational rational(numerator, denominator);
-  Normalize(rational);
-  return rational;
 }
 
 }  // namespace barely

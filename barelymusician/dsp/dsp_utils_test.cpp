@@ -2,6 +2,7 @@
 
 #include <array>
 
+#include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -31,8 +32,8 @@ TEST(DspUtilsTest, GetFrequency) {
   constexpr double kEpsilon = 1e-2;
 
   constexpr int kPitchCount = 5;
-  constexpr std::array<double, kPitchCount> kPitches = {
-      -4.0, -0.75, 0.0, 2.0, 3.3,
+  constexpr std::array<Rational, kPitchCount> kPitches = {
+      -4, Rational(-3, 4), 0, 2, Rational(33, 10),
   };
   constexpr std::array<double, kPitchCount> kFrequencies = {
       27.50, 261.62, 440.00, 1760.00, 4333.63,

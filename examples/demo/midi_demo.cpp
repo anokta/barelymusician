@@ -50,10 +50,10 @@ constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Instrument settings.
 constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
-constexpr double kInstrumentEnvelopeAttack = 0.0;
-constexpr double kInstrumentEnvelopeRelease = 0.2;
+constexpr Rational kInstrumentEnvelopeAttack = 0;
+constexpr Rational kInstrumentEnvelopeRelease = Rational(1, 5);
 constexpr int kInstrumentVoiceCount = 16;
-constexpr double kInstrumentGain = 1.0 / static_cast<double>(kInstrumentVoiceCount);
+constexpr Rational kInstrumentGain = Rational(1, kInstrumentVoiceCount);
 
 // Midi file name.
 constexpr char kMidiFileName[] = "midi/sample.mid";
@@ -69,8 +69,8 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
     if (midi_event.isNoteOn()) {
       const Rational position = Rational(midi_event.tick, ticks_per_beat);
       const Rational duration = Rational(midi_event.getTickDuration(), ticks_per_beat);
-      const double pitch = PitchFromMidi(midi_event.getKeyNumber());
-      const double intensity = IntensityFromMidi(midi_event.getVelocity());
+      const Rational pitch = PitchFromMidi(midi_event.getKeyNumber());
+      const Rational intensity = IntensityFromMidi(midi_event.getVelocity());
       performer.ScheduleOneOffTask(
           [&instrument, pitch, intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
           position);
@@ -118,16 +118,17 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Set the instrument settings.
     const auto track_index = tracks.size() + 1;
-    instrument.SetNoteOnEvent([track_index](double pitch, double intensity) {
+    instrument.SetNoteOnEvent([track_index](Rational pitch, Rational intensity) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(key: " << MidiFromPitch(pitch)
                    << ", velocity: " << MidiFromIntensity(intensity) << ")";
     });
-    instrument.SetNoteOffEvent([track_index](double pitch) {
+    instrument.SetNoteOffEvent([track_index](Rational pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(key: " << MidiFromPitch(pitch)
                    << ")";
     });
     instrument.SetControl(SynthInstrument::Control::kGain, kInstrumentGain);
-    instrument.SetControl(SynthInstrument::Control::kOscillatorType, kInstrumentOscillatorType);
+    instrument.SetControl(SynthInstrument::Control::kOscillatorType,
+                          static_cast<int>(kInstrumentOscillatorType));
     instrument.SetControl(SynthInstrument::Control::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetControl(SynthInstrument::Control::kRelease, kInstrumentEnvelopeRelease);
     instrument.SetControl(SynthInstrument::Control::kVoiceCount, kInstrumentVoiceCount);

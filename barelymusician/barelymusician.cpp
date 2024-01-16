@@ -166,7 +166,7 @@ bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
   return true;
 }
 
-bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* out_value) {
+bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, BarelyRational* out_value) {
   if (!effect) return false;
   if (!out_value) return false;
 
@@ -210,8 +210,8 @@ bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t index) {
   return effect->instrument()->ResetEffectControl(*effect, index);
 }
 
-bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
-                             double slope_per_beat) {
+bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, BarelyRational value,
+                             BarelyRational slope_per_beat) {
   if (!effect || !effect->instrument()) return false;
 
   return effect->instrument()->SetEffectControl(*effect, index, value, slope_per_beat);
@@ -257,7 +257,7 @@ bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
 }
 
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t index,
-                                 double* out_value) {
+                                 BarelyRational* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
 
@@ -280,8 +280,8 @@ bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, in
   return false;
 }
 
-bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
-                                     double* out_value) {
+bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, BarelyRational pitch,
+                                     int32_t index, BarelyRational* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
 
@@ -292,8 +292,8 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double p
   return false;
 }
 
-bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument, double pitch,
-                                               int32_t index,
+bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument,
+                                               BarelyRational pitch, int32_t index,
                                                BarelyControlDefinition* out_definition) {
   if (!instrument) return false;
   if (!out_definition) return false;
@@ -305,7 +305,7 @@ bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument
   return false;
 }
 
-bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
+bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, BarelyRational pitch,
                                bool* out_is_note_on) {
   if (!instrument) return false;
   if (!out_is_note_on) return false;
@@ -329,7 +329,8 @@ bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument) {
   return true;
 }
 
-bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument, double pitch) {
+bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument,
+                                           BarelyRational pitch) {
   if (!instrument) return false;
 
   return instrument->ResetAllNoteControls(pitch);
@@ -341,7 +342,7 @@ bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t in
   return instrument->ResetControl(index);
 }
 
-bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument, double pitch,
+bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument, BarelyRational pitch,
                                        int32_t index) {
   if (!instrument) return false;
 
@@ -355,8 +356,8 @@ bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   return true;
 }
 
-bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index, double value,
-                                 double slope_per_beat) {
+bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index,
+                                 BarelyRational value, BarelyRational slope_per_beat) {
   if (!instrument) return false;
 
   return instrument->SetControl(index, value, slope_per_beat);
@@ -379,8 +380,9 @@ bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* dat
   return true;
 }
 
-bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
-                                     double value, double slope_per_beat) {
+bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, BarelyRational pitch,
+                                     int32_t index, BarelyRational value,
+                                     BarelyRational slope_per_beat) {
   if (!instrument) return false;
 
   return instrument->SetNoteControl(pitch, index, value, slope_per_beat);
@@ -395,7 +397,7 @@ bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle instrument,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch) {
+bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, BarelyRational pitch) {
   if (!instrument) return false;
 
   instrument->SetNoteOff(pitch);
@@ -410,7 +412,8 @@ bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch, double intensity) {
+bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, BarelyRational pitch,
+                                BarelyRational intensity) {
   if (!instrument) return false;
 
   instrument->SetNoteOn(pitch, intensity);

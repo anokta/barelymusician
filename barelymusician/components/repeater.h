@@ -53,7 +53,8 @@ BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
 /// @param pitch Note pitch.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length);
+BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, BarelyRational pitch,
+                                       int32_t length);
 
 /// Pushes silence to the end.
 ///
@@ -90,7 +91,7 @@ BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater,
 /// @param repeater Repeater handle.
 /// @param pitch_shift Note pitch shift.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_shift);
+BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, BarelyRational pitch_shift);
 
 /// Stops the repeater.
 ///
@@ -149,7 +150,7 @@ class Repeater {
   /// @param pitch_or Note pitch or silence.
   /// @param length Note length.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Push(std::optional<double> pitch_or, int length = 1) noexcept;
+  void Push(std::optional<Rational> pitch_or, int length = 1) noexcept;
 
   /// Sets the instrument.
   void SetInstrument(Instrument* instrument) noexcept;
@@ -168,7 +169,7 @@ class Repeater {
   ///
   /// @param pitch_shift Note pitch shift.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Start(double pitch_shift = 0.0) noexcept;
+  void Start(Rational pitch_shift = 0) noexcept;
 
   /// Stop the repeater.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -192,7 +193,7 @@ class Repeater {
   Instrument* instrument_ = nullptr;
 
   // List of pitches to play.
-  std::vector<std::pair<std::optional<double>, int>> pitches_;
+  std::vector<std::pair<std::optional<Rational>, int>> pitches_;
 
   // Style.
   RepeaterStyle style_ = RepeaterStyle::kForward;
@@ -201,7 +202,7 @@ class Repeater {
   int index_ = -1;
 
   // Pitch shift.
-  double pitch_shift_ = 0.0;
+  Rational pitch_shift_ = 0;
 
   // Remaining length;
   int remaining_length_ = 0;

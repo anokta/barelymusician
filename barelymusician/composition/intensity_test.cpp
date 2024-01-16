@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -11,22 +13,19 @@ namespace {
 TEST(PitchTest, PitchFromMidi) {
   constexpr int kValueCount = 5;
   constexpr std::array<int, kValueCount> kMidis = {
-      0, 32, 64, 95, 127,
+      0, 1, 64, 95, 127,
   };
-  constexpr std::array<double, kValueCount> kIntensities = {
-      0.0, 0.25, 0.5, 0.75, 1.0,
+  constexpr std::array<Rational, kValueCount> kIntensities = {
+      0, Rational(1, 127), Rational(64, 127), Rational(95, 127), 1,
   };
-
-  constexpr double kIntensityEpsilon = 0.5 / kMaxMidiVelocity;
 
   for (int i = 0; i < kValueCount; ++i) {
-    EXPECT_DOUBLE_EQ(MidiFromIntensity(kIntensities[i]), kMidis[i]);
-    EXPECT_NEAR(IntensityFromMidi(kMidis[i]), kIntensities[i], kIntensityEpsilon);
+    EXPECT_EQ(MidiFromIntensity(kIntensities[i]), kMidis[i]);
+    EXPECT_EQ(IntensityFromMidi(kMidis[i]), kIntensities[i]);
 
     // Verify that the back and forth conversions do not mutate the value.
-    EXPECT_DOUBLE_EQ(MidiFromIntensity(IntensityFromMidi(kMidis[i])), kMidis[i]);
-    EXPECT_NEAR(IntensityFromMidi(MidiFromIntensity(kIntensities[i])), kIntensities[i],
-                kIntensityEpsilon);
+    EXPECT_EQ(MidiFromIntensity(IntensityFromMidi(kMidis[i])), kMidis[i]);
+    EXPECT_EQ(IntensityFromMidi(MidiFromIntensity(kIntensities[i])), kIntensities[i]);
   }
 }
 

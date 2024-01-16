@@ -1,26 +1,30 @@
 #include "barelymusician/composition/pitch.h"
 
+#include <cassert>
 #include <cmath>
 #include <span>
 
+#include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
+
 namespace barely {
 
-int MidiFromPitch(double pitch) noexcept {
-  return static_cast<int>(std::round(kSemitoneCount * pitch)) + kMidiA0;
+int MidiFromPitch(Rational pitch) noexcept {
+  return static_cast<int>(static_cast<std::int64_t>(kSemitoneCount * pitch)) + kMidiA0;
 }
 
-double PitchFromMidi(int midi) noexcept {
-  return static_cast<double>(midi - kMidiA0) / kSemitoneCount;
-}
+Rational PitchFromMidi(int midi) noexcept { return Rational(midi - kMidiA0, kSemitoneCount); }
 
-double PitchFromScale(std::span<const double> scale, int index) noexcept {
+Rational PitchFromScale(std::span<const Rational> scale, int index) noexcept {
   if (!scale.empty()) {
-    const double scale_length = static_cast<double>(scale.size());
-    const double octave_offset = std::floor(static_cast<double>(index) / scale_length);
-    const int scale_offset = index - static_cast<int>(octave_offset * scale_length);
+    const int scale_length = static_cast<int>(scale.size());
+    const int octave_offset = static_cast<int>(
+        std::floor(static_cast<double>(index) / static_cast<double>(scale_length)));
+    const int scale_offset = index - octave_offset * scale_length;
+    assert(scale_offset >= 0);
     return octave_offset + scale[scale_offset];
   }
-  return 0.0;
+  return 0;
 }
 
 }  // namespace barely

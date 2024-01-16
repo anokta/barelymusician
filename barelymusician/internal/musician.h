@@ -32,6 +32,8 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(Performer& performer) noexcept;
 
+  [[nodiscard]] Rational FramesFromBeats(Rational beats) noexcept;
+
   /// Returns frame rate.
   ///
   /// @return Frame rate in hz.

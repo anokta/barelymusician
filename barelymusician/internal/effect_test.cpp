@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {
@@ -15,7 +16,7 @@ namespace {
 // Returns a test effect definition that produces constant output.
 EffectDefinition GetTestDefinition() {
   static const std::array<ControlDefinition, 1> control_definitions = {
-      ControlDefinition{0.0},
+      ControlDefinition{0},
   };
   return EffectDefinition(
       [](void** state, int32_t frame_rate) {
@@ -27,8 +28,9 @@ EffectDefinition GetTestDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int32_t index, double value, double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(index + 1) * value;
+      [](void** state, int32_t index, BarelyRational value, BarelyRational /*slope_per_frame*/) {
+        *reinterpret_cast<double*>(*state) =
+            static_cast<double>(index + 1) * static_cast<double>(Rational(value));
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {}, control_definitions);
 }
@@ -52,7 +54,7 @@ TEST(EffectTest, Process) {
   }
 
   // Process a control message.
-  effect.ProcessControlMessage(0, 5.0, 0.0);
+  effect.ProcessControlMessage(0, 5, 0);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   effect.Process(buffer.data(), kChannelCount, kFrameCount);

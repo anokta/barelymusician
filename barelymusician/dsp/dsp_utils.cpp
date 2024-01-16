@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
 namespace {
@@ -21,9 +23,9 @@ double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept {
   return 0.0;
 }
 
-double GetFrequency(double pitch) noexcept {
+double GetFrequency(Rational pitch) noexcept {
   // Middle A note (A4) is selected as the base note frequency, where f = fA4 * 2 ^ p.
-  return kFrequencyA4 * std::pow(2.0, pitch);
+  return kFrequencyA4 * std::pow(2.0, static_cast<double>(pitch));
 }
 
 }  // namespace barely

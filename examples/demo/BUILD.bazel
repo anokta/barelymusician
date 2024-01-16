@@ -7,6 +7,7 @@ cc_binary(
     srcs = ["arpeggiator_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/common:rational",
         "//barelymusician/components:arpeggiator",
         "//barelymusician/composition:pitch",
         "//barelymusician/dsp:oscillator",
@@ -23,6 +24,7 @@ cc_binary(
     srcs = ["instrument_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/common:rational",
         "//barelymusician/composition:pitch",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/instruments:synth_instrument",
@@ -37,6 +39,7 @@ cc_binary(
     srcs = ["metronome_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/common:rational",
         "//barelymusician/components:metronome",
         "//barelymusician/composition:pitch",
         "//barelymusician/dsp:oscillator",
@@ -75,7 +78,6 @@ cc_binary(
         "//barelymusician/common:random",
         "//barelymusician/common:rational",
         "//barelymusician/components:metronome",
-        "//barelymusician/composition:duration",
         "//barelymusician/composition:pitch",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/instruments:percussion_instrument",
@@ -94,6 +96,7 @@ cc_binary(
     srcs = ["repeater_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/common:rational",
         "//barelymusician/components:repeater",
         "//barelymusician/composition:pitch",
         "//barelymusician/dsp:oscillator",
@@ -110,6 +113,7 @@ cc_binary(
     srcs = ["sampler_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/common:rational",
         "//barelymusician/composition:pitch",
         "//barelymusician/effects:low_pass_effect",
         "//barelymusician/instruments:sampler_instrument",

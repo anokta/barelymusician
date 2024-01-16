@@ -77,7 +77,6 @@ target_link_libraries(
   barely_random
   barely_rational
   barely_metronome
-  barely_duration
   barely_pitch
   barely_oscillator
   barely_percussion_instrument

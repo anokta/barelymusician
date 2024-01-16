@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_INTENSITY_H_
 #define BARELYMUSICIAN_COMPOSITION_INTENSITY_H_
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
 // Maximum midi velocity.
@@ -10,13 +12,13 @@ inline constexpr int kMaxMidiVelocity = 127;
 ///
 /// @param midi Midi note velocity.
 /// @return Note intensity.
-double IntensityFromMidi(int midi) noexcept;
+Rational IntensityFromMidi(int midi) noexcept;
 
 /// Returns the correspnding midi note velocity for a given note intensity.
 ///
 /// @param intensity Note intensity.
 /// @return Midi note velocity.
-int MidiFromIntensity(double intensity) noexcept;
+int MidiFromIntensity(Rational intensity) noexcept;
 
 }  // namespace barely
 

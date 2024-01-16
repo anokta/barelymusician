@@ -53,4 +53,15 @@ Rational RationalNormalized(std::int64_t numerator = 0, std::int64_t denominator
 
 }  // namespace barely
 
+namespace std {
+
+template <>
+struct hash<barely::Rational> {
+  size_t operator()(const barely::Rational& rational) const {
+    return hash<double>()(static_cast<double>(rational));
+  }
+};
+
+}  // namespace std
+
 #endif  // BARELYMUSICIAN_COMMON_RATIONAL_H_

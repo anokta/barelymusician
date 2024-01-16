@@ -39,10 +39,10 @@ constexpr int kFrameCount = 256;
 constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Arpeggiator settings.
-constexpr double kGain = 0.125;
+constexpr Rational kGain = Rational(1, 8);
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.05;
+constexpr Rational kAttack = 0;
+constexpr Rational kRelease = Rational(1, 20);
 constexpr int kVoiceCount = 16;
 
 constexpr Rational kInitialGateRatio = Rational(1, 2);
@@ -51,18 +51,18 @@ constexpr int kInitialTempo = 100;
 constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kRandom;
 
 // Note settings.
-constexpr double kRootPitch = barely::kPitchC3;
+constexpr Rational kRootPitch = barely::kPitchC4;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kMaxOffsetOctaves = 3.0;
+constexpr int kMaxOffsetOctaves = 3;
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(const InputManager::Key& key) {
+std::optional<Rational> PitchFromKey(const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  const double distance = static_cast<double>(std::distance(kOctaveKeys.begin(), it));
+  const Rational distance = std::distance(kOctaveKeys.begin(), it);
   return kRootPitch + distance / barely::kSemitoneCount;
 }
 
@@ -80,12 +80,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
+                        static_cast<int>(kOscillatorType));
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
+  instrument.SetNoteOnEvent([](Rational pitch, Rational /*intensity*/) {
     ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
   });
 
@@ -102,7 +103,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  double offset_octaves = 0.0;
+  int offset_octaves = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {

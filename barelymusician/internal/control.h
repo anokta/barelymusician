@@ -13,7 +13,7 @@ namespace barely::internal {
 class Control {
  public:
   /// Event alias.
-  using Event = ::barely::internal::Event<ControlEventDefinition, int, double>;
+  using Event = ::barely::internal::Event<ControlEventDefinition, int, Rational>;
 
   /// Constructs a new `Control`.
   ///
@@ -28,12 +28,12 @@ class Control {
   /// Returns the slope per beat.
   ///
   /// @return Control slope in value change per beat.
-  [[nodiscard]] double GetSlopePerBeat() const noexcept;
+  [[nodiscard]] Rational GetSlopePerBeat() const noexcept;
 
   /// Returns the value.
   ///
   /// @return Control value.
-  [[nodiscard]] double GetValue() const noexcept;
+  [[nodiscard]] Rational GetValue() const noexcept;
 
   /// Resets the value.
   ///
@@ -45,7 +45,7 @@ class Control {
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if changed, false otherwise.
-  bool Set(double value, double slope_per_beat) noexcept;
+  bool Set(Rational value, Rational slope_per_beat) noexcept;
 
   /// Updates the value by duration.
   ///
@@ -55,16 +55,16 @@ class Control {
 
  private:
   // Clamps a given `value`.
-  [[nodiscard]] double Clamp(double value) noexcept;
+  [[nodiscard]] Rational Clamp(Rational value) noexcept;
 
   // Definition.
   ControlDefinition definition_;
 
   // Value.
-  double value_ = 0.0;
+  Rational value_ = 0;
 
   // Slope in value change per beat.
-  double slope_per_beat_ = 0.0;
+  Rational slope_per_beat_ = 0;
 };
 
 /// Builds the corresponding controls for a given array of control `definitions`.

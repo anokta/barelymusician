@@ -1,6 +1,7 @@
 #include "barelymusician/internal/event.h"
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {
@@ -14,24 +15,24 @@ TEST(EventTest, Process) {
     int create_count = 0;
     int destroy_count = 0;
     int process_count = 0;
-    double pitch = 0.0;
+    Rational pitch = 0;
   };
   TestData test_data = {};
 
   EXPECT_EQ(test_data.create_count, 0);
   EXPECT_EQ(test_data.destroy_count, 0);
   EXPECT_EQ(test_data.process_count, 0);
-  EXPECT_DOUBLE_EQ(test_data.pitch, 0.0);
+  EXPECT_EQ(test_data.pitch, 0);
 
   {
-    Event<NoteOffEventDefinition, double> event(
+    Event<NoteOffEventDefinition, Rational> event(
         NoteOffEventDefinition{
             [](void** state, void* user_data) {
               *state = user_data;
               ++static_cast<TestData*>(*state)->create_count;
             },
             [](void** state) { ++static_cast<TestData*>(*state)->destroy_count; },
-            [](void** state, double pitch) {
+            [](void** state, BarelyRational pitch) {
               auto& test_data = *static_cast<TestData*>(*state);
               ++test_data.process_count;
               test_data.pitch = pitch;
@@ -43,16 +44,16 @@ TEST(EventTest, Process) {
     EXPECT_EQ(test_data.create_count, 1);
     EXPECT_EQ(test_data.destroy_count, 0);
     EXPECT_EQ(test_data.process_count, 0);
-    EXPECT_DOUBLE_EQ(test_data.pitch, 0.0);
+    EXPECT_EQ(test_data.pitch, 0);
 
     for (int i = 1; i <= kTotalProcessCount; ++i) {
-      event.Process(static_cast<double>(i));
+      event.Process(i);
 
       // Event should be processed.
       EXPECT_EQ(test_data.create_count, 1);
       EXPECT_EQ(test_data.destroy_count, 0);
       EXPECT_EQ(test_data.process_count, i);
-      EXPECT_DOUBLE_EQ(test_data.pitch, static_cast<double>(i));
+      EXPECT_EQ(test_data.pitch, i);
     }
   }
 
@@ -60,7 +61,7 @@ TEST(EventTest, Process) {
   EXPECT_EQ(test_data.create_count, 1);
   EXPECT_EQ(test_data.destroy_count, 1);
   EXPECT_EQ(test_data.process_count, kTotalProcessCount);
-  EXPECT_DOUBLE_EQ(test_data.pitch, static_cast<double>(kTotalProcessCount));
+  EXPECT_EQ(test_data.pitch, kTotalProcessCount);
 }
 
 }  // namespace

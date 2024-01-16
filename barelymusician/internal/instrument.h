@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/event.h"
@@ -62,13 +63,13 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] const Control* GetNoteControl(double pitch, int index) const noexcept;
+  [[nodiscard]] const Control* GetNoteControl(Rational pitch, int index) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
   /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
+  [[nodiscard]] bool IsNoteOn(Rational pitch) const noexcept;
 
   /// Processes output samples at timestamp.
   ///
@@ -99,7 +100,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return True if successful, false otherwise.
-  bool ResetAllNoteControls(double pitch) noexcept;
+  bool ResetAllNoteControls(Rational pitch) noexcept;
 
   /// Resets a control value.
   ///
@@ -119,7 +120,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @return True if successful, false otherwise.
-  bool ResetNoteControl(double pitch, int index) noexcept;
+  bool ResetNoteControl(Rational pitch, int index) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -131,7 +132,7 @@ class Instrument {
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetControl(int index, double value, double slope_per_beat) noexcept;
+  bool SetControl(int index, Rational value, Rational slope_per_beat) noexcept;
 
   /// Sets the control event callback.
   ///
@@ -151,7 +152,8 @@ class Instrument {
   /// @param value Effect control value.
   /// @param slope_per_beat Effect control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetEffectControl(Effect& effect, int index, double value, double slope_per_beat) noexcept;
+  bool SetEffectControl(Effect& effect, int index, Rational value,
+                        Rational slope_per_beat) noexcept;
 
   /// Sets effect data.
   ///
@@ -174,7 +176,7 @@ class Instrument {
   /// @param value Note control value.
   /// @param slope_per_beat Note control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetNoteControl(double pitch, int index, double value, double slope_per_beat) noexcept;
+  bool SetNoteControl(Rational pitch, int index, Rational value, Rational slope_per_beat) noexcept;
 
   /// Sets the note control event.
   ///
@@ -185,7 +187,7 @@ class Instrument {
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(double pitch) noexcept;
+  void SetNoteOff(Rational pitch) noexcept;
 
   /// Sets the note off event.
   ///
@@ -198,7 +200,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch, double intensity) noexcept;
+  void SetNoteOn(Rational pitch, Rational intensity = 1) noexcept;
 
   /// Sets the note on event.
   ///
@@ -219,16 +221,16 @@ class Instrument {
 
  private:
   // Note control event alias.
-  using NoteControlEvent = Event<NoteControlEventDefinition, double, int, double>;
+  using NoteControlEvent = Event<NoteControlEventDefinition, Rational, int, Rational>;
 
   // Note off event alias.
-  using NoteOffEvent = Event<NoteOffEventDefinition, double>;
+  using NoteOffEvent = Event<NoteOffEventDefinition, Rational>;
 
   // Note on event alias.
-  using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
+  using NoteOnEvent = Event<NoteOnEventDefinition, Rational, Rational>;
 
   // Returns the corresponding slope per frame for a given `slope_per_beat`.
-  [[nodiscard]] double GetSlopePerFrame(double slope_per_beat) const noexcept;
+  [[nodiscard]] Rational GetSlopePerFrame(Rational slope_per_beat) const noexcept;
 
   // Updates effect references.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -268,7 +270,7 @@ class Instrument {
   std::set<std::pair<int, Effect*>> effects_;
 
   // Map of current note controls by note pitches.
-  std::unordered_map<double, std::vector<Control>> note_controls_;
+  std::unordered_map<Rational, std::vector<Control>> note_controls_;
 
   // Control event.
   Control::Event control_event_;

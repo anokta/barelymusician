@@ -9,6 +9,10 @@ add_library(
   dsp_utils.cpp
   dsp_utils.h
 )
+target_link_libraries(
+  barely_dsp_utils
+  barelymusician_headeronly
+)
 
 add_library(
   barely_envelope

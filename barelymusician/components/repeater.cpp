@@ -58,7 +58,7 @@ bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater) {
   return true;
 }
 
-bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length) {
+bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, BarelyRational pitch, int32_t length) {
   if (!repeater) return false;
 
   repeater->Push(pitch, static_cast<int>(length));
@@ -102,7 +102,7 @@ bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle 
   return true;
 }
 
-bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_shift) {
+bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, BarelyRational pitch_shift) {
   if (!repeater) return false;
 
   repeater->Start(pitch_shift);
@@ -143,7 +143,7 @@ void Repeater::Pop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
+void Repeater::Push(std::optional<Rational> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
@@ -162,7 +162,7 @@ void Repeater::SetRate(Rational rate) noexcept {
 void Repeater::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Start(double pitch_shift) noexcept {
+void Repeater::Start(Rational pitch_shift) noexcept {
   if (IsPlaying()) {
     return;
   }
@@ -217,7 +217,7 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
         if (!pitches_[index_].first.has_value()) {
           return;
         }
-        const double pitch = *pitches_[index_].first + pitch_shift_;
+        const Rational pitch = *pitches_[index_].first + pitch_shift_;
         instrument_->SetNoteOn(pitch);
         performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
                                       length * performer_.GetLoopLength(), process_order);

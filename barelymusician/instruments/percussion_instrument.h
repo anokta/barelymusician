@@ -21,6 +21,7 @@ BARELY_EXPORT BarelyInstrumentDefinition BarelyPercussionInstrument_GetDefinitio
 #ifdef __cplusplus
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/sample_player.h"
@@ -54,19 +55,19 @@ class PercussionInstrument : public CustomInstrument {
   /// Implements `CustomInstrument`.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
-  void SetControl(int index, double value, double slope_per_frame) noexcept final;
+  void SetControl(int index, Rational value, Rational slope_per_frame) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetData(const void* data, int size) noexcept final;
-  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
-                      double /*slope_per_frame*/) noexcept final {}
-  void SetNoteOff(double pitch) noexcept final;
-  void SetNoteOn(double pitch, double intensity) noexcept final;
+  void SetNoteControl(Rational /*pitch*/, int /*index*/, Rational /*value*/,
+                      Rational /*slope_per_frame*/) noexcept final {}
+  void SetNoteOff(Rational pitch) noexcept final;
+  void SetNoteOn(Rational pitch, Rational intensity) noexcept final;
 
  private:
   struct Pad {
     explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
 
-    double pitch = 0.0;
+    Rational pitch = 0;
     EnvelopedVoice<SamplePlayer> voice;
   };
   int frame_rate_;

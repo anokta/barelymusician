@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/instruments/custom_instrument.h"
 
 BarelyInstrumentDefinition BarelyPercussionInstrument_GetDefinition() {
@@ -18,7 +19,7 @@ namespace {
 constexpr int kMaxPadCount = 64;
 
 // Default pad release in seconds.
-constexpr double kDefaultPadRelease = 0.1;
+constexpr Rational kDefaultPadRelease = Rational(1, 10);
 
 }  // namespace
 
@@ -26,9 +27,9 @@ InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
   static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
       control_definitions = {
           // Gain.
-          ControlDefinition{1.0, 0.0, 1.0},
+          ControlDefinition{1, 0, 1},
           // Pad release.
-          ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
+          ControlDefinition{kDefaultPadRelease, 0, 60},
       };
   return CustomInstrument::GetDefinition<PercussionInstrument>(control_definitions, {});
 }
@@ -53,14 +54,14 @@ void PercussionInstrument::Process(double* output_samples, int output_channel_co
   gain_processor_.Process(output_samples, output_channel_count, output_frame_count);
 }
 
-void PercussionInstrument::SetControl(int index, double value,
-                                      double /*slope_per_frame*/) noexcept {
+void PercussionInstrument::SetControl(int index, Rational value,
+                                      Rational /*slope_per_frame*/) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kGain:
-      gain_processor_.SetGain(value);
+      gain_processor_.SetGain(static_cast<double>(value));
       break;
     case Control::kRelease:
-      release_ = value;
+      release_ = static_cast<double>(value);
       for (auto& pad : pads_) {
         pad.voice.envelope().SetRelease(release_);
       }
@@ -82,7 +83,9 @@ void PercussionInstrument::SetData(const void* data, [[maybe_unused]] int size) 
   pads_.resize(voice_count, Pad(frame_rate_));
   for (auto& pad : pads_) {
     // Pad data is sequentially aligned by pitch, frequency, length and data.
-    pad.pitch = static_cast<double>(*data_double++);
+    const auto pitch_numerator = static_cast<std::int64_t>(static_cast<double>(*data_double++));
+    const auto pitch_denominator = static_cast<std::int64_t>(static_cast<double>(*data_double++));
+    pad.pitch = Rational(pitch_numerator, pitch_denominator);
     const int frequency = static_cast<int>(static_cast<double>(*data_double++));
     const int length = static_cast<int>(static_cast<double>(*data_double++));
     pad.voice.generator().SetData(data_double, frequency, length);
@@ -91,7 +94,7 @@ void PercussionInstrument::SetData(const void* data, [[maybe_unused]] int size) 
   }
 }
 
-void PercussionInstrument::SetNoteOff(double pitch) noexcept {
+void PercussionInstrument::SetNoteOff(Rational pitch) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
       pad.voice.Stop();
@@ -100,10 +103,10 @@ void PercussionInstrument::SetNoteOff(double pitch) noexcept {
   }
 }
 
-void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
+void PercussionInstrument::SetNoteOn(Rational pitch, Rational intensity) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
-      pad.voice.set_gain(intensity);
+      pad.voice.set_gain(static_cast<double>(intensity));
       pad.voice.Start();
       break;
     }

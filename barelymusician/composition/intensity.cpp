@@ -2,12 +2,15 @@
 
 #include <cmath>
 
+#include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
+
 namespace barely {
 
-int MidiFromIntensity(double intensity) noexcept {
-  return static_cast<int>(std::round(intensity * kMaxMidiVelocity));
+int MidiFromIntensity(Rational intensity) noexcept {
+  return static_cast<int>(static_cast<std::int64_t>(intensity * kMaxMidiVelocity));
 }
 
-double IntensityFromMidi(int midi) noexcept { return static_cast<double>(midi) / kMaxMidiVelocity; }
+Rational IntensityFromMidi(int midi) noexcept { return Rational(midi, kMaxMidiVelocity); }
 
 }  // namespace barely

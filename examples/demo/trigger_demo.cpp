@@ -34,10 +34,10 @@ constexpr int kFrameCount = 512;
 constexpr std::int64_t kLookahead = kFrameRate / 20;
 
 // Instrument settings.
-constexpr double kGain = 0.1;
+constexpr Rational kGain = Rational(1, 10);
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.1;
+constexpr Rational kAttack = 0;
+constexpr Rational kRelease = Rational(1, 10);
 
 constexpr int kInitialTempo = 120;
 
@@ -55,10 +55,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
+                        static_cast<int>(kOscillatorType));
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
+  instrument.SetNoteOnEvent([](Rational pitch, Rational /*intensity*/) {
     ConsoleLog() << "Note{" << barely::MidiFromPitch(pitch) << "}";
   });
 
@@ -68,8 +69,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   auto performer = musician.CreatePerformer();
 
   const auto play_note_fn = [&](int scale_index, Rational duration) {
-    const double pitch =
-        barely::kPitchD3 + barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
+    const Rational pitch =
+        barely::kPitchD4 + barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
     return [&instrument, &performer, duration, pitch]() {
       instrument.SetNoteOn(pitch);
       performer.ScheduleOneOffTask(

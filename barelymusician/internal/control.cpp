@@ -18,20 +18,20 @@ Control::Control(ControlDefinition definition) noexcept
 
 const ControlDefinition& Control::GetDefinition() const noexcept { return definition_; }
 
-double Control::GetSlopePerBeat() const noexcept { return slope_per_beat_; }
+Rational Control::GetSlopePerBeat() const noexcept { return slope_per_beat_; }
 
-double Control::GetValue() const noexcept { return value_; }
+Rational Control::GetValue() const noexcept { return value_; }
 
 bool Control::Reset() noexcept {
-  if (value_ != definition_.default_value || slope_per_beat_ != 0.0) {
+  if (value_ != definition_.default_value || slope_per_beat_ != 0) {
     value_ = definition_.default_value;
-    slope_per_beat_ = 0.0;
+    slope_per_beat_ = 0;
     return true;
   }
   return false;
 }
 
-bool Control::Set(double value, double slope_per_beat) noexcept {
+bool Control::Set(Rational value, Rational slope_per_beat) noexcept {
   value = Clamp(value);
   if (value_ != value || slope_per_beat_ != slope_per_beat) {
     value_ = value;
@@ -43,10 +43,8 @@ bool Control::Set(double value, double slope_per_beat) noexcept {
 
 bool Control::Update(Rational duration) noexcept {
   assert(duration > 0);
-  if (slope_per_beat_ != 0.0) {
-    // TODO(#107): Use `Rational` throughout.
-    if (const double value = Clamp(value_ + slope_per_beat_ * static_cast<double>(duration));
-        value_ != value) {
+  if (slope_per_beat_ != 0) {
+    if (const Rational value = Clamp(value_ + slope_per_beat_ * duration); value_ != value) {
       value_ = value;
       return true;
     }
@@ -54,8 +52,14 @@ bool Control::Update(Rational duration) noexcept {
   return false;
 }
 
-double Control::Clamp(double value) noexcept {
-  return std::min(std::max(value, definition_.min_value), definition_.max_value);
+Rational Control::Clamp(Rational value) noexcept {
+  if (value < definition_.min_value) {
+    return definition_.min_value;
+  }
+  if (value > definition_.max_value) {
+    return definition_.max_value;
+  }
+  return value;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

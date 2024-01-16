@@ -64,12 +64,12 @@ class SynthInstrument : public CustomInstrument {
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(int index, double value, double slope_per_frame) noexcept final;
+  void SetControl(int index, Rational value, Rational slope_per_frame) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
-  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
-                      double /*slope_per_frame*/) noexcept final {}
-  void SetNoteOff(double pitch) noexcept final;
-  void SetNoteOn(double pitch, double intensity) noexcept final;
+  void SetNoteControl(Rational /*pitch*/, int /*index*/, Rational /*value*/,
+                      Rational /*slope_per_frame*/) noexcept final {}
+  void SetNoteOff(Rational pitch) noexcept final;
+  void SetNoteOn(Rational pitch, Rational intensity) noexcept final;
 
  private:
   using SynthVoice = EnvelopedVoice<Oscillator>;

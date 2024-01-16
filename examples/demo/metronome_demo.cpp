@@ -5,6 +5,7 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -19,6 +20,7 @@ namespace {
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::Rational;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -34,13 +36,13 @@ constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Metronome settings.
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
-constexpr double kGain = 0.25;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.025;
+constexpr Rational kGain = Rational(1, 4);
+constexpr Rational kAttack = 0;
+constexpr Rational kRelease = Rational(1, 40);
 constexpr int kVoiceCount = 1;
 
-constexpr double kBarPitch = barely::kPitchA4;
-constexpr double kBeatPitch = barely::kPitchA3;
+constexpr Rational kBarPitch = barely::kPitchA4;
+const Rational kBeatPitch = kBarPitch - 1;
 
 constexpr int kBeatCount = 4;
 constexpr int kInitialTempo = 120;
@@ -61,7 +63,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   // Create the metronome instrument.
   auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
+                        static_cast<int>(kOscillatorType));
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
@@ -72,7 +75,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
+    const Rational pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
     instrument.SetNoteOn(pitch);
     instrument.SetNoteOff(pitch);
   });

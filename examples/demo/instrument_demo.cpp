@@ -2,12 +2,12 @@
 #include <array>
 #include <cctype>
 #include <chrono>
-#include <iomanip>
 #include <iterator>
 #include <optional>
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
@@ -19,6 +19,7 @@ namespace {
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::Rational;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -30,25 +31,25 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
 // Instrument settings.
-constexpr double kGain = 0.125;
+constexpr Rational kGain = Rational(1, 8);
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr double kAttack = 0.05;
-constexpr double kRelease = 0.125;
+constexpr Rational kAttack = Rational(1, 20);
+constexpr Rational kRelease = Rational(1, 8);
 constexpr int kVoiceCount = 16;
 
 // Note settings.
-constexpr double kRootPitch = barely::kPitchC3;
+constexpr Rational kRootPitch = barely::kPitchC4;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kMaxOffsetOctaves = 3.0;
+constexpr int kMaxOffsetOctaves = 3;
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(const InputManager::Key& key) {
+std::optional<Rational> PitchFromKey(const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  const double distance = static_cast<double>(std::distance(kOctaveKeys.begin(), it));
+  const Rational distance = std::distance(kOctaveKeys.begin(), it);
   return kRootPitch + distance / barely::kSemitoneCount;
 }
 
@@ -63,16 +64,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
+                        static_cast<int>(kOscillatorType));
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEvent([](double pitch, double intensity) {
-    ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", " << intensity << ")";
+  instrument.SetNoteOnEvent([](Rational pitch, Rational intensity) {
+    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
   });
-  instrument.SetNoteOffEvent(
-      [](double pitch) { ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") "; });
+  instrument.SetNoteOffEvent([](Rational pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
@@ -80,8 +81,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  double intensity = 1.0;
-  double offset_octaves = 0.0;
+  Rational intensity = 1;
+  int offset_octaves = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -106,11 +107,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (upper_key == 'C' || upper_key == 'V') {
       // Change intensity.
       if (upper_key == 'C') {
-        intensity -= 0.25;
+        intensity -= Rational(1, 4);
       } else {
-        intensity += 0.25;
+        intensity += Rational(1, 4);
       }
-      intensity = std::clamp(intensity, 0.0, 1.0);
+      intensity = std::clamp(intensity, Rational(0), Rational(1));
       ConsoleLog() << "Note intensity set to " << intensity;
       return;
     }

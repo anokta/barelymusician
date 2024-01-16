@@ -46,15 +46,15 @@ instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
 
 // Set the A3 synth instrument note pitch on with a 0.25 intensity.
 //
-// @note Pitch values are normalized by octaves, where each 1.0 value change shifts one octave, and
-// 0.0 represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition. However,
-// this is not a strict rule, since `pitch` and `intensity` can be interpreted in any desired way by
-// a custom instrument.
-const double a3_pitch = -1.0;
-instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
+// @note Pitch values are normalized by octaves, where each integer value of one shifts an octave by
+// one, and zero represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition.
+// However, this is not a strict rule, since `pitch` and `intensity` can be interpreted in any
+// desired way by a custom instrument.
+const auto d4_pitch = barely::Rational(-7, 12);
+instrument.SetNoteOn(d4_pitch, /*intensity=*/barely::Rational(1, 2));
 
 // Check if the instrument note is on.
-const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
+const bool is_note_on = instrument.IsNoteOn(d4_pitch);  // will return true.
 
 // Add a low-pass effect to the instrument.
 auto effect = instrument.CreateEffect<barely::LowPassEffect>();

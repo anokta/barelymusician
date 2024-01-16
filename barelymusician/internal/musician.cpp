@@ -37,6 +37,10 @@ void Musician::AddPerformer(Performer& performer) noexcept {
   assert(success);
 }
 
+Rational Musician::FramesFromBeats(Rational beats) noexcept {
+  return frame_rate_ * kSecondsFromMinutes * beats / tempo_;
+}
+
 int Musician::GetFrameRate() const noexcept { return frame_rate_; }
 
 int Musician::GetTempo() const noexcept { return tempo_; }
@@ -95,7 +99,7 @@ void Musician::Update(std::int64_t timestamp) noexcept {
         }
 
         const Rational update_interval =
-            frame_rate_ * kSecondsFromMinutes * update_duration.first / tempo_ + timestamp_fraction;
+            FramesFromBeats(update_duration.first) + timestamp_fraction;
         timestamp_fraction = (update_interval % 1);
         timestamp_ += static_cast<std::int64_t>(update_interval);
 

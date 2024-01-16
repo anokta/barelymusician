@@ -15,10 +15,10 @@ struct ControlMessage {
   int index;
 
   /// Value.
-  double value;
+  Rational value;
 
   /// Slope in value change per frame.
-  double slope_per_frame;
+  Rational slope_per_frame;
 };
 
 /// Data message.
@@ -36,10 +36,10 @@ struct EffectControlMessage {
   int index;
 
   /// Value.
-  double value;
+  Rational value;
 
   /// Slope in value change per frame.
-  double slope_per_frame;
+  Rational slope_per_frame;
 };
 
 /// Effect data message.
@@ -54,31 +54,31 @@ struct EffectDataMessage {
 /// Note control message.
 struct NoteControlMessage {
   /// Pitch.
-  double pitch;
+  Rational pitch;
 
   /// Index.
   int index;
 
   /// Value.
-  double value;
+  Rational value;
 
   /// Slope in value change per frame.
-  double slope_per_frame;
+  Rational slope_per_frame;
 };
 
 /// Note off message.
 struct NoteOffMessage {
   /// Pitch.
-  double pitch;
+  Rational pitch;
 };
 
 /// Note on message.
 struct NoteOnMessage {
   /// Pitch.
-  double pitch;
+  Rational pitch;
 
   /// Intensity.
-  double intensity;
+  Rational intensity;
 };
 
 /// Message alias.

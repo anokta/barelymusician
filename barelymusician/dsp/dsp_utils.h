@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
 /// Pi.
@@ -20,7 +22,7 @@ double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept;
 ///
 /// @param pitch Pitch.
 /// @return Frequency in hertz.
-double GetFrequency(double pitch) noexcept;
+double GetFrequency(Rational pitch) noexcept;
 
 }  // namespace barely
 

@@ -31,7 +31,7 @@ class CustomInstrument {
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_frame Control slope in value change per frame.
-  virtual void SetControl(int index, double value, double slope_per_frame) noexcept = 0;
+  virtual void SetControl(int index, Rational value, Rational slope_per_frame) noexcept = 0;
 
   /// Sets data.
   ///
@@ -45,19 +45,19 @@ class CustomInstrument {
   /// @param index Note control index.
   /// @param value Note control value.
   /// @param slope_per_frame Note control slope in value change per frame.
-  virtual void SetNoteControl(double pitch, int index, double value,
-                              double slope_per_frame) noexcept = 0;
+  virtual void SetNoteControl(Rational pitch, int index, Rational value,
+                              Rational slope_per_frame) noexcept = 0;
 
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  virtual void SetNoteOff(double pitch) noexcept = 0;
+  virtual void SetNoteOff(Rational pitch) noexcept = 0;
 
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  virtual void SetNoteOn(double pitch, double intensity) noexcept = 0;
+  virtual void SetNoteOn(Rational pitch, Rational intensity) noexcept = 0;
 
   /// Returns the definition for `CustomInstrumentType`.
   ///
@@ -92,7 +92,7 @@ class CustomInstrument {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->Process(output_samples, output_channel_count, output_frame_count);
         },
-        [](void** state, int32_t index, double value, double slope_per_frame) {
+        [](void** state, int32_t index, BarelyRational value, BarelyRational slope_per_frame) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetControl(index, value, slope_per_frame);
         },
@@ -100,15 +100,16 @@ class CustomInstrument {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetData(data, size);
         },
-        [](void** state, double pitch, int32_t index, double value, double slope_per_frame) {
+        [](void** state, BarelyRational pitch, int32_t index, BarelyRational value,
+           BarelyRational slope_per_frame) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteControl(pitch, index, value, slope_per_frame);
         },
-        [](void** state, double pitch) noexcept {
+        [](void** state, BarelyRational pitch) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteOff(pitch);
         },
-        [](void** state, double pitch, double intensity) noexcept {
+        [](void** state, BarelyRational pitch, BarelyRational intensity) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteOn(pitch, intensity);
         },

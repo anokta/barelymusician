@@ -42,24 +42,26 @@
 ///
 ///   // Set a note on.
 ///   //
-///   // Pitch values are normalized, where each `1.0` shifts one octave, and `0.0` represents the
-///   // middle A (A4) for a typical instrument definition. However, this is not a strict rule,
-///   // since `pitch` and `intensity` can be interpreted in any desired way by a custom instrument.
-///   instrument.SetNoteOn(/*pitch=*/-1.0, /*intensity=*/0.25);
+///   // Pitch values are normalized, where each integer value of one shifts an octave by one, and
+///   // zero represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition.
+///   // However, this is not a strict rule, since `pitch` and `intensity` can be interpreted in any
+///   // desired way by a custom instrument.
+///   const auto d4_pitch = barely::Rational(-7, 12);
+///   instrument.SetNoteOn(d4_pitch, /*intensity=*/barely::Rational(1, 4));
 ///
 ///   // Check if the note is on.
-///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/-1.0);
+///   const bool is_note_on = instrument.IsNoteOn(d4_pitch);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
-///                         /*slope_per_beat=*/0.0);
+///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/Rational(1, 2),
+///                         /*slope_per_beat=*/0);
 ///
 ///   // Create a low-pass effect.
 ///   auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 ///
 ///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
-///                     /*slope_per_beat=*/100.0);
+///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0,
+///                     /*slope_per_beat=*/100);
 ///
 ///   // Process.
 ///   //
@@ -136,14 +138,16 @@
 ///
 ///   // Set a note on.
 ///   //
-///   // Pitch values are normalized, where each `1.0` shifts one octave, and `0.0` represents the
-///   // middle A (A4) for a typical instrument definition. However, this is not a strict rule,
-///   // since `pitch` and `intensity` can be interpreted in any desired way by a custom instrument.
-///   BarelyInstrument_SetNoteOn(instrument, /*pitch=*/-1.0, /*intensity=*/0.25);
+///   // Pitch values are normalized, where each integer value of one shifts an octave by one, and
+///   // zero represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition.
+///   // However, this is not a strict rule, since `pitch` and `intensity` can be interpreted in any
+///   // desired way by a custom instrument.
+///   BarelyRational d4_pitch = {-7, 12};
+///   BarelyInstrument_SetNoteOn(instrument, d4_pitch, /*intensity=*/BarelyRational{1, 4});
 ///
 ///   // Check if the note is on.
 ///   bool is_note_on = false;
-///   BarelyInstrument_IsNoteOn(instrument, /*pitch=*/-1.0, &is_note_on);
+///   BarelyInstrument_IsNoteOn(instrument, d4_pitch, &is_note_on);
 ///
 ///   // Set a control value.
 ///   BarelyInstrument_SetControl(instrument, /*index=*/0, /*value=*/0.5, /*slope_per_beat=*/0.0);
@@ -250,13 +254,13 @@ typedef struct BarelyRational {
 /// Control definition.
 typedef struct BarelyControlDefinition {
   /// Default value.
-  double default_value;
+  BarelyRational default_value;
 
   /// Minimum value.
-  double min_value;
+  BarelyRational min_value;
 
   /// Maximum value.
-  double max_value;
+  BarelyRational max_value;
 } BarelyControlDefinition;
 
 /// Control event definition create callback signature.
@@ -276,7 +280,7 @@ typedef void (*BarelyControlEventDefinition_DestroyCallback)(void** state);
 /// @param index Control index.
 /// @param value Control value.
 typedef void (*BarelyControlEventDefinition_ProcessCallback)(void** state, int32_t index,
-                                                             double value);
+                                                             BarelyRational value);
 
 /// Control event definition.
 typedef struct BarelyControlEventDefinition {
@@ -317,8 +321,9 @@ typedef void (*BarelyEffectDefinition_ProcessCallback)(void** state, double* out
 /// @param index Control index.
 /// @param value Control value.
 /// @param slope_per_frame Control slope in value change per frame.
-typedef void (*BarelyEffectDefinition_SetControlCallback)(void** state, int32_t index, double value,
-                                                          double slope_per_frame);
+typedef void (*BarelyEffectDefinition_SetControlCallback)(void** state, int32_t index,
+                                                          BarelyRational value,
+                                                          BarelyRational slope_per_frame);
 
 /// Effect definition set data callback signature.
 ///
@@ -380,7 +385,8 @@ typedef void (*BarelyInstrumentDefinition_ProcessCallback)(void** state, double*
 /// @param value Control value.
 /// @param slope_per_frame Control slope in value change per frame.
 typedef void (*BarelyInstrumentDefinition_SetControlCallback)(void** state, int32_t index,
-                                                              double value, double slope_per_frame);
+                                                              BarelyRational value,
+                                                              BarelyRational slope_per_frame);
 
 /// Instrument definition set data callback signature.
 ///
@@ -397,23 +403,25 @@ typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state, const v
 /// @param index Note control index.
 /// @param value Note control value.
 /// @param slope_per_frame Note control slope in value change per frame.
-typedef void (*BarelyInstrumentDefinition_SetNoteControlCallback)(void** state, double pitch,
-                                                                  int32_t index, double value,
-                                                                  double slope_per_frame);
+typedef void (*BarelyInstrumentDefinition_SetNoteControlCallback)(void** state,
+                                                                  BarelyRational pitch,
+                                                                  int32_t index,
+                                                                  BarelyRational value,
+                                                                  BarelyRational slope_per_frame);
 
 /// Instrument definition set note off callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state, double pitch);
+typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state, BarelyRational pitch);
 
 /// Instrument definition set note on callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state, double pitch,
-                                                             double intensity);
+typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state, BarelyRational pitch,
+                                                             BarelyRational intensity);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -471,8 +479,9 @@ typedef void (*BarelyNoteControlEventDefinition_DestroyCallback)(void** state);
 /// @param pitch Note pitch.
 /// @param index Note control index.
 /// @param value Note control value.
-typedef void (*BarelyNoteControlEventDefinition_ProcessCallback)(void** state, double pitch,
-                                                                 int32_t index, double value);
+typedef void (*BarelyNoteControlEventDefinition_ProcessCallback)(void** state, BarelyRational pitch,
+                                                                 int32_t index,
+                                                                 BarelyRational value);
 
 /// Note control event definition.
 typedef struct BarelyNoteControlEventDefinition {
@@ -501,7 +510,7 @@ typedef void (*BarelyNoteOffEventDefinition_DestroyCallback)(void** state);
 ///
 /// @param state Pointer to note off event state.
 /// @param pitch Note pitch.
-typedef void (*BarelyNoteOffEventDefinition_ProcessCallback)(void** state, double pitch);
+typedef void (*BarelyNoteOffEventDefinition_ProcessCallback)(void** state, BarelyRational pitch);
 
 /// Note off event definition.
 typedef struct BarelyNoteOffEventDefinition {
@@ -531,8 +540,8 @@ typedef void (*BarelyNoteOnEventDefinition_DestroyCallback)(void** state);
 /// @param state Pointer to note on event state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyNoteOnEventDefinition_ProcessCallback)(void** state, double pitch,
-                                                            double intensity);
+typedef void (*BarelyNoteOnEventDefinition_ProcessCallback)(void** state, BarelyRational pitch,
+                                                            BarelyRational intensity);
 
 /// Note on event definition.
 typedef struct BarelyNoteOnEventDefinition {
@@ -613,7 +622,7 @@ BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
 /// @param out_value Output control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index,
-                                           double* out_value);
+                                           BarelyRational* out_value);
 
 /// Gets an effect control definition.
 ///
@@ -652,8 +661,8 @@ BARELY_EXPORT bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t 
 /// @param value Control value.
 /// @param slope_per_beat Control slope in value change per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
-                                           double slope_per_beat);
+BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index,
+                                           BarelyRational value, BarelyRational slope_per_beat);
 
 /// Sets the control event of an effect.
 ///
@@ -703,7 +712,7 @@ BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 /// @param out_value Output control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t index,
-                                               double* out_value);
+                                               BarelyRational* out_value);
 
 /// Gets an instrument control definition.
 ///
@@ -722,8 +731,9 @@ BARELY_EXPORT bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle 
 /// @param index Note control index.
 /// @param out_value Output note control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   int32_t index, double* out_value);
+BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument,
+                                                   BarelyRational pitch, int32_t index,
+                                                   BarelyRational* out_value);
 
 /// Gets an instrument note control definition.
 ///
@@ -733,7 +743,7 @@ BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instru
 /// @param out_definition Output note control definition.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetNoteControlDefinition(
-    BarelyInstrumentHandle instrument, double pitch, int32_t index,
+    BarelyInstrumentHandle instrument, BarelyRational pitch, int32_t index,
     BarelyControlDefinition* out_definition);
 
 /// Gets whether an instrument note is on or not.
@@ -742,8 +752,8 @@ BARELY_EXPORT bool BarelyInstrument_GetNoteControlDefinition(
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
-                                             bool* out_is_note_on);
+BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument,
+                                             BarelyRational pitch, bool* out_is_note_on);
 
 /// Processes instrument output samples at timestamp.
 /// @note This function is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
@@ -770,7 +780,7 @@ BARELY_EXPORT bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle inst
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument,
-                                                         double pitch);
+                                                         BarelyRational pitch);
 
 /// Resets an instrument control value.
 ///
@@ -786,7 +796,7 @@ BARELY_EXPORT bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrume
 /// @param index Note control index.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument,
-                                                     double pitch, int32_t index);
+                                                     BarelyRational pitch, int32_t index);
 
 /// Sets all instrument notes off.
 ///
@@ -802,7 +812,7 @@ BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instru
 /// @param slope_per_beat Control slope in value change per beat.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index,
-                                               double value, double slope_per_beat);
+                                               BarelyRational value, BarelyRational slope_per_beat);
 
 /// Sets the control event of an instrument.
 ///
@@ -831,9 +841,10 @@ BARELY_EXPORT bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, c
 /// @param value Note control value.
 /// @param slope_per_beat Note control slope in value change per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   int32_t index, double value,
-                                                   double slope_per_beat);
+BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument,
+                                                   BarelyRational pitch, int32_t index,
+                                                   BarelyRational value,
+                                                   BarelyRational slope_per_beat);
 
 /// Sets the note control event of an instrument.
 ///
@@ -850,7 +861,8 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle i
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch);
+BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument,
+                                               BarelyRational pitch);
 
 /// Sets the note off event of an instrument.
 ///
@@ -868,8 +880,8 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instr
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch,
-                                              double intensity);
+BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
+                                              BarelyRational pitch, BarelyRational intensity);
 
 /// Sets the note on event of an instrument.
 ///
@@ -1143,39 +1155,21 @@ struct ControlDefinition : public BarelyControlDefinition {
   /// @param default_value Default value.
   /// @param min_value Minimum value.
   /// @param max_value Maximum value.
-  explicit ControlDefinition(double default_value,
-                             double min_value = std::numeric_limits<double>::lowest(),
-                             double max_value = std::numeric_limits<double>::max()) noexcept
+  explicit ControlDefinition(Rational default_value,
+                             Rational min_value = std::numeric_limits<int32_t>::lowest(),
+                             Rational max_value = std::numeric_limits<int32_t>::max()) noexcept
       : ControlDefinition(BarelyControlDefinition{
             default_value,
             min_value,
             max_value,
         }) {}
 
-  /// Constructs a new `ControlDefinition` with a boolean type.
-  ///
-  /// @param default_value Default boolean value.
-  explicit ControlDefinition(bool default_value) noexcept
-      : ControlDefinition(static_cast<double>(default_value)) {}
-
-  /// Constructs a new `ControlDefinition` with an integer type.
-  ///
-  /// @param default_value Default integer value.
-  /// @param min_value Minimum integer value.
-  /// @param max_value Maximum integer value.
-  explicit ControlDefinition(int default_value, int min_value = std::numeric_limits<int>::lowest(),
-                             int max_value = std::numeric_limits<int>::max()) noexcept
-      : ControlDefinition(static_cast<double>(default_value), static_cast<double>(min_value),
-                          static_cast<double>(max_value)) {}
-
   /// Constructs a new `ControlDefinition` from a raw type.
   ///
   /// @param definition Raw control definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
   ControlDefinition(BarelyControlDefinition definition) noexcept
-      : BarelyControlDefinition{definition} {
-    assert(default_value >= min_value && default_value <= max_value);
-  }
+      : BarelyControlDefinition{definition} {}
 };
 
 /// Control event definition.
@@ -1184,7 +1178,7 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
   ///
   /// @param index Control index.
   /// @param value Control value.
-  using Callback = std::function<void(int index, double value)>;
+  using Callback = std::function<void(int index, Rational value)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyControlEventDefinition_CreateCallback;
@@ -1205,7 +1199,7 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, int32_t index, double value) noexcept {
+        [](void** state, int32_t index, BarelyRational value) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
             callback(index, value);
           }
@@ -1363,7 +1357,7 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @param value Note control value.
-  using Callback = std::function<void(double pitch, int index, double value)>;
+  using Callback = std::function<void(Rational pitch, int index, Rational value)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteControlEventDefinition_CreateCallback;
@@ -1384,7 +1378,7 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch, int32_t index, double value) noexcept {
+        [](void** state, BarelyRational pitch, int32_t index, BarelyRational value) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
             callback(pitch, index, value);
           }
@@ -1418,7 +1412,7 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
   /// Callback signature.
   ///
   /// @param pitch Note pitch.
-  using Callback = std::function<void(double pitch)>;
+  using Callback = std::function<void(Rational pitch)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteOffEventDefinition_CreateCallback;
@@ -1439,7 +1433,7 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch) noexcept {
+        [](void** state, BarelyRational pitch) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
             callback(pitch);
           }
@@ -1473,7 +1467,7 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  using Callback = std::function<void(double pitch, double intensity)>;
+  using Callback = std::function<void(Rational pitch, Rational intensity)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteOnEventDefinition_CreateCallback;
@@ -1494,7 +1488,7 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch, double intensity) noexcept {
+        [](void** state, BarelyRational pitch, BarelyRational intensity) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
             callback(pitch, intensity);
           }
@@ -1685,15 +1679,15 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
   ///
   /// @param index Control index.
   /// @return Control value.
-  template <typename IndexType, typename ValueType>
-  [[nodiscard]] ValueType GetControl(IndexType index) const noexcept {
+  template <typename IndexType>
+  [[nodiscard]] Rational GetControl(IndexType index) const noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
-    double value = 0.0;
+    Rational value = 0;
     [[maybe_unused]] const bool success =
         BarelyEffect_GetControl(Get(), static_cast<int>(index), &value);
     assert(success);
-    return static_cast<ValueType>(value);
+    return value;
   }
 
   /// Returns a control definition.
@@ -1743,14 +1737,12 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
-  template <typename IndexType, typename ValueType>
-  void SetControl(IndexType index, ValueType value, double slope_per_beat = 0.0) noexcept {
+  template <typename IndexType>
+  void SetControl(IndexType index, Rational value, Rational slope_per_beat = 0) noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyEffect_SetControl(
-        Get(), static_cast<int>(index), static_cast<double>(value), slope_per_beat);
+    [[maybe_unused]] const bool success =
+        BarelyEffect_SetControl(Get(), static_cast<int32_t>(index), value, slope_per_beat);
     assert(success);
   }
 
@@ -1871,7 +1863,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   [[nodiscard]] ValueType GetControl(IndexType index) const noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
-    double value = 0.0;
+    Rational value = 0.0;
     [[maybe_unused]] const bool success =
         BarelyInstrument_GetControl(Get(), static_cast<int>(index), &value);
     assert(success);
@@ -1898,10 +1890,10 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param index Note control index.
   /// @return Note control value.
   template <typename IndexType, typename ValueType>
-  [[nodiscard]] ValueType GetNoteControl(double pitch, IndexType index) const noexcept {
+  [[nodiscard]] ValueType GetNoteControl(Rational pitch, IndexType index) const noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
-    double value = 0.0;
+    Rational value = 0.0;
     [[maybe_unused]] const bool success =
         BarelyInstrument_GetNoteControl(Get(), pitch, static_cast<int>(index), &value);
     assert(success);
@@ -1913,7 +1905,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param index Note control index.
   /// @return Note control definition.
   template <typename IndexType>
-  [[nodiscard]] ControlDefinition GetNoteControlDefinition(double pitch,
+  [[nodiscard]] ControlDefinition GetNoteControlDefinition(Rational pitch,
                                                            IndexType index) const noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
@@ -1928,7 +1920,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
+  [[nodiscard]] bool IsNoteOn(Rational pitch) const noexcept {
     bool is_note_on = false;
     [[maybe_unused]] const bool success = BarelyInstrument_IsNoteOn(Get(), pitch, &is_note_on);
     assert(success);
@@ -1957,7 +1949,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// Resets all note control values.
   ///
   /// @param pitch Note pitch.
-  void ResetAllNoteControls(double pitch) noexcept {
+  void ResetAllNoteControls(Rational pitch) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_ResetAllNoteControls(Get(), pitch);
     assert(success);
   }
@@ -1978,7 +1970,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param pitch Note pitch.
   /// @param index Note control index.
   template <typename IndexType>
-  void ResetNoteControl(double pitch, IndexType index) noexcept {
+  void ResetNoteControl(Rational pitch, IndexType index) noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_ResetNoteControl(Get(), pitch, index);
@@ -1996,14 +1988,12 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
-  template <typename IndexType, typename ValueType>
-  void SetControl(IndexType index, ValueType value, double slope_per_beat = 0.0) noexcept {
+  template <typename IndexType>
+  void SetControl(IndexType index, Rational value, Rational slope_per_beat = 0) noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
-        Get(), static_cast<int>(index), static_cast<double>(value), slope_per_beat);
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_SetControl(Get(), static_cast<int32_t>(index), value, slope_per_beat);
     assert(success);
   }
 
@@ -2056,15 +2046,13 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param index Note control index.
   /// @param value Note control value.
   /// @param slope_per_beat Note control slope in value change per beat.
-  template <typename IndexType, typename ValueType>
-  void SetNoteControl(double pitch, IndexType index, ValueType value,
-                      double slope_per_beat = 0.0) noexcept {
+  template <typename IndexType>
+  void SetNoteControl(Rational pitch, IndexType index, Rational value,
+                      Rational slope_per_beat = 0) noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        Get(), pitch, static_cast<int>(index), static_cast<double>(value), slope_per_beat);
+        Get(), pitch, static_cast<int>(index), value, slope_per_beat);
     assert(success);
   }
 
@@ -2089,7 +2077,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(double pitch) noexcept {
+  void SetNoteOff(Rational pitch) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOff(Get(), pitch);
     assert(success);
   }
@@ -2115,7 +2103,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  void SetNoteOn(double pitch, double intensity = 1.0) noexcept {
+  void SetNoteOn(Rational pitch, Rational intensity = 1) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(Get(), pitch, intensity);
     assert(success);
   }

@@ -18,7 +18,7 @@ EffectDefinition LowPassEffect::GetDefinition() noexcept {
   static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
       control_definitions = {
           // Cutoff frequency.
-          ControlDefinition{48000.0, 0.0},
+          ControlDefinition{48000, 0},
       };
   return CustomEffect::GetDefinition<LowPassEffect>(control_definitions);
 }
@@ -41,11 +41,11 @@ void LowPassEffect::Process(double* output_samples, int output_channel_count,
   }
 }
 
-void LowPassEffect::SetControl(int index, double value, double /*slope_per_frame*/) noexcept {
+void LowPassEffect::SetControl(int index, Rational value, Rational /*slope_per_frame*/) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kCutoffFrequency:
       for (auto& filter : filters_) {
-        filter.SetCoefficient(GetFilterCoefficient(frame_rate_, value));
+        filter.SetCoefficient(GetFilterCoefficient(frame_rate_, static_cast<double>(value)));
       }
       break;
     default:

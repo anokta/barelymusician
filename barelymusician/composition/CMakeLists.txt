@@ -1,13 +1,12 @@
 add_library(
-  barely_duration
-  duration.cpp
-  duration.h
-)
-
-add_library(
   barely_intensity
   intensity.cpp
   intensity.h
+)
+target_link_libraries(
+  barely_intensity
+  barely_rational
+  barelymusician_headeronly
 )
 
 add_library(
@@ -15,19 +14,13 @@ add_library(
   pitch.cpp
   pitch.h
 )
+target_link_libraries(
+  barely_pitch
+  barely_rational
+  barelymusician_headeronly
+)
 
 if (ENABLE_TESTS)
-  add_executable(
-    barely_duration_test
-    duration_test.cpp
-  )
-  target_link_libraries(
-    barely_duration_test
-    barely_duration
-    gtest_main
-  )
-  gtest_discover_tests(barely_duration_test)
-
   add_executable(
     barely_intensity_test
     intensity_test.cpp
@@ -35,6 +28,8 @@ if (ENABLE_TESTS)
   target_link_libraries(
     barely_intensity_test
     barely_intensity
+    barely_rational
+    barelymusician_headeronly
     gtest_main
   )
   gtest_discover_tests(barely_intensity_test)
@@ -46,6 +41,8 @@ if (ENABLE_TESTS)
   target_link_libraries(
     barely_pitch_test
     barely_pitch
+    barely_rational
+    barelymusician_headeronly
     gtest_main
   )
   gtest_discover_tests(barely_pitch_test)

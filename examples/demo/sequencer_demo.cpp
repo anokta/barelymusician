@@ -37,10 +37,10 @@ constexpr int kFrameCount = 1024;
 constexpr std::int64_t kLookahead = kFrameRate / 10;
 
 // Instrument settings.
-constexpr double kGain = 0.1;
+constexpr Rational kGain = Rational(1, 10);
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.1;
+constexpr Rational kAttack = 0;
+constexpr Rational kRelease = Rational(1, 10);
 
 constexpr int kInitialTempo = 120;
 constexpr int kTempoIncrement = 10;
@@ -59,10 +59,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = musician.CreateInstrument<SynthInstrument>();
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
+                        static_cast<int>(kOscillatorType));
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
+  instrument.SetNoteOnEvent([](Rational pitch, Rational /*intensity*/) {
     ConsoleLog() << "Note{" << barely::MidiFromPitch(pitch) << "}";
   });
 
@@ -71,7 +72,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetLoopBeginPosition(3);
   performer.SetLoopLength(5);
 
-  const auto play_note_fn = [&](Rational duration, double pitch) {
+  const auto play_note_fn = [&](Rational duration, Rational pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
       performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
@@ -86,9 +87,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.emplace_back(3, play_note_fn(1, barely::kPitchF4));
   score.emplace_back(4, play_note_fn(1, barely::kPitchG4));
   score.emplace_back(5, play_note_fn(Rational(1, 3), barely::kPitchG4));
-  score.emplace_back(5 + Rational(1, 3), play_note_fn(Rational(1, 3), barely::kPitchA5));
-  score.emplace_back(5 + Rational(2, 3), play_note_fn(Rational(1, 3), barely::kPitchB5));
-  score.emplace_back(6, play_note_fn(2, barely::kPitchC5));
+  score.emplace_back(5 + Rational(1, 3), play_note_fn(Rational(1, 3), barely::kPitchA4));
+  score.emplace_back(5 + Rational(2, 3), play_note_fn(Rational(1, 3), barely::kPitchB4));
+  score.emplace_back(6, play_note_fn(2, barely::kPitchC4 + 1));
 
   std::unordered_map<int, Task> tasks;
   int index = 0;

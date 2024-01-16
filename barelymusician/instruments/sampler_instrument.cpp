@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/rational.h"
 #include "barelymusician/instruments/custom_instrument.h"
 
 BarelyInstrumentDefinition BarelySamplerInstrument_GetDefinition() {
@@ -24,19 +25,19 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
   static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
       control_definitions = {
           // Gain.
-          ControlDefinition{1.0, 0.0, 1.0},
+          ControlDefinition{1, 0, 1},
           // Root pitch.
-          ControlDefinition{0.0},
+          ControlDefinition{0},
           // Sample player loop.
           ControlDefinition{false},
           // Attack.
-          ControlDefinition{0.05, 0.0, 60.0},
+          ControlDefinition{Rational(1, 20), 0, 60},
           // Decay.
-          ControlDefinition{0.0, 0.0, 60.0},
+          ControlDefinition{0, 0, 60},
           // Sustain.
-          ControlDefinition{1.0, 0.0, 1.0},
+          ControlDefinition{1, 0, 1},
           // Release.
-          ControlDefinition{0.25, 0.0, 60.0},
+          ControlDefinition{Rational(1, 4), 0, 60},
           // Number of voices.
           ControlDefinition{8, 1, kMaxVoiceCount},
       };
@@ -59,33 +60,41 @@ void SamplerInstrument::Process(double* output_samples, int output_channel_count
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SamplerInstrument::SetControl(int index, double value, double /*slope*/) noexcept {
+void SamplerInstrument::SetControl(int index, Rational value,
+                                   Rational /*slope_per_beat*/) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kGain:
-      gain_processor_.SetGain(value);
+      gain_processor_.SetGain(static_cast<double>(value));
       break;
     case Control::kRootPitch:
       root_pitch_ = value;
       break;
     case Control::kLoop:
-      voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->generator().SetLoop(static_cast<bool>(value));
-      });
+      voice_.Update(
+          [value](SamplerVoice* voice) noexcept { voice->generator().SetLoop(value > 0); });
       break;
     case Control::kAttack:
-      voice_.Update([value](SamplerVoice* voice) noexcept { voice->envelope().SetAttack(value); });
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->envelope().SetAttack(static_cast<double>(value));
+      });
       break;
     case Control::kDecay:
-      voice_.Update([value](SamplerVoice* voice) noexcept { voice->envelope().SetDecay(value); });
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->envelope().SetDecay(static_cast<double>(value));
+      });
       break;
     case Control::kSustain:
-      voice_.Update([value](SamplerVoice* voice) noexcept { voice->envelope().SetSustain(value); });
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->envelope().SetSustain(static_cast<double>(value));
+      });
       break;
     case Control::kRelease:
-      voice_.Update([value](SamplerVoice* voice) noexcept { voice->envelope().SetRelease(value); });
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->envelope().SetRelease(static_cast<double>(value));
+      });
       break;
     case Control::kVoiceCount:
-      voice_.Resize(static_cast<int>(value));
+      voice_.Resize(static_cast<int>(static_cast<double>(value)));
       break;
     default:
       assert(false);
@@ -103,13 +112,13 @@ void SamplerInstrument::SetData(const void* data, int size) noexcept {
   });
 }
 
-void SamplerInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
+void SamplerInstrument::SetNoteOff(Rational pitch) noexcept { voice_.Stop(pitch); }
 
-void SamplerInstrument::SetNoteOn(double pitch, double intensity) noexcept {
-  const double speed = std::pow(2.0, pitch - root_pitch_);
+void SamplerInstrument::SetNoteOn(Rational pitch, Rational intensity) noexcept {
+  const double speed = std::pow(2.0, static_cast<double>(pitch - root_pitch_));
   voice_.Start(pitch, [speed, intensity](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
-    voice->set_gain(intensity);
+    voice->set_gain(static_cast<double>(intensity));
   });
 }
 

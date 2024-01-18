@@ -45,7 +45,7 @@ Control* Effect::GetControl(int index) noexcept {
 
 int Effect::GetProcessOrder() const noexcept { return process_order_; }
 
-void Effect::Process(double* output_samples, int output_channel_count,
+void Effect::Process(float* output_samples, int output_channel_count,
                      int output_frame_count) noexcept {
   if (process_callback_) {
     process_callback_(&state_, output_samples, output_channel_count, output_frame_count);

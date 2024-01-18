@@ -4,19 +4,19 @@
 namespace barely {
 
 /// Minimum decibel threshold.
-inline constexpr double kMinDecibels = -80.0;
+inline constexpr float kMinDecibels = -80.0f;
 
 /// Converts a value from decibels to linear amplitude.
 ///
 /// @param decibels Value in decibels.
 /// @return Value in linear amplitude.
-double AmplitudeFromDecibels(double decibels) noexcept;
+float AmplitudeFromDecibels(float decibels) noexcept;
 
 /// Converts a value from linear amplitude to decibels.
 ///
 /// @param amplitude Value in linear amplitude.
 /// @return Value in decibels.
-double DecibelsFromAmplitude(double amplitude) noexcept;
+float DecibelsFromAmplitude(float amplitude) noexcept;
 
 }  // namespace barely
 

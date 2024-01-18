@@ -49,7 +49,7 @@ class Effect {
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  void Process(double* output_samples, int output_channel_count, int output_frame_count) noexcept;
+  void Process(float* output_samples, int output_channel_count, int output_frame_count) noexcept;
 
   /// Processes a control event.
   ///

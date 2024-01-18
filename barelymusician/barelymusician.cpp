@@ -314,7 +314,7 @@ bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, BarelyRational
   return true;
 }
 
-bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
+bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, float* output_samples,
                               int32_t output_channel_count, int32_t output_frame_count,
                               int64_t timestamp) {
   if (!instrument) return false;

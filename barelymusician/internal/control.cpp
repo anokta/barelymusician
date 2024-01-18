@@ -1,7 +1,6 @@
 
 #include "barelymusician/internal/control.h"
 
-#include <algorithm>
 #include <cassert>
 #include <vector>
 

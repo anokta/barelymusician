@@ -79,7 +79,7 @@ class Instrument {
   /// @param timestamp Timestamp in frames.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool Process(double* output_samples, int output_channel_count, int output_frame_count,
+  bool Process(float* output_samples, int output_channel_count, int output_frame_count,
                std::int64_t timestamp) noexcept;
 
   /// Removes an effect.

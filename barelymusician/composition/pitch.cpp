@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <span>
 
 #include "barelymusician/barelymusician.h"
@@ -13,13 +14,13 @@ int MidiFromPitch(Rational pitch) noexcept {
   return static_cast<int>(static_cast<std::int64_t>(kSemitoneCount * pitch)) + kMidiA0;
 }
 
-Rational PitchFromMidi(int midi) noexcept { return Rational(midi - kMidiA0, kSemitoneCount); }
+Rational PitchFromMidi(int midi) noexcept { return {midi - kMidiA0, kSemitoneCount}; }
 
 Rational PitchFromScale(std::span<const Rational> scale, int index) noexcept {
   if (!scale.empty()) {
     const int scale_length = static_cast<int>(scale.size());
-    const int octave_offset = static_cast<int>(
-        std::floor(static_cast<double>(index) / static_cast<double>(scale_length)));
+    const int octave_offset =
+        static_cast<int>(std::floor(static_cast<float>(index) / static_cast<float>(scale_length)));
     const int scale_offset = index - octave_offset * scale_length;
     assert(scale_offset >= 0);
     return octave_offset + scale[scale_offset];

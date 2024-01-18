@@ -15,7 +15,7 @@ class Envelope : public Generator {
   explicit Envelope(int frame_rate) noexcept;
 
   /// Implements `Generator`.
-  double Next() noexcept override;
+  float Next() noexcept override;
   void Reset() noexcept override;
 
   /// Returns whether the envelope is currently active (i.e., not idle).
@@ -26,22 +26,22 @@ class Envelope : public Generator {
   /// Sets the attack of the envelope in seconds.
   ///
   /// @param attack Attack in milliseconds.
-  void SetAttack(double attack) noexcept;
+  void SetAttack(float attack) noexcept;
 
   /// Sets the decay of the envelope in seconds.
   ///
   /// @param  decay Attack in seconds.
-  void SetDecay(double decay) noexcept;
+  void SetDecay(float decay) noexcept;
 
   /// Sets the release of the envelope in seconds.
   ///
   /// @param  release Release in seconds.
-  void SetRelease(double release) noexcept;
+  void SetRelease(float release) noexcept;
 
   /// Sets the sustain of the envelope in amplitude.
   ///
   /// @param  sustain Sustain in amplitude range [0, 1].
-  void SetSustain(double sustain) noexcept;
+  void SetSustain(float sustain) noexcept;
 
   /// Starts the envelope.
   void Start() noexcept;
@@ -54,22 +54,22 @@ class Envelope : public Generator {
   enum class State { kAttack, kDecay, kSustain, kRelease, kIdle };
 
   // Inverse frame rate in seconds.
-  double frame_interval_ = 0.0;
+  float frame_interval_ = 0.0f;
 
   // Current ADSR values.
-  double attack_increment_ = 0.0;
-  double decay_increment_ = 0.0;
-  double sustain_ = 1.0;
-  double release_increment_ = 0.0;
+  float attack_increment_ = 0.0f;
+  float decay_increment_ = 0.0f;
+  float sustain_ = 1.0f;
+  float release_increment_ = 0.0f;
 
   // Last output value.
-  double output_ = 0.0;
+  float output_ = 0.0f;
 
   // Last output value on release.
-  double release_output_ = 0.0;
+  float release_output_ = 0.0f;
 
   // Internal clock.
-  double phase_ = 0.0;
+  float phase_ = 0.0f;
 
   // Current state.
   State state_ = State::kIdle;

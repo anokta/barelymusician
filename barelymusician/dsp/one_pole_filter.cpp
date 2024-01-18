@@ -4,7 +4,7 @@
 
 namespace barely {
 
-double OnePoleFilter::Next(double input) noexcept {
+float OnePoleFilter::Next(float input) noexcept {
   output_ = coefficient_ * (output_ - input) + input;
   if (type_ == FilterType::kHighPass) {
     return input - output_;
@@ -12,10 +12,10 @@ double OnePoleFilter::Next(double input) noexcept {
   return output_;
 }
 
-void OnePoleFilter::Reset() noexcept { output_ = 0.0; }
+void OnePoleFilter::Reset() noexcept { output_ = 0.0f; }
 
-void OnePoleFilter::SetCoefficient(double coefficient) noexcept {
-  coefficient_ = std::min(std::max(coefficient, 0.0), 1.0);
+void OnePoleFilter::SetCoefficient(float coefficient) noexcept {
+  coefficient_ = std::min(std::max(coefficient, 0.0f), 1.0f);
 }
 
 void OnePoleFilter::SetType(FilterType type) noexcept { type_ = type; }

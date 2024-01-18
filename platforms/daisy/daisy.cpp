@@ -23,10 +23,10 @@ constexpr size_t kChannelCount = 2;
 constexpr size_t kFrameCount = 16;
 
 // Instrument settings.
-constexpr double kGain = 0.125;
+constexpr float kGain = 0.125f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
-constexpr double kAttack = 0.05;
-constexpr double kRelease = 0.125;
+constexpr float kAttack = 0.05f;
+constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
 
 constexpr int kOscCount = static_cast<int>(OscillatorType::kCount);
@@ -36,7 +36,7 @@ static MidiUsbHandler midi;
 
 static barely::Instrument* instrument_ptr = nullptr;
 static int osc_index = static_cast<int>(kOscillatorType);
-static std::array<double, kChannelCount * kFrameCount> temp_samples{0.0};
+static std::array<float, kChannelCount * kFrameCount> temp_samples{0.0};
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.

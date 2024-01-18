@@ -84,7 +84,7 @@ bool Instrument::IsNoteOn(Rational pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
+bool Instrument::Process(float* output_samples, int output_channel_count, int output_frame_count,
                          std::int64_t timestamp) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {

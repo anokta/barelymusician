@@ -2,7 +2,6 @@
 #define EXAMPLES_COMMON_AUDIO_OUTPUT_H_
 
 #include <functional>
-#include <vector>
 
 #include "portaudio.h"
 
@@ -14,7 +13,7 @@ class AudioOutput {
   /// Audio process callback signature.
   ///
   /// @param output Output buffer.
-  using ProcessCallback = std::function<void(double* output)>;
+  using ProcessCallback = std::function<void(float* output)>;
 
   /// Constructs new `AudioOutput`.
   AudioOutput() noexcept;
@@ -44,15 +43,8 @@ class AudioOutput {
   void SetProcessCallback(ProcessCallback process_callback) noexcept;
 
  private:
-  // Process data.
-  struct ProcessData {
-    // Buffer.
-    std::vector<double> buffer;
-
-    // Callback.
-    ProcessCallback callback = nullptr;
-  };
-  ProcessData process_data_;
+  // Process callback.
+  ProcessCallback process_callback_ = nullptr;
 
   // Stream for audio processing.
   PaStream* stream_ = nullptr;

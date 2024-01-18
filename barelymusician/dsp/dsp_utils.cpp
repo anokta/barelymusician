@@ -9,23 +9,23 @@ namespace barely {
 namespace {
 
 // Middle A (A4) frequency.
-constexpr double kFrequencyA4 = 440.0;
+constexpr float kFrequencyA4 = 440.0f;
 
 }  // namespace
 
-double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept {
-  if (const double frame_rate_double = static_cast<double>(frame_rate);
-      frame_rate_double > 0.0 && cuttoff_frequency < frame_rate_double) {
+float GetFilterCoefficient(int frame_rate, float cuttoff_frequency) noexcept {
+  if (const float frame_rate_float = static_cast<float>(frame_rate);
+      frame_rate_float > 0.0f && cuttoff_frequency < frame_rate_float) {
     // c = exp(-2 * pi * fc / fs).
     // TODO(#8): Verify if this *a proper way* to calculate the coefficient?
-    return std::exp(-kTwoPi * cuttoff_frequency / frame_rate_double);
+    return std::exp(-kTwoPi * cuttoff_frequency / frame_rate_float);
   }
   return 0.0;
 }
 
-double GetFrequency(Rational pitch) noexcept {
+float GetFrequency(Rational pitch) noexcept {
   // Middle A note (A4) is selected as the base note frequency, where f = fA4 * 2 ^ p.
-  return kFrequencyA4 * std::pow(2.0, static_cast<double>(pitch));
+  return kFrequencyA4 * std::pow(2.0f, static_cast<float>(pitch));
 }
 
 }  // namespace barely

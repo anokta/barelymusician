@@ -30,7 +30,7 @@ LowPassEffect::LowPassEffect(int frame_rate) noexcept : frame_rate_(frame_rate) 
   }
 }
 
-void LowPassEffect::Process(double* output_samples, int output_channel_count,
+void LowPassEffect::Process(float* output_samples, int output_channel_count,
                             int output_frame_count) noexcept {
   assert(output_channel_count <= kMaxChannelCount);
   for (int frame = 0; frame < output_frame_count; ++frame) {
@@ -45,7 +45,7 @@ void LowPassEffect::SetControl(int index, Rational value, Rational /*slope_per_f
   switch (static_cast<Control>(index)) {
     case Control::kCutoffFrequency:
       for (auto& filter : filters_) {
-        filter.SetCoefficient(GetFilterCoefficient(frame_rate_, static_cast<double>(value)));
+        filter.SetCoefficient(GetFilterCoefficient(frame_rate_, static_cast<float>(value)));
       }
       break;
     default:

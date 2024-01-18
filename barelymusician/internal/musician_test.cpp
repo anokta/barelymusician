@@ -35,23 +35,23 @@ InstrumentDefinition GetTestInstrumentDefinition() {
       ControlDefinition{1, 0, 1},
   };
   return InstrumentDefinition(
-      [](void** state, int32_t /*frame_rate*/) { *state = reinterpret_cast<void*>(new double{0}); },
-      [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, int32_t output_channel_count,
+      [](void** state, int32_t /*frame_rate*/) { *state = reinterpret_cast<void*>(new float{0}); },
+      [](void** state) { delete static_cast<float*>(*state); },
+      [](void** state, float* output_samples, int32_t output_channel_count,
          int32_t output_frame_count) {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
-                    *reinterpret_cast<double*>(*state));
+                    *reinterpret_cast<float*>(*state));
       },
       [](void** state, int32_t index, BarelyRational value, BarelyRational /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>((index + 1) * Rational(value));
+        *reinterpret_cast<float*>(*state) = static_cast<float>((index + 1) * Rational(value));
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {},
       [](void** /*state*/, BarelyRational /*pitch*/, int32_t /*index*/, BarelyRational /*value*/,
          BarelyRational /*slope_per_frame*/) {},
-      [](void** state, BarelyRational /*pitch*/) { *reinterpret_cast<double*>(*state) = 0; },
+      [](void** state, BarelyRational /*pitch*/) { *reinterpret_cast<float*>(*state) = 0; },
       [](void** state, BarelyRational pitch, BarelyRational intensity) {
-        *reinterpret_cast<double*>(*state) =
-            static_cast<double>(Rational(pitch) * Rational(intensity));
+        *reinterpret_cast<float*>(*state) =
+            static_cast<float>(Rational(pitch) * Rational(intensity));
       },
       control_definitions, note_control_definitions);
 }
@@ -62,18 +62,18 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr Rational kIntensity = Rational(3, 4);
 
   Musician musician(kFrameRate);
-  std::vector<double> buffer(kChannelCount * kFrameCount);
+  std::vector<float> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
   Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetTempo(),
                         musician.GetTimestamp());
   musician.AddInstrument(instrument);
 
-  std::fill(buffer.begin(), buffer.end(), 0.0);
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0);
+      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel], 0);
     }
   }
 
@@ -104,12 +104,12 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_EQ(note_on_pitch, kPitch);
   EXPECT_EQ(note_on_intensity, kIntensity);
 
-  std::fill(buffer.begin(), buffer.end(), 0.0);
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
-                       static_cast<double>(kPitch * kIntensity));
+      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel],
+                      static_cast<float>(kPitch * kIntensity));
     }
   }
 

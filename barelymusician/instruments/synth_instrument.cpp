@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cassert>
+#include <cstdint>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
@@ -47,10 +48,10 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
 SynthInstrument::SynthInstrument(int frame_rate) noexcept
     : voice_(SynthVoice(frame_rate), kMaxVoiceCount), gain_processor_(frame_rate) {}
 
-void SynthInstrument::Process(double* output_samples, int output_channel_count,
+void SynthInstrument::Process(float* output_samples, int output_channel_count,
                               int output_frame_count) noexcept {
   for (int frame = 0; frame < output_frame_count; ++frame) {
-    const double mono_sample = voice_.Next(0);
+    const float mono_sample = voice_.Next(0);
     for (int channel = 0; channel < output_channel_count; ++channel) {
       output_samples[output_channel_count * frame + channel] = mono_sample;
     }
@@ -62,7 +63,7 @@ void SynthInstrument::Process(double* output_samples, int output_channel_count,
 void SynthInstrument::SetControl(int index, Rational value, Rational /*slope_per_frame*/) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kGain:
-      gain_processor_.SetGain(static_cast<double>(value));
+      gain_processor_.SetGain(static_cast<float>(value));
       break;
     case Control::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
@@ -71,22 +72,22 @@ void SynthInstrument::SetControl(int index, Rational value, Rational /*slope_per
       break;
     case Control::kAttack:
       voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetAttack(static_cast<double>(value));
+        voice->envelope().SetAttack(static_cast<float>(value));
       });
       break;
     case Control::kDecay:
       voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetDecay(static_cast<double>(value));
+        voice->envelope().SetDecay(static_cast<float>(value));
       });
       break;
     case Control::kSustain:
       voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetSustain(static_cast<double>(value));
+        voice->envelope().SetSustain(static_cast<float>(value));
       });
       break;
     case Control::kRelease:
       voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetRelease(static_cast<double>(value));
+        voice->envelope().SetRelease(static_cast<float>(value));
       });
       break;
     case Control::kVoiceCount:
@@ -103,7 +104,7 @@ void SynthInstrument::SetNoteOff(Rational pitch) noexcept { voice_.Stop(pitch); 
 void SynthInstrument::SetNoteOn(Rational pitch, Rational intensity) noexcept {
   voice_.Start(pitch, [pitch, intensity](SynthVoice* voice) {
     voice->generator().SetFrequency(GetFrequency(pitch));
-    voice->set_gain(static_cast<double>(intensity));
+    voice->set_gain(static_cast<float>(intensity));
   });
 }
 

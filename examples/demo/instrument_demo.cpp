@@ -76,7 +76,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetNoteOffEvent([](Rational pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](double* output) {
+  audio_output.SetProcessCallback([&](float* output) {
     instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0);
   });
 

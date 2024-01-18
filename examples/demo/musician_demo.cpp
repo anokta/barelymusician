@@ -74,17 +74,17 @@ constexpr Rational kRootNote = barely::kPitchD4;
 constexpr char kDrumsDir[] = "audio/drums/";
 
 // Inserts pad data to a given `data` from a given `file_path`.
-void InsertPadData(Rational pitch, const std::string& file_path, std::vector<double>& data) {
+void InsertPadData(Rational pitch, const std::string& file_path, std::vector<float>& data) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
 
-  const double frame_rate = static_cast<double>(sample_file.GetFrameRate());
+  const float frame_rate = static_cast<float>(sample_file.GetFrameRate());
   const auto& sample_data = sample_file.GetData();
-  const double length = static_cast<double>(sample_data.size());
+  const float length = static_cast<float>(sample_data.size());
   data.reserve(data.size() + sample_data.size() + 4);
-  data.push_back(static_cast<double>(pitch.numerator));
-  data.push_back(static_cast<double>(pitch.denominator));
+  data.push_back(static_cast<float>(pitch.numerator));
+  data.push_back(static_cast<float>(pitch.denominator));
   data.push_back(frame_rate);
   data.push_back(length);
   data.insert(data.end(), sample_data.begin(), sample_data.end());
@@ -266,8 +266,8 @@ int main(int /*argc*/, char* argv[]) {
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::unordered_map<Rational, std::string>& percussion_map) {
-        std::vector<double> data;
-        data.push_back(static_cast<double>(percussion_map.size()));
+        std::vector<float> data;
+        data.push_back(static_cast<float>(percussion_map.size()));
         for (const auto& [pitch, file_path] : percussion_map) {
           InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), data);
         }
@@ -321,9 +321,9 @@ int main(int /*argc*/, char* argv[]) {
   metronome.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  std::vector<double> temp_buffer(kChannelCount * kFrameCount);
-  const auto process_callback = [&](double* output) {
-    std::fill_n(output, kChannelCount * kFrameCount, 0.0);
+  std::vector<float> temp_buffer(kChannelCount * kFrameCount);
+  const auto process_callback = [&](float* output) {
+    std::fill_n(output, kChannelCount * kFrameCount, 0.0f);
     for (auto& instrument : instruments) {
       instrument.Process(temp_buffer.data(), kChannelCount, kFrameCount, clock.GetTimestamp());
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output, std::plus());
@@ -360,12 +360,12 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        musician.SetTempo(static_cast<int>(random.DrawUniform(0.5, 0.75) * musician.GetTempo()));
+        musician.SetTempo(static_cast<int>(random.DrawUniform(0.5f, 0.75f) * musician.GetTempo()));
         ConsoleLog() << "Tempo changed to " << musician.GetTempo();
         break;
       case '2':
-        musician.SetTempo(std::min(
-            kFrameRate / 2, static_cast<int>(random.DrawUniform(1.5, 2.0) * musician.GetTempo())));
+        musician.SetTempo(std::min(kFrameRate / 2, static_cast<int>(random.DrawUniform(1.5f, 2.0f) *
+                                                                    musician.GetTempo())));
         ConsoleLog() << "Tempo changed to " << musician.GetTempo();
         break;
       case 'R':

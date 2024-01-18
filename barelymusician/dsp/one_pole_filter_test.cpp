@@ -9,10 +9,10 @@ namespace {
 
 // Test input (single impulse).
 constexpr int kInputLength = 5;
-constexpr double kInput[kInputLength] = {1.0, 0.0, 0.0, 0.0, 0.0};
+constexpr float kInput[kInputLength] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
 // Test coefficent.
-constexpr double kCoefficient = 0.5;
+constexpr float kCoefficient = 0.5f;
 
 // Tests that a low-pass filter generates the expected output when an arbitrary coefficient is set.
 TEST(OnePoleFilterTest, LowPass) {
@@ -21,9 +21,9 @@ TEST(OnePoleFilterTest, LowPass) {
   low_pass_filter.SetCoefficient(kCoefficient);
 
   for (int i = 0; i < kInputLength; ++i) {
-    const double expected_output =
-        (1.0 - kCoefficient) * std::pow(kCoefficient, static_cast<double>(i));
-    EXPECT_DOUBLE_EQ(low_pass_filter.Next(kInput[i]), expected_output);
+    const float expected_output =
+        (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
+    EXPECT_FLOAT_EQ(low_pass_filter.Next(kInput[i]), expected_output);
   }
 }
 
@@ -31,10 +31,10 @@ TEST(OnePoleFilterTest, LowPass) {
 TEST(OnePoleFilterTest, LowPassAllPass) {
   OnePoleFilter low_pass_filter;
   low_pass_filter.SetType(FilterType::kLowPass);
-  low_pass_filter.SetCoefficient(0.0);
+  low_pass_filter.SetCoefficient(0.0f);
 
-  for (const double input : kInput) {
-    EXPECT_DOUBLE_EQ(low_pass_filter.Next(input), input);
+  for (const float input : kInput) {
+    EXPECT_FLOAT_EQ(low_pass_filter.Next(input), input);
   }
 }
 
@@ -45,9 +45,9 @@ TEST(OnePoleFilterTest, HighPass) {
   high_pass_filter.SetCoefficient(kCoefficient);
 
   for (int i = 0; i < kInputLength; ++i) {
-    const double expected_output =
-        kInput[i] - (1.0 - kCoefficient) * std::pow(kCoefficient, static_cast<double>(i));
-    EXPECT_DOUBLE_EQ(high_pass_filter.Next(kInput[i]), expected_output);
+    const float expected_output =
+        kInput[i] - (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
+    EXPECT_FLOAT_EQ(high_pass_filter.Next(kInput[i]), expected_output);
   }
 }
 
@@ -55,10 +55,10 @@ TEST(OnePoleFilterTest, HighPass) {
 TEST(OnePoleFilterTest, HighPassAllPass) {
   OnePoleFilter high_pass_filter;
   high_pass_filter.SetType(FilterType::kHighPass);
-  high_pass_filter.SetCoefficient(1.0);
+  high_pass_filter.SetCoefficient(1.0f);
 
-  for (const double input : kInput) {
-    EXPECT_DOUBLE_EQ(high_pass_filter.Next(input), input);
+  for (const float input : kInput) {
+    EXPECT_FLOAT_EQ(high_pass_filter.Next(input), input);
   }
 }
 

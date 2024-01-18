@@ -31,13 +31,13 @@ class Oscillator : public Generator {
   explicit Oscillator(int frame_rate) noexcept;
 
   /// Implements `Generator`.
-  double Next() noexcept override;
+  float Next() noexcept override;
   void Reset() noexcept override;
 
   /// Sets the frequency of the oscillator.
   ///
   /// @param frequency Oscillator frequency in hertz.
-  void SetFrequency(double frequency) noexcept;
+  void SetFrequency(float frequency) noexcept;
 
   /// Sets the type of the oscillator.
   ///
@@ -46,19 +46,19 @@ class Oscillator : public Generator {
 
  private:
   // Inverse frame rate in seconds.
-  double frame_interval_ = 0.0;
+  float frame_interval_ = 0.0f;
 
   // Maximum allowed frequency.
-  double max_frequency_ = 0.0;
+  float max_frequency_ = 0.0f;
 
   // Oscillator type.
   OscillatorType type_ = OscillatorType::kNoise;
 
   // Increment per sample.
-  double increment_ = 0.0;
+  float increment_ = 0.0f;
 
   // Internal clock.
-  double phase_ = 0.0;
+  float phase_ = 0.0f;
 
   // White noise random number generator.
   Random random_;

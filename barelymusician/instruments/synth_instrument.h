@@ -61,7 +61,7 @@ class SynthInstrument : public CustomInstrument {
   explicit SynthInstrument(int frame_rate) noexcept;
 
   /// Implements `CustomInstrument`.
-  void Process(double* output_samples, int output_channel_count,
+  void Process(float* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(int index, Rational value, Rational slope_per_frame) noexcept final;

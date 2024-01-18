@@ -12,7 +12,7 @@ class WavFile {
   /// Returns the audio data.
   ///
   /// @return Audio data.
-  [[nodiscard]] const std::vector<double>& GetData() const noexcept;
+  [[nodiscard]] const std::vector<float>& GetData() const noexcept;
 
   /// Returns the number of audio channels.
   ///
@@ -38,7 +38,7 @@ class WavFile {
   int frame_rate_ = 0;
 
   // Audio data.
-  std::vector<double> data_;
+  std::vector<float> data_;
 };
 
 }  // namespace barely::examples

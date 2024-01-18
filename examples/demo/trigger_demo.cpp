@@ -106,7 +106,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                       /*process_order=*/-1);
 
   // Audio process callback.
-  const auto process_callback = [&](double* output) {
+  const auto process_callback = [&](float* output) {
     instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
     audio_clock.Update(kFrameCount);
   };

@@ -55,15 +55,15 @@ constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
 constexpr int kMaxOffsetOctaves = 3;
 
 // Returns the sample data from a given `file_path`.
-std::vector<double> GetSampleData(const std::string& file_path) {
+std::vector<float> GetSampleData(const std::string& file_path) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
 
-  const double frame_rate = static_cast<double>(sample_file.GetFrameRate());
+  const float frame_rate = static_cast<float>(sample_file.GetFrameRate());
   const auto& sample_data = sample_file.GetData();
 
-  std::vector<double> data;
+  std::vector<float> data;
   data.reserve(sample_data.size() + 1);
   data.push_back(frame_rate);
   data.insert(data.end(), sample_data.begin(), sample_data.end());
@@ -103,13 +103,12 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
   instrument.SetNoteOnEvent([](Rational pitch, Rational intensity) {
-    ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", " << intensity << ")";
+    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
   });
-  instrument.SetNoteOffEvent(
-      [](Rational pitch) { ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") "; });
+  instrument.SetNoteOffEvent([](Rational pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](double* output) {
+  audio_output.SetProcessCallback([&](float* output) {
     instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0);
   });
 

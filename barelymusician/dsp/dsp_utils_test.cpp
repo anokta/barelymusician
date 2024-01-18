@@ -11,15 +11,15 @@ namespace {
 // Tests that the expected filter coefficients are generated for an arbitrary set of cutoff
 // frequencies.
 TEST(DspUtilsTest, GetFilterCoefficient) {
-  constexpr double kEpsilon = 1e-2;
+  constexpr float kEpsilon = 1e-2f;
   constexpr int kFrameRate = 8000;
 
   constexpr int kCutoffCount = 5;
-  constexpr std::array<double, kCutoffCount> kCutoffs = {
-      0.0, 100.0, 500.0, 1000.0, 8000.0,
+  constexpr std::array<float, kCutoffCount> kCutoffs = {
+      0.0f, 100.0f, 500.0f, 1000.0f, 8000.0f,
   };
-  constexpr std::array<double, kCutoffCount> kExpectedCoefficients = {
-      1.00, 0.92, 0.68, 0.46, 0.00,
+  constexpr std::array<float, kCutoffCount> kExpectedCoefficients = {
+      1.00f, 0.92f, 0.68f, 0.46f, 0.00f,
   };
 
   for (int i = 0; i < kCutoffCount; ++i) {
@@ -29,14 +29,14 @@ TEST(DspUtilsTest, GetFilterCoefficient) {
 
 // Tests that converting arbitrary pitches returns the expected frequencies.
 TEST(DspUtilsTest, GetFrequency) {
-  constexpr double kEpsilon = 1e-2;
+  constexpr float kEpsilon = 1e-2f;
 
   constexpr int kPitchCount = 5;
   constexpr std::array<Rational, kPitchCount> kPitches = {
       -4, Rational(-3, 4), 0, 2, Rational(33, 10),
   };
-  constexpr std::array<double, kPitchCount> kFrequencies = {
-      27.50, 261.62, 440.00, 1760.00, 4333.63,
+  constexpr std::array<float, kPitchCount> kFrequencies = {
+      27.50f, 261.62f, 440.00f, 1760.00f, 4333.63f,
   };
 
   for (int i = 0; i < kPitchCount; ++i) {

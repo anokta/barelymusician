@@ -136,9 +136,9 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<double> mix_buffer(kChannelCount * kFrameCount);
-  const auto process_callback = [&](double* output) {
-    std::fill_n(output, kChannelCount * kFrameCount, 0.0);
+  std::vector<float> mix_buffer(kChannelCount * kFrameCount);
+  const auto process_callback = [&](float* output) {
+    std::fill_n(output, kChannelCount * kFrameCount, 0.0f);
     for (auto& [instrument, performer] : tracks) {
       instrument.Process(mix_buffer.data(), kChannelCount, kFrameCount, clock.GetTimestamp());
       std::transform(mix_buffer.begin(), mix_buffer.end(), output, output, std::plus<>());

@@ -10,7 +10,7 @@ namespace barely {
 namespace {
 
 // Tests that expected note intensities are returned for given midi note velocities.
-TEST(PitchTest, PitchFromMidi) {
+TEST(IntensityTest, IntensityFromMidi) {
   constexpr int kValueCount = 5;
   constexpr std::array<int, kValueCount> kMidis = {
       0, 1, 64, 95, 127,

@@ -15,13 +15,13 @@ enum class FilterType {
 class OnePoleFilter : public Filter {
  public:
   /// Implements `Processor`.
-  double Next(double input) noexcept override;
+  float Next(float input) noexcept override;
   void Reset() noexcept override;
 
   /// Sets the coefficent of the filter.
   ///
   /// @param coefficient Filter coefficient.
-  void SetCoefficient(double coefficient) noexcept;
+  void SetCoefficient(float coefficient) noexcept;
 
   /// Sets the type of the filter.
   ///
@@ -30,10 +30,10 @@ class OnePoleFilter : public Filter {
 
  private:
   // Transfer function coefficient of the filter.
-  double coefficient_ = 1.0;
+  float coefficient_ = 1.0f;
 
   // The last output sample.
-  double output_ = 0.0;
+  float output_ = 0.0f;
 
   // Filter type.
   FilterType type_ = FilterType::kLowPass;

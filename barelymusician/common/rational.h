@@ -58,7 +58,7 @@ namespace std {
 template <>
 struct hash<barely::Rational> {
   size_t operator()(const barely::Rational& rational) const {
-    return hash<double>()(static_cast<double>(rational));
+    return hash<float>()(static_cast<float>(rational));
   }
 };
 

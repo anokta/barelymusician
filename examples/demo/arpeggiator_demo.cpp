@@ -97,7 +97,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   arpeggiator.SetStyle(kInitialStyle);
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](double* output) {
+  audio_output.SetProcessCallback([&](float* output) {
     instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
     audio_clock.Update(kFrameCount);
   });

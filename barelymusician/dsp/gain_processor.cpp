@@ -8,36 +8,36 @@ namespace barely {
 namespace {
 
 // Gain threshold of -96db in amplitude.
-constexpr double kGainThreshold = 2e-5;
+constexpr float kGainThreshold = 2e-5f;
 
 // Unity gain in amplitude.
-constexpr double kUnityGain = 1.0;
+constexpr float kUnityGain = 1.0f;
 
 // Total ramp duration in seconds.
-constexpr double kUnityRampDurationSeconds = 0.05;
+constexpr float kUnityRampDurationSeconds = 0.05f;
 
 // Applies constant `gain`.
-void ApplyConstantGain(double gain, double* buffer, int channel_count, int frame_count) noexcept {
+void ApplyConstantGain(float gain, float* buffer, int channel_count, int frame_count) noexcept {
   if (std::abs(gain - kUnityGain) < kGainThreshold) {
     return;
   }
   if (std::abs(gain) < kGainThreshold) {
-    std::fill_n(buffer, channel_count * frame_count, 0.0);
+    std::fill_n(buffer, channel_count * frame_count, 0.0f);
     return;
   }
   for (int i = 0; i < channel_count * frame_count; ++i) {
-    buffer[i] *= static_cast<double>(gain);
+    buffer[i] *= static_cast<float>(gain);
   }
 }
 
 // Applies linear ramp of `ramp_frame_count` from `gain` to `target_gain`.
-double ApplyLinearRamp(double gain, double target_gain, int ramp_frame_count, double* buffer,
-                       int channel_count, int frame_count) noexcept {
-  const double ramp_increment_ = (target_gain - gain) / static_cast<double>(ramp_frame_count);
+float ApplyLinearRamp(float gain, float target_gain, int ramp_frame_count, float* buffer,
+                      int channel_count, int frame_count) noexcept {
+  const float ramp_increment_ = (target_gain - gain) / static_cast<float>(ramp_frame_count);
   for (int frame = 0; frame < std::min(ramp_frame_count, frame_count); ++frame) {
     gain += ramp_increment_;
     for (int channel = 0; channel < channel_count; ++channel) {
-      buffer[channel_count * frame + channel] *= static_cast<double>(gain);
+      buffer[channel_count * frame + channel] *= static_cast<float>(gain);
     }
   }
   return (ramp_frame_count <= frame_count) ? target_gain : gain;
@@ -47,9 +47,9 @@ double ApplyLinearRamp(double gain, double target_gain, int ramp_frame_count, do
 
 GainProcessor::GainProcessor(int frame_rate) noexcept
     : unity_ramp_frame_count_(
-          static_cast<int>(static_cast<double>(frame_rate) * kUnityRampDurationSeconds)) {}
+          std::floor(static_cast<float>(frame_rate) * kUnityRampDurationSeconds)) {}
 
-void GainProcessor::Process(double* buffer, int channel_count, int frame_count) noexcept {
+void GainProcessor::Process(float* buffer, int channel_count, int frame_count) noexcept {
   int frame = 0;
   // Apply linear ramp.
   if (gain_ != target_gain_) {
@@ -69,6 +69,6 @@ void GainProcessor::Process(double* buffer, int channel_count, int frame_count) 
   }
 }
 
-void GainProcessor::SetGain(double gain) noexcept { target_gain_ = gain; }
+void GainProcessor::SetGain(float gain) noexcept { target_gain_ = gain; }
 
 }  // namespace barely

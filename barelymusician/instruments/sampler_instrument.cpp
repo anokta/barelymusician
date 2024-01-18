@@ -48,10 +48,10 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
     : voice_(SamplerVoice(frame_rate), kMaxVoiceCount), gain_processor_(frame_rate) {}
 
-void SamplerInstrument::Process(double* output_samples, int output_channel_count,
+void SamplerInstrument::Process(float* output_samples, int output_channel_count,
                                 int output_frame_count) noexcept {
   for (int frame = 0; frame < output_frame_count; ++frame) {
-    const double mono_sample = voice_.Next(0);
+    const float mono_sample = voice_.Next(0);
     for (int channel = 0; channel < output_channel_count; ++channel) {
       output_samples[output_channel_count * frame + channel] = mono_sample;
     }
@@ -64,7 +64,7 @@ void SamplerInstrument::SetControl(int index, Rational value,
                                    Rational /*slope_per_beat*/) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kGain:
-      gain_processor_.SetGain(static_cast<double>(value));
+      gain_processor_.SetGain(static_cast<float>(value));
       break;
     case Control::kRootPitch:
       root_pitch_ = value;
@@ -75,26 +75,26 @@ void SamplerInstrument::SetControl(int index, Rational value,
       break;
     case Control::kAttack:
       voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->envelope().SetAttack(static_cast<double>(value));
+        voice->envelope().SetAttack(static_cast<float>(value));
       });
       break;
     case Control::kDecay:
       voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->envelope().SetDecay(static_cast<double>(value));
+        voice->envelope().SetDecay(static_cast<float>(value));
       });
       break;
     case Control::kSustain:
       voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->envelope().SetSustain(static_cast<double>(value));
+        voice->envelope().SetSustain(static_cast<float>(value));
       });
       break;
     case Control::kRelease:
       voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->envelope().SetRelease(static_cast<double>(value));
+        voice->envelope().SetRelease(static_cast<float>(value));
       });
       break;
     case Control::kVoiceCount:
-      voice_.Resize(static_cast<int>(static_cast<double>(value)));
+      voice_.Resize(static_cast<int>(static_cast<float>(value)));
       break;
     default:
       assert(false);
@@ -103,10 +103,10 @@ void SamplerInstrument::SetControl(int index, Rational value,
 }
 
 void SamplerInstrument::SetData(const void* data, int size) noexcept {
-  const double* data_double = static_cast<const double*>(data);
-  const double* sample_data = size > 0 ? &data_double[1] : nullptr;
-  const int frame_rate = size > 0 ? static_cast<int>(data_double[0]) : 0;
-  const int length = size > 0 ? size / static_cast<int>(sizeof(double)) - 1 : 0;
+  const float* data_float = static_cast<const float*>(data);
+  const float* sample_data = size > 0 ? &data_float[1] : nullptr;
+  const int frame_rate = size > 0 ? static_cast<int>(data_float[0]) : 0;
+  const int length = size > 0 ? size / static_cast<int>(sizeof(float)) - 1 : 0;
   voice_.Update([sample_data, frame_rate, length](SamplerVoice* voice) noexcept {
     voice->generator().SetData(sample_data, frame_rate, length);
   });
@@ -115,10 +115,10 @@ void SamplerInstrument::SetData(const void* data, int size) noexcept {
 void SamplerInstrument::SetNoteOff(Rational pitch) noexcept { voice_.Stop(pitch); }
 
 void SamplerInstrument::SetNoteOn(Rational pitch, Rational intensity) noexcept {
-  const double speed = std::pow(2.0, static_cast<double>(pitch - root_pitch_));
+  const float speed = std::pow(2.0f, static_cast<float>(pitch - root_pitch_));
   voice_.Start(pitch, [speed, intensity](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
-    voice->set_gain(static_cast<double>(intensity));
+    voice->set_gain(static_cast<float>(intensity));
   });
 }
 

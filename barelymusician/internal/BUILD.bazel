@@ -112,7 +112,6 @@ cc_test(
     deps = [
         ":control",
         "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:rational",
         "@googletest//:gtest_main",
     ],
 )

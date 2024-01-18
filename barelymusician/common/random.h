@@ -20,15 +20,15 @@ class Random {
   ///
   /// @param mean Distrubition mean value.
   /// @param variance Distrubition variance.
-  /// @return Random double number.
-  double DrawNormal(double mean, double variance) noexcept;
+  /// @return Random float number.
+  float DrawNormal(float mean, float variance) noexcept;
 
   /// Draws a number with continuous uniform distribution in range [min, max).
   ///
   /// @param min Minimum value (inclusive).
   /// @param max Maximum value (exclusive).
-  /// @return Random double number.
-  double DrawUniform(double min, double max) noexcept;
+  /// @return Random float number.
+  float DrawUniform(float min, float max) noexcept;
 
   /// Draws a number with discrete uniform distribution in range [min, max].
   ///
@@ -54,8 +54,8 @@ class Random {
   std::default_random_engine engine_;
 
   // Distributions.
-  std::normal_distribution<double> normal_distribution_;
-  std::uniform_real_distribution<double> uniform_real_distribution_;
+  std::normal_distribution<float> normal_distribution_;
+  std::uniform_real_distribution<float> uniform_real_distribution_;
   std::uniform_int_distribution<int> uniform_int_distribution_;
   std::uniform_int_distribution<std::int64_t> uniform_rational_distribution_;
 };

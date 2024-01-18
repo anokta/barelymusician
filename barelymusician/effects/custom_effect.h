@@ -23,7 +23,7 @@ class CustomEffect {
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  virtual void Process(double* output_samples, int output_channel_count,
+  virtual void Process(float* output_samples, int output_channel_count,
                        int output_frame_count) noexcept = 0;
 
   /// Sets a control value.
@@ -62,7 +62,7 @@ class CustomEffect {
           delete static_cast<PublicEffect*>(*state);
           *state = nullptr;
         },
-        [](void** state, double* output_samples, int32_t output_channel_count,
+        [](void** state, float* output_samples, int32_t output_channel_count,
            int32_t output_frame_count) noexcept {
           auto* effect = static_cast<PublicEffect*>(*state);
           effect->Process(output_samples, output_channel_count, output_frame_count);

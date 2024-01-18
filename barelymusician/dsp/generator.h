@@ -12,7 +12,7 @@ class Generator {
   /// Generates the next output sample.
   ///
   /// @return Next output sample.
-  virtual double Next() noexcept = 0;
+  virtual float Next() noexcept = 0;
 
   /// Resets module state.
   virtual void Reset() noexcept = 0;

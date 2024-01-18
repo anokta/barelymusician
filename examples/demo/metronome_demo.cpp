@@ -81,7 +81,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   });
 
   // Audio process callback.
-  const auto process_callback = [&](double* output) {
+  const auto process_callback = [&](float* output) {
     instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
     audio_clock.Update(kFrameCount);
   };
@@ -143,7 +143,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   ConsoleLog() << "Play the metronome using the keyboard keys:";
   ConsoleLog() << "  * Use space key to start or stop the metronome";
   ConsoleLog() << "  * Use enter key to reset the metronome";
-  ConsoleLog() << "  * Use 12 keys to halve and double the tempo";
+  ConsoleLog() << "  * Use 12 keys to halve and float the tempo";
   ConsoleLog() << "  * Use OP keys to increment and decrement the tempo";
   ConsoleLog() << "  * Use R key to reset the tempo";
 

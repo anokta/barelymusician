@@ -18,7 +18,7 @@ class Voice {
   ///
   /// @param channel Output channel.
   /// @return Output sample.
-  virtual double Next(int channel) noexcept = 0;
+  virtual float Next(int channel) noexcept = 0;
 
   /// Starts the voice.
   virtual void Start() noexcept = 0;

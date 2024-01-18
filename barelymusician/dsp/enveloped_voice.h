@@ -17,7 +17,7 @@ class EnvelopedVoice : public Voice {
 
   /// Implements `Voice`.
   [[nodiscard]] bool IsActive() const noexcept override;
-  double Next(int channel) noexcept override;
+  float Next(int channel) noexcept override;
   void Start() noexcept override;
   void Stop() noexcept override;
 
@@ -28,8 +28,8 @@ class EnvelopedVoice : public Voice {
   [[nodiscard]] const GeneratorType& generator() const noexcept { return generator_; }
   [[nodiscard]] GeneratorType& generator() noexcept { return generator_; }
 
-  [[nodiscard]] double gain() const noexcept { return gain_; }
-  void set_gain(double gain) noexcept { gain_ = gain; }
+  [[nodiscard]] float gain() const noexcept { return gain_; }
+  void set_gain(float gain) noexcept { gain_ = gain; }
 
  private:
   // Voice envelope.
@@ -39,10 +39,10 @@ class EnvelopedVoice : public Voice {
   GeneratorType generator_;
 
   // Voice gain.
-  double gain_ = 0.0;
+  float gain_ = 0.0f;
 
   // Last output.
-  double output_ = 0.0;
+  float output_ = 0.0f;
 };
 
 template <class GeneratorType>
@@ -50,7 +50,7 @@ EnvelopedVoice<GeneratorType>::EnvelopedVoice(int frame_rate) noexcept
     : envelope_(frame_rate), generator_(frame_rate) {}
 
 template <class GeneratorType>
-double EnvelopedVoice<GeneratorType>::Next(int channel) noexcept {
+float EnvelopedVoice<GeneratorType>::Next(int channel) noexcept {
   if (channel == 0) {
     output_ = gain_ * envelope_.Next() * generator_.Next();
   }

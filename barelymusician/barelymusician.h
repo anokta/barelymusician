@@ -70,7 +70,7 @@
 ///   // real-time audio applications.
 ///   const int output_channel_count = 2;
 ///   const int output_frame_count = 1024;
-///   std::vector<double> output_samples(output_channel_count * output_frame_count, 0.0);
+///   std::vector<float> output_samples(output_channel_count * output_frame_count, 0.0f);
 ///   std::int64_t timestamp = 0;
 ///   instrument.Process(output_samples.data(), output_channel_count, output_frame_count,
 ///                      timestamp);
@@ -165,7 +165,7 @@
 ///   // Instruments expect raw PCM audio buffers to be processed with a synchronous call.
 ///   // Therefore, this should typically be called from an audio thread process callback in
 ///   // real-time audio applications.
-///   double output_samples[2 * 1024];
+///   float output_samples[2 * 1024];
 ///   int output_channel_count = 2;
 ///   int output_frame_count = 1024;
 ///   int64_t timestamp = 0;
@@ -311,7 +311,7 @@ typedef void (*BarelyEffectDefinition_DestroyCallback)(void** state);
 /// @param output_samples Array of output samples.
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
-typedef void (*BarelyEffectDefinition_ProcessCallback)(void** state, double* output_samples,
+typedef void (*BarelyEffectDefinition_ProcessCallback)(void** state, float* output_samples,
                                                        int32_t output_channel_count,
                                                        int32_t output_frame_count);
 
@@ -374,7 +374,7 @@ typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 /// @param output_samples Array of output samples.
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
-typedef void (*BarelyInstrumentDefinition_ProcessCallback)(void** state, double* output_samples,
+typedef void (*BarelyInstrumentDefinition_ProcessCallback)(void** state, float* output_samples,
                                                            int32_t output_channel_count,
                                                            int32_t output_frame_count);
 
@@ -765,7 +765,7 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument,
 /// @param timestamp Timestamp in frames.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
-                                            double* output_samples, int32_t output_channel_count,
+                                            float* output_samples, int32_t output_channel_count,
                                             int32_t output_frame_count, int64_t timestamp);
 
 /// Resets all instrument control values.
@@ -1123,12 +1123,12 @@ struct Rational : public BarelyRational {
   constexpr Rational(int64_t numerator = 0, int64_t denominator = 1) noexcept
       : Rational(BarelyRational{numerator, denominator}) {}
 
-  /// Converts the rational number to `double`.
+  /// Converts the rational number to `float`.
   ///
-  /// @return Double value.
-  constexpr explicit operator double() const noexcept {
+  /// @return Float value.
+  constexpr explicit operator float() const noexcept {
     assert(denominator != 0);
-    return static_cast<double>(numerator) / static_cast<double>(denominator);
+    return static_cast<float>(numerator) / static_cast<float>(denominator);
   }
 
   /// Converts the rational number to `int`.
@@ -1933,7 +1933,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in frames.
-  void Process(double* output_samples, int output_channel_count, int output_frame_count,
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
                int64_t timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_Process(
         Get(), output_samples, output_channel_count, output_frame_count, timestamp);

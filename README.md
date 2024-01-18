@@ -41,8 +41,8 @@ musician.SetTempo(/*tempo=*/124);
 auto instrument = musician.CreateInstrument<barely::SynthInstrument>();
 
 // Set the synth instrument gain to 0.5.
-instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
-                      /*slope_per_beat=*/0.0);
+instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/Rational(1, 2),
+                      /*slope_per_beat=*/0);
 
 // Set the A3 synth instrument note pitch on with a 0.25 intensity.
 //
@@ -60,8 +60,8 @@ const bool is_note_on = instrument.IsNoteOn(d4_pitch);  // will return true.
 auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 
 // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
-                  /*slope_per_beat=*/100.0);
+effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0,
+                  /*slope_per_beat=*/100);
 
 // Update the musician Timestamp in frames.
 //
@@ -81,7 +81,7 @@ musician.Update(timestamp + lookahead);
 // real-time audio applications.
 const int channel_count = 2;
 const int frame_count = 1024;
-std::vector<double> output_samples(channel_count * frame_count, 0.0);
+std::vector<float> output_samples(channel_count * frame_count, 0.0f);
 instrument.Process(output_samples.data(), channel_count, frame_count, timestamp);
 
 // Create a performer.
@@ -90,17 +90,17 @@ auto performer = musician.CreatePerformer();
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
-// Create a looping performer task that plays the A4 synth instrument note at position 0.5 for a
-// duration of 0.25 beats.
+// Create a looping performer task that plays the A4 synth instrument note at half of a beat for a
+// duration of quarter beats.
 auto task = performer.CreateTask(
     [&]() {
       // Set the A4 note pitch on.
-      instrument.SetNoteOn(0.0);
-      // Schedule a one-off task to set the A4 note pitch off after 0.25 beats.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(0.0); },
-                                   performer.GetPosition() + 0.25);
+      instrument.SetNoteOn(0);
+      // Schedule a one-off task to set the A4 note pitch off after quarter beats.
+      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(0); },
+                                   performer.GetPosition() + Rational(1, 4));
     },
-    /*position=*/0.5);
+    /*position=*/Rational(1, 2));
 
 // Start the performer.
 performer.Start();

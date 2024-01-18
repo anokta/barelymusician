@@ -30,7 +30,7 @@ class PolyphonicVoice {
   ///
   /// @param channel Output channel.
   /// @return Accumulated output sample.
-  double Next(int channel) noexcept;
+  float Next(int channel) noexcept;
 
   /// Resizes number of available voices that can be played simultaneously.
   ///
@@ -75,8 +75,8 @@ PolyphonicVoice<VoiceType>::PolyphonicVoice(VoiceType&& base_voice, int max_voic
 }
 
 template <class VoiceType>
-double PolyphonicVoice<VoiceType>::Next(int channel) noexcept {
-  double output = 0.0;
+float PolyphonicVoice<VoiceType>::Next(int channel) noexcept {
+  float output = 0.0f;
   for (VoiceType& voice : voices_) {
     if (voice.IsActive()) {
       output += voice.Next(channel);

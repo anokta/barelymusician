@@ -53,7 +53,7 @@ class PercussionInstrument : public CustomInstrument {
   explicit PercussionInstrument(int frame_rate) noexcept;
 
   /// Implements `CustomInstrument`.
-  void Process(double* output_samples, int output_channel_count,
+  void Process(float* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
   void SetControl(int index, Rational value, Rational slope_per_frame) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -73,7 +73,7 @@ class PercussionInstrument : public CustomInstrument {
   int frame_rate_;
   std::vector<Pad> pads_;
   GainProcessor gain_processor_;
-  double release_;
+  float release_ = 0.0f;
 };
 
 }  // namespace barely

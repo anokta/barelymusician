@@ -13,7 +13,7 @@ class Filter {
   ///
   /// @param input Input sample.
   /// @return Filtered output sample.
-  virtual double Next(double input) noexcept = 0;
+  virtual float Next(float input) noexcept = 0;
 
   /// Resets module state.
   virtual void Reset() noexcept = 0;

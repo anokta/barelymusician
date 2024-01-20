@@ -71,7 +71,7 @@ class SamplerInstrument : public CustomInstrument {
   void SetNoteControl(Rational /*pitch*/, int /*index*/, Rational /*value*/,
                       Rational /*slope_per_frame*/) noexcept final {}
   void SetNoteOff(Rational pitch) noexcept final;
-  void SetNoteOn(Rational pitch, Rational intensity) noexcept final;
+  void SetNoteOn(Rational pitch, float intensity) noexcept final;
 
  private:
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;

@@ -1,16 +1,15 @@
 #include "barelymusician/composition/intensity.h"
 
-#include <cstdint>
-
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
+#include <algorithm>
 
 namespace barely {
 
-int MidiFromIntensity(Rational intensity) noexcept {
-  return static_cast<int>(static_cast<int64_t>(intensity * kMaxMidiVelocity));
+int MidiFromIntensity(float intensity) noexcept {
+  return std::clamp(static_cast<int>(intensity * static_cast<float>(kMaxMidiVelocity)), 0, 127);
 }
 
-Rational IntensityFromMidi(int midi) noexcept { return {midi, kMaxMidiVelocity}; }
+float IntensityFromMidi(int midi) noexcept {
+  return std::clamp(static_cast<float>(midi) / static_cast<float>(kMaxMidiVelocity), 0.0f, 1.0f);
+}
 
 }  // namespace barely

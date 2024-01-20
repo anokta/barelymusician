@@ -21,7 +21,7 @@ namespace Barely {
         Debug.Log(instrument.name + ": NoteOff(" + pitch.ToString("F2") + ")");
       }
 
-      private void OnNoteOn(double pitch, double intensity) {
+      private void OnNoteOn(double pitch, float intensity) {
         Debug.Log(instrument.name + ": NoteOn(" + pitch.ToString("F2") + ", " +
                   intensity.ToString("F1") + ")");
       }

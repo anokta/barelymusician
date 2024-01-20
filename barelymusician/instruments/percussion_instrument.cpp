@@ -104,10 +104,10 @@ void PercussionInstrument::SetNoteOff(Rational pitch) noexcept {
   }
 }
 
-void PercussionInstrument::SetNoteOn(Rational pitch, Rational intensity) noexcept {
+void PercussionInstrument::SetNoteOn(Rational pitch, float intensity) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
-      pad.voice.set_gain(static_cast<float>(intensity));
+      pad.voice.set_gain(intensity);
       pad.voice.Start();
       break;
     }

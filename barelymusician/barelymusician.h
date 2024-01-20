@@ -47,7 +47,7 @@
 ///   // However, this is not a strict rule, since `pitch` and `intensity` can be interpreted in any
 ///   // desired way by a custom instrument.
 ///   const auto d4_pitch = barely::Rational(-7, 12);
-///   instrument.SetNoteOn(d4_pitch, /*intensity=*/barely::Rational(1, 4));
+///   instrument.SetNoteOn(d4_pitch, /*intensity=*/0.25f);
 ///
 ///   // Check if the note is on.
 ///   const bool is_note_on = instrument.IsNoteOn(d4_pitch);
@@ -143,7 +143,7 @@
 ///   // However, this is not a strict rule, since `pitch` and `intensity` can be interpreted in any
 ///   // desired way by a custom instrument.
 ///   BarelyRational d4_pitch = {-7, 12};
-///   BarelyInstrument_SetNoteOn(instrument, d4_pitch, /*intensity=*/BarelyRational{1, 4});
+///   BarelyInstrument_SetNoteOn(instrument, d4_pitch, /*intensity=*/0.25f);
 ///
 ///   // Check if the note is on.
 ///   bool is_note_on = false;
@@ -421,7 +421,7 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state, Bare
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state, BarelyRational pitch,
-                                                             BarelyRational intensity);
+                                                             float intensity);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -541,7 +541,7 @@ typedef void (*BarelyNoteOnEventDefinition_DestroyCallback)(void** state);
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 typedef void (*BarelyNoteOnEventDefinition_ProcessCallback)(void** state, BarelyRational pitch,
-                                                            BarelyRational intensity);
+                                                            float intensity);
 
 /// Note on event definition.
 typedef struct BarelyNoteOnEventDefinition {
@@ -881,7 +881,7 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instr
 /// @param intensity Note intensity.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
-                                              BarelyRational pitch, BarelyRational intensity);
+                                              BarelyRational pitch, float intensity);
 
 /// Sets the note on event of an instrument.
 ///
@@ -1468,7 +1468,7 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  using Callback = std::function<void(Rational pitch, Rational intensity)>;
+  using Callback = std::function<void(Rational pitch, float intensity)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteOnEventDefinition_CreateCallback;
@@ -1489,7 +1489,7 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, BarelyRational pitch, BarelyRational intensity) noexcept {
+        [](void** state, BarelyRational pitch, float intensity) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
             callback(pitch, intensity);
           }
@@ -2104,7 +2104,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  void SetNoteOn(Rational pitch, Rational intensity = 1) noexcept {
+  void SetNoteOn(Rational pitch, float intensity = 1.0f) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(Get(), pitch, intensity);
     assert(success);
   }

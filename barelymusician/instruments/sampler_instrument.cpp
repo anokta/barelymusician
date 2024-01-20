@@ -114,11 +114,11 @@ void SamplerInstrument::SetData(const void* data, int size) noexcept {
 
 void SamplerInstrument::SetNoteOff(Rational pitch) noexcept { voice_.Stop(pitch); }
 
-void SamplerInstrument::SetNoteOn(Rational pitch, Rational intensity) noexcept {
+void SamplerInstrument::SetNoteOn(Rational pitch, float intensity) noexcept {
   const float speed = std::pow(2.0f, static_cast<float>(pitch - root_pitch_));
   voice_.Start(pitch, [speed, intensity](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
-    voice->set_gain(static_cast<float>(intensity));
+    voice->set_gain(intensity);
   });
 }
 

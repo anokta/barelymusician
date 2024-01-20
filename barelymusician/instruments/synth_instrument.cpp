@@ -101,10 +101,10 @@ void SynthInstrument::SetControl(int index, Rational value, Rational /*slope_per
 
 void SynthInstrument::SetNoteOff(Rational pitch) noexcept { voice_.Stop(pitch); }
 
-void SynthInstrument::SetNoteOn(Rational pitch, Rational intensity) noexcept {
+void SynthInstrument::SetNoteOn(Rational pitch, float intensity) noexcept {
   voice_.Start(pitch, [pitch, intensity](SynthVoice* voice) {
     voice->generator().SetFrequency(GetFrequency(pitch));
-    voice->set_gain(static_cast<float>(intensity));
+    voice->set_gain(intensity);
   });
 }
 

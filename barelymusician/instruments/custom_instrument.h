@@ -56,7 +56,7 @@ class CustomInstrument {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  virtual void SetNoteOn(Rational pitch, Rational intensity) noexcept = 0;
+  virtual void SetNoteOn(Rational pitch, float intensity) noexcept = 0;
 
   /// Returns the definition for `CustomInstrumentType`.
   ///
@@ -108,7 +108,7 @@ class CustomInstrument {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteOff(pitch);
         },
-        [](void** state, BarelyRational pitch, BarelyRational intensity) noexcept {
+        [](void** state, BarelyRational pitch, float intensity) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteOn(pitch, intensity);
         },

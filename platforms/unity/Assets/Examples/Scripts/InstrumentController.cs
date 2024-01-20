@@ -23,7 +23,7 @@ namespace Barely {
 
       // Note intensity.
       [Range(0.0f, 1.0f)]
-      public double noteIntensity = 1.0;
+      public float noteIntensity = 1.0f;
 
       [Range(1, 4)]
       public int repeaterNoteLength = 1;
@@ -72,9 +72,9 @@ namespace Barely {
         }
         // Adjust note intensity.
         if (Input.GetKeyDown(KeyCode.C)) {
-          noteIntensity = (double)Mathf.Max((float)noteIntensity - 0.2f, 0.0f);
+          noteIntensity = Mathf.Max(noteIntensity - 0.2f, 0.0f);
         } else if (Input.GetKeyDown(KeyCode.V)) {
-          noteIntensity = (double)Mathf.Min((float)noteIntensity + 0.2f, 1.0f);
+          noteIntensity = Mathf.Min(noteIntensity + 0.2f, 1.0f);
         }
         // Play notes.
         for (int i = 0; i < _octaveKeys.Length; ++i) {

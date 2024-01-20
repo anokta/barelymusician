@@ -19,7 +19,7 @@ namespace Barely {
 
       /// Note intensity.
       [Range(0.0f, 1.0f)]
-      public double intensity = 1.0f;
+      public float intensity = 1.0f;
 
       /// True if logging to console, false otherwise.
       public bool isLoggingToConsole = true;

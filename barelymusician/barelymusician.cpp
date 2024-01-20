@@ -412,7 +412,7 @@ bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
 }
 
 bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, BarelyRational pitch,
-                                BarelyRational intensity) {
+                                float intensity) {
   if (!instrument) return false;
 
   instrument->SetNoteOn(pitch, intensity);

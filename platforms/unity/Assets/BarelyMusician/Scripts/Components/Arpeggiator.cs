@@ -61,7 +61,6 @@ namespace Barely {
     /// Sets a note on.
     ///
     /// @param pitch Note pitch.
-    /// @param intensity Note intensity.
     public void SetNoteOn(double pitch) {
       Musician.Internal.Arpeggiator_SetNoteOn(_handle, pitch);
     }

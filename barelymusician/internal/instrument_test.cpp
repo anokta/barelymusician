@@ -46,8 +46,8 @@ InstrumentDefinition GetTestDefinition() {
       [](void** /*state*/, BarelyRational /*pitch*/, int32_t /*index*/, BarelyRational /*value*/,
          BarelyRational /*slope_per_frame*/) {},
       [](void** state, BarelyRational /*pitch*/) { *reinterpret_cast<float*>(*state) = 0.0f; },
-      [](void** state, BarelyRational pitch, BarelyRational intensity) {
-        *reinterpret_cast<float*>(*state) = static_cast<float>(pitch * intensity);
+      [](void** state, BarelyRational pitch, float intensity) {
+        *reinterpret_cast<float*>(*state) = static_cast<float>(Rational(pitch)) * intensity;
       },
       control_definitions, note_control_definitions);
 }
@@ -78,7 +78,7 @@ TEST(InstrumentTest, GetControl) {
 // Tests that the instrument returns a note control value as expected.
 TEST(InstrumentTest, GetNoteControl) {
   constexpr Rational kPitch = 10;
-  constexpr Rational kIntensity = 1;
+  constexpr float kIntensity = 1.0f;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
@@ -118,7 +118,7 @@ TEST(InstrumentTest, GetNoteControl) {
 // Tests that the instrument plays a single note as expected.
 TEST(InstrumentTest, PlaySingleNote) {
   constexpr Rational kPitch = 32;
-  constexpr Rational kIntensity = Rational(1, 2);
+  constexpr float kIntensity = 0.5f;
   constexpr int64_t kTimestamp = 20;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, kTimestamp);
@@ -142,7 +142,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel],
-                      static_cast<float>(kPitch * kIntensity));
+                      static_cast<float>(kPitch) * kIntensity);
     }
   }
 
@@ -161,7 +161,7 @@ TEST(InstrumentTest, PlaySingleNote) {
 
 // Tests that the instrument plays multiple notes as expected.
 TEST(InstrumentTest, PlayMultipleNotes) {
-  constexpr Rational kIntensity = 1;
+  constexpr float kIntensity = 1.0f;
 
   Instrument instrument(GetTestDefinition(), 1, kTempo, 0);
   std::vector<float> buffer(kChannelCount * kFrameCount);
@@ -187,7 +187,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel],
-                      static_cast<float>(frame * kIntensity));
+                      static_cast<float>(frame) * kIntensity);
     }
   }
 
@@ -203,39 +203,39 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 // Tests that the instrument triggers its note callbacks as expected.
 TEST(InstrumentTest, SetNoteCallbacks) {
   constexpr Rational kPitch = 4;
-  constexpr Rational kIntensity = Rational(1, 4);
+  constexpr float kIntensity = 0.25f;
 
   Instrument instrument(GetTestDefinition(), 1, kTempo, 0);
 
   // Trigger the note on callback.
   Rational note_on_pitch = 0;
-  Rational note_on_intensity = 0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](Rational pitch, Rational intensity) {
+  float note_on_intensity = 0.0f;
+  NoteOnEventDefinition::Callback note_on_callback = [&](Rational pitch, float intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
   instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
                             static_cast<void*>(&note_on_callback));
   EXPECT_EQ(note_on_pitch, 0);
-  EXPECT_EQ(note_on_intensity, 0);
+  EXPECT_FLOAT_EQ(note_on_intensity, 0.0f);
 
   instrument.SetNoteOn(kPitch, kIntensity);
   EXPECT_EQ(note_on_pitch, kPitch);
-  EXPECT_EQ(note_on_intensity, kIntensity);
+  EXPECT_FLOAT_EQ(note_on_intensity, kIntensity);
 
   // This should not trigger the callback since the note is already on.
   note_on_pitch = 0;
-  note_on_intensity = 0;
+  note_on_intensity = 0.0f;
   instrument.SetNoteOn(kPitch, kIntensity);
   EXPECT_EQ(note_on_pitch, 0);
-  EXPECT_EQ(note_on_intensity, 0);
+  EXPECT_FLOAT_EQ(note_on_intensity, 0.0f);
 
   // Trigger the note on callback again with another note.
   note_on_pitch = 0;
-  note_on_intensity = 0;
+  note_on_intensity = 0.0f;
   instrument.SetNoteOn(kPitch + 2, kIntensity);
   EXPECT_EQ(note_on_pitch, kPitch + 2);
-  EXPECT_EQ(note_on_intensity, kIntensity);
+  EXPECT_FLOAT_EQ(note_on_intensity, kIntensity);
 
   // Trigger the note off callback.
   Rational note_off_pitch = 0;
@@ -262,7 +262,7 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 // Tests that the instrument stops all notes as expected.
 TEST(InstrumentTest, SetAllNotesOff) {
   constexpr std::array<Rational, 3> kPitches = {1, 2, 3};
-  constexpr Rational kIntensity = 1;
+  constexpr float kIntensity = 1.0f;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0);
   for (const Rational pitch : kPitches) {

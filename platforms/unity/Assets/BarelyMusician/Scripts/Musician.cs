@@ -148,7 +148,7 @@ namespace Barely {
       /// @param pitch Note pitch.
       /// @param intensity Note intensity.
       public delegate void InstrumentDefinition_SetNoteOnCallback(ref IntPtr state, double pitch,
-                                                                  double intensity);
+                                                                  float intensity);
 
       /// Effect definition.
       [StructLayout(LayoutKind.Sequential)]
@@ -674,7 +674,7 @@ namespace Barely {
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
       public static void Instrument_SetNoteOn(IntPtr instrumentHandle, double pitch,
-                                              double intensity) {
+                                              float intensity) {
         if (!BarelyInstrument_SetNoteOn(instrumentHandle, pitch, intensity) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
@@ -1321,10 +1321,10 @@ namespace Barely {
 
       // Note on event definition process callback.
       private delegate void NoteOnEventDefinition_ProcessCallback(ref IntPtr state, double pitch,
-                                                                  double intensity);
+                                                                  float intensity);
       [AOT.MonoPInvokeCallback(typeof(NoteOnEventDefinition_ProcessCallback))]
       private static void NoteOnEventDefinition_OnProcess(ref IntPtr state, double pitch,
-                                                          double intensity) {
+                                                          float intensity) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
       }
@@ -1646,7 +1646,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
       private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, double pitch,
-                                                            double intensity);
+                                                            float intensity);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEvent")]
       private static extern bool BarelyInstrument_SetNoteOnEvent(IntPtr instrument,

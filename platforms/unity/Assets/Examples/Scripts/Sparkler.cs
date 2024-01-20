@@ -34,8 +34,8 @@ namespace Barely {
         targetColor = noteOffColor;
       }
 
-      private void OnNoteOn(double pitch, double intensity) {
-        targetColor = Color.Lerp(noteOffColor, noteOnColor, (float)intensity);
+      private void OnNoteOn(double pitch, float intensity) {
+        targetColor = Color.Lerp(noteOffColor, noteOnColor, intensity);
         GetComponent<Renderer>().material.color = targetColor;
       }
     }

@@ -86,7 +86,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEvent([](Rational pitch, Rational /*intensity*/) {
+  instrument.SetNoteOnEvent([](Rational pitch, float /*intensity*/) {
     ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
   });
 

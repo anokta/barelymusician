@@ -336,7 +336,7 @@ void Instrument::SetNoteOffEvent(NoteOffEventDefinition definition, void* user_d
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(Rational pitch, Rational intensity) noexcept {
+void Instrument::SetNoteOn(Rational pitch, float intensity) noexcept {
   if (note_controls_.try_emplace(pitch, default_note_controls_).second) {
     note_on_event_.Process(pitch, intensity);
     message_queue_.Add(timestamp_, NoteOnMessage{pitch, intensity});

@@ -78,7 +78,7 @@ struct NoteOnMessage {
   Rational pitch;
 
   /// Intensity.
-  Rational intensity;
+  float intensity;
 };
 
 /// Message alias.

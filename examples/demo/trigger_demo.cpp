@@ -59,7 +59,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                         static_cast<int>(kOscillatorType));
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetNoteOnEvent([](Rational pitch, Rational /*intensity*/) {
+  instrument.SetNoteOnEvent([](Rational pitch, float /*intensity*/) {
     ConsoleLog() << "Note{" << barely::MidiFromPitch(pitch) << "}";
   });
 

@@ -48,9 +48,8 @@ InstrumentDefinition GetTestInstrumentDefinition() {
       [](void** /*state*/, BarelyRational /*pitch*/, int32_t /*index*/, BarelyRational /*value*/,
          BarelyRational /*slope_per_frame*/) {},
       [](void** state, BarelyRational /*pitch*/) { *reinterpret_cast<float*>(*state) = 0; },
-      [](void** state, BarelyRational pitch, BarelyRational intensity) {
-        *reinterpret_cast<float*>(*state) =
-            static_cast<float>(Rational(pitch) * Rational(intensity));
+      [](void** state, BarelyRational pitch, float intensity) {
+        *reinterpret_cast<float*>(*state) = static_cast<float>(Rational(pitch)) * intensity;
       },
       control_definitions, note_control_definitions);
 }
@@ -58,7 +57,7 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 // Tests that a single instrument is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr Rational kPitch = Rational(-5, 4);
-  constexpr Rational kIntensity = Rational(3, 4);
+  constexpr float kIntensity = 0.75f;
 
   Musician musician(kFrameRate);
   std::vector<float> buffer(kChannelCount * kFrameCount);
@@ -78,15 +77,15 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
 
   // Set the note callbacks.
   Rational note_on_pitch = 0;
-  Rational note_on_intensity = 0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](Rational pitch, Rational intensity) {
+  float note_on_intensity = 0.0f;
+  NoteOnEventDefinition::Callback note_on_callback = [&](Rational pitch, float intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
   instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
                             static_cast<void*>(&note_on_callback));
   EXPECT_EQ(note_on_pitch, 0);
-  EXPECT_EQ(note_on_intensity, 0);
+  EXPECT_FLOAT_EQ(note_on_intensity, 0.0f);
 
   Rational note_off_pitch = 0;
   NoteOffEventDefinition::Callback note_off_callback = [&](Rational pitch) {
@@ -101,14 +100,14 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   EXPECT_EQ(note_on_pitch, kPitch);
-  EXPECT_EQ(note_on_intensity, kIntensity);
+  EXPECT_FLOAT_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel],
-                      static_cast<float>(kPitch * kIntensity));
+                      static_cast<float>(kPitch) * kIntensity);
     }
   }
 

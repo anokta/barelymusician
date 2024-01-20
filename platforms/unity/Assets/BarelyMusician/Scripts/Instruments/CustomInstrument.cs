@@ -50,7 +50,7 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void OnSetNoteOn(double pitch, double intensity);
+    public void OnSetNoteOn(double pitch, float intensity);
   }
 
   /// Custom instrument template that implements a custom instrument.
@@ -148,7 +148,7 @@ namespace Barely {
 
     // Set note on callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteOnCallback))]
-    private static void OnSetNoteOn(ref IntPtr state, double pitch, double intensity) {
+    private static void OnSetNoteOn(ref IntPtr state, double pitch, float intensity) {
       (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOn(pitch, intensity);
     }
 

@@ -200,7 +200,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(Rational pitch, Rational intensity = 1) noexcept;
+  void SetNoteOn(Rational pitch, float intensity = 1.0f) noexcept;
 
   /// Sets the note on event.
   ///
@@ -227,7 +227,7 @@ class Instrument {
   using NoteOffEvent = Event<NoteOffEventDefinition, Rational>;
 
   // Note on event alias.
-  using NoteOnEvent = Event<NoteOnEventDefinition, Rational, Rational>;
+  using NoteOnEvent = Event<NoteOnEventDefinition, Rational, float>;
 
   // Returns the corresponding slope per frame for a given `slope_per_beat`.
   [[nodiscard]] Rational GetSlopePerFrame(Rational slope_per_beat) const noexcept;

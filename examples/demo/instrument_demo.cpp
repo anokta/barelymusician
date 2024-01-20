@@ -70,7 +70,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEvent([](Rational pitch, Rational intensity) {
+  instrument.SetNoteOnEvent([](Rational pitch, float intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
   });
   instrument.SetNoteOffEvent([](Rational pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
@@ -81,7 +81,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  Rational intensity = 1;
+  float intensity = 1.0f;
   int offset_octaves = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -107,11 +107,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (upper_key == 'C' || upper_key == 'V') {
       // Change intensity.
       if (upper_key == 'C') {
-        intensity -= Rational(1, 4);
+        intensity -= 0.25f;
       } else {
-        intensity += Rational(1, 4);
+        intensity += 0.25f;
       }
-      intensity = std::clamp(intensity, Rational(0), Rational(1));
+      intensity = std::clamp(intensity, 0.0f, 1.0f);
       ConsoleLog() << "Note intensity set to " << intensity;
       return;
     }

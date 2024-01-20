@@ -90,7 +90,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteOnEvent([&repeater](Rational pitch, Rational /*intensity*/) {
+  instrument.SetNoteOnEvent([&repeater](Rational pitch, float /*intensity*/) {
     if (repeater.IsPlaying()) {
       ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
     }

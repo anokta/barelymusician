@@ -45,7 +45,7 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public delegate void NoteOnEventCallback(double pitch, double intensity);
+    public delegate void NoteOnEventCallback(double pitch, float intensity);
     public event NoteOnEventCallback OnNoteOn;
 
     [Serializable]
@@ -153,7 +153,7 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void SetNoteOn(double pitch, double intensity = 1.0) {
+    public void SetNoteOn(double pitch, float intensity = 1.0f) {
       Musician.Internal.Instrument_SetNoteOn(_handle, pitch, intensity);
     }
 
@@ -184,9 +184,9 @@ namespace Barely {
       }
 
       /// Internal note on event callback.
-      public static void OnNoteOnEvent(Instrument instrument, double pitch, double intensity) {
+      public static void OnNoteOnEvent(Instrument instrument, double pitch, float intensity) {
         instrument.OnNoteOn?.Invoke(pitch, intensity);
-        instrument.OnNoteOnEvent?.Invoke((float)pitch, (float)intensity);
+        instrument.OnNoteOnEvent?.Invoke((float)pitch, intensity);
       }
     }
 

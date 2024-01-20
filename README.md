@@ -44,14 +44,14 @@ auto instrument = musician.CreateInstrument<barely::SynthInstrument>();
 instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/Rational(1, 2),
                       /*slope_per_beat=*/0);
 
-// Set the A3 synth instrument note pitch on with a 0.25 intensity.
+// Set the A3 synth instrument note pitch on with a 0.25f intensity.
 //
 // @note Pitch values are normalized by octaves, where each integer value of one shifts an octave by
 // one, and zero represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition.
 // However, this is not a strict rule, since `pitch` and `intensity` can be interpreted in any
 // desired way by a custom instrument.
 const auto d4_pitch = barely::Rational(-7, 12);
-instrument.SetNoteOn(d4_pitch, /*intensity=*/barely::Rational(1, 2));
+instrument.SetNoteOn(d4_pitch, /*intensity=*/0.25f);
 
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(d4_pitch);  // will return true.
@@ -90,8 +90,8 @@ auto performer = musician.CreatePerformer();
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
-// Create a looping performer task that plays the A4 synth instrument note at half of a beat for a
-// duration of quarter beats.
+// Create a looping performer task that plays the A4 synth instrument note pitch at position half
+// beats for a duration of quarter beats.
 auto task = performer.CreateTask(
     [&]() {
       // Set the A4 note pitch on.

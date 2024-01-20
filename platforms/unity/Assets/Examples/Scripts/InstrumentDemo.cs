@@ -50,7 +50,7 @@ namespace Barely {
         }
       }
 
-      private void OnNoteOn(double pitch, double intensity) {
+      private void OnNoteOn(double pitch, float intensity) {
         int i = (int)((pitch - controller.octaveOffset - controller.rootPitch) * 12.0);
         int y = i / 4;
         int x = i - 4 * y;

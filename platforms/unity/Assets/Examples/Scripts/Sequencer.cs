@@ -19,7 +19,7 @@ namespace Barely {
         [Range(0, 127)]
         public int key;
         [Range(0.0f, 1.0f)]
-        public double intensity;
+        public float intensity;
         [Min(0.0f)]
         public double position;
         [Min(0.0f)]

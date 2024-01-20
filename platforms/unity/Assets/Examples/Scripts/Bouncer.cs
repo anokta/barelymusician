@@ -21,7 +21,7 @@ namespace Barely {
         double octaveOffset = lastIndex / MajorScale.Length;
         double pitch =
             rootPitch + octaveOffset + MajorScale[lastIndex++ % MajorScale.Length] / 12.0;
-        double intensity = (double)Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
+        float intensity = Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
         instrument.SetNoteOn(pitch, intensity);
         instrument.SetNoteOff(pitch);
       }

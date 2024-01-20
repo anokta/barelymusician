@@ -70,7 +70,7 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
       const Rational position = Rational(midi_event.tick, ticks_per_beat);
       const Rational duration = Rational(midi_event.getTickDuration(), ticks_per_beat);
       const Rational pitch = PitchFromMidi(midi_event.getKeyNumber());
-      const Rational intensity = IntensityFromMidi(midi_event.getVelocity());
+      const float intensity = IntensityFromMidi(midi_event.getVelocity());
       performer.ScheduleOneOffTask(
           [&instrument, pitch, intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
           position);
@@ -118,7 +118,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Set the instrument settings.
     const auto track_index = tracks.size() + 1;
-    instrument.SetNoteOnEvent([track_index](Rational pitch, Rational intensity) {
+    instrument.SetNoteOnEvent([track_index](Rational pitch, float intensity) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(key: " << MidiFromPitch(pitch)
                    << ", velocity: " << MidiFromIntensity(intensity) << ")";
     });

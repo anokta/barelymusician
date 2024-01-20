@@ -3,11 +3,6 @@ add_library(
   intensity.cpp
   intensity.h
 )
-target_link_libraries(
-  barely_intensity
-  barely_rational
-  barelymusician_headeronly
-)
 
 add_library(
   barely_pitch
@@ -28,8 +23,6 @@ if (ENABLE_TESTS)
   target_link_libraries(
     barely_intensity_test
     barely_intensity
-    barely_rational
-    barelymusician_headeronly
     gtest_main
   )
   gtest_discover_tests(barely_intensity_test)

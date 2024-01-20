@@ -9,7 +9,7 @@ namespace Barely {
 
       public void Randomize() {
         randomSequencer.notes[0].key = 57 + Scale[Random.Range(0, Scale.Length)];
-        randomSequencer.notes[0].intensity = 0.5 * (double)Random.Range(0, 3);
+        randomSequencer.notes[0].intensity = 0.5f * Random.Range(0, 3);
         // randomSequencer.notes[0].position = (double)Random.Range(0, 2) * 0.5;
         randomSequencer.notes[0].duration = 0.125f + (double)Random.Range(1, 3) * 0.125;
       }

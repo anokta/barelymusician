@@ -57,7 +57,7 @@ namespace Barely {
         _targetAmplitude = 0.0;
       }
 
-      public void OnSetNoteOn(double pitch, double intensity) {
+      public void OnSetNoteOn(double pitch, float intensity) {
         _isOn = true;
         _phase = 0.0;
         _targetAmplitude = intensity;
@@ -93,7 +93,7 @@ namespace Barely {
 
       public void Update() {
         double pitch = Input.mousePosition.x / Screen.width;
-        double amplitude = Input.mousePosition.y / Screen.height;
+        float amplitude = Input.mousePosition.y / Screen.height;
         if (Input.GetMouseButtonDown(0)) {
           SetNoteOn(0.0, amplitude);
         } else if (Input.GetMouseButtonUp(0)) {

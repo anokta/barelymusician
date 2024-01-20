@@ -62,7 +62,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
-constexpr std::int64_t kLookahead = kFrameRate / 10;
+constexpr int64_t kLookahead = kFrameRate / 10;
 
 // Performer settings.
 constexpr int kTempo = 124;

@@ -1,8 +1,8 @@
 #include "barelymusician/instruments/percussion_instrument.h"
 
 #include <array>
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/rational.h"
@@ -84,8 +84,8 @@ void PercussionInstrument::SetData(const void* data, [[maybe_unused]] int size) 
   pads_.resize(voice_count, Pad(frame_rate_));
   for (auto& pad : pads_) {
     // Pad data is sequentially aligned by pitch, frequency, length and data.
-    const auto pitch_numerator = static_cast<std::int64_t>(static_cast<float>(*data_float++));
-    const auto pitch_denominator = static_cast<std::int64_t>(static_cast<float>(*data_float++));
+    const auto pitch_numerator = static_cast<int64_t>(static_cast<float>(*data_float++));
+    const auto pitch_denominator = static_cast<int64_t>(static_cast<float>(*data_float++));
     pad.pitch = Rational(pitch_numerator, pitch_denominator);
     const int frequency = static_cast<int>(static_cast<float>(*data_float++));
     const int length = static_cast<int>(static_cast<float>(*data_float++));

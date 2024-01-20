@@ -46,7 +46,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
-constexpr std::int64_t kLookahead = kFrameRate / 10;
+constexpr int64_t kLookahead = kFrameRate / 10;
 
 // Instrument settings.
 constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;

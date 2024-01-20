@@ -17,7 +17,7 @@ class AudioClock {
   /// Returns the timestamp.
   ///
   /// @return Timestamp in frames.
-  std::int64_t GetTimestamp() const noexcept;
+  int64_t GetTimestamp() const noexcept;
 
   /// Updates the clock.
   ///
@@ -29,7 +29,7 @@ class AudioClock {
   const int frame_rate_;
 
   // Monothonic timestamp in frames.
-  std::atomic<std::int64_t> timestamp_ = 0;
+  std::atomic<int64_t> timestamp_ = 0;
 };
 
 }  // namespace barely::examples

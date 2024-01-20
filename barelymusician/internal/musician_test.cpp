@@ -1,8 +1,7 @@
 #include "barelymusician/internal/musician.h"
 
-#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
-
 #include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <vector>

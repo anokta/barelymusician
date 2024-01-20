@@ -28,8 +28,8 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
           // Gain.
           ControlDefinition{1, 0, 1},
           // Oscillator type.
-          ControlDefinition{static_cast<std::int64_t>(OscillatorType::kSine), 0,
-                            static_cast<std::int64_t>(OscillatorType::kNoise)},
+          ControlDefinition{static_cast<int64_t>(OscillatorType::kSine), 0,
+                            static_cast<int64_t>(OscillatorType::kNoise)},
           // Attack.
           ControlDefinition{Rational(1, 20), 0, 60},
           // Decay.
@@ -67,7 +67,7 @@ void SynthInstrument::SetControl(int index, Rational value, Rational /*slope_per
       break;
     case Control::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->generator().SetType(static_cast<OscillatorType>(static_cast<std::int64_t>(value)));
+        voice->generator().SetType(static_cast<OscillatorType>(static_cast<int64_t>(value)));
       });
       break;
     case Control::kAttack:
@@ -91,7 +91,7 @@ void SynthInstrument::SetControl(int index, Rational value, Rational /*slope_per
       });
       break;
     case Control::kVoiceCount:
-      voice_.Resize(static_cast<int>(static_cast<std::int64_t>(value)));
+      voice_.Resize(static_cast<int>(static_cast<int64_t>(value)));
       break;
     default:
       assert(false);

@@ -18,7 +18,7 @@ namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate, int initial_tempo,
-                       std::int64_t initial_timestamp) noexcept
+                       int64_t initial_timestamp) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
       set_control_callback_(definition.set_control_callback),
@@ -85,14 +85,14 @@ bool Instrument::IsNoteOn(Rational pitch) const noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Instrument::Process(float* output_samples, int output_channel_count, int output_frame_count,
-                         std::int64_t timestamp) noexcept {
+                         int64_t timestamp) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {
     return false;
   }
   int frame = 0;
   // Process *all* messages before the end timestamp.
-  const std::int64_t end_timestamp = timestamp + output_frame_count;
+  const int64_t end_timestamp = timestamp + output_frame_count;
   auto effect_ptrs = effect_ptrs_.GetScopedView();
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
@@ -385,7 +385,7 @@ void Instrument::SetTempo(int tempo) noexcept {
   }
 }
 
-void Instrument::Update(std::int64_t timestamp, Rational duration) noexcept {
+void Instrument::Update(int64_t timestamp, Rational duration) noexcept {
   if (timestamp_ >= timestamp) {
     return;
   }

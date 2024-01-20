@@ -57,7 +57,7 @@ class Random {
   std::normal_distribution<float> normal_distribution_;
   std::uniform_real_distribution<float> uniform_real_distribution_;
   std::uniform_int_distribution<int> uniform_int_distribution_;
-  std::uniform_int_distribution<std::int64_t> uniform_rational_distribution_;
+  std::uniform_int_distribution<int64_t> uniform_rational_distribution_;
 };
 
 }  // namespace barely

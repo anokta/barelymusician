@@ -45,7 +45,7 @@ int Musician::GetFrameRate() const noexcept { return frame_rate_; }
 
 int Musician::GetTempo() const noexcept { return tempo_; }
 
-std::int64_t Musician::GetTimestamp() const noexcept { return timestamp_; }
+int64_t Musician::GetTimestamp() const noexcept { return timestamp_; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::RemoveInstrument(Instrument& instrument) noexcept {
@@ -71,7 +71,7 @@ void Musician::SetTempo(int tempo) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::Update(std::int64_t timestamp) noexcept {
+void Musician::Update(int64_t timestamp) noexcept {
   // Keep track of the fractional part of the timestamp to compensate for update intervals beyond
   // the timestamp granularity.
   Rational timestamp_fraction = 0;
@@ -101,7 +101,7 @@ void Musician::Update(std::int64_t timestamp) noexcept {
         const Rational update_interval =
             FramesFromBeats(update_duration.first) + timestamp_fraction;
         timestamp_fraction = (update_interval % 1);
-        timestamp_ += static_cast<std::int64_t>(update_interval);
+        timestamp_ += static_cast<int64_t>(update_interval);
 
         for (const auto& instrument : instruments_) {
           assert(instrument);

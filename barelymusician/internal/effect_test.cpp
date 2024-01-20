@@ -1,9 +1,8 @@
 #include "barelymusician/internal/effect.h"
 
-#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
-
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"

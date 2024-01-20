@@ -11,7 +11,7 @@
 namespace barely {
 
 int MidiFromPitch(Rational pitch) noexcept {
-  return static_cast<int>(static_cast<std::int64_t>(kSemitoneCount * pitch)) + kMidiA0;
+  return static_cast<int>(static_cast<int64_t>(kSemitoneCount * pitch)) + kMidiA0;
 }
 
 Rational PitchFromMidi(int midi) noexcept { return {midi - kMidiA0, kSemitoneCount}; }

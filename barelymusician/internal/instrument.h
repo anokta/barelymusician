@@ -30,7 +30,7 @@ class Instrument {
   /// @param initial_timestamp Initial Timestamp in frames.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Instrument(const InstrumentDefinition& definition, int frame_rate, int initial_tempo,
-             std::int64_t initial_timestamp) noexcept;
+             int64_t initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -80,7 +80,7 @@ class Instrument {
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool Process(float* output_samples, int output_channel_count, int output_frame_count,
-               std::int64_t timestamp) noexcept;
+               int64_t timestamp) noexcept;
 
   /// Removes an effect.
   ///
@@ -217,7 +217,7 @@ class Instrument {
   ///
   /// @param timestamp Timestamp in frames.
   /// @param duration Duration in beats.
-  void Update(std::int64_t timestamp, Rational duration) noexcept;
+  void Update(int64_t timestamp, Rational duration) noexcept;
 
  private:
   // Note control event alias.
@@ -288,7 +288,7 @@ class Instrument {
   int tempo_ = 120;
 
   // Timestamp in frames.
-  std::int64_t timestamp_ = 0;
+  int64_t timestamp_ = 0;
 
   // State.
   void* state_ = nullptr;

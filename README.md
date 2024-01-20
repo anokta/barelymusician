@@ -63,15 +63,15 @@ auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0,
                   /*slope_per_beat=*/100);
 
-// Update the musician Timestamp in frames.
+// Update the musician timestamp in frames.
 //
 // @note Timestamp updates must happen prior to processing of instruments with respective
 // timestamps. Otherwise, such `Process` calls will be *late* to receive any relevant state changes.
 // To compensate, `Update` should typically be called from a main thread update callback, with an
 // additional "lookahead", in order to avoid any potential thread synchronization issues that could
 // occur in real-time audio applications.
-const auto lookahead = 480;
-auto timestamp = 0;
+const int64_t lookahead = 480;
+int64_t timestamp = 0;
 musician.Update(timestamp + lookahead);
 
 // Process the next output samples of the synth instrument.

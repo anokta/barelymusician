@@ -1,7 +1,5 @@
 #include "barelymusician/internal/instrument.h"
 
-#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
-
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -121,7 +119,7 @@ TEST(InstrumentTest, GetNoteControl) {
 TEST(InstrumentTest, PlaySingleNote) {
   constexpr Rational kPitch = 32;
   constexpr Rational kIntensity = Rational(1, 2);
-  constexpr std::int64_t kTimestamp = 20;
+  constexpr int64_t kTimestamp = 20;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, kTimestamp);
   std::vector<float> buffer(kChannelCount * kFrameCount);

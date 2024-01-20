@@ -47,7 +47,7 @@ class Musician {
   /// Returns timestamp.
   ///
   /// @return Timestamp in frames.
-  [[nodiscard]] std::int64_t GetTimestamp() const noexcept;
+  [[nodiscard]] int64_t GetTimestamp() const noexcept;
 
   /// Destroys instrument.
   ///
@@ -70,7 +70,7 @@ class Musician {
   ///
   /// @param timestamp Timestamp in frames.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(std::int64_t timestamp) noexcept;
+  void Update(int64_t timestamp) noexcept;
 
  private:
   // Set of pointers to instruments.
@@ -86,7 +86,7 @@ class Musician {
   int tempo_ = 120;
 
   // Timestamp in frames.
-  std::int64_t timestamp_ = 0;
+  int64_t timestamp_ = 0;
 };
 
 }  // namespace barely::internal

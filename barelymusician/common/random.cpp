@@ -31,15 +31,15 @@ int Random::DrawUniform(int min, int max) noexcept {
 
 Rational Random::DrawUniform(Rational min, Rational max) noexcept {
   assert(min <= max);
-  std::int64_t min_numerator = min.numerator;
-  std::int64_t max_numerator = max.numerator;
-  std::int64_t denominator = min.denominator;
+  int64_t min_numerator = min.numerator;
+  int64_t max_numerator = max.numerator;
+  int64_t denominator = min.denominator;
   if (min.denominator != max.denominator) {
     min_numerator *= max.denominator;
     max_numerator *= min.denominator;
     denominator *= max.denominator;
   }
-  const std::uniform_int_distribution<std::int64_t>::param_type param(min_numerator, max_numerator);
+  const std::uniform_int_distribution<int64_t>::param_type param(min_numerator, max_numerator);
   return RationalNormalized(uniform_rational_distribution_(engine_, param), denominator);
 }
 

@@ -23,11 +23,11 @@ Rational& operator*=(Rational& lhs, const Rational& rhs) noexcept;
 Rational& operator/=(Rational& lhs, const Rational& rhs) noexcept;
 Rational& operator%=(Rational& lhs, const Rational& rhs) noexcept;
 
-Rational& operator+=(Rational& lhs, const std::int64_t& rhs) noexcept;
-Rational& operator-=(Rational& lhs, const std::int64_t& rhs) noexcept;
-Rational& operator*=(Rational& lhs, const std::int64_t& rhs) noexcept;
-Rational& operator/=(Rational& lhs, const std::int64_t& rhs) noexcept;
-Rational& operator%=(Rational& lhs, const std::int64_t& rhs) noexcept;
+Rational& operator+=(Rational& lhs, const int64_t& rhs) noexcept;
+Rational& operator-=(Rational& lhs, const int64_t& rhs) noexcept;
+Rational& operator*=(Rational& lhs, const int64_t& rhs) noexcept;
+Rational& operator/=(Rational& lhs, const int64_t& rhs) noexcept;
+Rational& operator%=(Rational& lhs, const int64_t& rhs) noexcept;
 
 /// Other arithmetic operators.
 Rational operator+(Rational lhs, const Rational& rhs) noexcept;
@@ -36,11 +36,11 @@ Rational operator*(Rational lhs, const Rational& rhs) noexcept;
 Rational operator/(Rational lhs, const Rational& rhs) noexcept;
 Rational operator%(Rational lhs, const Rational& rhs) noexcept;
 
-Rational operator+(Rational lhs, const std::int64_t& rhs) noexcept;
-Rational operator-(Rational lhs, const std::int64_t& rhs) noexcept;
-Rational operator*(Rational lhs, const std::int64_t& rhs) noexcept;
-Rational operator/(Rational lhs, const std::int64_t& rhs) noexcept;
-Rational operator%(Rational lhs, const std::int64_t& rhs) noexcept;
+Rational operator+(Rational lhs, const int64_t& rhs) noexcept;
+Rational operator-(Rational lhs, const int64_t& rhs) noexcept;
+Rational operator*(Rational lhs, const int64_t& rhs) noexcept;
+Rational operator/(Rational lhs, const int64_t& rhs) noexcept;
+Rational operator%(Rational lhs, const int64_t& rhs) noexcept;
 
 /// Output stream operator.
 std::ostream& operator<<(std::ostream& out_stream, const Rational& rational);
@@ -49,7 +49,7 @@ std::ostream& operator<<(std::ostream& out_stream, const Rational& rational);
 ///
 /// @param numerator Numerator.
 /// @param denominator Denominator.
-Rational RationalNormalized(std::int64_t numerator = 0, std::int64_t denominator = 1) noexcept;
+Rational RationalNormalized(int64_t numerator = 0, int64_t denominator = 1) noexcept;
 
 }  // namespace barely
 

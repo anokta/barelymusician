@@ -1,14 +1,15 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
-#include <numbers>
-
 #include "barelymusician/barelymusician.h"
 
 namespace barely {
 
+/// Pi.
+inline constexpr float kPi = 3.14159265358979323846f;
+
 /// 2 * pi.
-inline constexpr float kTwoPi = 2.0f * std::numbers::pi_v<float>;
+inline constexpr float kTwoPi = 2.0f * kPi;
 
 /// Returns one-pole filter coefficient for a given cutoff frequency.
 ///

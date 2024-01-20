@@ -1,12 +1,11 @@
 #ifndef BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_
 #define BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_
 
-#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
-
 #include "barelymusician/barelymusician.h"
 
 #ifdef __cplusplus
 #include <cassert>
+#include <cstdint>
 #include <new>
 #include <span>
 

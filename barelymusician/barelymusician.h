@@ -27,7 +27,7 @@
 ///   // changes. Therefore, this should typically be called from a main thread update callback,
 ///   // with an additional "lookahead", in order to avoid any potential thread synchronization
 ///   // issues that could occur in real-time audio applications.
-///   std::int64_t timestamp = 4800;
+///   int64_t timestamp = 4800;
 ///   musician.Update(timestamp);
 ///   @endcode
 ///
@@ -71,7 +71,7 @@
 ///   const int output_channel_count = 2;
 ///   const int output_frame_count = 1024;
 ///   std::vector<float> output_samples(output_channel_count * output_frame_count, 0.0f);
-///   std::int64_t timestamp = 0;
+///   int64_t timestamp = 0;
 ///   instrument.Process(output_samples.data(), output_channel_count, output_frame_count,
 ///                      timestamp);
 ///   @endcode
@@ -1105,6 +1105,7 @@ BARELY_EXPORT bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t pro
 
 #ifdef __cplusplus
 #include <cassert>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <new>

@@ -8,7 +8,7 @@
 namespace barely {
 
 int MidiFromIntensity(Rational intensity) noexcept {
-  return static_cast<int>(static_cast<std::int64_t>(intensity * kMaxMidiVelocity));
+  return static_cast<int>(static_cast<int64_t>(intensity * kMaxMidiVelocity));
 }
 
 Rational IntensityFromMidi(int midi) noexcept { return {midi, kMaxMidiVelocity}; }

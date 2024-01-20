@@ -14,7 +14,7 @@ namespace {
 
 // Normalizes a given `rational` number.
 void Normalize(Rational& rational) noexcept {
-  const std::int64_t gcd = std::gcd(rational.numerator, rational.denominator);
+  const int64_t gcd = std::gcd(rational.numerator, rational.denominator);
   rational.numerator /= gcd;
   rational.denominator /= gcd;
   if (rational.denominator < 0) {
@@ -87,37 +87,37 @@ Rational& operator%=(Rational& lhs, const Rational& rhs) noexcept {
   return lhs;
 }
 
-Rational& operator+=(Rational& lhs, const std::int64_t& rhs) noexcept {
-  lhs.numerator += static_cast<std::int64_t>(rhs) * lhs.denominator;
+Rational& operator+=(Rational& lhs, const int64_t& rhs) noexcept {
+  lhs.numerator += static_cast<int64_t>(rhs) * lhs.denominator;
   Normalize(lhs);
   return lhs;
 }
 
-Rational& operator-=(Rational& lhs, const std::int64_t& rhs) noexcept {
-  lhs.numerator -= static_cast<std::int64_t>(rhs) * lhs.denominator;
+Rational& operator-=(Rational& lhs, const int64_t& rhs) noexcept {
+  lhs.numerator -= static_cast<int64_t>(rhs) * lhs.denominator;
   Normalize(lhs);
   return lhs;
 }
 
-Rational& operator*=(Rational& lhs, const std::int64_t& rhs) noexcept {
-  lhs.numerator *= static_cast<std::int64_t>(rhs);
+Rational& operator*=(Rational& lhs, const int64_t& rhs) noexcept {
+  lhs.numerator *= static_cast<int64_t>(rhs);
   Normalize(lhs);
   return lhs;
 }
 
-Rational& operator/=(Rational& lhs, const std::int64_t& rhs) noexcept {
+Rational& operator/=(Rational& lhs, const int64_t& rhs) noexcept {
   assert(rhs != 0);
   if (lhs == 0) {
     return lhs;
   }
-  lhs.denominator *= static_cast<std::int64_t>(rhs);
+  lhs.denominator *= static_cast<int64_t>(rhs);
   Normalize(lhs);
   return lhs;
 }
 
-Rational& operator%=(Rational& lhs, const std::int64_t& rhs) noexcept {
+Rational& operator%=(Rational& lhs, const int64_t& rhs) noexcept {
   assert(rhs != 0);
-  lhs.numerator %= static_cast<std::int64_t>(rhs) * lhs.denominator;
+  lhs.numerator %= static_cast<int64_t>(rhs) * lhs.denominator;
   Normalize(lhs);
   return lhs;
 }
@@ -147,32 +147,32 @@ Rational operator%(Rational lhs, const Rational& rhs) noexcept {
   return lhs;
 }
 
-Rational operator+(Rational lhs, const std::int64_t& rhs) noexcept {
+Rational operator+(Rational lhs, const int64_t& rhs) noexcept {
   lhs += rhs;
   return lhs;
 }
 
-Rational operator-(Rational lhs, const std::int64_t& rhs) noexcept {
+Rational operator-(Rational lhs, const int64_t& rhs) noexcept {
   lhs -= rhs;
   return lhs;
 }
 
-Rational operator*(Rational lhs, const std::int64_t& rhs) noexcept {
+Rational operator*(Rational lhs, const int64_t& rhs) noexcept {
   lhs *= rhs;
   return lhs;
 }
 
-Rational operator/(Rational lhs, const std::int64_t& rhs) noexcept {
+Rational operator/(Rational lhs, const int64_t& rhs) noexcept {
   lhs /= rhs;
   return lhs;
 }
 
-Rational operator%(Rational lhs, const std::int64_t& rhs) noexcept {
+Rational operator%(Rational lhs, const int64_t& rhs) noexcept {
   lhs %= rhs;
   return lhs;
 }
 
-Rational RationalNormalized(std::int64_t numerator, std::int64_t denominator) noexcept {
+Rational RationalNormalized(int64_t numerator, int64_t denominator) noexcept {
   Rational rational(numerator, denominator);
   Normalize(rational);
   return rational;

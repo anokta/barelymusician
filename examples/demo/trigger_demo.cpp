@@ -31,7 +31,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
-constexpr std::int64_t kLookahead = kFrameRate / 20;
+constexpr int64_t kLookahead = kFrameRate / 20;
 
 // Instrument settings.
 constexpr Rational kGain = Rational(1, 10);

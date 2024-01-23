@@ -5,7 +5,6 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "barelymusician",
     srcs = ["barelymusician.cpp"],
-    defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":barelymusician_headeronly",
         "//barelymusician/internal:effect",
@@ -21,6 +20,7 @@ cc_library(
 cc_library(
     name = "barelymusician_headeronly",
     hdrs = ["barelymusician.h"],
+    defines = ["BARELYMUSICIAN_EXPORTS"],
     visibility = ["//barelymusician:__subpackages__"],
 )
 

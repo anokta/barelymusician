@@ -84,7 +84,7 @@
 ///
 ///   // Create a task.
 ///   auto task = performer.CreateTask([]() {},  // populate this.
-///                                    /*position=*/0.0, /*process_order=*/0);
+///                                    /*position=*/barely::Rational(1, 2), /*process_order=*/0);
 ///
 ///   // Set looping on.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -189,8 +189,8 @@
 ///   // Create a task.
 ///   BarelyTaskDefinition definition;  // populate this.
 ///   BarelyTaskHandle task;
-///   BarelyTask_Create(performer, definition, /*position=*/0.0, /*process_order=*/0,
-///                     /*user_data=*/nullptr, &task);
+///   BarelyTask_Create(performer, definition, /*position=*/BarelyRational{1, 2},
+///                     /*process_order=*/0, /*user_data=*/nullptr, &task);
 ///
 ///   // Set looping on.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
@@ -1050,6 +1050,74 @@ BARELY_EXPORT bool BarelyPerformer_Start(BarelyPerformerHandle performer);
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 
+/// Operates addition of two rational numbers in place.
+///
+/// @param lhs Left-hand side accumulator.
+/// @param rhs Right-hand side.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_Add(BarelyRational* lhs, const BarelyRational* rhs);
+
+/// Operates division of two rational numbers in place.
+///
+/// @param lhs Left-hand side accumulator.
+/// @param rhs Right-hand side.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_Divide(BarelyRational* lhs, const BarelyRational* rhs);
+
+/// Gets whether two rational numbers are equal or not.
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @param out_is_equal True if equal, false otherwise.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_IsEqual(const BarelyRational* lhs, const BarelyRational* rhs,
+                                          bool* out_is_equal);
+
+/// Gets whether a rational number is less than another rational number.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @param out_is_equal True if less than, false otherwise.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_IsGreaterThan(const BarelyRational* lhs,
+                                                const BarelyRational* rhs,
+                                                bool* out_is_greater_than);
+
+/// Gets whether a rational number is greater than another rational number.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @param out_is_equal True if greater than, false otherwise.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_IsLessThan(const BarelyRational* lhs, const BarelyRational* rhs,
+                                             bool* out_is_less_than);
+
+/// Operates modulo of two rational numbers in place.
+///
+/// @param lhs Left-hand side accumulator.
+/// @param rhs Right-hand side.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_Mod(BarelyRational* lhs, const BarelyRational* rhs);
+
+/// Operates multiplication of two rational numbers in place.
+///
+/// @param lhs Left-hand side accumulator.
+/// @param rhs Right-hand side.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_Multiply(BarelyRational* lhs, const BarelyRational* rhs);
+
+/// Normalizes a rational number in place.
+///
+/// @param rational Rational number.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_Normalize(BarelyRational* rational);
+
+/// Operates subtraction of two rational numbers in place.
+///
+/// @param lhs Left-hand side accumulator.
+/// @param rhs Right-hand side.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRational_Subtract(BarelyRational* lhs, const BarelyRational* rhs);
+
 /// Creates a new task.
 ///
 /// @param performer Performer handle.
@@ -1105,8 +1173,10 @@ BARELY_EXPORT bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t pro
 
 #ifdef __cplusplus
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <functional>
+#include <iostream>
 #include <limits>
 #include <new>
 #include <span>
@@ -1117,6 +1187,17 @@ namespace barely {
 
 /// Rational number.
 struct Rational : public BarelyRational {
+  /// Returns a normalized `Rational`.
+  ///
+  /// @param numerator Numerator.
+  /// @param denominator Denominator.
+  /// @return Normalized rational number.
+  static Rational Normalized(int64_t numerator, int64_t denominator) {
+    Rational rational(numerator, denominator);
+    [[maybe_unused]] const bool success = BarelyRational_Normalize(&rational);
+    return rational;
+  }
+
   /// Constructs a new `Rational`.
   ///
   /// @param numerator Numerator.
@@ -1148,6 +1229,181 @@ struct Rational : public BarelyRational {
     assert(rational.denominator != 0);
   }
 };
+
+/// Returns whether two rational numbers are equal.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return True if equal, false otherwise.
+inline bool operator==(const Rational& lhs, const Rational& rhs) noexcept {
+  bool is_equal = false;
+  [[maybe_unused]] const bool success = BarelyRational_IsEqual(&lhs, &rhs, &is_equal);
+  assert(success);
+  return is_equal;
+}
+
+/// Returns whether two rational numbers are not equal.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return True if not equal, false otherwise.
+inline bool operator!=(const Rational& lhs, const Rational& rhs) noexcept { return !(lhs == rhs); }
+
+/// Returns whether a rational number is less than another rational number.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return True if less than, false otherwise.
+inline bool operator<(const Rational& lhs, const Rational& rhs) noexcept {
+  bool is_less_than = false;
+  [[maybe_unused]] const bool success = BarelyRational_IsLessThan(&lhs, &rhs, &is_less_than);
+  assert(success);
+  return is_less_than;
+}
+
+/// Returns whether a rational number is greater than another rational number.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return True if greater than, false otherwise.
+inline bool operator>(const Rational& lhs, const Rational& rhs) noexcept {
+  bool is_greater_than = false;
+  [[maybe_unused]] const bool success = BarelyRational_IsGreaterThan(&lhs, &rhs, &is_greater_than);
+  assert(success);
+  return is_greater_than;
+}
+
+/// Returns whether a rational number is less than pr equal to another rational number.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return True if less than or equal, false otherwise.
+inline bool operator<=(const Rational& lhs, const Rational& rhs) noexcept { return !(lhs > rhs); }
+
+/// Returns whether a rational number is greater than or equal to another rational number.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return True if greater than or equal, false otherwise.
+inline bool operator>=(const Rational& lhs, const Rational& rhs) noexcept { return !(lhs < rhs); }
+
+/// Compound addition of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Addition of two rational numbers.
+inline Rational& operator+=(Rational& lhs, const Rational& rhs) noexcept {
+  [[maybe_unused]] const bool success = BarelyRational_Add(&lhs, &rhs);
+  assert(success);
+  return lhs;
+}
+
+/// Returns the addition of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Addition of two rational numbers.
+inline Rational operator+(Rational lhs, const Rational& rhs) noexcept {
+  lhs += rhs;
+  return lhs;
+}
+
+/// Compound subtraction of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Subtraction of two rational numbers.
+inline Rational& operator-=(Rational& lhs, const Rational& rhs) noexcept {
+  [[maybe_unused]] const bool success = BarelyRational_Subtract(&lhs, &rhs);
+  assert(success);
+  return lhs;
+}
+
+/// Returns the subtraction of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Subtraction of two rational numbers.
+inline Rational operator-(Rational lhs, const Rational& rhs) noexcept {
+  lhs -= rhs;
+  return lhs;
+}
+
+/// Compound multiplication of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Multiplication of two rational numbers.
+inline Rational& operator*=(Rational& lhs, const Rational& rhs) noexcept {
+  [[maybe_unused]] const bool success = BarelyRational_Multiply(&lhs, &rhs);
+  assert(success);
+  return lhs;
+}
+
+/// Returns the multiplication of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Multiplication of two rational numbers.
+inline Rational operator*(Rational lhs, const Rational& rhs) noexcept {
+  lhs *= rhs;
+  return lhs;
+}
+
+/// Compound division of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Division of two rational numbers.
+inline Rational& operator/=(Rational& lhs, const Rational& rhs) noexcept {
+  [[maybe_unused]] const bool success = BarelyRational_Divide(&lhs, &rhs);
+  assert(success);
+  return lhs;
+}
+
+/// Returns the division of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Division of two rational numbers.
+inline Rational operator/(Rational lhs, const Rational& rhs) noexcept {
+  lhs /= rhs;
+  return lhs;
+}
+
+/// Compound modulo of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Modulo of two rational numbers.
+inline Rational& operator%=(Rational& lhs, const Rational& rhs) noexcept {
+  [[maybe_unused]] const bool success = BarelyRational_Mod(&lhs, &rhs);
+  assert(success);
+  return lhs;
+}
+
+/// Returns the modulo of two rational numbers.
+///
+/// @param lhs Left-hand side.
+/// @param rhs Right-hand side.
+/// @return Modulo of two rational numbers.
+inline Rational operator%(Rational lhs, const Rational& rhs) noexcept {
+  lhs %= rhs;
+  return lhs;
+}
+
+/// Overloads stream insertion operator of a rational number.
+///
+/// @param out_stream Output stream.
+/// @param rational Rational number.
+/// @return Inserted output stream.
+inline std::ostream& operator<<(std::ostream& out_stream, const Rational& rational) {
+  out_stream << (rational.denominator > 0 ? rational.numerator : -rational.numerator);
+  if (rational.numerator != 0 && rational.denominator != 1) {
+    out_stream << "/" << std::abs(rational.denominator);
+  }
+  return out_stream;
+}
 
 /// Control definition.
 struct ControlDefinition : public BarelyControlDefinition {
@@ -2512,6 +2768,17 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
 };
 
 }  // namespace barely
+
+namespace std {
+
+template <>
+struct hash<barely::Rational> {
+  size_t operator()(const barely::Rational& rational) const {
+    return hash<float>()(static_cast<float>(rational));
+  }
+};
+
+}  // namespace std
 #endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_BARELYMUSICIAN_H_

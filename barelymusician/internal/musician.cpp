@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
 
@@ -37,7 +36,7 @@ void Musician::AddPerformer(Performer& performer) noexcept {
   assert(success);
 }
 
-Rational Musician::FramesFromBeats(Rational beats) noexcept {
+Rational Musician::FramesFromBeats(Rational beats) const noexcept {
   return frame_rate_ * kSecondsFromMinutes * beats / tempo_;
 }
 

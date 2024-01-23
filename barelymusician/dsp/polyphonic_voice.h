@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 
 namespace barely {
 

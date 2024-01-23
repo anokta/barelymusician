@@ -76,7 +76,6 @@ cc_library(
     hdrs = ["polyphonic_voice.h"],
     deps = [
         "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:rational",
     ],
 )
 
@@ -154,7 +153,7 @@ cc_test(
     deps = [
         ":polyphonic_voice",
         ":voice",
-        "//barelymusician:barelymusician_headeronly",
+        "//barelymusician",
         "@googletest//:gtest_main",
     ],
 )

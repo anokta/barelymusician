@@ -54,7 +54,6 @@ add_executable(
 target_link_libraries(
   barely_examples_midi_demo
   barelymusician
-  barely_rational
   barely_intensity
   barely_pitch
   barely_oscillator
@@ -75,7 +74,6 @@ target_link_libraries(
   barely_examples_musician_demo
   barelymusician
   barely_random
-  barely_rational
   barely_metronome
   barely_pitch
   barely_oscillator
@@ -130,7 +128,6 @@ add_executable(
 target_link_libraries(
   barely_examples_sequencer_demo
   barelymusician
-  barely_rational
   barely_pitch
   barely_oscillator
   barely_synth_instrument
@@ -147,7 +144,6 @@ add_executable(
 target_link_libraries(
   barely_examples_trigger_demo
   barelymusician
-  barely_rational
   barely_pitch
   barely_oscillator
   barely_synth_instrument

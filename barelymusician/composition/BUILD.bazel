@@ -8,7 +8,6 @@ cc_library(
     hdrs = ["intensity.h"],
     deps = [
         "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:rational",
     ],
 )
 
@@ -18,7 +17,6 @@ cc_library(
     hdrs = ["pitch.h"],
     deps = [
         "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:rational",
     ],
 )
 
@@ -27,8 +25,6 @@ cc_test(
     srcs = ["intensity_test.cpp"],
     deps = [
         ":intensity",
-        "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:rational",
         "@googletest//:gtest_main",
     ],
 )
@@ -38,8 +34,7 @@ cc_test(
     srcs = ["pitch_test.cpp"],
     deps = [
         ":pitch",
-        "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:rational",
+        "//barelymusician",
         "@googletest//:gtest_main",
     ],
 )

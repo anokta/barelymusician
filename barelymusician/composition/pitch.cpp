@@ -6,7 +6,6 @@
 #include <span>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 
 namespace barely {
 

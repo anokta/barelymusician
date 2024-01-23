@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
 #include "gmock/gmock-matchers.h"

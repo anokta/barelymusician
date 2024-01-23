@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <numeric>
 
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
@@ -586,6 +587,93 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
 
   performer->Stop();
   return true;
+}
+
+bool BarelyRational_Add(BarelyRational* lhs, const BarelyRational* rhs) {
+  if (!lhs || !rhs) return false;
+
+  lhs->numerator = lhs->numerator * rhs->denominator + rhs->numerator * lhs->denominator;
+  lhs->denominator *= rhs->denominator;
+  return BarelyRational_Normalize(lhs);
+}
+
+bool BarelyRational_Divide(BarelyRational* lhs, const BarelyRational* rhs) {
+  if (!lhs || !rhs) return false;
+  if (rhs->numerator == 0) return false;
+
+  if (lhs->numerator == 0) {
+    return true;
+  }
+  lhs->numerator *= rhs->denominator;
+  lhs->denominator *= rhs->numerator;
+  return BarelyRational_Normalize(lhs);
+}
+
+bool BarelyRational_IsEqual(const BarelyRational* lhs, const BarelyRational* rhs,
+                            bool* out_is_equal) {
+  if (!lhs || !rhs || !out_is_equal) return false;
+
+  *out_is_equal = (lhs->numerator == rhs->numerator && lhs->denominator == rhs->denominator) ||
+                  (lhs->numerator * rhs->denominator == lhs->denominator * rhs->numerator);
+  return true;
+}
+
+bool BarelyRational_IsGreaterThan(const BarelyRational* lhs, const BarelyRational* rhs,
+                                  bool* out_is_greater_than) {
+  if (!lhs || !rhs || !out_is_greater_than) return false;
+
+  *out_is_greater_than =
+      (lhs->denominator == rhs->denominator && lhs->numerator > rhs->numerator) ||
+      (lhs->numerator * rhs->denominator > lhs->denominator * rhs->numerator);
+  return true;
+}
+
+bool BarelyRational_IsLessThan(const BarelyRational* lhs, const BarelyRational* rhs,
+                               bool* out_is_less_than) {
+  if (!lhs || !rhs || !out_is_less_than) return false;
+
+  *out_is_less_than = (lhs->denominator == rhs->denominator && lhs->numerator < rhs->numerator) ||
+                      (lhs->numerator * rhs->denominator < lhs->denominator * rhs->numerator);
+  return true;
+}
+
+bool BarelyRational_Mod(BarelyRational* lhs, const BarelyRational* rhs) {
+  if (!lhs || !rhs) return false;
+  if (rhs->numerator == 0) return false;
+
+  lhs->numerator *= rhs->denominator;
+  lhs->numerator %= rhs->numerator * lhs->denominator;
+  lhs->denominator *= rhs->denominator;
+  return BarelyRational_Normalize(lhs);
+}
+
+bool BarelyRational_Multiply(BarelyRational* lhs, const BarelyRational* rhs) {
+  if (!lhs || !rhs) return false;
+
+  lhs->numerator *= rhs->numerator;
+  lhs->denominator *= rhs->denominator;
+  return BarelyRational_Normalize(lhs);
+}
+
+bool BarelyRational_Normalize(BarelyRational* rational) {
+  if (!rational) return false;
+
+  const int64_t gcd = std::gcd(rational->numerator, rational->denominator);
+  rational->numerator /= gcd;
+  rational->denominator /= gcd;
+  if (rational->denominator < 0) {
+    rational->numerator *= -1;
+    rational->denominator *= -1;
+  }
+  return true;
+}
+
+bool BarelyRational_Subtract(BarelyRational* lhs, const BarelyRational* rhs) {
+  if (!lhs || !rhs) return false;
+
+  lhs->numerator = lhs->numerator * rhs->denominator - rhs->numerator * lhs->denominator;
+  lhs->denominator *= rhs->denominator;
+  return BarelyRational_Normalize(lhs);
 }
 
 bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition definition,

@@ -11,7 +11,6 @@
 #include "MidiEventList.h"
 #include "MidiFile.h"
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/composition/intensity.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"

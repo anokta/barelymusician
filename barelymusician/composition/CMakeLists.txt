@@ -11,7 +11,6 @@ add_library(
 )
 target_link_libraries(
   barely_pitch
-  barely_rational
   barelymusician_headeronly
 )
 
@@ -34,7 +33,6 @@ if (ENABLE_TESTS)
   target_link_libraries(
     barely_pitch_test
     barely_pitch
-    barely_rational
     barelymusician_headeronly
     gtest_main
   )

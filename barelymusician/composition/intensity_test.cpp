@@ -2,8 +2,6 @@
 
 #include <array>
 
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "gtest/gtest.h"
 
 namespace barely {

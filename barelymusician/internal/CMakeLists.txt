@@ -7,7 +7,6 @@ target_link_libraries(
   barely_internal_control
   barely_internal_event
   barelymusician_headeronly
-  barely_rational
 )
 
 add_library(
@@ -41,7 +40,6 @@ target_link_libraries(
   barely_internal_mutable
   barelymusician_headeronly
   barely_find_or_null
-  barely_rational
 )
 
 add_library(
@@ -74,7 +72,6 @@ target_link_libraries(
   barely_internal_mutable
   barely_internal_performer
   barelymusician_headeronly
-  barely_rational
 )
 
 add_library(
@@ -96,7 +93,6 @@ target_link_libraries(
   barely_internal_performer
   barely_internal_task
   barelymusician_headeronly
-  barely_rational
 )
 
 add_library(
@@ -210,7 +206,6 @@ if (ENABLE_TESTS)
     barely_internal_performer
     barely_internal_task
     barelymusician_headeronly
-    barely_rational
     gmock
     gtest_main
   )
@@ -224,7 +219,6 @@ if (ENABLE_TESTS)
     barely_internal_task_test
     barely_internal_task
     barelymusician_headeronly
-    barely_rational
     gmock
     gtest_main
   )

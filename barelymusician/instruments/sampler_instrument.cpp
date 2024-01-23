@@ -5,7 +5,6 @@
 #include <cmath>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/instruments/custom_instrument.h"
 
 BarelyInstrumentDefinition BarelySamplerInstrument_GetDefinition() {

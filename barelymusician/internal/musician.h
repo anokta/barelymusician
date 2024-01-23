@@ -32,7 +32,7 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(Performer& performer) noexcept;
 
-  [[nodiscard]] Rational FramesFromBeats(Rational beats) noexcept;
+  [[nodiscard]] Rational FramesFromBeats(Rational beats) const noexcept;
 
   /// Returns frame rate.
   ///

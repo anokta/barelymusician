@@ -7,7 +7,6 @@ target_link_libraries(
   barely_arpeggiator
   barelymusician
   barely_random
-  barely_rational
 )
 
 add_library(
@@ -29,5 +28,4 @@ target_link_libraries(
   barely_repeater
   barelymusician
   barely_random
-  barely_rational
 )

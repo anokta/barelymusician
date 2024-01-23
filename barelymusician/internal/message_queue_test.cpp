@@ -1,7 +1,6 @@
 #include "barelymusician/internal/message_queue.h"
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"

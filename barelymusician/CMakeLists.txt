@@ -39,6 +39,7 @@ if (ENABLE_TESTS)
   target_link_libraries(
     barelymusician_test
     barelymusician
+    gmock
     gtest_main
   )
   gtest_discover_tests(barelymusician_test)

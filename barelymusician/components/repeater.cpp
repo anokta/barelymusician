@@ -4,7 +4,6 @@
 #include <optional>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 
 // Repeater.
 struct BarelyRepeater : public barely::Repeater {

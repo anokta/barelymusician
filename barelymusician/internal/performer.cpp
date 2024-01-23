@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/task.h"
 
 namespace barely::internal {

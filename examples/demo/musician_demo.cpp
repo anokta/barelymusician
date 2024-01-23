@@ -14,7 +14,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"

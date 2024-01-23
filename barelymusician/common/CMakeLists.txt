@@ -8,21 +8,6 @@ add_library(
   random.cpp
   random.h
 )
-target_link_libraries(
-  barely_random
-  barely_rational
-  barelymusician_headeronly
-)
-
-add_library(
-  barely_internal_rational
-  rational.cpp
-  rational.h
-)
-target_link_libraries(
-  barely_internal_rational
-  barelymusician_headeronly
-)
 
 if (ENABLE_TESTS)
   add_executable(
@@ -46,17 +31,4 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_random_test)
-
-  add_executable(
-    barely_rational_test
-    rational_test.cpp
-  )
-  target_link_libraries(
-    barely_rational_test
-    barely_rational
-    barely_internal_rational
-    gmock
-    gtest_main
-  )
-  gtest_discover_tests(barely_rational_test)
 endif()

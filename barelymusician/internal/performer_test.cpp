@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/rational.h"
 #include "barelymusician/internal/task.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"

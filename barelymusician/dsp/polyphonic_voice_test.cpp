@@ -46,13 +46,13 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 
   polyphonic_voice.Start(kPitch);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), kOutput);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), kOutput);
 
   polyphonic_voice.Stop(kPitch);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 }
 
 // Tests that voice initialization callback produces the expected output.
@@ -62,13 +62,13 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 
   for (int i = 0; i < kVoiceCount; ++i) {
     const Rational pitch = i + 1;
     polyphonic_voice.Start(
         pitch, [pitch](FakeVoice* voice) { voice->SetOutput(static_cast<float>(pitch)); });
-    EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), static_cast<float>(pitch));
+    EXPECT_EQ(polyphonic_voice.Next(kChannel), static_cast<float>(pitch));
     polyphonic_voice.Stop(pitch);
   }
 }
@@ -81,18 +81,18 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 
   float previous_output = 0.0f;
   for (int i = 0; i < kVoiceCount; ++i) {
     polyphonic_voice.Start(i);
     const float output = polyphonic_voice.Next(kChannel);
-    EXPECT_FLOAT_EQ(output - previous_output, kOutput);
+    EXPECT_EQ(output - previous_output, kOutput);
     previous_output = output;
   }
 
   polyphonic_voice.Start(kVoiceCount);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), previous_output);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), previous_output);
 }
 
 // Tests that the polyphonic voice produces silence when there are no available voices set.
@@ -101,10 +101,10 @@ TEST(PolyphonicVoiceTest, NoVoice) {
   base_voice.SetOutput(kOutput);
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 
   polyphonic_voice.Start(0);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 }
 
 // Tests that the voice update callback updates all the voices as expected.
@@ -116,12 +116,12 @@ TEST(PolyphonicVoiceTest, Update) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
+  EXPECT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 
   for (int i = 0; i < kVoiceCount; ++i) {
     const Rational pitch = i;
     polyphonic_voice.Start(pitch);
-    EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), kOutput);
+    EXPECT_EQ(polyphonic_voice.Next(kChannel), kOutput);
     polyphonic_voice.Stop(pitch);
   }
 
@@ -130,7 +130,7 @@ TEST(PolyphonicVoiceTest, Update) {
   for (int i = 0; i < kVoiceCount; ++i) {
     const Rational pitch = i;
     polyphonic_voice.Start(pitch);
-    EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), kUpdatedOutput);
+    EXPECT_EQ(polyphonic_voice.Next(kChannel), kUpdatedOutput);
     polyphonic_voice.Stop(pitch);
   }
 }

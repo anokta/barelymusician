@@ -70,7 +70,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel], 0);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], 0);
     }
   }
 
@@ -84,7 +84,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
                             static_cast<void*>(&note_on_callback));
   EXPECT_EQ(note_on_pitch, 0);
-  EXPECT_FLOAT_EQ(note_on_intensity, 0.0f);
+  EXPECT_EQ(note_on_intensity, 0.0f);
 
   Rational note_off_pitch = 0;
   NoteOffEventDefinition::Callback note_off_callback = [&](Rational pitch) {
@@ -99,14 +99,13 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   EXPECT_EQ(note_on_pitch, kPitch);
-  EXPECT_FLOAT_EQ(note_on_intensity, kIntensity);
+  EXPECT_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel],
-                      static_cast<float>(kPitch) * kIntensity);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], static_cast<float>(kPitch) * kIntensity);
     }
   }
 

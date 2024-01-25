@@ -129,7 +129,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel], 15.0f);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], 15.0f);
     }
   }
 
@@ -141,8 +141,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel],
-                      static_cast<float>(kPitch) * kIntensity);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], static_cast<float>(kPitch) * kIntensity);
     }
   }
 
@@ -154,7 +153,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel], 0.0f);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], 0.0f);
     }
   }
 }
@@ -171,7 +170,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel], 15.0f);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], 15.0f);
     }
   }
 
@@ -186,8 +185,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel],
-                      static_cast<float>(frame) * kIntensity);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], static_cast<float>(frame) * kIntensity);
     }
   }
 
@@ -195,7 +193,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kFrameCount));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel], 0.0f);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], 0.0f);
     }
   }
 }
@@ -217,25 +215,25 @@ TEST(InstrumentTest, SetNoteCallbacks) {
   instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
                             static_cast<void*>(&note_on_callback));
   EXPECT_EQ(note_on_pitch, 0);
-  EXPECT_FLOAT_EQ(note_on_intensity, 0.0f);
+  EXPECT_EQ(note_on_intensity, 0.0f);
 
   instrument.SetNoteOn(kPitch, kIntensity);
   EXPECT_EQ(note_on_pitch, kPitch);
-  EXPECT_FLOAT_EQ(note_on_intensity, kIntensity);
+  EXPECT_EQ(note_on_intensity, kIntensity);
 
   // This should not trigger the callback since the note is already on.
   note_on_pitch = 0;
   note_on_intensity = 0.0f;
   instrument.SetNoteOn(kPitch, kIntensity);
   EXPECT_EQ(note_on_pitch, 0);
-  EXPECT_FLOAT_EQ(note_on_intensity, 0.0f);
+  EXPECT_EQ(note_on_intensity, 0.0f);
 
   // Trigger the note on callback again with another note.
   note_on_pitch = 0;
   note_on_intensity = 0.0f;
   instrument.SetNoteOn(kPitch + 2, kIntensity);
   EXPECT_EQ(note_on_pitch, kPitch + 2);
-  EXPECT_FLOAT_EQ(note_on_intensity, kIntensity);
+  EXPECT_EQ(note_on_intensity, kIntensity);
 
   // Trigger the note off callback.
   Rational note_off_pitch = 0;

@@ -14,7 +14,7 @@ TEST(OscillatorTest, Next) {
   oscillator.SetFrequency(2);
   for (int cycle = 0; cycle < kCycleCount; ++cycle) {
     for (int i = -2; i < 2; ++i) {
-      EXPECT_FLOAT_EQ(oscillator.Next(), static_cast<float>(i) * 0.5f);
+      EXPECT_EQ(oscillator.Next(), static_cast<float>(i) * 0.5f);
     }
   }
 }
@@ -27,8 +27,8 @@ TEST(OscillatorTest, MaxFrequency) {
   oscillator.SetType(OscillatorType::kSquare);
   oscillator.SetFrequency(1234);
   for (int i = 0; i < kCycleCount; ++i) {
-    EXPECT_FLOAT_EQ(oscillator.Next(), -1.0f);
-    EXPECT_FLOAT_EQ(oscillator.Next(), 1.0f);
+    EXPECT_EQ(oscillator.Next(), -1.0f);
+    EXPECT_EQ(oscillator.Next(), 1.0f);
   }
 }
 

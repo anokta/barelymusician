@@ -40,7 +40,7 @@ TEST(RandomTest, Reset) {
   random.Reset(kSeed);
   // Validate that the same numbers are generated for the next `kValueCount`.
   for (int i = 0; i < kValueCount; ++i) {
-    EXPECT_FLOAT_EQ(random.DrawNormal(kMean, kVariance), values[i]);
+    EXPECT_EQ(random.DrawNormal(kMean, kVariance), values[i]);
   }
 }
 

@@ -47,7 +47,7 @@ TEST(EffectTest, Process) {
   effect.Process(buffer.data(), kChannelCount, kFrameCount);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel], 0.0f);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], 0.0f);
     }
   }
 
@@ -58,7 +58,7 @@ TEST(EffectTest, Process) {
   effect.Process(buffer.data(), kChannelCount, kFrameCount);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kChannelCount * frame + channel], 5.0f);
+      EXPECT_EQ(buffer[kChannelCount * frame + channel], 5.0f);
     }
   }
 }

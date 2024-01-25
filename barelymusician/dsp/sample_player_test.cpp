@@ -20,9 +20,9 @@ TEST(SamplePlayerTest, SimplePlayback) {
   sample_player.SetData(kData, kFrameRate, kDataLength);
 
   for (int i = 0; i < kDataLength; ++i) {
-    EXPECT_FLOAT_EQ(sample_player.Next(), kData[i]) << "at index " << i;
+    EXPECT_EQ(sample_player.Next(), kData[i]) << "at index " << i;
   }
-  EXPECT_FLOAT_EQ(sample_player.Next(), 0.0f);
+  EXPECT_EQ(sample_player.Next(), 0.0f);
 }
 
 // Tests that the sample data is played back as expected, when set to loop.
@@ -33,7 +33,7 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
 
   constexpr int kLoopCount = 10;
   for (int i = 0; i < kDataLength * kLoopCount; ++i) {
-    EXPECT_FLOAT_EQ(sample_player.Next(), kData[i % kDataLength]) << "at index " << i;
+    EXPECT_EQ(sample_player.Next(), kData[i % kDataLength]) << "at index " << i;
   }
 }
 
@@ -50,7 +50,7 @@ TEST(SamplePlayerTest, SetSpeed) {
 
     for (int i = 0; i < kDataLength; ++i) {
       const int expected_index = static_cast<int>(static_cast<float>(i) * speed);
-      EXPECT_FLOAT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
+      EXPECT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where speed is: " << speed;
     }
   }
@@ -69,7 +69,7 @@ TEST(SamplePlayerTest, DifferentSampleFrequency) {
     for (int i = 0; i < kDataLength; ++i) {
       const int expected_index =
           static_cast<int>(static_cast<float>(i * frequency) / static_cast<float>(kFrameRate));
-      EXPECT_FLOAT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
+      EXPECT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where sample frequency is: " << frequency;
     }
   }
@@ -84,7 +84,7 @@ TEST(SamplePlayerTest, Reset) {
   EXPECT_NE(sample_player.Next(), first_sample);
 
   sample_player.Reset();
-  EXPECT_FLOAT_EQ(sample_player.Next(), first_sample);
+  EXPECT_EQ(sample_player.Next(), first_sample);
 }
 
 }  // namespace

@@ -21,13 +21,13 @@ constexpr float kEpsilon = 1e-3f;
 // constructor.
 TEST(EnvelopeTest, ProcessDefault) {
   Envelope envelope(kFrameRate);
-  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
+  EXPECT_EQ(envelope.Next(), 0.0f);
 
   envelope.Start();
-  EXPECT_FLOAT_EQ(envelope.Next(), 1.0f);
+  EXPECT_EQ(envelope.Next(), 1.0f);
 
   envelope.Stop();
-  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
+  EXPECT_EQ(envelope.Next(), 0.0f);
 }
 
 // Tests that the envelope generates the expected output samples consistently over multiple samples.
@@ -42,7 +42,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   envelope.SetDecay(kDecay);
   envelope.SetSustain(kSustain);
   envelope.SetRelease(kRelease);
-  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
+  EXPECT_EQ(envelope.Next(), 0.0f);
 
   float expected_sample = 0.0f;
 

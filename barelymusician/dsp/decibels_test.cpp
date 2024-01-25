@@ -20,15 +20,15 @@ TEST(DecibelsTest, AmplitudeDecibelsConversion) {
     EXPECT_NEAR(DecibelsFromAmplitude(kAmplitudes[i]), kDecibels[i], kEpsilon);
 
     // Verify that the back and forth conversions do not mutate the value.
-    EXPECT_FLOAT_EQ(AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])), kAmplitudes[i]);
-    EXPECT_FLOAT_EQ(DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])), kDecibels[i]);
+    EXPECT_EQ(AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])), kAmplitudes[i]);
+    EXPECT_EQ(DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])), kDecibels[i]);
   }
 }
 
 // Tests that amplitude/decibels conversion snaps to `kMinDecibels` threshold.
 TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
-  EXPECT_FLOAT_EQ(AmplitudeFromDecibels(kMinDecibels), 0.0f);
-  EXPECT_FLOAT_EQ(DecibelsFromAmplitude(0.0f), kMinDecibels);
+  EXPECT_EQ(AmplitudeFromDecibels(kMinDecibels), 0.0f);
+  EXPECT_EQ(DecibelsFromAmplitude(0.0f), kMinDecibels);
 }
 
 }  // namespace

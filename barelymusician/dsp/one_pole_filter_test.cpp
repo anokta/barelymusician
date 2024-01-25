@@ -23,7 +23,7 @@ TEST(OnePoleFilterTest, LowPass) {
   for (int i = 0; i < kInputLength; ++i) {
     const float expected_output =
         (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(low_pass_filter.Next(kInput[i]), expected_output);
+    EXPECT_EQ(low_pass_filter.Next(kInput[i]), expected_output);
   }
 }
 
@@ -34,7 +34,7 @@ TEST(OnePoleFilterTest, LowPassAllPass) {
   low_pass_filter.SetCoefficient(0.0f);
 
   for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(low_pass_filter.Next(input), input);
+    EXPECT_EQ(low_pass_filter.Next(input), input);
   }
 }
 
@@ -47,7 +47,7 @@ TEST(OnePoleFilterTest, HighPass) {
   for (int i = 0; i < kInputLength; ++i) {
     const float expected_output =
         kInput[i] - (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(high_pass_filter.Next(kInput[i]), expected_output);
+    EXPECT_EQ(high_pass_filter.Next(kInput[i]), expected_output);
   }
 }
 
@@ -58,7 +58,7 @@ TEST(OnePoleFilterTest, HighPassAllPass) {
   high_pass_filter.SetCoefficient(1.0f);
 
   for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(high_pass_filter.Next(input), input);
+    EXPECT_EQ(high_pass_filter.Next(input), input);
   }
 }
 

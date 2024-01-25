@@ -27,7 +27,7 @@ TEST(GainProcessorTest, ProcessConstantGain) {
   for (int frame = 0; frame < kFrameRate; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       const int index = frame * kChannelCount + channel;
-      EXPECT_FLOAT_EQ(data[index], kGain * static_cast<float>(index + 1));
+      EXPECT_EQ(data[index], kGain * static_cast<float>(index + 1));
     }
   }
 }
@@ -52,7 +52,7 @@ TEST(GainProcessorTest, ProcessSetGain) {
   for (int frame = 0; frame < kFrameRate; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       const int index = frame * kChannelCount + channel;
-      EXPECT_FLOAT_EQ(data[index], static_cast<float>(index + 1));
+      EXPECT_EQ(data[index], static_cast<float>(index + 1));
     }
   }
 

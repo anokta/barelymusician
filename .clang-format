@@ -3,5 +3,6 @@ BasedOnStyle: Google
 Standard: Latest
 ColumnLimit: 100
 DerivePointerAlignment: false
+MaxEmptyLinesToKeep: 1
 PointerAlignment: Left
 ...

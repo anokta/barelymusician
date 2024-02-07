@@ -35,13 +35,13 @@ TEST(TaskTest, Process) {
     EXPECT_EQ(task_process_count, 0);
 
     EXPECT_DOUBLE_EQ(task.GetPosition(), 1.0);
-    EXPECT_DOUBLE_EQ(task.GetProcessOrder(), 2);
+    EXPECT_EQ(task.GetProcessOrder(), 2);
 
     task.SetPosition(-1.0);
     EXPECT_DOUBLE_EQ(task.GetPosition(), -1.0);
 
     task.SetProcessOrder(10);
-    EXPECT_DOUBLE_EQ(task.GetProcessOrder(), 10);
+    EXPECT_EQ(task.GetProcessOrder(), 10);
 
     for (int i = 1; i <= 5; ++i) {
       task.Process();

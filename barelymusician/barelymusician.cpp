@@ -1,8 +1,7 @@
 #include "barelymusician/barelymusician.h"
 
-#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
-
 #include <cstddef>
+#include <cstdint>
 
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"

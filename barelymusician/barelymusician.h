@@ -1085,6 +1085,7 @@ BARELY_EXPORT bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t pro
 
 #ifdef __cplusplus
 #include <cassert>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <new>

@@ -1,7 +1,6 @@
 #include "barelymusician/components/repeater.h"
 
-#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
-
+#include <cstdint>
 #include <optional>
 
 #include "barelymusician/barelymusician.h"

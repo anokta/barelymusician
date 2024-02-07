@@ -48,7 +48,7 @@ constexpr char kSamplePath[] = "audio/sample.wav";
 constexpr double kLowPassCutoffFrequency = 2000;
 
 // Note settings.
-constexpr double kRootPitch = barely::kPitchC3;
+constexpr double kRootPitch = barely::kPitchC4;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr double kMaxOffsetOctaves = 3.0;

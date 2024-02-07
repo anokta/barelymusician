@@ -14,8 +14,8 @@ TEST(PitchTest, PitchFromMidi) {
       kMidiA0 + 6, kMidiA0 + 7, kMidiA0 + 8, kMidiA0 + 9, kMidiA0 + 10, kMidiA0 + 11,
   };
   constexpr std::array<double, static_cast<int>(kSemitoneCount)> kPitches = {
-      kPitchA4,      kPitchAsharp4, kPitchB4, kPitchC4,      kPitchCsharp4, kPitchD4,
-      kPitchDsharp4, kPitchE4,      kPitchF4, kPitchFsharp4, kPitchG4,      kPitchGsharp4,
+      kPitchA4,      kPitchAsharp4, kPitchB4, kPitchC5,      kPitchCsharp5, kPitchD5,
+      kPitchDsharp5, kPitchE5,      kPitchF5, kPitchFsharp5, kPitchG5,      kPitchGsharp5,
   };
 
   for (int i = 0; i < static_cast<int>(kSemitoneCount); ++i) {

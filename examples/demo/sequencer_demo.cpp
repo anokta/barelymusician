@@ -83,8 +83,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.emplace_back(3.0, play_note_fn(1.0, barely::kPitchF4));
   score.emplace_back(4.0, play_note_fn(1.0, barely::kPitchG4));
   score.emplace_back(5.0, play_note_fn(1.0 / 3.0, barely::kPitchG4));
-  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchA5));
-  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchB5));
+  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchA4));
+  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchB4));
   score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
 
   std::unordered_map<int, Task> tasks;

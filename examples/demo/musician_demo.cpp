@@ -67,7 +67,7 @@ constexpr double kTempo = 124.0;
 constexpr int kBeatCount = 3;
 
 // Ensemble settings.
-constexpr double kRootNote = barely::kPitchD3;
+constexpr double kRootNote = barely::kPitchD4;
 
 constexpr char kDrumsDir[] = "audio/drums/";
 

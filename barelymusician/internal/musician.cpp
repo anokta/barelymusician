@@ -1,4 +1,3 @@
-
 #include "barelymusician/internal/musician.h"
 
 #include <algorithm>
@@ -56,7 +55,7 @@ void Musician::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
       std::pair<double, int> update_duration = {BeatsFromSeconds(tempo_, timestamp - timestamp_),
-                                                std::numeric_limits<int>::max()};
+                                                std::numeric_limits<int>::lowest()};
       bool has_tasks_to_process = false;
       for (const auto& performer : performers_) {
         assert(performer);
@@ -66,6 +65,7 @@ void Musician::Update(double timestamp) noexcept {
           update_duration = *maybe_duration;
         }
       }
+      assert(update_duration.first > 0.0 || has_tasks_to_process);
 
       if (update_duration.first > 0) {
         for (const auto& performer : performers_) {
@@ -80,7 +80,7 @@ void Musician::Update(double timestamp) noexcept {
         }
       }
 
-      if (has_tasks_to_process && timestamp_ < timestamp) {
+      if (has_tasks_to_process) {
         for (const auto& performer : performers_) {
           assert(performer);
           performer->ProcessNextTaskAtPosition();

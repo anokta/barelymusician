@@ -24,10 +24,9 @@ class Instrument {
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @param initial_tempo Initial tempo in beats per minute.
   /// @param initial_timestamp Initial timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
+  Instrument(const InstrumentDefinition& definition, int frame_rate,
              double initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
@@ -128,9 +127,9 @@ class Instrument {
   ///
   /// @param index Control index.
   /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
+  /// @param slope_per_second Control slope in value change per second.
   /// @return True if successful, false otherwise.
-  bool SetControl(int index, double value, double slope_per_beat) noexcept;
+  bool SetControl(int index, double value, double slope_per_second) noexcept;
 
   /// Sets the control event callback.
   ///
@@ -148,9 +147,9 @@ class Instrument {
   /// @param effect Effect.
   /// @param index Effect control index.
   /// @param value Effect control value.
-  /// @param slope_per_beat Effect control slope in value change per beat.
+  /// @param slope_per_second Effect control slope in value change per second.
   /// @return True if successful, false otherwise.
-  bool SetEffectControl(Effect& effect, int index, double value, double slope_per_beat) noexcept;
+  bool SetEffectControl(Effect& effect, int index, double value, double slope_per_second) noexcept;
 
   /// Sets effect data.
   ///
@@ -171,9 +170,9 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @param value Note control value.
-  /// @param slope_per_beat Note control slope in value change per beat.
+  /// @param slope_per_second Note control slope in value change per second.
   /// @return True if successful, false otherwise.
-  bool SetNoteControl(double pitch, int index, double value, double slope_per_beat) noexcept;
+  bool SetNoteControl(double pitch, int index, double value, double slope_per_second) noexcept;
 
   /// Sets the note control event.
   ///
@@ -205,11 +204,6 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
 
-  /// Sets the tempo.
-  ///
-  /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept;
-
   /// Updates the instrument at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
@@ -225,8 +219,8 @@ class Instrument {
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
 
-  // Returns the corresponding slope per frame for a given `slope_per_beat`.
-  [[nodiscard]] double GetSlopePerFrame(double slope_per_beat) const noexcept;
+  // Returns the corresponding slope per frame for a given `slope_per_second`.
+  [[nodiscard]] double GetSlopePerFrame(double slope_per_second) const noexcept;
 
   // Updates effect references.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -279,9 +273,6 @@ class Instrument {
 
   // Note on event.
   NoteOnEvent note_on_event_;
-
-  // Tempo in beats per minute.
-  double tempo_ = 120.0;
 
   // Timestamp in seconds.
   double timestamp_ = 0;

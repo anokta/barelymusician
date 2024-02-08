@@ -54,8 +54,7 @@ struct BarelyInstrument : public Observable<Instrument> {
   // Constructs `BarelyInstrument` with `musician`, `definition`, and `frame_rate`.
   BarelyInstrument(const Observable<Musician>& musician, BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
-      : Observable<Instrument>(definition, frame_rate, musician.GetTempo(),
-                               musician.GetTimestamp()),
+      : Observable<Instrument>(definition, frame_rate, musician.GetTimestamp()),
         musician_(musician.Observe()) {
     musician_->AddInstrument(*this);
   }
@@ -210,10 +209,10 @@ bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t index) {
 }
 
 bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
-                             double slope_per_beat) {
+                             double slope_per_second) {
   if (!effect || !effect->instrument()) return false;
 
-  return effect->instrument()->SetEffectControl(*effect, index, value, slope_per_beat);
+  return effect->instrument()->SetEffectControl(*effect, index, value, slope_per_second);
 }
 
 bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
@@ -356,10 +355,10 @@ bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
 }
 
 bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index, double value,
-                                 double slope_per_beat) {
+                                 double slope_per_second) {
   if (!instrument) return false;
 
-  return instrument->SetControl(index, value, slope_per_beat);
+  return instrument->SetControl(index, value, slope_per_second);
 }
 
 bool BarelyInstrument_SetControlEvent(BarelyInstrumentHandle instrument,
@@ -380,10 +379,10 @@ bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* dat
 }
 
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
-                                     double value, double slope_per_beat) {
+                                     double value, double slope_per_second) {
   if (!instrument) return false;
 
-  return instrument->SetNoteControl(pitch, index, value, slope_per_beat);
+  return instrument->SetNoteControl(pitch, index, value, slope_per_second);
 }
 
 bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle instrument,

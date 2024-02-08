@@ -16,7 +16,7 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
+Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
                        double initial_timestamp) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
@@ -31,10 +31,8 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate, d
                         definition.note_control_definition_count)),
       controls_(BuildControls(static_cast<const ControlDefinition*>(definition.control_definitions),
                               definition.control_definition_count)),
-      tempo_(initial_tempo),
       timestamp_(initial_timestamp) {
   assert(frame_rate > 0);
-  assert(initial_tempo >= 0.0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
@@ -253,12 +251,12 @@ void Instrument::SetAllNotesOff() noexcept {
   }
 }
 
-bool Instrument::SetControl(int index, double value, double slope_per_beat) noexcept {
+bool Instrument::SetControl(int index, double value, double slope_per_second) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    if (auto& control = controls_[index]; control.Set(value, slope_per_beat)) {
+    if (auto& control = controls_[index]; control.Set(value, slope_per_second)) {
       control_event_.Process(index, control.GetValue());
-      message_queue_.Add(
-          timestamp_, ControlMessage{index, control.GetValue(), GetSlopePerFrame(slope_per_beat)});
+      message_queue_.Add(timestamp_, ControlMessage{index, control.GetValue(),
+                                                    GetSlopePerFrame(slope_per_second)});
     }
     return true;
   }
@@ -274,13 +272,13 @@ void Instrument::SetData(std::vector<std::byte> data) noexcept {
 }
 
 bool Instrument::SetEffectControl(Effect& effect, int index, double value,
-                                  double slope_per_beat) noexcept {
+                                  double slope_per_second) noexcept {
   if (auto* effect_control = effect.GetControl(index)) {
-    if (effect_control->Set(value, slope_per_beat)) {
+    if (effect_control->Set(value, slope_per_second)) {
       effect.ProcessControlEvent(index);
       message_queue_.Add(timestamp_,
                          EffectControlMessage{&effect, index, effect_control->GetValue(),
-                                              GetSlopePerFrame(slope_per_beat)});
+                                              GetSlopePerFrame(slope_per_second)});
     }
     return true;
   }
@@ -304,13 +302,13 @@ void Instrument::SetEffectProcessOrder(Effect& effect, int process_order) noexce
 }
 
 bool Instrument::SetNoteControl(double pitch, int index, double value,
-                                double slope_per_beat) noexcept {
+                                double slope_per_second) noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-      if (auto& note_control = (*note_controls)[index]; note_control.Set(value, slope_per_beat)) {
+      if (auto& note_control = (*note_controls)[index]; note_control.Set(value, slope_per_second)) {
         note_control_event_.Process(pitch, index, note_control.GetValue());
         message_queue_.Add(timestamp_, NoteControlMessage{pitch, index, note_control.GetValue(),
-                                                          GetSlopePerFrame(slope_per_beat)});
+                                                          GetSlopePerFrame(slope_per_second)});
       }
       return true;
     }
@@ -350,76 +348,39 @@ void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition, void* user_dat
   note_on_event_ = {definition, user_data};
 }
 
-void Instrument::SetTempo(double tempo) noexcept {
-  assert(tempo_ != tempo);
-  tempo_ = tempo;
+void Instrument::Update(double timestamp) noexcept {
+  if (timestamp_ >= timestamp) {
+    return;
+  }
+  const double interval = timestamp - timestamp_;
   // Update controls.
   for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
-    if (const auto& control = controls_[index]; control.GetSlopePerBeat() != 0.0) {
-      message_queue_.Add(timestamp_, ControlMessage{index, control.GetValue(),
-                                                    GetSlopePerFrame(control.GetSlopePerBeat())});
+    if (auto& control = controls_[index]; control.Update(interval)) {
+      control_event_.Process(index, control.GetValue());
     }
   }
   // Update effect controls.
   for (const auto& [process_order, effect] : effects_) {
     auto& effect_controls = effect->GetAllControls();
     for (int index = 0; index < static_cast<int>(effect_controls.size()); ++index) {
-      if (const auto& effect_control = effect_controls[index];
-          effect_control.GetSlopePerBeat() != 0.0) {
-        message_queue_.Add(
-            timestamp_, EffectControlMessage{effect, index, effect_control.GetValue(),
-                                             GetSlopePerFrame(effect_control.GetSlopePerBeat())});
+      if (auto& effect_control = effect_controls[index]; effect_control.Update(interval)) {
+        effect->ProcessControlEvent(index);
       }
     }
   }
   // Update note controls.
   for (auto& [pitch, note_controls] : note_controls_) {
     for (int index = 0; index < static_cast<int>(note_controls.size()); ++index) {
-      if (const auto& note_control = note_controls[index]; note_control.GetSlopePerBeat() != 0.0) {
-        message_queue_.Add(timestamp_,
-                           NoteControlMessage{pitch, index, note_control.GetValue(),
-                                              GetSlopePerFrame(note_control.GetSlopePerBeat())});
-      }
-    }
-  }
-}
-
-void Instrument::Update(double timestamp) noexcept {
-  if (timestamp_ >= timestamp) {
-    return;
-  }
-  if (tempo_ > 0.0) {
-    const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
-    // Update controls.
-    for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
-      if (auto& control = controls_[index]; control.Update(duration)) {
-        control_event_.Process(index, control.GetValue());
-      }
-    }
-    // Update effect controls.
-    for (const auto& [process_order, effect] : effects_) {
-      auto& effect_controls = effect->GetAllControls();
-      for (int index = 0; index < static_cast<int>(effect_controls.size()); ++index) {
-        if (auto& effect_control = effect_controls[index]; effect_control.Update(duration)) {
-          effect->ProcessControlEvent(index);
-        }
-      }
-    }
-    // Update note controls.
-    for (auto& [pitch, note_controls] : note_controls_) {
-      for (int index = 0; index < static_cast<int>(note_controls.size()); ++index) {
-        if (auto& note_control = note_controls[index]; note_control.Update(duration)) {
-          note_control_event_.Process(pitch, index, note_control.GetValue());
-        }
+      if (auto& note_control = note_controls[index]; note_control.Update(interval)) {
+        note_control_event_.Process(pitch, index, note_control.GetValue());
       }
     }
   }
   timestamp_ = timestamp;
 }
 
-double Instrument::GetSlopePerFrame(double slope_per_beat) const noexcept {
-  return tempo_ > 0.0 ? BeatsFromSeconds(tempo_, slope_per_beat) / static_cast<double>(frame_rate_)
-                      : 0.0;
+double Instrument::GetSlopePerFrame(double slope_per_second) const noexcept {
+  return slope_per_second / static_cast<double>(frame_rate_);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

@@ -39,16 +39,7 @@ void Musician::RemovePerformer(Performer& performer) noexcept {
   assert(success);
 }
 
-void Musician::SetTempo(double tempo) noexcept {
-  tempo = std::max(tempo, 0.0);
-  if (tempo_ == tempo) {
-    return;
-  }
-  tempo_ = tempo;
-  for (const auto& instrument : instruments_) {
-    instrument->SetTempo(tempo_);
-  }
-}
+void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::Update(double timestamp) noexcept {

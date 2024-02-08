@@ -119,9 +119,9 @@ namespace Barely {
     ///
     /// @param index Control index.
     /// @param value Control value.
-    /// @param slopePerBeat Control slope in value change per beat.
-    public void SetControl(int index, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Instrument_SetControl(_handle, index, value, slopePerBeat);
+    /// @param slopePerSecond Control slope in value change per second.
+    public void SetControl(int index, double value, double slopePerSecond = 0.0) {
+      Musician.Internal.Instrument_SetControl(_handle, index, value, slopePerSecond);
     }
 
     /// Sets data.
@@ -137,9 +137,9 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param index Note control index.
     /// @param value Note control value.
-    /// @param slopePerBeat Note control slope in value change per beat.
-    public void SetNoteControl(double pitch, int index, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, index, value, slopePerBeat);
+    /// @param slopePerSecond Note control slope in value change per second.
+    public void SetNoteControl(double pitch, int index, double value, double slopePerSecond = 0.0) {
+      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, index, value, slopePerSecond);
     }
 
     /// Sets a note off.

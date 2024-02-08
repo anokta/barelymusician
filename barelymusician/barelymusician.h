@@ -52,14 +52,14 @@
 ///
 ///   // Set a control value.
 ///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
-///                         /*slope_per_beat=*/0.0);
+///                         /*slope_per_second=*/0.0);
 ///
 ///   // Create a low-pass effect.
 ///   auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 ///
-///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
+///   // Set the low-pass cutoff frequency to increase by 100 hertz per second.
 ///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
-///                     /*slope_per_beat=*/100.0);
+///                     /*slope_per_second=*/100.0);
 ///
 ///   // Process.
 ///   //
@@ -147,15 +147,15 @@
 ///   BarelyInstrument_IsNoteOn(instrument, /*pitch=*/-1.0, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, /*index=*/0, /*value=*/0.5, /*slope_per_beat=*/0.0);
+///   BarelyInstrument_SetControl(instrument, /*index=*/0, /*value=*/0.5, /*slope_per_second=*/0.0);
 ///
 ///   // Create a low-pass effect.
 ///   BarelyEffectHandle effect;
 ///   BarelyEffect_Create(instrument, BarelyLowPassEffect_GetDefinition(), /*process_order=*/0,
 ///                       &effect);
 ///
-///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   BarelyEffect_SetControl(effect, /*index=*/0, /*value=*/0.0, /*slope_per_beat=*/100.0);
+///   // Set the low-pass cutoff frequency to increase by 100 hertz per second.
+///   BarelyEffect_SetControl(effect, /*index=*/0, /*value=*/0.0, /*slope_per_second=*/100.0);
 ///
 ///   // Process.
 ///   //
@@ -642,10 +642,10 @@ BARELY_EXPORT bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t 
 /// @param effect Effect handle.
 /// @param index Control index.
 /// @param value Control value.
-/// @param slope_per_beat Control slope in value change per beat.
+/// @param slope_per_second Control slope in value change per second.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
-                                           double slope_per_beat);
+                                           double slope_per_second);
 
 /// Sets the control event of an effect.
 ///
@@ -793,10 +793,10 @@ BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instru
 /// @param instrument Instrument handle.
 /// @param index Control index.
 /// @param value Control value.
-/// @param slope_per_beat Control slope in value change per beat.
+/// @param slope_per_second Control slope in value change per second.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index,
-                                               double value, double slope_per_beat);
+                                               double value, double slope_per_second);
 
 /// Sets the control event of an instrument.
 ///
@@ -823,11 +823,11 @@ BARELY_EXPORT bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, c
 /// @param pitch Note pitch.
 /// @param index Note control index.
 /// @param value Note control value.
-/// @param slope_per_beat Note control slope in value change per beat.
+/// @param slope_per_second Note control slope in value change per second.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
                                                    int32_t index, double value,
-                                                   double slope_per_beat);
+                                                   double slope_per_second);
 
 /// Sets the note control event of an instrument.
 ///
@@ -1701,15 +1701,15 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
   ///
   /// @param index Control index.
   /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
+  /// @param slope_per_second Control slope in value change per second.
   template <typename IndexType, typename ValueType>
-  void SetControl(IndexType index, ValueType value, double slope_per_beat = 0.0) noexcept {
+  void SetControl(IndexType index, ValueType value, double slope_per_second = 0.0) noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyEffect_SetControl(
-        Get(), static_cast<int>(index), static_cast<double>(value), slope_per_beat);
+        Get(), static_cast<int>(index), static_cast<double>(value), slope_per_second);
     assert(success);
   }
 
@@ -1954,15 +1954,15 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   ///
   /// @param index Control index.
   /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
+  /// @param slope_per_second Control slope in value change per second.
   template <typename IndexType, typename ValueType>
-  void SetControl(IndexType index, ValueType value, double slope_per_beat = 0.0) noexcept {
+  void SetControl(IndexType index, ValueType value, double slope_per_second = 0.0) noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
-        Get(), static_cast<int>(index), static_cast<double>(value), slope_per_beat);
+        Get(), static_cast<int>(index), static_cast<double>(value), slope_per_second);
     assert(success);
   }
 
@@ -2014,16 +2014,16 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @param value Note control value.
-  /// @param slope_per_beat Note control slope in value change per beat.
+  /// @param slope_per_second Note control slope in value change per second.
   template <typename IndexType, typename ValueType>
   void SetNoteControl(double pitch, IndexType index, ValueType value,
-                      double slope_per_beat = 0.0) noexcept {
+                      double slope_per_second = 0.0) noexcept {
     static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
                   "IndexType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        Get(), pitch, static_cast<int>(index), static_cast<double>(value), slope_per_beat);
+        Get(), pitch, static_cast<int>(index), static_cast<double>(value), slope_per_second);
     assert(success);
   }
 

@@ -64,8 +64,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
-  Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetTempo(),
-                        musician.GetTimestamp());
+  Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetTimestamp());
   musician.AddInstrument(instrument);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -125,8 +124,8 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     // Create instruments with note off callback.
     std::vector<std::unique_ptr<Instrument>> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(std::make_unique<Instrument>(
-          GetTestInstrumentDefinition(), kFrameRate, musician.GetTempo(), musician.GetTimestamp()));
+      instruments.push_back(std::make_unique<Instrument>(GetTestInstrumentDefinition(), kFrameRate,
+                                                         musician.GetTimestamp()));
       musician.AddInstrument(*instruments[i]);
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);

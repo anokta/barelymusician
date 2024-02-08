@@ -17,33 +17,33 @@ Control::Control(ControlDefinition definition) noexcept
 
 const ControlDefinition& Control::GetDefinition() const noexcept { return definition_; }
 
-double Control::GetSlopePerBeat() const noexcept { return slope_per_beat_; }
+double Control::GetSlopePerSecond() const noexcept { return slope_per_second_; }
 
 double Control::GetValue() const noexcept { return value_; }
 
 bool Control::Reset() noexcept {
-  if (value_ != definition_.default_value || slope_per_beat_ != 0.0) {
+  if (value_ != definition_.default_value || slope_per_second_ != 0.0) {
     value_ = definition_.default_value;
-    slope_per_beat_ = 0.0;
+    slope_per_second_ = 0.0;
     return true;
   }
   return false;
 }
 
-bool Control::Set(double value, double slope_per_beat) noexcept {
+bool Control::Set(double value, double slope_per_second) noexcept {
   value = Clamp(value);
-  if (value_ != value || slope_per_beat_ != slope_per_beat) {
+  if (value_ != value || slope_per_second_ != slope_per_second) {
     value_ = value;
-    slope_per_beat_ = slope_per_beat;
+    slope_per_second_ = slope_per_second;
     return true;
   }
   return false;
 }
 
-bool Control::Update(double duration) noexcept {
-  assert(duration > 0.0);
-  if (slope_per_beat_ != 0.0) {
-    if (const double value = Clamp(value_ + slope_per_beat_ * duration); value_ != value) {
+bool Control::Update(double interval) noexcept {
+  assert(interval > 0.0);
+  if (slope_per_second_ != 0.0) {
+    if (const double value = Clamp(value_ + slope_per_second_ * interval); value_ != value) {
       value_ = value;
       return true;
     }

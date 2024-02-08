@@ -21,8 +21,6 @@ constexpr int kFrameRate = 8000;
 constexpr int kChannelCount = 1;
 constexpr int kFrameCount = 4;
 
-constexpr double kTempo = 60.0;
-
 // Returns a test instrument definition that produces constant output per note.
 InstrumentDefinition GetTestDefinition() {
   static const std::array<ControlDefinition, 1> control_definitions = {
@@ -54,7 +52,7 @@ InstrumentDefinition GetTestDefinition() {
 
 // Tests that the instrument returns a control value as expected.
 TEST(InstrumentTest, GetControl) {
-  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), kFrameRate, 0.0);
   EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
 
   EXPECT_TRUE(instrument.SetControl(0, 20.0, 0.0));
@@ -80,7 +78,7 @@ TEST(InstrumentTest, GetNoteControl) {
   constexpr double kPitch = 1.0;
   constexpr double kIntensity = 1.0;
 
-  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), kFrameRate, 0.0);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
   EXPECT_FALSE(instrument.GetNoteControl(kPitch, 0));
 
@@ -116,7 +114,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   constexpr double kIntensity = 0.5;
   constexpr double kTimestamp = 20.0;
 
-  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, kTimestamp);
+  Instrument instrument(GetTestDefinition(), kFrameRate, kTimestamp);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Control is set to its default value.
@@ -157,7 +155,7 @@ TEST(InstrumentTest, PlaySingleNote) {
 TEST(InstrumentTest, PlayMultipleNotes) {
   constexpr double kIntensity = 1.0;
 
-  Instrument instrument(GetTestDefinition(), 1, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), 1, 0.0);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Control is set to its default value.
@@ -200,7 +198,7 @@ TEST(InstrumentTest, SetNoteCallbacks) {
   constexpr double kPitch = 4.0;
   constexpr double kIntensity = 0.25;
 
-  Instrument instrument(GetTestDefinition(), 1, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), 1, 0.0);
 
   // Trigger the note on callback.
   double note_on_pitch = 0.0;
@@ -259,7 +257,7 @@ TEST(InstrumentTest, SetAllNotesOff) {
   constexpr std::array<double, 3> kPitches = {1.0, 2.0, 3.0};
   constexpr double kIntensity = 1.0;
 
-  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), kFrameRate, 0.0);
   for (const double pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

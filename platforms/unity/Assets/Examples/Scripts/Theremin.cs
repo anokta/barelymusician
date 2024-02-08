@@ -33,7 +33,7 @@ namespace Barely {
         }
       }
 
-      public void OnSetControl(int index, double value, double slopePerBeat) {
+      public void OnSetControl(int index, double value, double slopePerSecond) {
         switch (index) {
           case 0:
             _targetFrequency = GetFrequency(value);
@@ -48,7 +48,7 @@ namespace Barely {
         Debug.LogWarning("Theremin does not implement OnSetData");
       }
 
-      public void OnSetNoteControl(double pitch, int index, double value, double slopePerBeat) {
+      public void OnSetNoteControl(double pitch, int index, double value, double slopePerSecond) {
         Debug.LogWarning("Theremin does not implement OnSetNoteControl");
       }
 

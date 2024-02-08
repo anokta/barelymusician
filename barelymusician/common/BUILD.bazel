@@ -15,7 +15,6 @@ cc_library(
 
 cc_library(
     name = "seconds",
-    srcs = ["seconds.cpp"],
     hdrs = ["seconds.h"],
 )
 

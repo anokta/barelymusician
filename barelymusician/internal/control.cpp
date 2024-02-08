@@ -40,10 +40,10 @@ bool Control::Set(double value, double slope_per_second) noexcept {
   return false;
 }
 
-bool Control::Update(double interval) noexcept {
-  assert(interval > 0.0);
+bool Control::Update(double elapsed_seconds) noexcept {
+  assert(elapsed_seconds > 0.0);
   if (slope_per_second_ != 0.0) {
-    if (const double value = Clamp(value_ + slope_per_second_ * interval); value_ != value) {
+    if (const double value = Clamp(value_ + slope_per_second_ * elapsed_seconds); value_ != value) {
       value_ = value;
       return true;
     }

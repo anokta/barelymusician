@@ -47,11 +47,11 @@ class Control {
   /// @return True if changed, false otherwise.
   bool Set(double value, double slope_per_second) noexcept;
 
-  /// Updates the value by interval.
+  /// Updates the value by elapsed seconds.
   ///
-  /// @param interval Update interval in seconds.
+  /// @param elapsed_seconds Elapsed seconds.
   /// @return True if changed, false otherwise.
-  bool Update(double interval) noexcept;
+  bool Update(double elapsed_seconds) noexcept;
 
  private:
   // Clamps a given `value`.

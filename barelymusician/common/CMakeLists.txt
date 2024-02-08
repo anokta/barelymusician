@@ -10,8 +10,7 @@ add_library(
 )
 
 add_library(
-  barely_seconds
-  seconds.cpp
+  barely_seconds INTERFACE
   seconds.h
 )
 

@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <set>
@@ -276,6 +277,9 @@ class Instrument {
 
   // Timestamp in seconds.
   double timestamp_ = 0;
+
+  // Update frame.
+  int64_t update_frame_ = 0;
 
   // State.
   void* state_ = nullptr;

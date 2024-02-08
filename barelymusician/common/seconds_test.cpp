@@ -1,6 +1,7 @@
 #include "barelymusician/common/seconds.h"
 
 #include <array>
+#include <cstdint>
 
 #include "gtest/gtest.h"
 
@@ -30,7 +31,7 @@ TEST(SecondsTest, FramesSecondsConversion) {
   constexpr int kFrameRate = 8000;
 
   constexpr int kValueCount = 4;
-  constexpr std::array<int, kValueCount> kFrames = {0, 800, 4000, 32000};
+  constexpr std::array<int64_t, kValueCount> kFrames = {0, 800, 4000, 32000};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.1, 0.5, 4.0};
 
   for (int i = 0; i < kValueCount; ++i) {

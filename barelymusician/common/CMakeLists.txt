@@ -9,11 +9,6 @@ add_library(
   random.h
 )
 
-add_library(
-  barely_seconds INTERFACE
-  seconds.h
-)
-
 if (ENABLE_TESTS)
   add_executable(
     barely_find_or_null_test
@@ -36,15 +31,4 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_random_test)
-
-  add_executable(
-    barely_seconds_test
-    seconds_test.cpp
-  )
-  target_link_libraries(
-    barely_seconds_test
-    barely_seconds
-    gtest_main
-  )
-  gtest_discover_tests(barely_seconds_test)
 endif()

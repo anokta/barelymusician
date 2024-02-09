@@ -56,12 +56,25 @@ class Instrument {
   /// @return Frame rate in hz.
   [[nodiscard]] int GetFrameRate() const noexcept;
 
+  /// Returns the corresponding number of frames for a given number of seconds.
+  ///
+  /// @param seconds Number of seconds.
+  /// @return Number of frames.
+  [[nodiscard]] int64_t GetFramesFromSeconds(double seconds) noexcept;
+
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @return Pointer to note control, or nullptr if not found.
   [[nodiscard]] const Control* GetNoteControl(double pitch, int index) const noexcept;
+
+  /// Returns the corresponding number of seconds for a given number of frames.
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  /// @param frames Number of frames.
+  /// @return Number of seconds.
+  [[nodiscard]] double GetSecondsFromFrames(int64_t frames) noexcept;
 
   /// Returns whether a note is on or not.
   ///

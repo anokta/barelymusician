@@ -40,10 +40,6 @@ add_library(
   gain_processor.cpp
   gain_processor.h
 )
-target_link_libraries(
-  barely_gain_processor
-  barely_seconds
-)
 
 add_library(
   barely_generator INTERFACE

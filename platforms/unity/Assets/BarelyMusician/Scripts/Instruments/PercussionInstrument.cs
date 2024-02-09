@@ -21,7 +21,7 @@ namespace Barely {
       public double[] Data {
         get {
           if (_data == null || HasChanged) {
-            _pitch = Musician.PitchFromMidiKey(Key);
+            _pitch = Musician.GetPitchFromMidiKey(Key);
             _sample = Sample;
             if (_sample == null || _sample.samples == 0) {
               _data = null;
@@ -51,7 +51,7 @@ namespace Barely {
 
       /// Denotes whether any changes has occured since the last update.
       public bool HasChanged {
-        get { return Sample != _sample || Musician.PitchFromMidiKey(Key) != _pitch; }
+        get { return Sample != _sample || Musician.GetPitchFromMidiKey(Key) != _pitch; }
       }
 
       /// Current note pitch.

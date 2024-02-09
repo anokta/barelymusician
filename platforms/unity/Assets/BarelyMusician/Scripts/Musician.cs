@@ -25,19 +25,36 @@ namespace Barely {
       get { return Internal.Musician_GetTimestamp(); }
     }
 
+    /// Returns the corresponding number of beats for a given number of `seconds`.
+    ///
+    /// @param seconds Number of seconds.
+    /// @return Number of beats.
+    public static double GetBeatsFromSeconds(double seconds) {
+      return Internal.Musician_GetBeatsFromSeconds(seconds);
+    }
+
     /// Returns the corresponding midi key for a given `pitch`.
     ///
     /// @param pitch Note pitch.
     /// @return Midi key.
-    public static int MidiKeyFromPitch(double pitch) {
+    public static int GetMidiKeyFromPitch(double pitch) {
       return 69 + (int)(pitch * 12.0);
     }
 
     /// Returns the corresponding pitch for a given `midiKey`.
+    ///
     /// @param midiKey Midi key.
     /// @param Note pitch.
-    public static double PitchFromMidiKey(int midiKey) {
+    public static double GetPitchFromMidiKey(int midiKey) {
       return (double)(midiKey - 69) / 12.0;
+    }
+
+    /// Returns the corresponding number of seconds for a given number of `beats`.
+    ///
+    /// @param beats Number of beats.
+    /// @return Number of seconds.
+    public static double GetSecondsFromBeats(double beats) {
+      return Internal.Musician_GetSecondsFromBeats(beats);
     }
 
     /// Schedules a task at a specific time.
@@ -505,6 +522,20 @@ namespace Barely {
         return value;
       }
 
+      /// Returns the corresponding number of instrument frames for a given number of seconds.
+      ///
+      /// @param instrumentHandle Instrument handle.
+      /// @param seconds Number of seconds.
+      /// @return Number of frames.
+      public static Int64 Instrument_GetFramesFromSeconds(IntPtr instrumentHandle, double seconds) {
+        Int64 frames = 0;
+        if (!BarelyInstrument_GetFramesFromSeconds(instrumentHandle, seconds, ref frames) &&
+            instrumentHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get instrument frames for " + seconds + " seconds");
+        }
+        return frames;
+      }
+
       /// Returns the value of an instrument note control.
       ///
       /// @param instrumentHandle Instrument handle.
@@ -520,6 +551,20 @@ namespace Barely {
                          " value");
         }
         return value;
+      }
+
+      /// Returns the corresponding number of seconds for a given number of instrument frames.
+      ///
+      /// @param instrumentHandle Instrument handle.
+      /// @param frames Number of frames.
+      /// @return Number of seconds.
+      public static double Instrument_GetSecondsFromFrames(IntPtr instrumentHandle, Int64 frames) {
+        double seconds = 0.0;
+        if (!BarelyInstrument_GetSecondsFromFrames(instrumentHandle, frames, ref seconds) &&
+            instrumentHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get seconds for " + frames + " instrument frames");
+        }
+        return frames;
       }
 
       /// Returns whether an instrument note is on or not.
@@ -682,6 +727,32 @@ namespace Barely {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
                          " intensity");
         }
+      }
+
+      /// Returns the corresponding number of seconds for a given number of musician beats.
+      ///
+      /// @param frames Number of beats.
+      /// @return Number of seconds.
+      public static double Musician_GetSecondsFromBeats(double beats) {
+        double seconds = 0.0;
+        if (!BarelyMusician_GetSecondsFromBeats(Handle, beats, ref seconds) &&
+            _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get seconds for " + beats + " musician beats");
+        }
+        return seconds;
+      }
+
+      /// Returns the corresponding number of musician beats for a given number of seconds.
+      ///
+      /// @param frames Number of seconds.
+      /// @return Number of beats.
+      public static double Musician_GetBeatsFromSeconds(double seconds) {
+        double beats = 0.0;
+        if (!BarelyMusician_GetBeatsFromSeconds(Handle, seconds, ref beats) &&
+            _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician beats for " + seconds + " seconds");
+        }
+        return beats;
       }
 
       /// Returns the tempo of a musician.
@@ -1571,6 +1642,11 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
 
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetFramesFromSeconds")]
+      private static extern bool BarelyInstrument_GetFramesFromSeconds(IntPtr musician,
+                                                                       double seconds,
+                                                                       ref Int64 outFrames);
+
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetControl")]
       private static extern bool BarelyInstrument_GetControl(IntPtr instrument, Int32 index,
                                                              ref double outValue);
@@ -1578,6 +1654,11 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
       private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, double pitch,
                                                                  Int32 index, ref double outValue);
+
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetSecondsFromFrames")]
+      private static extern bool BarelyInstrument_GetSecondsFromFrames(IntPtr musician,
+                                                                       Int64 frames,
+                                                                       ref double outSeconds);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, double pitch,
@@ -1650,6 +1731,14 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern bool BarelyMusician_Destroy(IntPtr musician);
+
+      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetBeatsFromSeconds")]
+      private static extern bool BarelyMusician_GetBeatsFromSeconds(IntPtr musician, double seconds,
+                                                                    ref double outBeats);
+
+      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetSecondsFromBeats")]
+      private static extern bool BarelyMusician_GetSecondsFromBeats(IntPtr musician, double beats,
+                                                                    ref double outSeconds);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTempo")]
       private static extern bool BarelyMusician_GetTempo(IntPtr musician, ref double outTempo);

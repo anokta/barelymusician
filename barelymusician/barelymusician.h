@@ -709,6 +709,15 @@ BARELY_EXPORT bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle 
                                                          int32_t index,
                                                          BarelyControlDefinition* out_definition);
 
+/// Gets the corresponding number of instrument frames for a given number of seconds.
+///
+/// @param instrument Instrument handle.
+/// @param seconds Number of seconds.
+/// @param out_frames Output number of instrument frames.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_GetFramesFromSeconds(BarelyInstrumentHandle instrument,
+                                                         double seconds, int64_t* out_frames);
+
 /// Gets an instrument note control value.
 ///
 /// @param instrument Instrument handle.
@@ -729,6 +738,15 @@ BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instru
 BARELY_EXPORT bool BarelyInstrument_GetNoteControlDefinition(
     BarelyInstrumentHandle instrument, double pitch, int32_t index,
     BarelyControlDefinition* out_definition);
+
+/// Gets the corresponding number of seconds for a given number of instrument frames.
+///
+/// @param instrument Instrument handle.
+/// @param frames Number of instrument frames.
+/// @param out_seconds Output number of seconds.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_GetSecondsFromFrames(BarelyInstrumentHandle instrument,
+                                                         int64_t frames, double* out_seconds);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -886,6 +904,24 @@ BARELY_EXPORT bool BarelyMusician_Create(BarelyMusicianHandle* out_musician);
 /// @param musician Musician handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
+
+/// Gets the corresponding number of musician beats for a given number of seconds.
+///
+/// @param musician Musician handle.
+/// @param seconds Number of seconds.
+/// @param out_beats Output number of musician beats.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_GetBeatsFromSeconds(BarelyMusicianHandle musician, double seconds,
+                                                      double* out_beats);
+
+/// Gets the corresponding number of seconds for a given number of musician beats.
+///
+/// @param musician Musician handle.
+/// @param beats Number of musician beats.
+/// @param out_seconds Output number of seconds.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_GetSecondsFromBeats(BarelyMusicianHandle musician, double beats,
+                                                      double* out_seconds);
 
 /// Gets the tempo of a musician.
 ///
@@ -1852,6 +1888,18 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
     return definition;
   }
 
+  /// Returns the corresponding number of frames for a given number of seconds.
+  ///
+  /// @param seconds Number of seconds.
+  /// @return Number of frames.
+  [[nodiscard]] int64_t GetFramesFromSeconds(double seconds) {
+    int64_t frames = 0;
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_GetFramesFromSeconds(Get(), seconds, &frames);
+    assert(success);
+    return frames;
+  }
+
   /// Returns a note control value.
   ///
   /// @param index Note control index.
@@ -1881,6 +1929,18 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
         Get(), pitch, static_cast<int>(index), &definition);
     assert(success);
     return definition;
+  }
+
+  /// Returns the corresponding number of seconds for a given number of frames.
+  ///
+  /// @param frames Number of frames.
+  /// @return Number of seconds.
+  [[nodiscard]] double GetSecondsFromFrames(int64_t frames) {
+    double seconds = 0.0;
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_GetSecondsFromFrames(Get(), frames, &seconds);
+    assert(success);
+    return seconds;
   }
 
   /// Returns whether a note is on or not.
@@ -2442,6 +2502,30 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
     [[maybe_unused]] const bool success = BarelyPerformer_Create(Get(), &performer);
     assert(success);
     return Performer(performer);
+  }
+
+  /// Returns the corresponding number of beats for a given number of seconds.
+  ///
+  /// @param seconds Number of seconds.
+  /// @return Number of beats.
+  [[nodiscard]] double GetBeatsFromSeconds(double seconds) {
+    double beats = 0.0;
+    [[maybe_unused]] const bool success =
+        BarelyMusician_GetBeatsFromSeconds(Get(), seconds, &beats);
+    assert(success);
+    return beats;
+  }
+
+  /// Returns the corresponding number of seconds for a given number of beats.
+  ///
+  /// @param beats Number of beats.
+  /// @return Number of seconds.
+  [[nodiscard]] double GetSecondsFromBeats(double beats) {
+    double seconds = 0.0;
+    [[maybe_unused]] const bool success =
+        BarelyMusician_GetSecondsFromBeats(Get(), beats, &seconds);
+    assert(success);
+    return seconds;
   }
 
   /// Returns the tempo.

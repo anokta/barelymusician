@@ -15,8 +15,10 @@ VERS_1.0 {
     BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
     BarelyInstrument_GetControlDefinition;
+    BarelyInstrument_GetFramesFromSeconds;
     BarelyInstrument_GetNoteControl;
     BarelyInstrument_GetNoteControlDefinition;
+    BarelyInstrument_GetSecondsFromFrames;
     BarelyInstrument_IsNoteOn;
     BarelyInstrument_Process;
     BarelyInstrument_ResetAllControls;
@@ -35,6 +37,8 @@ VERS_1.0 {
     BarelyInstrument_SetNoteOnEvent;
     BarelyMusician_Create;
     BarelyMusician_Destroy;
+    BarelyMusician_GetBeatsFromSeconds;
+    BarelyMusician_GetSecondsFromBeats;
     BarelyMusician_GetTempo;
     BarelyMusician_GetTimestamp;
     BarelyMusician_SetTempo;

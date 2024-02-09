@@ -279,6 +279,15 @@ bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, in
   return false;
 }
 
+bool BarelyInstrument_GetFramesFromSeconds(BarelyInstrumentHandle instrument, double seconds,
+                                           int64_t* out_frames) {
+  if (!instrument) return false;
+  if (!out_frames) return false;
+
+  *out_frames = instrument->GetFramesFromSeconds(seconds);
+  return true;
+}
+
 bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
                                      double* out_value) {
   if (!instrument) return false;
@@ -302,6 +311,15 @@ bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument
     return true;
   }
   return false;
+}
+
+bool BarelyInstrument_GetSecondsFromFrames(BarelyInstrumentHandle instrument, int64_t frames,
+                                           double* out_seconds) {
+  if (!instrument) return false;
+  if (!out_seconds) return false;
+
+  *out_seconds = instrument->GetSecondsFromFrames(frames);
+  return true;
 }
 
 bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
@@ -435,6 +453,24 @@ bool BarelyMusician_Destroy(BarelyMusicianHandle musician) {
   if (!musician) return false;
 
   delete musician;
+  return true;
+}
+
+bool BarelyMusician_GetBeatsFromSeconds(BarelyMusicianHandle musician, double seconds,
+                                        double* out_beats) {
+  if (!musician) return false;
+  if (!out_beats) return false;
+
+  *out_beats = musician->GetBeatsFromSeconds(seconds);
+  return true;
+}
+
+bool BarelyMusician_GetSecondsFromBeats(BarelyMusicianHandle musician, double beats,
+                                        double* out_seconds) {
+  if (!musician) return false;
+  if (!out_seconds) return false;
+
+  *out_seconds = musician->GetSecondsFromBeats(beats);
   return true;
 }
 

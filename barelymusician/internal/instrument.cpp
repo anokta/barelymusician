@@ -2,13 +2,13 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/message.h"
@@ -32,7 +32,7 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
       controls_(BuildControls(static_cast<const ControlDefinition*>(definition.control_definitions),
                               definition.control_definition_count)),
       timestamp_(initial_timestamp),
-      update_frame_(FramesFromSeconds(frame_rate_, timestamp_)) {
+      update_frame_(GetFramesFromSeconds(timestamp_)) {
   assert(frame_rate > 0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
@@ -67,6 +67,10 @@ const Control* Instrument::GetControl(int index) const noexcept {
 
 int Instrument::GetFrameRate() const noexcept { return frame_rate_; }
 
+int64_t Instrument::GetFramesFromSeconds(double seconds) noexcept {
+  return static_cast<int64_t>(seconds * static_cast<double>(frame_rate_));
+}
+
 const Control* Instrument::GetNoteControl(double pitch, int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
@@ -74,6 +78,10 @@ const Control* Instrument::GetNoteControl(double pitch, int index) const noexcep
     }
   }
   return nullptr;
+}
+
+double Instrument::GetSecondsFromFrames(int64_t frames) noexcept {
+  return static_cast<double>(frames) / static_cast<double>(frame_rate_);
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {
@@ -90,7 +98,7 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
   }
   int frame = 0;
   // Process *all* messages before the end frame.
-  const int64_t begin_frame = FramesFromSeconds(frame_rate_, timestamp);
+  const int64_t begin_frame = GetFramesFromSeconds(timestamp);
   const int64_t end_frame = begin_frame + output_frame_count;
   auto effect_ptrs = effect_ptrs_.GetScopedView();
   for (auto* message = message_queue_.GetNext(end_frame); message;
@@ -380,7 +388,7 @@ void Instrument::Update(double timestamp) noexcept {
     }
   }
   timestamp_ = timestamp;
-  update_frame_ = FramesFromSeconds(frame_rate_, timestamp_);
+  update_frame_ = GetFramesFromSeconds(timestamp_);
 }
 
 double Instrument::GetSlopePerFrame(double slope_per_second) const noexcept {

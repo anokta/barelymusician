@@ -40,7 +40,6 @@ cc_library(
         ":mutable",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
-        "//barelymusician/common:seconds",
     ],
 )
 
@@ -69,7 +68,6 @@ cc_library(
         ":instrument",
         ":mutable",
         ":performer",
-        "//barelymusician/common:seconds",
     ],
 )
 

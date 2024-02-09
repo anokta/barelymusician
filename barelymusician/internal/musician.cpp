@@ -6,11 +6,20 @@
 #include <optional>
 #include <utility>
 
-#include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
 
 namespace barely::internal {
+
+namespace {
+
+/// Converts seconds to minutes.
+constexpr double kMinutesFromSeconds = 1.0 / 60.0;
+
+/// Converts minutes to seconds.
+constexpr double kSecondsFromMinutes = 60.0;
+
+}  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::AddInstrument(Instrument& instrument) noexcept {
@@ -23,6 +32,17 @@ void Musician::AddPerformer(Performer& performer) noexcept {
   [[maybe_unused]] const bool success = performers_.insert(&performer).second;
   assert(success);
 }
+
+double Musician::GetBeatsFromSeconds(double seconds) noexcept {
+  return tempo_ * seconds * kMinutesFromSeconds;
+}
+
+double Musician::GetSecondsFromBeats(double beats) noexcept {
+  return tempo_ > 0.0 ? beats * kSecondsFromMinutes / tempo_
+                      : (beats > 0.0 ? std::numeric_limits<double>::max()
+                                     : std::numeric_limits<double>::lowest());
+}
+
 double Musician::GetTempo() const noexcept { return tempo_; }
 
 double Musician::GetTimestamp() const noexcept { return timestamp_; }
@@ -45,7 +65,7 @@ void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); 
 void Musician::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      std::pair<double, int> update_duration = {BeatsFromSeconds(tempo_, timestamp - timestamp_),
+      std::pair<double, int> update_duration = {GetBeatsFromSeconds(timestamp - timestamp_),
                                                 std::numeric_limits<int>::lowest()};
       bool has_tasks_to_process = false;
       for (const auto& performer : performers_) {
@@ -64,7 +84,7 @@ void Musician::Update(double timestamp) noexcept {
           performer->Update(update_duration.first);
         }
 
-        timestamp_ += SecondsFromBeats(tempo_, update_duration.first);
+        timestamp_ += GetSecondsFromBeats(update_duration.first);
         for (const auto& instrument : instruments_) {
           assert(instrument);
           instrument->Update(timestamp_);

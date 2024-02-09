@@ -40,7 +40,6 @@ target_link_libraries(
   barely_internal_mutable
   barelymusician_headeronly
   barely_find_or_null
-  barely_seconds
 )
 
 add_library(
@@ -72,7 +71,6 @@ target_link_libraries(
   barely_internal_instrument
   barely_internal_mutable
   barely_internal_performer
-  barely_seconds
 )
 
 add_library(

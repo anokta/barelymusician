@@ -24,6 +24,18 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(Performer& performer) noexcept;
 
+  /// Returns the corresponding number of beats for a given number of seconds.
+  ///
+  /// @param seconds Number of seconds.
+  /// @return Number of beats.
+  [[nodiscard]] double GetBeatsFromSeconds(double seconds) noexcept;
+
+  /// Returns the corresponding number of seconds for a given number of beats.
+  ///
+  /// @param beats Number of beats.
+  /// @return Number of seconds.
+  [[nodiscard]] double GetSecondsFromBeats(double beats) noexcept;
+
   /// Returns tempo.
   ///
   /// @return Tempo in beats per minute.

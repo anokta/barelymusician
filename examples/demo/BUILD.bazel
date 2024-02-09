@@ -53,8 +53,7 @@ cc_binary(
     srcs = ["midi_demo.cpp"],
     deps = [
         "//barelymusician",
-        "//barelymusician/composition:intensity",
-        "//barelymusician/composition:pitch",
+        "//barelymusician/composition:midi",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
@@ -124,6 +123,7 @@ cc_binary(
     srcs = ["sequencer_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/composition:midi",
         "//barelymusician/composition:pitch",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/instruments:synth_instrument",
@@ -139,6 +139,7 @@ cc_binary(
     srcs = ["trigger_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/composition:midi",
         "//barelymusician/composition:pitch",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/instruments:synth_instrument",

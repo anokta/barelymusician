@@ -5,9 +5,13 @@ add_library(
 )
 
 add_library(
-  barely_intensity
-  intensity.cpp
-  intensity.h
+  barely_midi
+  midi.cpp
+  midi.h
+)
+target_link_libraries(
+  barely_midi
+  barely_pitch
 )
 
 add_library(
@@ -29,15 +33,16 @@ if (ENABLE_TESTS)
   gtest_discover_tests(barely_duration_test)
 
   add_executable(
-    barely_intensity_test
-    intensity_test.cpp
+    barely_midi_test
+    midi_test.cpp
   )
   target_link_libraries(
-    barely_intensity_test
-    barely_intensity
+    barely_midi_test
+    barely_midi
+    barely_pitch
     gtest_main
   )
-  gtest_discover_tests(barely_intensity_test)
+  gtest_discover_tests(barely_midi_test)
 
   add_executable(
     barely_pitch_test

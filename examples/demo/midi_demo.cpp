@@ -10,8 +10,7 @@
 #include "MidiEventList.h"
 #include "MidiFile.h"
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/intensity.h"
-#include "barelymusician/composition/pitch.h"
+#include "barelymusician/composition/midi.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
@@ -23,13 +22,13 @@
 namespace {
 
 using ::barely::Instrument;
-using ::barely::IntensityFromMidi;
-using ::barely::MidiFromIntensity;
-using ::barely::MidiFromPitch;
+using ::barely::IntensityFromMidiVelocity;
+using ::barely::MidiNumberFromPitch;
+using ::barely::MidiVelocityFromIntensity;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
-using ::barely::PitchFromMidi;
+using ::barely::PitchFromMidiNumber;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -69,8 +68,8 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
     if (midi_event.isNoteOn()) {
       const double position = get_position_fn(midi_event.tick);
       const double duration = get_position_fn(midi_event.getTickDuration());
-      const double pitch = PitchFromMidi(midi_event.getKeyNumber());
-      const double intensity = IntensityFromMidi(midi_event.getVelocity());
+      const double pitch = PitchFromMidiNumber(midi_event.getKeyNumber());
+      const double intensity = IntensityFromMidiVelocity(midi_event.getVelocity());
       performer.ScheduleOneOffTask(
           [&instrument, pitch, intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
           position);
@@ -120,12 +119,13 @@ int main(int /*argc*/, char* argv[]) {
     // Set the instrument settings.
     const auto track_index = tracks.size() + 1;
     instrument.SetNoteOnEvent([track_index](double pitch, double intensity) {
-      ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(key: " << MidiFromPitch(pitch)
-                   << ", velocity: " << MidiFromIntensity(intensity) << ")";
+      ConsoleLog() << "MIDI track #" << track_index
+                   << ": NoteOn(key: " << MidiNumberFromPitch(pitch)
+                   << ", velocity: " << MidiVelocityFromIntensity(intensity) << ")";
     });
     instrument.SetNoteOffEvent([track_index](double pitch) {
-      ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(key: " << MidiFromPitch(pitch)
-                   << ")";
+      ConsoleLog() << "MIDI track #" << track_index
+                   << ": NoteOff(key: " << MidiNumberFromPitch(pitch) << ")";
     });
     instrument.SetControl(SynthInstrument::Control::kGain, kInstrumentGain);
     instrument.SetControl(SynthInstrument::Control::kOscillatorType, kInstrumentOscillatorType);

@@ -142,21 +142,6 @@ inline constexpr double kPitchSnare = kPitchD3;
 inline constexpr double kPitchHihatClosed = kPitchE3;
 inline constexpr double kPitchHihatOpen = kPitchF3;
 
-// Midi note number for A4 (middle A).
-inline constexpr int kMidiA0 = 69;
-
-/// Returns the correspnding midi note number for a given pitch.
-///
-/// @param pitch Note pitch.
-/// @return Midi note number.
-int MidiFromPitch(double pitch) noexcept;
-
-/// Returns the correspnding note pitch for a given midi note number.
-///
-/// @param midi Midi note number.
-/// @return Note pitch.
-double PitchFromMidi(int midi) noexcept;
-
 /// Returns the corresponding note pitch for a given scale and index.
 ///
 /// @param scale Cumulative scale intervals of an octave in an increasing order.

@@ -54,8 +54,7 @@ add_executable(
 target_link_libraries(
   barely_examples_midi_demo
   barelymusician
-  barely_intensity
-  barely_pitch
+  barely_midi
   barely_oscillator
   barely_synth_instrument
   barely_examples_audio_clock
@@ -129,6 +128,7 @@ add_executable(
 target_link_libraries(
   barely_examples_sequencer_demo
   barelymusician
+  barely_midi
   barely_pitch
   barely_oscillator
   barely_synth_instrument
@@ -145,6 +145,7 @@ add_executable(
 target_link_libraries(
   barely_examples_trigger_demo
   barelymusician
+  barely_midi
   barely_pitch
   barely_oscillator
   barely_synth_instrument

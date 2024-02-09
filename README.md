@@ -26,9 +26,9 @@ For background about this project, see the original research paper
 ```cpp
 // Import the core engine.
 #include "barelymusician/barelymusician.h"
-// Import `barely::LowPassEffect`.
+// Import the low-pass effect.
 #include "barelymusician/effects/low_pass_effect.h"
-// Import `barely::SynthInstrument`.
+// Import the synth instrument.
 #include "barelymusician/instruments/synth_instrument.h"
 
 // Create a new musician.
@@ -40,11 +40,11 @@ musician.SetTempo(/*tempo=*/124.0);
 // Create a synth instrument.
 auto instrument = musician.CreateInstrument<barely::SynthInstrument>(/*frame_rate=*/48000);
 
-// Set the synth instrument gain to 0.5.
+// Set the instrument gain to 0.5.
 instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
                       /*slope_per_second=*/0.0);
 
-// Set the A3 synth instrument note pitch on with a 0.25 intensity.
+// Set the instrument A3 note pitch on with a 0.25 intensity.
 //
 // @note Pitch values are normalized by octaves, where each 1.0 value change shifts one octave, and
 // 0.0 represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition. However,
@@ -53,13 +53,13 @@ instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
 const double a3_pitch = -1.0;
 instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
 
-// Check if the instrument note is on.
+// Check if the instrument note pitch is on.
 const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
 
 // Add a low-pass effect to the instrument.
 auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 
-// Set the low-pass cutoff frequency to increase by 100 hertz per second.
+// Set the effect cutoff frequency to increase by 100 hertz per second.
 effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
                   /*slope_per_second=*/100.0);
 
@@ -74,7 +74,7 @@ const double lookahead = 0.1;
 double timestamp = 0.0;
 musician.Update(timestamp + lookahead);
 
-// Process the next output samples of the synth instrument.
+// Process the next output samples of the instrument.
 //
 // @note Instruments expect raw PCM audio samples to be processed with a synchronous call.
 // Therefore, `Process` should typically be called from an audio thread process callback in
@@ -90,14 +90,15 @@ auto performer = musician.CreatePerformer();
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
-// Create a looping performer task that plays the A4 synth instrument note at position 0.5 for a
-// duration of 0.25 beats.
+// Create a looping performer task that plays the instrument A4 note pitch at the position 0.5 beats
+// for a duration of 0.25 beats.
+const double a4_pitch = 0.0;
 auto task = performer.CreateTask(
     [&]() {
-      // Set the A4 note pitch on.
-      instrument.SetNoteOn(0.0);
-      // Schedule a one-off task to set the A4 note pitch off after 0.25 beats.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(0.0); },
+      // Set the instrument A4 note pitch on.
+      instrument.SetNoteOn(a4_pitch);
+      // Schedule a one-off task to set the instrument A4 note pitch off after 0.25 beats.
+      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(a4_pitch); },
                                    performer.GetPosition() + 0.25);
     },
     /*position=*/0.5);

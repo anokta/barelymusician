@@ -522,20 +522,6 @@ namespace Barely {
         return value;
       }
 
-      /// Returns the corresponding number of instrument frames for a given number of seconds.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      /// @param seconds Number of seconds.
-      /// @return Number of frames.
-      public static Int64 Instrument_GetFramesFromSeconds(IntPtr instrumentHandle, double seconds) {
-        Int64 frames = 0;
-        if (!BarelyInstrument_GetFramesFromSeconds(instrumentHandle, seconds, ref frames) &&
-            instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument frames for " + seconds + " seconds");
-        }
-        return frames;
-      }
-
       /// Returns the value of an instrument note control.
       ///
       /// @param instrumentHandle Instrument handle.
@@ -551,20 +537,6 @@ namespace Barely {
                          " value");
         }
         return value;
-      }
-
-      /// Returns the corresponding number of seconds for a given number of instrument frames.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      /// @param frames Number of frames.
-      /// @return Number of seconds.
-      public static double Instrument_GetSecondsFromFrames(IntPtr instrumentHandle, Int64 frames) {
-        double seconds = 0.0;
-        if (!BarelyInstrument_GetSecondsFromFrames(instrumentHandle, frames, ref seconds) &&
-            instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get seconds for " + frames + " instrument frames");
-        }
-        return frames;
       }
 
       /// Returns whether an instrument note is on or not.
@@ -1642,11 +1614,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetFramesFromSeconds")]
-      private static extern bool BarelyInstrument_GetFramesFromSeconds(IntPtr musician,
-                                                                       double seconds,
-                                                                       ref Int64 outFrames);
-
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetControl")]
       private static extern bool BarelyInstrument_GetControl(IntPtr instrument, Int32 index,
                                                              ref double outValue);
@@ -1654,11 +1621,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
       private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, double pitch,
                                                                  Int32 index, ref double outValue);
-
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetSecondsFromFrames")]
-      private static extern bool BarelyInstrument_GetSecondsFromFrames(IntPtr musician,
-                                                                       Int64 frames,
-                                                                       ref double outSeconds);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, double pitch,

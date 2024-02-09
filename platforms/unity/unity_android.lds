@@ -15,10 +15,8 @@ VERS_1.0 {
     BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
     BarelyInstrument_GetControlDefinition;
-    BarelyInstrument_GetFramesFromSeconds;
     BarelyInstrument_GetNoteControl;
     BarelyInstrument_GetNoteControlDefinition;
-    BarelyInstrument_GetSecondsFromFrames;
     BarelyInstrument_IsNoteOn;
     BarelyInstrument_Process;
     BarelyInstrument_ResetAllControls;

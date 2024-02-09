@@ -709,15 +709,6 @@ BARELY_EXPORT bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle 
                                                          int32_t index,
                                                          BarelyControlDefinition* out_definition);
 
-/// Gets the corresponding number of instrument frames for a given number of seconds.
-///
-/// @param instrument Instrument handle.
-/// @param seconds Number of seconds.
-/// @param out_frames Output number of instrument frames.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetFramesFromSeconds(BarelyInstrumentHandle instrument,
-                                                         double seconds, int64_t* out_frames);
-
 /// Gets an instrument note control value.
 ///
 /// @param instrument Instrument handle.
@@ -738,15 +729,6 @@ BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instru
 BARELY_EXPORT bool BarelyInstrument_GetNoteControlDefinition(
     BarelyInstrumentHandle instrument, double pitch, int32_t index,
     BarelyControlDefinition* out_definition);
-
-/// Gets the corresponding number of seconds for a given number of instrument frames.
-///
-/// @param instrument Instrument handle.
-/// @param frames Number of instrument frames.
-/// @param out_seconds Output number of seconds.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetSecondsFromFrames(BarelyInstrumentHandle instrument,
-                                                         int64_t frames, double* out_seconds);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -1888,18 +1870,6 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
     return definition;
   }
 
-  /// Returns the corresponding number of frames for a given number of seconds.
-  ///
-  /// @param seconds Number of seconds.
-  /// @return Number of frames.
-  [[nodiscard]] int64_t GetFramesFromSeconds(double seconds) {
-    int64_t frames = 0;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_GetFramesFromSeconds(Get(), seconds, &frames);
-    assert(success);
-    return frames;
-  }
-
   /// Returns a note control value.
   ///
   /// @param index Note control index.
@@ -1929,18 +1899,6 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
         Get(), pitch, static_cast<int>(index), &definition);
     assert(success);
     return definition;
-  }
-
-  /// Returns the corresponding number of seconds for a given number of frames.
-  ///
-  /// @param frames Number of frames.
-  /// @return Number of seconds.
-  [[nodiscard]] double GetSecondsFromFrames(int64_t frames) {
-    double seconds = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_GetSecondsFromFrames(Get(), frames, &seconds);
-    assert(success);
-    return seconds;
   }
 
   /// Returns whether a note is on or not.

@@ -66,14 +66,6 @@ namespace Barely {
       return Musician.Internal.Instrument_GetControl(_handle, index);
     }
 
-    /// Returns the corresponding number of frames for a given number of `seconds`.
-    ///
-    /// @param seconds Number of seconds.
-    /// @return Number of frames.
-    public Int64 GetFramesFromSeconds(double seconds) {
-      return Musician.Internal.Instrument_GetFramesFromSeconds(_handle, seconds);
-    }
-
     /// Returns a note control value.
     ///
     /// @param pitch Note pitch.
@@ -81,14 +73,6 @@ namespace Barely {
     /// @return Control value.
     public double GetNoteControl(double pitch, int index) {
       return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, index);
-    }
-
-    /// Returns the corresponding number of seconds for a given number of `frames`.
-    ///
-    /// @param frames Number of frames.
-    /// @return Number of seconds.
-    public double GetSecondsFromFrames(Int64 frames) {
-      return Musician.Internal.Instrument_GetSecondsFromFrames(_handle, frames);
     }
 
     /// Returns whether a note is on or not.

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Barely {
   /// A representation of a musician that governs the tempo for all musical components.
@@ -1523,8 +1522,7 @@ namespace Barely {
         }
 
         private void LateUpdate() {
-          double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
-          double nextTimestamp = AudioSettings.dspTime + lookahead;
+          double nextTimestamp = GetNextTimestamp();
           while (_scheduledTaskCallbacks.Count > 0) {
             double taskTimestamp = _scheduledTaskCallbacks.ElementAt(0).Key;
             if (taskTimestamp > nextTimestamp) {
@@ -1550,9 +1548,9 @@ namespace Barely {
           BarelyMusician_SetTempo(_handle, _tempo);
           var config = AudioSettings.GetConfiguration();
           OutputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
-          _latency = (double)(2 * config.dspBufferSize) / (double)config.sampleRate;
+          _latency = (double)config.dspBufferSize / config.sampleRate;
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
-          BarelyMusician_Update(_handle, AudioSettings.dspTime + _latency);
+          BarelyMusician_Update(_handle, GetNextTimestamp());
         }
 
         // Shuts down the native state.
@@ -1561,6 +1559,12 @@ namespace Barely {
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
           _scheduledTaskCallbacks = null;
+        }
+
+        // Returns the next timestamp to update.
+        private double GetNextTimestamp() {
+          double lookahead = Math.Max(_latency, (double)Time.smoothDeltaTime);
+          return AudioSettings.dspTime + lookahead;
         }
       }
 

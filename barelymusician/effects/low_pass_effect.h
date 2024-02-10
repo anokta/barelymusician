@@ -56,6 +56,9 @@ class LowPassEffect : public CustomEffect {
   // Maximum number of output channels allowed.
   static constexpr int kMaxChannelCount = 8;
 
+  // Cutoff frequency-slope pair.
+  std::pair<double, double> cutoff_frequency_ = {0.0, 0.0};
+
   // Array of low-pass filter.
   std::array<OnePoleFilter, kMaxChannelCount> filters_;
 

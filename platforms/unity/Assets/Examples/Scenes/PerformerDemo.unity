@@ -388,6 +388,7 @@ GameObject:
   - component: {fileID: 2014543008}
   - component: {fileID: 2014543007}
   - component: {fileID: 2014543005}
+  - component: {fileID: 2014543011}
   - component: {fileID: 2014543009}
   m_Layer: 0
   m_Name: PerformerDemo
@@ -585,8 +586,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 2014543005}
+  effect: {fileID: 2014543011}
   performer: {fileID: 2014543008}
   text: {fileID: 84924158}
+  cutoffLfoAmplitude: 2000
+  freq: 0
   scale: 00000000020000000400000007000000090000000b000000
 --- !u!114 &2014543010
 MonoBehaviour:
@@ -601,3 +605,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tempo: 118
+--- !u!114 &2014543011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2014543004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f2ff1f90a102ef4f8bd71a89773ebb8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnControlEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  _processOrder: 0

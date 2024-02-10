@@ -4,11 +4,17 @@ namespace Barely {
   /// A representation of a simple high-pass effect.
   public class HighPassEffect : Effect {
     /// Cutoff frequency.
-    [Range(0, 48000)]
-    public double CutoffFrequency = 0.0;
+    public double CutoffFrequency {
+      get { return GetControl(0); }
+      set { SetControl(0, value, 0.0); }
+    }
 
-    private void Update() {
-      SetControl(0, CutoffFrequency);
+    /// Sets the cutoff frequency with a slope.
+    ///
+    /// @param cutoffFrequency Cutoff frequency.
+    /// @param slopePerSecond Slope in value change per second.
+    public void SetCutoffFrequency(double cutoffFrequency, double slopePerSecond) {
+      SetControl(0, cutoffFrequency, slopePerSecond);
     }
   }
 }  // namespace Barely

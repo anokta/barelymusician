@@ -34,6 +34,12 @@ void LowPassEffect::Process(double* output_samples, int output_channel_count,
                             int output_frame_count) noexcept {
   assert(output_channel_count <= kMaxChannelCount);
   for (int frame = 0; frame < output_frame_count; ++frame) {
+    if (cutoff_frequency_.second != 0.0) {
+      cutoff_frequency_.first += cutoff_frequency_.second;
+      for (auto& filter : filters_) {
+        filter.SetCoefficient(GetFilterCoefficient(frame_rate_, cutoff_frequency_.first));
+      }
+    }
     for (int channel = 0; channel < output_channel_count; ++channel) {
       auto& sample = output_samples[output_channel_count * frame + channel];
       sample = filters_[channel].Next(sample);
@@ -41,12 +47,16 @@ void LowPassEffect::Process(double* output_samples, int output_channel_count,
   }
 }
 
-void LowPassEffect::SetControl(int index, double value, double /*slope_per_frame*/) noexcept {
+void LowPassEffect::SetControl(int index, double value, double slope_per_frame) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kCutoffFrequency:
-      for (auto& filter : filters_) {
-        filter.SetCoefficient(GetFilterCoefficient(frame_rate_, value));
+      if (value != cutoff_frequency_.first) {
+        cutoff_frequency_.first = value;
+        for (auto& filter : filters_) {
+          filter.SetCoefficient(GetFilterCoefficient(frame_rate_, cutoff_frequency_.first));
+        }
       }
+      cutoff_frequency_.second = slope_per_frame;
       break;
     default:
       assert(false);

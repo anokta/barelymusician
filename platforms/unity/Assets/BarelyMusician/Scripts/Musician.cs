@@ -7,6 +7,16 @@ using UnityEngine;
 namespace Barely {
   /// A representation of a musician that governs the tempo for all musical components.
   public static class Musician {
+    /// Tempo event callback.
+    ///
+    /// @param tempo Tempo in beats per minute.
+    public delegate void TempoEventCallback(double tempo);
+    public static event TempoEventCallback OnTempo;
+
+    [Serializable]
+    public class TempoEvent : UnityEngine.Events.UnityEvent<float> {}
+    public static TempoEvent OnTempoEvent;
+
     /// Tempo in beats per minute.
     public static double Tempo {
       get { return _tempo; }
@@ -14,6 +24,8 @@ namespace Barely {
         if (_tempo != value) {
           Internal.Musician_SetTempo(value);
           _tempo = Internal.Musician_GetTempo();
+          OnTempo?.Invoke(_tempo);
+          OnTempoEvent?.Invoke((float)_tempo);
         }
       }
     }

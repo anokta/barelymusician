@@ -142,6 +142,20 @@ inline constexpr double kPitchSnare = kPitchD3;
 inline constexpr double kPitchHihatClosed = kPitchE3;
 inline constexpr double kPitchHihatOpen = kPitchF3;
 
+/// Middle note pitches.
+inline constexpr double kPitchC = kPitchC4;
+inline constexpr double kPitchCsharp = kPitchCsharp4;
+inline constexpr double kPitchD = kPitchD4;
+inline constexpr double kPitchDsharp = kPitchDsharp4;
+inline constexpr double kPitchE = kPitchE4;
+inline constexpr double kPitchF = kPitchF4;
+inline constexpr double kPitchFsharp = kPitchFsharp4;
+inline constexpr double kPitchG = kPitchG4;
+inline constexpr double kPitchGsharp = kPitchGsharp4;
+inline constexpr double kPitchA = kPitchA4;
+inline constexpr double kPitchASharp = kPitchAsharp4;
+inline constexpr double kPitchB = kPitchB4;
+
 /// Returns the corresponding note pitch for a given scale and index.
 ///
 /// @param scale Cumulative scale intervals of an octave in an increasing order.

@@ -4,7 +4,7 @@
 namespace barely {
 
 // Midi note number for A4 (middle A).
-inline constexpr int kMidiNumberA0 = 69;
+inline constexpr int kMidiNumberA4 = 69;
 
 // Maximum midi velocity.
 inline constexpr int kMaxMidiVelocity = 127;

@@ -11,7 +11,7 @@ double IntensityFromMidiVelocity(int midi_velocity) noexcept {
 }
 
 int MidiNumberFromPitch(double pitch) noexcept {
-  return static_cast<int>(std::round(kSemitoneCount * pitch)) + kMidiNumberA0;
+  return static_cast<int>(std::round(kSemitoneCount * pitch)) + kMidiNumberA4;
 }
 
 int MidiVelocityFromIntensity(double intensity) noexcept {
@@ -19,7 +19,7 @@ int MidiVelocityFromIntensity(double intensity) noexcept {
 }
 
 double PitchFromMidiNumber(int midi_number) noexcept {
-  return static_cast<double>(midi_number - kMidiNumberA0) / kSemitoneCount;
+  return static_cast<double>(midi_number - kMidiNumberA4) / kSemitoneCount;
 }
 
 }  // namespace barely

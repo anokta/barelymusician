@@ -35,9 +35,9 @@ TEST(MidiTest, IntensityMidiVelocityConversion) {
 // Tests that the expected note pitches are returned for the given midi note numbers.
 TEST(MidiTest, MidiNumberPitchConversion) {
   constexpr std::array<int, static_cast<int>(kSemitoneCount)> kMidiNumbers = {
-      kMidiNumberA0,     kMidiNumberA0 + 1, kMidiNumberA0 + 2,  kMidiNumberA0 + 3,
-      kMidiNumberA0 + 4, kMidiNumberA0 + 5, kMidiNumberA0 + 6,  kMidiNumberA0 + 7,
-      kMidiNumberA0 + 8, kMidiNumberA0 + 9, kMidiNumberA0 + 10, kMidiNumberA0 + 11,
+      kMidiNumberA4,     kMidiNumberA4 + 1, kMidiNumberA4 + 2,  kMidiNumberA4 + 3,
+      kMidiNumberA4 + 4, kMidiNumberA4 + 5, kMidiNumberA4 + 6,  kMidiNumberA4 + 7,
+      kMidiNumberA4 + 8, kMidiNumberA4 + 9, kMidiNumberA4 + 10, kMidiNumberA4 + 11,
   };
   constexpr std::array<double, static_cast<int>(kSemitoneCount)> kPitches = {
       kPitchA4,      kPitchAsharp4, kPitchB4, kPitchC5,      kPitchCsharp5, kPitchD5,

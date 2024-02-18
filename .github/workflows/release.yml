@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
@@ -35,7 +35,7 @@ jobs:
             //examples/demo:instrument_demo //examples/demo:metronome_demo
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: examples-${{ matrix.os }}
           path: |
@@ -53,7 +53,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
@@ -72,7 +72,7 @@ jobs:
             $( [ ${{ matrix.os }} == 'ubuntu-latest' ] && echo '--android=true' )
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: unity-${{ matrix.os }}
           path: platforms/unity/Assets/BarelyMusician/Plugins
@@ -82,8 +82,8 @@ jobs:
     needs: [examples, unity]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
           path: temp
       - name: examples

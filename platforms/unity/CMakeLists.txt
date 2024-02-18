@@ -11,6 +11,7 @@ target_link_libraries(
   barelymusician
   barely_arpeggiator
   barely_high_pass_effect
+  barely_lfo_effect
   barely_low_pass_effect
   barely_percussion_instrument
   barely_sampler_instrument

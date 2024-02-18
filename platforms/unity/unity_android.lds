@@ -88,6 +88,7 @@ VERS_1.0 {
     BarelyRepeater_Stop;
 
     BarelyHighPassEffect_GetDefinition;
+    BarelyLfoEffect_GetDefinition;
     BarelyLowPassEffect_GetDefinition;
 
     BarelyPercussionInstrument_GetDefinition;

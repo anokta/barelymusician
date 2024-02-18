@@ -318,6 +318,9 @@ namespace Barely {
           case HighPassEffect highPass:
             definition = BarelyHighPassEffect_GetDefinition();
             break;
+          case LfoEffect lfoEffect:
+            definition = BarelyLfoEffect_GetDefinition();
+            break;
           case LowPassEffect lowPass:
             definition = BarelyLowPassEffect_GetDefinition();
             break;
@@ -1874,6 +1877,9 @@ namespace Barely {
       // Effects.
       [DllImport(pluginName, EntryPoint = "BarelyHighPassEffect_GetDefinition")]
       private static extern EffectDefinition BarelyHighPassEffect_GetDefinition();
+
+      [DllImport(pluginName, EntryPoint = "BarelyLfoEffect_GetDefinition")]
+      private static extern EffectDefinition BarelyLfoEffect_GetDefinition();
 
       [DllImport(pluginName, EntryPoint = "BarelyLowPassEffect_GetDefinition")]
       private static extern EffectDefinition BarelyLowPassEffect_GetDefinition();

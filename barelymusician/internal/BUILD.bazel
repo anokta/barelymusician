@@ -38,6 +38,7 @@ cc_library(
         ":message",
         ":message_queue",
         ":mutable",
+        ":seconds",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
     ],
@@ -68,6 +69,7 @@ cc_library(
         ":instrument",
         ":mutable",
         ":performer",
+        ":seconds",
     ],
 )
 
@@ -89,6 +91,12 @@ cc_library(
         ":task",
         "//barelymusician:barelymusician_headeronly",
     ],
+)
+
+cc_library(
+    name = "seconds",
+    srcs = ["seconds.cpp"],
+    hdrs = ["seconds.h"],
 )
 
 cc_library(

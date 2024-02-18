@@ -41,14 +41,6 @@ namespace Barely {
         _v = midiNumber / 80.0f;
       }
 
-      private void OnEnable() {
-        Musician.OnTempo += OnTempo;
-      }
-
-      private void OnDisable() {
-        Musician.OnTempo -= OnTempo;
-      }
-
       private void Update() {
         _s = (float)(0.5 - effect.CutoffFrequency / cutoffLfoAmplitude);
         text.color = Color.HSVToRGB(_h, _s, _v);
@@ -56,15 +48,8 @@ namespace Barely {
       }
 
       private double ComputeSlopePerBeat() {
-        return Musician.GetBeatsFromSeconds(
-            (_isIncreasing ? cutoffLfoAmplitude : -cutoffLfoAmplitude) /
-            (performer.LoopLength * _period));
-      }
-
-      private void OnTempo(double tempo) {
-        if (performer.IsPlaying) {
-          effect.SetCutoffFrequency(effect.CutoffFrequency, ComputeSlopePerBeat());
-        }
+        return (_isIncreasing ? cutoffLfoAmplitude : -cutoffLfoAmplitude) /
+               (performer.LoopLength * _period);
       }
     }
   }  // namespace Examples

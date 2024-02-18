@@ -25,9 +25,10 @@ class Instrument {
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
+  /// @param initial_tempo Initial tempo in beats per minute.
   /// @param initial_timestamp Initial timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate,
+  Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
              double initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
@@ -56,25 +57,12 @@ class Instrument {
   /// @return Frame rate in hz.
   [[nodiscard]] int GetFrameRate() const noexcept;
 
-  /// Returns the corresponding number of frames for a given number of seconds.
-  ///
-  /// @param seconds Number of seconds.
-  /// @return Number of frames.
-  [[nodiscard]] int64_t GetFramesFromSeconds(double seconds) noexcept;
-
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @return Pointer to note control, or nullptr if not found.
   [[nodiscard]] const Control* GetNoteControl(double pitch, int index) const noexcept;
-
-  /// Returns the corresponding number of seconds for a given number of frames.
-  ///
-  /// @param frame_rate Frame rate in hertz.
-  /// @param frames Number of frames.
-  /// @return Number of seconds.
-  [[nodiscard]] double GetSecondsFromFrames(int64_t frames) noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -141,9 +129,9 @@ class Instrument {
   ///
   /// @param index Control index.
   /// @param value Control value.
-  /// @param slope_per_second Control slope in value change per second.
+  /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetControl(int index, double value, double slope_per_second) noexcept;
+  bool SetControl(int index, double value, double slope_per_beat) noexcept;
 
   /// Sets the control event callback.
   ///
@@ -161,9 +149,9 @@ class Instrument {
   /// @param effect Effect.
   /// @param index Effect control index.
   /// @param value Effect control value.
-  /// @param slope_per_second Effect control slope in value change per second.
+  /// @param slope_per_beat Effect control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetEffectControl(Effect& effect, int index, double value, double slope_per_second) noexcept;
+  bool SetEffectControl(Effect& effect, int index, double value, double slope_per_beat) noexcept;
 
   /// Sets effect data.
   ///
@@ -184,9 +172,9 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @param value Note control value.
-  /// @param slope_per_second Note control slope in value change per second.
+  /// @param slope_per_beat Note control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetNoteControl(double pitch, int index, double value, double slope_per_second) noexcept;
+  bool SetNoteControl(double pitch, int index, double value, double slope_per_beat) noexcept;
 
   /// Sets the note control event.
   ///
@@ -218,10 +206,16 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
 
-  /// Updates the instrument at timestamp.
+  /// Sets the tempo.
+  ///
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept;
+
+  /// Updates the instrument.
   ///
   /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept;
+  /// @param duration Duration in beats.
+  void Update(double timestamp, double duration) noexcept;
 
  private:
   // Note control event alias.
@@ -233,8 +227,8 @@ class Instrument {
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
 
-  // Returns the corresponding slope per frame for a given `slope_per_second`.
-  [[nodiscard]] double GetSlopePerFrame(double slope_per_second) const noexcept;
+  // Returns the corresponding slope per frame for a given `slope_per_beat`.
+  [[nodiscard]] double GetSlopePerFrame(double slope_per_beat) const noexcept;
 
   // Updates effect references.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -288,8 +282,8 @@ class Instrument {
   // Note on event.
   NoteOnEvent note_on_event_;
 
-  // Timestamp in seconds.
-  double timestamp_ = 0;
+  // Tempo in beats per minute.
+  double tempo_ = 120.0;
 
   // Update frame.
   int64_t update_frame_ = 0;

@@ -55,9 +55,9 @@ namespace Barely {
     ///
     /// @param index Control index.
     /// @param value Control value.
-    /// @param slopePerSecond Control slope in value change per second.
-    public void SetControl(int index, double value, double slopePerSecond = 0.0) {
-      Musician.Internal.Effect_SetControl(_handle, index, value, slopePerSecond);
+    /// @param slopePerBeat Control slope in value change per beat.
+    public void SetControl(int index, double value, double slopePerBeat = 0.0) {
+      Musician.Internal.Effect_SetControl(_handle, index, value, slopePerBeat);
     }
 
     /// Sets data.

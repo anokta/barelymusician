@@ -27,8 +27,8 @@ class Control {
 
   /// Returns the slope per beat.
   ///
-  /// @return Control slope in value change per second.
-  [[nodiscard]] double GetSlopePerSecond() const noexcept;
+  /// @return Control slope in value change per beat.
+  [[nodiscard]] double GetSlopePerBeat() const noexcept;
 
   /// Returns the value.
   ///
@@ -43,15 +43,15 @@ class Control {
   /// Sets the value.
   ///
   /// @param value Control value.
-  /// @param slope_per_second Control slope in value change per second.
+  /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if changed, false otherwise.
-  bool Set(double value, double slope_per_second) noexcept;
+  bool Set(double value, double slope_per_beat) noexcept;
 
-  /// Updates the value by elapsed seconds.
+  /// Updates the value.
   ///
-  /// @param elapsed_seconds Elapsed seconds.
+  /// @param duration Duration in beats.
   /// @return True if changed, false otherwise.
-  bool Update(double elapsed_seconds) noexcept;
+  bool Update(double duration) noexcept;
 
  private:
   // Clamps a given `value`.
@@ -63,8 +63,8 @@ class Control {
   // Value.
   double value_ = 0.0;
 
-  // Slope in value change per second.
-  double slope_per_second_ = 0.0;
+  // Slope in value change per beat.
+  double slope_per_beat_ = 0.0;
 };
 
 /// Builds the corresponding controls for a given array of control `definitions`.

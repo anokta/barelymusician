@@ -8,18 +8,9 @@
 
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
+#include "barelymusician/internal/seconds.h"
 
 namespace barely::internal {
-
-namespace {
-
-/// Converts seconds to minutes.
-constexpr double kMinutesFromSeconds = 1.0 / 60.0;
-
-/// Converts minutes to seconds.
-constexpr double kSecondsFromMinutes = 60.0;
-
-}  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::AddInstrument(Instrument& instrument) noexcept {
@@ -34,13 +25,13 @@ void Musician::AddPerformer(Performer& performer) noexcept {
 }
 
 double Musician::GetBeatsFromSeconds(double seconds) noexcept {
-  return tempo_ * seconds * kMinutesFromSeconds;
+  return BeatsFromSeconds(tempo_, seconds);
 }
 
 double Musician::GetSecondsFromBeats(double beats) noexcept {
-  return tempo_ > 0.0 ? beats * kSecondsFromMinutes / tempo_
-                      : (beats > 0.0 ? std::numeric_limits<double>::max()
-                                     : std::numeric_limits<double>::lowest());
+  return (tempo_ > 0.0) ? SecondsFromBeats(tempo_, beats)
+                        : (beats > 0.0 ? std::numeric_limits<double>::max()
+                                       : std::numeric_limits<double>::lowest());
 }
 
 double Musician::GetTempo() const noexcept { return tempo_; }
@@ -59,7 +50,15 @@ void Musician::RemovePerformer(Performer& performer) noexcept {
   assert(success);
 }
 
-void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
+void Musician::SetTempo(double tempo) noexcept {
+  tempo = std::max(tempo, 0.0);
+  if (tempo != tempo_) {
+    tempo_ = tempo;
+    for (const auto& instrument : instruments_) {
+      instrument->SetTempo(tempo_);
+    }
+  }
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::Update(double timestamp) noexcept {
@@ -87,7 +86,7 @@ void Musician::Update(double timestamp) noexcept {
         timestamp_ += GetSecondsFromBeats(update_duration.first);
         for (const auto& instrument : instruments_) {
           assert(instrument);
-          instrument->Update(timestamp_);
+          instrument->Update(timestamp_, update_duration.first);
         }
       }
 
@@ -101,7 +100,7 @@ void Musician::Update(double timestamp) noexcept {
       timestamp_ = timestamp;
       for (const auto& instrument : instruments_) {
         assert(instrument);
-        instrument->Update(timestamp_);
+        instrument->Update(timestamp_, /*duration=*/0.0);
       }
     }
   }

@@ -38,6 +38,7 @@ target_link_libraries(
   barely_internal_message
   barely_internal_message_queue
   barely_internal_mutable
+  barely_internal_seconds
   barelymusician_headeronly
   barely_find_or_null
 )
@@ -71,6 +72,7 @@ target_link_libraries(
   barely_internal_instrument
   barely_internal_mutable
   barely_internal_performer
+  barely_internal_seconds
 )
 
 add_library(
@@ -92,6 +94,12 @@ target_link_libraries(
   barely_internal_performer
   barely_internal_task
   barelymusician_headeronly
+)
+
+add_library(
+  barely_internal_seconds
+  seconds.cpp
+  seconds.h
 )
 
 add_library(
@@ -209,6 +217,17 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_internal_performer_test)
+
+  add_executable(
+    barely_internal_seconds_test
+    seconds_test.cpp
+  )
+  target_link_libraries(
+    barely_internal_seconds_test
+    barely_internal_seconds
+    gtest_main
+  )
+  gtest_discover_tests(barely_internal_seconds_test)
 
   add_executable(
     barely_internal_task_test

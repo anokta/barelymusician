@@ -4,20 +4,13 @@
 namespace barely {
 
 /// Common note values in relation to quarter note beat duration.
-inline constexpr int kQuarterNotesPerBeat = 1;
-inline constexpr int kEighthNotesPerBeat = 2;
-inline constexpr int kEighthTripletNotesPerBeat = 3;
-inline constexpr int kSixteenthNotesPerBeat = 4;
-inline constexpr int kSixteenthTripletNotesPerBeat = 6;
-inline constexpr int kThirtySecondNotesPerBeat = 8;
-inline constexpr int kThirtySecondTripletNotesPerBeat = 12;
-
-/// Returns quantized position for a given number of beat steps.
-///
-/// @param step Quantized step.
-/// @param step_count Number of steps per beat.
-/// @return Quantized position in beats.
-double GetPosition(int step, int step_count) noexcept;
+inline constexpr double kQuarterNotesPerBeat = 1.0;
+inline constexpr double kEighthNotesPerBeat = 2.0;
+inline constexpr double kEighthTripletNotesPerBeat = 3.0;
+inline constexpr double kSixteenthNotesPerBeat = 4.0;
+inline constexpr double kSixteenthTripletNotesPerBeat = 6.0;
+inline constexpr double kThirtySecondNotesPerBeat = 8.0;
+inline constexpr double kThirtySecondTripletNotesPerBeat = 12.0;
 
 /// Returns quantized position.
 ///

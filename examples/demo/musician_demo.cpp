@@ -137,7 +137,7 @@ void ComposeLine(double octave_offset, double intensity, int bar, int beat, int 
 void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument& instrument,
                   Performer& performer) {
   const auto get_beat = [](int step) {
-    return barely::GetPosition(step, barely::kSixteenthNotesPerBeat);
+    return static_cast<double>(step) / barely::kSixteenthNotesPerBeat;
   };
   const auto add_note = [&](double begin_position, double end_position, double pitch,
                             double intensity) {

@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tempo: 150
+  Bpm: 135
 --- !u!850595691 &748775628
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -442,9 +442,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   instrument: {fileID: 1737834380}
   arpeggiator: {fileID: 1737834384}
+  repeater: {fileID: 0}
   rootPitch: 0
   octaveOffset: 0
   noteIntensity: 1
+  repeaterNoteLength: 1
 --- !u!114 &1737834380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -612,6 +614,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ProcessOrder: 0
   GateRatio: 0.5
-  Instrument: {fileID: 1737834380}
   Rate: 2
   Style: 0

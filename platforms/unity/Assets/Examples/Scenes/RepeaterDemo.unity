@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tempo: 150
+  Bpm: 110
 --- !u!850595691 &748775628
 LightingSettings:
   m_ObjectHideFlags: 0

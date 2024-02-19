@@ -484,7 +484,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tempo: 118
+  Bpm: 121
 --- !u!114 &675413002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -546,6 +546,7 @@ MonoBehaviour:
   isLoggingToConsole: 0
   isTicking: 0
   playOnAwake: 1
+  isAuto: 1
   OnBeatEvent:
     m_PersistentCalls:
       m_Calls:
@@ -1546,7 +1547,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   _processOrder: 0
-  CutoffFrequency: 800
 --- !u!114 &2110623104
 MonoBehaviour:
   m_ObjectHideFlags: 0

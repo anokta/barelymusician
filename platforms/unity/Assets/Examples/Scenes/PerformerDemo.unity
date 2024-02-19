@@ -590,7 +590,6 @@ MonoBehaviour:
   performer: {fileID: 2014543008}
   text: {fileID: 84924158}
   cutoffLfoAmplitude: 2000
-  freq: 0
   scale: 00000000020000000400000007000000090000000b000000
 --- !u!114 &2014543010
 MonoBehaviour:
@@ -604,7 +603,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tempo: 118
+  Bpm: 115
 --- !u!114 &2014543011
 MonoBehaviour:
   m_ObjectHideFlags: 0

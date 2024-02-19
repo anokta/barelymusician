@@ -31,6 +31,7 @@ readonly WINDOWS_BIN_SRC_PATH="${NATIVE_BIN_DIR}/unity_windows.dll"
 readonly WINDOWS_BIN_DST_PATH="${PLUGINS_X64_DIR}/${PLUGIN_NAME}.dll"
 
 readonly GREEN="\e[32m"
+readonly RESET="\e[0m"
 
 parse_flags() {
   COMPILATION_MODE="opt"
@@ -105,7 +106,7 @@ main() {
     cp -rf "${ANDROID_BIN_SRC_PATH}" "${ANDROID_ARM64_BIN_DST_PATH}"
   fi
 
-  echo -e "${GREEN}Done!"
+  echo -e "${GREEN}Done!${RESET}"
 }
 
 main "$@"

@@ -12,6 +12,7 @@ readonly API_CPP_PATH="${API_DIR}/barelymusician.cpp"
 readonly BLACK="\e[30m"
 readonly RED="\e[31m"
 readonly GREEN="\e[32m"
+readonly RESET="\e[0m"
 
 main() {
   set -e
@@ -39,7 +40,7 @@ main() {
     exit 1
   fi
 
-  echo -e "${GREEN}Done!"
+  echo -e "${GREEN}Done!${RESET}"
 }
 
 main

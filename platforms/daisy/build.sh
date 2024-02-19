@@ -8,6 +8,7 @@
 readonly DAISY_TOOLCHAIN_FILE="_deps/libdaisy-src/cmake/toolchains/stm32h750xx.cmake"
 
 readonly GREEN="\e[32m"
+readonly RESET="\e[0m"
 
 parse_flags() {
   DAISY_TOOLCHAIN_PREFIX="C:/Program Files/DaisyToolchain"
@@ -49,7 +50,7 @@ main() {
   read -s -n 1
   make barely_daisy_program_dfu
 
-  echo -e "${GREEN}Done!"
+  echo -e "${GREEN}Done!${RESET}"
 }
 
 main "$@"

@@ -1,5 +1,6 @@
 #include "barelymusician/internal/control.h"
 
+#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -10,7 +11,7 @@ namespace {
 
 // Tests that the control sets its value as expected.
 TEST(ControlTest, Set) {
-  Control control(ControlDefinition{15.0, 10.0, 20.0});
+  Control control(ControlDefinition{0, 15.0, 10.0, 20.0});
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 0.0);
 
@@ -61,7 +62,7 @@ TEST(ControlTest, Set) {
 
 // Tests that the control updates its value as expected.
 TEST(ControlTest, Update) {
-  Control control(ControlDefinition{15.0, 10.0, 20.0});
+  Control control(ControlDefinition{1, 15.0, 10.0, 20.0});
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
   EXPECT_DOUBLE_EQ(control.GetSlopePerBeat(), 0.0);
 
@@ -130,15 +131,15 @@ TEST(ControlTest, Update) {
 // Tests that the controls are built from an array of control definitions as expected.
 TEST(ControlTest, BuildControls) {
   const std::vector<ControlDefinition> control_definitions = {
-      ControlDefinition{1.0},
-      ControlDefinition{5.0},
+      ControlDefinition{2, 1.0},
+      ControlDefinition{10, 5.0},
   };
 
-  const std::vector<Control> controls =
+  const std::unordered_map<int, Control> controls =
       BuildControls(control_definitions.data(), static_cast<int>(control_definitions.size()));
   ASSERT_EQ(controls.size(), 2);
-  EXPECT_DOUBLE_EQ(controls[0].GetValue(), 1.0);
-  EXPECT_DOUBLE_EQ(controls[1].GetValue(), 5.0);
+  EXPECT_DOUBLE_EQ(controls.find(2)->second.GetValue(), 1.0);
+  EXPECT_DOUBLE_EQ(controls.find(10)->second.GetValue(), 5.0);
 }
 
 }  // namespace

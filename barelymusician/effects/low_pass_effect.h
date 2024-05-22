@@ -49,7 +49,7 @@ class LowPassEffect : public CustomEffect {
   /// Implements `CustomEffect`.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
-  void SetControl(int index, double value, double slope_per_frame) noexcept final;
+  void SetControl(int id, double value, double slope_per_frame) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
 
  private:

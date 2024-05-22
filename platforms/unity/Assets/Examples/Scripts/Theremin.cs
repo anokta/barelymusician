@@ -33,8 +33,8 @@ namespace Barely {
         }
       }
 
-      public void OnSetControl(int index, double value, double slopePerBeat) {
-        switch (index) {
+      public void OnSetControl(int id, double value, double slopePerBeat) {
+        switch (id) {
           case 0:
             _targetFrequency = GetFrequency(value);
             break;
@@ -48,7 +48,7 @@ namespace Barely {
         Debug.LogWarning("Theremin does not implement OnSetData");
       }
 
-      public void OnSetNoteControl(double pitch, int index, double value, double slopePerBeat) {
+      public void OnSetNoteControl(double pitch, int id, double value, double slopePerBeat) {
         Debug.LogWarning("Theremin does not implement OnSetNoteControl");
       }
 
@@ -107,12 +107,14 @@ namespace Barely {
         ControlDefinition[] definitions = new ControlDefinition[2] {
           // Continuous pitch.
           new ControlDefinition() {
+            id = 0,
             defaultValue = 0.0,
             minValue = 0.0,
             maxValue = 1.0,
           },
           // Continuous amplitude.
           new ControlDefinition() {
+            id = 1,
             defaultValue = 0.0,
             minValue = 0.0,
             maxValue = 1.0,

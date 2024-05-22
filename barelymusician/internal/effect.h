@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_INTERNAL_EFFECT_H_
 
 #include <cstddef>
+#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -31,13 +32,13 @@ class Effect {
   /// Returns all controls.
   ///
   /// @return Array of controls.
-  [[nodiscard]] std::vector<Control>& GetAllControls() noexcept;
+  [[nodiscard]] std::unordered_map<int, Control>& GetAllControls() noexcept;
 
   /// Returns a control value.
   ///
-  /// @param index Control index.
+  /// @param id Control identifier.
   /// @return Pointer to control, or nullptr if not found.
-  [[nodiscard]] Control* GetControl(int index) noexcept;
+  [[nodiscard]] Control* GetControl(int id) noexcept;
 
   /// Returns the process order.
   ///
@@ -53,16 +54,16 @@ class Effect {
 
   /// Processes a control event.
   ///
-  /// @param index Control index.
-  void ProcessControlEvent(int index) noexcept;
+  /// @param id Control identifier.
+  void ProcessControlEvent(int id) noexcept;
 
   /// Processes a control message.
   ///
-  /// @param index Control index.
+  /// @param id Control identifier.
   /// @param value Control value.
   /// @param slope_per_frame Control slope in value change per frame.
   /// @return True if successful, false otherwise.
-  void ProcessControlMessage(int index, double value, double slope_per_frame) noexcept;
+  void ProcessControlMessage(int id, double value, double slope_per_frame) noexcept;
 
   /// Processes a data message.
   ///
@@ -94,8 +95,8 @@ class Effect {
   // Set data callback.
   const EffectDefinition::SetDataCallback set_data_callback_;
 
-  // Array of controls.
-  std::vector<Control> controls_;
+  // Map of controls by identifiers.
+  std::unordered_map<int, Control> controls_;
 
   // Control event.
   Control::Event control_event_;

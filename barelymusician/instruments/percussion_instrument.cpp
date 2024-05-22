@@ -26,9 +26,9 @@ InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
   static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
       control_definitions = {
           // Gain.
-          ControlDefinition{1.0, 0.0, 1.0},
+          ControlDefinition{Control::kGain, 1.0, 0.0, 1.0},
           // Pad release.
-          ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
+          ControlDefinition{Control::kRelease, kDefaultPadRelease, 0.0, 60.0},
       };
   return CustomInstrument::GetDefinition<PercussionInstrument>(control_definitions, {});
 }
@@ -53,9 +53,8 @@ void PercussionInstrument::Process(double* output_samples, int output_channel_co
   gain_processor_.Process(output_samples, output_channel_count, output_frame_count);
 }
 
-void PercussionInstrument::SetControl(int index, double value,
-                                      double /*slope_per_frame*/) noexcept {
-  switch (static_cast<Control>(index)) {
+void PercussionInstrument::SetControl(int id, double value, double /*slope_per_frame*/) noexcept {
+  switch (static_cast<Control>(id)) {
     case Control::kGain:
       gain_processor_.SetGain(value);
       break;

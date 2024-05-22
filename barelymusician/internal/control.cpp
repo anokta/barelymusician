@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <vector>
+#include <unordered_map>
 
 #include "barelymusician/barelymusician.h"
 
@@ -56,12 +56,12 @@ double Control::Clamp(double value) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-std::vector<Control> BuildControls(const ControlDefinition* definitions,
-                                   int definition_count) noexcept {
-  std::vector<Control> controls;
+std::unordered_map<int, Control> BuildControls(const ControlDefinition* definitions,
+                                               int definition_count) noexcept {
+  std::unordered_map<int, Control> controls;
   controls.reserve(definition_count);
   for (int index = 0; index < definition_count; ++index) {
-    controls.emplace_back(definitions[index]);
+    controls.emplace(definitions[index].id, definitions[index]);
   }
   return controls;
 }

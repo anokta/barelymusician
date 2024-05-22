@@ -48,9 +48,9 @@ class Instrument {
 
   /// Returns a control value.
   ///
-  /// @param index Control index.
+  /// @param id Control identifier.
   /// @return Pointer to control, or nullptr if not found.
-  [[nodiscard]] const Control* GetControl(int index) const noexcept;
+  [[nodiscard]] const Control* GetControl(int id) const noexcept;
 
   /// Returns the frame rate.
   ///
@@ -60,9 +60,9 @@ class Instrument {
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param index Note control index.
+  /// @param id Note control identifier.
   /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] const Control* GetNoteControl(double pitch, int index) const noexcept;
+  [[nodiscard]] const Control* GetNoteControl(double pitch, int id) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -103,23 +103,23 @@ class Instrument {
 
   /// Resets a control value.
   ///
-  /// @param index Control index.
+  /// @param id Control identifier.
   /// @return True if successful, false otherwise.
-  bool ResetControl(int index) noexcept;
+  bool ResetControl(int id) noexcept;
 
   /// Resets a note control value.
   ///
   /// @param effect Effect.
-  /// @param index Effect control index.
+  /// @param id Effect control identifier.
   /// @return True if successful, false otherwise.
-  bool ResetEffectControl(Effect& effect, int index) noexcept;
+  bool ResetEffectControl(Effect& effect, int id) noexcept;
 
   /// Resets a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param index Note control index.
+  /// @param id Note control identifier.
   /// @return True if successful, false otherwise.
-  bool ResetNoteControl(double pitch, int index) noexcept;
+  bool ResetNoteControl(double pitch, int id) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -127,11 +127,11 @@ class Instrument {
 
   /// Sets a control value.
   ///
-  /// @param index Control index.
+  /// @param id Control identifier.
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetControl(int index, double value, double slope_per_beat) noexcept;
+  bool SetControl(int id, double value, double slope_per_beat) noexcept;
 
   /// Sets the control event callback.
   ///
@@ -147,11 +147,11 @@ class Instrument {
   /// Sets an effect control value.
   ///
   /// @param effect Effect.
-  /// @param index Effect control index.
+  /// @param id Effect control identifier.
   /// @param value Effect control value.
   /// @param slope_per_beat Effect control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetEffectControl(Effect& effect, int index, double value, double slope_per_beat) noexcept;
+  bool SetEffectControl(Effect& effect, int id, double value, double slope_per_beat) noexcept;
 
   /// Sets effect data.
   ///
@@ -170,11 +170,11 @@ class Instrument {
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param index Note control index.
+  /// @param id Note control identifier.
   /// @param value Note control value.
   /// @param slope_per_beat Note control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetNoteControl(double pitch, int index, double value, double slope_per_beat) noexcept;
+  bool SetNoteControl(double pitch, int id, double value, double slope_per_beat) noexcept;
 
   /// Sets the note control event.
   ///
@@ -259,16 +259,16 @@ class Instrument {
   const int frame_rate_;
 
   // Array of default note controls.
-  const std::vector<Control> default_note_controls_;
+  const std::unordered_map<int, Control> default_note_controls_;
 
-  // Array of controls.
-  std::vector<Control> controls_;
+  // Map of controls by identifiers.
+  std::unordered_map<int, Control> controls_;
 
   // Ordered set of effects.
   std::set<std::pair<int, Effect*>> effects_;
 
   // Map of current note controls by note pitches.
-  std::unordered_map<double, std::vector<Control>> note_controls_;
+  std::unordered_map<double, std::unordered_map<int, Control>> note_controls_;
 
   // Control event.
   Control::Event control_event_;

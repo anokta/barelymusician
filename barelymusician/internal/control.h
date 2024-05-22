@@ -2,7 +2,7 @@
 #define BARELYMUSICIAN_INTERNAL_CONTROL_H_
 
 #include <functional>
-#include <vector>
+#include <unordered_map>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/event.h"
@@ -14,6 +14,9 @@ class Control {
  public:
   /// Event alias.
   using Event = ::barely::internal::Event<ControlEventDefinition, int, double>;
+
+  /// Default constructor.
+  Control() noexcept = default;
 
   /// Constructs a new `Control`.
   ///
@@ -73,8 +76,8 @@ class Control {
 /// @param definition_count Number of control definitions.
 /// @return Array of controls.
 // NOLINTNEXTLINE(bugprone-exception-escape)
-std::vector<Control> BuildControls(const ControlDefinition* definitions,
-                                   int definition_count) noexcept;
+std::unordered_map<int, Control> BuildControls(const ControlDefinition* definitions,
+                                               int definition_count) noexcept;
 
 }  // namespace barely::internal
 

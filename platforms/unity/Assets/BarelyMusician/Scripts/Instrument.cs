@@ -10,9 +10,9 @@ namespace Barely {
 
     /// Control event callback.
     ///
-    /// @param index Control index.
+    /// @param id Control identifier.
     /// @param control Control value.
-    public delegate void ControlEventCallback(int index, double value);
+    public delegate void ControlEventCallback(int id, double value);
     public event ControlEventCallback OnControl;
 
     [Serializable]
@@ -22,9 +22,9 @@ namespace Barely {
     /// Note control event callback.
     ///
     /// @param pitch Note pitch.
-    /// @param index Note control index.
+    /// @param id Note control identifier.
     /// @param control Note control value.
-    public delegate void NoteControlEventCallback(double pitch, int index, double value);
+    public delegate void NoteControlEventCallback(double pitch, int id, double value);
     public event NoteControlEventCallback OnNoteControl;
 
     [Serializable]
@@ -60,19 +60,19 @@ namespace Barely {
 
     /// Returns a control value.
     ///
-    /// @param index Control index.
+    /// @param id Control identifier.
     /// @return Control value.
-    public double GetControl(int index) {
-      return Musician.Internal.Instrument_GetControl(_handle, index);
+    public double GetControl(int id) {
+      return Musician.Internal.Instrument_GetControl(_handle, id);
     }
 
     /// Returns a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param index Control index.
+    /// @param id Control identifier.
     /// @return Control value.
-    public double GetNoteControl(double pitch, int index) {
-      return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, index);
+    public double GetNoteControl(double pitch, int id) {
+      return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, id);
     }
 
     /// Returns whether a note is on or not.
@@ -97,17 +97,17 @@ namespace Barely {
 
     /// Resets a control value.
     ///
-    /// @param index Control index.
-    public void ResetControl(int index) {
-      Musician.Internal.Instrument_ResetControl(_handle, index);
+    /// @param id Control identifier.
+    public void ResetControl(int id) {
+      Musician.Internal.Instrument_ResetControl(_handle, id);
     }
 
     /// Resets a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param index Note control index.
-    public void ResetNoteControl(double pitch, int index) {
-      Musician.Internal.Instrument_ResetNoteControl(_handle, pitch, index);
+    /// @param id Note control identifier.
+    public void ResetNoteControl(double pitch, int id) {
+      Musician.Internal.Instrument_ResetNoteControl(_handle, pitch, id);
     }
 
     /// Sets all notes off.
@@ -117,11 +117,11 @@ namespace Barely {
 
     /// Sets a control value.
     ///
-    /// @param index Control index.
+    /// @param id Control identifier.
     /// @param value Control value.
     /// @param slopePerBeat Control slope in value change per beat.
-    public void SetControl(int index, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Instrument_SetControl(_handle, index, value, slopePerBeat);
+    public void SetControl(int id, double value, double slopePerBeat = 0.0) {
+      Musician.Internal.Instrument_SetControl(_handle, id, value, slopePerBeat);
     }
 
     /// Sets data.
@@ -135,11 +135,11 @@ namespace Barely {
     /// Sets a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param index Note control index.
+    /// @param id Note control identifier.
     /// @param value Note control value.
     /// @param slopePerBeat Note control slope in value change per beat.
-    public void SetNoteControl(double pitch, int index, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, index, value, slopePerBeat);
+    public void SetNoteControl(double pitch, int id, double value, double slopePerBeat = 0.0) {
+      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, id, value, slopePerBeat);
     }
 
     /// Sets a note off.
@@ -165,16 +165,16 @@ namespace Barely {
       }
 
       /// Internal control event callback.
-      public static void OnControlEvent(Instrument instrument, int index, double value) {
-        instrument.OnControl?.Invoke(index, value);
-        instrument.OnControlEvent?.Invoke(index, (float)value);
+      public static void OnControlEvent(Instrument instrument, int id, double value) {
+        instrument.OnControl?.Invoke(id, value);
+        instrument.OnControlEvent?.Invoke(id, (float)value);
       }
 
       /// Internal note control event callback.
-      public static void OnNoteControlEvent(Instrument instrument, double pitch, int index,
+      public static void OnNoteControlEvent(Instrument instrument, double pitch, int id,
                                             double value) {
-        instrument.OnNoteControl?.Invoke(pitch, index, value);
-        instrument.OnNoteControlEvent?.Invoke((float)pitch, index, (float)value);
+        instrument.OnNoteControl?.Invoke(pitch, id, value);
+        instrument.OnNoteControlEvent?.Invoke((float)pitch, id, (float)value);
       }
 
       /// Internal note off event callback.

@@ -17,12 +17,12 @@ EffectDefinition LfoEffect::GetDefinition() noexcept {
   static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
       control_definitions = {
           // Oscillator type.
-          ControlDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
-                            static_cast<double>(OscillatorType::kNoise)},
+          ControlDefinition{Control::kOscillatorType, static_cast<double>(OscillatorType::kSine),
+                            0.0, static_cast<double>(OscillatorType::kNoise)},
           // Oscillator frequency.
-          ControlDefinition{1.0, 0.0, 32.0},
+          ControlDefinition{Control::kOscillatorFrequency, 1.0, 0.0, 32.0},
           // Intensity.
-          ControlDefinition{1.0, 0.0, 1.0},
+          ControlDefinition{Control::kIntensity, 1.0, 0.0, 1.0},
       };
   return CustomEffect::GetDefinition<LfoEffect>(control_definitions);
 }
@@ -47,8 +47,8 @@ void LfoEffect::Process(double* output_samples, int output_channel_count,
   }
 }
 
-void LfoEffect::SetControl(int index, double value, double slope_per_frame) noexcept {
-  switch (static_cast<Control>(index)) {
+void LfoEffect::SetControl(int id, double value, double slope_per_frame) noexcept {
+  switch (static_cast<Control>(id)) {
     case Control::kOscillatorType:
       lfo_.SetType(static_cast<OscillatorType>(static_cast<int>(value)));
       break;

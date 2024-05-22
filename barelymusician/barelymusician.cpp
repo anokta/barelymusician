@@ -165,23 +165,23 @@ bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
   return true;
 }
 
-bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* out_value) {
+bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id, double* out_value) {
   if (!effect) return false;
   if (!out_value) return false;
 
-  if (const auto* control = effect->GetControl(index)) {
+  if (const auto* control = effect->GetControl(id)) {
     *out_value = control->GetValue();
     return true;
   }
   return false;
 }
 
-bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
+bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t id,
                                        BarelyControlDefinition* out_definition) {
   if (!effect) return false;
   if (!out_definition) return false;
 
-  if (const auto* control = effect->GetControl(index)) {
+  if (const auto* control = effect->GetControl(id)) {
     *out_definition = control->GetDefinition();
     return true;
   }
@@ -203,17 +203,17 @@ bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
   return true;
 }
 
-bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t index) {
+bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t id) {
   if (!effect || !effect->instrument()) return false;
 
-  return effect->instrument()->ResetEffectControl(*effect, index);
+  return effect->instrument()->ResetEffectControl(*effect, id);
 }
 
-bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
+bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value,
                              double slope_per_beat) {
   if (!effect || !effect->instrument()) return false;
 
-  return effect->instrument()->SetEffectControl(*effect, index, value, slope_per_beat);
+  return effect->instrument()->SetEffectControl(*effect, id, value, slope_per_beat);
 }
 
 bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
@@ -256,36 +256,35 @@ bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   return true;
 }
 
-bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t index,
-                                 double* out_value) {
+bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t id, double* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
 
-  if (const auto* control = instrument->GetControl(index)) {
+  if (const auto* control = instrument->GetControl(id)) {
     *out_value = control->GetValue();
     return true;
   }
   return false;
 }
 
-bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, int32_t index,
+bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, int32_t id,
                                            BarelyControlDefinition* out_definition) {
   if (!instrument) return false;
   if (!out_definition) return false;
 
-  if (const auto* control = instrument->GetControl(index)) {
+  if (const auto* control = instrument->GetControl(id)) {
     *out_definition = control->GetDefinition();
     return true;
   }
   return false;
 }
 
-bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
+bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t id,
                                      double* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
 
-  if (const auto* note_control = instrument->GetNoteControl(pitch, index)) {
+  if (const auto* note_control = instrument->GetNoteControl(pitch, id)) {
     *out_value = note_control->GetValue();
     return true;
   }
@@ -293,12 +292,12 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double p
 }
 
 bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument, double pitch,
-                                               int32_t index,
+                                               int32_t id,
                                                BarelyControlDefinition* out_definition) {
   if (!instrument) return false;
   if (!out_definition) return false;
 
-  if (const auto* note_control = instrument->GetNoteControl(pitch, index)) {
+  if (const auto* note_control = instrument->GetNoteControl(pitch, id)) {
     *out_definition = note_control->GetDefinition();
     return true;
   }
@@ -335,17 +334,17 @@ bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument, do
   return instrument->ResetAllNoteControls(pitch);
 }
 
-bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t index) {
+bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t id) {
   if (!instrument) return false;
 
-  return instrument->ResetControl(index);
+  return instrument->ResetControl(id);
 }
 
 bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                       int32_t index) {
+                                       int32_t id) {
   if (!instrument) return false;
 
-  return instrument->ResetNoteControl(pitch, index);
+  return instrument->ResetNoteControl(pitch, id);
 }
 
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
@@ -355,11 +354,11 @@ bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   return true;
 }
 
-bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index, double value,
+bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t id, double value,
                                  double slope_per_beat) {
   if (!instrument) return false;
 
-  return instrument->SetControl(index, value, slope_per_beat);
+  return instrument->SetControl(id, value, slope_per_beat);
 }
 
 bool BarelyInstrument_SetControlEvent(BarelyInstrumentHandle instrument,
@@ -379,11 +378,11 @@ bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* dat
   return true;
 }
 
-bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
+bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t id,
                                      double value, double slope_per_beat) {
   if (!instrument) return false;
 
-  return instrument->SetNoteControl(pitch, index, value, slope_per_beat);
+  return instrument->SetNoteControl(pitch, id, value, slope_per_beat);
 }
 
 bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle instrument,

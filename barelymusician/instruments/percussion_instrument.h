@@ -54,10 +54,10 @@ class PercussionInstrument : public CustomInstrument {
   /// Implements `CustomInstrument`.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
-  void SetControl(int index, double value, double slope_per_frame) noexcept final;
+  void SetControl(int id, double value, double slope_per_frame) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetData(const void* data, int size) noexcept final;
-  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+  void SetNoteControl(double /*pitch*/, int /*id*/, double /*value*/,
                       double /*slope_per_frame*/) noexcept final {}
   void SetNoteOff(double pitch) noexcept final;
   void SetNoteOn(double pitch, double intensity) noexcept final;

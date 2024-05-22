@@ -25,20 +25,20 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
       control_definitions = {
           // Gain.
-          ControlDefinition{1.0, 0.0, 1.0},
+          ControlDefinition{Control::kGain, 1.0, 0.0, 1.0},
           // Oscillator type.
-          ControlDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
-                            static_cast<double>(OscillatorType::kNoise)},
+          ControlDefinition{Control::kOscillatorType, static_cast<double>(OscillatorType::kSine),
+                            0.0, static_cast<double>(OscillatorType::kNoise)},
           // Attack.
-          ControlDefinition{0.05, 0.0, 60.0},
+          ControlDefinition{Control::kAttack, 0.05, 0.0, 60.0},
           // Decay.
-          ControlDefinition{0.0, 0.0, 60.0},
+          ControlDefinition{Control::kDecay, 0.0, 0.0, 60.0},
           // Sustain.
-          ControlDefinition{1.0, 0.0, 1.0},
+          ControlDefinition{Control::kSustain, 1.0, 0.0, 1.0},
           // Release.
-          ControlDefinition{0.25, 0.0, 60.0},
+          ControlDefinition{Control::kRelease, 0.25, 0.0, 60.0},
           // Number of voices.
-          ControlDefinition{8, 1, kMaxVoiceCount},
+          ControlDefinition{Control::kVoiceCount, 8, 1, kMaxVoiceCount},
       };
   return CustomInstrument::GetDefinition<SynthInstrument>(control_definitions, {});
 }
@@ -59,8 +59,8 @@ void SynthInstrument::Process(double* output_samples, int output_channel_count,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SynthInstrument::SetControl(int index, double value, double /*slope_per_frame*/) noexcept {
-  switch (static_cast<Control>(index)) {
+void SynthInstrument::SetControl(int id, double value, double /*slope_per_frame*/) noexcept {
+  switch (static_cast<Control>(id)) {
     case Control::kGain:
       gain_processor_.SetGain(value);
       break;

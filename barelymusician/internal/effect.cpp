@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -22,8 +23,8 @@ Effect::Effect(const EffectDefinition& definition, int frame_rate, int process_o
     definition.create_callback(&state_, frame_rate);
   }
   if (set_control_callback_) {
-    for (int index = 0; index < definition.control_definition_count; ++index) {
-      set_control_callback_(&state_, index, controls_[index].GetValue(), 0.0);
+    for (const auto& [id, control] : controls_) {
+      set_control_callback_(&state_, id, control.GetValue(), 0.0);
     }
   }
 }
@@ -34,7 +35,7 @@ Effect::~Effect() noexcept {
   }
 }
 
-std::vector<Control>& Effect::GetAllControls() noexcept { return controls_; }
+std::unordered_map<int, Control>& Effect::GetAllControls() noexcept { return controls_; }
 
 Control* Effect::GetControl(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {

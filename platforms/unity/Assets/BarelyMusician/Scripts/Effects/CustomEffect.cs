@@ -22,10 +22,10 @@ namespace Barely {
 
     /// Set control callback.
     ///
-    /// @param index Control index.
+    /// @param id Control identifier.
     /// @param value Control value.
     /// @param slopePerFrame Control slope in value change per frame.
-    public void OnSetControl(int index, double value, double slopePerFrame);
+    public void OnSetControl(int id, double value, double slopePerFrame);
 
     /// Set data callback.
     ///
@@ -89,10 +89,9 @@ namespace Barely {
 
     // Set control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.EffectDefinition_SetControlCallback))]
-    private static void OnSetControl(ref IntPtr state, Int32 index, double value,
+    private static void OnSetControl(ref IntPtr state, Int32 id, double value,
                                      double slopePerFrame) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType)
-          .OnSetControl(index, value, slopePerFrame);
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value, slopePerFrame);
     }
 
     // Set data callback.
@@ -108,20 +107,10 @@ namespace Barely {
       }
       IntPtr definitionsPtr =
           Marshal.AllocHGlobal(definitions.Length * Marshal.SizeOf<ControlDefinition>());
-      int byteOffset = 0;
       for (int i = 0; i < definitions.Length; ++i) {
-        var defaultValueBytes = BitConverter.GetBytes(definitions[i].defaultValue);
-        for (int j = 0; j < defaultValueBytes.Length; ++j) {
-          Marshal.WriteByte(definitionsPtr, byteOffset++, defaultValueBytes[j]);
-        }
-        var minValueBytes = BitConverter.GetBytes(definitions[i].minValue);
-        for (int j = 0; j < minValueBytes.Length; ++j) {
-          Marshal.WriteByte(definitionsPtr, byteOffset++, minValueBytes[j]);
-        }
-        var maxValueBytes = BitConverter.GetBytes(definitions[i].maxValue);
-        for (int j = 0; j < maxValueBytes.Length; ++j) {
-          Marshal.WriteByte(definitionsPtr, byteOffset++, maxValueBytes[j]);
-        }
+        IntPtr definitionPtr =
+            new IntPtr(definitionsPtr.ToInt64() + i * Marshal.SizeOf<ControlDefinition>());
+        Marshal.StructureToPtr(definitions[i], definitionPtr, false);
       }
       return definitionsPtr;
     }

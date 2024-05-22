@@ -88,10 +88,10 @@ namespace Barely {
       /// Effect definition set note control callback signature.
       ///
       /// @param state Pointer to effect state.
-      /// @param index Control index.
+      /// @param id Control identifier.
       /// @param value Control value.
       /// @param slopePerFrame Control slope in value change per frame.
-      public delegate void EffectDefinition_SetControlCallback(ref IntPtr state, Int32 index,
+      public delegate void EffectDefinition_SetControlCallback(ref IntPtr state, Int32 id,
                                                                double value, double slopePerFrame);
 
       /// Effect definition set data callback signature.
@@ -125,10 +125,10 @@ namespace Barely {
       /// Instrument definition set note control callback signature.
       ///
       /// @param state Pointer to instrument state.
-      /// @param index Control index.
+      /// @param id Control identifier.
       /// @param value Control value.
       /// @param slopePerFrame Control slope in value change per frame.
-      public delegate void InstrumentDefinition_SetControlCallback(ref IntPtr state, Int32 index,
+      public delegate void InstrumentDefinition_SetControlCallback(ref IntPtr state, Int32 id,
                                                                    double value,
                                                                    double slopePerFrame);
 
@@ -144,11 +144,11 @@ namespace Barely {
       ///
       /// @param state Pointer to instrument state.
       /// @param pitch Note pitch.
-      /// @param index Note control index.
+      /// @param id Note control identifier.
       /// @param value Note control value.
       /// @param slopePerFrame Note control slope in value change per frame.
       public delegate void InstrumentDefinition_SetNoteControlCallback(ref IntPtr state,
-                                                                       double pitch, Int32 index,
+                                                                       double pitch, Int32 id,
                                                                        double value,
                                                                        double slopePerFrame);
 
@@ -363,13 +363,12 @@ namespace Barely {
       /// Returns the value of an effect control.
       ///
       /// @param effectHandle Effect handle.
-      /// @param index Control index.
+      /// @param id Control identifier.
       /// @return Control value.
-      public static double Effect_GetControl(IntPtr effectHandle, int index) {
+      public static double Effect_GetControl(IntPtr effectHandle, int id) {
         double value = 0.0;
-        if (!BarelyEffect_GetControl(effectHandle, index, ref value) &&
-            effectHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get effect control " + index + " value");
+        if (!BarelyEffect_GetControl(effectHandle, id, ref value) && effectHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get effect control " + id + " value");
         }
         return value;
       }
@@ -399,24 +398,24 @@ namespace Barely {
       /// Resets an effect control value.
       ///
       /// @param effectHandle Effect handle.
-      /// @param index Control index.
-      public static void Effect_ResetControl(IntPtr effectHandle, int index) {
-        if (!BarelyEffect_ResetControl(effectHandle, index) && effectHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset effect control " + index + " value");
+      /// @param id Control identifier.
+      public static void Effect_ResetControl(IntPtr effectHandle, int id) {
+        if (!BarelyEffect_ResetControl(effectHandle, id) && effectHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to reset effect control " + id + " value");
         }
       }
 
       /// Sets an effect control value.
       ///
       /// @param effectHandle Effect handle.
-      /// @param index Control index.
+      /// @param id Control identifier.
       /// @param value Control value.
       /// @param slopePerBeat Control slope in value change per beat.
-      public static void Effect_SetControl(IntPtr effectHandle, int index, double value,
+      public static void Effect_SetControl(IntPtr effectHandle, int id, double value,
                                            double slopePerBeat) {
-        if (!BarelyEffect_SetControl(effectHandle, index, value, slopePerBeat) &&
+        if (!BarelyEffect_SetControl(effectHandle, id, value, slopePerBeat) &&
             effectHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set effect control " + index + " value to " + value +
+          Debug.LogError("Failed to set effect control " + id + " value to " + value +
                          " with slope " + slopePerBeat);
         }
       }
@@ -513,13 +512,13 @@ namespace Barely {
       /// Returns the value of an instrument control.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @param index Control index.
+      /// @param id Control identifier.
       /// @return Control value.
-      public static double Instrument_GetControl(IntPtr instrumentHandle, int index) {
+      public static double Instrument_GetControl(IntPtr instrumentHandle, int id) {
         double value = 0.0;
-        if (!BarelyInstrument_GetControl(instrumentHandle, index, ref value) &&
+        if (!BarelyInstrument_GetControl(instrumentHandle, id, ref value) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument control " + index + " value");
+          Debug.LogError("Failed to get instrument control " + id + " value");
         }
         return value;
       }
@@ -528,14 +527,14 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      /// @param index Note control index.
+      /// @param id Note control identifier.
       /// @return Note control value.
       public static double Instrument_GetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                     int index) {
+                                                     int id) {
         double value = 0.0;
-        if (!BarelyInstrument_GetNoteControl(instrumentHandle, pitch, index, ref value) &&
+        if (!BarelyInstrument_GetNoteControl(instrumentHandle, pitch, id, ref value) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument note pitch " + pitch + " control " + index +
+          Debug.LogError("Failed to get instrument note pitch " + pitch + " control " + id +
                          " value");
         }
         return value;
@@ -604,11 +603,11 @@ namespace Barely {
       /// Resets an instrument control value.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @param index Control index.
-      public static void Instrument_ResetControl(IntPtr instrumentHandle, int index) {
-        if (!BarelyInstrument_ResetControl(instrumentHandle, index) &&
+      /// @param id Control identifier.
+      public static void Instrument_ResetControl(IntPtr instrumentHandle, int id) {
+        if (!BarelyInstrument_ResetControl(instrumentHandle, id) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset instrument control " + index + " value");
+          Debug.LogError("Failed to reset instrument control " + id + " value");
         }
       }
 
@@ -616,12 +615,12 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      /// @param index Note control index.
+      /// @param id Note control identifier.
       public static void Instrument_ResetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                     int index) {
-        if (!BarelyInstrument_ResetNoteControl(instrumentHandle, pitch, index) &&
+                                                     int id) {
+        if (!BarelyInstrument_ResetNoteControl(instrumentHandle, pitch, id) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset instrument note pitch " + pitch + " control " + index +
+          Debug.LogError("Failed to reset instrument note pitch " + pitch + " control " + id +
                          " value");
         }
       }
@@ -638,14 +637,14 @@ namespace Barely {
       /// Sets an instrument control value.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @param index Control index.
+      /// @param id Control identifier.
       /// @param value Control value.
       /// @param slopePerBeat Control slope in value change per beat.
-      public static void Instrument_SetControl(IntPtr instrumentHandle, int index, double value,
+      public static void Instrument_SetControl(IntPtr instrumentHandle, int id, double value,
                                                double slopePerBeat) {
-        if (!BarelyInstrument_SetControl(instrumentHandle, index, value, slopePerBeat) &&
+        if (!BarelyInstrument_SetControl(instrumentHandle, id, value, slopePerBeat) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument control " + index + " value to " + value +
+          Debug.LogError("Failed to set instrument control " + id + " value to " + value +
                          " with slope " + slopePerBeat);
         }
       }
@@ -666,14 +665,14 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      /// @param index Note control index.
+      /// @param id Note control identifier.
       /// @param value Note control value.
       /// @param slopePerBeat Note control slope in value change per beat.
-      public static void Instrument_SetNoteControl(IntPtr instrumentHandle, double pitch, int index,
+      public static void Instrument_SetNoteControl(IntPtr instrumentHandle, double pitch, int id,
                                                    double value, double slopePerBeat) {
-        if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, index, value, slopePerBeat) &&
+        if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, id, value, slopePerBeat) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument note pitch " + pitch + " control " + index +
+          Debug.LogError("Failed to set instrument note pitch " + pitch + " control " + id +
                          " value to " + value + " with slope " + slopePerBeat);
         }
       }
@@ -1247,19 +1246,19 @@ namespace Barely {
       }
 
       // Control event definition process callback.
-      private delegate void ControlEventDefinition_ProcessCallback(ref IntPtr state, int index,
+      private delegate void ControlEventDefinition_ProcessCallback(ref IntPtr state, int id,
                                                                    double value);
       [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
-      private static void EffectControlEventDefinition_OnProcess(ref IntPtr state, int index,
+      private static void EffectControlEventDefinition_OnProcess(ref IntPtr state, int id,
                                                                  double value) {
         Effect effect = GCHandle.FromIntPtr(state).Target as Effect;
-        Effect.Internal.OnControlEvent(effect, index, value);
+        Effect.Internal.OnControlEvent(effect, id, value);
       }
       [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
-      private static void InstrumentControlEventDefinition_OnProcess(ref IntPtr state, int index,
+      private static void InstrumentControlEventDefinition_OnProcess(ref IntPtr state, int id,
                                                                      double value) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
-        Instrument.Internal.OnControlEvent(instrument, index, value);
+        Instrument.Internal.OnControlEvent(instrument, id, value);
       }
 
       // Control event definition.
@@ -1292,13 +1291,13 @@ namespace Barely {
 
       // Note control event definition process callback.
       private delegate void NoteControlEventDefinition_ProcessCallback(ref IntPtr state,
-                                                                       double pitch, int index,
+                                                                       double pitch, int id,
                                                                        double value);
       [AOT.MonoPInvokeCallback(typeof(NoteControlEventDefinition_ProcessCallback))]
       private static void NoteControlEventDefinition_OnProcess(ref IntPtr state, double pitch,
-                                                               int index, double value) {
+                                                               int id, double value) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
-        Instrument.Internal.OnNoteControlEvent(instrument, pitch, index, value);
+        Instrument.Internal.OnNoteControlEvent(instrument, pitch, id, value);
       }
 
       // Note control event definition.
@@ -1584,7 +1583,7 @@ namespace Barely {
       private static extern bool BarelyEffect_Destroy(IntPtr effect);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_GetControl")]
-      private static extern bool BarelyEffect_GetControl(IntPtr effect, Int32 index,
+      private static extern bool BarelyEffect_GetControl(IntPtr effect, Int32 id,
                                                          ref double outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_GetProcessOrder")]
@@ -1595,10 +1594,10 @@ namespace Barely {
       private static extern bool BarelyEffect_ResetAllControls(IntPtr effect);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_ResetControl")]
-      private static extern bool BarelyEffect_ResetControl(IntPtr effect, Int32 index);
+      private static extern bool BarelyEffect_ResetControl(IntPtr effect, Int32 id);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControl")]
-      private static extern bool BarelyEffect_SetControl(IntPtr effect, Int32 index, double value,
+      private static extern bool BarelyEffect_SetControl(IntPtr effect, Int32 id, double value,
                                                          double slopePerBeat);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControlEvent")]
@@ -1621,12 +1620,12 @@ namespace Barely {
       private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetControl")]
-      private static extern bool BarelyInstrument_GetControl(IntPtr instrument, Int32 index,
+      private static extern bool BarelyInstrument_GetControl(IntPtr instrument, Int32 id,
                                                              ref double outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
       private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, double pitch,
-                                                                 Int32 index, ref double outValue);
+                                                                 Int32 id, ref double outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, double pitch,
@@ -1646,17 +1645,17 @@ namespace Barely {
                                                                        double pitch);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetControl")]
-      private static extern bool BarelyInstrument_ResetControl(IntPtr instrument, Int32 index);
+      private static extern bool BarelyInstrument_ResetControl(IntPtr instrument, Int32 id);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetNoteControl")]
       private static extern bool BarelyInstrument_ResetNoteControl(IntPtr instrument, double pitch,
-                                                                   Int32 index);
+                                                                   Int32 id);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
       private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr instrument);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControl")]
-      private static extern bool BarelyInstrument_SetControl(IntPtr instrument, Int32 index,
+      private static extern bool BarelyInstrument_SetControl(IntPtr instrument, Int32 id,
                                                              double value, double slopePerBeat);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControlEvent")]
@@ -1670,7 +1669,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
-                                                                 Int32 index, double value,
+                                                                 Int32 id, double value,
                                                                  double slopePerBeat);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControlEvent")]

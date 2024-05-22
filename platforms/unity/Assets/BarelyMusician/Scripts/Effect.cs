@@ -7,9 +7,9 @@ namespace Barely {
   public abstract class Effect : MonoBehaviour {
     /// Control event callback.
     ///
-    /// @param index Control index.
+    /// @param id Control identifier.
     /// @param control Control value.
-    public delegate void ControlEventCallback(int index, double value);
+    public delegate void ControlEventCallback(int id, double value);
     public event ControlEventCallback OnControl;
 
     [Serializable]
@@ -33,10 +33,10 @@ namespace Barely {
 
     /// Returns a control value.
     ///
-    /// @param index Control index.
+    /// @param id Control identifier.
     /// @return Control value.
-    public double GetControl(int index) {
-      return Musician.Internal.Effect_GetControl(_handle, index);
+    public double GetControl(int id) {
+      return Musician.Internal.Effect_GetControl(_handle, id);
     }
 
     /// Resets all control values.
@@ -46,18 +46,18 @@ namespace Barely {
 
     /// Resets a control value.
     ///
-    /// @param index Control index.
-    public void ResetControl(int index) {
-      Musician.Internal.Effect_ResetControl(_handle, index);
+    /// @param id Control identifier.
+    public void ResetControl(int id) {
+      Musician.Internal.Effect_ResetControl(_handle, id);
     }
 
     /// Sets a control value.
     ///
-    /// @param index Control index.
+    /// @param id Control identifier.
     /// @param value Control value.
     /// @param slopePerBeat Control slope in value change per beat.
-    public void SetControl(int index, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Effect_SetControl(_handle, index, value, slopePerBeat);
+    public void SetControl(int id, double value, double slopePerBeat = 0.0) {
+      Musician.Internal.Effect_SetControl(_handle, id, value, slopePerBeat);
     }
 
     /// Sets data.
@@ -71,9 +71,9 @@ namespace Barely {
     /// Class that wraps the internal api.
     public static class Internal {
       /// Internal control event callback.
-      public static void OnControlEvent(Effect effect, int index, double value) {
-        effect.OnControl?.Invoke(index, value);
-        effect.OnControlEvent?.Invoke(index, (float)value);
+      public static void OnControlEvent(Effect effect, int id, double value) {
+        effect.OnControl?.Invoke(id, value);
+        effect.OnControlEvent?.Invoke(id, (float)value);
       }
     }
 

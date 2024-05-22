@@ -18,7 +18,7 @@ EffectDefinition HighPassEffect::GetDefinition() noexcept {
   static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
       control_definitions = {
           // Cutoff frequency.
-          ControlDefinition{0.0, 0.0},
+          ControlDefinition{Control::kCutoffFrequency, 0.0, 0.0},
       };
   return CustomEffect::GetDefinition<HighPassEffect>(control_definitions);
 }
@@ -47,8 +47,8 @@ void HighPassEffect::Process(double* output_samples, int output_channel_count,
   }
 }
 
-void HighPassEffect::SetControl(int index, double value, double slope_per_frame) noexcept {
-  switch (static_cast<Control>(index)) {
+void HighPassEffect::SetControl(int id, double value, double slope_per_frame) noexcept {
+  switch (static_cast<Control>(id)) {
     case Control::kCutoffFrequency:
       if (value != cutoff_frequency_.first) {
         cutoff_frequency_.first = value;

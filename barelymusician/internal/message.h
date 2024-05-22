@@ -11,8 +11,8 @@ namespace barely::internal {
 
 /// Control message.
 struct ControlMessage {
-  /// Index.
-  int index;
+  /// Identifier.
+  int id;
 
   /// Value.
   double value;
@@ -32,8 +32,8 @@ struct EffectControlMessage {
   /// Effect.
   Effect* effect;
 
-  /// Index.
-  int index;
+  /// Identifier.
+  int id;
 
   /// Value.
   double value;
@@ -56,8 +56,8 @@ struct NoteControlMessage {
   /// Pitch.
   double pitch;
 
-  /// Index.
-  int index;
+  /// Identifier.
+  int id;
 
   /// Value.
   double value;

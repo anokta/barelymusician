@@ -14,7 +14,7 @@ namespace {
 // Returns a test effect definition that produces constant output.
 EffectDefinition GetTestDefinition() {
   static const std::array<ControlDefinition, 1> control_definitions = {
-      ControlDefinition{0.0},
+      ControlDefinition{0, 0.0},
   };
   return EffectDefinition(
       [](void** state, int32_t frame_rate) {
@@ -26,8 +26,8 @@ EffectDefinition GetTestDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int32_t index, double value, double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(index + 1) * value;
+      [](void** state, int32_t id, double value, double /*slope_per_frame*/) {
+        *reinterpret_cast<double*>(*state) = static_cast<double>(id + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {}, control_definitions);
 }

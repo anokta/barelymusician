@@ -28,10 +28,10 @@ constexpr int kFrameCount = 8;
 // Returns a test instrument definition that produces constant output per note.
 InstrumentDefinition GetTestInstrumentDefinition() {
   static const std::vector<ControlDefinition> control_definitions = {
-      ControlDefinition{0.0, -10.0, 10.0},
+      ControlDefinition{0, 0.0, -10.0, 10.0},
   };
   static const std::vector<ControlDefinition> note_control_definitions = {
-      ControlDefinition{1.0, 0.0, 1.0},
+      ControlDefinition{0, 1.0, 0.0, 1.0},
   };
   return InstrumentDefinition(
       [](void** state, int32_t /*frame_rate*/) {
@@ -43,11 +43,11 @@ InstrumentDefinition GetTestInstrumentDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int32_t index, double value, double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(index + 1) * value;
+      [](void** state, int32_t id, double value, double /*slope_per_frame*/) {
+        *reinterpret_cast<double*>(*state) = static_cast<double>(id + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {},
-      [](void** /*state*/, double /*pitch*/, int32_t /*index*/, double /*value*/,
+      [](void** /*state*/, double /*pitch*/, int32_t /*id*/, double /*value*/,
          double /*slope_per_frame*/) {},
       [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
       [](void** state, double pitch, double intensity) {

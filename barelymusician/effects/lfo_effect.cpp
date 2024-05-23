@@ -32,39 +32,30 @@ LfoEffect::LfoEffect(int frame_rate) noexcept : lfo_(frame_rate) { assert(frame_
 void LfoEffect::Process(double* output_samples, int output_channel_count,
                         int output_frame_count) noexcept {
   for (int frame = 0; frame < output_frame_count; ++frame) {
-    const double gain = intensity_.first * lfo_.Next();
+    const double gain = intensity_ * lfo_.Next();
     for (int channel = 0; channel < output_channel_count; ++channel) {
       auto& sample = output_samples[output_channel_count * frame + channel];
       sample *= gain;
     }
-    if (frequency_.second != 0.0) {
-      frequency_.first += frequency_.second;
-      lfo_.SetFrequency(frequency_.first);
-    }
-    if (intensity_.second != 0.0) {
-      intensity_.first += intensity_.second;
-    }
   }
 }
 
-void LfoEffect::SetControl(int id, double value, double slope_per_frame) noexcept {
+void LfoEffect::SetControl(int id, double value) noexcept {
   switch (static_cast<Control>(id)) {
     case Control::kOscillatorType:
       lfo_.SetType(static_cast<OscillatorType>(static_cast<int>(value)));
       break;
     case Control::kOscillatorFrequency:
-      if (value != frequency_.first) {
-        frequency_.first = value;
+      if (value != frequency_) {
+        frequency_ = value;
         lfo_.SetFrequency(value);
       }
-      frequency_.second = slope_per_frame;
       break;
     case Control::kIntensity:
-      if (value != intensity_.first) {
-        intensity_.first = value;
+      if (value != intensity_) {
+        intensity_ = value;
         lfo_.SetFrequency(value);
       }
-      intensity_.second = slope_per_frame;
       break;
     default:
       assert(false);

@@ -119,9 +119,8 @@ namespace Barely {
     ///
     /// @param id Control identifier.
     /// @param value Control value.
-    /// @param slopePerBeat Control slope in value change per beat.
-    public void SetControl(int id, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Instrument_SetControl(_handle, id, value, slopePerBeat);
+    public void SetControl(int id, double value) {
+      Musician.Internal.Instrument_SetControl(_handle, id, value);
     }
 
     /// Sets data.
@@ -137,9 +136,8 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param id Note control identifier.
     /// @param value Note control value.
-    /// @param slopePerBeat Note control slope in value change per beat.
-    public void SetNoteControl(double pitch, int id, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, id, value, slopePerBeat);
+    public void SetNoteControl(double pitch, int id, double value) {
+      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, id, value);
     }
 
     /// Sets a note off.

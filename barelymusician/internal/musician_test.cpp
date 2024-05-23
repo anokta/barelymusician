@@ -43,12 +43,11 @@ InstrumentDefinition GetTestInstrumentDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int32_t id, double value, double /*slope_per_frame*/) {
+      [](void** state, int32_t id, double value) {
         *reinterpret_cast<double*>(*state) = static_cast<double>(id + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {},
-      [](void** /*state*/, double /*pitch*/, int32_t /*id*/, double /*value*/,
-         double /*slope_per_frame*/) {},
+      [](void** /*state*/, double /*pitch*/, int32_t /*id*/, double /*value*/) {},
       [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
       [](void** state, double pitch, double intensity) {
         *reinterpret_cast<double*>(*state) = pitch * intensity;
@@ -88,8 +87,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
-  Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetTempo(),
-                        musician.GetTimestamp());
+  Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetTimestamp());
   musician.AddInstrument(instrument);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -149,8 +147,8 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     // Create instruments with note off callback.
     std::vector<std::unique_ptr<Instrument>> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(std::make_unique<Instrument>(
-          GetTestInstrumentDefinition(), kFrameRate, musician.GetTempo(), musician.GetTimestamp()));
+      instruments.push_back(std::make_unique<Instrument>(GetTestInstrumentDefinition(), kFrameRate,
+                                                         musician.GetTimestamp()));
       musician.AddInstrument(*instruments[i]);
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);

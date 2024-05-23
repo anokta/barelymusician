@@ -61,9 +61,8 @@ class Effect {
   ///
   /// @param id Control identifier.
   /// @param value Control value.
-  /// @param slope_per_frame Control slope in value change per frame.
   /// @return True if successful, false otherwise.
-  void ProcessControlMessage(int id, double value, double slope_per_frame) noexcept;
+  void ProcessControlMessage(int id, double value) noexcept;
 
   /// Processes a data message.
   ///

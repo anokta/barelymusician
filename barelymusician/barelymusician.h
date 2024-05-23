@@ -51,15 +51,13 @@
 ///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/-1.0);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
-///                         /*slope_per_beat=*/0.0);
+///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
 ///
 ///   // Create a low-pass effect.
 ///   auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 ///
-///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
-///                     /*slope_per_beat=*/100.0);
+///   // Set the low-pass cutoff frequency to 1kHz.
+///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
 ///
 ///   // Process.
 ///   //
@@ -147,15 +145,15 @@
 ///   BarelyInstrument_IsNoteOn(instrument, /*pitch=*/-1.0, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, /*id=*/0, /*value=*/0.5, /*slope_per_beat=*/0.0);
+///   BarelyInstrument_SetControl(instrument, /*id=*/0, /*value=*/0.5);
 ///
 ///   // Create a low-pass effect.
 ///   BarelyEffectHandle effect;
 ///   BarelyEffect_Create(instrument, BarelyLowPassEffect_GetDefinition(), /*process_order=*/0,
 ///                       &effect);
 ///
-///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   BarelyEffect_SetControl(effect, /*id=*/0, /*value=*/0.0, /*slope_per_beat=*/100.0);
+///   // Set the low-pass cutoff frequency to 1kHz.
+///   BarelyEffect_SetControl(effect, /*id=*/0, /*value=*/1000.0);
 ///
 ///   // Process.
 ///   //
@@ -311,9 +309,7 @@ typedef void (*BarelyEffectDefinition_ProcessCallback)(void** state, double* out
 /// @param state Pointer to effect state.
 /// @param id Control identifier.
 /// @param value Control value.
-/// @param slope_per_frame Control slope in value change per frame.
-typedef void (*BarelyEffectDefinition_SetControlCallback)(void** state, int32_t id, double value,
-                                                          double slope_per_frame);
+typedef void (*BarelyEffectDefinition_SetControlCallback)(void** state, int32_t id, double value);
 
 /// Effect definition set data callback signature.
 ///
@@ -373,9 +369,8 @@ typedef void (*BarelyInstrumentDefinition_ProcessCallback)(void** state, double*
 /// @param state Pointer to instrument state.
 /// @param id Control identifier.
 /// @param value Control value.
-/// @param slope_per_frame Control slope in value change per frame.
 typedef void (*BarelyInstrumentDefinition_SetControlCallback)(void** state, int32_t id,
-                                                              double value, double slope_per_frame);
+                                                              double value);
 
 /// Instrument definition set data callback signature.
 ///
@@ -391,10 +386,8 @@ typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state, const v
 /// @param pitch Note pitch.
 /// @param id Note control identifier.
 /// @param value Note control value.
-/// @param slope_per_frame Note control slope in value change per frame.
 typedef void (*BarelyInstrumentDefinition_SetNoteControlCallback)(void** state, double pitch,
-                                                                  int32_t id, double value,
-                                                                  double slope_per_frame);
+                                                                  int32_t id, double value);
 
 /// Instrument definition set note off callback signature.
 ///
@@ -645,10 +638,8 @@ BARELY_EXPORT bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t 
 /// @param effect Effect handle.
 /// @param id Control identifier.
 /// @param value Control value.
-/// @param slope_per_beat Control slope in value change per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value,
-                                           double slope_per_beat);
+BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value);
 
 /// Sets the control event of an effect.
 ///
@@ -796,10 +787,9 @@ BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instru
 /// @param instrument Instrument handle.
 /// @param id Control identifier.
 /// @param value Control value.
-/// @param slope_per_beat Control slope in value change per beat.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t id,
-                                               double value, double slope_per_beat);
+                                               double value);
 
 /// Sets the control event of an instrument.
 ///
@@ -826,10 +816,9 @@ BARELY_EXPORT bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, c
 /// @param pitch Note pitch.
 /// @param id Note control identifier.
 /// @param value Note control value.
-/// @param slope_per_beat Note control slope in value change per beat.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   int32_t id, double value, double slope_per_beat);
+                                                   int32_t id, double value);
 
 /// Sets the note control event of an instrument.
 ///
@@ -1732,15 +1721,14 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
   ///
   /// @param id Control identifier.
   /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
   template <typename IdType, typename ValueType>
-  void SetControl(IdType id, ValueType value, double slope_per_beat = 0.0) noexcept {
+  void SetControl(IdType id, ValueType value = 0.0) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyEffect_SetControl(
-        Get(), static_cast<int>(id), static_cast<double>(value), slope_per_beat);
+    [[maybe_unused]] const bool success =
+        BarelyEffect_SetControl(Get(), static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -1984,15 +1972,14 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   ///
   /// @param id Control identifier.
   /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
   template <typename IdType, typename ValueType>
-  void SetControl(IdType id, ValueType value, double slope_per_beat = 0.0) noexcept {
+  void SetControl(IdType id, ValueType value = 0.0) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
-        Get(), static_cast<int>(id), static_cast<double>(value), slope_per_beat);
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_SetControl(Get(), static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -2044,16 +2031,14 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @param value Note control value.
-  /// @param slope_per_beat Note control slope in value change per beat.
   template <typename IdType, typename ValueType>
-  void SetNoteControl(double pitch, IdType id, ValueType value,
-                      double slope_per_beat = 0.0) noexcept {
+  void SetNoteControl(double pitch, IdType id, ValueType value) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        Get(), pitch, static_cast<int>(id), static_cast<double>(value), slope_per_beat);
+        Get(), pitch, static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 

@@ -54,8 +54,7 @@ struct BarelyInstrument : public Observable<Instrument> {
   // Constructs `BarelyInstrument` with `musician`, `definition`, and `frame_rate`.
   BarelyInstrument(const Observable<Musician>& musician, BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
-      : Observable<Instrument>(definition, frame_rate, musician.GetTempo(),
-                               musician.GetTimestamp()),
+      : Observable<Instrument>(definition, frame_rate, musician.GetTimestamp()),
         musician_(musician.Observe()) {
     musician_->AddInstrument(*this);
   }
@@ -209,11 +208,10 @@ bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t id) {
   return effect->instrument()->ResetEffectControl(*effect, id);
 }
 
-bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value,
-                             double slope_per_beat) {
+bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value) {
   if (!effect || !effect->instrument()) return false;
 
-  return effect->instrument()->SetEffectControl(*effect, id, value, slope_per_beat);
+  return effect->instrument()->SetEffectControl(*effect, id, value);
 }
 
 bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
@@ -354,11 +352,10 @@ bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   return true;
 }
 
-bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t id, double value,
-                                 double slope_per_beat) {
+bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t id, double value) {
   if (!instrument) return false;
 
-  return instrument->SetControl(id, value, slope_per_beat);
+  return instrument->SetControl(id, value);
 }
 
 bool BarelyInstrument_SetControlEvent(BarelyInstrumentHandle instrument,
@@ -379,10 +376,10 @@ bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* dat
 }
 
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t id,
-                                     double value, double slope_per_beat) {
+                                     double value) {
   if (!instrument) return false;
 
-  return instrument->SetNoteControl(pitch, id, value, slope_per_beat);
+  return instrument->SetNoteControl(pitch, id, value);
 }
 
 bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle instrument,

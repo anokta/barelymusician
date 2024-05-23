@@ -53,7 +53,7 @@ void PercussionInstrument::Process(double* output_samples, int output_channel_co
   gain_processor_.Process(output_samples, output_channel_count, output_frame_count);
 }
 
-void PercussionInstrument::SetControl(int id, double value, double /*slope_per_frame*/) noexcept {
+void PercussionInstrument::SetControl(int id, double value) noexcept {
   switch (static_cast<Control>(id)) {
     case Control::kGain:
       gain_processor_.SetGain(value);

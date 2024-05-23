@@ -55,9 +55,8 @@ namespace Barely {
     ///
     /// @param id Control identifier.
     /// @param value Control value.
-    /// @param slopePerBeat Control slope in value change per beat.
-    public void SetControl(int id, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Effect_SetControl(_handle, id, value, slopePerBeat);
+    public void SetControl(int id, double value) {
+      Musician.Internal.Effect_SetControl(_handle, id, value);
     }
 
     /// Sets data.

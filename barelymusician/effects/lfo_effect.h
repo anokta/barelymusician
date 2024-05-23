@@ -52,18 +52,18 @@ class LfoEffect : public CustomEffect {
   /// Implements `CustomEffect`.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
-  void SetControl(int id, double value, double slope_per_frame) noexcept final;
+  void SetControl(int id, double value) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
 
  private:
   // Low-frequency oscillator.
   Oscillator lfo_;
 
-  // Frequency-slope pair.
-  std::pair<double, double> frequency_ = {220.0, 0.0};
+  // Frequency.
+  double frequency_ = 220.0;
 
-  // Intensity-slope pair.
-  std::pair<double, double> intensity_ = {1.0, 0.0};
+  // Intensity.
+  double intensity_ = 1.0;
 };
 
 }  // namespace barely

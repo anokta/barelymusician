@@ -24,7 +24,7 @@ Effect::Effect(const EffectDefinition& definition, int frame_rate, int process_o
   }
   if (set_control_callback_) {
     for (const auto& [id, control] : controls_) {
-      set_control_callback_(&state_, id, control.GetValue(), 0.0);
+      set_control_callback_(&state_, id, control.GetValue());
     }
   }
 }
@@ -58,9 +58,9 @@ void Effect::ProcessControlEvent(int index) noexcept {
   control_event_.Process(index, controls_[index].GetValue());
 }
 
-void Effect::ProcessControlMessage(int index, double value, double slope_per_frame) noexcept {
+void Effect::ProcessControlMessage(int index, double value) noexcept {
   if (set_control_callback_) {
-    set_control_callback_(&state_, index, value, slope_per_frame);
+    set_control_callback_(&state_, index, value);
   }
 }
 

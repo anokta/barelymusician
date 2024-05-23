@@ -59,7 +59,7 @@ void SynthInstrument::Process(double* output_samples, int output_channel_count,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SynthInstrument::SetControl(int id, double value, double /*slope_per_frame*/) noexcept {
+void SynthInstrument::SetControl(int id, double value) noexcept {
   switch (static_cast<Control>(id)) {
     case Control::kGain:
       gain_processor_.SetGain(value);

@@ -90,9 +90,8 @@ namespace Barely {
       /// @param state Pointer to effect state.
       /// @param id Control identifier.
       /// @param value Control value.
-      /// @param slopePerFrame Control slope in value change per frame.
       public delegate void EffectDefinition_SetControlCallback(ref IntPtr state, Int32 id,
-                                                               double value, double slopePerFrame);
+                                                               double value);
 
       /// Effect definition set data callback signature.
       ///
@@ -127,10 +126,8 @@ namespace Barely {
       /// @param state Pointer to instrument state.
       /// @param id Control identifier.
       /// @param value Control value.
-      /// @param slopePerFrame Control slope in value change per frame.
       public delegate void InstrumentDefinition_SetControlCallback(ref IntPtr state, Int32 id,
-                                                                   double value,
-                                                                   double slopePerFrame);
+                                                                   double value);
 
       /// Instrument definition set data callback signature.
       ///
@@ -146,11 +143,9 @@ namespace Barely {
       /// @param pitch Note pitch.
       /// @param id Note control identifier.
       /// @param value Note control value.
-      /// @param slopePerFrame Note control slope in value change per frame.
       public delegate void InstrumentDefinition_SetNoteControlCallback(ref IntPtr state,
                                                                        double pitch, Int32 id,
-                                                                       double value,
-                                                                       double slopePerFrame);
+                                                                       double value);
 
       /// Instrument definition set note off callback signature.
       ///
@@ -410,13 +405,9 @@ namespace Barely {
       /// @param effectHandle Effect handle.
       /// @param id Control identifier.
       /// @param value Control value.
-      /// @param slopePerBeat Control slope in value change per beat.
-      public static void Effect_SetControl(IntPtr effectHandle, int id, double value,
-                                           double slopePerBeat) {
-        if (!BarelyEffect_SetControl(effectHandle, id, value, slopePerBeat) &&
-            effectHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set effect control " + id + " value to " + value +
-                         " with slope " + slopePerBeat);
+      public static void Effect_SetControl(IntPtr effectHandle, int id, double value) {
+        if (!BarelyEffect_SetControl(effectHandle, id, value) && effectHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set effect control " + id + " value to " + value);
         }
       }
 
@@ -639,13 +630,10 @@ namespace Barely {
       /// @param instrumentHandle Instrument handle.
       /// @param id Control identifier.
       /// @param value Control value.
-      /// @param slopePerBeat Control slope in value change per beat.
-      public static void Instrument_SetControl(IntPtr instrumentHandle, int id, double value,
-                                               double slopePerBeat) {
-        if (!BarelyInstrument_SetControl(instrumentHandle, id, value, slopePerBeat) &&
+      public static void Instrument_SetControl(IntPtr instrumentHandle, int id, double value) {
+        if (!BarelyInstrument_SetControl(instrumentHandle, id, value) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument control " + id + " value to " + value +
-                         " with slope " + slopePerBeat);
+          Debug.LogError("Failed to set instrument control " + id + " value to " + value);
         }
       }
 
@@ -667,13 +655,12 @@ namespace Barely {
       /// @param pitch Note pitch.
       /// @param id Note control identifier.
       /// @param value Note control value.
-      /// @param slopePerBeat Note control slope in value change per beat.
       public static void Instrument_SetNoteControl(IntPtr instrumentHandle, double pitch, int id,
-                                                   double value, double slopePerBeat) {
-        if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, id, value, slopePerBeat) &&
+                                                   double value) {
+        if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, id, value) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument note pitch " + pitch + " control " + id +
-                         " value to " + value + " with slope " + slopePerBeat);
+                         " value to " + value);
         }
       }
 
@@ -1597,8 +1584,7 @@ namespace Barely {
       private static extern bool BarelyEffect_ResetControl(IntPtr effect, Int32 id);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControl")]
-      private static extern bool BarelyEffect_SetControl(IntPtr effect, Int32 id, double value,
-                                                         double slopePerBeat);
+      private static extern bool BarelyEffect_SetControl(IntPtr effect, Int32 id, double value);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControlEvent")]
       private static extern bool BarelyEffect_SetControlEvent(IntPtr effect,
@@ -1656,7 +1642,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControl")]
       private static extern bool BarelyInstrument_SetControl(IntPtr instrument, Int32 id,
-                                                             double value, double slopePerBeat);
+                                                             double value);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControlEvent")]
       private static extern bool BarelyInstrument_SetControlEvent(IntPtr instrument,
@@ -1669,8 +1655,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
-                                                                 Int32 id, double value,
-                                                                 double slopePerBeat);
+                                                                 Int32 id, double value);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControlEvent")]
       private static extern bool BarelyInstrument_SetNoteControlEvent(

@@ -6,35 +6,33 @@ namespace Barely {
     /// Type.
     public OscillatorType Type {
       get { return (OscillatorType)GetControl(0); }
-      set { SetControl(0, (double)value, 0.0); }
+      set { SetControl(0, (double)value); }
     }
 
     /// Frequency.
     public double Frequency {
       get { return GetControl(1); }
-      set { SetControl(1, value, 0.0); }
+      set { SetControl(1, value); }
     }
 
     /// Intensity.
     public double Intensity {
       get { return GetControl(2); }
-      set { SetControl(2, value, 0.0); }
+      set { SetControl(2, value); }
     }
 
-    /// Sets the oscillator frequency with a slope.
+    /// Sets the oscillator frequency.
     ///
     /// @param frequency Oscillator frequency.
-    /// @param slopePerBeat Slope in value change per beat.
-    public void SetFrequency(double frequency, double slopePerBeat) {
-      SetControl(0, frequency, slopePerBeat);
+    public void SetFrequency(double frequency) {
+      SetControl(0, frequency);
     }
 
-    /// Sets the intensity with a slope.
+    /// Sets the intensity.
     ///
     /// @param intensity Intensity.
-    /// @param slopePerBeat Slope in value change per beat.
-    public void SetIntensity(double intensity, double slopePerBeat) {
-      SetControl(0, intensity, slopePerBeat);
+    public void SetIntensity(double intensity) {
+      SetControl(0, intensity);
     }
   }
 }  // namespace Barely

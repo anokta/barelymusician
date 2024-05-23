@@ -25,10 +25,9 @@ class Instrument {
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @param initial_tempo Initial tempo in beats per minute.
   /// @param initial_timestamp Initial timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
+  Instrument(const InstrumentDefinition& definition, int frame_rate,
              double initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
@@ -129,9 +128,8 @@ class Instrument {
   ///
   /// @param id Control identifier.
   /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetControl(int id, double value, double slope_per_beat) noexcept;
+  bool SetControl(int id, double value) noexcept;
 
   /// Sets the control event callback.
   ///
@@ -149,9 +147,8 @@ class Instrument {
   /// @param effect Effect.
   /// @param id Effect control identifier.
   /// @param value Effect control value.
-  /// @param slope_per_beat Effect control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetEffectControl(Effect& effect, int id, double value, double slope_per_beat) noexcept;
+  bool SetEffectControl(Effect& effect, int id, double value) noexcept;
 
   /// Sets effect data.
   ///
@@ -172,9 +169,8 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @param value Note control value.
-  /// @param slope_per_beat Note control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetNoteControl(double pitch, int id, double value, double slope_per_beat) noexcept;
+  bool SetNoteControl(double pitch, int id, double value) noexcept;
 
   /// Sets the note control event.
   ///
@@ -206,16 +202,10 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
 
-  /// Sets the tempo.
-  ///
-  /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept;
-
   /// Updates the instrument.
   ///
   /// @param timestamp Timestamp in seconds.
-  /// @param duration Duration in beats.
-  void Update(double timestamp, double duration) noexcept;
+  void Update(double timestamp) noexcept;
 
  private:
   // Note control event alias.
@@ -226,9 +216,6 @@ class Instrument {
 
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
-
-  // Returns the corresponding slope per frame for a given `slope_per_beat`.
-  [[nodiscard]] double GetSlopePerFrame(double slope_per_beat) const noexcept;
 
   // Updates effect references.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -281,9 +268,6 @@ class Instrument {
 
   // Note on event.
   NoteOnEvent note_on_event_;
-
-  // Tempo in beats per minute.
-  double tempo_ = 120.0;
 
   // Update frame.
   int64_t update_frame_ = 0;

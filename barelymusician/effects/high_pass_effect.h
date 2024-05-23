@@ -49,15 +49,15 @@ class HighPassEffect : public CustomEffect {
   /// Implements `CustomEffect`.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
-  void SetControl(int id, double value, double slope_per_frame) noexcept final;
+  void SetControl(int id, double value) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
 
  private:
   // Maximum number of output channels alhighed.
   static constexpr int kMaxChannelCount = 8;
 
-  // Cutoff frequency-slope pair.
-  std::pair<double, double> cutoff_frequency_ = {0.0, 0.0};
+  // Cutoff frequency.
+  double cutoff_frequency_ = 0.0;
 
   // Array of high-pass filter.
   std::array<OnePoleFilter, kMaxChannelCount> filters_;

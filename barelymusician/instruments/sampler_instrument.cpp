@@ -34,7 +34,7 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
           // Decay.
           ControlDefinition{Control::kDecay, 0.0, 0.0, 60.0},
           // Sustain.
-          ControlDefinition{Control::kSustain, 0.0, 0.0, 1.0},
+          ControlDefinition{Control::kSustain, 1.0, 0.0, 1.0},
           // Release.
           ControlDefinition{Control::kRelease, 0.25, 0.0, 60.0},
           // Number of voices.
@@ -59,7 +59,7 @@ void SamplerInstrument::Process(double* output_samples, int output_channel_count
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SamplerInstrument::SetControl(int id, double value, double /*slope*/) noexcept {
+void SamplerInstrument::SetControl(int id, double value) noexcept {
   switch (static_cast<Control>(id)) {
     case Control::kGain:
       gain_processor_.SetGain(value);

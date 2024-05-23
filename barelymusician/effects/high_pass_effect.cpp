@@ -38,25 +38,18 @@ void HighPassEffect::Process(double* output_samples, int output_channel_count,
       auto& sample = output_samples[output_channel_count * frame + channel];
       sample = filters_[channel].Next(sample);
     }
-    if (cutoff_frequency_.second != 0.0) {
-      cutoff_frequency_.first += cutoff_frequency_.second;
-      for (auto& filter : filters_) {
-        filter.SetCoefficient(GetFilterCoefficient(frame_rate_, cutoff_frequency_.first));
-      }
-    }
   }
 }
 
-void HighPassEffect::SetControl(int id, double value, double slope_per_frame) noexcept {
+void HighPassEffect::SetControl(int id, double value) noexcept {
   switch (static_cast<Control>(id)) {
     case Control::kCutoffFrequency:
-      if (value != cutoff_frequency_.first) {
-        cutoff_frequency_.first = value;
+      if (value != cutoff_frequency_) {
+        cutoff_frequency_ = value;
         for (auto& filter : filters_) {
           filter.SetCoefficient(GetFilterCoefficient(frame_rate_, value));
         }
       }
-      cutoff_frequency_.second = slope_per_frame;
       break;
     default:
       assert(false);

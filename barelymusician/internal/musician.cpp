@@ -50,15 +50,7 @@ void Musician::RemovePerformer(Performer& performer) noexcept {
   assert(success);
 }
 
-void Musician::SetTempo(double tempo) noexcept {
-  tempo = std::max(tempo, 0.0);
-  if (tempo != tempo_) {
-    tempo_ = tempo;
-    for (const auto& instrument : instruments_) {
-      instrument->SetTempo(tempo_);
-    }
-  }
-}
+void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::Update(double timestamp) noexcept {
@@ -86,7 +78,7 @@ void Musician::Update(double timestamp) noexcept {
         timestamp_ += GetSecondsFromBeats(update_duration.first);
         for (const auto& instrument : instruments_) {
           assert(instrument);
-          instrument->Update(timestamp_, update_duration.first);
+          instrument->Update(timestamp_);
         }
       }
 
@@ -100,7 +92,7 @@ void Musician::Update(double timestamp) noexcept {
       timestamp_ = timestamp;
       for (const auto& instrument : instruments_) {
         assert(instrument);
-        instrument->Update(timestamp_, /*duration=*/0.0);
+        instrument->Update(timestamp_);
       }
     }
   }

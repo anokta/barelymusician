@@ -111,13 +111,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0c0da27e6ca915e11af5df8028c0a6cf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_barely_1_1_custom_instrument_definition.html#a0c0da27e6ca915e11af5df8028c0a6cf">OnProcess</a> (double[] outputSamples, int outputChannelCount, int outputFrameCount)</td></tr>
 <tr class="memdesc:a0c0da27e6ca915e11af5df8028c0a6cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process callback.  <br /></td></tr>
 <tr class="separator:a0c0da27e6ca915e11af5df8028c0a6cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7445f44b51b2b25de41f33b57ef2cb0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_barely_1_1_custom_instrument_definition.html#aa7445f44b51b2b25de41f33b57ef2cb0">OnSetControl</a> (, double value, double slopePerFrame)</td></tr>
+<tr class="memitem:aa7445f44b51b2b25de41f33b57ef2cb0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_barely_1_1_custom_instrument_definition.html#aa7445f44b51b2b25de41f33b57ef2cb0">OnSetControl</a> (, double value)</td></tr>
 <tr class="memdesc:aa7445f44b51b2b25de41f33b57ef2cb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set control callback.  <br /></td></tr>
 <tr class="separator:aa7445f44b51b2b25de41f33b57ef2cb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7134a5692af182dbba766935e68f0790"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_barely_1_1_custom_instrument_definition.html#a7134a5692af182dbba766935e68f0790">OnSetData</a> (IntPtr data, int size)</td></tr>
 <tr class="memdesc:a7134a5692af182dbba766935e68f0790"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set data callback.  <br /></td></tr>
 <tr class="separator:a7134a5692af182dbba766935e68f0790"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa0d1c6c4294fc25c069b2b6a8bbe059"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_barely_1_1_custom_instrument_definition.html#aaa0d1c6c4294fc25c069b2b6a8bbe059">OnSetNoteControl</a> (double pitch, , double value, double slopePerFrame)</td></tr>
+<tr class="memitem:aaa0d1c6c4294fc25c069b2b6a8bbe059"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_barely_1_1_custom_instrument_definition.html#aaa0d1c6c4294fc25c069b2b6a8bbe059">OnSetNoteControl</a> (double pitch, , double value)</td></tr>
 <tr class="memdesc:aaa0d1c6c4294fc25c069b2b6a8bbe059"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set note control callback.  <br /></td></tr>
 <tr class="separator:aaa0d1c6c4294fc25c069b2b6a8bbe059"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5bfabe58f0dacacf99ccba94102bdc96"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_barely_1_1_custom_instrument_definition.html#a5bfabe58f0dacacf99ccba94102bdc96">OnSetNoteOff</a> (double pitch)</td></tr>
@@ -238,12 +238,6 @@ Public Member Functions</h2></td></tr>
           <td class="paramname"><em>value</em>, </td>
         </tr>
         <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>slopePerFrame</em>&#160;</td>
-        </tr>
-        <tr>
           <td></td>
           <td>)</td>
           <td></td><td></td>
@@ -256,7 +250,6 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">index</td><td>Control index. </td></tr>
     <tr><td class="paramname">value</td><td>Control value. </td></tr>
-    <tr><td class="paramname">slopePerFrame</td><td>Control slope in value change per frame. </td></tr>
   </table>
   </dd>
 </dl>
@@ -325,12 +318,6 @@ Public Member Functions</h2></td></tr>
           <td class="paramname"><em>value</em>, </td>
         </tr>
         <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>slopePerFrame</em>&#160;</td>
-        </tr>
-        <tr>
           <td></td>
           <td>)</td>
           <td></td><td></td>
@@ -344,7 +331,6 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">pitch</td><td>Note pitch. </td></tr>
     <tr><td class="paramname">index</td><td>Note control identifier. </td></tr>
     <tr><td class="paramname">value</td><td>Note control value. </td></tr>
-    <tr><td class="paramname">slopePerFrame</td><td>Note control slope in value change per frame. </td></tr>
   </table>
   </dd>
 </dl>

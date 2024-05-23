@@ -6,15 +6,14 @@ namespace Barely {
     /// Cutoff frequency.
     public double CutoffFrequency {
       get { return GetControl(0); }
-      set { SetControl(0, value, 0.0); }
+      set { SetControl(0, value); }
     }
 
-    /// Sets the cutoff frequency with a slope.
+    /// Sets the cutoff frequency.
     ///
     /// @param cutoffFrequency Cutoff frequency.
-    /// @param slopePerBeat Slope in value change per beat.
-    public void SetCutoffFrequency(double cutoffFrequency, double slopePerBeat) {
-      SetControl(0, cutoffFrequency, slopePerBeat);
+    public void SetCutoffFrequency(double cutoffFrequency) {
+      SetControl(0, cutoffFrequency);
     }
   }
 }  // namespace Barely

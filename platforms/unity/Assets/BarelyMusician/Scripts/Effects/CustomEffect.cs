@@ -24,8 +24,7 @@ namespace Barely {
     ///
     /// @param id Control identifier.
     /// @param value Control value.
-    /// @param slopePerFrame Control slope in value change per frame.
-    public void OnSetControl(int id, double value, double slopePerFrame);
+    public void OnSetControl(int id, double value);
 
     /// Set data callback.
     ///
@@ -89,9 +88,8 @@ namespace Barely {
 
     // Set control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.EffectDefinition_SetControlCallback))]
-    private static void OnSetControl(ref IntPtr state, Int32 id, double value,
-                                     double slopePerFrame) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value, slopePerFrame);
+    private static void OnSetControl(ref IntPtr state, Int32 id, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value);
     }
 
     // Set data callback.

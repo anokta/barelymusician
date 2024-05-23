@@ -24,8 +24,7 @@ namespace Barely {
     ///
     /// @param id Control identifier.
     /// @param value Control value.
-    /// @param slopePerFrame Control slope in value change per frame.
-    public void OnSetControl(int id, double value, double slopePerFrame);
+    public void OnSetControl(int id, double value);
 
     /// Set data callback.
     ///
@@ -38,8 +37,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param id Note control identifier.
     /// @param value Note control value.
-    /// @param slopePerFrame Note control slope in value change per frame.
-    public void OnSetNoteControl(double pitch, int id, double value, double slopePerFrame);
+    public void OnSetNoteControl(double pitch, int id, double value);
 
     /// Set note off callback.
     ///
@@ -120,9 +118,8 @@ namespace Barely {
 
     // Set control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetControlCallback))]
-    private static void OnSetControl(ref IntPtr state, Int32 id, double value,
-                                     double slopePerFrame) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value, slopePerFrame);
+    private static void OnSetControl(ref IntPtr state, Int32 id, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value);
     }
 
     // Set data callback.
@@ -133,10 +130,8 @@ namespace Barely {
 
     // Set note control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteControlCallback))]
-    private static void OnSetNoteControl(ref IntPtr state, double pitch, Int32 id, double value,
-                                         double slopePerFrame) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType)
-          .OnSetNoteControl(pitch, id, value, slopePerFrame);
+    private static void OnSetNoteControl(ref IntPtr state, double pitch, Int32 id, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteControl(pitch, id, value);
     }
 
     // Set note off callback.

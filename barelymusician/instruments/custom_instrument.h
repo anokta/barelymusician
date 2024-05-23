@@ -29,8 +29,7 @@ class CustomInstrument {
   ///
   /// @param id Control identifier.
   /// @param value Control value.
-  /// @param slope_per_frame Control slope in value change per frame.
-  virtual void SetControl(int id, double value, double slope_per_frame) noexcept = 0;
+  virtual void SetControl(int id, double value) noexcept = 0;
 
   /// Sets data.
   ///
@@ -43,9 +42,7 @@ class CustomInstrument {
   /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @param value Note control value.
-  /// @param slope_per_frame Note control slope in value change per frame.
-  virtual void SetNoteControl(double pitch, int id, double value,
-                              double slope_per_frame) noexcept = 0;
+  virtual void SetNoteControl(double pitch, int id, double value) noexcept = 0;
 
   /// Sets a note off.
   ///
@@ -91,17 +88,17 @@ class CustomInstrument {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->Process(output_samples, output_channel_count, output_frame_count);
         },
-        [](void** state, int32_t id, double value, double slope_per_frame) {
+        [](void** state, int32_t id, double value) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetControl(id, value, slope_per_frame);
+          instrument->SetControl(id, value);
         },
         [](void** state, const void* data, int32_t size) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetData(data, size);
         },
-        [](void** state, double pitch, int32_t id, double value, double slope_per_frame) {
+        [](void** state, double pitch, int32_t id, double value) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteControl(pitch, id, value, slope_per_frame);
+          instrument->SetNoteControl(pitch, id, value);
         },
         [](void** state, double pitch) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);

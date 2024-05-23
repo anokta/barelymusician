@@ -41,8 +41,7 @@ musician.SetTempo(/*tempo=*/124.0);
 auto instrument = musician.CreateInstrument<barely::SynthInstrument>(/*frame_rate=*/48000);
 
 // Set the instrument gain to 0.5.
-instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5,
-                      /*slope_per_beat=*/0.0);
+instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
 
 // Set the instrument A3 note pitch on with a 0.25 intensity.
 //
@@ -59,9 +58,8 @@ const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
 // Add a low-pass effect to the instrument.
 auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 
-// Set the effect cutoff frequency to increase by 100 hertz per beat.
-effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
-                  /*slope_per_beat=*/100.0);
+// Set the effect cutoff frequency to 1kHz.
+effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
 
 // Update the musician timestamp in seconds.
 //

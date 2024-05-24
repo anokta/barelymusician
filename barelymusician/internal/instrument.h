@@ -4,17 +4,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <optional>
-#include <set>
 #include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
-#include "barelymusician/internal/effect.h"
-#include "barelymusician/internal/event.h"
 #include "barelymusician/internal/message_queue.h"
-#include "barelymusician/internal/mutable.h"
 
 namespace barely::internal {
 
@@ -38,12 +33,6 @@ class Instrument {
   Instrument& operator=(const Instrument& other) noexcept = delete;
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
-
-  /// Adds an effect.
-  ///
-  /// @param effect Effect.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddEffect(Effect& effect) noexcept;
 
   /// Returns a control value.
   ///
@@ -80,19 +69,8 @@ class Instrument {
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
 
-  /// Removes an effect.
-  ///
-  /// @param effect Effect.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveEffect(Effect& effect) noexcept;
-
   /// Resets all control values.
   void ResetAllControls() noexcept;
-
-  /// Resets all effect control values.
-  ///
-  /// @param effect_id Effect.
-  void ResetAllEffectControls(Effect& effect) noexcept;
 
   /// Resets all note control values.
   ///
@@ -105,13 +83,6 @@ class Instrument {
   /// @param id Control identifier.
   /// @return True if successful, false otherwise.
   bool ResetControl(int id) noexcept;
-
-  /// Resets a note control value.
-  ///
-  /// @param effect Effect.
-  /// @param id Effect control identifier.
-  /// @return True if successful, false otherwise.
-  bool ResetEffectControl(Effect& effect, int id) noexcept;
 
   /// Resets a note control value.
   ///
@@ -141,28 +112,6 @@ class Instrument {
   ///
   /// @param data Data.
   void SetData(std::vector<std::byte> data) noexcept;
-
-  /// Sets an effect control value.
-  ///
-  /// @param effect Effect.
-  /// @param id Effect control identifier.
-  /// @param value Effect control value.
-  /// @return True if successful, false otherwise.
-  bool SetEffectControl(Effect& effect, int id, double value) noexcept;
-
-  /// Sets effect data.
-  ///
-  /// @param effect Effect.
-  /// @param data Effect data.
-  void SetEffectData(Effect& effect, std::vector<std::byte> data) noexcept;
-
-  /// Sets effect process order.
-  ///
-  /// @param effect Effect.
-  /// @param process_order Effect process order.
-  /// @return True if successful, false otherwise.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetEffectProcessOrder(Effect& effect, int process_order) noexcept;
 
   /// Sets a note control value.
   ///
@@ -217,10 +166,6 @@ class Instrument {
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
 
-  // Updates effect references.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void UpdateEffectReferences() noexcept;
-
   // Destroy callback.
   const InstrumentDefinition::DestroyCallback destroy_callback_;
 
@@ -251,9 +196,6 @@ class Instrument {
   // Map of controls by identifiers.
   std::unordered_map<int, Control> controls_;
 
-  // Ordered set of effects.
-  std::set<std::pair<int, Effect*>> effects_;
-
   // Map of current note controls by note pitches.
   std::unordered_map<double, std::unordered_map<int, Control>> note_controls_;
 
@@ -277,9 +219,6 @@ class Instrument {
 
   // Data.
   std::vector<std::byte> data_;
-
-  // List of pointers to effects.
-  Mutable<std::vector<Effect*>> effect_ptrs_;
 
   // Message queue.
   MessageQueue message_queue_;

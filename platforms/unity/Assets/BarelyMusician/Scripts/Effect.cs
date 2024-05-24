@@ -2,8 +2,8 @@ using System;
 using UnityEngine;
 
 namespace Barely {
-  /// A representation of an audio effect that can be attached to a musical instrument.
-  [RequireComponent(typeof(Instrument))]
+  /// A representation of an audio effect that can be attached to an audio source.
+  [RequireComponent(typeof(AudioSource))]
   public abstract class Effect : MonoBehaviour {
     /// Control event callback.
     ///
@@ -15,21 +15,6 @@ namespace Barely {
     [Serializable]
     public class ControlEvent : UnityEngine.Events.UnityEvent<int, float> {}
     public ControlEvent OnControlEvent;
-
-    /// Process order.
-    public int ProcessOrder {
-      get { return _processOrder; }
-      set {
-        if (_handle == IntPtr.Zero) {
-          _processOrder = value;
-          return;
-        }
-        Musician.Internal.Effect_SetProcessOrder(_handle, value);
-        _processOrder = Musician.Internal.Effect_GetProcessOrder(_handle);
-      }
-    }
-    [SerializeField]
-    private int _processOrder = 0;
 
     /// Returns a control value.
     ///
@@ -77,31 +62,18 @@ namespace Barely {
     }
 
     protected virtual void OnEnable() {
-      _instrument = GetComponent<Instrument>();
-      _instrument.OnInstrumentCreate += OnInstrumentCreate;
-      _instrument.OnInstrumentDestroy += OnInstrumentDestroy;
-      Musician.Internal.Effect_Create(_instrument, this, ref _handle);
+      Musician.Internal.Effect_Create(this, ref _handle);
     }
 
     protected virtual void OnDisable() {
       Musician.Internal.Effect_Destroy(ref _handle);
-      _instrument.OnInstrumentCreate -= OnInstrumentCreate;
-      _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
-      _instrument = null;
     }
 
-    private void OnInstrumentCreate() {
-      Musician.Internal.Effect_Create(_instrument, this, ref _handle);
-    }
-
-    private void OnInstrumentDestroy() {
-      Musician.Internal.Effect_Destroy(ref _handle);
+    private void OnAudioFilterRead(float[] data, int channels) {
+      Musician.Internal.Effect_Process(_handle, data, channels);
     }
 
     // Handle.
     private IntPtr _handle = IntPtr.Zero;
-
-    // Instrument.
-    private Instrument _instrument = null;
   }
 }  // namespace Barely

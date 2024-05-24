@@ -20,18 +20,17 @@ using ::barely::internal::Task;
 
 // Effect.
 struct BarelyEffect : public Effect {
-  // Constructs `BarelyEffect` with `definition`, `instrument`, and `process_order`.
-  BarelyEffect(const Observable<Instrument>& instrument, BarelyEffectDefinition definition,
-               int process_order) noexcept
-      : Effect(definition, instrument.GetFrameRate(), process_order),
-        instrument_(instrument.Observe()) {
-    instrument_->AddEffect(*this);
+  // Constructs `BarelyEffect` with `musician`, `definition`, and `frame_rate`.
+  BarelyEffect(const Observable<Musician>& musician, BarelyEffectDefinition definition,
+               int frame_rate) noexcept
+      : Effect(definition, frame_rate, musician.GetTimestamp()), musician_(musician.Observe()) {
+    musician_->AddEffect(*this);
   }
 
   // Destroys `BarelyEffect`.
   ~BarelyEffect() noexcept {
-    if (instrument_) {
-      instrument_->RemoveEffect(*this);
+    if (musician_) {
+      musician_->RemoveEffect(*this);
     }
   }
 
@@ -41,12 +40,9 @@ struct BarelyEffect : public Effect {
   BarelyEffect(BarelyEffect&& other) noexcept = delete;
   BarelyEffect& operator=(BarelyEffect&& other) noexcept = delete;
 
-  // Returns the instrument.
-  [[nodiscard]] Instrument* instrument() const noexcept { return instrument_.get(); }
-
  private:
-  // Internal instrument.
-  Observer<Instrument> instrument_;
+  // Internal musician.
+  Observer<Musician> musician_;
 };
 
 // Instrument.
@@ -149,11 +145,11 @@ struct BarelyTask : public Task {
   Observer<Performer> performer_;
 };
 
-bool BarelyEffect_Create(BarelyInstrumentHandle instrument, BarelyEffectDefinition definition,
-                         int32_t process_order, BarelyEffectHandle* out_effect) {
-  if (!instrument || !out_effect) return false;
+bool BarelyEffect_Create(BarelyMusicianHandle musician, BarelyEffectDefinition definition,
+                         int32_t frame_rate, BarelyEffectHandle* out_effect) {
+  if (!musician || !out_effect) return false;
 
-  *out_effect = new BarelyEffect(*instrument, definition, process_order);
+  *out_effect = new BarelyEffect(*musician, definition, frame_rate);
   return true;
 }
 
@@ -187,31 +183,31 @@ bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t id,
   return false;
 }
 
-bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect, int32_t* out_process_order) {
+bool BarelyEffect_Process(BarelyEffectHandle effect, double* output_samples,
+                          int32_t output_channel_count, int32_t output_frame_count,
+                          double timestamp) {
   if (!effect) return false;
-  if (!out_process_order) return false;
 
-  *out_process_order = effect->GetProcessOrder();
-  return true;
+  return effect->Process(output_samples, output_channel_count, output_frame_count, timestamp);
 }
 
 bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
-  if (!effect || !effect->instrument()) return false;
+  if (!effect) return false;
 
-  effect->instrument()->ResetAllEffectControls(*effect);
+  effect->ResetAllControls();
   return true;
 }
 
 bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t id) {
-  if (!effect || !effect->instrument()) return false;
+  if (!effect) return false;
 
-  return effect->instrument()->ResetEffectControl(*effect, id);
+  return effect->ResetControl(id);
 }
 
 bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value) {
-  if (!effect || !effect->instrument()) return false;
+  if (!effect) return false;
 
-  return effect->instrument()->SetEffectControl(*effect, id, value);
+  return effect->SetControl(id, value);
 }
 
 bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
@@ -223,17 +219,10 @@ bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
 }
 
 bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size) {
-  if (!effect || !effect->instrument()) return false;
+  if (!effect) return false;
 
-  effect->instrument()->SetEffectData(
-      *effect, {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
-  return true;
-}
-
-bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order) {
-  if (!effect || !effect->instrument()) return false;
-
-  effect->instrument()->SetEffectProcessOrder(*effect, process_order);
+  effect->SetData(
+      {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
   return true;
 }
 

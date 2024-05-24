@@ -4,13 +4,12 @@ VERS_1.0 {
     BarelyEffect_Destroy;
     BarelyEffect_GetControl;
     BarelyEffect_GetControlDefinition;
-    BarelyEffect_GetProcessOrder;
+    BarelyEffect_Process;
     BarelyEffect_ResetAllControls;
     BarelyEffect_ResetControl;
     BarelyEffect_SetControl;
     BarelyEffect_SetControlEvent;
     BarelyEffect_SetData;
-    BarelyEffect_SetProcessOrder;
     BarelyInstrument_Create;
     BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;

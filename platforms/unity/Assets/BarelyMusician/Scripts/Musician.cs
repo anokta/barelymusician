@@ -296,16 +296,10 @@ namespace Barely {
 
       /// Creates a new effect.
       ///
-      /// @param instrumentHandle Instrument handle.
       /// @param effect Effect.
       /// @param effectHandle Effect handle.
-      public static void Effect_Create(Instrument instrument, Effect effect,
-                                       ref IntPtr effectHandle) {
+      public static void Effect_Create(Effect effect, ref IntPtr effectHandle) {
         if (Handle == IntPtr.Zero || effectHandle != IntPtr.Zero) {
-          return;
-        }
-        IntPtr instrumentHandle = Instrument.Internal.GetHandle(instrument);
-        if (instrumentHandle == IntPtr.Zero) {
           return;
         }
         EffectDefinition definition;
@@ -326,7 +320,7 @@ namespace Barely {
             Debug.LogError("Unsupported effect type: " + effect.GetType());
             return;
         }
-        bool success = BarelyEffect_Create(instrumentHandle, definition, effect.ProcessOrder,
+        bool success = BarelyEffect_Create(Handle, definition, AudioSettings.outputSampleRate,
                                            ref effectHandle);
         if (effect.GetType().IsSubclassOf(typeof(CustomEffectInterface))) {
           if (definition.controlDefinitionCount > 0) {
@@ -368,17 +362,23 @@ namespace Barely {
         return value;
       }
 
-      /// Returns the process order of an effect.
+      /// Processes effect output samples.
       ///
       /// @param effectHandle Effect handle.
-      /// @return Process order.
-      public static int Effect_GetProcessOrder(IntPtr effectHandle) {
-        Int32 processOrder = 0;
-        if (!BarelyEffect_GetProcessOrder(effectHandle, ref processOrder) &&
-            effectHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get effect process order");
+      /// @param outputSamples Output samples.
+      /// @param outputChannelCount Number of output channels.
+      public static void Effect_Process(IntPtr effectHandle, float[] outputSamples,
+                                        int outputChannelCount) {
+        if (Handle == IntPtr.Zero) {
+          return;
         }
-        return processOrder;
+        if (BarelyEffect_Process(effectHandle, OutputSamples, outputChannelCount,
+                                 outputSamples.Length / outputChannelCount,
+                                 AudioSettings.dspTime)) {
+          for (int i = 0; i < outputSamples.Length; ++i) {
+            outputSamples[i] *= (float)OutputSamples[i];
+          }
+        }
       }
 
       /// Resets all effect control values.
@@ -419,17 +419,6 @@ namespace Barely {
       public static void Effect_SetData(IntPtr effectHandle, IntPtr dataPtr, int size) {
         if (!BarelyEffect_SetData(effectHandle, dataPtr, size) && effectHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set effect data");
-        }
-      }
-
-      /// Sets the process order of an effect.
-      ///
-      /// @param effectHandle Effect handle.
-      /// @param processOrder Process order.
-      public static void Effect_SetProcessOrder(IntPtr effectHandle, int processOrder) {
-        if (!BarelyEffect_SetProcessOrder(effectHandle, processOrder) &&
-            effectHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set effect process order to" + processOrder + "");
         }
       }
 
@@ -1564,7 +1553,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_Create")]
       private static extern bool BarelyEffect_Create(IntPtr instrument, EffectDefinition definition,
-                                                     Int32 processOrder, ref IntPtr outEffect);
+                                                     Int32 frameRate, ref IntPtr outEffect);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_Destroy")]
       private static extern bool BarelyEffect_Destroy(IntPtr effect);
@@ -1573,9 +1562,11 @@ namespace Barely {
       private static extern bool BarelyEffect_GetControl(IntPtr effect, Int32 id,
                                                          ref double outValue);
 
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_GetProcessOrder")]
-      private static extern bool BarelyEffect_GetProcessOrder(IntPtr effect,
-                                                              ref Int32 outProcessOrder);
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_Process")]
+      private static extern bool BarelyEffect_Process(IntPtr effect,
+                                                      [In, Out] double[] outputSamples,
+                                                      Int32 outputChannelCount,
+                                                      Int32 outputFrameCount, double timestamp);
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_ResetAllControls")]
       private static extern bool BarelyEffect_ResetAllControls(IntPtr effect);
@@ -1593,9 +1584,6 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyEffect_SetData")]
       private static extern bool BarelyEffect_SetData(IntPtr effect, IntPtr data, Int32 size);
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetProcessOrder")]
-      private static extern bool BarelyEffect_SetProcessOrder(IntPtr effect, Int32 processOrder);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Create")]
       private static extern bool BarelyInstrument_Create(IntPtr musician,

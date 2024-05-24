@@ -17,7 +17,11 @@ add_library(
 target_link_libraries(
   barely_internal_effect
   barely_internal_control
+  barely_internal_message
+  barely_internal_message_queue
+  barely_internal_seconds
   barelymusician_headeronly
+  barely_find_or_null
 )
 
 add_library(
@@ -33,11 +37,8 @@ add_library(
 target_link_libraries(
   barely_internal_instrument
   barely_internal_control
-  barely_internal_effect
-  barely_internal_event
   barely_internal_message
   barely_internal_message_queue
-  barely_internal_mutable
   barely_internal_seconds
   barelymusician_headeronly
   barely_find_or_null
@@ -46,10 +47,6 @@ target_link_libraries(
 add_library(
   barely_internal_message INTERFACE
   message.h
-)
-target_link_libraries(
-  barely_internal_message INTERFACE
-  barely_internal_effect
 )
 
 add_library(
@@ -69,15 +66,10 @@ add_library(
 )
 target_link_libraries(
   barely_internal_musician
+  barely_internal_effect
   barely_internal_instrument
-  barely_internal_mutable
   barely_internal_performer
   barely_internal_seconds
-)
-
-add_library(
-  barely_internal_mutable INTERFACE
-  mutable.h
 )
 
 add_library(
@@ -180,18 +172,6 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_internal_musician_test)
-
-  add_executable(
-    barely_internal_mutable_test
-    mutable_test.cpp
-  )
-  target_link_libraries(
-    barely_internal_mutable_test
-    barely_internal_mutable
-    gmock
-    gtest_main
-  )
-  gtest_discover_tests(barely_internal_mutable_test)
 
   add_executable(
     barely_internal_observable_test

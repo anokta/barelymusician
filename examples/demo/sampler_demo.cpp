@@ -96,7 +96,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(SamplerInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SamplerInstrument::Control::kVoiceCount, kVoiceCount);
 
-  auto effect = instrument.CreateEffect<LowPassEffect>();
+  auto effect = musician.CreateEffect<LowPassEffect>(kFrameRate);
   effect.SetControl(LowPassEffect::Control::kCutoffFrequency, kLowPassCutoffFrequency);
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
@@ -110,6 +110,7 @@ int main(int /*argc*/, char* argv[]) {
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
+    effect.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
   });
 
   // Key down callback.

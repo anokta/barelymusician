@@ -3,8 +3,8 @@
 
 #include <unordered_set>
 
+#include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
-#include "barelymusician/internal/mutable.h"
 #include "barelymusician/internal/performer.h"
 
 namespace barely::internal {
@@ -12,6 +12,12 @@ namespace barely::internal {
 /// Class that wraps a musician.
 class Musician {
  public:
+  /// Adds an effect.
+  ///
+  /// @param effect Effect.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void AddEffect(Effect& effect) noexcept;
+
   /// Adds an instrument.
   ///
   /// @param instrument Instrument.
@@ -46,6 +52,12 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
 
+  /// Destroys effect.
+  ///
+  /// @param effect Effect.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void RemoveEffect(Effect& effect) noexcept;
+
   /// Destroys instrument.
   ///
   /// @param instrument Instrument.
@@ -68,6 +80,9 @@ class Musician {
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
+
+  // Set of pointers to effects.
+  std::unordered_set<Effect*> effects_;
 
   // Set of pointers to instruments.
   std::unordered_set<Instrument*> instruments_;

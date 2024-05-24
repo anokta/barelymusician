@@ -5,8 +5,6 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/internal/effect.h"
-
 namespace barely::internal {
 
 /// Control message.
@@ -20,27 +18,6 @@ struct ControlMessage {
 
 /// Data message.
 struct DataMessage {
-  /// Data.
-  std::vector<std::byte> data;
-};
-
-/// Effect control message.
-struct EffectControlMessage {
-  /// Effect.
-  Effect* effect;
-
-  /// Identifier.
-  int id;
-
-  /// Value.
-  double value;
-};
-
-/// Effect data message.
-struct EffectDataMessage {
-  /// Effect.
-  Effect* effect;
-
   /// Data.
   std::vector<std::byte> data;
 };
@@ -73,8 +50,8 @@ struct NoteOnMessage {
 };
 
 /// Message alias.
-using Message = std::variant<ControlMessage, DataMessage, EffectControlMessage, EffectDataMessage,
-                             NoteControlMessage, NoteOffMessage, NoteOnMessage>;
+using Message =
+    std::variant<ControlMessage, DataMessage, NoteControlMessage, NoteOffMessage, NoteOnMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

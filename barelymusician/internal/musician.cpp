@@ -6,11 +6,18 @@
 #include <optional>
 #include <utility>
 
+#include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/seconds.h"
 
 namespace barely::internal {
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Musician::AddEffect(Effect& effect) noexcept {
+  [[maybe_unused]] const bool success = effects_.insert(&effect).second;
+  assert(success);
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::AddInstrument(Instrument& instrument) noexcept {
@@ -37,6 +44,12 @@ double Musician::GetSecondsFromBeats(double beats) noexcept {
 double Musician::GetTempo() const noexcept { return tempo_; }
 
 double Musician::GetTimestamp() const noexcept { return timestamp_; }
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Musician::RemoveEffect(Effect& effect) noexcept {
+  [[maybe_unused]] const bool success = effects_.erase(&effect) > 0;
+  assert(success);
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::RemoveInstrument(Instrument& instrument) noexcept {
@@ -76,6 +89,10 @@ void Musician::Update(double timestamp) noexcept {
         }
 
         timestamp_ += GetSecondsFromBeats(update_duration.first);
+        for (const auto& effect : effects_) {
+          assert(effect);
+          effect->Update(timestamp_);
+        }
         for (const auto& instrument : instruments_) {
           assert(instrument);
           instrument->Update(timestamp_);
@@ -90,6 +107,10 @@ void Musician::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
+      for (const auto& effect : effects_) {
+        assert(effect);
+        effect->Update(timestamp_);
+      }
       for (const auto& instrument : instruments_) {
         assert(instrument);
         instrument->Update(timestamp_);

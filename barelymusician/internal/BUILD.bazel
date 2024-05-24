@@ -18,7 +18,11 @@ cc_library(
     hdrs = ["effect.h"],
     deps = [
         ":control",
+        ":message",
+        ":message_queue",
+        ":seconds",
         "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:find_or_null",
     ],
 )
 
@@ -33,11 +37,8 @@ cc_library(
     hdrs = ["instrument.h"],
     deps = [
         ":control",
-        ":effect",
-        ":event",
         ":message",
         ":message_queue",
-        ":mutable",
         ":seconds",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
@@ -47,9 +48,6 @@ cc_library(
 cc_library(
     name = "message",
     hdrs = ["message.h"],
-    deps = [
-        ":effect",
-    ],
 )
 
 cc_library(
@@ -66,16 +64,11 @@ cc_library(
     srcs = ["musician.cpp"],
     hdrs = ["musician.h"],
     deps = [
+        ":effect",
         ":instrument",
-        ":mutable",
         ":performer",
         ":seconds",
     ],
-)
-
-cc_library(
-    name = "mutable",
-    hdrs = ["mutable.h"],
 )
 
 cc_library(
@@ -169,15 +162,6 @@ cc_test(
         ":musician",
         ":performer",
         "//barelymusician:barelymusician_headeronly",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "mutable_test",
-    srcs = ["mutable_test.cpp"],
-    deps = [
-        ":mutable",
         "@googletest//:gtest_main",
     ],
 )

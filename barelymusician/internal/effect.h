@@ -7,6 +7,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
+#include "barelymusician/internal/message_queue.h"
 
 namespace barely::internal {
 
@@ -17,8 +18,8 @@ class Effect {
   ///
   /// @param definition Effect definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @param process_order Process order.
-  Effect(const EffectDefinition& definition, int frame_rate, int process_order) noexcept;
+  /// @param initial_timestamp Initial timestamp in seconds.
+  Effect(const EffectDefinition& definition, int frame_rate, double initial_timestamp) noexcept;
 
   /// Destroys `Effect`.
   ~Effect() noexcept;
@@ -29,45 +30,37 @@ class Effect {
   Effect(Effect&& other) noexcept = delete;
   Effect& operator=(Effect&& other) noexcept = delete;
 
-  /// Returns all controls.
-  ///
-  /// @return Array of controls.
-  [[nodiscard]] std::unordered_map<int, Control>& GetAllControls() noexcept;
-
   /// Returns a control value.
   ///
   /// @param id Control identifier.
   /// @return Pointer to control, or nullptr if not found.
   [[nodiscard]] Control* GetControl(int id) noexcept;
 
-  /// Returns the process order.
-  ///
-  /// @return Process order.
-  [[nodiscard]] int GetProcessOrder() const noexcept;
-
-  /// Processes the next output samples.
+  /// Processes output samples at timestamp.
   ///
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  void Process(double* output_samples, int output_channel_count, int output_frame_count) noexcept;
+  /// @param timestamp Timestamp in seconds.
+  /// @return True if successful, false otherwise.
+  bool Process(double* output_samples, int output_channel_count, int output_frame_count,
+               double timestamp) noexcept;
 
-  /// Processes a control event.
+  /// Resets all control values.
+  void ResetAllControls() noexcept;
+
+  /// Resets a control value.
   ///
   /// @param id Control identifier.
-  void ProcessControlEvent(int id) noexcept;
+  /// @return True if successful, false otherwise.
+  bool ResetControl(int id) noexcept;
 
-  /// Processes a control message.
+  /// Sets a control value.
   ///
   /// @param id Control identifier.
   /// @param value Control value.
   /// @return True if successful, false otherwise.
-  void ProcessControlMessage(int id, double value) noexcept;
-
-  /// Processes a data message.
-  ///
-  /// @param data Data.
-  void ProcessDataMessage(std::vector<std::byte>& data) noexcept;
+  bool SetControl(int id, double value) noexcept;
 
   /// Sets the control event callback.
   ///
@@ -75,11 +68,15 @@ class Effect {
   /// @param user_data Pointer to user data.
   void SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept;
 
-  /// Returns the process order.
+  /// Sets data.
   ///
-  /// @param process_order Process order.
-  /// @return True if successful, false otherwise.
-  bool SetProcessOrder(int process_order) noexcept;
+  /// @param data Data.
+  void SetData(std::vector<std::byte> data) noexcept;
+
+  /// Updates the instrument.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void Update(double timestamp) noexcept;
 
  private:
   // Destroy callback.
@@ -94,20 +91,26 @@ class Effect {
   // Set data callback.
   const EffectDefinition::SetDataCallback set_data_callback_;
 
+  // Frame rate in hertz.
+  const int frame_rate_;
+
   // Map of controls by identifiers.
   std::unordered_map<int, Control> controls_;
 
   // Control event.
   Control::Event control_event_;
 
-  // Process order.
-  int process_order_ = 0;
+  // Update frame.
+  int64_t update_frame_ = 0;
 
   // State.
   void* state_ = nullptr;
 
   // Data.
   std::vector<std::byte> data_;
+
+  // Message queue.
+  MessageQueue message_queue_;
 };
 
 }  // namespace barely::internal

@@ -4,35 +4,20 @@ namespace Barely {
   /// A representation of a simple amplitude low-frequency oscillator effect.
   public class LfoEffect : Effect {
     /// Type.
-    public OscillatorType Type {
-      get { return (OscillatorType)GetControl(0); }
-      set { SetControl(0, (double)value); }
-    }
+    public OscillatorType OscillatorType = OscillatorType.SINE;
 
     /// Frequency.
-    public double Frequency {
-      get { return GetControl(1); }
-      set { SetControl(1, value); }
-    }
+    [Range(0.0f, 32.0f)]
+    public double Frequency = 1.0;
 
     /// Intensity.
-    public double Intensity {
-      get { return GetControl(2); }
-      set { SetControl(2, value); }
-    }
+    [Range(0.0f, 1.0f)]
+    public double Intensity = 1.0;
 
-    /// Sets the oscillator frequency.
-    ///
-    /// @param frequency Oscillator frequency.
-    public void SetFrequency(double frequency) {
-      SetControl(0, frequency);
-    }
-
-    /// Sets the intensity.
-    ///
-    /// @param intensity Intensity.
-    public void SetIntensity(double intensity) {
-      SetControl(0, intensity);
+    private void Update() {
+      SetControl(0, (double)OscillatorType);
+      SetControl(1, Frequency);
+      SetControl(2, Intensity);
     }
   }
 }  // namespace Barely

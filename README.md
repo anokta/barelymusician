@@ -55,8 +55,8 @@ instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
 // Check if the instrument note pitch is on.
 const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
 
-// Add a low-pass effect to the instrument.
-auto effect = instrument.CreateEffect<barely::LowPassEffect>();
+// Create a low-pass effect.
+auto effect = musician.CreateEffect<barely::LowPassEffect>(kFrameRate);
 
 // Set the effect cutoff frequency to 1kHz.
 effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
@@ -81,6 +81,9 @@ const int channel_count = 2;
 const int frame_count = 1024;
 std::vector<double> output_samples(channel_count * frame_count, 0.0);
 instrument.Process(output_samples.data(), channel_count, frame_count, timestamp);
+
+// Process the instrument output with the effect.
+effect.Process(output_samples.data(), channel_count, frame_count, timestamp);
 
 // Create a performer.
 auto performer = musician.CreatePerformer();

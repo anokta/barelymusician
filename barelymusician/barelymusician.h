@@ -34,11 +34,7 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician/instruments/low_pass_effect.h"
 ///   #include "barelymusician/instruments/synth_instrument.h"
-///
-///   // Create.
-///   auto instrument = musician.CreateInstrument<barely::SynthInstrument>(/*frame_rate=*/48000);
 ///
 ///   // Set a note on.
 ///   //
@@ -70,6 +66,21 @@
 ///   double timestamp = 0.0;
 ///   instrument.Process(output_samples.data(), output_channel_count, output_frame_count,
 ///                      timestamp);
+///   @endcode
+///
+/// - Effect:
+///
+///   @code{.cpp}
+///   #include "barelymusician/instruments/low_pass_effect.h"
+///
+///   // Create.
+///   auto effect = musician.CreateEffect<barely::LowPassEffect>(/*frame_rate=*/48000);
+///
+///   // Set a control value.
+///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
+///
+///   // Process.
+///   effect.Process(output_samples.data(), output_channel_count, output_frame_count, timestamp);
 ///   @endcode
 ///
 /// - Performer:
@@ -125,7 +136,6 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician/effects/low_pass_effect.h"
 ///   #include "barelymusician/instruments/synth_instrument.h"
 ///
 ///   // Create.
@@ -147,14 +157,6 @@
 ///   // Set a control value.
 ///   BarelyInstrument_SetControl(instrument, /*id=*/0, /*value=*/0.5);
 ///
-///   // Create a low-pass effect.
-///   BarelyEffectHandle effect;
-///   BarelyEffect_Create(instrument, BarelyLowPassEffect_GetDefinition(), /*process_order=*/0,
-///                       &effect);
-///
-///   // Set the low-pass cutoff frequency to 1kHz.
-///   BarelyEffect_SetControl(effect, /*id=*/0, /*value=*/1000.0);
-///
 ///   // Process.
 ///   //
 ///   // Instruments expect raw PCM audio buffers to be processed with a synchronous call.
@@ -167,11 +169,29 @@
 ///   BarelyInstrument_Process(instrument, output_samples, output_channel_count, output_frame_count,
 ///                            timestamp);
 ///
-///   // Destroy the effect.
-///   BarelyEffect_Destroy(effect);
-///
 ///   // Destroy.
 ///   BarelyInstrument_Destroy(instrument);
+///   @endcode
+///
+/// - Effect:
+///
+///   @code{.cpp}
+///   #include "barelymusician/effects/low_pass_effect.h"
+///
+///   // Create.
+///   BarelyEffectHandle effect;
+///   BarelyEffect_Create(musician, BarelyLowPassEffect_GetDefinition(), /*frame_rate=*/48000,
+///                       &effect);
+///
+///   // Set a control value.
+///   BarelyEffect_SetControl(effect, /*id=*/0, /*value=*/1000.0);
+///
+///   // Process.
+///   BarelyEffect_Process(effect, output_samples, output_channel_count, output_frame_count,
+///                        timestamp);
+///
+///   // Destroy the effect.
+///   BarelyEffect_Destroy(effect);
 ///   @endcode
 ///
 /// - Performer:
@@ -579,13 +599,13 @@ typedef struct BarelyTask* BarelyTaskHandle;
 
 /// Creates a new effect.
 ///
-/// @param instrument Instrument handle.
+/// @param musician Musician handle.
 /// @param definition Effect definition.
-/// @param process_order Effect process order.
+/// @param frame_rate Frame rate in hertz.
 /// @param out_effect Output effect handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_Create(BarelyInstrumentHandle instrument,
-                                       BarelyEffectDefinition definition, int32_t process_order,
+BARELY_EXPORT bool BarelyEffect_Create(BarelyMusicianHandle musician,
+                                       BarelyEffectDefinition definition, int32_t frame_rate,
                                        BarelyEffectHandle* out_effect);
 
 /// Destroys an effect.
@@ -612,13 +632,18 @@ BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id
 BARELY_EXPORT bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t id,
                                                      BarelyControlDefinition* out_value);
 
-/// Gets the process order of an effect.
+/// Processes instrument output samples at timestamp.
+/// @note This function is *not* thread-safe during a corresponding `BarelyEffect_Destroy` call.
 ///
 /// @param effect Effect handle.
-/// @param out_process_order Output process order.
+/// @param output_samples Array of interleaved output samples.
+/// @param output_channel_count Number of output channels.
+/// @param output_frame_count Number of output frames.
+/// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect,
-                                                int32_t* out_process_order);
+BARELY_EXPORT bool BarelyEffect_Process(BarelyEffectHandle instrument, double* output_samples,
+                                        int32_t output_channel_count, int32_t output_frame_count,
+                                        double timestamp);
 
 /// Resets all effect control values.
 ///
@@ -658,13 +683,6 @@ BARELY_EXPORT bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
 /// @param size Data size in bytes.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size);
-
-/// Sets the process order of an effect.
-///
-/// @param effect Effect handle.
-/// @param process_order Process order.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order);
 
 /// Creates a new instrument.
 ///
@@ -1690,14 +1708,17 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
     return definition;
   }
 
-  /// Returns the process order.
+  /// Processes output samples at timestamp.
   ///
-  /// @return Process order.
-  [[nodiscard]] int GetProcessOrder() const noexcept {
-    int32_t process_order = 0;
-    [[maybe_unused]] const bool success = BarelyEffect_GetProcessOrder(Get(), &process_order);
+  /// @param output_samples Interleaved array of output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
+  /// @param timestamp Timestamp in seconds.
+  void Process(double* output_samples, int output_channel_count, int output_frame_count,
+               double timestamp) noexcept {
+    [[maybe_unused]] const bool success = BarelyEffect_Process(
+        Get(), output_samples, output_channel_count, output_frame_count, timestamp);
     assert(success);
-    return static_cast<int>(process_order);
   }
 
   /// Resets all control values.
@@ -1774,14 +1795,6 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
     [[maybe_unused]] const bool success = BarelyEffect_SetData(Get(), data, size);
     assert(success);
   }
-
-  /// Sets the process order.
-  ///
-  /// @param process_order Process order.
-  void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const bool success = BarelyEffect_SetProcessOrder(Get(), process_order);
-    assert(success);
-  }
 };
 
 /// Class that wraps an instrument.
@@ -1818,27 +1831,6 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
       Wrapper::operator=(std::move(other));
     }
     return *this;
-  }
-
-  /// Creates a new effect of type.
-  ///
-  /// @return Effect.
-  template <class EffectType>
-  [[nodiscard]] Effect CreateEffect() noexcept {
-    return CreateEffect(EffectType::GetDefinition());
-  }
-
-  /// Creates a new effect.
-  ///
-  /// @param definition Effect definition.
-  /// @param process_order Effect process order.
-  /// @return Effect.
-  [[nodiscard]] Effect CreateEffect(EffectDefinition definition, int process_order = 0) noexcept {
-    BarelyEffectHandle effect;
-    [[maybe_unused]] const bool success =
-        BarelyEffect_Create(Get(), definition, process_order, &effect);
-    assert(success);
-    return Effect(effect);
   }
 
   /// Returns a control value.
@@ -2424,6 +2416,28 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   template <class ComponentType, typename... ComponentArgs>
   [[nodiscard]] ComponentType CreateComponent(ComponentArgs&&... args) noexcept {
     return ComponentType(*this, args...);
+  }
+
+  /// Creates a new effect of type.
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  /// @return Effect.
+  template <class EffectType>
+  [[nodiscard]] Effect CreateEffect(int frame_rate) noexcept {
+    return CreateEffect(EffectType::GetDefinition(), frame_rate);
+  }
+
+  /// Creates a new effect.
+  ///
+  /// @param definition Effect definition.
+  /// @param frame_rate Frame rate in hertz.
+  /// @return Effect.
+  [[nodiscard]] Effect CreateEffect(EffectDefinition definition, int frame_rate) noexcept {
+    BarelyEffectHandle effect;
+    [[maybe_unused]] const bool success =
+        BarelyEffect_Create(Get(), definition, frame_rate, &effect);
+    assert(success);
+    return Effect(effect);
   }
 
   /// Creates a new instrument of type.

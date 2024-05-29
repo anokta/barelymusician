@@ -97,7 +97,6 @@ bool Effect::Process(double* output_samples, int output_channel_count, int outpu
 void Effect::ResetAllControls() noexcept {
   for (auto& [id, control] : controls_) {
     if (control.Reset()) {
-      control_event_.Process(id, control.GetValue());
       message_queue_.Add(update_frame_, ControlMessage{id, control.GetValue()});
     }
   }
@@ -106,7 +105,6 @@ void Effect::ResetAllControls() noexcept {
 bool Effect::ResetControl(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Reset()) {
-      control_event_.Process(index, control.GetValue());
       message_queue_.Add(update_frame_, ControlMessage{index, control.GetValue()});
     }
     return true;
@@ -117,16 +115,11 @@ bool Effect::ResetControl(int index) noexcept {
 bool Effect::SetControl(int index, double value) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Set(value)) {
-      control_event_.Process(index, control.GetValue());
       message_queue_.Add(update_frame_, ControlMessage{index, control.GetValue()});
     }
     return true;
   }
   return false;
-}
-
-void Effect::SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept {
-  control_event_ = {definition, user_data};
 }
 
 void Effect::SetData(std::vector<std::byte> data) noexcept {

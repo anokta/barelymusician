@@ -210,14 +210,6 @@ bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value
   return effect->SetControl(id, value);
 }
 
-bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
-                                  BarelyControlEventDefinition definition, void* user_data) {
-  if (!effect) return false;
-
-  effect->SetControlEvent(definition, user_data);
-  return true;
-}
-
 bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size) {
   if (!effect) return false;
 
@@ -347,14 +339,6 @@ bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t id, 
   return instrument->SetControl(id, value);
 }
 
-bool BarelyInstrument_SetControlEvent(BarelyInstrumentHandle instrument,
-                                      BarelyControlEventDefinition definition, void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetControlEvent(definition, user_data);
-  return true;
-}
-
 bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* data, int32_t size) {
   if (!instrument) return false;
   if (size < 0 || (!data && size > 0)) return false;
@@ -369,15 +353,6 @@ bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double p
   if (!instrument) return false;
 
   return instrument->SetNoteControl(pitch, id, value);
-}
-
-bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle instrument,
-                                          BarelyNoteControlEventDefinition definition,
-                                          void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetNoteControlEvent(definition, user_data);
-  return true;
 }
 
 bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch) {

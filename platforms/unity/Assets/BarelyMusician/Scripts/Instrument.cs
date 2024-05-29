@@ -8,29 +8,6 @@ namespace Barely {
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
 
-    /// Control event callback.
-    ///
-    /// @param id Control identifier.
-    /// @param control Control value.
-    public delegate void ControlEventCallback(int id, double value);
-    public event ControlEventCallback OnControl;
-
-    [Serializable]
-    public class ControlEvent : UnityEngine.Events.UnityEvent<int, float> {}
-    public ControlEvent OnControlEvent;
-
-    /// Note control event callback.
-    ///
-    /// @param pitch Note pitch.
-    /// @param id Note control identifier.
-    /// @param control Note control value.
-    public delegate void NoteControlEventCallback(double pitch, int id, double value);
-    public event NoteControlEventCallback OnNoteControl;
-
-    [Serializable]
-    public class NoteControlEvent : UnityEngine.Events.UnityEvent<float, int, float> {}
-    public NoteControlEvent OnNoteControlEvent;
-
     /// Note off event callback.
     ///
     /// @param pitch Note pitch.
@@ -160,19 +137,6 @@ namespace Barely {
       /// Returns the handle.
       public static IntPtr GetHandle(Instrument instrument) {
         return instrument ? instrument._handle : IntPtr.Zero;
-      }
-
-      /// Internal control event callback.
-      public static void OnControlEvent(Instrument instrument, int id, double value) {
-        instrument.OnControl?.Invoke(id, value);
-        instrument.OnControlEvent?.Invoke(id, (float)value);
-      }
-
-      /// Internal note control event callback.
-      public static void OnNoteControlEvent(Instrument instrument, double pitch, int id,
-                                            double value) {
-        instrument.OnNoteControl?.Invoke(pitch, id, value);
-        instrument.OnNoteControlEvent?.Invoke((float)pitch, id, (float)value);
       }
 
       /// Internal note off event callback.

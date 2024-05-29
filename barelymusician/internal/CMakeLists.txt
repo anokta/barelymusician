@@ -5,7 +5,6 @@ add_library(
 )
 target_link_libraries(
   barely_internal_control
-  barely_internal_event
   barelymusician_headeronly
 )
 
@@ -37,6 +36,7 @@ add_library(
 target_link_libraries(
   barely_internal_instrument
   barely_internal_control
+  barely_internal_event
   barely_internal_message
   barely_internal_message_queue
   barely_internal_seconds

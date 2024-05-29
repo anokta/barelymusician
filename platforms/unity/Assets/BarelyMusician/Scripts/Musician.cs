@@ -331,9 +331,6 @@ namespace Barely {
           Debug.LogError("Failed to create effect '" + effect.name + "'");
           return;
         }
-        GCHandle controlEventHandle = GCHandle.Alloc(effect);
-        BarelyEffect_SetControlEvent(effectHandle, _effectControlEventDefinition,
-                                     GCHandle.ToIntPtr(controlEventHandle));
       }
 
       /// Destroys an effect.
@@ -369,7 +366,7 @@ namespace Barely {
       /// @param outputChannelCount Number of output channels.
       public static void Effect_Process(IntPtr effectHandle, float[] outputSamples,
                                         int outputChannelCount) {
-        if (Handle == IntPtr.Zero) {
+        if (_handle == IntPtr.Zero) {
           return;
         }
         if (BarelyEffect_Process(effectHandle, OutputSamples, outputChannelCount,
@@ -462,12 +459,6 @@ namespace Barely {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
         }
-        GCHandle controlEventHandle = GCHandle.Alloc(instrument);
-        BarelyInstrument_SetControlEvent(instrumentHandle, _instrumentControlEventDefinition,
-                                         GCHandle.ToIntPtr(controlEventHandle));
-        GCHandle noteControlEventHandle = GCHandle.Alloc(instrument);
-        BarelyInstrument_SetNoteControlEvent(instrumentHandle, _noteControlEventDefinition,
-                                             GCHandle.ToIntPtr(noteControlEventHandle));
         GCHandle noteOffEventHandle = GCHandle.Alloc(instrument);
         BarelyInstrument_SetNoteOffEvent(instrumentHandle, _noteOffEventDefinition,
                                          GCHandle.ToIntPtr(noteOffEventHandle));
@@ -541,7 +532,7 @@ namespace Barely {
       /// @param outputChannelCount Number of output channels.
       public static void Instrument_Process(IntPtr instrumentHandle, float[] outputSamples,
                                             int outputChannelCount) {
-        if (Handle == IntPtr.Zero) {
+        if (_handle == IntPtr.Zero) {
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;
           }
@@ -1206,89 +1197,6 @@ namespace Barely {
       // Internal output samples.
       public static double[] OutputSamples { get; private set; } = null;
 
-      // Control event definition create callback.
-      private delegate void ControlEventDefinition_CreateCallback(ref IntPtr state,
-                                                                  IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_CreateCallback))]
-      private static void ControlEventDefinition_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = userData;
-      }
-
-      // Control event definition destroy callback.
-      private delegate void ControlEventDefinition_DestroyCallback(ref IntPtr state);
-      [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_DestroyCallback))]
-      private static void ControlEventDefinition_OnDestroy(ref IntPtr state) {
-        GCHandle.FromIntPtr(state).Free();
-      }
-
-      // Control event definition process callback.
-      private delegate void ControlEventDefinition_ProcessCallback(ref IntPtr state, int id,
-                                                                   double value);
-      [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
-      private static void EffectControlEventDefinition_OnProcess(ref IntPtr state, int id,
-                                                                 double value) {
-        Effect effect = GCHandle.FromIntPtr(state).Target as Effect;
-        Effect.Internal.OnControlEvent(effect, id, value);
-      }
-      [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
-      private static void InstrumentControlEventDefinition_OnProcess(ref IntPtr state, int id,
-                                                                     double value) {
-        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
-        Instrument.Internal.OnControlEvent(instrument, id, value);
-      }
-
-      // Control event definition.
-      [StructLayout(LayoutKind.Sequential)]
-      private struct ControlEventDefinition {
-        // Create callback.
-        public ControlEventDefinition_CreateCallback createCallback;
-
-        // Destroy callback.
-        public ControlEventDefinition_DestroyCallback destroyCallback;
-
-        // Process callback.
-        public ControlEventDefinition_ProcessCallback processCallback;
-      }
-
-      // Note control event definition create callback.
-      private delegate void NoteControlEventDefinition_CreateCallback(ref IntPtr state,
-                                                                      IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(NoteControlEventDefinition_CreateCallback))]
-      private static void NoteControlEventDefinition_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = userData;
-      }
-
-      // Note control event definition destroy callback.
-      private delegate void NoteControlEventDefinition_DestroyCallback(ref IntPtr state);
-      [AOT.MonoPInvokeCallback(typeof(NoteControlEventDefinition_DestroyCallback))]
-      private static void NoteControlEventDefinition_OnDestroy(ref IntPtr state) {
-        GCHandle.FromIntPtr(state).Free();
-      }
-
-      // Note control event definition process callback.
-      private delegate void NoteControlEventDefinition_ProcessCallback(ref IntPtr state,
-                                                                       double pitch, int id,
-                                                                       double value);
-      [AOT.MonoPInvokeCallback(typeof(NoteControlEventDefinition_ProcessCallback))]
-      private static void NoteControlEventDefinition_OnProcess(ref IntPtr state, double pitch,
-                                                               int id, double value) {
-        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
-        Instrument.Internal.OnNoteControlEvent(instrument, pitch, id, value);
-      }
-
-      // Note control event definition.
-      [StructLayout(LayoutKind.Sequential)]
-      private struct NoteControlEventDefinition {
-        // Create callback.
-        public NoteControlEventDefinition_CreateCallback createCallback;
-
-        // Destroy callback.
-        public NoteControlEventDefinition_DestroyCallback destroyCallback;
-
-        // Process callback.
-        public NoteControlEventDefinition_ProcessCallback processCallback;
-      }
-
       // Note off event definition create callback.
       private delegate void NoteOffEventDefinition_CreateCallback(ref IntPtr state,
                                                                   IntPtr userData);
@@ -1415,30 +1323,6 @@ namespace Barely {
         }
       }
       private static IntPtr _handle = IntPtr.Zero;
-
-      // Effect control event definition.
-      private static ControlEventDefinition _effectControlEventDefinition =
-          new ControlEventDefinition() {
-            createCallback = ControlEventDefinition_OnCreate,
-            destroyCallback = ControlEventDefinition_OnDestroy,
-            processCallback = EffectControlEventDefinition_OnProcess,
-          };
-
-      // Instrument control event definition.
-      private static ControlEventDefinition _instrumentControlEventDefinition =
-          new ControlEventDefinition() {
-            createCallback = ControlEventDefinition_OnCreate,
-            destroyCallback = ControlEventDefinition_OnDestroy,
-            processCallback = InstrumentControlEventDefinition_OnProcess,
-          };
-
-      // Note control event definition.
-      private static NoteControlEventDefinition _noteControlEventDefinition =
-          new NoteControlEventDefinition() {
-            createCallback = NoteControlEventDefinition_OnCreate,
-            destroyCallback = NoteControlEventDefinition_OnDestroy,
-            processCallback = NoteControlEventDefinition_OnProcess,
-          };
 
       // Note off event definition.
       private static NoteOffEventDefinition _noteOffEventDefinition = new NoteOffEventDefinition() {
@@ -1577,11 +1461,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControl")]
       private static extern bool BarelyEffect_SetControl(IntPtr effect, Int32 id, double value);
 
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControlEvent")]
-      private static extern bool BarelyEffect_SetControlEvent(IntPtr effect,
-                                                              ControlEventDefinition definition,
-                                                              IntPtr userData);
-
       [DllImport(pluginName, EntryPoint = "BarelyEffect_SetData")]
       private static extern bool BarelyEffect_SetData(IntPtr effect, IntPtr data, Int32 size);
 
@@ -1632,11 +1511,6 @@ namespace Barely {
       private static extern bool BarelyInstrument_SetControl(IntPtr instrument, Int32 id,
                                                              double value);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControlEvent")]
-      private static extern bool BarelyInstrument_SetControlEvent(IntPtr instrument,
-                                                                  ControlEventDefinition definition,
-                                                                  IntPtr userData);
-
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
       private static extern bool BarelyInstrument_SetData(IntPtr instrument, IntPtr data,
                                                           Int32 size);
@@ -1644,10 +1518,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
                                                                  Int32 id, double value);
-
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControlEvent")]
-      private static extern bool BarelyInstrument_SetNoteControlEvent(
-          IntPtr instrument, NoteControlEventDefinition definition, IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, double pitch);

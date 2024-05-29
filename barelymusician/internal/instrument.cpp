@@ -137,7 +137,6 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
 void Instrument::ResetAllControls() noexcept {
   for (auto& [id, control] : controls_) {
     if (control.Reset()) {
-      control_event_.Process(id, control.GetValue());
       message_queue_.Add(update_frame_, ControlMessage{id, control.GetValue()});
     }
   }
@@ -147,7 +146,6 @@ bool Instrument::ResetAllNoteControls(double pitch) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     for (auto& [id, note_control] : *note_controls) {
       if (note_control.Reset()) {
-        note_control_event_.Process(pitch, id, note_control.GetValue());
         message_queue_.Add(update_frame_, NoteControlMessage{pitch, id, note_control.GetValue()});
       }
     }
@@ -159,7 +157,6 @@ bool Instrument::ResetAllNoteControls(double pitch) noexcept {
 bool Instrument::ResetControl(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Reset()) {
-      control_event_.Process(index, control.GetValue());
       message_queue_.Add(update_frame_, ControlMessage{index, control.GetValue()});
     }
     return true;
@@ -171,7 +168,6 @@ bool Instrument::ResetNoteControl(double pitch, int index) noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
       if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
-        note_control_event_.Process(pitch, index, note_control.GetValue());
         message_queue_.Add(update_frame_,
                            NoteControlMessage{pitch, index, note_control.GetValue()});
       }
@@ -192,16 +188,11 @@ void Instrument::SetAllNotesOff() noexcept {
 bool Instrument::SetControl(int index, double value) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Set(value)) {
-      control_event_.Process(index, control.GetValue());
       message_queue_.Add(update_frame_, ControlMessage{index, control.GetValue()});
     }
     return true;
   }
   return false;
-}
-
-void Instrument::SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept {
-  control_event_ = {definition, user_data};
 }
 
 void Instrument::SetData(std::vector<std::byte> data) noexcept {
@@ -212,7 +203,6 @@ bool Instrument::SetNoteControl(double pitch, int index, double value) noexcept 
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
       if (auto& note_control = (*note_controls)[index]; note_control.Set(value)) {
-        note_control_event_.Process(pitch, index, note_control.GetValue());
         message_queue_.Add(update_frame_,
                            NoteControlMessage{pitch, index, note_control.GetValue()});
       }
@@ -220,11 +210,6 @@ bool Instrument::SetNoteControl(double pitch, int index, double value) noexcept 
     }
   }
   return false;
-}
-
-void Instrument::SetNoteControlEvent(NoteControlEventDefinition definition,
-                                     void* user_data) noexcept {
-  note_control_event_ = {definition, user_data};
 }
 
 void Instrument::SetNoteOff(double pitch) noexcept {

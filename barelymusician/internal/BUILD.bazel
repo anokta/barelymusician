@@ -7,7 +7,6 @@ cc_library(
     srcs = ["control.cpp"],
     hdrs = ["control.h"],
     deps = [
-        ":event",
         "//barelymusician:barelymusician_headeronly",
     ],
 )
@@ -37,6 +36,7 @@ cc_library(
     hdrs = ["instrument.h"],
     deps = [
         ":control",
+        ":event",
         ":message",
         ":message_queue",
         ":seconds",

@@ -9,6 +9,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
+#include "barelymusician/internal/event.h"
 #include "barelymusician/internal/message_queue.h"
 
 namespace barely::internal {
@@ -102,12 +103,6 @@ class Instrument {
   /// @return True if successful, false otherwise.
   bool SetControl(int id, double value) noexcept;
 
-  /// Sets the control event callback.
-  ///
-  /// @param callback Control event definition.
-  /// @param user_data Pointer to user data.
-  void SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept;
-
   /// Sets data.
   ///
   /// @param data Data.
@@ -120,12 +115,6 @@ class Instrument {
   /// @param value Note control value.
   /// @return True if successful, false otherwise.
   bool SetNoteControl(double pitch, int id, double value) noexcept;
-
-  /// Sets the note control event.
-  ///
-  /// @param definition Note control event definition.
-  /// @param user_data Pointer to user data.
-  void SetNoteControlEvent(NoteControlEventDefinition definition, void* user_data) noexcept;
 
   /// Sets a note off.
   ///
@@ -157,9 +146,6 @@ class Instrument {
   void Update(double timestamp) noexcept;
 
  private:
-  // Note control event alias.
-  using NoteControlEvent = Event<NoteControlEventDefinition, double, int, double>;
-
   // Note off event alias.
   using NoteOffEvent = Event<NoteOffEventDefinition, double>;
 
@@ -198,12 +184,6 @@ class Instrument {
 
   // Map of current note controls by note pitches.
   std::unordered_map<double, std::unordered_map<int, Control>> note_controls_;
-
-  // Control event.
-  Control::Event control_event_;
-
-  // Note control event.
-  NoteControlEvent note_control_event_;
 
   // Note off event.
   NoteOffEvent note_off_event_;

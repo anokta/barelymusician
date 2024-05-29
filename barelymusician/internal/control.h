@@ -5,16 +5,12 @@
 #include <unordered_map>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/event.h"
 
 namespace barely::internal {
 
 /// Class that wraps a control.
 class Control {
  public:
-  /// Event alias.
-  using Event = ::barely::internal::Event<ControlEventDefinition, int, double>;
-
   /// Default constructor.
   Control() noexcept = default;
 

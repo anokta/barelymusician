@@ -8,7 +8,6 @@ VERS_1.0 {
     BarelyEffect_ResetAllControls;
     BarelyEffect_ResetControl;
     BarelyEffect_SetControl;
-    BarelyEffect_SetControlEvent;
     BarelyEffect_SetData;
     BarelyInstrument_Create;
     BarelyInstrument_Destroy;
@@ -24,10 +23,8 @@ VERS_1.0 {
     BarelyInstrument_ResetNoteControl;
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
-    BarelyInstrument_SetControlEvent;
     BarelyInstrument_SetData;
     BarelyInstrument_SetNoteControl;
-    BarelyInstrument_SetNoteControlEvent;
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOffEvent;
     BarelyInstrument_SetNoteOn;

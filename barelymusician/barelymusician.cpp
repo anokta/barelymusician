@@ -46,12 +46,11 @@ struct BarelyEffect : public Effect {
 };
 
 // Instrument.
-struct BarelyInstrument : public Observable<Instrument> {
+struct BarelyInstrument : public Instrument {
   // Constructs `BarelyInstrument` with `musician`, `definition`, and `frame_rate`.
   BarelyInstrument(const Observable<Musician>& musician, BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
-      : Observable<Instrument>(definition, frame_rate, musician.GetTimestamp()),
-        musician_(musician.Observe()) {
+      : Instrument(definition, frame_rate, musician.GetTimestamp()), musician_(musician.Observe()) {
     musician_->AddInstrument(*this);
   }
 

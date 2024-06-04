@@ -1369,25 +1369,6 @@ struct TaskDefinition : public BarelyTaskDefinition {
 template <typename HandleType>
 class Wrapper {
  public:
-  /// Observer template.
-  template <class WrapperType>
-  class Observer : public WrapperType {
-   public:
-    /// Constructs a new `Observer`.
-    ///
-    /// @param handle Handle.
-    explicit Observer(HandleType handle) noexcept : WrapperType(handle) {}
-
-    /// Destroys `Observer`.
-    ~Observer() noexcept { WrapperType::Release(); }
-
-    /// Non-copyable and non-movable.
-    Observer(const Observer& other) noexcept = delete;
-    Observer& operator=(const Observer& other) noexcept = delete;
-    Observer(Observer&& other) noexcept = delete;
-    Observer& operator=(Observer&& other) noexcept = delete;
-  };
-
   /// Default constructor.
   Wrapper() noexcept = default;
 
@@ -1432,16 +1413,36 @@ class Wrapper {
     return std::exchange(handle_, nullptr);
   }
 
+ protected:
+  /// Handle template.
+  template <class WrapperType>
+  class Handle : public WrapperType {
+   public:
+    /// Constructs a new `Handle`.
+    ///
+    /// @param handle Raw handle.
+    explicit Handle(HandleType handle) noexcept : WrapperType(handle) {}
+
+    /// Destroys `Handle`.
+    ~Handle() noexcept { WrapperType::Release(); }
+
+    /// Non-copyable and non-movable.
+    Handle(const Handle& other) noexcept = delete;
+    Handle& operator=(const Handle& other) noexcept = delete;
+    Handle(Handle&& other) noexcept = delete;
+    Handle& operator=(Handle&& other) noexcept = delete;
+  };
+
  private:
-  // Handle.
+  // Raw handle.
   HandleType handle_ = nullptr;
 };
 
 /// Class that wraps an effect.
 class Effect : protected Wrapper<BarelyEffectHandle> {
  public:
-  /// Observer alias.
-  using Observer = Observer<Effect>;
+  /// Handle alias.
+  using Handle = Handle<Effect>;
 
   /// Default constructor.
   Effect() noexcept = default;
@@ -1578,8 +1579,8 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
 /// Class that wraps an instrument.
 class Instrument : protected Wrapper<BarelyInstrumentHandle> {
  public:
-  /// Observer alias.
-  using Observer = Observer<Instrument>;
+  /// Handle alias.
+  using Handle = Handle<Instrument>;
 
   /// Default constructor.
   Instrument() noexcept = default;
@@ -1850,8 +1851,8 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
 /// Class that wraps a task.
 class Task : protected Wrapper<BarelyTaskHandle> {
  public:
-  /// Observer alias.
-  using Observer = Observer<Task>;
+  /// Handle alias.
+  using Handle = Handle<Task>;
 
   /// Default constructor.
   Task() noexcept = default;
@@ -1923,8 +1924,8 @@ class Task : protected Wrapper<BarelyTaskHandle> {
 /// Class that wraps a performer.
 class Performer : protected Wrapper<BarelyPerformerHandle> {
  public:
-  /// Observer alias.
-  using Observer = Observer<Performer>;
+  /// Handle alias.
+  using Handle = Handle<Performer>;
 
   /// Default constructor.
   Performer() noexcept = default;
@@ -2114,8 +2115,8 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
 /// Class that wraps a musician.
 class Musician : protected Wrapper<BarelyMusicianHandle> {
  public:
-  /// Observer alias.
-  using Observer = Observer<Musician>;
+  /// Handle alias.
+  using Handle = Handle<Musician>;
 
   /// Creates a new `Musician`.
   Musician() noexcept {

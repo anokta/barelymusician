@@ -49,12 +49,6 @@
 ///   // Set a control value.
 ///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
 ///
-///   // Create a low-pass effect.
-///   auto effect = instrument.CreateEffect<barely::LowPassEffect>();
-///
-///   // Set the low-pass cutoff frequency to 1kHz.
-///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
-///
 ///   // Process.
 ///   //
 ///   // Instruments expect raw PCM audio samples to be processed with a synchronous call.

@@ -1394,19 +1394,6 @@ class Wrapper {
     return *this;
   }
 
-  /// Returns the handle.
-  ///
-  /// @return Handle.
-  [[nodiscard]] HandleType Get() const noexcept { return handle_; }
-
-  /// Releases the handle.
-  ///
-  /// @return Handle.
-  HandleType Release() noexcept {
-    assert(handle_);
-    return std::exchange(handle_, nullptr);
-  }
-
  protected:
   /// Handle template.
   template <class WrapperType>
@@ -1426,6 +1413,17 @@ class Wrapper {
     Handle(Handle&& other) noexcept = delete;
     Handle& operator=(Handle&& other) noexcept = delete;
   };
+
+  /// Returns the handle.
+  ///
+  /// @return Handle.
+  [[nodiscard]] HandleType Get() const noexcept { return handle_; }
+
+  /// Releases the handle.
+  void Release() noexcept {
+    assert(handle_);
+    handle_ = nullptr;
+  }
 
  private:
   // Raw handle.

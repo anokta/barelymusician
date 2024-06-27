@@ -3,7 +3,6 @@ VERS_1.0 {
     BarelyEffect_Create;
     BarelyEffect_Destroy;
     BarelyEffect_GetControl;
-    BarelyEffect_GetControlDefinition;
     BarelyEffect_Process;
     BarelyEffect_ResetAllControls;
     BarelyEffect_ResetControl;
@@ -12,9 +11,7 @@ VERS_1.0 {
     BarelyInstrument_Create;
     BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
-    BarelyInstrument_GetControlDefinition;
     BarelyInstrument_GetNoteControl;
-    BarelyInstrument_GetNoteControlDefinition;
     BarelyInstrument_IsNoteOn;
     BarelyInstrument_Process;
     BarelyInstrument_ResetAllControls;

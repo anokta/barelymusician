@@ -554,15 +554,6 @@ BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
 BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id,
                                            double* out_value);
 
-/// Gets an effect control definition.
-///
-/// @param effect Effect handle.
-/// @param id Control identifier.
-/// @param out_definition Output control definition.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t id,
-                                                     BarelyControlDefinition* out_value);
-
 /// Processes instrument output samples at timestamp.
 /// @note This function is *not* thread-safe during a corresponding `BarelyEffect_Destroy` call.
 ///
@@ -632,16 +623,6 @@ BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t id,
                                                double* out_value);
 
-/// Gets an instrument control definition.
-///
-/// @param instrument Instrument handle.
-/// @param id Control identifier.
-/// @param out_definition Output control definition.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument,
-                                                         int32_t id,
-                                                         BarelyControlDefinition* out_definition);
-
 /// Gets an instrument note control value.
 ///
 /// @param instrument Instrument handle.
@@ -651,17 +632,6 @@ BARELY_EXPORT bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle 
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
                                                    int32_t id, double* out_value);
-
-/// Gets an instrument note control definition.
-///
-/// @param instrument Instrument handle.
-/// @param pitch Note pitch.
-/// @param id Note control identifier.
-/// @param out_definition Output note control definition.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetNoteControlDefinition(
-    BarelyInstrumentHandle instrument, double pitch, int32_t id,
-    BarelyControlDefinition* out_definition);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -1481,21 +1451,6 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
     return static_cast<ValueType>(value);
   }
 
-  /// Returns a control definition.
-  ///
-  /// @param id Control identifier.
-  /// @return Control definition.
-  template <typename IdType>
-  [[nodiscard]] ControlDefinition GetControlDefinition(IdType id) const noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    BarelyControlDefinition definition;
-    [[maybe_unused]] const bool success =
-        BarelyEffect_GetControlDefinition(Get(), static_cast<int>(id), &definition);
-    assert(success);
-    return definition;
-  }
-
   /// Processes output samples at timestamp.
   ///
   /// @param output_samples Interleaved array of output samples.
@@ -1619,21 +1574,6 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
     return static_cast<ValueType>(value);
   }
 
-  /// Returns a control definition.
-  ///
-  /// @param id Control identifier.
-  /// @return Control definition.
-  template <typename IdType>
-  [[nodiscard]] ControlDefinition GetControlDefinition(IdType id) const noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    BarelyControlDefinition definition;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_GetControlDefinition(Get(), static_cast<int>(id), &definition);
-    assert(success);
-    return definition;
-  }
-
   /// Returns a note control value.
   ///
   /// @param id Note control identifier.
@@ -1647,21 +1587,6 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
         BarelyInstrument_GetNoteControl(Get(), pitch, static_cast<int>(id), &value);
     assert(success);
     return static_cast<ValueType>(value);
-  }
-
-  /// Returns a note control definition.
-  ///
-  /// @param id Note control identifier.
-  /// @return Note control definition.
-  template <typename IdType>
-  [[nodiscard]] ControlDefinition GetNoteControlDefinition(double pitch, IdType id) const noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    BarelyControlDefinition definition;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_GetNoteControlDefinition(Get(), pitch, static_cast<int>(id), &definition);
-    assert(success);
-    return definition;
   }
 
   /// Returns whether a note is on or not.

@@ -170,18 +170,6 @@ bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id, double* out_
   return false;
 }
 
-bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t id,
-                                       BarelyControlDefinition* out_definition) {
-  if (!effect) return false;
-  if (!out_definition) return false;
-
-  if (const auto* control = effect->GetControl(id)) {
-    *out_definition = control->GetDefinition();
-    return true;
-  }
-  return false;
-}
-
 bool BarelyEffect_Process(BarelyEffectHandle effect, double* output_samples,
                           int32_t output_channel_count, int32_t output_frame_count,
                           double timestamp) {
@@ -245,18 +233,6 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t id, 
   return false;
 }
 
-bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, int32_t id,
-                                           BarelyControlDefinition* out_definition) {
-  if (!instrument) return false;
-  if (!out_definition) return false;
-
-  if (const auto* control = instrument->GetControl(id)) {
-    *out_definition = control->GetDefinition();
-    return true;
-  }
-  return false;
-}
-
 bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t id,
                                      double* out_value) {
   if (!instrument) return false;
@@ -264,19 +240,6 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double p
 
   if (const auto* note_control = instrument->GetNoteControl(pitch, id)) {
     *out_value = note_control->GetValue();
-    return true;
-  }
-  return false;
-}
-
-bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument, double pitch,
-                                               int32_t id,
-                                               BarelyControlDefinition* out_definition) {
-  if (!instrument) return false;
-  if (!out_definition) return false;
-
-  if (const auto* note_control = instrument->GetNoteControl(pitch, id)) {
-    *out_definition = note_control->GetDefinition();
     return true;
   }
   return false;

@@ -15,8 +15,6 @@ Control::Control(ControlDefinition definition) noexcept
          definition.default_value <= definition.max_value);
 }
 
-const ControlDefinition& Control::GetDefinition() const noexcept { return definition_; }
-
 double Control::GetValue() const noexcept { return value_; }
 
 bool Control::Reset() noexcept {

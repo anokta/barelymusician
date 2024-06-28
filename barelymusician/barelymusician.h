@@ -1004,37 +1004,21 @@ struct ControlDefinition : public BarelyControlDefinition {
   /// @param default_value Default value.
   /// @param min_value Minimum value.
   /// @param max_value Maximum value.
-  template <typename IdType>
-  ControlDefinition(IdType id, double default_value,
-                    double min_value = std::numeric_limits<double>::lowest(),
-                    double max_value = std::numeric_limits<double>::max()) noexcept
+  template <typename IdType, typename ValueType>
+  ControlDefinition(IdType id, ValueType default_value,
+                    ValueType min_value = std::numeric_limits<ValueType>::lowest(),
+                    ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
       : ControlDefinition(BarelyControlDefinition{
             static_cast<int32_t>(id),
-            default_value,
-            min_value,
-            max_value,
-        }) {}
-
-  /// Constructs a new `ControlDefinition` with a boolean type.
-  ///
-  /// @param id Identifier.
-  /// @param default_value Default boolean value.
-  template <typename IdType>
-  ControlDefinition(IdType id, bool default_value) noexcept
-      : ControlDefinition(id, static_cast<double>(default_value)) {}
-
-  /// Constructs a new `ControlDefinition` with an integer type.
-  ///
-  /// @param id Identifier.
-  /// @param default_value Default integer value.
-  /// @param min_value Minimum integer value.
-  /// @param max_value Maximum integer value.
-  template <typename IdType>
-  explicit ControlDefinition(IdType id, int default_value,
-                             int min_value = std::numeric_limits<int>::lowest(),
-                             int max_value = std::numeric_limits<int>::max()) noexcept
-      : ControlDefinition(id, static_cast<double>(default_value), static_cast<double>(min_value),
-                          static_cast<double>(max_value)) {}
+            static_cast<double>(default_value),
+            static_cast<double>(min_value),
+            static_cast<double>(max_value),
+        }) {
+    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
+                  "IdType is not supported");
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
+  }
 
   /// Constructs a new `ControlDefinition` from a raw type.
   ///
@@ -1444,6 +1428,8 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
   [[nodiscard]] ValueType GetControl(IdType id) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
         BarelyEffect_GetControl(Get(), static_cast<int>(id), &value);
@@ -1567,6 +1553,8 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   [[nodiscard]] ValueType GetControl(IdType id) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
         BarelyInstrument_GetControl(Get(), static_cast<int>(id), &value);
@@ -1582,6 +1570,8 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   [[nodiscard]] ValueType GetNoteControl(double pitch, IdType id) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
         BarelyInstrument_GetNoteControl(Get(), pitch, static_cast<int>(id), &value);

@@ -178,13 +178,6 @@ bool BarelyEffect_Process(BarelyEffectHandle effect, double* output_samples,
   return effect->Process(output_samples, output_channel_count, output_frame_count, timestamp);
 }
 
-bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
-  if (!effect) return false;
-
-  effect->ResetAllControls();
-  return true;
-}
-
 bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t id) {
   if (!effect) return false;
 
@@ -260,19 +253,6 @@ bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_
   if (!instrument) return false;
 
   return instrument->Process(output_samples, output_channel_count, output_frame_count, timestamp);
-}
-
-bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument) {
-  if (!instrument) return false;
-
-  instrument->ResetAllControls();
-  return true;
-}
-
-bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument, double pitch) {
-  if (!instrument) return false;
-
-  return instrument->ResetAllNoteControls(pitch);
 }
 
 bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t id) {

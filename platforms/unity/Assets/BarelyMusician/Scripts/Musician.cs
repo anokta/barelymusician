@@ -378,15 +378,6 @@ namespace Barely {
         }
       }
 
-      /// Resets all effect control values.
-      ///
-      /// @param effectHandle Effect handle.
-      public static void Effect_ResetAllControls(IntPtr effectHandle) {
-        if (!BarelyEffect_ResetAllControls(effectHandle) && effectHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset all effect controls");
-        }
-      }
-
       /// Resets an effect control value.
       ///
       /// @param effectHandle Effect handle.
@@ -548,26 +539,6 @@ namespace Barely {
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;
           }
-        }
-      }
-
-      /// Resets all instrument control values.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      public static void Instrument_ResetAllControls(IntPtr instrumentHandle) {
-        if (!BarelyInstrument_ResetAllControls(instrumentHandle) &&
-            instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset all instrument controls");
-        }
-      }
-
-      /// Resets all instrument note control values.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      public static void Instrument_ResetAllNoteControls(IntPtr instrumentHandle, double pitch) {
-        if (!BarelyInstrument_ResetAllNoteControls(instrumentHandle, pitch) &&
-            instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset all instrument note pitch " + pitch + " controls");
         }
       }
 
@@ -1452,9 +1423,6 @@ namespace Barely {
                                                       Int32 outputChannelCount,
                                                       Int32 outputFrameCount, double timestamp);
 
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_ResetAllControls")]
-      private static extern bool BarelyEffect_ResetAllControls(IntPtr effect);
-
       [DllImport(pluginName, EntryPoint = "BarelyEffect_ResetControl")]
       private static extern bool BarelyEffect_ResetControl(IntPtr effect, Int32 id);
 
@@ -1489,13 +1457,6 @@ namespace Barely {
                                                           [In, Out] double[] outputSamples,
                                                           Int32 outputChannelCount,
                                                           Int32 outputFrameCount, double timestamp);
-
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetAllControls")]
-      private static extern bool BarelyInstrument_ResetAllControls(IntPtr instrument);
-
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetAllNoteControls")]
-      private static extern bool BarelyInstrument_ResetAllNoteControls(IntPtr instrument,
-                                                                       double pitch);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetControl")]
       private static extern bool BarelyInstrument_ResetControl(IntPtr instrument, Int32 id);

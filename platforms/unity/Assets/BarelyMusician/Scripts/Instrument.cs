@@ -60,18 +60,6 @@ namespace Barely {
       return Musician.Internal.Instrument_IsNoteOn(_handle, pitch);
     }
 
-    /// Resets all control values.
-    public void ResetAllControls() {
-      Musician.Internal.Instrument_ResetAllControls(_handle);
-    }
-
-    /// Resets all note control values.
-    ///
-    /// @param pitch Note pitch.
-    public void ResetAllNoteControls(double pitch) {
-      Musician.Internal.Instrument_ResetAllNoteControls(_handle, pitch);
-    }
-
     /// Resets a control value.
     ///
     /// @param id Control identifier.

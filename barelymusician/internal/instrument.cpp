@@ -134,26 +134,6 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
   return true;
 }
 
-void Instrument::ResetAllControls() noexcept {
-  for (auto& [id, control] : controls_) {
-    if (control.Reset()) {
-      message_queue_.Add(update_frame_, ControlMessage{id, control.GetValue()});
-    }
-  }
-}
-
-bool Instrument::ResetAllNoteControls(double pitch) noexcept {
-  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    for (auto& [id, note_control] : *note_controls) {
-      if (note_control.Reset()) {
-        message_queue_.Add(update_frame_, NoteControlMessage{pitch, id, note_control.GetValue()});
-      }
-    }
-    return true;
-  }
-  return false;
-}
-
 bool Instrument::ResetControl(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Reset()) {

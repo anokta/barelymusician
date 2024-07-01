@@ -63,9 +63,6 @@ TEST(InstrumentTest, GetControl) {
   EXPECT_TRUE(instrument.SetControl(0, 50.0));
   EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 20.0)));
 
-  instrument.ResetAllControls();
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
-
   // Control does not exist.
   EXPECT_THAT(instrument.GetControl(1), IsNull());
   EXPECT_FALSE(instrument.SetControl(1, 2.0));
@@ -93,9 +90,6 @@ TEST(InstrumentTest, GetNoteControl) {
 
   EXPECT_TRUE(instrument.SetNoteControl(kPitch, 0, -10.0));
   EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 0.0)));
-
-  instrument.ResetAllNoteControls(kPitch);
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
 
   // Note control does not exist.
   EXPECT_THAT(instrument.GetNoteControl(kPitch, 1), IsNull());

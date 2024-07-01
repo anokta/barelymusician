@@ -13,11 +13,6 @@ namespace Barely {
       return Musician.Internal.Effect_GetControl(_handle, id);
     }
 
-    /// Resets all control values.
-    public void ResetAllControls() {
-      Musician.Internal.Effect_ResetAllControls(_handle);
-    }
-
     /// Resets a control value.
     ///
     /// @param id Control identifier.

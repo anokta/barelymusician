@@ -46,9 +46,6 @@ class Effect {
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
 
-  /// Resets all control values.
-  void ResetAllControls() noexcept;
-
   /// Resets a control value.
   ///
   /// @param id Control identifier.

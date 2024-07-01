@@ -567,12 +567,6 @@ BARELY_EXPORT bool BarelyEffect_Process(BarelyEffectHandle instrument, double* o
                                         int32_t output_channel_count, int32_t output_frame_count,
                                         double timestamp);
 
-/// Resets all effect control values.
-///
-/// @param effect Effect handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect);
-
 /// Resets an effect control value.
 ///
 /// @param effect Effect handle.
@@ -654,20 +648,6 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
 BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
                                             double* output_samples, int32_t output_channel_count,
                                             int32_t output_frame_count, double timestamp);
-
-/// Resets all instrument control values.
-///
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument);
-
-/// Resets all instrument note control values.
-///
-/// @param instrument Instrument handle.
-/// @param pitch Note pitch.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument,
-                                                         double pitch);
 
 /// Resets an instrument control value.
 ///
@@ -1450,12 +1430,6 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
     assert(success);
   }
 
-  /// Resets all control values.
-  void ResetAllControls() noexcept {
-    [[maybe_unused]] const bool success = BarelyEffect_ResetAllControls(Get());
-    assert(success);
-  }
-
   /// Resets a control value.
   ///
   /// @param id Control identifier.
@@ -1600,20 +1574,6 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
                double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_Process(
         Get(), output_samples, output_channel_count, output_frame_count, timestamp);
-    assert(success);
-  }
-
-  /// Resets all control values.
-  void ResetAllControls() noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetAllControls(Get());
-    assert(success);
-  }
-
-  /// Resets all note control values.
-  ///
-  /// @param pitch Note pitch.
-  void ResetAllNoteControls(double pitch) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetAllNoteControls(Get(), pitch);
     assert(success);
   }
 

@@ -94,14 +94,6 @@ bool Effect::Process(double* output_samples, int output_channel_count, int outpu
   return true;
 }
 
-void Effect::ResetAllControls() noexcept {
-  for (auto& [id, control] : controls_) {
-    if (control.Reset()) {
-      message_queue_.Add(update_frame_, ControlMessage{id, control.GetValue()});
-    }
-  }
-}
-
 bool Effect::ResetControl(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Reset()) {

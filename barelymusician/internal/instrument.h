@@ -41,11 +41,6 @@ class Instrument {
   /// @return Pointer to control, or nullptr if not found.
   [[nodiscard]] const Control* GetControl(int id) const noexcept;
 
-  /// Returns the frame rate.
-  ///
-  /// @return Frame rate in hz.
-  [[nodiscard]] int GetFrameRate() const noexcept;
-
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.

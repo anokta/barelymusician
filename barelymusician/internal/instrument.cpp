@@ -56,8 +56,6 @@ const Control* Instrument::GetControl(int id) const noexcept {
   return nullptr;
 }
 
-int Instrument::GetFrameRate() const noexcept { return frame_rate_; }
-
 const Control* Instrument::GetNoteControl(double pitch, int id) const noexcept {
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (const auto* note_control = FindOrNull(*note_controls, id)) {

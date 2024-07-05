@@ -15,7 +15,7 @@
 ///   #include "barelymusician/barelymusician.h"
 ///
 ///   // Create.
-///   barely::Musician musician;
+///   barely::ScopedMusician musician;
 ///
 ///   // Set the tempo.
 ///   musician.SetTempo(/*tempo=*/124.0);
@@ -1302,62 +1302,13 @@ class Wrapper {
 
   /// Constructs a new `Wrapper`.
   ///
-  /// @param handle Handle.
+  /// @param handle Raw handle.
   explicit Wrapper(HandleType handle) noexcept : handle_(handle) { assert(handle); }
 
-  /// Destroys `Effect`.
-  ~Wrapper() noexcept = default;
-
-  /// Non-copyable.
-  Wrapper(const Wrapper& other) noexcept = delete;
-  Wrapper& operator=(const Wrapper& other) noexcept = delete;
-
-  /// Constructs a new `Wrapper` via move.
-  ///
-  /// @param other Other handle.
-  Wrapper(Wrapper&& other) noexcept : handle_(std::exchange(other.handle_, nullptr)) {}
-
-  /// Assigns `Wrapper` via move.
-  ///
-  /// @param other Other handle.
-  /// @return Wrapper.
-  Wrapper& operator=(Wrapper&& other) noexcept {
-    if (this != &other) {
-      handle_ = std::exchange(other.handle_, nullptr);
-    }
-    return *this;
-  }
-
- protected:
-  /// Handle template.
-  template <class WrapperType>
-  class Handle : public WrapperType {
-   public:
-    /// Constructs a new `Handle`.
-    ///
-    /// @param handle Raw handle.
-    explicit Handle(HandleType handle) noexcept : WrapperType(handle) {}
-
-    /// Destroys `Handle`.
-    ~Handle() noexcept { WrapperType::Release(); }
-
-    /// Non-copyable and non-movable.
-    Handle(const Handle& other) noexcept = delete;
-    Handle& operator=(const Handle& other) noexcept = delete;
-    Handle(Handle&& other) noexcept = delete;
-    Handle& operator=(Handle&& other) noexcept = delete;
-  };
-
-  /// Returns the handle.
+  /// Returns the raw handle.
   ///
   /// @return Handle.
-  [[nodiscard]] HandleType Get() const noexcept { return handle_; }
-
-  /// Releases the handle.
-  void Release() noexcept {
-    assert(handle_);
-    handle_ = nullptr;
-  }
+  operator HandleType() const noexcept { return handle_; }
 
  private:
   // Raw handle.
@@ -1365,40 +1316,15 @@ class Wrapper {
 };
 
 /// Class that wraps an effect.
-class Effect : protected Wrapper<BarelyEffectHandle> {
+class Effect : public Wrapper<BarelyEffectHandle> {
  public:
-  /// Handle alias.
-  using Handle = Handle<Effect>;
-
   /// Default constructor.
   Effect() noexcept = default;
 
-  /// Creates a new `Effect` from a raw handle.
+  /// Creates a new `Effect` from a raw effect handle.
   ///
   /// @param effect Raw effect handle.
   explicit Effect(BarelyEffectHandle effect) noexcept : Wrapper(effect) {}
-
-  /// Destroys `Effect`.
-  ~Effect() noexcept { BarelyEffect_Destroy(Get()); }
-
-  /// Non-copyable.
-  Effect(const Effect& other) noexcept = delete;
-  Effect& operator=(const Effect& other) noexcept = delete;
-
-  /// Default move constructor.
-  Effect(Effect&& other) noexcept = default;
-
-  /// Assigns `Effect` via move.
-  ///
-  /// @param other Other effect.
-  /// @return Effect.
-  Effect& operator=(Effect&& other) noexcept {
-    if (this != &other) {
-      BarelyEffect_Destroy(Get());
-      Wrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
 
   /// Returns a control value.
   ///
@@ -1412,7 +1338,7 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
                   "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyEffect_GetControl(Get(), static_cast<int>(id), &value);
+        BarelyEffect_GetControl(*this, static_cast<int>(id), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1426,7 +1352,7 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
   void Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyEffect_Process(
-        Get(), output_samples, output_channel_count, output_frame_count, timestamp);
+        *this, output_samples, output_channel_count, output_frame_count, timestamp);
     assert(success);
   }
 
@@ -1437,7 +1363,7 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
   void ResetControl(IdType id) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
-    [[maybe_unused]] const bool success = BarelyEffect_ResetControl(Get(), static_cast<int>(id));
+    [[maybe_unused]] const bool success = BarelyEffect_ResetControl(*this, static_cast<int>(id));
     assert(success);
   }
 
@@ -1452,7 +1378,7 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success =
-        BarelyEffect_SetControl(Get(), static_cast<int>(id), static_cast<double>(value));
+        BarelyEffect_SetControl(*this, static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -1478,46 +1404,21 @@ class Effect : protected Wrapper<BarelyEffectHandle> {
   /// @param data Pointer to immutable data.
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const bool success = BarelyEffect_SetData(Get(), data, size);
+    [[maybe_unused]] const bool success = BarelyEffect_SetData(*this, data, size);
     assert(success);
   }
 };
 
 /// Class that wraps an instrument.
-class Instrument : protected Wrapper<BarelyInstrumentHandle> {
+class Instrument : public Wrapper<BarelyInstrumentHandle> {
  public:
-  /// Handle alias.
-  using Handle = Handle<Instrument>;
-
   /// Default constructor.
   Instrument() noexcept = default;
 
-  // Creates a new `Instrument` from a raw handle.
+  // Creates a new `Instrument` from a raw instrument handle.
   ///
   /// @param instrument Raw instrument handle.
   explicit Instrument(BarelyInstrumentHandle instrument) noexcept : Wrapper(instrument) {}
-
-  /// Destroys `Instrument`.
-  ~Instrument() noexcept { BarelyInstrument_Destroy(Get()); }
-
-  /// Non-copyable.
-  Instrument(const Instrument& other) noexcept = delete;
-  Instrument& operator=(const Instrument& other) noexcept = delete;
-
-  /// Default move constructor.
-  Instrument(Instrument&& other) noexcept = default;
-
-  /// Assigns `Instrument` via move.
-  ///
-  /// @param other Other instrument.
-  /// @return Instrument.
-  Instrument& operator=(Instrument&& other) noexcept {
-    if (this != &other) {
-      BarelyInstrument_Destroy(Get());
-      Wrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
 
   /// Returns a control value.
   ///
@@ -1531,7 +1432,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
                   "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_GetControl(Get(), static_cast<int>(id), &value);
+        BarelyInstrument_GetControl(*this, static_cast<int>(id), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1548,7 +1449,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
                   "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_GetNoteControl(Get(), pitch, static_cast<int>(id), &value);
+        BarelyInstrument_GetNoteControl(*this, pitch, static_cast<int>(id), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1559,7 +1460,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
     bool is_note_on = false;
-    [[maybe_unused]] const bool success = BarelyInstrument_IsNoteOn(Get(), pitch, &is_note_on);
+    [[maybe_unused]] const bool success = BarelyInstrument_IsNoteOn(*this, pitch, &is_note_on);
     assert(success);
     return is_note_on;
   }
@@ -1573,7 +1474,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   void Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_Process(
-        Get(), output_samples, output_channel_count, output_frame_count, timestamp);
+        *this, output_samples, output_channel_count, output_frame_count, timestamp);
     assert(success);
   }
 
@@ -1584,7 +1485,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   void ResetControl(IdType id) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetControl(Get(), id);
+    [[maybe_unused]] const bool success = BarelyInstrument_ResetControl(*this, id);
     assert(success);
   }
 
@@ -1596,13 +1497,13 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   void ResetNoteControl(double pitch, IdType id) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetNoteControl(Get(), pitch, id);
+    [[maybe_unused]] const bool success = BarelyInstrument_ResetNoteControl(*this, pitch, id);
     assert(success);
   }
 
   /// Sets all notes off.
   void SetAllNotesOff() noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetAllNotesOff(Get());
+    [[maybe_unused]] const bool success = BarelyInstrument_SetAllNotesOff(*this);
     assert(success);
   }
 
@@ -1617,7 +1518,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success =
-        BarelyInstrument_SetControl(Get(), static_cast<int>(id), static_cast<double>(value));
+        BarelyInstrument_SetControl(*this, static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -1643,7 +1544,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param data Pointer to immutable data.
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetData(Get(), data, size);
+    [[maybe_unused]] const bool success = BarelyInstrument_SetData(*this, data, size);
     assert(success);
   }
 
@@ -1659,7 +1560,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        Get(), pitch, static_cast<int>(id), static_cast<double>(value));
+        *this, pitch, static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -1667,7 +1568,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   ///
   /// @param pitch Note pitch.
   void SetNoteOff(double pitch) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOff(Get(), pitch);
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOff(*this, pitch);
     assert(success);
   }
 
@@ -1677,7 +1578,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param user_data Pointer to user data.
   void SetNoteOffEvent(NoteOffEventDefinition definition, void* user_data = nullptr) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOffEvent(Get(), definition, user_data);
+        BarelyInstrument_SetNoteOffEvent(*this, definition, user_data);
     assert(success);
   }
 
@@ -1693,7 +1594,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   void SetNoteOn(double pitch, double intensity = 1.0) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(Get(), pitch, intensity);
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(*this, pitch, intensity);
     assert(success);
   }
 
@@ -1703,7 +1604,7 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data = nullptr) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOnEvent(Get(), definition, user_data);
+        BarelyInstrument_SetNoteOnEvent(*this, definition, user_data);
     assert(success);
   }
 
@@ -1716,47 +1617,22 @@ class Instrument : protected Wrapper<BarelyInstrumentHandle> {
 };
 
 /// Class that wraps a task.
-class Task : protected Wrapper<BarelyTaskHandle> {
+class Task : public Wrapper<BarelyTaskHandle> {
  public:
-  /// Handle alias.
-  using Handle = Handle<Task>;
-
   /// Default constructor.
   Task() noexcept = default;
 
-  // Creates a new `Task` from a raw handle.
+  /// Creates a new `Task` from a raw task handle.
   ///
-  /// @param handle Raw task handle.
+  /// @param task Raw task handle.
   explicit Task(BarelyTaskHandle task) noexcept : Wrapper(task) {}
-
-  /// Destroys `Task`.
-  ~Task() noexcept { BarelyTask_Destroy(Get()); }
-
-  /// Non-copyable.
-  Task(const Task& other) noexcept = delete;
-  Task& operator=(const Task& other) noexcept = delete;
-
-  /// Default move constructor.
-  Task(Task&& other) noexcept = default;
-
-  /// Assigns `Task` via move.
-  ///
-  /// @param other Other task.
-  /// @return Task.
-  Task& operator=(Task&& other) noexcept {
-    if (this != &other) {
-      BarelyTask_Destroy(Get());
-      Wrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
 
   /// Returns the position.
   ///
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const bool success = BarelyTask_GetPosition(Get(), &position);
+    [[maybe_unused]] const bool success = BarelyTask_GetPosition(*this, &position);
     assert(success);
     return position;
   }
@@ -1766,7 +1642,7 @@ class Task : protected Wrapper<BarelyTaskHandle> {
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
     int32_t process_order = 0;
-    [[maybe_unused]] const bool success = BarelyTask_GetProcessOrder(Get(), &process_order);
+    [[maybe_unused]] const bool success = BarelyTask_GetProcessOrder(*this, &process_order);
     assert(success);
     return static_cast<int>(process_order);
   }
@@ -1775,7 +1651,7 @@ class Task : protected Wrapper<BarelyTaskHandle> {
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const bool success = BarelyTask_SetPosition(Get(), position);
+    [[maybe_unused]] const bool success = BarelyTask_SetPosition(*this, position);
     assert(success);
   }
 
@@ -1783,50 +1659,25 @@ class Task : protected Wrapper<BarelyTaskHandle> {
   ///
   /// @param process_order Process order.
   void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const bool success = BarelyTask_SetProcessOrder(Get(), process_order);
+    [[maybe_unused]] const bool success = BarelyTask_SetProcessOrder(*this, process_order);
     assert(success);
   }
 };
 
 /// Class that wraps a performer.
-class Performer : protected Wrapper<BarelyPerformerHandle> {
+class Performer : public Wrapper<BarelyPerformerHandle> {
  public:
-  /// Handle alias.
-  using Handle = Handle<Performer>;
-
   /// Default constructor.
   Performer() noexcept = default;
 
-  /// Creates a new `Performer` from a raw handle.
+  /// Creates a new `Performer` from a raw performer handle.
   ///
   /// @param performer Raw performer handle.
   explicit Performer(BarelyPerformerHandle performer) noexcept : Wrapper(performer) {}
 
-  /// Destroys `Performer`.
-  ~Performer() noexcept { BarelyPerformer_Destroy(Get()); }
-
-  /// Non-copyable.
-  Performer(const Performer& other) noexcept = delete;
-  Performer& operator=(const Performer& other) noexcept = delete;
-
-  /// Default move constructor.
-  Performer(Performer&& other) noexcept = default;
-
-  /// Assigns `Performer` via move.
-  ///
-  /// @param other Other performer.
-  /// @return Performer.
-  Performer& operator=(Performer&& other) noexcept {
-    if (this != &other) {
-      BarelyPerformer_Destroy(Get());
-      Wrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
-
   /// Cancels all one-off tasks.
   void CancelAllOneOffTasks() noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_CancelAllOneOffTasks(Get());
+    [[maybe_unused]] const bool success = BarelyPerformer_CancelAllOneOffTasks(*this);
     assert(success);
   }
 
@@ -1841,7 +1692,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
                                 void* user_data = nullptr) noexcept {
     BarelyTaskHandle task;
     [[maybe_unused]] const bool success =
-        BarelyTask_Create(Get(), definition, position, process_order, user_data, &task);
+        BarelyTask_Create(*this, definition, position, process_order, user_data, &task);
     assert(success);
     return Task(task);
   }
@@ -1858,13 +1709,18 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
                       static_cast<void*>(&callback));
   }
 
+  /// Destroys a task.
+  ///
+  /// @param task Task.
+  void DestroyTask(Task task) noexcept { BarelyTask_Destroy(task); }
+
   /// Returns the loop begin position.
   ///
   /// @return Loop begin position in beats.
   [[nodiscard]] double GetLoopBeginPosition() const noexcept {
     double loop_begin_position = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyPerformer_GetLoopBeginPosition(Get(), &loop_begin_position);
+        BarelyPerformer_GetLoopBeginPosition(*this, &loop_begin_position);
     assert(success);
     return loop_begin_position;
   }
@@ -1874,7 +1730,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept {
     double loop_length = 0.0;
-    [[maybe_unused]] const bool success = BarelyPerformer_GetLoopLength(Get(), &loop_length);
+    [[maybe_unused]] const bool success = BarelyPerformer_GetLoopLength(*this, &loop_length);
     assert(success);
     return loop_length;
   }
@@ -1884,7 +1740,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const bool success = BarelyPerformer_GetPosition(Get(), &position);
+    [[maybe_unused]] const bool success = BarelyPerformer_GetPosition(*this, &position);
     assert(success);
     return position;
   }
@@ -1894,7 +1750,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept {
     bool is_looping = false;
-    [[maybe_unused]] const bool success = BarelyPerformer_IsLooping(Get(), &is_looping);
+    [[maybe_unused]] const bool success = BarelyPerformer_IsLooping(*this, &is_looping);
     assert(success);
     return is_looping;
   }
@@ -1904,7 +1760,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept {
     bool is_playing = false;
-    [[maybe_unused]] const bool success = BarelyPerformer_IsPlaying(Get(), &is_playing);
+    [[maybe_unused]] const bool success = BarelyPerformer_IsPlaying(*this, &is_playing);
     assert(success);
     return is_playing;
   }
@@ -1918,7 +1774,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   void ScheduleOneOffTask(TaskDefinition definition, double position, int process_order = 0,
                           void* user_data = nullptr) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyPerformer_ScheduleOneOffTask(Get(), definition, position, process_order, user_data);
+        BarelyPerformer_ScheduleOneOffTask(*this, definition, position, process_order, user_data);
     assert(success);
   }
 
@@ -1938,7 +1794,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   /// @param loop_begin_position Loop begin position in beats.
   void SetLoopBeginPosition(double loop_begin_position) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyPerformer_SetLoopBeginPosition(Get(), loop_begin_position);
+        BarelyPerformer_SetLoopBeginPosition(*this, loop_begin_position);
     assert(success);
   }
 
@@ -1946,7 +1802,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_SetLoopLength(Get(), loop_length);
+    [[maybe_unused]] const bool success = BarelyPerformer_SetLoopLength(*this, loop_length);
     assert(success);
   }
 
@@ -1954,7 +1810,7 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   ///
   /// @param is_looping True if looping, false otherwise.
   void SetLooping(bool is_looping) noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_SetLooping(Get(), is_looping);
+    [[maybe_unused]] const bool success = BarelyPerformer_SetLooping(*this, is_looping);
     assert(success);
   }
 
@@ -1962,63 +1818,49 @@ class Performer : protected Wrapper<BarelyPerformerHandle> {
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_SetPosition(Get(), position);
+    [[maybe_unused]] const bool success = BarelyPerformer_SetPosition(*this, position);
     assert(success);
   }
 
   /// Starts the performer.
   void Start() noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_Start(Get());
+    [[maybe_unused]] const bool success = BarelyPerformer_Start(*this);
     assert(success);
   }
 
   /// Stops the performer.
   void Stop() noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_Stop(Get());
+    [[maybe_unused]] const bool success = BarelyPerformer_Stop(*this);
     assert(success);
   }
 };
 
 /// Class that wraps a musician.
-class Musician : protected Wrapper<BarelyMusicianHandle> {
+// TODO(#131): These will leak memory now when Destroy is not called - to fix in a later commit.
+class Musician : public Wrapper<BarelyMusicianHandle> {
  public:
-  /// Handle alias.
-  using Handle = Handle<Musician>;
+  /// Default constructor.
+  Musician() noexcept = default;
 
-  /// Creates a new `Musician`.
-  Musician() noexcept {
-    BarelyMusicianHandle musician = nullptr;
-    [[maybe_unused]] const bool success = BarelyMusician_Create(&musician);
-    assert(success);
-    *this = Musician(musician);
-  }
-
-  /// Creates a new `Musician` from a raw handle.
+  /// Creates a new `Musician` from a raw musician handle.
   ///
   /// @param musician Raw musician handle.
   explicit Musician(BarelyMusicianHandle musician) noexcept : Wrapper(musician) {}
 
-  /// Destroys `Musician`.
-  ~Musician() noexcept { BarelyMusician_Destroy(Get()); }
-
-  /// Non-copyable.
-  Musician(const Musician& other) noexcept = delete;
-  Musician& operator=(const Musician& other) noexcept = delete;
-
-  /// Default move constructor.
-  Musician(Musician&& other) noexcept = default;
-
-  /// Assigns `Musician` via move.
+  /// Creates a new musician.
   ///
-  /// @param other Other musician.
   /// @return Musician.
-  Musician& operator=(Musician&& other) noexcept {
-    if (this != &other) {
-      BarelyMusician_Destroy(Get());
-      Wrapper::operator=(std::move(other));
-    }
-    return *this;
+  static Musician Create() noexcept {
+    BarelyMusicianHandle musician = nullptr;
+    [[maybe_unused]] const bool success = BarelyMusician_Create(&musician);
+    assert(success);
+    return Musician(musician);
   }
+
+  /// Destroys a musician.
+  ///
+  /// @param musician Musician.
+  static void Destroy(Musician musician) noexcept { BarelyMusician_Destroy(musician); }
 
   /// Creates a new component of type.
   ///
@@ -2046,7 +1888,7 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   [[nodiscard]] Effect CreateEffect(EffectDefinition definition, int frame_rate) noexcept {
     BarelyEffectHandle effect;
     [[maybe_unused]] const bool success =
-        BarelyEffect_Create(Get(), definition, frame_rate, &effect);
+        BarelyEffect_Create(*this, definition, frame_rate, &effect);
     assert(success);
     return Effect(effect);
   }
@@ -2069,7 +1911,7 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
                                             int frame_rate) noexcept {
     BarelyInstrumentHandle instrument;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_Create(Get(), definition, frame_rate, &instrument);
+        BarelyInstrument_Create(*this, definition, frame_rate, &instrument);
     assert(success);
     return Instrument(instrument);
   }
@@ -2079,10 +1921,25 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer() noexcept {
     BarelyPerformerHandle performer;
-    [[maybe_unused]] const bool success = BarelyPerformer_Create(Get(), &performer);
+    [[maybe_unused]] const bool success = BarelyPerformer_Create(*this, &performer);
     assert(success);
     return Performer(performer);
   }
+
+  /// Destroys an effect.
+  ///
+  /// @param effect Effect.
+  void DestroyEffect(Effect effect) noexcept { BarelyEffect_Destroy(effect); }
+
+  /// Destroys an instrument.
+  ///
+  /// @param instrument Instrument.
+  void DestroyInstrument(Instrument instrument) noexcept { BarelyInstrument_Destroy(instrument); }
+
+  /// Destroys a performer.
+  ///
+  /// @param performer Performer.
+  void DestroyPerformer(Performer performer) noexcept { BarelyPerformer_Destroy(performer); }
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
@@ -2091,7 +1948,7 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   [[nodiscard]] double GetBeatsFromSeconds(double seconds) {
     double beats = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyMusician_GetBeatsFromSeconds(Get(), seconds, &beats);
+        BarelyMusician_GetBeatsFromSeconds(*this, seconds, &beats);
     assert(success);
     return beats;
   }
@@ -2103,7 +1960,7 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   [[nodiscard]] double GetSecondsFromBeats(double beats) {
     double seconds = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyMusician_GetSecondsFromBeats(Get(), beats, &seconds);
+        BarelyMusician_GetSecondsFromBeats(*this, beats, &seconds);
     assert(success);
     return seconds;
   }
@@ -2113,7 +1970,7 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept {
     double tempo = 0.0;
-    [[maybe_unused]] const bool success = BarelyMusician_GetTempo(Get(), &tempo);
+    [[maybe_unused]] const bool success = BarelyMusician_GetTempo(*this, &tempo);
     assert(success);
     return tempo;
   }
@@ -2123,7 +1980,7 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept {
     double timestamp = 0.0;
-    [[maybe_unused]] const bool success = BarelyMusician_GetTimestamp(Get(), &timestamp);
+    [[maybe_unused]] const bool success = BarelyMusician_GetTimestamp(*this, &timestamp);
     assert(success);
     return timestamp;
   }
@@ -2132,7 +1989,7 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   ///
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept {
-    [[maybe_unused]] const bool success = BarelyMusician_SetTempo(Get(), tempo);
+    [[maybe_unused]] const bool success = BarelyMusician_SetTempo(*this, tempo);
     assert(success);
   }
 
@@ -2140,8 +1997,42 @@ class Musician : protected Wrapper<BarelyMusicianHandle> {
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyMusician_Update(Get(), timestamp);
+    [[maybe_unused]] const bool success = BarelyMusician_Update(*this, timestamp);
     assert(success);
+  }
+};
+
+/// Class that wraps a musician within a scope.
+class ScopedMusician : public Musician {
+ public:
+  /// Creates a new `ScopedMusician`.
+  ScopedMusician() noexcept : ScopedMusician(Musician::Create()) {}
+
+  /// Creates a new `ScopedMusician` from a raw musician handle.
+  ///
+  /// @param musician Raw musician handle.
+  explicit ScopedMusician(Musician musician) noexcept : Musician(musician) {}
+
+  /// Destroys `ScopedMusician`.
+  ~ScopedMusician() noexcept { Musician::Destroy(*this); }
+
+  /// Non-copyable.
+  ScopedMusician(const ScopedMusician& other) noexcept = delete;
+  ScopedMusician& operator=(const ScopedMusician& other) noexcept = delete;
+
+  /// Default move constructor.
+  ScopedMusician(ScopedMusician&& other) noexcept = default;
+
+  /// Assigns `ScopedMusician` via move.
+  ///
+  /// @param other Other musician.
+  /// @return Scoped musician.
+  ScopedMusician& operator=(ScopedMusician&& other) noexcept {
+    if (this != &other) {
+      Musician::Destroy(*this);
+      Musician::operator=(std::move(other));
+    }
+    return *this;
   }
 };
 

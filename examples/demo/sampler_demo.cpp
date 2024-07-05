@@ -23,8 +23,8 @@
 namespace {
 
 using ::barely::LowPassEffect;
-using ::barely::Musician;
 using ::barely::SamplerInstrument;
+using ::barely::ScopedMusician;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -86,7 +86,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Musician musician;
+  ScopedMusician musician;
 
   auto instrument = musician.CreateInstrument<SamplerInstrument>(kFrameRate);
   instrument.SetControl(SamplerInstrument::Control::kGain, kGain);

@@ -21,8 +21,8 @@ namespace {
 
 using ::barely::Arpeggiator;
 using ::barely::ArpeggiatorStyle;
-using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::ScopedMusician;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -73,7 +73,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  ScopedMusician musician;
   musician.SetTempo(kInitialTempo);
 
   auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);

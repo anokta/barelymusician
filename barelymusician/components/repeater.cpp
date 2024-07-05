@@ -10,13 +10,13 @@ struct BarelyRepeater : public barely::Repeater {
   // Constructs `BarelyRepeater` with `musician` and `process_order`.
   BarelyRepeater(BarelyMusicianHandle musician, int process_order) noexcept
       : barely::Repeater(
-            barely::Musician::Handle(musician).CreateComponent<barely::Repeater>(process_order)) {}
+            barely::Musician(musician).CreateComponent<barely::Repeater>(process_order)) {}
 
   // Destroys `BarelyRepeater`.
   ~BarelyRepeater() noexcept { SetInstrument(nullptr); }
 
   // Optional instrument.
-  std::optional<barely::Instrument::Handle> instrument = std::nullopt;
+  std::optional<barely::Instrument> instrument = std::nullopt;
 };
 
 bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {

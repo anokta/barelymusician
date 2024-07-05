@@ -31,8 +31,8 @@ For background about this project, see the original research paper
 // Import the synth instrument.
 #include "barelymusician/instruments/synth_instrument.h"
 
-// Create a new musician.
-barely::Musician musician;
+// Create a new musician within the scope.
+barely::ScopedMusician musician;
 
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);

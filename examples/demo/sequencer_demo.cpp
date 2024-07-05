@@ -17,8 +17,8 @@
 
 namespace {
 
-using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::ScopedMusician;
 using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::TaskDefinition;
@@ -52,7 +52,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  ScopedMusician musician;
   musician.SetTempo(kInitialTempo);
 
   auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
@@ -112,6 +112,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
       if (const auto it = tasks.find(index - 1); it != tasks.end()) {
+        performer.DestroyTask(it->second);
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {

@@ -15,8 +15,8 @@
 
 namespace {
 
-using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::ScopedMusician;
 using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::examples::AudioClock;
@@ -48,7 +48,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  ScopedMusician musician;
   musician.SetTempo(kInitialTempo);
 
   auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);

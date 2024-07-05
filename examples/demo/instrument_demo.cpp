@@ -17,8 +17,8 @@
 
 namespace {
 
-using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::ScopedMusician;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -59,7 +59,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Musician musician;
+  ScopedMusician musician;
 
   auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);

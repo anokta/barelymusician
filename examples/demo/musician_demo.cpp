@@ -30,11 +30,11 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::Metronome;
-using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::PercussionInstrument;
 using ::barely::Performer;
 using ::barely::Random;
+using ::barely::ScopedMusician;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -190,7 +190,7 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  Musician musician;
+  ScopedMusician musician;
   musician.SetTempo(kTempo);
 
   // Note on callback.

@@ -144,21 +144,6 @@ struct BarelyTask : public Task {
   Observer<Performer> performer_;
 };
 
-bool BarelyEffect_Create(BarelyMusicianHandle musician, BarelyEffectDefinition definition,
-                         int32_t frame_rate, BarelyEffectHandle* out_effect) {
-  if (!musician || !out_effect) return false;
-
-  *out_effect = new BarelyEffect(*musician, definition, frame_rate);
-  return true;
-}
-
-bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
-  if (!effect) return false;
-
-  delete effect;
-  return true;
-}
-
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id, double* out_value) {
   if (!effect) return false;
   if (!out_value) return false;
@@ -195,23 +180,6 @@ bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t s
 
   effect->SetData(
       {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
-  return true;
-}
-
-bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefinition definition,
-                             int32_t frame_rate, BarelyInstrumentHandle* out_instrument) {
-  if (!musician) return false;
-  if (frame_rate <= 0) return false;
-  if (!out_instrument) return false;
-
-  *out_instrument = new BarelyInstrument(*musician, definition, frame_rate);
-  return true;
-}
-
-bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
-  if (!instrument) return false;
-
-  delete instrument;
   return true;
 }
 
@@ -334,10 +302,64 @@ bool BarelyMusician_Create(BarelyMusicianHandle* out_musician) {
   return true;
 }
 
+bool BarelyMusician_CreateEffect(BarelyMusicianHandle musician, BarelyEffectDefinition definition,
+                                 int32_t frame_rate, BarelyEffectHandle* out_effect) {
+  if (!musician || !out_effect) return false;
+
+  *out_effect = new BarelyEffect(*musician, definition, frame_rate);
+  return true;
+}
+
+bool BarelyMusician_CreateInstrument(BarelyMusicianHandle musician,
+                                     BarelyInstrumentDefinition definition, int32_t frame_rate,
+                                     BarelyInstrumentHandle* out_instrument) {
+  if (!musician) return false;
+  if (frame_rate <= 0) return false;
+  if (!out_instrument) return false;
+
+  *out_instrument = new BarelyInstrument(*musician, definition, frame_rate);
+  return true;
+}
+
+bool BarelyMusician_CreatePerformer(BarelyMusicianHandle musician,
+                                    BarelyPerformerHandle* out_performer) {
+  if (!musician) return false;
+  if (!out_performer) return false;
+
+  *out_performer = new BarelyPerformer(*musician);
+  return true;
+}
+
 bool BarelyMusician_Destroy(BarelyMusicianHandle musician) {
   if (!musician) return false;
 
   delete musician;
+  return true;
+}
+
+bool BarelyMusician_DestroyEffect(BarelyMusicianHandle musician, BarelyEffectHandle effect) {
+  if (!musician) return false;
+  if (!effect) return false;
+
+  delete effect;
+  return true;
+}
+
+bool BarelyMusician_DestroyInstrument(BarelyMusicianHandle musician,
+                                      BarelyInstrumentHandle instrument) {
+  if (!musician) return false;
+  if (!instrument) return false;
+
+  delete instrument;
+  return true;
+}
+
+bool BarelyMusician_DestroyPerformer(BarelyMusicianHandle musician,
+                                     BarelyPerformerHandle performer) {
+  if (!musician) return false;
+  if (!performer) return false;
+
+  delete performer;
   return true;
 }
 
@@ -396,18 +418,21 @@ bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer) {
   return true;
 }
 
-bool BarelyPerformer_Create(BarelyMusicianHandle musician, BarelyPerformerHandle* out_performer) {
-  if (!musician) return false;
-  if (!out_performer) return false;
+bool BarelyPerformer_CreateTask(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
+                                double position, int32_t process_order, void* user_data,
+                                BarelyTaskHandle* out_task) {
+  if (!performer) return false;
+  if (!out_task) return false;
 
-  *out_performer = new BarelyPerformer(*musician);
+  (*out_task) = new BarelyTask(*performer, definition, position, process_order, user_data);
   return true;
 }
 
-bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
+bool BarelyPerformer_DestroyTask(BarelyPerformerHandle performer, BarelyTaskHandle task) {
   if (!performer) return false;
+  if (!task) return false;
 
-  delete performer;
+  delete task;
   return true;
 }
 
@@ -501,23 +526,6 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
   performer->Stop();
-  return true;
-}
-
-bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
-                       double position, int32_t process_order, void* user_data,
-                       BarelyTaskHandle* out_task) {
-  if (!performer) return false;
-  if (!out_task) return false;
-
-  (*out_task) = new BarelyTask(*performer, definition, position, process_order, user_data);
-  return true;
-}
-
-bool BarelyTask_Destroy(BarelyTaskHandle task) {
-  if (!task) return false;
-
-  delete task;
   return true;
 }
 

@@ -134,8 +134,8 @@
 ///
 ///   // Create.
 ///   BarelyInstrumentHandle instrument;
-///   BarelyInstrument_Create(musician, BarelySynthInstrument_GetDefinition(), /*frame_rate=*/48000,
-///                           &instrument);
+///   BarelyMusician_CreateInstrument(musician, BarelySynthInstrument_GetDefinition(),
+///                                   /*frame_rate=*/48000, &instrument);
 ///
 ///   // Set a note on.
 ///   //
@@ -164,7 +164,7 @@
 ///                            timestamp);
 ///
 ///   // Destroy.
-///   BarelyInstrument_Destroy(instrument);
+///   BarelyMusician_DestroyInstrument(musician, instrument);
 ///   @endcode
 ///
 /// - Effect:
@@ -174,8 +174,8 @@
 ///
 ///   // Create.
 ///   BarelyEffectHandle effect;
-///   BarelyEffect_Create(musician, BarelyLowPassEffect_GetDefinition(), /*frame_rate=*/48000,
-///                       &effect);
+///   BarelyMusician_CreateEffect(musician, BarelyLowPassEffect_GetDefinition(),
+///                               /*frame_rate=*/48000, &effect);
 ///
 ///   // Set a control value.
 ///   BarelyEffect_SetControl(effect, /*id=*/0, /*value=*/1000.0);
@@ -185,7 +185,7 @@
 ///                        timestamp);
 ///
 ///   // Destroy the effect.
-///   BarelyEffect_Destroy(effect);
+///   BarelyMusician_DestroyEffect(musician, effect);
 ///   @endcode
 ///
 /// - Performer:
@@ -193,13 +193,13 @@
 ///   @code{.cpp}
 ///   // Create.
 ///   BarelyPerformerHandle performer;
-///   BarelyPerformer_Create(musician, &performer);
+///   BarelyMusician_CreatePerformer(musician, &performer);
 ///
 ///   // Create a task.
 ///   BarelyTaskDefinition definition;  // populate this.
 ///   BarelyTaskHandle task;
-///   BarelyTask_Create(performer, definition, /*position=*/0.0, /*process_order=*/0,
-///                     /*user_data=*/nullptr, &task);
+///   BarelyPerformer_CreateTask(performer, definition, /*position=*/0.0, /*process_order=*/0,
+///                              /*user_data=*/nullptr, &task);
 ///
 ///   // Set looping on.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
@@ -212,10 +212,10 @@
 ///   BarelyPerformer_IsPlaying(performer, &is_playing);
 ///
 ///   // Destroy the task.
-///   BarelyTask_Destroy(task);
+///   BarelyPerformer_DestroyTask(performer, task);
 ///
 ///   // Destroy.
-///   BarelyPerformer_Destroy(performer);
+///   BarelyMusician_DestroyPerformer(musician, performer);
 ///   @endcode
 
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
@@ -528,23 +528,6 @@ typedef struct BarelyPerformer* BarelyPerformerHandle;
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
 
-/// Creates a new effect.
-///
-/// @param musician Musician handle.
-/// @param definition Effect definition.
-/// @param frame_rate Frame rate in hertz.
-/// @param out_effect Output effect handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_Create(BarelyMusicianHandle musician,
-                                       BarelyEffectDefinition definition, int32_t frame_rate,
-                                       BarelyEffectHandle* out_effect);
-
-/// Destroys an effect.
-///
-/// @param effect Effect handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
-
 /// Gets an effect control value.
 ///
 /// @param effect Effect handle.
@@ -554,8 +537,8 @@ BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
 BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id,
                                            double* out_value);
 
-/// Processes instrument output samples at timestamp.
-/// @note This function is *not* thread-safe during a corresponding `BarelyEffect_Destroy` call.
+/// Processes effect output samples at timestamp.
+/// @note This is *not* thread-safe during a corresponding `BarelyMusician_DestroyEffect` call.
 ///
 /// @param effect Effect handle.
 /// @param output_samples Array of interleaved output samples.
@@ -590,24 +573,6 @@ BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size);
 
-/// Creates a new instrument.
-///
-/// @param musician Musician handle.
-/// @param definition Instrument definition.
-/// @param frame_rate Frame rate in hertz.
-/// @param out_instrument Output instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusicianHandle musician,
-                                           BarelyInstrumentDefinition definition,
-                                           int32_t frame_rate,
-                                           BarelyInstrumentHandle* out_instrument);
-
-/// Destroys an instrument.
-///
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
-
 /// Gets an instrument control value.
 ///
 /// @param instrument Instrument handle.
@@ -637,7 +602,7 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
                                              bool* out_is_note_on);
 
 /// Processes instrument output samples at timestamp.
-/// @note This function is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
+/// @note This is *not* thread-safe during a corresponding `BarelyMusician_DestroyInstrument` call.
 ///
 /// @param instrument Instrument handle.
 /// @param output_samples Array of interleaved output samples.
@@ -741,11 +706,66 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instru
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_Create(BarelyMusicianHandle* out_musician);
 
+/// Creates a new effect.
+///
+/// @param musician Musician handle.
+/// @param definition Effect definition.
+/// @param frame_rate Frame rate in hertz.
+/// @param out_effect Output effect handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_CreateEffect(BarelyMusicianHandle musician,
+                                               BarelyEffectDefinition definition,
+                                               int32_t frame_rate, BarelyEffectHandle* out_effect);
+
+/// Creates a new instrument.
+///
+/// @param musician Musician handle.
+/// @param definition Instrument definition.
+/// @param frame_rate Frame rate in hertz.
+/// @param out_instrument Output instrument handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_CreateInstrument(BarelyMusicianHandle musician,
+                                                   BarelyInstrumentDefinition definition,
+                                                   int32_t frame_rate,
+                                                   BarelyInstrumentHandle* out_instrument);
+
+/// Creates a new performer.
+///
+/// @param musician Musician handle.
+/// @param out_performer Output performer handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_CreatePerformer(BarelyMusicianHandle musician,
+                                                  BarelyPerformerHandle* out_performer);
+
 /// Destroys a musician.
 ///
 /// @param musician Musician handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
+
+/// Destroys an effect.
+///
+/// @param musician Musician handle.
+/// @param effect Effect handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_DestroyEffect(BarelyMusicianHandle musician,
+                                                BarelyEffectHandle effect);
+
+/// Destroys an instrument.
+///
+/// @param musician Musician handle.
+/// @param instrument Instrument handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_DestroyInstrument(BarelyMusicianHandle musician,
+                                                    BarelyInstrumentHandle instrument);
+
+/// Destroys a performer.
+///
+/// @param musician Musician handle.
+/// @param performer Performer handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_DestroyPerformer(BarelyMusicianHandle musician,
+                                                   BarelyPerformerHandle performer);
 
 /// Gets the corresponding number of musician beats for a given number of seconds.
 ///
@@ -801,19 +821,27 @@ BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, double t
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer);
 
-/// Creates a new performer.
-///
-/// @param musician Musician handle.
-/// @param out_performer Output performer handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician,
-                                          BarelyPerformerHandle* out_performer);
-
-/// Destroys a performer.
+/// Creates a new performer task.
 ///
 /// @param performer Performer handle.
+/// @param definition Task definition.
+/// @param position Task position in beats.
+/// @param process_order Task process order.
+/// @param user_data Pointer to user data.
+/// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
+BARELY_EXPORT bool BarelyPerformer_CreateTask(BarelyPerformerHandle performer,
+                                              BarelyTaskDefinition definition, double position,
+                                              int32_t process_order, void* user_data,
+                                              BarelyTaskHandle* out_task);
+
+/// Destroys a performer task.
+///
+/// @param performer Performer handle.
+/// @param task Task handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_DestroyTask(BarelyPerformerHandle performer,
+                                               BarelyTaskHandle task);
 
 /// Gets the loop begin position of a performer.
 ///
@@ -907,26 +935,6 @@ BARELY_EXPORT bool BarelyPerformer_Start(BarelyPerformerHandle performer);
 /// @param performer Performer handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
-
-/// Creates a new task.
-///
-/// @param performer Performer handle.
-/// @param definition Task definition.
-/// @param position Task position in beats.
-/// @param process_order Task process order.
-/// @param user_data Pointer to user data.
-/// @param out_task Output task handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_Create(BarelyPerformerHandle performer,
-                                     BarelyTaskDefinition definition, double position,
-                                     int32_t process_order, void* user_data,
-                                     BarelyTaskHandle* out_task);
-
-/// Destroys a task.
-///
-/// @param task Task handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
 
 /// Gets the position of a task.
 ///
@@ -1692,7 +1700,7 @@ class Performer : public Wrapper<BarelyPerformerHandle> {
                                 void* user_data = nullptr) noexcept {
     BarelyTaskHandle task;
     [[maybe_unused]] const bool success =
-        BarelyTask_Create(*this, definition, position, process_order, user_data, &task);
+        BarelyPerformer_CreateTask(*this, definition, position, process_order, user_data, &task);
     assert(success);
     return Task(task);
   }
@@ -1712,7 +1720,7 @@ class Performer : public Wrapper<BarelyPerformerHandle> {
   /// Destroys a task.
   ///
   /// @param task Task.
-  void DestroyTask(Task task) noexcept { BarelyTask_Destroy(task); }
+  void DestroyTask(Task task) noexcept { BarelyPerformer_DestroyTask(*this, task); }
 
   /// Returns the loop begin position.
   ///
@@ -1888,7 +1896,7 @@ class Musician : public Wrapper<BarelyMusicianHandle> {
   [[nodiscard]] Effect CreateEffect(EffectDefinition definition, int frame_rate) noexcept {
     BarelyEffectHandle effect;
     [[maybe_unused]] const bool success =
-        BarelyEffect_Create(*this, definition, frame_rate, &effect);
+        BarelyMusician_CreateEffect(*this, definition, frame_rate, &effect);
     assert(success);
     return Effect(effect);
   }
@@ -1911,7 +1919,7 @@ class Musician : public Wrapper<BarelyMusicianHandle> {
                                             int frame_rate) noexcept {
     BarelyInstrumentHandle instrument;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_Create(*this, definition, frame_rate, &instrument);
+        BarelyMusician_CreateInstrument(*this, definition, frame_rate, &instrument);
     assert(success);
     return Instrument(instrument);
   }
@@ -1921,7 +1929,7 @@ class Musician : public Wrapper<BarelyMusicianHandle> {
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer() noexcept {
     BarelyPerformerHandle performer;
-    [[maybe_unused]] const bool success = BarelyPerformer_Create(*this, &performer);
+    [[maybe_unused]] const bool success = BarelyMusician_CreatePerformer(*this, &performer);
     assert(success);
     return Performer(performer);
   }
@@ -1929,17 +1937,21 @@ class Musician : public Wrapper<BarelyMusicianHandle> {
   /// Destroys an effect.
   ///
   /// @param effect Effect.
-  void DestroyEffect(Effect effect) noexcept { BarelyEffect_Destroy(effect); }
+  void DestroyEffect(Effect effect) noexcept { BarelyMusician_DestroyEffect(*this, effect); }
 
   /// Destroys an instrument.
   ///
   /// @param instrument Instrument.
-  void DestroyInstrument(Instrument instrument) noexcept { BarelyInstrument_Destroy(instrument); }
+  void DestroyInstrument(Instrument instrument) noexcept {
+    BarelyMusician_DestroyInstrument(*this, instrument);
+  }
 
   /// Destroys a performer.
   ///
   /// @param performer Performer.
-  void DestroyPerformer(Performer performer) noexcept { BarelyPerformer_Destroy(performer); }
+  void DestroyPerformer(Performer performer) noexcept {
+    BarelyMusician_DestroyPerformer(*this, performer);
+  }
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///

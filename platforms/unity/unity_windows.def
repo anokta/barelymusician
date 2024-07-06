@@ -1,15 +1,11 @@
 LIBRARY "barelymusicianunity"
 
 EXPORTS
-  BarelyEffect_Create
-  BarelyEffect_Destroy
   BarelyEffect_GetControl
   BarelyEffect_Process
   BarelyEffect_ResetControl
   BarelyEffect_SetControl
   BarelyEffect_SetData
-  BarelyInstrument_Create
-  BarelyInstrument_Destroy
   BarelyInstrument_GetControl
   BarelyInstrument_GetNoteControl
   BarelyInstrument_IsNoteOn
@@ -25,7 +21,13 @@ EXPORTS
   BarelyInstrument_SetNoteOn
   BarelyInstrument_SetNoteOnEvent
   BarelyMusician_Create
+  BarelyMusician_CreateEffect
+  BarelyMusician_CreateInstrument
+  BarelyMusician_CreatePerformer
   BarelyMusician_Destroy
+  BarelyMusician_DestroyEffect
+  BarelyMusician_DestroyInstrument
+  BarelyMusician_DestroyPerformer
   BarelyMusician_GetBeatsFromSeconds
   BarelyMusician_GetSecondsFromBeats
   BarelyMusician_GetTempo
@@ -33,8 +35,8 @@ EXPORTS
   BarelyMusician_SetTempo
   BarelyMusician_Update
   BarelyPerformer_CancelAllOneOffTasks
-  BarelyPerformer_Create
-  BarelyPerformer_Destroy
+  BarelyPerformer_CreateTask
+  BarelyPerformer_DestroyTask
   BarelyPerformer_GetLoopBeginPosition
   BarelyPerformer_GetLoopLength
   BarelyPerformer_GetPosition
@@ -47,8 +49,6 @@ EXPORTS
   BarelyPerformer_SetPosition
   BarelyPerformer_Start
   BarelyPerformer_Stop
-  BarelyTask_Create
-  BarelyTask_Destroy
   BarelyTask_GetPosition
   BarelyTask_GetProcessOrder
   BarelyTask_SetPosition

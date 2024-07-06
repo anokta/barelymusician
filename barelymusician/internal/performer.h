@@ -118,7 +118,7 @@ class Performer {
 
  private:
   // Recurring task alias.
-  using RecurringTask = ::std::pair<std::pair<double, int>, Task*>;
+  using RecurringTask = std::pair<std::pair<double, int>, Task*>;
 
   // Returns an iterator to the next recurring task to process.
   [[nodiscard]] std::set<RecurringTask>::const_iterator GetNextRecurringTask() const noexcept;

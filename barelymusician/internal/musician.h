@@ -1,7 +1,8 @@
 #ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 #define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
-#include <unordered_set>
+#include <memory>
+#include <unordered_map>
 
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
@@ -12,23 +13,41 @@ namespace barely::internal {
 /// Class that wraps a musician.
 class Musician {
  public:
-  /// Adds an effect.
+  /// Creates an effect.
+  ///
+  /// @return Pointer to effect.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  Effect* CreateEffect(EffectDefinition definition, int frame_rate) noexcept;
+
+  /// Creates an instrument.
+  ///
+  /// @return Pointer to instrument.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  Instrument* CreateInstrument(InstrumentDefinition definition, int frame_rate) noexcept;
+
+  /// Creates a performer.
+  ///
+  /// @return Pointer to performer.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  Performer* CreatePerformer() noexcept;
+
+  /// Destroys effect.
   ///
   /// @param effect Effect.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddEffect(Effect& effect) noexcept;
+  bool DestroyEffect(Effect* effect) noexcept;
 
-  /// Adds an instrument.
+  /// Destroys instrument.
   ///
   /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddInstrument(Instrument& instrument) noexcept;
+  bool DestroyInstrument(Instrument* instrument) noexcept;
 
-  /// Adds a performer.
+  /// Destroys a performer.
   ///
   /// @param performer Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddPerformer(Performer& performer) noexcept;
+  bool DestroyPerformer(Performer* performer) noexcept;
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
@@ -52,24 +71,6 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
 
-  /// Destroys effect.
-  ///
-  /// @param effect Effect.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveEffect(Effect& effect) noexcept;
-
-  /// Destroys instrument.
-  ///
-  /// @param instrument Instrument.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveInstrument(Instrument& instrument) noexcept;
-
-  /// Destroys a performer.
-  ///
-  /// @param performer Performer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemovePerformer(Performer& performer) noexcept;
-
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
@@ -81,14 +82,19 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
-  // Set of pointers to effects.
-  std::unordered_set<Effect*> effects_;
+ private:
+  // Pointer map alias.
+  template <typename PointerType>
+  using PointerMap = std::unordered_map<PointerType*, std::unique_ptr<PointerType>>;
 
-  // Set of pointers to instruments.
-  std::unordered_set<Instrument*> instruments_;
+  // Map of pointers to effects.
+  PointerMap<Effect> effects_;
 
-  // Set of pointers to performers.
-  std::unordered_set<Performer*> performers_;
+  // Map of pointers to instruments.
+  PointerMap<Instrument> instruments_;
+
+  // Map of pointers to performers.
+  PointerMap<Performer> performers_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

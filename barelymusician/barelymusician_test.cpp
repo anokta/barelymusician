@@ -40,12 +40,12 @@ TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   ASSERT_TRUE(BarelyMusician_Create(&musician));
 
   // Failures.
-  EXPECT_FALSE(BarelyMusician_CreatePerformer(musician, nullptr));
+  EXPECT_FALSE(BarelyMusician_CreatePerformer(musician, 0, nullptr));
   EXPECT_FALSE(BarelyMusician_DestroyPerformer(musician, nullptr));
 
   // Success.
   BarelyPerformerHandle performer = nullptr;
-  EXPECT_TRUE(BarelyMusician_CreatePerformer(musician, &performer));
+  EXPECT_TRUE(BarelyMusician_CreatePerformer(musician, 0, &performer));
   EXPECT_NE(performer, nullptr);
 
   EXPECT_TRUE(BarelyMusician_DestroyPerformer(musician, performer));

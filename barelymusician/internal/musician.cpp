@@ -6,6 +6,7 @@
 #include <memory>
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
@@ -30,31 +31,37 @@ Instrument* Musician::CreateInstrument(InstrumentDefinition definition, int fram
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer* Musician::CreatePerformer() noexcept {
-  auto performer = std::make_unique<Performer>();
-  const auto [it, success] = performers_.emplace(performer.get(), std::move(performer));
+Performer* Musician::CreatePerformer(int process_order) noexcept {
+  auto performer = std::make_unique<Performer>(process_order);
+  const auto [it, success] =
+      performers_.emplace(std::pair{process_order, performer.get()}, std::move(performer));
   assert(success);
   return it->second.get();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Musician::DestroyEffect(Effect* effect) noexcept { return effects_.erase(effect) > 0; }
+bool Musician::DestroyEffect(Effect* effect) noexcept {
+  assert(effect);
+  return effects_.erase(effect) > 0;
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Musician::DestroyInstrument(Instrument* instrument) noexcept {
+  assert(instrument);
   return instruments_.erase(instrument) > 0;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Musician::DestroyPerformer(Performer* performer) noexcept {
-  return performers_.erase(performer) > 0;
+  assert(performer);
+  return performers_.erase({performer->GetProcessOrder(), performer}) > 0;
 }
 
-double Musician::GetBeatsFromSeconds(double seconds) noexcept {
+double Musician::GetBeatsFromSeconds(double seconds) const noexcept {
   return BeatsFromSeconds(tempo_, seconds);
 }
 
-double Musician::GetSecondsFromBeats(double beats) noexcept {
+double Musician::GetSecondsFromBeats(double beats) const noexcept {
   return (tempo_ > 0.0) ? SecondsFromBeats(tempo_, beats)
                         : (beats > 0.0 ? std::numeric_limits<double>::max()
                                        : std::numeric_limits<double>::lowest());
@@ -70,46 +77,43 @@ void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); 
 void Musician::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      std::pair<double, int> update_duration = {GetBeatsFromSeconds(timestamp - timestamp_),
-                                                std::numeric_limits<int>::lowest()};
+      double update_duration = GetBeatsFromSeconds(timestamp - timestamp_);
       bool has_tasks_to_process = false;
-      for (const auto& [performer_ptr, performer] : performers_) {
-        assert(performer_ptr);
-        // TODO(#131): Add process_order to Performer.
-        if (const auto maybe_duration = performer_ptr->GetDurationToNextTask();
-            maybe_duration && maybe_duration < update_duration.first) {
+      for (const auto& [_, performer] : performers_) {
+        if (const auto maybe_duration = performer->GetDurationToNextTask();
+            maybe_duration && maybe_duration < update_duration) {
           has_tasks_to_process = true;
-          update_duration.first = *maybe_duration;
+          update_duration = *maybe_duration;
         }
       }
-      assert(update_duration.first > 0.0 || has_tasks_to_process);
+      assert(update_duration > 0.0 || has_tasks_to_process);
 
-      if (update_duration.first > 0) {
-        for (const auto& [performer_ptr, performer] : performers_) {
-          performer_ptr->Update(update_duration.first);
+      if (update_duration > 0) {
+        for (const auto& [_, performer] : performers_) {
+          performer->Update(update_duration);
         }
 
-        timestamp_ += GetSecondsFromBeats(update_duration.first);
-        for (const auto& [effect_ptr, effect] : effects_) {
-          effect_ptr->Update(timestamp_);
+        timestamp_ += GetSecondsFromBeats(update_duration);
+        for (const auto& [effect, _] : effects_) {
+          effect->Update(timestamp_);
         }
-        for (const auto& [instrument_ptr, instrument] : instruments_) {
-          instrument_ptr->Update(timestamp_);
+        for (const auto& [instrument, _] : instruments_) {
+          instrument->Update(timestamp_);
         }
       }
 
       if (has_tasks_to_process) {
-        for (const auto& [performer_ptr, performer] : performers_) {
-          performer_ptr->ProcessNextTaskAtPosition();
+        for (const auto& [_, performer] : performers_) {
+          performer->ProcessNextTaskAtPosition();
         }
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      for (const auto& [effect_ptr, effect] : effects_) {
-        effect_ptr->Update(timestamp_);
+      for (const auto& [effect, _] : effects_) {
+        effect->Update(timestamp_);
       }
-      for (const auto& [instrument_ptr, instrument] : instruments_) {
-        instrument_ptr->Update(timestamp_);
+      for (const auto& [instrument, _] : instruments_) {
+        instrument->Update(timestamp_);
       }
     }
   }

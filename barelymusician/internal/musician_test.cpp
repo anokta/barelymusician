@@ -177,7 +177,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   Musician musician;
 
   // Create a performer.
-  Performer* performer = musician.CreatePerformer();
+  Performer* performer = musician.CreatePerformer(/*process_order=*/0);
 
   // Create a task definition.
   double task_position = 0.0;

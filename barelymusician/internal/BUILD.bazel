@@ -68,6 +68,7 @@ cc_library(
         ":instrument",
         ":performer",
         ":seconds",
+        "//barelymusician:barelymusician_headeronly",
     ],
 )
 

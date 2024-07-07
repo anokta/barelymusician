@@ -2,6 +2,7 @@
 #include "barelymusician/internal/task.h"
 
 #include <cassert>
+#include <utility>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/event.h"
@@ -12,7 +13,7 @@ Task::Task(const TaskDefinition& definition, double position, void* user_data,
            SetPositionCallback set_position_callback) noexcept
     : Event<TaskDefinition>(definition, user_data),
       position_(position),
-      set_position_callback_(set_position_callback) {
+      set_position_callback_(std::move(set_position_callback)) {
   assert(set_position_callback_);
 }
 

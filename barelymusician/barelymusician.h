@@ -81,7 +81,7 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   auto performer = musician.CreatePerformer();
+///   auto performer = musician.CreatePerformer(/*process_order=*/0);
 ///
 ///   // Create a task.
 ///   auto task = performer.CreateTask([]() { /*populate this*/ }, /*position=*/0.0);
@@ -192,7 +192,7 @@
 ///   @code{.cpp}
 ///   // Create.
 ///   BarelyPerformerHandle performer;
-///   BarelyMusician_CreatePerformer(musician, &performer);
+///   BarelyMusician_CreatePerformer(musician, /*process_order=*/0, &performer);
 ///
 ///   // Create a task.
 ///   BarelyTaskHandle task;
@@ -730,9 +730,11 @@ BARELY_EXPORT bool BarelyMusician_CreateInstrument(BarelyMusicianHandle musician
 /// Creates a new performer.
 ///
 /// @param musician Musician handle.
+/// @param process_order Process order.
 /// @param out_performer Output performer handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_CreatePerformer(BarelyMusicianHandle musician,
+                                                  int32_t process_order,
                                                   BarelyPerformerHandle* out_performer);
 
 /// Destroys a musician.
@@ -1880,10 +1882,12 @@ class Musician : public Wrapper<BarelyMusicianHandle> {
 
   /// Creates a new performer.
   ///
+  /// @param process_order Process order.
   /// @return Performer.
-  [[nodiscard]] Performer CreatePerformer() noexcept {
+  [[nodiscard]] Performer CreatePerformer(int process_order = 0) noexcept {
     BarelyPerformerHandle performer;
-    [[maybe_unused]] const bool success = BarelyMusician_CreatePerformer(*this, &performer);
+    [[maybe_unused]] const bool success =
+        BarelyMusician_CreatePerformer(*this, process_order, &performer);
     assert(success);
     return Performer(performer);
   }

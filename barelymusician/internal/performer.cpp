@@ -14,6 +14,8 @@
 
 namespace barely::internal {
 
+Performer::Performer(int process_order) noexcept : process_order_(process_order) {}
+
 void Performer::CancelAllOneOffTasks() noexcept { one_off_tasks_.clear(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -79,6 +81,8 @@ double Performer::GetLoopBeginPosition() const noexcept { return loop_begin_posi
 double Performer::GetLoopLength() const noexcept { return loop_length_; }
 
 double Performer::GetPosition() const noexcept { return position_; }
+
+int Performer::GetProcessOrder() const noexcept { return process_order_; }
 
 bool Performer::IsLooping() const noexcept { return is_looping_; }
 

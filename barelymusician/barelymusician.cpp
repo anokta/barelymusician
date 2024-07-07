@@ -223,12 +223,12 @@ bool BarelyMusician_CreateInstrument(BarelyMusicianHandle musician,
   return true;
 }
 
-bool BarelyMusician_CreatePerformer(BarelyMusicianHandle musician,
+bool BarelyMusician_CreatePerformer(BarelyMusicianHandle musician, int32_t process_order,
                                     BarelyPerformerHandle* out_performer) {
   if (!musician) return false;
   if (!out_performer) return false;
 
-  *out_performer = static_cast<BarelyPerformer*>(musician->CreatePerformer());
+  *out_performer = static_cast<BarelyPerformer*>(musician->CreatePerformer(process_order));
   return true;
 }
 
@@ -331,7 +331,7 @@ bool BarelyPerformer_DestroyTask(BarelyPerformerHandle performer, BarelyTaskHand
   if (!performer) return false;
   if (!task) return false;
 
-  delete task;
+  performer->DestroyTask(task);
   return true;
 }
 

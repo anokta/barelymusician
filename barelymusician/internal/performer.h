@@ -15,6 +15,11 @@ namespace barely::internal {
 /// Class that wraps a performer.
 class Performer {
  public:
+  /// Constructs a new `Performer`.
+  ///
+  /// @param process_order Process order.
+  explicit Performer(int process_order) noexcept;
+
   /// Cancels all one-off tasks.
   void CancelAllOneOffTasks() noexcept;
 
@@ -51,6 +56,11 @@ class Performer {
   ///
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept;
+
+  /// Returns process order.
+  ///
+  /// @return Process order.
+  [[nodiscard]] int GetProcessOrder() const noexcept;
 
   /// Returns whether performer is looping or not.
   ///
@@ -141,6 +151,9 @@ class Performer {
 
   // Position in beats.
   double position_ = 0.0;
+
+  // Process order.
+  int process_order_ = 0;
 
   // Map of tasks.
   std::multimap<double, OneOffTask> one_off_tasks_;

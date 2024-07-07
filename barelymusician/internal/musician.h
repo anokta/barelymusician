@@ -1,9 +1,12 @@
 #ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 #define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
+#include <map>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
@@ -27,9 +30,10 @@ class Musician {
 
   /// Creates a performer.
   ///
+  /// @param process_order Process order.
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Performer* CreatePerformer() noexcept;
+  Performer* CreatePerformer(int process_order) noexcept;
 
   /// Destroys effect.
   ///
@@ -53,13 +57,13 @@ class Musician {
   ///
   /// @param seconds Number of seconds.
   /// @return Number of beats.
-  [[nodiscard]] double GetBeatsFromSeconds(double seconds) noexcept;
+  [[nodiscard]] double GetBeatsFromSeconds(double seconds) const noexcept;
 
   /// Returns the corresponding number of seconds for a given number of beats.
   ///
   /// @param beats Number of beats.
   /// @return Number of seconds.
-  [[nodiscard]] double GetSecondsFromBeats(double beats) noexcept;
+  [[nodiscard]] double GetSecondsFromBeats(double beats) const noexcept;
 
   /// Returns tempo.
   ///
@@ -83,18 +87,14 @@ class Musician {
   void Update(double timestamp) noexcept;
 
  private:
-  // Pointer map alias.
-  template <typename PointerType>
-  using PointerMap = std::unordered_map<PointerType*, std::unique_ptr<PointerType>>;
-
   // Map of pointers to effects.
-  PointerMap<Effect> effects_;
+  std::unordered_map<Effect*, std::unique_ptr<Effect>> effects_;
 
   // Map of pointers to instruments.
-  PointerMap<Instrument> instruments_;
+  std::unordered_map<Instrument*, std::unique_ptr<Instrument>> instruments_;
 
-  // Map of pointers to performers.
-  PointerMap<Performer> performers_;
+  // Map of process order-pointer pairs to performers.
+  std::map<std::pair<int, Performer*>, std::unique_ptr<Performer>> performers_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

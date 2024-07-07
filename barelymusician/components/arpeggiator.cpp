@@ -193,9 +193,8 @@ void Arpeggiator::Stop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-// TODO(#131): Add process_order to Performer.
-Arpeggiator::Arpeggiator(Musician& musician, int /*process_order*/) noexcept
-    : performer_(musician.CreatePerformer()) {
+Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
+    : performer_(musician.CreatePerformer(process_order)) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
   task_ = performer_.CreateTask(

@@ -70,6 +70,7 @@ target_link_libraries(
   barely_internal_instrument
   barely_internal_performer
   barely_internal_seconds
+  barelymusician_headeronly
 )
 
 add_library(

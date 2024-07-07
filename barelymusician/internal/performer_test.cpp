@@ -35,7 +35,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   };
 
   // Create a recurring task.
-  Task* task = performer.CreateTask(definition, 0.25, 0, &task_process_count);
+  Task* task = performer.CreateTask(definition, 0.25, &task_process_count);
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
@@ -46,14 +46,14 @@ TEST(PerformerTest, ProcessSingleTask) {
   performer.Start();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.25, 0)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.25));
   EXPECT_EQ(task_process_count, 0);
 
   // Process the task.
   performer.Update(0.25);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, 0)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.0));
   EXPECT_EQ(task_process_count, 0);
 
   performer.ProcessNextTaskAtPosition();
@@ -64,39 +64,39 @@ TEST(PerformerTest, ProcessSingleTask) {
 
   // Set looping on.
   performer.SetLooping(true);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, 0)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(1.0));
 
   // Process the next task with a loop back.
   performer.Update(1.0);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, 0)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.0));
   EXPECT_EQ(task_process_count, 1);
 
   performer.ProcessNextTaskAtPosition();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, 0)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(1.0));
   EXPECT_EQ(task_process_count, 2);
 
   // Update the task position.
-  performer.SetTaskPosition(*task, 0.75);
+  task->SetPosition(0.75);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.5, 0)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.5));
   EXPECT_EQ(task_process_count, 2);
 
   // Process the task with the updated position.
   performer.Update(0.5);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, 0)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.0));
   EXPECT_EQ(task_process_count, 2);
 
   performer.ProcessNextTaskAtPosition();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, 0)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(1.0));
   EXPECT_EQ(task_process_count, 3);
 
   // Stop the performer.
@@ -131,7 +131,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
             },
             [](void** state) { delete static_cast<std::function<void()>*>(*state); },
             [](void** state) { (*static_cast<std::function<void()>*>(*state))(); }),
-        static_cast<double>(i), 4 - i, static_cast<void*>(&callback));
+        static_cast<double>(i), static_cast<void*>(&callback));
   };
   for (int i = 1; i <= 4; ++i) {
     create_task_fn(i);
@@ -146,7 +146,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
   performer.Start();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, 3)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(1.0));
   EXPECT_TRUE(positions.empty());
 
   // Process tasks.
@@ -154,10 +154,10 @@ TEST(PerformerTest, ProcessMultipleTasks) {
   for (int i = 1; i <= 4; ++i) {
     const double expected_position = static_cast<double>(i);
     expected_positions.push_back(expected_position);
-    EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, 4 - i)));
+    EXPECT_THAT(performer.GetDurationToNextTask(), Optional(1.0));
 
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-    performer.Update(performer.GetDurationToNextTask()->first);
+    performer.Update(*performer.GetDurationToNextTask());
     EXPECT_DOUBLE_EQ(performer.GetPosition(), expected_position);
 
     performer.ProcessNextTaskAtPosition();

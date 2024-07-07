@@ -93,8 +93,7 @@ void ScheduleNote(double position, double duration, double pitch, double intensi
   performer.ScheduleOneOffTask(
       [pitch, intensity, &instrument]() { instrument.SetNoteOn(pitch, intensity); }, position);
   performer.ScheduleOneOffTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-                               position + duration,
-                               /*process_order=*/-1);
+                               position + duration);
 }
 
 void ComposeChord(double intensity, int harmonic, Instrument& instrument, Performer& performer) {

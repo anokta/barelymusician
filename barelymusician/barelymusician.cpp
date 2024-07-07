@@ -318,13 +318,12 @@ bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer) {
 }
 
 bool BarelyPerformer_CreateTask(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
-                                double position, int32_t process_order, void* user_data,
-                                BarelyTaskHandle* out_task) {
+                                double position, void* user_data, BarelyTaskHandle* out_task) {
   if (!performer) return false;
   if (!out_task) return false;
 
-  (*out_task) = static_cast<BarelyTaskHandle>(
-      performer->CreateTask(definition, position, process_order, user_data));
+  (*out_task) =
+      static_cast<BarelyTaskHandle>(performer->CreateTask(definition, position, user_data));
   return true;
 }
 
@@ -379,10 +378,10 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
 
 bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
                                         BarelyTaskDefinition definition, double position,
-                                        int32_t process_order, void* user_data) {
+                                        void* user_data) {
   if (!performer) return false;
 
-  performer->ScheduleOneOffTask(definition, position, process_order, user_data);
+  performer->ScheduleOneOffTask(definition, position, user_data);
   return true;
 }
 
@@ -437,24 +436,9 @@ bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
   return true;
 }
 
-bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_order) {
-  if (!task) return false;
-  if (!out_process_order) return false;
-
-  *out_process_order = task->GetProcessOrder();
-  return true;
-}
-
 bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
   if (!task) return false;
 
   task->SetPosition(position);
-  return true;
-}
-
-bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t process_order) {
-  if (!task) return false;
-
-  task->SetProcessOrder(process_order);
   return true;
 }

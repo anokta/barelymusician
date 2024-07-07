@@ -174,8 +174,6 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySinglePerformer) {
-  constexpr int kProcessOrder = 0;
-
   Musician musician;
 
   // Create a performer.
@@ -191,7 +189,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   };
 
   // Schedule a task.
-  performer->ScheduleOneOffTask(definition, 1.0, kProcessOrder, &process_callback);
+  performer->ScheduleOneOffTask(definition, 1.0, &process_callback);
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);
@@ -202,14 +200,14 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   EXPECT_TRUE(performer->IsPlaying());
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(1.0, kProcessOrder)));
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(1.0));
   musician.Update(1.0);
-  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(0.0));
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp past the task, which should be triggered now.
-  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(0.0));
   musician.Update(1.5);
   EXPECT_FALSE(performer->GetDurationToNextTask().has_value());
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.5);

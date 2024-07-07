@@ -193,12 +193,13 @@ void Arpeggiator::Stop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
+// TODO(#131): Add process_order to Performer.
+Arpeggiator::Arpeggiator(Musician& musician, int /*process_order*/) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
   task_ = performer_.CreateTask(
-      [this, process_order]() noexcept {
+      [this]() noexcept {
         Update();
         if (instrument_ == nullptr) {
           return;
@@ -211,9 +212,9 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
                 instrument_->SetNoteOff(pitch);
               }
             },
-            gate_ratio_ * performer_.GetLoopLength(), process_order);
+            gate_ratio_ * performer_.GetLoopLength());
       },
-      0.0, process_order);
+      0.0);
 }
 
 }  // namespace barely

@@ -21,7 +21,8 @@ void Metronome::Start() noexcept { performer_.Start(); }
 void Metronome::Stop() noexcept { performer_.Stop(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Metronome::Metronome(Musician& musician, int process_order) noexcept
+// TODO(#131): Add process_order to Performer.
+Metronome::Metronome(Musician& musician, int /*process_order*/) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
@@ -32,7 +33,7 @@ Metronome::Metronome(Musician& musician, int process_order) noexcept
         }
         ++beat_;
       },
-      0.0, process_order);
+      0.0);
 }
 
 }  // namespace barely

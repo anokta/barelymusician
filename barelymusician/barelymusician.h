@@ -84,8 +84,7 @@
 ///   auto performer = musician.CreatePerformer();
 ///
 ///   // Create a task.
-///   auto task = performer.CreateTask([]() {},  // populate this.
-///                                    /*position=*/0.0, /*process_order=*/0);
+///   auto task = performer.CreateTask([]() { /*populate this*/ }, /*position=*/0.0);
 ///
 ///   // Set looping on.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -196,10 +195,9 @@
 ///   BarelyMusician_CreatePerformer(musician, &performer);
 ///
 ///   // Create a task.
-///   BarelyTaskDefinition definition;  // populate this.
 ///   BarelyTaskHandle task;
-///   BarelyPerformer_CreateTask(performer, definition, /*position=*/0.0, /*process_order=*/0,
-///                              /*user_data=*/nullptr, &task);
+///   BarelyPerformer_CreateTask(performer, BarelyTaskDefinition{/*populate this*/},
+///                              /*position=*/0.0, /*user_data=*/nullptr, &task);
 ///
 ///   // Set looping on.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
@@ -826,14 +824,12 @@ BARELY_EXPORT bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle pe
 /// @param performer Performer handle.
 /// @param definition Task definition.
 /// @param position Task position in beats.
-/// @param process_order Task process order.
 /// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_CreateTask(BarelyPerformerHandle performer,
                                               BarelyTaskDefinition definition, double position,
-                                              int32_t process_order, void* user_data,
-                                              BarelyTaskHandle* out_task);
+                                              void* user_data, BarelyTaskHandle* out_task);
 
 /// Destroys a performer task.
 ///
@@ -886,13 +882,11 @@ BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bo
 /// @param performer Performer handle.
 /// @param definition Task definition.
 /// @param position Task position in beats.
-/// @param process_order Task process order.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
                                                       BarelyTaskDefinition definition,
-                                                      double position, int32_t process_order,
-                                                      void* user_data);
+                                                      double position, void* user_data);
 
 /// Sets the loop begin position of a performer.
 ///
@@ -943,26 +937,12 @@ BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position);
 
-/// Gets the process order of a task.
-///
-/// @param task Task handle.
-/// @param out_process_order Output process order.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_order);
-
 /// Sets the position of a task.
 ///
 /// @param task Task handle.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
-
-/// Sets the process order of a task.
-///
-/// @param task Task handle.
-/// @param process_order Process order.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t process_order);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -1645,29 +1625,11 @@ class Task : public Wrapper<BarelyTaskHandle> {
     return position;
   }
 
-  /// Returns the process order.
-  ///
-  /// @return Process order.
-  [[nodiscard]] int GetProcessOrder() const noexcept {
-    int32_t process_order = 0;
-    [[maybe_unused]] const bool success = BarelyTask_GetProcessOrder(*this, &process_order);
-    assert(success);
-    return static_cast<int>(process_order);
-  }
-
   /// Sets the position.
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
     [[maybe_unused]] const bool success = BarelyTask_SetPosition(*this, position);
-    assert(success);
-  }
-
-  /// Sets the process order.
-  ///
-  /// @param process_order Process order.
-  void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const bool success = BarelyTask_SetProcessOrder(*this, process_order);
     assert(success);
   }
 };
@@ -1693,14 +1655,13 @@ class Performer : public Wrapper<BarelyPerformerHandle> {
   ///
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   /// @return Task.
-  [[nodiscard]] Task CreateTask(TaskDefinition definition, double position, int process_order = 0,
+  [[nodiscard]] Task CreateTask(TaskDefinition definition, double position,
                                 void* user_data = nullptr) noexcept {
     BarelyTaskHandle task;
     [[maybe_unused]] const bool success =
-        BarelyPerformer_CreateTask(*this, definition, position, process_order, user_data, &task);
+        BarelyPerformer_CreateTask(*this, definition, position, user_data, &task);
     assert(success);
     return Task(task);
   }
@@ -1709,12 +1670,9 @@ class Performer : public Wrapper<BarelyPerformerHandle> {
   ///
   /// @param callback Task callback.
   /// @param position Task position in beats.
-  /// @param process_order Task process order.
   /// @return Task.
-  [[nodiscard]] Task CreateTask(TaskDefinition::Callback callback, double position,
-                                int process_order = 0) noexcept {
-    return CreateTask(TaskDefinition::WithCallback(), position, process_order,
-                      static_cast<void*>(&callback));
+  [[nodiscard]] Task CreateTask(TaskDefinition::Callback callback, double position) noexcept {
+    return CreateTask(TaskDefinition::WithCallback(), position, static_cast<void*>(&callback));
   }
 
   /// Destroys a task.
@@ -1777,12 +1735,11 @@ class Performer : public Wrapper<BarelyPerformerHandle> {
   ///
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  void ScheduleOneOffTask(TaskDefinition definition, double position, int process_order = 0,
+  void ScheduleOneOffTask(TaskDefinition definition, double position,
                           void* user_data = nullptr) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyPerformer_ScheduleOneOffTask(*this, definition, position, process_order, user_data);
+        BarelyPerformer_ScheduleOneOffTask(*this, definition, position, user_data);
     assert(success);
   }
 
@@ -1790,11 +1747,8 @@ class Performer : public Wrapper<BarelyPerformerHandle> {
   ///
   /// @param callback Task callback.
   /// @param position Task position in beats.
-  /// @param process_order Task process order.
-  void ScheduleOneOffTask(TaskDefinition::Callback callback, double position,
-                          int process_order = 0) noexcept {
-    ScheduleOneOffTask(TaskDefinition::WithCallback(), position, process_order,
-                       static_cast<void*>(&callback));
+  void ScheduleOneOffTask(TaskDefinition::Callback callback, double position) noexcept {
+    ScheduleOneOffTask(TaskDefinition::WithCallback(), position, static_cast<void*>(&callback));
   }
 
   /// Sets the loop begin position.

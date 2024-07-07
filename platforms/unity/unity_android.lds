@@ -49,9 +49,7 @@ VERS_1.0 {
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
     BarelyTask_GetPosition;
-    BarelyTask_GetProcessOrder;
     BarelyTask_SetPosition;
-    BarelyTask_SetProcessOrder;
 
     BarelyArpeggiator_Create;
     BarelyArpeggiator_Destroy;

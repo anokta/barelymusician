@@ -5,7 +5,6 @@
 #include <map>
 #include <memory>
 #include <optional>
-#include <tuple>
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
@@ -23,12 +22,10 @@ class Performer {
   ///
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   /// @return Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Task* CreateTask(TaskDefinition definition, double position, int32_t process_order,
-                   void* user_data) noexcept;
+  Task* CreateTask(TaskDefinition definition, double position, void* user_data) noexcept;
 
   /// Destroys a task.
   ///
@@ -37,8 +34,8 @@ class Performer {
 
   /// Returns the duration to next task.
   ///
-  /// @return Optional pair of duration in beats and process order.
-  [[nodiscard]] std::optional<std::pair<double, int>> GetDurationToNextTask() const noexcept;
+  /// @return Optional duration in beats.
+  [[nodiscard]] std::optional<double> GetDurationToNextTask() const noexcept;
 
   /// Returns loop begin position.
   ///
@@ -72,10 +69,8 @@ class Performer {
   ///
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  void ScheduleOneOffTask(TaskDefinition definition, double position, int process_order,
-                          void* user_data) noexcept;
+  void ScheduleOneOffTask(TaskDefinition definition, double position, void* user_data) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -100,15 +95,9 @@ class Performer {
 
   /// Sets task position.
   ///
-  /// @param task Task.
+  /// @param task Pointer to task.
   /// @param position Task position.
-  void SetTaskPosition(Task& task, double position) noexcept;
-
-  /// Sets task process order.
-  ///
-  /// @param task Task.
-  /// @param process_order Task process order.
-  void SetTaskProcessOrder(Task& task, int process_order) noexcept;
+  void SetTaskPosition(Task* task, double position) noexcept;
 
   /// Stops performer.
   void Start() noexcept;
@@ -127,7 +116,7 @@ class Performer {
   using OneOffTask = Event<TaskDefinition>;
 
   // Recurring task map alias.
-  using RecurringTaskMap = std::map<std::tuple<double, int, Task*>, std::unique_ptr<Task>>;
+  using RecurringTaskMap = std::map<std::pair<double, Task*>, std::unique_ptr<Task>>;
 
   // Returns an iterator to the next recurring task to process.
   [[nodiscard]] RecurringTaskMap::const_iterator GetNextRecurringTask() const noexcept;
@@ -154,7 +143,7 @@ class Performer {
   double position_ = 0.0;
 
   // Map of tasks.
-  std::multimap<std::pair<double, int>, OneOffTask> one_off_tasks_;
+  std::multimap<double, OneOffTask> one_off_tasks_;
   RecurringTaskMap recurring_tasks_;
 
   // Last processed recurring task iterator.

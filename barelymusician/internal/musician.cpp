@@ -75,10 +75,11 @@ void Musician::Update(double timestamp) noexcept {
       bool has_tasks_to_process = false;
       for (const auto& [performer_ptr, performer] : performers_) {
         assert(performer_ptr);
+        // TODO(#131): Add process_order to Performer.
         if (const auto maybe_duration = performer_ptr->GetDurationToNextTask();
-            maybe_duration && maybe_duration < update_duration) {
+            maybe_duration && maybe_duration < update_duration.first) {
           has_tasks_to_process = true;
-          update_duration = *maybe_duration;
+          update_duration.first = *maybe_duration;
         }
       }
       assert(update_duration.first > 0.0 || has_tasks_to_process);

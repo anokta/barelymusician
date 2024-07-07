@@ -98,10 +98,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   triggers.emplace_back(5.0, 2.0);
   tasks.push_back(performer.CreateTask(play_note_fn(8, 2.0), 5.0));
 
-  // Stopper.
-  auto stopper = performer.CreateTask([&performer]() { performer.Stop(); }, 0.0,
-                                      /*process_order=*/-1);
-
   // Audio process callback.
   const auto process_callback = [&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
@@ -120,9 +116,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '1');
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
+      performer.CancelAllOneOffTasks();
       instrument.SetAllNotesOff();
       performer.SetPosition(triggers[index].first);
-      stopper.SetPosition(triggers[index].first + triggers[index].second);
+      performer.ScheduleOneOffTask(
+          [&]() {
+            instrument.SetAllNotesOff();
+            performer.Stop();
+          },
+          triggers[index].first + triggers[index].second);
       performer.Start();
       return;
     }

@@ -201,12 +201,13 @@ bool Repeater::Update() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(Musician& musician, int process_order) noexcept
+// TODO(#131): Add process_order to Performer.
+Repeater::Repeater(Musician& musician, int /*process_order*/) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
   task_ = performer_.CreateTask(
-      [this, process_order]() noexcept {
+      [this]() noexcept {
         if (pitches_.empty() || !Update() || instrument_ == nullptr) {
           return;
         }
@@ -217,10 +218,9 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
         const double pitch = *pitches_[index_].first + pitch_shift_;
         instrument_->SetNoteOn(pitch);
         performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                                      static_cast<double>(length) * performer_.GetLoopLength(),
-                                      process_order);
+                                      static_cast<double>(length) * performer_.GetLoopLength());
       },
-      0.0, process_order);
+      0.0);
 }
 
 }  // namespace barely

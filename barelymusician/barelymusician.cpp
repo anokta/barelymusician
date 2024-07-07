@@ -25,7 +25,7 @@ struct BarelyEffect : public Effect {};
 struct BarelyInstrument : public Instrument {};
 
 // Musician.
-struct BarelyMusician : public Observable<Musician> {
+struct BarelyMusician : public Musician {
   // Default constructor.
   BarelyMusician() noexcept = default;
 
@@ -43,35 +43,7 @@ struct BarelyMusician : public Observable<Musician> {
 struct BarelyPerformer : public Performer {};
 
 // Task.
-struct BarelyTask : public Task {
-  // Constructs `BarelyTask` with `performer`, `definition`, `position`, `process_order`, and
-  // `user_data`.
-  BarelyTask(Performer* performer, BarelyTaskDefinition definition, double position,
-             int process_order, void* user_data) noexcept
-      : Task(definition, position, process_order, user_data), performer_(performer) {
-    performer_->AddTask(*this);
-  }
-
-  // Destroys `BarelyTask`.
-  ~BarelyTask() noexcept {
-    if (performer_) {
-      performer_->RemoveTask(*this);
-    }
-  }
-
-  // Non-copyable and non-movable.
-  BarelyTask(const BarelyTask& other) noexcept = delete;
-  BarelyTask& operator=(const BarelyTask& other) noexcept = delete;
-  BarelyTask(BarelyTask&& other) noexcept = delete;
-  BarelyTask& operator=(BarelyTask&& other) noexcept = delete;
-
-  // Returns the performer.
-  [[nodiscard]] Performer* performer() const noexcept { return performer_; }
-
- private:
-  // Internal performer.
-  Performer* performer_;
-};
+struct BarelyTask : public Task {};
 
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id, double* out_value) {
   if (!effect) return false;
@@ -351,7 +323,8 @@ bool BarelyPerformer_CreateTask(BarelyPerformerHandle performer, BarelyTaskDefin
   if (!performer) return false;
   if (!out_task) return false;
 
-  (*out_task) = new BarelyTask(performer, definition, position, process_order, user_data);
+  (*out_task) = static_cast<BarelyTaskHandle>(
+      performer->CreateTask(definition, position, process_order, user_data));
   return true;
 }
 
@@ -473,15 +446,15 @@ bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_orde
 }
 
 bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
-  if (!task || !task->performer()) return false;
+  if (!task) return false;
 
-  task->performer()->SetTaskPosition(*task, position);
+  task->SetPosition(position);
   return true;
 }
 
 bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t process_order) {
-  if (!task || !task->performer()) return false;
+  if (!task) return false;
 
-  task->performer()->SetTaskProcessOrder(*task, process_order);
+  task->SetProcessOrder(process_order);
   return true;
 }

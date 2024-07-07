@@ -3,8 +3,9 @@
 
 #include <compare>
 #include <map>
+#include <memory>
 #include <optional>
-#include <set>
+#include <tuple>
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
@@ -15,14 +16,24 @@ namespace barely::internal {
 /// Class that wraps a performer.
 class Performer {
  public:
-  /// Adds a task.
-  ///
-  /// @param task Task.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddTask(Task& task) noexcept;
-
   /// Cancels all one-off tasks.
   void CancelAllOneOffTasks() noexcept;
+
+  /// Adds a task.
+  ///
+  /// @param definition Task definition.
+  /// @param position Task position in beats.
+  /// @param process_order Task process order.
+  /// @param user_data Pointer to user data.
+  /// @return Pointer to task.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  Task* CreateTask(TaskDefinition definition, double position, int32_t process_order,
+                   void* user_data) noexcept;
+
+  /// Destroys a task.
+  ///
+  /// @param task Task.
+  bool DestroyTask(Task* task) noexcept;
 
   /// Returns the duration to next task.
   ///
@@ -56,11 +67,6 @@ class Performer {
 
   /// Processes the next task at the current position.
   void ProcessNextTaskAtPosition() noexcept;
-
-  /// Destroys a task.
-  ///
-  /// @param task Task.
-  void RemoveTask(Task& task) noexcept;
 
   /// Schedules a one-off task.
   ///
@@ -117,11 +123,14 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
-  // Recurring task alias.
-  using RecurringTask = std::pair<std::pair<double, int>, Task*>;
+  // One-off task alias.
+  using OneOffTask = Event<TaskDefinition>;
+
+  // Recurring task map alias.
+  using RecurringTaskMap = std::map<std::tuple<double, int, Task*>, std::unique_ptr<Task>>;
 
   // Returns an iterator to the next recurring task to process.
-  [[nodiscard]] std::set<RecurringTask>::const_iterator GetNextRecurringTask() const noexcept;
+  [[nodiscard]] RecurringTaskMap::const_iterator GetNextRecurringTask() const noexcept;
 
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
@@ -144,12 +153,12 @@ class Performer {
   // Position in beats.
   double position_ = 0.0;
 
-  // Sorted map of tasks by task position-identifier pairs.
-  std::multimap<std::pair<double, int>, Task> one_off_tasks_;
-  std::set<RecurringTask> recurring_tasks_;
+  // Map of tasks.
+  std::multimap<std::pair<double, int>, OneOffTask> one_off_tasks_;
+  RecurringTaskMap recurring_tasks_;
 
   // Last processed recurring task iterator.
-  std::optional<std::set<RecurringTask>::const_iterator> last_processed_recurring_task_it_;
+  std::optional<RecurringTaskMap::const_iterator> last_processed_recurring_task_it_;
 };
 
 }  // namespace barely::internal

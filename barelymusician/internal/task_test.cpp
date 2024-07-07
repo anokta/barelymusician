@@ -28,7 +28,10 @@ TEST(TaskTest, Process) {
   EXPECT_EQ(task_process_count, 0);
 
   {
-    Task task(definition, 1.0, 2, &task_process_count);
+    Task task(
+        definition, 1.0, 2, &task_process_count,
+        [](Task* task, double position) { EXPECT_NE(task->GetPosition(), position); },
+        [](Task* task, int process_order) { EXPECT_NE(task->GetProcessOrder(), process_order); });
 
     EXPECT_EQ(task_create_count, 1);
     EXPECT_EQ(task_destroy_count, 0);

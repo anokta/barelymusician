@@ -47,7 +47,7 @@
 ///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/-1.0);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
+///   instrument.GetControl(barely::SynthInstrument::Control::kGain).SetValue(/*value=*/0.5);
 ///
 ///   // Process.
 ///   //
@@ -71,7 +71,7 @@
 ///   auto effect = musician.CreateEffect<barely::LowPassEffect>(/*frame_rate=*/48000);
 ///
 ///   // Set a control value.
-///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
+///   effect.GetControl(barely::LowPassEffect::Control::kCutoffFrequency).SetValue(/*value=*/800.0);
 ///
 ///   // Process.
 ///   effect.Process(output_samples.data(), output_channel_count, output_frame_count, timestamp);
@@ -148,7 +148,9 @@
 ///   BarelyInstrument_IsNoteOn(instrument, /*pitch=*/-1.0, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, /*id=*/0, /*value=*/0.5);
+///   BarelyControlHandle control;
+///   BarelyInstrument_GetControl(instrument, /*id=*/0, &control);
+///   BarelyControl_SetValue(control, /*value=*/0.5);
 ///
 ///   // Process.
 ///   //
@@ -177,7 +179,9 @@
 ///                               /*frame_rate=*/48000, &effect);
 ///
 ///   // Set a control value.
-///   BarelyEffect_SetControl(effect, /*id=*/0, /*value=*/1000.0);
+///   BarelyControlHandle control;
+///   BarelyEffect_GetControl(effect, /*id=*/0, &control);
+///   BarelyControl_SetValue(control, /*value=*/800.0);
 ///
 ///   // Process.
 ///   BarelyEffect_Process(effect, output_samples, output_channel_count, output_frame_count,
@@ -511,6 +515,9 @@ typedef struct BarelyTaskDefinition {
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
 
+/// Control handle.
+typedef struct BarelyControl* BarelyControlHandle;
+
 /// Effect handle.
 typedef struct BarelyEffect* BarelyEffectHandle;
 
@@ -526,14 +533,34 @@ typedef struct BarelyPerformer* BarelyPerformerHandle;
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
 
-/// Gets an effect control value.
+/// Gets a control value.
+///
+/// @param control Control handle.
+/// @param out_value Output value.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyControl_GetValue(BarelyControlHandle control, double* out_value);
+
+/// Resets a control value.
+///
+/// @param control Control handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyControl_ResetValue(BarelyControlHandle control);
+
+/// Sets a control value.
+///
+/// @param control Control handle.
+/// @param value Value.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyControl_SetValue(BarelyControlHandle control, double value);
+
+/// Gets an effect control.
 ///
 /// @param effect Effect handle.
 /// @param id Control identifier.
-/// @param out_value Output control value.
+/// @param out_control Output control handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id,
-                                           double* out_value);
+                                           BarelyControlHandle* out_control);
 
 /// Processes effect output samples at timestamp.
 /// @note This is *not* thread-safe during a corresponding `BarelyMusician_DestroyEffect` call.
@@ -548,21 +575,6 @@ BARELY_EXPORT bool BarelyEffect_Process(BarelyEffectHandle instrument, double* o
                                         int32_t output_channel_count, int32_t output_frame_count,
                                         double timestamp);
 
-/// Resets an effect control value.
-///
-/// @param effect Effect handle.
-/// @param id Control identifier.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t id);
-
-/// Sets an effect control value.
-///
-/// @param effect Effect handle.
-/// @param id Control identifier.
-/// @param value Control value.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value);
-
 /// Sets effect data.
 ///
 /// @param effect Effect handle.
@@ -571,24 +583,24 @@ BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size);
 
-/// Gets an instrument control value.
+/// Gets an instrument control.
 ///
 /// @param instrument Instrument handle.
 /// @param id Control identifier.
-/// @param out_value Output control value.
+/// @param out_control Output control handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t id,
-                                               double* out_value);
+                                               BarelyControlHandle* out_control);
 
-/// Gets an instrument note control value.
+/// Gets an instrument note control.
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
 /// @param id Note control identifier.
-/// @param out_value Output note control value.
+/// @param out_control Output control handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   int32_t id, double* out_value);
+                                                   int32_t id, BarelyControlHandle* out_control);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -612,36 +624,11 @@ BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
                                             double* output_samples, int32_t output_channel_count,
                                             int32_t output_frame_count, double timestamp);
 
-/// Resets an instrument control value.
-///
-/// @param instrument Instrument handle.
-/// @param id Control identifier.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t id);
-
-/// Resets an instrument note control value.
-///
-/// @param instrument Instrument handle.
-/// @param pitch Note pitch.
-/// @param id Note control identifier.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument,
-                                                     double pitch, int32_t id);
-
 /// Sets all instrument notes off.
 ///
 /// @param instrument Instrument handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument);
-
-/// Sets an instrument control value.
-///
-/// @param instrument Instrument handle.
-/// @param id Control identifier.
-/// @param value Control value.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t id,
-                                               double value);
 
 /// Sets instrument data.
 ///
@@ -651,16 +638,6 @@ BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* data,
                                             int32_t size);
-
-/// Sets an instrument note control value.
-///
-/// @param instrument Instrument handle.
-/// @param pitch Note pitch.
-/// @param id Note control identifier.
-/// @param value Note control value.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   int32_t id, double value);
 
 /// Sets an instrument note off.
 ///
@@ -1305,6 +1282,48 @@ class Wrapper {
   HandleType handle_ = nullptr;
 };
 
+/// Class that wraps a control.
+class Control : public Wrapper<BarelyControlHandle> {
+ public:
+  /// Default constructor.
+  Control() noexcept = default;
+
+  /// Creates a new `Control` from a raw control handle.
+  ///
+  /// @param control Raw control handle.
+  explicit Control(BarelyControlHandle control) noexcept : Wrapper(control) {}
+
+  /// Returns the value.
+  ///
+  /// @return Value.
+  template <typename ValueType>
+  [[nodiscard]] ValueType GetValue() const noexcept {
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
+    double value = 0.0;
+    [[maybe_unused]] const bool success = BarelyControl_GetValue(*this, &value);
+    assert(success);
+    return static_cast<ValueType>(value);
+  }
+
+  /// Resets the value.
+  void ResetValue() noexcept {
+    [[maybe_unused]] const bool success = BarelyControl_ResetValue(*this);
+    assert(success);
+  }
+
+  /// Sets the value.
+  ///
+  /// @param value Value.
+  template <typename ValueType>
+  void SetValue(ValueType value) noexcept {
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
+    [[maybe_unused]] const bool success = BarelyControl_SetValue(*this, static_cast<double>(value));
+    assert(success);
+  }
+};
+
 /// Class that wraps an effect.
 class Effect : public Wrapper<BarelyEffectHandle> {
  public:
@@ -1316,21 +1335,19 @@ class Effect : public Wrapper<BarelyEffectHandle> {
   /// @param effect Raw effect handle.
   explicit Effect(BarelyEffectHandle effect) noexcept : Wrapper(effect) {}
 
-  /// Returns a control value.
+  /// Returns a control.
   ///
   /// @param id Control identifier.
-  /// @return Control value.
-  template <typename IdType, typename ValueType>
-  [[nodiscard]] ValueType GetControl(IdType id) const noexcept {
+  /// @return Control.
+  template <typename IdType>
+  [[nodiscard]] Control GetControl(IdType id) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    double value = 0.0;
+    BarelyControlHandle control = nullptr;
     [[maybe_unused]] const bool success =
-        BarelyEffect_GetControl(*this, static_cast<int>(id), &value);
+        BarelyEffect_GetControl(*this, static_cast<int>(id), &control);
     assert(success);
-    return static_cast<ValueType>(value);
+    return Control(control);
   }
 
   /// Processes output samples at timestamp.
@@ -1343,32 +1360,6 @@ class Effect : public Wrapper<BarelyEffectHandle> {
                double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyEffect_Process(
         *this, output_samples, output_channel_count, output_frame_count, timestamp);
-    assert(success);
-  }
-
-  /// Resets a control value.
-  ///
-  /// @param id Control identifier.
-  template <typename IdType>
-  void ResetControl(IdType id) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    [[maybe_unused]] const bool success = BarelyEffect_ResetControl(*this, static_cast<int>(id));
-    assert(success);
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param id Control identifier.
-  /// @param value Control value.
-  template <typename IdType, typename ValueType>
-  void SetControl(IdType id, ValueType value = 0.0) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success =
-        BarelyEffect_SetControl(*this, static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -1410,38 +1401,35 @@ class Instrument : public Wrapper<BarelyInstrumentHandle> {
   /// @param instrument Raw instrument handle.
   explicit Instrument(BarelyInstrumentHandle instrument) noexcept : Wrapper(instrument) {}
 
-  /// Returns a control value.
+  /// Returns a control.
   ///
   /// @param id Control identifier.
-  /// @return Control value.
-  template <typename IdType, typename ValueType>
-  [[nodiscard]] ValueType GetControl(IdType id) const noexcept {
+  /// @return Control.
+  template <typename IdType>
+  [[nodiscard]] Control GetControl(IdType id) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    double value = 0.0;
+    BarelyControlHandle control = nullptr;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_GetControl(*this, static_cast<int>(id), &value);
+        BarelyInstrument_GetControl(*this, static_cast<int>(id), &control);
     assert(success);
-    return static_cast<ValueType>(value);
+    return Control(control);
   }
 
-  /// Returns a note control value.
+  /// Returns a note control.
   ///
+  /// @param pitch Note pitch.
   /// @param id Note control identifier.
-  /// @return Note control value.
-  template <typename IdType, typename ValueType>
-  [[nodiscard]] ValueType GetNoteControl(double pitch, IdType id) const noexcept {
+  /// @return Note control.
+  template <typename IdType>
+  [[nodiscard]] Control GetNoteControl(double pitch, IdType id) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    double value = 0.0;
+    BarelyControlHandle note_control = nullptr;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_GetNoteControl(*this, pitch, static_cast<int>(id), &value);
+        BarelyInstrument_GetNoteControl(*this, pitch, id, &note_control);
     assert(success);
-    return static_cast<ValueType>(value);
+    return Control(note_control);
   }
 
   /// Returns whether a note is on or not.
@@ -1468,47 +1456,9 @@ class Instrument : public Wrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
-  /// Resets a control value.
-  ///
-  /// @param id Control identifier.
-  template <typename IdType>
-  void ResetControl(IdType id) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetControl(*this, id);
-    assert(success);
-  }
-
-  /// Resets a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param id Note control identifier.
-  template <typename IdType>
-  void ResetNoteControl(double pitch, IdType id) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetNoteControl(*this, pitch, id);
-    assert(success);
-  }
-
   /// Sets all notes off.
   void SetAllNotesOff() noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetAllNotesOff(*this);
-    assert(success);
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param id Control identifier.
-  /// @param value Control value.
-  template <typename IdType, typename ValueType>
-  void SetControl(IdType id, ValueType value = 0.0) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_SetControl(*this, static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -1535,22 +1485,6 @@ class Instrument : public Wrapper<BarelyInstrumentHandle> {
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetData(*this, data, size);
-    assert(success);
-  }
-
-  /// Sets a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param id Note control identifier.
-  /// @param value Note control value.
-  template <typename IdType, typename ValueType>
-  void SetNoteControl(double pitch, IdType id, ValueType value) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        *this, pitch, static_cast<int>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -1800,7 +1734,6 @@ class Performer : public Wrapper<BarelyPerformerHandle> {
 };
 
 /// Class that wraps a musician.
-// TODO(#131): These will leak memory now when Destroy is not called - to fix in a later commit.
 class Musician : public Wrapper<BarelyMusicianHandle> {
  public:
   /// Default constructor.
@@ -1814,7 +1747,7 @@ class Musician : public Wrapper<BarelyMusicianHandle> {
   /// Creates a new musician.
   ///
   /// @return Musician.
-  static Musician Create() noexcept {
+  [[nodiscard]] static Musician Create() noexcept {
     BarelyMusicianHandle musician = nullptr;
     [[maybe_unused]] const bool success = BarelyMusician_Create(&musician);
     assert(success);

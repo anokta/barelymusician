@@ -212,10 +212,10 @@ int main(int /*argc*/, char* argv[]) {
                                              double release) {
     instruments.push_back(musician.CreateInstrument<SynthInstrument>(kFrameRate));
     auto& instrument = instruments.back();
-    instrument.SetControl(SynthInstrument::Control::kGain, gain);
-    instrument.SetControl(SynthInstrument::Control::kOscillatorType, type);
-    instrument.SetControl(SynthInstrument::Control::kAttack, attack);
-    instrument.SetControl(SynthInstrument::Control::kRelease, release);
+    instrument.GetControl(SynthInstrument::Control::kGain).SetValue(gain);
+    instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(type);
+    instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(attack);
+    instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(release);
     set_note_callbacks_fn(instruments.size(), instrument);
   };
 
@@ -253,7 +253,7 @@ int main(int /*argc*/, char* argv[]) {
   // Add percussion instrument.
   instruments.push_back(musician.CreateInstrument<PercussionInstrument>(kFrameRate));
   auto& percussion = instruments.back();
-  percussion.SetControl(PercussionInstrument::Control::kGain, 0.25);
+  percussion.GetControl(PercussionInstrument::Control::kGain).SetValue(0.25);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::unordered_map<double, std::string>& percussion_map) {

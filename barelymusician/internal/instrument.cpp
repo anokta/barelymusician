@@ -25,11 +25,14 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
       frame_rate_(frame_rate),
-      default_note_controls_(
-          BuildControls(static_cast<const ControlDefinition*>(definition.note_control_definitions),
-                        definition.note_control_definition_count)),
+      note_control_definitions_(
+          definition.note_control_definitions,
+          definition.note_control_definitions + definition.note_control_definition_count),
       controls_(BuildControls(static_cast<const ControlDefinition*>(definition.control_definitions),
-                              definition.control_definition_count)),
+                              definition.control_definition_count,
+                              [this](int id, double value) {
+                                message_queue_.Add(update_frame_, ControlMessage{id, value});
+                              })),
       update_frame_(FramesFromSeconds(frame_rate_, initial_timestamp)) {
   assert(frame_rate > 0);
   if (definition.create_callback) {
@@ -49,18 +52,11 @@ Instrument::~Instrument() noexcept {
   }
 }
 
-const Control* Instrument::GetControl(int id) const noexcept {
-  if (const auto* control = FindOrNull(controls_, id)) {
-    return control;
-  }
-  return nullptr;
-}
+Control* Instrument::GetControl(int id) noexcept { return FindOrNull(controls_, id); }
 
-const Control* Instrument::GetNoteControl(double pitch, int id) const noexcept {
-  if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (const auto* note_control = FindOrNull(*note_controls, id)) {
-      return note_control;
-    }
+Control* Instrument::GetNoteControl(double pitch, int id) noexcept {
+  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
+    return FindOrNull(*note_controls, id);
   }
   return nullptr;
 }
@@ -132,29 +128,6 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
   return true;
 }
 
-bool Instrument::ResetControl(int index) noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    if (auto& control = controls_[index]; control.Reset()) {
-      message_queue_.Add(update_frame_, ControlMessage{index, control.GetValue()});
-    }
-    return true;
-  }
-  return false;
-}
-
-bool Instrument::ResetNoteControl(double pitch, int index) noexcept {
-  if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
-    if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-      if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
-        message_queue_.Add(update_frame_,
-                           NoteControlMessage{pitch, index, note_control.GetValue()});
-      }
-      return true;
-    }
-  }
-  return false;
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::SetAllNotesOff() noexcept {
   for (const auto& [pitch, note_controls] : std::exchange(note_controls_, {})) {
@@ -163,31 +136,8 @@ void Instrument::SetAllNotesOff() noexcept {
   }
 }
 
-bool Instrument::SetControl(int index, double value) noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    if (auto& control = controls_[index]; control.Set(value)) {
-      message_queue_.Add(update_frame_, ControlMessage{index, control.GetValue()});
-    }
-    return true;
-  }
-  return false;
-}
-
 void Instrument::SetData(std::vector<std::byte> data) noexcept {
   message_queue_.Add(update_frame_, DataMessage{std::move(data)});
-}
-
-bool Instrument::SetNoteControl(double pitch, int index, double value) noexcept {
-  if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
-    if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-      if (auto& note_control = (*note_controls)[index]; note_control.Set(value)) {
-        message_queue_.Add(update_frame_,
-                           NoteControlMessage{pitch, index, note_control.GetValue()});
-      }
-      return true;
-    }
-  }
-  return false;
 }
 
 void Instrument::SetNoteOff(double pitch) noexcept {
@@ -203,11 +153,20 @@ void Instrument::SetNoteOffEvent(NoteOffEventDefinition definition, void* user_d
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
-  if (note_controls_.try_emplace(pitch, default_note_controls_).second) {
+  if (note_controls_
+          .try_emplace(pitch, BuildControls(note_control_definitions_.data(),
+                                            static_cast<int>(note_control_definitions_.size()),
+                                            [this, pitch](int id, double value) {
+                                              message_queue_.Add(
+                                                  update_frame_,
+                                                  NoteControlMessage{pitch, id, value});
+                                            }))
+          .second) {
     note_on_event_.Process(pitch, intensity);
     message_queue_.Add(update_frame_, NoteOnMessage{pitch, intensity});
-    for (const auto& [id, note_control] : default_note_controls_) {
-      message_queue_.Add(update_frame_, NoteControlMessage{pitch, id, note_control.GetValue()});
+    for (const auto& definition : note_control_definitions_) {
+      message_queue_.Add(update_frame_,
+                         NoteControlMessage{pitch, definition.id, definition.default_value});
     }
   }
 }

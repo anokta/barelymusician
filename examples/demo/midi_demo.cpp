@@ -127,11 +127,12 @@ int main(int /*argc*/, char* argv[]) {
       ConsoleLog() << "MIDI track #" << track_index
                    << ": NoteOff(key: " << MidiNumberFromPitch(pitch) << ")";
     });
-    instrument.SetControl(SynthInstrument::Control::kGain, kInstrumentGain);
-    instrument.SetControl(SynthInstrument::Control::kOscillatorType, kInstrumentOscillatorType);
-    instrument.SetControl(SynthInstrument::Control::kAttack, kInstrumentEnvelopeAttack);
-    instrument.SetControl(SynthInstrument::Control::kRelease, kInstrumentEnvelopeRelease);
-    instrument.SetControl(SynthInstrument::Control::kVoiceCount, kInstrumentVoiceCount);
+    instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kInstrumentGain);
+    instrument.GetControl(SynthInstrument::Control::kOscillatorType)
+        .SetValue(kInstrumentOscillatorType);
+    instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kInstrumentEnvelopeAttack);
+    instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kInstrumentEnvelopeRelease);
+    instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kInstrumentVoiceCount);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 

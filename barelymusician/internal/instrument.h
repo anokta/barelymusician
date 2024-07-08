@@ -39,14 +39,14 @@ class Instrument {
   ///
   /// @param id Control identifier.
   /// @return Pointer to control, or nullptr if not found.
-  [[nodiscard]] const Control* GetControl(int id) const noexcept;
+  [[nodiscard]] Control* GetControl(int id) noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] const Control* GetNoteControl(double pitch, int id) const noexcept;
+  [[nodiscard]] Control* GetNoteControl(double pitch, int id) noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -65,42 +65,14 @@ class Instrument {
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
 
-  /// Resets a control value.
-  ///
-  /// @param id Control identifier.
-  /// @return True if successful, false otherwise.
-  bool ResetControl(int id) noexcept;
-
-  /// Resets a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param id Note control identifier.
-  /// @return True if successful, false otherwise.
-  bool ResetNoteControl(double pitch, int id) noexcept;
-
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetAllNotesOff() noexcept;
-
-  /// Sets a control value.
-  ///
-  /// @param id Control identifier.
-  /// @param value Control value.
-  /// @return True if successful, false otherwise.
-  bool SetControl(int id, double value) noexcept;
 
   /// Sets data.
   ///
   /// @param data Data.
   void SetData(std::vector<std::byte> data) noexcept;
-
-  /// Sets a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param id Note control identifier.
-  /// @param value Note control value.
-  /// @return True if successful, false otherwise.
-  bool SetNoteControl(double pitch, int id, double value) noexcept;
 
   /// Sets a note off.
   ///
@@ -162,8 +134,8 @@ class Instrument {
   // Frame rate in hertz.
   const int frame_rate_;
 
-  // Array of default note controls.
-  const std::unordered_map<int, Control> default_note_controls_;
+  // Array of note control definitions.
+  const std::vector<ControlDefinition> note_control_definitions_;
 
   // Map of controls by identifiers.
   std::unordered_map<int, Control> controls_;

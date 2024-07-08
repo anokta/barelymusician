@@ -89,15 +89,15 @@ int main(int /*argc*/, char* argv[]) {
   ScopedMusician musician;
 
   auto instrument = musician.CreateInstrument<SamplerInstrument>(kFrameRate);
-  instrument.SetControl(SamplerInstrument::Control::kGain, kGain);
-  instrument.SetControl(SamplerInstrument::Control::kRootPitch, kRootPitch);
-  instrument.SetControl(SamplerInstrument::Control::kLoop, kLoop);
-  instrument.SetControl(SamplerInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SamplerInstrument::Control::kRelease, kRelease);
-  instrument.SetControl(SamplerInstrument::Control::kVoiceCount, kVoiceCount);
+  instrument.GetControl(SamplerInstrument::Control::kGain).SetValue(kGain);
+  instrument.GetControl(SamplerInstrument::Control::kRootPitch).SetValue(kRootPitch);
+  instrument.GetControl(SamplerInstrument::Control::kLoop).SetValue(kLoop);
+  instrument.GetControl(SamplerInstrument::Control::kAttack).SetValue(kAttack);
+  instrument.GetControl(SamplerInstrument::Control::kRelease).SetValue(kRelease);
+  instrument.GetControl(SamplerInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
   auto effect = musician.CreateEffect<LowPassEffect>(kFrameRate);
-  effect.SetControl(LowPassEffect::Control::kCutoffFrequency, kLowPassCutoffFrequency);
+  effect.GetControl(LowPassEffect::Control::kCutoffFrequency).SetValue(kLowPassCutoffFrequency);
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 

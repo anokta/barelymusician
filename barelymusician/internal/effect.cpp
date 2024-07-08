@@ -22,7 +22,10 @@ Effect::Effect(const EffectDefinition& definition, int frame_rate,
       set_data_callback_(definition.set_data_callback),
       frame_rate_(frame_rate),
       controls_(BuildControls(static_cast<const ControlDefinition*>(definition.control_definitions),
-                              definition.control_definition_count)),
+                              definition.control_definition_count,
+                              [&](int id, double value) {
+                                message_queue_.Add(update_frame_, ControlMessage{id, value});
+                              })),
       update_frame_(FramesFromSeconds(frame_rate_, initial_timestamp)) {
   assert(frame_rate > 0);
   if (definition.create_callback) {
@@ -41,12 +44,7 @@ Effect::~Effect() noexcept {
   }
 }
 
-Control* Effect::GetControl(int index) noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    return &controls_[index];
-  }
-  return nullptr;
-}
+Control* Effect::GetControl(int id) noexcept { return FindOrNull(controls_, id); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Effect::Process(double* output_samples, int output_channel_count, int output_frame_count,
@@ -92,26 +90,6 @@ bool Effect::Process(double* output_samples, int output_channel_count, int outpu
     }
   }
   return true;
-}
-
-bool Effect::ResetControl(int index) noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    if (auto& control = controls_[index]; control.Reset()) {
-      message_queue_.Add(update_frame_, ControlMessage{index, control.GetValue()});
-    }
-    return true;
-  }
-  return false;
-}
-
-bool Effect::SetControl(int index, double value) noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    if (auto& control = controls_[index]; control.Set(value)) {
-      message_queue_.Add(update_frame_, ControlMessage{index, control.GetValue()});
-    }
-    return true;
-  }
-  return false;
 }
 
 void Effect::SetData(std::vector<std::byte> data) noexcept {

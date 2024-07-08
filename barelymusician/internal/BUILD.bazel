@@ -73,11 +73,6 @@ cc_library(
 )
 
 cc_library(
-    name = "observable",
-    hdrs = ["observable.h"],
-)
-
-cc_library(
     name = "performer",
     srcs = ["performer.cpp"],
     hdrs = ["performer.h"],
@@ -163,15 +158,6 @@ cc_test(
         ":musician",
         ":performer",
         "//barelymusician:barelymusician_headeronly",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "observable_test",
-    srcs = ["observable_test.cpp"],
-    deps = [
-        ":observable",
         "@googletest//:gtest_main",
     ],
 )

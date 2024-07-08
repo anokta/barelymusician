@@ -6,44 +6,23 @@
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/musician.h"
-#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
-using ::barely::internal::Effect;
-using ::barely::internal::Instrument;
-using ::barely::internal::Musician;
-using ::barely::internal::Observable;
-using ::barely::internal::Observer;
-using ::barely::internal::Performer;
-using ::barely::internal::Task;
-
 // Effect.
-struct BarelyEffect : public Effect {};
+struct BarelyEffect : public barely::internal::Effect {};
 
 // Instrument.
-struct BarelyInstrument : public Instrument {};
+struct BarelyInstrument : public barely::internal::Instrument {};
 
 // Musician.
-struct BarelyMusician : public Musician {
-  // Default constructor.
-  BarelyMusician() noexcept = default;
-
-  // Default destructor.
-  ~BarelyMusician() noexcept = default;
-
-  // Non-copyable and non-movable.
-  BarelyMusician(const BarelyMusician& other) noexcept = delete;
-  BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
-  BarelyMusician(BarelyMusician&& other) noexcept = delete;
-  BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
-};
+struct BarelyMusician : public barely::internal::Musician {};
 
 // Performer.
-struct BarelyPerformer : public Performer {};
+struct BarelyPerformer : public barely::internal::Performer {};
 
 // Task.
-struct BarelyTask : public Task {};
+struct BarelyTask : public barely::internal::Task {};
 
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id, double* out_value) {
   if (!effect) return false;

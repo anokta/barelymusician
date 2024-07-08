@@ -11,13 +11,16 @@ namespace barely::internal {
 /// Class that wraps a control.
 class Control {
  public:
-  /// Default constructor.
+  /// Set value callback alias.
+  using SetValueCallback = std::function<void(int, double)>;
+
   Control() noexcept = default;
 
   /// Constructs a new `Control`.
   ///
   /// @param definition Control definition.
-  explicit Control(ControlDefinition definition) noexcept;
+  /// @param set_value_callback Set value callback.
+  explicit Control(ControlDefinition definition, SetValueCallback set_value_callback) noexcept;
 
   /// Returns the value.
   ///
@@ -25,22 +28,19 @@ class Control {
   [[nodiscard]] double GetValue() const noexcept;
 
   /// Resets the value.
-  ///
-  /// @return True if changed, false otherwise.
-  bool Reset() noexcept;
+  void ResetValue() noexcept;
 
   /// Sets the value.
   ///
   /// @param value Control value.
-  /// @return True if changed, false otherwise.
-  bool Set(double value) noexcept;
+  void SetValue(double value) noexcept;
 
  private:
-  // Clamps a given `value`.
-  [[nodiscard]] double Clamp(double value) noexcept;
-
   // Definition.
   ControlDefinition definition_;
+
+  // Set value callback.
+  SetValueCallback set_value_callback_;
 
   // Value.
   double value_ = 0.0;
@@ -50,10 +50,12 @@ class Control {
 ///
 /// @param definitions Array of control definitions.
 /// @param definition_count Number of control definitions.
+/// @param set_value_callback Set value callback.
 /// @return Array of controls.
 // NOLINTNEXTLINE(bugprone-exception-escape)
-std::unordered_map<int, Control> BuildControls(const ControlDefinition* definitions,
-                                               int definition_count) noexcept;
+std::unordered_map<int, Control> BuildControls(
+    const ControlDefinition* definitions, int definition_count,
+    Control::SetValueCallback set_value_callback) noexcept;
 
 }  // namespace barely::internal
 

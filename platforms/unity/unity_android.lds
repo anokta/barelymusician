@@ -1,20 +1,17 @@
 VERS_1.0 {
   global:
+    BarelyControl_GetValue;
+    BarelyControl_ResetValue;
+    BarelyControl_SetValue;
     BarelyEffect_GetControl;
     BarelyEffect_Process;
-    BarelyEffect_ResetControl;
-    BarelyEffect_SetControl;
     BarelyEffect_SetData;
     BarelyInstrument_GetControl;
     BarelyInstrument_GetNoteControl;
     BarelyInstrument_IsNoteOn;
     BarelyInstrument_Process;
-    BarelyInstrument_ResetControl;
-    BarelyInstrument_ResetNoteControl;
     BarelyInstrument_SetAllNotesOff;
-    BarelyInstrument_SetControl;
     BarelyInstrument_SetData;
-    BarelyInstrument_SetNoteControl;
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOffEvent;
     BarelyInstrument_SetNoteOn;

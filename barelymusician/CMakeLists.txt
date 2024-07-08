@@ -18,6 +18,7 @@ target_compile_definitions(
 target_link_libraries(
   barelymusician
   barelymusician_headeronly
+  barely_internal_control
   barely_internal_effect
   barely_internal_instrument
   barely_internal_musician

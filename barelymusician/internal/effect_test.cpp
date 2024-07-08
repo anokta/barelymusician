@@ -50,7 +50,7 @@ TEST(EffectTest, Process) {
   }
 
   // Set a control message.
-  effect.SetControl(0, 5.0);
+  effect.GetControl(0)->SetValue(5.0);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   effect.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);

@@ -11,39 +11,51 @@ namespace {
 
 // Tests that the control sets its value as expected.
 TEST(ControlTest, Set) {
-  Control control(ControlDefinition{0, 15.0, 10.0, 20.0});
+  int callback_count = 0;
+  Control control(ControlDefinition{0, 15.0, 10.0, 20.0},
+                  [&](int /*id*/, double /*value*/) { ++callback_count; });
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
-  EXPECT_TRUE(control.Set(12.0));
+  control.SetValue(12.0);
+  EXPECT_EQ(callback_count, 1);
   EXPECT_DOUBLE_EQ(control.GetValue(), 12.0);
 
   // The control value is already set to 12.0.
-  EXPECT_FALSE(control.Set(12.0));
+  control.SetValue(12.0);
+  EXPECT_EQ(callback_count, 1);
   EXPECT_DOUBLE_EQ(control.GetValue(), 12.0);
 
   // Verify that the control value is clamped at the minimum value.
-  EXPECT_TRUE(control.Set(0.0));
+  control.SetValue(0.0);
+  EXPECT_EQ(callback_count, 2);
   EXPECT_DOUBLE_EQ(control.GetValue(), 10.0);
 
   // The control value is already set to 0.0, which is clamped to 10.0.
-  EXPECT_FALSE(control.Set(0.0));
-  EXPECT_FALSE(control.Set(10.0));
+  control.SetValue(0.0);
+  EXPECT_EQ(callback_count, 2);
+  control.SetValue(10.0);
+  EXPECT_EQ(callback_count, 2);
   EXPECT_DOUBLE_EQ(control.GetValue(), 10.0);
 
   // Verify that the control value is clamped at the maximum value.
-  EXPECT_TRUE(control.Set(50.0));
+  control.SetValue(50.0);
+  EXPECT_EQ(callback_count, 3);
   EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
 
   // The control value is already set to 50.0, which is clamped to 20.0.
-  EXPECT_FALSE(control.Set(50.0));
-  EXPECT_FALSE(control.Set(20.0));
+  control.SetValue(50.0);
+  EXPECT_EQ(callback_count, 3);
+  control.SetValue(20.0);
+  EXPECT_EQ(callback_count, 3);
   EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
 
-  EXPECT_TRUE(control.Reset());
+  control.ResetValue();
+  EXPECT_EQ(callback_count, 4);
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   // The control value is already reset.
-  EXPECT_FALSE(control.Reset());
+  control.ResetValue();
+  EXPECT_EQ(callback_count, 4);
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 }
 
@@ -55,7 +67,8 @@ TEST(ControlTest, BuildControls) {
   };
 
   const std::unordered_map<int, Control> controls =
-      BuildControls(control_definitions.data(), static_cast<int>(control_definitions.size()));
+      BuildControls(control_definitions.data(), static_cast<int>(control_definitions.size()),
+                    [](int /*id*/, double /*value*/) {});
   ASSERT_EQ(controls.size(), 2);
   EXPECT_DOUBLE_EQ(controls.find(2)->second.GetValue(), 1.0);
   EXPECT_DOUBLE_EQ(controls.find(10)->second.GetValue(), 5.0);

@@ -3,11 +3,15 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/musician.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
+
+// Control.
+struct BarelyControl : public barely::internal::Control {};
 
 // Effect.
 struct BarelyEffect : public barely::internal::Effect {};
@@ -24,15 +28,35 @@ struct BarelyPerformer : public barely::internal::Performer {};
 // Task.
 struct BarelyTask : public barely::internal::Task {};
 
-bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id, double* out_value) {
-  if (!effect) return false;
+bool BarelyControl_GetValue(BarelyControlHandle control, double* out_value) {
+  if (!control) return false;
   if (!out_value) return false;
 
-  if (const auto* control = effect->GetControl(id)) {
-    *out_value = control->GetValue();
-    return true;
-  }
-  return false;
+  *out_value = control->GetValue();
+  return true;
+}
+
+bool BarelyControl_ResetValue(BarelyControlHandle control) {
+  if (!control) return false;
+
+  control->ResetValue();
+  return true;
+}
+
+bool BarelyControl_SetValue(BarelyControlHandle control, double value) {
+  if (!control) return false;
+
+  control->SetValue(value);
+  return true;
+}
+
+bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id,
+                             BarelyControlHandle* out_control) {
+  if (!effect) return false;
+  if (!out_control) return false;
+
+  *out_control = static_cast<BarelyControlHandle>(effect->GetControl(id));
+  return *out_control;
 }
 
 bool BarelyEffect_Process(BarelyEffectHandle effect, double* output_samples,
@@ -43,18 +67,6 @@ bool BarelyEffect_Process(BarelyEffectHandle effect, double* output_samples,
   return effect->Process(output_samples, output_channel_count, output_frame_count, timestamp);
 }
 
-bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t id) {
-  if (!effect) return false;
-
-  return effect->ResetControl(id);
-}
-
-bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t id, double value) {
-  if (!effect) return false;
-
-  return effect->SetControl(id, value);
-}
-
 bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size) {
   if (!effect) return false;
 
@@ -63,15 +75,13 @@ bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t s
   return true;
 }
 
-bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t id, double* out_value) {
+bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t id,
+                                 BarelyControlHandle* out_control) {
   if (!instrument) return false;
-  if (!out_value) return false;
+  if (!out_control) return false;
 
-  if (const auto* control = instrument->GetControl(id)) {
-    *out_value = control->GetValue();
-    return true;
-  }
-  return false;
+  *out_control = static_cast<BarelyControlHandle>(instrument->GetControl(id));
+  return *out_control;
 }
 
 bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t id,
@@ -103,30 +113,11 @@ bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_
   return instrument->Process(output_samples, output_channel_count, output_frame_count, timestamp);
 }
 
-bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t id) {
-  if (!instrument) return false;
-
-  return instrument->ResetControl(id);
-}
-
-bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                       int32_t id) {
-  if (!instrument) return false;
-
-  return instrument->ResetNoteControl(pitch, id);
-}
-
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
   instrument->SetAllNotesOff();
   return true;
-}
-
-bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t id, double value) {
-  if (!instrument) return false;
-
-  return instrument->SetControl(id, value);
 }
 
 bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* data, int32_t size) {
@@ -136,13 +127,6 @@ bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* dat
   instrument->SetData(
       {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
   return true;
-}
-
-bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t id,
-                                     double value) {
-  if (!instrument) return false;
-
-  return instrument->SetNoteControl(pitch, id, value);
 }
 
 bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch) {
@@ -186,7 +170,7 @@ bool BarelyMusician_CreateEffect(BarelyMusicianHandle musician, BarelyEffectDefi
                                  int32_t frame_rate, BarelyEffectHandle* out_effect) {
   if (!musician || !out_effect) return false;
 
-  *out_effect = static_cast<BarelyEffect*>(musician->CreateEffect(definition, frame_rate));
+  *out_effect = static_cast<BarelyEffectHandle>(musician->CreateEffect(definition, frame_rate));
   return true;
 }
 
@@ -198,7 +182,7 @@ bool BarelyMusician_CreateInstrument(BarelyMusicianHandle musician,
   if (!out_instrument) return false;
 
   *out_instrument =
-      static_cast<BarelyInstrument*>(musician->CreateInstrument(definition, frame_rate));
+      static_cast<BarelyInstrumentHandle>(musician->CreateInstrument(definition, frame_rate));
   return true;
 }
 
@@ -207,7 +191,7 @@ bool BarelyMusician_CreatePerformer(BarelyMusicianHandle musician, int32_t proce
   if (!musician) return false;
   if (!out_performer) return false;
 
-  *out_performer = static_cast<BarelyPerformer*>(musician->CreatePerformer(process_order));
+  *out_performer = static_cast<BarelyPerformerHandle>(musician->CreatePerformer(process_order));
   return true;
 }
 
@@ -301,8 +285,7 @@ bool BarelyPerformer_CreateTask(BarelyPerformerHandle performer, BarelyTaskDefin
   if (!performer) return false;
   if (!out_task) return false;
 
-  (*out_task) =
-      static_cast<BarelyTaskHandle>(performer->CreateTask(definition, position, user_data));
+  *out_task = static_cast<BarelyTaskHandle>(performer->CreateTask(definition, position, user_data));
   return true;
 }
 

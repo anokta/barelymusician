@@ -46,19 +46,6 @@ class Effect {
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
 
-  /// Resets a control value.
-  ///
-  /// @param id Control identifier.
-  /// @return True if successful, false otherwise.
-  bool ResetControl(int id) noexcept;
-
-  /// Sets a control value.
-  ///
-  /// @param id Control identifier.
-  /// @param value Control value.
-  /// @return True if successful, false otherwise.
-  bool SetControl(int id, double value) noexcept;
-
   /// Sets data.
   ///
   /// @param data Data.

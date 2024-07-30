@@ -28,42 +28,59 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
       note_control_definitions_(
           definition.note_control_definitions,
           definition.note_control_definitions + definition.note_control_definition_count),
-      controls_(BuildControls(static_cast<const ControlDefinition*>(definition.control_definitions),
-                              definition.control_definition_count,
-                              [this](int id, double value) {
-                                message_queue_.Add(update_frame_, ControlMessage{id, value});
-                              })),
+      control_map_(
+          BuildControlMap(static_cast<const ControlDefinition*>(definition.control_definitions),
+                          definition.control_definition_count,
+                          [this](int control_id, double value) {
+                            message_queue_.Add(update_frame_, ControlMessage{control_id, value});
+                          })),
       update_frame_(FramesFromSeconds(frame_rate_, initial_timestamp)) {
   assert(frame_rate > 0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
   if (set_control_callback_) {
-    for (const auto& [id, control] : controls_) {
-      set_control_callback_(&state_, id, control.GetValue());
+    for (const auto& [control_id, control] : control_map_) {
+      set_control_callback_(&state_, control_id, control.GetValue());
     }
   }
 }
 
 Instrument::~Instrument() noexcept {
-  SetAllNotesOff();
   if (destroy_callback_) {
     destroy_callback_(&state_);
   }
 }
 
-Control* Instrument::GetControl(int id) noexcept { return FindOrNull(controls_, id); }
-
-Control* Instrument::GetNoteControl(double pitch, int id) noexcept {
-  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    return FindOrNull(*note_controls, id);
+// NOLINTNEXTLINE(bugprone-exception-escape)
+Note* Instrument::CreateNote(double pitch, double intensity) noexcept {
+  const int note_id = ++note_id_counter_;
+  auto note = std::make_unique<Note>(
+      note_id, pitch, intensity,
+      BuildControlMap(
+          note_control_definitions_.data(), static_cast<int>(note_control_definitions_.size()),
+          [this, note_id](int control_id, double value) {
+            message_queue_.Add(update_frame_, NoteControlMessage{note_id, control_id, value});
+          }));
+  [[maybe_unused]] const auto [it, success] = notes_.emplace(note.get(), std::move(note));
+  assert(success);
+  message_queue_.Add(update_frame_, NoteOnMessage{note_id, pitch, intensity});
+  for (const auto& definition : note_control_definitions_) {
+    message_queue_.Add(update_frame_, NoteControlMessage{note_id, definition.control_id,
+                                                         definition.default_value});
   }
-  return nullptr;
+  return it->second.get();
 }
 
-bool Instrument::IsNoteOn(double pitch) const noexcept {
-  // TODO(#111): Use `contains` instead of `find`.
-  return note_controls_.find(pitch) != note_controls_.end();
+void Instrument::DestroyNote(Note* note) noexcept {
+  if (notes_.erase(note) > 0) {
+    assert(note);
+    message_queue_.Add(update_frame_, NoteOffMessage{note->GetId()});
+  }
+}
+
+Control* Instrument::GetControl(int control_id) noexcept {
+  return FindOrNull(control_map_, control_id);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -87,36 +104,38 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
       }
       frame = message_frame;
     }
-    std::visit(
-        MessageVisitor{
-            [this](ControlMessage& control_message) noexcept {
-              if (set_control_callback_) {
-                set_control_callback_(&state_, control_message.id, control_message.value);
-              }
-            },
-            [this](DataMessage& data_message) noexcept {
-              if (set_data_callback_) {
-                data_.swap(data_message.data);
-                set_data_callback_(&state_, data_.data(), static_cast<int>(data_.size()));
-              }
-            },
-            [this](NoteControlMessage& note_control_message) noexcept {
-              if (set_note_control_callback_) {
-                set_note_control_callback_(&state_, note_control_message.pitch,
-                                           note_control_message.id, note_control_message.value);
-              }
-            },
-            [this](NoteOffMessage& note_off_message) noexcept {
-              if (set_note_off_callback_) {
-                set_note_off_callback_(&state_, note_off_message.pitch);
-              }
-            },
-            [this](NoteOnMessage& note_on_message) noexcept {
-              if (set_note_on_callback_) {
-                set_note_on_callback_(&state_, note_on_message.pitch, note_on_message.intensity);
-              }
-            }},
-        message->second);
+    std::visit(MessageVisitor{
+                   [this](ControlMessage& control_message) noexcept {
+                     if (set_control_callback_) {
+                       set_control_callback_(&state_, control_message.control_id,
+                                             control_message.value);
+                     }
+                   },
+                   [this](DataMessage& data_message) noexcept {
+                     if (set_data_callback_) {
+                       data_.swap(data_message.data);
+                       set_data_callback_(&state_, data_.data(), static_cast<int>(data_.size()));
+                     }
+                   },
+                   [this](NoteControlMessage& note_control_message) noexcept {
+                     if (set_note_control_callback_) {
+                       set_note_control_callback_(&state_, note_control_message.note_id,
+                                                  note_control_message.control_id,
+                                                  note_control_message.value);
+                     }
+                   },
+                   [this](NoteOffMessage& note_off_message) noexcept {
+                     if (set_note_off_callback_) {
+                       set_note_off_callback_(&state_, note_off_message.note_id);
+                     }
+                   },
+                   [this](NoteOnMessage& note_on_message) noexcept {
+                     if (set_note_on_callback_) {
+                       set_note_on_callback_(&state_, note_on_message.note_id,
+                                             note_on_message.pitch, note_on_message.intensity);
+                     }
+                   }},
+               message->second);
   }
   // Process the rest of the buffer.
   if (frame < output_frame_count) {
@@ -128,51 +147,8 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
   return true;
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetAllNotesOff() noexcept {
-  for (const auto& [pitch, note_controls] : std::exchange(note_controls_, {})) {
-    note_off_event_.Process(pitch);
-    message_queue_.Add(update_frame_, NoteOffMessage{pitch});
-  }
-}
-
 void Instrument::SetData(std::vector<std::byte> data) noexcept {
   message_queue_.Add(update_frame_, DataMessage{std::move(data)});
-}
-
-void Instrument::SetNoteOff(double pitch) noexcept {
-  if (note_controls_.erase(pitch) > 0) {
-    note_off_event_.Process(pitch);
-    message_queue_.Add(update_frame_, NoteOffMessage{pitch});
-  }
-}
-
-void Instrument::SetNoteOffEvent(NoteOffEventDefinition definition, void* user_data) noexcept {
-  note_off_event_ = {definition, user_data};
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
-  if (note_controls_
-          .try_emplace(pitch, BuildControls(note_control_definitions_.data(),
-                                            static_cast<int>(note_control_definitions_.size()),
-                                            [this, pitch](int id, double value) {
-                                              message_queue_.Add(
-                                                  update_frame_,
-                                                  NoteControlMessage{pitch, id, value});
-                                            }))
-          .second) {
-    note_on_event_.Process(pitch, intensity);
-    message_queue_.Add(update_frame_, NoteOnMessage{pitch, intensity});
-    for (const auto& definition : note_control_definitions_) {
-      message_queue_.Add(update_frame_,
-                         NoteControlMessage{pitch, definition.id, definition.default_value});
-    }
-  }
-}
-
-void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept {
-  note_on_event_ = {definition, user_data};
 }
 
 void Instrument::Update(double timestamp) noexcept {

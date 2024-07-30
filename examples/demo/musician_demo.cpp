@@ -91,9 +91,12 @@ void InsertPadData(double pitch, const std::string& file_path, std::vector<doubl
 void ScheduleNote(double position, double duration, double pitch, double intensity,
                   Instrument& instrument, Performer& performer) {
   performer.ScheduleOneOffTask(
-      [pitch, intensity, &instrument]() { instrument.SetNoteOn(pitch, intensity); }, position);
-  performer.ScheduleOneOffTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-                               position + duration);
+      [position, duration, pitch, intensity, &instrument, &performer]() {
+        const auto note = instrument.CreateNote(pitch, intensity);
+        performer.ScheduleOneOffTask([pitch, note, &instrument]() { instrument.DestroyNote(note); },
+                                     position + duration);
+      },
+      position);
 }
 
 void ComposeChord(double intensity, int harmonic, Instrument& instrument, Performer& performer) {
@@ -123,7 +126,9 @@ void ComposeLine(double octave_offset, double intensity, int bar, int beat, int 
     add_note(0.0, 0.25, harmonic + note_offset);
   }
   if (beat % 2 == 0) {
-    add_note(0.0, 0.125, harmonic - note_offset);
+    if (note_offset != 0) {
+      add_note(0.0, 0.125, harmonic - note_offset);
+    }
     add_note(0.5, 0.55, harmonic - 2 * note_offset);
   }
   if (beat + 1 == beat_count && bar % 2 == 1) {
@@ -192,16 +197,6 @@ int main(int /*argc*/, char* argv[]) {
   ScopedMusician musician;
   musician.SetTempo(kTempo);
 
-  // Note on callback.
-  const auto set_note_callbacks_fn = [&](auto index, Instrument& instrument) {
-    instrument.SetNoteOffEvent([index](double pitch) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
-    });
-    instrument.SetNoteOnEvent([index](double pitch, double intensity) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", " << intensity << ")";
-    });
-  };
-
   const std::vector<int> progression = {0, 3, 4, 0};
 
   // Initialize performers.
@@ -216,7 +211,6 @@ int main(int /*argc*/, char* argv[]) {
     instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(type);
     instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(attack);
     instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(release);
-    set_note_callbacks_fn(instruments.size(), instrument);
   };
 
   // Add synth instruments.
@@ -254,7 +248,6 @@ int main(int /*argc*/, char* argv[]) {
   instruments.push_back(musician.CreateInstrument<PercussionInstrument>(kFrameRate));
   auto& percussion = instruments.back();
   percussion.GetControl(PercussionInstrument::Control::kGain).SetValue(0.25);
-  set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::unordered_map<double, std::string>& percussion_map) {
         std::vector<double> data;
@@ -337,9 +330,6 @@ int main(int /*argc*/, char* argv[]) {
           metronome.Stop();
           for (auto& [performer, beat_composer_callback, index] : performers) {
             performer.Stop();
-          }
-          for (auto& instrument : instruments) {
-            instrument.SetAllNotesOff();
           }
           ConsoleLog() << "Stopped playback";
         } else {

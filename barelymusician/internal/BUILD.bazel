@@ -39,6 +39,7 @@ cc_library(
         ":event",
         ":message",
         ":message_queue",
+        ":note",
         ":seconds",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
@@ -69,6 +70,16 @@ cc_library(
         ":performer",
         ":seconds",
         "//barelymusician:barelymusician_headeronly",
+    ],
+)
+
+cc_library(
+    name = "note",
+    srcs = ["note.cpp"],
+    hdrs = ["note.h"],
+    deps = [
+        ":control",
+        "//barelymusician/common:find_or_null",
     ],
 )
 

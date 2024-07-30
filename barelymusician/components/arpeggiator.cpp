@@ -110,11 +110,7 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeg
 
 namespace barely {
 
-Arpeggiator::~Arpeggiator() noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
-  }
-}
+Arpeggiator::~Arpeggiator() noexcept { Stop(); }
 
 bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();
@@ -134,8 +130,11 @@ void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
 }
 
 void Arpeggiator::SetInstrument(Instrument* instrument) noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
+  if (!notes_.empty()) {
+    for (const auto& note : notes_) {
+      instrument_->DestroyNote(note);
+    }
+    notes_.clear();
   }
   instrument_ = instrument;
 }
@@ -186,8 +185,11 @@ void Arpeggiator::Stop() noexcept {
   performer_.Stop();
   performer_.CancelAllOneOffTasks();
   performer_.SetPosition(0.0);
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
+  if (!notes_.empty()) {
+    for (const auto& note : notes_) {
+      instrument_->DestroyNote(note);
+    }
+    notes_.clear();
   }
   index_ = -1;
 }
@@ -204,11 +206,11 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
           return;
         }
         const double pitch = pitches_[index_];
-        instrument_->SetNoteOn(pitch);
+        const auto [it, success] = notes_.emplace(instrument_->CreateNote(pitch));
         performer_.ScheduleOneOffTask(
-            [this, pitch]() {
+            [this, note = *it]() {
               if (instrument_ != nullptr) {
-                instrument_->SetNoteOff(pitch);
+                instrument_->DestroyNote(note);
               }
             },
             gate_ratio_ * performer_.GetLoopLength());

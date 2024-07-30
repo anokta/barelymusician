@@ -191,6 +191,9 @@ class Repeater {
   // Instrument.
   Instrument* instrument_ = nullptr;
 
+  // Currently active note.
+  Note note_ = {};
+
   // List of pitches to play.
   std::vector<std::pair<std::optional<double>, int>> pitches_;
 

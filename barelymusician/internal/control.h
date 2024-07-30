@@ -46,16 +46,18 @@ class Control {
   double value_ = 0.0;
 };
 
-/// Builds the corresponding controls for a given array of control `definitions`.
+/// Control map alias.
+using ControlMap = std::unordered_map<int, Control>;
+
+/// Builds the corresponding control map for a given array of control `definitions`.
 ///
 /// @param definitions Array of control definitions.
 /// @param definition_count Number of control definitions.
 /// @param set_value_callback Set value callback.
-/// @return Array of controls.
+/// @return Control map.
 // NOLINTNEXTLINE(bugprone-exception-escape)
-std::unordered_map<int, Control> BuildControls(
-    const ControlDefinition* definitions, int definition_count,
-    Control::SetValueCallback set_value_callback) noexcept;
+ControlMap BuildControlMap(const ControlDefinition* definitions, int definition_count,
+                           Control::SetValueCallback set_value_callback) noexcept;
 
 }  // namespace barely::internal
 

@@ -46,7 +46,7 @@ constexpr int kVoiceCount = 16;
 constexpr double kInitialGateRatio = 0.5;
 constexpr double kInitialRate = 4.0;
 constexpr double kInitialTempo = 100.0;
-constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kRandom;
+constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kUp;
 
 // Note settings.
 constexpr double kRootPitch = barely::kPitchC4;
@@ -82,10 +82,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
   instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
   instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
-
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
-  });
 
   auto arpeggiator = musician.CreateComponent<Arpeggiator>();
   arpeggiator.SetInstrument(&instrument);

@@ -4,13 +4,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/message_queue.h"
+#include "barelymusician/internal/note.h"
 
 namespace barely::internal {
 
@@ -35,24 +35,24 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
+  /// Creates a note.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @return Pointer to note.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  Note* CreateNote(double pitch, double intensity) noexcept;
+
+  /// Destroys note.
+  ///
+  /// @param note Pointer to note.
+  void DestroyNote(Note* note) noexcept;
+
   /// Returns a control value.
   ///
-  /// @param id Control identifier.
+  /// @param control_id Control identifier.
   /// @return Pointer to control, or nullptr if not found.
-  [[nodiscard]] Control* GetControl(int id) noexcept;
-
-  /// Returns a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param id Note control identifier.
-  /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] Control* GetNoteControl(double pitch, int id) noexcept;
-
-  /// Returns whether a note is on or not.
-  ///
-  /// @param pitch Note pitch.
-  /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
+  [[nodiscard]] Control* GetControl(int control_id) noexcept;
 
   /// Processes output samples at timestamp.
   ///
@@ -65,38 +65,10 @@ class Instrument {
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
 
-  /// Sets all notes off.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetAllNotesOff() noexcept;
-
   /// Sets data.
   ///
   /// @param data Data.
   void SetData(std::vector<std::byte> data) noexcept;
-
-  /// Sets a note off.
-  ///
-  /// @param pitch Note pitch.
-  void SetNoteOff(double pitch) noexcept;
-
-  /// Sets the note off event.
-  ///
-  /// @param definition Note off event definition.
-  /// @param user_data Pointer to user data.
-  void SetNoteOffEvent(NoteOffEventDefinition definition, void* user_data) noexcept;
-
-  /// Sets a note on.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch, double intensity) noexcept;
-
-  /// Sets the note on event.
-  ///
-  /// @param definition Note on event definition.
-  /// @param user_data Pointer to user data.
-  void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
 
   /// Updates the instrument.
   ///
@@ -104,12 +76,6 @@ class Instrument {
   void Update(double timestamp) noexcept;
 
  private:
-  // Note off event alias.
-  using NoteOffEvent = Event<NoteOffEventDefinition, double>;
-
-  // Note on event alias.
-  using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
-
   // Destroy callback.
   const InstrumentDefinition::DestroyCallback destroy_callback_;
 
@@ -137,17 +103,14 @@ class Instrument {
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;
 
-  // Map of controls by identifiers.
-  std::unordered_map<int, Control> controls_;
+  // Control map.
+  ControlMap control_map_;
 
-  // Map of current note controls by note pitches.
-  std::unordered_map<double, std::unordered_map<int, Control>> note_controls_;
+  // Map of pointers to notes.
+  std::unordered_map<Note*, std::unique_ptr<Note>> notes_;
 
-  // Note off event.
-  NoteOffEvent note_off_event_;
-
-  // Note on event.
-  NoteOnEvent note_on_event_;
+  // Note identifier counter.
+  int note_id_counter_ = 0;
 
   // Update frame.
   int64_t update_frame_ = 0;

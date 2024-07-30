@@ -1,5 +1,6 @@
 #include <chrono>
 #include <thread>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -15,6 +16,7 @@
 
 namespace {
 
+using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::ScopedMusician;
 using ::barely::SynthInstrument;
@@ -56,24 +58,34 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
   instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
   instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
-  });
 
   std::vector<std::pair<double, double>> triggers;
   std::vector<Task> tasks;
 
   auto performer = musician.CreatePerformer();
 
+  std::unordered_set<Note> notes;
   const auto play_note_fn = [&](int scale_index, double duration) {
     const double pitch =
         barely::kPitchD3 + barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
-    return [&instrument, &performer, duration, pitch]() {
-      instrument.SetNoteOn(pitch);
+    return [&instrument, &performer, &notes, duration, pitch]() {
+      ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
+      const auto [it, success] = notes.emplace(instrument.CreateNote(pitch));
       performer.ScheduleOneOffTask(
-          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
+          [&instrument, &performer, &notes, note = *it]() {
+            instrument.DestroyNote(note);
+            notes.erase(note);
+          },
           performer.GetPosition() + duration);
     };
+  };
+  const auto stop_all_notes_fn = [&]() {
+    if (!notes.empty()) {
+      for (auto& note : notes) {
+        instrument.DestroyNote(note);
+      }
+      notes.clear();
+    }
   };
 
   // Trigger 1.
@@ -117,11 +129,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
       performer.CancelAllOneOffTasks();
-      instrument.SetAllNotesOff();
+      stop_all_notes_fn();
       performer.SetPosition(triggers[index].first);
       performer.ScheduleOneOffTask(
           [&]() {
-            instrument.SetAllNotesOff();
+            stop_all_notes_fn();
             performer.Stop();
           },
           triggers[index].first + triggers[index].second);

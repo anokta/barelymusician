@@ -7,25 +7,25 @@ namespace Barely {
   public abstract class Effect : MonoBehaviour {
     /// Returns a control value.
     ///
-    /// @param id Control identifier.
+    /// @param controlId Control identifier.
     /// @return Control value.
-    public double GetControl(int id) {
-      return Musician.Internal.Effect_GetControl(_handle, id);
+    public double GetControl(int controlId) {
+      return Musician.Internal.Effect_GetControl(_handle, controlId);
     }
 
     /// Resets a control value.
     ///
-    /// @param id Control identifier.
-    public void ResetControl(int id) {
-      Musician.Internal.Effect_ResetControl(_handle, id);
+    /// @param controlId Control identifier.
+    public void ResetControl(int controlId) {
+      Musician.Internal.Effect_ResetControl(_handle, controlId);
     }
 
     /// Sets a control value.
     ///
-    /// @param id Control identifier.
+    /// @param controlId Control identifier.
     /// @param value Control value.
-    public void SetControl(int id, double value) {
-      Musician.Internal.Effect_SetControl(_handle, id, value);
+    public void SetControl(int controlId, double value) {
+      Musician.Internal.Effect_SetControl(_handle, controlId, value);
     }
 
     /// Sets data.

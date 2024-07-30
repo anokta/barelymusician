@@ -12,6 +12,7 @@ cc_library(
         "//barelymusician/internal:effect",
         "//barelymusician/internal:instrument",
         "//barelymusician/internal:musician",
+        "//barelymusician/internal:note",
         "//barelymusician/internal:performer",
         "//barelymusician/internal:task",
     ],

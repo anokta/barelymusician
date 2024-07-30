@@ -6,7 +6,7 @@ namespace Barely {
   [StructLayout(LayoutKind.Sequential)]
   public struct ControlDefinition {
     /// Identifier.
-    public Int32 id;
+    public Int32 controlId;
 
     /// Default value.
     public double defaultValue;

@@ -17,6 +17,7 @@
 
 namespace {
 
+using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::ScopedMusician;
 using ::barely::SynthInstrument;
@@ -40,16 +41,16 @@ constexpr int kVoiceCount = 16;
 constexpr double kRootPitch = barely::kPitchC4;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kMaxOffsetOctaves = 3.0;
+constexpr int kMaxOctave = 3;
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(const InputManager::Key& key) {
+std::optional<double> PitchFromKey(int octave, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
   const double distance = static_cast<double>(std::distance(kOctaveKeys.begin(), it));
-  return kRootPitch + distance / barely::kSemitoneCount;
+  return octave + kRootPitch + distance / barely::kSemitoneCount;
 }
 
 }  // namespace
@@ -68,21 +69,21 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
   instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
-  instrument.SetNoteOnEvent([](double pitch, double intensity) {
-    ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", " << intensity << ")";
-  });
-  instrument.SetNoteOffEvent(
-      [](double pitch) { ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") "; });
-
-  // Audio process callback.
-  audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
-  });
+  // Key up callback.
+  int octave = 0;
+  std::unordered_map<InputManager::Key, Note> notes;
+  const auto key_up_callback = [&](const InputManager::Key& key) {
+    if (const auto it = notes.find(key); it != notes.end()) {
+      instrument.DestroyNote(it->second);
+      notes.erase(it);
+      ConsoleLog() << std::setprecision(2) << "NoteOff(" << *PitchFromKey(octave, key) << ") ";
+    }
+  };
+  input_manager.SetKeyUpCallback(key_up_callback);
 
   // Key down callback.
-  double intensity = 1.0;
-  double offset_octaves = 0.0;
   bool quit = false;
+  double intensity = 1.0;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
@@ -91,20 +92,27 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
 
     const auto upper_key = std::toupper(key);
+
     if (upper_key == 'Z' || upper_key == 'X') {
-      // Shift octaves.
-      instrument.SetAllNotesOff();
-      if (upper_key == 'Z') {
-        --offset_octaves;
-      } else {
-        ++offset_octaves;
+      // Stop all notes.
+      for (const auto& [active_key, note] : notes) {
+        key_up_callback(active_key);
       }
-      offset_octaves = std::clamp(offset_octaves, -kMaxOffsetOctaves, kMaxOffsetOctaves);
-      ConsoleLog() << "Octave offset set to " << offset_octaves;
+      notes.clear();
+
+      // Shift octaves.
+      if (upper_key == 'Z') {
+        --octave;
+      } else {
+        ++octave;
+      }
+      octave = std::clamp(octave, -kMaxOctave, kMaxOctave);
+      ConsoleLog() << "Octave set to " << octave;
       return;
     }
+
+    // Change intensity.
     if (upper_key == 'C' || upper_key == 'V') {
-      // Change intensity.
       if (upper_key == 'C') {
         intensity -= 0.25;
       } else {
@@ -115,21 +123,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
 
-    // Play note.
-    if (const auto pitch = PitchFromKey(key)) {
-      instrument.SetNoteOn(offset_octaves + *pitch, intensity);
+    // Start note.
+    if (const auto pitch = PitchFromKey(octave, key)) {
+      [[maybe_unused]] const auto success =
+          notes.emplace(key, instrument.CreateNote(*pitch, intensity)).second;
+      assert(success);
+      ConsoleLog() << std::setprecision(2) << "NoteOn(" << *pitch << ", " << intensity << ")";
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
-  // Key up callback.
-  const auto key_up_callback = [&](const InputManager::Key& key) {
-    // Stop note.
-    if (const auto pitch = PitchFromKey(key)) {
-      instrument.SetNoteOff(offset_octaves + *pitch);
-    }
-  };
-  input_manager.SetKeyUpCallback(key_up_callback);
+  // Audio process callback.
+  audio_output.SetProcessCallback([&](double* output) {
+    instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
+  });
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";

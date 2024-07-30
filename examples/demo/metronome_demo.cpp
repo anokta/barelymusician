@@ -72,8 +72,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     const int current_beat = (beat % kBeatCount) + 1;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
-    instrument.SetNoteOn(pitch);
-    instrument.SetNoteOff(pitch);
+    instrument.DestroyNote(instrument.CreateNote(pitch));
   });
 
   // Audio process callback.

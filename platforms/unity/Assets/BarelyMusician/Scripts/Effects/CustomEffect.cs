@@ -22,9 +22,9 @@ namespace Barely {
 
     /// Set control callback.
     ///
-    /// @param id Control identifier.
+    /// @param controlId Control identifier.
     /// @param value Control value.
-    public void OnSetControl(int id, double value);
+    public void OnSetControl(int controlId, double value);
 
     /// Set data callback.
     ///
@@ -88,8 +88,8 @@ namespace Barely {
 
     // Set control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.EffectDefinition_SetControlCallback))]
-    private static void OnSetControl(ref IntPtr state, Int32 id, double value) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value);
+    private static void OnSetControl(ref IntPtr state, Int32 controlId, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(controlId, value);
     }
 
     // Set data callback.

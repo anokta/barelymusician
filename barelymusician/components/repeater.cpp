@@ -115,11 +115,7 @@ bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater) {
 
 namespace barely {
 
-Repeater::~Repeater() noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
-  }
-}
+Repeater::~Repeater() noexcept { Stop(); }
 
 void Repeater::Clear() noexcept { pitches_.clear(); }
 
@@ -132,7 +128,7 @@ void Repeater::Pop() noexcept {
   }
   if (index_ == static_cast<int>(pitches_.size()) - 1 && IsPlaying()) {
     if (instrument_ != nullptr) {
-      instrument_->SetNoteOff(*pitches_.back().first + pitch_shift_);
+      instrument_->DestroyNote(note_);
     }
     remaining_length_ = 0;
   }
@@ -145,8 +141,8 @@ void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
 }
 
 void Repeater::SetInstrument(Instrument* instrument) noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
+  if (instrument_ != nullptr && IsPlaying()) {
+    instrument_->DestroyNote(note_);
   }
   instrument_ = instrument;
 }
@@ -175,7 +171,7 @@ void Repeater::Stop() noexcept {
   performer_.Stop();
   performer_.SetPosition(0.0);
   if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
+    instrument_->DestroyNote(note_);
   }
   index_ = -1;
   remaining_length_ = 0;
@@ -215,9 +211,13 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
           return;
         }
         const double pitch = *pitches_[index_].first + pitch_shift_;
-        instrument_->SetNoteOn(pitch);
-        performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                                      static_cast<double>(length) * performer_.GetLoopLength());
+        note_ = instrument_->CreateNote(pitch);
+        performer_.ScheduleOneOffTask(
+            [this]() {
+              instrument_->DestroyNote(note_);
+              note_ = {};
+            },
+            static_cast<double>(length) * performer_.GetLoopLength());
       },
       0.0);
 }

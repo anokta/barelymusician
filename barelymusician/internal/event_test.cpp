@@ -14,27 +14,24 @@ TEST(EventTest, Process) {
     int create_count = 0;
     int destroy_count = 0;
     int process_count = 0;
-    double pitch = 0.0;
   };
   TestData test_data = {};
 
   EXPECT_EQ(test_data.create_count, 0);
   EXPECT_EQ(test_data.destroy_count, 0);
   EXPECT_EQ(test_data.process_count, 0);
-  EXPECT_DOUBLE_EQ(test_data.pitch, 0.0);
 
   {
-    Event<NoteOffEventDefinition, double> event(
-        NoteOffEventDefinition{
+    Event<TaskDefinition> event(
+        TaskDefinition{
             [](void** state, void* user_data) {
               *state = user_data;
               ++static_cast<TestData*>(*state)->create_count;
             },
             [](void** state) { ++static_cast<TestData*>(*state)->destroy_count; },
-            [](void** state, double pitch) {
+            [](void** state) {
               auto& test_data = *static_cast<TestData*>(*state);
               ++test_data.process_count;
-              test_data.pitch = pitch;
             },
         },
         static_cast<void*>(&test_data));
@@ -43,16 +40,14 @@ TEST(EventTest, Process) {
     EXPECT_EQ(test_data.create_count, 1);
     EXPECT_EQ(test_data.destroy_count, 0);
     EXPECT_EQ(test_data.process_count, 0);
-    EXPECT_DOUBLE_EQ(test_data.pitch, 0.0);
 
     for (int i = 1; i <= kTotalProcessCount; ++i) {
-      event.Process(static_cast<double>(i));
+      event.Process();
 
       // Event should be processed.
       EXPECT_EQ(test_data.create_count, 1);
       EXPECT_EQ(test_data.destroy_count, 0);
       EXPECT_EQ(test_data.process_count, i);
-      EXPECT_DOUBLE_EQ(test_data.pitch, static_cast<double>(i));
     }
   }
 
@@ -60,7 +55,6 @@ TEST(EventTest, Process) {
   EXPECT_EQ(test_data.create_count, 1);
   EXPECT_EQ(test_data.destroy_count, 1);
   EXPECT_EQ(test_data.process_count, kTotalProcessCount);
-  EXPECT_DOUBLE_EQ(test_data.pitch, static_cast<double>(kTotalProcessCount));
 }
 
 }  // namespace

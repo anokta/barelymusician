@@ -99,6 +99,7 @@ BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiato
 #endif  // __cplusplus
 
 #ifdef __cplusplus
+#include <unordered_set>
 #include <vector>
 
 #include "barelymusician/common/random.h"
@@ -195,7 +196,10 @@ class Arpeggiator {
   // Instrument.
   Instrument* instrument_ = nullptr;
 
-  // List of pitches to play.
+  // Set of currently playing notes.
+  std::unordered_set<Note> notes_;
+
+  // Array of pitches to play.
   std::vector<double> pitches_;
 
   // Gate ratio.

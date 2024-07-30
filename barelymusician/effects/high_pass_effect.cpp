@@ -41,8 +41,8 @@ void HighPassEffect::Process(double* output_samples, int output_channel_count,
   }
 }
 
-void HighPassEffect::SetControl(int id, double value) noexcept {
-  switch (static_cast<Control>(id)) {
+void HighPassEffect::SetControl(int control_id, double value) noexcept {
+  switch (static_cast<Control>(control_id)) {
     case Control::kCutoffFrequency:
       if (value != cutoff_frequency_) {
         cutoff_frequency_ = value;

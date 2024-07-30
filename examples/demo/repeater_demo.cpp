@@ -19,6 +19,7 @@
 
 namespace {
 
+using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
@@ -87,12 +88,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteOnEvent([&repeater](double pitch, double /*intensity*/) {
-    if (repeater.IsPlaying()) {
-      ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
-    }
-  });
-
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
@@ -100,6 +95,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
+  std::unordered_map<double, Note> notes;
   double offset_octaves = 0.0;
   int length = 1;
   bool quit = false;
@@ -113,8 +109,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Shift octaves.
-      if (!repeater.IsPlaying()) {
-        instrument.SetAllNotesOff();
+      if (!repeater.IsPlaying() && !notes.empty()) {
+        for (const auto& [_, note] : notes) {
+          instrument.DestroyNote(note);
+        }
+        notes.clear();
       }
       if (upper_key == 'Z') {
         --offset_octaves;
@@ -130,7 +129,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const auto pitch_or = PitchFromKey(key)) {
       const double pitch = offset_octaves + *pitch_or;
       if (!repeater.IsPlaying()) {
-        instrument.SetNoteOn(pitch);
+        notes.emplace(pitch, instrument.CreateNote(pitch));
       }
       repeater.Push(pitch, length);
       ConsoleLog() << "Note(" << pitch << ") added";
@@ -163,7 +162,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
           repeater.Stop();
           ConsoleLog() << "Repeater stopped";
         } else {
-          instrument.SetAllNotesOff();
+          if (!notes.empty()) {
+            for (const auto& [_, note] : notes) {
+              instrument.DestroyNote(note);
+            }
+            notes.clear();
+          }
           repeater.Start();
           ConsoleLog() << "Repeater started";
         }
@@ -179,7 +183,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
       if (!repeater.IsPlaying()) {
-        instrument.SetNoteOff(offset_octaves + *pitch);
+        if (const auto it = notes.find(offset_octaves + *pitch); it != notes.end()) {
+          instrument.DestroyNote(it->second);
+          notes.erase(it);
+        }
       }
     }
   };

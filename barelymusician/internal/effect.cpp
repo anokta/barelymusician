@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -21,19 +20,20 @@ Effect::Effect(const EffectDefinition& definition, int frame_rate,
       set_control_callback_(definition.set_control_callback),
       set_data_callback_(definition.set_data_callback),
       frame_rate_(frame_rate),
-      controls_(BuildControls(static_cast<const ControlDefinition*>(definition.control_definitions),
-                              definition.control_definition_count,
-                              [&](int id, double value) {
-                                message_queue_.Add(update_frame_, ControlMessage{id, value});
-                              })),
+      control_map_(
+          BuildControlMap(static_cast<const ControlDefinition*>(definition.control_definitions),
+                          definition.control_definition_count,
+                          [&](int control_id, double value) {
+                            message_queue_.Add(update_frame_, ControlMessage{control_id, value});
+                          })),
       update_frame_(FramesFromSeconds(frame_rate_, initial_timestamp)) {
   assert(frame_rate > 0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
   if (set_control_callback_) {
-    for (const auto& [id, control] : controls_) {
-      set_control_callback_(&state_, id, control.GetValue());
+    for (const auto& [control_id, control] : control_map_) {
+      set_control_callback_(&state_, control_id, control.GetValue());
     }
   }
 }
@@ -44,7 +44,9 @@ Effect::~Effect() noexcept {
   }
 }
 
-Control* Effect::GetControl(int id) noexcept { return FindOrNull(controls_, id); }
+Control* Effect::GetControl(int control_id) noexcept {
+  return FindOrNull(control_map_, control_id);
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Effect::Process(double* output_samples, int output_channel_count, int output_frame_count,
@@ -67,19 +69,20 @@ bool Effect::Process(double* output_samples, int output_channel_count, int outpu
       }
       frame = message_frame;
     }
-    std::visit(MessageVisitor{
-                   [this](ControlMessage& control_message) noexcept {
-                     if (set_control_callback_) {
-                       set_control_callback_(&state_, control_message.id, control_message.value);
-                     }
-                   },
-                   [this](DataMessage& data_message) noexcept {
-                     if (set_data_callback_) {
-                       data_.swap(data_message.data);
-                       set_data_callback_(&state_, data_.data(), static_cast<int>(data_.size()));
-                     }
-                   },
-                   [](const auto&) noexcept { assert(false); }},
+    std::visit(MessageVisitor{[this](ControlMessage& control_message) noexcept {
+                                if (set_control_callback_) {
+                                  set_control_callback_(&state_, control_message.control_id,
+                                                        control_message.value);
+                                }
+                              },
+                              [this](DataMessage& data_message) noexcept {
+                                if (set_data_callback_) {
+                                  data_.swap(data_message.data);
+                                  set_data_callback_(&state_, data_.data(),
+                                                     static_cast<int>(data_.size()));
+                                }
+                              },
+                              [](const auto&) noexcept { assert(false); }},
                message->second);
   }
   // Process the rest of the buffer.

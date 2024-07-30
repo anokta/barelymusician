@@ -22,9 +22,9 @@ namespace Barely {
 
     /// Set control callback.
     ///
-    /// @param id Control identifier.
+    /// @param controlId Control identifier.
     /// @param value Control value.
-    public void OnSetControl(int id, double value);
+    public void OnSetControl(int controlId, double value);
 
     /// Set data callback.
     ///
@@ -35,9 +35,9 @@ namespace Barely {
     /// Set note control callback.
     ///
     /// @param pitch Note pitch.
-    /// @param id Note control identifier.
+    /// @param controlId Note control identifier.
     /// @param value Note control value.
-    public void OnSetNoteControl(double pitch, int id, double value);
+    public void OnSetNoteControl(double pitch, int controlId, double value);
 
     /// Set note off callback.
     ///
@@ -118,8 +118,8 @@ namespace Barely {
 
     // Set control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetControlCallback))]
-    private static void OnSetControl(ref IntPtr state, Int32 id, double value) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value);
+    private static void OnSetControl(ref IntPtr state, Int32 controlId, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(controlId, value);
     }
 
     // Set data callback.
@@ -130,8 +130,10 @@ namespace Barely {
 
     // Set note control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteControlCallback))]
-    private static void OnSetNoteControl(ref IntPtr state, double pitch, Int32 id, double value) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteControl(pitch, id, value);
+    private static void OnSetNoteControl(ref IntPtr state, double pitch, Int32 controlId,
+                                         double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType)
+          .OnSetNoteControl(pitch, controlId, value);
     }
 
     // Set note off callback.

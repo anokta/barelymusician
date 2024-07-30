@@ -2,6 +2,7 @@
 #include <chrono>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -17,6 +18,7 @@
 
 namespace {
 
+using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::ScopedMusician;
 using ::barely::SynthInstrument;
@@ -60,21 +62,33 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
   instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
   instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
-  });
 
   auto performer = musician.CreatePerformer();
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
+  std::unordered_set<Note> notes;
   const auto play_note_fn = [&](double duration, double pitch) {
-    return [&instrument, &performer, pitch, duration]() {
-      instrument.SetNoteOn(pitch);
-      performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-                                   performer.GetPosition() + duration);
+    return [&instrument, &performer, &notes, pitch, duration]() {
+      Note note = instrument.CreateNote(pitch);
+      notes.emplace(note);
+      performer.ScheduleOneOffTask(
+          [&instrument, &notes, note]() {
+            instrument.DestroyNote(note);
+            notes.erase(note);
+          },
+          performer.GetPosition() + duration);
+      ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
     };
+  };
+  const auto stop_all_notes_fn = [&]() {
+    if (!notes.empty()) {
+      for (auto& note : notes) {
+        instrument.DestroyNote(note);
+      }
+      notes.clear();
+    }
   };
 
   std::vector<std::pair<double, TaskDefinition::Callback>> score;
@@ -128,7 +142,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (performer.IsPlaying()) {
           performer.Stop();
-          instrument.SetAllNotesOff();
+          stop_all_notes_fn();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();
@@ -145,7 +159,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'P':
-        instrument.SetAllNotesOff();
+        stop_all_notes_fn();
         performer.SetPosition(0.0);
         return;
       case '-':

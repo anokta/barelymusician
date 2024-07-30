@@ -37,19 +37,19 @@ namespace Barely {
 
     /// Returns a control value.
     ///
-    /// @param id Control identifier.
+    /// @param controlId Control identifier.
     /// @return Control value.
-    public double GetControl(int id) {
-      return Musician.Internal.Instrument_GetControl(_handle, id);
+    public double GetControl(int controlId) {
+      return Musician.Internal.Instrument_GetControl(_handle, controlId);
     }
 
     /// Returns a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param id Control identifier.
+    /// @param controlId Control identifier.
     /// @return Control value.
-    public double GetNoteControl(double pitch, int id) {
-      return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, id);
+    public double GetNoteControl(double pitch, int controlId) {
+      return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, controlId);
     }
 
     /// Returns whether a note is on or not.
@@ -62,17 +62,17 @@ namespace Barely {
 
     /// Resets a control value.
     ///
-    /// @param id Control identifier.
-    public void ResetControl(int id) {
-      Musician.Internal.Instrument_ResetControl(_handle, id);
+    /// @param controlId Control identifier.
+    public void ResetControl(int controlId) {
+      Musician.Internal.Instrument_ResetControl(_handle, controlId);
     }
 
     /// Resets a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param id Note control identifier.
-    public void ResetNoteControl(double pitch, int id) {
-      Musician.Internal.Instrument_ResetNoteControl(_handle, pitch, id);
+    /// @param controlId Note control identifier.
+    public void ResetNoteControl(double pitch, int controlId) {
+      Musician.Internal.Instrument_ResetNoteControl(_handle, pitch, controlId);
     }
 
     /// Sets all notes off.
@@ -82,10 +82,10 @@ namespace Barely {
 
     /// Sets a control value.
     ///
-    /// @param id Control identifier.
+    /// @param controlId Control identifier.
     /// @param value Control value.
-    public void SetControl(int id, double value) {
-      Musician.Internal.Instrument_SetControl(_handle, id, value);
+    public void SetControl(int controlId, double value) {
+      Musician.Internal.Instrument_SetControl(_handle, controlId, value);
     }
 
     /// Sets data.
@@ -99,10 +99,10 @@ namespace Barely {
     /// Sets a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param id Note control identifier.
+    /// @param controlId Note control identifier.
     /// @param value Note control value.
-    public void SetNoteControl(double pitch, int id, double value) {
-      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, id, value);
+    public void SetNoteControl(double pitch, int controlId, double value) {
+      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, controlId, value);
     }
 
     /// Sets a note off.

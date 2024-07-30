@@ -9,8 +9,8 @@ namespace barely::internal {
 
 /// Control message.
 struct ControlMessage {
-  /// Identifier.
-  int id;
+  /// Control identifier.
+  int control_id;
 
   /// Value.
   double value;
@@ -24,11 +24,11 @@ struct DataMessage {
 
 /// Note control message.
 struct NoteControlMessage {
-  /// Pitch.
-  double pitch;
+  /// Note identifier.
+  int note_id;
 
-  /// Identifier.
-  int id;
+  /// Control identifier.
+  int control_id;
 
   /// Value.
   double value;
@@ -36,12 +36,15 @@ struct NoteControlMessage {
 
 /// Note off message.
 struct NoteOffMessage {
-  /// Pitch.
-  double pitch;
+  /// Note identifier.
+  int note_id;
 };
 
 /// Note on message.
 struct NoteOnMessage {
+  /// Note identifier.
+  int note_id;
+
   /// Pitch.
   double pitch;
 

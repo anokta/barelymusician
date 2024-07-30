@@ -32,9 +32,9 @@ class Effect {
 
   /// Returns a control value.
   ///
-  /// @param id Control identifier.
+  /// @param control_id Control identifier.
   /// @return Pointer to control, or nullptr if not found.
-  [[nodiscard]] Control* GetControl(int id) noexcept;
+  [[nodiscard]] Control* GetControl(int control_id) noexcept;
 
   /// Processes output samples at timestamp.
   ///
@@ -72,8 +72,8 @@ class Effect {
   // Frame rate in hertz.
   const int frame_rate_;
 
-  // Map of controls by identifiers.
-  std::unordered_map<int, Control> controls_;
+  // Control map.
+  ControlMap control_map_;
 
   // Update frame.
   int64_t update_frame_ = 0;

@@ -7,26 +7,37 @@
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/musician.h"
+#include "barelymusician/internal/note.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
 // Control.
 struct BarelyControl : public barely::internal::Control {};
+static_assert(sizeof(BarelyControl) == sizeof(barely::internal::Control));
 
 // Effect.
 struct BarelyEffect : public barely::internal::Effect {};
+static_assert(sizeof(BarelyEffect) == sizeof(barely::internal::Effect));
 
 // Instrument.
 struct BarelyInstrument : public barely::internal::Instrument {};
+static_assert(sizeof(BarelyInstrument) == sizeof(barely::internal::Instrument));
 
 // Musician.
 struct BarelyMusician : public barely::internal::Musician {};
+static_assert(sizeof(BarelyMusician) == sizeof(barely::internal::Musician));
+
+// Note.
+struct BarelyNote : public barely::internal::Note {};
+static_assert(sizeof(BarelyNote) == sizeof(barely::internal::Note));
 
 // Performer.
 struct BarelyPerformer : public barely::internal::Performer {};
+static_assert(sizeof(BarelyPerformer) == sizeof(barely::internal::Performer));
 
 // Task.
 struct BarelyTask : public barely::internal::Task {};
+static_assert(sizeof(BarelyTask) == sizeof(barely::internal::Task));
 
 bool BarelyControl_GetValue(BarelyControlHandle control, double* out_value) {
   if (!control) return false;
@@ -50,12 +61,12 @@ bool BarelyControl_SetValue(BarelyControlHandle control, double value) {
   return true;
 }
 
-bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t id,
+bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t control_id,
                              BarelyControlHandle* out_control) {
   if (!effect) return false;
   if (!out_control) return false;
 
-  *out_control = static_cast<BarelyControlHandle>(effect->GetControl(id));
+  *out_control = static_cast<BarelyControlHandle>(effect->GetControl(control_id));
   return *out_control;
 }
 
@@ -75,34 +86,29 @@ bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t s
   return true;
 }
 
-bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t id,
+bool BarelyInstrument_CreateNote(BarelyInstrumentHandle instrument, double pitch, double intensity,
+                                 BarelyNoteHandle* out_note) {
+  if (!instrument) return false;
+  if (!out_note) return false;
+
+  *out_note = static_cast<BarelyNote*>(instrument->CreateNote(pitch, intensity));
+  return *out_note;
+}
+
+bool BarelyInstrument_DestroyNote(BarelyInstrumentHandle instrument, BarelyNoteHandle note) {
+  if (!instrument) return false;
+
+  instrument->DestroyNote(note);
+  return true;
+}
+
+bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t control_id,
                                  BarelyControlHandle* out_control) {
   if (!instrument) return false;
   if (!out_control) return false;
 
-  *out_control = static_cast<BarelyControlHandle>(instrument->GetControl(id));
+  *out_control = static_cast<BarelyControlHandle>(instrument->GetControl(control_id));
   return *out_control;
-}
-
-bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t id,
-                                     double* out_value) {
-  if (!instrument) return false;
-  if (!out_value) return false;
-
-  if (const auto* note_control = instrument->GetNoteControl(pitch, id)) {
-    *out_value = note_control->GetValue();
-    return true;
-  }
-  return false;
-}
-
-bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
-                               bool* out_is_note_on) {
-  if (!instrument) return false;
-  if (!out_is_note_on) return false;
-
-  *out_is_note_on = instrument->IsNoteOn(pitch);
-  return true;
 }
 
 bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
@@ -113,49 +119,12 @@ bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_
   return instrument->Process(output_samples, output_channel_count, output_frame_count, timestamp);
 }
 
-bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
-  if (!instrument) return false;
-
-  instrument->SetAllNotesOff();
-  return true;
-}
-
 bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* data, int32_t size) {
   if (!instrument) return false;
   if (size < 0 || (!data && size > 0)) return false;
 
   instrument->SetData(
       {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
-  return true;
-}
-
-bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch) {
-  if (!instrument) return false;
-
-  instrument->SetNoteOff(pitch);
-  return true;
-}
-
-bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                      BarelyNoteOffEventDefinition definition, void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetNoteOffEvent(definition, user_data);
-  return true;
-}
-
-bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch, double intensity) {
-  if (!instrument) return false;
-
-  instrument->SetNoteOn(pitch, intensity);
-  return true;
-}
-
-bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                     BarelyNoteOnEventDefinition definition, void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetNoteOnEvent(definition, user_data);
   return true;
 }
 
@@ -273,6 +242,31 @@ bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   return true;
 }
 
+bool BarelyNote_GetControl(BarelyNoteHandle note, int32_t control_id,
+                           BarelyControlHandle* out_control) {
+  if (!note) return false;
+  if (!out_control) return false;
+
+  *out_control = static_cast<BarelyControlHandle>(note->GetControl(control_id));
+  return *out_control;
+}
+
+bool BarelyNote_GetIntensity(BarelyNoteHandle note, double* out_intensity) {
+  if (!note) return false;
+  if (!out_intensity) return false;
+
+  *out_intensity = note->GetIntensity();
+  return true;
+}
+
+bool BarelyNote_GetPitch(BarelyNoteHandle note, double* out_pitch) {
+  if (!note) return false;
+  if (!out_pitch) return false;
+
+  *out_pitch = note->GetPitch();
+  return true;
+}
+
 bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
@@ -286,7 +280,7 @@ bool BarelyPerformer_CreateTask(BarelyPerformerHandle performer, BarelyTaskDefin
   if (!out_task) return false;
 
   *out_task = static_cast<BarelyTaskHandle>(performer->CreateTask(definition, position, user_data));
-  return true;
+  return *out_task;
 }
 
 bool BarelyPerformer_DestroyTask(BarelyPerformerHandle performer, BarelyTaskHandle task) {

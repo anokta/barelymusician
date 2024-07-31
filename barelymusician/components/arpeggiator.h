@@ -7,91 +7,91 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Arpeggiator handle.
-typedef struct BarelyArpeggiator* BarelyArpeggiatorHandle;
+/// Arpeggiator alias.
+typedef struct BarelyArpeggiator BarelyArpeggiator;
 
 /// Arpeggiator style enum alias.
 typedef int32_t BarelyArpeggiatorStyle;
 
 /// Creates a new arpeggiator.
 ///
-/// @param musician Musician handle.
+/// @param musician Pointer to musician.
 /// @param process_order Arpeggiator process order.
-/// @param out_arpeggiator Output arpeggiator handle.
+/// @param out_arpeggiator Output pointer to arpeggiator.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_order,
-                                            BarelyArpeggiatorHandle* out_arpeggiator);
+BARELY_EXPORT bool BarelyArpeggiator_Create(BarelyMusician* musician, int32_t process_order,
+                                            BarelyArpeggiator** out_arpeggiator);
 
 /// Destroys an arpeggiator.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator);
+BARELY_EXPORT bool BarelyArpeggiator_Destroy(BarelyArpeggiator* arpeggiator);
 
 /// Gets whether an arpeggiator note is on or not.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch,
+BARELY_EXPORT bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiator* arpeggiator, double pitch,
                                               bool* out_is_note_on);
 
 /// Gets whether an arpeggiator is playing or not.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator,
+BARELY_EXPORT bool BarelyArpeggiator_IsPlaying(const BarelyArpeggiator* arpeggiator,
                                                bool* out_is_playing);
 
 /// Sets all arpeggiator notes off.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator);
+BARELY_EXPORT bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiator* arpeggiator);
 
 /// Sets the gate ratio of an arpeggiator.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @param gate_ratio Gate ratio.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
+BARELY_EXPORT bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiator* arpeggiator,
                                                   double gate_ratio);
 
 /// Sets the instrument of an arpeggiator.
 ///
-/// @param arpeggiator Arpeggiator handle.
-/// @param instrument Instrument handle.
+/// @param arpeggiator Pointer to arpeggiator.
+/// @param instrument Pointer to instrument.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                                   BarelyInstrumentHandle instrument);
+BARELY_EXPORT bool BarelyArpeggiator_SetInstrument(BarelyArpeggiator* arpeggiator,
+                                                   BarelyInstrument* instrument);
 
 /// Sets an arpeggiator note off.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, double pitch);
+BARELY_EXPORT bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiator* arpeggiator, double pitch);
 
 /// Sets an arpeggiator note on.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch);
+BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiator* arpeggiator, double pitch);
 
 /// Sets the rate of an arpeggiator.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @param rate Rate in notes per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate);
+BARELY_EXPORT bool BarelyArpeggiator_SetRate(BarelyArpeggiator* arpeggiator, double rate);
 
 /// Sets the style of an arpeggiator.
 ///
-/// @param arpeggiator Arpeggiator handle.
+/// @param arpeggiator Pointer to arpeggiator.
 /// @param style Arpeggiator style.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
+BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiator* arpeggiator,
                                               BarelyArpeggiatorStyle style);
 
 #ifdef __cplusplus
@@ -99,6 +99,7 @@ BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiato
 #endif  // __cplusplus
 
 #ifdef __cplusplus
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -152,7 +153,9 @@ class Arpeggiator {
   void SetGateRatio(double gate_ratio) noexcept;
 
   /// Sets the instrument.
-  void SetInstrument(Instrument* instrument) noexcept;
+  ///
+  /// @param instrument Optional instrument.
+  void SetInstrument(std::optional<Instrument> instrument) noexcept;
 
   /// Sets a note off.
   ///
@@ -194,7 +197,7 @@ class Arpeggiator {
   Performer performer_;
 
   // Instrument.
-  Instrument* instrument_ = nullptr;
+  std::optional<Instrument> instrument_ = std::nullopt;
 
   // Set of currently playing notes.
   std::unordered_set<Note> notes_;

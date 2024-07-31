@@ -84,7 +84,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
   auto arpeggiator = musician.CreateComponent<Arpeggiator>();
-  arpeggiator.SetInstrument(&instrument);
+  arpeggiator.SetInstrument(instrument);
   arpeggiator.SetGateRatio(kInitialGateRatio);
   arpeggiator.SetRate(kInitialRate);
   arpeggiator.SetStyle(kInitialStyle);

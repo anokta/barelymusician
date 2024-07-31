@@ -9,33 +9,30 @@
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::Arpeggiator {
   // Constructs `BarelyArpeggiator` with `musician` and `process_order`.
-  BarelyArpeggiator(BarelyMusicianHandle musician, int process_order) noexcept
+  BarelyArpeggiator(BarelyMusician* musician, int process_order) noexcept
       : barely::Arpeggiator(
             barely::Musician(musician).CreateComponent<barely::Arpeggiator>(process_order)) {}
 
   // Destroys `BarelyArpeggiator`.
-  ~BarelyArpeggiator() noexcept { SetInstrument(nullptr); }
-
-  // Optional instrument.
-  std::optional<barely::Instrument> instrument = std::nullopt;
+  ~BarelyArpeggiator() noexcept { SetInstrument(std::nullopt); }
 };
 
-bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_order,
-                              BarelyArpeggiatorHandle* out_arpeggiator) {
+bool BarelyArpeggiator_Create(BarelyMusician* musician, int32_t process_order,
+                              BarelyArpeggiator** out_arpeggiator) {
   if (!musician || !out_arpeggiator) return false;
 
   *out_arpeggiator = new BarelyArpeggiator(musician, static_cast<int>(process_order));
   return true;
 }
 
-bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator) {
+bool BarelyArpeggiator_Destroy(BarelyArpeggiator* arpeggiator) {
   if (!arpeggiator) return false;
 
   delete arpeggiator;
   return true;
 }
 
-bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch,
+bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiator* arpeggiator, double pitch,
                                 bool* out_is_note_on) {
   if (!arpeggiator || !out_is_note_on) return false;
 
@@ -43,65 +40,57 @@ bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitc
   return true;
 }
 
-bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator, bool* out_is_playing) {
+bool BarelyArpeggiator_IsPlaying(const BarelyArpeggiator* arpeggiator, bool* out_is_playing) {
   if (!arpeggiator || !out_is_playing) return false;
 
   *out_is_playing = arpeggiator->IsPlaying();
   return true;
 }
 
-bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator) {
+bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiator* arpeggiator) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetAllNotesOff();
   return true;
 }
 
-bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator, double gate_ratio) {
+bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiator* arpeggiator, double gate_ratio) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetGateRatio(gate_ratio);
   return true;
 }
 
-bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                     BarelyInstrumentHandle instrument) {
+bool BarelyArpeggiator_SetInstrument(BarelyArpeggiator* arpeggiator, BarelyInstrument* instrument) {
   if (!arpeggiator) return false;
 
-  if (arpeggiator->instrument) {
-    arpeggiator->SetInstrument(nullptr);
-  }
-  if (instrument) {
-    arpeggiator->instrument.emplace(instrument);
-    arpeggiator->SetInstrument(&arpeggiator->instrument.value());
-  } else {
-    arpeggiator->instrument.reset();
-  }
+  arpeggiator->SetInstrument(instrument != nullptr ? std::optional(barely::Instrument(instrument))
+                                                   : std::nullopt);
   return true;
 }
 
-bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, double pitch) {
+bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiator* arpeggiator, double pitch) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetNoteOff(pitch);
   return true;
 }
 
-bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch) {
+bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiator* arpeggiator, double pitch) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetNoteOn(pitch);
   return true;
 }
 
-bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate) {
+bool BarelyArpeggiator_SetRate(BarelyArpeggiator* arpeggiator, double rate) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetRate(rate);
   return true;
 }
 
-bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeggiatorStyle style) {
+bool BarelyArpeggiator_SetStyle(BarelyArpeggiator* arpeggiator, BarelyArpeggiatorStyle style) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetStyle(static_cast<barely::ArpeggiatorStyle>(style));
@@ -129,7 +118,7 @@ void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
   gate_ratio_ = std::min(std::max(gate_ratio, 0.0), 1.0);
 }
 
-void Arpeggiator::SetInstrument(Instrument* instrument) noexcept {
+void Arpeggiator::SetInstrument(std::optional<Instrument> instrument) noexcept {
   if (!notes_.empty()) {
     for (const auto& note : notes_) {
       instrument_->DestroyNote(note);
@@ -202,14 +191,14 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
   task_ = performer_.CreateTask(
       [this]() noexcept {
         Update();
-        if (instrument_ == nullptr) {
+        if (!instrument_.has_value()) {
           return;
         }
         const double pitch = pitches_[index_];
         const auto [it, success] = notes_.emplace(instrument_->CreateNote(pitch));
         performer_.ScheduleOneOffTask(
             [this, note = *it]() {
-              if (instrument_ != nullptr) {
+              if (instrument_.has_value()) {
                 instrument_->DestroyNote(note);
               }
             },

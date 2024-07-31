@@ -246,19 +246,19 @@ namespace Barely {
       /// Creates a new component.
       ///
       /// @param component Component.
-      /// @param componentHandle Component handle.
-      public static void Component_Create(Component component, ref IntPtr componentHandle) {
-        if (Handle == IntPtr.Zero || componentHandle != IntPtr.Zero) {
+      /// @param componentPtr Pointer to component.
+      public static void Component_Create(Component component, ref IntPtr componentPtr) {
+        if (Ptr == IntPtr.Zero || componentPtr != IntPtr.Zero) {
           return;
         }
         switch (component) {
           case Arpeggiator arpeggiator:
-            if (BarelyArpeggiator_Create(_handle, arpeggiator.ProcessOrder, ref componentHandle)) {
+            if (BarelyArpeggiator_Create(_ptr, arpeggiator.ProcessOrder, ref componentPtr)) {
               return;
             }
             break;
           case Repeater repeater:
-            if (BarelyRepeater_Create(_handle, repeater.ProcessOrder, ref componentHandle)) {
+            if (BarelyRepeater_Create(_ptr, repeater.ProcessOrder, ref componentPtr)) {
               return;
             }
             break;
@@ -272,18 +272,18 @@ namespace Barely {
       /// Destroys a component.
       ///
       /// @param component Component.
-      /// @param componentHandle Component handle.
-      public static void Component_Destroy(Component component, ref IntPtr componentHandle) {
-        if (Handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
+      /// @param componentPtr Pointer to component.
+      public static void Component_Destroy(Component component, ref IntPtr componentPtr) {
+        if (Ptr == IntPtr.Zero || componentPtr == IntPtr.Zero) {
           return;
         }
         bool success = true;
         switch (component) {
           case Arpeggiator arpeggiator:
-            success = BarelyArpeggiator_Destroy(componentHandle);
+            success = BarelyArpeggiator_Destroy(componentPtr);
             break;
           case Repeater repeater:
-            success = BarelyRepeater_Destroy(componentHandle);
+            success = BarelyRepeater_Destroy(componentPtr);
             break;
           default:
             Debug.LogError("Unsupported component type: " + component.GetType());
@@ -292,15 +292,15 @@ namespace Barely {
         if (!success) {
           Debug.LogError("Failed to destroy component '" + component.name + "'");
         }
-        componentHandle = IntPtr.Zero;
+        componentPtr = IntPtr.Zero;
       }
 
       /// Creates a new effect.
       ///
       /// @param effect Effect.
-      /// @param effectHandle Effect handle.
-      public static void Effect_Create(Effect effect, ref IntPtr effectHandle) {
-        if (Handle == IntPtr.Zero || effectHandle != IntPtr.Zero) {
+      /// @param effectPtr Pointer to effect.
+      public static void Effect_Create(Effect effect, ref IntPtr effectPtr) {
+        if (Ptr == IntPtr.Zero || effectPtr != IntPtr.Zero) {
           return;
         }
         EffectDefinition definition;
@@ -321,8 +321,8 @@ namespace Barely {
             Debug.LogError("Unsupported effect type: " + effect.GetType());
             return;
         }
-        bool success = BarelyMusician_CreateEffect(
-            Handle, definition, AudioSettings.outputSampleRate, ref effectHandle);
+        bool success = BarelyMusician_CreateEffect(Ptr, definition, AudioSettings.outputSampleRate,
+                                                   ref effectPtr);
         if (effect.GetType().IsSubclassOf(typeof(CustomEffectInterface))) {
           if (definition.controlDefinitionCount > 0) {
             Marshal.FreeHGlobal(definition.controlDefinitions);
@@ -336,26 +336,25 @@ namespace Barely {
 
       /// Destroys an effect.
       ///
-      /// @param effectHandle Effect handle.
-      public static void Effect_Destroy(ref IntPtr effectHandle) {
-        if (Handle == IntPtr.Zero || effectHandle == IntPtr.Zero) {
+      /// @param effectPtr Pointer to effect.
+      public static void Effect_Destroy(ref IntPtr effectPtr) {
+        if (Ptr == IntPtr.Zero || effectPtr == IntPtr.Zero) {
           return;
         }
-        if (!BarelyMusician_DestroyEffect(_handle, effectHandle)) {
+        if (!BarelyMusician_DestroyEffect(_ptr, effectPtr)) {
           Debug.LogError("Failed to destroy effect");
         }
-        effectHandle = IntPtr.Zero;
+        effectPtr = IntPtr.Zero;
       }
 
       /// Returns the value of an effect control.
       ///
-      /// @param effectHandle Effect handle.
+      /// @param effectPtr Pointer to effect.
       /// @param controlId Control identifier.
       /// @return Control value.
-      public static double Effect_GetControl(IntPtr effectHandle, int controlId) {
+      public static double Effect_GetControl(IntPtr effectPtr, int controlId) {
         double value = 0.0;
-        if (!BarelyEffect_GetControl(effectHandle, controlId, ref value) &&
-            effectHandle != IntPtr.Zero) {
+        if (!BarelyEffect_GetControl(effectPtr, controlId, ref value) && effectPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get effect control " + controlId + " value");
         }
         return value;
@@ -363,15 +362,15 @@ namespace Barely {
 
       /// Processes effect output samples.
       ///
-      /// @param effectHandle Effect handle.
+      /// @param effectPtr Pointer to effect.
       /// @param outputSamples Output samples.
       /// @param outputChannelCount Number of output channels.
-      public static void Effect_Process(IntPtr effectHandle, float[] outputSamples,
+      public static void Effect_Process(IntPtr effectPtr, float[] outputSamples,
                                         int outputChannelCount) {
-        if (_handle == IntPtr.Zero) {
+        if (_ptr == IntPtr.Zero) {
           return;
         }
-        if (BarelyEffect_Process(effectHandle, OutputSamples, outputChannelCount,
+        if (BarelyEffect_Process(effectPtr, OutputSamples, outputChannelCount,
                                  outputSamples.Length / outputChannelCount,
                                  AudioSettings.dspTime)) {
           for (int i = 0; i < outputSamples.Length; ++i) {
@@ -382,33 +381,32 @@ namespace Barely {
 
       /// Resets an effect control value.
       ///
-      /// @param effectHandle Effect handle.
+      /// @param effectPtr Pointer to effect.
       /// @param controlId Control identifier.
-      public static void Effect_ResetControl(IntPtr effectHandle, int controlId) {
-        if (!BarelyEffect_ResetControl(effectHandle, controlId) && effectHandle != IntPtr.Zero) {
+      public static void Effect_ResetControl(IntPtr effectPtr, int controlId) {
+        if (!BarelyEffect_ResetControl(effectPtr, controlId) && effectPtr != IntPtr.Zero) {
           Debug.LogError("Failed to reset effect control " + controlId + " value");
         }
       }
 
       /// Sets an effect control value.
       ///
-      /// @param effectHandle Effect handle.
+      /// @param effectPtr Pointer to effect.
       /// @param controlId Control identifier.
       /// @param value Control value.
-      public static void Effect_SetControl(IntPtr effectHandle, int controlId, double value) {
-        if (!BarelyEffect_SetControl(effectHandle, controlId, value) &&
-            effectHandle != IntPtr.Zero) {
+      public static void Effect_SetControl(IntPtr effectPtr, int controlId, double value) {
+        if (!BarelyEffect_SetControl(effectPtr, controlId, value) && effectPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set effect control " + controlId + " value to " + value);
         }
       }
 
       /// Sets effect data.
       ///
-      /// @param effectHandle Effect handle.
+      /// @param effectPtr Pointer to effect.
       /// @param dataPtr Pointer to data.
       /// @param size Data size in bytes.
-      public static void Effect_SetData(IntPtr effectHandle, IntPtr dataPtr, int size) {
-        if (!BarelyEffect_SetData(effectHandle, dataPtr, size) && effectHandle != IntPtr.Zero) {
+      public static void Effect_SetData(IntPtr effectPtr, IntPtr dataPtr, int size) {
+        if (!BarelyEffect_SetData(effectPtr, dataPtr, size) && effectPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set effect data");
         }
       }
@@ -416,9 +414,9 @@ namespace Barely {
       /// Creates a new instrument.
       ///
       /// @param instrument Instrument.
-      /// @param instrumentHandle Instrument handle.
-      public static void Instrument_Create(Instrument instrument, ref IntPtr instrumentHandle) {
-        if (Handle == IntPtr.Zero || instrumentHandle != IntPtr.Zero) {
+      /// @param instrumentPtr Pointer to instrument.
+      public static void Instrument_Create(Instrument instrument, ref IntPtr instrumentPtr) {
+        if (Ptr == IntPtr.Zero || instrumentPtr != IntPtr.Zero) {
           return;
         }
         InstrumentDefinition definition;
@@ -440,7 +438,7 @@ namespace Barely {
             return;
         }
         bool success = BarelyMusician_CreateInstrument(
-            Handle, definition, AudioSettings.outputSampleRate, ref instrumentHandle);
+            Ptr, definition, AudioSettings.outputSampleRate, ref instrumentPtr);
         if (instrument.GetType().IsSubclassOf(typeof(CustomInstrumentInterface))) {
           if (definition.controlDefinitionCount > 0) {
             Marshal.FreeHGlobal(definition.controlDefinitions);
@@ -453,36 +451,36 @@ namespace Barely {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
         }
-        GCHandle noteOffEventHandle = GCHandle.Alloc(instrument);
-        BarelyInstrument_SetNoteOffEvent(instrumentHandle, _noteOffEventDefinition,
-                                         GCHandle.ToIntPtr(noteOffEventHandle));
-        GCHandle noteOnEventHandle = GCHandle.Alloc(instrument);
-        BarelyInstrument_SetNoteOnEvent(instrumentHandle, _noteOnEventDefinition,
-                                        GCHandle.ToIntPtr(noteOnEventHandle));
+        GCPtr noteOffEventPtr = GCPtr.Alloc(instrument);
+        BarelyInstrument_SetNoteOffEvent(instrumentPtr, _noteOffEventDefinition,
+                                         GCPtr.ToIntPtr(noteOffEventPtr));
+        GCPtr noteOnEventPtr = GCPtr.Alloc(instrument);
+        BarelyInstrument_SetNoteOnEvent(instrumentPtr, _noteOnEventDefinition,
+                                        GCPtr.ToIntPtr(noteOnEventPtr));
       }
 
       /// Destroys an instrument.
       ///
-      /// @param instrumentHandle Instrument handle.
-      public static void Instrument_Destroy(ref IntPtr instrumentHandle) {
-        if (Handle == IntPtr.Zero || instrumentHandle == IntPtr.Zero) {
+      /// @param instrumentPtr Pointer to instrument.
+      public static void Instrument_Destroy(ref IntPtr instrumentPtr) {
+        if (Ptr == IntPtr.Zero || instrumentPtr == IntPtr.Zero) {
           return;
         }
-        if (!BarelyMusician_DestroyInstrument(_handle, instrumentHandle)) {
+        if (!BarelyMusician_DestroyInstrument(_ptr, instrumentPtr)) {
           Debug.LogError("Failed to destroy instrument");
         }
-        instrumentHandle = IntPtr.Zero;
+        instrumentPtr = IntPtr.Zero;
       }
 
       /// Returns the value of an instrument control.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param controlId Control identifier.
       /// @return Control value.
-      public static double Instrument_GetControl(IntPtr instrumentHandle, int controlId) {
+      public static double Instrument_GetControl(IntPtr instrumentPtr, int controlId) {
         double value = 0.0;
-        if (!BarelyInstrument_GetControl(instrumentHandle, controlId, ref value) &&
-            instrumentHandle != IntPtr.Zero) {
+        if (!BarelyInstrument_GetControl(instrumentPtr, controlId, ref value) &&
+            instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get instrument control " + controlId + " value");
         }
         return value;
@@ -490,13 +488,13 @@ namespace Barely {
 
       /// Returns whether an instrument note is on or not.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
       /// @return True if on, false otherwise.
-      public static bool Instrument_IsNoteOn(IntPtr instrumentHandle, double pitch) {
+      public static bool Instrument_IsNoteOn(IntPtr instrumentPtr, double pitch) {
         bool isNoteOn = false;
-        if (!BarelyInstrument_IsNoteOn(instrumentHandle, pitch, ref isNoteOn) &&
-            instrumentHandle != IntPtr.Zero) {
+        if (!BarelyInstrument_IsNoteOn(instrumentPtr, pitch, ref isNoteOn) &&
+            instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get if instrument note pitch " + pitch + " is on");
         }
         return isNoteOn;
@@ -504,18 +502,18 @@ namespace Barely {
 
       /// Processes instrument output samples.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param outputSamples Output samples.
       /// @param outputChannelCount Number of output channels.
-      public static void Instrument_Process(IntPtr instrumentHandle, float[] outputSamples,
+      public static void Instrument_Process(IntPtr instrumentPtr, float[] outputSamples,
                                             int outputChannelCount) {
-        if (_handle == IntPtr.Zero) {
+        if (_ptr == IntPtr.Zero) {
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;
           }
           return;
         }
-        if (BarelyInstrument_Process(instrumentHandle, OutputSamples, outputChannelCount,
+        if (BarelyInstrument_Process(instrumentPtr, OutputSamples, outputChannelCount,
                                      outputSamples.Length / outputChannelCount,
                                      AudioSettings.dspTime)) {
           for (int i = 0; i < outputSamples.Length; ++i) {
@@ -530,24 +528,24 @@ namespace Barely {
 
       /// Resets an instrument control value.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param controlId Control identifier.
-      public static void Instrument_ResetControl(IntPtr instrumentHandle, int controlId) {
-        if (!BarelyInstrument_ResetControl(instrumentHandle, controlId) &&
-            instrumentHandle != IntPtr.Zero) {
+      public static void Instrument_ResetControl(IntPtr instrumentPtr, int controlId) {
+        if (!BarelyInstrument_ResetControl(instrumentPtr, controlId) &&
+            instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to reset instrument control " + controlId + " value");
         }
       }
 
       /// Resets an instrument note control value.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
       /// @param controlId Note control identifier.
-      public static void Instrument_ResetNoteControl(IntPtr instrumentHandle, double pitch,
+      public static void Instrument_ResetNoteControl(IntPtr instrumentPtr, double pitch,
                                                      int controlId) {
-        if (!BarelyInstrument_ResetNoteControl(instrumentHandle, pitch, controlId) &&
-            instrumentHandle != IntPtr.Zero) {
+        if (!BarelyInstrument_ResetNoteControl(instrumentPtr, pitch, controlId) &&
+            instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to reset instrument note pitch " + pitch + " control " +
                          controlId + " value");
         }
@@ -555,48 +553,47 @@ namespace Barely {
 
       /// Sets all instrument notes off.
       ///
-      /// @param instrumentHandle Instrument handle.
-      public static void Instrument_SetAllNotesOff(IntPtr instrumentHandle) {
-        if (!BarelyInstrument_SetAllNotesOff(instrumentHandle) && instrumentHandle != IntPtr.Zero) {
+      /// @param instrumentPtr Pointer to instrument.
+      public static void Instrument_SetAllNotesOff(IntPtr instrumentPtr) {
+        if (!BarelyInstrument_SetAllNotesOff(instrumentPtr) && instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop all instrument notes");
         }
       }
 
       /// Sets an instrument control value.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param controlId Control identifier.
       /// @param value Control value.
-      public static void Instrument_SetControl(IntPtr instrumentHandle, int controlId,
-                                               double value) {
-        if (!BarelyInstrument_SetControl(instrumentHandle, controlId, value) &&
-            instrumentHandle != IntPtr.Zero) {
+      public static void Instrument_SetControl(IntPtr instrumentPtr, int controlId, double value) {
+        if (!BarelyInstrument_SetControl(instrumentPtr, controlId, value) &&
+            instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument control " + controlId + " value to " + value);
         }
       }
 
       /// Sets instrument data.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param dataPtr Pointer to data.
       /// @param size Data size in bytes.
-      public static void Instrument_SetData(IntPtr instrumentHandle, IntPtr dataPtr, int size) {
-        if (!BarelyInstrument_SetData(instrumentHandle, dataPtr, size) &&
-            instrumentHandle != IntPtr.Zero) {
+      public static void Instrument_SetData(IntPtr instrumentPtr, IntPtr dataPtr, int size) {
+        if (!BarelyInstrument_SetData(instrumentPtr, dataPtr, size) &&
+            instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument data");
         }
       }
 
       /// Sets an instrument note control value.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
       /// @param controlId Note control identifier.
       /// @param value Note control value.
-      public static void Instrument_SetNoteControl(IntPtr instrumentHandle, double pitch,
+      public static void Instrument_SetNoteControl(IntPtr instrumentPtr, double pitch,
                                                    int controlId, double value) {
-        if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, controlId, value) &&
-            instrumentHandle != IntPtr.Zero) {
+        if (!BarelyInstrument_SetNoteControl(instrumentPtr, pitch, controlId, value) &&
+            instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument note pitch " + pitch + " control " + controlId +
                          " value to " + value);
         }
@@ -604,23 +601,22 @@ namespace Barely {
 
       /// Sets an instrument note off.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
-      public static void Instrument_SetNoteOff(IntPtr instrumentHandle, double pitch) {
-        if (!BarelyInstrument_SetNoteOff(instrumentHandle, pitch) &&
-            instrumentHandle != IntPtr.Zero) {
+      public static void Instrument_SetNoteOff(IntPtr instrumentPtr, double pitch) {
+        if (!BarelyInstrument_SetNoteOff(instrumentPtr, pitch) && instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop instrument note " + pitch + "");
         }
       }
 
       /// Sets an instrument note on.
       ///
-      /// @param instrumentHandle Instrument handle.
+      /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
-      public static void Instrument_SetNoteOn(IntPtr instrumentHandle, double pitch,
+      public static void Instrument_SetNoteOn(IntPtr instrumentPtr, double pitch,
                                               double intensity) {
-        if (!BarelyInstrument_SetNoteOn(instrumentHandle, pitch, intensity) &&
-            instrumentHandle != IntPtr.Zero) {
+        if (!BarelyInstrument_SetNoteOn(instrumentPtr, pitch, intensity) &&
+            instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
                          " intensity");
         }
@@ -632,8 +628,7 @@ namespace Barely {
       /// @return Number of seconds.
       public static double Musician_GetSecondsFromBeats(double beats) {
         double seconds = 0.0;
-        if (!BarelyMusician_GetSecondsFromBeats(Handle, beats, ref seconds) &&
-            _handle != IntPtr.Zero) {
+        if (!BarelyMusician_GetSecondsFromBeats(Ptr, beats, ref seconds) && _ptr != IntPtr.Zero) {
           Debug.LogError("Failed to get seconds for " + beats + " musician beats");
         }
         return seconds;
@@ -645,8 +640,7 @@ namespace Barely {
       /// @return Number of beats.
       public static double Musician_GetBeatsFromSeconds(double seconds) {
         double beats = 0.0;
-        if (!BarelyMusician_GetBeatsFromSeconds(Handle, seconds, ref beats) &&
-            _handle != IntPtr.Zero) {
+        if (!BarelyMusician_GetBeatsFromSeconds(Ptr, seconds, ref beats) && _ptr != IntPtr.Zero) {
           Debug.LogError("Failed to get musician beats for " + seconds + " seconds");
         }
         return beats;
@@ -657,7 +651,7 @@ namespace Barely {
       /// @return Tempo in beats per minute.
       public static double Musician_GetTempo() {
         double tempo = 0.0;
-        if (!BarelyMusician_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
+        if (!BarelyMusician_GetTempo(Ptr, ref tempo) && _ptr != IntPtr.Zero) {
           Debug.LogError("Failed to get musician tempo");
         }
         return tempo;
@@ -668,7 +662,7 @@ namespace Barely {
       /// @return Timestamp in seconds.
       public static double Musician_GetTimestamp() {
         double timestamp = 0.0;
-        if (!BarelyMusician_GetTimestamp(Handle, ref timestamp) && _handle != IntPtr.Zero) {
+        if (!BarelyMusician_GetTimestamp(Ptr, ref timestamp) && _ptr != IntPtr.Zero) {
           Debug.LogError("Failed to get musician timestamp");
         }
         return timestamp;
@@ -696,17 +690,16 @@ namespace Barely {
       ///
       /// @param tempo Tempo in beats per minute.
       public static void Musician_SetTempo(double tempo) {
-        if (!BarelyMusician_SetTempo(Handle, tempo) && _handle != IntPtr.Zero) {
+        if (!BarelyMusician_SetTempo(Ptr, tempo) && _ptr != IntPtr.Zero) {
           Debug.LogError("Failed to set musician tempo");
         }
       }
 
       /// Cancels all one-off tasks.
       ///
-      /// @param performerHandle Performer handle.
-      public static void Performer_CancelAllOneOffTasks(IntPtr performerHandle) {
-        if (!BarelyPerformer_CancelAllOneOffTasks(performerHandle) &&
-            performerHandle != IntPtr.Zero) {
+      /// @param performerPtr Pointer to performer.
+      public static void Performer_CancelAllOneOffTasks(IntPtr performerPtr) {
+        if (!BarelyPerformer_CancelAllOneOffTasks(performerPtr) && performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to cancel all one-off tasks");
         }
       }
@@ -714,37 +707,37 @@ namespace Barely {
       /// Creates a new performer.
       ///
       /// @param performer Performer.
-      /// @param performerHandle Performer handle.
-      public static void Performer_Create(Performer performer, ref IntPtr performerHandle) {
-        if (Handle == IntPtr.Zero || performerHandle != IntPtr.Zero) {
+      /// @param performerPtr Pointer to performer.
+      public static void Performer_Create(Performer performer, ref IntPtr performerPtr) {
+        if (Ptr == IntPtr.Zero || performerPtr != IntPtr.Zero) {
           return;
         }
-        if (!BarelyMusician_CreatePerformer(Handle, ref performerHandle)) {
+        if (!BarelyMusician_CreatePerformer(Ptr, ref performerPtr)) {
           Debug.LogError("Failed to create performer '" + performer.name + "'");
         }
       }
 
       /// Destroys a performer.
       ///
-      /// @param performerHandle Performer handle.
-      public static void Performer_Destroy(ref IntPtr performerHandle) {
-        if (Handle == IntPtr.Zero || performerHandle == IntPtr.Zero) {
+      /// @param performerPtr Pointer to performer.
+      public static void Performer_Destroy(ref IntPtr performerPtr) {
+        if (Ptr == IntPtr.Zero || performerPtr == IntPtr.Zero) {
           return;
         }
-        if (!BarelyMusician_DestroyPerformer(_handle, performerHandle)) {
+        if (!BarelyMusician_DestroyPerformer(_ptr, performerPtr)) {
           Debug.LogError("Failed to destroy performer");
         }
-        performerHandle = IntPtr.Zero;
+        performerPtr = IntPtr.Zero;
       }
 
       /// Returns the loop begin position of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @return Loop begin position in beats.
-      public static double Performer_GetLoopBeginPosition(IntPtr performerHandle) {
+      public static double Performer_GetLoopBeginPosition(IntPtr performerPtr) {
         double loopBeginPosition = 0.0;
-        if (!BarelyPerformer_GetLoopBeginPosition(performerHandle, ref loopBeginPosition) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_GetLoopBeginPosition(performerPtr, ref loopBeginPosition) &&
+            performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get performer loop begin position");
         }
         return loopBeginPosition;
@@ -752,12 +745,12 @@ namespace Barely {
 
       /// Returns the loop length of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @return Loop length in beats.
-      public static double Performer_GetLoopLength(IntPtr performerHandle) {
+      public static double Performer_GetLoopLength(IntPtr performerPtr) {
         double loopLength = 0.0;
-        if (!BarelyPerformer_GetLoopLength(performerHandle, ref loopLength) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_GetLoopLength(performerPtr, ref loopLength) &&
+            performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get performer loop length");
         }
         return loopLength;
@@ -765,12 +758,12 @@ namespace Barely {
 
       /// Returns the position of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @return Position in beats.
-      public static double Performer_GetPosition(IntPtr performerHandle) {
+      public static double Performer_GetPosition(IntPtr performerPtr) {
         double position = 0.0;
-        if (!BarelyPerformer_GetPosition(performerHandle, ref position) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_GetPosition(performerPtr, ref position) &&
+            performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get performer position");
         }
         return position;
@@ -778,12 +771,12 @@ namespace Barely {
 
       /// Returns whether a performer is looping or not.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @return True if looping, false otherwise.
-      public static bool Performer_IsLooping(IntPtr performerHandle) {
+      public static bool Performer_IsLooping(IntPtr performerPtr) {
         bool isLooping = false;
-        if (!BarelyPerformer_IsLooping(performerHandle, ref isLooping) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_IsLooping(performerPtr, ref isLooping) &&
+            performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get if performer is looping");
         }
         return isLooping;
@@ -791,12 +784,12 @@ namespace Barely {
 
       /// Returns whether a performer is playing or not.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @return True if playing, false otherwise.
-      public static bool Performer_IsPlaying(IntPtr performerHandle) {
+      public static bool Performer_IsPlaying(IntPtr performerPtr) {
         bool isPlaying = false;
-        if (!BarelyPerformer_IsPlaying(performerHandle, ref isPlaying) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_IsPlaying(performerPtr, ref isPlaying) &&
+            performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get if performer is playing");
         }
         return isPlaying;
@@ -804,127 +797,125 @@ namespace Barely {
 
       /// Schedules a one-off task.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @param callback Task callback.
       /// @param position Task position.
       /// @param processOrder Task process order.
-      public static void Performer_ScheduleOneOffTask(IntPtr performerHandle, Action callback,
+      public static void Performer_ScheduleOneOffTask(IntPtr performerPtr, Action callback,
                                                       double position, int processOrder) {
-        if (Handle == null || callback == null) {
+        if (Ptr == null || callback == null) {
           return;
         }
-        GCHandle handle = GCHandle.Alloc(callback);
-        if (!BarelyPerformer_ScheduleOneOffTask(performerHandle, _taskDefinition, position,
-                                                processOrder, GCHandle.ToIntPtr(handle)) &&
-            performerHandle != IntPtr.Zero) {
-          handle.Free();
+        GCPtr pointer = GCPtr.Alloc(callback);
+        if (!BarelyPerformer_ScheduleOneOffTask(performerPtr, _taskDefinition, position,
+                                                processOrder, GCPtr.ToIntPtr(pointer)) &&
+            performerPtr != IntPtr.Zero) {
+          pointer.Free();
           Debug.LogError("Failed to set performer loop begin position");
         }
       }
 
       /// Sets the loop begin position of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @param loopBeginPosition Loop begin position in beats.
-      public static void Performer_SetLoopBeginPosition(IntPtr performerHandle,
+      public static void Performer_SetLoopBeginPosition(IntPtr performerPtr,
                                                         double loopBeginPosition) {
-        if (!BarelyPerformer_SetLoopBeginPosition(performerHandle, loopBeginPosition) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_SetLoopBeginPosition(performerPtr, loopBeginPosition) &&
+            performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set performer loop begin position");
         }
       }
 
       /// Sets the loop length of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @param loopLength Loop length in beats.
-      public static void Performer_SetLoopLength(IntPtr performerHandle, double loopLength) {
-        if (!BarelyPerformer_SetLoopLength(performerHandle, loopLength) &&
-            performerHandle != IntPtr.Zero) {
+      public static void Performer_SetLoopLength(IntPtr performerPtr, double loopLength) {
+        if (!BarelyPerformer_SetLoopLength(performerPtr, loopLength) &&
+            performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set performer loop length");
         }
       }
 
       /// Sets whether a performer is looping or not.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @param isLooping True if looping, false otherwise.
-      public static void Performer_SetLooping(IntPtr performerHandle, bool isLooping) {
-        if (!BarelyPerformer_SetLooping(performerHandle, isLooping) &&
-            performerHandle != IntPtr.Zero) {
+      public static void Performer_SetLooping(IntPtr performerPtr, bool isLooping) {
+        if (!BarelyPerformer_SetLooping(performerPtr, isLooping) && performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set performer looping");
         }
       }
 
       /// Sets the position of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @param position Position in beats.
-      public static void Performer_SetPosition(IntPtr performerHandle, double position) {
-        if (!BarelyPerformer_SetPosition(performerHandle, position) &&
-            performerHandle != IntPtr.Zero) {
+      public static void Performer_SetPosition(IntPtr performerPtr, double position) {
+        if (!BarelyPerformer_SetPosition(performerPtr, position) && performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set performer position");
         }
       }
 
       /// Starts a performer.
       ///
-      /// @param performerHandle Performer handle.
-      public static void Performer_Start(IntPtr performerHandle) {
-        if (!BarelyPerformer_Start(performerHandle) && performerHandle != IntPtr.Zero) {
+      /// @param performerPtr Pointer to performer.
+      public static void Performer_Start(IntPtr performerPtr) {
+        if (!BarelyPerformer_Start(performerPtr) && performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to start performer");
         }
       }
 
       /// Stops a performer.
       ///
-      /// @param performerHandle Performer handle.
-      public static void Performer_Stop(IntPtr performerHandle) {
-        if (!BarelyPerformer_Stop(performerHandle) && performerHandle != IntPtr.Zero) {
+      /// @param performerPtr Pointer to performer.
+      public static void Performer_Stop(IntPtr performerPtr) {
+        if (!BarelyPerformer_Stop(performerPtr) && performerPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop performer");
         }
       }
 
       /// Creates a new task.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerPtr Pointer to performer.
       /// @param callback Task callback.
       /// @param position Task position.
       /// @param processOrder Task process order.
-      /// @param taskHandle Task handle.
-      public static void Task_Create(IntPtr performerHandle, Action callback, double position,
-                                     int processOrder, ref IntPtr taskHandle) {
-        if (Handle == IntPtr.Zero || taskHandle != IntPtr.Zero) {
+      /// @param taskPtr Pointer to task.
+      public static void Task_Create(IntPtr performerPtr, Action callback, double position,
+                                     int processOrder, ref IntPtr taskPtr) {
+        if (Ptr == IntPtr.Zero || taskPtr != IntPtr.Zero) {
           return;
         }
-        GCHandle handle = GCHandle.Alloc(callback);
-        if (!BarelyPerformer_CreateTask(performerHandle, _taskDefinition, position, processOrder,
-                                        GCHandle.ToIntPtr(handle), ref taskHandle)) {
-          handle.Free();
+        GCPtr pointer = GCPtr.Alloc(callback);
+        if (!BarelyPerformer_CreateTask(performerPtr, _taskDefinition, position, processOrder,
+                                        GCPtr.ToIntPtr(pointer), ref taskPtr)) {
+          pointer.Free();
         }
       }
 
       /// Destroys a task.
       ///
-      /// @param performerHandle Performer handle.
-      /// @param taskHandle Task handle.
-      public static void Task_Destroy(IntPtr performerHandle, ref IntPtr taskHandle) {
-        if (Handle == IntPtr.Zero || performerHandle == IntPtr.Zero || taskHandle == IntPtr.Zero) {
+      /// @param performerPtr Pointer to performer.
+      /// @param taskPtr Pointer to task.
+      public static void Task_Destroy(IntPtr performerPtr, ref IntPtr taskPtr) {
+        if (Ptr == IntPtr.Zero || performerPtr == IntPtr.Zero || taskPtr == IntPtr.Zero) {
           return;
         }
-        if (!BarelyPerformer_DestroyTask(performerHandle, taskHandle)) {
+        if (!BarelyPerformer_DestroyTask(performerPtr, taskPtr)) {
           Debug.LogError("Failed to destroy performer task");
         }
-        taskHandle = IntPtr.Zero;
+        taskPtr = IntPtr.Zero;
       }
 
       /// Returns the position of a task.
       ///
-      /// @param taskHandle Task handle.
+      /// @param taskPtr Pointer to task.
       /// @return Position in beats.
-      public static double Task_GetPosition(IntPtr taskHandle) {
+      public static double Task_GetPosition(IntPtr taskPtr) {
         double position = 0.0;
-        if (!BarelyTask_GetPosition(taskHandle, ref position) && taskHandle != IntPtr.Zero) {
+        if (!BarelyTask_GetPosition(taskPtr, ref position) && taskPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get performer task position");
         }
         return position;
@@ -932,12 +923,11 @@ namespace Barely {
 
       /// Returns the process order of a task.
       ///
-      /// @param taskHandle Task handle.
+      /// @param taskPtr Pointer to task.
       /// @return Process order.
-      public static int Task_GetProcessOrder(IntPtr taskHandle) {
+      public static int Task_GetProcessOrder(IntPtr taskPtr) {
         Int32 processOrder = 0;
-        if (!BarelyTask_GetProcessOrder(taskHandle, ref processOrder) &&
-            taskHandle != IntPtr.Zero) {
+        if (!BarelyTask_GetProcessOrder(taskPtr, ref processOrder) && taskPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get performer task process order");
         }
         return processOrder;
@@ -945,33 +935,33 @@ namespace Barely {
 
       /// Sets the position of a task.
       ///
-      /// @param taskHandle Task handle.
+      /// @param taskPtr Pointer to task.
       /// @param position Position in beats.
-      public static void Task_SetPosition(IntPtr taskHandle, double position) {
-        if (!BarelyTask_SetPosition(taskHandle, position) && taskHandle != IntPtr.Zero) {
+      public static void Task_SetPosition(IntPtr taskPtr, double position) {
+        if (!BarelyTask_SetPosition(taskPtr, position) && taskPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set performer task position");
         }
       }
 
       /// Sets the process order of a task.
       ///
-      /// @param taskHandle Task handle.
+      /// @param taskPtr Pointer to task.
       /// @param processOrder Process order.
-      public static void Task_SetProcessOrder(IntPtr taskHandle, int processOrder) {
-        if (!BarelyTask_SetProcessOrder(taskHandle, processOrder) && taskHandle != IntPtr.Zero) {
+      public static void Task_SetProcessOrder(IntPtr taskPtr, int processOrder) {
+        if (!BarelyTask_SetProcessOrder(taskPtr, processOrder) && taskPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set performer task process order");
         }
       }
 
       /// Returns whether an arpeggiator note is on or not.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param pitch Note pitch.
       /// @return True if on, false otherwise.
-      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorHandle, double pitch) {
+      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorPtr, double pitch) {
         bool isNoteOn = false;
-        if (!BarelyArpeggiator_IsNoteOn(arpeggiatorHandle, pitch, ref isNoteOn) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+        if (!BarelyArpeggiator_IsNoteOn(arpeggiatorPtr, pitch, ref isNoteOn) &&
+            arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get if arpeggiator note pitch " + pitch + " is on");
         }
         return isNoteOn;
@@ -979,12 +969,12 @@ namespace Barely {
 
       /// Returns whether an arpeggiator is playing or not.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @return True if playing, false otherwise.
-      public static bool Arpeggiator_IsPlaying(IntPtr arpeggiatorHandle) {
+      public static bool Arpeggiator_IsPlaying(IntPtr arpeggiatorPtr) {
         bool isPlaying = false;
-        if (!BarelyArpeggiator_IsPlaying(arpeggiatorHandle, ref isPlaying) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+        if (!BarelyArpeggiator_IsPlaying(arpeggiatorPtr, ref isPlaying) &&
+            arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get if arpeggiator is playing");
         }
         return isPlaying;
@@ -992,90 +982,83 @@ namespace Barely {
 
       /// Sets all arpeggiator notes off.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      public static void Arpeggiator_SetAllNotesOff(IntPtr arpeggiatorHandle) {
-        if (!BarelyArpeggiator_SetAllNotesOff(arpeggiatorHandle) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
+      public static void Arpeggiator_SetAllNotesOff(IntPtr arpeggiatorPtr) {
+        if (!BarelyArpeggiator_SetAllNotesOff(arpeggiatorPtr) && arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop all arpeggiator notes");
         }
       }
 
       /// Sets an arpeggiator gate ratio.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param gateRatio Gate ratio.
-      public static void Arpeggiator_SetGateRatio(IntPtr arpeggiatorHandle, double gateRatio) {
-        if (!BarelyArpeggiator_SetGateRatio(arpeggiatorHandle, gateRatio) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+      public static void Arpeggiator_SetGateRatio(IntPtr arpeggiatorPtr, double gateRatio) {
+        if (!BarelyArpeggiator_SetGateRatio(arpeggiatorPtr, gateRatio) &&
+            arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop arpeggiator gate ratio " + gateRatio);
         }
       }
 
       /// Sets an arpeggiator instrument.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param instrument Instrument.
-      public static void Arpeggiator_SetInstrument(IntPtr arpeggiatorHandle,
-                                                   Instrument instrument) {
-        if (!BarelyArpeggiator_SetInstrument(arpeggiatorHandle,
-                                             Instrument.Internal.GetHandle(instrument)) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+      public static void Arpeggiator_SetInstrument(IntPtr arpeggiatorPtr, Instrument instrument) {
+        if (!BarelyArpeggiator_SetInstrument(arpeggiatorPtr,
+                                             Instrument.Internal.GetPtr(instrument)) &&
+            arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set arpeggiator instrument '" + instrument.name + "'");
         }
       }
 
       /// Sets an arpeggiator note off.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorHandle, double pitch) {
-        if (!BarelyArpeggiator_SetNoteOff(arpeggiatorHandle, pitch) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorPtr, double pitch) {
+        if (!BarelyArpeggiator_SetNoteOff(arpeggiatorPtr, pitch) && arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop arpeggiator note " + pitch);
         }
       }
 
       /// Sets an arpeggiator note on.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorHandle, double pitch) {
-        if (!BarelyArpeggiator_SetNoteOn(arpeggiatorHandle, pitch) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorPtr, double pitch) {
+        if (!BarelyArpeggiator_SetNoteOn(arpeggiatorPtr, pitch) && arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to start arpeggiator note " + pitch);
         }
       }
 
       /// Sets an arpeggiator rate.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param rate Rate in notes per beat.
-      public static void Arpeggiator_SetRate(IntPtr arpeggiatorHandle, double rate) {
-        if (!BarelyArpeggiator_SetRate(arpeggiatorHandle, rate) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+      public static void Arpeggiator_SetRate(IntPtr arpeggiatorPtr, double rate) {
+        if (!BarelyArpeggiator_SetRate(arpeggiatorPtr, rate) && arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set arpeggiator rate " + rate);
         }
       }
 
       /// Sets an arpeggiator style.
       ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param style Style.
-      public static void Arpeggiator_SetStyle(IntPtr arpeggiatorHandle, ArpeggiatorStyle style) {
-        if (!BarelyArpeggiator_SetStyle(arpeggiatorHandle, style) &&
-            arpeggiatorHandle != IntPtr.Zero) {
+      public static void Arpeggiator_SetStyle(IntPtr arpeggiatorPtr, ArpeggiatorStyle style) {
+        if (!BarelyArpeggiator_SetStyle(arpeggiatorPtr, style) && arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set arpeggiator style " + style);
         }
       }
 
       /// Returns whether an repeater is playing or not.
       ///
-      /// @param repeaterHandle Repeater handle.
+      /// @param repeaterPtr Pointer to repeater.
       /// @return True if playing, false otherwise.
-      public static bool Repeater_IsPlaying(IntPtr repeaterHandle) {
+      public static bool Repeater_IsPlaying(IntPtr repeaterPtr) {
         bool isPlaying = false;
-        if (!BarelyRepeater_IsPlaying(repeaterHandle, ref isPlaying) &&
-            repeaterHandle != IntPtr.Zero) {
+        if (!BarelyRepeater_IsPlaying(repeaterPtr, ref isPlaying) && repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to get if repeater is playing");
         }
         return isPlaying;
@@ -1083,72 +1066,71 @@ namespace Barely {
 
       /// Pops the last note from the end.
       ///
-      /// @param repeaterHandle Repeater handle.
-      public static void Repeater_Pop(IntPtr repeaterHandle) {
-        if (!BarelyRepeater_Pop(repeaterHandle) && repeaterHandle != IntPtr.Zero) {
+      /// @param repeaterPtr Pointer to repeater.
+      public static void Repeater_Pop(IntPtr repeaterPtr) {
+        if (!BarelyRepeater_Pop(repeaterPtr) && repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to pop from repeater");
         }
       }
 
       /// Pushes a new note to the end.
       ///
-      /// @param repeaterHandle Repeater handle.
+      /// @param repeaterPtr Pointer to repeater.
       /// @param pitchOr Note pitch or silence.
       /// @param length Note length in beats.
-      public static void Repeater_Push(IntPtr repeaterHandle, double? pitchOr, int length) {
-        if ((pitchOr.HasValue && !BarelyRepeater_Push(repeaterHandle, pitchOr.Value, length)) ||
-            (!pitchOr.HasValue && !BarelyRepeater_PushSilence(repeaterHandle, length)) &&
-                repeaterHandle != IntPtr.Zero) {
+      public static void Repeater_Push(IntPtr repeaterPtr, double? pitchOr, int length) {
+        if ((pitchOr.HasValue && !BarelyRepeater_Push(repeaterPtr, pitchOr.Value, length)) ||
+            (!pitchOr.HasValue && !BarelyRepeater_PushSilence(repeaterPtr, length)) &&
+                repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to pop from repeater");
         }
       }
 
       /// Sets an repeater instrument.
       ///
-      /// @param repeaterHandle Repeater handle.
+      /// @param repeaterPtr Pointer to repeater.
       /// @param instrument Instrument.
-      public static void Repeater_SetInstrument(IntPtr repeaterHandle, Instrument instrument) {
-        if (!BarelyRepeater_SetInstrument(repeaterHandle,
-                                          Instrument.Internal.GetHandle(instrument)) &&
-            repeaterHandle != IntPtr.Zero) {
+      public static void Repeater_SetInstrument(IntPtr repeaterPtr, Instrument instrument) {
+        if (!BarelyRepeater_SetInstrument(repeaterPtr, Instrument.Internal.GetPtr(instrument)) &&
+            repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set repeater instrument '" + instrument.name + "'");
         }
       }
 
       /// Sets an repeater rate.
       ///
-      /// @param repeaterHandle Repeater handle.
+      /// @param repeaterPtr Pointer to repeater.
       /// @param rate Rate in notes per beat.
-      public static void Repeater_SetRate(IntPtr repeaterHandle, double rate) {
-        if (!BarelyRepeater_SetRate(repeaterHandle, rate) && repeaterHandle != IntPtr.Zero) {
+      public static void Repeater_SetRate(IntPtr repeaterPtr, double rate) {
+        if (!BarelyRepeater_SetRate(repeaterPtr, rate) && repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set repeater rate " + rate);
         }
       }
 
       /// Sets an repeater style.
       ///
-      /// @param repeaterHandle Repeater handle.
+      /// @param repeaterPtr Pointer to repeater.
       /// @param style Style.
-      public static void Repeater_SetStyle(IntPtr repeaterHandle, RepeaterStyle style) {
-        if (!BarelyRepeater_SetStyle(repeaterHandle, style) && repeaterHandle != IntPtr.Zero) {
+      public static void Repeater_SetStyle(IntPtr repeaterPtr, RepeaterStyle style) {
+        if (!BarelyRepeater_SetStyle(repeaterPtr, style) && repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set repeater style " + style);
         }
       }
 
       /// Starts a repeater.
       ///
-      /// @param repeaterHandle Repeater handle.
-      public static void Repeater_Start(IntPtr repeaterHandle, double pitchOffset) {
-        if (!BarelyRepeater_Start(repeaterHandle, pitchOffset) && repeaterHandle != IntPtr.Zero) {
+      /// @param repeaterPtr Pointer to repeater.
+      public static void Repeater_Start(IntPtr repeaterPtr, double pitchOffset) {
+        if (!BarelyRepeater_Start(repeaterPtr, pitchOffset) && repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to start repeater with pitch offset " + pitchOffset);
         }
       }
 
       /// Stops a repeater.
       ///
-      /// @param repeaterHandle Repeater handle.
-      public static void Repeater_Stop(IntPtr repeaterHandle) {
-        if (!BarelyRepeater_Stop(repeaterHandle) && repeaterHandle != IntPtr.Zero) {
+      /// @param repeaterPtr Pointer to repeater.
+      public static void Repeater_Stop(IntPtr repeaterPtr) {
+        if (!BarelyRepeater_Stop(repeaterPtr) && repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop repeater");
         }
       }
@@ -1168,14 +1150,14 @@ namespace Barely {
       private delegate void NoteOffEventDefinition_DestroyCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(NoteOffEventDefinition_DestroyCallback))]
       private static void NoteOffEventDefinition_OnDestroy(ref IntPtr state) {
-        GCHandle.FromIntPtr(state).Free();
+        GCPtr.FromIntPtr(state).Free();
       }
 
       // Note off event definition process callback.
       private delegate void NoteOffEventDefinition_ProcessCallback(ref IntPtr state, double pitch);
       [AOT.MonoPInvokeCallback(typeof(NoteOffEventDefinition_ProcessCallback))]
       private static void NoteOffEventDefinition_OnProcess(ref IntPtr state, double pitch) {
-        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
+        Instrument instrument = GCPtr.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnNoteOffEvent(instrument, pitch);
       }
 
@@ -1203,7 +1185,7 @@ namespace Barely {
       private delegate void NoteOnEventDefinition_DestroyCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(NoteOnEventDefinition_DestroyCallback))]
       private static void NoteOnEventDefinition_OnDestroy(ref IntPtr state) {
-        GCHandle.FromIntPtr(state).Free();
+        GCPtr.FromIntPtr(state).Free();
       }
 
       // Note on event definition process callback.
@@ -1212,7 +1194,7 @@ namespace Barely {
       [AOT.MonoPInvokeCallback(typeof(NoteOnEventDefinition_ProcessCallback))]
       private static void NoteOnEventDefinition_OnProcess(ref IntPtr state, double pitch,
                                                           double intensity) {
-        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
+        Instrument instrument = GCPtr.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
       }
 
@@ -1240,14 +1222,14 @@ namespace Barely {
       private delegate void TaskDefinition_DestroyCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(TaskDefinition_DestroyCallback))]
       private static void TaskDefinition_OnDestroy(ref IntPtr state) {
-        GCHandle.FromIntPtr(state).Free();
+        GCPtr.FromIntPtr(state).Free();
       }
 
       // Task definition process callback.
       private delegate void TaskDefinition_ProcessCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(TaskDefinition_ProcessCallback))]
       private static void TaskDefinition_OnProcess(ref IntPtr state) {
-        (GCHandle.FromIntPtr(state).Target as Action)?.Invoke();
+        (GCPtr.FromIntPtr(state).Target as Action)?.Invoke();
       }
 
       // Task definition.
@@ -1263,25 +1245,25 @@ namespace Barely {
         public TaskDefinition_ProcessCallback processCallback;
       }
 
-      // Singleton musician handle.
-      private static IntPtr Handle {
+      // Singleton musician pointer.
+      private static IntPtr Ptr {
         get {
           if (_isShuttingDown) {
             return IntPtr.Zero;
           }
-          if (_handle == IntPtr.Zero) {
+          if (_ptr == IntPtr.Zero) {
             var state =
                 new GameObject() { hideFlags = HideFlags.HideAndDontSave }.AddComponent<State>();
             GameObject.DontDestroyOnLoad(state.gameObject);
-            if (_handle == IntPtr.Zero) {
+            if (_ptr == IntPtr.Zero) {
               GameObject.DestroyImmediate(state.gameObject);
               _isShuttingDown = true;
             }
           }
-          return _handle;
+          return _ptr;
         }
       }
-      private static IntPtr _handle = IntPtr.Zero;
+      private static IntPtr _ptr = IntPtr.Zero;
 
       // Note off event definition.
       private static NoteOffEventDefinition _noteOffEventDefinition = new NoteOffEventDefinition() {
@@ -1348,36 +1330,36 @@ namespace Barely {
             if (taskTimestamp > nextTimestamp) {
               break;
             }
-            BarelyMusician_Update(_handle, taskTimestamp);
+            BarelyMusician_Update(_ptr, taskTimestamp);
             var callbacks = _scheduledTaskCallbacks.ElementAt(0).Value;
             for (int i = 0; i < callbacks.Count; ++i) {
               callbacks[i]?.Invoke();
             }
             _scheduledTaskCallbacks.Remove(taskTimestamp);
           }
-          BarelyMusician_Update(_handle, nextTimestamp);
+          BarelyMusician_Update(_ptr, nextTimestamp);
         }
 
         // Initializes the native state.
         private void Initialize() {
           _isShuttingDown = false;
-          if (!BarelyMusician_Create(ref _handle)) {
+          if (!BarelyMusician_Create(ref _ptr)) {
             Debug.LogError("Failed to initialize BarelyMusician");
             return;
           }
-          BarelyMusician_SetTempo(_handle, _tempo);
+          BarelyMusician_SetTempo(_ptr, _tempo);
           var config = AudioSettings.GetConfiguration();
           OutputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
           _latency = (double)config.dspBufferSize / config.sampleRate;
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
-          BarelyMusician_Update(_handle, GetNextTimestamp());
+          BarelyMusician_Update(_ptr, GetNextTimestamp());
         }
 
         // Shuts down the native state.
         private void Shutdown() {
           _isShuttingDown = true;
-          BarelyMusician_Destroy(_handle);
-          _handle = IntPtr.Zero;
+          BarelyMusician_Destroy(_ptr);
+          _ptr = IntPtr.Zero;
           _scheduledTaskCallbacks = null;
         }
 

@@ -43,17 +43,14 @@ auto instrument = musician.CreateInstrument<barely::SynthInstrument>(/*frame_rat
 // Set the instrument gain to 0.5.
 instrument.GetControl(barely::SynthInstrument::Control::kGain).SetValue(/*value=*/0.5);
 
-// Set the instrument A3 note pitch on with a 0.25 intensity.
+// Create an instrument note with a pitch value of A3 and a 0.25 instensity.
 //
 // @note Pitch values are normalized by octaves, where each 1.0 value change shifts one octave, and
 // 0.0 represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition. However,
 // this is not a strict rule, since `pitch` and `intensity` can be interpreted in any desired way by
 // a custom instrument.
 const double a3_pitch = -1.0;
-instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
-
-// Check if the instrument note pitch is on.
-const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
+const auto note = instrument.CreateNote(a3_pitch, /*intensity=*/0.25);
 
 // Create a low-pass effect.
 auto effect = musician.CreateEffect<barely::LowPassEffect>(kFrameRate);

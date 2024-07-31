@@ -11,20 +11,20 @@ TEST(BarelyMusicianTest, CreateDestroyMusician) {
   EXPECT_FALSE(BarelyMusician_Destroy(nullptr));
 
   // Success.
-  BarelyMusicianHandle musician = nullptr;
+  BarelyMusician* musician = nullptr;
   EXPECT_TRUE(BarelyMusician_Create(&musician));
   EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
 TEST(BarelyMusicianTest, CreateDestroyInstrument) {
-  BarelyMusicianHandle musician = nullptr;
+  BarelyMusician* musician = nullptr;
   ASSERT_TRUE(BarelyMusician_Create(&musician));
 
   // Failures.
   EXPECT_FALSE(BarelyMusician_CreateInstrument(musician, {}, 1, nullptr));
   EXPECT_FALSE(BarelyMusician_DestroyInstrument(musician, nullptr));
 
-  BarelyInstrumentHandle instrument = nullptr;
+  BarelyInstrument* instrument = nullptr;
   EXPECT_FALSE(BarelyMusician_CreateInstrument(musician, {}, 0, &instrument));
 
   // Success.
@@ -36,7 +36,7 @@ TEST(BarelyMusicianTest, CreateDestroyInstrument) {
 }
 
 TEST(BarelyMusicianTest, CreateDestroyPerformer) {
-  BarelyMusicianHandle musician = nullptr;
+  BarelyMusician* musician = nullptr;
   ASSERT_TRUE(BarelyMusician_Create(&musician));
 
   // Failures.
@@ -44,7 +44,7 @@ TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   EXPECT_FALSE(BarelyMusician_DestroyPerformer(musician, nullptr));
 
   // Success.
-  BarelyPerformerHandle performer = nullptr;
+  BarelyPerformer* performer = nullptr;
   EXPECT_TRUE(BarelyMusician_CreatePerformer(musician, 0, &performer));
   EXPECT_NE(performer, nullptr);
 

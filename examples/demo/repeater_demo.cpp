@@ -84,7 +84,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
   auto repeater = musician.CreateComponent<Repeater>();
-  repeater.SetInstrument(&instrument);
+  repeater.SetInstrument(instrument);
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 

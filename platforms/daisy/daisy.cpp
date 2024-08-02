@@ -8,7 +8,8 @@
 
 using ::barely::OscillatorType;
 using ::barely::PitchFromMidi;
-using ::barely::ScopedMusician;
+using ::barely::Musician;
+using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
@@ -69,7 +70,7 @@ int main(void) {
   midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  ScopedMusician musician;
+  Scoped<Musician> musician;
 
   auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);

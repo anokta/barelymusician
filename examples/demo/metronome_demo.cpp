@@ -16,8 +16,9 @@
 namespace {
 
 using ::barely::Metronome;
+using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::ScopedMusician;
+using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -54,7 +55,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  ScopedMusician musician;
+  Scoped<Musician> musician;
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.

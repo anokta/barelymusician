@@ -31,12 +31,13 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::Metronome;
+using ::barely::Musician;
 using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::PercussionInstrument;
 using ::barely::Performer;
 using ::barely::Random;
-using ::barely::ScopedMusician;
+using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -204,7 +205,7 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  ScopedMusician musician;
+  Scoped<Musician> musician;
   musician.SetTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};

@@ -19,11 +19,12 @@
 
 namespace {
 
+using ::barely::Musician;
 using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
-using ::barely::ScopedMusician;
+using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -73,7 +74,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  ScopedMusician musician;
+  Scoped<Musician> musician;
   musician.SetTempo(kInitialTempo);
 
   auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);

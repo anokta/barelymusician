@@ -58,12 +58,12 @@ TEST(MusicianTest, CreateDestroyMusician) {
 }
 
 TEST(MusicianTest, CreateDestroyInstrument) {
-  ScopedMusician musician;
+  Scoped<Musician> musician;
   [[maybe_unused]] const Instrument instrument = musician.CreateInstrument({{}}, 1);
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {
-  ScopedMusician musician;
+  Scoped<Musician> musician;
   [[maybe_unused]] const Performer performer = musician.CreatePerformer();
 }
 

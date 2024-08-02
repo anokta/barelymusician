@@ -15,7 +15,7 @@
 ///   #include "barelymusician/barelymusician.h"
 ///
 ///   // Create.
-///   barely::ScopedMusician musician;
+///   barely::Scoped<Musician> musician;
 ///
 ///   // Set the tempo.
 ///   musician.SetTempo(/*tempo=*/124.0);
@@ -1099,6 +1099,37 @@ class Wrapper {
   RawType* ptr_ = nullptr;
 };
 
+/// Scoped wrapper template.
+template <typename WrapperType>
+class Scoped : public WrapperType {
+ public:
+  /// Constructs a new `Scoped`.
+  template <typename... Args>
+  explicit Scoped(Args&&... args) noexcept : WrapperType(WrapperType::Create(args...)) {}
+
+  /// Destroys `Scoped`.
+  ~Scoped() noexcept { WrapperType::Destroy(*this); }
+
+  /// Non-copyable.
+  Scoped(const Scoped& other) noexcept = delete;
+  Scoped& operator=(const Scoped& other) noexcept = delete;
+
+  /// Default move constructor.
+  Scoped(Scoped&& other) noexcept = default;
+
+  /// Assigns `Scoped` via move.
+  ///
+  /// @param other Other.
+  /// @return Scoped.
+  Scoped& operator=(Scoped&& other) noexcept {
+    if (this != &other) {
+      WrapperType::Destroy(*this);
+      WrapperType::operator=(std::move(other));
+    }
+    return *this;
+  }
+};
+
 /// Class that wraps a control.
 class Control : public Wrapper<BarelyControl> {
  public:
@@ -1558,7 +1589,10 @@ class Musician : public Wrapper<BarelyMusician> {
   /// Destroys a musician.
   ///
   /// @param musician Musician.
-  static void Destroy(Musician musician) noexcept { BarelyMusician_Destroy(musician); }
+  static void Destroy(Musician musician) noexcept {
+    [[maybe_unused]] const bool success = BarelyMusician_Destroy(musician);
+    assert(success);
+  }
 
   /// Creates a new component of type.
   ///
@@ -1703,40 +1737,6 @@ class Musician : public Wrapper<BarelyMusician> {
   void Update(double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyMusician_Update(*this, timestamp);
     assert(success);
-  }
-};
-
-/// Class that wraps a musician within a scope.
-class ScopedMusician : public Musician {
- public:
-  /// Creates a new `ScopedMusician`.
-  ScopedMusician() noexcept : ScopedMusician(Musician::Create()) {}
-
-  /// Creates a new `ScopedMusician` from a raw pointer to musician.
-  ///
-  /// @param musician Raw pointer to musician.
-  explicit ScopedMusician(Musician musician) noexcept : Musician(musician) {}
-
-  /// Destroys `ScopedMusician`.
-  ~ScopedMusician() noexcept { Musician::Destroy(*this); }
-
-  /// Non-copyable.
-  ScopedMusician(const ScopedMusician& other) noexcept = delete;
-  ScopedMusician& operator=(const ScopedMusician& other) noexcept = delete;
-
-  /// Default move constructor.
-  ScopedMusician(ScopedMusician&& other) noexcept = default;
-
-  /// Assigns `ScopedMusician` via move.
-  ///
-  /// @param other Other musician.
-  /// @return Scoped musician.
-  ScopedMusician& operator=(ScopedMusician&& other) noexcept {
-    if (this != &other) {
-      Musician::Destroy(*this);
-      Musician::operator=(std::move(other));
-    }
-    return *this;
   }
 };
 

@@ -25,11 +25,12 @@ using ::barely::Instrument;
 using ::barely::IntensityFromMidiVelocity;
 using ::barely::MidiNumberFromPitch;
 using ::barely::MidiVelocityFromIntensity;
+using ::barely::Musician;
 using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::PitchFromMidiNumber;
-using ::barely::ScopedMusician;
+using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -112,7 +113,7 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  ScopedMusician musician;
+  Scoped<Musician> musician;
   musician.SetTempo(kTempo);
 
   std::vector<std::pair<Instrument, Performer>> tracks;

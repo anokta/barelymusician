@@ -26,11 +26,10 @@ using ::barely::IntensityFromMidiVelocity;
 using ::barely::MidiNumberFromPitch;
 using ::barely::MidiVelocityFromIntensity;
 using ::barely::Musician;
-using ::barely::Note;
+using ::barely::NotePtr;
 using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::PitchFromMidiNumber;
-using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -75,9 +74,9 @@ bool BuildScore(const smf::MidiEventList& midi_events, int track_index, int tick
       performer.ScheduleOneOffTask(
           [&instrument, &performer, track_index, position, duration, pitch, intensity]() mutable {
             performer.ScheduleOneOffTask(
-                [&instrument, track_index, pitch,
-                 note = instrument.CreateNote(pitch, intensity)]() mutable {
-                  instrument.DestroyNote(note);
+                [track_index, pitch,
+                 note = NotePtr::Create(instrument, pitch, intensity)]() mutable {
+                  NotePtr::Destroy(note);
                   ConsoleLog() << "MIDI track #" << track_index
                                << ": NoteOff(key: " << MidiNumberFromPitch(pitch) << ")";
                 },
@@ -113,14 +112,14 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  Scoped<Musician> musician;
+  Musician musician;
   musician.SetTempo(kTempo);
 
   std::vector<std::pair<Instrument, Performer>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(musician.CreateInstrument<SynthInstrument>(kFrameRate),
-                        musician.CreatePerformer());
+    tracks.emplace_back(Instrument(musician, SynthInstrument::GetDefinition(), kFrameRate),
+                        Performer(musician));
     auto& [instrument, performer] = tracks.back();
     // Build the score to perform.
     if (!BuildScore(midi_file[i], static_cast<int>(tracks.size() + 1), ticks_per_quarter,

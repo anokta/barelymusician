@@ -2,7 +2,6 @@
 #include <chrono>
 #include <thread>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -18,10 +17,11 @@
 
 namespace {
 
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::Note;
 using ::barely::OscillatorType;
-using ::barely::Scoped;
+using ::barely::Performer;
 using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::TaskDefinition;
@@ -55,41 +55,28 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Scoped<Musician> musician;
+  Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  Instrument instrument(musician, SynthInstrument::GetDefinition(), kFrameRate);
   instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
   instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
   instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
   instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
 
-  auto performer = musician.CreatePerformer();
+  Performer performer(musician);
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
-  std::unordered_set<Note> notes;
+  std::unordered_map<double, Note> notes;
   const auto play_note_fn = [&](double duration, double pitch) {
     return [&instrument, &performer, &notes, pitch, duration]() {
-      Note note = instrument.CreateNote(pitch);
-      notes.emplace(note);
-      performer.ScheduleOneOffTask(
-          [&instrument, &notes, note]() {
-            instrument.DestroyNote(note);
-            notes.erase(note);
-          },
-          performer.GetPosition() + duration);
+      notes.emplace(pitch, Note(instrument, pitch));
+      performer.ScheduleOneOffTask([&instrument, &notes, pitch]() { notes.erase(pitch); },
+                                   performer.GetPosition() + duration);
       ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
     };
-  };
-  const auto stop_all_notes_fn = [&]() {
-    if (!notes.empty()) {
-      for (auto& note : notes) {
-        instrument.DestroyNote(note);
-      }
-      notes.clear();
-    }
   };
 
   std::vector<std::pair<double, TaskDefinition::Callback>> score;
@@ -106,7 +93,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Task> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, performer.CreateTask(callback, position));
+    tasks.emplace(index++, Task(performer, callback, position));
   }
 
   // Audio process callback.
@@ -126,13 +113,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
-      if (const auto it = tasks.find(index - 1); it != tasks.end()) {
-        performer.DestroyTask(it->second);
-        tasks.erase(it);
+      if (tasks.erase(index - 1) > 0) {
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, performer.CreateTask(callback, position));
+        tasks.emplace(index - 1, Task(performer, callback, position));
         ConsoleLog() << "Added note " << index;
       }
       return;
@@ -143,7 +128,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (performer.IsPlaying()) {
           performer.Stop();
-          stop_all_notes_fn();
+          notes.clear();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();
@@ -160,7 +145,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'P':
-        stop_all_notes_fn();
+        notes.clear();
         performer.SetPosition(0.0);
         return;
       case '-':

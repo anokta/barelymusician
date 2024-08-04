@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cassert>
 #include <limits>
-#include <memory>
-#include <utility>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/effect.h"
@@ -15,46 +13,39 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Effect* Musician::CreateEffect(EffectDefinition definition, int frame_rate) noexcept {
-  auto effect = std::make_unique<Effect>(definition, frame_rate, timestamp_);
-  const auto [it, success] = effects_.emplace(effect.get(), std::move(effect));
-  assert(success);
-  return it->second.get();
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument* Musician::CreateInstrument(InstrumentDefinition definition, int frame_rate) noexcept {
-  auto instrument = std::make_unique<Instrument>(definition, frame_rate, timestamp_);
-  const auto [it, success] = instruments_.emplace(instrument.get(), std::move(instrument));
-  assert(success);
-  return it->second.get();
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Performer* Musician::CreatePerformer(int process_order) noexcept {
-  auto performer = std::make_unique<Performer>(process_order);
-  const auto [it, success] =
-      performers_.emplace(std::pair{process_order, performer.get()}, std::move(performer));
-  assert(success);
-  return it->second.get();
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-bool Musician::DestroyEffect(Effect* effect) noexcept {
+void Musician::AddEffect(Effect* effect) noexcept {
   assert(effect);
-  return effects_.erase(effect) > 0;
+  effects_.emplace(effect);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Musician::DestroyInstrument(Instrument* instrument) noexcept {
+void Musician::AddInstrument(Instrument* instrument) noexcept {
   assert(instrument);
-  return instruments_.erase(instrument) > 0;
+  instruments_.emplace(instrument);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Musician::DestroyPerformer(Performer* performer) noexcept {
+void Musician::AddPerformer(Performer* performer) noexcept {
   assert(performer);
-  return performers_.erase({performer->GetProcessOrder(), performer}) > 0;
+  performers_.emplace(performer->GetProcessOrder(), performer);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Musician::RemoveEffect(Effect* effect) noexcept {
+  assert(effect);
+  effects_.erase(effect);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Musician::RemoveInstrument(Instrument* instrument) noexcept {
+  assert(instrument);
+  instruments_.erase(instrument);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Musician::RemovePerformer(Performer* performer) noexcept {
+  assert(performer);
+  performers_.erase({performer->GetProcessOrder(), performer});
 }
 
 double Musician::GetBeatsFromSeconds(double seconds) const noexcept {
@@ -94,10 +85,10 @@ void Musician::Update(double timestamp) noexcept {
         }
 
         timestamp_ += GetSecondsFromBeats(update_duration);
-        for (const auto& [effect, _] : effects_) {
+        for (const auto& effect : effects_) {
           effect->Update(timestamp_);
         }
-        for (const auto& [instrument, _] : instruments_) {
+        for (const auto& instrument : instruments_) {
           instrument->Update(timestamp_);
         }
       }
@@ -109,10 +100,10 @@ void Musician::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      for (const auto& [effect, _] : effects_) {
+      for (const auto& effect : effects_) {
         effect->Update(timestamp_);
       }
-      for (const auto& [instrument, _] : instruments_) {
+      for (const auto& instrument : instruments_) {
         instrument->Update(timestamp_);
       }
     }

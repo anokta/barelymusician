@@ -65,11 +65,13 @@ TEST(InstrumentTest, GetControl) {
 TEST(InstrumentTest, GetNoteControl) {
   Instrument instrument(GetTestDefinition(), kFrameRate, 0.0);
 
-  Note* note = instrument.CreateNote(kPitch, kIntensity);
-  ASSERT_THAT(note, NotNull());
-  EXPECT_THAT(note->GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
+  constexpr int kNoteId = 1;
+  Note note(kNoteId, kPitch, kIntensity, instrument.BuildNoteControlMap(kNoteId));
 
-  instrument.DestroyNote(note);
+  instrument.AddNote(&note);
+  EXPECT_THAT(note.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
+
+  instrument.RemoveNote(&note);
 }
 
 // Tests that the instrument plays a single note as expected.
@@ -89,8 +91,9 @@ TEST(InstrumentTest, PlaySingleNote) {
   }
 
   // Set a note on.
-  Note* note = instrument.CreateNote(kPitch, kIntensity);
-  ASSERT_THAT(note, NotNull());
+  constexpr int kNoteId = 1;
+  Note note(kNoteId, kPitch, kIntensity, instrument.BuildNoteControlMap(kNoteId));
+  instrument.AddNote(&note);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
@@ -101,7 +104,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   }
 
   // Set the note off.
-  instrument.DestroyNote(note);
+  instrument.RemoveNote(&note);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
@@ -128,9 +131,10 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   // Start a new note per each frame in the buffer.
   for (int i = 0; i < kFrameCount; ++i) {
-    Note* note = instrument.CreateNote(static_cast<double>(i), kIntensity);
+    Note note(i, static_cast<double>(i), kIntensity, instrument.BuildNoteControlMap(i));
+    instrument.AddNote(&note);
     instrument.Update(static_cast<double>(i + 1));
-    instrument.DestroyNote(note);
+    instrument.RemoveNote(&note);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);

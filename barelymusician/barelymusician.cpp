@@ -8,36 +8,132 @@
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/musician.h"
 #include "barelymusician/internal/note.h"
+#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
+using ::barely::internal::Control;
+using ::barely::internal::ControlMap;
+using ::barely::internal::Effect;
+using ::barely::internal::Instrument;
+using ::barely::internal::Musician;
+using ::barely::internal::Note;
+using ::barely::internal::Observable;
+using ::barely::internal::Observer;
+using ::barely::internal::Performer;
+using ::barely::internal::Task;
+
 // Control.
-struct BarelyControl : public barely::internal::Control {};
+struct BarelyControl : public Control {};
 static_assert(sizeof(BarelyControl) == sizeof(barely::internal::Control));
 
+// Musician.
+struct BarelyMusician : public Observable<Musician> {};
+
 // Effect.
-struct BarelyEffect : public barely::internal::Effect {};
-static_assert(sizeof(BarelyEffect) == sizeof(barely::internal::Effect));
+struct BarelyEffect : public Effect {
+ public:
+  BarelyEffect(BarelyMusician* musician, BarelyEffectDefinition definition, int frame_rate) noexcept
+      : Effect(definition, frame_rate, musician->GetTimestamp()), musician_(musician->Observe()) {
+    assert(musician_);
+    musician_->AddEffect(this);
+  }
+
+  ~BarelyEffect() noexcept {
+    if (musician_) {
+      musician_->RemoveEffect(this);
+    }
+  }
+
+ private:
+  Observer<Musician> musician_;
+};
 
 // Instrument.
-struct BarelyInstrument : public barely::internal::Instrument {};
-static_assert(sizeof(BarelyInstrument) == sizeof(barely::internal::Instrument));
+struct BarelyInstrument : public Observable<Instrument> {
+ public:
+  BarelyInstrument(BarelyMusician* musician, BarelyInstrumentDefinition definition,
+                   int frame_rate) noexcept
+      : Observable<Instrument>(definition, frame_rate, musician->GetTimestamp()),
+        musician_(musician->Observe()) {
+    assert(musician_);
+    musician_->AddInstrument(this);
+  }
 
-// Musician.
-struct BarelyMusician : public barely::internal::Musician {};
-static_assert(sizeof(BarelyMusician) == sizeof(barely::internal::Musician));
+  ~BarelyInstrument() noexcept {
+    if (musician_) {
+      musician_->RemoveInstrument(this);
+    }
+  }
+
+  int GenerateNextNoteId() noexcept { return ++note_id_counter_; }
+  int GetCurrentNoteId() const noexcept { return note_id_counter_; }
+
+ private:
+  Observer<Musician> musician_;
+  int note_id_counter_ = 0;
+};
 
 // Note.
-struct BarelyNote : public barely::internal::Note {};
-static_assert(sizeof(BarelyNote) == sizeof(barely::internal::Note));
+struct BarelyNote : public Note {
+  BarelyNote(BarelyInstrument* instrument, double pitch, double intensity) noexcept
+      : Note(instrument->GenerateNextNoteId(), pitch, intensity,
+             instrument->BuildNoteControlMap(instrument->GetCurrentNoteId())),
+        instrument_(instrument->Observe()) {
+    assert(instrument_);
+    instrument_->AddNote(this);
+  }
+
+  ~BarelyNote() noexcept {
+    if (instrument_) {
+      instrument_->RemoveNote(this);
+    }
+  }
+
+ private:
+  Observer<Instrument> instrument_;
+};
 
 // Performer.
-struct BarelyPerformer : public barely::internal::Performer {};
-static_assert(sizeof(BarelyPerformer) == sizeof(barely::internal::Performer));
+struct BarelyPerformer : public Observable<Performer> {
+ public:
+  BarelyPerformer(BarelyMusician* musician, int process_order) noexcept
+      : Observable<Performer>(process_order), musician_(musician->Observe()) {
+    assert(musician_);
+    musician_->AddPerformer(this);
+  }
+
+  ~BarelyPerformer() noexcept {
+    if (musician_) {
+      musician_->RemovePerformer(this);
+    }
+  }
+
+ private:
+  Observer<Musician> musician_;
+};
 
 // Task.
-struct BarelyTask : public barely::internal::Task {};
-static_assert(sizeof(BarelyTask) == sizeof(barely::internal::Task));
+struct BarelyTask : public Task {
+ public:
+  BarelyTask(BarelyPerformer* performer, BarelyTaskDefinition definition, double position,
+             void* user_data) noexcept
+      : Task(definition, position, user_data,
+             [this](Task* task, double position) { performer_->SetTaskPosition(task, position); }),
+        performer_(performer->Observe()) {
+    assert(performer_);
+    performer_->AddTask(this);
+  }
+
+  ~BarelyTask() noexcept {
+    if (performer_) {
+      performer_->RemoveTask(this);
+    }
+  }
+
+ private:
+  Observer<Performer> performer_;
+};
 
 bool BarelyControl_GetValue(const BarelyControl* control, double* out_value) {
   if (!control) return false;
@@ -58,6 +154,21 @@ bool BarelyControl_SetValue(BarelyControl* control, double value) {
   if (!control) return false;
 
   control->SetValue(value);
+  return true;
+}
+
+bool BarelyEffect_Create(BarelyMusician* musician, BarelyEffectDefinition definition,
+                         int32_t frame_rate, BarelyEffect** out_effect) {
+  if (!musician || !out_effect) return false;
+
+  *out_effect = new BarelyEffect(musician, definition, frame_rate);
+  return true;
+}
+
+bool BarelyEffect_Destroy(BarelyEffect* effect) {
+  if (!effect) return false;
+
+  delete effect;
   return true;
 }
 
@@ -86,19 +197,20 @@ bool BarelyEffect_SetData(BarelyEffect* effect, const void* data, int32_t size) 
   return true;
 }
 
-bool BarelyInstrument_CreateNote(BarelyInstrument* instrument, double pitch, double intensity,
-                                 BarelyNote** out_note) {
-  if (!instrument) return false;
-  if (!out_note) return false;
+bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrumentDefinition definition,
+                             int32_t frame_rate, BarelyInstrument** out_instrument) {
+  if (!musician) return false;
+  if (frame_rate <= 0) return false;
+  if (!out_instrument) return false;
 
-  *out_note = static_cast<BarelyNote*>(instrument->CreateNote(pitch, intensity));
-  return *out_note;
+  *out_instrument = new BarelyInstrument(musician, definition, frame_rate);
+  return true;
 }
 
-bool BarelyInstrument_DestroyNote(BarelyInstrument* instrument, BarelyNote* note) {
+bool BarelyInstrument_Destroy(BarelyInstrument* instrument) {
   if (!instrument) return false;
 
-  instrument->DestroyNote(note);
+  delete instrument;
   return true;
 }
 
@@ -135,61 +247,11 @@ bool BarelyMusician_Create(BarelyMusician** out_musician) {
   return true;
 }
 
-bool BarelyMusician_CreateEffect(BarelyMusician* musician, BarelyEffectDefinition definition,
-                                 int32_t frame_rate, BarelyEffect** out_effect) {
-  if (!musician || !out_effect) return false;
-
-  *out_effect = static_cast<BarelyEffect*>(musician->CreateEffect(definition, frame_rate));
-  return true;
-}
-
-bool BarelyMusician_CreateInstrument(BarelyMusician* musician,
-                                     BarelyInstrumentDefinition definition, int32_t frame_rate,
-                                     BarelyInstrument** out_instrument) {
-  if (!musician) return false;
-  if (frame_rate <= 0) return false;
-  if (!out_instrument) return false;
-
-  *out_instrument =
-      static_cast<BarelyInstrument*>(musician->CreateInstrument(definition, frame_rate));
-  return true;
-}
-
-bool BarelyMusician_CreatePerformer(BarelyMusician* musician, int32_t process_order,
-                                    BarelyPerformer** out_performer) {
-  if (!musician) return false;
-  if (!out_performer) return false;
-
-  *out_performer = static_cast<BarelyPerformer*>(musician->CreatePerformer(process_order));
-  return true;
-}
-
 bool BarelyMusician_Destroy(BarelyMusician* musician) {
   if (!musician) return false;
 
   delete musician;
   return true;
-}
-
-bool BarelyMusician_DestroyEffect(BarelyMusician* musician, BarelyEffect* effect) {
-  if (!musician) return false;
-  if (!effect) return false;
-
-  return musician->DestroyEffect(effect);
-}
-
-bool BarelyMusician_DestroyInstrument(BarelyMusician* musician, BarelyInstrument* instrument) {
-  if (!musician) return false;
-  if (!instrument) return false;
-
-  return musician->DestroyInstrument(instrument);
-}
-
-bool BarelyMusician_DestroyPerformer(BarelyMusician* musician, BarelyPerformer* performer) {
-  if (!musician) return false;
-  if (!performer) return false;
-
-  return musician->DestroyPerformer(performer);
 }
 
 bool BarelyMusician_GetBeatsFromSeconds(const BarelyMusician* musician, double seconds,
@@ -240,6 +302,22 @@ bool BarelyMusician_Update(BarelyMusician* musician, double timestamp) {
   return true;
 }
 
+bool BarelyNote_Create(BarelyInstrument* instrument, double pitch, double intensity,
+                       BarelyNote** out_note) {
+  if (!instrument) return false;
+  if (!out_note) return false;
+
+  *out_note = new BarelyNote(instrument, pitch, intensity);
+  return *out_note;
+}
+
+bool BarelyNote_Destroy(BarelyNote* note) {
+  if (!note) return false;
+
+  delete note;
+  return true;
+}
+
 bool BarelyNote_GetControl(BarelyNote* note, int32_t control_id, BarelyControl** out_control) {
   if (!note) return false;
   if (!out_control) return false;
@@ -271,20 +349,19 @@ bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformer* performer) {
   return true;
 }
 
-bool BarelyPerformer_CreateTask(BarelyPerformer* performer, BarelyTaskDefinition definition,
-                                double position, void* user_data, BarelyTask** out_task) {
-  if (!performer) return false;
-  if (!out_task) return false;
+bool BarelyPerformer_Create(BarelyMusician* musician, int32_t process_order,
+                            BarelyPerformer** out_performer) {
+  if (!musician) return false;
+  if (!out_performer) return false;
 
-  *out_task = static_cast<BarelyTask*>(performer->CreateTask(definition, position, user_data));
-  return *out_task;
+  *out_performer = new BarelyPerformer(musician, process_order);
+  return true;
 }
 
-bool BarelyPerformer_DestroyTask(BarelyPerformer* performer, BarelyTask* task) {
+bool BarelyPerformer_Destroy(BarelyPerformer* performer) {
   if (!performer) return false;
-  if (!task) return false;
 
-  performer->DestroyTask(task);
+  delete performer;
   return true;
 }
 
@@ -376,6 +453,22 @@ bool BarelyPerformer_Stop(BarelyPerformer* performer) {
   if (!performer) return false;
 
   performer->Stop();
+  return true;
+}
+
+bool BarelyTask_Create(BarelyPerformer* performer, BarelyTaskDefinition definition, double position,
+                       void* user_data, BarelyTask** out_task) {
+  if (!performer) return false;
+  if (!out_task) return false;
+
+  *out_task = new BarelyTask(performer, definition, position, user_data);
+  return *out_task;
+}
+
+bool BarelyTask_Destroy(BarelyTask* task) {
+  if (!task) return false;
+
+  delete task;
   return true;
 }
 

@@ -53,30 +53,23 @@ Instrument::~Instrument() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Note* Instrument::CreateNote(double pitch, double intensity) noexcept {
-  const int note_id = ++note_id_counter_;
-  auto note = std::make_unique<Note>(
-      note_id, pitch, intensity,
-      BuildControlMap(
-          note_control_definitions_.data(), static_cast<int>(note_control_definitions_.size()),
-          [this, note_id](int control_id, double value) {
-            message_queue_.Add(update_frame_, NoteControlMessage{note_id, control_id, value});
-          }));
-  [[maybe_unused]] const auto [it, success] = notes_.emplace(note.get(), std::move(note));
-  assert(success);
-  message_queue_.Add(update_frame_, NoteOnMessage{note_id, pitch, intensity});
+void Instrument::AddNote(Note* note) noexcept {
+  assert(note != nullptr);
+  notes_.emplace(note);
+  message_queue_.Add(update_frame_,
+                     NoteOnMessage{note->GetId(), note->GetPitch(), note->GetIntensity()});
   for (const auto& definition : note_control_definitions_) {
-    message_queue_.Add(update_frame_, NoteControlMessage{note_id, definition.control_id,
+    message_queue_.Add(update_frame_, NoteControlMessage{note->GetId(), definition.control_id,
                                                          definition.default_value});
   }
-  return it->second.get();
 }
 
-void Instrument::DestroyNote(Note* note) noexcept {
-  if (notes_.erase(note) > 0) {
-    assert(note);
-    message_queue_.Add(update_frame_, NoteOffMessage{note->GetId()});
-  }
+ControlMap Instrument::BuildNoteControlMap(int note_id) noexcept {
+  return BuildControlMap(
+      note_control_definitions_.data(), static_cast<int>(note_control_definitions_.size()),
+      [this, note_id](int control_id, double value) {
+        message_queue_.Add(update_frame_, NoteControlMessage{note_id, control_id, value});
+      });
 }
 
 Control* Instrument::GetControl(int control_id) noexcept {
@@ -145,6 +138,12 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
     }
   }
   return true;
+}
+
+void Instrument::RemoveNote(Note* note) noexcept {
+  assert(note);
+  notes_.erase(note);
+  message_queue_.Add(update_frame_, NoteOffMessage{note->GetId()});
 }
 
 void Instrument::SetData(std::vector<std::byte> data) noexcept {

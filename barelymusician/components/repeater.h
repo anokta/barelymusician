@@ -120,6 +120,13 @@ enum class RepeaterStyle {
 /// Simple repeater that repeats notes in sequence.
 class Repeater {
  public:
+  // Constructs a new `Repeater`.
+  ///
+  /// @param musician Musician pointer.
+  /// @param process_order Process order.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  explicit Repeater(MusicianPtr musician, int process_order = 0) noexcept;
+
   /// Destroys `Repeater`.
   ~Repeater() noexcept;
 
@@ -153,7 +160,7 @@ class Repeater {
   /// Sets the instrument.
   ///
   /// @param instrument Optional instrument.
-  void SetInstrument(std::optional<Instrument> instrument) noexcept;
+  void SetInstrument(std::optional<InstrumentPtr> instrument) noexcept;
 
   /// Sets the rate.
   ///
@@ -176,13 +183,6 @@ class Repeater {
   void Stop() noexcept;
 
  private:
-  // Ensures that the component can only be created by `Musician`.
-  friend class Musician;
-
-  // Creates a new `Repeater` with a given `musician` and `process_order`.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Repeater(Musician& musician, int process_order = 0) noexcept;
-
   // Updates the repeater.
   bool Update() noexcept;
 
@@ -190,10 +190,10 @@ class Repeater {
   Performer performer_;
 
   // Instrument.
-  std::optional<Instrument> instrument_ = std::nullopt;
+  std::optional<InstrumentPtr> instrument_ = std::nullopt;
 
   // Currently active note.
-  Note note_ = {};
+  std::optional<Note> note_;
 
   // List of pitches to play.
   std::vector<std::pair<std::optional<double>, int>> pitches_;

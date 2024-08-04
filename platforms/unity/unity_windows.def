@@ -4,31 +4,32 @@ EXPORTS
   BarelyControl_GetValue
   BarelyControl_ResetValue
   BarelyControl_SetValue
+  BarelyEffect_Create
+  BarelyEffect_Destroy
   BarelyEffect_GetControl
   BarelyEffect_Process
   BarelyEffect_SetData
-  BarelyInstrument_CreateNote
-  BarelyInstrument_DestroyNote
+  BarelyInstrument_Create
+  BarelyInstrument_Destroy
   BarelyInstrument_GetControl
   BarelyInstrument_Process
   BarelyInstrument_SetData
   BarelyMusician_Create
-  BarelyMusician_CreateEffect
-  BarelyMusician_CreateInstrument
-  BarelyMusician_CreatePerformer
   BarelyMusician_Destroy
-  BarelyMusician_DestroyEffect
-  BarelyMusician_DestroyInstrument
-  BarelyMusician_DestroyPerformer
   BarelyMusician_GetBeatsFromSeconds
   BarelyMusician_GetSecondsFromBeats
   BarelyMusician_GetTempo
   BarelyMusician_GetTimestamp
   BarelyMusician_SetTempo
   BarelyMusician_Update
+  BarelyNote_Create
+  BarelyNote_Destroy
+  BarelyNote_GetControl
+  BarelyNote_GetIntensity
+  BarelyNote_GetPitch
   BarelyPerformer_CancelAllOneOffTasks
-  BarelyPerformer_CreateTask
-  BarelyPerformer_DestroyTask
+  BarelyPerformer_Create
+  BarelyPerformer_Destroy
   BarelyPerformer_GetLoopBeginPosition
   BarelyPerformer_GetLoopLength
   BarelyPerformer_GetPosition
@@ -41,6 +42,8 @@ EXPORTS
   BarelyPerformer_SetPosition
   BarelyPerformer_Start
   BarelyPerformer_Stop
+  BarelyTask_Create
+  BarelyTask_Destroy
   BarelyTask_GetPosition
   BarelyTask_SetPosition
 

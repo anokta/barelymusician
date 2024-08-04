@@ -21,9 +21,9 @@ namespace {
 
 using ::barely::Arpeggiator;
 using ::barely::ArpeggiatorStyle;
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -74,17 +74,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Scoped<Musician> musician;
+  Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  Instrument instrument(musician, SynthInstrument::GetDefinition(), kFrameRate);
   instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
   instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
   instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
   instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
   instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
-  auto arpeggiator = musician.CreateComponent<Arpeggiator>();
+  Arpeggiator arpeggiator(musician);
   arpeggiator.SetInstrument(instrument);
   arpeggiator.SetGateRatio(kInitialGateRatio);
   arpeggiator.SetRate(kInitialRate);

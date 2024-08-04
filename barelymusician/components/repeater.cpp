@@ -9,8 +9,7 @@
 struct BarelyRepeater : public barely::Repeater {
   // Constructs `BarelyRepeater` with `musician` and `process_order`.
   BarelyRepeater(BarelyMusician* musician, int process_order) noexcept
-      : barely::Repeater(
-            barely::Musician(musician).CreateComponent<barely::Repeater>(process_order)) {}
+      : barely::Repeater(barely::MusicianPtr(musician), process_order) {}
 
   // Destroys `BarelyRepeater`.
   ~BarelyRepeater() noexcept { SetInstrument(std::nullopt); }
@@ -69,7 +68,7 @@ bool BarelyRepeater_PushSilence(BarelyRepeater* repeater, int32_t length) {
 bool BarelyRepeater_SetInstrument(BarelyRepeater* repeater, BarelyInstrument* instrument) {
   if (!repeater) return false;
 
-  repeater->SetInstrument(instrument != nullptr ? std::optional(barely::Instrument(instrument))
+  repeater->SetInstrument(instrument != nullptr ? std::optional(barely::InstrumentPtr(instrument))
                                                 : std::nullopt);
   return true;
 }
@@ -104,6 +103,29 @@ bool BarelyRepeater_Stop(BarelyRepeater* repeater) {
 
 namespace barely {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
+Repeater::Repeater(MusicianPtr musician, int process_order) noexcept
+    : performer_(musician, process_order),
+      task_(
+          performer_,
+          [this]() noexcept {
+            if (pitches_.empty() || !Update() || !instrument_.has_value()) {
+              return;
+            }
+            const auto& [pitch_or, length] = pitches_[index_];
+            if (!pitches_[index_].first.has_value()) {
+              return;
+            }
+            const double pitch = *pitches_[index_].first + pitch_shift_;
+            note_.emplace(*instrument_, pitch);
+            performer_.ScheduleOneOffTask([this]() { note_.reset(); },
+                                          static_cast<double>(length) * performer_.GetLoopLength());
+          },
+          0.0) {
+  performer_.SetLooping(true);
+  performer_.SetLoopLength(1.0);
+}
+
 Repeater::~Repeater() noexcept { Stop(); }
 
 void Repeater::Clear() noexcept { pitches_.clear(); }
@@ -116,9 +138,7 @@ void Repeater::Pop() noexcept {
     return;
   }
   if (index_ == static_cast<int>(pitches_.size()) - 1 && IsPlaying()) {
-    if (instrument_.has_value()) {
-      instrument_->DestroyNote(note_);
-    }
+    note_.reset();
     remaining_length_ = 0;
   }
   pitches_.pop_back();
@@ -129,9 +149,9 @@ void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void Repeater::SetInstrument(std::optional<Instrument> instrument) noexcept {
+void Repeater::SetInstrument(std::optional<InstrumentPtr> instrument) noexcept {
   if (instrument_.has_value() && IsPlaying()) {
-    instrument_->DestroyNote(note_);
+    note_.reset();
   }
   instrument_ = instrument;
 }
@@ -159,9 +179,7 @@ void Repeater::Stop() noexcept {
   }
   performer_.Stop();
   performer_.SetPosition(0.0);
-  if (instrument_.has_value()) {
-    instrument_->DestroyNote(note_);
-  }
+  note_.reset();
   index_ = -1;
   remaining_length_ = 0;
 }
@@ -183,32 +201,6 @@ bool Repeater::Update() noexcept {
   }
   remaining_length_ = pitches_[index_].second;
   return true;
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(Musician& musician, int process_order) noexcept
-    : performer_(musician.CreatePerformer(process_order)) {
-  performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
-  task_ = performer_.CreateTask(
-      [this]() noexcept {
-        if (pitches_.empty() || !Update() || !instrument_.has_value()) {
-          return;
-        }
-        const auto& [pitch_or, length] = pitches_[index_];
-        if (!pitches_[index_].first.has_value()) {
-          return;
-        }
-        const double pitch = *pitches_[index_].first + pitch_shift_;
-        note_ = instrument_->CreateNote(pitch);
-        performer_.ScheduleOneOffTask(
-            [this]() {
-              instrument_->DestroyNote(note_);
-              note_ = {};
-            },
-            static_cast<double>(length) * performer_.GetLoopLength());
-      },
-      0.0);
 }
 
 }  // namespace barely

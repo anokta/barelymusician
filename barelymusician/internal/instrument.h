@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -35,18 +36,17 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
-  /// Creates a note.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @return Pointer to note.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  Note* CreateNote(double pitch, double intensity) noexcept;
-
-  /// Destroys note.
+  /// Adds a note.
   ///
   /// @param note Pointer to note.
-  void DestroyNote(Note* note) noexcept;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void AddNote(Note* note) noexcept;
+
+  /// Builds a note control map.
+  ///
+  /// @param note_id Note identifier.
+  /// @return Control map.
+  ControlMap BuildNoteControlMap(int note_id) noexcept;
 
   /// Returns a control value.
   ///
@@ -64,6 +64,11 @@ class Instrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
+
+  /// Removes a note.
+  ///
+  /// @param note Pointer to note.
+  void RemoveNote(Note* note) noexcept;
 
   /// Sets data.
   ///
@@ -106,11 +111,8 @@ class Instrument {
   // Control map.
   ControlMap control_map_;
 
-  // Map of pointers to notes.
-  std::unordered_map<Note*, std::unique_ptr<Note>> notes_;
-
-  // Note identifier counter.
-  int note_id_counter_ = 0;
+  // Set of pointers to notes.
+  std::unordered_set<Note*> notes_;
 
   // Update frame.
   int64_t update_frame_ = 0;

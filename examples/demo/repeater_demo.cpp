@@ -19,12 +19,12 @@
 
 namespace {
 
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
-using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -74,17 +74,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Scoped<Musician> musician;
+  Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  Instrument instrument(musician, SynthInstrument::GetDefinition(), kFrameRate);
   instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
   instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
   instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
   instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
   instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
-  auto repeater = musician.CreateComponent<Repeater>();
+  Repeater repeater(musician);
   repeater.SetInstrument(instrument);
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
@@ -110,10 +110,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Shift octaves.
-      if (!repeater.IsPlaying() && !notes.empty()) {
-        for (const auto& [_, note] : notes) {
-          instrument.DestroyNote(note);
-        }
+      if (!repeater.IsPlaying()) {
         notes.clear();
       }
       if (upper_key == 'Z') {
@@ -130,7 +127,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const auto pitch_or = PitchFromKey(key)) {
       const double pitch = offset_octaves + *pitch_or;
       if (!repeater.IsPlaying()) {
-        notes.emplace(pitch, instrument.CreateNote(pitch));
+        notes.emplace(pitch, Note(instrument, pitch));
       }
       repeater.Push(pitch, length);
       ConsoleLog() << "Note(" << pitch << ") added";
@@ -163,12 +160,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
           repeater.Stop();
           ConsoleLog() << "Repeater stopped";
         } else {
-          if (!notes.empty()) {
-            for (const auto& [_, note] : notes) {
-              instrument.DestroyNote(note);
-            }
-            notes.clear();
-          }
+          notes.clear();
           repeater.Start();
           ConsoleLog() << "Repeater started";
         }
@@ -184,10 +176,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
       if (!repeater.IsPlaying()) {
-        if (const auto it = notes.find(offset_octaves + *pitch); it != notes.end()) {
-          instrument.DestroyNote(it->second);
-          notes.erase(it);
-        }
+        notes.erase(offset_octaves + *pitch);
       }
     }
   };

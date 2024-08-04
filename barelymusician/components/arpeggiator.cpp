@@ -10,8 +10,7 @@
 struct BarelyArpeggiator : public barely::Arpeggiator {
   // Constructs `BarelyArpeggiator` with `musician` and `process_order`.
   BarelyArpeggiator(BarelyMusician* musician, int process_order) noexcept
-      : barely::Arpeggiator(
-            barely::Musician(musician).CreateComponent<barely::Arpeggiator>(process_order)) {}
+      : barely::Arpeggiator(barely::MusicianPtr(musician), process_order) {}
 
   // Destroys `BarelyArpeggiator`.
   ~BarelyArpeggiator() noexcept { SetInstrument(std::nullopt); }
@@ -64,8 +63,8 @@ bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiator* arpeggiator, double gate_
 bool BarelyArpeggiator_SetInstrument(BarelyArpeggiator* arpeggiator, BarelyInstrument* instrument) {
   if (!arpeggiator) return false;
 
-  arpeggiator->SetInstrument(instrument != nullptr ? std::optional(barely::Instrument(instrument))
-                                                   : std::nullopt);
+  arpeggiator->SetInstrument(
+      instrument != nullptr ? std::optional(barely::InstrumentPtr(instrument)) : std::nullopt);
   return true;
 }
 
@@ -99,6 +98,26 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiator* arpeggiator, BarelyArpeggiato
 
 namespace barely {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
+Arpeggiator::Arpeggiator(MusicianPtr musician, int process_order) noexcept
+    : performer_(musician, process_order),
+      task_(
+          performer_,
+          [this]() noexcept {
+            Update();
+            if (!instrument_.has_value()) {
+              return;
+            }
+            const double pitch = pitches_[index_];
+            notes_.emplace(pitch, Note(*instrument_, pitch));
+            performer_.ScheduleOneOffTask([this, pitch]() { notes_.erase(pitch); },
+                                          gate_ratio_ * performer_.GetLoopLength());
+          },
+          0.0) {
+  performer_.SetLooping(true);
+  performer_.SetLoopLength(1.0);
+}
+
 Arpeggiator::~Arpeggiator() noexcept { Stop(); }
 
 bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
@@ -118,13 +137,8 @@ void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
   gate_ratio_ = std::min(std::max(gate_ratio, 0.0), 1.0);
 }
 
-void Arpeggiator::SetInstrument(std::optional<Instrument> instrument) noexcept {
-  if (!notes_.empty()) {
-    for (const auto& note : notes_) {
-      instrument_->DestroyNote(note);
-    }
-    notes_.clear();
-  }
+void Arpeggiator::SetInstrument(std::optional<InstrumentPtr> instrument) noexcept {
+  notes_.clear();
   instrument_ = instrument;
 }
 
@@ -174,37 +188,8 @@ void Arpeggiator::Stop() noexcept {
   performer_.Stop();
   performer_.CancelAllOneOffTasks();
   performer_.SetPosition(0.0);
-  if (!notes_.empty()) {
-    for (const auto& note : notes_) {
-      instrument_->DestroyNote(note);
-    }
-    notes_.clear();
-  }
+  notes_.clear();
   index_ = -1;
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
-    : performer_(musician.CreatePerformer(process_order)) {
-  performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
-  task_ = performer_.CreateTask(
-      [this]() noexcept {
-        Update();
-        if (!instrument_.has_value()) {
-          return;
-        }
-        const double pitch = pitches_[index_];
-        const auto [it, success] = notes_.emplace(instrument_->CreateNote(pitch));
-        performer_.ScheduleOneOffTask(
-            [this, note = *it]() {
-              if (instrument_.has_value()) {
-                instrument_->DestroyNote(note);
-              }
-            },
-            gate_ratio_ * performer_.GetLoopLength());
-      },
-      0.0);
 }
 
 }  // namespace barely

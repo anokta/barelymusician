@@ -21,17 +21,17 @@ TEST(BarelyMusicianTest, CreateDestroyInstrument) {
   ASSERT_TRUE(BarelyMusician_Create(&musician));
 
   // Failures.
-  EXPECT_FALSE(BarelyMusician_CreateInstrument(musician, {}, 1, nullptr));
-  EXPECT_FALSE(BarelyMusician_DestroyInstrument(musician, nullptr));
+  EXPECT_FALSE(BarelyInstrument_Create(musician, {}, 1, nullptr));
+  EXPECT_FALSE(BarelyInstrument_Destroy(nullptr));
 
   BarelyInstrument* instrument = nullptr;
-  EXPECT_FALSE(BarelyMusician_CreateInstrument(musician, {}, 0, &instrument));
+  EXPECT_FALSE(BarelyInstrument_Create(musician, {}, 0, &instrument));
 
   // Success.
-  EXPECT_TRUE(BarelyMusician_CreateInstrument(musician, {}, 1, &instrument));
+  EXPECT_TRUE(BarelyInstrument_Create(musician, {}, 1, &instrument));
   EXPECT_NE(instrument, nullptr);
 
-  EXPECT_TRUE(BarelyMusician_DestroyInstrument(musician, instrument));
+  EXPECT_TRUE(BarelyInstrument_Destroy(instrument));
   EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
@@ -40,31 +40,28 @@ TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   ASSERT_TRUE(BarelyMusician_Create(&musician));
 
   // Failures.
-  EXPECT_FALSE(BarelyMusician_CreatePerformer(musician, 0, nullptr));
-  EXPECT_FALSE(BarelyMusician_DestroyPerformer(musician, nullptr));
+  EXPECT_FALSE(BarelyPerformer_Create(musician, 0, nullptr));
+  EXPECT_FALSE(BarelyPerformer_Destroy(nullptr));
 
   // Success.
   BarelyPerformer* performer = nullptr;
-  EXPECT_TRUE(BarelyMusician_CreatePerformer(musician, 0, &performer));
+  EXPECT_TRUE(BarelyPerformer_Create(musician, 0, &performer));
   EXPECT_NE(performer, nullptr);
 
-  EXPECT_TRUE(BarelyMusician_DestroyPerformer(musician, performer));
+  EXPECT_TRUE(BarelyPerformer_Destroy(performer));
   EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
-TEST(MusicianTest, CreateDestroyMusician) {
-  const Musician musician = Musician::Create();
-  Musician::Destroy(musician);
-}
+TEST(MusicianTest, CreateDestroyMusician) { [[maybe_unused]] const Musician musician; }
 
 TEST(MusicianTest, CreateDestroyInstrument) {
-  Scoped<Musician> musician;
-  [[maybe_unused]] const Instrument instrument = musician.CreateInstrument({{}}, 1);
+  const Musician musician;
+  [[maybe_unused]] const Instrument instrument(musician, InstrumentDefinition({}), 1);
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {
-  Scoped<Musician> musician;
-  [[maybe_unused]] const Performer performer = musician.CreatePerformer();
+  const Musician musician;
+  [[maybe_unused]] const Performer performer(musician);
 }
 
 }  // namespace

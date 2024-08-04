@@ -15,10 +15,11 @@
 
 namespace {
 
+using ::barely::Instrument;
 using ::barely::Metronome;
 using ::barely::Musician;
+using ::barely::Note;
 using ::barely::OscillatorType;
-using ::barely::Scoped;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -55,11 +56,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Scoped<Musician> musician;
+  Musician musician;
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
+  Instrument instrument(musician, SynthInstrument::GetDefinition(), kFrameRate);
   instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
   instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
   instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
@@ -67,13 +68,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
   // Create the metronome with a beat callback.
-  auto metronome = musician.CreateComponent<Metronome>();
+  Metronome metronome(musician);
   metronome.SetBeatCallback([&](int beat) {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
-    instrument.DestroyNote(instrument.CreateNote(pitch));
+    [[maybe_unused]] const Note note(instrument, pitch);
   });
 
   // Audio process callback.

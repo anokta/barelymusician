@@ -15,6 +15,13 @@ class Metronome {
   /// @param beat Beat.
   using BeatCallback = std::function<void(int beat)>;
 
+  // Creates a new `Metronome`.
+  ///
+  /// @param musician Musician pointer.
+  /// @param process_order Process order.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  explicit Metronome(MusicianPtr musician, int process_order = -1) noexcept;
+
   /// Returns whether the metronome is playing or not.
   ///
   /// @return True if playing, false otherwise.
@@ -35,13 +42,6 @@ class Metronome {
   void Stop() noexcept;
 
  private:
-  // Ensures that `Metronome` can only be created by `Musician`.
-  friend class Musician;
-
-  // Creates a new `Metronome` with a given `musician` and `process_order`.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Metronome(Musician& musician, int process_order = -1) noexcept;
-
   // Performer.
   Performer performer_;
 

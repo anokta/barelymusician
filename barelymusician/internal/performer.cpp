@@ -16,30 +16,13 @@ namespace barely::internal {
 
 Performer::Performer(int process_order) noexcept : process_order_(process_order) {}
 
-void Performer::CancelAllOneOffTasks() noexcept { one_off_tasks_.clear(); }
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Task* Performer::CreateTask(TaskDefinition definition, double position, void* user_data) noexcept {
-  auto task =
-      std::make_unique<Task>(definition, position, user_data,
-                             [&](Task* task, double position) { SetTaskPosition(task, position); });
-  [[maybe_unused]] const auto [it, success] =
-      recurring_tasks_.emplace(std::pair{position, task.get()}, std::move(task));
-  assert(success);
-  return it->second.get();
+void Performer::AddTask(Task* task) noexcept {
+  assert(task);
+  recurring_tasks_.emplace(task->GetPosition(), task);
 }
 
-bool Performer::DestroyTask(Task* task) noexcept {
-  if (last_processed_recurring_task_it_ &&
-      (*last_processed_recurring_task_it_)->second.get() == task) {
-    const auto recurring_task_it = *last_processed_recurring_task_it_;
-    PrevLastProcessedRecurringTaskIt();
-    recurring_tasks_.erase(recurring_task_it);
-    return true;
-  } else {
-    return recurring_tasks_.erase({task->GetPosition(), task}) == 1;
-  }
-}
+void Performer::CancelAllOneOffTasks() noexcept { one_off_tasks_.clear(); }
 
 std::optional<double> Performer::GetDurationToNextTask() const noexcept {
   if (!is_playing_) {
@@ -50,11 +33,10 @@ std::optional<double> Performer::GetDurationToNextTask() const noexcept {
   std::optional<double> next_task_position = std::nullopt;
   if (const auto next_recurring_task = GetNextRecurringTask();
       next_recurring_task != recurring_tasks_.end()) {
-    next_task_position = next_recurring_task->first.first;
-    if (is_looping_ &&
-        (*next_task_position < position_ ||
-         (last_processed_recurring_task_it_ &&
-          next_recurring_task->first <= (*last_processed_recurring_task_it_)->first))) {
+    next_task_position = next_recurring_task->first;
+    if (is_looping_ && (*next_task_position < position_ ||
+                        (last_processed_recurring_task_it_ &&
+                         *next_recurring_task <= **last_processed_recurring_task_it_))) {
       // Loop around.
       if (loop_length_ > 0.0) {
         *next_task_position += loop_length_;
@@ -105,6 +87,16 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     // Process the next recurring task.
     it->second->Process();
     last_processed_recurring_task_it_ = it;
+  }
+}
+
+void Performer::RemoveTask(Task* task) noexcept {
+  if (last_processed_recurring_task_it_ && (*last_processed_recurring_task_it_)->second == task) {
+    const auto recurring_task_it = *last_processed_recurring_task_it_;
+    PrevLastProcessedRecurringTaskIt();
+    recurring_tasks_.erase(recurring_task_it);
+  } else {
+    recurring_tasks_.erase({task->GetPosition(), task});
   }
 }
 
@@ -180,12 +172,11 @@ void Performer::SetPosition(double position) noexcept {
 }
 
 void Performer::SetTaskPosition(Task* task, double position) noexcept {
-  if (last_processed_recurring_task_it_ &&
-      task == (*last_processed_recurring_task_it_)->first.second) {
+  if (last_processed_recurring_task_it_ && task == (*last_processed_recurring_task_it_)->second) {
     PrevLastProcessedRecurringTaskIt();
   }
   auto node = recurring_tasks_.extract({task->GetPosition(), task});
-  node.key().first = position;
+  node.value().first = position;
   recurring_tasks_.insert(std::move(node));
 }
 
@@ -209,12 +200,12 @@ void Performer::Update(double duration) noexcept {
   }
 }
 
-Performer::RecurringTaskMap::const_iterator Performer::GetNextRecurringTask() const noexcept {
+Performer::RecurringTaskSet::const_iterator Performer::GetNextRecurringTask() const noexcept {
   auto next_it = last_processed_recurring_task_it_
                      ? std::next(*last_processed_recurring_task_it_)
                      : recurring_tasks_.lower_bound({position_, nullptr});
   if (is_looping_ && (next_it == recurring_tasks_.end() ||
-                      next_it->first.first >= loop_begin_position_ + loop_length_)) {
+                      next_it->first >= loop_begin_position_ + loop_length_)) {
     // Loop back to the beginning.
     next_it = recurring_tasks_.lower_bound({loop_begin_position_, nullptr});
   }

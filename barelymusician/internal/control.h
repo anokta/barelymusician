@@ -14,13 +14,11 @@ class Control {
   /// Set value callback alias.
   using SetValueCallback = std::function<void(int, double)>;
 
-  Control() noexcept = default;
-
   /// Constructs a new `Control`.
   ///
   /// @param definition Control definition.
   /// @param set_value_callback Set value callback.
-  explicit Control(ControlDefinition definition, SetValueCallback set_value_callback) noexcept;
+  Control(ControlDefinition definition, SetValueCallback set_value_callback) noexcept;
 
   /// Returns the value.
   ///

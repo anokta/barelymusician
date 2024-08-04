@@ -8,9 +8,6 @@ namespace barely::internal {
 /// Class that wraps a note.
 class Note {
  public:
-  /// Default constructor.
-  Note() noexcept = default;
-
   /// Constructs a new `Control`.
   ///
   /// @param note_id Note identifier.

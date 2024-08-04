@@ -100,7 +100,7 @@ BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiator* arpeggiator,
 
 #ifdef __cplusplus
 #include <optional>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/common/random.h"
@@ -123,6 +123,13 @@ enum class ArpeggiatorStyle {
 /// Simple arpeggiator that plays notes in sequence.
 class Arpeggiator {
  public:
+  // Constructs a new `Arpeggiator`.
+  ///
+  /// @param musician Musician pointer.
+  /// @param process_order Process order.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  explicit Arpeggiator(MusicianPtr musician, int process_order = -1) noexcept;
+
   /// Destroys `Arpeggiator`.
   ~Arpeggiator() noexcept;
 
@@ -155,7 +162,7 @@ class Arpeggiator {
   /// Sets the instrument.
   ///
   /// @param instrument Optional instrument.
-  void SetInstrument(std::optional<Instrument> instrument) noexcept;
+  void SetInstrument(std::optional<InstrumentPtr> instrument) noexcept;
 
   /// Sets a note off.
   ///
@@ -180,13 +187,6 @@ class Arpeggiator {
   void SetStyle(ArpeggiatorStyle style) noexcept;
 
  private:
-  // Ensures that `Metronome` can only be created by `Musician`.
-  friend class Musician;
-
-  // Creates a new `Arpeggiator` with a given `musician` and `process_order`.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Arpeggiator(Musician& musician, int process_order = -1) noexcept;
-
   // Stop the arpeggiator.
   void Stop() noexcept;
 
@@ -197,10 +197,10 @@ class Arpeggiator {
   Performer performer_;
 
   // Instrument.
-  std::optional<Instrument> instrument_ = std::nullopt;
+  std::optional<InstrumentPtr> instrument_ = std::nullopt;
 
   // Set of currently playing notes.
-  std::unordered_set<Note> notes_;
+  std::unordered_map<double, Note> notes_;
 
   // Array of pitches to play.
   std::vector<double> pitches_;

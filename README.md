@@ -40,22 +40,22 @@ musician.SetTempo(/*tempo=*/124.0);
 // Create a synth instrument.
 barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
 
-// Set the instrument gain to 0.5.
+// Set the instrument gain control to 0.5.
 instrument.GetControl(barely::SynthInstrument::Control::kGain).SetValue(/*value=*/0.5);
 
-// Start a note with an A3 pitch and a 0.25 instensity.
+// Start an instrument note with an A3 pitch and a 0.25 intensity.
 //
 // @note Pitch values are normalized by octaves, where each 1.0 value change shifts one octave, and
 // 0.0 represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition. However,
 // this is not a strict rule, since `pitch` and `intensity` can be interpreted in any desired way by
 // a custom instrument.
 const double a3_pitch = -1.0;
-const barely::Note note(instrument, a3_pitch, /*intensity=*/0.25);
+barely::Note note(instrument, a3_pitch, /*intensity=*/0.25);
 
 // Create a low-pass effect.
 barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
 
-// Set the effect cutoff frequency to 1kHz.
+// Set the effect cutoff frequency control to 1kHz.
 effect.GetControl(barely::LowPassEffect::Control::kCutoffFrequency).SetValue(/*value=*/1000.0);
 
 // Update the musician timestamp in seconds.

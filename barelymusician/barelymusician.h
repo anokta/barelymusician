@@ -521,8 +521,7 @@ BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffect* effect, int32_t control
                                            BarelyControl** out_control);
 
 /// Processes effect output samples at timestamp.
-/// @note This is *not* thread-safe during a corresponding
-/// `BarelyMusician_DestroyEffect` call.
+/// @note This is *not* thread-safe during a corresponding `BarelyEffect_Destroy` call.
 ///
 /// @param effect Pointer to effect.
 /// @param output_samples Array of interleaved output samples.
@@ -568,8 +567,7 @@ BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrument* instrument, int
                                                BarelyControl** out_control);
 
 /// Processes instrument output samples at timestamp.
-/// @note This is *not* thread-safe during a corresponding
-/// `BarelyMusician_DestroyInstrument` call.
+/// @note This is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
 ///
 /// @param instrument Pointer to instrument.
 /// @param output_samples Array of interleaved output samples.
@@ -1376,7 +1374,7 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// Default constructor.
   InstrumentPtr() noexcept = default;
 
-  // Creates a new `InstrumentPtr` from a raw pointer.
+  /// Creates a new `InstrumentPtr` from a raw pointer.
   ///
   /// @param instrument Raw pointer to instrument.
   explicit InstrumentPtr(BarelyInstrument* instrument) noexcept : PtrWrapper(instrument) {}

@@ -85,7 +85,7 @@ namespace Barely {
             var pitch = Musician.GetPitchFromMidiKey(note.key);
             instrument?.SetNoteOn(pitch, note.intensity);
             _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(pitch); },
-                                          _performer.Position + note.duration, -1);
+                                          _performer.Position + note.duration);
           }, note.position));
         }
       }

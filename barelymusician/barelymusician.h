@@ -496,15 +496,6 @@ BARELY_EXPORT bool BarelyControl_ResetValue(BarelyControl* control);
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyControl_SetValue(BarelyControl* control, double value);
 
-/// Gets an effect control.
-///
-/// @param effect Pointer to effect.
-/// @param control_id Control identifier.
-/// @param out_control Output pointer to control.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffect* effect, int32_t control_id,
-                                           BarelyControl** out_control);
-
 /// Creates a new effect.
 ///
 /// @param musician Pointer to musician.
@@ -519,6 +510,15 @@ BARELY_EXPORT bool BarelyEffect_Create(BarelyMusician* musician, BarelyEffectDef
 /// @param effect Pointer to effect.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffect* effect);
+
+/// Gets an effect control.
+///
+/// @param effect Pointer to effect.
+/// @param control_id Control identifier.
+/// @param out_control Output pointer to control.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffect* effect, int32_t control_id,
+                                           BarelyControl** out_control);
 
 /// Processes effect output samples at timestamp.
 /// @note This is *not* thread-safe during a corresponding
@@ -676,22 +676,6 @@ BARELY_EXPORT bool BarelyNote_Destroy(BarelyNote* note);
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyNote_GetControl(BarelyNote* note, int32_t control_id,
                                          BarelyControl** out_control);
-
-/// Gets a note intensity.
-///
-/// @param note Pointer to note.
-/// @param control_id Control identifier.
-/// @param out_intensity Output intensity.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyNote_GetIntensity(const BarelyNote* note, double* out_intensity);
-
-/// Gets a note pitch.
-///
-/// @param note Pointer to note.
-/// @param control_id Control identifier.
-/// @param out_pitch Output pitch.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyNote_GetPitch(const BarelyNote* note, double* out_pitch);
 
 /// Cancels all one-off performer tasks.
 ///
@@ -1497,26 +1481,6 @@ class NotePtr : public PtrWrapper<BarelyNote> {
         BarelyNote_GetControl(*this, static_cast<int>(control_id), &control);
     assert(success);
     return ControlPtr(control);
-  }
-
-  /// Returns the intensity.
-  ///
-  /// @return Intensity.
-  [[nodiscard]] double GetIntensity() const noexcept {
-    double intensity = 0.0;
-    [[maybe_unused]] const bool success = BarelyNote_GetIntensity(*this, &intensity);
-    assert(success);
-    return intensity;
-  }
-
-  /// Returns the pitch.
-  ///
-  /// @return Pitch.
-  [[nodiscard]] double GetPitch() const noexcept {
-    double pitch = 0.0;
-    [[maybe_unused]] const bool success = BarelyNote_GetPitch(*this, &pitch);
-    assert(success);
-    return pitch;
   }
 };
 

@@ -24,21 +24,6 @@ namespace Barely {
     [SerializeField]
     private double _position = 0.0;
 
-    /// Process order.
-    public int ProcessOrder {
-      get { return _processOrder; }
-      set {
-        if (_performer == null) {
-          _processOrder = value;
-          return;
-        }
-        Musician.Internal.Task_SetProcessOrder(_ptr, value);
-        _processOrder = Musician.Internal.Task_GetProcessOrder(_ptr);
-      }
-    }
-    [SerializeField]
-    private int _processOrder = 0;
-
     /// Constructs a new `Task`.
     ///
     /// @param callback Task process callback.
@@ -50,11 +35,10 @@ namespace Barely {
       OnProcess = callback;
       OnProcessEvent = onProcessEvent;
       _position = position;
-      _processOrder = processOrder;
     }
 
     ~Task() {
-      Musician.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _ptr);
+      Musician.Internal.Task_Destroy(ref _ptr);
     }
 
     /// Updates the task.
@@ -63,16 +47,15 @@ namespace Barely {
     public void Update(Performer performer) {
       if (_performer == performer && _ptr != IntPtr.Zero) {
         Position = _position;
-        ProcessOrder = _processOrder;
         return;
       }
-      Musician.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _ptr);
+      Musician.Internal.Task_Destroy(ref _ptr);
       _performer = performer;
       if (_performer != null) {
-        Musician.Internal.Task_Create(Performer.Internal.GetHandle(_performer), delegate() {
+        Musician.Internal.Task_Create(Performer.Internal.GetPtr(_performer), delegate() {
           OnProcess?.Invoke();
           OnProcessEvent?.Invoke();
-        }, _position, _processOrder, ref _ptr);
+        }, _position, ref _ptr);
       }
     }
 

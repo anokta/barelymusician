@@ -5,27 +5,12 @@ namespace Barely {
   /// A representation of an audio effect that can be attached to an audio source.
   [RequireComponent(typeof(AudioSource))]
   public abstract class Effect : MonoBehaviour {
-    /// Returns a control value.
+    /// Returns a control.
     ///
     /// @param controlId Control identifier.
-    /// @return Control value.
-    public double GetControl(int controlId) {
+    /// @return Control.
+    public Control GetControl(int controlId) {
       return Musician.Internal.Effect_GetControl(_ptr, controlId);
-    }
-
-    /// Resets a control value.
-    ///
-    /// @param controlId Control identifier.
-    public void ResetControl(int controlId) {
-      Musician.Internal.Effect_ResetControl(_ptr, controlId);
-    }
-
-    /// Sets a control value.
-    ///
-    /// @param controlId Control identifier.
-    /// @param value Control value.
-    public void SetControl(int controlId, double value) {
-      Musician.Internal.Effect_SetControl(_ptr, controlId, value);
     }
 
     /// Sets data.

@@ -83,8 +83,8 @@ namespace Barely {
     /// @param callback Task process callback.
     /// @param position Task position in beats.
     /// @param processOrder Task process order.
-    public void ScheduleOneOffTask(Action callback, double position, int processOrder = 0) {
-      Musician.Internal.Performer_ScheduleOneOffTask(_ptr, callback, position, processOrder);
+    public void ScheduleOneOffTask(Action callback, double position) {
+      Musician.Internal.Performer_ScheduleOneOffTask(_ptr, callback, position);
     }
 
     /// Stops the performer.
@@ -94,8 +94,8 @@ namespace Barely {
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Returns the handle.
-      public static IntPtr GetHandle(Performer performer) {
+      /// Returns the pointer.
+      public static IntPtr GetPtr(Performer performer) {
         return performer ? performer._ptr : IntPtr.Zero;
       }
     }

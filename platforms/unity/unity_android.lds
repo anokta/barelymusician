@@ -24,8 +24,6 @@ VERS_1.0 {
     BarelyNote_Create;
     BarelyNote_Destroy;
     BarelyNote_GetControl;
-    BarelyNote_GetIntensity;
-    BarelyNote_GetPitch;
     BarelyPerformer_CancelAllOneOffTasks;
     BarelyPerformer_Create;
     BarelyPerformer_Destroy;
@@ -45,6 +43,30 @@ VERS_1.0 {
     BarelyTask_Destroy;
     BarelyTask_GetPosition;
     BarelyTask_SetPosition;
+
+    BarelyArpeggiator_Create;
+    BarelyArpeggiator_Destroy;
+    BarelyArpeggiator_IsNoteOn;
+    BarelyArpeggiator_IsPlaying;
+    BarelyArpeggiator_SetAllNotesOff;
+    BarelyArpeggiator_SetGateRatio;
+    BarelyArpeggiator_SetInstrument;
+    BarelyArpeggiator_SetNoteOff;
+    BarelyArpeggiator_SetNoteOn;
+    BarelyArpeggiator_SetRate;
+    BarelyArpeggiator_SetStyle;
+    BarelyRepeater_Clear;
+    BarelyRepeater_Create;
+    BarelyRepeater_Destroy;
+    BarelyRepeater_IsPlaying;
+    BarelyRepeater_Pop;
+    BarelyRepeater_Push;
+    BarelyRepeater_PushSilence;
+    BarelyRepeater_SetInstrument;
+    BarelyRepeater_SetRate;
+    BarelyRepeater_SetStyle;
+    BarelyRepeater_Start;
+    BarelyRepeater_Stop;
 
     BarelyHighPassEffect_GetDefinition;
     BarelyLfoEffect_GetDefinition;

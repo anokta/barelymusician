@@ -24,12 +24,31 @@ using ::barely::internal::Performer;
 using ::barely::internal::Task;
 
 // Control.
-struct BarelyControl : public Control {};
+struct BarelyControl : public Control {
+ public:
+  // Non-constructable and non-destructable.
+  BarelyControl() noexcept = delete;
+  ~BarelyControl() noexcept = delete;
+
+  // Non-copyable and non-movable.
+  BarelyControl(const BarelyControl& other) noexcept = delete;
+  BarelyControl& operator=(const BarelyControl& other) noexcept = delete;
+  BarelyControl(BarelyControl&& other) noexcept = delete;
+  BarelyControl& operator=(BarelyControl&& other) noexcept = delete;
+};
 static_assert(sizeof(BarelyControl) == sizeof(barely::internal::Control));
 
 // Musician.
 struct BarelyMusician : public Observable<Musician> {
+ public:
   explicit BarelyMusician(int32_t frame_rate) noexcept : Observable<Musician>(frame_rate) {}
+  ~BarelyMusician() = default;
+
+  // Non-copyable and non-movable.
+  BarelyMusician(const BarelyMusician& other) noexcept = delete;
+  BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
+  BarelyMusician(BarelyMusician&& other) noexcept = delete;
+  BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 };
 
 // Effect.
@@ -47,6 +66,12 @@ struct BarelyEffect : public Effect {
       musician_->RemoveEffect(this);
     }
   }
+
+  // Non-copyable and non-movable.
+  BarelyEffect(const BarelyEffect& other) noexcept = delete;
+  BarelyEffect& operator=(const BarelyEffect& other) noexcept = delete;
+  BarelyEffect(BarelyEffect&& other) noexcept = delete;
+  BarelyEffect& operator=(BarelyEffect&& other) noexcept = delete;
 
  private:
   Observer<Musician> musician_;
@@ -67,6 +92,12 @@ struct BarelyInstrument : public Observable<Instrument> {
       musician_->RemoveInstrument(this);
     }
   }
+
+  /// Non-copyable and non-movable.
+  BarelyInstrument(const BarelyInstrument& other) noexcept = delete;
+  BarelyInstrument& operator=(const BarelyInstrument& other) noexcept = delete;
+  BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
+  BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
 
   int GenerateNextNoteId() noexcept { return ++note_id_counter_; }
   int GetCurrentNoteId() const noexcept { return note_id_counter_; }
@@ -92,6 +123,12 @@ struct BarelyNote : public Note {
     }
   }
 
+  /// Non-copyable and non-movable.
+  BarelyNote(const BarelyNote& other) noexcept = delete;
+  BarelyNote& operator=(const BarelyNote& other) noexcept = delete;
+  BarelyNote(BarelyNote&& other) noexcept = delete;
+  BarelyNote& operator=(BarelyNote&& other) noexcept = delete;
+
  private:
   Observer<Instrument> instrument_;
 };
@@ -110,6 +147,12 @@ struct BarelyPerformer : public Observable<Performer> {
       musician_->RemovePerformer(this);
     }
   }
+
+  /// Non-copyable and non-movable.
+  BarelyPerformer(const BarelyPerformer& other) noexcept = delete;
+  BarelyPerformer& operator=(const BarelyPerformer& other) noexcept = delete;
+  BarelyPerformer(BarelyPerformer&& other) noexcept = delete;
+  BarelyPerformer& operator=(BarelyPerformer&& other) noexcept = delete;
 
  private:
   Observer<Musician> musician_;
@@ -132,6 +175,12 @@ struct BarelyTask : public Task {
       performer_->RemoveTask(this);
     }
   }
+
+  /// Non-copyable and non-movable.
+  BarelyTask(const BarelyTask& other) noexcept = delete;
+  BarelyTask& operator=(const BarelyTask& other) noexcept = delete;
+  BarelyTask(BarelyTask&& other) noexcept = delete;
+  BarelyTask& operator=(BarelyTask&& other) noexcept = delete;
 
  private:
   Observer<Performer> performer_;
@@ -326,22 +375,6 @@ bool BarelyNote_GetControl(BarelyNote* note, int32_t control_id, BarelyControl**
 
   *out_control = static_cast<BarelyControl*>(note->GetControl(control_id));
   return *out_control;
-}
-
-bool BarelyNote_GetIntensity(const BarelyNote* note, double* out_intensity) {
-  if (!note) return false;
-  if (!out_intensity) return false;
-
-  *out_intensity = note->GetIntensity();
-  return true;
-}
-
-bool BarelyNote_GetPitch(const BarelyNote* note, double* out_pitch) {
-  if (!note) return false;
-  if (!out_pitch) return false;
-
-  *out_pitch = note->GetPitch();
-  return true;
 }
 
 bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformer* performer) {

@@ -1,8 +1,11 @@
 #ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 #define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
+#include <set>
 #include <unordered_set>
+#include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
@@ -12,35 +15,46 @@ namespace barely::internal {
 /// Class that wraps a musician.
 class Musician {
  public:
+  /// Constructs a new `Musician`.
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  explicit Musician(int frame_rate) noexcept;
+
   /// Adds an effect.
   ///
-  /// @param effect Effect.
+  /// @param effect Pointer to effect.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddEffect(Effect& effect) noexcept;
+  void AddEffect(Effect* effect) noexcept;
 
   /// Adds an instrument.
   ///
-  /// @param instrument Instrument.
+  /// @param instrument Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddInstrument(Instrument& instrument) noexcept;
+  void AddInstrument(Instrument* instrument) noexcept;
 
   /// Adds a performer.
   ///
-  /// @param performer Performer.
+  /// @param process_order Process order.
+  /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddPerformer(Performer& performer) noexcept;
+  void AddPerformer(Performer* performer) noexcept;
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
   /// @param seconds Number of seconds.
   /// @return Number of beats.
-  [[nodiscard]] double GetBeatsFromSeconds(double seconds) noexcept;
+  [[nodiscard]] double GetBeatsFromSeconds(double seconds) const noexcept;
+
+  /// Returns frame rate.
+  ///
+  /// @return Frame rate in hertz.
+  [[nodiscard]] int GetFrameRate() const noexcept;
 
   /// Returns the corresponding number of seconds for a given number of beats.
   ///
   /// @param beats Number of beats.
   /// @return Number of seconds.
-  [[nodiscard]] double GetSecondsFromBeats(double beats) noexcept;
+  [[nodiscard]] double GetSecondsFromBeats(double beats) const noexcept;
 
   /// Returns tempo.
   ///
@@ -52,23 +66,23 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
 
-  /// Destroys effect.
+  /// Removes effect.
   ///
   /// @param effect Effect.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveEffect(Effect& effect) noexcept;
+  void RemoveEffect(Effect* effect) noexcept;
 
-  /// Destroys instrument.
+  /// Removes instrument.
   ///
   /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveInstrument(Instrument& instrument) noexcept;
+  void RemoveInstrument(Instrument* instrument) noexcept;
 
-  /// Destroys a performer.
+  /// Removes a performer.
   ///
   /// @param performer Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemovePerformer(Performer& performer) noexcept;
+  void RemovePerformer(Performer* performer) noexcept;
 
   /// Sets the tempo.
   ///
@@ -81,14 +95,18 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
+ private:
   // Set of pointers to effects.
   std::unordered_set<Effect*> effects_;
 
   // Set of pointers to instruments.
   std::unordered_set<Instrument*> instruments_;
 
-  // Set of pointers to performers.
-  std::unordered_set<Performer*> performers_;
+  // Set of process order-pointer pairs to performers.
+  std::set<std::pair<int, Performer*>> performers_;
+
+  // Frame rate in hertz.
+  const int frame_rate_ = 0;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

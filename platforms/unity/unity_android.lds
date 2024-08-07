@@ -1,28 +1,18 @@
 VERS_1.0 {
   global:
+    BarelyControl_GetValue;
+    BarelyControl_ResetValue;
+    BarelyControl_SetValue;
     BarelyEffect_Create;
     BarelyEffect_Destroy;
     BarelyEffect_GetControl;
     BarelyEffect_Process;
-    BarelyEffect_ResetControl;
-    BarelyEffect_SetControl;
     BarelyEffect_SetData;
     BarelyInstrument_Create;
     BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
-    BarelyInstrument_GetNoteControl;
-    BarelyInstrument_IsNoteOn;
     BarelyInstrument_Process;
-    BarelyInstrument_ResetControl;
-    BarelyInstrument_ResetNoteControl;
-    BarelyInstrument_SetAllNotesOff;
-    BarelyInstrument_SetControl;
     BarelyInstrument_SetData;
-    BarelyInstrument_SetNoteControl;
-    BarelyInstrument_SetNoteOff;
-    BarelyInstrument_SetNoteOffEvent;
-    BarelyInstrument_SetNoteOn;
-    BarelyInstrument_SetNoteOnEvent;
     BarelyMusician_Create;
     BarelyMusician_Destroy;
     BarelyMusician_GetBeatsFromSeconds;
@@ -31,6 +21,9 @@ VERS_1.0 {
     BarelyMusician_GetTimestamp;
     BarelyMusician_SetTempo;
     BarelyMusician_Update;
+    BarelyNote_Create;
+    BarelyNote_Destroy;
+    BarelyNote_GetControl;
     BarelyPerformer_CancelAllOneOffTasks;
     BarelyPerformer_Create;
     BarelyPerformer_Destroy;
@@ -49,9 +42,7 @@ VERS_1.0 {
     BarelyTask_Create;
     BarelyTask_Destroy;
     BarelyTask_GetPosition;
-    BarelyTask_GetProcessOrder;
     BarelyTask_SetPosition;
-    BarelyTask_SetProcessOrder;
 
     BarelyArpeggiator_Create;
     BarelyArpeggiator_Destroy;

@@ -1,5 +1,6 @@
 #include <chrono>
 #include <thread>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -15,8 +16,11 @@
 
 namespace {
 
+using ::barely::Instrument;
 using ::barely::Musician;
+using ::barely::Note;
 using ::barely::OscillatorType;
+using ::barely::Performer;
 using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::examples::AudioClock;
@@ -48,59 +52,54 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
-  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
-  });
+  Instrument instrument(musician, SynthInstrument::GetDefinition());
+  instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
+  instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
+  instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
+  instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
 
   std::vector<std::pair<double, double>> triggers;
   std::vector<Task> tasks;
 
-  auto performer = musician.CreatePerformer();
+  Performer performer(musician);
 
+  std::unordered_map<double, Note> notes;
   const auto play_note_fn = [&](int scale_index, double duration) {
     const double pitch =
         barely::kPitchD3 + barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
-    return [&instrument, &performer, duration, pitch]() {
-      instrument.SetNoteOn(pitch);
+    return [&instrument, &performer, &notes, duration, pitch]() {
+      ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
+      notes.emplace(pitch, Note(instrument, pitch));
       performer.ScheduleOneOffTask(
-          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
+          [&instrument, &performer, &notes, pitch]() { notes.erase(pitch); },
           performer.GetPosition() + duration);
     };
   };
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(0, 1.0), 0.0));
+  tasks.emplace_back(performer, play_note_fn(0, 1.0), 0.0);
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(1, 1.0), 1.0));
+  tasks.emplace_back(performer, play_note_fn(1, 1.0), 1.0);
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(2, 1.0), 2.0));
+  tasks.emplace_back(performer, play_note_fn(2, 1.0), 2.0);
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(3, 0.66), 3.0));
-  tasks.push_back(performer.CreateTask(play_note_fn(4, 0.34), 3.66));
+  tasks.emplace_back(performer, play_note_fn(3, 0.66), 3.0);
+  tasks.emplace_back(performer, play_note_fn(4, 0.34), 3.66);
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(5, 0.33), 4.0));
-  tasks.push_back(performer.CreateTask(play_note_fn(6, 0.33), 4.33));
-  tasks.push_back(performer.CreateTask(play_note_fn(7, 0.34), 4.66));
+  tasks.emplace_back(performer, play_note_fn(5, 0.33), 4.0);
+  tasks.emplace_back(performer, play_note_fn(6, 0.33), 4.33);
+  tasks.emplace_back(performer, play_note_fn(7, 0.34), 4.66);
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  tasks.push_back(performer.CreateTask(play_note_fn(8, 2.0), 5.0));
-
-  // Stopper.
-  auto stopper = performer.CreateTask([&performer]() { performer.Stop(); }, 0.0,
-                                      /*process_order=*/-1);
+  tasks.emplace_back(performer, play_note_fn(8, 2.0), 5.0);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
@@ -120,9 +119,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '1');
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
-      instrument.SetAllNotesOff();
+      performer.CancelAllOneOffTasks();
+      notes.clear();
       performer.SetPosition(triggers[index].first);
-      stopper.SetPosition(triggers[index].first + triggers[index].second);
+      performer.ScheduleOneOffTask(
+          [&]() {
+            notes.clear();
+            performer.Stop();
+          },
+          triggers[index].first + triggers[index].second);
       performer.Start();
       return;
     }

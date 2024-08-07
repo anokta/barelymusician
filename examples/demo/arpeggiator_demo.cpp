@@ -21,6 +21,7 @@ namespace {
 
 using ::barely::Arpeggiator;
 using ::barely::ArpeggiatorStyle;
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthInstrument;
@@ -46,7 +47,7 @@ constexpr int kVoiceCount = 16;
 constexpr double kInitialGateRatio = 0.5;
 constexpr double kInitialRate = 4.0;
 constexpr double kInitialTempo = 100.0;
-constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kRandom;
+constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kUp;
 
 // Note settings.
 constexpr double kRootPitch = barely::kPitchC4;
@@ -73,22 +74,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
-  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
+  Instrument instrument(musician, SynthInstrument::GetDefinition());
+  instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
+  instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
+  instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
+  instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
+  instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
-  });
-
-  auto arpeggiator = musician.CreateComponent<Arpeggiator>();
-  arpeggiator.SetInstrument(&instrument);
+  Arpeggiator arpeggiator(musician);
+  arpeggiator.SetInstrument(instrument);
   arpeggiator.SetGateRatio(kInitialGateRatio);
   arpeggiator.SetRate(kInitialRate);
   arpeggiator.SetStyle(kInitialStyle);

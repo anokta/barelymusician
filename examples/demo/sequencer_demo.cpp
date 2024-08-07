@@ -17,8 +17,11 @@
 
 namespace {
 
+using ::barely::Instrument;
 using ::barely::Musician;
+using ::barely::Note;
 using ::barely::OscillatorType;
+using ::barely::Performer;
 using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::TaskDefinition;
@@ -52,28 +55,27 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
-  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
-  });
+  Instrument instrument(musician, SynthInstrument::GetDefinition());
+  instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
+  instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
+  instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
+  instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
 
-  auto performer = musician.CreatePerformer();
+  Performer performer(musician);
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
+  std::unordered_map<double, Note> notes;
   const auto play_note_fn = [&](double duration, double pitch) {
-    return [&instrument, &performer, pitch, duration]() {
-      instrument.SetNoteOn(pitch);
-      performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+    return [&instrument, &performer, &notes, pitch, duration]() {
+      notes.emplace(pitch, Note(instrument, pitch));
+      performer.ScheduleOneOffTask([&instrument, &notes, pitch]() { notes.erase(pitch); },
                                    performer.GetPosition() + duration);
+      ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
     };
   };
 
@@ -91,7 +93,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Task> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, performer.CreateTask(callback, position));
+    tasks.emplace(index++, Task(performer, callback, position));
   }
 
   // Audio process callback.
@@ -111,12 +113,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
-      if (const auto it = tasks.find(index - 1); it != tasks.end()) {
-        tasks.erase(it);
+      if (tasks.erase(index - 1) > 0) {
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, performer.CreateTask(callback, position));
+        tasks.emplace(index - 1, Task(performer, callback, position));
         ConsoleLog() << "Added note " << index;
       }
       return;
@@ -127,7 +128,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (performer.IsPlaying()) {
           performer.Stop();
-          instrument.SetAllNotesOff();
+          notes.clear();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();
@@ -144,7 +145,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'P':
-        instrument.SetAllNotesOff();
+        notes.clear();
         performer.SetPosition(0.0);
         return;
       case '-':

@@ -59,8 +59,8 @@ void SynthInstrument::Process(double* output_samples, int output_channel_count,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SynthInstrument::SetControl(int id, double value) noexcept {
-  switch (static_cast<Control>(id)) {
+void SynthInstrument::SetControl(int control_id, double value) noexcept {
+  switch (static_cast<Control>(control_id)) {
     case Control::kGain:
       gain_processor_.SetGain(value);
       break;
@@ -90,10 +90,10 @@ void SynthInstrument::SetControl(int id, double value) noexcept {
   }
 }
 
-void SynthInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
+void SynthInstrument::SetNoteOff(int note_id) noexcept { voice_.Stop(note_id); }
 
-void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
-  voice_.Start(pitch, [pitch, intensity](SynthVoice* voice) {
+void SynthInstrument::SetNoteOn(int note_id, double pitch, double intensity) noexcept {
+  voice_.Start(note_id, [pitch, intensity](SynthVoice* voice) {
     voice->generator().SetFrequency(GetFrequency(pitch));
     voice->set_gain(intensity);
   });

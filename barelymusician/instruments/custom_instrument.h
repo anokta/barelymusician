@@ -27,9 +27,9 @@ class CustomInstrument {
 
   /// Sets a control value.
   ///
-  /// @param id Control identifier.
+  /// @param control_id Control identifier.
   /// @param value Control value.
-  virtual void SetControl(int id, double value) noexcept = 0;
+  virtual void SetControl(int control_id, double value) noexcept = 0;
 
   /// Sets data.
   ///
@@ -39,21 +39,22 @@ class CustomInstrument {
 
   /// Sets a note control value.
   ///
-  /// @param pitch Note pitch.
-  /// @param id Note control identifier.
+  /// @param note_id Note identifier.
+  /// @param control_id Note control identifier.
   /// @param value Note control value.
-  virtual void SetNoteControl(double pitch, int id, double value) noexcept = 0;
+  virtual void SetNoteControl(int note_id, int control_id, double value) noexcept = 0;
 
   /// Sets a note off.
   ///
-  /// @param pitch Note pitch.
-  virtual void SetNoteOff(double pitch) noexcept = 0;
+  /// @param note_id Note identifier.
+  virtual void SetNoteOff(int note_id) noexcept = 0;
 
   /// Sets a note on.
   ///
+  /// @param note_id Note identifier.
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  virtual void SetNoteOn(double pitch, double intensity) noexcept = 0;
+  virtual void SetNoteOn(int note_id, double pitch, double intensity) noexcept = 0;
 
   /// Returns the definition for `CustomInstrumentType`.
   ///
@@ -88,25 +89,25 @@ class CustomInstrument {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->Process(output_samples, output_channel_count, output_frame_count);
         },
-        [](void** state, int32_t id, double value) {
+        [](void** state, int32_t control_id, double value) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetControl(id, value);
+          instrument->SetControl(control_id, value);
         },
         [](void** state, const void* data, int32_t size) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetData(data, size);
         },
-        [](void** state, double pitch, int32_t id, double value) {
+        [](void** state, int32_t note_id, int32_t control_id, double value) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteControl(pitch, id, value);
+          instrument->SetNoteControl(note_id, control_id, value);
         },
-        [](void** state, double pitch) noexcept {
+        [](void** state, int32_t note_id) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteOff(pitch);
+          instrument->SetNoteOff(note_id);
         },
-        [](void** state, double pitch, double intensity) noexcept {
+        [](void** state, int32_t note_id, double pitch, double intensity) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteOn(pitch, intensity);
+          instrument->SetNoteOn(note_id, pitch, intensity);
         },
         control_definitions, note_control_definitions);
   }

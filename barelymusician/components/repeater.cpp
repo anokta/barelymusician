@@ -8,105 +8,93 @@
 // Repeater.
 struct BarelyRepeater : public barely::Repeater {
   // Constructs `BarelyRepeater` with `musician` and `process_order`.
-  BarelyRepeater(BarelyMusicianHandle musician, int process_order) noexcept
-      : barely::Repeater(
-            barely::Musician::Handle(musician).CreateComponent<barely::Repeater>(process_order)) {}
+  BarelyRepeater(BarelyMusician* musician, int process_order) noexcept
+      : barely::Repeater(barely::MusicianPtr(musician), process_order) {}
 
   // Destroys `BarelyRepeater`.
-  ~BarelyRepeater() noexcept { SetInstrument(nullptr); }
-
-  // Optional instrument.
-  std::optional<barely::Instrument::Handle> instrument = std::nullopt;
+  ~BarelyRepeater() noexcept { SetInstrument(std::nullopt); }
 };
 
-bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
+bool BarelyRepeater_Clear(BarelyRepeater* repeater) {
   if (!repeater) return false;
 
   repeater->Clear();
   return true;
 }
 
-bool BarelyRepeater_Create(BarelyMusicianHandle musician, int32_t process_order,
-                           BarelyRepeaterHandle* out_repeater) {
+bool BarelyRepeater_Create(BarelyMusician* musician, int32_t process_order,
+                           BarelyRepeater** out_repeater) {
   if (!musician || !out_repeater) return false;
 
   *out_repeater = new BarelyRepeater(musician, static_cast<int>(process_order));
   return true;
 }
 
-bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater) {
+bool BarelyRepeater_Destroy(BarelyRepeater* repeater) {
   if (!repeater) return false;
 
   delete repeater;
   return true;
 }
 
-bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing) {
+bool BarelyRepeater_IsPlaying(const BarelyRepeater* repeater, bool* out_is_playing) {
   if (!repeater || !out_is_playing) return false;
 
   *out_is_playing = repeater->IsPlaying();
   return true;
 }
 
-bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater) {
+bool BarelyRepeater_Pop(BarelyRepeater* repeater) {
   if (!repeater) return false;
 
   repeater->Pop();
   return true;
 }
 
-bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length) {
+bool BarelyRepeater_Push(BarelyRepeater* repeater, double pitch, int32_t length) {
   if (!repeater) return false;
 
   repeater->Push(pitch, static_cast<int>(length));
   return true;
 }
 
-bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length) {
+bool BarelyRepeater_PushSilence(BarelyRepeater* repeater, int32_t length) {
   if (!repeater) return false;
 
   repeater->Push(std::nullopt, static_cast<int>(length));
   return true;
 }
 
-bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
-                                  BarelyInstrumentHandle instrument) {
+bool BarelyRepeater_SetInstrument(BarelyRepeater* repeater, BarelyInstrument* instrument) {
   if (!repeater) return false;
 
-  if (repeater->instrument) {
-    repeater->SetInstrument(nullptr);
-  }
-  if (instrument) {
-    repeater->instrument.emplace(instrument);
-    repeater->SetInstrument(&repeater->instrument.value());
-  } else {
-    repeater->instrument.reset();
-  }
+  repeater->SetInstrument(instrument != nullptr ? std::optional(barely::InstrumentPtr(instrument))
+                                                : std::nullopt);
   return true;
 }
 
-bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate) {
+bool BarelyRepeater_SetRate(BarelyRepeater* repeater, double rate) {
   if (!repeater) return false;
 
   repeater->SetRate(rate);
   return true;
 }
 
-bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style) {
+bool BarelyRepeater_SetStyle(BarelyRepeater* repeater, BarelyRepeaterStyle style) {
   if (!repeater) return false;
 
   repeater->SetStyle(static_cast<barely::RepeaterStyle>(style));
   return true;
 }
 
-bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_shift) {
+bool BarelyRepeater_Start(BarelyRepeater* repeater, double pitch_shift) {
   if (!repeater) return false;
 
   repeater->Start(pitch_shift);
   return true;
 }
 
-bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater) {
+bool BarelyRepeater_Stop(BarelyRepeater* repeater) {
   if (!repeater) return false;
 
   repeater->Stop();
@@ -115,11 +103,30 @@ bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater) {
 
 namespace barely {
 
-Repeater::~Repeater() noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
-  }
+// NOLINTNEXTLINE(bugprone-exception-escape)
+Repeater::Repeater(MusicianPtr musician, int process_order) noexcept
+    : performer_(musician, process_order),
+      task_(
+          performer_,
+          [this]() noexcept {
+            if (pitches_.empty() || !Update() || !instrument_.has_value()) {
+              return;
+            }
+            const auto& [pitch_or, length] = pitches_[index_];
+            if (!pitches_[index_].first.has_value()) {
+              return;
+            }
+            const double pitch = *pitches_[index_].first + pitch_shift_;
+            note_.emplace(*instrument_, pitch);
+            performer_.ScheduleOneOffTask([this]() { note_.reset(); },
+                                          static_cast<double>(length) * performer_.GetLoopLength());
+          },
+          0.0) {
+  performer_.SetLooping(true);
+  performer_.SetLoopLength(1.0);
 }
+
+Repeater::~Repeater() noexcept { Stop(); }
 
 void Repeater::Clear() noexcept { pitches_.clear(); }
 
@@ -131,9 +138,7 @@ void Repeater::Pop() noexcept {
     return;
   }
   if (index_ == static_cast<int>(pitches_.size()) - 1 && IsPlaying()) {
-    if (instrument_ != nullptr) {
-      instrument_->SetNoteOff(*pitches_.back().first + pitch_shift_);
-    }
+    note_.reset();
     remaining_length_ = 0;
   }
   pitches_.pop_back();
@@ -144,9 +149,9 @@ void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void Repeater::SetInstrument(Instrument* instrument) noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
+void Repeater::SetInstrument(std::optional<InstrumentPtr> instrument) noexcept {
+  if (instrument_.has_value() && IsPlaying()) {
+    note_.reset();
   }
   instrument_ = instrument;
 }
@@ -174,9 +179,7 @@ void Repeater::Stop() noexcept {
   }
   performer_.Stop();
   performer_.SetPosition(0.0);
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
-  }
+  note_.reset();
   index_ = -1;
   remaining_length_ = 0;
 }
@@ -198,29 +201,6 @@ bool Repeater::Update() noexcept {
   }
   remaining_length_ = pitches_[index_].second;
   return true;
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(Musician& musician, int process_order) noexcept
-    : performer_(musician.CreatePerformer()) {
-  performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
-  task_ = performer_.CreateTask(
-      [this, process_order]() noexcept {
-        if (pitches_.empty() || !Update() || instrument_ == nullptr) {
-          return;
-        }
-        const auto& [pitch_or, length] = pitches_[index_];
-        if (!pitches_[index_].first.has_value()) {
-          return;
-        }
-        const double pitch = *pitches_[index_].first + pitch_shift_;
-        instrument_->SetNoteOn(pitch);
-        performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                                      static_cast<double>(length) * performer_.GetLoopLength(),
-                                      process_order);
-      },
-      0.0, process_order);
 }
 
 }  // namespace barely

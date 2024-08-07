@@ -17,6 +17,7 @@ namespace barely::internal {
 namespace {
 
 using ::testing::ElementsAre;
+using ::testing::NotNull;
 using ::testing::Optional;
 using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
@@ -43,13 +44,13 @@ InstrumentDefinition GetTestInstrumentDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int32_t id, double value) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(id + 1) * value;
+      [](void** state, int32_t control_id, double value) {
+        *reinterpret_cast<double*>(*state) = static_cast<double>(control_id + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {},
-      [](void** /*state*/, double /*pitch*/, int32_t /*id*/, double /*value*/) {},
-      [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
-      [](void** state, double pitch, double intensity) {
+      [](void** /*state*/, int32_t /*note_id*/, int32_t /*control_id*/, double /*value*/) {},
+      [](void** state, int32_t /*note_id*/) { *reinterpret_cast<double*>(*state) = 0.0; },
+      [](void** state, int32_t /*note_id*/, double pitch, double intensity) {
         *reinterpret_cast<double*>(*state) = pitch * intensity;
       },
       control_definitions, note_control_definitions);
@@ -63,7 +64,7 @@ TEST(MusicianTest, BeatsSecondsConversion) {
   constexpr std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0, -24.6};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0, -12.3};
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
 
   for (int i = 0; i < kValueCount; ++i) {
@@ -83,12 +84,12 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr double kPitch = -1.25;
   constexpr double kIntensity = 0.75;
 
-  Musician musician;
+  Musician musician(kFrameRate);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
   Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetTimestamp());
-  musician.AddInstrument(instrument);
+  musician.AddInstrument(&instrument);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
@@ -98,32 +99,10 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
     }
   }
 
-  // Set the note callbacks.
-  double note_on_pitch = 0.0;
-  double note_on_intensity = 0.0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch, double intensity) {
-    note_on_pitch = pitch;
-    note_on_intensity = intensity;
-  };
-  instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
-                            static_cast<void*>(&note_on_callback));
-  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
-
-  double note_off_pitch = 0.0;
-  NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
-    note_off_pitch = pitch;
-  };
-  instrument.SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
-                             static_cast<void*>(&note_off_callback));
-  EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
-
-  // Set a note on.
-  instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_TRUE(instrument.IsNoteOn(kPitch));
-
-  EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
+  // Create a note.
+  constexpr int kNoteId = 1;
+  Note note(kNoteId, kPitch, kIntensity, instrument.BuildNoteControlMap(kNoteId));
+  instrument.AddNote(&note);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
@@ -133,57 +112,57 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
     }
   }
 
+  // Remove the note.
+  instrument.RemoveNote(&note);
+
   // Remove the instrument.
-  musician.RemoveInstrument(instrument);
+  musician.RemoveInstrument(&instrument);
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
 TEST(MusicianTest, CreateDestroyMultipleInstruments) {
-  std::vector<double> note_off_pitches;
+  Musician musician(kFrameRate);
+  std::vector<double> buffer(kChannelCount * kFrameCount);
 
-  {
-    Musician musician;
+  // Create instruments with note off callback.
+  std::vector<std::unique_ptr<Instrument>> instruments;
+  for (int i = 0; i < 3; ++i) {
+    instruments.emplace_back(
+        new Instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetTimestamp()));
+    musician.AddInstrument(instruments[i].get());
+  }
 
-    // Create instruments with note off callback.
-    std::vector<std::unique_ptr<Instrument>> instruments;
-    for (int i = 0; i < 3; ++i) {
-      instruments.push_back(std::make_unique<Instrument>(GetTestInstrumentDefinition(), kFrameRate,
-                                                         musician.GetTimestamp()));
-      musician.AddInstrument(*instruments[i]);
-      NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
-        note_off_pitches.push_back(pitch);
-      };
-      instruments[i]->SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
-                                      static_cast<void*>(&note_off_callback));
-    }
+  // Start multiple notes, then immediately stop some of them.
+  for (int i = 0; i < 3; ++i) {
+    Note first_note(i, static_cast<double>(i + 1), 1.0, instruments[i]->BuildNoteControlMap(i));
+    instruments[i]->AddNote(&first_note);
+    instruments[i]->RemoveNote(&first_note);
 
-    // Start multiple notes, then immediately stop some of them.
-    for (int i = 0; i < 3; ++i) {
-      instruments[i]->SetNoteOn(static_cast<double>(i + 1), 1.0);
-      instruments[i]->SetNoteOn(static_cast<double>(-i - 1), 1.0);
-      instruments[i]->SetNoteOff(static_cast<double>(i + 1));
-    }
-    EXPECT_THAT(note_off_pitches, ElementsAre(1.0, 2.0, 3.0));
+    Note second_note(-i, static_cast<double>(-i - 1), 1.0, instruments[i]->BuildNoteControlMap(-i));
+    instruments[i]->AddNote(&second_note);
 
-    // Remove instruments.
-    for (int i = 0; i < 3; ++i) {
-      musician.RemoveInstrument(*instruments[i]);
+    std::fill(buffer.begin(), buffer.end(), 0.0);
+    EXPECT_TRUE(instruments[i]->Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
+    for (int frame = 0; frame < kFrameCount; ++frame) {
+      for (int channel = 0; channel < kChannelCount; ++channel) {
+        EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], static_cast<double>(-i - 1));
+      }
     }
   }
 
-  // Remaining active notes should be stopped once the musician goes out of scope.
-  EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
+  // Remove instruments.
+  for (int i = 0; i < 3; ++i) {
+    musician.RemoveInstrument(instruments[i].get());
+  }
 }
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySinglePerformer) {
-  constexpr int kProcessOrder = 0;
-
-  Musician musician;
+  Musician musician(kFrameRate);
 
   // Create a performer.
-  Performer performer;
-  musician.AddPerformer(performer);
+  Performer performer(/*process_order=*/0);
+  musician.AddPerformer(&performer);
 
   // Create a task definition.
   double task_position = 0.0;
@@ -195,7 +174,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   };
 
   // Schedule a task.
-  performer.ScheduleOneOffTask(definition, 1.0, kProcessOrder, &process_callback);
+  performer.ScheduleOneOffTask(definition, 1.0, &process_callback);
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);
@@ -206,26 +185,26 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   EXPECT_TRUE(performer.IsPlaying());
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, kProcessOrder)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(1.0));
   musician.Update(1.0);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.0));
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp past the task, which should be triggered now.
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.0));
   musician.Update(1.5);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Remove the performer.
-  musician.RemovePerformer(performer);
+  musician.RemovePerformer(&performer);
 }
 
 // Tests that the musician sets its tempo as expected.
 TEST(MusicianTest, SetTempo) {
-  Musician musician;
+  Musician musician(kFrameRate);
   EXPECT_DOUBLE_EQ(musician.GetTempo(), 120.0);
 
   musician.SetTempo(200.0);

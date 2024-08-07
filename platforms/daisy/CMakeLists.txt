@@ -28,7 +28,7 @@ target_compile_options(
 target_link_libraries(
   ${BARELY_DAISY_TARGET} PUBLIC
   barelymusician
-  barely_pitch
+  barely_midi
   barely_oscillator
   barely_synth_instrument
   daisy

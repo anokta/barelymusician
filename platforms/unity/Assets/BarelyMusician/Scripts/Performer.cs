@@ -12,12 +12,12 @@ namespace Barely {
     public bool Loop {
       get { return _loop; }
       set {
-        if (_handle == IntPtr.Zero) {
+        if (_ptr == IntPtr.Zero) {
           _loop = value;
           return;
         }
-        Musician.Internal.Performer_SetLooping(_handle, value);
-        _loop = Musician.Internal.Performer_IsLooping(_handle);
+        Musician.Internal.Performer_SetLooping(_ptr, value);
+        _loop = Musician.Internal.Performer_IsLooping(_ptr);
       }
     }
     [SerializeField]
@@ -27,12 +27,12 @@ namespace Barely {
     public double LoopBeginPosition {
       get { return _loopBeginPosition; }
       set {
-        if (_handle == IntPtr.Zero) {
+        if (_ptr == IntPtr.Zero) {
           _loopBeginPosition = value;
           return;
         }
-        Musician.Internal.Performer_SetLoopBeginPosition(_handle, value);
-        _loopBeginPosition = Musician.Internal.Performer_GetLoopBeginPosition(_handle);
+        Musician.Internal.Performer_SetLoopBeginPosition(_ptr, value);
+        _loopBeginPosition = Musician.Internal.Performer_GetLoopBeginPosition(_ptr);
       }
     }
     [SerializeField]
@@ -42,12 +42,12 @@ namespace Barely {
     public double LoopLength {
       get { return _loopLength; }
       set {
-        if (_handle == IntPtr.Zero) {
+        if (_ptr == IntPtr.Zero) {
           _loopLength = value;
           return;
         }
-        Musician.Internal.Performer_SetLoopLength(_handle, value);
-        _loopLength = Musician.Internal.Performer_GetLoopLength(_handle);
+        Musician.Internal.Performer_SetLoopLength(_ptr, value);
+        _loopLength = Musician.Internal.Performer_GetLoopLength(_ptr);
       }
     }
     [SerializeField]
@@ -56,8 +56,8 @@ namespace Barely {
 
     /// Position in beats.
     public double Position {
-      get { return Musician.Internal.Performer_GetPosition(_handle); }
-      set { Musician.Internal.Performer_SetPosition(_handle, value); }
+      get { return Musician.Internal.Performer_GetPosition(_ptr); }
+      set { Musician.Internal.Performer_SetPosition(_ptr, value); }
     }
 
     /// List of recurring tasks.
@@ -65,17 +65,17 @@ namespace Barely {
 
     /// True if playing, false otherwise.
     public bool IsPlaying {
-      get { return Musician.Internal.Performer_IsPlaying(_handle); }
+      get { return Musician.Internal.Performer_IsPlaying(_ptr); }
     }
 
     /// Starts the performer.
     public void Play() {
-      Musician.Internal.Performer_Start(_handle);
+      Musician.Internal.Performer_Start(_ptr);
     }
 
     /// Cancels all one-off tasks.
     public void CancelAllOneOffTasks() {
-      Musician.Internal.Performer_CancelAllOneOffTasks(_handle);
+      Musician.Internal.Performer_CancelAllOneOffTasks(_ptr);
     }
 
     /// Schedules a one-off task at a specific position.
@@ -83,28 +83,28 @@ namespace Barely {
     /// @param callback Task process callback.
     /// @param position Task position in beats.
     /// @param processOrder Task process order.
-    public void ScheduleOneOffTask(Action callback, double position, int processOrder = 0) {
-      Musician.Internal.Performer_ScheduleOneOffTask(_handle, callback, position, processOrder);
+    public void ScheduleOneOffTask(Action callback, double position) {
+      Musician.Internal.Performer_ScheduleOneOffTask(_ptr, callback, position);
     }
 
     /// Stops the performer.
     public void Stop() {
-      Musician.Internal.Performer_Stop(_handle);
+      Musician.Internal.Performer_Stop(_ptr);
     }
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Returns the handle.
-      public static IntPtr GetHandle(Performer performer) {
-        return performer ? performer._handle : IntPtr.Zero;
+      /// Returns the pointer.
+      public static IntPtr GetPtr(Performer performer) {
+        return performer ? performer._ptr : IntPtr.Zero;
       }
     }
 
-    // Handle.
-    private IntPtr _handle = IntPtr.Zero;
+    // Raw pointer.
+    private IntPtr _ptr = IntPtr.Zero;
 
     private void OnEnable() {
-      Musician.Internal.Performer_Create(this, ref _handle);
+      Musician.Internal.Performer_Create(this, ref _ptr);
       Loop = _loop;
       LoopBeginPosition = _loopBeginPosition;
       LoopLength = _loopLength;
@@ -114,7 +114,7 @@ namespace Barely {
     }
 
     private void OnDisable() {
-      Musician.Internal.Performer_Destroy(ref _handle);
+      Musician.Internal.Performer_Destroy(ref _ptr);
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(null);
       }

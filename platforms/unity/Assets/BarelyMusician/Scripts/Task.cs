@@ -17,27 +17,12 @@ namespace Barely {
           _position = value;
           return;
         }
-        Musician.Internal.Task_SetPosition(_handle, value);
-        _position = Musician.Internal.Task_GetPosition(_handle);
+        Musician.Internal.Task_SetPosition(_ptr, value);
+        _position = Musician.Internal.Task_GetPosition(_ptr);
       }
     }
     [SerializeField]
     private double _position = 0.0;
-
-    /// Process order.
-    public int ProcessOrder {
-      get { return _processOrder; }
-      set {
-        if (_performer == null) {
-          _processOrder = value;
-          return;
-        }
-        Musician.Internal.Task_SetProcessOrder(_handle, value);
-        _processOrder = Musician.Internal.Task_GetProcessOrder(_handle);
-      }
-    }
-    [SerializeField]
-    private int _processOrder = 0;
 
     /// Constructs a new `Task`.
     ///
@@ -50,36 +35,34 @@ namespace Barely {
       OnProcess = callback;
       OnProcessEvent = onProcessEvent;
       _position = position;
-      _processOrder = processOrder;
     }
 
     ~Task() {
-      Musician.Internal.Task_Destroy(ref _handle);
+      Musician.Internal.Task_Destroy(ref _ptr);
     }
 
     /// Updates the task.
     ///
     /// @param performer Performer.
     public void Update(Performer performer) {
-      if (_performer == performer && _handle != IntPtr.Zero) {
+      if (_performer == performer && _ptr != IntPtr.Zero) {
         Position = _position;
-        ProcessOrder = _processOrder;
         return;
       }
-      Musician.Internal.Task_Destroy(ref _handle);
+      Musician.Internal.Task_Destroy(ref _ptr);
       _performer = performer;
       if (_performer != null) {
-        Musician.Internal.Task_Create(Performer.Internal.GetHandle(_performer), delegate() {
+        Musician.Internal.Task_Create(Performer.Internal.GetPtr(_performer), delegate() {
           OnProcess?.Invoke();
           OnProcessEvent?.Invoke();
-        }, _position, _processOrder, ref _handle);
+        }, _position, ref _ptr);
       }
     }
 
-    // Handle.
-    private IntPtr _handle = IntPtr.Zero;
-
     /// Performer.
     private Performer _performer = null;
+
+    // Raw pointer.
+    private IntPtr _ptr = IntPtr.Zero;
   }
 }  // namespace Barely

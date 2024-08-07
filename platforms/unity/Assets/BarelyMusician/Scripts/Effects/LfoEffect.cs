@@ -15,9 +15,9 @@ namespace Barely {
     public double Intensity = 1.0;
 
     private void Update() {
-      SetControl(0, (double)OscillatorType);
-      SetControl(1, Frequency);
-      SetControl(2, Intensity);
+      GetControl(0).Value = (double)OscillatorType;
+      GetControl(1).Value = Frequency;
+      GetControl(2).Value = Intensity;
     }
   }
 }  // namespace Barely

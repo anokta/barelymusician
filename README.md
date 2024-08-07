@@ -31,35 +31,32 @@ For background about this project, see the original research paper
 // Import the synth instrument.
 #include "barelymusician/instruments/synth_instrument.h"
 
-// Create a new musician.
-barely::Musician musician;
+// Create a musician.
+barely::Musician musician(/*frame_rate=*/48000);
 
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);
 
 // Create a synth instrument.
-auto instrument = musician.CreateInstrument<barely::SynthInstrument>(/*frame_rate=*/48000);
+barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
 
 // Set the instrument gain to 0.5.
-instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
+instrument.GetControl(barely::SynthInstrument::Control::kGain).SetValue(/*value=*/0.5);
 
-// Set the instrument A3 note pitch on with a 0.25 intensity.
+// Start a note with an A3 pitch and a 0.25 instensity.
 //
 // @note Pitch values are normalized by octaves, where each 1.0 value change shifts one octave, and
 // 0.0 represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition. However,
 // this is not a strict rule, since `pitch` and `intensity` can be interpreted in any desired way by
 // a custom instrument.
 const double a3_pitch = -1.0;
-instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
-
-// Check if the instrument note pitch is on.
-const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
+const barely::Note note(instrument, a3_pitch, /*intensity=*/0.25);
 
 // Create a low-pass effect.
-auto effect = musician.CreateEffect<barely::LowPassEffect>(kFrameRate);
+barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
 
 // Set the effect cutoff frequency to 1kHz.
-effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
+effect.GetControl(barely::LowPassEffect::Control::kCutoffFrequency).SetValue(/*value=*/1000.0);
 
 // Update the musician timestamp in seconds.
 //
@@ -82,25 +79,26 @@ const int frame_count = 1024;
 std::vector<double> output_samples(channel_count * frame_count, 0.0);
 instrument.Process(output_samples.data(), channel_count, frame_count, timestamp);
 
-// Process the instrument output with the effect.
+// Process the effect on the instrument output.
 effect.Process(output_samples.data(), channel_count, frame_count, timestamp);
 
 // Create a performer.
-auto performer = musician.CreatePerformer();
+barely::Performer performer(musician);
 
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
-// Create a looping performer task that plays the instrument A4 note pitch at the position 0.5 beats
-// for a duration of 0.25 beats.
-const double a4_pitch = 0.0;
-auto task = performer.CreateTask(
+// Create a looping task that plays an note at the position 0.5 beats for a duration of 0.25 beats.
+Task task(
+    performer,
     [&]() {
-      // Set the instrument A4 note pitch on.
-      instrument.SetNoteOn(a4_pitch);
-      // Schedule a one-off task to set the instrument A4 note pitch off after 0.25 beats.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(a4_pitch); },
-                                   performer.GetPosition() + 0.25);
+      // Play an instrument note with an A4 pitch for 0.25 beats.
+      const double a4_pitch = 0.0;
+      performer.ScheduleOneOffTask(
+          [note_ptr = barely::Note(instrument, a4_pitch).Release()]() {
+            NotePtr::Destroy(note_ptr);
+          },
+          performer.GetPosition() + 0.25);
     },
     /*position=*/0.5);
 

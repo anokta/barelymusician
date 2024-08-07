@@ -53,8 +53,8 @@ void PercussionInstrument::Process(double* output_samples, int output_channel_co
   gain_processor_.Process(output_samples, output_channel_count, output_frame_count);
 }
 
-void PercussionInstrument::SetControl(int id, double value) noexcept {
-  switch (static_cast<Control>(id)) {
+void PercussionInstrument::SetControl(int control_id, double value) noexcept {
+  switch (static_cast<Control>(control_id)) {
     case Control::kGain:
       gain_processor_.SetGain(value);
       break;
@@ -90,18 +90,19 @@ void PercussionInstrument::SetData(const void* data, [[maybe_unused]] int size) 
   }
 }
 
-void PercussionInstrument::SetNoteOff(double pitch) noexcept {
+void PercussionInstrument::SetNoteOff(int note_id) noexcept {
   for (auto& pad : pads_) {
-    if (pad.pitch == pitch) {
+    if (pad.note_id == note_id) {
       pad.voice.Stop();
       break;
     }
   }
 }
 
-void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
+void PercussionInstrument::SetNoteOn(int note_id, double pitch, double intensity) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
+      pad.note_id = note_id;
       pad.voice.set_gain(intensity);
       pad.voice.Start();
       break;

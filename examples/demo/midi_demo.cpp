@@ -112,13 +112,13 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
 
   std::vector<std::pair<Instrument, Performer>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(Instrument(musician, SynthInstrument::GetDefinition(), kFrameRate),
+    tracks.emplace_back(Instrument(musician, SynthInstrument::GetDefinition()),
                         Performer(musician));
     auto& [instrument, performer] = tracks.back();
     // Build the score to perform.

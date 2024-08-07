@@ -12,6 +12,8 @@
 
 namespace barely::internal {
 
+Musician::Musician(int frame_rate) noexcept : frame_rate_(frame_rate) {}
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::AddEffect(Effect* effect) noexcept {
   assert(effect);
@@ -51,6 +53,8 @@ void Musician::RemovePerformer(Performer* performer) noexcept {
 double Musician::GetBeatsFromSeconds(double seconds) const noexcept {
   return BeatsFromSeconds(tempo_, seconds);
 }
+
+int Musician::GetFrameRate() const noexcept { return frame_rate_; }
 
 double Musician::GetSecondsFromBeats(double beats) const noexcept {
   return (tempo_ > 0.0) ? SecondsFromBeats(tempo_, beats)

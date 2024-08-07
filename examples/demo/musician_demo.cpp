@@ -199,7 +199,7 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};
@@ -210,7 +210,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain, double attack,
                                              double release) {
-    instruments.emplace_back(Instrument(musician, SynthInstrument::GetDefinition(), kFrameRate),
+    instruments.emplace_back(Instrument(musician, SynthInstrument::GetDefinition()),
                              std::unordered_map<double, Note>{});
     auto& instrument = instruments.back().first;
     instrument.GetControl(SynthInstrument::Control::kGain).SetValue(gain);
@@ -255,7 +255,7 @@ int main(int /*argc*/, char* argv[]) {
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.emplace_back(Instrument(musician, PercussionInstrument::GetDefinition(), kFrameRate),
+  instruments.emplace_back(Instrument(musician, PercussionInstrument::GetDefinition()),
                            std::unordered_map<double, Note>{});
   auto& percussion = instruments.back().first;
   percussion.GetControl(PercussionInstrument::Control::kGain).SetValue(0.25);

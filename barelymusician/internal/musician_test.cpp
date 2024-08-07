@@ -64,7 +64,7 @@ TEST(MusicianTest, BeatsSecondsConversion) {
   constexpr std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0, -24.6};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0, -12.3};
 
-  Musician musician;
+  Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
 
   for (int i = 0; i < kValueCount; ++i) {
@@ -84,7 +84,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr double kPitch = -1.25;
   constexpr double kIntensity = 0.75;
 
-  Musician musician;
+  Musician musician(kFrameRate);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
@@ -121,7 +121,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
 
 // Tests that multiple instruments are created and destroyed as expected.
 TEST(MusicianTest, CreateDestroyMultipleInstruments) {
-  Musician musician;
+  Musician musician(kFrameRate);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create instruments with note off callback.
@@ -158,7 +158,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySinglePerformer) {
-  Musician musician;
+  Musician musician(kFrameRate);
 
   // Create a performer.
   Performer performer(/*process_order=*/0);
@@ -204,7 +204,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
 
 // Tests that the musician sets its tempo as expected.
 TEST(MusicianTest, SetTempo) {
-  Musician musician;
+  Musician musician(kFrameRate);
   EXPECT_DOUBLE_EQ(musician.GetTempo(), 120.0);
 
   musician.SetTempo(200.0);

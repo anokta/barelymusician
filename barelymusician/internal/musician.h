@@ -15,6 +15,11 @@ namespace barely::internal {
 /// Class that wraps a musician.
 class Musician {
  public:
+  /// Constructs a new `Musician`.
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  explicit Musician(int frame_rate) noexcept;
+
   /// Adds an effect.
   ///
   /// @param effect Pointer to effect.
@@ -39,6 +44,11 @@ class Musician {
   /// @param seconds Number of seconds.
   /// @return Number of beats.
   [[nodiscard]] double GetBeatsFromSeconds(double seconds) const noexcept;
+
+  /// Returns frame rate.
+  ///
+  /// @return Frame rate in hertz.
+  [[nodiscard]] int GetFrameRate() const noexcept;
 
   /// Returns the corresponding number of seconds for a given number of beats.
   ///
@@ -94,6 +104,9 @@ class Musician {
 
   // Set of process order-pointer pairs to performers.
   std::set<std::pair<int, Performer*>> performers_;
+
+  // Frame rate in hertz.
+  const int frame_rate_ = 0;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

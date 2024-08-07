@@ -15,7 +15,7 @@
 ///   #include "barelymusician/barelymusician.h"
 ///
 ///   // Create.
-///   Musician musician;
+///   Musician musician(/*frame_rate=*/48000);
 ///
 ///   // Set the tempo.
 ///   musician.SetTempo(/*tempo=*/124.0);
@@ -37,8 +37,7 @@
 ///   #include "barelymusician/instruments/synth_instrument.h"
 ///
 ///   // Create.
-///   barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition(),
-///                                 /*frame_rate=*/48000);
+///   barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
 ///
 ///   // Create a note.
 ///   //
@@ -69,7 +68,7 @@
 ///   #include "barelymusician/instruments/low_pass_effect.h"
 ///
 ///   // Create.
-///   barely::Effect effect(musician, barely::LowPassEffect::GetDefinition(), /*frame_rate=*/48000);
+///   barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
 ///
 ///   // Set a control value.
 ///   effect.GetControl(barely::LowPassEffect::Control::kCutoffFrequency).SetValue(/*value=*/800.0);
@@ -108,7 +107,7 @@
 ///
 ///   // Create.
 ///   BarelyMusician* musician = nullptr;
-///   BarelyMusician_Create(&musician);
+///   BarelyMusician_Create(/*frame_rate=*/48000, &musician);
 ///
 ///   // Set the tempo.
 ///   BarelyMusician_SetTempo(musician, /*tempo=*/124.0);
@@ -134,8 +133,7 @@
 ///
 ///   // Create.
 ///   BarelyInstrument* instrument = nullptr;
-///   BarelyInstrument_Create(musician, BarelySynthInstrument_GetDefinition(), /*frame_rate=*/48000,
-///                           &instrument);
+///   BarelyInstrument_Create(musician, BarelySynthInstrument_GetDefinition(), &instrument);
 ///
 ///   // Create a note.
 ///   //
@@ -176,8 +174,7 @@
 ///
 ///   // Create.
 ///   BarelyEffect* effect = nullptr;
-///   BarelyEffect_Create(musician, BarelyLowPassEffect_GetDefinition(), /*frame_rate=*/48000,
-///                       &effect);
+///   BarelyEffect_Create(musician, BarelyLowPassEffect_GetDefinition(), &effect);
 ///
 ///   // Set a control value.
 ///   BarelyControl* control = nullptr;
@@ -512,11 +509,10 @@ BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffect* effect, int32_t control
 ///
 /// @param musician Pointer to musician.
 /// @param definition Effect definition.
-/// @param frame_rate Frame rate in hertz.
 /// @param out_effect Output pointer to effect.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEffect_Create(BarelyMusician* musician, BarelyEffectDefinition definition,
-                                       int32_t frame_rate, BarelyEffect** out_effect);
+                                       BarelyEffect** out_effect);
 
 /// Destroys an effect.
 ///
@@ -550,12 +546,11 @@ BARELY_EXPORT bool BarelyEffect_SetData(BarelyEffect* effect, const void* data, 
 ///
 /// @param musician Pointer to musician.
 /// @param definition Instrument definition.
-/// @param frame_rate Frame rate in hertz.
 /// @param out_instrument Output pointer to instrument.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusician* musician,
                                            BarelyInstrumentDefinition definition,
-                                           int32_t frame_rate, BarelyInstrument** out_instrument);
+                                           BarelyInstrument** out_instrument);
 
 /// Destroys an instrument.
 ///
@@ -597,9 +592,10 @@ BARELY_EXPORT bool BarelyInstrument_SetData(BarelyInstrument* instrument, const 
 
 /// Creates a new musician.
 ///
+/// @param frame_rate Frame rate in hertz.
 /// @param out_musician Output pointer to musician.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Create(BarelyMusician** out_musician);
+BARELY_EXPORT bool BarelyMusician_Create(int32_t frame_rate, BarelyMusician** out_musician);
 
 /// Destroys a musician.
 ///
@@ -1204,10 +1200,11 @@ class MusicianPtr : public PtrWrapper<BarelyMusician> {
  public:
   /// Creates a new `MusicianPtr`.
   ///
+  /// @param frame_rate Frame rate in hertz.
   /// @return Musician pointer.
-  [[nodiscard]] static MusicianPtr Create() noexcept {
+  [[nodiscard]] static MusicianPtr Create(int frame_rate) noexcept {
     BarelyMusician* musician = nullptr;
-    [[maybe_unused]] const bool success = BarelyMusician_Create(&musician);
+    [[maybe_unused]] const bool success = BarelyMusician_Create(frame_rate, &musician);
     assert(success);
     return MusicianPtr(musician);
   }
@@ -1293,13 +1290,11 @@ class EffectPtr : public PtrWrapper<BarelyEffect> {
   ///
   /// @param musician Musician pointer.
   /// @param definition Effect definition.
-  /// @param frame_rate Frame rate in hertz.
   /// @return Effect pointer.
-  [[nodiscard]] static EffectPtr Create(MusicianPtr musician, EffectDefinition definition,
-                                        int frame_rate) noexcept {
+  [[nodiscard]] static EffectPtr Create(MusicianPtr musician,
+                                        EffectDefinition definition) noexcept {
     BarelyEffect* effect;
-    [[maybe_unused]] const bool success =
-        BarelyEffect_Create(musician, definition, frame_rate, &effect);
+    [[maybe_unused]] const bool success = BarelyEffect_Create(musician, definition, &effect);
     assert(success);
     return EffectPtr(effect);
   }
@@ -1379,13 +1374,12 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   ///
   /// @param musician Musician pointer.
   /// @param definition Instrument definition.
-  /// @param frame_rate Frame rate in hertz.
   /// @return Instrument pointer.
-  [[nodiscard]] static InstrumentPtr Create(MusicianPtr musician, InstrumentDefinition definition,
-                                            int frame_rate) noexcept {
+  [[nodiscard]] static InstrumentPtr Create(MusicianPtr musician,
+                                            InstrumentDefinition definition) noexcept {
     BarelyInstrument* instrument;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_Create(musician, definition, frame_rate, &instrument);
+        BarelyInstrument_Create(musician, definition, &instrument);
     assert(success);
     return InstrumentPtr(instrument);
   }

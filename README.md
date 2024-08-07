@@ -32,14 +32,13 @@ For background about this project, see the original research paper
 #include "barelymusician/instruments/synth_instrument.h"
 
 // Create a musician.
-barely::Musician musician;
+barely::Musician musician(/*frame_rate=*/48000);
 
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);
 
 // Create a synth instrument.
-barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition(),
-                              /*frame_rate=*/48000);
+barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
 
 // Set the instrument gain to 0.5.
 instrument.GetControl(barely::SynthInstrument::Control::kGain).SetValue(/*value=*/0.5);
@@ -54,7 +53,7 @@ const double a3_pitch = -1.0;
 const barely::Note note(instrument, a3_pitch, /*intensity=*/0.25);
 
 // Create a low-pass effect.
-barely::Effect effect(musician, barely::LowPassEffect::GetDefinition(), kFrameRate);
+barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
 
 // Set the effect cutoff frequency to 1kHz.
 effect.GetControl(barely::LowPassEffect::Control::kCutoffFrequency).SetValue(/*value=*/1000.0);

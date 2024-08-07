@@ -89,9 +89,9 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Musician musician;
+  Musician musician(kFrameRate);
 
-  Instrument instrument(musician, SamplerInstrument::GetDefinition(), kFrameRate);
+  Instrument instrument(musician, SamplerInstrument::GetDefinition());
   instrument.GetControl(SamplerInstrument::Control::kGain).SetValue(kGain);
   instrument.GetControl(SamplerInstrument::Control::kRootPitch).SetValue(kRootPitch);
   instrument.GetControl(SamplerInstrument::Control::kLoop).SetValue(kLoop);
@@ -99,7 +99,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument.GetControl(SamplerInstrument::Control::kRelease).SetValue(kRelease);
   instrument.GetControl(SamplerInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
 
-  Effect effect(musician, LowPassEffect::GetDefinition(), kFrameRate);
+  Effect effect(musician, LowPassEffect::GetDefinition());
   effect.GetControl(LowPassEffect::Control::kCutoffFrequency).SetValue(kLowPassCutoffFrequency);
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));

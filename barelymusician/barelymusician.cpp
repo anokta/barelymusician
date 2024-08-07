@@ -28,13 +28,16 @@ struct BarelyControl : public Control {};
 static_assert(sizeof(BarelyControl) == sizeof(barely::internal::Control));
 
 // Musician.
-struct BarelyMusician : public Observable<Musician> {};
+struct BarelyMusician : public Observable<Musician> {
+  explicit BarelyMusician(int32_t frame_rate) noexcept : Observable<Musician>(frame_rate) {}
+};
 
 // Effect.
 struct BarelyEffect : public Effect {
  public:
-  BarelyEffect(BarelyMusician* musician, BarelyEffectDefinition definition, int frame_rate) noexcept
-      : Effect(definition, frame_rate, musician->GetTimestamp()), musician_(musician->Observe()) {
+  BarelyEffect(BarelyMusician* musician, BarelyEffectDefinition definition) noexcept
+      : Effect(definition, musician->GetFrameRate(), musician->GetTimestamp()),
+        musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddEffect(this);
   }
@@ -52,9 +55,8 @@ struct BarelyEffect : public Effect {
 // Instrument.
 struct BarelyInstrument : public Observable<Instrument> {
  public:
-  BarelyInstrument(BarelyMusician* musician, BarelyInstrumentDefinition definition,
-                   int frame_rate) noexcept
-      : Observable<Instrument>(definition, frame_rate, musician->GetTimestamp()),
+  BarelyInstrument(BarelyMusician* musician, BarelyInstrumentDefinition definition) noexcept
+      : Observable<Instrument>(definition, musician->GetFrameRate(), musician->GetTimestamp()),
         musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddInstrument(this);
@@ -158,10 +160,10 @@ bool BarelyControl_SetValue(BarelyControl* control, double value) {
 }
 
 bool BarelyEffect_Create(BarelyMusician* musician, BarelyEffectDefinition definition,
-                         int32_t frame_rate, BarelyEffect** out_effect) {
+                         BarelyEffect** out_effect) {
   if (!musician || !out_effect) return false;
 
-  *out_effect = new BarelyEffect(musician, definition, frame_rate);
+  *out_effect = new BarelyEffect(musician, definition);
   return true;
 }
 
@@ -198,12 +200,11 @@ bool BarelyEffect_SetData(BarelyEffect* effect, const void* data, int32_t size) 
 }
 
 bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrumentDefinition definition,
-                             int32_t frame_rate, BarelyInstrument** out_instrument) {
+                             BarelyInstrument** out_instrument) {
   if (!musician) return false;
-  if (frame_rate <= 0) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = new BarelyInstrument(musician, definition, frame_rate);
+  *out_instrument = new BarelyInstrument(musician, definition);
   return true;
 }
 
@@ -240,10 +241,11 @@ bool BarelyInstrument_SetData(BarelyInstrument* instrument, const void* data, in
   return true;
 }
 
-bool BarelyMusician_Create(BarelyMusician** out_musician) {
+bool BarelyMusician_Create(int32_t frame_rate, BarelyMusician** out_musician) {
+  if (frame_rate <= 0) return false;
   if (!out_musician) return false;
 
-  *out_musician = new BarelyMusician();
+  *out_musician = new BarelyMusician(frame_rate);
   return true;
 }
 

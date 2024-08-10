@@ -122,7 +122,7 @@ TEST(PolyphonicVoiceTest, Update) {
     polyphonic_voice.Stop(i);
   }
 
-  polyphonic_voice.Update([kUpdatedOutput](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
+  polyphonic_voice.Update([](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
 
   for (int i = 0; i < kVoiceCount; ++i) {
     polyphonic_voice.Start(i);

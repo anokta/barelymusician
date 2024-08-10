@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 
-option(ENABLE_EXAMPLES "Build examples"  ON)
-option(ENABLE_TESTS "Build tests" ON)
+option(ENABLE_EXAMPLES "Build examples"  OFF)
+option(ENABLE_TESTS "Build tests" OFF)
 
 option(ENABLE_DAISY "Build daisy platform" OFF)
-option(ENABLE_UNITY "Build unity platform" ON)
+option(ENABLE_UNITY "Build unity platform" OFF)
 
 include(FetchContent)
 

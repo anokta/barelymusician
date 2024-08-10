@@ -1,5 +1,8 @@
 {
   "bazel.buildifierFixOnFormat": true,
+  "black-formatter.args": [
+    "--line-length=100"
+  ],
   "C_Cpp.clang_format_style": "file",
   "C_Cpp.codeAnalysis.clangTidy.config": "",
   "C_Cpp.codeAnalysis.clangTidy.enabled": true,
@@ -25,6 +28,10 @@
   "clang-format.language.c.enable": false,
   "clang-format.language.cpp.enable": false,
   "clang-format.style": "Google",
+  "cmake.configureOnEdit": false,
+  "cmake.configureOnOpen": false,
+  "cmake.automaticReconfigure": false,
+  "cmake.enableAutomaticKitScan": false,
   "csharp.format.enable": false,
   "dotnet.defaultSolution": "platforms/unity/unity.sln",
   "editor.insertSpaces": true,

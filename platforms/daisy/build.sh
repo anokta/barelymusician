@@ -48,7 +48,7 @@ main() {
 
   echo "Programming BarelyMusician on Daisy bootloader. Press any key to continue..."
   read -s -n 1
-  make barely_daisy_program_dfu
+  make barelymusician_platforms_daisy_program_dfu
 
   echo -e "${GREEN}Done!${RESET}"
 }

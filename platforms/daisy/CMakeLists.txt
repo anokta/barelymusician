@@ -1,4 +1,4 @@
-SET(BARELY_DAISY_TARGET barelymusician_platforms_daisy)
+SET(BARELY_DAISY_TARGET barelymusiciandaisy)
 set(BARELY_DAISY_LINKER_SCRIPT ${libdaisy_SOURCE_DIR}/core/STM32H750IB_sram.lds)
 
 add_executable(

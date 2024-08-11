@@ -8,7 +8,7 @@ add_subdirectory(instruments)
 add_subdirectory(internal)
 
 add_library(
-  barelymusician
+  barelymusician STATIC
   barelymusician.cpp
 )
 target_compile_definitions(

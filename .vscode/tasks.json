@@ -4,7 +4,7 @@
     {
       "label": "barelymusician: build all",
       "type": "shell",
-      "command": "bazel build ...",
+      "command": "bazel build --examples --test --unity",
       "problemMatcher": [],
       "group": {
         "kind": "build",
@@ -34,7 +34,7 @@
     {
       "label": "barelymusician: test all",
       "type": "shell",
-      "command": "bazel build ... && bazel test --test_output=errors ...",
+      "command": "python build.py --test",
       "problemMatcher": [],
       "group": {
         "kind": "test",
@@ -44,7 +44,7 @@
     {
       "label": "barelymusician: build daisy",
       "type": "shell",
-      "command": "chmod +x ./platforms/daisy/build.sh && ./platforms/daisy/build.sh",
+      "command": "python build.py --daisy",
       "problemMatcher": [],
       "group": {
         "kind": "build",
@@ -54,7 +54,7 @@
     {
       "label": "barelymusician: build unity",
       "type": "shell",
-      "command": "chmod +x ./platforms/unity/build.sh && ./platforms/unity/build.sh",
+      "command": "python build.py --unity",
       "problemMatcher": [],
       "group": {
         "kind": "build",

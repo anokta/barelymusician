@@ -10,8 +10,7 @@ accurate way.
 
 [iOS]: ## "see issue #112 for the status of the upcoming iOS platform support"
 This repository includes build targets for Linux, OSX, Windows, Android, and Daisy platforms, in
-addition to a native Unity game engine plugin[*][iOS]. The library targets can be built with
-[Bazel](https://bazel.build/) or [CMake](https://cmake.org/). To use in a project, simply include
+addition to a native Unity game engine plugin[*][iOS]. To use in a project, simply include
 [barelymusician/barelymusician.h](barelymusician/barelymusician.h).
 
 To use in Unity, download the latest version of
@@ -109,5 +108,5 @@ performer.Start();
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the
 [instrument_demo.cpp](examples/demo/instrument_demo.cpp):
 ```
-bazel run //examples/demo:instrument_demo
+python build.py --examples_demo instrument_demo
 ```

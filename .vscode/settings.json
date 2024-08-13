@@ -1,5 +1,4 @@
 {
-  "bazel.buildifierFixOnFormat": true,
   "black-formatter.args": [
     "--line-length=100"
   ],
@@ -7,22 +6,12 @@
   "C_Cpp.codeAnalysis.clangTidy.config": "",
   "C_Cpp.codeAnalysis.clangTidy.enabled": true,
   "C_Cpp.codeAnalysis.exclude": {
-    "bazel-*/**": true,
-    "build*/**": true,
-    "cmake-*/**": true,
-    // TODO(#123): This requires `libDaisy` to be included in `includePath` below.
-    "platforms/daisy/**": true,
-    "platforms/unity/**": true,
+    "build/**": true,
+    "platforms/**": true,
   },
   "C_Cpp.default.cppStandard": "c++20",
   "C_Cpp.default.includePath": [
     "${workspaceRoot}",
-    "${workspaceRoot}/bazel-barelymusician/external/dr_libs",
-    "${workspaceRoot}/bazel-barelymusician/external/googletest/googlemock/include",
-    "${workspaceRoot}/bazel-barelymusician/external/googletest/googletest/include",
-    "${workspaceRoot}/bazel-barelymusician/external/midifile/include",
-    "${workspaceRoot}/bazel-barelymusician/external/portaudio/include",
-    "${workspaceRoot}/bazel-barelymusician/external/bazel_tools",
     "${default}",
   ],
   "clang-format.language.c.enable": false,
@@ -77,7 +66,6 @@
     "**/*.user": true,
     "**/*.userprefs": true,
     "**/*.wav": true,
-    "**/bazel-*": true,
     "library/": true,
     "Library/": true,
     "obj/": true,

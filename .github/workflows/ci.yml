@@ -7,8 +7,19 @@ on:
     branches: [ main ]
 
 jobs:
+  dev:
+    name: dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: check symbols
+        shell: bash
+        run: |
+          chmod +x ./dev/check_symbols.sh
+          ./dev/check_symbols.sh
+
   test:
-    name: build on ${{ matrix.os }}
+    name: test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -25,17 +36,6 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
       - name: build
         run: python build.py --examples --test --unity
-
-  dev:
-    name: dev
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: check symbols
-        shell: bash
-        run: |
-          chmod +x ./dev/check_symbols.sh
-          ./dev/check_symbols.sh
 
   unity:
     name: unity on ${{ matrix.os }}

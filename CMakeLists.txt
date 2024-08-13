@@ -82,8 +82,6 @@ include_directories(.)
 add_subdirectory(barelymusician)
 
 if(ENABLE_EXAMPLES)
-  add_compile_definitions(BARELYMUSICIAN_CMAKE)
-
   FetchContent_Declare(
     dr_libs
     GIT_REPOSITORY https://github.com/mackron/dr_libs.git

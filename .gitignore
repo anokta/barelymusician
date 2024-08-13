@@ -1,7 +1,5 @@
 # Build artifacts.
 build/
-bazel-*
-cmake-*
 
 # OSX.
 .DS_Store

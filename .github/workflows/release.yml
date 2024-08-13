@@ -17,32 +17,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: nttld/setup-ndk@v1
-        id: setup-ndk
-        with:
-          ndk-version: r21e
       - name: install
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update && sudo apt-get install -y libasound-dev
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
-      # TODO(#94): Build all demos (which require `//examples/data`).
       - name: build
         shell: bash
-        run: |
-          bazel build -c opt \
-            //examples/demo:instrument_demo //examples/demo:metronome_demo
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: python build.py --examples
       - uses: actions/upload-artifact@v4
         with:
           name: examples-${{ matrix.os }}
-          path: |
-            bazel-bin/examples/demo/instrument_demo
-            bazel-bin/examples/demo/instrument_demo.exe
-            bazel-bin/examples/demo/metronome_demo
-            bazel-bin/examples/demo/metronome_demo.exe
+          path: build/**/bin/**/*_demo*
 
   unity:
     name: unity on ${{ matrix.os }}
@@ -57,7 +44,8 @@ jobs:
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r21e
+          ndk-version: r26d
+      - uses: seanmiddleditch/gha-setup-ninja@master
       - name: install
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -66,10 +54,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
       - name: build
         shell: bash
-        run: |
-          chmod +x ./platforms/unity/build.sh
-          ./platforms/unity/build.sh \
-            $( [ ${{ matrix.os }} == 'ubuntu-latest' ] && echo '--android=true' )
+        run: python build.py --android --unity
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       - uses: actions/upload-artifact@v4
@@ -90,9 +75,6 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts/examples/demo
-          for file in temp/examples-macos*/*_demo; do
-            mv -f "${file}" "${file}".app
-          done
           for dir in temp/examples-*/; do
             cp -rf "${dir}"* artifacts/examples/demo/
           done

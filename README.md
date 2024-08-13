@@ -10,7 +10,9 @@ accurate way.
 
 [iOS]: ## "see issue #112 for the status of the upcoming iOS platform support"
 This repository includes build targets for Linux, OSX, Windows, Android, and Daisy platforms, in
-addition to a native Unity game engine plugin[*][iOS]. To use in a project, simply include
+addition to a native Unity game engine plugin[*][iOS].
+
+To use in a project, simply include
 [barelymusician/barelymusician.h](barelymusician/barelymusician.h).
 
 To use in Unity, download the latest version of

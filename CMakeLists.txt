@@ -8,7 +8,7 @@ option(ENABLE_UNITY "Build unity platform" OFF)
 
 include(FetchContent)
 
-if (ENABLE_DAISY)
+if(ENABLE_DAISY)
   FetchContent_Declare(
     libdaisy
     GIT_REPOSITORY https://github.com/electro-smith/libDaisy.git
@@ -26,7 +26,12 @@ if (ENABLE_DAISY)
   include_directories(${libdaisy_SOURCE_DIR}/src)
 endif()
 
-project(barelymusician)
+project(
+  barelymusician
+  VERSION 0.3.1
+  DESCRIPTION "a real-time music engine for interactive systems"
+  HOMEPAGE_URL "https://github.com/anokta/barelymusician"
+)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -34,12 +39,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
-if (MSVC)
+if(MSVC)
   add_compile_options(
     /W4
     /WX
   )
-elseif (APPLE)
+elseif(APPLE)
   add_compile_options(
     -Wall
     -Wextra
@@ -47,16 +52,16 @@ elseif (APPLE)
     -Wno-unused-lambda-capture
     -Werror
   )
-else ()
+else()
   add_compile_options(
     -Wall
     -Wextra
     -Wno-missing-field-initializers
     -Werror
   )
-endif ()
+endif()
 
-if (ENABLE_TESTS)
+if(ENABLE_TESTS)
   enable_testing()
 
   FetchContent_Declare(
@@ -64,9 +69,9 @@ if (ENABLE_TESTS)
     GIT_REPOSITORY https://github.com/google/googletest.git
     GIT_TAG e2239ee6043f73722e7aa812a459f54a28552929
   )
-  if (MSVC)
+  if(MSVC)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  endif ()
+  endif()
   FetchContent_MakeAvailable(googletest)
 
   include(GoogleTest)
@@ -76,7 +81,7 @@ include_directories(.)
 
 add_subdirectory(barelymusician)
 
-if (ENABLE_EXAMPLES)
+if(ENABLE_EXAMPLES)
   add_compile_definitions(BARELYMUSICIAN_CMAKE)
 
   FetchContent_Declare(
@@ -121,10 +126,10 @@ if (ENABLE_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-if (ENABLE_DAISY)
+if(ENABLE_DAISY)
   add_subdirectory(platforms/daisy)
 endif()
 
-if (ENABLE_UNITY)
+if(ENABLE_UNITY)
   add_subdirectory(platforms/unity)
 endif()

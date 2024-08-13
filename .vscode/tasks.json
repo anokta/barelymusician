@@ -4,7 +4,7 @@
     {
       "label": "barelymusician: build all",
       "type": "shell",
-      "command": "bazel build --examples --test --unity",
+      "command": "python build.py --examples --unity",
       "problemMatcher": [],
       "group": {
         "kind": "build",
@@ -12,32 +12,12 @@
       },
     },
     {
-      "label": "barelymusician: build demo (debug)",
+      "label": "barelymusician: build examples (debug)",
       "type": "shell",
-      "command": "bazel build -c dbg //examples/demo:${fileBasenameNoExtension}",
+      "command": "python build.py -c debug --examples",
       "problemMatcher": [],
       "group": {
         "kind": "build",
-        "isDefault": true,
-      },
-    },
-    {
-      "label": "barelymusician: run demo",
-      "type": "shell",
-      "command": "bazel run //examples/demo:${fileBasenameNoExtension}",
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true,
-      },
-    },
-    {
-      "label": "barelymusician: test all",
-      "type": "shell",
-      "command": "python build.py --test",
-      "problemMatcher": [],
-      "group": {
-        "kind": "test",
         "isDefault": true,
       },
     },
@@ -59,6 +39,26 @@
       "group": {
         "kind": "build",
         "isDefault": false,
+      },
+    },
+    {
+      "label": "barelymusician: run demo",
+      "type": "shell",
+      "command": "python build.py --examples_demo ${fileBasenameNoExtension}",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true,
+      },
+    },
+    {
+      "label": "barelymusician: test all",
+      "type": "shell",
+      "command": "python build.py --examples --test --unity",
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true,
       },
     },
   ],

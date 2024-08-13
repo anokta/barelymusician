@@ -8,7 +8,7 @@ target_link_libraries(
   barely_random
 )
 
-if (ENABLE_TESTS)
+if(ENABLE_TESTS)
   add_executable(
     barely_context_free_grammar_test
     context_free_grammar_test.cpp

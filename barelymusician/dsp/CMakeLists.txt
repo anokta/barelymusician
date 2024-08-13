@@ -88,7 +88,7 @@ add_library(
   voice.h
 )
 
-if (ENABLE_TESTS)
+if(ENABLE_TESTS)
   add_executable(
     barely_decibels_test
     decibels_test.cpp

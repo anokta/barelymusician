@@ -118,7 +118,7 @@ target_link_libraries(
   barelymusician_headeronly
 )
 
-if (ENABLE_TESTS)
+if(ENABLE_TESTS)
   add_executable(
     barely_internal_control_test
     control_test.cpp

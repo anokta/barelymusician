@@ -9,7 +9,7 @@ add_library(
   random.h
 )
 
-if (ENABLE_TESTS)
+if(ENABLE_TESTS)
   add_executable(
     barely_find_or_null_test
     find_or_null_test.cpp

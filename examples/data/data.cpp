@@ -16,7 +16,7 @@ namespace barely::examples {
 
 std::string GetDataFilePath(std::string_view relative_file_path, [[maybe_unused]] char* argv[]) {
 #ifdef BARELYMUSICIAN_CMAKE
-  return std::string(BARELYMUSICIAN_ROOT_DIR).append("/examples/data/").append(relative_file_path);
+  return std::string(BARELYMUSICIAN_EXAMPLES_DATA_DIR).append("/").append(relative_file_path);
 #else   // BARELYMUSICIAN_CMAKE
   static auto runfiles = std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles>(
       bazel::tools::cpp::runfiles::Runfiles::Create(argv[0]));

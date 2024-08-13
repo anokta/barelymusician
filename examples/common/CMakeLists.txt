@@ -24,17 +24,17 @@ add_library(
   input_manager.cpp
   input_manager.h
 )
-if (MSVC)
+if(MSVC)
   target_link_options(
     barely_examples_input_manager
     PUBLIC -l user32.lib
   )
-elseif (APPLE)
+elseif(APPLE)
   target_link_options(
     barely_examples_input_manager
     PUBLIC -framework ApplicationServices
   )
-endif ()
+endif()
 
 add_library(
   barely_examples_wav_file

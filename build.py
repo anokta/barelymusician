@@ -5,6 +5,7 @@ import sys
 
 ANDROID_NDK_HOME = os.environ.get("ANDROID_NDK_HOME", "C:/Microsoft/AndroidSDK/ndk/27.0.12077973")
 ANDROID_TOOLCHAIN_FILE = os.path.join(ANDROID_NDK_HOME, "build/cmake/android.toolchain.cmake")
+
 DAISY_TOOLCHAIN_FILE = "_deps/libdaisy-src/cmake/toolchains/stm32h750xx.cmake"
 
 
@@ -72,6 +73,11 @@ def parse_args():
         help="build the examples for the selected platforms",
     )
     parser.add_argument(
+        "--examples_demo",
+        default=None,
+        help="specify the examples demo to run (defaults to none)",
+    )
+    parser.add_argument(
         "--test",
         action="store_true",
         help="build and run the unit tests for the selected platforms",
@@ -106,7 +112,7 @@ def build(args, source_dir, build_dir):
     common_cmake_options = []
     if args.test:
         common_cmake_options.append("-DENABLE_TESTS=ON -DGTEST_COLOR=1")
-    if args.examples:
+    if args.examples or args.examples_demo:
         common_cmake_options.append("-DENABLE_EXAMPLES=ON")
     if args.unity:
         common_cmake_options.append("-DENABLE_UNITY=ON")
@@ -158,41 +164,29 @@ def build(args, source_dir, build_dir):
         build_platform(config, source_dir, windows_build_dir, windows_cmake_options)
 
 
-def package_unity(build_dir, unity_dir):
-    print("Packaging the Unity native plugins...")
-    # TODO(#134): Use cmake install directly to copy the files over?
-    # plugins_dir = os.path.join(unity_dir, "Assets/BarelyMusician/Plugins")
-    # plugins_android_dir = os.path.join(plugins_dir, "Android/libs")
-    # plugins_x64_dir = os.path.join(plugins_dir, "x86_64")
-
-    # plugin_name = "barelymusicianunity"
-
-    # for platform in os.listdir(build_dir):
-    #     platform_build_dir = os.path.join(build_dir, platform)
-    #     if platform == "Android":
-    #         android_plugin_name = f"lib{plugin_name}.so"
-    #         for android_abi in os.listdir(platform_build_dir):
-    #             print(f"Copying native Android ({android_abi}) plugin into Unity project...")
-    #             source_dir = os.path.join(platform_build_dir, android_abi, "platforms/unity")
-    #             source_path = os.path.join(source_dir, android_plugin_name)
-    #             dest_path = os.path.join(plugins_android_dir, android_abi, android_plugin_name)
-    #             shutil.copyfile(source_path, dest_path)
-    #     elif platform == "Windows":
-    #         print(f"Copying native Windows plugin into Unity project...")
-    #         windows_plugin_name = f"{plugin_name}.dll"
-    #         source_path = os.path.join(
-    #             platform_build_dir, "platforms/unity/Release", windows_plugin_name
-    #         )
-    #         dest_path = os.path.join(plugins_x64_dir, windows_plugin_name)
-    #         shutil.copyfile(source_path, dest_path)
-
-
 def run_daisy_program(build_dir):
     input("Running the Daisy program, press enter to continue...")
 
     daisy_build_dir = os.path.join(build_dir, "Daisy")
     daisy_make_command = "make barelymusiciandaisy_program_dfu"
     run_command(daisy_make_command, daisy_build_dir)
+
+
+def run_demo(args, build_dir):
+    input("Running the demo, press enter to continue...")
+
+    for platform in os.listdir(build_dir):
+        if (
+            (platform == "Linux" and sys.platform.startswith("linux"))
+            or (platform == "Mac" and sys.platform.startswith("darwin"))
+            or (platform == "Windows" and sys.platform.startswith("win"))
+        ):
+            demo_dir = f"{build_dir}/{platform}/bin/{str.capitalize(args.config)}"
+            demo_path = os.path.join(demo_dir, args.examples_demo)
+            if platform == "Windows":
+                demo_path += ".exe"
+            run_command(demo_path, demo_dir)
+            break
 
 
 def run_tests(build_dir):
@@ -208,15 +202,14 @@ def main():
     build_dir = os.path.join(root_dir, "build")
     build(args, root_dir, build_dir)
 
-    if args.unity:
-        unity_dir = os.path.join(root_dir, "platforms", "unity")
-        package_unity(build_dir, unity_dir)
+    if args.test:
+        run_tests(build_dir)
 
     if args.daisy:
         run_daisy_program(build_dir)
 
-    if args.test:
-        run_tests(build_dir)
+    if args.examples_demo is not None:
+        run_demo(args, build_dir)
 
 
 if __name__ == "__main__":

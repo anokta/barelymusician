@@ -2,11 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "preLaunchTask": "barelymusician: build demo (debug)",
+      "preLaunchTask": "barelymusician: build examples (debug)",
       "type": "lldb",
       "request": "launch",
       "name": "Launch Demo (LLDB)",
-      "program": "${workspaceFolder}/bazel-bin/examples/demo/${fileBasenameNoExtension}",
+      "linux": {
+        "program": "${workspaceFolder}/build/Linux/bin/${fileBasenameNoExtension}",
+      },
+      "osx": {
+        "program": "${workspaceFolder}/build/Mac/bin/Debug/${fileBasenameNoExtension}",
+      },
+      "windows": {
+        "program": "${workspaceFolder}/build/Windows/bin/Debug/${fileBasenameNoExtension}.exe",
+      },
       "args": [],
       "sourceMap": {
         ".": "${workspaceFolder}"

@@ -20,7 +20,7 @@ add_library(
   pitch.h
 )
 
-if (ENABLE_TESTS)
+if(ENABLE_TESTS)
   add_executable(
     barely_duration_test
     duration_test.cpp

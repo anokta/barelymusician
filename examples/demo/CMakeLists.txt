@@ -1,9 +1,22 @@
-add_executable(
-  barely_examples_arpeggiator_demo
-  arpeggiator_demo.cpp
-)
-target_link_libraries(
-  barely_examples_arpeggiator_demo
+function(add_barelymusician_demo demo_name)
+  set(DEMO_TARGET_NAME barelymusician_examples_${demo_name})
+  add_executable(
+    ${DEMO_TARGET_NAME}
+    ${demo_name}.cpp
+  )
+  set_target_properties(
+    ${DEMO_TARGET_NAME} PROPERTIES
+    OUTPUT_NAME ${demo_name}
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+  )
+  target_link_libraries(
+    ${DEMO_TARGET_NAME} PRIVATE
+    ${ARGN}
+  )
+endfunction()
+
+add_barelymusician_demo(
+  arpeggiator_demo
   barelymusician
   barely_arpeggiator
   barely_pitch
@@ -15,12 +28,8 @@ target_link_libraries(
   barely_examples_input_manager
 )
 
-add_executable(
-  barely_examples_instrument_demo
-  instrument_demo.cpp
-)
-target_link_libraries(
-  barely_examples_instrument_demo
+add_barelymusician_demo(
+  instrument_demo
   barelymusician
   barely_pitch
   barely_oscillator
@@ -30,12 +39,8 @@ target_link_libraries(
   barely_examples_input_manager
 )
 
-add_executable(
-  barely_examples_metronome_demo
-  metronome_demo.cpp
-)
-target_link_libraries(
-  barely_examples_metronome_demo
+add_barelymusician_demo(
+  metronome_demo
   barelymusician
   barely_metronome
   barely_pitch
@@ -47,12 +52,8 @@ target_link_libraries(
   barely_examples_input_manager
 )
 
-add_executable(
-  barely_examples_midi_demo
-  midi_demo.cpp
-)
-target_link_libraries(
-  barely_examples_midi_demo
+add_barelymusician_demo(
+  midi_demo
   barelymusician
   barely_midi
   barely_oscillator
@@ -65,12 +66,8 @@ target_link_libraries(
   midifile
 )
 
-add_executable(
-  barely_examples_musician_demo
-  musician_demo.cpp
-)
-target_link_libraries(
-  barely_examples_musician_demo
+add_barelymusician_demo(
+  musician_demo
   barelymusician
   barely_random
   barely_metronome
@@ -87,12 +84,8 @@ target_link_libraries(
   barely_examples_data
 )
 
-add_executable(
-  barely_examples_repeater_demo
-  repeater_demo.cpp
-)
-target_link_libraries(
-  barely_examples_repeater_demo
+add_barelymusician_demo(
+  repeater_demo
   barelymusician
   barely_repeater
   barely_pitch
@@ -104,12 +97,8 @@ target_link_libraries(
   barely_examples_input_manager
 )
 
-add_executable(
-  barely_examples_sampler_demo
-  sampler_demo.cpp
-)
-target_link_libraries(
-  barely_examples_sampler_demo
+add_barelymusician_demo(
+  sampler_demo
   barelymusician
   barely_pitch
   barely_low_pass_effect
@@ -121,12 +110,8 @@ target_link_libraries(
   barely_examples_data
 )
 
-add_executable(
-  barely_examples_sequencer_demo
-  sequencer_demo.cpp
-)
-target_link_libraries(
-  barely_examples_sequencer_demo
+add_barelymusician_demo(
+  sequencer_demo
   barelymusician
   barely_midi
   barely_pitch
@@ -138,12 +123,8 @@ target_link_libraries(
   barely_examples_input_manager
 )
 
-add_executable(
-  barely_examples_trigger_demo
-  trigger_demo.cpp
-)
-target_link_libraries(
-  barely_examples_trigger_demo
+add_barelymusician_demo(
+  trigger_demo
   barelymusician
   barely_midi
   barely_pitch

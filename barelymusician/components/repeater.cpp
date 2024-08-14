@@ -117,8 +117,8 @@ Repeater::Repeater(MusicianPtr musician, int process_order) noexcept
               return;
             }
             const double pitch = *pitches_[index_].first + pitch_shift_;
-            note_.emplace(*instrument_, pitch);
-            performer_.ScheduleOneOffTask([this]() { note_.reset(); },
+            instrument_->SetNoteOn(pitch);
+            performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
                                           static_cast<double>(length) * performer_.GetLoopLength());
           },
           0.0) {
@@ -138,7 +138,9 @@ void Repeater::Pop() noexcept {
     return;
   }
   if (index_ == static_cast<int>(pitches_.size()) - 1 && IsPlaying()) {
-    note_.reset();
+    if (instrument_ != nullptr) {
+      instrument_->SetNoteOff(*pitches_.back().first + pitch_shift_);
+    }
     remaining_length_ = 0;
   }
   pitches_.pop_back();
@@ -151,7 +153,7 @@ void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
 
 void Repeater::SetInstrument(std::optional<InstrumentPtr> instrument) noexcept {
   if (instrument_.has_value() && IsPlaying()) {
-    note_.reset();
+    instrument_->SetAllNotesOff();
   }
   instrument_ = instrument;
 }
@@ -179,7 +181,9 @@ void Repeater::Stop() noexcept {
   }
   performer_.Stop();
   performer_.SetPosition(0.0);
-  note_.reset();
+  if (instrument_.has_value()) {
+    instrument_->SetAllNotesOff();
+  }
   index_ = -1;
   remaining_length_ = 0;
 }

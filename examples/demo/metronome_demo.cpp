@@ -18,7 +18,6 @@ namespace {
 using ::barely::Instrument;
 using ::barely::Metronome;
 using ::barely::Musician;
-using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
@@ -61,11 +60,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Create the metronome instrument.
   Instrument instrument(musician, SynthInstrument::GetDefinition());
-  instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
-  instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
-  instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
-  instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
-  instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
+  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
+  instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
   Metronome metronome(musician);
@@ -74,7 +73,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     const int current_beat = (beat % kBeatCount) + 1;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
-    [[maybe_unused]] const Note note(instrument, pitch);
+    instrument.SetNoteOn(pitch);
+    instrument.SetNoteOff(pitch);
   });
 
   // Audio process callback.

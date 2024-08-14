@@ -22,9 +22,9 @@ namespace Barely {
 
     /// Set control callback.
     ///
-    /// @param controlId Control identifier.
+    /// @param id Control identifier.
     /// @param value Control value.
-    public void OnSetControl(int controlId, double value);
+    public void OnSetControl(int id, double value);
 
     /// Set data callback.
     ///
@@ -58,7 +58,7 @@ namespace Barely {
     /// Returns an array of control definitions.
     ///
     /// @return Array of control definitions.
-    protected abstract Control.Definition[] GetControlDefinitions();
+    protected abstract ControlDefinition[] GetControlDefinitions();
 
     // Create callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.EffectDefinition_CreateCallback))]
@@ -88,8 +88,8 @@ namespace Barely {
 
     // Set control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.EffectDefinition_SetControlCallback))]
-    private static void OnSetControl(ref IntPtr state, Int32 controlId, double value) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(controlId, value);
+    private static void OnSetControl(ref IntPtr state, Int32 id, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value);
     }
 
     // Set data callback.
@@ -99,15 +99,15 @@ namespace Barely {
     }
 
     // Allocates and returns a pointer to an array of control definitions.
-    private IntPtr GetControlDefinitionsPtr(Control.Definition[] definitions) {
+    private IntPtr GetControlDefinitionsPtr(ControlDefinition[] definitions) {
       if (definitions == null || definitions.Length == 0) {
         return IntPtr.Zero;
       }
       IntPtr definitionsPtr =
-          Marshal.AllocHGlobal(definitions.Length * Marshal.SizeOf<Control.Definition>());
+          Marshal.AllocHGlobal(definitions.Length * Marshal.SizeOf<ControlDefinition>());
       for (int i = 0; i < definitions.Length; ++i) {
         IntPtr definitionPtr =
-            new IntPtr(definitionsPtr.ToInt64() + i * Marshal.SizeOf<Control.Definition>());
+            new IntPtr(definitionsPtr.ToInt64() + i * Marshal.SizeOf<ControlDefinition>());
         Marshal.StructureToPtr(definitions[i], definitionPtr, false);
       }
       return definitionsPtr;

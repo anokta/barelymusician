@@ -43,13 +43,13 @@ namespace Barely {
     public int VoiceCount = 8;
 
     private void Update() {
-      GetControl(0).Value = Gain;
-      GetControl(1).Value = (double)OscillatorType;
-      GetControl(2).Value = Attack;
-      GetControl(3).Value = Decay;
-      GetControl(4).Value = Sustain;
-      GetControl(5).Value = Release;
-      GetControl(6).Value = (double)VoiceCount;
+      SetControl(0, Gain);
+      SetControl(1, (double)OscillatorType);
+      SetControl(2, Attack);
+      SetControl(3, Decay);
+      SetControl(4, Sustain);
+      SetControl(5, Release);
+      SetControl(6, (double)VoiceCount);
     }
   }
 }  // namespace Barely

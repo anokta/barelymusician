@@ -3,40 +3,21 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/musician.h"
-#include "barelymusician/internal/note.h"
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
-using ::barely::internal::Control;
 using ::barely::internal::ControlMap;
 using ::barely::internal::Effect;
 using ::barely::internal::Instrument;
 using ::barely::internal::Musician;
-using ::barely::internal::Note;
 using ::barely::internal::Observable;
 using ::barely::internal::Observer;
 using ::barely::internal::Performer;
 using ::barely::internal::Task;
-
-// Control.
-struct BarelyControl : public Control {
- public:
-  // Non-constructable and non-destructable.
-  BarelyControl() noexcept = delete;
-  ~BarelyControl() noexcept = delete;
-
-  // Non-copyable and non-movable.
-  BarelyControl(const BarelyControl& other) noexcept = delete;
-  BarelyControl& operator=(const BarelyControl& other) noexcept = delete;
-  BarelyControl(BarelyControl&& other) noexcept = delete;
-  BarelyControl& operator=(BarelyControl&& other) noexcept = delete;
-};
-static_assert(sizeof(BarelyControl) == sizeof(barely::internal::Control));
 
 // Musician.
 struct BarelyMusician : public Observable<Musician> {
@@ -99,38 +80,8 @@ struct BarelyInstrument : public Observable<Instrument> {
   BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
   BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
 
-  int GenerateNextNoteId() noexcept { return ++note_id_counter_; }
-  int GetCurrentNoteId() const noexcept { return note_id_counter_; }
-
  private:
   Observer<Musician> musician_;
-  int note_id_counter_ = 0;
-};
-
-// Note.
-struct BarelyNote : public Note {
-  BarelyNote(BarelyInstrument* instrument, double pitch, double intensity) noexcept
-      : Note(instrument->GenerateNextNoteId(), pitch, intensity,
-             instrument->BuildNoteControlMap(instrument->GetCurrentNoteId())),
-        instrument_(instrument->Observe()) {
-    assert(instrument_);
-    instrument_->AddNote(this);
-  }
-
-  ~BarelyNote() noexcept {
-    if (instrument_) {
-      instrument_->RemoveNote(this);
-    }
-  }
-
-  /// Non-copyable and non-movable.
-  BarelyNote(const BarelyNote& other) noexcept = delete;
-  BarelyNote& operator=(const BarelyNote& other) noexcept = delete;
-  BarelyNote(BarelyNote&& other) noexcept = delete;
-  BarelyNote& operator=(BarelyNote&& other) noexcept = delete;
-
- private:
-  Observer<Instrument> instrument_;
 };
 
 // Performer.
@@ -186,28 +137,6 @@ struct BarelyTask : public Task {
   Observer<Performer> performer_;
 };
 
-bool BarelyControl_GetValue(const BarelyControl* control, double* out_value) {
-  if (!control) return false;
-  if (!out_value) return false;
-
-  *out_value = control->GetValue();
-  return true;
-}
-
-bool BarelyControl_ResetValue(BarelyControl* control) {
-  if (!control) return false;
-
-  control->ResetValue();
-  return true;
-}
-
-bool BarelyControl_SetValue(BarelyControl* control, double value) {
-  if (!control) return false;
-
-  control->SetValue(value);
-  return true;
-}
-
 bool BarelyEffect_Create(BarelyMusician* musician, BarelyEffectDefinition definition,
                          BarelyEffect** out_effect) {
   if (!musician || !out_effect) return false;
@@ -223,13 +152,15 @@ bool BarelyEffect_Destroy(BarelyEffect* effect) {
   return true;
 }
 
-bool BarelyEffect_GetControl(BarelyEffect* effect, int32_t control_id,
-                             BarelyControl** out_control) {
+bool BarelyEffect_GetControl(const BarelyEffect* effect, int32_t id, double* out_value) {
   if (!effect) return false;
-  if (!out_control) return false;
+  if (!out_value) return false;
 
-  *out_control = static_cast<BarelyControl*>(effect->GetControl(control_id));
-  return *out_control;
+  if (const auto* control = effect->GetControl(id); control != nullptr) {
+    *out_value = control->GetValue();
+    return true;
+  }
+  return false;
 }
 
 bool BarelyEffect_Process(BarelyEffect* effect, double* output_samples,
@@ -238,6 +169,41 @@ bool BarelyEffect_Process(BarelyEffect* effect, double* output_samples,
   if (!effect) return false;
 
   return effect->Process(output_samples, output_channel_count, output_frame_count, timestamp);
+}
+
+bool BarelyEffect_ResetAllControls(BarelyEffect* effect) {
+  if (!effect) return false;
+
+  effect->ResetAllControls();
+  return true;
+}
+
+bool BarelyEffect_ResetControl(BarelyEffect* effect, int32_t id) {
+  if (!effect) return false;
+
+  if (auto* control = effect->GetControl(id); control != nullptr) {
+    control->ResetValue();
+    return true;
+  }
+  return false;
+}
+
+bool BarelyEffect_SetControl(BarelyEffect* effect, int32_t id, double value) {
+  if (!effect) return false;
+
+  if (auto* control = effect->GetControl(id); control != nullptr) {
+    control->SetValue(value);
+    return true;
+  }
+  return false;
+}
+
+bool BarelyEffect_SetControlEvent(BarelyEffect* effect, BarelyControlEventDefinition definition,
+                                  void* user_data) {
+  if (!effect) return false;
+
+  effect->SetControlEvent(definition, user_data);
+  return true;
 }
 
 bool BarelyEffect_SetData(BarelyEffect* effect, const void* data, int32_t size) {
@@ -264,13 +230,37 @@ bool BarelyInstrument_Destroy(BarelyInstrument* instrument) {
   return true;
 }
 
-bool BarelyInstrument_GetControl(BarelyInstrument* instrument, int32_t control_id,
-                                 BarelyControl** out_control) {
+bool BarelyInstrument_GetControl(const BarelyInstrument* instrument, int32_t id,
+                                 double* out_value) {
   if (!instrument) return false;
-  if (!out_control) return false;
+  if (!out_value) return false;
 
-  *out_control = static_cast<BarelyControl*>(instrument->GetControl(control_id));
-  return *out_control;
+  if (const auto* control = instrument->GetControl(id); control != nullptr) {
+    *out_value = control->GetValue();
+    return true;
+  }
+  return false;
+}
+
+bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, double pitch, int32_t id,
+                                     double* out_value) {
+  if (!instrument) return false;
+  if (!out_value) return false;
+
+  if (const auto* note_control = instrument->GetNoteControl(pitch, id); note_control != nullptr) {
+    *out_value = note_control->GetValue();
+    return true;
+  }
+  return false;
+}
+
+bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, double pitch,
+                               bool* out_is_note_on) {
+  if (!instrument) return false;
+  if (!out_is_note_on) return false;
+
+  *out_is_note_on = instrument->IsNoteOn(pitch);
+  return true;
 }
 
 bool BarelyInstrument_Process(BarelyInstrument* instrument, double* output_samples,
@@ -281,12 +271,120 @@ bool BarelyInstrument_Process(BarelyInstrument* instrument, double* output_sampl
   return instrument->Process(output_samples, output_channel_count, output_frame_count, timestamp);
 }
 
+bool BarelyInstrument_ResetAllControls(BarelyInstrument* instrument) {
+  if (!instrument) return false;
+
+  instrument->ResetAllControls();
+  return true;
+}
+
+bool BarelyInstrument_ResetAllNoteControls(BarelyInstrument* instrument, double pitch) {
+  if (!instrument) return false;
+
+  return instrument->ResetAllNoteControls(pitch);
+}
+
+bool BarelyInstrument_ResetControl(BarelyInstrument* instrument, int32_t id) {
+  if (!instrument) return false;
+
+  if (auto* control = instrument->GetControl(id); control != nullptr) {
+    control->ResetValue();
+    return true;
+  }
+  return false;
+}
+
+bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, double pitch, int32_t id) {
+  if (!instrument) return false;
+
+  if (auto* note_control = instrument->GetNoteControl(pitch, id); note_control != nullptr) {
+    note_control->ResetValue();
+    return true;
+  }
+  return false;
+}
+
+bool BarelyInstrument_SetAllNotesOff(BarelyInstrument* instrument) {
+  if (!instrument) return false;
+
+  instrument->SetAllNotesOff();
+  return true;
+}
+
+bool BarelyInstrument_SetControl(BarelyInstrument* instrument, int32_t id, double value) {
+  if (!instrument) return false;
+
+  if (auto* control = instrument->GetControl(id); control != nullptr) {
+    control->SetValue(value);
+    return true;
+  }
+  return false;
+}
+
+bool BarelyInstrument_SetControlEvent(BarelyInstrument* instrument,
+                                      BarelyControlEventDefinition definition, void* user_data) {
+  if (!instrument) return false;
+
+  instrument->SetControlEvent(definition, user_data);
+  return true;
+}
+
 bool BarelyInstrument_SetData(BarelyInstrument* instrument, const void* data, int32_t size) {
   if (!instrument) return false;
   if (size < 0 || (!data && size > 0)) return false;
 
   instrument->SetData(
       {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
+  return true;
+}
+
+bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, double pitch, int32_t id,
+                                     double value) {
+  if (!instrument) return false;
+
+  if (auto* note_control = instrument->GetNoteControl(pitch, id); note_control != nullptr) {
+    note_control->SetValue(value);
+    return true;
+  }
+  return false;
+}
+
+bool BarelyInstrument_SetNoteControlEvent(BarelyInstrument* instrument,
+                                          BarelyNoteControlEventDefinition definition,
+                                          void* user_data) {
+  if (!instrument) return false;
+
+  instrument->SetNoteControlEvent(definition, user_data);
+  return true;
+}
+
+bool BarelyInstrument_SetNoteOff(BarelyInstrument* instrument, double pitch) {
+  if (!instrument) return false;
+
+  instrument->SetNoteOff(pitch);
+  return true;
+}
+
+bool BarelyInstrument_SetNoteOffEvent(BarelyInstrument* instrument,
+                                      BarelyNoteOffEventDefinition definition, void* user_data) {
+  if (!instrument) return false;
+
+  instrument->SetNoteOffEvent(definition, user_data);
+  return true;
+}
+
+bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, double pitch, double intensity) {
+  if (!instrument) return false;
+
+  instrument->SetNoteOn(pitch, intensity);
+  return true;
+}
+
+bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
+                                     BarelyNoteOnEventDefinition definition, void* user_data) {
+  if (!instrument) return false;
+
+  instrument->SetNoteOnEvent(definition, user_data);
   return true;
 }
 
@@ -351,30 +449,6 @@ bool BarelyMusician_Update(BarelyMusician* musician, double timestamp) {
 
   musician->Update(timestamp);
   return true;
-}
-
-bool BarelyNote_Create(BarelyInstrument* instrument, double pitch, double intensity,
-                       BarelyNote** out_note) {
-  if (!instrument) return false;
-  if (!out_note) return false;
-
-  *out_note = new BarelyNote(instrument, pitch, intensity);
-  return *out_note;
-}
-
-bool BarelyNote_Destroy(BarelyNote* note) {
-  if (!note) return false;
-
-  delete note;
-  return true;
-}
-
-bool BarelyNote_GetControl(BarelyNote* note, int32_t control_id, BarelyControl** out_control) {
-  if (!note) return false;
-  if (!out_control) return false;
-
-  *out_control = static_cast<BarelyControl*>(note->GetControl(control_id));
-  return *out_control;
 }
 
 bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformer* performer) {

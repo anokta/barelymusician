@@ -49,7 +49,7 @@ class HighPassEffect : public CustomEffect {
   /// Implements `CustomEffect`.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
-  void SetControl(int control_id, double value) noexcept final;
+  void SetControl(int id, double value) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
 
  private:

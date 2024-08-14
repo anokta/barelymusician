@@ -38,7 +38,7 @@ class FakeVoice : public Voice {
 
 // Tests that playing a single voice produces the expected output.
 TEST(PolyphonicVoiceTest, SingleVoice) {
-  constexpr int kNoteId = 1;
+  constexpr double kPitch = 0.0;
 
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
@@ -47,10 +47,10 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
-  polyphonic_voice.Start(kNoteId);
+  polyphonic_voice.Start(kPitch);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kOutput);
 
-  polyphonic_voice.Stop(kNoteId);
+  polyphonic_voice.Stop(kPitch);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 }
 
@@ -64,10 +64,10 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   for (int i = 0; i < kVoiceCount; ++i) {
-    double pitch = static_cast<double>(i + 1);
-    polyphonic_voice.Start(i + 1, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
+    const double pitch = static_cast<double>(i + 1);
+    polyphonic_voice.Start(pitch, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), pitch);
-    polyphonic_voice.Stop(i + 1);
+    polyphonic_voice.Stop(pitch);
   }
 }
 
@@ -83,13 +83,13 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
 
   double previous_output = 0.0;
   for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(i);
+    polyphonic_voice.Start(static_cast<double>(i));
     const double output = polyphonic_voice.Next(kChannel);
     EXPECT_DOUBLE_EQ(output - previous_output, kOutput);
     previous_output = output;
   }
 
-  polyphonic_voice.Start(kVoiceCount);
+  polyphonic_voice.Start(static_cast<double>(kVoiceCount));
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), previous_output);
 }
 
@@ -117,17 +117,19 @@ TEST(PolyphonicVoiceTest, Update) {
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(i);
+    const double pitch = static_cast<double>(i);
+    polyphonic_voice.Start(pitch);
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kOutput);
-    polyphonic_voice.Stop(i);
+    polyphonic_voice.Stop(pitch);
   }
 
   polyphonic_voice.Update([](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
 
   for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(i);
+    const double pitch = static_cast<double>(i);
+    polyphonic_voice.Start(pitch);
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kUpdatedOutput);
-    polyphonic_voice.Stop(i);
+    polyphonic_voice.Stop(pitch);
   }
 }
 

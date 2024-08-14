@@ -1,6 +1,5 @@
 #include <chrono>
 #include <thread>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -18,7 +17,6 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::Musician;
-using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::SynthInstrument;
@@ -56,25 +54,26 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetTempo(kInitialTempo);
 
   Instrument instrument(musician, SynthInstrument::GetDefinition());
-  instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
-  instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
-  instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
-  instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
+  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
+  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
+    ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
+  });
 
   std::vector<std::pair<double, double>> triggers;
   std::vector<Task> tasks;
 
   Performer performer(musician);
 
-  std::unordered_map<double, Note> notes;
   const auto play_note_fn = [&](int scale_index, double duration) {
     const double pitch =
         barely::kPitchD3 + barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
-    return [&instrument, &performer, &notes, duration, pitch]() {
-      ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
-      notes.emplace(pitch, Note(instrument, pitch));
+    return [&instrument, &performer, duration, pitch]() {
+      instrument.SetNoteOn(pitch);
       performer.ScheduleOneOffTask(
-          [&instrument, &performer, &notes, pitch]() { notes.erase(pitch); },
+          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
           performer.GetPosition() + duration);
     };
   };
@@ -101,6 +100,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   triggers.emplace_back(5.0, 2.0);
   tasks.emplace_back(performer, play_note_fn(8, 2.0), 5.0);
 
+  // Stopper.
+  Task stopper(performer, [&performer]() { performer.Stop(); }, 0.0);
+
   // Audio process callback.
   const auto process_callback = [&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
@@ -119,15 +121,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '1');
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
-      performer.CancelAllOneOffTasks();
-      notes.clear();
+      instrument.SetAllNotesOff();
       performer.SetPosition(triggers[index].first);
-      performer.ScheduleOneOffTask(
-          [&]() {
-            notes.clear();
-            performer.Stop();
-          },
-          triggers[index].first + triggers[index].second);
+      stopper.SetPosition(triggers[index].first + triggers[index].second);
       performer.Start();
       return;
     }

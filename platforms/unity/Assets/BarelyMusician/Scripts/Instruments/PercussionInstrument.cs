@@ -77,8 +77,8 @@ namespace Barely {
       if (Pads != null) {
         UpdatePadData();
       }
-      GetControl(0).Value = Gain;
-      GetControl(1).Value = PadRelease;
+      SetControl(0, Gain);
+      SetControl(1, PadRelease);
     }
 
     // Updates pad data.

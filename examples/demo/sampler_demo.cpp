@@ -26,7 +26,6 @@ using ::barely::Effect;
 using ::barely::Instrument;
 using ::barely::LowPassEffect;
 using ::barely::Musician;
-using ::barely::Note;
 using ::barely::SamplerInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -54,7 +53,7 @@ constexpr double kLowPassCutoffFrequency = 2000;
 constexpr double kRootPitch = barely::kPitchC4;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr int kMaxOctave = 3;
+constexpr double kMaxOctave = 3.0;
 
 // Returns the sample data from a given `file_path`.
 std::vector<double> GetSampleData(const std::string& file_path) {
@@ -73,13 +72,13 @@ std::vector<double> GetSampleData(const std::string& file_path) {
 }
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(int octave, const InputManager::Key& key) {
+std::optional<double> PitchFromKey(const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
   const double distance = static_cast<double>(std::distance(kOctaveKeys.begin(), it));
-  return octave + kRootPitch + distance / barely::kSemitoneCount;
+  return kRootPitch + distance / barely::kSemitoneCount;
 }
 
 }  // namespace
@@ -92,24 +91,34 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician(kFrameRate);
 
   Instrument instrument(musician, SamplerInstrument::GetDefinition());
-  instrument.GetControl(SamplerInstrument::Control::kGain).SetValue(kGain);
-  instrument.GetControl(SamplerInstrument::Control::kRootPitch).SetValue(kRootPitch);
-  instrument.GetControl(SamplerInstrument::Control::kLoop).SetValue(kLoop);
-  instrument.GetControl(SamplerInstrument::Control::kAttack).SetValue(kAttack);
-  instrument.GetControl(SamplerInstrument::Control::kRelease).SetValue(kRelease);
-  instrument.GetControl(SamplerInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
+  instrument.SetControl(SamplerInstrument::Control::kGain, kGain);
+  instrument.SetControl(SamplerInstrument::Control::kRootPitch, kRootPitch);
+  instrument.SetControl(SamplerInstrument::Control::kLoop, kLoop);
+  instrument.SetControl(SamplerInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(SamplerInstrument::Control::kRelease, kRelease);
+  instrument.SetControl(SamplerInstrument::Control::kVoiceCount, kVoiceCount);
 
   Effect effect(musician, LowPassEffect::GetDefinition());
-  effect.GetControl(LowPassEffect::Control::kCutoffFrequency).SetValue(kLowPassCutoffFrequency);
+  effect.SetControl(LowPassEffect::Control::kCutoffFrequency, kLowPassCutoffFrequency);
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
-  int octave = 0;
-  std::unordered_map<InputManager::Key, Note> notes;
+  instrument.SetNoteOnEvent([](double pitch, double intensity) {
+    ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", " << intensity << ")";
+  });
+  instrument.SetNoteOffEvent(
+      [](double pitch) { ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") "; });
+
+  // Audio process callback.
+  audio_output.SetProcessCallback([&](double* output) {
+    instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
+    effect.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
+  });
 
   // Key down callback.
-  bool quit = false;
   double intensity = 1.0;
+  double octave = 0.0;
+  bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
@@ -118,12 +127,9 @@ int main(int /*argc*/, char* argv[]) {
     }
 
     const auto upper_key = std::toupper(key);
-
     if (upper_key == 'Z' || upper_key == 'X') {
-      // Stop all notes.
-      notes.clear();
-
       // Shift octaves.
+      instrument.SetAllNotesOff();
       if (upper_key == 'Z') {
         --octave;
       } else {
@@ -133,9 +139,8 @@ int main(int /*argc*/, char* argv[]) {
       ConsoleLog() << "Octave set to " << octave;
       return;
     }
-
-    // Change intensity.
     if (upper_key == 'C' || upper_key == 'V') {
+      // Change intensity.
       if (upper_key == 'C') {
         intensity -= 0.25;
       } else {
@@ -146,28 +151,21 @@ int main(int /*argc*/, char* argv[]) {
       return;
     }
 
-    // Start note.
-    if (const auto pitch = PitchFromKey(octave, key)) {
-      [[maybe_unused]] const auto success =
-          notes.emplace(key, Note(instrument, *pitch, intensity)).second;
-      assert(success);
-      ConsoleLog() << std::setprecision(2) << "NoteOn(" << *pitch << ", " << intensity << ")";
+    // Play note.
+    if (const auto pitch = PitchFromKey(key)) {
+      instrument.SetNoteOn(octave + *pitch, intensity);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
-    if (notes.erase(key) > 0) {
-      ConsoleLog() << std::setprecision(2) << "NoteOff(" << *PitchFromKey(octave, key) << ") ";
+    // Stop note.
+    if (const auto pitch = PitchFromKey(key)) {
+      instrument.SetNoteOff(octave + *pitch);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);
-
-  // Audio process callback.
-  audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
-  });
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";

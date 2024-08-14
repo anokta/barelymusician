@@ -1,13 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Barely {
   /// A representation of a musical instrument that can be played in real-time.
   [RequireComponent(typeof(AudioSource))]
   public abstract class Instrument : MonoBehaviour {
-    /// Audio source.
-    public AudioSource Source { get; private set; } = null;
+    /// Control event callback.
+    ///
+    /// @param id Control identifier.
+    /// @param control Control value.
+    public delegate void ControlEventCallback(int id, double value);
+    public event ControlEventCallback OnControl;
+
+    [Serializable]
+    public class ControlEvent : UnityEngine.Events.UnityEvent<int, float> {}
+    public ControlEvent OnControlEvent;
+
+    /// Note control event callback.
+    ///
+    /// @param pitch Note pitch.
+    /// @param id Note control identifier.
+    /// @param control Note control value.
+    public delegate void NoteControlEventCallback(double pitch, int id, double value);
+    public event NoteControlEventCallback OnNoteControl;
+
+    [Serializable]
+    public class NoteControlEvent : UnityEngine.Events.UnityEvent<float, int, float> {}
+    public NoteControlEvent OnNoteControlEvent;
 
     /// Note off event callback.
     ///
@@ -36,12 +55,24 @@ namespace Barely {
     /// Instrument destroy callback.
     public event Action OnInstrumentDestroy;
 
-    /// Returns a control.
+    /// Audio source.
+    public AudioSource Source { get; private set; } = null;
+
+    /// Returns a control value.
     ///
-    /// @param controlId Control identifier.
-    /// @return Control.
-    public Control GetControl(int controlId) {
-      return Musician.Internal.Instrument_GetControl(_ptr, controlId);
+    /// @param id Control identifier.
+    /// @return Control value.
+    public double GetControl(int id) {
+      return Musician.Internal.Instrument_GetControl(_ptr, id);
+    }
+
+    /// Returns a note control value.
+    ///
+    /// @param pitch Note pitch.
+    /// @param id Control identifier.
+    /// @return Control value.
+    public double GetNoteControl(double pitch, int id) {
+      return Musician.Internal.Instrument_GetNoteControl(_ptr, pitch, id);
     }
 
     /// Returns whether a note is on or not.
@@ -49,17 +80,35 @@ namespace Barely {
     /// @param Note pitch.
     /// @return True if on, false otherwise.
     public bool IsNoteOn(double pitch) {
-      return _notes.ContainsKey(pitch);
+      return Musician.Internal.Instrument_IsNoteOn(_ptr, pitch);
+    }
+
+    /// Resets a control value.
+    ///
+    /// @param id Control identifier.
+    public void ResetControl(int id) {
+      Musician.Internal.Instrument_ResetControl(_ptr, id);
+    }
+
+    /// Resets a note control value.
+    ///
+    /// @param pitch Note pitch.
+    /// @param id Note control identifier.
+    public void ResetNoteControl(double pitch, int id) {
+      Musician.Internal.Instrument_ResetNoteControl(_ptr, pitch, id);
     }
 
     /// Sets all notes off.
     public void SetAllNotesOff() {
-      foreach (var note in _notes) {
-        note.Value.Destroy();
-        OnNoteOff?.Invoke(note.Key);
-        OnNoteOffEvent?.Invoke((float)note.Key);
-      }
-      _notes.Clear();
+      Musician.Internal.Instrument_SetAllNotesOff(_ptr);
+    }
+
+    /// Sets a control value.
+    ///
+    /// @param id Control identifier.
+    /// @param value Control value.
+    public void SetControl(int id, double value) {
+      Musician.Internal.Instrument_SetControl(_ptr, id, value);
     }
 
     /// Sets data.
@@ -70,17 +119,20 @@ namespace Barely {
       Musician.Internal.Instrument_SetData(_ptr, dataPtr, size);
     }
 
+    /// Sets a note control value.
+    ///
+    /// @param pitch Note pitch.
+    /// @param id Note control identifier.
+    /// @param value Note control value.
+    public void SetNoteControl(double pitch, int id, double value) {
+      Musician.Internal.Instrument_SetNoteControl(_ptr, pitch, id, value);
+    }
+
     /// Sets a note off.
     ///
     /// @param pitch Note pitch.
     public void SetNoteOff(double pitch) {
-      Note note;
-      if (_notes.TryGetValue(pitch, out note)) {
-        note.Destroy();
-        _notes.Remove(pitch);
-        OnNoteOff?.Invoke(pitch);
-        OnNoteOffEvent?.Invoke((float)pitch);
-      }
+      Musician.Internal.Instrument_SetNoteOff(_ptr, pitch);
     }
 
     /// Sets a note on.
@@ -88,15 +140,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     public void SetNoteOn(double pitch, double intensity = 1.0) {
-      if (_notes.ContainsKey(pitch)) {
-        return;
-      }
-      Note note = Musician.Internal.Note_Create(_ptr, pitch, intensity);
-      if (note != null) {
-        _notes.Add(pitch, note);
-        OnNoteOn?.Invoke(pitch, intensity);
-        OnNoteOnEvent?.Invoke((float)pitch, (float)intensity);
-      }
+      Musician.Internal.Instrument_SetNoteOn(_ptr, pitch, intensity);
     }
 
     /// Class that wraps the internal api.
@@ -104,6 +148,31 @@ namespace Barely {
       /// Returns the pointer.
       public static IntPtr GetPtr(Instrument instrument) {
         return instrument ? instrument._ptr : IntPtr.Zero;
+      }
+
+      /// Internal control event callback.
+      public static void OnControlEvent(Instrument instrument, int id, double value) {
+        instrument.OnControl?.Invoke(id, value);
+        instrument.OnControlEvent?.Invoke(id, (float)value);
+      }
+
+      /// Internal note control event callback.
+      public static void OnNoteControlEvent(Instrument instrument, double pitch, int id,
+                                            double value) {
+        instrument.OnNoteControl?.Invoke(pitch, id, value);
+        instrument.OnNoteControlEvent?.Invoke((float)pitch, id, (float)value);
+      }
+
+      /// Internal note off event callback.
+      public static void OnNoteOffEvent(Instrument instrument, double pitch) {
+        instrument.OnNoteOff?.Invoke(pitch);
+        instrument.OnNoteOffEvent?.Invoke((float)pitch);
+      }
+
+      /// Internal note on event callback.
+      public static void OnNoteOnEvent(Instrument instrument, double pitch, double intensity) {
+        instrument.OnNoteOn?.Invoke(pitch, intensity);
+        instrument.OnNoteOnEvent?.Invoke((float)pitch, (float)intensity);
       }
     }
 
@@ -116,12 +185,10 @@ namespace Barely {
       }
       Source.clip.SetData(ones, 0);
       Source.loop = true;
-      _notes = new Dictionary<double, Note>();
     }
 
     protected virtual void OnDestroy() {
       Source = null;
-      _notes = null;
     }
 
     protected virtual void OnEnable() {
@@ -131,7 +198,6 @@ namespace Barely {
     }
 
     protected virtual void OnDisable() {
-      SetAllNotesOff();
       Source?.Stop();
       OnInstrumentDestroy?.Invoke();
       Musician.Internal.Instrument_Destroy(ref _ptr);
@@ -140,9 +206,6 @@ namespace Barely {
     private void OnAudioFilterRead(float[] data, int channels) {
       Musician.Internal.Instrument_Process(_ptr, data, channels);
     }
-
-    // Map of notes by their pitches.
-    private Dictionary<double, Note> _notes = null;
 
     // Raw pointer.
     private IntPtr _ptr = IntPtr.Zero;

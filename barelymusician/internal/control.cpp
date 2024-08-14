@@ -22,7 +22,7 @@ double Control::GetValue() const noexcept { return value_; }
 
 void Control::ResetValue() noexcept {
   if (value_ != definition_.default_value) {
-    set_value_callback_(definition_.control_id, definition_.default_value);
+    set_value_callback_(definition_.id, definition_.default_value);
     value_ = definition_.default_value;
   }
 }
@@ -30,7 +30,7 @@ void Control::ResetValue() noexcept {
 void Control::SetValue(double value) noexcept {
   value = std::min(std::max(value, definition_.min_value), definition_.max_value);
   if (value_ != value) {
-    set_value_callback_(definition_.control_id, value);
+    set_value_callback_(definition_.id, value);
     value_ = value;
   }
 }
@@ -41,8 +41,7 @@ ControlMap BuildControlMap(const ControlDefinition* definitions, int definition_
   ControlMap control_map;
   control_map.reserve(definition_count);
   for (int index = 0; index < definition_count; ++index) {
-    control_map.emplace(definitions[index].control_id,
-                        Control(definitions[index], set_value_callback));
+    control_map.emplace(definitions[index].id, Control(definitions[index], set_value_callback));
   }
   return control_map;
 }

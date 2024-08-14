@@ -50,14 +50,14 @@ namespace Barely {
       if (_sample != Sample) {
         SetSampleData();
       }
-      GetControl(0).Value = Gain;
-      GetControl(1).Value = RootPitch;
-      GetControl(2).Value = Loop ? 1.0 : 0.0;
-      GetControl(3).Value = Attack;
-      GetControl(4).Value = Decay;
-      GetControl(5).Value = Sustain;
-      GetControl(6).Value = Release;
-      GetControl(7).Value = (double)VoiceCount;
+      SetControl(0, Gain);
+      SetControl(1, RootPitch);
+      SetControl(2, Loop ? 1.0 : 0.0);
+      SetControl(3, Attack);
+      SetControl(4, Decay);
+      SetControl(5, Sustain);
+      SetControl(6, Release);
+      SetControl(7, (double)VoiceCount);
     }
 
     private void SetSampleData() {

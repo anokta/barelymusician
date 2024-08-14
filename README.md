@@ -42,22 +42,25 @@ musician.SetTempo(/*tempo=*/124.0);
 barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
 
 // Set the instrument gain control to 0.5.
-instrument.GetControl(barely::SynthInstrument::Control::kGain).SetValue(/*value=*/0.5);
+instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
 
-// Start an instrument note with an A3 pitch and a 0.25 intensity.
+// Set the instrument A3 note pitch on with a 0.25 intensity.
 //
 // @note Pitch values are normalized by octaves, where each 1.0 value change shifts one octave, and
 // 0.0 represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition. However,
 // this is not a strict rule, since `pitch` and `intensity` can be interpreted in any desired way by
 // a custom instrument.
 const double a3_pitch = -1.0;
-barely::Note note(instrument, a3_pitch, /*intensity=*/0.25);
+instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
+
+// Check if the instrument note pitch is on.
+const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
 
 // Create a low-pass effect.
 barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
 
 // Set the effect cutoff frequency control to 1kHz.
-effect.GetControl(barely::LowPassEffect::Control::kCutoffFrequency).SetValue(/*value=*/1000.0);
+effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
 
 // Update the musician timestamp in seconds.
 //
@@ -93,13 +96,11 @@ performer.SetLooping(/*is_looping=*/true);
 Task task(
     performer,
     [&]() {
-      // Play an instrument note with an A4 pitch for 0.25 beats.
-      const double a4_pitch = 0.0;
-      performer.ScheduleOneOffTask(
-          [note_ptr = barely::Note(instrument, a4_pitch).Release()]() {
-            NotePtr::Destroy(note_ptr);
-          },
-          performer.GetPosition() + 0.25);
+      // Set the instrument A4 note pitch on.
+      instrument.SetNoteOn(/*pitch=*/0.0);
+      // Schedule a one-off task to set the instrument A4 note pitch off after 0.25 beats.
+      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/0.0); },
+                                   performer.GetPosition() + 0.25);
     },
     /*position=*/0.5);
 

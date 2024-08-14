@@ -22,9 +22,9 @@ namespace Barely {
 
     /// Set control callback.
     ///
-    /// @param controlId Control identifier.
+    /// @param id Control identifier.
     /// @param value Control value.
-    public void OnSetControl(int controlId, double value);
+    public void OnSetControl(int id, double value);
 
     /// Set data callback.
     ///
@@ -35,9 +35,9 @@ namespace Barely {
     /// Set note control callback.
     ///
     /// @param pitch Note pitch.
-    /// @param controlId Note control identifier.
+    /// @param id Note control identifier.
     /// @param value Note control value.
-    public void OnSetNoteControl(double pitch, int controlId, double value);
+    public void OnSetNoteControl(double pitch, int id, double value);
 
     /// Set note off callback.
     ///
@@ -46,10 +46,9 @@ namespace Barely {
 
     /// Set note on callback.
     ///
-    /// @param noteId Note identifier.
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void OnSetNoteOn(int noteId, double pitch, double intensity);
+    public void OnSetNoteOn(double pitch, double intensity);
   }
 
   /// Custom instrument template that implements a custom instrument.
@@ -84,12 +83,12 @@ namespace Barely {
     /// Returns an array of control definitions.
     ///
     /// @return Array of control definitions.
-    protected abstract Control.Definition[] GetControlDefinitions();
+    protected abstract ControlDefinition[] GetControlDefinitions();
 
     /// Returns an array of note control definitions.
     ///
     /// @return Array of note control definitions.
-    protected abstract Control.Definition[] GetNoteControlDefinitions();
+    protected abstract ControlDefinition[] GetNoteControlDefinitions();
 
     // Create callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_CreateCallback))]
@@ -119,8 +118,8 @@ namespace Barely {
 
     // Set control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetControlCallback))]
-    private static void OnSetControl(ref IntPtr state, Int32 controlId, double value) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(controlId, value);
+    private static void OnSetControl(ref IntPtr state, Int32 id, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetControl(id, value);
     }
 
     // Set data callback.
@@ -131,10 +130,8 @@ namespace Barely {
 
     // Set note control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteControlCallback))]
-    private static void OnSetNoteControl(ref IntPtr state, double pitch, Int32 controlId,
-                                         double value) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType)
-          .OnSetNoteControl(pitch, controlId, value);
+    private static void OnSetNoteControl(ref IntPtr state, double pitch, Int32 id, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteControl(pitch, id, value);
     }
 
     // Set note off callback.
@@ -145,21 +142,20 @@ namespace Barely {
 
     // Set note on callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteOnCallback))]
-    private static void OnSetNoteOn(ref IntPtr state, Int32 noteId, double pitch,
-                                    double intensity) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOn(noteId, pitch, intensity);
+    private static void OnSetNoteOn(ref IntPtr state, double pitch, double intensity) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOn(pitch, intensity);
     }
 
     // Allocates and returns a pointer to an array of control definitions.
-    private IntPtr GetControlDefinitionsPtr(Control.Definition[] definitions) {
+    private IntPtr GetControlDefinitionsPtr(ControlDefinition[] definitions) {
       if (definitions == null || definitions.Length == 0) {
         return IntPtr.Zero;
       }
       IntPtr definitionsPtr =
-          Marshal.AllocHGlobal(definitions.Length * Marshal.SizeOf<Control.Definition>());
+          Marshal.AllocHGlobal(definitions.Length * Marshal.SizeOf<ControlDefinition>());
       for (int i = 0; i < definitions.Length; ++i) {
         IntPtr definitionPtr =
-            new IntPtr(definitionsPtr.ToInt64() + i * Marshal.SizeOf<Control.Definition>());
+            new IntPtr(definitionsPtr.ToInt64() + i * Marshal.SizeOf<ControlDefinition>());
         Marshal.StructureToPtr(definitions[i], definitionPtr, false);
       }
       return definitionsPtr;

@@ -1,5 +1,3 @@
-#include <array>
-
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/midi.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -9,7 +7,6 @@
 using ::barely::Instrument;
 using ::barely::InstrumentPtr;
 using ::barely::Musician;
-using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::PitchFromMidiNumber;
 using ::barely::SynthInstrument;
@@ -76,11 +73,11 @@ int main(void) {
   Musician musician(kFrameRate);
 
   Instrument instrument(musician, SynthInstrument::GetDefinition());
-  instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
-  instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
-  instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
-  instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
-  instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
+  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
+  instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
   instrument_ptr = instrument;
 
@@ -88,7 +85,6 @@ int main(void) {
   hw.StartAdc();
   hw.StartAudio(AudioCallback);
 
-  std::array<std::optional<Note>, barely::kMaxMidiNumber + 1> notes;
   while (true) {
     // Listen to MIDI events.
     midi.Listen();
@@ -97,16 +93,12 @@ int main(void) {
       auto midi_event = midi.PopEvent();
       switch (midi_event.type) {
         case MidiMessageType::NoteOn:
-          if (const auto note_on_event = midi_event.AsNoteOn();
-              note_on_event.velocity != 0 && note_on_event.note <= barely::kMaxMidiNumber) {
-            notes[note_on_event.note] = Note(instrument, PitchFromMidiNumber(note_on_event.note));
+          if (const auto note_on_event = midi_event.AsNoteOn(); note_on_event.velocity != 0) {
+            instrument.SetNoteOn(PitchFromMidiNumber(note_on_event.note));
           }
           break;
         case MidiMessageType::NoteOff:
-          if (const auto note_off_event = midi_event.AsNoteOff();
-              note_off_event.note <= barely::kMaxMidiNumber) {
-            notes[note_off_event.note].reset();
-          }
+          instrument.SetNoteOff(PitchFromMidiNumber(midi_event.AsNoteOff().note));
           break;
         default:
           break;

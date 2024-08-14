@@ -26,8 +26,8 @@ EffectDefinition GetTestDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int32_t control_id, double value) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(control_id + 1) * value;
+      [](void** state, int32_t id, double value) {
+        *reinterpret_cast<double*>(*state) = static_cast<double>(id + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {}, control_definitions);
 }

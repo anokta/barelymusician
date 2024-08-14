@@ -40,8 +40,8 @@ void LfoEffect::Process(double* output_samples, int output_channel_count,
   }
 }
 
-void LfoEffect::SetControl(int control_id, double value) noexcept {
-  switch (static_cast<Control>(control_id)) {
+void LfoEffect::SetControl(int id, double value) noexcept {
+  switch (static_cast<Control>(id)) {
     case Control::kOscillatorType:
       lfo_.SetType(static_cast<OscillatorType>(static_cast<int>(value)));
       break;

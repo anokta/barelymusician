@@ -109,9 +109,14 @@ Arpeggiator::Arpeggiator(MusicianPtr musician, int process_order) noexcept
               return;
             }
             const double pitch = pitches_[index_];
-            notes_.emplace(pitch, Note(*instrument_, pitch));
-            performer_.ScheduleOneOffTask([this, pitch]() { notes_.erase(pitch); },
-                                          gate_ratio_ * performer_.GetLoopLength());
+            instrument_->SetNoteOn(pitch);
+            performer_.ScheduleOneOffTask(
+                [this, pitch]() {
+                  if (instrument_ != nullptr) {
+                    instrument_->SetNoteOff(pitch);
+                  }
+                },
+                gate_ratio_ * performer_.GetLoopLength());
           },
           0.0) {
   performer_.SetLooping(true);
@@ -138,7 +143,9 @@ void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
 }
 
 void Arpeggiator::SetInstrument(std::optional<InstrumentPtr> instrument) noexcept {
-  notes_.clear();
+  if (instrument_.has_value()) {
+    instrument_->SetAllNotesOff();
+  }
   instrument_ = instrument;
 }
 
@@ -188,7 +195,9 @@ void Arpeggiator::Stop() noexcept {
   performer_.Stop();
   performer_.CancelAllOneOffTasks();
   performer_.SetPosition(0.0);
-  notes_.clear();
+  if (instrument_.has_value()) {
+    instrument_->SetAllNotesOff();
+  }
   index_ = -1;
 }
 

@@ -34,8 +34,8 @@ namespace Barely {
         }
       }
 
-      public void OnSetControl(int controlId, double value) {
-        switch (controlId) {
+      public void OnSetControl(int id, double value) {
+        switch (id) {
           case 0:
             _targetFrequency = GetFrequency(value);
             break;
@@ -49,7 +49,7 @@ namespace Barely {
         Debug.LogWarning("Theremin does not implement OnSetData");
       }
 
-      public void OnSetNoteControl(double pitch, int controlId, double value) {
+      public void OnSetNoteControl(double pitch, int id, double value) {
         Debug.LogWarning("Theremin does not implement OnSetNoteControl");
       }
 
@@ -58,7 +58,7 @@ namespace Barely {
         _targetAmplitude = 0.0;
       }
 
-      public void OnSetNoteOn(int noteId, double pitch, double intensity) {
+      public void OnSetNoteOn(double pitch, double intensity) {
         _isOn = true;
         _phase = 0.0;
         _targetAmplitude = intensity;
@@ -100,22 +100,22 @@ namespace Barely {
         } else if (Input.GetMouseButtonUp(0)) {
           SetNoteOff(0.0);
         }
-        GetControl(0).Value = pitch;
-        GetControl(1).Value = amplitude;
+        SetControl(0, pitch);
+        SetControl(1, amplitude);
       }
 
-      protected override sealed Control.Definition[] GetControlDefinitions() {
-        Control.Definition[] definitions = new Control.Definition[2] {
+      protected override sealed ControlDefinition[] GetControlDefinitions() {
+        ControlDefinition[] definitions = new ControlDefinition[2] {
           // Continuous pitch.
-          new Control.Definition() {
-            controlId = 0,
+          new ControlDefinition() {
+            id = 0,
             defaultValue = 0.0,
             minValue = 0.0,
             maxValue = 1.0,
           },
           // Continuous amplitude.
-          new Control.Definition() {
-            controlId = 1,
+          new ControlDefinition() {
+            id = 1,
             defaultValue = 0.0,
             minValue = 0.0,
             maxValue = 1.0,
@@ -124,7 +124,7 @@ namespace Barely {
         return definitions;
       }
 
-      protected override sealed Control.Definition[] GetNoteControlDefinitions() {
+      protected override sealed ControlDefinition[] GetNoteControlDefinitions() {
         return null;
       }
     }

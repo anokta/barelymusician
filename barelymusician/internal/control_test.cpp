@@ -12,7 +12,7 @@ namespace {
 TEST(ControlTest, Set) {
   int callback_count = 0;
   Control control(ControlDefinition{0, 15.0, 10.0, 20.0},
-                  [&](int /*control_id*/, double /*value*/) { ++callback_count; });
+                  [&](int /*id*/, double /*value*/) { ++callback_count; });
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   control.SetValue(12.0);
@@ -67,7 +67,7 @@ TEST(ControlTest, BuildControlMap) {
 
   const ControlMap control_map =
       BuildControlMap(control_definitions.data(), static_cast<int>(control_definitions.size()),
-                      [](int /*control_id*/, double /*value*/) {});
+                      [](int /*id*/, double /*value*/) {});
   ASSERT_EQ(control_map.size(), 2);
   EXPECT_DOUBLE_EQ(control_map.find(2)->second.GetValue(), 1.0);
   EXPECT_DOUBLE_EQ(control_map.find(10)->second.GetValue(), 5.0);

@@ -54,18 +54,17 @@ class PercussionInstrument : public CustomInstrument {
   /// Implements `CustomInstrument`.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
-  void SetControl(int control_id, double value) noexcept final;
+  void SetControl(int id, double value) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetData(const void* data, int size) noexcept final;
-  void SetNoteControl(int /*note_id*/, int /*control_id*/, double /*value*/) noexcept final {}
-  void SetNoteOff(int note_id) noexcept final;
-  void SetNoteOn(int note_id, double pitch, double intensity) noexcept final;
+  void SetNoteControl(double /*pitch*/, int /*id*/, double /*value*/) noexcept final {}
+  void SetNoteOff(double pitch) noexcept final;
+  void SetNoteOn(double pitch, double intensity) noexcept final;
 
  private:
   struct Pad {
     explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
 
-    int note_id = 0;
     double pitch = 0.0;
     EnvelopedVoice<SamplePlayer> voice;
   };

@@ -8,7 +8,7 @@ namespace Barely {
     public double CutoffFrequency = 48000.0;
 
     private void Update() {
-      GetControl(0).Value = CutoffFrequency;
+      SetControl(0, CutoffFrequency);
     }
   }
 }  // namespace Barely

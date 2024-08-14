@@ -21,7 +21,6 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::Musician;
-using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
@@ -78,16 +77,22 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetTempo(kInitialTempo);
 
   Instrument instrument(musician, SynthInstrument::GetDefinition());
-  instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
-  instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
-  instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
-  instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
-  instrument.GetControl(SynthInstrument::Control::kVoiceCount).SetValue(kVoiceCount);
+  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
+  instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
   Repeater repeater(musician);
   repeater.SetInstrument(instrument);
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
+
+  instrument.SetNoteOnEvent([&repeater](double pitch, double /*intensity*/) {
+    if (repeater.IsPlaying()) {
+      ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
+    }
+  });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
@@ -96,7 +101,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  std::unordered_map<double, Note> notes;
   double offset_octaves = 0.0;
   int length = 1;
   bool quit = false;
@@ -111,7 +115,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (upper_key == 'Z' || upper_key == 'X') {
       // Shift octaves.
       if (!repeater.IsPlaying()) {
-        notes.clear();
+        instrument.SetAllNotesOff();
       }
       if (upper_key == 'Z') {
         --offset_octaves;
@@ -127,7 +131,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const auto pitch_or = PitchFromKey(key)) {
       const double pitch = offset_octaves + *pitch_or;
       if (!repeater.IsPlaying()) {
-        notes.emplace(pitch, Note(instrument, pitch));
+        instrument.SetNoteOn(pitch);
       }
       repeater.Push(pitch, length);
       ConsoleLog() << "Note(" << pitch << ") added";
@@ -160,7 +164,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
           repeater.Stop();
           ConsoleLog() << "Repeater stopped";
         } else {
-          notes.clear();
+          instrument.SetAllNotesOff();
           repeater.Start();
           ConsoleLog() << "Repeater started";
         }
@@ -176,7 +180,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
       if (!repeater.IsPlaying()) {
-        notes.erase(offset_octaves + *pitch);
+        instrument.SetNoteOff(offset_octaves + *pitch);
       }
     }
   };

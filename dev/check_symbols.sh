@@ -2,7 +2,7 @@
 #
 # Compares the BarelyMusician API function declarations in `barelymusician.h` against the
 # corresponding definitions in `barelymusician.cpp`.
-readonly SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 readonly API_DIR="${SCRIPT_DIR}/../barelymusician"
 readonly API_H_PATH="${API_DIR}/barelymusician.h"
 readonly API_CPP_PATH="${API_DIR}/barelymusician.cpp"

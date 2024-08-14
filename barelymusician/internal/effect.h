@@ -32,9 +32,10 @@ class Effect {
 
   /// Returns a control value.
   ///
-  /// @param control_id Control identifier.
+  /// @param id Control identifier.
   /// @return Pointer to control, or nullptr if not found.
-  [[nodiscard]] Control* GetControl(int control_id) noexcept;
+  [[nodiscard]] Control* GetControl(int id) noexcept;
+  [[nodiscard]] const Control* GetControl(int id) const noexcept;
 
   /// Processes output samples at timestamp.
   ///
@@ -45,6 +46,15 @@ class Effect {
   /// @return True if successful, false otherwise.
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
+
+  /// Resets all control values.
+  void ResetAllControls() noexcept;
+
+  /// Sets the control event callback.
+  ///
+  /// @param callback Control event definition.
+  /// @param user_data Pointer to user data.
+  void SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept;
 
   /// Sets data.
   ///
@@ -74,6 +84,9 @@ class Effect {
 
   // Control map.
   ControlMap control_map_;
+
+  // Control event.
+  Control::Event control_event_;
 
   // Update frame.
   int64_t update_frame_ = 0;

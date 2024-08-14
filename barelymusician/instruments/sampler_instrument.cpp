@@ -59,8 +59,8 @@ void SamplerInstrument::Process(double* output_samples, int output_channel_count
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SamplerInstrument::SetControl(int control_id, double value) noexcept {
-  switch (static_cast<Control>(control_id)) {
+void SamplerInstrument::SetControl(int id, double value) noexcept {
+  switch (static_cast<Control>(id)) {
     case Control::kGain:
       gain_processor_.SetGain(value);
       break;
@@ -103,11 +103,11 @@ void SamplerInstrument::SetData(const void* data, int size) noexcept {
   });
 }
 
-void SamplerInstrument::SetNoteOff(int note_id) noexcept { voice_.Stop(note_id); }
+void SamplerInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
 
-void SamplerInstrument::SetNoteOn(int note_id, double pitch, double intensity) noexcept {
+void SamplerInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   const double speed = std::pow(2.0, pitch - root_pitch_);
-  voice_.Start(note_id, [speed, intensity](SamplerVoice* voice) noexcept {
+  voice_.Start(pitch, [speed, intensity](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
     voice->set_gain(intensity);
   });

@@ -27,9 +27,9 @@ class CustomEffect {
 
   /// Sets a control value.
   ///
-  /// @param control_id Control identifier.
+  /// @param id Control identifier.
   /// @param value Control value.
-  virtual void SetControl(int control_id, double value) noexcept = 0;
+  virtual void SetControl(int id, double value) noexcept = 0;
 
   /// Sets data.
   ///
@@ -65,9 +65,9 @@ class CustomEffect {
           auto* effect = static_cast<PublicEffect*>(*state);
           effect->Process(output_samples, output_channel_count, output_frame_count);
         },
-        [](void** state, int32_t control_id, double value) {
+        [](void** state, int32_t id, double value) {
           auto* effect = static_cast<PublicEffect*>(*state);
-          effect->SetControl(control_id, value);
+          effect->SetControl(id, value);
         },
         [](void** state, const void* data, int32_t size) noexcept {
           auto* effect = static_cast<PublicEffect*>(*state);

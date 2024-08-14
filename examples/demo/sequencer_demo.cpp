@@ -19,7 +19,6 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::Musician;
-using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::SynthInstrument;
@@ -59,23 +58,24 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetTempo(kInitialTempo);
 
   Instrument instrument(musician, SynthInstrument::GetDefinition());
-  instrument.GetControl(SynthInstrument::Control::kGain).SetValue(kGain);
-  instrument.GetControl(SynthInstrument::Control::kOscillatorType).SetValue(kOscillatorType);
-  instrument.GetControl(SynthInstrument::Control::kAttack).SetValue(kAttack);
-  instrument.GetControl(SynthInstrument::Control::kRelease).SetValue(kRelease);
+  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
+  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
+    ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
+  });
 
   Performer performer(musician);
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
-  std::unordered_map<double, Note> notes;
   const auto play_note_fn = [&](double duration, double pitch) {
-    return [&instrument, &performer, &notes, pitch, duration]() {
-      notes.emplace(pitch, Note(instrument, pitch));
-      performer.ScheduleOneOffTask([&instrument, &notes, pitch]() { notes.erase(pitch); },
+    return [&instrument, &performer, pitch, duration]() {
+      instrument.SetNoteOn(pitch);
+      performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
                                    performer.GetPosition() + duration);
-      ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
     };
   };
 
@@ -128,7 +128,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (performer.IsPlaying()) {
           performer.Stop();
-          notes.clear();
+          instrument.SetAllNotesOff();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();
@@ -145,7 +145,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'P':
-        notes.clear();
+        instrument.SetAllNotesOff();
         performer.SetPosition(0.0);
         return;
       case '-':

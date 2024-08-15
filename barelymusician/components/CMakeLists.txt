@@ -1,31 +1,31 @@
 add_library(
-  barely_arpeggiator
+  barelymusician_arpeggiator
   arpeggiator.cpp
   arpeggiator.h
 )
 target_link_libraries(
-  barely_arpeggiator
+  barelymusician_arpeggiator
   barelymusician
-  barely_random
+  barelymusician_random
 )
 
 add_library(
-  barely_metronome
+  barelymusician_metronome
   metronome.cpp
   metronome.h
 )
 target_link_libraries(
-  barely_metronome
+  barelymusician_metronome
   barelymusician
 )
 
 add_library(
-  barely_repeater
+  barelymusician_repeater
   repeater.cpp
   repeater.h
 )
 target_link_libraries(
-  barely_repeater
+  barelymusician_repeater
   barelymusician
-  barely_random
+  barelymusician_random
 )

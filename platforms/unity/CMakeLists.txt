@@ -9,14 +9,14 @@ target_compile_definitions(
 target_link_libraries(
   barelymusicianunity PUBLIC
   barelymusician
-  barely_arpeggiator
-  barely_repeater
-  barely_high_pass_effect
-  barely_lfo_effect
-  barely_low_pass_effect
-  barely_percussion_instrument
-  barely_sampler_instrument
-  barely_synth_instrument
+  barelymusician_arpeggiator
+  barelymusician_repeater
+  barelymusician_high_pass_effect
+  barelymusician_lfo_effect
+  barelymusician_low_pass_effect
+  barelymusician_percussion_instrument
+  barelymusician_sampler_instrument
+  barelymusician_synth_instrument
 )
 if(MSVC)
   target_sources(

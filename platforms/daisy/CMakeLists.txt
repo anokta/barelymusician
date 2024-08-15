@@ -1,17 +1,17 @@
-SET(BARELY_DAISY_TARGET barelymusiciandaisy)
-set(BARELY_DAISY_LINKER_SCRIPT ${libdaisy_SOURCE_DIR}/core/STM32H750IB_sram.lds)
+set(BARELYMUSICIAN_DAISY_TARGET barelymusiciandaisy)
+set(BARELYMUSICIAN_DAISY_LINKER_SCRIPT ${libdaisy_SOURCE_DIR}/core/STM32H750IB_sram.lds)
 
 add_executable(
-  ${BARELY_DAISY_TARGET}
+  ${BARELYMUSICIAN_DAISY_TARGET}
   daisy.cpp
 )
 set_target_properties(
-  ${BARELY_DAISY_TARGET} PROPERTIES
+  ${BARELYMUSICIAN_DAISY_TARGET} PROPERTIES
   SUFFIX ".elf"
-  LINK_DEPENDS ${BARELY_DAISY_LINKER_SCRIPT}
+  LINK_DEPENDS ${BARELYMUSICIAN_DAISY_LINKER_SCRIPT}
 )
 target_compile_options(
-  ${BARELY_DAISY_TARGET} PUBLIC
+  ${BARELYMUSICIAN_DAISY_TARGET} PUBLIC
   -Os
   -Wall
   -Wno-attributes
@@ -26,17 +26,17 @@ target_compile_options(
   $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>
 )
 target_link_libraries(
-  ${BARELY_DAISY_TARGET} PUBLIC
+  ${BARELYMUSICIAN_DAISY_TARGET} PUBLIC
   barelymusician
-  barely_midi
-  barely_oscillator
-  barely_synth_instrument
+  barelymusician_midi
+  barelymusician_oscillator
+  barelymusician_synth_instrument
   daisy
 )
 target_link_options(
-  ${BARELY_DAISY_TARGET} PUBLIC
-  -T ${BARELY_DAISY_LINKER_SCRIPT}
-  -Wl,-Map=${BARELY_DAISY_TARGET}.map,--cref
+  ${BARELYMUSICIAN_DAISY_TARGET} PUBLIC
+  -T ${BARELYMUSICIAN_DAISY_LINKER_SCRIPT}
+  -Wl,-Map=${BARELYMUSICIAN_DAISY_TARGET}.map,--cref
   -Wl,--check-sections
   -Wl,--unresolved-symbols=report-all
   -Wl,--warn-common
@@ -45,29 +45,29 @@ target_link_options(
 )
 
 add_custom_command(
-  TARGET ${BARELY_DAISY_TARGET} POST_BUILD
+  TARGET ${BARELYMUSICIAN_DAISY_TARGET} POST_BUILD
   COMMAND ${CMAKE_OBJCOPY}
   ARGS -O ihex
-  -S ${BARELY_DAISY_TARGET}.elf
-  ${BARELY_DAISY_TARGET}.hex
+  -S ${BARELYMUSICIAN_DAISY_TARGET}.elf
+  ${BARELYMUSICIAN_DAISY_TARGET}.hex
   BYPRODUCTS
-  ${BARELY_DAISY_TARGET}.hex
+  ${BARELYMUSICIAN_DAISY_TARGET}.hex
   COMMENT "Generating HEX image"
   VERBATIM
 )
 add_custom_command(
-  TARGET ${BARELY_DAISY_TARGET} POST_BUILD
+  TARGET ${BARELYMUSICIAN_DAISY_TARGET} POST_BUILD
   COMMAND ${CMAKE_OBJCOPY}
   ARGS -O binary
-  -S ${BARELY_DAISY_TARGET}.elf
-  ${BARELY_DAISY_TARGET}.bin
+  -S ${BARELYMUSICIAN_DAISY_TARGET}.elf
+  ${BARELYMUSICIAN_DAISY_TARGET}.bin
   BYPRODUCTS
-  ${BARELY_DAISY_TARGET}.bin
+  ${BARELYMUSICIAN_DAISY_TARGET}.bin
   COMMENT "Generating binary image"
   VERBATIM
 )
 
 add_custom_target(
-  ${BARELY_DAISY_TARGET}_program_dfu
-  COMMAND dfu-util -a 0 -s 0x90040000:leave -D ${BARELY_DAISY_TARGET}.bin -d ,0483:df11
+  ${BARELYMUSICIAN_DAISY_TARGET}_program_dfu
+  COMMAND dfu-util -a 0 -s 0x90040000:leave -D ${BARELYMUSICIAN_DAISY_TARGET}.bin -d ,0483:df11
 )

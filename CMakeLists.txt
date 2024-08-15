@@ -1,14 +1,22 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
-option(ENABLE_EXAMPLES "Build examples"  OFF)
+unset(ENABLE_EXAMPLES CACHE)
+unset(ENABLE_TESTS CACHE)
+unset(ENABLE_DAISY CACHE)
+unset(ENABLE_UNITY CACHE)
+
+option(ENABLE_EXAMPLES "Build examples" OFF)
 option(ENABLE_TESTS "Build tests" OFF)
-
 option(ENABLE_DAISY "Build daisy platform" OFF)
 option(ENABLE_UNITY "Build unity platform" OFF)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER predefined)
 
 include(FetchContent)
 
 if(ENABLE_DAISY)
+  set(CMAKE_FOLDER external)
   FetchContent_Declare(
     libdaisy
     GIT_REPOSITORY https://github.com/electro-smith/libDaisy.git
@@ -64,6 +72,7 @@ endif()
 if(ENABLE_TESTS)
   enable_testing()
 
+  set(CMAKE_FOLDER external)
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
@@ -82,6 +91,7 @@ include_directories(.)
 add_subdirectory(barelymusician)
 
 if(ENABLE_EXAMPLES)
+  set(CMAKE_FOLDER external)
   FetchContent_Declare(
     dr_libs
     GIT_REPOSITORY https://github.com/mackron/dr_libs.git
@@ -94,6 +104,7 @@ if(ENABLE_EXAMPLES)
   )
   include_directories(${dr_libs_SOURCE_DIR})
 
+  set(CMAKE_FOLDER external)
   FetchContent_Declare(
     midifile
     GIT_REPOSITORY https://github.com/craigsapp/midifile.git
@@ -106,6 +117,7 @@ if(ENABLE_EXAMPLES)
   )
   include_directories(${midifile_SOURCE_DIR}/include)
 
+  set(CMAKE_FOLDER external)
   FetchContent_Declare(
     portaudio
     GIT_REPOSITORY https://github.com/PortAudio/portaudio.git
@@ -124,10 +136,4 @@ if(ENABLE_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-if(ENABLE_DAISY)
-  add_subdirectory(platforms/daisy)
-endif()
-
-if(ENABLE_UNITY)
-  add_subdirectory(platforms/unity)
-endif()
+add_subdirectory(platforms)

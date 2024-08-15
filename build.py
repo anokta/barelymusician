@@ -95,6 +95,16 @@ def parse_args():
         action="store_true",
         help="clean the previous build before the new build",
     )
+    parser.add_argument(
+        "--skip_generate",
+        action="store_true",
+        help="skip the cmake generate step",
+    )
+    parser.add_argument(
+        "--skip_build",
+        action="store_true",
+        help="skip the cmake build step",
+    )
     return parser.parse_args()
 
 
@@ -114,28 +124,39 @@ def run_command(command, cwd):
     subprocess.run(command, check=True, cwd=cwd, shell=True)
 
 
-def build_platform(config, source_dir, build_dir, cmake_options):
+def build_platform(args, config, source_dir, build_dir, cmake_options):
     if not os.path.exists(build_dir):
         os.makedirs(build_dir)
 
-    cmake_generate_command = f'cmake -S "{source_dir}" -B "{build_dir}" {" ".join(cmake_options)}'
-    run_command(cmake_generate_command, build_dir)
+    if not args.skip_generate:
+        generate_command = f'cmake -S "{source_dir}" -B "{build_dir}" {" ".join(cmake_options)}'
+        run_command(generate_command, build_dir)
 
-    cmake_build_command = f'cmake --build "{build_dir}" --config {config}'
-    run_command(cmake_build_command, build_dir)
+    if not args.skip_build:
+        build_command = f'cmake --build "{build_dir}" --config {config}'
+        run_command(build_command, build_dir)
 
 
 def build(args, source_dir, build_dir):
     if args.clean and os.path.exists(build_dir):
         clean(build_dir)
 
+    if args.skip_generate and args.skip_build:
+        return
+
     config = str.capitalize(args.config)
 
+    if args.daisy:
+        daisy_build_dir = os.path.join(build_dir, "Daisy")
+        daisy_cmake_options = [
+            '-G "Unix Makefiles"',
+            f'-DCMAKE_TOOLCHAIN_FILE="{DAISY_TOOLCHAIN_FILE}"',
+            f'-DTOOLCHAIN_PREFIX="{args.daisy_toolchain_prefix}"',
+            "-DENABLE_DAISY=ON",
+        ]
+        build_platform(args, config, source_dir, daisy_build_dir, daisy_cmake_options)
+
     common_cmake_options = []
-    if args.test:
-        common_cmake_options.append("-DENABLE_TESTS=ON -DGTEST_COLOR=1")
-    if args.examples or args.run_demo:
-        common_cmake_options.append("-DENABLE_EXAMPLES=ON")
     if args.unity:
         common_cmake_options.append("-DENABLE_UNITY=ON")
 
@@ -151,18 +172,12 @@ def build(args, source_dir, build_dir):
                 f'-DANDROID_PLATFORM="android-{args.android_min_api}"',
                 f'-DCMAKE_BUILD_TYPE="{config}"',
             ] + common_cmake_options
-            build_platform(config, source_dir, android_build_dir, android_cmake_options)
+            build_platform(args, config, source_dir, android_build_dir, android_cmake_options)
 
-    if args.daisy:
-        print("Building the Daisy targets...")
-        daisy_build_dir = os.path.join(build_dir, "Daisy")
-        daisy_cmake_options = [
-            '-G "Unix Makefiles"',
-            f'-DCMAKE_TOOLCHAIN_FILE="{DAISY_TOOLCHAIN_FILE}"',
-            f'-DTOOLCHAIN_PREFIX="{args.daisy_toolchain_prefix}"',
-            "-DENABLE_DAISY=ON",  # ignore `common_cmake_options`
-        ]
-        build_platform(config, source_dir, daisy_build_dir, daisy_cmake_options)
+    if args.test:
+        common_cmake_options.append("-DENABLE_TESTS=ON -DGTEST_COLOR=1")
+    if args.examples or args.run_demo:
+        common_cmake_options.append("-DENABLE_EXAMPLES=ON")
 
     if args.linux:
         print("Building the Linux targets...")
@@ -171,19 +186,19 @@ def build(args, source_dir, build_dir):
             '-G "Unix Makefiles"',
             f'-DCMAKE_BUILD_TYPE="{config}"',
         ] + common_cmake_options
-        build_platform(config, source_dir, linux_build_dir, linux_cmake_options)
+        build_platform(args, config, source_dir, linux_build_dir, linux_cmake_options)
 
     if args.mac:
         print("Building the Windows targets...")
         mac_build_dir = os.path.join(build_dir, "Mac")
         mac_cmake_options = ['-G "Xcode"'] + common_cmake_options
-        build_platform(config, source_dir, mac_build_dir, mac_cmake_options)
+        build_platform(args, config, source_dir, mac_build_dir, mac_cmake_options)
 
     if args.windows:
         print("Building the Windows targets...")
         windows_build_dir = os.path.join(build_dir, "Windows")
         windows_cmake_options = ['-G "Visual Studio 17 2022"'] + common_cmake_options
-        build_platform(config, source_dir, windows_build_dir, windows_cmake_options)
+        build_platform(args, config, source_dir, windows_build_dir, windows_cmake_options)
 
 
 def run_daisy_program(build_dir):
@@ -214,7 +229,12 @@ def run_demo(args, build_dir):
 def run_tests(build_dir):
     ctest_command = "ctest --output-on-failure"
     for platform in os.listdir(build_dir):
-        run_command(ctest_command, os.path.join(build_dir, platform))
+        if (
+            (platform == "Linux" and sys.platform.startswith("linux"))
+            or (platform == "Mac" and sys.platform.startswith("darwin"))
+            or (platform == "Windows" and sys.platform.startswith("win"))
+        ):
+            run_command(ctest_command, os.path.join(build_dir, platform))
 
 
 def main():

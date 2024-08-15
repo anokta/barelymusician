@@ -1,62 +1,62 @@
 add_library(
-  barely_custom_instrument INTERFACE
+  barelymusician_custom_instrument INTERFACE
   custom_instrument.h
 )
 target_link_libraries(
-  barely_custom_instrument INTERFACE
+  barelymusician_custom_instrument INTERFACE
   barelymusician
 )
 
 add_library(
-  barely_percussion_instrument
+  barelymusician_percussion_instrument
   percussion_instrument.cpp
   percussion_instrument.h
 )
 target_compile_definitions(
-  barely_percussion_instrument
+  barelymusician_percussion_instrument
   PUBLIC BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
-  barely_percussion_instrument
-  barely_custom_instrument
-  barely_enveloped_voice
-  barely_gain_processor
-  barely_sample_player
+  barelymusician_percussion_instrument
+  barelymusician_custom_instrument
+  barelymusician_enveloped_voice
+  barelymusician_gain_processor
+  barelymusician_sample_player
 )
 
 add_library(
-  barely_sampler_instrument
+  barelymusician_sampler_instrument
   sampler_instrument.cpp
   sampler_instrument.h
 )
 target_compile_definitions(
-  barely_sampler_instrument
+  barelymusician_sampler_instrument
   PUBLIC BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
-  barely_sampler_instrument
-  barely_custom_instrument
-  barely_enveloped_voice
-  barely_gain_processor
-  barely_polyphonic_voice
-  barely_sample_player
+  barelymusician_sampler_instrument
+  barelymusician_custom_instrument
+  barelymusician_enveloped_voice
+  barelymusician_gain_processor
+  barelymusician_polyphonic_voice
+  barelymusician_sample_player
 )
 
 add_library(
-  barely_synth_instrument
+  barelymusician_synth_instrument
   synth_instrument.cpp
   synth_instrument.h
 )
 target_compile_definitions(
-  barely_synth_instrument
+  barelymusician_synth_instrument
   PUBLIC BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
-  barely_synth_instrument
-  barely_custom_instrument
-  barely_dsp_utils
-  barely_enveloped_voice
-  barely_gain_processor
-  barely_oscillator
-  barely_polyphonic_voice
+  barelymusician_synth_instrument
+  barelymusician_custom_instrument
+  barelymusician_dsp_utils
+  barelymusician_enveloped_voice
+  barelymusician_gain_processor
+  barelymusician_oscillator
+  barelymusician_polyphonic_voice
 )

@@ -44,7 +44,7 @@
     {
       "label": "barelymusician: run demo",
       "type": "shell",
-      "command": "python build.py --examples_demo ${fileBasenameNoExtension}",
+      "command": "python build.py --run_demo ${fileBasenameNoExtension}",
       "problemMatcher": [],
       "group": {
         "kind": "build",

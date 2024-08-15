@@ -1,5 +1,8 @@
 import argparse
+import errno
 import os
+import shutil
+import stat
 import subprocess
 import sys
 
@@ -73,7 +76,7 @@ def parse_args():
         help="build the examples for the selected platforms",
     )
     parser.add_argument(
-        "--examples_demo",
+        "--run_demo",
         default=None,
         help="specify the examples demo to run (defaults to none)",
     )
@@ -87,7 +90,23 @@ def parse_args():
         action="store_true",
         help="build the unity native plugins for the selected platforms",
     )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="clean the previous build before the new build",
+    )
     return parser.parse_args()
+
+
+def clean(build_dir):
+    print("Cleaning the previous build...")
+
+    def onerror(func, path, excinfo):
+        if func in (os.unlink, os.rmdir) and excinfo[1].errno == errno.EACCES:
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+
+    shutil.rmtree(build_dir, onerror=onerror)
 
 
 def run_command(command, cwd):
@@ -107,12 +126,15 @@ def build_platform(config, source_dir, build_dir, cmake_options):
 
 
 def build(args, source_dir, build_dir):
+    if args.clean and os.path.exists(build_dir):
+        clean(build_dir)
+
     config = str.capitalize(args.config)
 
     common_cmake_options = []
     if args.test:
         common_cmake_options.append("-DENABLE_TESTS=ON -DGTEST_COLOR=1")
-    if args.examples or args.examples_demo:
+    if args.examples or args.run_demo:
         common_cmake_options.append("-DENABLE_EXAMPLES=ON")
     if args.unity:
         common_cmake_options.append("-DENABLE_UNITY=ON")
@@ -182,7 +204,7 @@ def run_demo(args, build_dir):
             or (platform == "Windows" and sys.platform.startswith("win"))
         ):
             demo_dir = f"{build_dir}/{platform}/bin/{str.capitalize(args.config)}"
-            demo_path = os.path.join(demo_dir, args.examples_demo)
+            demo_path = os.path.join(demo_dir, args.run_demo)
             if platform == "Windows":
                 demo_path += ".exe"
             run_command(demo_path, demo_dir)
@@ -208,7 +230,7 @@ def main():
     if args.daisy:
         run_daisy_program(build_dir)
 
-    if args.examples_demo is not None:
+    if args.run_demo is not None:
         run_demo(args, build_dir)
 
 

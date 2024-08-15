@@ -111,5 +111,5 @@ performer.Start();
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the
 [instrument_demo.cpp](examples/demo/instrument_demo.cpp):
 ```
-python build.py --examples_demo instrument_demo
+python build.py --run_demo instrument_demo
 ```

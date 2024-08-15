@@ -138,7 +138,7 @@ void Repeater::Pop() noexcept {
     return;
   }
   if (index_ == static_cast<int>(pitches_.size()) - 1 && IsPlaying()) {
-    if (instrument_ != nullptr) {
+    if (instrument_.has_value()) {
       instrument_->SetNoteOff(*pitches_.back().first + pitch_shift_);
     }
     remaining_length_ = 0;

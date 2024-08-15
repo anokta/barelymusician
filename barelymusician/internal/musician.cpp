@@ -2,9 +2,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdint>
 #include <limits>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"

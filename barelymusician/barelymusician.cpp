@@ -1,5 +1,6 @@
 #include "barelymusician/barelymusician.h"
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 
@@ -10,7 +11,6 @@
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
-using ::barely::internal::ControlMap;
 using ::barely::internal::Effect;
 using ::barely::internal::Instrument;
 using ::barely::internal::Musician;

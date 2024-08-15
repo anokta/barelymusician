@@ -41,7 +41,8 @@ ControlMap BuildControlMap(const ControlDefinition* definitions, int definition_
   ControlMap control_map;
   control_map.reserve(definition_count);
   for (int index = 0; index < definition_count; ++index) {
-    control_map.emplace(definitions[index].id, Control(definitions[index], set_value_callback));
+    control_map.emplace(definitions[index].id,
+                        Control(definitions[index], std::move(set_value_callback)));
   }
   return control_map;
 }

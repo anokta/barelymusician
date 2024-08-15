@@ -26,7 +26,7 @@ void ApplyConstantGain(double gain, double* buffer, int channel_count, int frame
     return;
   }
   for (int i = 0; i < channel_count * frame_count; ++i) {
-    buffer[i] *= static_cast<double>(gain);
+    buffer[i] *= gain;
   }
 }
 
@@ -37,7 +37,7 @@ double ApplyLinearRamp(double gain, double target_gain, int ramp_frame_count, do
   for (int frame = 0; frame < std::min(ramp_frame_count, frame_count); ++frame) {
     gain += ramp_increment_;
     for (int channel = 0; channel < channel_count; ++channel) {
-      buffer[channel_count * frame + channel] *= static_cast<double>(gain);
+      buffer[channel_count * frame + channel] *= gain;
     }
   }
   return (ramp_frame_count <= frame_count) ? target_gain : gain;

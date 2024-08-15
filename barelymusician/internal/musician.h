@@ -5,7 +5,6 @@
 #include <unordered_set>
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"

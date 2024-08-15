@@ -88,11 +88,11 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
-  Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetTimestamp());
+  Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetUpdateFrame());
   musician.AddInstrument(&instrument);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
@@ -127,7 +127,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch * kIntensity);
@@ -149,7 +149,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     std::vector<std::unique_ptr<Instrument>> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(std::make_unique<Instrument>(GetTestInstrumentDefinition(), kFrameRate,
-                                                         musician.GetTimestamp()));
+                                                         musician.GetUpdateFrame()));
       musician.AddInstrument(instruments[i].get());
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);

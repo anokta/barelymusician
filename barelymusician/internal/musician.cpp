@@ -8,9 +8,18 @@
 #include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
-#include "barelymusician/internal/seconds.h"
 
 namespace barely::internal {
+
+namespace {
+
+// Converts seconds to minutes.
+constexpr double kMinutesFromSeconds = 1.0 / 60.0;
+
+// Converts minutes to seconds.
+constexpr double kSecondsFromMinutes = 60.0;
+
+}  // namespace
 
 Musician::Musician(int frame_rate) noexcept : frame_rate_(frame_rate) {}
 
@@ -51,13 +60,17 @@ void Musician::RemovePerformer(Performer* performer) noexcept {
 }
 
 double Musician::GetBeatsFromSeconds(double seconds) const noexcept {
-  return BeatsFromSeconds(tempo_, seconds);
+  return tempo_ * seconds * kMinutesFromSeconds;
 }
 
 int Musician::GetFrameRate() const noexcept { return frame_rate_; }
 
+int64_t Musician::GetFramesFromSeconds(double seconds) const noexcept {
+  return static_cast<int64_t>(seconds * static_cast<double>(frame_rate_));
+}
+
 double Musician::GetSecondsFromBeats(double beats) const noexcept {
-  return (tempo_ > 0.0) ? SecondsFromBeats(tempo_, beats)
+  return (tempo_ > 0.0) ? beats * kSecondsFromMinutes / tempo_
                         : (beats > 0.0 ? std::numeric_limits<double>::max()
                                        : std::numeric_limits<double>::lowest());
 }
@@ -65,6 +78,8 @@ double Musician::GetSecondsFromBeats(double beats) const noexcept {
 double Musician::GetTempo() const noexcept { return tempo_; }
 
 double Musician::GetTimestamp() const noexcept { return timestamp_; }
+
+int64_t Musician::GetUpdateFrame() const noexcept { return update_frame_; }
 
 void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
@@ -89,11 +104,12 @@ void Musician::Update(double timestamp) noexcept {
         }
 
         timestamp_ += GetSecondsFromBeats(update_duration);
+        update_frame_ = GetFramesFromSeconds(timestamp_);
         for (const auto& effect : effects_) {
-          effect->Update(timestamp_);
+          effect->Update(update_frame_);
         }
         for (const auto& instrument : instruments_) {
-          instrument->Update(timestamp_);
+          instrument->Update(update_frame_);
         }
       }
 
@@ -104,11 +120,12 @@ void Musician::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
+      update_frame_ = GetFramesFromSeconds(timestamp_);
       for (const auto& effect : effects_) {
-        effect->Update(timestamp_);
+        effect->Update(update_frame_);
       }
       for (const auto& instrument : instruments_) {
-        instrument->Update(timestamp_);
+        instrument->Update(update_frame_);
       }
     }
   }

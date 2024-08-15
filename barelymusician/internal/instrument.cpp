@@ -10,13 +10,12 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/message.h"
-#include "barelymusician/internal/seconds.h"
 
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
-                       double initial_timestamp) noexcept
+                       int64_t update_frame) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
       set_control_callback_(definition.set_control_callback),
@@ -24,7 +23,6 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
       set_note_control_callback_(definition.set_note_control_callback),
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
-      frame_rate_(frame_rate),
       note_control_definitions_(
           definition.note_control_definitions,
           definition.note_control_definitions + definition.note_control_definition_count),
@@ -35,7 +33,7 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
                             control_event_.Process(id, value);
                             message_queue_.Add(update_frame_, ControlMessage{id, value});
                           })),
-      update_frame_(FramesFromSeconds(frame_rate_, initial_timestamp)) {
+      update_frame_(update_frame) {
   assert(frame_rate > 0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
@@ -80,18 +78,17 @@ bool Instrument::IsNoteOn(double pitch) const noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
-                         double timestamp) noexcept {
+                         int64_t process_frame) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {
     return false;
   }
   int frame = 0;
   // Process *all* messages before the end frame.
-  const int64_t begin_frame = FramesFromSeconds(frame_rate_, timestamp);
-  const int64_t end_frame = begin_frame + output_frame_count;
+  const int64_t end_frame = process_frame + output_frame_count;
   for (auto* message = message_queue_.GetNext(end_frame); message;
        message = message_queue_.GetNext(end_frame)) {
-    if (const int message_frame = static_cast<int>(message->first - begin_frame);
+    if (const int message_frame = static_cast<int>(message->first - process_frame);
         frame < message_frame) {
       if (process_callback_) {
         process_callback_(&state_, &output_samples[frame * output_channel_count],
@@ -211,8 +208,9 @@ void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition, void* user_dat
   note_on_event_ = {definition, user_data};
 }
 
-void Instrument::Update(double timestamp) noexcept {
-  update_frame_ = FramesFromSeconds(frame_rate_, timestamp);
+void Instrument::Update(int64_t update_frame) noexcept {
+  assert(update_frame >= update_frame_);
+  update_frame_ = update_frame;
 }
 
 }  // namespace barely::internal

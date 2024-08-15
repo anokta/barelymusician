@@ -36,7 +36,7 @@ struct BarelyMusician : public Observable<Musician> {
 struct BarelyEffect : public Effect {
  public:
   BarelyEffect(BarelyMusician* musician, BarelyEffectDefinition definition) noexcept
-      : Effect(definition, musician->GetFrameRate(), musician->GetTimestamp()),
+      : Effect(definition, musician->GetFrameRate(), musician->GetUpdateFrame()),
         musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddEffect(this);
@@ -54,6 +54,11 @@ struct BarelyEffect : public Effect {
   BarelyEffect(BarelyEffect&& other) noexcept = delete;
   BarelyEffect& operator=(BarelyEffect&& other) noexcept = delete;
 
+  Musician& musician() const noexcept {
+    assert(musician_);
+    return *musician_;
+  }
+
  private:
   Observer<Musician> musician_;
 };
@@ -62,7 +67,7 @@ struct BarelyEffect : public Effect {
 struct BarelyInstrument : public Observable<Instrument> {
  public:
   BarelyInstrument(BarelyMusician* musician, BarelyInstrumentDefinition definition) noexcept
-      : Observable<Instrument>(definition, musician->GetFrameRate(), musician->GetTimestamp()),
+      : Observable<Instrument>(definition, musician->GetFrameRate(), musician->GetUpdateFrame()),
         musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddInstrument(this);
@@ -79,6 +84,11 @@ struct BarelyInstrument : public Observable<Instrument> {
   BarelyInstrument& operator=(const BarelyInstrument& other) noexcept = delete;
   BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
   BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
+
+  Musician& musician() const noexcept {
+    assert(musician_);
+    return *musician_;
+  }
 
  private:
   Observer<Musician> musician_;
@@ -168,7 +178,8 @@ bool BarelyEffect_Process(BarelyEffect* effect, double* output_samples,
                           double timestamp) {
   if (!effect) return false;
 
-  return effect->Process(output_samples, output_channel_count, output_frame_count, timestamp);
+  return effect->Process(output_samples, output_channel_count, output_frame_count,
+                         effect->musician().GetFramesFromSeconds(timestamp));
 }
 
 bool BarelyEffect_ResetAllControls(BarelyEffect* effect) {
@@ -268,7 +279,8 @@ bool BarelyInstrument_Process(BarelyInstrument* instrument, double* output_sampl
                               double timestamp) {
   if (!instrument) return false;
 
-  return instrument->Process(output_samples, output_channel_count, output_frame_count, timestamp);
+  return instrument->Process(output_samples, output_channel_count, output_frame_count,
+                             instrument->musician().GetFramesFromSeconds(timestamp));
 }
 
 bool BarelyInstrument_ResetAllControls(BarelyInstrument* instrument) {

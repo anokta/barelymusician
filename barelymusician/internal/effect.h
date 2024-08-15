@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_INTERNAL_EFFECT_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <unordered_map>
 #include <vector>
 
@@ -18,8 +19,8 @@ class Effect {
   ///
   /// @param definition Effect definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @param initial_timestamp Initial timestamp in seconds.
-  Effect(const EffectDefinition& definition, int frame_rate, double initial_timestamp) noexcept;
+  /// @param update_frame Update frame.
+  Effect(const EffectDefinition& definition, int frame_rate, int64_t update_frame) noexcept;
 
   /// Destroys `Effect`.
   ~Effect() noexcept;
@@ -37,15 +38,15 @@ class Effect {
   [[nodiscard]] Control* GetControl(int id) noexcept;
   [[nodiscard]] const Control* GetControl(int id) const noexcept;
 
-  /// Processes output samples at timestamp.
+  /// Processes output samples.
   ///
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
+  /// @param process_frame Process frame.
   /// @return True if successful, false otherwise.
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept;
+               int64_t process_frame) noexcept;
 
   /// Resets all control values.
   void ResetAllControls() noexcept;
@@ -63,8 +64,8 @@ class Effect {
 
   /// Updates the instrument.
   ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept;
+  /// @param update_frame Update frame.
+  void Update(int64_t update_frame) noexcept;
 
  private:
   // Destroy callback.
@@ -78,9 +79,6 @@ class Effect {
 
   // Set data callback.
   const EffectDefinition::SetDataCallback set_data_callback_;
-
-  // Frame rate in hertz.
-  const int frame_rate_;
 
   // Control map.
   ControlMap control_map_;

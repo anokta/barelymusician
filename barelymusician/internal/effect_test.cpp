@@ -38,14 +38,14 @@ TEST(EffectTest, Process) {
   constexpr int kChannelCount = 1;
   constexpr int kFrameCount = 4;
 
-  Effect effect(GetTestDefinition(), kFrameRate, 0.0);
+  Effect effect(GetTestDefinition(), kFrameRate, 0);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  effect.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);
+  effect.Process(buffer.data(), kChannelCount, kFrameCount, 0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0);
     }
   }
 
@@ -53,7 +53,7 @@ TEST(EffectTest, Process) {
   effect.GetControl(0)->SetValue(5.0);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  effect.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);
+  effect.Process(buffer.data(), kChannelCount, kFrameCount, 0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 5.0);

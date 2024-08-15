@@ -21,10 +21,9 @@ class Instrument {
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @param initial_timestamp Initial timestamp in seconds.
+  /// @param update_frame Update frame.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate,
-             double initial_timestamp) noexcept;
+  Instrument(const InstrumentDefinition& definition, int frame_rate, int64_t update_frame) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -56,16 +55,16 @@ class Instrument {
   /// @return True if on, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
 
-  /// Processes output samples at timestamp.
+  /// Processes output samples.
   ///
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
+  /// @param process_frame Process frame.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept;
+               int64_t process_frame) noexcept;
 
   /// Resets all control values.
   void ResetAllControls() noexcept;
@@ -123,8 +122,8 @@ class Instrument {
 
   /// Updates the instrument.
   ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept;
+  /// @param update_frame Update frame.
+  void Update(int64_t update_frame) noexcept;
 
  private:
   // Note control event alias.
@@ -156,9 +155,6 @@ class Instrument {
 
   // Set note on callback.
   const InstrumentDefinition::SetNoteOnCallback set_note_on_callback_;
-
-  // Frame rate in hertz.
-  const int frame_rate_;
 
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;

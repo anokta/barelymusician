@@ -50,6 +50,12 @@ class Musician {
   /// @return Frame rate in hertz.
   [[nodiscard]] int GetFrameRate() const noexcept;
 
+  /// Returns the corresponding number of frames for a given number of seconds.
+  ///
+  /// @param seconds Number of seconds.
+  /// @return Number of frames.
+  [[nodiscard]] int64_t GetFramesFromSeconds(double seconds) const noexcept;
+
   /// Returns the corresponding number of seconds for a given number of beats.
   ///
   /// @param beats Number of beats.
@@ -65,6 +71,11 @@ class Musician {
   ///
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
+
+  /// Returns update frame.
+  ///
+  /// @return Update frame.
+  [[nodiscard]] int64_t GetUpdateFrame() const noexcept;
 
   /// Removes effect.
   ///
@@ -113,6 +124,9 @@ class Musician {
 
   // Timestamp in seconds.
   double timestamp_ = 0.0;
+
+  // Update frame.
+  int64_t update_frame_ = 0;
 };
 
 }  // namespace barely::internal

@@ -12,7 +12,7 @@ if(ENABLE_DAISY)
   FetchContent_Declare(
     libdaisy
     GIT_REPOSITORY https://github.com/electro-smith/libDaisy.git
-    GIT_TAG ae9b45e2927aafba5f261f2ff36e3f41ae74d019
+    GIT_TAG 8d106a2c822f687bcb8c86bed0b6f2c22f680999
   )
   FetchContent_MakeAvailable(libdaisy)
   target_compile_definitions(
@@ -67,7 +67,7 @@ if(ENABLE_TESTS)
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG e2239ee6043f73722e7aa812a459f54a28552929
+    GIT_TAG b514bdc898e2951020cbdca1304b75f5950d1f59
   )
   if(MSVC)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -85,7 +85,7 @@ if(ENABLE_EXAMPLES)
   FetchContent_Declare(
     dr_libs
     GIT_REPOSITORY https://github.com/mackron/dr_libs.git
-    GIT_TAG 4aff56541f5e6bd4b74053a0d5c9e6156e736059
+    GIT_TAG da35f9d6c7374a95353fd1df1d394d44ab66cf01
   )
   FetchContent_MakeAvailable(dr_libs)
   add_library(
@@ -97,7 +97,7 @@ if(ENABLE_EXAMPLES)
   FetchContent_Declare(
     midifile
     GIT_REPOSITORY https://github.com/craigsapp/midifile.git
-    GIT_TAG de6aa0c8f82f9dff29b62dba013a65c9034d633d
+    GIT_TAG f79e8ea395b858ceb6e0d8f353885ff80773dc76
   )
   FetchContent_MakeAvailable(midifile)
   target_compile_options(

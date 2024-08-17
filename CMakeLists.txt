@@ -1,14 +1,24 @@
 cmake_minimum_required(VERSION 3.20)
 
-unset(ENABLE_EXAMPLES CACHE)
-unset(ENABLE_TESTS CACHE)
-unset(ENABLE_DAISY CACHE)
-unset(ENABLE_UNITY CACHE)
+if(NOT DEFINED ENABLE_EXAMPLES)
+  set(ENABLE_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
+endif()
+option(ENABLE_EXAMPLES "Build examples" ${ENABLE_EXAMPLES})
 
-option(ENABLE_EXAMPLES "Build examples" OFF)
-option(ENABLE_TESTS "Build tests" OFF)
-option(ENABLE_DAISY "Build daisy platform" OFF)
-option(ENABLE_UNITY "Build unity platform" OFF)
+if(NOT DEFINED ENABLE_TESTS)
+  set(ENABLE_TESTS OFF CACHE BOOL "Build tests" FORCE)
+endif()
+option(ENABLE_TESTS "Build tests" ${ENABLE_TESTS})
+
+if(NOT DEFINED ENABLE_DAISY)
+  set(ENABLE_DAISY OFF CACHE BOOL "Build Daisy platform" FORCE)
+endif()
+option(ENABLE_DAISY "Build Daisy platform" ${ENABLE_DAISY})
+
+if(NOT DEFINED ENABLE_UNITY)
+  set(ENABLE_UNITY OFF CACHE BOOL "Build Unity platform" FORCE)
+endif()
+option(ENABLE_UNITY "Build Unity platform" ${ENABLE_UNITY})
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER predefined)

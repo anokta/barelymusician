@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cctype>
 #include <chrono>
+#include <cmath>
 #include <iterator>
 #include <optional>
 #include <string>

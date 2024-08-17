@@ -113,7 +113,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   sequencer_demo
   barelymusician
-  barelymusician_midi
   barelymusician_pitch
   barelymusician_oscillator
   barelymusician_synth_instrument
@@ -126,7 +125,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   trigger_demo
   barelymusician
-  barelymusician_midi
   barelymusician_pitch
   barelymusician_oscillator
   barelymusician_synth_instrument

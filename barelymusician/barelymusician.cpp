@@ -253,24 +253,24 @@ bool BarelyInstrument_GetControl(const BarelyInstrument* instrument, int32_t id,
   return false;
 }
 
-bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, double pitch, int32_t id,
+bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, double note, int32_t id,
                                      double* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
 
-  if (const auto* note_control = instrument->GetNoteControl(pitch, id); note_control != nullptr) {
+  if (const auto* note_control = instrument->GetNoteControl(note, id); note_control != nullptr) {
     *out_value = note_control->GetValue();
     return true;
   }
   return false;
 }
 
-bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, double pitch,
+bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, double note,
                                bool* out_is_note_on) {
   if (!instrument) return false;
   if (!out_is_note_on) return false;
 
-  *out_is_note_on = instrument->IsNoteOn(pitch);
+  *out_is_note_on = instrument->IsNoteOn(note);
   return true;
 }
 
@@ -290,10 +290,10 @@ bool BarelyInstrument_ResetAllControls(BarelyInstrument* instrument) {
   return true;
 }
 
-bool BarelyInstrument_ResetAllNoteControls(BarelyInstrument* instrument, double pitch) {
+bool BarelyInstrument_ResetAllNoteControls(BarelyInstrument* instrument, double note) {
   if (!instrument) return false;
 
-  return instrument->ResetAllNoteControls(pitch);
+  return instrument->ResetAllNoteControls(note);
 }
 
 bool BarelyInstrument_ResetControl(BarelyInstrument* instrument, int32_t id) {
@@ -306,10 +306,10 @@ bool BarelyInstrument_ResetControl(BarelyInstrument* instrument, int32_t id) {
   return false;
 }
 
-bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, double pitch, int32_t id) {
+bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, double note, int32_t id) {
   if (!instrument) return false;
 
-  if (auto* note_control = instrument->GetNoteControl(pitch, id); note_control != nullptr) {
+  if (auto* note_control = instrument->GetNoteControl(note, id); note_control != nullptr) {
     note_control->ResetValue();
     return true;
   }
@@ -350,11 +350,11 @@ bool BarelyInstrument_SetData(BarelyInstrument* instrument, const void* data, in
   return true;
 }
 
-bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, double pitch, int32_t id,
+bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, double note, int32_t id,
                                      double value) {
   if (!instrument) return false;
 
-  if (auto* note_control = instrument->GetNoteControl(pitch, id); note_control != nullptr) {
+  if (auto* note_control = instrument->GetNoteControl(note, id); note_control != nullptr) {
     note_control->SetValue(value);
     return true;
   }
@@ -370,10 +370,10 @@ bool BarelyInstrument_SetNoteControlEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOff(BarelyInstrument* instrument, double pitch) {
+bool BarelyInstrument_SetNoteOff(BarelyInstrument* instrument, double note) {
   if (!instrument) return false;
 
-  instrument->SetNoteOff(pitch);
+  instrument->SetNoteOff(note);
   return true;
 }
 
@@ -385,10 +385,10 @@ bool BarelyInstrument_SetNoteOffEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, double pitch, double intensity) {
+bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, double note, double intensity) {
   if (!instrument) return false;
 
-  instrument->SetNoteOn(pitch, intensity);
+  instrument->SetNoteOn(note, intensity);
   return true;
 }
 

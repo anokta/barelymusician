@@ -67,12 +67,12 @@ constexpr double kTempo = 124.0;
 constexpr int kBeatCount = 3;
 
 // Ensemble settings.
-constexpr double kRootNote = barely::kPitchD4;
+constexpr double kRootNote = barely::kNoteD4;
 
 constexpr char kDrumsDir[] = "audio/drums/";
 
 // Inserts pad data to a given `data` from a given `file_path`.
-void InsertPadData(double pitch, const std::string& file_path, std::vector<double>& data) {
+void InsertPadData(double note, const std::string& file_path, std::vector<double>& data) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
@@ -81,24 +81,24 @@ void InsertPadData(double pitch, const std::string& file_path, std::vector<doubl
   const auto& sample_data = sample_file.GetData();
   const double length = static_cast<double>(sample_data.size());
   data.reserve(data.size() + sample_data.size() + 3);
-  data.push_back(pitch);
+  data.push_back(note);
   data.push_back(frame_rate);
   data.push_back(length);
   data.insert(data.end(), sample_data.begin(), sample_data.end());
 }
 
 // Schedules performer to play an instrument note.
-void ScheduleNote(double position, double duration, double pitch, double intensity,
+void ScheduleNote(double position, double duration, double note, double intensity,
                   Instrument& instrument, Performer& performer) {
   performer.ScheduleOneOffTask(
-      [pitch, intensity, &instrument]() { instrument.SetNoteOn(pitch, intensity); }, position);
-  performer.ScheduleOneOffTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
+      [note, intensity, &instrument]() { instrument.SetNoteOn(note, intensity); }, position);
+  performer.ScheduleOneOffTask([note, &instrument]() { instrument.SetNoteOff(note); },
                                position + duration);
 }
 
 void ComposeChord(double intensity, int harmonic, Instrument& instrument, Performer& performer) {
   const auto add_chord_note = [&](int index) {
-    ScheduleNote(0.0, 1.0, kRootNote + barely::PitchFromScale(barely::kPitchMajorScale, index),
+    ScheduleNote(0.0, 1.0, kRootNote * barely::PitchFromScale(barely::kPitchMajorScale, index),
                  intensity, instrument, performer);
   };
   add_chord_note(harmonic);
@@ -112,7 +112,11 @@ void ComposeLine(double octave_offset, double intensity, int bar, int beat, int 
   const auto add_note = [&](double begin_position, double end_position, int index) {
     ScheduleNote(
         begin_position, end_position - begin_position,
-        kRootNote + octave_offset + barely::PitchFromScale(barely::kPitchMajorScale, index),
+        kRootNote * barely::PitchFromScale(
+                        barely::kPitchMajorScale,
+                        static_cast<int>(octave_offset *
+                                         static_cast<double>(barely::kPitchMajorScale.size())) +
+                            index),
         intensity, instrument, performer);
   };
   if (beat % 2 == 1) {
@@ -138,43 +142,43 @@ void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument&
   const auto get_beat = [](int step) {
     return static_cast<double>(step) / barely::kSixteenthNotesPerBeat;
   };
-  const auto add_note = [&](double begin_position, double end_position, double pitch,
+  const auto add_note = [&](double begin_position, double end_position, double note,
                             double intensity) {
-    ScheduleNote(begin_position, end_position - begin_position, pitch, intensity, instrument,
+    ScheduleNote(begin_position, end_position - begin_position, note, intensity, instrument,
                  performer);
   };
 
   // Kick.
   if (beat % 2 == 0) {
-    add_note(get_beat(0), get_beat(2), barely::kPitchKick, 1.0);
+    add_note(get_beat(0), get_beat(2), barely::kNoteKick, 1.0);
     if (bar % 2 == 1 && beat == 0) {
-      add_note(get_beat(2), get_beat(4), barely::kPitchKick, 1.0);
+      add_note(get_beat(2), get_beat(4), barely::kNoteKick, 1.0);
     }
   }
   // Snare.
   if (beat % 2 == 1) {
-    add_note(get_beat(0), get_beat(2), barely::kPitchSnare, 1.0);
+    add_note(get_beat(0), get_beat(2), barely::kNoteSnare, 1.0);
   }
   if (beat + 1 == beat_count) {
-    add_note(get_beat(2), get_beat(4), barely::kPitchSnare, 0.75);
+    add_note(get_beat(2), get_beat(4), barely::kNoteSnare, 0.75);
     if (bar % 4 == 3) {
-      add_note(get_beat(1), get_beat(2), barely::kPitchSnare, 1.0);
-      add_note(get_beat(3), get_beat(4), barely::kPitchSnare, 0.75);
+      add_note(get_beat(1), get_beat(2), barely::kNoteSnare, 1.0);
+      add_note(get_beat(3), get_beat(4), barely::kNoteSnare, 0.75);
     }
   }
   // Hihat Closed.
-  add_note(get_beat(0), get_beat(2), barely::kPitchHihatClosed, random.DrawUniform(0.5, 0.75));
-  add_note(get_beat(2), get_beat(4), barely::kPitchHihatClosed, random.DrawUniform(0.25, 0.75));
+  add_note(get_beat(0), get_beat(2), barely::kNoteHihatClosed, random.DrawUniform(0.5, 0.75));
+  add_note(get_beat(2), get_beat(4), barely::kNoteHihatClosed, random.DrawUniform(0.25, 0.75));
   // Hihat Open.
   if (beat + 1 == beat_count) {
     if (bar % 4 == 3) {
-      add_note(get_beat(1), get_beat(2), barely::kPitchHihatOpen, 0.5);
+      add_note(get_beat(1), get_beat(2), barely::kNoteHihatOpen, 0.5);
     } else if (bar % 2 == 0) {
-      add_note(get_beat(3), get_beat(4), barely::kPitchHihatOpen, 0.5);
+      add_note(get_beat(3), get_beat(4), barely::kNoteHihatOpen, 0.5);
     }
   }
   if (beat == 0 && bar % 4 == 0) {
-    add_note(get_beat(0), get_beat(2), barely::kPitchHihatOpen, 0.75);
+    add_note(get_beat(0), get_beat(2), barely::kNoteHihatOpen, 0.75);
   }
 }
 
@@ -194,11 +198,11 @@ int main(int /*argc*/, char* argv[]) {
 
   // Note on callback.
   const auto set_note_callbacks_fn = [&](auto index, Instrument& instrument) {
-    instrument.SetNoteOffEvent([index](double pitch) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
+    instrument.SetNoteOffEvent([index](double note) {
+      ConsoleLog() << "Instrument #" << index << ": NoteOff(" << note << ")";
     });
-    instrument.SetNoteOnEvent([index](double pitch, double intensity) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", " << intensity << ")";
+    instrument.SetNoteOnEvent([index](double note, double intensity) {
+      ConsoleLog() << "Instrument #" << index << ": NoteOn(" << note << ", " << intensity << ")";
     });
   };
 
@@ -258,16 +262,16 @@ int main(int /*argc*/, char* argv[]) {
       [&](const std::unordered_map<double, std::string>& percussion_map) {
         std::vector<double> data;
         data.push_back(static_cast<double>(percussion_map.size()));
-        for (const auto& [pitch, file_path] : percussion_map) {
-          InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), data);
+        for (const auto& [note, file_path] : percussion_map) {
+          InsertPadData(note, GetDataFilePath(kDrumsDir + file_path, argv), data);
         }
         percussion.SetData(data);
       };
   set_percussion_pad_map_fn({
-      {barely::kPitchKick, "basic_kick.wav"},
-      {barely::kPitchSnare, "basic_snare.wav"},
-      {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
-      {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
+      {barely::kNoteKick, "basic_kick.wav"},
+      {barely::kNoteSnare, "basic_snare.wav"},
+      {barely::kNoteHihatClosed, "basic_hihat_closed.wav"},
+      {barely::kNoteHihatOpen, "basic_hihat_open.wav"},
   });
   const auto percussion_beat_composer_callback = [&](int bar, int beat, int beat_count,
                                                      int /*harmonic*/, Instrument& instrument,
@@ -363,18 +367,18 @@ int main(int /*argc*/, char* argv[]) {
         break;
       case 'D':
         set_percussion_pad_map_fn({
-            {barely::kPitchKick, "basic_kick.wav"},
-            {barely::kPitchSnare, "basic_snare.wav"},
-            {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
-            {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
+            {barely::kNoteKick, "basic_kick.wav"},
+            {barely::kNoteSnare, "basic_snare.wav"},
+            {barely::kNoteHihatClosed, "basic_hihat_closed.wav"},
+            {barely::kNoteHihatOpen, "basic_hihat_open.wav"},
         });
         break;
       case 'H':
         set_percussion_pad_map_fn({
-            {barely::kPitchKick, "basic_hihat_closed.wav"},
-            {barely::kPitchSnare, "basic_hihat_open.wav"},
-            {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
-            {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
+            {barely::kNoteKick, "basic_hihat_closed.wav"},
+            {barely::kNoteSnare, "basic_hihat_open.wav"},
+            {barely::kNoteHihatClosed, "basic_hihat_closed.wav"},
+            {barely::kNoteHihatOpen, "basic_hihat_open.wav"},
         });
         break;
       default:

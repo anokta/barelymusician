@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/midi.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
@@ -58,9 +57,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
-  });
+  instrument.SetNoteOnEvent(
+      [](double note, double /*intensity*/) { ConsoleLog() << "Note{" << note << "}"; });
 
   std::vector<std::pair<double, double>> triggers;
   std::vector<Task> tasks;
@@ -68,15 +66,24 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Performer performer(musician);
 
   const auto play_note_fn = [&](int scale_index, double duration) {
-    const double pitch =
-        barely::kPitchD3 + barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
-    return [&instrument, &performer, duration, pitch]() {
-      instrument.SetNoteOn(pitch);
+    const double note =
+        barely::kNoteD3 * barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
+    return [&instrument, &performer, duration, note]() {
+      instrument.SetNoteOn(note);
       performer.ScheduleOneOffTask(
-          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
+          [&instrument, &performer, note]() { instrument.SetNoteOff(note); },
           performer.GetPosition() + duration);
     };
   };
+
+  // Stopper.
+  Task stopper(
+      performer,
+      [&]() {
+        performer.Stop();
+        instrument.SetAllNotesOff();
+      },
+      0.0);
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
@@ -99,9 +106,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
   tasks.emplace_back(performer, play_note_fn(8, 2.0), 5.0);
-
-  // Stopper.
-  Task stopper(performer, [&performer]() { performer.Stop(); }, 0.0);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {

@@ -13,7 +13,7 @@ typedef struct BarelyRepeater BarelyRepeater;
 /// Repeater style enum alias.
 typedef int32_t BarelyRepeaterStyle;
 
-/// Clears all pitches.
+/// Clears all notes.
 ///
 /// @param repeater Pointer to repeater.
 /// @return True if successful, false otherwise.
@@ -50,10 +50,10 @@ BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeater* repeater);
 /// Pushes a new note to the end.
 ///
 /// @param repeater Pointer to repeater.
-/// @param pitch Note pitch.
+/// @param note Note value.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeater* repeater, double pitch, int32_t length);
+BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeater* repeater, double note, int32_t length);
 
 /// Pushes silence to the end.
 ///
@@ -87,9 +87,9 @@ BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeater* repeater, BarelyRepea
 /// Starts the repeater.
 ///
 /// @param repeater Pointer to repeater.
-/// @param pitch_shift Note pitch shift.
+/// @param note_multiplier Note multiplier.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeater* repeater, double pitch_shift);
+BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeater* repeater, double note_multiplier);
 
 /// Stops the repeater.
 ///
@@ -138,7 +138,7 @@ class Repeater {
   Repeater(Repeater&& other) noexcept = default;
   Repeater& operator=(Repeater&& other) noexcept = default;
 
-  /// Clears all pitches.
+  /// Clears all notes.
   void Clear() noexcept;
 
   /// Returns whether the repeater is playing or not.
@@ -152,10 +152,10 @@ class Repeater {
 
   /// Pushes a new note to the end.
   ///
-  /// @param pitch_or Note pitch or silence.
+  /// @param note_or Note value or silence.
   /// @param length Note length.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Push(std::optional<double> pitch_or, int length = 1) noexcept;
+  void Push(std::optional<double> note_or, int length = 1) noexcept;
 
   /// Sets the instrument.
   ///
@@ -174,9 +174,9 @@ class Repeater {
 
   /// Starts the repeater.
   ///
-  /// @param pitch_shift Note pitch shift.
+  /// @param note_multiplier Note multiplier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Start(double pitch_shift = 0.0) noexcept;
+  void Start(double note_multiplier = 1.0) noexcept;
 
   /// Stop the repeater.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -192,8 +192,8 @@ class Repeater {
   // Instrument.
   std::optional<InstrumentPtr> instrument_ = std::nullopt;
 
-  // List of pitches to play.
-  std::vector<std::pair<std::optional<double>, int>> pitches_;
+  // Array of notes to play.
+  std::vector<std::pair<std::optional<double>, int>> notes_;
 
   // Style.
   RepeaterStyle style_ = RepeaterStyle::kForward;
@@ -201,8 +201,8 @@ class Repeater {
   // Current index.
   int index_ = -1;
 
-  // Pitch shift.
-  double pitch_shift_ = 0.0;
+  // Note multiplier.
+  double note_multiplier_ = 1.0;
 
   // Remaining length;
   int remaining_length_ = 0;

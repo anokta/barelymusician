@@ -32,25 +32,26 @@ TEST(MidiTest, IntensityMidiVelocityConversion) {
   }
 }
 
-// Tests that the expected note pitches are returned for the given midi note numbers.
-TEST(MidiTest, MidiNumberPitchConversion) {
-  constexpr std::array<int, static_cast<int>(kSemitoneCount)> kMidiNumbers = {
-      kMidiNumberA4,     kMidiNumberA4 + 1, kMidiNumberA4 + 2,  kMidiNumberA4 + 3,
-      kMidiNumberA4 + 4, kMidiNumberA4 + 5, kMidiNumberA4 + 6,  kMidiNumberA4 + 7,
-      kMidiNumberA4 + 8, kMidiNumberA4 + 9, kMidiNumberA4 + 10, kMidiNumberA4 + 11,
+// Tests that converting arbitrary midi note numbers returns the expected frequencies.
+TEST(MidiTest, FrequencyFromMidiNumber) {
+  constexpr double kEpsilon = 1e-2;
+
+  constexpr int kMidiNumberCount = 4;
+  constexpr std::array<int, kMidiNumberCount> kMidiNumbers = {
+      21,
+      60,
+      69,
+      93,
   };
-  constexpr std::array<double, static_cast<int>(kSemitoneCount)> kPitches = {
-      kPitchA4,      kPitchAsharp4, kPitchB4, kPitchC5,      kPitchCsharp5, kPitchD5,
-      kPitchDsharp5, kPitchE5,      kPitchF5, kPitchFsharp5, kPitchG5,      kPitchGsharp5,
+  constexpr std::array<double, kMidiNumberCount> kFrequencies = {
+      27.50,
+      261.62,
+      440.00,
+      1760.00,
   };
 
-  for (int i = 0; i < static_cast<int>(kSemitoneCount); ++i) {
-    EXPECT_DOUBLE_EQ(MidiNumberFromPitch(kPitches[i]), kMidiNumbers[i]);
-    EXPECT_DOUBLE_EQ(PitchFromMidiNumber(kMidiNumbers[i]), kPitches[i]);
-
-    // Verify that the back and forth conversions do not mutate the value.
-    EXPECT_DOUBLE_EQ(MidiNumberFromPitch(PitchFromMidiNumber(kMidiNumbers[i])), kMidiNumbers[i]);
-    EXPECT_DOUBLE_EQ(PitchFromMidiNumber(MidiNumberFromPitch(kPitches[i])), kPitches[i]);
+  for (int i = 0; i < kMidiNumberCount; ++i) {
+    EXPECT_NEAR(FrequencyFromMidiNumber(kMidiNumbers[i]), kFrequencies[i], kEpsilon);
   }
 }
 

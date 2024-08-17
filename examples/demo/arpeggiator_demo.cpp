@@ -2,7 +2,6 @@
 #include <array>
 #include <cctype>
 #include <chrono>
-#include <iomanip>
 #include <iterator>
 #include <optional>
 #include <thread>
@@ -50,19 +49,23 @@ constexpr double kInitialTempo = 100.0;
 constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kUp;
 
 // Note settings.
-constexpr double kRootPitch = barely::kPitchC4;
+constexpr double kRootNote = barely::kNoteC4;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kMaxOffsetOctaves = 3.0;
+constexpr double kMaxOctave = 3.0;
 
-// Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(const InputManager::Key& key) {
+// Returns the note for a given `key`.
+std::optional<double> NoteFromKey(int octave, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  const double distance = static_cast<double>(std::distance(kOctaveKeys.begin(), it));
-  return kRootPitch + distance / barely::kSemitoneCount;
+  int distance = static_cast<int>(std::distance(kOctaveKeys.begin(), it));
+  if (distance == barely::kSemitoneCount) {
+    ++octave;
+    distance = 0;
+  }
+  return std::pow(2.0, octave) * kRootNote * barely::kSemitoneRatios[distance];
 }
 
 }  // namespace
@@ -84,9 +87,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
-  });
+  instrument.SetNoteOnEvent(
+      [](double note, double /*intensity*/) { ConsoleLog() << "Note(" << note << ")"; });
 
   Arpeggiator arpeggiator(musician);
   arpeggiator.SetInstrument(instrument);
@@ -101,7 +103,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  double offset_octaves = 0.0;
+  double octave = 0.0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -115,18 +117,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
       // Shift octaves.
       arpeggiator.SetAllNotesOff();
       if (upper_key == 'Z') {
-        --offset_octaves;
+        --octave;
       } else {
-        ++offset_octaves;
+        ++octave;
       }
-      offset_octaves = std::clamp(offset_octaves, -kMaxOffsetOctaves, kMaxOffsetOctaves);
-      ConsoleLog() << "Octave offset set to " << offset_octaves;
+      octave = std::clamp(octave, -kMaxOctave, kMaxOctave);
+      ConsoleLog() << "Octave offset set to " << octave;
       return;
     }
 
     // Play note.
-    if (const auto pitch = PitchFromKey(key)) {
-      arpeggiator.SetNoteOn(offset_octaves + *pitch);
+    if (const auto note = NoteFromKey(octave, key)) {
+      arpeggiator.SetNoteOn(*note);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -134,8 +136,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    if (const auto pitch = PitchFromKey(key)) {
-      arpeggiator.SetNoteOff(offset_octaves + *pitch);
+    if (const auto note = NoteFromKey(octave, key)) {
+      arpeggiator.SetNoteOff(*note);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

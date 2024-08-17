@@ -39,8 +39,8 @@ constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.025;
 constexpr int kVoiceCount = 1;
 
-constexpr double kBarPitch = barely::kPitchA4;
-constexpr double kBeatPitch = barely::kPitchA3;
+constexpr double kBarNote = 440.0;
+constexpr double kBeatNote = 220.0;
 
 constexpr int kBeatCount = 4;
 constexpr double kInitialTempo = 120.0;
@@ -72,9 +72,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
-    instrument.SetNoteOn(pitch);
-    instrument.SetNoteOff(pitch);
+    const double note = current_beat == 1 ? kBarNote : kBeatNote;
+    instrument.SetNoteOn(note);
+    instrument.SetNoteOff(note);
   });
 
   // Audio process callback.

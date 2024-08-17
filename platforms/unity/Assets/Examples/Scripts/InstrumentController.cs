@@ -13,9 +13,9 @@ namespace Barely {
       // Repeater to control.
       public Repeater repeater = null;
 
-      // Root note pitch.
-      [Range(0.0f, 1.0f)]
-      public double rootPitch = 0.0;
+      // Root note.
+      [Range(0, 127)]
+      public int rootNote = 60;
 
       // Octave offset.
       [Range(-3, 3)]
@@ -80,21 +80,22 @@ namespace Barely {
         for (int i = 0; i < _octaveKeys.Length; ++i) {
           if (Input.GetKeyDown(_octaveKeys[i])) {
             if (arpeggiator != null) {
-              arpeggiator.SetNoteOn(GetPitchFromKeyIndex(i));
+              arpeggiator.SetNoteOn(GetNoteFromKeyIndex(i));
             } else if (_isRepeaterActive) {
               repeater.Stop();
-              repeater.Play(GetPitchFromKeyIndex(i) - rootPitch);
+              repeater.Play(Musician.GetFrequencyFromMidiKey(i) /
+                            Musician.GetFrequencyFromMidiKey(-octaveOffset * 12));
             } else if (instrument != null) {
-              instrument.SetNoteOn(GetPitchFromKeyIndex(i), noteIntensity);
+              instrument.SetNoteOn(GetNoteFromKeyIndex(i), noteIntensity);
               if (repeater != null) {
-                repeater.Push(GetPitchFromKeyIndex(i), repeaterNoteLength);
+                repeater.Push(GetNoteFromKeyIndex(i), repeaterNoteLength);
               }
             }
           } else if (Input.GetKeyUp(_octaveKeys[i])) {
             if (arpeggiator != null) {
-              arpeggiator.SetNoteOff(GetPitchFromKeyIndex(i));
+              arpeggiator.SetNoteOff(GetNoteFromKeyIndex(i));
             } else if (instrument != null) {
-              instrument.SetNoteOff(GetPitchFromKeyIndex(i));
+              instrument.SetNoteOff(GetNoteFromKeyIndex(i));
             }
           }
         }
@@ -108,9 +109,9 @@ namespace Barely {
         }
       }
 
-      // Returns the corresponding pitch for the given key.
-      private double GetPitchFromKeyIndex(int keyIndex) {
-        return rootPitch + octaveOffset + (double)keyIndex / 12.0;
+      // Returns the corresponding note for the given key.
+      private double GetNoteFromKeyIndex(int keyIndex) {
+        return Musician.GetFrequencyFromMidiKey(octaveOffset * 12 + rootNote + keyIndex);
       }
     }
   }  // namespace Examples

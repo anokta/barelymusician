@@ -4,11 +4,11 @@
 #include "barelymusician/instruments/synth_instrument.h"
 #include "daisy_pod.h"
 
+using ::barely::FrequencyFromMidiNumber;
 using ::barely::Instrument;
 using ::barely::InstrumentPtr;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::PitchFromMidiNumber;
 using ::barely::SynthInstrument;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
@@ -45,8 +45,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
     osc_index = (osc_index + increment + kOscCount) % kOscCount;
-    instrument_ptr.GetControl(SynthInstrument::Control::kOscillatorType)
-        .SetValue(static_cast<OscillatorType>(osc_index));
+    instrument_ptr.SetControl(SynthInstrument::Control::kOscillatorType,
+                              static_cast<OscillatorType>(osc_index));
   }
 
   // Process samples.
@@ -94,11 +94,11 @@ int main(void) {
       switch (midi_event.type) {
         case MidiMessageType::NoteOn:
           if (const auto note_on_event = midi_event.AsNoteOn(); note_on_event.velocity != 0) {
-            instrument.SetNoteOn(PitchFromMidiNumber(note_on_event.note));
+            instrument.SetNoteOn(FrequencyFromMidiNumber(note_on_event.note));
           }
           break;
         case MidiMessageType::NoteOff:
-          instrument.SetNoteOff(PitchFromMidiNumber(midi_event.AsNoteOff().note));
+          instrument.SetNoteOff(FrequencyFromMidiNumber(midi_event.AsNoteOff().note));
           break;
         default:
           break;

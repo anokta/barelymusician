@@ -30,11 +30,11 @@ namespace Barely {
             Color.Lerp(GetComponent<Renderer>().material.color, targetColor, 8 * Time.deltaTime);
       }
 
-      private void OnNoteOff(double pitch) {
+      private void OnNoteOff(double note) {
         targetColor = noteOffColor;
       }
 
-      private void OnNoteOn(double pitch, double intensity) {
+      private void OnNoteOn(double note, double intensity) {
         targetColor = Color.Lerp(noteOffColor, noteOnColor, (float)intensity);
         GetComponent<Renderer>().material.color = targetColor;
       }

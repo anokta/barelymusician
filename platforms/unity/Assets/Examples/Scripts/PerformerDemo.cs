@@ -14,9 +14,9 @@ namespace Barely {
 
       public void OnProcess() {
         int midiNumber = 33 + Random.Range(0, 4) * 12 + scale[Random.Range(0, scale.Length)];
-        double pitch = Musician.GetPitchFromMidiKey(midiNumber);
-        instrument.SetNoteOn(pitch);
-        performer.ScheduleOneOffTask(delegate() { instrument.SetNoteOff(pitch); },
+        double note = Musician.GetFrequencyFromMidiKey(midiNumber);
+        instrument.SetNoteOn(note);
+        performer.ScheduleOneOffTask(delegate() { instrument.SetNoteOff(note); },
                                      performer.LoopLength);
 
         text.text = midiNumber.ToString();

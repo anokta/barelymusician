@@ -5,12 +5,6 @@ add_library(
 )
 
 add_library(
-  barelymusician_dsp_utils
-  dsp_utils.cpp
-  dsp_utils.h
-)
-
-add_library(
   barelymusician_envelope
   envelope.cpp
   envelope.h
@@ -63,7 +57,6 @@ add_library(
 )
 target_link_libraries(
   barelymusician_oscillator
-  barelymusician_dsp_utils
   barelymusician_generator
   barelymusician_random
 )
@@ -99,17 +92,6 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_decibels_test)
-
-  add_executable(
-    barelymusician_dsp_utils_test
-    dsp_utils_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_dsp_utils_test
-    barelymusician_dsp_utils
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_dsp_utils_test)
 
   add_executable(
     barelymusician_envelope_test

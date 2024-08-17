@@ -43,17 +43,17 @@ class Instrument {
 
   /// Returns a note control value.
   ///
-  /// @param pitch Note pitch.
+  /// @param note Note value.
   /// @param id Note control identifier.
   /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] Control* GetNoteControl(double pitch, int id) noexcept;
-  [[nodiscard]] const Control* GetNoteControl(double pitch, int id) const noexcept;
+  [[nodiscard]] Control* GetNoteControl(double note, int id) noexcept;
+  [[nodiscard]] const Control* GetNoteControl(double note, int id) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
-  /// @param pitch Note pitch.
+  /// @param note Note value.
   /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
+  [[nodiscard]] bool IsNoteOn(double note) const noexcept;
 
   /// Processes output samples.
   ///
@@ -71,9 +71,9 @@ class Instrument {
 
   /// Resets all note control values.
   ///
-  /// @param pitch Note pitch.
+  /// @param note Note value.
   /// @return True if successful, false otherwise.
-  bool ResetAllNoteControls(double pitch) noexcept;
+  bool ResetAllNoteControls(double note) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -98,8 +98,8 @@ class Instrument {
 
   /// Sets a note off.
   ///
-  /// @param pitch Note pitch.
-  void SetNoteOff(double pitch) noexcept;
+  /// @param note Note value.
+  void SetNoteOff(double note) noexcept;
 
   /// Sets the note off event.
   ///
@@ -109,10 +109,10 @@ class Instrument {
 
   /// Sets a note on.
   ///
-  /// @param pitch Note pitch.
+  /// @param note Note value.
   /// @param intensity Note intensity.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch, double intensity) noexcept;
+  void SetNoteOn(double note, double intensity) noexcept;
 
   /// Sets the note on event.
   ///
@@ -162,7 +162,7 @@ class Instrument {
   // Control map.
   ControlMap control_map_;
 
-  // Map of note control maps by their pitches.
+  // Map of note control maps by their note values.
   std::unordered_map<double, ControlMap> note_control_maps_;
 
   // Control event.

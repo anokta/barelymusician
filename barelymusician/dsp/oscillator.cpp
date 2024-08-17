@@ -2,8 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
-
-#include "barelymusician/dsp/dsp_utils.h"
+#include <numbers>
 
 namespace barely {
 
@@ -16,7 +15,7 @@ double Oscillator::Next() noexcept {
   // Generate the next sample.
   switch (type_) {
     case OscillatorType::kSine:
-      output = std::sin(phase_ * kTwoPi);
+      output = std::sin(phase_ * 2.0 * std::numbers::pi_v<double>);
       break;
     case OscillatorType::kSaw:
       output = 2.0 * phase_ - 1.0;

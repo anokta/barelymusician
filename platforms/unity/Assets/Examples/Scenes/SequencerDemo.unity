@@ -540,8 +540,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beatCount: 4
-  barPitch: 1
-  beatPitch: 0
+  barNote: 1
+  beatNote: 0
   intensity: 1
   isLoggingToConsole: 0
   isTicking: 0
@@ -1546,7 +1546,7 @@ MonoBehaviour:
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
-  _processOrder: 0
+  CutoffFrequency: 0
 --- !u!114 &2110623104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1573,7 +1573,7 @@ MonoBehaviour:
       m_Calls: []
   Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   Gain: 1
-  RootPitch: 0
+  RootNote: 440
   Loop: 1
   Attack: 0
   Decay: 0

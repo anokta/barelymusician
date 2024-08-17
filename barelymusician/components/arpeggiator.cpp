@@ -31,11 +31,11 @@ bool BarelyArpeggiator_Destroy(BarelyArpeggiator* arpeggiator) {
   return true;
 }
 
-bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiator* arpeggiator, double pitch,
+bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiator* arpeggiator, double note,
                                 bool* out_is_note_on) {
   if (!arpeggiator || !out_is_note_on) return false;
 
-  *out_is_note_on = arpeggiator->IsNoteOn(pitch);
+  *out_is_note_on = arpeggiator->IsNoteOn(note);
   return true;
 }
 
@@ -68,17 +68,17 @@ bool BarelyArpeggiator_SetInstrument(BarelyArpeggiator* arpeggiator, BarelyInstr
   return true;
 }
 
-bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiator* arpeggiator, double pitch) {
+bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiator* arpeggiator, double note) {
   if (!arpeggiator) return false;
 
-  arpeggiator->SetNoteOff(pitch);
+  arpeggiator->SetNoteOff(note);
   return true;
 }
 
-bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiator* arpeggiator, double pitch) {
+bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiator* arpeggiator, double note) {
   if (!arpeggiator) return false;
 
-  arpeggiator->SetNoteOn(pitch);
+  arpeggiator->SetNoteOn(note);
   return true;
 }
 
@@ -108,12 +108,12 @@ Arpeggiator::Arpeggiator(MusicianPtr musician, int process_order) noexcept
             if (!instrument_.has_value()) {
               return;
             }
-            const double pitch = pitches_[index_];
-            instrument_->SetNoteOn(pitch);
+            const double note = notes_[index_];
+            instrument_->SetNoteOn(note);
             performer_.ScheduleOneOffTask(
-                [this, pitch]() {
+                [this, note]() {
                   if (instrument_ != nullptr) {
-                    instrument_->SetNoteOff(pitch);
+                    instrument_->SetNoteOff(note);
                   }
                 },
                 gate_ratio_ * performer_.GetLoopLength());
@@ -125,15 +125,15 @@ Arpeggiator::Arpeggiator(MusicianPtr musician, int process_order) noexcept
 
 Arpeggiator::~Arpeggiator() noexcept { Stop(); }
 
-bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
-  return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();
+bool Arpeggiator::IsNoteOn(double note) const noexcept {
+  return std::find(notes_.begin(), notes_.end(), note) != notes_.end();
 }
 
 bool Arpeggiator::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 void Arpeggiator::SetAllNotesOff() noexcept {
-  if (!pitches_.empty()) {
-    pitches_.clear();
+  if (!notes_.empty()) {
+    notes_.clear();
     Stop();
   }
 }
@@ -150,21 +150,21 @@ void Arpeggiator::SetInstrument(std::optional<InstrumentPtr> instrument) noexcep
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Arpeggiator::SetNoteOff(double pitch) noexcept {
-  if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch); it != pitches_.end()) {
-    pitches_.erase(it);
-    if (pitches_.empty() && IsPlaying()) {
+void Arpeggiator::SetNoteOff(double note) noexcept {
+  if (const auto it = std::find(notes_.begin(), notes_.end(), note); it != notes_.end()) {
+    notes_.erase(it);
+    if (notes_.empty() && IsPlaying()) {
       Stop();
     }
   }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Arpeggiator::SetNoteOn(double pitch) noexcept {
-  if (const auto it = std::lower_bound(pitches_.begin(), pitches_.end(), pitch);
-      it == pitches_.end() || *it != pitch) {
-    pitches_.insert(it, pitch);
-    if (!pitches_.empty() && !IsPlaying()) {
+void Arpeggiator::SetNoteOn(double note) noexcept {
+  if (const auto it = std::lower_bound(notes_.begin(), notes_.end(), note);
+      it == notes_.end() || *it != note) {
+    notes_.insert(it, note);
+    if (!notes_.empty() && !IsPlaying()) {
       performer_.Start();
     }
   }
@@ -178,7 +178,7 @@ void Arpeggiator::SetRate(double rate) noexcept {
 void Arpeggiator::SetStyle(ArpeggiatorStyle style) noexcept { style_ = style; }
 
 void Arpeggiator::Update() noexcept {
-  const int size = static_cast<int>(pitches_.size());
+  const int size = static_cast<int>(notes_.size());
   switch (style_) {
     case ArpeggiatorStyle::kUp:
       index_ = (index_ + 1) % size;

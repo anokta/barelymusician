@@ -34,21 +34,21 @@ namespace Barely {
 
     /// Set note control callback.
     ///
-    /// @param pitch Note pitch.
+    /// @param note Note value.
     /// @param id Note control identifier.
     /// @param value Note control value.
-    public void OnSetNoteControl(double pitch, int id, double value);
+    public void OnSetNoteControl(double note, int id, double value);
 
     /// Set note off callback.
     ///
-    /// @param pitch Note pitch.
-    public void OnSetNoteOff(double pitch);
+    /// @param note Note value.
+    public void OnSetNoteOff(double note);
 
     /// Set note on callback.
     ///
-    /// @param pitch Note pitch.
+    /// @param note Note value.
     /// @param intensity Note intensity.
-    public void OnSetNoteOn(double pitch, double intensity);
+    public void OnSetNoteOn(double note, double intensity);
   }
 
   /// Custom instrument template that implements a custom instrument.
@@ -130,20 +130,20 @@ namespace Barely {
 
     // Set note control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteControlCallback))]
-    private static void OnSetNoteControl(ref IntPtr state, double pitch, Int32 id, double value) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteControl(pitch, id, value);
+    private static void OnSetNoteControl(ref IntPtr state, double note, Int32 id, double value) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteControl(note, id, value);
     }
 
     // Set note off callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteOffCallback))]
-    private static void OnSetNoteOff(ref IntPtr state, double pitch) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOff(pitch);
+    private static void OnSetNoteOff(ref IntPtr state, double note) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOff(note);
     }
 
     // Set note on callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteOnCallback))]
-    private static void OnSetNoteOn(ref IntPtr state, double pitch, double intensity) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOn(pitch, intensity);
+    private static void OnSetNoteOn(ref IntPtr state, double note, double intensity) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOn(note, intensity);
     }
 
     // Allocates and returns a pointer to an array of control definitions.

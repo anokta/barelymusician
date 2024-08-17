@@ -39,6 +39,13 @@ class OnePoleFilter : public Filter {
   FilterType type_ = FilterType::kLowPass;
 };
 
+/// Returns one-pole filter coefficient for a given cutoff frequency.
+///
+/// @param frame_rate Frame rate in hertz.
+/// @param cuttoff_frequency Cutoff frequency in hertz.
+/// @return Filter coefficient.
+double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept;
+
 }  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_

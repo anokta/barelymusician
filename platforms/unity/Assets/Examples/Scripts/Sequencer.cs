@@ -82,9 +82,9 @@ namespace Barely {
             continue;
           }
           _performer.Tasks.Add(new Task(delegate() {
-            var pitch = Musician.GetPitchFromMidiKey(note.key);
-            instrument?.SetNoteOn(pitch, note.intensity);
-            _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(pitch); },
+            var frequency = Musician.GetFrequencyFromMidiKey(note.key);
+            instrument?.SetNoteOn(frequency, note.intensity);
+            _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(frequency); },
                                           _performer.Position + note.duration);
           }, note.position));
         }

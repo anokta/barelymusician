@@ -59,23 +59,21 @@ const Control* Instrument::GetControl(int id) const noexcept {
   return FindOrNull(control_map_, id);
 }
 
-Control* Instrument::GetNoteControl(double pitch, int id) noexcept {
-  if (auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
+Control* Instrument::GetNoteControl(double note, int id) noexcept {
+  if (auto* note_control_map = FindOrNull(note_control_maps_, note)) {
     return FindOrNull(*note_control_map, id);
   }
   return nullptr;
 }
 
-const Control* Instrument::GetNoteControl(double pitch, int id) const noexcept {
-  if (const auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
+const Control* Instrument::GetNoteControl(double note, int id) const noexcept {
+  if (const auto* note_control_map = FindOrNull(note_control_maps_, note)) {
     return FindOrNull(*note_control_map, id);
   }
   return nullptr;
 }
 
-bool Instrument::IsNoteOn(double pitch) const noexcept {
-  return note_control_maps_.contains(pitch);
-}
+bool Instrument::IsNoteOn(double note) const noexcept { return note_control_maps_.contains(note); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
@@ -112,18 +110,18 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
             },
             [this](NoteControlMessage& note_control_message) noexcept {
               if (set_note_control_callback_) {
-                set_note_control_callback_(&state_, note_control_message.pitch,
+                set_note_control_callback_(&state_, note_control_message.note,
                                            note_control_message.id, note_control_message.value);
               }
             },
             [this](NoteOffMessage& note_off_message) noexcept {
               if (set_note_off_callback_) {
-                set_note_off_callback_(&state_, note_off_message.pitch);
+                set_note_off_callback_(&state_, note_off_message.note);
               }
             },
             [this](NoteOnMessage& note_on_message) noexcept {
               if (set_note_on_callback_) {
-                set_note_on_callback_(&state_, note_on_message.pitch, note_on_message.intensity);
+                set_note_on_callback_(&state_, note_on_message.note, note_on_message.intensity);
               }
             }},
         message->second);
@@ -144,8 +142,8 @@ void Instrument::ResetAllControls() noexcept {
   }
 }
 
-bool Instrument::ResetAllNoteControls(double pitch) noexcept {
-  if (auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
+bool Instrument::ResetAllNoteControls(double note) noexcept {
+  if (auto* note_control_map = FindOrNull(note_control_maps_, note)) {
     for (auto& [id, note_control] : *note_control_map) {
       note_control.ResetValue();
     }
@@ -156,9 +154,9 @@ bool Instrument::ResetAllNoteControls(double pitch) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::SetAllNotesOff() noexcept {
-  for (const auto& [pitch, _] : std::exchange(note_control_maps_, {})) {
-    note_off_event_.Process(pitch);
-    message_queue_.Add(update_frame_, NoteOffMessage{pitch});
+  for (const auto& [note, _] : std::exchange(note_control_maps_, {})) {
+    note_off_event_.Process(note);
+    message_queue_.Add(update_frame_, NoteOffMessage{note});
   }
 }
 
@@ -175,10 +173,10 @@ void Instrument::SetNoteControlEvent(NoteControlEventDefinition definition,
   note_control_event_ = {definition, user_data};
 }
 
-void Instrument::SetNoteOff(double pitch) noexcept {
-  if (note_control_maps_.erase(pitch) > 0) {
-    note_off_event_.Process(pitch);
-    message_queue_.Add(update_frame_, NoteOffMessage{pitch});
+void Instrument::SetNoteOff(double note) noexcept {
+  if (note_control_maps_.erase(note) > 0) {
+    note_off_event_.Process(note);
+    message_queue_.Add(update_frame_, NoteOffMessage{note});
   }
 }
 
@@ -187,20 +185,20 @@ void Instrument::SetNoteOffEvent(NoteOffEventDefinition definition, void* user_d
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
+void Instrument::SetNoteOn(double note, double intensity) noexcept {
   if (const auto [it, success] = note_control_maps_.try_emplace(
-          pitch, BuildControlMap(note_control_definitions_.data(),
-                                 static_cast<int>(note_control_definitions_.size()),
-                                 [this, pitch](int id, double value) {
-                                   note_control_event_.Process(pitch, id, value);
-                                   message_queue_.Add(update_frame_,
-                                                      NoteControlMessage{pitch, id, value});
-                                 }));
+          note, BuildControlMap(note_control_definitions_.data(),
+                                static_cast<int>(note_control_definitions_.size()),
+                                [this, note](int id, double value) {
+                                  note_control_event_.Process(note, id, value);
+                                  message_queue_.Add(update_frame_,
+                                                     NoteControlMessage{note, id, value});
+                                }));
       success) {
-    note_on_event_.Process(pitch, intensity);
-    message_queue_.Add(update_frame_, NoteOnMessage{pitch, intensity});
+    note_on_event_.Process(note, intensity);
+    message_queue_.Add(update_frame_, NoteOnMessage{note, intensity});
     for (const auto& [id, note_control] : it->second) {
-      message_queue_.Add(update_frame_, NoteControlMessage{pitch, id, note_control.GetValue()});
+      message_queue_.Add(update_frame_, NoteControlMessage{note, id, note_control.GetValue()});
     }
   }
 }

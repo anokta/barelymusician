@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/midi.h"
 #include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
@@ -62,33 +61,32 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << "Note{" << barely::MidiNumberFromPitch(pitch) << "}";
-  });
+  instrument.SetNoteOnEvent(
+      [](double note, double /*intensity*/) { ConsoleLog() << "Note{" << note << "}"; });
 
   Performer performer(musician);
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
-  const auto play_note_fn = [&](double duration, double pitch) {
-    return [&instrument, &performer, pitch, duration]() {
-      instrument.SetNoteOn(pitch);
-      performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+  const auto play_note_fn = [&](double duration, double note) {
+    return [&instrument, &performer, note, duration]() {
+      instrument.SetNoteOn(note);
+      performer.ScheduleOneOffTask([&instrument, note]() { instrument.SetNoteOff(note); },
                                    performer.GetPosition() + duration);
     };
   };
 
   std::vector<std::pair<double, TaskDefinition::Callback>> score;
-  score.emplace_back(0.0, play_note_fn(1.0, barely::kPitchC4));
-  score.emplace_back(1.0, play_note_fn(1.0, barely::kPitchD4));
-  score.emplace_back(2.0, play_note_fn(1.0, barely::kPitchE4));
-  score.emplace_back(3.0, play_note_fn(1.0, barely::kPitchF4));
-  score.emplace_back(4.0, play_note_fn(1.0, barely::kPitchG4));
-  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, barely::kPitchG4));
-  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchA4));
-  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchB4));
-  score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
+  score.emplace_back(0.0, play_note_fn(1.0, barely::kNoteC4));
+  score.emplace_back(1.0, play_note_fn(1.0, barely::kNoteD4));
+  score.emplace_back(2.0, play_note_fn(1.0, barely::kNoteE4));
+  score.emplace_back(3.0, play_note_fn(1.0, barely::kNoteF4));
+  score.emplace_back(4.0, play_note_fn(1.0, barely::kNoteG4));
+  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, barely::kNoteG4));
+  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kNoteA4));
+  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kNoteB4));
+  score.emplace_back(6.0, play_note_fn(2.0, barely::kNoteC5));
 
   std::unordered_map<int, Task> tasks;
   int index = 0;

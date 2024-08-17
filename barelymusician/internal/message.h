@@ -24,8 +24,8 @@ struct DataMessage {
 
 /// Note control message.
 struct NoteControlMessage {
-  /// Pitch.
-  double pitch;
+  /// Note.
+  double note;
 
   /// Identifier.
   int id;
@@ -36,14 +36,14 @@ struct NoteControlMessage {
 
 /// Note off message.
 struct NoteOffMessage {
-  /// Pitch.
-  double pitch;
+  /// Note.
+  double note;
 };
 
 /// Note on message.
 struct NoteOnMessage {
-  /// Pitch.
-  double pitch;
+  /// Note.
+  double note;
 
   /// Intensity.
   double intensity;

@@ -21,7 +21,7 @@ namespace Barely {
       public double[] Data {
         get {
           if (_data == null || HasChanged) {
-            _pitch = Musician.GetPitchFromMidiKey(Key);
+            _note = Musician.GetFrequencyFromMidiKey(Key);
             _sample = Sample;
             if (_sample == null || _sample.samples == 0) {
               _data = null;
@@ -31,7 +31,7 @@ namespace Barely {
               _data = new double[_sample.samples + 3];
             }
             // Write the meta data.
-            _data[0] = (double)_pitch;
+            _data[0] = (double)_note;
             _data[1] = (double)_sample.frequency;
             _data[2] = (double)_sample.samples;
             // Write the sample data.
@@ -51,11 +51,11 @@ namespace Barely {
 
       /// Denotes whether any changes has occured since the last update.
       public bool HasChanged {
-        get { return Sample != _sample || Musician.GetPitchFromMidiKey(Key) != _pitch; }
+        get { return Sample != _sample || Musician.GetFrequencyFromMidiKey(Key) != _note; }
       }
 
-      /// Current note pitch.
-      private double _pitch = 0.0;
+      /// Current note.
+      private double _note = 0.0;
 
       // Current sample.
       private AudioClip _sample = null;

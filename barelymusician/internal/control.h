@@ -59,7 +59,7 @@ using ControlMap = std::unordered_map<int, Control>;
 /// @return Control map.
 // NOLINTNEXTLINE(bugprone-exception-escape)
 ControlMap BuildControlMap(const ControlDefinition* definitions, int definition_count,
-                           Control::SetValueCallback set_value_callback) noexcept;
+                           const Control::SetValueCallback& set_value_callback) noexcept;
 
 }  // namespace barely::internal
 

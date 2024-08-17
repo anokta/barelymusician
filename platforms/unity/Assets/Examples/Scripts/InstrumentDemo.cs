@@ -9,12 +9,12 @@ namespace Barely {
       public Color color = Color.white;
 
       private const int N = 4;
-      private Dictionary<double, Vector2> _activePitches = null;
+      private Dictionary<double, Vector2> _activeNotes = null;
       private float[,] _alphas = null;
       private float[,] _targetAlphas = null;
 
       private void OnEnable() {
-        _activePitches = new Dictionary<double, Vector2>();
+        _activeNotes = new Dictionary<double, Vector2>();
         _alphas = new float[N, N];
         _targetAlphas = new float[N, N];
         controller.instrument.OnNoteOff += OnNoteOff;
@@ -42,23 +42,23 @@ namespace Barely {
         }
       }
 
-      private void OnNoteOff(double pitch) {
+      private void OnNoteOff(double note) {
         Vector2 value = Vector2.zero;
-        if (_activePitches.TryGetValue(pitch, out value)) {
+        if (_activeNotes.TryGetValue(note, out value)) {
           _targetAlphas[(int)value.x, (int)value.y] = 0.0f;
-          _activePitches.Remove(pitch);
+          _activeNotes.Remove(note);
         }
       }
 
-      private void OnNoteOn(double pitch, double intensity) {
-        int i = (int)((pitch - controller.octaveOffset - controller.rootPitch) * 12.0);
+      private void OnNoteOn(double note, double intensity) {
+        int i = (int)((note - controller.octaveOffset - controller.rootNote) * 12.0);
         int y = i / 4;
         int x = i - 4 * y;
         if (x < 0 || x >= N || y < 0 || y >= N) {
           return;
         }
         _targetAlphas[x, N - 1 - y] = 1.0f;
-        _activePitches.Add(pitch, new Vector2(x, N - 1 - y));
+        _activeNotes.Add(note, new Vector2(x, N - 1 - y));
       }
     }
   }  // namespace Examples

@@ -35,15 +35,17 @@ namespace Barely {
 
     /// Pushes a new note to the end.
     ///
-    /// @param pitchOr Note pitch or silence.
+    /// @param noteOr Note value or silence.
     /// @param length Note length in beats.
-    public void Push(double? pitchOr, int length = 1) {
-      Musician.Internal.Repeater_Push(_ptr, pitchOr, length);
+    public void Push(double? noteOr, int length = 1) {
+      Musician.Internal.Repeater_Push(_ptr, noteOr, length);
     }
 
     /// Starts the repeater.
-    public void Play(double pitchShift = 0.0) {
-      Musician.Internal.Repeater_Start(_ptr, pitchShift);
+    ///
+    /// @param noteMultiplier Note multiplier.
+    public void Play(double noteMultiplier = 1.0) {
+      Musician.Internal.Repeater_Start(_ptr, noteMultiplier);
     }
 
     /// Stops the repeater.

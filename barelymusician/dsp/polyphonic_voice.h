@@ -35,17 +35,17 @@ class PolyphonicVoice {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Resize(int voice_count) noexcept;
 
-  /// Starts a new voice with a given pitch.
+  /// Starts a new voice with a given note.
   ///
-  /// @param pitch Voice pitch.
+  /// @param note Voice note.
   /// @param init_voice Callback to initialize the voice for playback.
-  void Start(double pitch, const VoiceCallback& init_voice = nullptr) noexcept;
+  void Start(double note, const VoiceCallback& init_voice = nullptr) noexcept;
 
-  /// Stops the voice with a given pitch.
+  /// Stops the voice with a given note.
   ///
-  /// @param pitch Voice pitch.
+  /// @param note Voice note.
   /// @param shutdown_voice Callback to shutdown the voice.
-  void Stop(double pitch, const VoiceCallback& shutdown_voice = nullptr) noexcept;
+  void Stop(double note, const VoiceCallback& shutdown_voice = nullptr) noexcept;
 
   /// Updates all the available voices with the given callback.
   ///
@@ -59,7 +59,7 @@ class PolyphonicVoice {
   // List of available voices.
   std::vector<VoiceType> voices_;
 
-  // List of voice states, namely the voice pitch and its timestamp. Timestamp is used to determine
+  // List of voice states, namely the voice note and its timestamp. Timestamp is used to determine
   // which voice to *steal* when there is no free voice available.
   // TODO(#12): Consider a more optimized implementation for voice stealing.
   std::vector<std::pair<double, int>> voice_states_;
@@ -90,7 +90,7 @@ void PolyphonicVoice<VoiceType>::Resize(int voice_count) noexcept {
 }
 
 template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Start(double pitch, const VoiceCallback& init_voice) noexcept {
+void PolyphonicVoice<VoiceType>::Start(double note, const VoiceCallback& init_voice) noexcept {
   const int voice_count = static_cast<int>(voices_.size());
   if (voice_count == 0) {
     // No voices available.
@@ -116,7 +116,7 @@ void PolyphonicVoice<VoiceType>::Start(double pitch, const VoiceCallback& init_v
     }
   }
   VoiceType* voice = &voices_[voice_index];
-  voice_states_[voice_index] = {pitch, 0};
+  voice_states_[voice_index] = {note, 0};
 
   if (init_voice) {
     init_voice(voice);
@@ -125,10 +125,10 @@ void PolyphonicVoice<VoiceType>::Start(double pitch, const VoiceCallback& init_v
 }
 
 template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Stop(double pitch, const VoiceCallback& shutdown_voice) noexcept {
+void PolyphonicVoice<VoiceType>::Stop(double note, const VoiceCallback& shutdown_voice) noexcept {
   const int voice_count = static_cast<int>(voices_.size());
   for (int i = 0; i < voice_count; ++i) {
-    if (voice_states_[i].first == pitch && voices_[i].IsActive()) {
+    if (voice_states_[i].first == note && voices_[i].IsActive()) {
       VoiceType* voice = &voices_[i];
       if (shutdown_voice) {
         shutdown_voice(voice);

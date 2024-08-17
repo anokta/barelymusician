@@ -39,21 +39,21 @@ class CustomInstrument {
 
   /// Sets a note control value.
   ///
-  /// @param pitch Note pitch.
+  /// @param note Note value.
   /// @param id Note control identifier.
   /// @param value Note control value.
-  virtual void SetNoteControl(double pitch, int id, double value) noexcept = 0;
+  virtual void SetNoteControl(double note, int id, double value) noexcept = 0;
 
   /// Sets a note off.
   ///
-  /// @param pitch Note pitch.
-  virtual void SetNoteOff(double pitch) noexcept = 0;
+  /// @param note Note value.
+  virtual void SetNoteOff(double note) noexcept = 0;
 
   /// Sets a note on.
   ///
-  /// @param pitch Note pitch.
+  /// @param note Note value.
   /// @param intensity Note intensity.
-  virtual void SetNoteOn(double pitch, double intensity) noexcept = 0;
+  virtual void SetNoteOn(double note, double intensity) noexcept = 0;
 
   /// Returns the definition for `CustomInstrumentType`.
   ///
@@ -96,17 +96,17 @@ class CustomInstrument {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetData(data, size);
         },
-        [](void** state, double pitch, int32_t id, double value) {
+        [](void** state, double note, int32_t id, double value) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteControl(pitch, id, value);
+          instrument->SetNoteControl(note, id, value);
         },
-        [](void** state, double pitch) noexcept {
+        [](void** state, double note) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteOff(pitch);
+          instrument->SetNoteOff(note);
         },
-        [](void** state, double pitch, double intensity) noexcept {
+        [](void** state, double note, double intensity) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteOn(pitch, intensity);
+          instrument->SetNoteOn(note, intensity);
         },
         control_definitions, note_control_definitions);
   }

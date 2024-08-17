@@ -4,7 +4,6 @@
 #include <cassert>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/custom_instrument.h"
 
@@ -90,11 +89,11 @@ void SynthInstrument::SetControl(int id, double value) noexcept {
   }
 }
 
-void SynthInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
+void SynthInstrument::SetNoteOff(double note) noexcept { voice_.Stop(note); }
 
-void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
-  voice_.Start(pitch, [pitch, intensity](SynthVoice* voice) {
-    voice->generator().SetFrequency(GetFrequency(pitch));
+void SynthInstrument::SetNoteOn(double note, double intensity) noexcept {
+  voice_.Start(note, [note, intensity](SynthVoice* voice) {
+    voice->generator().SetFrequency(note);
     voice->set_gain(intensity);
   });
 }

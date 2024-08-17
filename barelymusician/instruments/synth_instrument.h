@@ -56,7 +56,7 @@ class SynthInstrument : public CustomInstrument {
   static InstrumentDefinition GetDefinition() noexcept;
 
  protected:
-  /// Constructs new `SynthInstrument`.
+  /// Constructs a new `SynthInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit SynthInstrument(int frame_rate) noexcept;
 
@@ -66,9 +66,9 @@ class SynthInstrument : public CustomInstrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(int id, double value) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
-  void SetNoteControl(double /*pitch*/, int /*id*/, double /*value*/) noexcept final {}
-  void SetNoteOff(double pitch) noexcept final;
-  void SetNoteOn(double pitch, double intensity) noexcept final;
+  void SetNoteControl(double /*note*/, int /*id*/, double /*value*/) noexcept final {}
+  void SetNoteOff(double note) noexcept final;
+  void SetNoteOn(double note, double intensity) noexcept final;
 
  private:
   using SynthVoice = EnvelopedVoice<Oscillator>;

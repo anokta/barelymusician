@@ -54,7 +54,6 @@ target_compile_definitions(
 target_link_libraries(
   barelymusician_synth_instrument
   barelymusician_custom_instrument
-  barelymusician_dsp_utils
   barelymusician_enveloped_voice
   barelymusician_gain_processor
   barelymusician_oscillator

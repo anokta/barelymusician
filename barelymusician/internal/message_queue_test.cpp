@@ -28,7 +28,7 @@ TEST(MessageQueueTest, AddSingleMessage) {
   EXPECT_THAT(
       messages.GetNext(10),
       AllOf(NotNull(),
-            Pointee(Pair(1, VariantWith<NoteOffMessage>(Field(&NoteOffMessage::pitch, 5.0))))));
+            Pointee(Pair(1, VariantWith<NoteOffMessage>(Field(&NoteOffMessage::note, 5.0))))));
 
   // Message is already returned.
   EXPECT_THAT(messages.GetNext(10), IsNull());
@@ -46,7 +46,7 @@ TEST(MessageQueueTest, AddMultipleMessages) {
     EXPECT_THAT(
         messages.GetNext(10),
         AllOf(NotNull(), Pointee(Pair(i, VariantWith<NoteOffMessage>(Field(
-                                             &NoteOffMessage::pitch, static_cast<double>(i)))))));
+                                             &NoteOffMessage::note, static_cast<double>(i)))))));
   }
 
   // All messages are already returned.

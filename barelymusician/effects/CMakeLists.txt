@@ -20,7 +20,6 @@ target_link_libraries(
   barelymusician_high_pass_effect
   barelymusician_custom_effect
   barelymusician
-  barelymusician_dsp_utils
   barelymusician_one_pole_filter
 )
 
@@ -54,6 +53,5 @@ target_link_libraries(
   barelymusician_low_pass_effect
   barelymusician_custom_effect
   barelymusician
-  barelymusician_dsp_utils
   barelymusician_one_pole_filter
 )

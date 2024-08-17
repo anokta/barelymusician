@@ -41,50 +41,24 @@ musician.SetTempo(/*tempo=*/124.0);
 // Create a synth instrument.
 barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
 
-// Set the instrument gain control to 0.5.
+// Set the instrument gain to half.
 instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
 
-// Set the instrument A3 note pitch on with a 0.25 intensity.
+// Set an instrument note on.
 //
-// @note Pitch values are normalized by octaves, where each 1.0 value change shifts one octave, and
-// 0.0 represents the A4 (middle A) pitch at 440 hertz in a typical instrument definition. However,
-// this is not a strict rule, since `pitch` and `intensity` can be interpreted in any desired way by
-// a custom instrument.
-const double a3_pitch = -1.0;
-instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
+// Note values for pitched instruments typically represent the frequencies of the corresponding
+// notes. However, this is not a strict rule, as the `note` and `intensity` values can be
+// interpreted in any desired way by a custom instrument.
+instrument.SetNoteOn(/*note=*/220.0, /*intensity=*/0.25);
 
-// Check if the instrument note pitch is on.
-const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
+// Check if the instrument note is on.
+const bool is_note_on = instrument.IsNoteOn(/*note=*/220.0);  // will return true.
 
 // Create a low-pass effect.
 barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
 
-// Set the effect cutoff frequency control to 1kHz.
+// Set the effect cutoff frequency to 1kHz.
 effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
-
-// Update the musician timestamp in seconds.
-//
-// @note Timestamp updates must happen prior to processing of instruments with respective
-// timestamps. Otherwise, such `Process` calls will be *late* to receive any relevant state changes.
-// To compensate, `Update` should typically be called from a main thread update callback, with an
-// additional "lookahead", in order to avoid any potential thread synchronization issues that could
-// occur in real-time audio applications.
-const double lookahead = 0.1;
-double timestamp = 0.0;
-musician.Update(timestamp + lookahead);
-
-// Process the next output samples of the instrument.
-//
-// @note Instruments expect raw PCM audio samples to be processed with a synchronous call.
-// Therefore, `Process` should typically be called from an audio thread process callback in
-// real-time audio applications.
-const int channel_count = 2;
-const int frame_count = 1024;
-std::vector<double> output_samples(channel_count * frame_count, 0.0);
-instrument.Process(output_samples.data(), channel_count, frame_count, timestamp);
-
-// Process the effect on the instrument output.
-effect.Process(output_samples.data(), channel_count, frame_count, timestamp);
 
 // Create a performer.
 barely::Performer performer(musician);
@@ -92,20 +66,42 @@ barely::Performer performer(musician);
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
-// Create a looping task that plays an note at the position 0.5 beats for a duration of 0.25 beats.
+// Create a looping task that plays an instrument note every beat.
 Task task(
     performer,
     [&]() {
-      // Set the instrument A4 note pitch on.
-      instrument.SetNoteOn(/*pitch=*/0.0);
-      // Schedule a one-off task to set the instrument A4 note pitch off after 0.25 beats.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/0.0); },
-                                   performer.GetPosition() + 0.25);
-    },
-    /*position=*/0.5);
+      // Set an instrument note on.
+      instrument.SetNoteOn(/*note=*/440.0);
+      // Schedule a one-off task to set the instrument note off after half a beat.
+      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*note=*/440.0); },
+                                   performer.GetPosition() + 0.5);
+    });
 
 // Start the performer.
 performer.Start();
+
+// Update the musician timestamp in seconds.
+//
+// Timestamp updates must occur before processing effects and instruments with their respective
+// timestamps. Otherwise, such `Process` calls will be *late* to receive the relevant state changes.
+// To compensate for this, `Update` should typically be called from a main thread update callback
+// with an additional "lookahead" to avoid potential thread synchronization issues that could arise
+// in real-time audio applications.
+const double lookahead = 0.1;
+double timestamp = 0.0;
+musician.Update(timestamp + lookahead);
+
+// Process the next output samples of the instrument.
+//
+// Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process` should
+// typically be called from an audio thread process callback in real-time audio applications.
+const int channel_count = 2;
+const int frame_count = 1024;
+std::vector<double> output_samples(channel_count * frame_count, 0.0);
+instrument.Process(output_samples.data(), channel_count, frame_count, timestamp);
+
+// Process the effect on the instrument output.
+effect.Process(output_samples.data(), channel_count, frame_count, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

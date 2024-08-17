@@ -49,16 +49,16 @@ namespace Barely {
         Debug.LogWarning("Theremin does not implement OnSetData");
       }
 
-      public void OnSetNoteControl(double pitch, int id, double value) {
+      public void OnSetNoteControl(double note, int id, double value) {
         Debug.LogWarning("Theremin does not implement OnSetNoteControl");
       }
 
-      public void OnSetNoteOff(double pitch) {
+      public void OnSetNoteOff(double note) {
         _isOn = false;
         _targetAmplitude = 0.0;
       }
 
-      public void OnSetNoteOn(double pitch, double intensity) {
+      public void OnSetNoteOn(double note, double intensity) {
         _isOn = true;
         _phase = 0.0;
         _targetAmplitude = intensity;
@@ -67,9 +67,9 @@ namespace Barely {
       // Middle A (A4) frequency.
       private const double FrequencyA4 = 440.0;
 
-      // Returns the corresponding frequency for a given pitch.
-      private double GetFrequency(double pitch) {
-        return FrequencyA4 * System.Math.Pow(2.0, pitch);
+      // Returns the corresponding frequency for a given note.
+      private double GetFrequency(double note) {
+        return FrequencyA4 * System.Math.Pow(2.0, note);
       }
 
       // Linearly interpolates between given points.
@@ -93,20 +93,20 @@ namespace Barely {
       }
 
       public void Update() {
-        double pitch = Input.mousePosition.x / Screen.width;
+        double note = Input.mousePosition.x / Screen.width;
         double amplitude = Input.mousePosition.y / Screen.height;
         if (Input.GetMouseButtonDown(0)) {
           SetNoteOn(0.0, amplitude);
         } else if (Input.GetMouseButtonUp(0)) {
           SetNoteOff(0.0);
         }
-        SetControl(0, pitch);
+        SetControl(0, note);
         SetControl(1, amplitude);
       }
 
       protected override sealed ControlDefinition[] GetControlDefinitions() {
         ControlDefinition[] definitions = new ControlDefinition[2] {
-          // Continuous pitch.
+          // Continuous note.
           new ControlDefinition() {
             id = 0,
             defaultValue = 0.0,

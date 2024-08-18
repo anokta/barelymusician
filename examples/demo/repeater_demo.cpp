@@ -64,7 +64,8 @@ std::optional<double> NoteFromKey(int octave, const InputManager::Key& key) {
     ++octave;
     distance = 0;
   }
-  return std::pow(2.0, octave) * kRootNote * barely::kSemitoneRatios[distance];
+  return std::pow(2.0, octave) * kRootNote *
+         (distance > 0 ? barely::kSemitoneRatios[distance] : 1.0);
 }
 
 }  // namespace

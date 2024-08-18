@@ -7,8 +7,7 @@
 namespace barely {
 
 double FrequencyFromMidiNumber(int midi_number) noexcept {
-  return kFrequencyA4 *
-         std::pow(2.0, static_cast<double>(midi_number - kMidiNumberA4) / kSemitoneCount);
+  return kNoteA4 * std::pow(2.0, static_cast<double>(midi_number - kMidiNumberA4) / kSemitoneCount);
 }
 
 double IntensityFromMidiVelocity(int midi_velocity) noexcept {

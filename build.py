@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument(
         "-c",
         "--config",
-        choices=["debug", "release"],
+        choices=["debug", "release", "asan", "msan", "tsan"],
         default="release",
         help="specify the build configuration (defaults to release)",
     )
@@ -139,6 +139,13 @@ def build_platform(args, config, source_dir, build_dir, cmake_options):
         run_command(build_command, build_dir)
 
 
+def get_build_config(args):
+    if args.config == "release":
+        return "Release"
+    else:
+        return "Debug"
+
+
 def build(args, source_dir, build_dir):
     if args.clean and os.path.exists(build_dir):
         clean(build_dir)
@@ -146,7 +153,7 @@ def build(args, source_dir, build_dir):
     if args.skip_generate and args.skip_build:
         return
 
-    config = str.capitalize(args.config)
+    config = get_build_config(args)
 
     if args.daisy:
         daisy_build_dir = os.path.join(build_dir, "Daisy")
@@ -175,6 +182,13 @@ def build(args, source_dir, build_dir):
                 f'-DCMAKE_BUILD_TYPE="{config}"',
             ] + common_cmake_options
             build_platform(args, config, source_dir, android_build_dir, android_cmake_options)
+
+    if args.config == "asan":
+        common_cmake_options.append("-DENABLE_ASAN=ON")
+    elif args.config == "msan":
+        common_cmake_options.append("-DENABLE_MSAN=ON")
+    elif args.config == "tsan":
+        common_cmake_options.append("-DENABLE_TSAN=ON")
 
     if args.test:
         common_cmake_options.append("-DENABLE_TESTS=ON -DGTEST_COLOR=1")
@@ -220,7 +234,7 @@ def run_demo(args, build_dir):
             or (platform == "Mac" and sys.platform.startswith("darwin"))
             or (platform == "Windows" and sys.platform.startswith("win"))
         ):
-            demo_dir = f"{build_dir}/{platform}/bin/{str.capitalize(args.config)}"
+            demo_dir = f"{build_dir}/{platform}/bin/{get_build_config(args)}"
             demo_path = os.path.join(demo_dir, args.run_demo)
             if platform == "Windows":
                 demo_path += ".exe"

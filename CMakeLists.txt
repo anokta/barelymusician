@@ -79,6 +79,47 @@ else()
   )
 endif()
 
+if(ENABLE_ASAN)
+  if(MSVC)
+    add_compile_options(
+      /fsanitize=address
+      /MTd
+    )
+  else()
+    add_compile_options(
+      -fsanitize=address
+      -fno-omit-frame-pointer
+    )
+    add_link_options(
+      -fsanitize=address
+    )
+  endif()
+endif()
+
+if(ENABLE_MSAN)
+  if(NOT MSVC)
+    add_compile_options(
+      -fsanitize=memory
+      -fno-omit-frame-pointer
+    )
+    add_link_options(
+      -fsanitize=memory
+    )
+  endif()
+endif()
+
+if(ENABLE_TSAN)
+  if(NOT MSVC)
+    add_compile_options(
+      -fsanitize=thread
+      -fno-omit-frame-pointer
+    )
+    add_link_options(
+      -fsanitize=thread
+    )
+  endif()
+endif()
+
 if(ENABLE_TESTS)
   enable_testing()
 

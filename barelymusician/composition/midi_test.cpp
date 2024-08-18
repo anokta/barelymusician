@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "barelymusician/composition/pitch.h"
+#include "barelymusician/composition/scale.h"
 #include "gtest/gtest.h"
 
 namespace barely {

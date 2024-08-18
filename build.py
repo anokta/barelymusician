@@ -134,6 +134,8 @@ def build_platform(args, config, source_dir, build_dir, cmake_options):
 
     if not args.skip_build:
         build_command = f'cmake --build "{build_dir}" --config {config}'
+        if args.run_demo:
+            build_command += f" --target barelymusician_examples_{args.run_demo}"
         run_command(build_command, build_dir)
 
 

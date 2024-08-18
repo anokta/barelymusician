@@ -1,16 +1,155 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_PITCH_H_
-#define BARELYMUSICIAN_COMPOSITION_PITCH_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_SCALE_H_
+#define BARELYMUSICIAN_COMPOSITION_SCALE_H_
 
+// NOLINTBEGIN
+#include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
+/// Scale definition.
+typedef struct BarelyScaleDefinition {
+  /// Array of ratios.
+  const double* ratios;
+
+  /// Number of ratios.
+  int32_t ratio_count;
+} BarelyScaleDefinition;
+
+/// Scale alias.
+typedef struct BarelyScale BarelyScale;
+
+/// Creates a new scale.
+///
+/// @param definition Scale definition.
+/// @param root_note Root note.
+/// @param out_scale Output scale.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyScale_Create(BarelyScaleDefinition definition, double root_note,
+                                      BarelyScale** out_scale);
+
+/// Destroys a scale.
+///
+/// @param scale Pointer to scale.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyScale_Destroy(BarelyScale* scale);
+
+/// Gets a scale note.
+///
+/// @param scale Pointer to scale.
+/// @param degree Scale degree.
+/// @param out_note Output note.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyScale_GetNote(const BarelyScale* scale, int32_t degree, double* out_note);
+
+/// Gets the number of notes in a scale.
+///
+/// @param scale Pointer to scale.
+/// @param out_note_count Output number of notes.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyScale_GetNoteCount(const BarelyScale* scale, int32_t* out_note_count);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
+// NOLINTEND
+
+#ifdef __cplusplus
 #include <array>
 #include <span>
 
 namespace barely {
 
+/// Scale definition.
+struct ScaleDefinition : public BarelyScaleDefinition {
+ public:
+  /// Default constructor.
+  ScaleDefinition() noexcept = default;
+
+  /// Constructs a new `ScaleDefinition`.
+  ///
+  /// @param ratios Span of ratios.
+  explicit ScaleDefinition(std::span<const double> ratios) noexcept
+      : BarelyScaleDefinition{ratios.data(), static_cast<int>(ratios.size())} {}
+
+  /// Constructs a new `ScaleDefinition` from a raw type.
+  ///
+  /// @param definition Raw scale definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  ScaleDefinition(BarelyScaleDefinition definition) noexcept : BarelyScaleDefinition{definition} {
+    assert(definition.ratios != nullptr);
+    assert(definition.ratio_count > 0);
+  }
+};
+
+/// Class that wraps a scale pointer.
+class ScalePtr : public PtrWrapper<BarelyScale> {
+ public:
+  /// Creates a new `ScalePtr`.
+  ///
+  /// @param definition Scale definition.
+  /// @param root_note Root note.
+  /// @return Scale pointer.
+  [[nodiscard]] static ScalePtr Create(ScaleDefinition definition, double root_note) noexcept {
+    BarelyScale* scale;
+    [[maybe_unused]] const bool success = BarelyScale_Create(definition, root_note, &scale);
+    assert(success);
+    return ScalePtr(scale);
+  }
+
+  /// Destroys a `ScalePtr`.
+  ///
+  /// @param scale Scale pointer.
+  static void Destroy(ScalePtr scale) noexcept { BarelyScale_Destroy(scale); }
+
+  /// Default constructor.
+  ScalePtr() noexcept = default;
+
+  /// Creates a new `ScalePtr` from a raw pointer.
+  ///
+  /// @param scale Raw pointer to scale.
+  explicit ScalePtr(BarelyScale* scale) noexcept : PtrWrapper(scale) {}
+
+  /// Returns note.
+  ///
+  /// @param degree Degree.
+  /// @return Note.
+  [[nodiscard]] double GetNote(int degree) const noexcept {
+    double note = 0.0;
+    [[maybe_unused]] const bool success = BarelyScale_GetNote(*this, degree, &note);
+    assert(success);
+    return note;
+  }
+
+  /// Returns note.
+  ///
+  /// @param octave Scale octave.
+  /// @param degree Scale degree.
+  /// @return Note.
+  [[nodiscard]] double GetNote(int octave, int degree) const noexcept {
+    return GetNote(octave * GetNoteCount() + degree);
+  }
+
+  /// Returns the number of notes.
+  ///
+  /// @return Number of notes.
+  [[nodiscard]] int GetNoteCount() const noexcept {
+    int32_t note_count = 0;
+    [[maybe_unused]] const bool success = BarelyScale_GetNoteCount(*this, &note_count);
+    assert(success);
+    return note_count;
+  }
+};
+
+/// Scoped scale alias.
+using Scale = ScopedWrapper<ScalePtr>;
+
 /// Number of semitones in an octave (twelwe-tone equal temperament).
 inline constexpr double kSemitoneCount = 12.0;
 
 /// Semitone pitch intervals of an octave.
-inline constexpr std::array<double, static_cast<int>(kSemitoneCount)> kSemitoneRatios = {
+inline constexpr std::array<double, static_cast<int>(kSemitoneCount + 1)> kSemitoneRatios = {
     1.0,
     1.0594630943592953,  // std::pow(2.0, 1.0 / 12.0)
     1.122462048309373,   // std::pow(2.0, 2.0 / 12.0)
@@ -23,20 +162,21 @@ inline constexpr std::array<double, static_cast<int>(kSemitoneCount)> kSemitoneR
     1.681792830507429,   // std::pow(2.0, 9.0 / 12.0)
     1.7817974362806785,  // std::pow(2.0, 10.0 / 12.0)
     1.8877486253633868,  // std::pow(2.0, 11.0 / 12.0)
+    2.0,
 };
 
-/// Common musical scales.
-inline constexpr std::array<double, 7> kPitchMajorScale = {
-    kSemitoneRatios[0], kSemitoneRatios[2], kSemitoneRatios[4],  kSemitoneRatios[5],
-    kSemitoneRatios[7], kSemitoneRatios[9], kSemitoneRatios[11],
+/// Common musical scale ratios.
+inline constexpr std::array<double, 7> kRatiosMajorScale = {
+    kSemitoneRatios[2], kSemitoneRatios[4],  kSemitoneRatios[5],  kSemitoneRatios[7],
+    kSemitoneRatios[9], kSemitoneRatios[11], kSemitoneRatios[12],
 };
-inline constexpr std::array<double, 7> kPitchNaturalMinorScale = {
-    kSemitoneRatios[0], kSemitoneRatios[2], kSemitoneRatios[3],  kSemitoneRatios[5],
-    kSemitoneRatios[7], kSemitoneRatios[8], kSemitoneRatios[10],
+inline constexpr std::array<double, 7> kRatiosNaturalMinorScale = {
+    kSemitoneRatios[2], kSemitoneRatios[3],  kSemitoneRatios[5],  kSemitoneRatios[7],
+    kSemitoneRatios[8], kSemitoneRatios[10], kSemitoneRatios[12],
 };
-inline constexpr std::array<double, 7> kPitchHarmonicMinorScale = {
-    kSemitoneRatios[0], kSemitoneRatios[2], kSemitoneRatios[3],  kSemitoneRatios[5],
-    kSemitoneRatios[7], kSemitoneRatios[8], kSemitoneRatios[11],
+inline constexpr std::array<double, 7> kRatiosHarmonicMinorScale = {
+    kSemitoneRatios[2], kSemitoneRatios[3],  kSemitoneRatios[5],  kSemitoneRatios[7],
+    kSemitoneRatios[8], kSemitoneRatios[11], kSemitoneRatios[12],
 };
 
 // Middle A (A4) reference frequency.
@@ -159,13 +299,7 @@ inline constexpr double kNoteA = kNoteA4;
 inline constexpr double kNoteASharp = kNoteAsharp4;
 inline constexpr double kNoteB = kNoteB4;
 
-/// Returns the corresponding note pitch for a given scale and index.
-///
-/// @param scale Cumulative scale intervals of an octave in an increasing order.
-/// @param index Scale index.
-/// @return Note pitch.
-double PitchFromScale(std::span<const double> scale, int index) noexcept;
-
 }  // namespace barely
+#endif  // __cplusplus
 
-#endif  // BARELYMUSICIAN_COMPOSITION_PITCH_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_SCALE_H_

@@ -15,7 +15,7 @@
 #include "barelymusician/common/random.h"
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/duration.h"
-#include "barelymusician/composition/pitch.h"
+#include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/percussion_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
@@ -35,6 +35,8 @@ using ::barely::OscillatorType;
 using ::barely::PercussionInstrument;
 using ::barely::Performer;
 using ::barely::Random;
+using ::barely::Scale;
+using ::barely::ScaleDefinition;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -96,10 +98,10 @@ void ScheduleNote(double position, double duration, double note, double intensit
                                position + duration);
 }
 
-void ComposeChord(double intensity, int harmonic, Instrument& instrument, Performer& performer) {
-  const auto add_chord_note = [&](int index) {
-    ScheduleNote(0.0, 1.0, kRootNote * barely::PitchFromScale(barely::kPitchMajorScale, index),
-                 intensity, instrument, performer);
+void ComposeChord(double intensity, int harmonic, const Scale& scale, Instrument& instrument,
+                  Performer& performer) {
+  const auto add_chord_note = [&](int degree) {
+    ScheduleNote(0.0, 1.0, scale.GetNote(degree), intensity, instrument, performer);
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -107,17 +109,11 @@ void ComposeChord(double intensity, int harmonic, Instrument& instrument, Perfor
 }
 
 void ComposeLine(double octave_offset, double intensity, int bar, int beat, int beat_count,
-                 int harmonic, Instrument& instrument, Performer& performer) {
+                 int harmonic, const Scale& scale, Instrument& instrument, Performer& performer) {
   const int note_offset = beat;
-  const auto add_note = [&](double begin_position, double end_position, int index) {
-    ScheduleNote(
-        begin_position, end_position - begin_position,
-        kRootNote * barely::PitchFromScale(
-                        barely::kPitchMajorScale,
-                        static_cast<int>(octave_offset *
-                                         static_cast<double>(barely::kPitchMajorScale.size())) +
-                            index),
-        intensity, instrument, performer);
+  const auto add_note = [&](double begin_position, double end_position, int degree) {
+    ScheduleNote(begin_position, end_position - begin_position,
+                 scale.GetNote(octave_offset, degree), intensity, instrument, performer);
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.33, harmonic);
@@ -223,10 +219,14 @@ int main(int /*argc*/, char* argv[]) {
     set_note_callbacks_fn(instruments.size(), instrument);
   };
 
+  const Scale scale(ScaleDefinition{barely::kRatiosMajorScale}, kRootNote);
+
   // Add synth instruments.
-  const auto chords_beat_composer_callback =
-      [&](int /*bar*/, int /*beat*/, int /*beat_count*/, int harmonic, Instrument& instrument,
-          Performer& performer) { return ComposeChord(0.5, harmonic, instrument, performer); };
+  const auto chords_beat_composer_callback = [&](int /*bar*/, int /*beat*/, int /*beat_count*/,
+                                                 int harmonic, Instrument& instrument,
+                                                 Performer& performer) {
+    return ComposeChord(0.5, harmonic, scale, instrument, performer);
+  };
 
   build_synth_instrument_fn(OscillatorType::kSine, 0.075, 0.125, 0.125);
   performers.emplace_back(Performer(musician), chords_beat_composer_callback,
@@ -238,7 +238,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto line_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                Instrument& instrument, Performer& performer) {
-    return ComposeLine(-1.0, 1.0, bar, beat, beat_count, harmonic, instrument, performer);
+    return ComposeLine(-1.0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
@@ -246,7 +246,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                  Instrument& instrument, Performer& performer) {
-    return ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, instrument, performer);
+    return ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
   build_synth_instrument_fn(OscillatorType::kSquare, 0.1, 0.05, 0.05);

@@ -5,7 +5,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/components/metronome.h"
-#include "barelymusician/composition/pitch.h"
+#include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"

@@ -11,13 +11,17 @@ add_library(
 )
 target_link_libraries(
   barelymusician_midi
-  barelymusician_pitch
+  barelymusician_scale
 )
 
 add_library(
-  barelymusician_pitch
-  pitch.cpp
-  pitch.h
+  barelymusician_scale
+  scale.cpp
+  scale.h
+)
+target_link_libraries(
+  barelymusician_scale
+  barelymusician
 )
 
 if(ENABLE_TESTS)
@@ -39,19 +43,19 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_midi_test
     barelymusician_midi
-    barelymusician_pitch
+    barelymusician_scale
     gtest_main
   )
   gtest_discover_tests(barelymusician_midi_test)
 
   add_executable(
-    barelymusician_pitch_test
-    pitch_test.cpp
+    barelymusician_scale_test
+    scale_test.cpp
   )
   target_link_libraries(
-    barelymusician_pitch_test
-    barelymusician_pitch
+    barelymusician_scale_test
+    barelymusician_scale
     gtest_main
   )
-  gtest_discover_tests(barelymusician_pitch_test)
+  gtest_discover_tests(barelymusician_scale_test)
 endif()

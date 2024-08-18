@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "barelymusician/composition/pitch.h"
+#include "barelymusician/composition/scale.h"
 
 namespace barely {
 

@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/pitch.h"
+#include "barelymusician/composition/scale.h"
 #include "barelymusician/effects/low_pass_effect.h"
 #include "barelymusician/instruments/sampler_instrument.h"
 #include "examples/common/audio_output.h"

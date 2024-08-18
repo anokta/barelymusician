@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/pitch.h"
+#include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
@@ -18,6 +18,8 @@ using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
+using ::barely::Scale;
+using ::barely::ScaleDefinition;
 using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::examples::AudioClock;
@@ -65,9 +67,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Performer performer(musician);
 
-  const auto play_note_fn = [&](int scale_index, double duration) {
-    const double note =
-        barely::kNoteD3 * barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
+  const Scale scale(ScaleDefinition{barely::kRatiosMajorScale}, barely::kNoteD3);
+
+  const auto play_note_fn = [&](int scale_degree, double duration) {
+    const double note = scale.GetNote(scale_degree);
     return [&instrument, &performer, duration, note]() {
       instrument.SetNoteOn(note);
       performer.ScheduleOneOffTask(
@@ -75,15 +78,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
           performer.GetPosition() + duration);
     };
   };
-
-  // Stopper.
-  Task stopper(
-      performer,
-      [&]() {
-        performer.Stop();
-        instrument.SetAllNotesOff();
-      },
-      0.0);
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
@@ -125,9 +119,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '1');
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
+      performer.CancelAllOneOffTasks();
       instrument.SetAllNotesOff();
       performer.SetPosition(triggers[index].first);
-      stopper.SetPosition(triggers[index].first + triggers[index].second);
+      performer.ScheduleOneOffTask(
+          [&]() {
+            performer.Stop();
+            instrument.SetAllNotesOff();
+          },
+          triggers[index].first + triggers[index].second);
       performer.Start();
       return;
     }

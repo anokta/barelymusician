@@ -1069,7 +1069,7 @@ namespace barely {
 /// Control definition.
 struct ControlDefinition : public BarelyControlDefinition {
   /// Default constructor.
-  ControlDefinition() noexcept = default;
+  constexpr ControlDefinition() noexcept = default;
 
   /// Constructs a new `ControlDefinition`.
   ///
@@ -1078,9 +1078,9 @@ struct ControlDefinition : public BarelyControlDefinition {
   /// @param min_value Minimum value.
   /// @param max_value Maximum value.
   template <typename IdType, typename ValueType>
-  ControlDefinition(IdType id, ValueType default_value,
-                    ValueType min_value = std::numeric_limits<ValueType>::lowest(),
-                    ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
+  constexpr ControlDefinition(IdType id, ValueType default_value,
+                              ValueType min_value = std::numeric_limits<ValueType>::lowest(),
+                              ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
       : ControlDefinition(BarelyControlDefinition{
             static_cast<int32_t>(id),
             static_cast<double>(default_value),
@@ -1097,7 +1097,7 @@ struct ControlDefinition : public BarelyControlDefinition {
   ///
   /// @param definition Raw control definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  ControlDefinition(BarelyControlDefinition definition) noexcept
+  constexpr ControlDefinition(BarelyControlDefinition definition) noexcept
       : BarelyControlDefinition{definition} {
     assert(default_value >= min_value && default_value <= max_value);
   }
@@ -1123,7 +1123,7 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
   /// Returns a new `ControlEventDefinition` with `Callback`.
   ///
   /// @return Control event definition.
-  static ControlEventDefinition WithCallback() noexcept {
+  static constexpr ControlEventDefinition WithCallback() noexcept {
     return ControlEventDefinition(
         [](void** state, void* user_data) noexcept {
           *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
@@ -1142,8 +1142,9 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit ControlEventDefinition(CreateCallback create_callback, DestroyCallback destroy_callback,
-                                  ProcessCallback process_callback) noexcept
+  explicit constexpr ControlEventDefinition(CreateCallback create_callback,
+                                            DestroyCallback destroy_callback,
+                                            ProcessCallback process_callback) noexcept
       : ControlEventDefinition(BarelyControlEventDefinition{
             create_callback,
             destroy_callback,
@@ -1154,7 +1155,7 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
   ///
   /// @param definition Raw control event definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  ControlEventDefinition(BarelyControlEventDefinition definition) noexcept
+  constexpr ControlEventDefinition(BarelyControlEventDefinition definition) noexcept
       : BarelyControlEventDefinition{definition} {}
 };
 
@@ -1183,11 +1184,11 @@ struct EffectDefinition : public BarelyEffectDefinition {
   /// @param set_control_callback Set control callback.
   /// @param set_data_callback Set data callback.
   /// @param control_definitions Span of control definitions.
-  explicit EffectDefinition(CreateCallback create_callback, DestroyCallback destroy_callback,
-                            ProcessCallback process_callback,
-                            SetControlCallback set_control_callback,
-                            SetDataCallback set_data_callback,
-                            std::span<const ControlDefinition> control_definitions) noexcept
+  explicit constexpr EffectDefinition(
+      CreateCallback create_callback, DestroyCallback destroy_callback,
+      ProcessCallback process_callback, SetControlCallback set_control_callback,
+      SetDataCallback set_data_callback,
+      std::span<const ControlDefinition> control_definitions) noexcept
       : EffectDefinition({
             create_callback,
             destroy_callback,
@@ -1202,7 +1203,7 @@ struct EffectDefinition : public BarelyEffectDefinition {
   ///
   /// @param definition Raw effect definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  EffectDefinition(BarelyEffectDefinition definition) noexcept
+  constexpr EffectDefinition(BarelyEffectDefinition definition) noexcept
       : BarelyEffectDefinition{definition} {
     assert(control_definitions || control_definition_count == 0);
     assert(control_definition_count >= 0);
@@ -1246,7 +1247,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// @param set_note_on_callback Set note on callback.
   /// @param control_definitions Span of control definitions.
   /// @param note_control_definitions Span of note control definitions.
-  explicit InstrumentDefinition(
+  explicit constexpr InstrumentDefinition(
       CreateCallback create_callback, DestroyCallback destroy_callback,
       ProcessCallback process_callback, SetControlCallback set_control_callback,
       SetDataCallback set_data_callback, SetNoteControlCallback set_note_control_callback,
@@ -1272,7 +1273,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   ///
   /// @param definition Raw instrument definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  InstrumentDefinition(BarelyInstrumentDefinition definition) noexcept
+  constexpr InstrumentDefinition(BarelyInstrumentDefinition definition) noexcept
       : BarelyInstrumentDefinition{definition} {
     assert(control_definitions || control_definition_count == 0);
     assert(control_definition_count >= 0);
@@ -1302,7 +1303,7 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   /// Returns a new `NoteControlEventDefinition` with `Callback`.
   ///
   /// @return Note control event definition.
-  static NoteControlEventDefinition WithCallback() noexcept {
+  static constexpr NoteControlEventDefinition WithCallback() noexcept {
     return NoteControlEventDefinition(
         [](void** state, void* user_data) noexcept {
           *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
@@ -1321,9 +1322,9 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit NoteControlEventDefinition(CreateCallback create_callback,
-                                      DestroyCallback destroy_callback,
-                                      ProcessCallback process_callback) noexcept
+  explicit constexpr NoteControlEventDefinition(CreateCallback create_callback,
+                                                DestroyCallback destroy_callback,
+                                                ProcessCallback process_callback) noexcept
       : NoteControlEventDefinition(BarelyNoteControlEventDefinition{
             create_callback,
             destroy_callback,
@@ -1334,7 +1335,7 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   ///
   /// @param definition Raw note control event definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  NoteControlEventDefinition(BarelyNoteControlEventDefinition definition) noexcept
+  constexpr NoteControlEventDefinition(BarelyNoteControlEventDefinition definition) noexcept
       : BarelyNoteControlEventDefinition{definition} {}
 };
 
@@ -1357,7 +1358,7 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
   /// Returns a new `NoteOffEventDefinition` with `Callback`.
   ///
   /// @return Note off event definition.
-  static NoteOffEventDefinition WithCallback() noexcept {
+  static constexpr NoteOffEventDefinition WithCallback() noexcept {
     return NoteOffEventDefinition(
         [](void** state, void* user_data) noexcept {
           *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
@@ -1376,8 +1377,9 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit NoteOffEventDefinition(CreateCallback create_callback, DestroyCallback destroy_callback,
-                                  ProcessCallback process_callback) noexcept
+  explicit constexpr NoteOffEventDefinition(CreateCallback create_callback,
+                                            DestroyCallback destroy_callback,
+                                            ProcessCallback process_callback) noexcept
       : NoteOffEventDefinition(BarelyNoteOffEventDefinition{
             create_callback,
             destroy_callback,
@@ -1388,7 +1390,7 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
   ///
   /// @param definition Raw note off event definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  NoteOffEventDefinition(BarelyNoteOffEventDefinition definition) noexcept
+  constexpr NoteOffEventDefinition(BarelyNoteOffEventDefinition definition) noexcept
       : BarelyNoteOffEventDefinition{definition} {}
 };
 
@@ -1412,7 +1414,7 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   /// Returns a new `NoteOnEventDefinition` with `Callback`.
   ///
   /// @return Note on event definition.
-  static NoteOnEventDefinition WithCallback() noexcept {
+  static constexpr NoteOnEventDefinition WithCallback() noexcept {
     return NoteOnEventDefinition(
         [](void** state, void* user_data) noexcept {
           *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
@@ -1431,8 +1433,9 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit NoteOnEventDefinition(CreateCallback create_callback, DestroyCallback destroy_callback,
-                                 ProcessCallback process_callback) noexcept
+  explicit constexpr NoteOnEventDefinition(CreateCallback create_callback,
+                                           DestroyCallback destroy_callback,
+                                           ProcessCallback process_callback) noexcept
       : NoteOnEventDefinition(BarelyNoteOnEventDefinition{
             create_callback,
             destroy_callback,
@@ -1443,7 +1446,7 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   ///
   /// @param definition Raw note on event definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  NoteOnEventDefinition(BarelyNoteOnEventDefinition definition) noexcept
+  constexpr NoteOnEventDefinition(BarelyNoteOnEventDefinition definition) noexcept
       : BarelyNoteOnEventDefinition{definition} {}
 };
 
@@ -1464,7 +1467,7 @@ struct TaskDefinition : public BarelyTaskDefinition {
   /// Returns a new `TaskDefinition` with `Callback`.
   ///
   /// @return Task definition.
-  static TaskDefinition WithCallback() noexcept {
+  static constexpr TaskDefinition WithCallback() noexcept {
     return TaskDefinition(
         [](void** state, void* user_data) noexcept {
           *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
@@ -1483,8 +1486,9 @@ struct TaskDefinition : public BarelyTaskDefinition {
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit TaskDefinition(CreateCallback create_callback, DestroyCallback destroy_callback,
-                          ProcessCallback process_callback) noexcept
+  explicit constexpr TaskDefinition(CreateCallback create_callback,
+                                    DestroyCallback destroy_callback,
+                                    ProcessCallback process_callback) noexcept
       : TaskDefinition(BarelyTaskDefinition{
             create_callback,
             destroy_callback,
@@ -1495,7 +1499,8 @@ struct TaskDefinition : public BarelyTaskDefinition {
   ///
   /// @param definition Raw task definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  TaskDefinition(BarelyTaskDefinition definition) noexcept : BarelyTaskDefinition{definition} {}
+  constexpr TaskDefinition(BarelyTaskDefinition definition) noexcept
+      : BarelyTaskDefinition{definition} {}
 };
 
 /// Pointer wrapper template.
@@ -1503,30 +1508,30 @@ template <typename RawType>
 class PtrWrapper {
  public:
   /// Default constructor.
-  PtrWrapper() noexcept = default;
+  constexpr PtrWrapper() noexcept = default;
 
   /// Constructs a new `PtrWrapper`.
   ///
   /// @param ptr Raw pointer.
-  explicit PtrWrapper(RawType* ptr) noexcept : ptr_(ptr) { assert(ptr != nullptr); }
+  explicit constexpr PtrWrapper(RawType* ptr) noexcept : ptr_(ptr) { assert(ptr != nullptr); }
 
   /// Default destructor.
-  ~PtrWrapper() noexcept = default;
+  constexpr ~PtrWrapper() noexcept = default;
 
   /// Copyable.
-  PtrWrapper(const PtrWrapper& other) noexcept = default;
-  PtrWrapper& operator=(const PtrWrapper& other) noexcept = default;
+  constexpr PtrWrapper(const PtrWrapper& other) noexcept = default;
+  constexpr PtrWrapper& operator=(const PtrWrapper& other) noexcept = default;
 
   /// Constructs a new `PtrWrapper` via move.
   ///
   /// @param other Other.
-  PtrWrapper(PtrWrapper&& other) noexcept : ptr_(std::exchange(other.ptr_, nullptr)) {}
+  constexpr PtrWrapper(PtrWrapper&& other) noexcept : ptr_(std::exchange(other.ptr_, nullptr)) {}
 
   /// Assigns `PtrWrapper` via move.
   ///
   /// @param other Other.
   /// @return Pointer wrapper.
-  PtrWrapper& operator=(PtrWrapper&& other) noexcept {
+  constexpr PtrWrapper& operator=(PtrWrapper&& other) noexcept {
     if (this != &other) {
       ptr_ = std::exchange(other.ptr_, nullptr);
     }
@@ -1536,7 +1541,7 @@ class PtrWrapper {
   /// Returns the raw pointer.
   ///
   /// @return Raw pointer.
-  operator RawType*() const noexcept { return ptr_; }
+  constexpr operator RawType*() const noexcept { return ptr_; }
 
  private:
   // Raw pointer.
@@ -1605,12 +1610,12 @@ class MusicianPtr : public PtrWrapper<BarelyMusician> {
   static void Destroy(MusicianPtr musician) noexcept { BarelyMusician_Destroy(musician); }
 
   /// Default constructor.
-  MusicianPtr() noexcept = default;
+  constexpr MusicianPtr() noexcept = default;
 
   /// Constructs a new `Musician` from a raw pointer.
   ///
   /// @param musician Raw pointer to musician.
-  explicit MusicianPtr(BarelyMusician* musician) noexcept : PtrWrapper(musician) {}
+  explicit constexpr MusicianPtr(BarelyMusician* musician) noexcept : PtrWrapper(musician) {}
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
@@ -1695,12 +1700,12 @@ class EffectPtr : public PtrWrapper<BarelyEffect> {
   static void Destroy(EffectPtr effect) noexcept { BarelyEffect_Destroy(effect); }
 
   /// Default constructor.
-  EffectPtr() noexcept = default;
+  constexpr EffectPtr() noexcept = default;
 
   /// Creates a new `EffectPtr` from a raw pointer.
   ///
   /// @param effect Raw pointer to effect.
-  explicit EffectPtr(BarelyEffect* effect) noexcept : PtrWrapper(effect) {}
+  explicit constexpr EffectPtr(BarelyEffect* effect) noexcept : PtrWrapper(effect) {}
 
   /// Returns a control value.
   ///
@@ -1831,12 +1836,13 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   static void Destroy(InstrumentPtr instrument) noexcept { BarelyInstrument_Destroy(instrument); }
 
   /// Default constructor.
-  InstrumentPtr() noexcept = default;
+  constexpr InstrumentPtr() noexcept = default;
 
   /// Creates a new `InstrumentPtr` from a raw pointer.
   ///
   /// @param instrument Raw pointer to instrument.
-  explicit InstrumentPtr(BarelyInstrument* instrument) noexcept : PtrWrapper(instrument) {}
+  explicit constexpr InstrumentPtr(BarelyInstrument* instrument) noexcept
+      : PtrWrapper(instrument) {}
 
   /// Returns a control value.
   ///
@@ -2108,12 +2114,12 @@ class PerformerPtr : public PtrWrapper<BarelyPerformer> {
   static void Destroy(PerformerPtr performer) noexcept { BarelyPerformer_Destroy(performer); }
 
   /// Default constructor.
-  PerformerPtr() noexcept = default;
+  constexpr PerformerPtr() noexcept = default;
 
   /// Creates a new `PerformerPtr` from a raw pointer.
   ///
   /// @param performer Raw pointer to performer.
-  explicit PerformerPtr(BarelyPerformer* performer) noexcept : PtrWrapper(performer) {}
+  explicit constexpr PerformerPtr(BarelyPerformer* performer) noexcept : PtrWrapper(performer) {}
 
   /// Cancels all one-off tasks.
   void CancelAllOneOffTasks() noexcept {
@@ -2275,12 +2281,12 @@ class TaskPtr : public PtrWrapper<BarelyTask> {
   static void Destroy(TaskPtr task) noexcept { BarelyTask_Destroy(task); }
 
   /// Default constructor.
-  TaskPtr() noexcept = default;
+  constexpr TaskPtr() noexcept = default;
 
   /// Constructs a new `TaskPtr` from a raw pointer.
   ///
   /// @param task Raw pointer to task.
-  explicit TaskPtr(BarelyTask* task) noexcept : PtrWrapper(task) {}
+  explicit constexpr TaskPtr(BarelyTask* task) noexcept : PtrWrapper(task) {}
 
   /// Returns the position.
   ///

@@ -65,19 +65,20 @@ namespace barely {
 struct ScaleDefinition : public BarelyScaleDefinition {
  public:
   /// Default constructor.
-  ScaleDefinition() noexcept = default;
+  constexpr ScaleDefinition() noexcept = default;
 
   /// Constructs a new `ScaleDefinition`.
   ///
   /// @param ratios Span of ratios.
-  explicit ScaleDefinition(std::span<const double> ratios) noexcept
-      : BarelyScaleDefinition{ratios.data(), static_cast<int>(ratios.size())} {}
+  explicit constexpr ScaleDefinition(std::span<const double> ratios) noexcept
+      : ScaleDefinition(BarelyScaleDefinition{ratios.data(), static_cast<int>(ratios.size())}) {}
 
   /// Constructs a new `ScaleDefinition` from a raw type.
   ///
   /// @param definition Raw scale definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  ScaleDefinition(BarelyScaleDefinition definition) noexcept : BarelyScaleDefinition{definition} {
+  constexpr ScaleDefinition(BarelyScaleDefinition definition) noexcept
+      : BarelyScaleDefinition{definition} {
     assert(definition.ratios != nullptr);
     assert(definition.ratio_count > 0);
   }
@@ -104,12 +105,12 @@ class ScalePtr : public PtrWrapper<BarelyScale> {
   static void Destroy(ScalePtr scale) noexcept { BarelyScale_Destroy(scale); }
 
   /// Default constructor.
-  ScalePtr() noexcept = default;
+  constexpr ScalePtr() noexcept = default;
 
   /// Creates a new `ScalePtr` from a raw pointer.
   ///
   /// @param scale Raw pointer to scale.
-  explicit ScalePtr(BarelyScale* scale) noexcept : PtrWrapper(scale) {}
+  explicit constexpr ScalePtr(BarelyScale* scale) noexcept : PtrWrapper(scale) {}
 
   /// Returns note.
   ///

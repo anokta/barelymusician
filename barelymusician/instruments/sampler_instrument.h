@@ -31,7 +31,7 @@ namespace barely {
 class SamplerInstrument : public CustomInstrument {
  public:
   /// Control enum.
-  enum class Control : int {
+  enum class Control : int32_t {
     /// Gain.
     kGain = 0,
     /// Root note.

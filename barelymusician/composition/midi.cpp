@@ -7,7 +7,8 @@
 namespace barely {
 
 double FrequencyFromMidiNumber(int midi_number) noexcept {
-  return kNoteA4 * std::pow(2.0, static_cast<double>(midi_number - kMidiNumberA4) / kSemitoneCount);
+  static const Scale scale = CreateScale(ScaleType::kChromatic, GetNote(PitchClass::kA));
+  return scale.GetNote(midi_number - kMidiNumberA4);
 }
 
 double IntensityFromMidiVelocity(int midi_velocity) noexcept {

@@ -31,7 +31,7 @@ namespace barely {
 class SynthInstrument : public CustomInstrument {
  public:
   /// Control enum.
-  enum class Control : int {
+  enum class Control : int32_t {
     /// Gain.
     kGain = 0,
     /// Oscillator type.

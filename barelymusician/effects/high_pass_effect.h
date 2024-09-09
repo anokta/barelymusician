@@ -30,7 +30,7 @@ namespace barely {
 class HighPassEffect : public CustomEffect {
  public:
   /// Control enum.
-  enum class Control : int {
+  enum class Control : int32_t {
     /// Cutoff frequency.
     kCutoffFrequency = 0,
     /// Number of controls.

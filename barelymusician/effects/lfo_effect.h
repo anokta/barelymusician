@@ -29,7 +29,7 @@ namespace barely {
 class LfoEffect : public CustomEffect {
  public:
   /// Control enum.
-  enum class Control : int {
+  enum class Control : int32_t {
     /// Oscillator type.
     kOscillatorType = 0,
     /// Oscillator frequency.

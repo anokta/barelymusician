@@ -109,7 +109,7 @@ BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiator* arpeggiator,
 namespace barely {
 
 /// Arpeggiator style.
-enum class ArpeggiatorStyle {
+enum class ArpeggiatorStyle : BarelyArpeggiatorStyle {
   kUp = 0,
   kDown = 1,
   // kUpDown = 2,

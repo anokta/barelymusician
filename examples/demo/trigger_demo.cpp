@@ -18,8 +18,9 @@ using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
+using ::barely::PitchClass;
 using ::barely::Scale;
-using ::barely::ScaleDefinition;
+using ::barely::ScaleType;
 using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::examples::AudioClock;
@@ -67,7 +68,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Performer performer(musician);
 
-  const Scale scale(ScaleDefinition{barely::kRatiosMajorScale}, barely::kNoteD3);
+  const Scale scale = barely::CreateScale(ScaleType::kMajor, barely::GetNote(PitchClass::kD, 3));
 
   const auto play_note_fn = [&](int scale_degree, double duration) {
     const double note = scale.GetNote(scale_degree);

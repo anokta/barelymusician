@@ -32,7 +32,7 @@ namespace barely {
 class PercussionInstrument : public CustomInstrument {
  public:
   /// Control enum.
-  enum class Control : int {
+  enum class Control : int32_t {
     /// Gain.
     kGain = 0,
     /// Pad envelope release.

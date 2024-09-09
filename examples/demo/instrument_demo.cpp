@@ -20,6 +20,9 @@ namespace {
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::PitchClass;
+using ::barely::Scale;
+using ::barely::ScaleType;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -44,18 +47,13 @@ constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
 constexpr double kMaxOctave = 3.0;
 
 // Returns the note for a given `key`.
-std::optional<double> NoteFromKey(int octave, const InputManager::Key& key) {
+std::optional<double> NoteFromKey(const Scale& scale, int octave, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  int distance = static_cast<int>(std::distance(kOctaveKeys.begin(), it));
-  if (distance == barely::kSemitoneCount) {
-    ++octave;
-    distance = 0;
-  }
-  return std::pow(2.0, octave) * kRootNote *
-         (distance > 0 ? barely::kSemitoneRatios[distance] : 1.0);
+  return scale.GetNote(octave * scale.GetNoteCount() +
+                       static_cast<int>(std::distance(kOctaveKeys.begin(), it)));
 }
 
 }  // namespace
@@ -78,6 +76,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
     ConsoleLog() << "NoteOn(" << note << ", " << intensity << ")";
   });
   instrument.SetNoteOffEvent([](double note) { ConsoleLog() << "NoteOff(" << note << ") "; });
+
+  const Scale scale = barely::CreateScale(ScaleType::kChromatic, kRootNote);
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
@@ -121,7 +121,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
 
     // Play note.
-    if (const auto note = NoteFromKey(octave, key)) {
+    if (const auto note = NoteFromKey(scale, octave, key)) {
       instrument.SetNoteOn(*note, intensity);
     }
   };
@@ -130,7 +130,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    if (const auto note = NoteFromKey(octave, key)) {
+    if (const auto note = NoteFromKey(scale, octave, key)) {
       instrument.SetNoteOff(*note);
     }
   };

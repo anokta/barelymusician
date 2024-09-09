@@ -111,7 +111,7 @@ BARELY_EXPORT bool BarelyRepeater_Stop(BarelyRepeater* repeater);
 namespace barely {
 
 /// Repeater style.
-enum class RepeaterStyle {
+enum class RepeaterStyle : BarelyRepeaterStyle {
   kForward = 0,
   kBackward = 1,
   kRandom = 2,

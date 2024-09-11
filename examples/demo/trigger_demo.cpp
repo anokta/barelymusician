@@ -68,7 +68,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Performer performer(musician);
 
-  const Scale scale = barely::CreateScale(ScaleType::kMajor, barely::GetNote(PitchClass::kD));
+  const Scale scale = barely::CreateScale(ScaleType::kMajor, PitchClass::kD);
 
   const auto play_note_fn = [&](int scale_degree, double duration) {
     const double note = scale.GetNote(scale_degree);

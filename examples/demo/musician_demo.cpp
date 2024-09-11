@@ -222,7 +222,7 @@ int main(int /*argc*/, char* argv[]) {
     set_note_callbacks_fn(instruments.size(), instrument);
   };
 
-  const Scale scale = barely::CreateScale(ScaleType::kMajor, barely::GetNote(kRootPitch));
+  const Scale scale = barely::CreateScale(ScaleType::kMajor, kRootPitch);
 
   // Add synth instruments.
   const auto chords_beat_composer_callback = [&](int /*bar*/, int /*beat*/, int /*beat_count*/,

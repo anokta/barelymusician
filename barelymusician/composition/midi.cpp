@@ -6,8 +6,18 @@
 
 namespace barely {
 
+namespace {
+
+// Midi note number for A4 (middle A).
+inline constexpr int kMidiNumberA4 = 69;
+
+// Maximum midi velocity.
+inline constexpr int kMaxMidiVelocity = 127;
+
+}  // namespace
+
 double FrequencyFromMidiNumber(int midi_number) noexcept {
-  static const Scale scale = CreateScale(ScaleType::kChromatic, GetNote(PitchClass::kA));
+  static const Scale scale = CreateScale(ScaleType::kChromatic, PitchClass::kA);
   return scale.GetNote(midi_number - kMidiNumberA4);
 }
 

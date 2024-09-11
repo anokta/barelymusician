@@ -89,7 +89,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetNoteOnEvent(
       [](double note, double /*intensity*/) { ConsoleLog() << "Note(" << note << ")"; });
 
-  const Scale scale = barely::CreateScale(ScaleType::kChromatic, barely::GetNote(kRootPitch));
+  const Scale scale = barely::CreateScale(ScaleType::kChromatic, kRootPitch);
 
   Arpeggiator arpeggiator(musician);
   arpeggiator.SetInstrument(instrument);

@@ -96,7 +96,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
   });
 
-  const Scale scale = barely::CreateScale(ScaleType::kChromatic, barely::GetNote(kRootPitch));
+  const Scale scale = barely::CreateScale(ScaleType::kChromatic, kRootPitch);
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {

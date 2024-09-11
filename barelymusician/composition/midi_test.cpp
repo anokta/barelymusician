@@ -18,7 +18,7 @@ TEST(MidiTest, IntensityMidiVelocityConversion) {
       0.0, 0.25, 0.5, 0.75, 1.0,
   };
 
-  constexpr double kIntensityEpsilon = 0.5 / kMaxMidiVelocity;
+  constexpr double kIntensityEpsilon = 0.5 / 127.0;
 
   for (int i = 0; i < kValueCount; ++i) {
     EXPECT_DOUBLE_EQ(MidiVelocityFromIntensity(kIntensities[i]), kMidiVelocities[i]);

@@ -233,6 +233,16 @@ inline double GetNote(PitchClass pitch_class, int octave = 4) noexcept {
   return note;
 }
 
+/// Creates a new scale of type with a pitch.
+///
+/// @param type Scale type.
+/// @param pitch_class Pitch class.
+/// @param octave Octave.
+/// @return Scale.
+inline Scale CreateScale(ScaleType type, PitchClass pitch_class, int octave = 4) noexcept {
+  return Scale(CreateScalePtr(type, GetNote(pitch_class, octave)));
+}
+
 }  // namespace barely
 #endif  // __cplusplus
 

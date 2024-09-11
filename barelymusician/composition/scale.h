@@ -86,18 +86,18 @@ namespace barely {
 
 /// Pitch class enum.
 enum class PitchClass : BarelyPitchClass {
-  kA = 0,        /// A
-  kAsharp = 1,   /// A#
-  kB = 2,        /// B
-  kC = 3,        /// C
-  kCsharp = 4,   /// C#
-  kD = 5,        /// D
-  kDsharp = 6,   /// D#
-  kE = 7,        /// E
-  kF = 8,        /// F
-  kFsharp = 9,   /// F#
-  kG = 10,       /// G
-  kGsharp = 11,  /// G#
+  kC = 0,        /// C
+  kCsharp = 1,   /// C#
+  kD = 2,        /// D
+  kDsharp = 3,   /// D#
+  kE = 4,        /// E
+  kF = 5,        /// F
+  kFsharp = 6,   /// F#
+  kG = 7,        /// G
+  kGsharp = 8,   /// G#
+  kA = 9,        /// A
+  kAsharp = 10,  /// A#
+  kB = 11,       /// B
   kCount,
   kKick = kC,
   kSnare = kD,

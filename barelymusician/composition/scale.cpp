@@ -113,7 +113,8 @@ bool Barely_GetNote(BarelyPitchClass pitch_class, int32_t octave, double* out_no
   static const barely::Scale chromatic_scale =
       barely::CreateScale(barely::ScaleType::kChromatic, kFrequencyA0);
   *out_note = chromatic_scale.GetNote(octave * static_cast<int>(barely::PitchClass::kCount) +
-                                      static_cast<int>(pitch_class));
+                                      static_cast<int>(pitch_class) -
+                                      static_cast<int>(barely::PitchClass::kA));
   return true;
 }
 

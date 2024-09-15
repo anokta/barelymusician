@@ -79,15 +79,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
   };
 
   std::vector<std::pair<double, TaskDefinition::Callback>> score;
-  score.emplace_back(0.0, play_note_fn(1.0, barely::GetNote(PitchClass::kC)));
-  score.emplace_back(1.0, play_note_fn(1.0, barely::GetNote(PitchClass::kD)));
-  score.emplace_back(2.0, play_note_fn(1.0, barely::GetNote(PitchClass::kE)));
-  score.emplace_back(3.0, play_note_fn(1.0, barely::GetNote(PitchClass::kF)));
-  score.emplace_back(4.0, play_note_fn(1.0, barely::GetNote(PitchClass::kG)));
-  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, barely::GetNote(PitchClass::kG)));
-  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, barely::GetNote(PitchClass::kA)));
-  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::GetNote(PitchClass::kB)));
-  score.emplace_back(6.0, play_note_fn(2.0, barely::GetNote(PitchClass::kC, 5)));
+  score.emplace_back(0.0, play_note_fn(1.0, barely::GetNoteFromPitch(PitchClass::kC)));
+  score.emplace_back(1.0, play_note_fn(1.0, barely::GetNoteFromPitch(PitchClass::kD)));
+  score.emplace_back(2.0, play_note_fn(1.0, barely::GetNoteFromPitch(PitchClass::kE)));
+  score.emplace_back(3.0, play_note_fn(1.0, barely::GetNoteFromPitch(PitchClass::kF)));
+  score.emplace_back(4.0, play_note_fn(1.0, barely::GetNoteFromPitch(PitchClass::kG)));
+  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, barely::GetNoteFromPitch(PitchClass::kG)));
+  score.emplace_back(5 + 1.0 / 3.0,
+                     play_note_fn(1.0 / 3.0, barely::GetNoteFromPitch(PitchClass::kA)));
+  score.emplace_back(5 + 2.0 / 3.0,
+                     play_note_fn(1.0 / 3.0, barely::GetNoteFromPitch(PitchClass::kB)));
+  score.emplace_back(6.0, play_note_fn(2.0, barely::GetNoteFromPitch(PitchClass::kC, 5)));
 
   std::unordered_map<int, Task> tasks;
   int index = 0;

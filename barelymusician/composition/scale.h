@@ -14,64 +14,46 @@ typedef int32_t BarelyPitchClass;
 /// Scale type enum alias.
 typedef int32_t BarelyScaleType;
 
-/// Scale definition.
+/// Definition of a musical scale.
+#pragma pack(push, 1)
 typedef struct BarelyScaleDefinition {
-  /// Array of ratios.
-  const double* ratios;
+  /// Array of pitch ratios relative to, but excluding, the root note.
+  const double* pitch_ratios;
 
-  /// Number of ratios.
-  int32_t ratio_count;
+  /// Number of pitch ratios.
+  int32_t pitch_ratio_count;
+
+  /// Root note.
+  double root_note;
 } BarelyScaleDefinition;
+#pragma pack(pop)
 
-/// Scale alias.
-typedef struct BarelyScale BarelyScale;
-
-/// Creates a new scale.
-///
-/// @param definition Scale definition.
-/// @param root_note Root note.
-/// @param out_scale Output scale.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyScale_Create(BarelyScaleDefinition definition, double root_note,
-                                      BarelyScale** out_scale);
-
-/// Destroys a scale.
-///
-/// @param scale Pointer to scale.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyScale_Destroy(BarelyScale* scale);
-
-/// Gets a scale note.
-///
-/// @param scale Pointer to scale.
-/// @param degree Scale degree.
-/// @param out_note Output note.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyScale_GetNote(const BarelyScale* scale, int32_t degree, double* out_note);
-
-/// Gets the number of notes in a scale.
-///
-/// @param scale Pointer to scale.
-/// @param out_note_count Output number of notes.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyScale_GetNoteCount(const BarelyScale* scale, int32_t* out_note_count);
-
-/// Creates a new scale of type.
-///
-/// @param type Scale type.
-/// @param root_note Root note.
-/// @param out_scale Output scale.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool Barely_CreateScale(BarelyScaleType type, double root_note,
-                                      BarelyScale** out_scale);
-
-/// Gets a note.
+/// Gets a note from a given pitch class and octave.
 ///
 /// @param pitch_class Pitch class.
 /// @param octave Octave.
 /// @param out_note Output note.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool Barely_GetNote(BarelyPitchClass pitch_class, int32_t octave, double* out_note);
+BARELY_EXPORT bool Barely_GetNoteFromPitch(BarelyPitchClass pitch_class, int32_t octave,
+                                           double* out_note);
+
+/// Gets a note from a scale based on a given degree.
+///
+/// @param definition Pointer to scale definition.
+/// @param degree Scale degree.
+/// @param out_note Output note.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool Barely_GetNoteFromScale(const BarelyScaleDefinition* definition, int32_t degree,
+                                           double* out_note);
+
+/// Gets a scale definition of type.
+///
+/// @param type Scale type.
+/// @param root_note Root note.
+/// @param out_definition Output scale definition.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool Barely_GetScaleDefinition(BarelyScaleType type, double root_note,
+                                             BarelyScaleDefinition* out_definition);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -108,9 +90,8 @@ enum class PitchClass : BarelyPitchClass {
 /// Scale type enum.
 enum class ScaleType : BarelyScaleType {
   kChromatic = 0,      /// Chromatic scale.
-  kHarmonicMinor = 1,  /// Harmonic minor scale.
-  kMajor = 2,          /// Major scale.
-  kNaturalMinor = 3,   /// Natural minor scale.
+  kDiatonic = 1,       /// Diatonic scale.
+  kHarmonicMinor = 2,  /// Harmonic minor scale.
   kCount,
 };
 
@@ -123,8 +104,10 @@ struct ScaleDefinition : public BarelyScaleDefinition {
   /// Constructs a new `ScaleDefinition`.
   ///
   /// @param ratios Span of ratios.
-  explicit constexpr ScaleDefinition(std::span<const double> ratios) noexcept
-      : ScaleDefinition(BarelyScaleDefinition{ratios.data(), static_cast<int>(ratios.size())}) {}
+  /// @param root_note Root note.
+  constexpr ScaleDefinition(std::span<const double> pitch_ratios, double root_note) noexcept
+      : ScaleDefinition(BarelyScaleDefinition{pitch_ratios.data(),
+                                              static_cast<int>(pitch_ratios.size()), root_note}) {}
 
   /// Constructs a new `ScaleDefinition` from a raw type.
   ///
@@ -132,115 +115,55 @@ struct ScaleDefinition : public BarelyScaleDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr ScaleDefinition(BarelyScaleDefinition definition) noexcept
       : BarelyScaleDefinition{definition} {
-    assert(definition.ratios != nullptr);
-    assert(definition.ratio_count > 0);
-  }
-};
-
-/// Class that wraps a scale pointer.
-class ScalePtr : public PtrWrapper<BarelyScale> {
- public:
-  /// Creates a new `ScalePtr`.
-  ///
-  /// @param definition Scale definition.
-  /// @param root_note Root note.
-  /// @return Scale pointer.
-  [[nodiscard]] static ScalePtr Create(ScaleDefinition definition, double root_note) noexcept {
-    BarelyScale* scale;
-    [[maybe_unused]] const bool success = BarelyScale_Create(definition, root_note, &scale);
-    assert(success);
-    return ScalePtr(scale);
+    assert(definition.pitch_ratios != nullptr);
+    assert(definition.pitch_ratio_count > 0);
   }
 
-  /// Destroys a `ScalePtr`.
-  ///
-  /// @param scale Scale pointer.
-  static void Destroy(ScalePtr scale) noexcept { BarelyScale_Destroy(scale); }
-
-  /// Default constructor.
-  constexpr ScalePtr() noexcept = default;
-
-  /// Creates a new `ScalePtr` from a raw pointer.
-  ///
-  /// @param scale Raw pointer to scale.
-  explicit constexpr ScalePtr(BarelyScale* scale) noexcept : PtrWrapper(scale) {}
-
-  /// Returns note.
-  ///
-  /// @param degree Degree.
-  /// @return Note.
-  [[nodiscard]] double GetNote(int degree) const noexcept {
-    double note = 0.0;
-    [[maybe_unused]] const bool success = BarelyScale_GetNote(*this, degree, &note);
-    assert(success);
-    return note;
-  }
-
-  /// Returns note.
-  ///
-  /// @param octave Scale octave.
-  /// @param degree Scale degree.
-  /// @return Note.
-  [[nodiscard]] double GetNote(int octave, int degree) const noexcept {
-    return GetNote(octave * GetNoteCount() + degree);
-  }
-
-  /// Returns the number of notes.
+  /// Returns the number of notes in the scale.
   ///
   /// @return Number of notes.
-  [[nodiscard]] int GetNoteCount() const noexcept {
-    int32_t note_count = 0;
-    [[maybe_unused]] const bool success = BarelyScale_GetNoteCount(*this, &note_count);
-    assert(success);
-    return note_count;
+  [[nodiscard]] constexpr int GetNoteCount() const noexcept {
+    return static_cast<int>(pitch_ratio_count);
   }
 };
 
-/// Scoped scale alias.
-using Scale = ScopedWrapper<ScalePtr>;
-
-/// Creates a new scale pointer of type.
-///
-/// @param type Scale type.
-/// @param root_note Root note.
-/// @return Scale pointer.
-inline ScalePtr CreateScalePtr(ScaleType type, double root_note) noexcept {
-  BarelyScale* scale = nullptr;
-  [[maybe_unused]] const bool success =
-      Barely_CreateScale(static_cast<BarelyScaleType>(type), root_note, &scale);
-  return ScalePtr(scale);
-}
-
-/// Creates a new scale of type.
-///
-/// @param type Scale type.
-/// @param root_note Root note.
-/// @return Scale.
-inline Scale CreateScale(ScaleType type, double root_note) noexcept {
-  return Scale(CreateScalePtr(type, root_note));
-}
-
-/// Returns a note.
+/// Returns a note from a given pitch class and octave.
 ///
 /// @param pitch_class Pitch class.
 /// @param octave Octave.
 /// @return Note.
-inline double GetNote(PitchClass pitch_class, int octave = 4) noexcept {
+[[nodiscard]] inline double GetNoteFromPitch(PitchClass pitch_class, int octave = 4) noexcept {
   double note = 0.0;
   [[maybe_unused]] const bool success =
-      Barely_GetNote(static_cast<BarelyPitchClass>(pitch_class), octave, &note);
+      Barely_GetNoteFromPitch(static_cast<BarelyPitchClass>(pitch_class), octave, &note);
   assert(success);
   return note;
 }
 
-/// Creates a new scale of type with a pitch.
+/// Returns a note from a scale based on a given degree.
+///
+/// @param definition Scale definition.
+/// @param degree Degree.
+/// @return Note.
+[[nodiscard]] inline double GetNoteFromScale(const ScaleDefinition& definition,
+                                             int degree) noexcept {
+  double note = 0.0;
+  [[maybe_unused]] const bool success = Barely_GetNoteFromScale(&definition, degree, &note);
+  assert(success);
+  return note;
+}
+
+/// Returns a scale definition of type.
 ///
 /// @param type Scale type.
-/// @param pitch_class Pitch class.
-/// @param octave Octave.
-/// @return Scale.
-inline Scale CreateScale(ScaleType type, PitchClass pitch_class, int octave = 4) noexcept {
-  return Scale(CreateScalePtr(type, GetNote(pitch_class, octave)));
+/// @param root_note Root note.
+/// @return Scale definition.
+inline ScaleDefinition GetScaleDefinition(ScaleType type, double root_note) noexcept {
+  BarelyScaleDefinition definition = {};
+  [[maybe_unused]] const bool success =
+      Barely_GetScaleDefinition(static_cast<BarelyScaleType>(type), root_note, &definition);
+  assert(success);
+  return definition;
 }
 
 }  // namespace barely

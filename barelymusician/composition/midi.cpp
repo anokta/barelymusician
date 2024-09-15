@@ -17,8 +17,9 @@ inline constexpr int kMaxMidiVelocity = 127;
 }  // namespace
 
 double FrequencyFromMidiNumber(int midi_number) noexcept {
-  static const Scale scale = CreateScale(ScaleType::kChromatic, PitchClass::kA);
-  return scale.GetNote(midi_number - kMidiNumberA4);
+  static const auto scale_definition =
+      GetScaleDefinition(ScaleType::kChromatic, GetNoteFromPitch(PitchClass::kA));
+  return GetNoteFromScale(scale_definition, midi_number - kMidiNumberA4);
 }
 
 double IntensityFromMidiVelocity(int midi_velocity) noexcept {

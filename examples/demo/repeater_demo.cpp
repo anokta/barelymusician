@@ -24,8 +24,6 @@ using ::barely::OscillatorType;
 using ::barely::PitchClass;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
-using ::barely::Scale;
-using ::barely::ScaleType;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -54,16 +52,19 @@ constexpr RepeaterStyle kInitialStyle = RepeaterStyle::kForward;
 constexpr PitchClass kRootPitch = PitchClass::kC;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kMaxOctave = 3.0;
+constexpr int kRootOctave = 4;
+constexpr int kMaxOctaveShift = 3;
 
 // Returns the note for a given `key`.
-std::optional<double> NoteFromKey(const Scale& scale, int octave, const InputManager::Key& key) {
+std::optional<double> NoteFromKey(int octave, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return scale.GetNote(octave * scale.GetNoteCount() +
-                       static_cast<int>(std::distance(kOctaveKeys.begin(), it)));
+  const int pitch_index = static_cast<int>(std::distance(kOctaveKeys.begin(), it));
+  const int pitch_count = static_cast<int>(PitchClass::kCount);
+  return barely::GetNoteFromPitch(static_cast<PitchClass>(pitch_index % pitch_count),
+                                  octave + pitch_index / pitch_count);
 }
 
 }  // namespace
@@ -96,8 +97,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
   });
 
-  const Scale scale = barely::CreateScale(ScaleType::kChromatic, kRootPitch);
-
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
@@ -105,7 +104,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  double octave = 0.0;
+  int octave = kRootOctave;
   int length = 1;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -126,13 +125,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
       } else {
         ++octave;
       }
-      octave = std::clamp(octave, -kMaxOctave, kMaxOctave);
+      octave = std::clamp(octave, kRootOctave - kMaxOctaveShift, kRootOctave + kMaxOctaveShift);
       ConsoleLog() << "Octave offset set to " << octave;
       return;
     }
 
     // Play note.
-    if (const auto note_or = NoteFromKey(scale, octave, key)) {
+    if (const auto note_or = NoteFromKey(octave, key)) {
       const double note = *note_or;
       if (!repeater.IsPlaying()) {
         instrument.SetNoteOn(note);
@@ -182,7 +181,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    if (const auto note = NoteFromKey(scale, octave, key)) {
+    if (const auto note = NoteFromKey(octave, key)) {
       if (!repeater.IsPlaying()) {
         instrument.SetNoteOff(*note);
       }

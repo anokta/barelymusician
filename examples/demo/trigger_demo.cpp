@@ -19,7 +19,7 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::PitchClass;
-using ::barely::Scale;
+using ::barely::ScaleDefinition;
 using ::barely::ScaleType;
 using ::barely::SynthInstrument;
 using ::barely::Task;
@@ -68,10 +68,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Performer performer(musician);
 
-  const Scale scale = barely::CreateScale(ScaleType::kMajor, PitchClass::kD);
+  const auto scale =
+      barely::GetScaleDefinition(ScaleType::kDiatonic, barely::GetNoteFromPitch(PitchClass::kD));
 
   const auto play_note_fn = [&](int scale_degree, double duration) {
-    const double note = scale.GetNote(scale_degree);
+    const double note = barely::GetNoteFromScale(scale, scale_degree);
     return [&instrument, &performer, duration, note]() {
       instrument.SetNoteOn(note);
       performer.ScheduleOneOffTask(

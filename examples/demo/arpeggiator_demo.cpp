@@ -24,8 +24,6 @@ using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::PitchClass;
-using ::barely::Scale;
-using ::barely::ScaleType;
 using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -52,19 +50,21 @@ constexpr double kInitialTempo = 100.0;
 constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kUp;
 
 // Note settings.
-constexpr PitchClass kRootPitch = PitchClass::kC;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kMaxOctave = 3.0;
+constexpr int kRootOctave = 4;
+constexpr int kMaxOctaveShift = 3;
 
 // Returns the note for a given `key`.
-std::optional<double> NoteFromKey(const Scale& scale, int octave, const InputManager::Key& key) {
+std::optional<double> NoteFromKey(int octave, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return scale.GetNote(octave * scale.GetNoteCount() +
-                       static_cast<int>(std::distance(kOctaveKeys.begin(), it)));
+  const int pitch_index = static_cast<int>(std::distance(kOctaveKeys.begin(), it));
+  const int pitch_count = static_cast<int>(PitchClass::kCount);
+  return barely::GetNoteFromPitch(static_cast<PitchClass>(pitch_index % pitch_count),
+                                  octave + pitch_index / pitch_count);
 }
 
 }  // namespace
@@ -89,8 +89,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetNoteOnEvent(
       [](double note, double /*intensity*/) { ConsoleLog() << "Note(" << note << ")"; });
 
-  const Scale scale = barely::CreateScale(ScaleType::kChromatic, kRootPitch);
-
   Arpeggiator arpeggiator(musician);
   arpeggiator.SetInstrument(instrument);
   arpeggiator.SetGateRatio(kInitialGateRatio);
@@ -104,7 +102,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  double octave = 0.0;
+  int octave = kRootOctave;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -122,13 +120,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
       } else {
         ++octave;
       }
-      octave = std::clamp(octave, -kMaxOctave, kMaxOctave);
-      ConsoleLog() << "Octave offset set to " << octave;
+      octave = std::clamp(octave, kRootOctave - kMaxOctaveShift, kRootOctave + kMaxOctaveShift);
+      ConsoleLog() << "Octave set to " << octave;
       return;
     }
 
     // Play note.
-    if (const auto note = NoteFromKey(scale, octave, key)) {
+    if (const auto note = NoteFromKey(octave, key)) {
       arpeggiator.SetNoteOn(*note);
     }
   };
@@ -137,7 +135,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    if (const auto note = NoteFromKey(scale, octave, key)) {
+    if (const auto note = NoteFromKey(octave, key)) {
       arpeggiator.SetNoteOff(*note);
     }
   };

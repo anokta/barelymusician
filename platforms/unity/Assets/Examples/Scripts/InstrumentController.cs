@@ -13,9 +13,8 @@ namespace Barely {
       // Repeater to control.
       public Repeater repeater = null;
 
-      // Root note.
-      [Range(0, 127)]
-      public int rootNote = 60;
+      // Scale.
+      public Scale scale = null;
 
       // Octave offset.
       [Range(-3, 3)]
@@ -111,7 +110,10 @@ namespace Barely {
 
       // Returns the corresponding note for the given key.
       private double GetNoteFromKeyIndex(int keyIndex) {
-        return Musician.GetFrequencyFromMidiKey(octaveOffset * 12 + rootNote + keyIndex);
+        if (scale == null) {
+          return 0.0;
+        }
+        return scale.GetNote(octaveOffset * scale.GetNoteCount() + keyIndex);
       }
     }
   }  // namespace Examples

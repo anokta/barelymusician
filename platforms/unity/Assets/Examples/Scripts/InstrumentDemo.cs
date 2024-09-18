@@ -51,7 +51,12 @@ namespace Barely {
       }
 
       private void OnNoteOn(double note, double intensity) {
-        int i = (int)((note - controller.octaveOffset - controller.rootNote) * 12.0);
+        int i =
+            Mathf.RoundToInt((float)((double)controller.scale.GetNoteCount() *
+                                     System.Math.Log(note / controller.scale.GetNote(
+                                                                controller.octaveOffset *
+                                                                controller.scale.GetNoteCount())) /
+                                     System.Math.Log(2)));
         int y = i / 4;
         int x = i - 4 * y;
         if (x < 0 || x >= N || y < 0 || y >= N) {

@@ -426,9 +426,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 1737834380}
-  rootPitch: 0
+  arpeggiator: {fileID: 0}
+  repeater: {fileID: 0}
+  scale: {fileID: 11400000, guid: 36cd54420cf4e3043978899564b2ec79, type: 2}
   octaveOffset: 0
   noteIntensity: 1
+  repeaterNoteLength: 1
 --- !u!114 &1737834380
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -11,6 +11,7 @@ target_link_libraries(
   barelymusician
   barelymusician_arpeggiator
   barelymusician_repeater
+  barelymusician_scale
   barelymusician_high_pass_effect
   barelymusician_lfo_effect
   barelymusician_low_pass_effect

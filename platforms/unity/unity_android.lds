@@ -81,6 +81,10 @@ VERS_1.0 {
     BarelyRepeater_Start;
     BarelyRepeater_Stop;
 
+    Barely_GetNoteFromPitch;
+    Barely_GetNoteFromScale;
+    Barely_GetScaleDefinition;
+
     BarelyHighPassEffect_GetDefinition;
     BarelyLfoEffect_GetDefinition;
     BarelyLowPassEffect_GetDefinition;

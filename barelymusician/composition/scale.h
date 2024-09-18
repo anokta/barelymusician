@@ -95,7 +95,7 @@ enum class ScaleType : BarelyScaleType {
   kCount,
 };
 
-/// Scale definition.
+/// Definition of a musical scale.
 struct ScaleDefinition : public BarelyScaleDefinition {
  public:
   /// Default constructor.

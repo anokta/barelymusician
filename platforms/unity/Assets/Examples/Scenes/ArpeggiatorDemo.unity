@@ -443,7 +443,7 @@ MonoBehaviour:
   instrument: {fileID: 1737834380}
   arpeggiator: {fileID: 1737834384}
   repeater: {fileID: 0}
-  rootPitch: 0
+  scale: {fileID: 11400000, guid: 36cd54420cf4e3043978899564b2ec79, type: 2}
   octaveOffset: 0
   noteIntensity: 1
   repeaterNoteLength: 1

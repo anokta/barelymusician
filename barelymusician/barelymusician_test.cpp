@@ -1,5 +1,7 @@
 #include "barelymusician/barelymusician.h"
 
+#include <array>
+
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -60,6 +62,26 @@ TEST(MusicianTest, CreateDestroyInstrument) {
 TEST(MusicianTest, CreateDestroyPerformer) {
   const Musician musician(1);
   [[maybe_unused]] const Performer performer(musician);
+}
+
+TEST(TuningDefinitionTest, GetFrequency) {
+  constexpr int kPitchCount = 5;
+  constexpr std::array<double, kPitchCount> kRatios = {1.25, 1.5, 1.75, 2.0, 3.0};
+  constexpr double kRootFrequency = 100.0;
+  constexpr int kRootPitch = 25;
+
+  const TuningDefinition definition = {kRatios, kRootFrequency, kRootPitch};
+
+  constexpr int kOctaveRange = 2;
+  for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
+    for (int i = 0; i < kPitchCount; ++i) {
+      const int pitch = kRootPitch + octave * kPitchCount + i;
+      const double expected_frequency = kRootFrequency *
+                                        std::pow(kRatios[kPitchCount - 1], octave) *
+                                        (i > 0 ? kRatios[i - 1] : 1.0);
+      EXPECT_DOUBLE_EQ(definition.GetFrequency(pitch), expected_frequency);
+    }
+  }
 }
 
 }  // namespace

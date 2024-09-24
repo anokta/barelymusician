@@ -575,6 +575,23 @@ typedef struct BarelyTaskDefinition {
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
 
+/// Definition of a musical tuning system.
+#pragma pack(push, 1)
+typedef struct BarelyTuningDefinition {
+  /// Array of pitch ratios relative to, but excluding, the root pitch.
+  const double* pitch_ratios;
+
+  /// Number of pitch ratios.
+  int32_t pitch_ratio_count;
+
+  /// Root frequency in hertz.
+  double root_frequency;
+
+  /// Root pitch corresponding to the root frequency.
+  int32_t root_pitch;
+} BarelyTuningDefinition;
+#pragma pack(pop)
+
 /// Effect alias.
 typedef struct BarelyEffect BarelyEffect;
 
@@ -1048,6 +1065,15 @@ BARELY_EXPORT bool BarelyTask_GetPosition(const BarelyTask* task, double* out_po
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTask* task, double position);
+
+/// Gets the corresponding frequency for a given pitch.
+///
+/// @param definition Pointer to tuning definition.
+/// @param pitch Pitch.
+/// @param out_frequency Output frequency.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyTuningDefinition_GetFrequency(const BarelyTuningDefinition* definition,
+                                                       int32_t pitch, double* out_frequency);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -2304,6 +2330,52 @@ class TaskPtr : public PtrWrapper<BarelyTask> {
   void SetPosition(double position) noexcept {
     [[maybe_unused]] const bool success = BarelyTask_SetPosition(*this, position);
     assert(success);
+  }
+};
+
+/// Definition of a musical tuning system.
+struct TuningDefinition : public BarelyTuningDefinition {
+ public:
+  /// Default constructor.
+  constexpr TuningDefinition() noexcept = default;
+
+  /// Constructs a new `TuningDefinition`.
+  ///
+  /// @param pitch_ratios Span of pitch ratios.
+  /// @param root_frequency Root frequency.
+  /// @param root_pitch Root pitch.
+  constexpr TuningDefinition(std::span<const double> pitch_ratios, double root_frequency,
+                             int root_pitch) noexcept
+      : TuningDefinition(
+            BarelyTuningDefinition{pitch_ratios.data(), static_cast<int32_t>(pitch_ratios.size()),
+                                   root_frequency, static_cast<int32_t>(root_pitch)}) {}
+
+  /// Constructs a new `TuningDefinition` from a raw type.
+  ///
+  /// @param definition Raw tuning definition.
+  // NOLINTNEXTLINE(google-explicit-BarelyTuningDefinition)
+  constexpr TuningDefinition(BarelyTuningDefinition definition) noexcept
+      : BarelyTuningDefinition{definition} {
+    assert(definition.pitch_ratios != nullptr);
+    assert(definition.pitch_ratio_count > 0);
+  }
+
+  /// Returns the corresponding frequency for a given pitch.
+  ///
+  /// @param pitch Pitch.
+  /// @return Frequency.
+  [[nodiscard]] double GetFrequency(int pitch) const noexcept {
+    double frequency = 0.0;
+    [[maybe_unused]] const bool success =
+        BarelyTuningDefinition_GetFrequency(this, static_cast<int32_t>(pitch), &frequency);
+    return frequency;
+  }
+
+  /// Returns the number of pitches in the tuning system.
+  ///
+  /// @return Number of pitches.
+  [[nodiscard]] constexpr int GetPitchCount() const noexcept {
+    return static_cast<int>(pitch_ratio_count);
   }
 };
 

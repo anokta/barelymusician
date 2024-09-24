@@ -1,6 +1,7 @@
 #include "barelymusician/barelymusician.h"
 
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 
@@ -605,5 +606,23 @@ bool BarelyTask_SetPosition(BarelyTask* task, double position) {
   if (!task) return false;
 
   task->SetPosition(position);
+  return true;
+}
+
+bool BarelyTuningDefinition_GetFrequency(const BarelyTuningDefinition* definition, int32_t pitch,
+                                         double* out_frequency) {
+  if (!definition) return false;
+  if (definition->pitch_ratios == nullptr || definition->pitch_ratio_count == 0) return false;
+  if (out_frequency == nullptr) return false;
+
+  const int pitch_count = static_cast<int>(definition->pitch_ratio_count);
+  const int relative_pitch = pitch - definition->root_pitch;
+  const int octave = static_cast<int>(
+      std::floor(static_cast<double>(relative_pitch) / static_cast<double>(pitch_count)));
+  const int index = relative_pitch - octave * pitch_count;
+  assert(index >= 0 && index < pitch_count);
+  *out_frequency = definition->root_frequency *
+                   std::pow(definition->pitch_ratios[pitch_count - 1], octave) *
+                   (index > 0 ? definition->pitch_ratios[index - 1] : 1.0);
   return true;
 }

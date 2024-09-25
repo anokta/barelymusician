@@ -5,6 +5,8 @@
 #include <variant>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely::internal {
 
 /// Control message.
@@ -49,9 +51,15 @@ struct NoteOnMessage {
   double intensity;
 };
 
+/// Tuning message.
+struct TuningMessage {
+  // TODO(#137): This should probably be a pointer (same goes for `DataMessage`).
+  TuningDefinition tuning;
+};
+
 /// Message alias.
-using Message =
-    std::variant<ControlMessage, DataMessage, NoteControlMessage, NoteOffMessage, NoteOnMessage>;
+using Message = std::variant<ControlMessage, DataMessage, NoteControlMessage, NoteOffMessage,
+                             NoteOnMessage, TuningMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

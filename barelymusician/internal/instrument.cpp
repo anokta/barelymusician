@@ -24,6 +24,7 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
       set_note_control_callback_(definition.set_note_control_callback),
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
+      set_tuning_callback_(definition.set_tuning_callback),
       note_control_definitions_(
           definition.note_control_definitions,
           definition.note_control_definitions + definition.note_control_definition_count),
@@ -123,6 +124,11 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
               if (set_note_on_callback_) {
                 set_note_on_callback_(&state_, note_on_message.note, note_on_message.intensity);
               }
+            },
+            [this](TuningMessage& tuning_message) noexcept {
+              if (set_tuning_callback_) {
+                set_tuning_callback_(&state_, &tuning_message.tuning);
+              }
             }},
         message->second);
   }
@@ -205,6 +211,10 @@ void Instrument::SetNoteOn(double note, double intensity) noexcept {
 
 void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept {
   note_on_event_ = {definition, user_data};
+}
+
+void Instrument::SetTuning(const TuningDefinition* definition) noexcept {
+  message_queue_.Add(update_frame_, TuningMessage{*definition});
 }
 
 void Instrument::Update(int64_t update_frame) noexcept {

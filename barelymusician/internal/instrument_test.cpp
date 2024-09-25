@@ -46,7 +46,7 @@ InstrumentDefinition GetTestDefinition() {
       [](void** state, double note, double intensity) {
         *reinterpret_cast<double*>(*state) = note * intensity;
       },
-      control_definitions, note_control_definitions);
+      [](void**, const BarelyTuningDefinition*) {}, control_definitions, note_control_definitions);
 }
 
 // Tests that the instrument returns a control value as expected.

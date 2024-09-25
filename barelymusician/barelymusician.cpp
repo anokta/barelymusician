@@ -401,6 +401,14 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
   return true;
 }
 
+bool BarelyInstrument_SetTuning(BarelyInstrument* instrument,
+                                const BarelyTuningDefinition* definition) {
+  if (!instrument) return false;
+
+  instrument->SetTuning(reinterpret_cast<const barely::TuningDefinition*>(definition));
+  return true;
+}
+
 bool BarelyMusician_Create(int32_t frame_rate, BarelyMusician** out_musician) {
   if (frame_rate <= 0) return false;
   if (!out_musician) return false;

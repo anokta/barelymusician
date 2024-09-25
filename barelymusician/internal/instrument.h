@@ -120,6 +120,12 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
 
+  /// Sets the tuning.
+  ///
+  /// @param definition Tuning definition.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetTuning(const TuningDefinition* definition) noexcept;
+
   /// Updates the instrument.
   ///
   /// @param update_frame Update frame.
@@ -155,6 +161,9 @@ class Instrument {
 
   // Set note on callback.
   const InstrumentDefinition::SetNoteOnCallback set_note_on_callback_;
+
+  // Set tuning callback.
+  const InstrumentDefinition::SetTuningCallback set_tuning_callback_;
 
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;

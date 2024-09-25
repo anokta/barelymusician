@@ -55,6 +55,30 @@ class CustomInstrument {
   /// @param intensity Note intensity.
   virtual void SetNoteOn(double note, double intensity) noexcept = 0;
 
+  /// Sets the tuning.
+  ///
+  /// @param tuning Tuning definition.
+  // TODO(#137): Temporary bypass, this should also be overridable.
+  void SetTuning(const TuningDefinition&) noexcept { assert(false); }
+  double GetFrequency(int pitch) noexcept {
+    static constexpr double kSemitones[] = {
+        1.0594630943592953,  // std::pow(2.0, 1.0 / 12.0)
+        1.122462048309373,   // std::pow(2.0, 2.0 / 12.0)
+        1.189207115002721,   // std::pow(2.0, 3.0 / 12.0)
+        1.2599210498948732,  // std::pow(2.0, 4.0 / 12.0)
+        1.3348398541700344,  // std::pow(2.0, 5.0 / 12.0)
+        1.4142135623730951,  // std::pow(2.0, 6.0 / 12.0)
+        1.4983070768766815,  // std::pow(2.0, 7.0 / 12.0)
+        1.5874010519681994,  // std::pow(2.0, 8.0 / 12.0)
+        1.681792830507429,   // std::pow(2.0, 9.0 / 12.0)
+        1.7817974362806785,  // std::pow(2.0, 10.0 / 12.0)
+        1.8877486253633868,  // std::pow(2.0, 11.0 / 12.0)
+        2.0,                 // std::pow(2.0, 12.0 / 12.0)
+    };
+    static constexpr TuningDefinition midi_standard_tuning = {kSemitones, 440.0, 69};
+    return midi_standard_tuning.GetFrequency(pitch);
+  }
+
   /// Returns the definition for `CustomInstrumentType`.
   ///
   /// @param control_definitions Span of control definitions.
@@ -73,6 +97,7 @@ class CustomInstrument {
       using CustomInstrumentType::SetNoteControl;
       using CustomInstrumentType::SetNoteOff;
       using CustomInstrumentType::SetNoteOn;
+      using CustomInstrumentType::SetTuning;
     };
     return InstrumentDefinition(
         [](void** state, int32_t frame_rate) noexcept {
@@ -107,6 +132,10 @@ class CustomInstrument {
         [](void** state, double note, double intensity) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteOn(note, intensity);
+        },
+        [](void** state, const BarelyTuningDefinition* tuning) {
+          auto* instrument = static_cast<PublicInstrument*>(*state);
+          instrument->SetTuning(*tuning);
         },
         control_definitions, note_control_definitions);
   }

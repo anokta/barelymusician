@@ -250,6 +250,9 @@
 extern "C" {
 #endif  // __cplusplus
 
+/// Tuning definition alias.
+typedef struct BarelyTuningDefinition BarelyTuningDefinition;
+
 /// Control definition.
 typedef struct BarelyControlDefinition {
   /// Identifier.
@@ -416,6 +419,13 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state, doub
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state, double note,
                                                              double intensity);
 
+/// Instrument definition set tuning callback signature.
+///
+/// @param state Pointer to instrument state.
+/// @param definition Pointer to tuning definition.
+typedef void (*BarelyInstrumentDefinition_SetTuningCallback)(
+    void** state, const BarelyTuningDefinition* definition);
+
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
   /// Create callback.
@@ -441,6 +451,9 @@ typedef struct BarelyInstrumentDefinition {
 
   /// Set note on callback.
   BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback;
+
+  /// Set tuning callback.
+  BarelyInstrumentDefinition_SetTuningCallback set_tuning_callback;
 
   /// Array of control definitions.
   const BarelyControlDefinition* control_definitions;
@@ -859,6 +872,14 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
                                                    BarelyNoteOnEventDefinition definition,
                                                    void* user_data);
 
+/// Sets an instrument tuning.
+///
+/// @param instrument Pointer to instrument.
+/// @param definition Tuning definition.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetTuning(BarelyInstrument* instrument,
+                                              const BarelyTuningDefinition* definition);
+
 /// Creates a new musician.
 ///
 /// @param frame_rate Frame rate in hertz.
@@ -1092,6 +1113,9 @@ BARELY_EXPORT bool BarelyTuningDefinition_GetFrequency(const BarelyTuningDefinit
 
 namespace barely {
 
+/// Tuning definition.
+struct TuningDefinition;
+
 /// Control definition.
 struct ControlDefinition : public BarelyControlDefinition {
   /// Default constructor.
@@ -1262,6 +1286,9 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Set note on callback signature.
   using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
 
+  /// Set tuning callback signature.
+  using SetTuningCallback = BarelyInstrumentDefinition_SetTuningCallback;
+
   /// Constructs a new `InstrumentDefinition`.
   ///
   /// @param create_callback Create callback.
@@ -1278,7 +1305,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       ProcessCallback process_callback, SetControlCallback set_control_callback,
       SetDataCallback set_data_callback, SetNoteControlCallback set_note_control_callback,
       SetNoteOffCallback set_note_off_callback, SetNoteOnCallback set_note_on_callback,
-      std::span<const ControlDefinition> control_definitions,
+      SetTuningCallback set_tuning_callback, std::span<const ControlDefinition> control_definitions,
       std::span<const ControlDefinition> note_control_definitions) noexcept
       : InstrumentDefinition({
             create_callback,
@@ -1289,6 +1316,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
             set_note_control_callback,
             set_note_off_callback,
             set_note_on_callback,
+            set_tuning_callback,
             control_definitions.data(),
             static_cast<int>(control_definitions.size()),
             note_control_definitions.data(),
@@ -2115,6 +2143,15 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// @param callback Note off event callback.
   void SetNoteOnEvent(NoteOnEventDefinition::Callback callback) noexcept {
     SetNoteOnEvent(NoteOnEventDefinition::WithCallback(), static_cast<void*>(&callback));
+  }
+
+  /// Sets the tuning.
+  ///
+  /// @param definition Tuning definition.
+  void SetTuning(const TuningDefinition* definition) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetTuning(
+        *this, reinterpret_cast<const BarelyTuningDefinition*>(definition));
+    assert(success);
   }
 };
 

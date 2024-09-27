@@ -34,8 +34,8 @@ class SamplerInstrument : public CustomInstrument {
   enum class Control : int32_t {
     /// Gain.
     kGain = 0,
-    /// Root note.
-    kRootNote = 1,
+    /// Root pitch.
+    kRootPitch = 1,
     /// Sample player loop.
     kLoop = 2,
     /// Envelope attack.
@@ -68,14 +68,14 @@ class SamplerInstrument : public CustomInstrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(int id, double value) noexcept final;
   void SetData(const void* data, int size) noexcept final;
-  void SetNoteControl(double /*note*/, int /*id*/, double /*value*/) noexcept final {}
-  void SetNoteOff(double note) noexcept final;
-  void SetNoteOn(double note, double intensity) noexcept final;
+  void SetNoteControl(int /*pitch*/, int /*id*/, double /*value*/) noexcept final {}
+  void SetNoteOff(int pitch) noexcept final;
+  void SetNoteOn(int pitch, double intensity) noexcept final;
 
  private:
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;
   PolyphonicVoice<SamplerVoice> voice_;
-  double root_note_ = 0.0;
+  int root_pitch_ = 60;
   GainProcessor gain_processor_;
 };
 

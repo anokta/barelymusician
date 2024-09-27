@@ -19,7 +19,6 @@ add_barelymusician_demo(
   arpeggiator_demo
   barelymusician
   barelymusician_arpeggiator
-  barelymusician_scale
   barelymusician_oscillator
   barelymusician_synth_instrument
   barelymusician_examples_audio_clock
@@ -31,7 +30,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   instrument_demo
   barelymusician
-  barelymusician_scale
   barelymusician_oscillator
   barelymusician_synth_instrument
   barelymusician_examples_audio_output
@@ -43,7 +41,6 @@ add_barelymusician_demo(
   metronome_demo
   barelymusician
   barelymusician_metronome
-  barelymusician_scale
   barelymusician_oscillator
   barelymusician_synth_instrument
   barelymusician_examples_audio_clock
@@ -55,7 +52,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   midi_demo
   barelymusician
-  barelymusician_midi
   barelymusician_oscillator
   barelymusician_synth_instrument
   barelymusician_examples_audio_clock
@@ -88,7 +84,6 @@ add_barelymusician_demo(
   repeater_demo
   barelymusician
   barelymusician_repeater
-  barelymusician_scale
   barelymusician_oscillator
   barelymusician_synth_instrument
   barelymusician_examples_audio_clock
@@ -100,7 +95,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   sampler_demo
   barelymusician
-  barelymusician_scale
   barelymusician_low_pass_effect
   barelymusician_sampler_instrument
   barelymusician_examples_audio_output
@@ -113,7 +107,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   sequencer_demo
   barelymusician
-  barelymusician_scale
   barelymusician_oscillator
   barelymusician_synth_instrument
   barelymusician_examples_audio_clock

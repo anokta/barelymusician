@@ -39,21 +39,21 @@ class CustomInstrument {
 
   /// Sets a note control value.
   ///
-  /// @param note Note value.
+  /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @param value Note control value.
-  virtual void SetNoteControl(double note, int id, double value) noexcept = 0;
+  virtual void SetNoteControl(int pitch, int id, double value) noexcept = 0;
 
   /// Sets a note off.
   ///
-  /// @param note Note value.
-  virtual void SetNoteOff(double note) noexcept = 0;
+  /// @param pitch Note pitch.
+  virtual void SetNoteOff(int pitch) noexcept = 0;
 
   /// Sets a note on.
   ///
-  /// @param note Note value.
+  /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  virtual void SetNoteOn(double note, double intensity) noexcept = 0;
+  virtual void SetNoteOn(int pitch, double intensity) noexcept = 0;
 
   /// Sets the tuning.
   ///
@@ -121,17 +121,17 @@ class CustomInstrument {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetData(data, size);
         },
-        [](void** state, double note, int32_t id, double value) {
+        [](void** state, int32_t pitch, int32_t id, double value) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteControl(note, id, value);
+          instrument->SetNoteControl(pitch, id, value);
         },
-        [](void** state, double note) noexcept {
+        [](void** state, int32_t pitch) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteOff(note);
+          instrument->SetNoteOff(pitch);
         },
-        [](void** state, double note, double intensity) noexcept {
+        [](void** state, int32_t pitch, double intensity) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetNoteOn(note, intensity);
+          instrument->SetNoteOn(pitch, intensity);
         },
         [](void** state, const BarelyTuningDefinition* tuning) {
           auto* instrument = static_cast<PublicInstrument*>(*state);

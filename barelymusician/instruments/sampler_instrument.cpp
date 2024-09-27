@@ -26,7 +26,7 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
           // Gain.
           ControlDefinition{Control::kGain, 1.0, 0.0, 1.0},
           // Root note.
-          ControlDefinition{Control::kRootNote, 0.0},
+          ControlDefinition{Control::kRootPitch, 60},
           // Sample player loop.
           ControlDefinition{Control::kLoop, false},
           // Attack.
@@ -64,8 +64,8 @@ void SamplerInstrument::SetControl(int id, double value) noexcept {
     case Control::kGain:
       gain_processor_.SetGain(value);
       break;
-    case Control::kRootNote:
-      root_note_ = value;
+    case Control::kRootPitch:
+      root_pitch_ = static_cast<int>(value);
       break;
     case Control::kLoop:
       voice_.Update([value](SamplerVoice* voice) noexcept {
@@ -103,11 +103,11 @@ void SamplerInstrument::SetData(const void* data, int size) noexcept {
   });
 }
 
-void SamplerInstrument::SetNoteOff(double note) noexcept { voice_.Stop(note); }
+void SamplerInstrument::SetNoteOff(int pitch) noexcept { voice_.Stop(pitch); }
 
-void SamplerInstrument::SetNoteOn(double note, double intensity) noexcept {
-  const double speed = (root_note_ > 0.0) ? note / root_note_ : 1.0;
-  voice_.Start(note, [speed, intensity](SamplerVoice* voice) noexcept {
+void SamplerInstrument::SetNoteOn(int pitch, double intensity) noexcept {
+  const double speed = GetFrequency(pitch) / GetFrequency(root_pitch_);
+  voice_.Start(pitch, [speed, intensity](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
     voice->set_gain(intensity);
   });

@@ -22,13 +22,13 @@ TEST(MessageQueueTest, AddSingleMessage) {
   EXPECT_THAT(messages.GetNext(1), IsNull());
   EXPECT_THAT(messages.GetNext(10), IsNull());
 
-  messages.Add(1, NoteOffMessage{5.0});
+  messages.Add(1, NoteOffMessage{5});
   EXPECT_THAT(messages.GetNext(0), IsNull());
   EXPECT_THAT(messages.GetNext(1), IsNull());
   EXPECT_THAT(
       messages.GetNext(10),
       AllOf(NotNull(),
-            Pointee(Pair(1, VariantWith<NoteOffMessage>(Field(&NoteOffMessage::note, 5.0))))));
+            Pointee(Pair(1, VariantWith<NoteOffMessage>(Field(&NoteOffMessage::pitch, 5))))));
 
   // Message is already returned.
   EXPECT_THAT(messages.GetNext(10), IsNull());
@@ -40,13 +40,13 @@ TEST(MessageQueueTest, AddMultipleMessages) {
   EXPECT_THAT(messages.GetNext(10), IsNull());
 
   for (int i = 0; i < 10; ++i) {
-    messages.Add(i, NoteOffMessage{static_cast<double>(i)});
+    messages.Add(i, NoteOffMessage{i});
   }
   for (int i = 0; i < 10; ++i) {
     EXPECT_THAT(
         messages.GetNext(10),
-        AllOf(NotNull(), Pointee(Pair(i, VariantWith<NoteOffMessage>(Field(
-                                             &NoteOffMessage::note, static_cast<double>(i)))))));
+        AllOf(NotNull(),
+              Pointee(Pair(i, VariantWith<NoteOffMessage>(Field(&NoteOffMessage::pitch, i))))));
   }
 
   // All messages are already returned.

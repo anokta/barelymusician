@@ -43,17 +43,17 @@ class Instrument {
 
   /// Returns a note control value.
   ///
-  /// @param note Note value.
+  /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] Control* GetNoteControl(double note, int id) noexcept;
-  [[nodiscard]] const Control* GetNoteControl(double note, int id) const noexcept;
+  [[nodiscard]] Control* GetNoteControl(int pitch, int id) noexcept;
+  [[nodiscard]] const Control* GetNoteControl(int pitch, int id) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
-  /// @param note Note value.
+  /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double note) const noexcept;
+  [[nodiscard]] bool IsNoteOn(int pitch) const noexcept;
 
   /// Processes output samples.
   ///
@@ -71,9 +71,9 @@ class Instrument {
 
   /// Resets all note control values.
   ///
-  /// @param note Note value.
+  /// @param pitch Note pitch.
   /// @return True if successful, false otherwise.
-  bool ResetAllNoteControls(double note) noexcept;
+  bool ResetAllNoteControls(int pitch) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -98,8 +98,8 @@ class Instrument {
 
   /// Sets a note off.
   ///
-  /// @param note Note value.
-  void SetNoteOff(double note) noexcept;
+  /// @param pitch Note pitch.
+  void SetNoteOff(int pitch) noexcept;
 
   /// Sets the note off event.
   ///
@@ -109,10 +109,10 @@ class Instrument {
 
   /// Sets a note on.
   ///
-  /// @param note Note value.
+  /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double note, double intensity) noexcept;
+  void SetNoteOn(int pitch, double intensity) noexcept;
 
   /// Sets the note on event.
   ///
@@ -133,13 +133,13 @@ class Instrument {
 
  private:
   // Note control event alias.
-  using NoteControlEvent = Event<NoteControlEventDefinition, double, int, double>;
+  using NoteControlEvent = Event<NoteControlEventDefinition, int, int, double>;
 
   // Note off event alias.
-  using NoteOffEvent = Event<NoteOffEventDefinition, double>;
+  using NoteOffEvent = Event<NoteOffEventDefinition, int>;
 
   // Note on event alias.
-  using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
+  using NoteOnEvent = Event<NoteOnEventDefinition, int, double>;
 
   // Destroy callback.
   const InstrumentDefinition::DestroyCallback destroy_callback_;
@@ -171,8 +171,8 @@ class Instrument {
   // Control map.
   ControlMap control_map_;
 
-  // Map of note control maps by their note values.
-  std::unordered_map<double, ControlMap> note_control_maps_;
+  // Map of note control maps by their pitches.
+  std::unordered_map<int, ControlMap> note_control_maps_;
 
   // Control event.
   Control::Event control_event_;

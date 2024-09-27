@@ -1,10 +1,8 @@
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/midi.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "daisy_pod.h"
 
-using ::barely::FrequencyFromMidiNumber;
 using ::barely::Instrument;
 using ::barely::InstrumentPtr;
 using ::barely::Musician;
@@ -29,7 +27,6 @@ constexpr double kAttack = 0.05;
 constexpr double kRelease = 0.125;
 constexpr int kVoiceCount = 16;
 
-constexpr int kMidiNoteCount = 128;
 constexpr int kOscCount = static_cast<int>(OscillatorType::kCount);
 
 static DaisyPod hw;  // Currently targets the Daisy Pod hardware.
@@ -94,11 +91,11 @@ int main(void) {
       switch (midi_event.type) {
         case MidiMessageType::NoteOn:
           if (const auto note_on_event = midi_event.AsNoteOn(); note_on_event.velocity != 0) {
-            instrument.SetNoteOn(FrequencyFromMidiNumber(note_on_event.note));
+            instrument.SetNoteOn(note_on_event.note);
           }
           break;
         case MidiMessageType::NoteOff:
-          instrument.SetNoteOff(FrequencyFromMidiNumber(midi_event.AsNoteOff().note));
+          instrument.SetNoteOff(midi_event.AsNoteOff().note);
           break;
         default:
           break;

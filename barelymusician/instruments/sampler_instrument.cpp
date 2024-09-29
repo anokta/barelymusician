@@ -45,7 +45,9 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
-    : voice_(SamplerVoice(frame_rate), kMaxVoiceCount), gain_processor_(frame_rate) {}
+    : voice_(SamplerVoice(frame_rate), kMaxVoiceCount),
+      gain_processor_(frame_rate),
+      tuning_(GetStandardTuning()) {}
 
 void SamplerInstrument::Process(double* output_samples, int output_channel_count,
                                 int output_frame_count) noexcept {
@@ -106,11 +108,13 @@ void SamplerInstrument::SetData(const void* data, int size) noexcept {
 void SamplerInstrument::SetNoteOff(int pitch) noexcept { voice_.Stop(pitch); }
 
 void SamplerInstrument::SetNoteOn(int pitch, double intensity) noexcept {
-  const double speed = GetFrequency(pitch) / GetFrequency(root_pitch_);
+  const double speed = tuning_.GetFrequency(pitch) / tuning_.GetFrequency(root_pitch_);
   voice_.Start(pitch, [speed, intensity](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
     voice->set_gain(intensity);
   });
 }
+
+void SamplerInstrument::SetTuning(const TuningDefinition& tuning) noexcept { tuning_ = tuning; }
 
 }  // namespace barely

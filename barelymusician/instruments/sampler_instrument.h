@@ -71,12 +71,14 @@ class SamplerInstrument : public CustomInstrument {
   void SetNoteControl(int /*pitch*/, int /*id*/, double /*value*/) noexcept final {}
   void SetNoteOff(int pitch) noexcept final;
   void SetNoteOn(int pitch, double intensity) noexcept final;
+  void SetTuning(const TuningDefinition& tuning) noexcept final;
 
  private:
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;
   PolyphonicVoice<SamplerVoice> voice_;
   int root_pitch_ = 60;
   GainProcessor gain_processor_;
+  TuningDefinition tuning_;
 };
 
 }  // namespace barely

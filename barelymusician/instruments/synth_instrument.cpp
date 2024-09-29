@@ -44,7 +44,9 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 SynthInstrument::SynthInstrument(int frame_rate) noexcept
-    : voice_(SynthVoice(frame_rate), kMaxVoiceCount), gain_processor_(frame_rate) {}
+    : voice_(SynthVoice(frame_rate), kMaxVoiceCount),
+      gain_processor_(frame_rate),
+      tuning_(GetStandardTuning()) {}
 
 void SynthInstrument::Process(double* output_samples, int output_channel_count,
                               int output_frame_count) noexcept {
@@ -92,10 +94,12 @@ void SynthInstrument::SetControl(int id, double value) noexcept {
 void SynthInstrument::SetNoteOff(int pitch) noexcept { voice_.Stop(pitch); }
 
 void SynthInstrument::SetNoteOn(int pitch, double intensity) noexcept {
-  voice_.Start(pitch, [frequency = GetFrequency(pitch), intensity](SynthVoice* voice) {
+  voice_.Start(pitch, [frequency = tuning_.GetFrequency(pitch), intensity](SynthVoice* voice) {
     voice->generator().SetFrequency(frequency);
     voice->set_gain(intensity);
   });
 }
+
+void SynthInstrument::SetTuning(const TuningDefinition& tuning) noexcept { tuning_ = tuning; }
 
 }  // namespace barely

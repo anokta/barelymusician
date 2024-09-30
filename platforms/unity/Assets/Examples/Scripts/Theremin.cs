@@ -49,16 +49,16 @@ namespace Barely {
         Debug.LogWarning("Theremin does not implement OnSetData");
       }
 
-      public void OnSetNoteControl(double note, int id, double value) {
+      public void OnSetNoteControl(int pitch, int id, double value) {
         Debug.LogWarning("Theremin does not implement OnSetNoteControl");
       }
 
-      public void OnSetNoteOff(double note) {
+      public void OnSetNoteOff(int pitch) {
         _isOn = false;
         _targetAmplitude = 0.0;
       }
 
-      public void OnSetNoteOn(double note, double intensity) {
+      public void OnSetNoteOn(int pitch, double intensity) {
         _isOn = true;
         _phase = 0.0;
         _targetAmplitude = intensity;
@@ -68,8 +68,8 @@ namespace Barely {
       private const double FrequencyA4 = 440.0;
 
       // Returns the corresponding frequency for a given note.
-      private double GetFrequency(double note) {
-        return FrequencyA4 * System.Math.Pow(2.0, note);
+      private double GetFrequency(double pitch) {
+        return FrequencyA4 * System.Math.Pow(2.0, pitch);
       }
 
       // Linearly interpolates between given points.
@@ -84,7 +84,7 @@ namespace Barely {
       public Color color = Color.white;
 
       public void OnGUI() {
-        color.a = Mathf.Lerp(color.a, IsNoteOn(0.0) ? 1.0f : 0.0f, 8.0f * Time.deltaTime);
+        color.a = Mathf.Lerp(color.a, IsNoteOn(0) ? 1.0f : 0.0f, 8.0f * Time.deltaTime);
         GUI.color = color;
         float size = 0.05f * Mathf.Min(Screen.width, Screen.height);
         GUI.DrawTexture(new Rect(Input.mousePosition.x - 0.5f * size,
@@ -93,14 +93,14 @@ namespace Barely {
       }
 
       public void Update() {
-        double note = Input.mousePosition.x / Screen.width;
-        double amplitude = Input.mousePosition.y / Screen.height;
+        double pitch = (double)Input.mousePosition.x / Screen.width;
+        double amplitude = (double)Input.mousePosition.y / Screen.height;
         if (Input.GetMouseButtonDown(0)) {
-          SetNoteOn(0.0, amplitude);
+          SetNoteOn(0, amplitude);
         } else if (Input.GetMouseButtonUp(0)) {
-          SetNoteOff(0.0);
+          SetNoteOff(0);
         }
-        SetControl(0, note);
+        SetControl(0, pitch);
         SetControl(1, amplitude);
       }
 

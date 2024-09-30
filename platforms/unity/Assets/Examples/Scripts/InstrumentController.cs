@@ -13,8 +13,9 @@ namespace Barely {
       // Repeater to control.
       public Repeater repeater = null;
 
-      // Scale.
-      public Scale scale = null;
+      // Root note pitch.
+      [Range(0, 127)]
+      public int rootPitch = 60;
 
       // Octave offset.
       [Range(-3, 3)]
@@ -79,41 +80,37 @@ namespace Barely {
         for (int i = 0; i < _octaveKeys.Length; ++i) {
           if (Input.GetKeyDown(_octaveKeys[i])) {
             if (arpeggiator != null) {
-              arpeggiator.SetNoteOn(GetNoteFromKeyIndex(i));
+              arpeggiator.SetNoteOn(GetPitchFromKeyIndex(i));
             } else if (_isRepeaterActive) {
               repeater.Stop();
-              repeater.Play(Musician.GetFrequencyFromMidiKey(i) /
-                            Musician.GetFrequencyFromMidiKey(-octaveOffset * 12));
+              repeater.Play(i + octaveOffset * 12);
             } else if (instrument != null) {
-              instrument.SetNoteOn(GetNoteFromKeyIndex(i), noteIntensity);
+              instrument.SetNoteOn(GetPitchFromKeyIndex(i), noteIntensity);
               if (repeater != null) {
-                repeater.Push(GetNoteFromKeyIndex(i), repeaterNoteLength);
+                repeater.Push(GetPitchFromKeyIndex(i), repeaterNoteLength);
               }
             }
           } else if (Input.GetKeyUp(_octaveKeys[i])) {
             if (arpeggiator != null) {
-              arpeggiator.SetNoteOff(GetNoteFromKeyIndex(i));
+              arpeggiator.SetNoteOff(GetPitchFromKeyIndex(i));
             } else if (instrument != null) {
-              instrument.SetNoteOff(GetNoteFromKeyIndex(i));
+              instrument.SetNoteOff(GetPitchFromKeyIndex(i));
             }
           }
         }
         if (Application.platform == RuntimePlatform.Android ||
             Application.platform == RuntimePlatform.IPhonePlayer) {
           if (Input.GetMouseButtonDown(0)) {
-            instrument?.SetNoteOn(0.0);
+            instrument?.SetNoteOn(GetPitchFromKeyIndex(0));
           } else if (Input.GetMouseButtonUp(0)) {
-            instrument?.SetNoteOff(0.0);
+            instrument?.SetNoteOff(GetPitchFromKeyIndex(0));
           }
         }
       }
 
-      // Returns the corresponding note for the given key.
-      private double GetNoteFromKeyIndex(int keyIndex) {
-        if (scale == null) {
-          return 0.0;
-        }
-        return scale.GetNote(octaveOffset * scale.GetNoteCount() + keyIndex);
+      // Returns the corresponding pitch for the given key.
+      private int GetPitchFromKeyIndex(int keyIndex) {
+        return rootPitch + octaveOffset * 12 + keyIndex;
       }
     }
   }  // namespace Examples

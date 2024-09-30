@@ -256,7 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 775038743496979810}
-  rootPitch: 0
+  scale: {fileID: 11400000, guid: 3e3c97bd143c20941bd40fa7667864c5, type: 2}
 --- !u!114 &979780177348129264
 MonoBehaviour:
   m_ObjectHideFlags: 0

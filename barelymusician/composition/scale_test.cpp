@@ -1,27 +1,28 @@
 #include "barelymusician/composition/scale.h"
 
 #include <array>
-#include <cmath>
 
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
-// Tests that expected notes are returned for a given arbitrary scale.
-TEST(ScaleTest, GetNoteFromScale) {
-  constexpr int kNoteCount = 5;
-  const std::array<double, kNoteCount> kRatios = {1.25, 1.5, 1.75, 2.0, 3.0};
-  constexpr double kRootNote = 100.0;
-  const ScaleDefinition kDefinition = {kRatios, kRootNote};
+// Tests that expected pitches are returned for a given arbitrary scale.
+TEST(ScaleTest, GetPitch) {
+  constexpr int kPitchCount = 5;
+  const std::array<int, kPitchCount> kPitches = {2, 4, 10, 20, 25};
+  constexpr int kRootPitch = 50;
+  constexpr int kMode = 0;
+
+  const ScaleDefinition scale = {kPitches, kRootPitch, kMode};
 
   constexpr int kOctaveRange = 2;
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
-    for (int i = 0; i < kNoteCount; ++i) {
-      const int degree = octave * kNoteCount + i;
-      const double expected_note =
-          kRootNote * std::pow(kRatios[kNoteCount - 1], octave) * (i > 0 ? kRatios[i - 1] : 1.0);
-      EXPECT_DOUBLE_EQ(GetNoteFromScale(kDefinition, degree), expected_note);
+    for (int i = 0; i < kPitchCount; ++i) {
+      const int degree = octave * kPitchCount + i;
+      const int expected_pitch =
+          kRootPitch + kPitches[kPitchCount - 1] * octave + (i > 0 ? kPitches[i - 1] : 0);
+      EXPECT_EQ(scale.GetPitch(degree), expected_pitch);
     }
   }
 }

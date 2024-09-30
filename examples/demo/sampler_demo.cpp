@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/scale.h"
 #include "barelymusician/effects/low_pass_effect.h"
 #include "barelymusician/instruments/sampler_instrument.h"
 #include "examples/common/audio_output.h"
@@ -26,7 +25,6 @@ using ::barely::Effect;
 using ::barely::Instrument;
 using ::barely::LowPassEffect;
 using ::barely::Musician;
-using ::barely::PitchClass;
 using ::barely::SamplerInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -53,8 +51,9 @@ constexpr double kLowPassCutoffFrequency = 2000;
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr int kRootOctave = 4;
-constexpr int kMaxOctaveShift = 3;
+constexpr int kRootPitch = 60;
+constexpr int kOctavePitchCount = 12;
+constexpr int kMaxOctaveShift = 4;
 
 // Returns the sample data from a given `file_path`.
 std::vector<double> GetSampleData(const std::string& file_path) {
@@ -72,16 +71,14 @@ std::vector<double> GetSampleData(const std::string& file_path) {
   return data;
 }
 
-// Returns the note for a given `key`.
-std::optional<double> NoteFromKey(int octave, const InputManager::Key& key) {
+// Returns the pitch for a given `key`.
+std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  const int pitch_index = static_cast<int>(std::distance(kOctaveKeys.begin(), it));
-  const int pitch_count = static_cast<int>(PitchClass::kCount);
-  return barely::GetNoteFromPitch(static_cast<PitchClass>(pitch_index % pitch_count),
-                                  octave + pitch_index / pitch_count);
+  return kRootPitch + octave_shift * kOctavePitchCount +
+         static_cast<int>(std::distance(kOctaveKeys.begin(), it));
 }
 
 }  // namespace
@@ -95,8 +92,7 @@ int main(int /*argc*/, char* argv[]) {
 
   Instrument instrument(musician, SamplerInstrument::GetDefinition());
   instrument.SetControl(SamplerInstrument::Control::kGain, kGain);
-  instrument.SetControl(SamplerInstrument::Control::kRootNote,
-                        barely::GetNoteFromPitch(PitchClass::kC));
+  instrument.SetControl(SamplerInstrument::Control::kRootPitch, kRootPitch);
   instrument.SetControl(SamplerInstrument::Control::kLoop, kLoop);
   instrument.SetControl(SamplerInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SamplerInstrument::Control::kRelease, kRelease);
@@ -107,10 +103,10 @@ int main(int /*argc*/, char* argv[]) {
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
-  instrument.SetNoteOnEvent([](double note, double intensity) { 
-    ConsoleLog() << "NoteOn(" << note << ", " << intensity << ")";
+  instrument.SetNoteOnEvent([](int pitch, double intensity) {
+    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
   });
-  instrument.SetNoteOffEvent([](double note) { ConsoleLog() << "NoteOff(" << note << ") "; });
+  instrument.SetNoteOffEvent([](int pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
@@ -120,7 +116,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Key down callback.
   double intensity = 1.0;
-  int octave = kRootOctave;
+  int octave_shift = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -134,12 +130,12 @@ int main(int /*argc*/, char* argv[]) {
       // Shift octaves.
       instrument.SetAllNotesOff();
       if (upper_key == 'Z') {
-        --octave;
+        --octave_shift;
       } else {
-        ++octave;
+        ++octave_shift;
       }
-      octave = std::clamp(octave, kRootOctave - kMaxOctaveShift, kRootOctave + kMaxOctaveShift);
-      ConsoleLog() << "Octave set to " << octave;
+      octave_shift = std::clamp(octave_shift, -kMaxOctaveShift, kMaxOctaveShift);
+      ConsoleLog() << "Octave shift set to " << octave_shift;
       return;
     }
     if (upper_key == 'C' || upper_key == 'V') {
@@ -155,8 +151,8 @@ int main(int /*argc*/, char* argv[]) {
     }
 
     // Play note.
-    if (const auto note = NoteFromKey(octave, key)) {
-      instrument.SetNoteOn(*note, intensity);
+    if (const auto pitch_or = PitchFromKey(octave_shift, key)) {
+      instrument.SetNoteOn(*pitch_or, intensity);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -164,8 +160,8 @@ int main(int /*argc*/, char* argv[]) {
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    if (const auto note = NoteFromKey(octave, key)) {
-      instrument.SetNoteOff(*note);
+    if (const auto pitch_or = PitchFromKey(octave_shift, key)) {
+      instrument.SetNoteOff(*pitch_or);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

@@ -48,6 +48,11 @@ add_library(
   message.h
 )
 
+target_link_libraries(
+  barelymusician_internal_message INTERFACE
+  barelymusician_headeronly
+)
+
 add_library(
   barelymusician_internal_message_queue
   message_queue.cpp

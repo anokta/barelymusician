@@ -13,8 +13,8 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public double Gain = 1.0;
 
-    /// Root note.
-    public double RootNote = 0.0;
+    /// Root note pitch.
+    public int RootPitch = 60;
 
     /// Sample player loop.
     public bool Loop = false;
@@ -52,7 +52,7 @@ namespace Barely {
         SetSampleData();
       }
       SetControl(0, Gain);
-      SetControl(1, RootNote);
+      SetControl(1, (double)RootPitch);
       SetControl(2, Loop ? 1.0 : 0.0);
       SetControl(3, Attack);
       SetControl(4, Decay);

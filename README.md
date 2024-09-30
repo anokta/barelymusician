@@ -46,13 +46,14 @@ instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
 
 // Set an instrument note on.
 //
-// Note values for pitched instruments typically represent the frequencies of the corresponding
-// notes. However, this is not a strict rule, as the `note` and `intensity` values can be
-// interpreted in any desired way by a custom instrument.
-instrument.SetNoteOn(/*note=*/220.0, /*intensity=*/0.25);
+// Note values typically follow the MIDI Standard Tuning for convenience, where `pitch` represents
+// the MIDI note number, and `intensity` represents the normalized MIDI note velocity. However, this
+// is not a strict rule, as the `pitch` and `intensity` values can be interpreted in any desired way
+// by a custom instrument with a custom tuning.
+instrument.SetNoteOn(/*pitch=*/60, /*intensity=*/0.25);
 
 // Check if the instrument note is on.
-const bool is_note_on = instrument.IsNoteOn(/*note=*/220.0);  // will return true.
+const bool is_note_on = instrument.IsNoteOn(/*note=*/60);  // will return true.
 
 // Create a low-pass effect.
 barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
@@ -71,9 +72,9 @@ Task task(
     performer,
     [&]() {
       // Set an instrument note on.
-      instrument.SetNoteOn(/*note=*/440.0);
+      instrument.SetNoteOn(/*pitch=*/62);
       // Schedule a one-off task to set the instrument note off after half a beat.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*note=*/440.0); },
+      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/62); },
                                    performer.GetPosition() + 0.5);
     });
 

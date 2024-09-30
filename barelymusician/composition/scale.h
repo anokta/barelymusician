@@ -8,51 +8,42 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Pitch class enum alias.
-typedef int32_t BarelyPitchClass;
-
 /// Scale type enum alias.
 typedef int32_t BarelyScaleType;
 
 /// Definition of a musical scale.
 #pragma pack(push, 1)
 typedef struct BarelyScaleDefinition {
-  /// Array of pitch ratios relative to, but excluding, the root note.
-  const double* pitch_ratios;
+  /// Array of pitches relative to the root pitch.
+  const int32_t* pitches;
 
-  /// Number of pitch ratios.
-  int32_t pitch_ratio_count;
+  /// Number of pitches.
+  int32_t pitch_count;
 
-  /// Root note.
-  double root_note;
+  /// Root pitch of the scale.
+  int32_t root_pitch;
+
+  /// Mode index.
+  int32_t mode;
 } BarelyScaleDefinition;
 #pragma pack(pop)
 
-/// Gets a note from a given pitch class and octave.
-///
-/// @param pitch_class Pitch class.
-/// @param octave Octave.
-/// @param out_note Output note.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool Barely_GetNoteFromPitch(BarelyPitchClass pitch_class, int32_t octave,
-                                           double* out_note);
-
-/// Gets a note from a scale based on a given degree.
+/// Gets a scale pitch for a given degree.
 ///
 /// @param definition Pointer to scale definition.
 /// @param degree Scale degree.
-/// @param out_note Output note.
+/// @param out_pitch Output pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool Barely_GetNoteFromScale(const BarelyScaleDefinition* definition, int32_t degree,
-                                           double* out_note);
+BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScaleDefinition* definition, int32_t degree,
+                                        int32_t* out_pitch);
 
 /// Gets a scale definition of type.
 ///
 /// @param type Scale type.
-/// @param root_note Root note.
+/// @param root_pitch Root pitch.
 /// @param out_definition Output scale definition.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool Barely_GetScaleDefinition(BarelyScaleType type, double root_note,
+BARELY_EXPORT bool Barely_GetScaleDefinition(BarelyScaleType type, int32_t pitch,
                                              BarelyScaleDefinition* out_definition);
 
 #ifdef __cplusplus
@@ -65,27 +56,6 @@ BARELY_EXPORT bool Barely_GetScaleDefinition(BarelyScaleType type, double root_n
 #include <span>
 
 namespace barely {
-
-/// Pitch class enum.
-enum class PitchClass : BarelyPitchClass {
-  kC = 0,        /// C
-  kCsharp = 1,   /// C#
-  kD = 2,        /// D
-  kDsharp = 3,   /// D#
-  kE = 4,        /// E
-  kF = 5,        /// F
-  kFsharp = 6,   /// F#
-  kG = 7,        /// G
-  kGsharp = 8,   /// G#
-  kA = 9,        /// A
-  kAsharp = 10,  /// A#
-  kB = 11,       /// B
-  kCount,
-  kKick = kC,
-  kSnare = kD,
-  kHihatClosed = kE,
-  kHihatOpen = kF,
-};
 
 /// Scale type enum.
 enum class ScaleType : BarelyScaleType {
@@ -103,11 +73,13 @@ struct ScaleDefinition : public BarelyScaleDefinition {
 
   /// Constructs a new `ScaleDefinition`.
   ///
-  /// @param ratios Span of ratios.
-  /// @param root_note Root note.
-  constexpr ScaleDefinition(std::span<const double> pitch_ratios, double root_note) noexcept
-      : ScaleDefinition(BarelyScaleDefinition{pitch_ratios.data(),
-                                              static_cast<int>(pitch_ratios.size()), root_note}) {}
+  /// @param pitches Span of pitches.
+  /// @param root_pitch Root pitch.
+  /// @param mode Mode.
+  constexpr ScaleDefinition(std::span<const int32_t> pitches, int root_pitch, int mode = 0) noexcept
+      : ScaleDefinition(BarelyScaleDefinition{pitches.data(), static_cast<int32_t>(pitches.size()),
+                                              static_cast<int32_t>(root_pitch),
+                                              static_cast<int32_t>(mode)}) {}
 
   /// Constructs a new `ScaleDefinition` from a raw type.
   ///
@@ -115,53 +87,40 @@ struct ScaleDefinition : public BarelyScaleDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr ScaleDefinition(BarelyScaleDefinition definition) noexcept
       : BarelyScaleDefinition{definition} {
-    assert(definition.pitch_ratios != nullptr);
-    assert(definition.pitch_ratio_count > 0);
+    assert(definition.pitches != nullptr);
+    assert(definition.pitch_count > 0);
+    assert(definition.mode >= 0 && definition.mode < definition.pitch_count);
   }
 
-  /// Returns the number of notes in the scale.
+  /// Returns the pitch for a given degree.
   ///
-  /// @return Number of notes.
-  [[nodiscard]] constexpr int GetNoteCount() const noexcept {
-    return static_cast<int>(pitch_ratio_count);
+  /// @param definition Scale definition.
+  /// @param degree Degree.
+  /// @return Pitch.
+  [[nodiscard]] int GetPitch(int degree) const noexcept {
+    int32_t pitch = 0;
+    [[maybe_unused]] const bool success = BarelyScale_GetPitch(this, degree, &pitch);
+    assert(success);
+    return pitch;
+  }
+
+  /// Returns the number of pitches in the scale.
+  ///
+  /// @return Number of pitches.
+  [[nodiscard]] constexpr int GetPitchCount() const noexcept {
+    return static_cast<int>(pitch_count);
   }
 };
-
-/// Returns a note from a given pitch class and octave.
-///
-/// @param pitch_class Pitch class.
-/// @param octave Octave.
-/// @return Note.
-[[nodiscard]] inline double GetNoteFromPitch(PitchClass pitch_class, int octave = 4) noexcept {
-  double note = 0.0;
-  [[maybe_unused]] const bool success =
-      Barely_GetNoteFromPitch(static_cast<BarelyPitchClass>(pitch_class), octave, &note);
-  assert(success);
-  return note;
-}
-
-/// Returns a note from a scale based on a given degree.
-///
-/// @param definition Scale definition.
-/// @param degree Degree.
-/// @return Note.
-[[nodiscard]] inline double GetNoteFromScale(const ScaleDefinition& definition,
-                                             int degree) noexcept {
-  double note = 0.0;
-  [[maybe_unused]] const bool success = Barely_GetNoteFromScale(&definition, degree, &note);
-  assert(success);
-  return note;
-}
 
 /// Returns a scale definition of type.
 ///
 /// @param type Scale type.
-/// @param root_note Root note.
+/// @param root_pitch Root pitch.
 /// @return Scale definition.
-inline ScaleDefinition GetScaleDefinition(ScaleType type, double root_note) noexcept {
+inline ScaleDefinition GetScaleDefinition(ScaleType type, int root_pitch) noexcept {
   BarelyScaleDefinition definition = {};
-  [[maybe_unused]] const bool success =
-      Barely_GetScaleDefinition(static_cast<BarelyScaleType>(type), root_note, &definition);
+  [[maybe_unused]] const bool success = Barely_GetScaleDefinition(
+      static_cast<BarelyScaleType>(type), static_cast<int32_t>(root_pitch), &definition);
   assert(success);
   return definition;
 }

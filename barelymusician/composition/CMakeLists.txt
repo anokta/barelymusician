@@ -5,16 +5,6 @@ add_library(
 )
 
 add_library(
-  barelymusician_midi
-  midi.cpp
-  midi.h
-)
-target_link_libraries(
-  barelymusician_midi
-  barelymusician_scale
-)
-
-add_library(
   barelymusician_scale
   scale.cpp
   scale.h
@@ -35,18 +25,6 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_duration_test)
-
-  add_executable(
-    barelymusician_midi_test
-    midi_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_midi_test
-    barelymusician_midi
-    barelymusician_scale
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_midi_test)
 
   add_executable(
     barelymusician_scale_test

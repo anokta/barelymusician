@@ -162,22 +162,22 @@ MonoBehaviour:
   loopLength: 8
   playOnAwake: 1
   notes:
-  - key: 69
+  - pitch: 69
     intensity: 1
     position: 1.5
     duration: 0.5
     muted: 0
-  - key: 61
+  - pitch: 61
     intensity: 1
     position: 1.5
     duration: 0.5
     muted: 0
-  - key: 69
+  - pitch: 69
     intensity: 1
     position: 5.5
     duration: 0.5
     muted: 0
-  - key: 64
+  - pitch: 64
     intensity: 1
     position: 5.5
     duration: 0.5
@@ -510,6 +510,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   randomSequencer: {fileID: 2031085264}
+  scale: {fileID: 11400000, guid: 8d46e355adb6b6146b88eba7485b6cec, type: 2}
 --- !u!1 &685451361
 GameObject:
   m_ObjectHideFlags: 0
@@ -540,8 +541,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beatCount: 4
-  barNote: 1
-  beatNote: 0
+  barPitch: 69
+  beatPitch: 57
   intensity: 1
   isLoggingToConsole: 0
   isTicking: 0
@@ -728,13 +729,13 @@ MonoBehaviour:
   Gain: 0.5
   PadRelease: 1
   Pads:
-  - Key: 69
+  - Pitch: 60
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
-  - Key: 71
+  - Pitch: 62
     Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
-  - Key: 73
+  - Pitch: 64
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
-  - Key: 74
+  - Pitch: 65
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
 --- !u!82 &1737834381
 AudioSource:
@@ -885,22 +886,22 @@ MonoBehaviour:
   loopLength: 2
   playOnAwake: 1
   notes:
-  - key: 69
+  - pitch: 60
     intensity: 1
     position: 0
     duration: 0
     muted: 0
-  - key: 73
+  - pitch: 64
     intensity: 0.5
     position: 0.5
     duration: 0
     muted: 0
-  - key: 71
+  - pitch: 62
     intensity: 1
     position: 1
     duration: 0
     muted: 0
-  - key: 73
+  - pitch: 64
     intensity: 0.5
     position: 1.5
     duration: 0
@@ -922,7 +923,7 @@ MonoBehaviour:
   loopLength: 8
   playOnAwake: 1
   notes:
-  - key: 74
+  - pitch: 65
     intensity: 1
     position: 7.5
     duration: 0.5
@@ -1170,27 +1171,27 @@ MonoBehaviour:
   loopLength: 4
   playOnAwake: 1
   notes:
-  - key: 69
+  - pitch: 69
     intensity: 1
     position: 0
     duration: 0.5
     muted: 0
-  - key: 73
+  - pitch: 73
     intensity: 1
     position: 1
     duration: 0.5
     muted: 0
-  - key: 74
+  - pitch: 74
     intensity: 1
     position: 2
     duration: 0.5
     muted: 0
-  - key: 57
+  - pitch: 57
     intensity: 0.75
     position: 0
     duration: 2
     muted: 0
-  - key: 56
+  - pitch: 56
     intensity: 0.75
     position: 2
     duration: 2
@@ -1311,7 +1312,7 @@ MonoBehaviour:
   loopLength: 1
   playOnAwake: 1
   notes:
-  - key: 69
+  - pitch: 69
     intensity: 1
     position: 0
     duration: 0.25
@@ -1497,22 +1498,22 @@ MonoBehaviour:
   loopLength: 8
   playOnAwake: 1
   notes:
-  - key: 69
+  - pitch: 69
     intensity: 1
     position: 3
     duration: 1
     muted: 0
-  - key: 69
+  - pitch: 69
     intensity: 1
     position: 6
     duration: 0.25
     muted: 0
-  - key: 64
+  - pitch: 64
     intensity: 1
     position: 6.5
     duration: 0.25
     muted: 0
-  - key: 57
+  - pitch: 57
     intensity: 1
     position: 7
     duration: 1
@@ -1573,7 +1574,7 @@ MonoBehaviour:
       m_Calls: []
   Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   Gain: 1
-  RootNote: 440
+  RootPitch: 69
   Loop: 1
   Attack: 0
   Decay: 0

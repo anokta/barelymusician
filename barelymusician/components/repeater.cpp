@@ -51,10 +51,10 @@ bool BarelyRepeater_Pop(BarelyRepeater* repeater) {
   return true;
 }
 
-bool BarelyRepeater_Push(BarelyRepeater* repeater, double note, int32_t length) {
+bool BarelyRepeater_Push(BarelyRepeater* repeater, int32_t pitch, int32_t length) {
   if (!repeater) return false;
 
-  repeater->Push(note, static_cast<int>(length));
+  repeater->Push(pitch, static_cast<int>(length));
   return true;
 }
 
@@ -87,10 +87,10 @@ bool BarelyRepeater_SetStyle(BarelyRepeater* repeater, BarelyRepeaterStyle style
   return true;
 }
 
-bool BarelyRepeater_Start(BarelyRepeater* repeater, double note_multiplier) {
+bool BarelyRepeater_Start(BarelyRepeater* repeater, int32_t pitch_offset) {
   if (!repeater) return false;
 
-  repeater->Start(note_multiplier);
+  repeater->Start(pitch_offset);
   return true;
 }
 
@@ -109,16 +109,16 @@ Repeater::Repeater(MusicianPtr musician, int process_order) noexcept
       task_(
           performer_,
           [this]() noexcept {
-            if (notes_.empty() || !Update() || !instrument_.has_value()) {
+            if (pitches_.empty() || !Update() || !instrument_.has_value()) {
               return;
             }
-            const auto& [pitch_or, length] = notes_[index_];
-            if (!notes_[index_].first.has_value()) {
+            const auto& [pitch_or, length] = pitches_[index_];
+            if (!pitches_[index_].first.has_value()) {
               return;
             }
-            const double note = *notes_[index_].first * note_multiplier_;
-            instrument_->SetNoteOn(note);
-            performer_.ScheduleOneOffTask([this, note]() { instrument_->SetNoteOff(note); },
+            const int pitch = *pitches_[index_].first + pitch_offset_;
+            instrument_->SetNoteOn(pitch);
+            performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
                                           static_cast<double>(length) * performer_.GetLoopLength());
           },
           0.0) {
@@ -128,27 +128,27 @@ Repeater::Repeater(MusicianPtr musician, int process_order) noexcept
 
 Repeater::~Repeater() noexcept { Stop(); }
 
-void Repeater::Clear() noexcept { notes_.clear(); }
+void Repeater::Clear() noexcept { pitches_.clear(); }
 
 bool Repeater::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Pop() noexcept {
-  if (notes_.empty()) {
+  if (pitches_.empty()) {
     return;
   }
-  if (index_ == static_cast<int>(notes_.size()) - 1 && IsPlaying()) {
+  if (index_ == static_cast<int>(pitches_.size()) - 1 && IsPlaying()) {
     if (instrument_.has_value()) {
-      instrument_->SetNoteOff(*notes_.back().first * note_multiplier_);
+      instrument_->SetNoteOff(*pitches_.back().first + pitch_offset_);
     }
     remaining_length_ = 0;
   }
-  notes_.pop_back();
+  pitches_.pop_back();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
-  notes_.emplace_back(pitch_or, length);
+void Repeater::Push(std::optional<int> pitch_or, int length) noexcept {
+  pitches_.emplace_back(pitch_or, length);
 }
 
 void Repeater::SetInstrument(std::optional<InstrumentPtr> instrument) noexcept {
@@ -166,11 +166,11 @@ void Repeater::SetRate(double rate) noexcept {
 void Repeater::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Start(double note_multiplier) noexcept {
+void Repeater::Start(int pitch_offset) noexcept {
   if (IsPlaying()) {
     return;
   }
-  note_multiplier_ = note_multiplier;
+  pitch_offset_ = pitch_offset;
   performer_.Start();
 }
 
@@ -189,10 +189,10 @@ void Repeater::Stop() noexcept {
 }
 
 bool Repeater::Update() noexcept {
-  if (--remaining_length_ > 0 || notes_.empty()) {
+  if (--remaining_length_ > 0 || pitches_.empty()) {
     return false;
   }
-  const int size = static_cast<int>(notes_.size());
+  const int size = static_cast<int>(pitches_.size());
   switch (style_) {
     case RepeaterStyle::kForward:
       index_ = (index_ + 1) % size;
@@ -203,7 +203,7 @@ bool Repeater::Update() noexcept {
     case RepeaterStyle::kRandom:
       index_ = random_.DrawUniform(0, size - 1);
   }
-  remaining_length_ = notes_[index_].second;
+  remaining_length_ = pitches_[index_].second;
   return true;
 }
 

@@ -8,7 +8,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/components/repeater.h"
-#include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
@@ -21,7 +20,6 @@ namespace {
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::PitchClass;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
 using ::barely::SynthInstrument;
@@ -49,22 +47,20 @@ constexpr double kInitialTempo = 135.0;
 constexpr RepeaterStyle kInitialStyle = RepeaterStyle::kForward;
 
 // Note settings.
-constexpr PitchClass kRootPitch = PitchClass::kC;
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr int kRootOctave = 4;
-constexpr int kMaxOctaveShift = 3;
+constexpr int kRootPitch = 60;
+constexpr int kOctavePitchCount = 12;
+constexpr int kMaxOctaveShift = 4;
 
-// Returns the note for a given `key`.
-std::optional<double> NoteFromKey(int octave, const InputManager::Key& key) {
+// Returns the pitch for a given `key`.
+std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  const int pitch_index = static_cast<int>(std::distance(kOctaveKeys.begin(), it));
-  const int pitch_count = static_cast<int>(PitchClass::kCount);
-  return barely::GetNoteFromPitch(static_cast<PitchClass>(pitch_index % pitch_count),
-                                  octave + pitch_index / pitch_count);
+  return kRootPitch + octave_shift * kOctavePitchCount +
+         static_cast<int>(std::distance(kOctaveKeys.begin(), it));
 }
 
 }  // namespace
@@ -91,9 +87,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteOnEvent([&repeater](double note, double /*intensity*/) {
+  instrument.SetNoteOnEvent([&repeater](int pitch, double /*intensity*/) {
     if (repeater.IsPlaying()) {
-      ConsoleLog() << "Note(" << note << ")";
+      ConsoleLog() << "Note(" << pitch << ")";
     }
   });
 
@@ -104,7 +100,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  int octave = kRootOctave;
+  int octave_shift = 0;
   int length = 1;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -121,29 +117,29 @@ int main(int /*argc*/, char* /*argv*/[]) {
         instrument.SetAllNotesOff();
       }
       if (upper_key == 'Z') {
-        --octave;
+        --octave_shift;
       } else {
-        ++octave;
+        ++octave_shift;
       }
-      octave = std::clamp(octave, kRootOctave - kMaxOctaveShift, kRootOctave + kMaxOctaveShift);
-      ConsoleLog() << "Octave offset set to " << octave;
+      octave_shift = std::clamp(octave_shift, -kMaxOctaveShift, kMaxOctaveShift);
+      ConsoleLog() << "Octave shift set to " << octave_shift;
       return;
     }
 
     // Play note.
-    if (const auto note_or = NoteFromKey(octave, key)) {
-      const double note = *note_or;
+    if (const auto pitch_or = PitchFromKey(octave_shift, key)) {
+      const int pitch = *pitch_or;
       if (!repeater.IsPlaying()) {
-        instrument.SetNoteOn(note);
+        instrument.SetNoteOn(pitch);
       }
-      repeater.Push(note, length);
-      ConsoleLog() << "Note(" << note << ") added";
+      repeater.Push(pitch, length);
+      ConsoleLog() << "Note(" << pitch << ") added";
       return;
     }
 
     switch (upper_key) {
       case '0':
-        repeater.Push(/*note_or=*/std::nullopt, length);
+        repeater.Push(/*pitch_or=*/std::nullopt, length);
         ConsoleLog() << "Silence added";
         break;
       case '1':
@@ -181,9 +177,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    if (const auto note = NoteFromKey(octave, key)) {
+    if (const auto pitch_or = PitchFromKey(octave_shift, key)) {
       if (!repeater.IsPlaying()) {
-        instrument.SetNoteOff(*note);
+        instrument.SetNoteOff(*pitch_or);
       }
     }
   };

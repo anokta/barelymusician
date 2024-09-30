@@ -18,7 +18,6 @@ using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
-using ::barely::PitchClass;
 using ::barely::ScaleDefinition;
 using ::barely::ScaleType;
 using ::barely::SynthInstrument;
@@ -61,22 +60,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetNoteOnEvent(
-      [](double note, double /*intensity*/) { ConsoleLog() << "Note{" << note << "}"; });
+      [](int pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   std::vector<std::pair<double, double>> triggers;
   std::vector<Task> tasks;
 
   Performer performer(musician);
 
-  const auto scale =
-      barely::GetScaleDefinition(ScaleType::kDiatonic, barely::GetNoteFromPitch(PitchClass::kD));
+  const ScaleDefinition scale = barely::GetScaleDefinition(ScaleType::kDiatonic, 60);
 
-  const auto play_note_fn = [&](int scale_degree, double duration) {
-    const double note = barely::GetNoteFromScale(scale, scale_degree);
-    return [&instrument, &performer, duration, note]() {
-      instrument.SetNoteOn(note);
+  const auto play_note_fn = [&](int degree, double duration) {
+    return [&instrument, &performer, duration, pitch = scale.GetPitch(degree)]() {
+      instrument.SetNoteOn(pitch);
       performer.ScheduleOneOffTask(
-          [&instrument, &performer, note]() { instrument.SetNoteOff(note); },
+          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
           performer.GetPosition() + duration);
     };
   };

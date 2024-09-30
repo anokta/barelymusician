@@ -50,10 +50,10 @@ BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeater* repeater);
 /// Pushes a new note to the end.
 ///
 /// @param repeater Pointer to repeater.
-/// @param note Note value.
+/// @param pitch Note pitch.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeater* repeater, double note, int32_t length);
+BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeater* repeater, int32_t pitch, int32_t length);
 
 /// Pushes silence to the end.
 ///
@@ -87,9 +87,9 @@ BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeater* repeater, BarelyRepea
 /// Starts the repeater.
 ///
 /// @param repeater Pointer to repeater.
-/// @param note_multiplier Note multiplier.
+/// @param pitch_offset Pitch offset.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeater* repeater, double note_multiplier);
+BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeater* repeater, int32_t pitch_offset);
 
 /// Stops the repeater.
 ///
@@ -152,10 +152,10 @@ class Repeater {
 
   /// Pushes a new note to the end.
   ///
-  /// @param note_or Note value or silence.
+  /// @param pitch_or Note pitch or silence.
   /// @param length Note length.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Push(std::optional<double> note_or, int length = 1) noexcept;
+  void Push(std::optional<int> pitch_or, int length = 1) noexcept;
 
   /// Sets the instrument.
   ///
@@ -174,9 +174,9 @@ class Repeater {
 
   /// Starts the repeater.
   ///
-  /// @param note_multiplier Note multiplier.
+  /// @param pitch_offset Pitch offset.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Start(double note_multiplier = 1.0) noexcept;
+  void Start(int pitch_offset = 0) noexcept;
 
   /// Stop the repeater.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -192,8 +192,8 @@ class Repeater {
   // Instrument.
   std::optional<InstrumentPtr> instrument_ = std::nullopt;
 
-  // Array of notes to play.
-  std::vector<std::pair<std::optional<double>, int>> notes_;
+  // Array of pitches to play.
+  std::vector<std::pair<std::optional<int>, int>> pitches_;
 
   // Style.
   RepeaterStyle style_ = RepeaterStyle::kForward;
@@ -201,8 +201,8 @@ class Repeater {
   // Current index.
   int index_ = -1;
 
-  // Note multiplier.
-  double note_multiplier_ = 1.0;
+  // Pitch offset.
+  int pitch_offset_ = 0;
 
   // Remaining length;
   int remaining_length_ = 0;

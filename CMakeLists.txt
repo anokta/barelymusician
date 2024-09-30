@@ -34,12 +34,12 @@ if(ENABLE_DAISY)
   )
   FetchContent_MakeAvailable(libdaisy)
   target_compile_definitions(
-    daisy
-    PUBLIC BOOT_APP # Use the Daisy bootloader.
+    daisy PUBLIC
+    BOOT_APP # Use the Daisy bootloader.
   )
   target_compile_options(
-    daisy
-    PUBLIC -w
+    daisy PUBLIC
+    -w
   )
   include_directories(${libdaisy_SOURCE_DIR}/src)
 endif()
@@ -163,26 +163,27 @@ if(ENABLE_EXAMPLES)
   )
   FetchContent_MakeAvailable(midifile)
   target_compile_options(
-    midifile
-    PUBLIC -w
+    midifile PUBLIC
+    -w
   )
   include_directories(${midifile_SOURCE_DIR}/include)
 
   set(CMAKE_FOLDER external)
   FetchContent_Declare(
-    portaudio
-    GIT_REPOSITORY https://github.com/PortAudio/portaudio.git
-    GIT_TAG 147dd722548358763a8b649b3e4b41dfffbcfbb6
+    miniaudio
+    GIT_REPOSITORY https://github.com/mackron/miniaudio.git
+    GIT_TAG 4a5b74bef029b3592c54b6048650ee5f972c1a48
   )
-  FetchContent_MakeAvailable(portaudio)
+  FetchContent_MakeAvailable(miniaudio)
+  add_library(
+    miniaudio INTERFACE
+    ${miniaudio_SOURCE_DIR}/miniaudio.h
+  )
   target_compile_options(
-    portaudio
-    PUBLIC -w
+    miniaudio INTERFACE
+    -w
   )
-  target_compile_options(
-    portaudio_static
-    PUBLIC -w
-  )
+  include_directories(${miniaudio_SOURCE_DIR})
 
   add_subdirectory(examples)
 endif()

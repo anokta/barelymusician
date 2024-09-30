@@ -82,7 +82,6 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* argv[]) {
-  AudioOutput audio_output;
   InputManager input_manager;
 
   MidiFile midi_file;
@@ -97,6 +96,7 @@ int main(int /*argc*/, char* argv[]) {
                << " tracks, " << ticks_per_quarter << " TPQ)";
 
   AudioClock clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
   Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
@@ -155,7 +155,8 @@ int main(int /*argc*/, char* argv[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
+  audio_output.Start();
+  musician.Update(kLookahead);
   for (auto& [instrument, performer] : tracks) {
     performer.Start();
   }

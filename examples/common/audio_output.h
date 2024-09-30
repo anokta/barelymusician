@@ -4,11 +4,11 @@
 #include <functional>
 #include <vector>
 
-#include "portaudio.h"
+#include "miniaudio.h"
 
 namespace barely::examples {
 
-/// Simple portaudio wrapper for handling audio output.
+/// Simple wrapper for handling audio output.
 class AudioOutput {
  public:
   /// Audio process callback signature.
@@ -17,7 +17,11 @@ class AudioOutput {
   using ProcessCallback = std::function<void(double* output)>;
 
   /// Constructs new `AudioOutput`.
-  AudioOutput() noexcept;
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  /// @param channel_count Number of output channels.
+  /// @param frame_count Number of output frames per buffer.
+  AudioOutput(int frame_rate, int channel_count, int frame_count) noexcept;
 
   /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;
@@ -28,12 +32,8 @@ class AudioOutput {
   AudioOutput(AudioOutput&& other) noexcept = delete;
   AudioOutput& operator=(AudioOutput&& other) noexcept = delete;
 
-  /// Starts audio processing routine with the given configuration.
-  ///
-  /// @param frame_rate Frame rate in hertz.
-  /// @param channel_count Number of output channels.
-  /// @param frame_count Number of output frames per buffer.
-  void Start(int frame_rate, int channel_count, int frame_count);
+  /// Starts audio processing routine.
+  void Start();
 
   /// Stops the audio processing routine.
   void Stop() noexcept;
@@ -54,8 +54,8 @@ class AudioOutput {
   };
   ProcessData process_data_;
 
-  // Stream for audio processing.
-  PaStream* stream_ = nullptr;
+  // Audio device.
+  ma_device device_;
 };
 
 }  // namespace barely::examples

@@ -54,7 +54,7 @@ constexpr int kOctavePitchCount = 12;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& key) {
+std::optional<int> PitchFromKey(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
@@ -67,10 +67,10 @@ std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& ke
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* /*argv*/[]) {
-  AudioOutput audio_output;
   InputManager input_manager;
 
   AudioClock audio_clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
   Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
@@ -187,7 +187,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
+  audio_output.Start();
+  musician.Update(kLookahead);
 
   ConsoleLog() << "Play the repeater using the keyboard keys:";
   ConsoleLog() << "  * Use space key to start or stop the repeater";

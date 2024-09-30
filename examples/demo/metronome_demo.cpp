@@ -50,10 +50,10 @@ constexpr double kTempoIncrement = 10.0;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
-  AudioOutput audio_output;
   InputManager input_manager;
 
   AudioClock audio_clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
   Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
@@ -134,7 +134,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
+  audio_output.Start();
+  musician.Update(kLookahead);
   metronome.Start();
 
   ConsoleLog() << "Play the metronome using the keyboard keys:";

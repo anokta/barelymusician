@@ -90,7 +90,7 @@ void InsertPadData(int pitch, const std::string& file_path, std::vector<double>&
   const auto& sample_data = sample_file.GetData();
   const double length = static_cast<double>(sample_data.size());
   data.reserve(data.size() + sample_data.size() + 3);
-  data.push_back(pitch);
+  data.push_back(static_cast<double>(pitch));
   data.push_back(frame_rate);
   data.push_back(length);
   data.insert(data.end(), sample_data.begin(), sample_data.end());
@@ -191,12 +191,12 @@ void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument&
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* argv[]) {
-  AudioOutput audio_output;
   InputManager input_manager;
 
   Random random;
 
   AudioClock clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
   Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
@@ -268,11 +268,11 @@ int main(int /*argc*/, char* argv[]) {
   percussion.SetControl(PercussionInstrument::Control::kGain, 0.25);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
-      [&](const std::unordered_map<double, std::string>& percussion_map) {
+      [&](const std::unordered_map<int, std::string>& percussion_map) {
         std::vector<double> data;
         data.push_back(static_cast<double>(percussion_map.size()));
-        for (const auto& [note, file_path] : percussion_map) {
-          InsertPadData(note, GetDataFilePath(kDrumsDir + file_path, argv), data);
+        for (const auto& [pitch, file_path] : percussion_map) {
+          InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), data);
         }
         percussion.SetData(data);
       };
@@ -398,7 +398,8 @@ int main(int /*argc*/, char* argv[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
+  audio_output.Start();
+  musician.Update(kLookahead);
   for (auto& [performer, beat_composer_callback, index] : performers) {
     performer.Start();
   }
@@ -406,7 +407,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(clock.GetTimestamp() + kLookahead);
+    musician.Update(clock.GetTimestamp());
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

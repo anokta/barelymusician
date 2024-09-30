@@ -11,7 +11,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_examples_audio_output
-  portaudio_static
+  miniaudio
 )
 
 add_library(

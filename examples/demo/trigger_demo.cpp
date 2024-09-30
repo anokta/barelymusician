@@ -46,10 +46,10 @@ constexpr double kInitialTempo = 120.0;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* /*argv*/[]) {
-  AudioOutput audio_output;
   InputManager input_manager;
 
   AudioClock audio_clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
   Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
@@ -135,7 +135,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
+  audio_output.Start();
+  musician.Update(kLookahead);
 
   while (!quit) {
     input_manager.Update();

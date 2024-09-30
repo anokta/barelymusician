@@ -17,7 +17,7 @@ namespace Barely {
       [System.Serializable]
       public class Note {
         [Range(0, 127)]
-        public int key;
+        public int pitch;
         [Range(0.0f, 1.0f)]
         public double intensity;
         [Min(0.0f)]
@@ -82,9 +82,9 @@ namespace Barely {
             continue;
           }
           _performer.Tasks.Add(new Task(delegate() {
-            var frequency = Musician.GetFrequencyFromMidiKey(note.key);
-            instrument?.SetNoteOn(frequency, note.intensity);
-            _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(frequency); },
+            int pitch = note.pitch;
+            instrument?.SetNoteOn(pitch, note.intensity);
+            _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(pitch); },
                                           _performer.Position + note.duration);
           }, note.position));
         }

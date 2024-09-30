@@ -40,10 +40,10 @@ namespace Barely {
 
     /// Returns whether a note is on or not.
     ///
-    /// @param Note value.
+    /// @param pitch Note pitch
     /// @return True if on, false otherwise.
-    public bool IsNoteOn(double note) {
-      return Musician.Internal.Arpeggiator_IsNoteOn(_ptr, note);
+    public bool IsNoteOn(int pitch) {
+      return Musician.Internal.Arpeggiator_IsNoteOn(_ptr, pitch);
     }
 
     /// Sets all notes off.
@@ -53,17 +53,17 @@ namespace Barely {
 
     /// Sets a note off.
     ///
-    /// @param note Note value.
-    public void SetNoteOff(double note) {
-      Musician.Internal.Arpeggiator_SetNoteOff(_ptr, note);
+    /// @param pitch Note pitch.
+    public void SetNoteOff(int pitch) {
+      Musician.Internal.Arpeggiator_SetNoteOff(_ptr, pitch);
     }
 
     /// Sets a note on.
     ///
-    /// @param note Note value.
+    /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void SetNoteOn(double note) {
-      Musician.Internal.Arpeggiator_SetNoteOn(_ptr, note);
+    public void SetNoteOn(int pitch) {
+      Musician.Internal.Arpeggiator_SetNoteOn(_ptr, pitch);
     }
 
     private void OnEnable() {

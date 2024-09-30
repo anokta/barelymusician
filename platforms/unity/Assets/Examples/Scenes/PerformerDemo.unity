@@ -572,7 +572,6 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
     _position: 0
-    _processOrder: 0
 --- !u!114 &2014543009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -587,8 +586,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   instrument: {fileID: 2014543005}
   performer: {fileID: 2014543008}
+  scale: {fileID: 11400000, guid: 87eab8b15d214ad48a382fde9c32060a, type: 2}
   text: {fileID: 84924158}
-  scale: 00000000020000000400000007000000090000000b000000
 --- !u!114 &2014543010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -601,7 +600,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Bpm: 115
+  Bpm: 110
 --- !u!114 &2014543011
 MonoBehaviour:
   m_ObjectHideFlags: 0

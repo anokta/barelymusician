@@ -10,9 +10,9 @@ namespace Barely {
     /// Percussion pad.
     [Serializable]
     public class Pad {
-      /// Note key in MIDI representation.
+      /// Note pitch.
       [Range(0, 127)]
-      public int Key = 0;
+      public int Pitch = 0;
 
       /// Sample.
       public AudioClip Sample = null;
@@ -21,7 +21,7 @@ namespace Barely {
       public double[] Data {
         get {
           if (_data == null || HasChanged) {
-            _note = Musician.GetFrequencyFromMidiKey(Key);
+            _pitch = Pitch;
             _sample = Sample;
             if (_sample == null || _sample.samples == 0) {
               _data = null;
@@ -31,7 +31,7 @@ namespace Barely {
               _data = new double[_sample.samples + 3];
             }
             // Write the meta data.
-            _data[0] = (double)_note;
+            _data[0] = (double)_pitch;
             _data[1] = (double)_sample.frequency;
             _data[2] = (double)_sample.samples;
             // Write the sample data.
@@ -51,11 +51,11 @@ namespace Barely {
 
       /// Denotes whether any changes has occured since the last update.
       public bool HasChanged {
-        get { return Sample != _sample || Musician.GetFrequencyFromMidiKey(Key) != _note; }
+        get { return Sample != _sample || Pitch != _pitch; }
       }
 
       /// Current note.
-      private double _note = 0.0;
+      private int _pitch = 0;
 
       // Current sample.
       private AudioClip _sample = null;

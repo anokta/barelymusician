@@ -76,10 +76,10 @@ struct ScaleDefinition : public BarelyScaleDefinition {
   /// @param pitches Span of pitches.
   /// @param root_pitch Root pitch.
   /// @param mode Mode.
-  constexpr ScaleDefinition(std::span<const int> pitches, int root_pitch, int mode = 0) noexcept
-      : ScaleDefinition(BarelyScaleDefinition{
-            reinterpret_cast<const int32_t*>(pitches.data()), static_cast<int32_t>(pitches.size()),
-            static_cast<int32_t>(root_pitch), static_cast<int32_t>(mode)}) {}
+  constexpr ScaleDefinition(std::span<const int32_t> pitches, int root_pitch, int mode = 0) noexcept
+      : ScaleDefinition(BarelyScaleDefinition{pitches.data(), static_cast<int32_t>(pitches.size()),
+                                              static_cast<int32_t>(root_pitch),
+                                              static_cast<int32_t>(mode)}) {}
 
   /// Constructs a new `ScaleDefinition` from a raw type.
   ///

@@ -436,12 +436,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beatCount: 3
-  barPitch: 1
-  beatPitch: 0
+  barPitch: 69
+  beatPitch: 57
   intensity: 1
   isLoggingToConsole: 1
   isTicking: 1
   playOnAwake: 1
+  isAuto: 1
   OnBeatEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -457,4 +458,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tempo: 128
+  Bpm: 120

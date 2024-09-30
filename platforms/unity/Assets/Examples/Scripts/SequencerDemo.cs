@@ -4,11 +4,10 @@ namespace Barely {
   namespace Examples {
     public class SequencerDemo : MonoBehaviour {
       public Sequencer randomSequencer;
-
-      private readonly int[] Scale = new int[] { 0, 4, 5, 7, 9, 12 };
+      public Scale scale;
 
       public void Randomize() {
-        randomSequencer.notes[0].key = 57 + Scale[Random.Range(0, Scale.Length)];
+        randomSequencer.notes[0].pitch = scale.GetPitch(Random.Range(0, scale.PitchCount));
         randomSequencer.notes[0].intensity = 0.5 * (double)Random.Range(0, 3);
         // randomSequencer.notes[0].position = (double)Random.Range(0, 2) * 0.5;
         randomSequencer.notes[0].duration = 0.125f + (double)Random.Range(1, 3) * 0.125;

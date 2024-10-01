@@ -1424,7 +1424,7 @@ namespace Barely {
           }
         }
 
-        private void LateUpdate() {
+        private void FixedUpdate() {
           double nextTimestamp = GetNextTimestamp();
           while (_scheduledTaskCallbacks.Count > 0) {
             double taskTimestamp = _scheduledTaskCallbacks.ElementAt(0).Key;
@@ -1466,7 +1466,7 @@ namespace Barely {
 
         // Returns the next timestamp to update.
         private double GetNextTimestamp() {
-          double lookahead = Math.Max(_latency, (double)Time.smoothDeltaTime);
+          double lookahead = Math.Max(_latency, (double)Time.fixedDeltaTime);
           return AudioSettings.dspTime + lookahead;
         }
       }

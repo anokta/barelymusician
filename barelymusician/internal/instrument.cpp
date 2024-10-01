@@ -127,7 +127,9 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
             },
             [this](TuningMessage& tuning_message) noexcept {
               if (set_tuning_callback_) {
-                set_tuning_callback_(&state_, &tuning_message.tuning);
+                tuning_or_ = std::move(tuning_message.tuning_or);
+                set_tuning_callback_(
+                    &state_, tuning_or_.has_value() ? &tuning_or_->GetDefinition() : nullptr);
               }
             }},
         message->second);
@@ -213,8 +215,8 @@ void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition, void* user_dat
   note_on_event_ = {definition, user_data};
 }
 
-void Instrument::SetTuning(const TuningDefinition* definition) noexcept {
-  message_queue_.Add(update_frame_, TuningMessage{*definition});
+void Instrument::SetTuning(std::optional<Tuning> tuning_or) noexcept {
+  message_queue_.Add(update_frame_, TuningMessage{std::move(tuning_or)});
 }
 
 void Instrument::Update(int64_t update_frame) noexcept {

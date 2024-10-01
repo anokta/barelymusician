@@ -2,10 +2,11 @@
 #define BARELYMUSICIAN_INTERNAL_MESSAGE_H_
 
 #include <cstddef>
+#include <optional>
 #include <variant>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician/internal/tuning.h"
 
 namespace barely::internal {
 
@@ -53,8 +54,8 @@ struct NoteOnMessage {
 
 /// Tuning message.
 struct TuningMessage {
-  // TODO(#137): This should probably be a pointer (same goes for `DataMessage`).
-  TuningDefinition tuning;
+  /// Optional tuning.
+  std::optional<Tuning> tuning_or;
 };
 
 /// Message alias.

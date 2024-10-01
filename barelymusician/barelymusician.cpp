@@ -11,6 +11,7 @@
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
+#include "barelymusician/internal/tuning.h"
 
 using ::barely::internal::Effect;
 using ::barely::internal::Instrument;
@@ -19,6 +20,7 @@ using ::barely::internal::Observable;
 using ::barely::internal::Observer;
 using ::barely::internal::Performer;
 using ::barely::internal::Task;
+using ::barely::internal::Tuning;
 
 // Musician.
 struct BarelyMusician : public Observable<Musician> {
@@ -405,7 +407,7 @@ bool BarelyInstrument_SetTuning(BarelyInstrument* instrument,
                                 const BarelyTuningDefinition* definition) {
   if (!instrument) return false;
 
-  instrument->SetTuning(reinterpret_cast<const barely::TuningDefinition*>(definition));
+  instrument->SetTuning(definition != nullptr ? std::optional<Tuning>(*definition) : std::nullopt);
   return true;
 }
 

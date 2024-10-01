@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -11,6 +12,7 @@
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/message_queue.h"
+#include "barelymusician/internal/tuning.h"
 
 namespace barely::internal {
 
@@ -122,9 +124,9 @@ class Instrument {
 
   /// Sets the tuning.
   ///
-  /// @param definition Tuning definition.
+  /// @param tuning_or Optional tuning.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetTuning(const TuningDefinition* definition) noexcept;
+  void SetTuning(std::optional<Tuning> tuning_or) noexcept;
 
   /// Updates the instrument.
   ///
@@ -194,6 +196,9 @@ class Instrument {
 
   // Data.
   std::vector<std::byte> data_;
+
+  // Optional tuning.
+  std::optional<Tuning> tuning_or_;
 
   // Message queue.
   MessageQueue message_queue_;

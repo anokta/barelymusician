@@ -39,6 +39,7 @@ target_link_libraries(
   barelymusician_internal_event
   barelymusician_internal_message
   barelymusician_internal_message_queue
+  barelymusician_internal_tuning
   barelymusician_headeronly
   barelymusician_find_or_null
 )
@@ -50,7 +51,7 @@ add_library(
 
 target_link_libraries(
   barelymusician_internal_message INTERFACE
-  barelymusician_headeronly
+  barelymusician_internal_tuning
 )
 
 add_library(
@@ -99,6 +100,16 @@ add_library(
 target_link_libraries(
   barelymusician_internal_task
   barelymusician_internal_event
+  barelymusician_headeronly
+)
+
+add_library(
+  barelymusician_internal_tuning
+  tuning.cpp
+  tuning.h
+)
+target_link_libraries(
+  barelymusician_internal_tuning
   barelymusician_headeronly
 )
 

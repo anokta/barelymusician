@@ -5,7 +5,6 @@
 #include <unordered_set>
 #include <utility>
 
-#include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
 
@@ -18,12 +17,6 @@ class Musician {
   ///
   /// @param frame_rate Frame rate in hertz.
   explicit Musician(int frame_rate) noexcept;
-
-  /// Adds an effect.
-  ///
-  /// @param effect Pointer to effect.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddEffect(Effect* effect) noexcept;
 
   /// Adds an instrument.
   ///
@@ -76,12 +69,6 @@ class Musician {
   /// @return Update frame.
   [[nodiscard]] int64_t GetUpdateFrame() const noexcept;
 
-  /// Removes effect.
-  ///
-  /// @param effect Effect.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveEffect(Effect* effect) noexcept;
-
   /// Removes instrument.
   ///
   /// @param instrument Instrument.
@@ -106,9 +93,6 @@ class Musician {
   void Update(double timestamp) noexcept;
 
  private:
-  // Set of pointers to effects.
-  std::unordered_set<Effect*> effects_;
-
   // Set of pointers to instruments.
   std::unordered_set<Instrument*> instruments_;
 

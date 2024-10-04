@@ -22,11 +22,11 @@
 ///
 ///   // Update the timestamp.
 ///   //
-///   // Timestamp updates must happen before processing effects and instruments with their
-///   // respective timestamps. Otherwise, such `Process` calls will be *late* to receive the
-///   // relevant state changes. To compensate for this, `Update` should typically be called from a
-///   // main thread update callback with an additional "lookahead" to avoid potential thread
-///   // synchronization issues that could arise in real-time audio applications.
+///   // Timestamp updates must happen before processing instruments with their respective
+///   // timestamps. Otherwise, such `Process` calls will be *late* to receive the relevant state
+///   // changes. To compensate for this, `Update` should typically be called from a main thread
+///   // update callback with an additional "lookahead" to avoid potential thread synchronization
+///   // issues that could arise in real-time audio applications.
 ///   double timestamp = 1.0;
 ///   musician.Update(timestamp);
 ///   @endcode
@@ -66,21 +66,6 @@
 ///                      timestamp);
 ///   @endcode
 ///
-/// - Effect:
-///
-///   @code{.cpp}
-///   #include "barelymusician/instruments/low_pass_effect.h"
-///
-///   // Create.
-///   barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
-///
-///   // Set a control value.
-///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
-///
-///   // Process.
-///   effect.Process(output_samples.data(), output_channel_count, output_frame_count, timestamp);
-///   @endcode
-///
 /// - Performer:
 ///
 ///   @code{.cpp}
@@ -118,11 +103,11 @@
 ///
 ///   // Update the timestamp.
 ///   //
-///   // Timestamp updates must occur before processing effects and instruments with their
-///   // respective timestamps. Otherwise, such `Process` calls will be *late* to receive the
-///   // relevant state changes. To compensate for this, `Update` should typically be called from a
-///   // main thread update callback with an additional "lookahead" to avoid potential thread
-///   // synchronization issues that could arise in real-time audio applications.
+///   // Timestamp updates must happen before processing instruments with their respective
+///   // timestamps. Otherwise, such `Process` calls will be *late* to receive the relevant state
+///   // changes. To compensate for this, `Update` should typically be called from a main thread
+///   // update callback with an additional "lookahead" to avoid potential thread synchronization
+///   // issues that could arise in real-time audio applications.
 ///   double timestamp = 1.0;
 ///   BarelyMusician_Update(musician, timestamp);
 ///
@@ -168,26 +153,6 @@
 ///
 ///   // Destroy.
 ///   BarelyInstrument_Destroy(instrument);
-///   @endcode
-///
-/// - Effect:
-///
-///   @code{.cpp}
-///   #include "barelymusician/effects/low_pass_effect.h"
-///
-///   // Create.
-///   BarelyEffect* effect = nullptr;
-///   BarelyEffect_Create(musician, BarelyLowPassEffect_GetDefinition(), &effect);
-///
-///   // Set a control value.
-///   BarelyEffect_SetControl(effect, /*id=*/0, /*value=*/1000.0);
-///
-///   // Process.
-///   BarelyEffect_Process(effect, output_samples, output_channel_count, output_frame_count,
-///                        timestamp);
-///
-///   // Destroy the effect.
-///   BarelyEffect_Destroy(effect);
 ///   @endcode
 ///
 /// - Performer:
@@ -300,66 +265,6 @@ typedef struct BarelyControlEventDefinition {
   /// Process callback.
   BarelyControlEventDefinition_ProcessCallback process_callback;
 } BarelyControlEventDefinition;
-
-/// Effect definition create callback signature.
-///
-/// @param state Pointer to effect state.
-/// @param frame_rate Frame rate in hertz.
-typedef void (*BarelyEffectDefinition_CreateCallback)(void** state, int32_t frame_rate);
-
-/// Effect definition destroy callback signature.
-///
-/// @param state Pointer to effect state.
-typedef void (*BarelyEffectDefinition_DestroyCallback)(void** state);
-
-/// Effect definition process callback signature.
-///
-/// @param state Pointer to effect state.
-/// @param output_samples Array of output samples.
-/// @param output_channel_count Number of output channels.
-/// @param output_frame_count Number of output frames.
-typedef void (*BarelyEffectDefinition_ProcessCallback)(void** state, double* output_samples,
-                                                       int32_t output_channel_count,
-                                                       int32_t output_frame_count);
-
-/// Effect definition set control callback signature.
-///
-/// @param state Pointer to effect state.
-/// @param id Control identifier.
-/// @param value Control value.
-typedef void (*BarelyEffectDefinition_SetControlCallback)(void** state, int32_t id, double value);
-
-/// Effect definition set data callback signature.
-///
-/// @param state Pointer to effect state.
-/// @param data Pointer to immutable data.
-/// @param size Data size in bytes.
-typedef void (*BarelyEffectDefinition_SetDataCallback)(void** state, const void* data,
-                                                       int32_t size);
-
-/// Effect definition.
-typedef struct BarelyEffectDefinition {
-  /// Create callback.
-  BarelyEffectDefinition_CreateCallback create_callback;
-
-  /// Destroy callback.
-  BarelyEffectDefinition_DestroyCallback destroy_callback;
-
-  /// Process callback.
-  BarelyEffectDefinition_ProcessCallback process_callback;
-
-  /// Set control callback.
-  BarelyEffectDefinition_SetControlCallback set_control_callback;
-
-  /// Set data callback.
-  BarelyEffectDefinition_SetDataCallback set_data_callback;
-
-  /// Array of control definitions.
-  const BarelyControlDefinition* control_definitions;
-
-  /// Number of control definitions.
-  int32_t control_definition_count;
-} BarelyEffectDefinition;
 
 /// Instrument definition create callback signature.
 ///
@@ -607,9 +512,6 @@ typedef struct BarelyTuningDefinition {
 } BarelyTuningDefinition;
 #pragma pack(pop)
 
-/// Effect alias.
-typedef struct BarelyEffect BarelyEffect;
-
 /// Instrument alias.
 typedef struct BarelyInstrument BarelyInstrument;
 
@@ -621,82 +523,6 @@ typedef struct BarelyPerformer BarelyPerformer;
 
 /// Task alias.
 typedef struct BarelyTask BarelyTask;
-
-/// Creates a new effect.
-///
-/// @param musician Pointer to musician.
-/// @param definition Effect definition.
-/// @param out_effect Output pointer to effect.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_Create(BarelyMusician* musician, BarelyEffectDefinition definition,
-                                       BarelyEffect** out_effect);
-
-/// Destroys an effect.
-///
-/// @param effect Pointer to effect.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffect* effect);
-
-/// Gets an effect control value.
-///
-/// @param effect Pointer to effect.
-/// @param id Control identifier.
-/// @param out_control Output pointer to control.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_GetControl(const BarelyEffect* effect, int32_t id,
-                                           double* out_value);
-
-/// Processes effect output samples at timestamp.
-/// This is *not* thread-safe during a corresponding `BarelyEffect_Destroy` call.
-///
-/// @param effect Pointer to effect.
-/// @param output_samples Array of interleaved output samples.
-/// @param output_channel_count Number of output channels.
-/// @param output_frame_count Number of output frames.
-/// @param timestamp Timestamp in seconds.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_Process(BarelyEffect* instrument, double* output_samples,
-                                        int32_t output_channel_count, int32_t output_frame_count,
-                                        double timestamp);
-
-/// Resets all control values of an effect.
-///
-/// @param effect Pointer to effect.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_ResetAllControls(BarelyEffect* effect);
-
-/// Resets an effect control value.
-///
-/// @param control Pointer to control.
-/// @param id Control identifier.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_ResetControl(BarelyEffect* effect, int32_t id);
-
-/// Sets an effect control value.
-///
-/// @param effect Pointer to effect.
-/// @param id Control identifier.
-/// @param value Control value.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffect* effect, int32_t id, double value);
-
-/// Sets the control event of an effect.
-///
-/// @param effect Pointer to effect.
-/// @param definition Control event definition.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_SetControlEvent(BarelyEffect* effect,
-                                                BarelyControlEventDefinition definition,
-                                                void* user_data);
-
-/// Sets effect data.
-///
-/// @param effect Pointer to effect.
-/// @param data Pointer to immutable data.
-/// @param size Data size in bytes.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEffect_SetData(BarelyEffect* effect, const void* data, int32_t size);
 
 /// Creates a new instrument.
 ///
@@ -1212,57 +1038,6 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
       : BarelyControlEventDefinition{definition} {}
 };
 
-/// Effect definition.
-struct EffectDefinition : public BarelyEffectDefinition {
-  /// Create callback signature.
-  using CreateCallback = BarelyEffectDefinition_CreateCallback;
-
-  /// Destroy callback signature.
-  using DestroyCallback = BarelyEffectDefinition_DestroyCallback;
-
-  /// Process callback signature.
-  using ProcessCallback = BarelyEffectDefinition_ProcessCallback;
-
-  /// Set control callback signature.
-  using SetControlCallback = BarelyEffectDefinition_SetControlCallback;
-
-  /// Set data callback signature.
-  using SetDataCallback = BarelyEffectDefinition_SetDataCallback;
-
-  /// Constructs a new `EffectDefinition`.
-  ///
-  /// @param create_callback Create callback.
-  /// @param destroy_callback Destroy callback.
-  /// @param process_callback Process callback.
-  /// @param set_control_callback Set control callback.
-  /// @param set_data_callback Set data callback.
-  /// @param control_definitions Span of control definitions.
-  explicit constexpr EffectDefinition(
-      CreateCallback create_callback, DestroyCallback destroy_callback,
-      ProcessCallback process_callback, SetControlCallback set_control_callback,
-      SetDataCallback set_data_callback,
-      std::span<const ControlDefinition> control_definitions) noexcept
-      : EffectDefinition({
-            create_callback,
-            destroy_callback,
-            process_callback,
-            set_control_callback,
-            set_data_callback,
-            control_definitions.data(),
-            static_cast<int>(control_definitions.size()),
-        }) {}
-
-  /// Constructs a new `EffectDefinition` from a raw type.
-  ///
-  /// @param definition Raw effect definition.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr EffectDefinition(BarelyEffectDefinition definition) noexcept
-      : BarelyEffectDefinition{definition} {
-    assert(control_definitions || control_definition_count == 0);
-    assert(control_definition_count >= 0);
-  }
-};
-
 /// Instrument definition.
 struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Create callback signature.
@@ -1731,141 +1506,6 @@ class MusicianPtr : public PtrWrapper<BarelyMusician> {
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyMusician_Update(*this, timestamp);
-    assert(success);
-  }
-};
-
-/// Class that wraps an effect pointer.
-class EffectPtr : public PtrWrapper<BarelyEffect> {
- public:
-  /// Creates a new `EffectPtr`.
-  ///
-  /// @param musician Musician pointer.
-  /// @param definition Effect definition.
-  /// @return Effect pointer.
-  [[nodiscard]] static EffectPtr Create(MusicianPtr musician,
-                                        EffectDefinition definition) noexcept {
-    BarelyEffect* effect;
-    [[maybe_unused]] const bool success = BarelyEffect_Create(musician, definition, &effect);
-    assert(success);
-    return EffectPtr(effect);
-  }
-
-  /// Destroys an `EffectPtr`.
-  ///
-  /// @param effect Effect pointer.
-  static void Destroy(EffectPtr effect) noexcept { BarelyEffect_Destroy(effect); }
-
-  /// Default constructor.
-  constexpr EffectPtr() noexcept = default;
-
-  /// Creates a new `EffectPtr` from a raw pointer.
-  ///
-  /// @param effect Raw pointer to effect.
-  explicit constexpr EffectPtr(BarelyEffect* effect) noexcept : PtrWrapper(effect) {}
-
-  /// Returns a control value.
-  ///
-  /// @param id Control identifier.
-  /// @return Control value.
-  template <typename IdType, typename ValueType>
-  [[nodiscard]] ValueType GetControl(IdType id) const noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    double value = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyEffect_GetControl(*this, static_cast<int32_t>(id), &value);
-    assert(success);
-    return static_cast<ValueType>(value);
-  }
-
-  /// Processes output samples at timestamp.
-  ///
-  /// @param output_samples Interleaved array of output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
-  void Process(double* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyEffect_Process(
-        *this, output_samples, output_channel_count, output_frame_count, timestamp);
-    assert(success);
-  }
-
-  void ResetAllControls() noexcept {
-    [[maybe_unused]] const bool success = BarelyEffect_ResetAllControls(*this);
-    assert(success);
-  }
-
-  /// Resets a control value.
-  ///
-  /// @param id Control identifier.
-  template <typename IdType>
-  void ResetControl(IdType id) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    [[maybe_unused]] const bool success =
-        BarelyEffect_ResetControl(*this, static_cast<int32_t>(id));
-    assert(success);
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param id Control identifier.
-  /// @param value Control value.
-  template <typename IdType, typename ValueType>
-  void SetControl(IdType id, ValueType value) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success =
-        BarelyEffect_SetControl(*this, static_cast<int32_t>(id), static_cast<double>(value));
-    assert(success);
-  }
-
-  /// Sets the control event.
-  ///
-  /// @param definition Control event definition.
-  /// @param user_data Pointer to user data.
-  void SetControlEvent(ControlEventDefinition definition, void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyEffect_SetControlEvent(*this, definition, user_data);
-    assert(success);
-  }
-
-  /// Sets the control event with a callback.
-  ///
-  /// @param callback Control event callback.
-  void SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
-    SetControlEvent(ControlEventDefinition::WithCallback(), static_cast<void*>(&callback));
-  }
-
-  /// Sets data of type.
-  ///
-  /// @param data Immutable data.
-  template <typename DataType, std::enable_if<std::is_trivially_copyable<DataType>::value>>
-  void SetData(const DataType& data) noexcept {
-    SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
-  }
-
-  /// Sets data with a container.
-  ///
-  /// @param container Immutable container.
-  template <typename ContainerType, typename ValueType = typename ContainerType::value_type>
-  void SetData(const ContainerType& container) noexcept {
-    SetData(static_cast<const void*>(container.data()),
-            static_cast<int>(container.size() * sizeof(ValueType)));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Pointer to immutable data.
-  /// @param size Data size in bytes.
-  void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const bool success = BarelyEffect_SetData(*this, data, size);
     assert(success);
   }
 };
@@ -2422,9 +2062,6 @@ struct TuningDefinition : public BarelyTuningDefinition {
     return static_cast<int>(pitch_ratio_count);
   }
 };
-
-/// Scoped effect alias.
-using Effect = ScopedWrapper<EffectPtr>;
 
 /// Scoped instrument alias.
 using Instrument = ScopedWrapper<InstrumentPtr>;

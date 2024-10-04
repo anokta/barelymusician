@@ -1,14 +1,5 @@
 VERS_1.0 {
   global:
-    BarelyEffect_Create;
-    BarelyEffect_Destroy;
-    BarelyEffect_GetControl;
-    BarelyEffect_Process;
-    BarelyEffect_ResetAllControls;
-    BarelyEffect_ResetControl;
-    BarelyEffect_SetControl;
-    BarelyEffect_SetControlEvent;
-    BarelyEffect_SetData;
     BarelyInstrument_Create;
     BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
@@ -83,10 +74,6 @@ VERS_1.0 {
 
     BarelyScale_GetPitch;
     Barely_GetScaleDefinition;
-
-    BarelyHighPassEffect_GetDefinition;
-    BarelyLfoEffect_GetDefinition;
-    BarelyLowPassEffect_GetDefinition;
 
     BarelyPercussionInstrument_GetDefinition;
     BarelySamplerInstrument_GetDefinition;

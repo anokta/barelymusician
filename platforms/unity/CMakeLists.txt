@@ -12,9 +12,6 @@ target_link_libraries(
   barelymusician_arpeggiator
   barelymusician_repeater
   barelymusician_scale
-  barelymusician_high_pass_effect
-  barelymusician_lfo_effect
-  barelymusician_low_pass_effect
   barelymusician_percussion_instrument
   barelymusician_sampler_instrument
   barelymusician_synth_instrument

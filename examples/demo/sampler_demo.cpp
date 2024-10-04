@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/effects/low_pass_effect.h"
 #include "barelymusician/instruments/sampler_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -21,9 +20,7 @@
 
 namespace {
 
-using ::barely::Effect;
 using ::barely::Instrument;
-using ::barely::LowPassEffect;
 using ::barely::Musician;
 using ::barely::SamplerInstrument;
 using ::barely::examples::AudioOutput;
@@ -99,9 +96,6 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(SamplerInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SamplerInstrument::Control::kVoiceCount, kVoiceCount);
 
-  Effect effect(musician, LowPassEffect::GetDefinition());
-  effect.SetControl(LowPassEffect::Control::kCutoffFrequency, kLowPassCutoffFrequency);
-
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
   instrument.SetNoteOnEvent([](int pitch, double intensity) {
@@ -112,7 +106,6 @@ int main(int /*argc*/, char* argv[]) {
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
-    effect.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
   });
 
   // Key down callback.

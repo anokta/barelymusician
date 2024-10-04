@@ -27,8 +27,6 @@ For background about this project, see the original research paper
 ```cpp
 // Import the core engine.
 #include "barelymusician/barelymusician.h"
-// Import the low-pass effect.
-#include "barelymusician/effects/low_pass_effect.h"
 // Import the synth instrument.
 #include "barelymusician/instruments/synth_instrument.h"
 
@@ -55,12 +53,6 @@ instrument.SetNoteOn(/*pitch=*/60, /*intensity=*/0.25);
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(/*note=*/60);  // will return true.
 
-// Create a low-pass effect.
-barely::Effect effect(musician, barely::LowPassEffect::GetDefinition());
-
-// Set the effect cutoff frequency to 1kHz.
-effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/1000.0);
-
 // Create a performer.
 barely::Performer performer(musician);
 
@@ -83,11 +75,11 @@ performer.Start();
 
 // Update the musician timestamp in seconds.
 //
-// Timestamp updates must occur before processing effects and instruments with their respective
-// timestamps. Otherwise, such `Process` calls will be *late* to receive the relevant state changes.
-// To compensate for this, `Update` should typically be called from a main thread update callback
-// with an additional "lookahead" to avoid potential thread synchronization issues that could arise
-// in real-time audio applications.
+// Timestamp updates must occur before processing instruments with their respective timestamps.
+// Otherwise, such `Process` calls will be *late* to receive the relevant state changes. To
+// compensate for this, `Update` should typically be called from a main thread update callback with
+// an additional "lookahead" to avoid potential thread synchronization issues that could arise in
+// real-time audio applications.
 const double lookahead = 0.1;
 double timestamp = 0.0;
 musician.Update(timestamp + lookahead);
@@ -100,9 +92,6 @@ const int channel_count = 2;
 const int frame_count = 1024;
 std::vector<double> output_samples(channel_count * frame_count, 0.0);
 instrument.Process(output_samples.data(), channel_count, frame_count, timestamp);
-
-// Process the effect on the instrument output.
-effect.Process(output_samples.data(), channel_count, frame_count, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

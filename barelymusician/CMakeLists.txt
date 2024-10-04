@@ -15,7 +15,6 @@ target_compile_definitions(
 target_link_libraries(
   barelymusician
   barelymusician_headeronly
-  barelymusician_internal_effect
   barelymusician_internal_instrument
   barelymusician_internal_musician
   barelymusician_internal_observable
@@ -47,6 +46,5 @@ add_subdirectory(common)
 add_subdirectory(components)
 add_subdirectory(composition)
 add_subdirectory(dsp)
-add_subdirectory(effects)
 add_subdirectory(instruments)
 add_subdirectory(internal)

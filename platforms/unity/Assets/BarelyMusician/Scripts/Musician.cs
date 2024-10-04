@@ -50,41 +50,6 @@ namespace Barely {
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Effect definition create callback signature.
-      ///
-      /// @param state Pointer to effect state.
-      /// @param frame_rate Frame rate in hertz.
-      public delegate void EffectDefinition_CreateCallback(ref IntPtr state, Int32 frameRate);
-
-      /// Effect definition destroy callback signature.
-      public delegate void EffectDefinition_DestroyCallback(ref IntPtr state);
-
-      // Effect definition process callback signature.
-      ///
-      /// @param state Pointer to effect state.
-      /// @param outputSamples Pointer to an array of interleaved output samples.
-      /// @param outputChannelCount Number of output channels.
-      /// @param outputFrameCount Number of output frames.
-      public delegate void EffectDefinition_ProcessCallback(ref IntPtr state, IntPtr outputSamples,
-                                                            Int32 outputChannelCount,
-                                                            Int32 outputFrameCount);
-
-      /// Effect definition set control callback signature.
-      ///
-      /// @param state Pointer to effect state.
-      /// @param id Control identifier.
-      /// @param value Control value.
-      public delegate void EffectDefinition_SetControlCallback(ref IntPtr state, Int32 id,
-                                                               double value);
-
-      /// Effect definition set data callback signature.
-      ///
-      /// @param state Pointer to effect state.
-      /// @param dataPtr Pointer to data.
-      /// @param size Data size in bytes.
-      public delegate void EffectDefinition_SetDataCallback(ref IntPtr state, IntPtr data,
-                                                            Int32 size);
-
       /// Instrument definition create callback signature.
       ///
       /// @param state Pointer to instrument state.
@@ -152,31 +117,6 @@ namespace Barely {
       public delegate void InstrumentDefinition_SetTuningCallback(ref IntPtr state,
                                                                   IntPtr definition);
 
-      /// Effect definition.
-      [StructLayout(LayoutKind.Sequential)]
-      public struct EffectDefinition {
-        /// Create callback.
-        public EffectDefinition_CreateCallback createCallback;
-
-        /// Destroy callback.
-        public EffectDefinition_DestroyCallback destroyCallback;
-
-        /// Process callback.
-        public EffectDefinition_ProcessCallback processCallback;
-
-        /// Set control callback.
-        public EffectDefinition_SetControlCallback setControlCallback;
-
-        /// Set data callback.
-        public EffectDefinition_SetDataCallback setDataCallback;
-
-        /// Pointer to an array of control definitions.
-        public IntPtr controlDefinitions;
-
-        /// Number of control definitions.
-        public Int32 controlDefinitionCount;
-      }
-
       /// Instrument definition.
       [StructLayout(LayoutKind.Sequential)]
       public struct InstrumentDefinition {
@@ -218,14 +158,6 @@ namespace Barely {
 
         /// Number of note control definitions.
         public Int32 noteControlDefinitionCount;
-      }
-
-      /// Custom effect interface.
-      public interface CustomEffectInterface {
-        /// Returns the effect definition.
-        ///
-        /// @return Effect definition.
-        public EffectDefinition GetDefinition();
       }
 
       /// Custom instrument interface.
@@ -288,125 +220,6 @@ namespace Barely {
         componentPtr = IntPtr.Zero;
       }
 
-      /// Creates a new effect.
-      ///
-      /// @param effect Effect.
-      /// @param effectPtr Pointer to effect.
-      public static void Effect_Create(Effect effect, ref IntPtr effectPtr) {
-        if (Ptr == IntPtr.Zero || effectPtr != IntPtr.Zero) {
-          return;
-        }
-        EffectDefinition definition;
-        switch (effect) {
-          case HighPassEffect highPass:
-            definition = BarelyHighPassEffect_GetDefinition();
-            break;
-          case LfoEffect lfoEffect:
-            definition = BarelyLfoEffect_GetDefinition();
-            break;
-          case LowPassEffect lowPass:
-            definition = BarelyLowPassEffect_GetDefinition();
-            break;
-          case CustomEffectInterface custom:
-            definition = custom.GetDefinition();
-            break;
-          default:
-            Debug.LogError("Unsupported effect type: " + effect.GetType());
-            return;
-        }
-        bool success = BarelyEffect_Create(Ptr, definition, ref effectPtr);
-        if (effect.GetType().IsSubclassOf(typeof(CustomEffectInterface))) {
-          if (definition.controlDefinitionCount > 0) {
-            Marshal.FreeHGlobal(definition.controlDefinitions);
-          }
-        }
-        if (!success) {
-          Debug.LogError("Failed to create effect '" + effect.name + "'");
-          return;
-        }
-        GCHandle controlEventHandle = GCHandle.Alloc(effect);
-        BarelyEffect_SetControlEvent(effectPtr, _effectControlEventDefinition,
-                                     GCHandle.ToIntPtr(controlEventHandle));
-      }
-
-      /// Destroys an effect.
-      ///
-      /// @param effectPtr Pointer to effect.
-      public static void Effect_Destroy(ref IntPtr effectPtr) {
-        if (Ptr == IntPtr.Zero || effectPtr == IntPtr.Zero) {
-          effectPtr = IntPtr.Zero;
-          return;
-        }
-        if (!BarelyEffect_Destroy(effectPtr)) {
-          Debug.LogError("Failed to destroy effect");
-        }
-        effectPtr = IntPtr.Zero;
-      }
-
-      /// Returns the value of an effect control.
-      ///
-      /// @param effectPtr Pointer to effect.
-      /// @param id Control identifier.
-      /// @return Control value.
-      public static double Effect_GetControl(IntPtr effectPtr, int id) {
-        double value = 0.0;
-        if (!BarelyEffect_GetControl(effectPtr, id, ref value) && effectPtr != IntPtr.Zero) {
-          Debug.LogError("Failed to get effect control " + id + " value");
-        }
-        return value;
-      }
-
-      /// Processes effect output samples.
-      ///
-      /// @param effectPtr Pointer to effect.
-      /// @param outputSamples Output samples.
-      /// @param outputChannelCount Number of output channels.
-      public static void Effect_Process(IntPtr effectPtr, float[] outputSamples,
-                                        int outputChannelCount) {
-        if (_ptr == IntPtr.Zero) {
-          return;
-        }
-        if (BarelyEffect_Process(effectPtr, OutputSamples, outputChannelCount,
-                                 outputSamples.Length / outputChannelCount,
-                                 AudioSettings.dspTime)) {
-          for (int i = 0; i < outputSamples.Length; ++i) {
-            outputSamples[i] *= (float)OutputSamples[i];
-          }
-        }
-      }
-
-      /// Resets an effect control value.
-      ///
-      /// @param effectPtr Pointer to effect.
-      /// @param id Control identifier.
-      public static void Effect_ResetControl(IntPtr effectPtr, int id) {
-        if (!BarelyEffect_ResetControl(effectPtr, id) && effectPtr != IntPtr.Zero) {
-          Debug.LogError("Failed to reset effect control " + id + " value");
-        }
-      }
-
-      /// Sets an effect control value.
-      ///
-      /// @param effectPtr Pointer to effect.
-      /// @param id Control identifier.
-      /// @param value Control value.
-      public static void Effect_SetControl(IntPtr effectPtr, int id, double value) {
-        if (!BarelyEffect_SetControl(effectPtr, id, value) && effectPtr != IntPtr.Zero) {
-          Debug.LogError("Failed to set effect control " + id + " value to " + value);
-        }
-      }
-
-      /// Sets effect data.
-      ///
-      /// @param effectPtr Pointer to effect.
-      /// @param dataPtr Pointer to data.
-      /// @param size Data size in bytes.
-      public static void Effect_SetData(IntPtr effectPtr, IntPtr dataPtr, int size) {
-        if (!BarelyEffect_SetData(effectPtr, dataPtr, size) && effectPtr != IntPtr.Zero) {
-          Debug.LogError("Failed to set effect data");
-        }
-      }
-
       /// Creates a new instrument.
       ///
       /// @param instrument Instrument.
@@ -447,7 +260,7 @@ namespace Barely {
           return;
         }
         GCHandle controlEventHandle = GCHandle.Alloc(instrument);
-        BarelyInstrument_SetControlEvent(instrumentPtr, _instrumentControlEventDefinition,
+        BarelyInstrument_SetControlEvent(instrumentPtr, _controlEventDefinition,
                                          GCHandle.ToIntPtr(controlEventHandle));
         GCHandle noteControlEventHandle = GCHandle.Alloc(instrument);
         BarelyInstrument_SetNoteControlEvent(instrumentPtr, _noteControlEventDefinition,
@@ -1151,14 +964,7 @@ namespace Barely {
       private delegate void ControlEventDefinition_ProcessCallback(ref IntPtr state, int id,
                                                                    double value);
       [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
-      private static void EffectControlEventDefinition_OnProcess(ref IntPtr state, int id,
-                                                                 double value) {
-        Effect effect = GCHandle.FromIntPtr(state).Target as Effect;
-        Effect.Internal.OnControlEvent(effect, id, value);
-      }
-      [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
-      private static void InstrumentControlEventDefinition_OnProcess(ref IntPtr state, int id,
-                                                                     double value) {
+      private static void ControlEventDefinition_OnProcess(ref IntPtr state, int id, double value) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnControlEvent(instrument, id, value);
       }
@@ -1342,21 +1148,12 @@ namespace Barely {
       }
       private static IntPtr _ptr = IntPtr.Zero;
 
-      // Effect control event definition.
-      private static ControlEventDefinition _effectControlEventDefinition =
-          new ControlEventDefinition() {
-            createCallback = ControlEventDefinition_OnCreate,
-            destroyCallback = ControlEventDefinition_OnDestroy,
-            processCallback = EffectControlEventDefinition_OnProcess,
-          };
-
-      // Instrument control event definition.
-      private static ControlEventDefinition _instrumentControlEventDefinition =
-          new ControlEventDefinition() {
-            createCallback = ControlEventDefinition_OnCreate,
-            destroyCallback = ControlEventDefinition_OnDestroy,
-            processCallback = InstrumentControlEventDefinition_OnProcess,
-          };
+      // Control event definition.
+      private static ControlEventDefinition _controlEventDefinition = new ControlEventDefinition() {
+        createCallback = ControlEventDefinition_OnCreate,
+        destroyCallback = ControlEventDefinition_OnDestroy,
+        processCallback = ControlEventDefinition_OnProcess,
+      };
 
       // Note control event definition.
       private static NoteControlEventDefinition _noteControlEventDefinition =
@@ -1476,38 +1273,6 @@ namespace Barely {
 #else
       private const string pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_Create")]
-      private static extern bool BarelyEffect_Create(IntPtr musician, EffectDefinition definition,
-                                                     ref IntPtr outEffect);
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_Destroy")]
-      private static extern bool BarelyEffect_Destroy(IntPtr effect);
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_GetControl")]
-      private static extern bool BarelyEffect_GetControl(IntPtr effect, Int32 id,
-                                                         ref double outValue);
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_Process")]
-      private static extern bool BarelyEffect_Process(IntPtr effect,
-                                                      [In, Out] double[] outputSamples,
-                                                      Int32 outputChannelCount,
-                                                      Int32 outputFrameCount, double timestamp);
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_ResetControl")]
-      private static extern bool BarelyEffect_ResetControl(IntPtr effect, Int32 controlId);
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControl")]
-      private static extern bool BarelyEffect_SetControl(IntPtr effect, Int32 controlId,
-                                                         double value);
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControlEvent")]
-      private static extern bool BarelyEffect_SetControlEvent(IntPtr effect,
-                                                              ControlEventDefinition definition,
-                                                              IntPtr userData);
-
-      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetData")]
-      private static extern bool BarelyEffect_SetData(IntPtr effect, IntPtr data, Int32 size);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Create")]
       private static extern bool BarelyInstrument_Create(IntPtr musician,
@@ -1756,16 +1521,6 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyRepeater_Stop")]
       private static extern bool BarelyRepeater_Stop(IntPtr repeater);
-
-      // Effects.
-      [DllImport(pluginName, EntryPoint = "BarelyHighPassEffect_GetDefinition")]
-      private static extern EffectDefinition BarelyHighPassEffect_GetDefinition();
-
-      [DllImport(pluginName, EntryPoint = "BarelyLfoEffect_GetDefinition")]
-      private static extern EffectDefinition BarelyLfoEffect_GetDefinition();
-
-      [DllImport(pluginName, EntryPoint = "BarelyLowPassEffect_GetDefinition")]
-      private static extern EffectDefinition BarelyLowPassEffect_GetDefinition();
 
       // Instruments.
       [DllImport(pluginName, EntryPoint = "BarelyPercussionInstrument_GetDefinition")]

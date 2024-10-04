@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <limits>
 
-#include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/performer.h"
 
@@ -24,12 +23,6 @@ constexpr double kSecondsFromMinutes = 60.0;
 Musician::Musician(int frame_rate) noexcept : frame_rate_(frame_rate) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::AddEffect(Effect* effect) noexcept {
-  assert(effect);
-  effects_.emplace(effect);
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::AddInstrument(Instrument* instrument) noexcept {
   assert(instrument);
   instruments_.emplace(instrument);
@@ -39,12 +32,6 @@ void Musician::AddInstrument(Instrument* instrument) noexcept {
 void Musician::AddPerformer(Performer* performer) noexcept {
   assert(performer);
   performers_.emplace(performer->GetProcessOrder(), performer);
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::RemoveEffect(Effect* effect) noexcept {
-  assert(effect);
-  effects_.erase(effect);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -105,9 +92,6 @@ void Musician::Update(double timestamp) noexcept {
 
         timestamp_ += GetSecondsFromBeats(update_duration);
         update_frame_ = GetFramesFromSeconds(timestamp_);
-        for (const auto& effect : effects_) {
-          effect->Update(update_frame_);
-        }
         for (const auto& instrument : instruments_) {
           instrument->Update(update_frame_);
         }
@@ -121,9 +105,6 @@ void Musician::Update(double timestamp) noexcept {
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
       update_frame_ = GetFramesFromSeconds(timestamp_);
-      for (const auto& effect : effects_) {
-        effect->Update(update_frame_);
-      }
       for (const auto& instrument : instruments_) {
         instrument->Update(update_frame_);
       }

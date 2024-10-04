@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "barelymusician/internal/effect.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/musician.h"
 #include "barelymusician/internal/observable.h"
@@ -13,7 +12,6 @@
 #include "barelymusician/internal/task.h"
 #include "barelymusician/internal/tuning.h"
 
-using ::barely::internal::Effect;
 using ::barely::internal::Instrument;
 using ::barely::internal::Musician;
 using ::barely::internal::Observable;
@@ -33,37 +31,6 @@ struct BarelyMusician : public Observable<Musician> {
   BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
   BarelyMusician(BarelyMusician&& other) noexcept = delete;
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
-};
-
-// Effect.
-struct BarelyEffect : public Effect {
- public:
-  BarelyEffect(BarelyMusician* musician, BarelyEffectDefinition definition) noexcept
-      : Effect(definition, musician->GetFrameRate(), musician->GetUpdateFrame()),
-        musician_(musician->Observe()) {
-    assert(musician_);
-    musician_->AddEffect(this);
-  }
-
-  ~BarelyEffect() noexcept {
-    if (musician_) {
-      musician_->RemoveEffect(this);
-    }
-  }
-
-  // Non-copyable and non-movable.
-  BarelyEffect(const BarelyEffect& other) noexcept = delete;
-  BarelyEffect& operator=(const BarelyEffect& other) noexcept = delete;
-  BarelyEffect(BarelyEffect&& other) noexcept = delete;
-  BarelyEffect& operator=(BarelyEffect&& other) noexcept = delete;
-
-  Musician& musician() const noexcept {
-    assert(musician_);
-    return *musician_;
-  }
-
- private:
-  Observer<Musician> musician_;
 };
 
 // Instrument.
@@ -149,84 +116,6 @@ struct BarelyTask : public Task {
  private:
   Observer<Performer> performer_;
 };
-
-bool BarelyEffect_Create(BarelyMusician* musician, BarelyEffectDefinition definition,
-                         BarelyEffect** out_effect) {
-  if (!musician || !out_effect) return false;
-
-  *out_effect = new BarelyEffect(musician, definition);
-  return true;
-}
-
-bool BarelyEffect_Destroy(BarelyEffect* effect) {
-  if (!effect) return false;
-
-  delete effect;
-  return true;
-}
-
-bool BarelyEffect_GetControl(const BarelyEffect* effect, int32_t id, double* out_value) {
-  if (!effect) return false;
-  if (!out_value) return false;
-
-  if (const auto* control = effect->GetControl(id); control != nullptr) {
-    *out_value = control->GetValue();
-    return true;
-  }
-  return false;
-}
-
-bool BarelyEffect_Process(BarelyEffect* effect, double* output_samples,
-                          int32_t output_channel_count, int32_t output_frame_count,
-                          double timestamp) {
-  if (!effect) return false;
-
-  return effect->Process(output_samples, output_channel_count, output_frame_count,
-                         effect->musician().GetFramesFromSeconds(timestamp));
-}
-
-bool BarelyEffect_ResetAllControls(BarelyEffect* effect) {
-  if (!effect) return false;
-
-  effect->ResetAllControls();
-  return true;
-}
-
-bool BarelyEffect_ResetControl(BarelyEffect* effect, int32_t id) {
-  if (!effect) return false;
-
-  if (auto* control = effect->GetControl(id); control != nullptr) {
-    control->ResetValue();
-    return true;
-  }
-  return false;
-}
-
-bool BarelyEffect_SetControl(BarelyEffect* effect, int32_t id, double value) {
-  if (!effect) return false;
-
-  if (auto* control = effect->GetControl(id); control != nullptr) {
-    control->SetValue(value);
-    return true;
-  }
-  return false;
-}
-
-bool BarelyEffect_SetControlEvent(BarelyEffect* effect, BarelyControlEventDefinition definition,
-                                  void* user_data) {
-  if (!effect) return false;
-
-  effect->SetControlEvent(definition, user_data);
-  return true;
-}
-
-bool BarelyEffect_SetData(BarelyEffect* effect, const void* data, int32_t size) {
-  if (!effect) return false;
-
-  effect->SetData(
-      {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
-  return true;
-}
 
 bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrumentDefinition definition,
                              BarelyInstrument** out_instrument) {

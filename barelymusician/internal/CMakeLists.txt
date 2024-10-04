@@ -10,20 +10,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_internal_effect
-  effect.cpp
-  effect.h
-)
-target_link_libraries(
-  barelymusician_internal_effect
-  barelymusician_internal_control
-  barelymusician_internal_message
-  barelymusician_internal_message_queue
-  barelymusician_headeronly
-  barelymusician_find_or_null
-)
-
-add_library(
   barelymusician_internal_event INTERFACE
   event.h
 )
@@ -71,7 +57,6 @@ add_library(
 )
 target_link_libraries(
   barelymusician_internal_musician
-  barelymusician_internal_effect
   barelymusician_internal_instrument
   barelymusician_internal_performer
 )

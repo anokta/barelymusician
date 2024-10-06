@@ -57,13 +57,6 @@ using ::barely::examples::WavFile;
 using BeatComposerCallback = std::function<void(int bar, int beat, int beat_count, int harmonic,
                                                 Instrument& instrument, Performer& performer)>;
 
-enum PercussionPitch : int {
-  kKick,
-  kSnare,
-  kHihatClosed,
-  kHihatOpen,
-};
-
 // System audio settings.
 constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
@@ -76,12 +69,17 @@ constexpr double kTempo = 124.0;
 constexpr int kBeatCount = 3;
 
 // Ensemble settings.
-constexpr int kRootPitch = 62;
+constexpr double kRootPitch = 2.0 / 12.0;
+
+constexpr double kPitchKick = 0.0;
+constexpr double kPitchSnare = 1.0;
+constexpr double kPitchHihatClosed = 2.0;
+constexpr double kPitchHihatOpen = 3.0;
 
 constexpr char kDrumsDir[] = "audio/drums/";
 
 // Inserts pad data to a given `data` from a given `file_path`.
-void InsertPadData(int pitch, const std::string& file_path, std::vector<double>& data) {
+void InsertPadData(double pitch, const std::string& file_path, std::vector<double>& data) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
@@ -97,7 +95,7 @@ void InsertPadData(int pitch, const std::string& file_path, std::vector<double>&
 }
 
 // Schedules performer to play an instrument note.
-void ScheduleNote(double position, double duration, int pitch, double intensity,
+void ScheduleNote(double position, double duration, double pitch, double intensity,
                   Instrument& instrument, Performer& performer) {
   performer.ScheduleOneOffTask(
       [pitch, intensity, &instrument]() { instrument.SetNoteOn(pitch, intensity); }, position);
@@ -147,7 +145,7 @@ void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument&
   const auto get_beat = [](int step) {
     return static_cast<double>(step) / barely::kSixteenthNotesPerBeat;
   };
-  const auto add_note = [&](double begin_position, double end_position, int pitch,
+  const auto add_note = [&](double begin_position, double end_position, double pitch,
                             double intensity) {
     ScheduleNote(begin_position, end_position - begin_position, pitch, intensity, instrument,
                  performer);
@@ -155,35 +153,35 @@ void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument&
 
   // Kick.
   if (beat % 2 == 0) {
-    add_note(get_beat(0), get_beat(2), PercussionPitch::kKick, 1.0);
+    add_note(get_beat(0), get_beat(2), kPitchKick, 1.0);
     if (bar % 2 == 1 && beat == 0) {
-      add_note(get_beat(2), get_beat(4), PercussionPitch::kKick, 1.0);
+      add_note(get_beat(2), get_beat(4), kPitchKick, 1.0);
     }
   }
   // Snare.
   if (beat % 2 == 1) {
-    add_note(get_beat(0), get_beat(2), PercussionPitch::kSnare, 1.0);
+    add_note(get_beat(0), get_beat(2), kPitchSnare, 1.0);
   }
   if (beat + 1 == beat_count) {
-    add_note(get_beat(2), get_beat(4), PercussionPitch::kSnare, 0.75);
+    add_note(get_beat(2), get_beat(4), kPitchSnare, 0.75);
     if (bar % 4 == 3) {
-      add_note(get_beat(1), get_beat(2), PercussionPitch::kSnare, 1.0);
-      add_note(get_beat(3), get_beat(4), PercussionPitch::kSnare, 0.75);
+      add_note(get_beat(1), get_beat(2), kPitchSnare, 1.0);
+      add_note(get_beat(3), get_beat(4), kPitchSnare, 0.75);
     }
   }
   // Hihat Closed.
-  add_note(get_beat(0), get_beat(2), PercussionPitch::kHihatClosed, random.DrawUniform(0.5, 0.75));
-  add_note(get_beat(2), get_beat(4), PercussionPitch::kHihatClosed, random.DrawUniform(0.25, 0.75));
+  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, random.DrawUniform(0.5, 0.75));
+  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, random.DrawUniform(0.25, 0.75));
   // Hihat Open.
   if (beat + 1 == beat_count) {
     if (bar % 4 == 3) {
-      add_note(get_beat(1), get_beat(2), PercussionPitch::kHihatOpen, 0.5);
+      add_note(get_beat(1), get_beat(2), kPitchHihatOpen, 0.5);
     } else if (bar % 2 == 0) {
-      add_note(get_beat(3), get_beat(4), PercussionPitch::kHihatOpen, 0.5);
+      add_note(get_beat(3), get_beat(4), kPitchHihatOpen, 0.5);
     }
   }
   if (beat == 0 && bar % 4 == 0) {
-    add_note(get_beat(0), get_beat(2), PercussionPitch::kHihatOpen, 0.75);
+    add_note(get_beat(0), get_beat(2), kPitchHihatOpen, 0.75);
   }
 }
 
@@ -203,10 +201,10 @@ int main(int /*argc*/, char* argv[]) {
 
   // Note on callback.
   const auto set_note_callbacks_fn = [&](auto index, Instrument& instrument) {
-    instrument.SetNoteOffEvent([index](int pitch) {
+    instrument.SetNoteOffEvent([index](double pitch) {
       ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
     });
-    instrument.SetNoteOnEvent([index](int pitch, double intensity) {
+    instrument.SetNoteOnEvent([index](double pitch, double intensity) {
       ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", " << intensity << ")";
     });
   };
@@ -268,7 +266,7 @@ int main(int /*argc*/, char* argv[]) {
   percussion.SetControl(PercussionInstrument::Control::kGain, 0.25);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
-      [&](const std::unordered_map<int, std::string>& percussion_map) {
+      [&](const std::unordered_map<double, std::string>& percussion_map) {
         std::vector<double> data;
         data.push_back(static_cast<double>(percussion_map.size()));
         for (const auto& [pitch, file_path] : percussion_map) {
@@ -277,10 +275,10 @@ int main(int /*argc*/, char* argv[]) {
         percussion.SetData(data);
       };
   set_percussion_pad_map_fn({
-      {PercussionPitch::kKick, "basic_kick.wav"},
-      {PercussionPitch::kSnare, "basic_snare.wav"},
-      {PercussionPitch::kHihatClosed, "basic_hihat_closed.wav"},
-      {PercussionPitch::kHihatOpen, "basic_hihat_open.wav"},
+      {kPitchKick, "basic_kick.wav"},
+      {kPitchSnare, "basic_snare.wav"},
+      {kPitchHihatClosed, "basic_hihat_closed.wav"},
+      {kPitchHihatOpen, "basic_hihat_open.wav"},
   });
   const auto percussion_beat_composer_callback = [&](int bar, int beat, int beat_count,
                                                      int /*harmonic*/, Instrument& instrument,
@@ -376,18 +374,18 @@ int main(int /*argc*/, char* argv[]) {
         break;
       case 'D':
         set_percussion_pad_map_fn({
-            {PercussionPitch::kKick, "basic_kick.wav"},
-            {PercussionPitch::kSnare, "basic_snare.wav"},
-            {PercussionPitch::kHihatClosed, "basic_hihat_closed.wav"},
-            {PercussionPitch::kHihatOpen, "basic_hihat_open.wav"},
+            {kPitchKick, "basic_kick.wav"},
+            {kPitchSnare, "basic_snare.wav"},
+            {kPitchHihatClosed, "basic_hihat_closed.wav"},
+            {kPitchHihatOpen, "basic_hihat_open.wav"},
         });
         break;
       case 'H':
         set_percussion_pad_map_fn({
-            {PercussionPitch::kKick, "basic_hihat_closed.wav"},
-            {PercussionPitch::kSnare, "basic_hihat_open.wav"},
-            {PercussionPitch::kHihatClosed, "basic_hihat_closed.wav"},
-            {PercussionPitch::kHihatOpen, "basic_hihat_open.wav"},
+            {kPitchKick, "basic_hihat_closed.wav"},
+            {kPitchSnare, "basic_hihat_open.wav"},
+            {kPitchHihatClosed, "basic_hihat_closed.wav"},
+            {kPitchHihatOpen, "basic_hihat_open.wav"},
         });
         break;
       default:

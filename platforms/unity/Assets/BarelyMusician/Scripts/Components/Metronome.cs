@@ -10,12 +10,12 @@ namespace Barely {
       public int beatCount = 4;
 
       /// Bar note pitch.
-      [Range(0, 127)]
-      public int barPitch = 69;
+      [Range(-1.0f, 1.0f)]
+      public double barPitch = 1.0;
 
       /// Beat note pitch.
-      [Range(0, 127)]
-      public int beatPitch = 57;
+      [Range(-1.0f, 1.0f)]
+      public double beatPitch = 0.0;
 
       /// Note intensity.
       [Range(0.0f, 1.0f)]
@@ -99,7 +99,7 @@ namespace Barely {
         _performer.Tasks.Add(new Task(delegate() {
           int bar = _beat / beatCount;
           int beat = _beat % beatCount;
-          int pitch = (beat == 0) ? barPitch : beatPitch;
+          double pitch = (beat == 0) ? barPitch : beatPitch;
           if (isTicking) {
             instrument.SetNoteOn(pitch, intensity);
             instrument.SetNoteOff(pitch);

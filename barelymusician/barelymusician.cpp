@@ -1,7 +1,6 @@
 #include "barelymusician/barelymusician.h"
 
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 
@@ -10,7 +9,6 @@
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
-#include "barelymusician/internal/tuning.h"
 
 using ::barely::internal::Instrument;
 using ::barely::internal::Musician;
@@ -18,7 +16,6 @@ using ::barely::internal::Observable;
 using ::barely::internal::Observer;
 using ::barely::internal::Performer;
 using ::barely::internal::Task;
-using ::barely::internal::Tuning;
 
 // Musician.
 struct BarelyMusician : public Observable<Musician> {
@@ -145,7 +142,7 @@ bool BarelyInstrument_GetControl(const BarelyInstrument* instrument, int32_t id,
   return false;
 }
 
-bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, int32_t pitch, int32_t id,
+bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, double pitch, int32_t id,
                                      double* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
@@ -157,7 +154,7 @@ bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, int32_t
   return false;
 }
 
-bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, int32_t pitch,
+bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, double pitch,
                                bool* out_is_note_on) {
   if (!instrument) return false;
   if (!out_is_note_on) return false;
@@ -182,7 +179,7 @@ bool BarelyInstrument_ResetAllControls(BarelyInstrument* instrument) {
   return true;
 }
 
-bool BarelyInstrument_ResetAllNoteControls(BarelyInstrument* instrument, int32_t pitch) {
+bool BarelyInstrument_ResetAllNoteControls(BarelyInstrument* instrument, double pitch) {
   if (!instrument) return false;
 
   return instrument->ResetAllNoteControls(pitch);
@@ -198,7 +195,7 @@ bool BarelyInstrument_ResetControl(BarelyInstrument* instrument, int32_t id) {
   return false;
 }
 
-bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, int32_t pitch, int32_t id) {
+bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, double pitch, int32_t id) {
   if (!instrument) return false;
 
   if (auto* note_control = instrument->GetNoteControl(pitch, id); note_control != nullptr) {
@@ -242,7 +239,7 @@ bool BarelyInstrument_SetData(BarelyInstrument* instrument, const void* data, in
   return true;
 }
 
-bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, int32_t pitch, int32_t id,
+bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, double pitch, int32_t id,
                                      double value) {
   if (!instrument) return false;
 
@@ -262,7 +259,7 @@ bool BarelyInstrument_SetNoteControlEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOff(BarelyInstrument* instrument, int32_t pitch) {
+bool BarelyInstrument_SetNoteOff(BarelyInstrument* instrument, double pitch) {
   if (!instrument) return false;
 
   instrument->SetNoteOff(pitch);
@@ -277,7 +274,7 @@ bool BarelyInstrument_SetNoteOffEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, int32_t pitch, double intensity) {
+bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, double pitch, double intensity) {
   if (!instrument) return false;
 
   instrument->SetNoteOn(pitch, intensity);
@@ -289,14 +286,6 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
   if (!instrument) return false;
 
   instrument->SetNoteOnEvent(definition, user_data);
-  return true;
-}
-
-bool BarelyInstrument_SetTuning(BarelyInstrument* instrument,
-                                const BarelyTuningDefinition* definition) {
-  if (!instrument) return false;
-
-  instrument->SetTuning(definition != nullptr ? std::optional<Tuning>(*definition) : std::nullopt);
   return true;
 }
 
@@ -505,23 +494,5 @@ bool BarelyTask_SetPosition(BarelyTask* task, double position) {
   if (!task) return false;
 
   task->SetPosition(position);
-  return true;
-}
-
-bool BarelyTuningDefinition_GetFrequency(const BarelyTuningDefinition* definition, int32_t pitch,
-                                         double* out_frequency) {
-  if (!definition) return false;
-  if (definition->pitch_ratios == nullptr || definition->pitch_ratio_count == 0) return false;
-  if (out_frequency == nullptr) return false;
-
-  const int pitch_count = static_cast<int>(definition->pitch_ratio_count);
-  const int relative_pitch = pitch - definition->root_pitch;
-  const int octave = static_cast<int>(
-      std::floor(static_cast<double>(relative_pitch) / static_cast<double>(pitch_count)));
-  const int index = relative_pitch - octave * pitch_count;
-  assert(index >= 0 && index < pitch_count);
-  *out_frequency = definition->root_frequency *
-                   std::pow(definition->pitch_ratios[pitch_count - 1], octave) *
-                   (index > 0 ? definition->pitch_ratios[index - 1] : 1.0);
   return true;
 }

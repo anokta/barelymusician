@@ -6,8 +6,6 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/internal/tuning.h"
-
 namespace barely::internal {
 
 /// Control message.
@@ -28,7 +26,7 @@ struct DataMessage {
 /// Note control message.
 struct NoteControlMessage {
   /// Pitch.
-  int pitch;
+  double pitch;
 
   /// Identifier.
   int id;
@@ -40,27 +38,21 @@ struct NoteControlMessage {
 /// Note off message.
 struct NoteOffMessage {
   /// Pitch.
-  int pitch;
+  double pitch;
 };
 
 /// Note on message.
 struct NoteOnMessage {
   /// Pitch.
-  int pitch;
+  double pitch;
 
   /// Intensity.
   double intensity;
 };
 
-/// Tuning message.
-struct TuningMessage {
-  /// Optional tuning.
-  std::optional<Tuning> tuning_or;
-};
-
 /// Message alias.
-using Message = std::variant<ControlMessage, DataMessage, NoteControlMessage, NoteOffMessage,
-                             NoteOnMessage, TuningMessage>;
+using Message =
+    std::variant<ControlMessage, DataMessage, NoteControlMessage, NoteOffMessage, NoteOnMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

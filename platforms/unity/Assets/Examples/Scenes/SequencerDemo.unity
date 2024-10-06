@@ -729,13 +729,13 @@ MonoBehaviour:
   Gain: 0.5
   PadRelease: 1
   Pads:
-  - Pitch: 60
+  - Pitch: 0
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
-  - Pitch: 62
+  - Pitch: 2
     Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
-  - Pitch: 64
+  - Pitch: 4
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
-  - Pitch: 65
+  - Pitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
 --- !u!82 &1737834381
 AudioSource:
@@ -1557,7 +1557,7 @@ MonoBehaviour:
       m_Calls: []
   Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   Gain: 1
-  RootPitch: 69
+  RootPitch: 0.75
   Loop: 1
   Attack: 0
   Decay: 0

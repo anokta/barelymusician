@@ -48,12 +48,12 @@ InstrumentDefinition GetTestInstrumentDefinition() {
         *reinterpret_cast<double*>(*state) = static_cast<double>(id + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {},
-      [](void** /*state*/, int32_t /*pitch*/, int32_t /*id*/, double /*value*/) {},
-      [](void** state, int32_t /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
-      [](void** state, int32_t pitch, double intensity) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(pitch) * intensity;
+      [](void** /*state*/, double /*pitch*/, int32_t /*id*/, double /*value*/) {},
+      [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
+      [](void** state, double pitch, double intensity) {
+        *reinterpret_cast<double*>(*state) = pitch * intensity;
       },
-      [](void**, const BarelyTuningDefinition*) {}, control_definitions, note_control_definitions);
+      control_definitions, note_control_definitions);
 }
 
 // Tests that the musician converts between beats and seconds as expected.
@@ -81,7 +81,7 @@ TEST(MusicianTest, BeatsSecondsConversion) {
 
 // Tests that a single instrument is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySingleInstrument) {
-  constexpr int kPitch = 48;
+  constexpr double kPitch = 0.5;
   constexpr double kIntensity = 0.75;
 
   Musician musician(kFrameRate);
@@ -100,28 +100,30 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   }
 
   // Set the note callbacks.
-  int note_on_pitch = 0;
+  double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](int pitch, double intensity) {
+  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch, double intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
   instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
                             static_cast<void*>(&note_on_callback));
-  EXPECT_EQ(note_on_pitch, 0);
+  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
-  int note_off_pitch = 0;
-  NoteOffEventDefinition::Callback note_off_callback = [&](int pitch) { note_off_pitch = pitch; };
+  double note_off_pitch = 0.0;
+  NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
+    note_off_pitch = pitch;
+  };
   instrument.SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
                              static_cast<void*>(&note_off_callback));
-  EXPECT_EQ(note_off_pitch, 0);
+  EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Set a note on.
   instrument.SetNoteOn(kPitch, kIntensity);
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
-  EXPECT_EQ(note_on_pitch, kPitch);
+  EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -138,7 +140,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
 
 // Tests that multiple instruments are created and destroyed as expected.
 TEST(MusicianTest, CreateDestroyMultipleInstruments) {
-  std::vector<int> note_off_pitches;
+  std::vector<double> note_off_pitches;
 
   {
     Musician musician(kFrameRate);
@@ -149,7 +151,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
       instruments.push_back(std::make_unique<Instrument>(GetTestInstrumentDefinition(), kFrameRate,
                                                          musician.GetUpdateFrame()));
       musician.AddInstrument(instruments[i].get());
-      NoteOffEventDefinition::Callback note_off_callback = [&](int pitch) {
+      NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
       instruments[i]->SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
@@ -158,9 +160,9 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 
     // Start multiple notes, then immediately stop some of them.
     for (int i = 0; i < 3; ++i) {
-      instruments[i]->SetNoteOn(i + 1, 1.0);
-      instruments[i]->SetNoteOn(-i - 1, 1.0);
-      instruments[i]->SetNoteOff(i + 1);
+      instruments[i]->SetNoteOn(static_cast<double>(i + 1), 1.0);
+      instruments[i]->SetNoteOn(static_cast<double>(-i - 1), 1.0);
+      instruments[i]->SetNoteOff(static_cast<double>(i + 1));
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1, 2, 3));
 
@@ -171,7 +173,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   }
 
   // Remaining active notes should be stopped once the musician goes out of scope.
-  EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3, -2, -1, 1, 2, 3));
+  EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
 }
 
 // Tests that a single performer is created and destroyed as expected.

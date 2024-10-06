@@ -49,18 +49,17 @@ constexpr RepeaterStyle kInitialStyle = RepeaterStyle::kForward;
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr int kRootPitch = 60;
-constexpr int kOctavePitchCount = 12;
+constexpr double kRootPitch = 0.0;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the pitch for a given `key`.
-std::optional<int> PitchFromKey(int octave_shift, const InputManager::Key& key) {
+std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return kRootPitch + octave_shift * kOctavePitchCount +
-         static_cast<int>(std::distance(kOctaveKeys.begin(), it));
+  return kRootPitch + static_cast<double>(octave_shift) +
+         static_cast<double>(std::distance(kOctaveKeys.begin(), it)) / 12.0;
 }
 
 }  // namespace
@@ -87,7 +86,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteOnEvent([&repeater](int pitch, double /*intensity*/) {
+  instrument.SetNoteOnEvent([&repeater](double pitch, double /*intensity*/) {
     if (repeater.IsPlaying()) {
       ConsoleLog() << "Note(" << pitch << ")";
     }
@@ -128,7 +127,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch_or = PitchFromKey(octave_shift, key)) {
-      const int pitch = *pitch_or;
+      const double pitch = *pitch_or;
       if (!repeater.IsPlaying()) {
         instrument.SetNoteOn(pitch);
       }

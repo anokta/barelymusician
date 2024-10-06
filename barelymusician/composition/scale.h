@@ -15,13 +15,13 @@ typedef int32_t BarelyScaleType;
 #pragma pack(push, 1)
 typedef struct BarelyScaleDefinition {
   /// Array of pitches relative to the root pitch.
-  const int32_t* pitches;
+  const double* pitches;
 
   /// Number of pitches.
   int32_t pitch_count;
 
   /// Root pitch of the scale.
-  int32_t root_pitch;
+  double root_pitch;
 
   /// Mode index.
   int32_t mode;
@@ -35,7 +35,7 @@ typedef struct BarelyScaleDefinition {
 /// @param out_pitch Output pitch.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScaleDefinition* definition, int32_t degree,
-                                        int32_t* out_pitch);
+                                        double* out_pitch);
 
 /// Gets a scale definition of type.
 ///
@@ -43,7 +43,7 @@ BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScaleDefinition* definition,
 /// @param root_pitch Root pitch.
 /// @param out_definition Output scale definition.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool Barely_GetScaleDefinition(BarelyScaleType type, int32_t pitch,
+BARELY_EXPORT bool Barely_GetScaleDefinition(BarelyScaleType type, double pitch,
                                              BarelyScaleDefinition* out_definition);
 
 #ifdef __cplusplus
@@ -76,10 +76,10 @@ struct ScaleDefinition : public BarelyScaleDefinition {
   /// @param pitches Span of pitches.
   /// @param root_pitch Root pitch.
   /// @param mode Mode.
-  constexpr ScaleDefinition(std::span<const int32_t> pitches, int root_pitch, int mode = 0) noexcept
+  constexpr ScaleDefinition(std::span<const double> pitches, double root_pitch,
+                            int mode = 0) noexcept
       : ScaleDefinition(BarelyScaleDefinition{pitches.data(), static_cast<int32_t>(pitches.size()),
-                                              static_cast<int32_t>(root_pitch),
-                                              static_cast<int32_t>(mode)}) {}
+                                              root_pitch, static_cast<int32_t>(mode)}) {}
 
   /// Constructs a new `ScaleDefinition` from a raw type.
   ///
@@ -97,8 +97,8 @@ struct ScaleDefinition : public BarelyScaleDefinition {
   /// @param definition Scale definition.
   /// @param degree Degree.
   /// @return Pitch.
-  [[nodiscard]] int GetPitch(int degree) const noexcept {
-    int32_t pitch = 0;
+  [[nodiscard]] double GetPitch(int degree) const noexcept {
+    double pitch = 0.0;
     [[maybe_unused]] const bool success = BarelyScale_GetPitch(this, degree, &pitch);
     assert(success);
     return pitch;
@@ -117,10 +117,10 @@ struct ScaleDefinition : public BarelyScaleDefinition {
 /// @param type Scale type.
 /// @param root_pitch Root pitch.
 /// @return Scale definition.
-inline ScaleDefinition GetScaleDefinition(ScaleType type, int root_pitch) noexcept {
+inline ScaleDefinition GetScaleDefinition(ScaleType type, double root_pitch = 0.0) noexcept {
   BarelyScaleDefinition definition = {};
-  [[maybe_unused]] const bool success = Barely_GetScaleDefinition(
-      static_cast<BarelyScaleType>(type), static_cast<int32_t>(root_pitch), &definition);
+  [[maybe_unused]] const bool success =
+      Barely_GetScaleDefinition(static_cast<BarelyScaleType>(type), root_pitch, &definition);
   assert(success);
   return definition;
 }

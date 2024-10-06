@@ -11,7 +11,6 @@ namespace Barely {
     [Serializable]
     public class Pad {
       /// Note pitch.
-      [Range(0, 127)]
       public int Pitch = 0;
 
       /// Sample.
@@ -21,7 +20,7 @@ namespace Barely {
       public double[] Data {
         get {
           if (_data == null || HasChanged) {
-            _pitch = Pitch;
+            _pitch = Pitch / 12.0;
             _sample = Sample;
             if (_sample == null || _sample.samples == 0) {
               _data = null;
@@ -31,7 +30,7 @@ namespace Barely {
               _data = new double[_sample.samples + 3];
             }
             // Write the meta data.
-            _data[0] = (double)_pitch;
+            _data[0] = _pitch;
             _data[1] = (double)_sample.frequency;
             _data[2] = (double)_sample.samples;
             // Write the sample data.
@@ -51,11 +50,11 @@ namespace Barely {
 
       /// Denotes whether any changes has occured since the last update.
       public bool HasChanged {
-        get { return Sample != _sample || Pitch != _pitch; }
+        get { return Sample != _sample || Pitch / 12.0 != _pitch; }
       }
 
       /// Current note.
-      private int _pitch = 0;
+      private double _pitch = 0.0;
 
       // Current sample.
       private AudioClip _sample = null;

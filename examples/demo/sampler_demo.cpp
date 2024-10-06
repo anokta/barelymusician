@@ -48,8 +48,7 @@ constexpr double kLowPassCutoffFrequency = 2000;
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr int kRootPitch = 60;
-constexpr int kOctavePitchCount = 12;
+constexpr double kRootPitch = 0.0;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the sample data from a given `file_path`.
@@ -69,13 +68,13 @@ std::vector<double> GetSampleData(const std::string& file_path) {
 }
 
 // Returns the pitch for a given `key`.
-std::optional<int> PitchFromKey(int octave_shift, const InputManager::Key& key) {
+std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return kRootPitch + octave_shift * kOctavePitchCount +
-         static_cast<int>(std::distance(kOctaveKeys.begin(), it));
+  return kRootPitch + static_cast<double>(octave_shift) +
+         static_cast<double>(std::distance(kOctaveKeys.begin(), it)) / 12.0;
 }
 
 }  // namespace
@@ -98,10 +97,10 @@ int main(int /*argc*/, char* argv[]) {
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
-  instrument.SetNoteOnEvent([](int pitch, double intensity) {
+  instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
   });
-  instrument.SetNoteOffEvent([](int pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
+  instrument.SetNoteOffEvent([](double pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {

@@ -10,9 +10,9 @@ namespace {
 // Tests that expected pitches are returned for a given arbitrary scale.
 TEST(ScaleTest, GetPitch) {
   constexpr int kPitchCount = 5;
-  const std::array<int, kPitchCount> kPitches = {2, 4, 10, 20, 25};
-  constexpr int kRootPitch = 50;
-  constexpr int kMode = 0;
+  const std::array<double, kPitchCount> kPitches = {0.0, 0.2, 0.35, 0.5, 0.95};
+  constexpr double kRootPitch = 1.75;
+  constexpr int kMode = 1;
 
   const ScaleDefinition scale = {kPitches, kRootPitch, kMode};
 
@@ -20,9 +20,9 @@ TEST(ScaleTest, GetPitch) {
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < kPitchCount; ++i) {
       const int degree = octave * kPitchCount + i;
-      const int expected_pitch =
-          kRootPitch + kPitches[kPitchCount - 1] * octave + (i > 0 ? kPitches[i - 1] : 0);
-      EXPECT_EQ(scale.GetPitch(degree), expected_pitch);
+      const double expected_pitch = kRootPitch + octave + (i + kMode) / kPitchCount +
+                                    kPitches[(i + kMode) % kPitchCount] - kPitches[kMode];
+      EXPECT_EQ(scale.GetPitch(degree), expected_pitch) << degree;
     }
   }
 }

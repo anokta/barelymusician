@@ -38,7 +38,7 @@ class FakeVoice : public Voice {
 
 // Tests that playing a single voice produces the expected output.
 TEST(PolyphonicVoiceTest, SingleVoice) {
-  constexpr int kPitch = 60;
+  constexpr double kPitch = 0.25;
 
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
@@ -64,7 +64,7 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   for (int i = 0; i < kVoiceCount; ++i) {
-    const int pitch = i + 1;
+    const double pitch = static_cast<double>(i + 1);
     polyphonic_voice.Start(pitch, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), pitch);
     polyphonic_voice.Stop(pitch);
@@ -83,7 +83,7 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
 
   double previous_output = 0.0;
   for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(i);
+    polyphonic_voice.Start(static_cast<double>(i));
     const double output = polyphonic_voice.Next(kChannel);
     EXPECT_DOUBLE_EQ(output - previous_output, kOutput);
     previous_output = output;
@@ -101,7 +101,7 @@ TEST(PolyphonicVoiceTest, NoVoice) {
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
-  polyphonic_voice.Start(0);
+  polyphonic_voice.Start(0.0);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 }
 
@@ -117,17 +117,17 @@ TEST(PolyphonicVoiceTest, Update) {
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(i);
+    polyphonic_voice.Start(static_cast<double>(i));
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kOutput);
-    polyphonic_voice.Stop(i);
+    polyphonic_voice.Stop(static_cast<double>(i));
   }
 
   polyphonic_voice.Update([](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
 
   for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(i);
+    polyphonic_voice.Start(static_cast<double>(i));
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kUpdatedOutput);
-    polyphonic_voice.Stop(i);
+    polyphonic_voice.Stop(static_cast<double>(i));
   }
 }
 

@@ -34,7 +34,7 @@ BARELY_EXPORT bool BarelyArpeggiator_Destroy(BarelyArpeggiator* arpeggiator);
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiator* arpeggiator, int32_t pitch,
+BARELY_EXPORT bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiator* arpeggiator, double pitch,
                                               bool* out_is_note_on);
 
 /// Gets whether an arpeggiator is playing or not.
@@ -72,14 +72,14 @@ BARELY_EXPORT bool BarelyArpeggiator_SetInstrument(BarelyArpeggiator* arpeggiato
 /// @param arpeggiator Pointer to arpeggiator.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiator* arpeggiator, int32_t pitch);
+BARELY_EXPORT bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiator* arpeggiator, double pitch);
 
 /// Sets an arpeggiator note on.
 ///
 /// @param arpeggiator Pointer to arpeggiator.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiator* arpeggiator, int32_t pitch);
+BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiator* arpeggiator, double pitch);
 
 /// Sets the rate of an arpeggiator.
 ///
@@ -146,7 +146,7 @@ class Arpeggiator {
   ///
   /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
-  bool IsNoteOn(int pitch) const noexcept;
+  bool IsNoteOn(double pitch) const noexcept;
 
   /// Returns whether the arpeggiator is playing or not.
   ///
@@ -170,13 +170,13 @@ class Arpeggiator {
   ///
   /// @param pitch Note pitch.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOff(int pitch) noexcept;
+  void SetNoteOff(double pitch) noexcept;
 
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(int pitch) noexcept;
+  void SetNoteOn(double pitch) noexcept;
 
   /// Sets the rate.
   ///
@@ -202,7 +202,7 @@ class Arpeggiator {
   std::optional<InstrumentPtr> instrument_ = std::nullopt;
 
   // Array of pitches to play.
-  std::vector<int> pitches_;
+  std::vector<double> pitches_;
 
   // Gate ratio.
   double gate_ratio_ = 1.0;

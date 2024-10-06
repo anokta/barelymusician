@@ -37,18 +37,18 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param id Note control identifier.
     /// @param value Note control value.
-    public void OnSetNoteControl(int pitch, int id, double value);
+    public void OnSetNoteControl(double pitch, int id, double value);
 
     /// Set note off callback.
     ///
     /// @param pitch Note pitch.
-    public void OnSetNoteOff(int pitch);
+    public void OnSetNoteOff(double pitch);
 
     /// Set note on callback.
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void OnSetNoteOn(int pitch, double intensity);
+    public void OnSetNoteOn(double pitch, double intensity);
   }
 
   /// Custom instrument template that implements a custom instrument.
@@ -130,19 +130,19 @@ namespace Barely {
 
     // Set note control callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteControlCallback))]
-    private static void OnSetNoteControl(ref IntPtr state, Int32 pitch, Int32 id, double value) {
+    private static void OnSetNoteControl(ref IntPtr state, double pitch, Int32 id, double value) {
       (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteControl(pitch, id, value);
     }
 
     // Set note off callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteOffCallback))]
-    private static void OnSetNoteOff(ref IntPtr state, Int32 pitch) {
+    private static void OnSetNoteOff(ref IntPtr state, double pitch) {
       (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOff(pitch);
     }
 
     // Set note on callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetNoteOnCallback))]
-    private static void OnSetNoteOn(ref IntPtr state, Int32 pitch, double intensity) {
+    private static void OnSetNoteOn(ref IntPtr state, double pitch, double intensity) {
       (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetNoteOn(pitch, intensity);
     }
 

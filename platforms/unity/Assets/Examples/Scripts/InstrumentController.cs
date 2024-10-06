@@ -13,10 +13,6 @@ namespace Barely {
       // Repeater to control.
       public Repeater repeater = null;
 
-      // Root note pitch.
-      [Range(0, 127)]
-      public int rootPitch = 60;
-
       // Octave offset.
       [Range(-3, 3)]
       public int octaveOffset = 0;
@@ -83,7 +79,7 @@ namespace Barely {
               arpeggiator.SetNoteOn(GetPitchFromKeyIndex(i));
             } else if (_isRepeaterActive) {
               repeater.Stop();
-              repeater.Play(i + octaveOffset * 12);
+              repeater.Play(octaveOffset + i / 12.0);
             } else if (instrument != null) {
               instrument.SetNoteOn(GetPitchFromKeyIndex(i), noteIntensity);
               if (repeater != null) {
@@ -109,8 +105,8 @@ namespace Barely {
       }
 
       // Returns the corresponding pitch for the given key.
-      private int GetPitchFromKeyIndex(int keyIndex) {
-        return rootPitch + octaveOffset * 12 + keyIndex;
+      private double GetPitchFromKeyIndex(int keyIndex) {
+        return (double)octaveOffset + (double)keyIndex / 12.0;
       }
     }
   }  // namespace Examples

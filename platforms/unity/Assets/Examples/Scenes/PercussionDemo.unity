@@ -428,7 +428,6 @@ MonoBehaviour:
   instrument: {fileID: 1737834380}
   arpeggiator: {fileID: 0}
   repeater: {fileID: 0}
-  rootPitch: 60
   octaveOffset: 0
   noteIntensity: 1
   repeaterNoteLength: 1
@@ -459,13 +458,13 @@ MonoBehaviour:
   Gain: 1
   PadRelease: 1
   Pads:
-  - Pitch: 60
+  - Pitch: 0
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
-  - Pitch: 62
+  - Pitch: 2
     Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
-  - Pitch: 64
+  - Pitch: 4
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
-  - Pitch: 65
+  - Pitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
 --- !u!82 &1737834381
 AudioSource:

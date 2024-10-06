@@ -53,7 +53,7 @@ BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeater* repeater);
 /// @param pitch Note pitch.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeater* repeater, int32_t pitch, int32_t length);
+BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeater* repeater, double pitch, int32_t length);
 
 /// Pushes silence to the end.
 ///
@@ -89,7 +89,7 @@ BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeater* repeater, BarelyRepea
 /// @param repeater Pointer to repeater.
 /// @param pitch_offset Pitch offset.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeater* repeater, int32_t pitch_offset);
+BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeater* repeater, double pitch_offset);
 
 /// Stops the repeater.
 ///
@@ -155,7 +155,7 @@ class Repeater {
   /// @param pitch_or Note pitch or silence.
   /// @param length Note length.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Push(std::optional<int> pitch_or, int length = 1) noexcept;
+  void Push(std::optional<double> pitch_or, int length = 1) noexcept;
 
   /// Sets the instrument.
   ///
@@ -176,7 +176,7 @@ class Repeater {
   ///
   /// @param pitch_offset Pitch offset.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Start(int pitch_offset = 0) noexcept;
+  void Start(double pitch_offset = 0.0) noexcept;
 
   /// Stop the repeater.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -193,7 +193,7 @@ class Repeater {
   std::optional<InstrumentPtr> instrument_ = std::nullopt;
 
   // Array of pitches to play.
-  std::vector<std::pair<std::optional<int>, int>> pitches_;
+  std::vector<std::pair<std::optional<double>, int>> pitches_;
 
   // Style.
   RepeaterStyle style_ = RepeaterStyle::kForward;
@@ -202,7 +202,7 @@ class Repeater {
   int index_ = -1;
 
   // Pitch offset.
-  int pitch_offset_ = 0;
+  double pitch_offset_ = 0.0;
 
   // Remaining length;
   int remaining_length_ = 0;

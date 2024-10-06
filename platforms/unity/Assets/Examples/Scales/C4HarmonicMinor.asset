@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: C4HarmonicMinor
   m_EditorClassIdentifier: 
   type: 2
-  rootPitch: 60
+  rootPitch: 0
   mode: 0

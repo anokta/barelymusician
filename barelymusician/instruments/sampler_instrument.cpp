@@ -26,7 +26,7 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
           // Gain.
           ControlDefinition{Control::kGain, 1.0, 0.0, 1.0},
           // Root note.
-          ControlDefinition{Control::kRootPitch, 60},
+          ControlDefinition{Control::kRootPitch, 0.0},
           // Sample player loop.
           ControlDefinition{Control::kLoop, false},
           // Attack.
@@ -45,9 +45,7 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
-    : voice_(SamplerVoice(frame_rate), kMaxVoiceCount),
-      gain_processor_(frame_rate),
-      tuning_(GetStandardTuning()) {}
+    : voice_(SamplerVoice(frame_rate), kMaxVoiceCount), gain_processor_(frame_rate) {}
 
 void SamplerInstrument::Process(double* output_samples, int output_channel_count,
                                 int output_frame_count) noexcept {
@@ -67,7 +65,7 @@ void SamplerInstrument::SetControl(int id, double value) noexcept {
       gain_processor_.SetGain(value);
       break;
     case Control::kRootPitch:
-      root_pitch_ = static_cast<int>(value);
+      root_pitch_ = value;
       break;
     case Control::kLoop:
       voice_.Update([value](SamplerVoice* voice) noexcept {
@@ -105,16 +103,14 @@ void SamplerInstrument::SetData(const void* data, int size) noexcept {
   });
 }
 
-void SamplerInstrument::SetNoteOff(int pitch) noexcept { voice_.Stop(pitch); }
+void SamplerInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
 
-void SamplerInstrument::SetNoteOn(int pitch, double intensity) noexcept {
-  const double speed = tuning_.GetFrequency(pitch) / tuning_.GetFrequency(root_pitch_);
+void SamplerInstrument::SetNoteOn(double pitch, double intensity) noexcept {
+  const double speed = GetFrequency(pitch) / GetFrequency(root_pitch_);
   voice_.Start(pitch, [speed, intensity](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
     voice->set_gain(intensity);
   });
 }
-
-void SamplerInstrument::SetTuning(const TuningDefinition& tuning) noexcept { tuning_ = tuning; }
 
 }  // namespace barely

@@ -5,6 +5,7 @@
 
 #ifdef __cplusplus
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <new>
 #include <span>
@@ -42,23 +43,18 @@ class CustomInstrument {
   /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @param value Note control value.
-  virtual void SetNoteControl(int pitch, int id, double value) noexcept = 0;
+  virtual void SetNoteControl(double pitch, int id, double value) noexcept = 0;
 
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  virtual void SetNoteOff(int pitch) noexcept = 0;
+  virtual void SetNoteOff(double pitch) noexcept = 0;
 
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  virtual void SetNoteOn(int pitch, double intensity) noexcept = 0;
-
-  /// Sets the tuning.
-  ///
-  /// @param tuning Tuning definition.
-  virtual void SetTuning(const TuningDefinition& tuning) noexcept = 0;
+  virtual void SetNoteOn(double pitch, double intensity) noexcept = 0;
 
   /// Returns the definition for `CustomInstrumentType`.
   ///
@@ -78,7 +74,6 @@ class CustomInstrument {
       using CustomInstrumentType::SetNoteControl;
       using CustomInstrumentType::SetNoteOff;
       using CustomInstrumentType::SetNoteOn;
-      using CustomInstrumentType::SetTuning;
     };
     return InstrumentDefinition(
         [](void** state, int32_t frame_rate) noexcept {
@@ -102,46 +97,28 @@ class CustomInstrument {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetData(data, size);
         },
-        [](void** state, int32_t pitch, int32_t id, double value) {
+        [](void** state, double pitch, int32_t id, double value) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteControl(pitch, id, value);
         },
-        [](void** state, int32_t pitch) noexcept {
+        [](void** state, double pitch) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteOff(pitch);
         },
-        [](void** state, int32_t pitch, double intensity) noexcept {
+        [](void** state, double pitch, double intensity) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteOn(pitch, intensity);
-        },
-        [](void** state, const BarelyTuningDefinition* tuning) {
-          auto* instrument = static_cast<PublicInstrument*>(*state);
-          instrument->SetTuning(*tuning);
         },
         control_definitions, note_control_definitions);
   }
 
-  /// Returns the MIDI Standard Tuning definition.
+  /// Returns the frequency of a given pitch.
   ///
-  /// @return Tuning definition.
-  static TuningDefinition GetStandardTuning() noexcept {
-    static constexpr double kA4Frequency = 440.0;
-    static constexpr int kA4Pitch = 69;
-    static constexpr double kSemitones[12] = {
-        1.0594630943592953,  // std::pow(2.0, 1.0 / 12.0)
-        1.122462048309373,   // std::pow(2.0, 2.0 / 12.0)
-        1.189207115002721,   // std::pow(2.0, 3.0 / 12.0)
-        1.2599210498948732,  // std::pow(2.0, 4.0 / 12.0)
-        1.3348398541700344,  // std::pow(2.0, 5.0 / 12.0)
-        1.4142135623730951,  // std::pow(2.0, 6.0 / 12.0)
-        1.4983070768766815,  // std::pow(2.0, 7.0 / 12.0)
-        1.5874010519681994,  // std::pow(2.0, 8.0 / 12.0)
-        1.681792830507429,   // std::pow(2.0, 9.0 / 12.0)
-        1.7817974362806785,  // std::pow(2.0, 10.0 / 12.0)
-        1.8877486253633868,  // std::pow(2.0, 11.0 / 12.0)
-        2.0,                 // std::pow(2.0, 12.0 / 12.0)
-    };
-    return TuningDefinition{kSemitones, kA4Frequency, kA4Pitch};
+  /// @param pitch Note pitch.
+  /// @return Note frequency.
+  static double GetFrequency(double pitch) noexcept {
+    static constexpr double kC4Frequency = 261.626;
+    return kC4Frequency * std::pow(2.0, pitch);
   }
 };
 

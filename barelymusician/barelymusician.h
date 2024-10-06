@@ -41,14 +41,14 @@
 ///
 ///   // Set a note on.
 ///   //
-///   // Note values typically follow the MIDI Standard Tuning for convenience, where `pitch`
-///   // represents the MIDI note number, and `intensity` represents the normalized MIDI note
-///   // velocity. However, this is not a strict rule, as the `pitch` and `intensity` values can be
-///   // interpreted in any desired way by a custom instrument with a custom tuning.
-///   instrument.SetNoteOn(/*pitch=*/60, /*intensity=*/0.25);
+//    // Note pitch is centered around the reference frequency, and measured in octaves. Fractional
+///   // values adjust the frequency logarithmically to maintain perceived pitch intervals in each
+///   // octave.
+///   const double c3_pitch = -1.0;
+///   instrument.SetNoteOn(c3_pitch, /*intensity=*/0.25);
 ///
 ///   // Check if the note is on.
-///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/60);
+///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
 ///
 ///   // Set a control value.
 ///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
@@ -126,15 +126,15 @@
 ///
 ///   // Set a note on.
 ///   //
-///   // Note values typically follow the MIDI Standard Tuning for convenience, where `pitch`
-///   // represents the MIDI note number, and `intensity` represents the normalized MIDI note
-///   // velocity. However, this is not a strict rule, as the `pitch` and `intensity` values can be
-///   // interpreted in any desired way by a custom instrument with a custom tuning.
-///   BarelyInstrument_SetNoteOn(instrument, /*pitch=*/60, /*intensity=*/0.25);
+//    // Note pitch is centered around the reference frequency, and measured in octaves. Fractional
+///   // values adjust the frequency logarithmically to maintain perceived pitch intervals in each
+///   // octave.
+///   double c3_pitch = -1.0;
+///   BarelyInstrument_SetNoteOn(instrument, c3_pitch, /*intensity=*/0.25);
 ///
 ///   // Check if the note is on.
 ///   bool is_note_on = false;
-///   BarelyInstrument_IsNoteOn(instrument, /*pitch=*/60, &is_note_on);
+///   BarelyInstrument_IsNoteOn(instrument, c3_pitch, &is_note_on);
 ///
 ///   // Set a control value.
 ///   BarelyInstrument_SetControl(instrument, /*id=*/0, /*value=*/0.5);
@@ -216,9 +216,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
-
-/// Tuning definition alias.
-typedef struct BarelyTuningDefinition BarelyTuningDefinition;
 
 /// Control definition.
 typedef struct BarelyControlDefinition {
@@ -309,29 +306,22 @@ typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state, const v
 /// @param pitch Note pitch.
 /// @param id Note control identifier.
 /// @param value Note control value.
-typedef void (*BarelyInstrumentDefinition_SetNoteControlCallback)(void** state, int32_t pitch,
+typedef void (*BarelyInstrumentDefinition_SetNoteControlCallback)(void** state, double pitch,
                                                                   int32_t id, double value);
 
 /// Instrument definition set note off callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state, int32_t pitch);
+typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state, double pitch);
 
 /// Instrument definition set note on callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state, int32_t pitch,
+typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state, double pitch,
                                                              double intensity);
-
-/// Instrument definition set tuning callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param definition Pointer to tuning definition.
-typedef void (*BarelyInstrumentDefinition_SetTuningCallback)(
-    void** state, const BarelyTuningDefinition* definition);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -358,9 +348,6 @@ typedef struct BarelyInstrumentDefinition {
 
   /// Set note on callback.
   BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback;
-
-  /// Set tuning callback.
-  BarelyInstrumentDefinition_SetTuningCallback set_tuning_callback;
 
   /// Array of control definitions.
   const BarelyControlDefinition* control_definitions;
@@ -392,7 +379,7 @@ typedef void (*BarelyNoteControlEventDefinition_DestroyCallback)(void** state);
 /// @param pitch Note pitch.
 /// @param id Note control identifier.
 /// @param value Note control value.
-typedef void (*BarelyNoteControlEventDefinition_ProcessCallback)(void** state, int32_t pitch,
+typedef void (*BarelyNoteControlEventDefinition_ProcessCallback)(void** state, double pitch,
                                                                  int32_t id, double value);
 
 /// Note control event definition.
@@ -422,7 +409,7 @@ typedef void (*BarelyNoteOffEventDefinition_DestroyCallback)(void** state);
 ///
 /// @param state Pointer to note off event state.
 /// @param pitch Note pitch.
-typedef void (*BarelyNoteOffEventDefinition_ProcessCallback)(void** state, int32_t pitch);
+typedef void (*BarelyNoteOffEventDefinition_ProcessCallback)(void** state, double pitch);
 
 /// Note off event definition.
 typedef struct BarelyNoteOffEventDefinition {
@@ -452,7 +439,7 @@ typedef void (*BarelyNoteOnEventDefinition_DestroyCallback)(void** state);
 /// @param state Pointer to note on event state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyNoteOnEventDefinition_ProcessCallback)(void** state, int32_t pitch,
+typedef void (*BarelyNoteOnEventDefinition_ProcessCallback)(void** state, double pitch,
                                                             double intensity);
 
 /// Note on event definition.
@@ -494,23 +481,6 @@ typedef struct BarelyTaskDefinition {
   /// Process callback.
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
-
-/// Definition of a musical tuning system.
-#pragma pack(push, 1)
-typedef struct BarelyTuningDefinition {
-  /// Array of pitch ratios relative to, but excluding, the root pitch.
-  const double* pitch_ratios;
-
-  /// Number of pitch ratios.
-  int32_t pitch_ratio_count;
-
-  /// Root frequency in hertz.
-  double root_frequency;
-
-  /// Root pitch corresponding to the root frequency.
-  int32_t root_pitch;
-} BarelyTuningDefinition;
-#pragma pack(pop)
 
 /// Instrument alias.
 typedef struct BarelyInstrument BarelyInstrument;
@@ -556,8 +526,8 @@ BARELY_EXPORT bool BarelyInstrument_GetControl(const BarelyInstrument* instrumen
 /// @param id Note control identifier.
 /// @param out_value Output note control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument,
-                                                   int32_t pitch, int32_t id, double* out_value);
+BARELY_EXPORT bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, double pitch,
+                                                   int32_t id, double* out_value);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -565,7 +535,7 @@ BARELY_EXPORT bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instr
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, int32_t pitch,
+BARELY_EXPORT bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, double pitch,
                                              bool* out_is_note_on);
 
 /// Processes instrument output samples at timestamp.
@@ -593,7 +563,7 @@ BARELY_EXPORT bool BarelyInstrument_ResetAllControls(BarelyInstrument* instrumen
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_ResetAllNoteControls(BarelyInstrument* instrument,
-                                                         int32_t pitch);
+                                                         double pitch);
 
 /// Resets an instrument control value.
 ///
@@ -608,7 +578,7 @@ BARELY_EXPORT bool BarelyInstrument_ResetControl(BarelyInstrument* instrument, i
 /// @param pitch Note pitch.
 /// @param id Control identifier.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, int32_t pitch,
+BARELY_EXPORT bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, double pitch,
                                                      int32_t id);
 
 /// Sets all instrument notes off.
@@ -652,7 +622,7 @@ BARELY_EXPORT bool BarelyInstrument_SetData(BarelyInstrument* instrument, const 
 /// @param id Note control identifier.
 /// @param value Note control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, int32_t pitch,
+BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, double pitch,
                                                    int32_t id, double value);
 
 /// Sets the note control event of an instrument.
@@ -670,7 +640,7 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteControlEvent(BarelyInstrument* instru
 /// @param instrument Pointer to instrument.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrument* instrument, int32_t pitch);
+BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrument* instrument, double pitch);
 
 /// Sets the note off event of an instrument.
 ///
@@ -688,7 +658,7 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrument* instrument
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, int32_t pitch,
+BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, double pitch,
                                               double intensity);
 
 /// Sets the note on event of an instrument.
@@ -700,14 +670,6 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, int3
 BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
                                                    BarelyNoteOnEventDefinition definition,
                                                    void* user_data);
-
-/// Sets an instrument tuning.
-///
-/// @param instrument Pointer to instrument.
-/// @param definition Tuning definition.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetTuning(BarelyInstrument* instrument,
-                                              const BarelyTuningDefinition* definition);
 
 /// Creates a new musician.
 ///
@@ -916,15 +878,6 @@ BARELY_EXPORT bool BarelyTask_GetPosition(const BarelyTask* task, double* out_po
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTask* task, double position);
 
-/// Gets the corresponding frequency for a given pitch.
-///
-/// @param definition Pointer to tuning definition.
-/// @param pitch Pitch.
-/// @param out_frequency Output frequency.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTuningDefinition_GetFrequency(const BarelyTuningDefinition* definition,
-                                                       int32_t pitch, double* out_frequency);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
@@ -941,9 +894,6 @@ BARELY_EXPORT bool BarelyTuningDefinition_GetFrequency(const BarelyTuningDefinit
 #include <utility>
 
 namespace barely {
-
-/// Tuning definition.
-struct TuningDefinition;
 
 /// Control definition.
 struct ControlDefinition : public BarelyControlDefinition {
@@ -1064,9 +1014,6 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Set note on callback signature.
   using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
 
-  /// Set tuning callback signature.
-  using SetTuningCallback = BarelyInstrumentDefinition_SetTuningCallback;
-
   /// Constructs a new `InstrumentDefinition`.
   ///
   /// @param create_callback Create callback.
@@ -1083,7 +1030,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       ProcessCallback process_callback, SetControlCallback set_control_callback,
       SetDataCallback set_data_callback, SetNoteControlCallback set_note_control_callback,
       SetNoteOffCallback set_note_off_callback, SetNoteOnCallback set_note_on_callback,
-      SetTuningCallback set_tuning_callback, std::span<const ControlDefinition> control_definitions,
+      std::span<const ControlDefinition> control_definitions,
       std::span<const ControlDefinition> note_control_definitions) noexcept
       : InstrumentDefinition({
             create_callback,
@@ -1094,7 +1041,6 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
             set_note_control_callback,
             set_note_off_callback,
             set_note_on_callback,
-            set_tuning_callback,
             control_definitions.data(),
             static_cast<int>(control_definitions.size()),
             note_control_definitions.data(),
@@ -1121,7 +1067,7 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @param value Note control value.
-  using Callback = std::function<void(int32_t pitch, int id, double value)>;
+  using Callback = std::function<void(double pitch, int id, double value)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteControlEventDefinition_CreateCallback;
@@ -1142,7 +1088,7 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, int32_t pitch, int32_t id, double value) noexcept {
+        [](void** state, double pitch, int32_t id, double value) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
             callback(pitch, id, value);
           }
@@ -1176,7 +1122,7 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
   /// Callback signature.
   ///
   /// @param pitch Note pitch.
-  using Callback = std::function<void(int32_t pitch)>;
+  using Callback = std::function<void(double pitch)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteOffEventDefinition_CreateCallback;
@@ -1197,7 +1143,7 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, int32_t pitch) noexcept {
+        [](void** state, double pitch) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
             callback(pitch);
           }
@@ -1232,7 +1178,7 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  using Callback = std::function<void(int32_t pitch, double intensity)>;
+  using Callback = std::function<void(double pitch, double intensity)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteOnEventDefinition_CreateCallback;
@@ -1253,7 +1199,7 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, int32_t pitch, double intensity) noexcept {
+        [](void** state, double pitch, double intensity) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
             callback(pitch, intensity);
           }
@@ -1564,14 +1510,14 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// @param id Note control identifier.
   /// @return Note control value.
   template <typename IdType, typename ValueType>
-  [[nodiscard]] ValueType GetNoteControl(int pitch, IdType id) const noexcept {
+  [[nodiscard]] ValueType GetNoteControl(double pitch, IdType id) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     double value = 0.0;
-    [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControl(
-        *this, static_cast<int32_t>(pitch), static_cast<int32_t>(id), &value);
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_GetNoteControl(*this, pitch, static_cast<int32_t>(id), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1580,10 +1526,9 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  [[nodiscard]] bool IsNoteOn(int pitch) const noexcept {
+  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
     bool is_note_on = false;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_IsNoteOn(*this, static_cast<int32_t>(pitch), &is_note_on);
+    [[maybe_unused]] const bool success = BarelyInstrument_IsNoteOn(*this, pitch, &is_note_on);
     assert(success);
     return is_note_on;
   }
@@ -1610,9 +1555,8 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// Resets all note control values.
   ///
   /// @param pitch Note pitch.
-  void ResetAllNoteControls(int pitch) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_ResetAllNoteControls(*this, static_cast<int32_t>(pitch));
+  void ResetAllNoteControls(double pitch) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_ResetAllNoteControls(*this, pitch);
     assert(success);
   }
 
@@ -1633,11 +1577,11 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// @param pitch Note pitch.
   /// @param id Control identifier.
   template <typename IdType>
-  void ResetNoteControl(int pitch, IdType id) noexcept {
+  void ResetNoteControl(double pitch, IdType id) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetNoteControl(
-        *this, static_cast<int32_t>(pitch), static_cast<int32_t>(id));
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_ResetNoteControl(*this, pitch, static_cast<int32_t>(id));
     assert(success);
   }
 
@@ -1711,13 +1655,13 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// @param id Control identifier.
   /// @param value Control value.
   template <typename IdType, typename ValueType>
-  void SetNoteControl(int pitch, IdType id, ValueType value) noexcept {
+  void SetNoteControl(double pitch, IdType id, ValueType value) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        *this, static_cast<int32_t>(pitch), static_cast<int32_t>(id), static_cast<double>(value));
+        *this, pitch, static_cast<int32_t>(id), static_cast<double>(value));
     assert(success);
   }
 
@@ -1742,9 +1686,8 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(int pitch) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOff(*this, static_cast<int32_t>(pitch));
+  void SetNoteOff(double pitch) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOff(*this, pitch);
     assert(success);
   }
 
@@ -1769,9 +1712,8 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  void SetNoteOn(int pitch, double intensity = 1.0) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOn(*this, static_cast<int32_t>(pitch), intensity);
+  void SetNoteOn(double pitch, double intensity = 1.0) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(*this, pitch, intensity);
     assert(success);
   }
 
@@ -1790,15 +1732,6 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// @param callback Note off event callback.
   void SetNoteOnEvent(NoteOnEventDefinition::Callback callback) noexcept {
     SetNoteOnEvent(NoteOnEventDefinition::WithCallback(), static_cast<void*>(&callback));
-  }
-
-  /// Sets the tuning.
-  ///
-  /// @param definition Tuning definition.
-  void SetTuning(const TuningDefinition* definition) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetTuning(
-        *this, reinterpret_cast<const BarelyTuningDefinition*>(definition));
-    assert(success);
   }
 };
 
@@ -2014,52 +1947,6 @@ class TaskPtr : public PtrWrapper<BarelyTask> {
   void SetPosition(double position) noexcept {
     [[maybe_unused]] const bool success = BarelyTask_SetPosition(*this, position);
     assert(success);
-  }
-};
-
-/// Definition of a musical tuning system.
-struct TuningDefinition : public BarelyTuningDefinition {
- public:
-  /// Default constructor.
-  constexpr TuningDefinition() noexcept = default;
-
-  /// Constructs a new `TuningDefinition`.
-  ///
-  /// @param pitch_ratios Span of pitch ratios.
-  /// @param root_frequency Root frequency.
-  /// @param root_pitch Root pitch.
-  constexpr TuningDefinition(std::span<const double> pitch_ratios, double root_frequency,
-                             int root_pitch) noexcept
-      : TuningDefinition(
-            BarelyTuningDefinition{pitch_ratios.data(), static_cast<int32_t>(pitch_ratios.size()),
-                                   root_frequency, static_cast<int32_t>(root_pitch)}) {}
-
-  /// Constructs a new `TuningDefinition` from a raw type.
-  ///
-  /// @param definition Raw tuning definition.
-  // NOLINTNEXTLINE(google-explicit-BarelyTuningDefinition)
-  constexpr TuningDefinition(BarelyTuningDefinition definition) noexcept
-      : BarelyTuningDefinition{definition} {
-    assert(definition.pitch_ratios != nullptr);
-    assert(definition.pitch_ratio_count > 0);
-  }
-
-  /// Returns the corresponding frequency for a given pitch.
-  ///
-  /// @param pitch Pitch.
-  /// @return Frequency.
-  [[nodiscard]] double GetFrequency(int pitch) const noexcept {
-    double frequency = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyTuningDefinition_GetFrequency(this, static_cast<int32_t>(pitch), &frequency);
-    return frequency;
-  }
-
-  /// Returns the number of pitches in the tuning system.
-  ///
-  /// @return Number of pitches.
-  [[nodiscard]] constexpr int GetPitchCount() const noexcept {
-    return static_cast<int>(pitch_ratio_count);
   }
 };
 

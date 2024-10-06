@@ -31,7 +31,7 @@ bool BarelyArpeggiator_Destroy(BarelyArpeggiator* arpeggiator) {
   return true;
 }
 
-bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiator* arpeggiator, int32_t pitch,
+bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiator* arpeggiator, double pitch,
                                 bool* out_is_note_on) {
   if (!arpeggiator || !out_is_note_on) return false;
 
@@ -68,14 +68,14 @@ bool BarelyArpeggiator_SetInstrument(BarelyArpeggiator* arpeggiator, BarelyInstr
   return true;
 }
 
-bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiator* arpeggiator, int32_t pitch) {
+bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiator* arpeggiator, double pitch) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetNoteOff(pitch);
   return true;
 }
 
-bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiator* arpeggiator, int32_t pitch) {
+bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiator* arpeggiator, double pitch) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetNoteOn(pitch);
@@ -108,7 +108,7 @@ Arpeggiator::Arpeggiator(MusicianPtr musician, int process_order) noexcept
             if (!instrument_.has_value()) {
               return;
             }
-            const int pitch = pitches_[index_];
+            const double pitch = pitches_[index_];
             instrument_->SetNoteOn(pitch);
             performer_.ScheduleOneOffTask(
                 [this, pitch]() {
@@ -125,7 +125,7 @@ Arpeggiator::Arpeggiator(MusicianPtr musician, int process_order) noexcept
 
 Arpeggiator::~Arpeggiator() noexcept { Stop(); }
 
-bool Arpeggiator::IsNoteOn(int pitch) const noexcept {
+bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();
 }
 
@@ -150,7 +150,7 @@ void Arpeggiator::SetInstrument(std::optional<InstrumentPtr> instrument) noexcep
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Arpeggiator::SetNoteOff(int pitch) noexcept {
+void Arpeggiator::SetNoteOff(double pitch) noexcept {
   if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch); it != pitches_.end()) {
     pitches_.erase(it);
     if (pitches_.empty() && IsPlaying()) {
@@ -160,7 +160,7 @@ void Arpeggiator::SetNoteOff(int pitch) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Arpeggiator::SetNoteOn(int pitch) noexcept {
+void Arpeggiator::SetNoteOn(double pitch) noexcept {
   if (const auto it = std::lower_bound(pitches_.begin(), pitches_.end(), pitch);
       it == pitches_.end() || *it != pitch) {
     pitches_.insert(it, pitch);

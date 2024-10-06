@@ -13,14 +13,14 @@ namespace Barely {
 
       public void OnProcess() {
         int degree = Random.Range(-2, 2) * scale.PitchCount + Random.Range(0, scale.PitchCount);
-        int pitch = scale.GetPitch(degree);
+        double pitch = scale.GetPitch(degree);
         instrument.SetNoteOn(pitch);
         performer.ScheduleOneOffTask(delegate() { instrument.SetNoteOff(pitch); },
                                      performer.LoopLength);
 
-        text.text = pitch.ToString();
+        text.text = ((int)(12.0 * pitch)).ToString();
         _h = Random.Range(0.0f, 1.0f);
-        _v = pitch / 80.0f;
+        _v = 0.1f * (float)(pitch + 2.0);
       }
 
       private void Update() {

@@ -39,8 +39,8 @@ constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.025;
 constexpr int kVoiceCount = 1;
 
-constexpr int kBarPitch = 69;
-constexpr int kBeatPitch = 57;
+constexpr double kBarPitch = 1.0;
+constexpr double kBeatPitch = 0.0;
 
 constexpr int kBeatCount = 4;
 constexpr double kInitialTempo = 120.0;
@@ -72,7 +72,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const int pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
+    const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
     instrument.SetNoteOn(pitch);
     instrument.SetNoteOff(pitch);
   });

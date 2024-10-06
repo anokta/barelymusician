@@ -93,29 +93,22 @@ namespace Barely {
       /// @param id Note control identifier.
       /// @param value Note control value.
       public delegate void InstrumentDefinition_SetNoteControlCallback(ref IntPtr state,
-                                                                       Int32 pitch, Int32 id,
+                                                                       double pitch, Int32 id,
                                                                        double value);
 
       /// Instrument definition set note off callback signature.
       ///
       /// @param state Pointer to instrument state.
       /// @param pitch Note pitch.
-      public delegate void InstrumentDefinition_SetNoteOffCallback(ref IntPtr state, Int32 pitch);
+      public delegate void InstrumentDefinition_SetNoteOffCallback(ref IntPtr state, double pitch);
 
       /// Instrument definition set note on callback signature.
       ///
       /// @param state Pointer to instrument state.
       /// @param pitch Note pitch.
       /// @param intensity Note intensity.
-      public delegate void InstrumentDefinition_SetNoteOnCallback(ref IntPtr state, Int32 pitch,
+      public delegate void InstrumentDefinition_SetNoteOnCallback(ref IntPtr state, double pitch,
                                                                   double intensity);
-
-      /// Instrument definition set tuning callback signature.
-      ///
-      /// @param state Pointer to instrument state.
-      /// @param definition Pointer to tuning definition.
-      public delegate void InstrumentDefinition_SetTuningCallback(ref IntPtr state,
-                                                                  IntPtr definition);
 
       /// Instrument definition.
       [StructLayout(LayoutKind.Sequential)]
@@ -143,9 +136,6 @@ namespace Barely {
 
         /// Set note on callback.
         public InstrumentDefinition_SetNoteOnCallback setNoteOnCallback;
-
-        /// Set tuning callback.
-        public InstrumentDefinition_SetTuningCallback setTuningCallback;
 
         /// Pointer to an array of control definitions.
         public IntPtr controlDefinitions;
@@ -307,7 +297,7 @@ namespace Barely {
       /// @param pitch Note pitch.
       /// @param id Note control identifier.
       /// @return Note control value.
-      public static double Instrument_GetNoteControl(IntPtr instrumentPtr, int pitch, int id) {
+      public static double Instrument_GetNoteControl(IntPtr instrumentPtr, double pitch, int id) {
         double value = 0.0;
         if (!BarelyInstrument_GetNoteControl(instrumentPtr, pitch, id, ref value) &&
             instrumentPtr != IntPtr.Zero) {
@@ -321,7 +311,7 @@ namespace Barely {
       /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
       /// @return True if on, false otherwise.
-      public static bool Instrument_IsNoteOn(IntPtr instrumentPtr, int pitch) {
+      public static bool Instrument_IsNoteOn(IntPtr instrumentPtr, double pitch) {
         bool isNoteOn = false;
         if (!BarelyInstrument_IsNoteOn(instrumentPtr, pitch, ref isNoteOn) &&
             instrumentPtr != IntPtr.Zero) {
@@ -372,7 +362,7 @@ namespace Barely {
       /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
       /// @param controlId Note control identifier.
-      public static void Instrument_ResetNoteControl(IntPtr instrumentPtr, int pitch,
+      public static void Instrument_ResetNoteControl(IntPtr instrumentPtr, double pitch,
                                                      int controlId) {
         if (!BarelyInstrument_ResetNoteControl(instrumentPtr, pitch, controlId) &&
             instrumentPtr != IntPtr.Zero) {
@@ -420,8 +410,8 @@ namespace Barely {
       /// @param pitch Note pitch.
       /// @param controlId Note control identifier.
       /// @param value Note control value.
-      public static void Instrument_SetNoteControl(IntPtr instrumentPtr, int pitch, int controlId,
-                                                   double value) {
+      public static void Instrument_SetNoteControl(IntPtr instrumentPtr, double pitch,
+                                                   int controlId, double value) {
         if (!BarelyInstrument_SetNoteControl(instrumentPtr, pitch, controlId, value) &&
             instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument note " + pitch + " control " + controlId +
@@ -433,7 +423,7 @@ namespace Barely {
       ///
       /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
-      public static void Instrument_SetNoteOff(IntPtr instrumentPtr, int pitch) {
+      public static void Instrument_SetNoteOff(IntPtr instrumentPtr, double pitch) {
         if (!BarelyInstrument_SetNoteOff(instrumentPtr, pitch) && instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop instrument note " + pitch + "");
         }
@@ -443,7 +433,8 @@ namespace Barely {
       ///
       /// @param instrumentPtr Pointer to instrument.
       /// @param pitch Note pitch.
-      public static void Instrument_SetNoteOn(IntPtr instrumentPtr, int pitch, double intensity) {
+      public static void Instrument_SetNoteOn(IntPtr instrumentPtr, double pitch,
+                                              double intensity) {
         if (!BarelyInstrument_SetNoteOn(instrumentPtr, pitch, intensity) &&
             instrumentPtr != IntPtr.Zero) {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
@@ -764,7 +755,7 @@ namespace Barely {
       /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param pitch Note pitch.
       /// @return True if on, false otherwise.
-      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorPtr, int pitch) {
+      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorPtr, double pitch) {
         bool isNoteOn = false;
         if (!BarelyArpeggiator_IsNoteOn(arpeggiatorPtr, pitch, ref isNoteOn) &&
             arpeggiatorPtr != IntPtr.Zero) {
@@ -822,7 +813,7 @@ namespace Barely {
       ///
       /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorPtr, int pitch) {
+      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorPtr, double pitch) {
         if (!BarelyArpeggiator_SetNoteOff(arpeggiatorPtr, pitch) && arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to stop arpeggiator note " + pitch);
         }
@@ -832,7 +823,7 @@ namespace Barely {
       ///
       /// @param arpeggiatorPtr Pointer to arpeggiator.
       /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorPtr, int pitch) {
+      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorPtr, double pitch) {
         if (!BarelyArpeggiator_SetNoteOn(arpeggiatorPtr, pitch) && arpeggiatorPtr != IntPtr.Zero) {
           Debug.LogError("Failed to start arpeggiator note " + pitch);
         }
@@ -884,7 +875,7 @@ namespace Barely {
       /// @param repeaterPtr Pointer to repeater.
       /// @param pitchOr Note pitch value or silence.
       /// @param length Note length in beats.
-      public static void Repeater_Push(IntPtr repeaterPtr, int? pitchOr, int length) {
+      public static void Repeater_Push(IntPtr repeaterPtr, double? pitchOr, int length) {
         if ((pitchOr.HasValue && !BarelyRepeater_Push(repeaterPtr, pitchOr.Value, length)) ||
             (!pitchOr.HasValue && !BarelyRepeater_PushSilence(repeaterPtr, length)) &&
                 repeaterPtr != IntPtr.Zero) {
@@ -927,7 +918,7 @@ namespace Barely {
       ///
       /// @param repeaterPtr Pointer to repeater.
       /// @param pitchOffset Pitch offset.
-      public static void Repeater_Start(IntPtr repeaterPtr, int pitchOffset) {
+      public static void Repeater_Start(IntPtr repeaterPtr, double pitchOffset) {
         if (!BarelyRepeater_Start(repeaterPtr, pitchOffset) && repeaterPtr != IntPtr.Zero) {
           Debug.LogError("Failed to start repeater with a pitch offset" + pitchOffset);
         }
@@ -999,10 +990,10 @@ namespace Barely {
 
       // Note control event definition process callback.
       private delegate void NoteControlEventDefinition_ProcessCallback(ref IntPtr state,
-                                                                       Int32 pitch, int id,
+                                                                       double pitch, int id,
                                                                        double value);
       [AOT.MonoPInvokeCallback(typeof(NoteControlEventDefinition_ProcessCallback))]
-      private static void NoteControlEventDefinition_OnProcess(ref IntPtr state, Int32 pitch,
+      private static void NoteControlEventDefinition_OnProcess(ref IntPtr state, double pitch,
                                                                int id, double value) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnNoteControlEvent(instrument, pitch, id, value);
@@ -1037,9 +1028,9 @@ namespace Barely {
       }
 
       // Note off event definition process callback.
-      private delegate void NoteOffEventDefinition_ProcessCallback(ref IntPtr state, Int32 pitch);
+      private delegate void NoteOffEventDefinition_ProcessCallback(ref IntPtr state, double pitch);
       [AOT.MonoPInvokeCallback(typeof(NoteOffEventDefinition_ProcessCallback))]
-      private static void NoteOffEventDefinition_OnProcess(ref IntPtr state, Int32 pitch) {
+      private static void NoteOffEventDefinition_OnProcess(ref IntPtr state, double pitch) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnNoteOffEvent(instrument, pitch);
       }
@@ -1072,10 +1063,10 @@ namespace Barely {
       }
 
       // Note on event definition process callback.
-      private delegate void NoteOnEventDefinition_ProcessCallback(ref IntPtr state, Int32 pitch,
+      private delegate void NoteOnEventDefinition_ProcessCallback(ref IntPtr state, double pitch,
                                                                   double intensity);
       [AOT.MonoPInvokeCallback(typeof(NoteOnEventDefinition_ProcessCallback))]
-      private static void NoteOnEventDefinition_OnProcess(ref IntPtr state, Int32 pitch,
+      private static void NoteOnEventDefinition_OnProcess(ref IntPtr state, double pitch,
                                                           double intensity) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
@@ -1287,11 +1278,11 @@ namespace Barely {
                                                              ref double outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
-      private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, Int32 pitch,
+      private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, double pitch,
                                                                  Int32 id, ref double outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
-      private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, Int32 pitch,
+      private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, double pitch,
                                                            ref bool outIsNoteOn);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Process")]
@@ -1304,7 +1295,7 @@ namespace Barely {
       private static extern bool BarelyInstrument_ResetControl(IntPtr instrument, Int32 id);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetNoteControl")]
-      private static extern bool BarelyInstrument_ResetNoteControl(IntPtr instrument, Int32 pitch,
+      private static extern bool BarelyInstrument_ResetNoteControl(IntPtr instrument, double pitch,
                                                                    Int32 id);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
@@ -1324,7 +1315,7 @@ namespace Barely {
                                                           Int32 size);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
-      private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, Int32 pitch,
+      private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
                                                                  Int32 id, double value);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControlEvent")]
@@ -1332,7 +1323,7 @@ namespace Barely {
           IntPtr instrument, NoteControlEventDefinition definition, IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
-      private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, Int32 pitch);
+      private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, double pitch);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffEvent")]
       private static extern bool BarelyInstrument_SetNoteOffEvent(IntPtr instrument,
@@ -1340,7 +1331,7 @@ namespace Barely {
                                                                   IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
-      private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, Int32 pitch,
+      private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, double pitch,
                                                             double intensity);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEvent")]
@@ -1451,7 +1442,7 @@ namespace Barely {
       private static extern bool BarelyArpeggiator_Destroy(IntPtr arpeggiator);
 
       [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_IsNoteOn")]
-      private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, Int32 pitch,
+      private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, double pitch,
                                                             ref bool outIsNoteOn);
 
       [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
@@ -1499,7 +1490,7 @@ namespace Barely {
       private static extern bool BarelyRepeater_Pop(IntPtr repeater);
 
       [DllImport(pluginName, EntryPoint = "BarelyRepeater_Push")]
-      private static extern bool BarelyRepeater_Push(IntPtr repeater, Int32 pitch, Int32 length);
+      private static extern bool BarelyRepeater_Push(IntPtr repeater, double pitch, Int32 length);
 
       [DllImport(pluginName, EntryPoint = "BarelyRepeater_PushSilence")]
       private static extern bool BarelyRepeater_PushSilence(IntPtr repeater, Int32 length);
@@ -1517,7 +1508,7 @@ namespace Barely {
       private static extern bool BarelyRepeater_SetStyle(IntPtr repeater, RepeaterStyle style);
 
       [DllImport(pluginName, EntryPoint = "BarelyRepeater_Start")]
-      private static extern bool BarelyRepeater_Start(IntPtr repeater, Int32 pitchOffset);
+      private static extern bool BarelyRepeater_Start(IntPtr repeater, double pitchOffset);
 
       [DllImport(pluginName, EntryPoint = "BarelyRepeater_Stop")]
       private static extern bool BarelyRepeater_Stop(IntPtr repeater);

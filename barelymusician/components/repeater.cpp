@@ -51,7 +51,7 @@ bool BarelyRepeater_Pop(BarelyRepeater* repeater) {
   return true;
 }
 
-bool BarelyRepeater_Push(BarelyRepeater* repeater, int32_t pitch, int32_t length) {
+bool BarelyRepeater_Push(BarelyRepeater* repeater, double pitch, int32_t length) {
   if (!repeater) return false;
 
   repeater->Push(pitch, static_cast<int>(length));
@@ -87,7 +87,7 @@ bool BarelyRepeater_SetStyle(BarelyRepeater* repeater, BarelyRepeaterStyle style
   return true;
 }
 
-bool BarelyRepeater_Start(BarelyRepeater* repeater, int32_t pitch_offset) {
+bool BarelyRepeater_Start(BarelyRepeater* repeater, double pitch_offset) {
   if (!repeater) return false;
 
   repeater->Start(pitch_offset);
@@ -116,7 +116,7 @@ Repeater::Repeater(MusicianPtr musician, int process_order) noexcept
             if (!pitches_[index_].first.has_value()) {
               return;
             }
-            const int pitch = *pitches_[index_].first + pitch_offset_;
+            const double pitch = *pitches_[index_].first + pitch_offset_;
             instrument_->SetNoteOn(pitch);
             performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
                                           static_cast<double>(length) * performer_.GetLoopLength());
@@ -147,7 +147,7 @@ void Repeater::Pop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Push(std::optional<int> pitch_or, int length) noexcept {
+void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
@@ -166,7 +166,7 @@ void Repeater::SetRate(double rate) noexcept {
 void Repeater::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Start(int pitch_offset) noexcept {
+void Repeater::Start(double pitch_offset) noexcept {
   if (IsPlaying()) {
     return;
   }

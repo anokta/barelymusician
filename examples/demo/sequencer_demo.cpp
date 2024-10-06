@@ -61,14 +61,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetNoteOnEvent(
-      [](int pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
+      [](double pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   Performer performer(musician);
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
-  const auto play_note_fn = [&](double duration, int pitch) {
+  const auto play_note_fn = [&](double duration, double pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
       performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
@@ -77,15 +77,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   };
 
   std::vector<std::pair<double, TaskDefinition::Callback>> score;
-  score.emplace_back(0.0, play_note_fn(1.0, 60));
-  score.emplace_back(1.0, play_note_fn(1.0, 62));
-  score.emplace_back(2.0, play_note_fn(1.0, 64));
-  score.emplace_back(3.0, play_note_fn(1.0, 65));
-  score.emplace_back(4.0, play_note_fn(1.0, 67));
-  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, 67));
-  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, 69));
-  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, 71));
-  score.emplace_back(6.0, play_note_fn(2.0, 72));
+  score.emplace_back(0.0, play_note_fn(1.0, 0.0));
+  score.emplace_back(1.0, play_note_fn(1.0, 2.0 / 12.0));
+  score.emplace_back(2.0, play_note_fn(1.0, 4.0 / 12.0));
+  score.emplace_back(3.0, play_note_fn(1.0, 5.0 / 12.0));
+  score.emplace_back(4.0, play_note_fn(1.0, 7.0 / 12.0));
+  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, 7.0 / 12.0));
+  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, 9.0 / 12.0));
+  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, 11.0 / 12.0));
+  score.emplace_back(6.0, play_note_fn(2.0, 1.0));
 
   std::unordered_map<int, Task> tasks;
   int index = 0;

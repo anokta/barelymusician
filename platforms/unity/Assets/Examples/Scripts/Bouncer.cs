@@ -15,7 +15,7 @@ namespace Barely {
       }
 
       private void OnCollisionEnter(Collision collision) {
-        int pitch = scale.GetPitch(_lastIndex++);
+        double pitch = scale.GetPitch(_lastIndex++);
         double intensity = (double)Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
         instrument.SetNoteOn(pitch, intensity);
         instrument.SetNoteOff(pitch);

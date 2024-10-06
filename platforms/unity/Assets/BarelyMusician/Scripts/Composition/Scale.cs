@@ -14,7 +14,7 @@ namespace Barely {
   struct ScaleDefinition {
     public IntPtr pitches;
     public Int32 pitchCount;
-    public Int32 rootPitch;
+    public double rootPitch;
     public Int32 mode;
   }
 
@@ -25,8 +25,7 @@ namespace Barely {
     public ScaleType type = ScaleType.CHROMATIC;
 
     /// Root pitch.
-    [Range(0, 127)]
-    public int rootPitch = 60;
+    public double rootPitch = 0.0;
 
     /// Mode.
     [Min(0)]
@@ -41,8 +40,8 @@ namespace Barely {
     ///
     /// @param degree Scale degree.
     /// @return Note pitch.
-    public int GetPitch(int degree) {
-      Int32 pitch = 0;
+    public double GetPitch(int degree) {
+      double pitch = 0.0;
       if (!BarelyScale_GetPitch(ref _definition, degree, ref pitch)) {
         Debug.LogError("Failed to get the scale note with a degree " + degree);
       }
@@ -70,10 +69,10 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyScale_GetPitch")]
     private static extern bool BarelyScale_GetPitch(ref ScaleDefinition definition, Int32 degree,
-                                                    ref Int32 outPitch);
+                                                    ref double outPitch);
 
     [DllImport(pluginName, EntryPoint = "Barely_GetScaleDefinition")]
-    private static extern bool Barely_GetScaleDefinition(ScaleType scaleType, Int32 rootPitch,
+    private static extern bool Barely_GetScaleDefinition(ScaleType scaleType, double rootPitch,
                                                          ref ScaleDefinition outDefinition);
   }
 }  // namespace Barely

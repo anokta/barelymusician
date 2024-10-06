@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: C4NaturalMinor
   m_EditorClassIdentifier: 
   type: 1
-  rootPitch: 60
+  rootPitch: 0
   mode: 6

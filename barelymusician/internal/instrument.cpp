@@ -24,7 +24,6 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
       set_note_control_callback_(definition.set_note_control_callback),
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
-      set_tuning_callback_(definition.set_tuning_callback),
       note_control_definitions_(
           definition.note_control_definitions,
           definition.note_control_definitions + definition.note_control_definition_count),
@@ -60,21 +59,23 @@ const Control* Instrument::GetControl(int id) const noexcept {
   return FindOrNull(control_map_, id);
 }
 
-Control* Instrument::GetNoteControl(int pitch, int id) noexcept {
+Control* Instrument::GetNoteControl(double pitch, int id) noexcept {
   if (auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
     return FindOrNull(*note_control_map, id);
   }
   return nullptr;
 }
 
-const Control* Instrument::GetNoteControl(int pitch, int id) const noexcept {
+const Control* Instrument::GetNoteControl(double pitch, int id) const noexcept {
   if (const auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
     return FindOrNull(*note_control_map, id);
   }
   return nullptr;
 }
 
-bool Instrument::IsNoteOn(int pitch) const noexcept { return note_control_maps_.contains(pitch); }
+bool Instrument::IsNoteOn(double pitch) const noexcept {
+  return note_control_maps_.contains(pitch);
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
@@ -124,13 +125,6 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
               if (set_note_on_callback_) {
                 set_note_on_callback_(&state_, note_on_message.pitch, note_on_message.intensity);
               }
-            },
-            [this](TuningMessage& tuning_message) noexcept {
-              if (set_tuning_callback_) {
-                tuning_or_ = std::move(tuning_message.tuning_or);
-                set_tuning_callback_(
-                    &state_, tuning_or_.has_value() ? &tuning_or_->GetDefinition() : nullptr);
-              }
             }},
         message->second);
   }
@@ -150,7 +144,7 @@ void Instrument::ResetAllControls() noexcept {
   }
 }
 
-bool Instrument::ResetAllNoteControls(int pitch) noexcept {
+bool Instrument::ResetAllNoteControls(double pitch) noexcept {
   if (auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
     for (auto& [id, note_control] : *note_control_map) {
       note_control.ResetValue();
@@ -181,7 +175,7 @@ void Instrument::SetNoteControlEvent(NoteControlEventDefinition definition,
   note_control_event_ = {definition, user_data};
 }
 
-void Instrument::SetNoteOff(int pitch) noexcept {
+void Instrument::SetNoteOff(double pitch) noexcept {
   if (note_control_maps_.erase(pitch) > 0) {
     note_off_event_.Process(pitch);
     message_queue_.Add(update_frame_, NoteOffMessage{pitch});
@@ -193,7 +187,7 @@ void Instrument::SetNoteOffEvent(NoteOffEventDefinition definition, void* user_d
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(int pitch, double intensity) noexcept {
+void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
   if (const auto [it, success] = note_control_maps_.try_emplace(
           pitch, BuildControlMap(note_control_definitions_.data(),
                                  static_cast<int>(note_control_definitions_.size()),
@@ -213,10 +207,6 @@ void Instrument::SetNoteOn(int pitch, double intensity) noexcept {
 
 void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept {
   note_on_event_ = {definition, user_data};
-}
-
-void Instrument::SetTuning(std::optional<Tuning> tuning_or) noexcept {
-  message_queue_.Add(update_frame_, TuningMessage{std::move(tuning_or)});
 }
 
 void Instrument::Update(int64_t update_frame) noexcept {

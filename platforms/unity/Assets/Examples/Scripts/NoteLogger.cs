@@ -22,20 +22,21 @@ namespace Barely {
       }
 
       private void OnControl(int id, double value) {
-        Debug.Log(instrument.name + ": Control(" + id + ", " + value.ToString("F2") + ")");
+        Debug.Log(instrument.name + ": Control(" + id + ", " + value.ToString("F1") + ")");
       }
 
-      private void OnNoteControl(int pitch, int id, double value) {
-        Debug.Log(instrument.name + ": NoteControl(" + pitch + ", " + id + ", " +
-                  value.ToString("F2") + ")");
+      private void OnNoteControl(double pitch, int id, double value) {
+        Debug.Log(instrument.name + ": NoteControl(" + pitch.ToString("F1") + ", " + id + ", " +
+                  value.ToString("F1") + ")");
       }
 
-      private void OnNoteOff(int pitch) {
-        Debug.Log(instrument.name + ": NoteOff(" + pitch + ")");
+      private void OnNoteOff(double pitch) {
+        Debug.Log(instrument.name + ": NoteOff(" + pitch.ToString("F1") + ")");
       }
 
-      private void OnNoteOn(int pitch, double intensity) {
-        Debug.Log(instrument.name + ": NoteOn(" + pitch + ", " + intensity.ToString("F1") + ")");
+      private void OnNoteOn(double pitch, double intensity) {
+        Debug.Log(instrument.name + ": NoteOn(" + pitch.ToString("F1") + ", " +
+                  intensity.ToString("F1") + ")");
       }
     }
   }  // namespace Examples

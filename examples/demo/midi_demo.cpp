@@ -46,8 +46,6 @@ constexpr double kInstrumentEnvelopeRelease = 0.2;
 constexpr int kInstrumentVoiceCount = 16;
 constexpr double kInstrumentGain = 1.0 / static_cast<double>(kInstrumentVoiceCount);
 
-constexpr double kMaxMidiVelocity = 127.0;
-
 // Midi file name.
 constexpr char kMidiFileName[] = "midi/sample.mid";
 
@@ -65,8 +63,8 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
     if (midi_event.isNoteOn()) {
       const double position = get_position_fn(midi_event.tick);
       const double duration = get_position_fn(midi_event.getTickDuration());
-      const int pitch = midi_event.getKeyNumber();
-      const double intensity = static_cast<double>(midi_event.getVelocity()) / kMaxMidiVelocity;
+      const double pitch = static_cast<double>(midi_event.getKeyNumber() - 60) / 12.0;
+      const double intensity = static_cast<double>(midi_event.getVelocity()) / 127.0;
       performer.ScheduleOneOffTask(
           [&instrument, pitch, intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
           position);
@@ -115,11 +113,11 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Set the instrument settings.
     const auto track_index = tracks.size() + 1;
-    instrument.SetNoteOnEvent([track_index](int pitch, double intensity) {
+    instrument.SetNoteOnEvent([track_index](double pitch, double intensity) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(" << pitch << ", " << intensity
                    << ")";
     });
-    instrument.SetNoteOffEvent([track_index](int pitch) {
+    instrument.SetNoteOffEvent([track_index](double pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
     });
     instrument.SetControl(SynthInstrument::Control::kGain, kInstrumentGain);

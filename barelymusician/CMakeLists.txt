@@ -20,7 +20,6 @@ target_link_libraries(
   barelymusician_internal_observable
   barelymusician_internal_performer
   barelymusician_internal_task
-  barelymusician_internal_tuning
 )
 
 add_library(

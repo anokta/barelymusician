@@ -12,7 +12,6 @@
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/message_queue.h"
-#include "barelymusician/internal/tuning.h"
 
 namespace barely::internal {
 
@@ -48,14 +47,14 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param id Note control identifier.
   /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] Control* GetNoteControl(int pitch, int id) noexcept;
-  [[nodiscard]] const Control* GetNoteControl(int pitch, int id) const noexcept;
+  [[nodiscard]] Control* GetNoteControl(double pitch, int id) noexcept;
+  [[nodiscard]] const Control* GetNoteControl(double pitch, int id) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
   /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(int pitch) const noexcept;
+  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
 
   /// Processes output samples.
   ///
@@ -75,7 +74,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return True if successful, false otherwise.
-  bool ResetAllNoteControls(int pitch) noexcept;
+  bool ResetAllNoteControls(double pitch) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -101,7 +100,7 @@ class Instrument {
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(int pitch) noexcept;
+  void SetNoteOff(double pitch) noexcept;
 
   /// Sets the note off event.
   ///
@@ -114,19 +113,13 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(int pitch, double intensity) noexcept;
+  void SetNoteOn(double pitch, double intensity) noexcept;
 
   /// Sets the note on event.
   ///
   /// @param definition Note on event definition.
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
-
-  /// Sets the tuning.
-  ///
-  /// @param tuning_or Optional tuning.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetTuning(std::optional<Tuning> tuning_or) noexcept;
 
   /// Updates the instrument.
   ///
@@ -135,13 +128,13 @@ class Instrument {
 
  private:
   // Note control event alias.
-  using NoteControlEvent = Event<NoteControlEventDefinition, int, int, double>;
+  using NoteControlEvent = Event<NoteControlEventDefinition, double, int, double>;
 
   // Note off event alias.
-  using NoteOffEvent = Event<NoteOffEventDefinition, int>;
+  using NoteOffEvent = Event<NoteOffEventDefinition, double>;
 
   // Note on event alias.
-  using NoteOnEvent = Event<NoteOnEventDefinition, int, double>;
+  using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
 
   // Destroy callback.
   const InstrumentDefinition::DestroyCallback destroy_callback_;
@@ -164,9 +157,6 @@ class Instrument {
   // Set note on callback.
   const InstrumentDefinition::SetNoteOnCallback set_note_on_callback_;
 
-  // Set tuning callback.
-  const InstrumentDefinition::SetTuningCallback set_tuning_callback_;
-
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;
 
@@ -174,7 +164,7 @@ class Instrument {
   ControlMap control_map_;
 
   // Map of note control maps by their pitches.
-  std::unordered_map<int, ControlMap> note_control_maps_;
+  std::unordered_map<double, ControlMap> note_control_maps_;
 
   // Control event.
   Control::Event control_event_;
@@ -196,9 +186,6 @@ class Instrument {
 
   // Data.
   std::vector<std::byte> data_;
-
-  // Optional tuning.
-  std::optional<Tuning> tuning_or_;
 
   // Message queue.
   MessageQueue message_queue_;

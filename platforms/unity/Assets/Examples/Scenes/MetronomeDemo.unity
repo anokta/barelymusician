@@ -436,8 +436,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beatCount: 3
-  barPitch: 69
-  beatPitch: 57
+  barPitch: 1
+  beatPitch: 0
   intensity: 1
   isLoggingToConsole: 1
   isTicking: 1

@@ -68,17 +68,15 @@ class SamplerInstrument : public CustomInstrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(int id, double value) noexcept final;
   void SetData(const void* data, int size) noexcept final;
-  void SetNoteControl(int /*pitch*/, int /*id*/, double /*value*/) noexcept final {}
-  void SetNoteOff(int pitch) noexcept final;
-  void SetNoteOn(int pitch, double intensity) noexcept final;
-  void SetTuning(const TuningDefinition& tuning) noexcept final;
+  void SetNoteControl(double /*pitch*/, int /*id*/, double /*value*/) noexcept final {}
+  void SetNoteOff(double pitch) noexcept final;
+  void SetNoteOn(double pitch, double intensity) noexcept final;
 
  private:
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;
   PolyphonicVoice<SamplerVoice> voice_;
-  int root_pitch_ = 60;
+  double root_pitch_ = 0.0;
   GainProcessor gain_processor_;
-  TuningDefinition tuning_;
 };
 
 }  // namespace barely

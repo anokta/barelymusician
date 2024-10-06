@@ -60,14 +60,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetNoteOnEvent(
-      [](int pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
+      [](double pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   std::vector<std::pair<double, double>> triggers;
   std::vector<Task> tasks;
 
   Performer performer(musician);
 
-  const ScaleDefinition scale = barely::GetScaleDefinition(ScaleType::kDiatonic, 60);
+  const ScaleDefinition scale = barely::GetScaleDefinition(ScaleType::kDiatonic);
 
   const auto play_note_fn = [&](int degree, double duration) {
     return [&instrument, &performer, duration, pitch = scale.GetPitch(degree)]() {

@@ -81,16 +81,16 @@ void PercussionInstrument::SetData(const void* data, [[maybe_unused]] int size) 
   pads_.resize(voice_count, Pad(frame_rate_));
   for (auto& pad : pads_) {
     // Pad data is sequentially aligned by pitch, frequency, length, and data.
-    pad.pitch = static_cast<int>(static_cast<double>(*data_double++));
-    const int frequency = static_cast<int>(static_cast<double>(*data_double++));
-    const int length = static_cast<int>(static_cast<double>(*data_double++));
+    pad.pitch = *data_double++;
+    const int frequency = static_cast<int>(*data_double++);
+    const int length = static_cast<int>(*data_double++);
     pad.voice.generator().SetData(data_double, frequency, length);
     pad.voice.envelope().SetRelease(release_);
     data_double += length;
   }
 }
 
-void PercussionInstrument::SetNoteOff(int32_t pitch) noexcept {
+void PercussionInstrument::SetNoteOff(double pitch) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
       pad.voice.Stop();
@@ -99,7 +99,7 @@ void PercussionInstrument::SetNoteOff(int32_t pitch) noexcept {
   }
 }
 
-void PercussionInstrument::SetNoteOn(int32_t pitch, double intensity) noexcept {
+void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
       pad.voice.set_gain(intensity);

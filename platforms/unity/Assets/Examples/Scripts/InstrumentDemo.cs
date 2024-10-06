@@ -9,12 +9,12 @@ namespace Barely {
       public Color color = Color.white;
 
       private const int N = 4;
-      private Dictionary<int, Vector2> _activeNotes = null;
+      private Dictionary<double, Vector2> _activeNotes = null;
       private float[,] _alphas = null;
       private float[,] _targetAlphas = null;
 
       private void OnEnable() {
-        _activeNotes = new Dictionary<int, Vector2>();
+        _activeNotes = new Dictionary<double, Vector2>();
         _alphas = new float[N, N];
         _targetAlphas = new float[N, N];
         controller.instrument.OnNoteOff += OnNoteOff;
@@ -42,7 +42,7 @@ namespace Barely {
         }
       }
 
-      private void OnNoteOff(int pitch) {
+      private void OnNoteOff(double pitch) {
         Vector2 value = Vector2.zero;
         if (_activeNotes.TryGetValue(pitch, out value)) {
           _targetAlphas[(int)value.x, (int)value.y] = 0.0f;
@@ -50,8 +50,8 @@ namespace Barely {
         }
       }
 
-      private void OnNoteOn(int pitch, double intensity) {
-        int i = pitch - 60;
+      private void OnNoteOn(double pitch, double intensity) {
+        int i = (int)(pitch * 12.0);
         int y = i / 4;
         int x = i - 4 * y;
         if (x < 0 || x >= N || y < 0 || y >= N) {

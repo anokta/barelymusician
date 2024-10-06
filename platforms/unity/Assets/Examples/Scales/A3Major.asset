@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: A3Major
   m_EditorClassIdentifier: 
   type: 1
-  rootPitch: 57
+  rootPitch: -0.25
   mode: 0

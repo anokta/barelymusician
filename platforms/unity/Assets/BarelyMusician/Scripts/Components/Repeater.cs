@@ -37,14 +37,14 @@ namespace Barely {
     ///
     /// @param pitchOr Note pitch or silence.
     /// @param length Note length in beats.
-    public void Push(int? pitchOr, int length = 1) {
+    public void Push(double? pitchOr, int length = 1) {
       Musician.Internal.Repeater_Push(_ptr, pitchOr, length);
     }
 
     /// Starts the repeater.
     ///
     /// @param pitchOffset Pitch offset.
-    public void Play(int pitchOffset = 0) {
+    public void Play(double pitchOffset = 0.0) {
       Musician.Internal.Repeater_Start(_ptr, pitchOffset);
     }
 

@@ -49,16 +49,16 @@ namespace Barely {
         Debug.LogWarning("Theremin does not implement OnSetData");
       }
 
-      public void OnSetNoteControl(int pitch, int id, double value) {
+      public void OnSetNoteControl(double pitch, int id, double value) {
         Debug.LogWarning("Theremin does not implement OnSetNoteControl");
       }
 
-      public void OnSetNoteOff(int pitch) {
+      public void OnSetNoteOff(double pitch) {
         _isOn = false;
         _targetAmplitude = 0.0;
       }
 
-      public void OnSetNoteOn(int pitch, double intensity) {
+      public void OnSetNoteOn(double pitch, double intensity) {
         _isOn = true;
         _phase = 0.0;
         _targetAmplitude = intensity;
@@ -84,7 +84,7 @@ namespace Barely {
       public Color color = Color.white;
 
       public void OnGUI() {
-        color.a = Mathf.Lerp(color.a, IsNoteOn(0) ? 1.0f : 0.0f, 8.0f * Time.deltaTime);
+        color.a = Mathf.Lerp(color.a, IsNoteOn(0.0) ? 1.0f : 0.0f, 8.0f * Time.deltaTime);
         GUI.color = color;
         float size = 0.05f * Mathf.Min(Screen.width, Screen.height);
         GUI.DrawTexture(new Rect(Input.mousePosition.x - 0.5f * size,
@@ -96,9 +96,9 @@ namespace Barely {
         double pitch = (double)Input.mousePosition.x / Screen.width;
         double amplitude = (double)Input.mousePosition.y / Screen.height;
         if (Input.GetMouseButtonDown(0)) {
-          SetNoteOn(0, amplitude);
+          SetNoteOn(0.0, amplitude);
         } else if (Input.GetMouseButtonUp(0)) {
-          SetNoteOff(0);
+          SetNoteOff(0.0);
         }
         SetControl(0, pitch);
         SetControl(1, amplitude);

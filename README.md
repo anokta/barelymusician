@@ -27,8 +27,8 @@ For background about this project, see the original research paper
 ```cpp
 // Import the core engine.
 #include "barelymusician/barelymusician.h"
-// Import the synth instrument.
-#include "barelymusician/instruments/synth_instrument.h"
+// Import the ultimate instrument.
+#include "barelymusician/instruments/ultimate_instrument.h"
 
 // Create a musician.
 barely::Musician musician(/*frame_rate=*/48000);
@@ -36,11 +36,11 @@ barely::Musician musician(/*frame_rate=*/48000);
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);
 
-// Create a synth instrument.
-barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
+// Create an instrument.
+barely::Instrument instrument(musician, barely::UltimateInstrument::GetDefinition());
 
 // Set the instrument gain to half.
-instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
+instrument.SetControl(barely::UltimateInstrument::Control::kGain, /*value=*/0.5);
 
 // Set an instrument note on.
 //

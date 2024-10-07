@@ -226,8 +226,8 @@ namespace Barely {
           case SamplerInstrument sampler:
             definition = BarelySamplerInstrument_GetDefinition();
             break;
-          case SynthInstrument synth:
-            definition = BarelySynthInstrument_GetDefinition();
+          case UltimateInstrument ultimate:
+            definition = BarelyUltimateInstrument_GetDefinition();
             break;
           case CustomInstrumentInterface custom:
             definition = custom.GetDefinition();
@@ -1520,8 +1520,8 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelySamplerInstrument_GetDefinition")]
       private static extern InstrumentDefinition BarelySamplerInstrument_GetDefinition();
 
-      [DllImport(pluginName, EntryPoint = "BarelySynthInstrument_GetDefinition")]
-      private static extern InstrumentDefinition BarelySynthInstrument_GetDefinition();
+      [DllImport(pluginName, EntryPoint = "BarelyUltimateInstrument_GetDefinition")]
+      private static extern InstrumentDefinition BarelyUltimateInstrument_GetDefinition();
     }
   }
 }  // namespace Barely

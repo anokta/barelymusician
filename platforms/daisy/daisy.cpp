@@ -1,13 +1,13 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/synth_instrument.h"
+#include "barelymusician/instruments/ultimate_instrument.h"
 #include "daisy_pod.h"
 
 using ::barely::Instrument;
 using ::barely::InstrumentPtr;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::SynthInstrument;
+using ::barely::UltimateInstrument;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
 using ::daisy::MidiMessageType;
@@ -42,7 +42,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
     osc_index = (osc_index + increment + kOscCount) % kOscCount;
-    instrument_ptr.SetControl(SynthInstrument::Control::kOscillatorType,
+    instrument_ptr.SetControl(UltimateInstrument::Control::kOscillatorType,
                               static_cast<OscillatorType>(osc_index));
   }
 
@@ -69,12 +69,12 @@ int main(void) {
   // Initialize the instrument.
   Musician musician(kFrameRate);
 
-  Instrument instrument(musician, SynthInstrument::GetDefinition());
-  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
+  Instrument instrument(musician, UltimateInstrument::GetDefinition());
+  instrument.SetControl(UltimateInstrument::Control::kGain, kGain);
+  instrument.SetControl(UltimateInstrument::Control::kOscillatorType, kOscillatorType);
+  instrument.SetControl(UltimateInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(UltimateInstrument::Control::kRelease, kRelease);
+  instrument.SetControl(UltimateInstrument::Control::kVoiceCount, kVoiceCount);
 
   instrument_ptr = instrument;
 

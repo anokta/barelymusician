@@ -13,8 +13,8 @@ namespace Barely {
     [InspectorName("Noise")] NOISE = 3,
   }
 
-  /// A representation of a simple polyphonic synthesizer instrument with an envelope.
-  public class SynthInstrument : Instrument {
+  /// A representation of an ultimate instrument to conquer 'em all!
+  public class UltimateInstrument : Instrument {
     /// Gain.
     [Range(0.0f, 1.0f)]
     public double Gain = 1.0;

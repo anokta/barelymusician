@@ -29,7 +29,7 @@ target_link_libraries(
   ${BARELYMUSICIAN_DAISY_TARGET} PUBLIC
   barelymusician
   barelymusician_oscillator
-  barelymusician_synth_instrument
+  barelymusician_ultimate_instrument
   daisy
 )
 target_link_options(

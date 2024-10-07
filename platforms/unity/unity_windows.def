@@ -78,4 +78,4 @@ EXPORTS
 
   BarelyPercussionInstrument_GetDefinition
   BarelySamplerInstrument_GetDefinition
-  BarelySynthInstrument_GetDefinition
+  BarelyUltimateInstrument_GetDefinition

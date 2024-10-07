@@ -11,7 +11,7 @@
 #include "MidiFile.h"
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/synth_instrument.h"
+#include "barelymusician/instruments/ultimate_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -24,7 +24,7 @@ using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
-using ::barely::SynthInstrument;
+using ::barely::UltimateInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -102,7 +102,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::pair<Instrument, Performer>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(Instrument(musician, SynthInstrument::GetDefinition()),
+    tracks.emplace_back(Instrument(musician, UltimateInstrument::GetDefinition()),
                         Performer(musician));
     auto& [instrument, performer] = tracks.back();
     // Build the score to perform.
@@ -120,11 +120,11 @@ int main(int /*argc*/, char* argv[]) {
     instrument.SetNoteOffEvent([track_index](double pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
     });
-    instrument.SetControl(SynthInstrument::Control::kGain, kInstrumentGain);
-    instrument.SetControl(SynthInstrument::Control::kOscillatorType, kInstrumentOscillatorType);
-    instrument.SetControl(SynthInstrument::Control::kAttack, kInstrumentEnvelopeAttack);
-    instrument.SetControl(SynthInstrument::Control::kRelease, kInstrumentEnvelopeRelease);
-    instrument.SetControl(SynthInstrument::Control::kVoiceCount, kInstrumentVoiceCount);
+    instrument.SetControl(UltimateInstrument::Control::kGain, kInstrumentGain);
+    instrument.SetControl(UltimateInstrument::Control::kOscillatorType, kInstrumentOscillatorType);
+    instrument.SetControl(UltimateInstrument::Control::kAttack, kInstrumentEnvelopeAttack);
+    instrument.SetControl(UltimateInstrument::Control::kRelease, kInstrumentEnvelopeRelease);
+    instrument.SetControl(UltimateInstrument::Control::kVoiceCount, kInstrumentVoiceCount);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 

@@ -34,10 +34,10 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician/instruments/synth_instrument.h"
+///   #include "barelymusician/instruments/ultimate_instrument.h"
 ///
 ///   // Create.
-///   barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
+///   barely::Instrument instrument(musician, barely::UltimateInstrument::GetDefinition());
 ///
 ///   // Set a note on.
 ///   //
@@ -51,7 +51,7 @@
 ///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
+///   instrument.SetControl(barely::UltimateInstrument::Control::kGain, /*value=*/0.5);
 ///
 ///   // Process.
 ///   //
@@ -118,11 +118,11 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician/instruments/synth_instrument.h"
+///   #include "barelymusician/instruments/ultimate_instrument.h"
 ///
 ///   // Create.
 ///   BarelyInstrument* instrument = nullptr;
-///   BarelyInstrument_Create(musician, BarelySynthInstrument_GetDefinition(), &instrument);
+///   BarelyInstrument_Create(musician, BarelyUltimateInstrument_GetDefinition(), &instrument);
 ///
 ///   // Set a note on.
 ///   //

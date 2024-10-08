@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instruments/sampler_instrument.h"
+#include "barelymusician/instruments/ultimate_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -22,7 +22,7 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::Musician;
-using ::barely::SamplerInstrument;
+using ::barely::UltimateInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -61,7 +61,8 @@ std::vector<double> GetSampleData(const std::string& file_path) {
   const auto& sample_data = sample_file.GetData();
 
   std::vector<double> data;
-  data.reserve(sample_data.size() + 1);
+  data.reserve(sample_data.size() + 2);
+  data.push_back(kRootPitch);
   data.push_back(frame_rate);
   data.insert(data.end(), sample_data.begin(), sample_data.end());
   return data;
@@ -87,13 +88,14 @@ int main(int /*argc*/, char* argv[]) {
 
   Musician musician(kFrameRate);
 
-  Instrument instrument(musician, SamplerInstrument::GetDefinition());
-  instrument.SetControl(SamplerInstrument::Control::kGain, kGain);
-  instrument.SetControl(SamplerInstrument::Control::kRootPitch, kRootPitch);
-  instrument.SetControl(SamplerInstrument::Control::kLoop, kLoop);
-  instrument.SetControl(SamplerInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SamplerInstrument::Control::kRelease, kRelease);
-  instrument.SetControl(SamplerInstrument::Control::kVoiceCount, kVoiceCount);
+  Instrument instrument(musician, UltimateInstrument::GetDefinition());
+  instrument.SetControl(UltimateInstrument::Control::kGain, kGain);
+  instrument.SetControl(UltimateInstrument::Control::kOscillatorOn, false);
+  instrument.SetControl(UltimateInstrument::Control::kSamplePlayerOn, true);
+  instrument.SetControl(UltimateInstrument::Control::kSamplePlayerLoop, kLoop);
+  instrument.SetControl(UltimateInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(UltimateInstrument::Control::kRelease, kRelease);
+  instrument.SetControl(UltimateInstrument::Control::kVoiceCount, kVoiceCount);
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 

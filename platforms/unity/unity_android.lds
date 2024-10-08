@@ -76,7 +76,6 @@ VERS_1.0 {
     Barely_GetScaleDefinition;
 
     BarelyPercussionInstrument_GetDefinition;
-    BarelySamplerInstrument_GetDefinition;
     BarelyUltimateInstrument_GetDefinition;
 
   local:

@@ -428,7 +428,6 @@ MonoBehaviour:
   instrument: {fileID: 1737834380}
   arpeggiator: {fileID: 0}
   repeater: {fileID: 0}
-  scale: {fileID: 11400000, guid: 36cd54420cf4e3043978899564b2ec79, type: 2}
   octaveOffset: 0
   noteIntensity: 1
   repeaterNoteLength: 1
@@ -441,7 +440,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1737834378}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e069298ae6f8da49b94b3567a4b8739, type: 3}
+  m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   OnControlEvent:
@@ -456,15 +455,16 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   Gain: 1
-  RootNote: 440
-  Loop: 1
+  VoiceCount: 8
+  OscillatorType: 4
+  Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
+  SampleRootPitch: 0
+  SampleLoop: 1
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0.07500000298023224
-  VoiceCount: 8
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0

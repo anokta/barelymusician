@@ -95,7 +95,7 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   sampler_demo
   barelymusician
-  barelymusician_sampler_instrument
+  barelymusician_ultimate_instrument
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
   barelymusician_examples_input_manager

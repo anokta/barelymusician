@@ -221,12 +221,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   Gain: 0.20000000298023224
+  VoiceCount: 8
   OscillatorType: 2
+  Sample: {fileID: 0}
+  SampleRootPitch: 0
+  SampleLoop: 0
   Attack: 0.05000000074505806
   Decay: 0
   Sustain: 0.800000011920929
   Release: 0.5
-  VoiceCount: 8
 --- !u!82 &332735188
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1016,12 +1019,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   Gain: 0.25
+  VoiceCount: 8
   OscillatorType: 0
+  Sample: {fileID: 0}
+  SampleRootPitch: 0
+  SampleLoop: 0
   Attack: 0.10000000149011612
   Decay: 0
   Sustain: 1
   Release: 0.5
-  VoiceCount: 8
 --- !u!82 &1886020160
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1342,12 +1348,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   Gain: 0.25
+  VoiceCount: 8
   OscillatorType: 1
+  Sample: {fileID: 0}
+  SampleRootPitch: 0
+  SampleLoop: 0
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0.05000000074505806
-  VoiceCount: 8
 --- !u!82 &2031085266
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1470,7 +1479,7 @@ GameObject:
   - component: {fileID: 2110623108}
   - component: {fileID: 2110623107}
   - component: {fileID: 2110623105}
-  - component: {fileID: 2110623104}
+  - component: {fileID: 2110623103}
   - component: {fileID: 2110623102}
   - component: {fileID: 2110623101}
   m_Layer: 0
@@ -1492,7 +1501,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec1d1448810202a4abd6aaf66d4a9235, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  instrument: {fileID: 2110623104}
+  instrument: {fileID: 2110623103}
   loop: 1
   loopLength: 8
   playOnAwake: 1
@@ -1529,9 +1538,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fbb0399be05119448c76a51e0b957fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetInstrument: {fileID: 2110623104}
+  targetInstrument: {fileID: 2110623103}
   noteOnColor: {r: 0.7294118, g: 1, b: 0.7882353, a: 1}
---- !u!114 &2110623104
+--- !u!114 &2110623103
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1540,7 +1549,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2110623100}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e069298ae6f8da49b94b3567a4b8739, type: 3}
+  m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   OnControlEvent:
@@ -1555,15 +1564,16 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   Gain: 1
-  RootPitch: 0.75
-  Loop: 1
+  VoiceCount: 8
+  OscillatorType: 4
+  Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
+  SampleRootPitch: 0.75
+  SampleLoop: 0
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0.07500000298023224
-  VoiceCount: 8
 --- !u!82 &2110623105
 AudioSource:
   m_ObjectHideFlags: 0

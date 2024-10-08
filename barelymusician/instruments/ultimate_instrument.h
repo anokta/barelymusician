@@ -23,6 +23,7 @@ BARELY_EXPORT BarelyInstrumentDefinition BarelyUltimateInstrument_GetDefinition(
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
+#include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/instruments/custom_instrument.h"
 
 namespace barely {
@@ -34,18 +35,26 @@ class UltimateInstrument : public CustomInstrument {
   enum class Control : int32_t {
     /// Gain.
     kGain = 0,
-    /// Oscillator type.
-    kOscillatorType = 1,
-    /// Envelope attack.
-    kAttack = 2,
-    /// Envelope decay.
-    kDecay = 3,
-    /// Envelope sustain.
-    kSustain = 4,
-    /// Envelope release.
-    kRelease = 5,
     /// Number of voices.
-    kVoiceCount = 6,
+    kVoiceCount,
+    /// Oscillator on.
+    // TODO(#139): This could be replaced by a mix value between the oscillator and sample playback.
+    kOscillatorOn,
+    /// Oscillator type.
+    kOscillatorType,
+    /// Sample player on.
+    kSamplePlayerOn,
+    /// Sample player loop.
+    // TODO(#139): This could be replaced by `SamplePlaybackMode` with sustained and looped modes.
+    kSamplePlayerLoop,
+    /// Envelope attack.
+    kAttack,
+    /// Envelope decay.
+    kDecay,
+    /// Envelope sustain.
+    kSustain,
+    /// Envelope release.
+    kRelease,
     /// Number of controls.
     kCount,
   };
@@ -65,14 +74,20 @@ class UltimateInstrument : public CustomInstrument {
                int output_frame_count) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(int id, double value) noexcept final;
-  void SetData(const void* /*data*/, int /*size*/) noexcept final {}
+  void SetData(const void* data, int size) noexcept final;
   void SetNoteControl(double /*pitch*/, int /*id*/, double /*value*/) noexcept final {}
   void SetNoteOff(double pitch) noexcept final;
   void SetNoteOn(double pitch, double intensity) noexcept final;
 
  private:
-  using UltimateVoice = EnvelopedVoice<Oscillator>;
-  PolyphonicVoice<UltimateVoice> voice_;
+  // TODO(#139): These should share the same voice type.
+  using OscillatorVoice = EnvelopedVoice<Oscillator>;
+  using SamplePlayerVoice = EnvelopedVoice<SamplePlayer>;
+  bool oscillator_on_ = false;
+  PolyphonicVoice<OscillatorVoice> oscillator_voice_;
+  bool sample_player_on_ = false;
+  double sample_player_root_pitch_ = 0.0;
+  PolyphonicVoice<SamplePlayerVoice> sample_player_voice_;
   GainProcessor gain_processor_;
 };
 

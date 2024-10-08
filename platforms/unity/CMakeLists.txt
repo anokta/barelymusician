@@ -12,7 +12,6 @@ target_link_libraries(
   barelymusician_arpeggiator
   barelymusician_repeater
   barelymusician_scale
-  barelymusician_percussion_instrument
   barelymusician_ultimate_instrument
 )
 if(MSVC)

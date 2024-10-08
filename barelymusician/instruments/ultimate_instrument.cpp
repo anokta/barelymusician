@@ -32,10 +32,8 @@ InstrumentDefinition UltimateInstrument::GetDefinition() noexcept {
           // Oscillator type.
           ControlDefinition{Control::kOscillatorType, static_cast<double>(OscillatorType::kSine),
                             0.0, static_cast<double>(OscillatorType::kNoise)},
-          // Sample player on.
-          ControlDefinition{Control::kSamplePlayerOn, false},
           // Sample player loop.
-          ControlDefinition{Control::kSamplePlayerLoop, true},
+          ControlDefinition{Control::kSamplePlayerLoop, false},
           // Attack.
           ControlDefinition{Control::kAttack, 0.05, 0.0, 60.0},
           // Decay.
@@ -50,17 +48,17 @@ InstrumentDefinition UltimateInstrument::GetDefinition() noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 UltimateInstrument::UltimateInstrument(int frame_rate) noexcept
-    : oscillator_voice_(OscillatorVoice(frame_rate), kMaxVoiceCount),
-      sample_player_voice_(SamplePlayerVoice(frame_rate), kMaxVoiceCount),
-      gain_processor_(frame_rate) {}
+    : frame_rate_(frame_rate),
+      oscillator_voice_(OscillatorVoice(frame_rate_), kMaxVoiceCount),
+      gain_processor_(frame_rate_) {}
 
 void UltimateInstrument::Process(double* output_samples, int output_channel_count,
                                  int output_frame_count) noexcept {
   for (int frame = 0; frame < output_frame_count; ++frame) {
-    const double oscillator_sample = oscillator_voice_.Next(0);
-    const double sample_player_sample = sample_player_voice_.Next(0);
-    const double mono_sample = (oscillator_on_ ? oscillator_sample : 0.0) +
-                               (sample_player_on_ ? sample_player_sample : 0.0);
+    double mono_sample = (oscillator_on_ ? oscillator_voice_.Next(0) : 0.0);
+    for (auto& sampler : samplers_) {
+      mono_sample += sampler.voice.Next(0);
+    }
     for (int channel = 0; channel < output_channel_count; ++channel) {
       output_samples[output_channel_count * frame + channel] = mono_sample;
     }
@@ -75,8 +73,11 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
       gain_processor_.SetGain(value);
       break;
     case Control::kVoiceCount:
+      voice_count_ = static_cast<int>(value);
       oscillator_voice_.Resize(static_cast<int>(value));
-      sample_player_voice_.Resize(static_cast<int>(value));
+      for (auto& sampler : samplers_) {
+        sampler.voice.Resize(static_cast<int>(value));
+      }
       break;
     case Control::kOscillatorOn:
       oscillator_on_ = static_cast<bool>(value);
@@ -86,37 +87,49 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
         voice->generator().SetType(static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
-    case Control::kSamplePlayerOn:
-      sample_player_on_ = static_cast<bool>(value);
-      break;
     case Control::kSamplePlayerLoop:
-      sample_player_voice_.Update([value](SamplePlayerVoice* voice) noexcept {
-        voice->generator().SetLoop(static_cast<bool>(value));
-      });
+      sampler_loop_ = value;
+      for (auto& sampler : samplers_) {
+        sampler.voice.Update([value](Sampler::Voice* voice) noexcept {
+          voice->generator().SetLoop(static_cast<bool>(value));
+        });
+      }
       break;
     case Control::kAttack:
+      attack_ = value;
       oscillator_voice_.Update(
           [value](OscillatorVoice* voice) noexcept { voice->envelope().SetAttack(value); });
-      sample_player_voice_.Update(
-          [value](SamplePlayerVoice* voice) noexcept { voice->envelope().SetAttack(value); });
+      for (auto& sampler : samplers_) {
+        sampler.voice.Update(
+            [value](Sampler::Voice* voice) noexcept { voice->envelope().SetAttack(value); });
+      }
       break;
     case Control::kDecay:
+      decay_ = value;
       oscillator_voice_.Update(
           [value](OscillatorVoice* voice) noexcept { voice->envelope().SetDecay(value); });
-      sample_player_voice_.Update(
-          [value](SamplePlayerVoice* voice) noexcept { voice->envelope().SetDecay(value); });
+      for (auto& sampler : samplers_) {
+        sampler.voice.Update(
+            [value](Sampler::Voice* voice) noexcept { voice->envelope().SetDecay(value); });
+      }
       break;
     case Control::kSustain:
+      sustain_ = value;
       oscillator_voice_.Update(
           [value](OscillatorVoice* voice) noexcept { voice->envelope().SetSustain(value); });
-      sample_player_voice_.Update(
-          [value](SamplePlayerVoice* voice) noexcept { voice->envelope().SetSustain(value); });
+      for (auto& sampler : samplers_) {
+        sampler.voice.Update(
+            [value](Sampler::Voice* voice) noexcept { voice->envelope().SetSustain(value); });
+      }
       break;
     case Control::kRelease:
+      release_ = value;
       oscillator_voice_.Update(
           [value](OscillatorVoice* voice) noexcept { voice->envelope().SetRelease(value); });
-      sample_player_voice_.Update(
-          [value](SamplePlayerVoice* voice) noexcept { voice->envelope().SetRelease(value); });
+      for (auto& sampler : samplers_) {
+        sampler.voice.Update(
+            [value](Sampler::Voice* voice) noexcept { voice->envelope().SetRelease(value); });
+      }
       break;
     default:
       assert(false);
@@ -126,18 +139,37 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
 
 void UltimateInstrument::SetData(const void* data, int size) noexcept {
   const double* data_double = static_cast<const double*>(data);
-  sample_player_root_pitch_ = size > 0 ? *data_double++ : 0.0;
-  const int frame_rate = size > 0 ? static_cast<int>(*data_double++) : 0;
-  const double* sample_data = size > 0 ? data_double : nullptr;
-  const int length = size > 0 ? size / static_cast<int>(sizeof(double)) - 2 : 0;
-  sample_player_voice_.Update([sample_data, frame_rate, length](SamplePlayerVoice* voice) noexcept {
-    voice->generator().SetData(sample_data, frame_rate, length);
-  });
+  if (data_double == nullptr || size == 0) {
+    samplers_.clear();
+    return;
+  }
+  const int sampler_count = static_cast<int>(*data_double++);
+  samplers_.resize(sampler_count, Sampler(frame_rate_));
+  for (auto& sampler : samplers_) {
+    // Sampler data is sequentially aligned by pitch, frequency, length, and data.
+    sampler.pitch = *data_double++;
+    const int frequency = static_cast<int>(*data_double++);
+    const int length = static_cast<int>(*data_double++);
+    sampler.voice.Resize(voice_count_);
+    sampler.voice.Update([&](Sampler::Voice* voice) noexcept {
+      voice->generator().SetData(data_double, frequency, length);
+      voice->generator().SetLoop(sampler_loop_);
+      voice->envelope().SetAttack(attack_);
+      voice->envelope().SetDecay(decay_);
+      voice->envelope().SetSustain(sustain_);
+      voice->envelope().SetRelease(release_);
+    });
+    data_double += length;
+  }
 }
 
 void UltimateInstrument::SetNoteOff(double pitch) noexcept {
   oscillator_voice_.Stop(pitch);
-  sample_player_voice_.Stop(pitch);
+  for (auto& sampler : samplers_) {
+    if (samplers_.size() == 1 || sampler.pitch == pitch) {
+      sampler.voice.Stop(pitch);
+    }
+  }
 }
 
 void UltimateInstrument::SetNoteOn(double pitch, double intensity) noexcept {
@@ -146,12 +178,26 @@ void UltimateInstrument::SetNoteOn(double pitch, double intensity) noexcept {
                             voice->generator().SetFrequency(frequency);
                             voice->set_gain(intensity);
                           });
-  sample_player_voice_.Start(pitch,
-                             [speed = GetFrequency(pitch) / GetFrequency(sample_player_root_pitch_),
-                              intensity](SamplePlayerVoice* voice) {
-                               voice->generator().SetSpeed(speed);
-                               voice->set_gain(intensity);
-                             });
+  // TODO(#139): Refactor this to make the percussion vs pitched sample distinction more robust.
+  if (samplers_.size() == 1) {
+    samplers_.front().voice.Start(
+        pitch, [speed = GetFrequency(pitch) / GetFrequency(samplers_.front().pitch),
+                intensity](Sampler::Voice* voice) {
+          voice->generator().SetSpeed(speed);
+          voice->set_gain(intensity);
+        });
+  } else {
+    for (auto& sampler : samplers_) {
+      if (sampler.pitch == pitch) {
+        sampler.voice.Start(pitch,
+                            [intensity](Sampler::Voice* voice) { voice->set_gain(intensity); });
+        break;
+      }
+    }
+  }
 }
+
+UltimateInstrument::Sampler::Sampler(int frame_rate) noexcept
+    : voice(Sampler::Voice(frame_rate), kMaxVoiceCount) {}
 
 }  // namespace barely

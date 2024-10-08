@@ -220,9 +220,6 @@ namespace Barely {
         }
         InstrumentDefinition definition;
         switch (instrument) {
-          case PercussionInstrument percussion:
-            definition = BarelyPercussionInstrument_GetDefinition();
-            break;
           case UltimateInstrument ultimate:
             definition = BarelyUltimateInstrument_GetDefinition();
             break;
@@ -1511,9 +1508,6 @@ namespace Barely {
       private static extern bool BarelyRepeater_Stop(IntPtr repeater);
 
       // Instruments.
-      [DllImport(pluginName, EntryPoint = "BarelyPercussionInstrument_GetDefinition")]
-      private static extern InstrumentDefinition BarelyPercussionInstrument_GetDefinition();
-
       [DllImport(pluginName, EntryPoint = "BarelyUltimateInstrument_GetDefinition")]
       private static extern InstrumentDefinition BarelyUltimateInstrument_GetDefinition();
     }

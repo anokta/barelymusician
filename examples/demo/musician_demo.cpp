@@ -17,7 +17,6 @@
 #include "barelymusician/composition/duration.h"
 #include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/percussion_instrument.h"
 #include "barelymusician/instruments/ultimate_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -32,7 +31,6 @@ using ::barely::Instrument;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::PercussionInstrument;
 using ::barely::Performer;
 using ::barely::Random;
 using ::barely::ScaleDefinition;
@@ -261,9 +259,13 @@ int main(int /*argc*/, char* argv[]) {
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.emplace_back(musician, PercussionInstrument::GetDefinition());
+  instruments.emplace_back(musician, UltimateInstrument::GetDefinition());
   auto& percussion = instruments.back();
-  percussion.SetControl(PercussionInstrument::Control::kGain, 0.25);
+  percussion.SetControl(UltimateInstrument::Control::kGain, 0.25);
+  percussion.SetControl(UltimateInstrument::Control::kAttack, 0.0);
+  percussion.SetControl(UltimateInstrument::Control::kRelease, 0.1);
+  percussion.SetControl(UltimateInstrument::Control::kVoiceCount, 1);
+  percussion.SetControl(UltimateInstrument::Control::kOscillatorOn, false);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::unordered_map<double, std::string>& percussion_map) {

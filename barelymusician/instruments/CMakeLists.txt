@@ -8,23 +8,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_percussion_instrument
-  percussion_instrument.cpp
-  percussion_instrument.h
-)
-target_compile_definitions(
-  barelymusician_percussion_instrument
-  PUBLIC BARELYMUSICIAN_EXPORTS
-)
-target_link_libraries(
-  barelymusician_percussion_instrument
-  barelymusician_custom_instrument
-  barelymusician_enveloped_voice
-  barelymusician_gain_processor
-  barelymusician_sample_player
-)
-
-add_library(
   barelymusician_ultimate_instrument
   ultimate_instrument.cpp
   ultimate_instrument.h

@@ -42,8 +42,6 @@ class UltimateInstrument : public CustomInstrument {
     kOscillatorOn,
     /// Oscillator type.
     kOscillatorType,
-    /// Sample player on.
-    kSamplePlayerOn,
     /// Sample player loop.
     // TODO(#139): This could be replaced by `SamplePlaybackMode` with sustained and looped modes.
     kSamplePlayerLoop,
@@ -82,12 +80,22 @@ class UltimateInstrument : public CustomInstrument {
  private:
   // TODO(#139): These should share the same voice type.
   using OscillatorVoice = EnvelopedVoice<Oscillator>;
-  using SamplePlayerVoice = EnvelopedVoice<SamplePlayer>;
+  struct Sampler {
+    using Voice = EnvelopedVoice<SamplePlayer>;
+    explicit Sampler(int frame_rate) noexcept;
+    double pitch = 0.0;
+    PolyphonicVoice<Voice> voice;
+  };
+  int frame_rate_ = 0;
   bool oscillator_on_ = false;
   PolyphonicVoice<OscillatorVoice> oscillator_voice_;
-  bool sample_player_on_ = false;
-  double sample_player_root_pitch_ = 0.0;
-  PolyphonicVoice<SamplePlayerVoice> sample_player_voice_;
+  std::vector<Sampler> samplers_;
+  int voice_count_ = 0;
+  double attack_ = 0.0;
+  double decay_ = 0.0;
+  double sustain_ = 1.0;
+  double release_ = 0.0;
+  bool sampler_loop_ = false;
   GainProcessor gain_processor_;
 };
 

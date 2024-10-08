@@ -61,9 +61,11 @@ std::vector<double> GetSampleData(const std::string& file_path) {
   const auto& sample_data = sample_file.GetData();
 
   std::vector<double> data;
-  data.reserve(sample_data.size() + 2);
+  data.reserve(sample_data.size() + 4);
+  data.push_back(1);
   data.push_back(kRootPitch);
   data.push_back(frame_rate);
+  data.push_back(sample_data.size());
   data.insert(data.end(), sample_data.begin(), sample_data.end());
   return data;
 }
@@ -91,7 +93,6 @@ int main(int /*argc*/, char* argv[]) {
   Instrument instrument(musician, UltimateInstrument::GetDefinition());
   instrument.SetControl(UltimateInstrument::Control::kGain, kGain);
   instrument.SetControl(UltimateInstrument::Control::kOscillatorOn, false);
-  instrument.SetControl(UltimateInstrument::Control::kSamplePlayerOn, true);
   instrument.SetControl(UltimateInstrument::Control::kSamplePlayerLoop, kLoop);
   instrument.SetControl(UltimateInstrument::Control::kAttack, kAttack);
   instrument.SetControl(UltimateInstrument::Control::kRelease, kRelease);

@@ -458,9 +458,10 @@ MonoBehaviour:
   Gain: 1
   VoiceCount: 8
   OscillatorType: 4
-  Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  SampleRootPitch: 0
-  SampleLoop: 1
+  Samplers:
+  - Pitch: 0
+    Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
+  SamplerLoop: 1
   Attack: 0
   Decay: 0
   Sustain: 1

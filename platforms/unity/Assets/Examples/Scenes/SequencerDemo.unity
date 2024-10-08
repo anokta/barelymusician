@@ -223,9 +223,8 @@ MonoBehaviour:
   Gain: 0.20000000298023224
   VoiceCount: 8
   OscillatorType: 2
-  Sample: {fileID: 0}
-  SampleRootPitch: 0
-  SampleLoop: 0
+  Samplers: []
+  SamplerLoop: 0
   Attack: 0.05000000074505806
   Decay: 0
   Sustain: 0.800000011920929
@@ -714,7 +713,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1737834378}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bbb9301535068f43b71fd6d9e1f57f8, type: 3}
+  m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   OnControlEvent:
@@ -729,9 +728,10 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 0.5
-  PadRelease: 1
-  Pads:
+  Gain: 1
+  VoiceCount: 1
+  OscillatorType: 4
+  Samplers:
   - Pitch: 0
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
   - Pitch: 2
@@ -740,6 +740,11 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - Pitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
+  SamplerLoop: 0
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 1
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1021,9 +1026,8 @@ MonoBehaviour:
   Gain: 0.25
   VoiceCount: 8
   OscillatorType: 0
-  Sample: {fileID: 0}
-  SampleRootPitch: 0
-  SampleLoop: 0
+  Samplers: []
+  SamplerLoop: 0
   Attack: 0.10000000149011612
   Decay: 0
   Sustain: 1
@@ -1350,9 +1354,8 @@ MonoBehaviour:
   Gain: 0.25
   VoiceCount: 8
   OscillatorType: 1
-  Sample: {fileID: 0}
-  SampleRootPitch: 0
-  SampleLoop: 0
+  Samplers: []
+  SamplerLoop: 0
   Attack: 0
   Decay: 0
   Sustain: 1
@@ -1567,9 +1570,10 @@ MonoBehaviour:
   Gain: 1
   VoiceCount: 8
   OscillatorType: 4
-  Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  SampleRootPitch: 0.75
-  SampleLoop: 0
+  Samplers:
+  - Pitch: 9
+    Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
+  SamplerLoop: 0
   Attack: 0
   Decay: 0
   Sustain: 1

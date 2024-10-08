@@ -70,7 +70,6 @@ add_barelymusician_demo(
   barelymusician_duration
   barelymusician_scale
   barelymusician_oscillator
-  barelymusician_percussion_instrument
   barelymusician_ultimate_instrument
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output

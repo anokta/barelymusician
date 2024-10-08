@@ -76,5 +76,4 @@ EXPORTS
   BarelyScale_GetPitch
   Barely_GetScaleDefinition
 
-  BarelyPercussionInstrument_GetDefinition
   BarelyUltimateInstrument_GetDefinition

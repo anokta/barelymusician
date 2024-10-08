@@ -59,7 +59,7 @@ barely::Performer performer(musician);
 performer.SetLooping(/*is_looping=*/true);
 
 // Create a looping task that plays an instrument note every beat.
-Task task(
+barely::Task task(
     performer,
     [&]() {
       // Set an instrument note on.

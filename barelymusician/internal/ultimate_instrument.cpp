@@ -1,4 +1,4 @@
-#include "barelymusician/instruments/ultimate_instrument.h"
+#include "barelymusician/internal/ultimate_instrument.h"
 
 #include <array>
 #include <cassert>
@@ -6,48 +6,24 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/custom_instrument.h"
 
-BarelyInstrumentDefinition BarelyUltimateInstrument_GetDefinition() {
-  return barely::UltimateInstrument::GetDefinition();
-}
-
-namespace barely {
+namespace barely::internal {
 
 namespace {
 
 // Maximum number of voices allowed to be set.
-constexpr int kMaxVoiceCount = 64;
+constexpr int kMaxVoiceCount = 32;
+
+// Returns the frequency of a given pitch.
+//
+// @param pitch Note pitch.
+// @return Note frequency.
+double GetFrequency(double pitch) noexcept {
+  static constexpr double kC4Frequency = 261.626;
+  return kC4Frequency * std::pow(2.0, pitch);
+}
 
 }  // namespace
-
-InstrumentDefinition UltimateInstrument::GetDefinition() noexcept {
-  static const std::array<ControlDefinition, static_cast<int>(Control::kCount)>
-      control_definitions = {
-          // Gain.
-          ControlDefinition{Control::kGain, 1.0, 0.0, 1.0},
-          // Number of voices.
-          ControlDefinition{Control::kVoiceCount, 8, 1, kMaxVoiceCount},
-          // Oscillator on.
-          ControlDefinition{Control::kOscillatorOn, true},
-          // Oscillator type.
-          ControlDefinition{Control::kOscillatorType, static_cast<double>(OscillatorType::kSine),
-                            0.0, static_cast<double>(OscillatorType::kNoise)},
-          // Sample player loop.
-          ControlDefinition{Control::kSamplePlayerLoop, false},
-          // Attack.
-          ControlDefinition{Control::kAttack, 0.05, 0.0, 60.0},
-          // Decay.
-          ControlDefinition{Control::kDecay, 0.0, 0.0, 60.0},
-          // Sustain.
-          ControlDefinition{Control::kSustain, 1.0, 0.0, 1.0},
-          // Release.
-          ControlDefinition{Control::kRelease, 0.25, 0.0, 60.0},
-          // Pitch shift.
-          ControlDefinition{Control::kPitchShift, 0.0},
-      };
-  return CustomInstrument::GetDefinition<UltimateInstrument>(control_definitions, {});
-}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 UltimateInstrument::UltimateInstrument(int frame_rate) noexcept
@@ -71,26 +47,26 @@ void UltimateInstrument::Process(double* output_samples, int output_channel_coun
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void UltimateInstrument::SetControl(int id, double value) noexcept {
-  switch (static_cast<Control>(id)) {
-    case Control::kGain:
+  switch (static_cast<InstrumentControl>(id)) {
+    case InstrumentControl::kGain:
       gain_processor_.SetGain(value);
       break;
-    case Control::kVoiceCount:
+    case InstrumentControl::kVoiceCount:
       voice_count_ = static_cast<int>(value);
       oscillator_voice_.Resize(static_cast<int>(value));
       for (auto& sampler : samplers_) {
         sampler.voice.Resize(static_cast<int>(value));
       }
       break;
-    case Control::kOscillatorOn:
+    case InstrumentControl::kOscillatorOn:
       oscillator_on_ = static_cast<bool>(value);
       break;
-    case Control::kOscillatorType:
+    case InstrumentControl::kOscillatorType:
       oscillator_voice_.Update([value](OscillatorVoice* voice) noexcept {
         voice->generator().SetType(static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
-    case Control::kSamplePlayerLoop:
+    case InstrumentControl::kSamplePlayerLoop:
       sampler_loop_ = value;
       for (auto& sampler : samplers_) {
         sampler.voice.Update([value](Sampler::Voice* voice) noexcept {
@@ -98,7 +74,7 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
         });
       }
       break;
-    case Control::kAttack:
+    case InstrumentControl::kAttack:
       attack_ = value;
       oscillator_voice_.Update(
           [value](OscillatorVoice* voice) noexcept { voice->envelope().SetAttack(value); });
@@ -107,7 +83,7 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
             [value](Sampler::Voice* voice) noexcept { voice->envelope().SetAttack(value); });
       }
       break;
-    case Control::kDecay:
+    case InstrumentControl::kDecay:
       decay_ = value;
       oscillator_voice_.Update(
           [value](OscillatorVoice* voice) noexcept { voice->envelope().SetDecay(value); });
@@ -116,7 +92,7 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
             [value](Sampler::Voice* voice) noexcept { voice->envelope().SetDecay(value); });
       }
       break;
-    case Control::kSustain:
+    case InstrumentControl::kSustain:
       sustain_ = value;
       oscillator_voice_.Update(
           [value](OscillatorVoice* voice) noexcept { voice->envelope().SetSustain(value); });
@@ -125,7 +101,7 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
             [value](Sampler::Voice* voice) noexcept { voice->envelope().SetSustain(value); });
       }
       break;
-    case Control::kRelease:
+    case InstrumentControl::kRelease:
       release_ = value;
       oscillator_voice_.Update(
           [value](OscillatorVoice* voice) noexcept { voice->envelope().SetRelease(value); });
@@ -134,7 +110,7 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
             [value](Sampler::Voice* voice) noexcept { voice->envelope().SetRelease(value); });
       }
       break;
-    case Control::kPitchShift:
+    case InstrumentControl::kPitchShift:
       // TODO(#139): Simplify pitch shift.
       if (const double pitch_offset = value - pitch_shift_; pitch_offset != 0.0) {
         pitch_shift_ = value;
@@ -222,4 +198,4 @@ void UltimateInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 UltimateInstrument::Sampler::Sampler(int frame_rate) noexcept
     : voice(Sampler::Voice(frame_rate), kMaxVoiceCount) {}
 
-}  // namespace barely
+}  // namespace barely::internal

@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instruments/ultimate_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -21,8 +20,8 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentControl;
 using ::barely::Musician;
-using ::barely::UltimateInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -90,13 +89,13 @@ int main(int /*argc*/, char* argv[]) {
 
   Musician musician(kFrameRate);
 
-  Instrument instrument(musician, UltimateInstrument::GetDefinition());
-  instrument.SetControl(UltimateInstrument::Control::kGain, kGain);
-  instrument.SetControl(UltimateInstrument::Control::kOscillatorOn, false);
-  instrument.SetControl(UltimateInstrument::Control::kSamplePlayerLoop, kLoop);
-  instrument.SetControl(UltimateInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(UltimateInstrument::Control::kRelease, kRelease);
-  instrument.SetControl(UltimateInstrument::Control::kVoiceCount, kVoiceCount);
+  Instrument instrument(musician);
+  instrument.SetControl(InstrumentControl::kGain, kGain);
+  instrument.SetControl(InstrumentControl::kOscillatorOn, false);
+  instrument.SetControl(InstrumentControl::kSamplePlayerLoop, kLoop);
+  instrument.SetControl(InstrumentControl::kAttack, kAttack);
+  instrument.SetControl(InstrumentControl::kRelease, kRelease);
+  instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 

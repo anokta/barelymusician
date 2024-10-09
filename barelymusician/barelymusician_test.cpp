@@ -24,12 +24,12 @@ TEST(BarelyMusicianTest, CreateDestroyInstrument) {
   ASSERT_TRUE(BarelyMusician_Create(1, &musician));
 
   // Failures.
-  EXPECT_FALSE(BarelyInstrument_Create(musician, {}, nullptr));
+  EXPECT_FALSE(BarelyInstrument_Create(musician, nullptr));
   EXPECT_FALSE(BarelyInstrument_Destroy(nullptr));
 
   // Success.
   BarelyInstrument* instrument = nullptr;
-  EXPECT_TRUE(BarelyInstrument_Create(musician, {}, &instrument));
+  EXPECT_TRUE(BarelyInstrument_Create(musician, &instrument));
   EXPECT_NE(instrument, nullptr);
 
   EXPECT_TRUE(BarelyInstrument_Destroy(instrument));
@@ -57,7 +57,7 @@ TEST(MusicianTest, CreateDestroyMusician) { [[maybe_unused]] const Musician musi
 
 TEST(MusicianTest, CreateDestroyInstrument) {
   const Musician musician(1);
-  [[maybe_unused]] const Instrument instrument(musician, InstrumentDefinition({}));
+  [[maybe_unused]] const Instrument instrument(musician);
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {

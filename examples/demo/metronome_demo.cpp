@@ -7,7 +7,6 @@
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/ultimate_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -16,10 +15,10 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentControl;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::UltimateInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -59,12 +58,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  Instrument instrument(musician, UltimateInstrument::GetDefinition());
-  instrument.SetControl(UltimateInstrument::Control::kGain, kGain);
-  instrument.SetControl(UltimateInstrument::Control::kOscillatorType, kOscillatorType);
-  instrument.SetControl(UltimateInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(UltimateInstrument::Control::kRelease, kRelease);
-  instrument.SetControl(UltimateInstrument::Control::kVoiceCount, kVoiceCount);
+  Instrument instrument(musician);
+  instrument.SetControl(InstrumentControl::kGain, kGain);
+  instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
+  instrument.SetControl(InstrumentControl::kAttack, kAttack);
+  instrument.SetControl(InstrumentControl::kRelease, kRelease);
+  instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
   Metronome metronome(musician);

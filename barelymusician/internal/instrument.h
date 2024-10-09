@@ -12,6 +12,7 @@
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/message_queue.h"
+#include "barelymusician/internal/ultimate_instrument.h"
 
 namespace barely::internal {
 
@@ -20,11 +21,10 @@ class Instrument {
  public:
   /// Constructs a new `Instrument`.
   ///
-  /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
   /// @param update_frame Update frame.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate, int64_t update_frame) noexcept;
+  Instrument(int frame_rate, int64_t update_frame) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -136,26 +136,8 @@ class Instrument {
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
 
-  // Destroy callback.
-  const InstrumentDefinition::DestroyCallback destroy_callback_;
-
-  // Process callback.
-  const InstrumentDefinition::ProcessCallback process_callback_;
-
-  // Set control callback.
-  const InstrumentDefinition::SetControlCallback set_control_callback_;
-
-  // Set data callback.
-  const InstrumentDefinition::SetDataCallback set_data_callback_;
-
-  // Set note control callback.
-  const InstrumentDefinition::SetNoteControlCallback set_note_control_callback_;
-
-  // Set note off callback.
-  const InstrumentDefinition::SetNoteOffCallback set_note_off_callback_;
-
-  // Set note on callback.
-  const InstrumentDefinition::SetNoteOnCallback set_note_on_callback_;
+  // TODO(#139): Merge this directly into `Instrument` implementation.
+  UltimateInstrument instrument_;
 
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;
@@ -180,9 +162,6 @@ class Instrument {
 
   // Update frame.
   int64_t update_frame_ = 0;
-
-  // State.
-  void* state_ = nullptr;
 
   // Data.
   std::vector<std::byte> data_;

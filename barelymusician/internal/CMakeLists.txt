@@ -18,6 +18,8 @@ add_library(
   barelymusician_internal_instrument
   instrument.cpp
   instrument.h
+  ultimate_instrument.cpp
+  ultimate_instrument.h
 )
 target_link_libraries(
   barelymusician_internal_instrument
@@ -27,6 +29,11 @@ target_link_libraries(
   barelymusician_internal_message_queue
   barelymusician_headeronly
   barelymusician_find_or_null
+  barelymusician_enveloped_voice
+  barelymusician_gain_processor
+  barelymusician_oscillator
+  barelymusician_polyphonic_voice
+  barelymusician_sample_player
 )
 
 add_library(

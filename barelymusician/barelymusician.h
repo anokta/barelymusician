@@ -34,10 +34,8 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician/instruments/ultimate_instrument.h"
-///
 ///   // Create.
-///   barely::Instrument instrument(musician, barely::UltimateInstrument::GetDefinition());
+///   barely::Instrument instrument(musician);
 ///
 ///   // Set a note on.
 ///   //
@@ -51,7 +49,7 @@
 ///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::UltimateInstrument::Control::kGain, /*value=*/0.5);
+///   instrument.SetControl(barely::InstrumentControl::kGain, /*value=*/0.5);
 ///
 ///   // Process.
 ///   //
@@ -118,11 +116,9 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician/instruments/ultimate_instrument.h"
-///
 ///   // Create.
 ///   BarelyInstrument* instrument = nullptr;
-///   BarelyInstrument_Create(musician, BarelyUltimateInstrument_GetDefinition(), &instrument);
+///   BarelyInstrument_Create(musician, &instrument);
 ///
 ///   // Set a note on.
 ///   //
@@ -217,21 +213,6 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Control definition.
-typedef struct BarelyControlDefinition {
-  /// Identifier.
-  int32_t id;
-
-  /// Default value.
-  double default_value;
-
-  /// Minimum value.
-  double min_value;
-
-  /// Maximum value.
-  double max_value;
-} BarelyControlDefinition;
-
 /// Control event definition create callback signature.
 ///
 /// @param state Pointer to control event state.
@@ -262,105 +243,6 @@ typedef struct BarelyControlEventDefinition {
   /// Process callback.
   BarelyControlEventDefinition_ProcessCallback process_callback;
 } BarelyControlEventDefinition;
-
-/// Instrument definition create callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param frame_rate Frame rate in hertz.
-typedef void (*BarelyInstrumentDefinition_CreateCallback)(void** state, int32_t frame_rate);
-
-/// Instrument definition destroy callback signature.
-///
-/// @param state Pointer to instrument state.
-typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
-
-/// Instrument definition process callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param output_samples Array of output samples.
-/// @param output_channel_count Number of output channels.
-/// @param output_frame_count Number of output frames.
-typedef void (*BarelyInstrumentDefinition_ProcessCallback)(void** state, double* output_samples,
-                                                           int32_t output_channel_count,
-                                                           int32_t output_frame_count);
-
-/// Instrument definition set control callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param id Control identifier.
-/// @param value Control value.
-typedef void (*BarelyInstrumentDefinition_SetControlCallback)(void** state, int32_t id,
-                                                              double value);
-
-/// Instrument definition set data callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param data Pointer to immutable data.
-/// @param size Data size in bytes.
-typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state, const void* data,
-                                                           int32_t size);
-
-/// Instrument definition set note control callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param pitch Note pitch.
-/// @param id Note control identifier.
-/// @param value Note control value.
-typedef void (*BarelyInstrumentDefinition_SetNoteControlCallback)(void** state, double pitch,
-                                                                  int32_t id, double value);
-
-/// Instrument definition set note off callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param pitch Note pitch.
-typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state, double pitch);
-
-/// Instrument definition set note on callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
-typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state, double pitch,
-                                                             double intensity);
-
-/// Instrument definition.
-typedef struct BarelyInstrumentDefinition {
-  /// Create callback.
-  BarelyInstrumentDefinition_CreateCallback create_callback;
-
-  /// Destroy callback.
-  BarelyInstrumentDefinition_DestroyCallback destroy_callback;
-
-  /// Process callback.
-  BarelyInstrumentDefinition_ProcessCallback process_callback;
-
-  /// Set control callback.
-  BarelyInstrumentDefinition_SetControlCallback set_control_callback;
-
-  /// Set data callback.
-  BarelyInstrumentDefinition_SetDataCallback set_data_callback;
-
-  /// Set note control callback.
-  BarelyInstrumentDefinition_SetNoteControlCallback set_note_control_callback;
-
-  /// Set note off callback.
-  BarelyInstrumentDefinition_SetNoteOffCallback set_note_off_callback;
-
-  /// Set note on callback.
-  BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback;
-
-  /// Array of control definitions.
-  const BarelyControlDefinition* control_definitions;
-
-  /// Number of control definitions.
-  int32_t control_definition_count;
-
-  /// Array of note control definitions.
-  const BarelyControlDefinition* note_control_definitions;
-
-  /// Number of note control definitions.
-  int32_t note_control_definition_count;
-} BarelyInstrumentDefinition;
 
 /// Note control event definition create callback signature.
 ///
@@ -497,11 +379,9 @@ typedef struct BarelyTask BarelyTask;
 /// Creates a new instrument.
 ///
 /// @param musician Pointer to musician.
-/// @param definition Instrument definition.
 /// @param out_instrument Output pointer to instrument.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusician* musician,
-                                           BarelyInstrumentDefinition definition,
                                            BarelyInstrument** out_instrument);
 
 /// Destroys an instrument.
@@ -895,43 +775,6 @@ BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTask* task, double position);
 
 namespace barely {
 
-/// Control definition.
-struct ControlDefinition : public BarelyControlDefinition {
-  /// Default constructor.
-  constexpr ControlDefinition() noexcept = default;
-
-  /// Constructs a new `ControlDefinition`.
-  ///
-  /// @param id Identifier.
-  /// @param default_value Default value.
-  /// @param min_value Minimum value.
-  /// @param max_value Maximum value.
-  template <typename IdType, typename ValueType>
-  constexpr ControlDefinition(IdType id, ValueType default_value,
-                              ValueType min_value = std::numeric_limits<ValueType>::lowest(),
-                              ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
-      : ControlDefinition(BarelyControlDefinition{
-            static_cast<int32_t>(id),
-            static_cast<double>(default_value),
-            static_cast<double>(min_value),
-            static_cast<double>(max_value),
-        }) {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-  }
-
-  /// Constructs a new `ControlDefinition` from a raw type.
-  ///
-  /// @param definition Raw control definition.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr ControlDefinition(BarelyControlDefinition definition) noexcept
-      : BarelyControlDefinition{definition} {
-    assert(default_value >= min_value && default_value <= max_value);
-  }
-};
-
 /// Control event definition.
 struct ControlEventDefinition : public BarelyControlEventDefinition {
   /// Callback signature.
@@ -986,78 +829,6 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr ControlEventDefinition(BarelyControlEventDefinition definition) noexcept
       : BarelyControlEventDefinition{definition} {}
-};
-
-/// Instrument definition.
-struct InstrumentDefinition : public BarelyInstrumentDefinition {
-  /// Create callback signature.
-  using CreateCallback = BarelyInstrumentDefinition_CreateCallback;
-
-  /// Destroy callback signature.
-  using DestroyCallback = BarelyInstrumentDefinition_DestroyCallback;
-
-  /// Process callback signature.
-  using ProcessCallback = BarelyInstrumentDefinition_ProcessCallback;
-
-  /// Set control callback signature.
-  using SetControlCallback = BarelyInstrumentDefinition_SetControlCallback;
-
-  /// Set data callback signature.
-  using SetDataCallback = BarelyInstrumentDefinition_SetDataCallback;
-
-  /// Set note control callback signature
-  using SetNoteControlCallback = BarelyInstrumentDefinition_SetNoteControlCallback;
-
-  /// Set note off callback signature
-  using SetNoteOffCallback = BarelyInstrumentDefinition_SetNoteOffCallback;
-
-  /// Set note on callback signature.
-  using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
-
-  /// Constructs a new `InstrumentDefinition`.
-  ///
-  /// @param create_callback Create callback.
-  /// @param destroy_callback Destroy callback.
-  /// @param process_callback Process callback.
-  /// @param set_control_callback Set control callback.
-  /// @param set_data_callback Set data callback.
-  /// @param set_note_off_callback Set note off callback.
-  /// @param set_note_on_callback Set note on callback.
-  /// @param control_definitions Span of control definitions.
-  /// @param note_control_definitions Span of note control definitions.
-  explicit constexpr InstrumentDefinition(
-      CreateCallback create_callback, DestroyCallback destroy_callback,
-      ProcessCallback process_callback, SetControlCallback set_control_callback,
-      SetDataCallback set_data_callback, SetNoteControlCallback set_note_control_callback,
-      SetNoteOffCallback set_note_off_callback, SetNoteOnCallback set_note_on_callback,
-      std::span<const ControlDefinition> control_definitions,
-      std::span<const ControlDefinition> note_control_definitions) noexcept
-      : InstrumentDefinition({
-            create_callback,
-            destroy_callback,
-            process_callback,
-            set_control_callback,
-            set_data_callback,
-            set_note_control_callback,
-            set_note_off_callback,
-            set_note_on_callback,
-            control_definitions.data(),
-            static_cast<int>(control_definitions.size()),
-            note_control_definitions.data(),
-            static_cast<int>(note_control_definitions.size()),
-        }) {}
-
-  /// Constructs a new `InstrumentDefinition` from a raw type.
-  ///
-  /// @param definition Raw instrument definition.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr InstrumentDefinition(BarelyInstrumentDefinition definition) noexcept
-      : BarelyInstrumentDefinition{definition} {
-    assert(control_definitions || control_definition_count == 0);
-    assert(control_definition_count >= 0);
-    assert(note_control_definitions || note_control_definition_count == 0);
-    assert(note_control_definition_count >= 0);
-  }
 };
 
 /// Note control event definition.
@@ -1456,19 +1227,44 @@ class MusicianPtr : public PtrWrapper<BarelyMusician> {
   }
 };
 
+/// Instrument control enum.
+enum class InstrumentControl : int32_t {
+  /// Gain.
+  kGain = 0,
+  /// Number of voices.
+  kVoiceCount,
+  /// Oscillator on.
+  // TODO(#139): This could be replaced by a mix value between the oscillator and sample playback.
+  kOscillatorOn,
+  /// Oscillator type.
+  kOscillatorType,
+  /// Sample player loop.
+  // TODO(#139): This could be replaced by `SamplePlaybackMode` with sustained and looped modes.
+  kSamplePlayerLoop,
+  /// Envelope attack.
+  kAttack,
+  /// Envelope decay.
+  kDecay,
+  /// Envelope sustain.
+  kSustain,
+  /// Envelope release.
+  kRelease,
+  /// Pitch shift.
+  kPitchShift,
+  /// Number of controls.
+  kCount,
+};
+
 /// Class that wraps an instrument pointer.
 class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
  public:
   /// Creates a new `InstrumentPtr`.
   ///
   /// @param musician Musician pointer.
-  /// @param definition Instrument definition.
   /// @return Instrument pointer.
-  [[nodiscard]] static InstrumentPtr Create(MusicianPtr musician,
-                                            InstrumentDefinition definition) noexcept {
+  [[nodiscard]] static InstrumentPtr Create(MusicianPtr musician) noexcept {
     BarelyInstrument* instrument;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_Create(musician, definition, &instrument);
+    [[maybe_unused]] const bool success = BarelyInstrument_Create(musician, &instrument);
     assert(success);
     return InstrumentPtr(instrument);
   }

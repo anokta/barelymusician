@@ -75,5 +75,3 @@ EXPORTS
 
   BarelyScale_GetPitch
   Barely_GetScaleDefinition
-
-  BarelyUltimateInstrument_GetDefinition

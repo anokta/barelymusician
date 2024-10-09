@@ -33,8 +33,8 @@ struct BarelyMusician : public Observable<Musician> {
 // Instrument.
 struct BarelyInstrument : public Observable<Instrument> {
  public:
-  BarelyInstrument(BarelyMusician* musician, BarelyInstrumentDefinition definition) noexcept
-      : Observable<Instrument>(definition, musician->GetFrameRate(), musician->GetUpdateFrame()),
+  explicit BarelyInstrument(BarelyMusician* musician) noexcept
+      : Observable<Instrument>(musician->GetFrameRate(), musician->GetUpdateFrame()),
         musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddInstrument(this);
@@ -114,12 +114,11 @@ struct BarelyTask : public Task {
   Observer<Performer> performer_;
 };
 
-bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrumentDefinition definition,
-                             BarelyInstrument** out_instrument) {
+bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrument** out_instrument) {
   if (!musician) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = new BarelyInstrument(musician, definition);
+  *out_instrument = new BarelyInstrument(musician);
   return true;
 }
 

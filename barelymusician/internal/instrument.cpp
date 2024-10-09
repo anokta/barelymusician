@@ -1,5 +1,6 @@
 #include "barelymusician/internal/instrument.h"
 
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -14,44 +15,52 @@
 
 namespace barely::internal {
 
+namespace {
+
+static constexpr std::array<ControlDefinition, static_cast<int>(InstrumentControl::kCount)>
+    control_definitions = {
+        // Gain.
+        ControlDefinition{InstrumentControl::kGain, 1.0, 0.0, 1.0},
+        // Number of voices.
+        ControlDefinition{InstrumentControl::kVoiceCount, 8, 1, 32},
+        // Oscillator on.
+        ControlDefinition{InstrumentControl::kOscillatorOn, true},
+        // Oscillator type.
+        ControlDefinition{InstrumentControl::kOscillatorType,
+                          static_cast<double>(OscillatorType::kSine), 0.0,
+                          static_cast<double>(OscillatorType::kNoise)},
+        // Sample player loop.
+        ControlDefinition{InstrumentControl::kSamplePlayerLoop, false},
+        // Attack.
+        ControlDefinition{InstrumentControl::kAttack, 0.05, 0.0, 60.0},
+        // Decay.
+        ControlDefinition{InstrumentControl::kDecay, 0.0, 0.0, 60.0},
+        // Sustain.
+        ControlDefinition{InstrumentControl::kSustain, 1.0, 0.0, 1.0},
+        // Release.
+        ControlDefinition{InstrumentControl::kRelease, 0.25, 0.0, 60.0},
+        // Pitch shift.
+        ControlDefinition{InstrumentControl::kPitchShift, 0.0},
+};
+
+}  // namespace
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
-                       int64_t update_frame) noexcept
-    : destroy_callback_(definition.destroy_callback),
-      process_callback_(definition.process_callback),
-      set_control_callback_(definition.set_control_callback),
-      set_data_callback_(definition.set_data_callback),
-      set_note_control_callback_(definition.set_note_control_callback),
-      set_note_off_callback_(definition.set_note_off_callback),
-      set_note_on_callback_(definition.set_note_on_callback),
-      note_control_definitions_(
-          definition.note_control_definitions,
-          definition.note_control_definitions + definition.note_control_definition_count),
-      control_map_(
-          BuildControlMap(static_cast<const ControlDefinition*>(definition.control_definitions),
-                          definition.control_definition_count,
-                          [this](int id, double value) {
-                            control_event_.Process(id, value);
-                            message_queue_.Add(update_frame_, ControlMessage{id, value});
-                          })),
+Instrument::Instrument(int frame_rate, int64_t update_frame) noexcept
+    : instrument_(frame_rate),
+      control_map_(BuildControlMap(control_definitions,
+                                   [this](int id, double value) {
+                                     control_event_.Process(id, value);
+                                     message_queue_.Add(update_frame_, ControlMessage{id, value});
+                                   })),
       update_frame_(update_frame) {
   assert(frame_rate > 0);
-  if (definition.create_callback) {
-    definition.create_callback(&state_, frame_rate);
-  }
-  if (set_control_callback_) {
-    for (const auto& [id, control] : control_map_) {
-      set_control_callback_(&state_, id, control.GetValue());
-    }
+  for (const auto& [id, control] : control_map_) {
+    instrument_.SetControl(id, control.GetValue());
   }
 }
 
-Instrument::~Instrument() noexcept {
-  SetAllNotesOff();
-  if (destroy_callback_) {
-    destroy_callback_(&state_);
-  }
-}
+Instrument::~Instrument() noexcept { SetAllNotesOff(); }
 
 Control* Instrument::GetControl(int id) noexcept { return FindOrNull(control_map_, id); }
 
@@ -91,49 +100,34 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         frame < message_frame) {
-      if (process_callback_) {
-        process_callback_(&state_, &output_samples[frame * output_channel_count],
-                          output_channel_count, message_frame - frame);
-      }
+      instrument_.Process(&output_samples[frame * output_channel_count], output_channel_count,
+                          message_frame - frame);
       frame = message_frame;
     }
-    std::visit(
-        MessageVisitor{
-            [this](ControlMessage& control_message) noexcept {
-              if (set_control_callback_) {
-                set_control_callback_(&state_, control_message.id, control_message.value);
-              }
-            },
-            [this](DataMessage& data_message) noexcept {
-              if (set_data_callback_) {
-                data_.swap(data_message.data);
-                set_data_callback_(&state_, data_.data(), static_cast<int>(data_.size()));
-              }
-            },
-            [this](NoteControlMessage& note_control_message) noexcept {
-              if (set_note_control_callback_) {
-                set_note_control_callback_(&state_, note_control_message.pitch,
-                                           note_control_message.id, note_control_message.value);
-              }
-            },
-            [this](NoteOffMessage& note_off_message) noexcept {
-              if (set_note_off_callback_) {
-                set_note_off_callback_(&state_, note_off_message.pitch);
-              }
-            },
-            [this](NoteOnMessage& note_on_message) noexcept {
-              if (set_note_on_callback_) {
-                set_note_on_callback_(&state_, note_on_message.pitch, note_on_message.intensity);
-              }
-            }},
-        message->second);
+    std::visit(MessageVisitor{
+                   [this](ControlMessage& control_message) noexcept {
+                     instrument_.SetControl(control_message.id, control_message.value);
+                   },
+                   [this](DataMessage& data_message) noexcept {
+                     data_.swap(data_message.data);
+                     instrument_.SetData(data_.data(), static_cast<int>(data_.size()));
+                   },
+                   [this](NoteControlMessage& note_control_message) noexcept {
+                     instrument_.SetNoteControl(note_control_message.pitch, note_control_message.id,
+                                                note_control_message.value);
+                   },
+                   [this](NoteOffMessage& note_off_message) noexcept {
+                     instrument_.SetNoteOff(note_off_message.pitch);
+                   },
+                   [this](NoteOnMessage& note_on_message) noexcept {
+                     instrument_.SetNoteOn(note_on_message.pitch, note_on_message.intensity);
+                   }},
+               message->second);
   }
   // Process the rest of the buffer.
   if (frame < output_frame_count) {
-    if (process_callback_) {
-      process_callback_(&state_, &output_samples[frame * output_channel_count],
-                        output_channel_count, output_frame_count - frame);
-    }
+    instrument_.Process(&output_samples[frame * output_channel_count], output_channel_count,
+                        output_frame_count - frame);
   }
   return true;
 }
@@ -188,9 +182,9 @@ void Instrument::SetNoteOffEvent(NoteOffEventDefinition definition, void* user_d
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
+  // TODO(#139): Revisit note controls.
   if (const auto [it, success] = note_control_maps_.try_emplace(
-          pitch, BuildControlMap(note_control_definitions_.data(),
-                                 static_cast<int>(note_control_definitions_.size()),
+          pitch, BuildControlMap({},
                                  [this, pitch](int id, double value) {
                                    note_control_event_.Process(pitch, id, value);
                                    message_queue_.Add(update_frame_,

@@ -4,7 +4,7 @@ namespace Barely {
   namespace Examples {
     // A simple theremin that is contolled by the mouse position on the screen.
     public class Theremin : MonoBehaviour {
-      public UltimateInstrument instrument = null;
+      public Instrument instrument = null;
       public Texture2D texture = null;
       public Color color = Color.white;
 

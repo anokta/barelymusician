@@ -75,8 +75,6 @@ VERS_1.0 {
     BarelyScale_GetPitch;
     Barely_GetScaleDefinition;
 
-    BarelyUltimateInstrument_GetDefinition;
-
   local:
     *;
 };

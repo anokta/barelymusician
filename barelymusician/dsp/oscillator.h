@@ -30,6 +30,11 @@ class Oscillator : public Generator {
   /// @param frame_rate Frame rate in hertz.
   explicit Oscillator(int frame_rate) noexcept;
 
+  /// Returns the frequency of the oscillator.
+  ///
+  /// @return Frequency in hertz.
+  double GetFrequency() const noexcept;
+
   /// Implements `Generator`.
   double Next() noexcept override;
   void Reset() noexcept override;
@@ -53,6 +58,9 @@ class Oscillator : public Generator {
 
   // Oscillator type.
   OscillatorType type_ = OscillatorType::kNoise;
+
+  // Frequency.
+  double frequency_ = 0.0;
 
   // Increment per sample.
   double increment_ = 0.0;

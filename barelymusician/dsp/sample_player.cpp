@@ -8,6 +8,8 @@ namespace barely {
 SamplePlayer::SamplePlayer(int frame_rate) noexcept
     : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate) : 0.0) {}
 
+double SamplePlayer::GetSpeed() const noexcept { return speed_; }
+
 double SamplePlayer::Next() noexcept {
   if (!data_ || cursor_ >= length_) {
     // Nothing to play, skip processing.

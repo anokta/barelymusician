@@ -108,6 +108,10 @@ namespace Barely {
     [Range(0.0f, 60.0f)]
     public double Release = 0.25;
 
+    /// Pitch shift.
+    [Range(-1.0f, 1.0f)]
+    public double PitchShift = 0.0;
+
     private void Update() {
       if (Samplers != null) {
         UpdateSamplerData();
@@ -122,6 +126,7 @@ namespace Barely {
       SetControl(id++, Decay);
       SetControl(id++, Sustain);
       SetControl(id++, Release);
+      SetControl(id++, PitchShift);
     }
 
     private void UpdateSamplerData() {

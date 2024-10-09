@@ -13,6 +13,11 @@ class SamplePlayer : public Generator {
   /// @param frame_rate Frame rate in hertz.
   explicit SamplePlayer(int frame_rate) noexcept;
 
+  /// Returns the playback speed.
+  ///
+  /// @return Playback speed.
+  double GetSpeed() const noexcept;
+
   /// Implements `Generator`.
   double Next() noexcept override;
   void Reset() noexcept override;

@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cassert>
+#include <cmath>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -42,6 +43,8 @@ InstrumentDefinition UltimateInstrument::GetDefinition() noexcept {
           ControlDefinition{Control::kSustain, 1.0, 0.0, 1.0},
           // Release.
           ControlDefinition{Control::kRelease, 0.25, 0.0, 60.0},
+          // Pitch shift.
+          ControlDefinition{Control::kPitchShift, 0.0},
       };
   return CustomInstrument::GetDefinition<UltimateInstrument>(control_definitions, {});
 }
@@ -131,6 +134,25 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
             [value](Sampler::Voice* voice) noexcept { voice->envelope().SetRelease(value); });
       }
       break;
+    case Control::kPitchShift:
+      // TODO(#139): Simplify pitch shift.
+      if (const double pitch_offset = value - pitch_shift_; pitch_offset != 0.0) {
+        pitch_shift_ = value;
+        const double frequency_ratio = std::pow(2.0, pitch_offset);
+        oscillator_voice_.Update([frequency_ratio](OscillatorVoice* voice) noexcept {
+          if (voice->IsActive()) {
+            voice->generator().SetFrequency(voice->generator().GetFrequency() * frequency_ratio);
+          }
+        });
+        if (samplers_.size() == 1) {
+          samplers_.front().voice.Update([frequency_ratio](Sampler::Voice* voice) noexcept {
+            if (voice->IsActive()) {
+              voice->generator().SetSpeed(voice->generator().GetSpeed() * frequency_ratio);
+            }
+          });
+        }
+      }
+      break;
     default:
       assert(false);
       break;
@@ -173,15 +195,15 @@ void UltimateInstrument::SetNoteOff(double pitch) noexcept {
 }
 
 void UltimateInstrument::SetNoteOn(double pitch, double intensity) noexcept {
-  oscillator_voice_.Start(pitch,
-                          [frequency = GetFrequency(pitch), intensity](OscillatorVoice* voice) {
-                            voice->generator().SetFrequency(frequency);
-                            voice->set_gain(intensity);
-                          });
+  oscillator_voice_.Start(
+      pitch, [frequency = GetFrequency(pitch + pitch_shift_), intensity](OscillatorVoice* voice) {
+        voice->generator().SetFrequency(frequency);
+        voice->set_gain(intensity);
+      });
   // TODO(#139): Refactor this to make the percussion vs pitched sample distinction more robust.
   if (samplers_.size() == 1) {
     samplers_.front().voice.Start(
-        pitch, [speed = GetFrequency(pitch) / GetFrequency(samplers_.front().pitch),
+        pitch, [speed = GetFrequency(pitch + pitch_shift_) / GetFrequency(samplers_.front().pitch),
                 intensity](Sampler::Voice* voice) {
           voice->generator().SetSpeed(speed);
           voice->set_gain(intensity);

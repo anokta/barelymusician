@@ -53,6 +53,8 @@ class UltimateInstrument : public CustomInstrument {
     kSustain,
     /// Envelope release.
     kRelease,
+    /// Pitch shift.
+    kPitchShift,
     /// Number of controls.
     kCount,
   };
@@ -95,6 +97,7 @@ class UltimateInstrument : public CustomInstrument {
   double decay_ = 0.0;
   double sustain_ = 1.0;
   double release_ = 0.0;
+  double pitch_shift_ = 0.0;
   bool sampler_loop_ = false;
   GainProcessor gain_processor_;
 };

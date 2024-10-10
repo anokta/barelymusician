@@ -9,10 +9,6 @@ add_library(
   envelope.cpp
   envelope.h
 )
-target_link_libraries(
-  barelymusician_envelope
-  barelymusician_generator
-)
 
 add_library(
   barelymusician_enveloped_voice INTERFACE
@@ -25,29 +21,15 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_filter INTERFACE
-  filter.h
-)
-
-add_library(
   barelymusician_gain_processor
   gain_processor.cpp
   gain_processor.h
 )
 
 add_library(
-  barelymusician_generator INTERFACE
-  generator.h
-)
-
-add_library(
   barelymusician_one_pole_filter
   one_pole_filter.cpp
   one_pole_filter.h
-)
-target_link_libraries(
-  barelymusician_one_pole_filter
-  barelymusician_filter
 )
 
 add_library(
@@ -57,7 +39,6 @@ add_library(
 )
 target_link_libraries(
   barelymusician_oscillator
-  barelymusician_generator
   barelymusician_random
 )
 
@@ -70,10 +51,6 @@ add_library(
   barelymusician_sample_player
   sample_player.cpp
   sample_player.h
-)
-target_link_libraries(
-  barelymusician_sample_player
-  barelymusician_generator
 )
 
 add_library(

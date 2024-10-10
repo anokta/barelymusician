@@ -1,27 +1,29 @@
 #ifndef BARELYMUSICIAN_DSP_ENVELOPE_H_
 #define BARELYMUSICIAN_DSP_ENVELOPE_H_
 
-#include "barelymusician/dsp/generator.h"
-
 namespace barely {
 
 /// Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output samples according to
 /// its current state.
-class Envelope : public Generator {
+class Envelope {
  public:
   /// Constructs new `Envelope`.
   ///
   /// @param frame_rate Frame rate in hertz.
   explicit Envelope(int frame_rate) noexcept;
 
-  /// Implements `Generator`.
-  double Next() noexcept override;
-  void Reset() noexcept override;
-
   /// Returns whether the envelope is currently active (i.e., not idle).
   ///
   /// @return True if active.
   [[nodiscard]] bool IsActive() const noexcept;
+
+  /// Generates the next output sample.
+  ///
+  /// @return Next output sample.
+  double Next() noexcept;
+
+  /// Resets the state.
+  void Reset() noexcept;
 
   /// Sets the attack of the envelope in seconds.
   ///

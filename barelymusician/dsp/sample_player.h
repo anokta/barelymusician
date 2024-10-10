@@ -1,12 +1,10 @@
 #ifndef BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
 #define BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
 
-#include "barelymusician/dsp/generator.h"
-
 namespace barely {
 
 /// Sample player that generates output samples from the provided mono data.
-class SamplePlayer : public Generator {
+class SamplePlayer {
  public:
   /// Construct new `SamplePlayer` with the given sample data.
   ///
@@ -18,9 +16,13 @@ class SamplePlayer : public Generator {
   /// @return Playback speed.
   double GetSpeed() const noexcept;
 
-  /// Implements `Generator`.
-  double Next() noexcept override;
-  void Reset() noexcept override;
+  /// Generates the next output sample.
+  ///
+  /// @return Next output sample.
+  double Next() noexcept;
+
+  /// Resets the state.
+  void Reset() noexcept;
 
   /// Sets the sample data.
   ///

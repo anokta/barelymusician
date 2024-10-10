@@ -7,6 +7,8 @@ namespace barely {
 Envelope::Envelope(int frame_rate) noexcept
     : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate) : 0.0) {}
 
+bool Envelope::IsActive() const noexcept { return state_ != State::kIdle; }
+
 double Envelope::Next() noexcept {
   if (state_ == State::kIdle) {
     return 0.0;
@@ -58,8 +60,6 @@ double Envelope::Next() noexcept {
 }
 
 void Envelope::Reset() noexcept { state_ = State::kIdle; }
-
-bool Envelope::IsActive() const noexcept { return state_ != State::kIdle; }
 
 void Envelope::SetAttack(double attack) noexcept {
   attack_increment_ = (attack > 0.0) ? frame_interval_ / attack : 0.0;

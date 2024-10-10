@@ -4,7 +4,6 @@
 #include <random>
 
 #include "barelymusician/common/random.h"
-#include "barelymusician/dsp/generator.h"
 
 namespace barely {
 
@@ -23,7 +22,7 @@ enum class OscillatorType {
 };
 
 /// Simple oscillator that generates output samples of basic waveforms.
-class Oscillator : public Generator {
+class Oscillator {
  public:
   /// Constructs new `Oscillator`.
   ///
@@ -35,9 +34,13 @@ class Oscillator : public Generator {
   /// @return Frequency in hertz.
   double GetFrequency() const noexcept;
 
-  /// Implements `Generator`.
-  double Next() noexcept override;
-  void Reset() noexcept override;
+  /// Generates the next output sample.
+  ///
+  /// @return Next output sample.
+  double Next() noexcept;
+
+  /// Resets the state.
+  void Reset() noexcept;
 
   /// Sets the frequency of the oscillator.
   ///

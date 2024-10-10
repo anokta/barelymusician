@@ -8,7 +8,7 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barely::internal {
+namespace barely {
 
 Control::Control(ControlDefinition definition, SetValueCallback set_value_callback) noexcept
     : definition_(definition),
@@ -47,4 +47,4 @@ ControlMap BuildControlMap(std::span<const ControlDefinition> definitions,
   return control_map;
 }
 
-}  // namespace barely::internal
+}  // namespace barely

@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/performer.h"
 
 namespace barely::internal {
@@ -22,7 +22,7 @@ class Musician {
   ///
   /// @param instrument Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddInstrument(Instrument* instrument) noexcept;
+  void AddInstrument(InstrumentController* instrument) noexcept;
 
   /// Adds a performer.
   ///
@@ -73,7 +73,7 @@ class Musician {
   ///
   /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveInstrument(Instrument* instrument) noexcept;
+  void RemoveInstrument(InstrumentController* instrument) noexcept;
 
   /// Removes a performer.
   ///
@@ -94,7 +94,7 @@ class Musician {
 
  private:
   // Set of pointers to instruments.
-  std::unordered_set<Instrument*> instruments_;
+  std::unordered_set<InstrumentController*> instruments_;
 
   // Set of process order-pointer pairs to performers.
   std::set<std::pair<int, Performer*>> performers_;

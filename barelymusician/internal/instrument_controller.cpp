@@ -1,4 +1,4 @@
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 
 #include <array>
 #include <cassert>
@@ -11,9 +11,10 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/internal/control.h"
+#include "barelymusician/internal/instrument_processor.h"
 #include "barelymusician/internal/message.h"
 
-namespace barely::internal {
+namespace barely {
 
 namespace {
 
@@ -46,49 +47,49 @@ static constexpr std::array<ControlDefinition, static_cast<int>(InstrumentContro
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument::Instrument(int frame_rate, int64_t update_frame) noexcept
-    : instrument_(frame_rate),
-      control_map_(BuildControlMap(control_definitions,
+InstrumentController::InstrumentController(int frame_rate, int64_t update_frame) noexcept
+    : control_map_(BuildControlMap(control_definitions,
                                    [this](int id, double value) {
                                      control_event_.Process(id, value);
                                      message_queue_.Add(update_frame_, ControlMessage{id, value});
                                    })),
-      update_frame_(update_frame) {
+      update_frame_(update_frame),
+      processor_(frame_rate) {
   assert(frame_rate > 0);
   for (const auto& [id, control] : control_map_) {
-    instrument_.SetControl(id, control.GetValue());
+    processor_.SetControl(id, control.GetValue());
   }
 }
 
-Instrument::~Instrument() noexcept { SetAllNotesOff(); }
+InstrumentController::~InstrumentController() noexcept { SetAllNotesOff(); }
 
-Control* Instrument::GetControl(int id) noexcept { return FindOrNull(control_map_, id); }
+Control* InstrumentController::GetControl(int id) noexcept { return FindOrNull(control_map_, id); }
 
-const Control* Instrument::GetControl(int id) const noexcept {
+const Control* InstrumentController::GetControl(int id) const noexcept {
   return FindOrNull(control_map_, id);
 }
 
-Control* Instrument::GetNoteControl(double pitch, int id) noexcept {
+Control* InstrumentController::GetNoteControl(double pitch, int id) noexcept {
   if (auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
     return FindOrNull(*note_control_map, id);
   }
   return nullptr;
 }
 
-const Control* Instrument::GetNoteControl(double pitch, int id) const noexcept {
+const Control* InstrumentController::GetNoteControl(double pitch, int id) const noexcept {
   if (const auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
     return FindOrNull(*note_control_map, id);
   }
   return nullptr;
 }
 
-bool Instrument::IsNoteOn(double pitch) const noexcept {
+bool InstrumentController::IsNoteOn(double pitch) const noexcept {
   return note_control_maps_.contains(pitch);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
-                         int64_t process_frame) noexcept {
+bool InstrumentController::Process(double* output_samples, int output_channel_count,
+                                   int output_frame_count, int64_t process_frame) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {
     return false;
@@ -100,45 +101,45 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         frame < message_frame) {
-      instrument_.Process(&output_samples[frame * output_channel_count], output_channel_count,
-                          message_frame - frame);
+      processor_.Process(&output_samples[frame * output_channel_count], output_channel_count,
+                         message_frame - frame);
       frame = message_frame;
     }
     std::visit(MessageVisitor{
                    [this](ControlMessage& control_message) noexcept {
-                     instrument_.SetControl(control_message.id, control_message.value);
+                     processor_.SetControl(control_message.id, control_message.value);
                    },
                    [this](DataMessage& data_message) noexcept {
                      data_.swap(data_message.data);
-                     instrument_.SetData(data_.data(), static_cast<int>(data_.size()));
+                     processor_.SetData(data_.data(), static_cast<int>(data_.size()));
                    },
                    [this](NoteControlMessage& note_control_message) noexcept {
-                     instrument_.SetNoteControl(note_control_message.pitch, note_control_message.id,
-                                                note_control_message.value);
+                     processor_.SetNoteControl(note_control_message.pitch, note_control_message.id,
+                                               note_control_message.value);
                    },
                    [this](NoteOffMessage& note_off_message) noexcept {
-                     instrument_.SetNoteOff(note_off_message.pitch);
+                     processor_.SetNoteOff(note_off_message.pitch);
                    },
                    [this](NoteOnMessage& note_on_message) noexcept {
-                     instrument_.SetNoteOn(note_on_message.pitch, note_on_message.intensity);
+                     processor_.SetNoteOn(note_on_message.pitch, note_on_message.intensity);
                    }},
                message->second);
   }
   // Process the rest of the buffer.
   if (frame < output_frame_count) {
-    instrument_.Process(&output_samples[frame * output_channel_count], output_channel_count,
-                        output_frame_count - frame);
+    processor_.Process(&output_samples[frame * output_channel_count], output_channel_count,
+                       output_frame_count - frame);
   }
   return true;
 }
 
-void Instrument::ResetAllControls() noexcept {
+void InstrumentController::ResetAllControls() noexcept {
   for (auto& [id, control] : control_map_) {
     control.ResetValue();
   }
 }
 
-bool Instrument::ResetAllNoteControls(double pitch) noexcept {
+bool InstrumentController::ResetAllNoteControls(double pitch) noexcept {
   if (auto* note_control_map = FindOrNull(note_control_maps_, pitch)) {
     for (auto& [id, note_control] : *note_control_map) {
       note_control.ResetValue();
@@ -149,39 +150,41 @@ bool Instrument::ResetAllNoteControls(double pitch) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetAllNotesOff() noexcept {
+void InstrumentController::SetAllNotesOff() noexcept {
   for (const auto& [note, _] : std::exchange(note_control_maps_, {})) {
     note_off_event_.Process(note);
     message_queue_.Add(update_frame_, NoteOffMessage{note});
   }
 }
 
-void Instrument::SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept {
+void InstrumentController::SetControlEvent(ControlEventDefinition definition,
+                                           void* user_data) noexcept {
   control_event_ = {definition, user_data};
 }
 
-void Instrument::SetData(std::vector<std::byte> data) noexcept {
+void InstrumentController::SetData(std::vector<std::byte> data) noexcept {
   message_queue_.Add(update_frame_, DataMessage{std::move(data)});
 }
 
-void Instrument::SetNoteControlEvent(NoteControlEventDefinition definition,
-                                     void* user_data) noexcept {
+void InstrumentController::SetNoteControlEvent(NoteControlEventDefinition definition,
+                                               void* user_data) noexcept {
   note_control_event_ = {definition, user_data};
 }
 
-void Instrument::SetNoteOff(double pitch) noexcept {
+void InstrumentController::SetNoteOff(double pitch) noexcept {
   if (note_control_maps_.erase(pitch) > 0) {
     note_off_event_.Process(pitch);
     message_queue_.Add(update_frame_, NoteOffMessage{pitch});
   }
 }
 
-void Instrument::SetNoteOffEvent(NoteOffEventDefinition definition, void* user_data) noexcept {
+void InstrumentController::SetNoteOffEvent(NoteOffEventDefinition definition,
+                                           void* user_data) noexcept {
   note_off_event_ = {definition, user_data};
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
+void InstrumentController::SetNoteOn(double pitch, double intensity) noexcept {
   // TODO(#139): Revisit note controls.
   if (const auto [it, success] = note_control_maps_.try_emplace(
           pitch, BuildControlMap({},
@@ -199,13 +202,14 @@ void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
   }
 }
 
-void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept {
+void InstrumentController::SetNoteOnEvent(NoteOnEventDefinition definition,
+                                          void* user_data) noexcept {
   note_on_event_ = {definition, user_data};
 }
 
-void Instrument::Update(int64_t update_frame) noexcept {
+void InstrumentController::Update(int64_t update_frame) noexcept {
   assert(update_frame >= update_frame_);
   update_frame_ = update_frame;
 }
 
-}  // namespace barely::internal
+}  // namespace barely

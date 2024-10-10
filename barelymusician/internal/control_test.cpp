@@ -5,7 +5,7 @@
 #include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 // Tests that the control sets its value as expected.
@@ -73,4 +73,4 @@ TEST(ControlTest, BuildControlMap) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

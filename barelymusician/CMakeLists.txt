@@ -15,7 +15,7 @@ target_compile_definitions(
 target_link_libraries(
   barelymusician
   barelymusician_headeronly
-  barelymusician_internal_instrument
+  barelymusician_internal_instrument_controller
   barelymusician_internal_musician
   barelymusician_internal_observable
   barelymusician_internal_performer

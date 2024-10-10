@@ -1,4 +1,4 @@
-#include "barelymusician/internal/ultimate_instrument.h"
+#include "barelymusician/internal/instrument_processor.h"
 
 #include <array>
 #include <cassert>
@@ -7,7 +7,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
 
-namespace barely::internal {
+namespace barely {
 
 namespace {
 
@@ -26,13 +26,13 @@ double GetFrequency(double pitch) noexcept {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-UltimateInstrument::UltimateInstrument(int frame_rate) noexcept
+InstrumentProcessor::InstrumentProcessor(int frame_rate) noexcept
     : frame_rate_(frame_rate),
       oscillator_voice_(OscillatorVoice(frame_rate_), kMaxVoiceCount),
       gain_processor_(frame_rate_) {}
 
-void UltimateInstrument::Process(double* output_samples, int output_channel_count,
-                                 int output_frame_count) noexcept {
+void InstrumentProcessor::Process(double* output_samples, int output_channel_count,
+                                  int output_frame_count) noexcept {
   for (int frame = 0; frame < output_frame_count; ++frame) {
     double mono_sample = (oscillator_on_ ? oscillator_voice_.Next(0) : 0.0);
     for (auto& sampler : samplers_) {
@@ -46,7 +46,7 @@ void UltimateInstrument::Process(double* output_samples, int output_channel_coun
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void UltimateInstrument::SetControl(int id, double value) noexcept {
+void InstrumentProcessor::SetControl(int id, double value) noexcept {
   switch (static_cast<InstrumentControl>(id)) {
     case InstrumentControl::kGain:
       gain_processor_.SetGain(value);
@@ -135,7 +135,7 @@ void UltimateInstrument::SetControl(int id, double value) noexcept {
   }
 }
 
-void UltimateInstrument::SetData(const void* data, int size) noexcept {
+void InstrumentProcessor::SetData(const void* data, int size) noexcept {
   const double* data_double = static_cast<const double*>(data);
   if (data_double == nullptr || size == 0) {
     samplers_.clear();
@@ -161,7 +161,7 @@ void UltimateInstrument::SetData(const void* data, int size) noexcept {
   }
 }
 
-void UltimateInstrument::SetNoteOff(double pitch) noexcept {
+void InstrumentProcessor::SetNoteOff(double pitch) noexcept {
   oscillator_voice_.Stop(pitch);
   for (auto& sampler : samplers_) {
     if (samplers_.size() == 1 || sampler.pitch == pitch) {
@@ -170,7 +170,7 @@ void UltimateInstrument::SetNoteOff(double pitch) noexcept {
   }
 }
 
-void UltimateInstrument::SetNoteOn(double pitch, double intensity) noexcept {
+void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
   oscillator_voice_.Start(
       pitch, [frequency = GetFrequency(pitch + pitch_shift_), intensity](OscillatorVoice* voice) {
         voice->generator().SetFrequency(frequency);
@@ -195,7 +195,7 @@ void UltimateInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   }
 }
 
-UltimateInstrument::Sampler::Sampler(int frame_rate) noexcept
+InstrumentProcessor::Sampler::Sampler(int frame_rate) noexcept
     : voice(Sampler::Voice(frame_rate), kMaxVoiceCount) {}
 
-}  // namespace barely::internal
+}  // namespace barely

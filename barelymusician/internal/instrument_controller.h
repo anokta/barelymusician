@@ -11,29 +11,29 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/event.h"
+#include "barelymusician/internal/instrument_processor.h"
 #include "barelymusician/internal/message_queue.h"
-#include "barelymusician/internal/ultimate_instrument.h"
 
-namespace barely::internal {
+namespace barely {
 
-/// Class that wraps an instrument.
-class Instrument {
+/// Class that controls an instrument.
+class InstrumentController {
  public:
-  /// Constructs a new `Instrument`.
+  /// Constructs a new `InstrumentController`.
   ///
   /// @param frame_rate Frame rate in hertz.
   /// @param update_frame Update frame.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(int frame_rate, int64_t update_frame) noexcept;
+  InstrumentController(int frame_rate, int64_t update_frame) noexcept;
 
-  /// Destroys `Instrument`.
-  ~Instrument() noexcept;
+  /// Destroys `InstrumentController`.
+  ~InstrumentController() noexcept;
 
   /// Non-copyable and non-movable.
-  Instrument(const Instrument& other) noexcept = delete;
-  Instrument& operator=(const Instrument& other) noexcept = delete;
-  Instrument(Instrument&& other) noexcept = delete;
-  Instrument& operator=(Instrument&& other) noexcept = delete;
+  InstrumentController(const InstrumentController& other) noexcept = delete;
+  InstrumentController& operator=(const InstrumentController& other) noexcept = delete;
+  InstrumentController(InstrumentController&& other) noexcept = delete;
+  InstrumentController& operator=(InstrumentController&& other) noexcept = delete;
 
   /// Returns a control value.
   ///
@@ -136,9 +136,6 @@ class Instrument {
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
 
-  // TODO(#139): Merge this directly into `Instrument` implementation.
-  UltimateInstrument instrument_;
-
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;
 
@@ -168,8 +165,11 @@ class Instrument {
 
   // Message queue.
   MessageQueue message_queue_;
+
+  // Processor.
+  InstrumentProcessor processor_;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_

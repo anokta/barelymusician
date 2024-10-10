@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/performer.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -55,7 +55,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   Musician musician(kFrameRate);
 
   // Create an instrument.
-  Instrument instrument(kFrameRate, musician.GetUpdateFrame());
+  InstrumentController instrument(kFrameRate, musician.GetUpdateFrame());
   musician.AddInstrument(&instrument);
 
   // Set the note callbacks.
@@ -97,9 +97,10 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     Musician musician(kFrameRate);
 
     // Create instruments with note off callback.
-    std::vector<std::unique_ptr<Instrument>> instruments;
+    std::vector<std::unique_ptr<InstrumentController>> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(std::make_unique<Instrument>(kFrameRate, musician.GetUpdateFrame()));
+      instruments.push_back(
+          std::make_unique<InstrumentController>(kFrameRate, musician.GetUpdateFrame()));
       musician.AddInstrument(instruments[i].get());
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);

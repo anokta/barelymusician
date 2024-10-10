@@ -1,4 +1,4 @@
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 
 #include <algorithm>
 #include <array>
@@ -10,7 +10,7 @@
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 using ::testing::IsNull;
@@ -22,10 +22,10 @@ constexpr int kChannelCount = 1;
 constexpr int kFrameCount = 4;
 
 // Tests that the instrument returns a control value as expected.
-TEST(InstrumentTest, GetControl) {
+TEST(InstrumentControllerTest, GetControl) {
   ASSERT_EQ(static_cast<int>(InstrumentControl::kGain), 0);
 
-  Instrument instrument(kFrameRate, 0);
+  InstrumentController instrument(kFrameRate, 0);
   EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
 
   instrument.GetControl(0)->SetValue(0.25);
@@ -45,12 +45,12 @@ TEST(InstrumentTest, GetControl) {
 }
 
 // Tests that the instrument plays a single note as expected.
-TEST(InstrumentTest, PlaySingleNote) {
+TEST(InstrumentControllerTest, PlaySingleNote) {
   constexpr double kPitch = 1.0;
   constexpr double kIntensity = 0.5;
   constexpr int64_t kUpdateFrame = 20;
 
-  Instrument instrument(kFrameRate, kUpdateFrame);
+  InstrumentController instrument(kFrameRate, kUpdateFrame);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // TODO(#139): Reenable the sample checks once the reference frequency is added.
@@ -90,10 +90,10 @@ TEST(InstrumentTest, PlaySingleNote) {
 }
 
 // Tests that the instrument plays multiple notes as expected.
-TEST(InstrumentTest, PlayMultipleNotes) {
+TEST(InstrumentControllerTest, PlayMultipleNotes) {
   constexpr double kIntensity = 1.0;
 
-  Instrument instrument(1, 0);
+  InstrumentController instrument(1, 0);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // TODO(#139): Reenable the sample checks once the reference frequency is added.
@@ -133,11 +133,11 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 }
 
 // Tests that the instrument triggers its note callbacks as expected.
-TEST(InstrumentTest, SetNoteCallbacks) {
+TEST(InstrumentControllerTest, SetNoteCallbacks) {
   constexpr double kPitch = 3.3;
   constexpr double kIntensity = 0.25;
 
-  Instrument instrument(1, 0);
+  InstrumentController instrument(1, 0);
 
   // Trigger the note on callback.
   double note_on_pitch = 0.0;
@@ -192,11 +192,11 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 }
 
 // Tests that the instrument stops all notes as expected.
-TEST(InstrumentTest, SetAllNotesOff) {
+TEST(InstrumentControllerTest, SetAllNotesOff) {
   constexpr std::array<double, 3> kPitches = {1.0, 2.0, 3.0};
   constexpr double kIntensity = 1.0;
 
-  Instrument instrument(kFrameRate, 0);
+  InstrumentController instrument(kFrameRate, 0);
   for (const double pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }
@@ -215,4 +215,4 @@ TEST(InstrumentTest, SetAllNotesOff) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

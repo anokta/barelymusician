@@ -4,13 +4,13 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/musician.h"
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
-using ::barely::internal::Instrument;
+using ::barely::InstrumentController;
 using ::barely::internal::Musician;
 using ::barely::internal::Observable;
 using ::barely::internal::Observer;
@@ -31,10 +31,10 @@ struct BarelyMusician : public Observable<Musician> {
 };
 
 // Instrument.
-struct BarelyInstrument : public Observable<Instrument> {
+struct BarelyInstrument : public Observable<InstrumentController> {
  public:
   explicit BarelyInstrument(BarelyMusician* musician) noexcept
-      : Observable<Instrument>(musician->GetFrameRate(), musician->GetUpdateFrame()),
+      : Observable<InstrumentController>(musician->GetFrameRate(), musician->GetUpdateFrame()),
         musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddInstrument(this);

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <limits>
 
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/performer.h"
 
 namespace barely::internal {
@@ -23,7 +23,7 @@ constexpr double kSecondsFromMinutes = 60.0;
 Musician::Musician(int frame_rate) noexcept : frame_rate_(frame_rate) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::AddInstrument(Instrument* instrument) noexcept {
+void Musician::AddInstrument(InstrumentController* instrument) noexcept {
   assert(instrument);
   instruments_.emplace(instrument);
 }
@@ -35,7 +35,7 @@ void Musician::AddPerformer(Performer* performer) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::RemoveInstrument(Instrument* instrument) noexcept {
+void Musician::RemoveInstrument(InstrumentController* instrument) noexcept {
   assert(instrument);
   instruments_.erase(instrument);
 }

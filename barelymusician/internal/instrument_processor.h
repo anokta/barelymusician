@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_ULTIMATE_INSTRUMENT_H_
-#define BARELYMUSICIAN_INTERNAL_ULTIMATE_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
+#define BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
 
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
@@ -7,14 +7,14 @@
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/dsp/sample_player.h"
 
-namespace barely::internal {
+namespace barely {
 
-/// Ultimate instrument to conquer 'em all!
-class UltimateInstrument {
+/// Class that wraps the audio processing of an instrument.
+class InstrumentProcessor {
  public:
-  /// Constructs a new `UltimateInstrument`.
+  /// Constructs a new `InstrumentProcessor`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit UltimateInstrument(int frame_rate) noexcept;
+  explicit InstrumentProcessor(int frame_rate) noexcept;
 
   /// Implements `CustomInstrument`.
   void Process(double* output_samples, int output_channel_count, int output_frame_count) noexcept;
@@ -48,6 +48,6 @@ class UltimateInstrument {
   GainProcessor gain_processor_;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
-#endif  // BARELYMUSICIAN_INTERNAL_ULTIMATE_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_

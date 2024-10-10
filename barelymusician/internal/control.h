@@ -9,7 +9,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/event.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Control definition.
 struct ControlDefinition {
@@ -51,7 +51,7 @@ struct ControlDefinition {
 class Control {
  public:
   /// Event alias.
-  using Event = ::barely::internal::Event<ControlEventDefinition, int, double>;
+  using Event = ::barely::Event<ControlEventDefinition, int, double>;
 
   /// Set value callback alias.
   using SetValueCallback = std::function<void(int, double)>;
@@ -98,6 +98,6 @@ using ControlMap = std::unordered_map<int, Control>;
 ControlMap BuildControlMap(std::span<const ControlDefinition> definitions,
                            const Control::SetValueCallback& set_value_callback) noexcept;
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INTERNAL_CONTROL_H_

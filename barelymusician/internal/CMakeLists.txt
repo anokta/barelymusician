@@ -15,14 +15,14 @@ add_library(
 )
 
 add_library(
-  barelymusician_internal_instrument
-  instrument.cpp
-  instrument.h
-  ultimate_instrument.cpp
-  ultimate_instrument.h
+  barelymusician_internal_instrument_controller
+  instrument_controller.cpp
+  instrument_controller.h
+  instrument_processor.cpp
+  instrument_processor.h
 )
 target_link_libraries(
-  barelymusician_internal_instrument
+  barelymusician_internal_instrument_controller
   barelymusician_internal_control
   barelymusician_internal_event
   barelymusician_internal_message
@@ -58,7 +58,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_internal_musician
-  barelymusician_internal_instrument
+  barelymusician_internal_instrument_controller
   barelymusician_internal_performer
 )
 
@@ -115,18 +115,18 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_internal_event_test)
 
   add_executable(
-    barelymusician_internal_instrument_test
-    instrument_test.cpp
+    barelymusician_internal_instrument_controller_test
+    instrument_controller_test.cpp
   )
   target_link_libraries(
-    barelymusician_internal_instrument_test
+    barelymusician_internal_instrument_controller_test
     barelymusician_internal_control
-    barelymusician_internal_instrument
+    barelymusician_internal_instrument_controller
     barelymusician_headeronly
     gmock
     gtest_main
   )
-  gtest_discover_tests(barelymusician_internal_instrument_test)
+  gtest_discover_tests(barelymusician_internal_instrument_controller_test)
 
   add_executable(
     barelymusician_internal_message_queue_test
@@ -148,7 +148,7 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_internal_musician_test
     barelymusician_internal_control
-    barelymusician_internal_instrument
+    barelymusician_internal_instrument_controller
     barelymusician_internal_musician
     barelymusician_internal_performer
     barelymusician_headeronly

@@ -1,11 +1,10 @@
 #ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
 #define BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
 
-#include "barelymusician/dsp/enveloped_voice.h"
+#include <vector>
+
 #include "barelymusician/dsp/gain_processor.h"
-#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
-#include "barelymusician/dsp/sample_player.h"
 
 namespace barely {
 
@@ -29,27 +28,17 @@ class InstrumentProcessor {
   void SetNoteOn(double pitch, double intensity) noexcept;
 
  private:
-  // TODO(#139): These should share the same voice type.
-  using OscillatorVoice = EnvelopedVoice<Oscillator>;
-  struct Sampler {
-    using Voice = EnvelopedVoice<SamplePlayer>;
-    explicit Sampler(int frame_rate) noexcept;
-    double pitch = 0.0;
-    PolyphonicVoice<Voice> voice;
+  struct SampleData {
+    const double* data = nullptr;
+    int length = 0;
+    int frame_rate = 0;
   };
+  std::unordered_map<double, SampleData> sample_data_;
   int frame_rate_ = 0;
   double reference_frequency_ = 0.0;
-  bool oscillator_on_ = false;
-  PolyphonicVoice<OscillatorVoice> oscillator_voice_;
-  std::vector<Sampler> samplers_;
-  int voice_count_ = 0;
-  double attack_ = 0.0;
-  double decay_ = 0.0;
-  double sustain_ = 1.0;
-  double release_ = 0.0;
   double pitch_shift_ = 0.0;
-  bool sampler_loop_ = false;
   GainProcessor gain_processor_;
+  PolyphonicVoice voice_;
 };
 
 }  // namespace barely

@@ -11,13 +11,15 @@ add_library(
 )
 
 add_library(
-  barelymusician_enveloped_voice INTERFACE
-  enveloped_voice.h
+  barelymusician_voice
+  voice.cpp
+  voice.h
 )
 target_link_libraries(
-  barelymusician_enveloped_voice INTERFACE
-  barelymusician_envelope
   barelymusician_voice
+  barelymusician_envelope
+  barelymusician_oscillator
+  barelymusician_sample_player
 )
 
 add_library(
@@ -43,19 +45,19 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_polyphonic_voice INTERFACE
+  barelymusician_polyphonic_voice
+  polyphonic_voice.cpp
   polyphonic_voice.h
+)
+target_link_libraries(
+  barelymusician_polyphonic_voice
+  barelymusician_voice
 )
 
 add_library(
   barelymusician_sample_player
   sample_player.cpp
   sample_player.h
-)
-
-add_library(
-  barelymusician_voice INTERFACE
-  voice.h
 )
 
 if(ENABLE_TESTS)

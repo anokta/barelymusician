@@ -263,7 +263,6 @@ int main(int /*argc*/, char* argv[]) {
   percussion.SetControl(InstrumentControl::kGain, 0.25);
   percussion.SetControl(InstrumentControl::kAttack, 0.0);
   percussion.SetControl(InstrumentControl::kRelease, 0.1);
-  percussion.SetControl(InstrumentControl::kVoiceCount, 1);
   percussion.SetControl(InstrumentControl::kOscillatorOn, false);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =

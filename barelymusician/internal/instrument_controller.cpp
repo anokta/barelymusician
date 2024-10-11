@@ -47,14 +47,15 @@ static constexpr std::array<ControlDefinition, static_cast<int>(InstrumentContro
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentController::InstrumentController(int frame_rate, int64_t update_frame) noexcept
+InstrumentController::InstrumentController(int frame_rate, double reference_frequency,
+                                           int64_t update_frame) noexcept
     : control_map_(BuildControlMap(control_definitions,
                                    [this](int id, double value) {
                                      control_event_.Process(id, value);
                                      message_queue_.Add(update_frame_, ControlMessage{id, value});
                                    })),
       update_frame_(update_frame),
-      processor_(frame_rate) {
+      processor_(frame_rate, reference_frequency) {
   assert(frame_rate > 0);
   for (const auto& [id, control] : control_map_) {
     processor_.SetControl(id, control.GetValue());

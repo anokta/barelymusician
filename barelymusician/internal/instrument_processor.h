@@ -13,8 +13,11 @@ namespace barely {
 class InstrumentProcessor {
  public:
   /// Constructs a new `InstrumentProcessor`.
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit InstrumentProcessor(int frame_rate) noexcept;
+  InstrumentProcessor(int frame_rate, double reference_frequency) noexcept;
 
   /// Implements `CustomInstrument`.
   void Process(double* output_samples, int output_channel_count, int output_frame_count) noexcept;
@@ -35,6 +38,7 @@ class InstrumentProcessor {
     PolyphonicVoice<Voice> voice;
   };
   int frame_rate_ = 0;
+  double reference_frequency_ = 0.0;
   bool oscillator_on_ = false;
   PolyphonicVoice<OscillatorVoice> oscillator_voice_;
   std::vector<Sampler> samplers_;

@@ -1099,7 +1099,7 @@ namespace Barely {
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          if (!BarelyMusician_Create(config.sampleRate, ref _ptr)) {
+          if (!BarelyMusician_Create(config.sampleRate, /*C4=*/261.625565301, ref _ptr)) {
             Debug.LogError("Failed to initialize BarelyMusician");
             return;
           }
@@ -1204,7 +1204,8 @@ namespace Barely {
                                                                  IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
-      private static extern bool BarelyMusician_Create(Int32 frameRate, ref IntPtr outMusician);
+      private static extern bool BarelyMusician_Create(Int32 frameRate, double referenceFrequency,
+                                                       ref IntPtr outMusician);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern bool BarelyMusician_Destroy(IntPtr musician);

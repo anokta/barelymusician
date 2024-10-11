@@ -20,7 +20,8 @@ using ::barely::internal::Task;
 // Musician.
 struct BarelyMusician : public Observable<Musician> {
  public:
-  explicit BarelyMusician(int32_t frame_rate) noexcept : Observable<Musician>(frame_rate) {}
+  BarelyMusician(int32_t frame_rate, double reference_frequency) noexcept
+      : Observable<Musician>(frame_rate, reference_frequency) {}
   ~BarelyMusician() = default;
 
   // Non-copyable and non-movable.
@@ -34,7 +35,9 @@ struct BarelyMusician : public Observable<Musician> {
 struct BarelyInstrument : public Observable<InstrumentController> {
  public:
   explicit BarelyInstrument(BarelyMusician* musician) noexcept
-      : Observable<InstrumentController>(musician->GetFrameRate(), musician->GetUpdateFrame()),
+      : Observable<InstrumentController>(musician->GetFrameRate(),
+                                         musician->GetReferenceFrequency(),
+                                         musician->GetUpdateFrame()),
         musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddInstrument(this);
@@ -288,11 +291,12 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyMusician_Create(int32_t frame_rate, BarelyMusician** out_musician) {
+bool BarelyMusician_Create(int32_t frame_rate, double reference_frequency,
+                           BarelyMusician** out_musician) {
   if (frame_rate <= 0) return false;
   if (!out_musician) return false;
 
-  *out_musician = new BarelyMusician(frame_rate);
+  *out_musician = new BarelyMusician(frame_rate, reference_frequency);
   return true;
 }
 

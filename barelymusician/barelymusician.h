@@ -15,7 +15,7 @@
 ///   #include "barelymusician/barelymusician.h"
 ///
 ///   // Create.
-///   Musician musician(/*frame_rate=*/48000);
+///   Musician musician(/*frame_rate=*/48000, /*reference_frequency=/440.0);
 ///
 ///   // Set the tempo.
 ///   musician.SetTempo(/*tempo=*/124.0);
@@ -94,7 +94,7 @@
 ///
 ///   // Create.
 ///   BarelyMusician* musician = nullptr;
-///   BarelyMusician_Create(/*frame_rate=*/48000, &musician);
+///   BarelyMusician_Create(/*frame_rate=*/48000, /*reference_frequency=/440.0, &musician);
 ///
 ///   // Set the tempo.
 ///   BarelyMusician_SetTempo(musician, /*tempo=*/124.0);
@@ -554,9 +554,11 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
 /// Creates a new musician.
 ///
 /// @param frame_rate Frame rate in hertz.
+/// @param reference_frequency Reference frequency in hertz.
 /// @param out_musician Output pointer to musician.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Create(int32_t frame_rate, BarelyMusician** out_musician);
+BARELY_EXPORT bool BarelyMusician_Create(int32_t frame_rate, double reference_frequency,
+                                         BarelyMusician** out_musician);
 
 /// Destroys a musician.
 ///
@@ -1145,10 +1147,14 @@ class MusicianPtr : public PtrWrapper<BarelyMusician> {
   /// Creates a new `MusicianPtr`.
   ///
   /// @param frame_rate Frame rate in hertz.
+  /// @param reference_frequency Reference frequency in hertz.
   /// @return Musician pointer.
-  [[nodiscard]] static MusicianPtr Create(int frame_rate) noexcept {
+  // TODO(#139): Move the C4 constant somewhere else - likely back to internal with a setter here.
+  [[nodiscard]] static MusicianPtr Create(int frame_rate,
+                                          double reference_frequency = 261.625565301) noexcept {
     BarelyMusician* musician = nullptr;
-    [[maybe_unused]] const bool success = BarelyMusician_Create(frame_rate, &musician);
+    [[maybe_unused]] const bool success =
+        BarelyMusician_Create(frame_rate, reference_frequency, &musician);
     assert(success);
     return MusicianPtr(musician);
   }

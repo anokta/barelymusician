@@ -22,9 +22,10 @@ class InstrumentController {
   /// Constructs a new `InstrumentController`.
   ///
   /// @param frame_rate Frame rate in hertz.
+  /// @param reference_frequency Reference frequency in hertz.
   /// @param update_frame Update frame.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentController(int frame_rate, int64_t update_frame) noexcept;
+  InstrumentController(int frame_rate, double reference_frequency, int64_t update_frame) noexcept;
 
   /// Destroys `InstrumentController`.
   ~InstrumentController() noexcept;

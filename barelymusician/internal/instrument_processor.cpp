@@ -17,17 +17,18 @@ constexpr int kMaxVoiceCount = 32;
 // Returns the frequency of a given pitch.
 //
 // @param pitch Note pitch.
+// @param reference_frequency Reference frequency in hertz.
 // @return Note frequency.
-double GetFrequency(double pitch) noexcept {
-  static constexpr double kC4Frequency = 261.626;
-  return kC4Frequency * std::pow(2.0, pitch);
+double GetFrequency(double pitch, double reference_frequency) noexcept {
+  return reference_frequency * std::pow(2.0, pitch);
 }
 
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentProcessor::InstrumentProcessor(int frame_rate) noexcept
+InstrumentProcessor::InstrumentProcessor(int frame_rate, double reference_frequency) noexcept
     : frame_rate_(frame_rate),
+      reference_frequency_(reference_frequency),
       oscillator_voice_(OscillatorVoice(frame_rate_), kMaxVoiceCount),
       gain_processor_(frame_rate_) {}
 
@@ -171,15 +172,17 @@ void InstrumentProcessor::SetNoteOff(double pitch) noexcept {
 }
 
 void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
-  oscillator_voice_.Start(
-      pitch, [frequency = GetFrequency(pitch + pitch_shift_), intensity](OscillatorVoice* voice) {
-        voice->generator().SetFrequency(frequency);
-        voice->set_gain(intensity);
-      });
+  oscillator_voice_.Start(pitch,
+                          [frequency = GetFrequency(pitch + pitch_shift_, reference_frequency_),
+                           intensity](OscillatorVoice* voice) {
+                            voice->generator().SetFrequency(frequency);
+                            voice->set_gain(intensity);
+                          });
   // TODO(#139): Refactor this to make the percussion vs pitched sample distinction more robust.
   if (samplers_.size() == 1) {
     samplers_.front().voice.Start(
-        pitch, [speed = GetFrequency(pitch + pitch_shift_) / GetFrequency(samplers_.front().pitch),
+        pitch, [speed = GetFrequency(pitch + pitch_shift_, reference_frequency_) /
+                        GetFrequency(samplers_.front().pitch, reference_frequency_),
                 intensity](Sampler::Voice* voice) {
           voice->generator().SetSpeed(speed);
           voice->set_gain(intensity);

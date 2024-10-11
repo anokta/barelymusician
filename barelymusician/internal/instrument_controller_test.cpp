@@ -20,12 +20,13 @@ using ::testing::Property;
 constexpr int kFrameRate = 8000;
 constexpr int kChannelCount = 1;
 constexpr int kFrameCount = 4;
+constexpr double kReferenceFrequency = 1.0;
 
 // Tests that the instrument returns a control value as expected.
 TEST(InstrumentControllerTest, GetControl) {
   ASSERT_EQ(static_cast<int>(InstrumentControl::kGain), 0);
 
-  InstrumentController instrument(kFrameRate, 0);
+  InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
   EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
 
   instrument.GetControl(0)->SetValue(0.25);
@@ -50,19 +51,19 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
   constexpr double kIntensity = 0.5;
   constexpr int64_t kUpdateFrame = 20;
 
-  InstrumentController instrument(kFrameRate, kUpdateFrame);
+  InstrumentController instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
-  // TODO(#139): Reenable the sample checks once the reference frequency is added.
+  // TODO(#139): Reenable the sample checks with explicit samples using `SetData`.
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kUpdateFrame));
-  // for (int frame = 0; frame < kFrameCount; ++frame) {
-  //   for (int channel = 0; channel < kChannelCount; ++channel) {
-  //     EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
-  //   }
-  // }
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
+    }
+  }
 
   // Set a note on.
   instrument.SetNoteOn(kPitch, kIntensity);
@@ -93,7 +94,7 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
 TEST(InstrumentControllerTest, PlayMultipleNotes) {
   constexpr double kIntensity = 1.0;
 
-  InstrumentController instrument(1, 0);
+  InstrumentController instrument(1, kReferenceFrequency, 0);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // TODO(#139): Reenable the sample checks once the reference frequency is added.
@@ -137,7 +138,7 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   constexpr double kPitch = 3.3;
   constexpr double kIntensity = 0.25;
 
-  InstrumentController instrument(1, 0);
+  InstrumentController instrument(1, kReferenceFrequency, 0);
 
   // Trigger the note on callback.
   double note_on_pitch = 0.0;
@@ -196,7 +197,7 @@ TEST(InstrumentControllerTest, SetAllNotesOff) {
   constexpr std::array<double, 3> kPitches = {1.0, 2.0, 3.0};
   constexpr double kIntensity = 1.0;
 
-  InstrumentController instrument(kFrameRate, 0);
+  InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
   for (const double pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

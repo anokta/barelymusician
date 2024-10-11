@@ -23,6 +23,7 @@ using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kFrameRate = 48000;
+constexpr double kReferenceFrequency = 440.0;
 
 // Tests that the musician converts between beats and seconds as expected.
 TEST(MusicianTest, BeatsSecondsConversion) {
@@ -32,7 +33,7 @@ TEST(MusicianTest, BeatsSecondsConversion) {
   constexpr std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0, -24.6};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0, -12.3};
 
-  Musician musician(kFrameRate);
+  Musician musician(kFrameRate, kReferenceFrequency);
   musician.SetTempo(kTempo);
 
   for (int i = 0; i < kValueCount; ++i) {
@@ -52,10 +53,10 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr double kPitch = 0.5;
   constexpr double kIntensity = 0.75;
 
-  Musician musician(kFrameRate);
+  Musician musician(kFrameRate, kReferenceFrequency);
 
   // Create an instrument.
-  InstrumentController instrument(kFrameRate, musician.GetUpdateFrame());
+  InstrumentController instrument(kFrameRate, kReferenceFrequency, musician.GetUpdateFrame());
   musician.AddInstrument(&instrument);
 
   // Set the note callbacks.
@@ -94,13 +95,13 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   std::vector<double> note_off_pitches;
 
   {
-    Musician musician(kFrameRate);
+    Musician musician(kFrameRate, kReferenceFrequency);
 
     // Create instruments with note off callback.
     std::vector<std::unique_ptr<InstrumentController>> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(
-          std::make_unique<InstrumentController>(kFrameRate, musician.GetUpdateFrame()));
+      instruments.push_back(std::make_unique<InstrumentController>(kFrameRate, kReferenceFrequency,
+                                                                   musician.GetUpdateFrame()));
       musician.AddInstrument(instruments[i].get());
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
@@ -129,7 +130,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySinglePerformer) {
-  Musician musician(kFrameRate);
+  Musician musician(kFrameRate, kReferenceFrequency);
 
   // Create a performer.
   Performer performer(/*process_order=*/0);
@@ -175,7 +176,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
 
 // Tests that the musician sets its tempo as expected.
 TEST(MusicianTest, SetTempo) {
-  Musician musician(kFrameRate);
+  Musician musician(kFrameRate, kReferenceFrequency);
   EXPECT_DOUBLE_EQ(musician.GetTempo(), 120.0);
 
   musician.SetTempo(200.0);

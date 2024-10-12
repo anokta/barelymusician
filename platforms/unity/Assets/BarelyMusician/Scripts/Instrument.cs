@@ -7,16 +7,16 @@ using UnityEngine;
 namespace Barely {
   /// Synthesizer oscillator type.
   public enum OscillatorType {
-    /// Sine wave.
-    [InspectorName("Sine")] SINE = 0,
-    /// Sawtooth wave.
-    [InspectorName("Saw")] SAW = 1,
-    /// Square wave.
-    [InspectorName("Square")] SQUARE = 2,
-    /// White noise.
-    [InspectorName("Noise")] NOISE = 3,
     /// None.
-    [InspectorName("None")] NONE = 4,
+    [InspectorName("None")] NONE = 0,
+    /// Sine wave.
+    [InspectorName("Sine")] SINE,
+    /// Sawtooth wave.
+    [InspectorName("Saw")] SAW,
+    /// Square wave.
+    [InspectorName("Square")] SQUARE,
+    /// White noise.
+    [InspectorName("Noise")] NOISE,
   }
 
   /// A representation of a musical instrument that can be played in real-time.
@@ -75,6 +75,44 @@ namespace Barely {
       private AudioClip _sample = null;
     }
 
+    /// Gain.
+    [Range(0.0f, 1.0f)]
+    public double Gain = 1.0;
+
+    /// Number of voices.
+    [Range(1, 32)]
+    public int VoiceCount = 8;
+
+    /// Oscillator type.
+    public OscillatorType OscillatorType = OscillatorType.NONE;
+
+    /// List of samplers.
+    public List<Sampler> Samplers = null;
+    private int _samplerCount = 0;
+
+    /// Sample player loop.
+    public bool SamplerLoop = false;
+
+    /// Envelope attack in seconds.
+    [Range(0.0f, 60.0f)]
+    public double Attack = 0.05;
+
+    /// Envelope decay in seconds.
+    [Range(0.0f, 60.0f)]
+    public double Decay = 0.0;
+
+    /// Envelope sustain.
+    [Range(0.0f, 1.0f)]
+    public double Sustain = 1.0;
+
+    /// Envelope release in seconds.
+    [Range(0.0f, 60.0f)]
+    public double Release = 0.25;
+
+    /// Pitch shift.
+    [Range(-1.0f, 1.0f)]
+    public double PitchShift = 0.0;
+
     /// Control event callback.
     ///
     /// @param id Control identifier.
@@ -127,44 +165,6 @@ namespace Barely {
 
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
-
-    /// Gain.
-    [Range(0.0f, 1.0f)]
-    public double Gain = 1.0;
-
-    /// Number of voices.
-    [Range(1, 32)]
-    public int VoiceCount = 8;
-
-    /// Oscillator type.
-    public OscillatorType OscillatorType = OscillatorType.SINE;
-
-    /// List of samplers.
-    public List<Sampler> Samplers = null;
-    private int _samplerCount = 0;
-
-    /// Sample player loop.
-    public bool SamplerLoop = false;
-
-    /// Envelope attack in seconds.
-    [Range(0.0f, 60.0f)]
-    public double Attack = 0.05;
-
-    /// Envelope decay in seconds.
-    [Range(0.0f, 60.0f)]
-    public double Decay = 0.0;
-
-    /// Envelope sustain.
-    [Range(0.0f, 1.0f)]
-    public double Sustain = 1.0;
-
-    /// Envelope release in seconds.
-    [Range(0.0f, 60.0f)]
-    public double Release = 0.25;
-
-    /// Pitch shift.
-    [Range(-1.0f, 1.0f)]
-    public double PitchShift = 0.0;
 
     /// Returns a control value.
     ///
@@ -318,8 +318,7 @@ namespace Barely {
       int id = 0;
       SetControl(id++, Gain);
       SetControl(id++, (double)VoiceCount);
-      SetControl(id++, OscillatorType != OscillatorType.NONE ? 1.0 : 0.0);
-      SetControl(id++, OscillatorType != OscillatorType.NONE ? (double)OscillatorType : 0.0);
+      SetControl(id++, (double)OscillatorType);
       SetControl(id++, SamplerLoop ? 1.0 : 0.0);
       SetControl(id++, Attack);
       SetControl(id++, Decay);

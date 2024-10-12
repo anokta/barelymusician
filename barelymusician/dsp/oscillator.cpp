@@ -16,6 +16,8 @@ double Oscillator::Next() noexcept {
   double output = 0.0;
   // Generate the next sample.
   switch (type_) {
+    case OscillatorType::kNone:
+      break;
     case OscillatorType::kSine:
       output = std::sin(phase_ * 2.0 * std::numbers::pi_v<double>);
       break;
@@ -26,7 +28,6 @@ double Oscillator::Next() noexcept {
       output = (phase_ < 0.5) ? -1.0 : 1.0;
       break;
     case OscillatorType::kNoise:
-    default:
       output = random_.DrawUniform(-1.0, 1.0);
       break;
   }

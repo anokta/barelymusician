@@ -46,12 +46,6 @@ class Voice {
   [[nodiscard]] double gain() const noexcept { return gain_; }
   void set_gain(double gain) noexcept { gain_ = gain; }
 
-  [[nodiscard]] double oscillator_gain() const noexcept { return oscillator_gain_; }
-  void set_oscillator_gain(double gain) noexcept { oscillator_gain_ = gain; }
-
-  [[nodiscard]] double sample_player_gain() const noexcept { return sample_player_gain_; }
-  void set_sample_player_gain(double gain) noexcept { sample_player_gain_ = gain; }
-
  private:
   Envelope envelope_;
   Oscillator oscillator_;
@@ -59,12 +53,6 @@ class Voice {
 
   // Voice gain.
   double gain_ = 0.0;
-
-  // Oscillator gain.
-  double oscillator_gain_ = 0.0;
-
-  // Sample player gain.
-  double sample_player_gain_ = 0.0;
 
   // Last output.
   double output_ = 0.0;

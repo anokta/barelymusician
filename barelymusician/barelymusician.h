@@ -1239,9 +1239,6 @@ enum class InstrumentControl : int32_t {
   kGain = 0,
   /// Number of voices.
   kVoiceCount,
-  /// Oscillator on.
-  // TODO(#139): This could be replaced by a mix value between the oscillator and sample playback.
-  kOscillatorOn,
   /// Oscillator type.
   kOscillatorType,
   /// Sample player loop.

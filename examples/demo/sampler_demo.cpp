@@ -91,7 +91,6 @@ int main(int /*argc*/, char* argv[]) {
 
   Instrument instrument(musician);
   instrument.SetControl(InstrumentControl::kGain, kGain);
-  instrument.SetControl(InstrumentControl::kOscillatorOn, false);
   instrument.SetControl(InstrumentControl::kSamplePlayerLoop, kLoop);
   instrument.SetControl(InstrumentControl::kAttack, kAttack);
   instrument.SetControl(InstrumentControl::kRelease, kRelease);

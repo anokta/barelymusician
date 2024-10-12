@@ -428,7 +428,6 @@ MonoBehaviour:
   instrument: {fileID: 1737834380}
   arpeggiator: {fileID: 0}
   repeater: {fileID: 0}
-  scale: {fileID: 11400000, guid: 36cd54420cf4e3043978899564b2ec79, type: 2}
   octaveOffset: 0
   noteIntensity: 1
   repeaterNoteLength: 1
@@ -457,12 +456,15 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   Gain: 1
-  OscillatorType: 0
+  VoiceCount: 8
+  OscillatorType: 1
+  Samplers: []
+  SamplerLoop: 0
   Attack: 0.05
   Decay: 0
   Sustain: 1
   Release: 0.25
-  VoiceCount: 8
+  PitchShift: 0
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0

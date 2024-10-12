@@ -24,11 +24,10 @@ static constexpr std::array<ControlDefinition, static_cast<int>(InstrumentContro
         ControlDefinition{InstrumentControl::kGain, 1.0, 0.0, 1.0},
         // Number of voices.
         ControlDefinition{InstrumentControl::kVoiceCount, 8, 1, 32},
-        // Oscillator on.
-        ControlDefinition{InstrumentControl::kOscillatorOn, true},
         // Oscillator type.
         ControlDefinition{InstrumentControl::kOscillatorType,
-                          static_cast<double>(OscillatorType::kSine), 0.0,
+                          static_cast<double>(OscillatorType::kNone),
+                          static_cast<double>(OscillatorType::kNone),
                           static_cast<double>(OscillatorType::kNoise)},
         // Sample player loop.
         ControlDefinition{InstrumentControl::kSamplePlayerLoop, false},

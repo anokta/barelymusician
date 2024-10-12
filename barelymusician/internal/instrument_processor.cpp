@@ -27,10 +27,9 @@ double GetFrequency(double pitch, double reference_frequency) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(int frame_rate, double reference_frequency) noexcept
-    : frame_rate_(frame_rate),
-      reference_frequency_(reference_frequency),
-      gain_processor_(frame_rate_),
-      voice_(frame_rate_, kMaxVoiceCount) {}
+    : reference_frequency_(reference_frequency),
+      gain_processor_(frame_rate),
+      voice_(frame_rate, kMaxVoiceCount) {}
 
 void InstrumentProcessor::Process(double* output_samples, int output_channel_count,
                                   int output_frame_count) noexcept {
@@ -51,9 +50,6 @@ void InstrumentProcessor::SetControl(int id, double value) noexcept {
       break;
     case InstrumentControl::kVoiceCount:
       voice_.Resize(static_cast<int>(value));
-      break;
-    case InstrumentControl::kOscillatorOn:
-      voice_.Update([value](Voice* voice) { voice->set_oscillator_gain(value); });
       break;
     case InstrumentControl::kOscillatorType:
       voice_.Update([value](Voice* voice) noexcept {
@@ -103,8 +99,8 @@ void InstrumentProcessor::SetControl(int id, double value) noexcept {
 void InstrumentProcessor::SetData(const void* data, int size) noexcept {
   const double* data_double = static_cast<const double*>(data);
   if (data_double == nullptr || size == 0) {
+    voice_.Update([](Voice* voice) { voice->sample_player().SetData(nullptr, 0, 0); });
     sample_data_.clear();
-    voice_.Update([](Voice* voice) { voice->set_sample_player_gain(0.0); });
     return;
   }
 
@@ -118,6 +114,7 @@ void InstrumentProcessor::SetData(const void* data, int size) noexcept {
     sample_data_.emplace(pitch, SampleData{data_double, length, frame_rate});
     data_double += length;
   }
+
   // TODO(#139): Refactor this to make the percussion vs pitched sample distinction more robust.
   voice_.Update([&, pitch = sample_data_.begin()->first,
                  sample_data = (sample_data_.size() == 1) ? &sample_data_.begin()->second
@@ -127,7 +124,6 @@ void InstrumentProcessor::SetData(const void* data, int size) noexcept {
                                      sample_data->length);
       voice->sample_player().SetSpeed(voice->oscillator().GetFrequency() /
                                       GetFrequency(pitch, reference_frequency_));
-      voice->set_sample_player_gain(1.0);
     }
   });
 }
@@ -149,7 +145,6 @@ void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
       voice->sample_player().SetData(sample_data_it->second.data, sample_data_it->second.frame_rate,
                                      sample_data_it->second.length);
       voice->sample_player().SetSpeed(speed);
-      voice->set_sample_player_gain(1.0);
     }
     voice->set_gain(intensity);
   });

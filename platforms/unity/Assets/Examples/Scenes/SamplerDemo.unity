@@ -457,7 +457,7 @@ MonoBehaviour:
       m_Calls: []
   Gain: 1
   VoiceCount: 8
-  OscillatorType: 4
+  OscillatorType: 0
   Samplers:
   - Pitch: 0
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
@@ -466,6 +466,7 @@ MonoBehaviour:
   Decay: 0
   Sustain: 1
   Release: 0.07500000298023224
+  PitchShift: 0
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0

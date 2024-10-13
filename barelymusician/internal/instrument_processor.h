@@ -62,7 +62,6 @@ class InstrumentProcessor {
     const double* data = nullptr;
     int length = 0;
     int frame_rate = 0;
-    auto operator<=>(double other_pitch) const noexcept { return pitch <=> other_pitch; }
   };
   const SampleData* SelectSampleData(double pitch) const noexcept;
   std::vector<SampleData> sample_data_;

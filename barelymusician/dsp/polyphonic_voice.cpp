@@ -66,8 +66,8 @@ void PolyphonicVoice::Stop(double pitch, const VoiceCallback& shutdown_voice) no
 }
 
 void PolyphonicVoice::Update(const VoiceCallback& update_voice) noexcept {
-  for (int i = 0; i < voice_count_; ++i) {
-    update_voice(&voices_[i]);
+  for (Voice& voice : voices_) {
+    update_voice(&voice);
   }
 }
 

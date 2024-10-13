@@ -1,6 +1,5 @@
 #include "barelymusician/internal/instrument_processor.h"
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 
@@ -80,8 +79,6 @@ void InstrumentProcessor::SetControl(int id, double value) noexcept {
         voice_.Update([frequency_ratio = std::pow(2.0, pitch_offset)](Voice* voice) noexcept {
           if (voice->IsActive()) {
             voice->oscillator().SetFrequency(voice->oscillator().GetFrequency() * frequency_ratio);
-          }
-          if (voice->IsActive()) {
             voice->sample_player().SetSpeed(voice->sample_player().GetSpeed() * frequency_ratio);
           }
         });
@@ -140,18 +137,15 @@ const InstrumentProcessor::SampleData* InstrumentProcessor::SelectSampleData(
   if (sample_data_.empty()) {
     return nullptr;
   }
-  if (sample_data_.size() == 1) {
-    return &sample_data_.front();
+  // TODO(#139): `std::upper_bound` turned out to be slow here, but this may be optimized further.
+  for (int i = 0; i < static_cast<int>(sample_data_.size()); ++i) {
+    if (const SampleData* current = &sample_data_[i]; pitch <= current->pitch) {
+      return (i == 0 || pitch - sample_data_[i - 1].pitch > current->pitch - pitch)
+                 ? current
+                 : &sample_data_[i - 1];
+    }
   }
-  const auto upper_it = std::upper_bound(sample_data_.begin(), sample_data_.end(), pitch);
-  if (upper_it == sample_data_.begin()) {
-    return &sample_data_.front();
-  }
-  const auto lower_it = std::prev(upper_it);
-  if (upper_it == sample_data_.end() || pitch - lower_it->pitch <= upper_it->pitch - pitch) {
-    return &(*lower_it);
-  }
-  return &(*upper_it);
+  return &sample_data_.back();
 }
 
 }  // namespace barely

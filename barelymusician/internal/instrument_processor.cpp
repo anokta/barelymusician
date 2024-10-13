@@ -1,5 +1,6 @@
 #include "barelymusician/internal/instrument_processor.h"
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
@@ -77,15 +78,12 @@ void InstrumentProcessor::SetControl(int id, double value) noexcept {
       // TODO(#139): Simplify pitch shift.
       if (const double pitch_offset = value - pitch_shift_; pitch_offset != 0.0) {
         pitch_shift_ = value;
-        const double frequency_ratio = std::pow(2.0, pitch_offset);
-        voice_.Update([frequency_ratio, speed_ratio = (sample_data_.size() == 1)
-                                                          ? frequency_ratio
-                                                          : 1.0](Voice* voice) noexcept {
+        voice_.Update([frequency_ratio = std::pow(2.0, pitch_offset)](Voice* voice) noexcept {
           if (voice->IsActive()) {
             voice->oscillator().SetFrequency(voice->oscillator().GetFrequency() * frequency_ratio);
           }
           if (voice->IsActive()) {
-            voice->sample_player().SetSpeed(voice->sample_player().GetSpeed() * speed_ratio);
+            voice->sample_player().SetSpeed(voice->sample_player().GetSpeed() * frequency_ratio);
           }
         });
       }
@@ -97,10 +95,11 @@ void InstrumentProcessor::SetControl(int id, double value) noexcept {
 }
 
 void InstrumentProcessor::SetData(const void* data, int size) noexcept {
+  sample_data_.clear();
+  voice_.Update([](Voice* voice) { voice->sample_player().SetData(nullptr, 0, 0); });
+
   const double* data_double = static_cast<const double*>(data);
   if (data_double == nullptr || size == 0) {
-    voice_.Update([](Voice* voice) { voice->sample_player().SetData(nullptr, 0, 0); });
-    sample_data_.clear();
     return;
   }
 
@@ -111,43 +110,49 @@ void InstrumentProcessor::SetData(const void* data, int size) noexcept {
     const double pitch = *data_double++;
     const int frame_rate = static_cast<int>(*data_double++);
     const int length = static_cast<int>(*data_double++);
-    sample_data_.emplace(pitch, SampleData{data_double, length, frame_rate});
+    sample_data_.emplace_back(pitch, data_double, length, frame_rate);
     data_double += length;
   }
 
-  // TODO(#139): Refactor this to make the percussion vs pitched sample distinction more robust.
-  voice_.Update([&, pitch = sample_data_.begin()->first,
-                 sample_data = (sample_data_.size() == 1) ? &sample_data_.begin()->second
-                                                          : nullptr](Voice* voice) {
-    if (sample_data != nullptr && voice->IsActive()) {
-      voice->sample_player().SetData(sample_data->data, sample_data->frame_rate,
-                                     sample_data->length);
-      voice->sample_player().SetSpeed(voice->oscillator().GetFrequency() /
-                                      GetFrequency(pitch, reference_frequency_));
-    }
-  });
+  // TODO(#139): Support data update for already playing voices.
 }
 
 void InstrumentProcessor::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
 
 void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
   const double frequency = GetFrequency(pitch + pitch_shift_, reference_frequency_);
-  // TODO(#139): Refactor this to make the percussion vs pitched sample distinction more robust.
-  const auto sample_data_it =
-      (sample_data_.size() == 1) ? sample_data_.begin() : sample_data_.find(pitch);
-  const double speed =
-      (sample_data_.size() == 1)
-          ? frequency / GetFrequency(sample_data_.begin()->first, reference_frequency_)
-          : 1.0;
+  const SampleData* sample_data = SelectSampleData(pitch);
+  const double speed = (sample_data != nullptr && pitch + pitch_shift_ != sample_data->pitch)
+                           ? frequency / GetFrequency(sample_data->pitch, reference_frequency_)
+                           : 1.0;
   voice_.Start(pitch, [&](Voice* voice) {
     voice->oscillator().SetFrequency(frequency);
-    if (sample_data_it != sample_data_.end()) {
-      voice->sample_player().SetData(sample_data_it->second.data, sample_data_it->second.frame_rate,
-                                     sample_data_it->second.length);
+    if (sample_data != nullptr) {
+      voice->sample_player().SetData(sample_data->data, sample_data->frame_rate,
+                                     sample_data->length);
       voice->sample_player().SetSpeed(speed);
     }
     voice->set_gain(intensity);
   });
+}
+
+const InstrumentProcessor::SampleData* InstrumentProcessor::SelectSampleData(
+    double pitch) const noexcept {
+  if (sample_data_.empty()) {
+    return nullptr;
+  }
+  if (sample_data_.size() == 1) {
+    return &sample_data_.front();
+  }
+  const auto upper_it = std::upper_bound(sample_data_.begin(), sample_data_.end(), pitch);
+  if (upper_it == sample_data_.begin()) {
+    return &sample_data_.front();
+  }
+  const auto lower_it = std::prev(upper_it);
+  if (upper_it == sample_data_.end() || pitch - lower_it->pitch <= upper_it->pitch - pitch) {
+    return &(*lower_it);
+  }
+  return &(*upper_it);
 }
 
 }  // namespace barely

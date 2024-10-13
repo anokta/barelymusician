@@ -58,11 +58,14 @@ class InstrumentProcessor {
 
  private:
   struct SampleData {
+    double pitch = 0.0;
     const double* data = nullptr;
     int length = 0;
     int frame_rate = 0;
+    auto operator<=>(double other_pitch) const noexcept { return pitch <=> other_pitch; }
   };
-  std::unordered_map<double, SampleData> sample_data_;
+  const SampleData* SelectSampleData(double pitch) const noexcept;
+  std::vector<SampleData> sample_data_;
   double reference_frequency_ = 0.0;
   double pitch_shift_ = 0.0;
   GainProcessor gain_processor_;

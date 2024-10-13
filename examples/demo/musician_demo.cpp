@@ -8,7 +8,6 @@
 #include <string>
 #include <thread>
 #include <tuple>
-#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -265,7 +264,7 @@ int main(int /*argc*/, char* argv[]) {
   percussion.SetControl(InstrumentControl::kRelease, 0.1);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
-      [&](const std::unordered_map<double, std::string>& percussion_map) {
+      [&](const std::vector<std::pair<double, std::string>>& percussion_map) {
         std::vector<double> data;
         data.push_back(static_cast<double>(percussion_map.size()));
         for (const auto& [pitch, file_path] : percussion_map) {

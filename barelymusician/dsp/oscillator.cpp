@@ -30,6 +30,8 @@ double Oscillator::Next() noexcept {
     case OscillatorType::kNoise:
       output = random_.DrawUniform(-1.0, 1.0);
       break;
+    default:
+      break;
   }
   // Update the phasor.
   phase_ += increment_;

@@ -101,7 +101,7 @@ void Envelope::Start() noexcept {
 }
 
 void Envelope::Stop() noexcept {
-  if (state_ != State::kIdle) {
+  if (state_ != State::kIdle && state_ != State::kRelease) {
     phase_ = 0.0;
     release_output_ = output_;
     state_ = State::kRelease;

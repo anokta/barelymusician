@@ -1,9 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_
 #define BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_
 
-#include <cassert>
 #include <functional>
-#include <utility>
 #include <vector>
 
 #include "barelymusician/dsp/voice.h"
@@ -59,16 +57,18 @@ class PolyphonicVoice {
   void Update(const VoiceCallback& update_voice) noexcept;
 
  private:
-  // List of all voices.
-  std::vector<Voice> voices_;
+  // List of voices with their pitch and timestamp. Voice timestamp is used to determine which voice
+  // to steal when there are no free voices available.
+  // TODO(#12): Consider a more optimized implementation for voice stealing.
+  struct VoiceState {
+    Voice voice;
+    double pitch = 0.0;
+    int timestamp = 0;
+  };
+  std::vector<VoiceState> voice_states_;
 
   // Number of available voices.
   int voice_count_ = 0;
-
-  // List of voice states, namely the voice pitch and its timestamp. Timestamp is used to determine
-  // which voice to *steal* when there is no free voice available.
-  // TODO(#12): Consider a more optimized implementation for voice stealing.
-  std::vector<std::pair<double, int>> voice_states_;
 
   // Determines whether to retrigger or not.
   bool should_retrigger_ = false;

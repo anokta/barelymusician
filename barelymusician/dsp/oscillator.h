@@ -62,7 +62,7 @@ class Oscillator {
   double max_frequency_ = 0.0;
 
   // Oscillator type.
-  OscillatorType type_ = OscillatorType::kNoise;
+  OscillatorType type_ = OscillatorType::kNone;
 
   // Frequency.
   double frequency_ = 0.0;

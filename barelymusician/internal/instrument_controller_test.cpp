@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -17,9 +18,8 @@ using ::testing::IsNull;
 using ::testing::Pointee;
 using ::testing::Property;
 
-constexpr int kFrameRate = 8000;
+constexpr int kFrameRate = 4;
 constexpr int kChannelCount = 1;
-constexpr int kFrameCount = 4;
 constexpr double kReferenceFrequency = 1.0;
 
 // Tests that the instrument returns a control value as expected.
@@ -47,14 +47,22 @@ TEST(InstrumentControllerTest, GetControl) {
 
 // Tests that the instrument plays a single note as expected.
 TEST(InstrumentControllerTest, PlaySingleNote) {
+  constexpr int kFrameCount = 5;
   constexpr double kPitch = 1.0;
   constexpr double kIntensity = 0.5;
   constexpr int64_t kUpdateFrame = 20;
 
   InstrumentController instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
-  std::vector<double> buffer(kChannelCount * kFrameCount);
 
-  // TODO(#139): Reenable the sample checks with explicit samples using `SetData`.
+  constexpr std::array<double, 4 + kFrameRate> kSampleData = {
+      1.0, kPitch, static_cast<double>(kFrameRate), static_cast<double>(kFrameRate), 1.0, 2.0,
+      3.0, 4.0,
+  };
+  instrument.SetData({reinterpret_cast<const std::byte*>(kSampleData.data()),
+                      reinterpret_cast<const std::byte*>(kSampleData.data()) +
+                          sizeof(double) * kSampleData.size()});
+
+  std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -71,11 +79,12 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kUpdateFrame));
-  // for (int frame = 0; frame < kFrameCount; ++frame) {
-  //   for (int channel = 0; channel < kChannelCount; ++channel) {
-  //     EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch * kIntensity);
-  //   }
-  // }
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
+                       (frame < kFrameRate) ? kSampleData[frame + 4] * kIntensity : 0.0);
+    }
+  }
 
   // Set the note off.
   instrument.SetNoteOff(kPitch);
@@ -83,54 +92,77 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kUpdateFrame));
-  // for (int frame = 0; frame < kFrameCount; ++frame) {
-  //   for (int channel = 0; channel < kChannelCount; ++channel) {
-  //     EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
-  //   }
-  // }
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
+    }
+  }
 }
 
 // Tests that the instrument plays multiple notes as expected.
 TEST(InstrumentControllerTest, PlayMultipleNotes) {
-  constexpr double kIntensity = 1.0;
-
   InstrumentController instrument(1, kReferenceFrequency, 0);
-  std::vector<double> buffer(kChannelCount * kFrameCount);
 
-  // TODO(#139): Reenable the sample checks once the reference frequency is added.
+  constexpr std::array<double, 1 + kFrameRate * 4> kSampleData = {
+      static_cast<double>(kFrameRate),
+      // 1
+      0.0,
+      static_cast<double>(kFrameRate),
+      1.0,
+      1.0,
+      // 2
+      1.0,
+      static_cast<double>(kFrameRate),
+      1.0,
+      2.0,
+      // 3
+      2.0,
+      static_cast<double>(kFrameRate),
+      1.0,
+      3.0,
+      // 4
+      3.0,
+      static_cast<double>(kFrameRate),
+      1.0,
+      4.0,
+  };
+  instrument.SetData({reinterpret_cast<const std::byte*>(kSampleData.data()),
+                      reinterpret_cast<const std::byte*>(kSampleData.data()) +
+                          sizeof(double) * kSampleData.size()});
+
+  std::vector<double> buffer(kChannelCount * kFrameRate);
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
-  // for (int frame = 0; frame < kFrameCount; ++frame) {
-  //   for (int channel = 0; channel < kChannelCount; ++channel) {
-  //     EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
-  //   }
-  // }
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameRate, 0));
+  for (int frame = 0; frame < kFrameRate; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
+    }
+  }
 
   // Start a new note per each frame in the buffer.
-  for (int i = 0; i < kFrameCount; ++i) {
-    instrument.SetNoteOn(i, kIntensity);
+  for (int i = 0; i < kFrameRate; ++i) {
+    instrument.SetNoteOn(static_cast<double>(i), 1.0);
     instrument.Update(i + 1);
-    instrument.SetNoteOff(i);
+    instrument.SetNoteOff(static_cast<double>(i));
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
-  // for (int frame = 0; frame < kFrameCount; ++frame) {
-  //   for (int channel = 0; channel < kChannelCount; ++channel) {
-  //     EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
-  //                      static_cast<double>(frame) * kIntensity);
-  //   }
-  // }
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameRate, 0));
+  for (int frame = 0; frame < kFrameRate; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], static_cast<double>(frame + 1));
+    }
+  }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kFrameCount));
-  // for (int frame = 0; frame < kFrameCount; ++frame) {
-  //   for (int channel = 0; channel < kChannelCount; ++channel) {
-  //     EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
-  //   }
-  // }
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameRate, kFrameRate));
+  for (int frame = 0; frame < kFrameRate; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
+    }
+  }
 }
 
 // Tests that the instrument triggers its note callbacks as expected.

@@ -1,7 +1,6 @@
 #include "barelymusician/internal/instrument_processor.h"
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cmath>
 
@@ -110,7 +109,7 @@ void InstrumentProcessor::SetData(const void* data, int size) noexcept {
     const double pitch = *data_double++;
     const int frame_rate = static_cast<int>(*data_double++);
     const int length = static_cast<int>(*data_double++);
-    sample_data_.emplace_back(pitch, data_double, length, frame_rate);
+    sample_data_.push_back({pitch, data_double, length, frame_rate});
     data_double += length;
   }
 

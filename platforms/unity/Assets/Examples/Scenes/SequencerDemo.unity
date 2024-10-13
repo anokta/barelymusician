@@ -218,6 +218,7 @@ MonoBehaviour:
   Sustain: 0.800000011920929
   Release: 0.5
   PitchShift: 0
+  Retrigger: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -718,7 +719,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Gain: 1
-  VoiceCount: 1
+  VoiceCount: 4
   OscillatorType: 0
   Samplers:
   - Pitch: 0
@@ -735,6 +736,7 @@ MonoBehaviour:
   Sustain: 1
   Release: 1
   PitchShift: 0
+  Retrigger: 1
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1023,6 +1025,7 @@ MonoBehaviour:
   Sustain: 1
   Release: 0.5
   PitchShift: 0
+  Retrigger: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1352,6 +1355,7 @@ MonoBehaviour:
   Sustain: 1
   Release: 0.05000000074505806
   PitchShift: 0
+  Retrigger: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1571,6 +1575,7 @@ MonoBehaviour:
   Sustain: 1
   Release: 0.07500000298023224
   PitchShift: 0
+  Retrigger: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []

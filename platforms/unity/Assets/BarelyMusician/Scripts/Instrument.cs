@@ -113,6 +113,9 @@ namespace Barely {
     [Range(-1.0f, 1.0f)]
     public double PitchShift = 0.0;
 
+    /// Retrigger.
+    public bool Retrigger = false;
+
     /// Control event callback.
     ///
     /// @param id Control identifier.
@@ -325,6 +328,7 @@ namespace Barely {
       SetControl(id++, Sustain);
       SetControl(id++, Release);
       SetControl(id++, PitchShift);
+      SetControl(id++, Retrigger ? 1.0 : 0.0);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

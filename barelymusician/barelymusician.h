@@ -1254,6 +1254,8 @@ enum class InstrumentControl : int32_t {
   kRelease,
   /// Pitch shift.
   kPitchShift,
+  /// Retrigger.
+  kRetrigger,
   /// Number of controls.
   kCount,
 };

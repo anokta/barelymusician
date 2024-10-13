@@ -51,38 +51,41 @@ void InstrumentProcessor::SetControl(int id, double value) noexcept {
       voice_.Resize(static_cast<int>(value));
       break;
     case InstrumentControl::kOscillatorType:
-      voice_.Update([value](Voice* voice) noexcept {
-        voice->oscillator().SetType(static_cast<OscillatorType>(static_cast<int>(value)));
+      voice_.Update([value](Voice& voice) noexcept {
+        voice.oscillator().SetType(static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
     case InstrumentControl::kSamplePlayerLoop:
-      voice_.Update([value](Voice* voice) noexcept {
-        voice->sample_player().SetLoop(static_cast<bool>(value));
+      voice_.Update([value](Voice& voice) noexcept {
+        voice.sample_player().SetLoop(static_cast<bool>(value));
       });
       break;
     case InstrumentControl::kAttack:
-      voice_.Update([value](Voice* voice) noexcept { voice->envelope().SetAttack(value); });
+      voice_.Update([value](Voice& voice) noexcept { voice.envelope().SetAttack(value); });
       break;
     case InstrumentControl::kDecay:
-      voice_.Update([value](Voice* voice) noexcept { voice->envelope().SetDecay(value); });
+      voice_.Update([value](Voice& voice) noexcept { voice.envelope().SetDecay(value); });
       break;
     case InstrumentControl::kSustain:
-      voice_.Update([value](Voice* voice) noexcept { voice->envelope().SetSustain(value); });
+      voice_.Update([value](Voice& voice) noexcept { voice.envelope().SetSustain(value); });
       break;
     case InstrumentControl::kRelease:
-      voice_.Update([value](Voice* voice) noexcept { voice->envelope().SetRelease(value); });
+      voice_.Update([value](Voice& voice) noexcept { voice.envelope().SetRelease(value); });
       break;
     case InstrumentControl::kPitchShift:
       // TODO(#139): Simplify pitch shift.
       if (const double pitch_offset = value - pitch_shift_; pitch_offset != 0.0) {
         pitch_shift_ = value;
-        voice_.Update([frequency_ratio = std::pow(2.0, pitch_offset)](Voice* voice) noexcept {
-          if (voice->IsActive()) {
-            voice->oscillator().SetFrequency(voice->oscillator().GetFrequency() * frequency_ratio);
-            voice->sample_player().SetSpeed(voice->sample_player().GetSpeed() * frequency_ratio);
+        voice_.Update([frequency_ratio = std::pow(2.0, pitch_offset)](Voice& voice) noexcept {
+          if (voice.IsActive()) {
+            voice.oscillator().SetFrequency(voice.oscillator().GetFrequency() * frequency_ratio);
+            voice.sample_player().SetSpeed(voice.sample_player().GetSpeed() * frequency_ratio);
           }
         });
       }
+      break;
+    case InstrumentControl::kRetrigger:
+      voice_.SetRetrigger(static_cast<bool>(value));
       break;
     default:
       assert(false);
@@ -92,7 +95,7 @@ void InstrumentProcessor::SetControl(int id, double value) noexcept {
 
 void InstrumentProcessor::SetData(const void* data, int size) noexcept {
   sample_data_.clear();
-  voice_.Update([](Voice* voice) { voice->sample_player().SetData(nullptr, 0, 0); });
+  voice_.Update([](Voice& voice) { voice.sample_player().SetData(nullptr, 0, 0); });
 
   const double* data_double = static_cast<const double*>(data);
   if (data_double == nullptr || size == 0) {
@@ -121,14 +124,14 @@ void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
   const double speed = (sample_data != nullptr && pitch + pitch_shift_ != sample_data->pitch)
                            ? frequency / GetFrequency(sample_data->pitch, reference_frequency_)
                            : 1.0;
-  voice_.Start(pitch, [&](Voice* voice) {
-    voice->oscillator().SetFrequency(frequency);
+  voice_.Start(pitch, [&](Voice& voice) {
+    voice.oscillator().SetFrequency(frequency);
     if (sample_data != nullptr) {
-      voice->sample_player().SetData(sample_data->data, sample_data->frame_rate,
-                                     sample_data->length);
-      voice->sample_player().SetSpeed(speed);
+      voice.sample_player().SetData(sample_data->data, sample_data->frame_rate,
+                                    sample_data->length);
+      voice.sample_player().SetSpeed(speed);
     }
-    voice->set_gain(intensity);
+    voice.set_gain(intensity);
   });
 }
 

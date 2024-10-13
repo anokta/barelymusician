@@ -41,6 +41,8 @@ static constexpr std::array<ControlDefinition, static_cast<int>(InstrumentContro
         ControlDefinition{InstrumentControl::kRelease, 0.25, 0.0, 60.0},
         // Pitch shift.
         ControlDefinition{InstrumentControl::kPitchShift, 0.0},
+        // Retrigger.
+        ControlDefinition{InstrumentControl::kRetrigger, false},
 };
 
 }  // namespace

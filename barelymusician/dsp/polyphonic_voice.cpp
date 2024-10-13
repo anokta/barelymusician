@@ -20,54 +20,60 @@ void PolyphonicVoice::Resize(int voice_count) noexcept {
   voice_states_.resize(voice_count, {0.0, 0});
 }
 
+void PolyphonicVoice::SetRetrigger(bool should_retrigger) noexcept {
+  should_retrigger_ = should_retrigger;
+}
+
 void PolyphonicVoice::Start(double pitch, const VoiceCallback& init_voice) noexcept {
   if (voice_count_ == 0) {
     // No voices available.
     return;
   }
 
-  int voice_index = 0;
+  int voice_index = -1;
+  int oldest_voice_index = 0;
   for (int i = 0; i < voice_count_; ++i) {
+    if (should_retrigger_ && voice_states_[i].first == pitch) {
+      // Retrigger the existing voice.
+      voice_index = i;
+    }
+
     if (voices_[i].IsActive()) {
       // Increment timestamp.
       ++voice_states_[i].second;
       if (voice_states_[i].second > voice_states_[voice_index].second) {
-        // If no free voices available, steal the last used active voice.
-        voice_index = i;
+        oldest_voice_index = i;
       }
-    }
-  }
-  for (int i = 0; i < voice_count_; ++i) {
-    if (!voices_[i].IsActive()) {
+    } else if (voice_index == -1) {
       // Acquire a free voice.
       voice_index = i;
-      break;
     }
   }
-  Voice* voice = &voices_[voice_index];
+  if (voice_index == -1) {
+    // If no voices are available to acquire, steal the oldest active voice.
+    voice_index = oldest_voice_index;
+  }
+  Voice& voice = voices_[voice_index];
   voice_states_[voice_index] = {pitch, 0};
 
   if (init_voice) {
     init_voice(voice);
   }
-  voice->Start();
+  voice.Start();
 }
 
-void PolyphonicVoice::Stop(double pitch, const VoiceCallback& shutdown_voice) noexcept {
+void PolyphonicVoice::Stop(double pitch) noexcept {
   for (int i = 0; i < voice_count_; ++i) {
     if (voice_states_[i].first == pitch && voices_[i].IsActive()) {
-      Voice* voice = &voices_[i];
-      if (shutdown_voice) {
-        shutdown_voice(voice);
-      }
-      voice->Stop();
+      voices_[i].Stop();
+      break;
     }
   }
 }
 
 void PolyphonicVoice::Update(const VoiceCallback& update_voice) noexcept {
   for (Voice& voice : voices_) {
-    update_voice(&voice);
+    update_voice(voice);
   }
 }
 

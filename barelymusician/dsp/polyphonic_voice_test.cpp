@@ -92,7 +92,7 @@ TEST(PolyphonicVoiceTest, Update) {
   //   polyphonic_voice.Stop(static_cast<double>(i));
   // }
 
-  polyphonic_voice.Update([](Voice* voice) { voice->set_gain(1.0); });
+  polyphonic_voice.Update([](Voice& voice) { voice.set_gain(1.0); });
 
   // for (int i = 0; i < kVoiceCount; ++i) {
   //   polyphonic_voice.Start(static_cast<double>(i));

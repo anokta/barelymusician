@@ -16,7 +16,7 @@ class PolyphonicVoice {
   /// Voice mutator callback signature.
   ///
   /// @param voice Pointer to voice.
-  using VoiceCallback = std::function<void(Voice* voice)>;
+  using VoiceCallback = std::function<void(Voice& voice)>;
 
   /// Constructs new `PolyphonicVoice` with the given `base_voice`.
   ///
@@ -36,6 +36,11 @@ class PolyphonicVoice {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Resize(int voice_count) noexcept;
 
+  /// Enables retrigger.
+  ///
+  /// @param should_retrigger True to retrigger.
+  void SetRetrigger(bool should_retrigger) noexcept;
+
   /// Starts a new voice with a given pitch.
   ///
   /// @param pitch Voice pitch.
@@ -46,7 +51,7 @@ class PolyphonicVoice {
   ///
   /// @param pitch Voice pitch.
   /// @param shutdown_voice Callback to shutdown the voice.
-  void Stop(double pitch, const VoiceCallback& shutdown_voice = nullptr) noexcept;
+  void Stop(double pitch) noexcept;
 
   /// Updates all the available voices with the given callback.
   ///
@@ -64,6 +69,9 @@ class PolyphonicVoice {
   // which voice to *steal* when there is no free voice available.
   // TODO(#12): Consider a more optimized implementation for voice stealing.
   std::vector<std::pair<double, int>> voice_states_;
+
+  // Determines whether to retrigger or not.
+  bool should_retrigger_ = false;
 };
 
 }  // namespace barely

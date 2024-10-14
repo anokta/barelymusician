@@ -7,12 +7,8 @@ Voice::Voice(int frame_rate) noexcept
 
 bool Voice::IsActive() const noexcept { return envelope_.IsActive(); }
 
-double Voice::Next(int channel) noexcept {
-  // TODO(#139): Decide on how many channels to support.
-  if (channel == 0) {
-    output_ = gain_ * envelope_.Next() * (oscillator_.Next() + sample_player_.Next());
-  }
-  return output_;
+double Voice::Next() noexcept {
+  return gain_ * envelope_.Next() * (oscillator_.Next() + sample_player_.Next());
 }
 
 void Voice::Start() noexcept {

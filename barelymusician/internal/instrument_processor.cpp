@@ -33,7 +33,7 @@ InstrumentProcessor::InstrumentProcessor(int frame_rate, double reference_freque
 void InstrumentProcessor::Process(double* output_samples, int output_channel_count,
                                   int output_frame_count) noexcept {
   for (int frame = 0; frame < output_frame_count; ++frame) {
-    const double mono_sample = voice_.Next(0);
+    const double mono_sample = voice_.Next();
     for (int channel = 0; channel < output_channel_count; ++channel) {
       output_samples[output_channel_count * frame + channel] = mono_sample;
     }

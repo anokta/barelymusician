@@ -21,11 +21,10 @@ class Voice {
   /// @return True if active.
   [[nodiscard]] bool IsActive() const noexcept;
 
-  /// Returns the next output sample for the given output channel.
+  /// Returns the next output sample.
   ///
-  /// @param channel Output channel.
   /// @return Output sample.
-  double Next(int channel) noexcept;
+  double Next() noexcept;
 
   /// Starts the voice.
   void Start() noexcept;
@@ -53,9 +52,6 @@ class Voice {
 
   // Voice gain.
   double gain_ = 0.0;
-
-  // Last output.
-  double output_ = 0.0;
 };
 
 }  // namespace barely

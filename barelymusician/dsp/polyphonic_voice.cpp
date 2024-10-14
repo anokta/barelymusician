@@ -5,11 +5,11 @@ namespace barely {
 PolyphonicVoice::PolyphonicVoice(int frame_rate, int max_voice_count) noexcept
     : voice_states_(max_voice_count, {Voice(frame_rate)}) {}
 
-double PolyphonicVoice::Next(int channel) noexcept {
+double PolyphonicVoice::Next() noexcept {
   double output = 0.0;
   for (int i = 0; i < voice_count_; ++i) {
     if (voice_states_[i].voice.IsActive()) {
-      output += voice_states_[i].voice.Next(channel);
+      output += voice_states_[i].voice.Next();
     }
   }
   return output;

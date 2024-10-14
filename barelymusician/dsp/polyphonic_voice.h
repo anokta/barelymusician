@@ -22,11 +22,10 @@ class PolyphonicVoice {
   /// @param max_voice_count Maximum number of voices allowed to be set.
   PolyphonicVoice(int frame_rate, int max_voice_count) noexcept;
 
-  /// Returns the next output sample for the given output `channel`.
+  /// Returns the next output sample.
   ///
-  /// @param channel Output channel.
   /// @return Accumulated output sample.
-  double Next(int channel) noexcept;
+  double Next() noexcept;
 
   /// Resizes number of available voices that can be played simultaneously.
   ///

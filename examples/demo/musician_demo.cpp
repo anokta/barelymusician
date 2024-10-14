@@ -127,7 +127,7 @@ void ComposeLine(int octave_offset, double intensity, int bar, int beat, int bea
   }
   if (beat % 2 == 0) {
     add_note(0.0, 0.125, harmonic - note_offset);
-    add_note(0.5, 0.55, harmonic - 2 * note_offset);
+    add_note(0.5, 0.625, harmonic - 2 * note_offset);
   }
   if (beat + 1 == beat_count && bar % 2 == 1) {
     add_note(0.25, 0.375, harmonic + 2 * note_offset);

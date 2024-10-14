@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/performer.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -23,38 +23,7 @@ using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kFrameRate = 48000;
-constexpr int kChannelCount = 2;
-constexpr int kFrameCount = 8;
-
-// Returns a test instrument definition that produces constant output per note.
-InstrumentDefinition GetTestInstrumentDefinition() {
-  static const std::vector<ControlDefinition> control_definitions = {
-      ControlDefinition{0, 0.0, -10.0, 10.0},
-  };
-  static const std::vector<ControlDefinition> note_control_definitions = {
-      ControlDefinition{0, 1.0, 0.0, 1.0},
-  };
-  return InstrumentDefinition(
-      [](void** state, int32_t /*frame_rate*/) {
-        *state = reinterpret_cast<void*>(new double{0.0});
-      },
-      [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, int32_t output_channel_count,
-         int32_t output_frame_count) {
-        std::fill_n(output_samples, output_channel_count * output_frame_count,
-                    *reinterpret_cast<double*>(*state));
-      },
-      [](void** state, int32_t id, double value) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(id + 1) * value;
-      },
-      [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {},
-      [](void** /*state*/, double /*pitch*/, int32_t /*id*/, double /*value*/) {},
-      [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
-      [](void** state, double pitch, double intensity) {
-        *reinterpret_cast<double*>(*state) = pitch * intensity;
-      },
-      control_definitions, note_control_definitions);
-}
+constexpr double kReferenceFrequency = 440.0;
 
 // Tests that the musician converts between beats and seconds as expected.
 TEST(MusicianTest, BeatsSecondsConversion) {
@@ -64,7 +33,7 @@ TEST(MusicianTest, BeatsSecondsConversion) {
   constexpr std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0, -24.6};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0, -12.3};
 
-  Musician musician(kFrameRate);
+  Musician musician(kFrameRate, kReferenceFrequency);
   musician.SetTempo(kTempo);
 
   for (int i = 0; i < kValueCount; ++i) {
@@ -84,20 +53,11 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr double kPitch = 0.5;
   constexpr double kIntensity = 0.75;
 
-  Musician musician(kFrameRate);
-  std::vector<double> buffer(kChannelCount * kFrameCount);
+  Musician musician(kFrameRate, kReferenceFrequency);
 
   // Create an instrument.
-  Instrument instrument(GetTestInstrumentDefinition(), kFrameRate, musician.GetUpdateFrame());
+  InstrumentController instrument(kFrameRate, kReferenceFrequency, musician.GetUpdateFrame());
   musician.AddInstrument(&instrument);
-
-  std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
-    }
-  }
 
   // Set the note callbacks.
   double note_on_pitch = 0.0;
@@ -126,14 +86,6 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
-  std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch * kIntensity);
-    }
-  }
-
   // Remove the instrument.
   musician.RemoveInstrument(&instrument);
 }
@@ -143,13 +95,13 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   std::vector<double> note_off_pitches;
 
   {
-    Musician musician(kFrameRate);
+    Musician musician(kFrameRate, kReferenceFrequency);
 
     // Create instruments with note off callback.
-    std::vector<std::unique_ptr<Instrument>> instruments;
+    std::vector<std::unique_ptr<InstrumentController>> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(std::make_unique<Instrument>(GetTestInstrumentDefinition(), kFrameRate,
-                                                         musician.GetUpdateFrame()));
+      instruments.push_back(std::make_unique<InstrumentController>(kFrameRate, kReferenceFrequency,
+                                                                   musician.GetUpdateFrame()));
       musician.AddInstrument(instruments[i].get());
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
@@ -178,7 +130,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySinglePerformer) {
-  Musician musician(kFrameRate);
+  Musician musician(kFrameRate, kReferenceFrequency);
 
   // Create a performer.
   Performer performer(/*process_order=*/0);
@@ -224,7 +176,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
 
 // Tests that the musician sets its tempo as expected.
 TEST(MusicianTest, SetTempo) {
-  Musician musician(kFrameRate);
+  Musician musician(kFrameRate, kReferenceFrequency);
   EXPECT_DOUBLE_EQ(musician.GetTempo(), 120.0);
 
   musician.SetTempo(200.0);

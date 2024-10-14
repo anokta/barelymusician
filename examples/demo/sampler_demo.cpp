@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instruments/sampler_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -21,8 +20,8 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentControl;
 using ::barely::Musician;
-using ::barely::SamplerInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -61,8 +60,11 @@ std::vector<double> GetSampleData(const std::string& file_path) {
   const auto& sample_data = sample_file.GetData();
 
   std::vector<double> data;
-  data.reserve(sample_data.size() + 1);
+  data.reserve(sample_data.size() + 4);
+  data.push_back(1);
+  data.push_back(kRootPitch);
   data.push_back(frame_rate);
+  data.push_back(sample_data.size());
   data.insert(data.end(), sample_data.begin(), sample_data.end());
   return data;
 }
@@ -87,13 +89,12 @@ int main(int /*argc*/, char* argv[]) {
 
   Musician musician(kFrameRate);
 
-  Instrument instrument(musician, SamplerInstrument::GetDefinition());
-  instrument.SetControl(SamplerInstrument::Control::kGain, kGain);
-  instrument.SetControl(SamplerInstrument::Control::kRootPitch, kRootPitch);
-  instrument.SetControl(SamplerInstrument::Control::kLoop, kLoop);
-  instrument.SetControl(SamplerInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SamplerInstrument::Control::kRelease, kRelease);
-  instrument.SetControl(SamplerInstrument::Control::kVoiceCount, kVoiceCount);
+  Instrument instrument(musician);
+  instrument.SetControl(InstrumentControl::kGain, kGain);
+  instrument.SetControl(InstrumentControl::kSamplePlayerLoop, kLoop);
+  instrument.SetControl(InstrumentControl::kAttack, kAttack);
+  instrument.SetControl(InstrumentControl::kRelease, kRelease);
+  instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
 
   instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 

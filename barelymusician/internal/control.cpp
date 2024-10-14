@@ -3,11 +3,12 @@
 
 #include <algorithm>
 #include <cassert>
+#include <span>
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
 
-namespace barely::internal {
+namespace barely {
 
 Control::Control(ControlDefinition definition, SetValueCallback set_value_callback) noexcept
     : definition_(definition),
@@ -36,14 +37,14 @@ void Control::SetValue(double value) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-ControlMap BuildControlMap(const ControlDefinition* definitions, int definition_count,
+ControlMap BuildControlMap(std::span<const ControlDefinition> definitions,
                            const Control::SetValueCallback& set_value_callback) noexcept {
   ControlMap control_map;
-  control_map.reserve(definition_count);
-  for (int index = 0; index < definition_count; ++index) {
-    control_map.emplace(definitions[index].id, Control(definitions[index], set_value_callback));
+  control_map.reserve(definitions.size());
+  for (const auto& definition : definitions) {
+    control_map.emplace(definition.id, Control(definition, set_value_callback));
   }
   return control_map;
 }
 
-}  // namespace barely::internal
+}  // namespace barely

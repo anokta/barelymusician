@@ -408,6 +408,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Gain: 0.5
+  VoiceCount: 8
+  OscillatorType: 2
+  Samplers: []
+  SamplerLoop: 0
+  Attack: 0.009999999776482582
+  Decay: 0.05000000074505806
+  Sustain: 0.25
+  Release: 0.02500000037252903
+  PitchShift: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -420,13 +430,6 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 0.5
-  OscillatorType: 1
-  Attack: 0.009999999776482582
-  Decay: 0.05000000074505806
-  Sustain: 0.25
-  Release: 0.02500000037252903
-  VoiceCount: 8
 --- !u!4 &2014543006
 Transform:
   m_ObjectHideFlags: 0

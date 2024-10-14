@@ -75,10 +75,6 @@ VERS_1.0 {
     BarelyScale_GetPitch;
     Barely_GetScaleDefinition;
 
-    BarelyPercussionInstrument_GetDefinition;
-    BarelySamplerInstrument_GetDefinition;
-    BarelySynthInstrument_GetDefinition;
-
   local:
     *;
 };

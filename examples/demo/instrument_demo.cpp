@@ -9,7 +9,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -17,9 +16,9 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentControl;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::SynthInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -62,12 +61,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Musician musician(kFrameRate);
 
-  Instrument instrument(musician, SynthInstrument::GetDefinition());
-  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
-  instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
+  Instrument instrument(musician);
+  instrument.SetControl(InstrumentControl::kGain, kGain);
+  instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
+  instrument.SetControl(InstrumentControl::kAttack, kAttack);
+  instrument.SetControl(InstrumentControl::kRelease, kRelease);
+  instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
 
   instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";

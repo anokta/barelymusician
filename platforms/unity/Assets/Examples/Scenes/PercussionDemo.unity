@@ -440,9 +440,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 1737834378}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bbb9301535068f43b71fd6d9e1f57f8, type: 3}
+  m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Gain: 1
+  VoiceCount: 4
+  OscillatorType: 0
+  Samplers:
+  - Pitch: 0
+    Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
+  - Pitch: 2
+    Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
+  - Pitch: 4
+    Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
+  - Pitch: 5
+    Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
+  SamplerLoop: 0
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 1
+  PitchShift: 0
+  Retrigger: 1
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -455,17 +474,6 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 1
-  PadRelease: 1
-  Pads:
-  - Pitch: 0
-    Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
-  - Pitch: 2
-    Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
-  - Pitch: 4
-    Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
-  - Pitch: 5
-    Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0

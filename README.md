@@ -27,8 +27,6 @@ For background about this project, see the original research paper
 ```cpp
 // Import the core engine.
 #include "barelymusician/barelymusician.h"
-// Import the synth instrument.
-#include "barelymusician/instruments/synth_instrument.h"
 
 // Create a musician.
 barely::Musician musician(/*frame_rate=*/48000);
@@ -36,11 +34,11 @@ barely::Musician musician(/*frame_rate=*/48000);
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);
 
-// Create a synth instrument.
-barely::Instrument instrument(musician, barely::SynthInstrument::GetDefinition());
+// Create an instrument.
+barely::Instrument instrument(musician);
 
 // Set the instrument gain to half.
-instrument.SetControl(barely::SynthInstrument::Control::kGain, /*value=*/0.5);
+instrument.SetControl(barely::InstrumentControl::kGain, /*value=*/0.5);
 
 // Set an instrument note on.
 //
@@ -59,7 +57,7 @@ barely::Performer performer(musician);
 performer.SetLooping(/*is_looping=*/true);
 
 // Create a looping task that plays an instrument note every beat.
-Task task(
+barely::Task task(
     performer,
     [&]() {
       // Set an instrument note on.

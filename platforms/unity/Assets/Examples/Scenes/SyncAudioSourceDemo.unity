@@ -444,7 +444,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f15cb84a740dc734c81e1ed2b4263902, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playOnAwake: 0
+  PlayOnAwake: 0
   _loop: 1
   _loopBeginPosition: 0
   _loopLength: 1
@@ -465,7 +465,6 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
     _position: 0
-    _processOrder: 0
   - OnProcessEvent:
       m_PersistentCalls:
         m_Calls:
@@ -482,7 +481,6 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
     _position: 0.5
-    _processOrder: 0
 --- !u!23 &1482507600
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -605,6 +603,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Gain: 0.5
+  VoiceCount: 8
+  OscillatorType: 1
+  Samplers: []
+  SamplerLoop: 0
+  Attack: 0
+  Decay: 0.10000000149011612
+  Sustain: 0.8999999761581421
+  Release: 0.20000000298023224
+  PitchShift: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -617,13 +625,6 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 0.5
-  OscillatorType: 0
-  Attack: 0
-  Decay: 0.10000000149011612
-  Sustain: 0.8999999761581421
-  Release: 0.20000000298023224
-  VoiceCount: 8
 --- !u!82 &1953674958
 AudioSource:
   m_ObjectHideFlags: 0

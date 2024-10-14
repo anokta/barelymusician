@@ -11,29 +11,30 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/event.h"
+#include "barelymusician/internal/instrument_processor.h"
 #include "barelymusician/internal/message_queue.h"
 
-namespace barely::internal {
+namespace barely {
 
-/// Class that wraps an instrument.
-class Instrument {
+/// Class that controls an instrument.
+class InstrumentController {
  public:
-  /// Constructs a new `Instrument`.
+  /// Constructs a new `InstrumentController`.
   ///
-  /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
+  /// @param reference_frequency Reference frequency in hertz.
   /// @param update_frame Update frame.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate, int64_t update_frame) noexcept;
+  InstrumentController(int frame_rate, double reference_frequency, int64_t update_frame) noexcept;
 
-  /// Destroys `Instrument`.
-  ~Instrument() noexcept;
+  /// Destroys `InstrumentController`.
+  ~InstrumentController() noexcept;
 
   /// Non-copyable and non-movable.
-  Instrument(const Instrument& other) noexcept = delete;
-  Instrument& operator=(const Instrument& other) noexcept = delete;
-  Instrument(Instrument&& other) noexcept = delete;
-  Instrument& operator=(Instrument&& other) noexcept = delete;
+  InstrumentController(const InstrumentController& other) noexcept = delete;
+  InstrumentController& operator=(const InstrumentController& other) noexcept = delete;
+  InstrumentController(InstrumentController&& other) noexcept = delete;
+  InstrumentController& operator=(InstrumentController&& other) noexcept = delete;
 
   /// Returns a control value.
   ///
@@ -136,27 +137,6 @@ class Instrument {
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
 
-  // Destroy callback.
-  const InstrumentDefinition::DestroyCallback destroy_callback_;
-
-  // Process callback.
-  const InstrumentDefinition::ProcessCallback process_callback_;
-
-  // Set control callback.
-  const InstrumentDefinition::SetControlCallback set_control_callback_;
-
-  // Set data callback.
-  const InstrumentDefinition::SetDataCallback set_data_callback_;
-
-  // Set note control callback.
-  const InstrumentDefinition::SetNoteControlCallback set_note_control_callback_;
-
-  // Set note off callback.
-  const InstrumentDefinition::SetNoteOffCallback set_note_off_callback_;
-
-  // Set note on callback.
-  const InstrumentDefinition::SetNoteOnCallback set_note_on_callback_;
-
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;
 
@@ -181,16 +161,16 @@ class Instrument {
   // Update frame.
   int64_t update_frame_ = 0;
 
-  // State.
-  void* state_ = nullptr;
-
   // Data.
   std::vector<std::byte> data_;
 
   // Message queue.
   MessageQueue message_queue_;
+
+  // Processor.
+  InstrumentProcessor processor_;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_

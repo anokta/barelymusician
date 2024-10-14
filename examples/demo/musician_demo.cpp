@@ -8,7 +8,6 @@
 #include <string>
 #include <thread>
 #include <tuple>
-#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -17,8 +16,6 @@
 #include "barelymusician/composition/duration.h"
 #include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/percussion_instrument.h"
-#include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -29,15 +26,14 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentControl;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::PercussionInstrument;
 using ::barely::Performer;
 using ::barely::Random;
 using ::barely::ScaleDefinition;
 using ::barely::ScaleType;
-using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -215,14 +211,14 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::tuple<Performer, BeatComposerCallback, size_t>> performers;
   std::vector<Instrument> instruments;
 
-  const auto build_synth_instrument_fn = [&](OscillatorType type, double gain, double attack,
-                                             double release) {
-    instruments.emplace_back(Instrument(musician, SynthInstrument::GetDefinition()));
+  const auto build_instrument_fn = [&](OscillatorType type, double gain, double attack,
+                                       double release) {
+    instruments.emplace_back(Instrument(musician));
     auto& instrument = instruments.back();
-    instrument.SetControl(SynthInstrument::Control::kGain, gain);
-    instrument.SetControl(SynthInstrument::Control::kOscillatorType, type);
-    instrument.SetControl(SynthInstrument::Control::kAttack, attack);
-    instrument.SetControl(SynthInstrument::Control::kRelease, release);
+    instrument.SetControl(InstrumentControl::kGain, gain);
+    instrument.SetControl(InstrumentControl::kOscillatorType, type);
+    instrument.SetControl(InstrumentControl::kAttack, attack);
+    instrument.SetControl(InstrumentControl::kRelease, release);
     set_note_callbacks_fn(instruments.size(), instrument);
   };
 
@@ -235,11 +231,11 @@ int main(int /*argc*/, char* argv[]) {
     return ComposeChord(0.5, harmonic, scale, instrument, performer);
   };
 
-  build_synth_instrument_fn(OscillatorType::kSine, 0.075, 0.125, 0.125);
+  build_instrument_fn(OscillatorType::kSine, 0.075, 0.125, 0.125);
   performers.emplace_back(Performer(musician), chords_beat_composer_callback,
                           instruments.size() - 1);
 
-  build_synth_instrument_fn(OscillatorType::kNoise, 0.0125, 0.5, 0.025);
+  build_instrument_fn(OscillatorType::kNoise, 0.0125, 0.5, 0.025);
   performers.emplace_back(Performer(musician), chords_beat_composer_callback,
                           instruments.size() - 1);
 
@@ -248,7 +244,7 @@ int main(int /*argc*/, char* argv[]) {
     return ComposeLine(-1, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_synth_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
+  build_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
   performers.emplace_back(Performer(musician), line_beat_composer_callback, instruments.size() - 1);
 
   const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
@@ -256,17 +252,20 @@ int main(int /*argc*/, char* argv[]) {
     return ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_synth_instrument_fn(OscillatorType::kSquare, 0.1, 0.05, 0.05);
+  build_instrument_fn(OscillatorType::kSquare, 0.1, 0.05, 0.05);
   performers.emplace_back(Performer(musician), line_2_beat_composer_callback,
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.emplace_back(musician, PercussionInstrument::GetDefinition());
+  instruments.emplace_back(musician);
   auto& percussion = instruments.back();
-  percussion.SetControl(PercussionInstrument::Control::kGain, 0.25);
+  percussion.SetControl(InstrumentControl::kGain, 0.25);
+  percussion.SetControl(InstrumentControl::kAttack, 0.0);
+  percussion.SetControl(InstrumentControl::kRelease, 0.1);
+  percussion.SetControl(InstrumentControl::kRetrigger, true);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
-      [&](const std::unordered_map<double, std::string>& percussion_map) {
+      [&](const std::vector<std::pair<double, std::string>>& percussion_map) {
         std::vector<double> data;
         data.push_back(static_cast<double>(percussion_map.size()));
         for (const auto& [pitch, file_path] : percussion_map) {

@@ -12,9 +12,6 @@ target_link_libraries(
   barelymusician_arpeggiator
   barelymusician_repeater
   barelymusician_scale
-  barelymusician_percussion_instrument
-  barelymusician_sampler_instrument
-  barelymusician_synth_instrument
 )
 if(MSVC)
   target_sources(

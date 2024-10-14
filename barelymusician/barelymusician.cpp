@@ -4,13 +4,13 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/musician.h"
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
-using ::barely::internal::Instrument;
+using ::barely::InstrumentController;
 using ::barely::internal::Musician;
 using ::barely::internal::Observable;
 using ::barely::internal::Observer;
@@ -20,7 +20,8 @@ using ::barely::internal::Task;
 // Musician.
 struct BarelyMusician : public Observable<Musician> {
  public:
-  explicit BarelyMusician(int32_t frame_rate) noexcept : Observable<Musician>(frame_rate) {}
+  BarelyMusician(int32_t frame_rate, double reference_frequency) noexcept
+      : Observable<Musician>(frame_rate, reference_frequency) {}
   ~BarelyMusician() = default;
 
   // Non-copyable and non-movable.
@@ -31,10 +32,12 @@ struct BarelyMusician : public Observable<Musician> {
 };
 
 // Instrument.
-struct BarelyInstrument : public Observable<Instrument> {
+struct BarelyInstrument : public Observable<InstrumentController> {
  public:
-  BarelyInstrument(BarelyMusician* musician, BarelyInstrumentDefinition definition) noexcept
-      : Observable<Instrument>(definition, musician->GetFrameRate(), musician->GetUpdateFrame()),
+  explicit BarelyInstrument(BarelyMusician* musician) noexcept
+      : Observable<InstrumentController>(musician->GetFrameRate(),
+                                         musician->GetReferenceFrequency(),
+                                         musician->GetUpdateFrame()),
         musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddInstrument(this);
@@ -114,12 +117,11 @@ struct BarelyTask : public Task {
   Observer<Performer> performer_;
 };
 
-bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrumentDefinition definition,
-                             BarelyInstrument** out_instrument) {
+bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrument** out_instrument) {
   if (!musician) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = new BarelyInstrument(musician, definition);
+  *out_instrument = new BarelyInstrument(musician);
   return true;
 }
 
@@ -289,11 +291,12 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyMusician_Create(int32_t frame_rate, BarelyMusician** out_musician) {
+bool BarelyMusician_Create(int32_t frame_rate, double reference_frequency,
+                           BarelyMusician** out_musician) {
   if (frame_rate <= 0) return false;
   if (!out_musician) return false;
 
-  *out_musician = new BarelyMusician(frame_rate);
+  *out_musician = new BarelyMusician(frame_rate, reference_frequency);
   return true;
 }
 

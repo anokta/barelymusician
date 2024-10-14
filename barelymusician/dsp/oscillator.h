@@ -4,35 +4,45 @@
 #include <random>
 
 #include "barelymusician/common/random.h"
-#include "barelymusician/dsp/generator.h"
 
 namespace barely {
 
 /// Oscillator type.
 enum class OscillatorType {
+  /// None.
+  kNone = 0,
   /// Sine wave.
-  kSine = 0,
+  kSine,
   /// Sawtooth wave.
-  kSaw = 1,
+  kSaw,
   /// Square wave.
-  kSquare = 2,
+  kSquare,
   /// White noise.
-  kNoise = 3,
+  kNoise,
   /// Count.
-  kCount = 4,
+  kCount,
 };
 
 /// Simple oscillator that generates output samples of basic waveforms.
-class Oscillator : public Generator {
+class Oscillator {
  public:
   /// Constructs new `Oscillator`.
   ///
   /// @param frame_rate Frame rate in hertz.
   explicit Oscillator(int frame_rate) noexcept;
 
-  /// Implements `Generator`.
-  double Next() noexcept override;
-  void Reset() noexcept override;
+  /// Returns the frequency of the oscillator.
+  ///
+  /// @return Frequency in hertz.
+  double GetFrequency() const noexcept;
+
+  /// Generates the next output sample.
+  ///
+  /// @return Next output sample.
+  double Next() noexcept;
+
+  /// Resets the state.
+  void Reset() noexcept;
 
   /// Sets the frequency of the oscillator.
   ///
@@ -52,7 +62,10 @@ class Oscillator : public Generator {
   double max_frequency_ = 0.0;
 
   // Oscillator type.
-  OscillatorType type_ = OscillatorType::kNoise;
+  OscillatorType type_ = OscillatorType::kNone;
+
+  // Frequency.
+  double frequency_ = 0.0;
 
   // Increment per sample.
   double increment_ = 0.0;

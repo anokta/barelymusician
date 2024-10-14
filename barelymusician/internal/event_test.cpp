@@ -3,7 +3,7 @@
 #include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 // Tests that the event gets processed as expected.
@@ -58,4 +58,4 @@ TEST(EventTest, Process) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

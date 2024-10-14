@@ -50,114 +50,6 @@ namespace Barely {
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Instrument definition create callback signature.
-      ///
-      /// @param state Pointer to instrument state.
-      /// @param frame_rate Frame rate in hertz.
-      public delegate void InstrumentDefinition_CreateCallback(ref IntPtr state, Int32 frameRate);
-
-      /// Instrument definition destroy callback signature.
-      public delegate void InstrumentDefinition_DestroyCallback(ref IntPtr state);
-
-      // Instrument definition process callback signature.
-      ///
-      /// @param state Pointer to instrument state.
-      /// @param outputSamples Pointer to an array of interleaved output samples.
-      /// @param outputChannelCount Number of output channels.
-      /// @param outputFrameCount Number of output frames.
-      public delegate void InstrumentDefinition_ProcessCallback(ref IntPtr state,
-                                                                IntPtr outputSamples,
-                                                                Int32 outputChannelCount,
-                                                                Int32 outputFrameCount);
-
-      /// Instrument definition set control callback signature.
-      ///
-      /// @param state Pointer to instrument state.
-      /// @param id Control identifier.
-      /// @param value Control value.
-      public delegate void InstrumentDefinition_SetControlCallback(ref IntPtr state, Int32 id,
-                                                                   double value);
-
-      /// Instrument definition set data callback signature.
-      ///
-      /// @param state Pointer to instrument state.
-      /// @param dataPtr Pointer to data.
-      /// @param size Data size in bytes.
-      public delegate void InstrumentDefinition_SetDataCallback(ref IntPtr state, IntPtr data,
-                                                                Int32 size);
-
-      /// Instrument definition set note control callback signature.
-      ///
-      /// @param state Pointer to instrument state.
-      /// @param pitch Note pitch.
-      /// @param id Note control identifier.
-      /// @param value Note control value.
-      public delegate void InstrumentDefinition_SetNoteControlCallback(ref IntPtr state,
-                                                                       double pitch, Int32 id,
-                                                                       double value);
-
-      /// Instrument definition set note off callback signature.
-      ///
-      /// @param state Pointer to instrument state.
-      /// @param pitch Note pitch.
-      public delegate void InstrumentDefinition_SetNoteOffCallback(ref IntPtr state, double pitch);
-
-      /// Instrument definition set note on callback signature.
-      ///
-      /// @param state Pointer to instrument state.
-      /// @param pitch Note pitch.
-      /// @param intensity Note intensity.
-      public delegate void InstrumentDefinition_SetNoteOnCallback(ref IntPtr state, double pitch,
-                                                                  double intensity);
-
-      /// Instrument definition.
-      [StructLayout(LayoutKind.Sequential)]
-      public struct InstrumentDefinition {
-        /// Create callback.
-        public InstrumentDefinition_CreateCallback createCallback;
-
-        /// Destroy callback.
-        public InstrumentDefinition_DestroyCallback destroyCallback;
-
-        /// Process callback.
-        public InstrumentDefinition_ProcessCallback processCallback;
-
-        /// Set control callback.
-        public InstrumentDefinition_SetControlCallback setControlCallback;
-
-        /// Set data callback.
-        public InstrumentDefinition_SetDataCallback setDataCallback;
-
-        /// Set note control callback.
-        public InstrumentDefinition_SetNoteControlCallback setNoteControlCallback;
-
-        /// Set note off callback.
-        public InstrumentDefinition_SetNoteOffCallback setNoteOffCallback;
-
-        /// Set note on callback.
-        public InstrumentDefinition_SetNoteOnCallback setNoteOnCallback;
-
-        /// Pointer to an array of control definitions.
-        public IntPtr controlDefinitions;
-
-        /// Number of control definitions.
-        public Int32 controlDefinitionCount;
-
-        /// Pointer to an array of note control definitions.
-        public IntPtr noteControlDefinitions;
-
-        /// Number of note control definitions.
-        public Int32 noteControlDefinitionCount;
-      }
-
-      /// Custom instrument interface.
-      public interface CustomInstrumentInterface {
-        /// Returns the instrument definition.
-        ///
-        /// @return Instrument definition.
-        public InstrumentDefinition GetDefinition();
-      }
-
       /// Creates a new component.
       ///
       /// @param component Component.
@@ -218,33 +110,7 @@ namespace Barely {
         if (Ptr == IntPtr.Zero || instrumentPtr != IntPtr.Zero) {
           return;
         }
-        InstrumentDefinition definition;
-        switch (instrument) {
-          case PercussionInstrument percussion:
-            definition = BarelyPercussionInstrument_GetDefinition();
-            break;
-          case SamplerInstrument sampler:
-            definition = BarelySamplerInstrument_GetDefinition();
-            break;
-          case SynthInstrument synth:
-            definition = BarelySynthInstrument_GetDefinition();
-            break;
-          case CustomInstrumentInterface custom:
-            definition = custom.GetDefinition();
-            break;
-          default:
-            Debug.LogError("Unsupported instrument type: " + instrument.GetType());
-            return;
-        }
-        bool success = BarelyInstrument_Create(Ptr, definition, ref instrumentPtr);
-        if (instrument.GetType().IsSubclassOf(typeof(CustomInstrumentInterface))) {
-          if (definition.controlDefinitionCount > 0) {
-            Marshal.FreeHGlobal(definition.controlDefinitions);
-          }
-          if (definition.noteControlDefinitionCount > 0) {
-            Marshal.FreeHGlobal(definition.noteControlDefinitions);
-          }
-        }
+        bool success = BarelyInstrument_Create(Ptr, ref instrumentPtr);
         if (!success) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
@@ -1233,7 +1099,7 @@ namespace Barely {
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          if (!BarelyMusician_Create(config.sampleRate, ref _ptr)) {
+          if (!BarelyMusician_Create(config.sampleRate, /*C4=*/261.625565301, ref _ptr)) {
             Debug.LogError("Failed to initialize BarelyMusician");
             return;
           }
@@ -1266,9 +1132,7 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Create")]
-      private static extern bool BarelyInstrument_Create(IntPtr musician,
-                                                         InstrumentDefinition definition,
-                                                         ref IntPtr outInstrument);
+      private static extern bool BarelyInstrument_Create(IntPtr musician, ref IntPtr outInstrument);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
@@ -1340,7 +1204,8 @@ namespace Barely {
                                                                  IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
-      private static extern bool BarelyMusician_Create(Int32 frameRate, ref IntPtr outMusician);
+      private static extern bool BarelyMusician_Create(Int32 frameRate, double referenceFrequency,
+                                                       ref IntPtr outMusician);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern bool BarelyMusician_Destroy(IntPtr musician);
@@ -1512,16 +1377,6 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyRepeater_Stop")]
       private static extern bool BarelyRepeater_Stop(IntPtr repeater);
-
-      // Instruments.
-      [DllImport(pluginName, EntryPoint = "BarelyPercussionInstrument_GetDefinition")]
-      private static extern InstrumentDefinition BarelyPercussionInstrument_GetDefinition();
-
-      [DllImport(pluginName, EntryPoint = "BarelySamplerInstrument_GetDefinition")]
-      private static extern InstrumentDefinition BarelySamplerInstrument_GetDefinition();
-
-      [DllImport(pluginName, EntryPoint = "BarelySynthInstrument_GetDefinition")]
-      private static extern InstrumentDefinition BarelySynthInstrument_GetDefinition();
     }
   }
 }  // namespace Barely

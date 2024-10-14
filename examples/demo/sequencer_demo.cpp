@@ -7,7 +7,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -16,10 +15,10 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentControl;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
-using ::barely::SynthInstrument;
 using ::barely::Task;
 using ::barely::TaskDefinition;
 using ::barely::examples::AudioClock;
@@ -55,11 +54,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  Instrument instrument(musician, SynthInstrument::GetDefinition());
-  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
-  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
+  Instrument instrument(musician);
+  instrument.SetControl(InstrumentControl::kGain, kGain);
+  instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
+  instrument.SetControl(InstrumentControl::kAttack, kAttack);
+  instrument.SetControl(InstrumentControl::kRelease, kRelease);
   instrument.SetNoteOnEvent(
       [](double pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 

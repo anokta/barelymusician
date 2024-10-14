@@ -1,54 +1,31 @@
 #include "barelymusician/dsp/polyphonic_voice.h"
 
-#include <utility>
-
 #include "barelymusician/dsp/voice.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
-// Number of voices for the polyphonic instrument.
 constexpr int kVoiceCount = 4;
-
-// Default voice output value.
-constexpr double kOutput = 1.0;
-
-// Default output channel.
 constexpr int kChannel = 0;
-
-// Fake voice that produces constant output for testing.
-class FakeVoice : public Voice {
- public:
-  // Implements `UnitGenerator`.
-  double Next(int /*channel*/) noexcept override { return active_ ? output_ : 0.0; }
-
-  // Implements `Voice`.
-  [[nodiscard]] bool IsActive() const noexcept override { return active_; }
-  void Start() noexcept override { active_ = true; }
-  void Stop() noexcept override { active_ = false; }
-
-  // Sets voice output.
-  void SetOutput(double output) noexcept { output_ = output; }
-
- private:
-  bool active_ = false;
-  double output_ = 0.0;
-};
+constexpr int kFrameRate = 1;
 
 // Tests that playing a single voice produces the expected output.
 TEST(PolyphonicVoiceTest, SingleVoice) {
   constexpr double kPitch = 0.25;
+  constexpr double kGain = 0.5;
 
-  FakeVoice base_voice;
-  base_voice.SetOutput(kOutput);
-
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
+  PolyphonicVoice polyphonic_voice(kFrameRate, kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
+  polyphonic_voice.Update([&](Voice& voice) {
+    voice.sample_player().SetData(&kPitch, kFrameRate, 1);
+    voice.sample_player().SetLoop(true);
+    voice.set_gain(kGain);
+  });
   polyphonic_voice.Start(kPitch);
-  EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kOutput);
+  EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kPitch * kGain);
 
   polyphonic_voice.Stop(kPitch);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
@@ -56,17 +33,19 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
 
 // Tests that voice initialization callback produces the expected output.
 TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
-  FakeVoice base_voice;
-  base_voice.SetOutput(kOutput);
-
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
+  PolyphonicVoice polyphonic_voice(kFrameRate, kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
+  constexpr double kOutput = 0.2;
   for (int i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i + 1);
-    polyphonic_voice.Start(pitch, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
-    EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), pitch);
+    polyphonic_voice.Start(pitch, [&](Voice& voice) {
+      voice.sample_player().SetData(&kOutput, kFrameRate, 1);
+      voice.sample_player().SetLoop(true);
+      voice.set_gain(pitch);
+    });
+    EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), pitch * kOutput);
     polyphonic_voice.Stop(pitch);
   }
 }
@@ -74,61 +53,32 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
 // Tests that the number of voices that is played by the polyphonic voice is capped at maximum
 // allowed number of voices.
 TEST(PolyphonicVoiceTest, MaxVoices) {
-  FakeVoice base_voice;
-  base_voice.SetOutput(kOutput);
-
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
+  PolyphonicVoice polyphonic_voice(kFrameRate, kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
-  double previous_output = 0.0;
+  constexpr double kOutput = 0.4;
+  polyphonic_voice.Update([&](Voice& voice) {
+    voice.sample_player().SetData(&kOutput, kFrameRate, 1);
+    voice.sample_player().SetLoop(true);
+  });
+
   for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(static_cast<double>(i));
-    const double output = polyphonic_voice.Next(kChannel);
-    EXPECT_DOUBLE_EQ(output - previous_output, kOutput);
-    previous_output = output;
+    polyphonic_voice.Start(static_cast<double>(i), [&](Voice& voice) { voice.set_gain(1.0); });
+    EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), static_cast<double>(i + 1) * kOutput);
   }
 
-  polyphonic_voice.Start(kVoiceCount);
-  EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), previous_output);
+  polyphonic_voice.Start(kVoiceCount, [&](Voice& voice) { voice.set_gain(1.0); });
+  EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), static_cast<double>(kVoiceCount) * kOutput);
 }
 
 // Tests that the polyphonic voice produces silence when there are no available voices set.
 TEST(PolyphonicVoiceTest, NoVoice) {
-  FakeVoice base_voice;
-  base_voice.SetOutput(kOutput);
-
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
+  PolyphonicVoice polyphonic_voice(kFrameRate, kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   polyphonic_voice.Start(0.0);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
-}
-
-// Tests that the voice update callback updates all the voices as expected.
-TEST(PolyphonicVoiceTest, Update) {
-  constexpr double kUpdatedOutput = 4.0 * kOutput;
-
-  FakeVoice base_voice;
-  base_voice.SetOutput(kOutput);
-
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
-  polyphonic_voice.Resize(kVoiceCount);
-  EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
-
-  for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(static_cast<double>(i));
-    EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kOutput);
-    polyphonic_voice.Stop(static_cast<double>(i));
-  }
-
-  polyphonic_voice.Update([](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
-
-  for (int i = 0; i < kVoiceCount; ++i) {
-    polyphonic_voice.Start(static_cast<double>(i));
-    EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kUpdatedOutput);
-    polyphonic_voice.Stop(static_cast<double>(i));
-  }
 }
 
 }  // namespace

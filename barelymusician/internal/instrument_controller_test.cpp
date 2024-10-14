@@ -1,7 +1,8 @@
-#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/instrument_controller.h"
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -10,106 +11,57 @@
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 using ::testing::IsNull;
 using ::testing::Pointee;
 using ::testing::Property;
 
-constexpr int kFrameRate = 8000;
+constexpr int kFrameRate = 4;
 constexpr int kChannelCount = 1;
-constexpr int kFrameCount = 4;
-
-// Returns a test instrument definition that produces constant output per note.
-InstrumentDefinition GetTestDefinition() {
-  static const std::array<ControlDefinition, 1> control_definitions = {
-      ControlDefinition{0, 15.0, 10.0, 20.0},
-  };
-  static const std::array<ControlDefinition, 1> note_control_definitions = {
-      ControlDefinition{0, 1.0, 0.0, 1.0},
-  };
-  return InstrumentDefinition(
-      [](void** state, int /*frame_rate*/) { *state = static_cast<void*>(new double{0.0}); },
-      [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, int32_t output_channel_count,
-         int32_t output_frame_count) {
-        std::fill_n(output_samples, output_channel_count * output_frame_count,
-                    *reinterpret_cast<double*>(*state));
-      },
-      [](void** state, int32_t id, double value) {
-        *reinterpret_cast<double*>(*state) = static_cast<double>(id + 1) * value;
-      },
-      [](void** /*state*/, const void* /*data*/, int32_t /*size*/) {},
-      [](void** /*state*/, double /*pitch*/, int32_t /*id*/, double /*value*/) {},
-      [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
-      [](void** state, double pitch, double intensity) {
-        *reinterpret_cast<double*>(*state) = pitch * intensity;
-      },
-      control_definitions, note_control_definitions);
-}
+constexpr double kReferenceFrequency = 1.0;
 
 // Tests that the instrument returns a control value as expected.
-TEST(InstrumentTest, GetControl) {
-  Instrument instrument(GetTestDefinition(), kFrameRate, 0);
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
+TEST(InstrumentControllerTest, GetControl) {
+  ASSERT_EQ(static_cast<int>(InstrumentControl::kGain), 0);
 
-  instrument.GetControl(0)->SetValue(20.0);
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 20.0)));
+  InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
+
+  instrument.GetControl(0)->SetValue(0.25);
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 0.25)));
 
   instrument.GetControl(0)->ResetValue();
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
 
-  instrument.GetControl(0)->SetValue(20.0);
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 20.0)));
+  instrument.GetControl(0)->SetValue(-2.0);
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 0.0)));
 
   instrument.ResetAllControls();
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
 
   // Control does not exist.
-  EXPECT_THAT(instrument.GetControl(1), IsNull());
-}
-
-// Tests that the instrument returns a note control value as expected.
-TEST(InstrumentTest, GetNoteControl) {
-  constexpr double kPitch = -1.8;
-  constexpr double kIntensity = 1.0;
-
-  Instrument instrument(GetTestDefinition(), kFrameRate, 0);
-  EXPECT_FALSE(instrument.IsNoteOn(kPitch));
-  EXPECT_FALSE(instrument.GetNoteControl(kPitch, 0));
-
-  instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_TRUE(instrument.IsNoteOn(kPitch));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
-
-  instrument.GetNoteControl(kPitch, 0)->SetValue(0.25);
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 0.25)));
-
-  instrument.GetNoteControl(kPitch, 0)->ResetValue();
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
-
-  instrument.GetNoteControl(kPitch, 0)->SetValue(-10.0);
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 0.0)));
-
-  instrument.ResetAllNoteControls(kPitch);
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
-
-  // Note control does not exist.
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 1), IsNull());
-
-  instrument.SetNoteOff(kPitch);
-  EXPECT_FALSE(instrument.IsNoteOn(kPitch));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), IsNull());
+  EXPECT_THAT(instrument.GetControl(-1), IsNull());
 }
 
 // Tests that the instrument plays a single note as expected.
-TEST(InstrumentTest, PlaySingleNote) {
+TEST(InstrumentControllerTest, PlaySingleNote) {
+  constexpr int kFrameCount = 5;
   constexpr double kPitch = 1.0;
   constexpr double kIntensity = 0.5;
   constexpr int64_t kUpdateFrame = 20;
 
-  Instrument instrument(GetTestDefinition(), kFrameRate, kUpdateFrame);
+  InstrumentController instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
+
+  constexpr std::array<double, 4 + kFrameRate> kSampleData = {
+      1.0, kPitch, static_cast<double>(kFrameRate), static_cast<double>(kFrameRate), 1.0, 2.0,
+      3.0, 4.0,
+  };
+  instrument.SetData({reinterpret_cast<const std::byte*>(kSampleData.data()),
+                      reinterpret_cast<const std::byte*>(kSampleData.data()) +
+                          sizeof(double) * kSampleData.size()});
+
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Control is set to its default value.
@@ -117,7 +69,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kUpdateFrame));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }
 
@@ -129,7 +81,8 @@ TEST(InstrumentTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kUpdateFrame));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch * kIntensity);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
+                       (frame < kFrameRate) ? kSampleData[frame + 4] * kIntensity : 0.0);
     }
   }
 
@@ -147,40 +100,65 @@ TEST(InstrumentTest, PlaySingleNote) {
 }
 
 // Tests that the instrument plays multiple notes as expected.
-TEST(InstrumentTest, PlayMultipleNotes) {
-  constexpr double kIntensity = 1.0;
+TEST(InstrumentControllerTest, PlayMultipleNotes) {
+  InstrumentController instrument(1, kReferenceFrequency, 0);
 
-  Instrument instrument(GetTestDefinition(), 1, 0);
-  std::vector<double> buffer(kChannelCount * kFrameCount);
+  constexpr std::array<double, 1 + kFrameRate * 4> kSampleData = {
+      static_cast<double>(kFrameRate),
+      // 1
+      0.0,
+      static_cast<double>(kFrameRate),
+      1.0,
+      1.0,
+      // 2
+      1.0,
+      static_cast<double>(kFrameRate),
+      1.0,
+      2.0,
+      // 3
+      2.0,
+      static_cast<double>(kFrameRate),
+      1.0,
+      3.0,
+      // 4
+      3.0,
+      static_cast<double>(kFrameRate),
+      1.0,
+      4.0,
+  };
+  instrument.SetData({reinterpret_cast<const std::byte*>(kSampleData.data()),
+                      reinterpret_cast<const std::byte*>(kSampleData.data()) +
+                          sizeof(double) * kSampleData.size()});
+
+  std::vector<double> buffer(kChannelCount * kFrameRate);
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameRate, 0));
+  for (int frame = 0; frame < kFrameRate; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }
 
   // Start a new note per each frame in the buffer.
-  for (int i = 0; i < kFrameCount; ++i) {
-    instrument.SetNoteOn(i, kIntensity);
+  for (int i = 0; i < kFrameRate; ++i) {
+    instrument.SetNoteOn(static_cast<double>(i), 1.0);
     instrument.Update(i + 1);
-    instrument.SetNoteOff(i);
+    instrument.SetNoteOff(static_cast<double>(i));
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameRate, 0));
+  for (int frame = 0; frame < kFrameRate; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
-                       static_cast<double>(frame) * kIntensity);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], static_cast<double>(frame + 1));
     }
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kFrameCount));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameRate, kFrameRate));
+  for (int frame = 0; frame < kFrameRate; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
@@ -188,11 +166,11 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 }
 
 // Tests that the instrument triggers its note callbacks as expected.
-TEST(InstrumentTest, SetNoteCallbacks) {
+TEST(InstrumentControllerTest, SetNoteCallbacks) {
   constexpr double kPitch = 3.3;
   constexpr double kIntensity = 0.25;
 
-  Instrument instrument(GetTestDefinition(), 1, 0);
+  InstrumentController instrument(1, kReferenceFrequency, 0);
 
   // Trigger the note on callback.
   double note_on_pitch = 0.0;
@@ -247,11 +225,11 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 }
 
 // Tests that the instrument stops all notes as expected.
-TEST(InstrumentTest, SetAllNotesOff) {
+TEST(InstrumentControllerTest, SetAllNotesOff) {
   constexpr std::array<double, 3> kPitches = {1.0, 2.0, 3.0};
   constexpr double kIntensity = 1.0;
 
-  Instrument instrument(GetTestDefinition(), kFrameRate, 0);
+  InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
   for (const double pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }
@@ -270,4 +248,4 @@ TEST(InstrumentTest, SetAllNotesOff) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

@@ -162,22 +162,22 @@ MonoBehaviour:
   loopLength: 8
   playOnAwake: 1
   notes:
-  - pitch: 69
+  - pitch: 9
     intensity: 1
     position: 1.5
     duration: 0.5
     muted: 0
-  - pitch: 61
+  - pitch: 1
     intensity: 1
     position: 1.5
     duration: 0.5
     muted: 0
-  - pitch: 69
+  - pitch: 9
     intensity: 1
     position: 5.5
     duration: 0.5
     muted: 0
-  - pitch: 64
+  - pitch: 4
     intensity: 1
     position: 5.5
     duration: 0.5
@@ -208,6 +208,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Gain: 0.20000000298023224
+  VoiceCount: 8
+  OscillatorType: 3
+  Samplers: []
+  SamplerLoop: 0
+  Attack: 0.05000000074505806
+  Decay: 0
+  Sustain: 0.800000011920929
+  Release: 0.5
+  PitchShift: 0
+  Retrigger: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -220,13 +231,6 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 0.20000000298023224
-  OscillatorType: 2
-  Attack: 0.05000000074505806
-  Decay: 0
-  Sustain: 0.800000011920929
-  Release: 0.5
-  VoiceCount: 8
 --- !u!82 &332735188
 AudioSource:
   m_ObjectHideFlags: 0
@@ -239,7 +243,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.125
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -711,9 +715,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 1737834378}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bbb9301535068f43b71fd6d9e1f57f8, type: 3}
+  m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Gain: 1
+  VoiceCount: 4
+  OscillatorType: 0
+  Samplers:
+  - Pitch: 0
+    Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
+  - Pitch: 2
+    Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
+  - Pitch: 4
+    Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
+  - Pitch: 5
+    Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
+  SamplerLoop: 0
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 1
+  PitchShift: 0
+  Retrigger: 1
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -726,17 +749,6 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 0.5
-  PadRelease: 1
-  Pads:
-  - Pitch: 0
-    Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
-  - Pitch: 2
-    Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
-  - Pitch: 4
-    Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
-  - Pitch: 5
-    Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0
@@ -749,7 +761,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.125
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -886,22 +898,22 @@ MonoBehaviour:
   loopLength: 2
   playOnAwake: 1
   notes:
-  - pitch: 60
+  - pitch: 0
     intensity: 1
     position: 0
     duration: 0
     muted: 0
-  - pitch: 64
+  - pitch: 4
     intensity: 0.5
     position: 0.5
     duration: 0
     muted: 0
-  - pitch: 62
+  - pitch: 2
     intensity: 1
     position: 1
     duration: 0
     muted: 0
-  - pitch: 64
+  - pitch: 4
     intensity: 0.5
     position: 1.5
     duration: 0
@@ -923,7 +935,7 @@ MonoBehaviour:
   loopLength: 8
   playOnAwake: 1
   notes:
-  - pitch: 65
+  - pitch: 5
     intensity: 1
     position: 7.5
     duration: 0.5
@@ -1003,6 +1015,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Gain: 0.25
+  VoiceCount: 8
+  OscillatorType: 1
+  Samplers: []
+  SamplerLoop: 0
+  Attack: 0.10000000149011612
+  Decay: 0
+  Sustain: 1
+  Release: 0.5
+  PitchShift: 0
+  Retrigger: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1015,13 +1038,6 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 0.25
-  OscillatorType: 0
-  Attack: 0.10000000149011612
-  Decay: 0
-  Sustain: 1
-  Release: 0.5
-  VoiceCount: 8
 --- !u!82 &1886020160
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1034,7 +1050,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.125
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -1171,27 +1187,27 @@ MonoBehaviour:
   loopLength: 4
   playOnAwake: 1
   notes:
-  - pitch: 69
+  - pitch: 9
     intensity: 1
     position: 0
     duration: 0.5
     muted: 0
-  - pitch: 73
+  - pitch: 13
     intensity: 1
     position: 1
     duration: 0.5
     muted: 0
-  - pitch: 74
+  - pitch: 14
     intensity: 1
     position: 2
     duration: 0.5
     muted: 0
-  - pitch: 57
+  - pitch: -3
     intensity: 0.75
     position: 0
     duration: 2
     muted: 0
-  - pitch: 56
+  - pitch: -4
     intensity: 0.75
     position: 2
     duration: 2
@@ -1312,7 +1328,7 @@ MonoBehaviour:
   loopLength: 1
   playOnAwake: 1
   notes:
-  - pitch: 69
+  - pitch: 0
     intensity: 1
     position: 0
     duration: 0.25
@@ -1329,6 +1345,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Gain: 0.22499999403953552
+  VoiceCount: 8
+  OscillatorType: 2
+  Samplers: []
+  SamplerLoop: 0
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 0.05000000074505806
+  PitchShift: 0
+  Retrigger: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1341,13 +1368,6 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 0.25
-  OscillatorType: 1
-  Attack: 0
-  Decay: 0
-  Sustain: 1
-  Release: 0.05000000074505806
-  VoiceCount: 8
 --- !u!82 &2031085266
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1360,7 +1380,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.125
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -1470,7 +1490,7 @@ GameObject:
   - component: {fileID: 2110623108}
   - component: {fileID: 2110623107}
   - component: {fileID: 2110623105}
-  - component: {fileID: 2110623104}
+  - component: {fileID: 2110623103}
   - component: {fileID: 2110623102}
   - component: {fileID: 2110623101}
   m_Layer: 0
@@ -1492,27 +1512,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec1d1448810202a4abd6aaf66d4a9235, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  instrument: {fileID: 2110623104}
+  instrument: {fileID: 2110623103}
   loop: 1
   loopLength: 8
   playOnAwake: 1
   notes:
-  - pitch: 69
+  - pitch: 9
     intensity: 1
     position: 3
     duration: 1
     muted: 0
-  - pitch: 69
+  - pitch: 9
     intensity: 1
     position: 6
     duration: 0.25
     muted: 0
-  - pitch: 64
+  - pitch: 4
     intensity: 1
     position: 6.5
     duration: 0.25
     muted: 0
-  - pitch: 57
+  - pitch: -3
     intensity: 1
     position: 7
     duration: 1
@@ -1529,9 +1549,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fbb0399be05119448c76a51e0b957fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetInstrument: {fileID: 2110623104}
+  targetInstrument: {fileID: 2110623103}
   noteOnColor: {r: 0.7294118, g: 1, b: 0.7882353, a: 1}
---- !u!114 &2110623104
+--- !u!114 &2110623103
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1540,9 +1560,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 2110623100}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e069298ae6f8da49b94b3567a4b8739, type: 3}
+  m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Gain: 1
+  VoiceCount: 8
+  OscillatorType: 0
+  Samplers:
+  - Pitch: 9
+    Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
+  SamplerLoop: 0
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 0.07500000298023224
+  PitchShift: 0
+  Retrigger: 0
   OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1555,15 +1588,6 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  Gain: 1
-  RootPitch: 0.75
-  Loop: 1
-  Attack: 0
-  Decay: 0
-  Sustain: 1
-  Release: 0.07500000298023224
-  VoiceCount: 8
 --- !u!82 &2110623105
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1576,7 +1600,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.125
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0

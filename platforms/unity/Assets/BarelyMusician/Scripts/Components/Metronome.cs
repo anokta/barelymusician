@@ -87,7 +87,7 @@ namespace Barely {
           OnBeatEvent?.Invoke(bar, beat);
         };
         var tempGameObject = new GameObject() { hideFlags = HideFlags.HideAndDontSave };
-        var instrument = tempGameObject.AddComponent<SynthInstrument>();
+        var instrument = tempGameObject.AddComponent<Instrument>();
         instrument.OscillatorType = OscillatorType.SQUARE;
         instrument.Gain = 0.25;
         instrument.Attack = 0.0;

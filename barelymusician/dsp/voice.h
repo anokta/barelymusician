@@ -1,32 +1,63 @@
 #ifndef BARELYMUSICIAN_DSP_VOICE_H_
 #define BARELYMUSICIAN_DSP_VOICE_H_
 
+#include "barelymusician/dsp/envelope.h"
+#include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/dsp/sample_player.h"
+#include "barelymusician/dsp/voice.h"
+
 namespace barely {
 
-/// Instrument voice interface.
+/// Class that wraps an instrument voice.
 class Voice {
  public:
-  /// Base destructor to ensure the derived classes get destroyed properly.
-  virtual ~Voice() = default;
+  /// Constructs a new `Voice` with the given `frame_rate`.
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  explicit Voice(int frame_rate) noexcept;
 
   /// Returns whether the voice is currently active (i.e., playing).
   ///
   /// @return True if active.
-  [[nodiscard]] virtual bool IsActive() const noexcept = 0;
+  [[nodiscard]] bool IsActive() const noexcept;
 
   /// Returns the next output sample for the given output channel.
   ///
   /// @param channel Output channel.
   /// @return Output sample.
-  virtual double Next(int channel) noexcept = 0;
+  double Next(int channel) noexcept;
 
   /// Starts the voice.
-  virtual void Start() noexcept = 0;
+  void Start() noexcept;
 
   /// Stops the voice.
-  virtual void Stop() noexcept = 0;
+  void Stop() noexcept;
+
+  /// Inline getter/setter functions.
+  [[nodiscard]] const Envelope& envelope() const noexcept { return envelope_; }
+  [[nodiscard]] Envelope& envelope() noexcept { return envelope_; }
+
+  [[nodiscard]] const Oscillator& oscillator() const noexcept { return oscillator_; }
+  [[nodiscard]] Oscillator& oscillator() noexcept { return oscillator_; }
+
+  [[nodiscard]] const SamplePlayer& sample_player() const noexcept { return sample_player_; }
+  [[nodiscard]] SamplePlayer& sample_player() noexcept { return sample_player_; }
+
+  [[nodiscard]] double gain() const noexcept { return gain_; }
+  void set_gain(double gain) noexcept { gain_ = gain; }
+
+ private:
+  Envelope envelope_;
+  Oscillator oscillator_;
+  SamplePlayer sample_player_;
+
+  // Voice gain.
+  double gain_ = 0.0;
+
+  // Last output.
+  double output_ = 0.0;
 };
 
 }  // namespace barely
 
-#endif  // EXAMPLES_VOICE_VOICE_H_
+#endif  // BARELYMUSICIAN_DSP_VOICE_H_

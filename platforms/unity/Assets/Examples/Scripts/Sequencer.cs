@@ -16,8 +16,8 @@ namespace Barely {
 
       [System.Serializable]
       public class Note {
-        [Range(0, 127)]
-        public double pitch;
+        [Range(-64, 64)]
+        public int pitch;
         [Range(0.0f, 1.0f)]
         public double intensity;
         [Min(0.0f)]
@@ -82,7 +82,7 @@ namespace Barely {
             continue;
           }
           _performer.Tasks.Add(new Task(delegate() {
-            double pitch = (note.pitch - 60) / 12.0;
+            double pitch = note.pitch / 12.0;
             instrument?.SetNoteOn(pitch, note.intensity);
             _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(pitch); },
                                           _performer.Position + note.duration);

@@ -5,7 +5,7 @@
 #include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 // Tests that the control sets its value as expected.
@@ -66,12 +66,11 @@ TEST(ControlTest, BuildControlMap) {
   };
 
   const ControlMap control_map =
-      BuildControlMap(control_definitions.data(), static_cast<int>(control_definitions.size()),
-                      [](int /*id*/, double /*value*/) {});
+      BuildControlMap(control_definitions, [](int /*id*/, double /*value*/) {});
   ASSERT_EQ(control_map.size(), 2);
   EXPECT_DOUBLE_EQ(control_map.find(2)->second.GetValue(), 1.0);
   EXPECT_DOUBLE_EQ(control_map.find(10)->second.GetValue(), 5.0);
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

@@ -6,7 +6,7 @@
 #include <variant>
 #include <vector>
 
-namespace barely::internal {
+namespace barely {
 
 /// Control message.
 struct ControlMessage {

@@ -9,24 +9,17 @@ add_library(
   envelope.cpp
   envelope.h
 )
-target_link_libraries(
-  barelymusician_envelope
-  barelymusician_generator
-)
 
 add_library(
-  barelymusician_enveloped_voice INTERFACE
-  enveloped_voice.h
-)
-target_link_libraries(
-  barelymusician_enveloped_voice INTERFACE
-  barelymusician_envelope
   barelymusician_voice
+  voice.cpp
+  voice.h
 )
-
-add_library(
-  barelymusician_filter INTERFACE
-  filter.h
+target_link_libraries(
+  barelymusician_voice
+  barelymusician_envelope
+  barelymusician_oscillator
+  barelymusician_sample_player
 )
 
 add_library(
@@ -36,18 +29,9 @@ add_library(
 )
 
 add_library(
-  barelymusician_generator INTERFACE
-  generator.h
-)
-
-add_library(
   barelymusician_one_pole_filter
   one_pole_filter.cpp
   one_pole_filter.h
-)
-target_link_libraries(
-  barelymusician_one_pole_filter
-  barelymusician_filter
 )
 
 add_library(
@@ -57,28 +41,23 @@ add_library(
 )
 target_link_libraries(
   barelymusician_oscillator
-  barelymusician_generator
   barelymusician_random
 )
 
 add_library(
-  barelymusician_polyphonic_voice INTERFACE
+  barelymusician_polyphonic_voice
+  polyphonic_voice.cpp
   polyphonic_voice.h
+)
+target_link_libraries(
+  barelymusician_polyphonic_voice
+  barelymusician_voice
 )
 
 add_library(
   barelymusician_sample_player
   sample_player.cpp
   sample_player.h
-)
-target_link_libraries(
-  barelymusician_sample_player
-  barelymusician_generator
-)
-
-add_library(
-  barelymusician_voice INTERFACE
-  voice.h
 )
 
 if(ENABLE_TESTS)

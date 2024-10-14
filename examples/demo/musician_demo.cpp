@@ -58,7 +58,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
-constexpr double kLookahead = 0.1;
+constexpr double kLookahead = 0.15;
 
 // Performer settings.
 constexpr double kTempo = 124.0;
@@ -231,11 +231,11 @@ int main(int /*argc*/, char* argv[]) {
     return ComposeChord(0.5, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorType::kSine, 0.075, 0.125, 0.125);
+  build_instrument_fn(OscillatorType::kSine, 0.05, 0.125, 0.125);
   performers.emplace_back(Performer(musician), chords_beat_composer_callback,
                           instruments.size() - 1);
 
-  build_instrument_fn(OscillatorType::kNoise, 0.0125, 0.5, 0.025);
+  build_instrument_fn(OscillatorType::kNoise, 0.01, 0.5, 0.025);
   performers.emplace_back(Performer(musician), chords_beat_composer_callback,
                           instruments.size() - 1);
 
@@ -244,7 +244,7 @@ int main(int /*argc*/, char* argv[]) {
     return ComposeLine(-1, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
+  build_instrument_fn(OscillatorType::kSaw, 0.06, 0.0025, 0.125);
   performers.emplace_back(Performer(musician), line_beat_composer_callback, instruments.size() - 1);
 
   const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
@@ -252,14 +252,14 @@ int main(int /*argc*/, char* argv[]) {
     return ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorType::kSquare, 0.1, 0.05, 0.05);
+  build_instrument_fn(OscillatorType::kSquare, 0.06, 0.05, 0.05);
   performers.emplace_back(Performer(musician), line_2_beat_composer_callback,
                           instruments.size() - 1);
 
   // Add percussion instrument.
   instruments.emplace_back(musician);
   auto& percussion = instruments.back();
-  percussion.SetControl(InstrumentControl::kGain, 0.25);
+  percussion.SetControl(InstrumentControl::kGain, 0.125);
   percussion.SetControl(InstrumentControl::kAttack, 0.0);
   percussion.SetControl(InstrumentControl::kRelease, 0.1);
   percussion.SetControl(InstrumentControl::kRetrigger, true);

@@ -8,6 +8,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
+#include "barelymusician/internal/sample_data.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -21,6 +22,7 @@ using ::testing::Property;
 constexpr int kFrameRate = 4;
 constexpr int kChannelCount = 1;
 constexpr double kReferenceFrequency = 1.0;
+constexpr std::array<double, kFrameRate> kSamples = {1.0, 2.0, 3.0, 4.0};
 
 // Tests that the instrument returns a control value as expected.
 TEST(InstrumentControllerTest, GetControl) {
@@ -51,16 +53,11 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
   constexpr double kPitch = 1.0;
   constexpr double kIntensity = 0.5;
   constexpr int64_t kUpdateFrame = 20;
+  constexpr std::array<SampleDataDefinition, 1> kDefinitions = {
+      SampleDataDefinition(kPitch, kFrameRate, kSamples)};
 
   InstrumentController instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
-
-  constexpr std::array<double, 4 + kFrameRate> kSampleData = {
-      1.0, kPitch, static_cast<double>(kFrameRate), static_cast<double>(kFrameRate), 1.0, 2.0,
-      3.0, 4.0,
-  };
-  instrument.SetData({reinterpret_cast<const std::byte*>(kSampleData.data()),
-                      reinterpret_cast<const std::byte*>(kSampleData.data()) +
-                          sizeof(double) * kSampleData.size()});
+  instrument.SetSampleData(SampleData(kDefinitions));
 
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
@@ -82,7 +79,7 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
-                       (frame < kFrameRate) ? kSampleData[frame + 4] * kIntensity : 0.0);
+                       (frame < kFrameRate) ? kSamples[frame] * kIntensity : 0.0);
     }
   }
 
@@ -101,34 +98,15 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
 
 // Tests that the instrument plays multiple notes as expected.
 TEST(InstrumentControllerTest, PlayMultipleNotes) {
-  InstrumentController instrument(1, kReferenceFrequency, 0);
-
-  constexpr std::array<double, 1 + kFrameRate * 4> kSampleData = {
-      static_cast<double>(kFrameRate),
-      // 1
-      0.0,
-      static_cast<double>(kFrameRate),
-      1.0,
-      1.0,
-      // 2
-      1.0,
-      static_cast<double>(kFrameRate),
-      1.0,
-      2.0,
-      // 3
-      2.0,
-      static_cast<double>(kFrameRate),
-      1.0,
-      3.0,
-      // 4
-      3.0,
-      static_cast<double>(kFrameRate),
-      1.0,
-      4.0,
+  constexpr std::array<SampleDataDefinition, kFrameRate> kDefinitions = {
+      SampleDataDefinition(0.0, kFrameRate, {kSamples.data(), kSamples.data() + 1}),
+      SampleDataDefinition(1.0, kFrameRate, {kSamples.data() + 1, kSamples.data() + 2}),
+      SampleDataDefinition(2.0, kFrameRate, {kSamples.data() + 2, kSamples.data() + 3}),
+      SampleDataDefinition(3.0, kFrameRate, {kSamples.data() + 3, kSamples.data() + 4}),
   };
-  instrument.SetData({reinterpret_cast<const std::byte*>(kSampleData.data()),
-                      reinterpret_cast<const std::byte*>(kSampleData.data()) +
-                          sizeof(double) * kSampleData.size()});
+
+  InstrumentController instrument(1, kReferenceFrequency, 0);
+  instrument.SetSampleData(SampleData(kDefinitions));
 
   std::vector<double> buffer(kChannelCount * kFrameRate);
 
@@ -152,7 +130,7 @@ TEST(InstrumentControllerTest, PlayMultipleNotes) {
   EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameRate, 0));
   for (int frame = 0; frame < kFrameRate; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], static_cast<double>(frame + 1));
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kSamples[frame]);
     }
   }
 

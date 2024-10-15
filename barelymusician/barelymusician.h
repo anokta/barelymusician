@@ -336,6 +336,21 @@ typedef struct BarelyNoteOnEventDefinition {
   BarelyNoteOnEventDefinition_ProcessCallback process_callback;
 } BarelyNoteOnEventDefinition;
 
+/// Sample data definition.
+typedef struct BarelySampleDataDefinition {
+  /// Root note pitch.
+  double root_pitch;
+
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
+
+  /// Array of mono samples.
+  const double* samples;
+
+  /// Number of mono samples.
+  int32_t sample_count;
+} BarelySampleDataDefinition;
+
 /// Task definition create callback signature.
 ///
 /// @param state Pointer to task state.
@@ -486,15 +501,6 @@ BARELY_EXPORT bool BarelyInstrument_SetControlEvent(BarelyInstrument* instrument
                                                     BarelyControlEventDefinition definition,
                                                     void* user_data);
 
-/// Sets instrument data.
-///
-/// @param instrument Pointer to instrument.
-/// @param data Pointer to immutable data.
-/// @param size Data size in bytes.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetData(BarelyInstrument* instrument, const void* data,
-                                            int32_t size);
-
 /// Sets an instrument note control value.
 ///
 /// @param instrument Pointer to instrument.
@@ -550,6 +556,16 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, doub
 BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
                                                    BarelyNoteOnEventDefinition definition,
                                                    void* user_data);
+
+/// Sets instrument sample data.
+///
+/// @param instrument Pointer to instrument.
+/// @param definitions Array of sample definitions.
+/// @param definition_count Number of sample definitions.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetSampleData(BarelyInstrument* instrument,
+                                                  const BarelySampleDataDefinition* definitions,
+                                                  int32_t definition_count);
 
 /// Creates a new musician.
 ///
@@ -1001,6 +1017,28 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
       : BarelyNoteOnEventDefinition{definition} {}
 };
 
+/// Sample data definition.
+struct SampleDataDefinition : public BarelySampleDataDefinition {
+  /// Constructs a new `SampleDataDefinition`.
+  ///
+  /// @param root_pitch Root pich.
+  /// @param sample_rate Sampling rate in hertz.
+  /// @param samples Span of mono samples.
+  explicit constexpr SampleDataDefinition(double root_pitch, int sample_rate,
+                                          std::span<const double> samples) noexcept
+      : SampleDataDefinition(
+            {root_pitch, sample_rate, samples.data(), static_cast<int>(samples.size())}) {
+    assert(sample_rate >= 0);
+  }
+
+  /// Constructs a new `SampleDataDefinition` from a raw type.
+  ///
+  /// @param definition Raw sample definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr SampleDataDefinition(BarelySampleDataDefinition definition) noexcept
+      : BarelySampleDataDefinition{definition} {}
+};
+
 /// Task definition.
 struct TaskDefinition : public BarelyTaskDefinition {
   /// Callback signature.
@@ -1424,29 +1462,13 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
     SetControlEvent(ControlEventDefinition::WithCallback(), static_cast<void*>(&callback));
   }
 
-  /// Sets data of type.
+  /// Sets the sample data.
   ///
-  /// @param data Immutable data.
-  template <typename DataType, std::enable_if<std::is_trivially_copyable<DataType>::value>>
-  void SetData(const DataType& data) noexcept {
-    SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
-  }
-
-  /// Sets data with a container.
-  ///
-  /// @param container Immutable container.
-  template <typename ContainerType, typename ValueType = typename ContainerType::value_type>
-  void SetData(const ContainerType& container) noexcept {
-    SetData(static_cast<const void*>(container.data()),
-            static_cast<int>(container.size() * sizeof(ValueType)));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Pointer to immutable data.
-  /// @param size Data size in bytes.
-  void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetData(*this, data, size);
+  /// @param definitions Span of sample data definitions.
+  void SetSampleData(std::span<const SampleDataDefinition> definitions) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetSampleData(
+        *this, reinterpret_cast<const BarelySampleDataDefinition*>(definitions.data()),
+        static_cast<int32_t>(definitions.size()));
     assert(success);
   }
 

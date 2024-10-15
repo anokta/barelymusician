@@ -111,10 +111,6 @@ bool InstrumentController::Process(double* output_samples, int output_channel_co
                    [this](ControlMessage& control_message) noexcept {
                      processor_.SetControl(control_message.id, control_message.value);
                    },
-                   [this](DataMessage& data_message) noexcept {
-                     data_.swap(data_message.data);
-                     processor_.SetData(data_.data(), static_cast<int>(data_.size()));
-                   },
                    [this](NoteControlMessage& note_control_message) noexcept {
                      processor_.SetNoteControl(note_control_message.pitch, note_control_message.id,
                                                note_control_message.value);
@@ -124,6 +120,9 @@ bool InstrumentController::Process(double* output_samples, int output_channel_co
                    },
                    [this](NoteOnMessage& note_on_message) noexcept {
                      processor_.SetNoteOn(note_on_message.pitch, note_on_message.intensity);
+                   },
+                   [this](SampleDataMessage& sample_data_message) noexcept {
+                     processor_.SetSampleData(sample_data_message.sample_data);
                    }},
                message->second);
   }
@@ -164,8 +163,8 @@ void InstrumentController::SetControlEvent(ControlEventDefinition definition,
   control_event_ = {definition, user_data};
 }
 
-void InstrumentController::SetData(std::vector<std::byte> data) noexcept {
-  message_queue_.Add(update_frame_, DataMessage{std::move(data)});
+void InstrumentController::SetSampleData(SampleData sample_data) noexcept {
+  message_queue_.Add(update_frame_, SampleDataMessage{std::move(sample_data)});
 }
 
 void InstrumentController::SetNoteControlEvent(NoteControlEventDefinition definition,

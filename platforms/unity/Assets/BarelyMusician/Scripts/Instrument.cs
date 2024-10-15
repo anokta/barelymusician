@@ -25,8 +25,8 @@ namespace Barely {
     /// Sampler.
     [Serializable]
     public class Sampler {
-      /// Note pitch.
-      public int Pitch = 0;
+      /// Root note pitch.
+      public int RootPitch = 0;
 
       /// Sample.
       public AudioClip Sample = null;
@@ -35,26 +35,22 @@ namespace Barely {
       public double[] Data {
         get {
           if (_data == null || HasChanged) {
-            _pitch = Pitch / 12.0;
+            _rootPitch = RootPitch;
             _sample = Sample;
             if (_sample == null || _sample.samples == 0) {
               _data = null;
               return _data;
             }
-            if (_data == null || _sample.samples + 3 != Data.Length) {
-              _data = new double[_sample.samples + 3];
+            if (_data == null || _sample.samples != _data.Length) {
+              _data = new double[_sample.samples];
             }
-            // Write the meta data.
-            _data[0] = _pitch;
-            _data[1] = (double)_sample.frequency;
-            _data[2] = (double)_sample.samples;
             // Write the sample data.
             float[] sampleData = new float[_sample.samples * _sample.channels];
             _sample.GetData(sampleData, 0);
             for (int frame = 0; frame < _sample.samples; ++frame) {
-              _data[frame + 3] = 0.0;
+              _data[frame] = 0.0;
               for (int channel = 0; channel < _sample.channels; ++channel) {
-                _data[frame + 3] += (double)sampleData[frame * _sample.channels + channel];
+                _data[frame] += (double)sampleData[frame * _sample.channels + channel];
               }
             }
           }
@@ -65,11 +61,11 @@ namespace Barely {
 
       /// Denotes whether any changes has occured since the last update.
       public bool HasChanged {
-        get { return Sample != _sample || Pitch / 12.0 != _pitch; }
+        get { return Sample != _sample || RootPitch != _rootPitch; }
       }
 
-      /// Current note.
-      private double _pitch = 0.0;
+      /// Current root pitch.
+      private double _rootPitch = 0.0;
 
       // Current sample.
       private AudioClip _sample = null;
@@ -222,14 +218,6 @@ namespace Barely {
       Musician.Internal.Instrument_SetControl(_ptr, id, value);
     }
 
-    /// Sets data.
-    ///
-    /// @param dataPtr Pointer to data.
-    /// @param size Data size in bytes.
-    public void SetData(IntPtr dataPtr, int size) {
-      Musician.Internal.Instrument_SetData(_ptr, dataPtr, size);
-    }
-
     /// Sets a note control value.
     ///
     /// @param pitch Note pitch.
@@ -315,9 +303,7 @@ namespace Barely {
     }
 
     private void Update() {
-      if (Samplers != null) {
-        UpdateSamplerData();
-      }
+      UpdateSampleData();
       int id = 0;
       SetControl(id++, Gain);
       SetControl(id++, (double)VoiceCount);
@@ -335,32 +321,12 @@ namespace Barely {
       Musician.Internal.Instrument_Process(_ptr, data, channels);
     }
 
-    private void UpdateSamplerData() {
-      if (Samplers.Count == _samplerCount && !Samplers.Any(sampler => sampler.HasChanged)) {
-        return;
+    private void UpdateSampleData() {
+      if (Samplers != null &&
+          (Samplers.Count != _samplerCount || Samplers.Any(sampler => sampler.HasChanged))) {
+        _samplerCount = Samplers.Count;
+        Musician.Internal.Instrument_SetSampleData(_ptr, Samplers);
       }
-      _samplerCount = 0;
-      int length = 1;
-      for (int i = 0; i < Samplers.Count; ++i) {
-        if (Samplers[i].Data != null) {
-          ++_samplerCount;
-          length += Samplers[i].Data.Length;
-        }
-      }
-      // Write into an unmanaged pointer.
-      int size = length * sizeof(double);
-      IntPtr dataPtr = Marshal.AllocHGlobal(size);
-      Marshal.Copy(new double[1] { (double)_samplerCount }, 0, dataPtr, 1);
-      IntPtr samplerDataPtr = IntPtr.Add(dataPtr, sizeof(double));
-      for (int i = 0; i < Samplers.Count; ++i) {
-        double[] samplerData = Samplers[i].Data;
-        if (samplerData != null) {
-          Marshal.Copy(samplerData, 0, samplerDataPtr, samplerData.Length);
-          samplerDataPtr = IntPtr.Add(samplerDataPtr, samplerData.Length * sizeof(double));
-        }
-      }
-      SetData(dataPtr, size);
-      Marshal.FreeHGlobal(dataPtr);
     }
 
     // Raw pointer.

@@ -22,6 +22,7 @@ namespace {
 using ::barely::Instrument;
 using ::barely::InstrumentControl;
 using ::barely::Musician;
+using ::barely::SampleDataDefinition;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -51,22 +52,13 @@ constexpr double kRootPitch = 0.0;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the sample data from a given `file_path`.
-std::vector<double> GetSampleData(const std::string& file_path) {
+std::vector<SampleDataDefinition> GetSampleData(const std::string& file_path) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
 
-  const double frame_rate = static_cast<double>(sample_file.GetFrameRate());
-  const auto& sample_data = sample_file.GetData();
-
-  std::vector<double> data;
-  data.reserve(sample_data.size() + 4);
-  data.push_back(1);
-  data.push_back(kRootPitch);
-  data.push_back(frame_rate);
-  data.push_back(sample_data.size());
-  data.insert(data.end(), sample_data.begin(), sample_data.end());
-  return data;
+  const static std::vector<double> samples = sample_file.GetData();
+  return {SampleDataDefinition(kRootPitch, sample_file.GetFrameRate(), samples)};
 }
 
 // Returns the pitch for a given `key`.
@@ -96,7 +88,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(InstrumentControl::kRelease, kRelease);
   instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
 
-  instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
+  instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
   instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";

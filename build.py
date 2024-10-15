@@ -205,7 +205,7 @@ def build(args, source_dir, build_dir):
         build_platform(args, config, source_dir, linux_build_dir, linux_cmake_options)
 
     if args.mac:
-        print("Building the Windows targets...")
+        print("Building the Mac targets...")
         mac_build_dir = os.path.join(build_dir, "Mac")
         mac_cmake_options = ['-G "Xcode"'] + common_cmake_options
         build_platform(args, config, source_dir, mac_build_dir, mac_cmake_options)

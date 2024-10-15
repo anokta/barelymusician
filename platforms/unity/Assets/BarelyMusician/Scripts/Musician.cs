@@ -263,10 +263,23 @@ namespace Barely {
       /// @param instrumentPtr Pointer to instrument.
       /// @param dataPtr Pointer to data.
       /// @param size Data size in bytes.
-      public static void Instrument_SetData(IntPtr instrumentPtr, IntPtr dataPtr, int size) {
-        if (!BarelyInstrument_SetData(instrumentPtr, dataPtr, size) &&
+      public static void Instrument_SetSampleData(IntPtr instrumentPtr,
+                                                  List<Instrument.Sampler> samplers) {
+        SampleDataDefinition[] definitions = null;
+        if (samplers.Count > 0) {
+          definitions = new SampleDataDefinition[samplers.Count];
+          for (int i = 0; i < definitions.Length; ++i) {
+            definitions[i] = new SampleDataDefinition() {
+              rootPitch = samplers[i].RootPitch / 12.0,
+              sampleRate = (samplers[i].Sample != null) ? samplers[i].Sample.frequency : 0,
+              samples = samplers[i].Data,
+              sampleCount = (samplers[i].Sample != null) ? samplers[i].Sample.samples : 0,
+            };
+          }
+        }
+        if (!BarelyInstrument_SetSampleData(instrumentPtr, definitions, samplers.Count) &&
             instrumentPtr != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument data");
+          Debug.LogError("Failed to set instrument sample data");
         }
       }
 
@@ -951,6 +964,22 @@ namespace Barely {
         public NoteOnEventDefinition_ProcessCallback processCallback;
       }
 
+      // Sample data definition.
+      [StructLayout(LayoutKind.Sequential)]
+      private struct SampleDataDefinition {
+        // Root note pitch.
+        public double rootPitch;
+
+        // Sampling rate in hertz.
+        public Int32 sampleRate;
+
+        // Array of mono samples.
+        public double[] samples;
+
+        // Number of mono samples.
+        public Int32 sampleCount;
+      }
+
       // Task definition create callback.
       private delegate void TaskDefinition_CreateCallback(ref IntPtr state, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(TaskDefinition_CreateCallback))]
@@ -1174,10 +1203,6 @@ namespace Barely {
                                                                   ControlEventDefinition definition,
                                                                   IntPtr userData);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
-      private static extern bool BarelyInstrument_SetData(IntPtr instrument, IntPtr data,
-                                                          Int32 size);
-
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
                                                                  Int32 id, double value);
@@ -1202,6 +1227,10 @@ namespace Barely {
       private static extern bool BarelyInstrument_SetNoteOnEvent(IntPtr instrument,
                                                                  NoteOnEventDefinition definition,
                                                                  IntPtr userData);
+
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
+      private static extern bool BarelyInstrument_SetSampleData(
+          IntPtr instrument, [In] SampleDataDefinition[] definitions, Int32 definitionCount);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
       private static extern bool BarelyMusician_Create(Int32 frameRate, double referenceFrequency,

@@ -722,13 +722,13 @@ MonoBehaviour:
   VoiceCount: 4
   OscillatorType: 0
   Samplers:
-  - Pitch: 0
+  - RootPitch: 0
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
-  - Pitch: 2
+  - RootPitch: 2
     Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
-  - Pitch: 4
+  - RootPitch: 4
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
-  - Pitch: 5
+  - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
   SamplerLoop: 0
   Attack: 0
@@ -1567,7 +1567,7 @@ MonoBehaviour:
   VoiceCount: 8
   OscillatorType: 0
   Samplers:
-  - Pitch: 9
+  - RootPitch: 9
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   SamplerLoop: 0
   Attack: 0

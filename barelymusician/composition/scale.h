@@ -12,7 +12,6 @@ extern "C" {
 typedef int32_t BarelyScaleType;
 
 /// Definition of a musical scale.
-#pragma pack(push, 1)
 typedef struct BarelyScaleDefinition {
   /// Array of pitches relative to the root pitch.
   const double* pitches;
@@ -26,7 +25,6 @@ typedef struct BarelyScaleDefinition {
   /// Mode index.
   int32_t mode;
 } BarelyScaleDefinition;
-#pragma pack(pop)
 
 /// Gets a scale pitch for a given degree.
 ///

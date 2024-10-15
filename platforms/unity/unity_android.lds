@@ -13,13 +13,13 @@ VERS_1.0 {
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
     BarelyInstrument_SetControlEvent;
-    BarelyInstrument_SetData;
     BarelyInstrument_SetNoteControl;
     BarelyInstrument_SetNoteControlEvent;
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOffEvent;
     BarelyInstrument_SetNoteOn;
     BarelyInstrument_SetNoteOnEvent;
+    BarelyInstrument_SetSampleData;
     BarelyMusician_Create;
     BarelyMusician_Destroy;
     BarelyMusician_GetBeatsFromSeconds;

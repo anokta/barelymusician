@@ -32,6 +32,7 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::Random;
+using ::barely::SampleDataDefinition;
 using ::barely::ScaleDefinition;
 using ::barely::ScaleType;
 using ::barely::examples::AudioClock;
@@ -75,19 +76,14 @@ constexpr double kPitchHihatOpen = 3.0;
 constexpr char kDrumsDir[] = "audio/drums/";
 
 // Inserts pad data to a given `data` from a given `file_path`.
-void InsertPadData(double pitch, const std::string& file_path, std::vector<double>& data) {
+void InsertPadData(double pitch, const std::string& file_path, std::vector<double>& samples,
+                   std::vector<SampleDataDefinition>& definitions) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
 
-  const double frame_rate = static_cast<double>(sample_file.GetFrameRate());
-  const auto& sample_data = sample_file.GetData();
-  const double length = static_cast<double>(sample_data.size());
-  data.reserve(data.size() + sample_data.size() + 3);
-  data.push_back(static_cast<double>(pitch));
-  data.push_back(frame_rate);
-  data.push_back(length);
-  data.insert(data.end(), sample_data.begin(), sample_data.end());
+  samples = sample_file.GetData();
+  definitions.emplace_back(pitch, sample_file.GetFrameRate(), samples);
 }
 
 // Schedules performer to play an instrument note.
@@ -266,12 +262,16 @@ int main(int /*argc*/, char* argv[]) {
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<double, std::string>>& percussion_map) {
-        std::vector<double> data;
-        data.push_back(static_cast<double>(percussion_map.size()));
+        std::vector<SampleDataDefinition> definitions;
+        std::vector<std::vector<double>> samples;
+        definitions.reserve(percussion_map.size());
+        samples.reserve(percussion_map.size());
         for (const auto& [pitch, file_path] : percussion_map) {
-          InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), data);
+          samples.emplace_back();
+          InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), samples.back(),
+                        definitions);
         }
-        percussion.SetData(data);
+        percussion.SetSampleData(definitions);
       };
   set_percussion_pad_map_fn({
       {kPitchKick, "basic_kick.wav"},

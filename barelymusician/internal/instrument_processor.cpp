@@ -5,6 +5,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/internal/sample_data.h"
 
 namespace barely {
 
@@ -93,62 +94,29 @@ void InstrumentProcessor::SetControl(int id, double value) noexcept {
   }
 }
 
-void InstrumentProcessor::SetData(const void* data, int size) noexcept {
-  sample_data_.clear();
-  voice_.Update([](Voice& voice) { voice.sample_player().SetData(nullptr, 0, 0); });
-
-  const double* data_double = static_cast<const double*>(data);
-  if (data_double == nullptr || size == 0) {
-    return;
-  }
-
-  const int sample_data_count = static_cast<int>(*data_double++);
-  sample_data_.reserve(sample_data_count);
-
-  for (int i = 0; i < sample_data_count; ++i) {
-    const double pitch = *data_double++;
-    const int frame_rate = static_cast<int>(*data_double++);
-    const int length = static_cast<int>(*data_double++);
-    sample_data_.push_back({pitch, data_double, length, frame_rate});
-    data_double += length;
-  }
-
-  // TODO(#139): Support data update for already playing voices.
-}
-
 void InstrumentProcessor::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
 
 void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
   const double frequency = GetFrequency(pitch + pitch_shift_, reference_frequency_);
-  const SampleData* sample_data = SelectSampleData(pitch);
-  const double speed = (sample_data != nullptr && pitch + pitch_shift_ != sample_data->pitch)
-                           ? frequency / GetFrequency(sample_data->pitch, reference_frequency_)
+  const auto* sample_data = sample_data_.Select(pitch);
+  const double speed = (sample_data != nullptr && pitch + pitch_shift_ != sample_data->root_pitch)
+                           ? frequency / GetFrequency(sample_data->root_pitch, reference_frequency_)
                            : 1.0;
   voice_.Start(pitch, [&](Voice& voice) {
     voice.oscillator().SetFrequency(frequency);
     if (sample_data != nullptr) {
-      voice.sample_player().SetData(sample_data->data, sample_data->frame_rate,
-                                    sample_data->length);
+      voice.sample_player().SetData(sample_data->samples, sample_data->sample_rate,
+                                    sample_data->sample_count);
       voice.sample_player().SetSpeed(speed);
     }
     voice.set_gain(intensity);
   });
 }
 
-const InstrumentProcessor::SampleData* InstrumentProcessor::SelectSampleData(
-    double pitch) const noexcept {
-  if (sample_data_.empty()) {
-    return nullptr;
-  }
-  // TODO(#139): `std::upper_bound` turned out to be slow here, but this may be optimized further.
-  for (int i = 0; i < static_cast<int>(sample_data_.size()); ++i) {
-    if (const SampleData* current = &sample_data_[i]; pitch <= current->pitch) {
-      return (i == 0 || pitch - sample_data_[i - 1].pitch > current->pitch - pitch)
-                 ? current
-                 : &sample_data_[i - 1];
-    }
-  }
-  return &sample_data_.back();
+void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
+  voice_.Update([](Voice& voice) { voice.sample_player().SetData(nullptr, 0, 0); });
+  sample_data_.Swap(sample_data);
+  // TODO(#139): Support data update for already playing voices.
 }
 
 }  // namespace barely

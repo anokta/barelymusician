@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
 #define BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
 
-#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -13,6 +12,7 @@
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/instrument_processor.h"
 #include "barelymusician/internal/message_queue.h"
+#include "barelymusician/internal/sample_data.h"
 
 namespace barely {
 
@@ -87,10 +87,10 @@ class InstrumentController {
   /// @param user_data Pointer to user data.
   void SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept;
 
-  /// Sets data.
+  /// Sets the sample data.
   ///
-  /// @param data Data.
-  void SetData(std::vector<std::byte> data) noexcept;
+  /// @param sample_data Sample data.
+  void SetSampleData(SampleData sample_data) noexcept;
 
   /// Sets the note control event.
   ///
@@ -160,9 +160,6 @@ class InstrumentController {
 
   // Update frame.
   int64_t update_frame_ = 0;
-
-  // Data.
-  std::vector<std::byte> data_;
 
   // Message queue.
   MessageQueue message_queue_;

@@ -1,7 +1,6 @@
 #include "barelymusician/barelymusician.h"
 
 #include <cassert>
-#include <cstddef>
 #include <cstdint>
 
 #include "barelymusician/internal/instrument_controller.h"
@@ -232,15 +231,6 @@ bool BarelyInstrument_SetControlEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyInstrument_SetData(BarelyInstrument* instrument, const void* data, int32_t size) {
-  if (!instrument) return false;
-  if (size < 0 || (!data && size > 0)) return false;
-
-  instrument->SetData(
-      {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
-  return true;
-}
-
 bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, double pitch, int32_t id,
                                      double value) {
   if (!instrument) return false;
@@ -288,6 +278,18 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
   if (!instrument) return false;
 
   instrument->SetNoteOnEvent(definition, user_data);
+  return true;
+}
+
+bool BarelyInstrument_SetSampleData(BarelyInstrument* instrument,
+                                    const BarelySampleDataDefinition* definitions,
+                                    int32_t definition_count) {
+  if (!instrument) return false;
+  if (definition_count < 0 || (!definitions && definition_count > 0)) return false;
+
+  instrument->SetSampleData(std::span<const barely::SampleDataDefinition>{
+      reinterpret_cast<const barely::SampleDataDefinition*>(definitions),
+      reinterpret_cast<const barely::SampleDataDefinition*>(definitions + definition_count)});
   return true;
 }
 

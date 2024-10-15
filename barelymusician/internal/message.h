@@ -6,6 +6,8 @@
 #include <variant>
 #include <vector>
 
+#include "barelymusician/internal/sample_data.h"
+
 namespace barely {
 
 /// Control message.
@@ -15,12 +17,6 @@ struct ControlMessage {
 
   /// Value.
   double value;
-};
-
-/// Data message.
-struct DataMessage {
-  /// Data.
-  std::vector<std::byte> data;
 };
 
 /// Note control message.
@@ -50,9 +46,15 @@ struct NoteOnMessage {
   double intensity;
 };
 
+/// Sample data message.
+struct SampleDataMessage {
+  /// Sample data.
+  SampleData sample_data;
+};
+
 /// Message alias.
-using Message =
-    std::variant<ControlMessage, DataMessage, NoteControlMessage, NoteOffMessage, NoteOnMessage>;
+using Message = std::variant<ControlMessage, NoteControlMessage, NoteOffMessage, NoteOnMessage,
+                             SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>
@@ -62,6 +64,6 @@ struct MessageVisitor : MessageTypes... {
 template <typename... MessageTypes>
 MessageVisitor(MessageTypes...) -> MessageVisitor<MessageTypes...>;
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INTERNAL_MESSAGE_H_

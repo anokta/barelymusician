@@ -5,6 +5,7 @@
 
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
+#include "barelymusician/internal/sample_data.h"
 
 namespace barely {
 
@@ -32,12 +33,6 @@ class InstrumentProcessor {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(int id, double value) noexcept;
 
-  /// Sets data.
-  ///
-  /// @param data Data.
-  /// @param size Data size in bytes.
-  void SetData(const void* data, int size) noexcept;
-
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
@@ -56,17 +51,15 @@ class InstrumentProcessor {
   /// @param intensity Note intensity.
   void SetNoteOn(double pitch, double intensity) noexcept;
 
+  /// Sets the sample data.
+  ///
+  /// @param sample_data Sample data.
+  void SetSampleData(SampleData& sample_data) noexcept;
+
  private:
-  struct SampleData {
-    double pitch = 0.0;
-    const double* data = nullptr;
-    int length = 0;
-    int frame_rate = 0;
-  };
-  const SampleData* SelectSampleData(double pitch) const noexcept;
-  std::vector<SampleData> sample_data_;
   double reference_frequency_ = 0.0;
   double pitch_shift_ = 0.0;
+  SampleData sample_data_;
   GainProcessor gain_processor_;
   PolyphonicVoice voice_;
 };

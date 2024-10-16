@@ -18,11 +18,10 @@ add_library(
   barelymusician_internal_instrument_controller
   instrument_controller.cpp
   instrument_controller.h
-  instrument_processor.cpp
-  instrument_processor.h
 )
 target_link_libraries(
   barelymusician_internal_instrument_controller
+  barelymusician_internal_instrument_processor
   barelymusician_internal_control
   barelymusician_internal_event
   barelymusician_internal_message
@@ -30,9 +29,21 @@ target_link_libraries(
   barelymusician_internal_sample_data
   barelymusician_headeronly
   barelymusician_find_or_null
+  barelymusician_oscillator
+)
+
+add_library(
+  barelymusician_internal_instrument_processor
+  instrument_processor.cpp
+  instrument_processor.h
+)
+target_link_libraries(
+  barelymusician_internal_instrument_processor
+  barelymusician_internal_sample_data
+  barelymusician_headeronly
   barelymusician_gain_processor
   barelymusician_oscillator
-  barelymusician_polyphonic_voice
+  barelymusician_voice
 )
 
 add_library(
@@ -141,6 +152,19 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_instrument_controller_test)
+
+  add_executable(
+    barelymusician_internal_instrument_processor_test
+    instrument_processor_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_internal_instrument_processor_test
+    barelymusician_internal_instrument_processor
+    barelymusician_internal_sample_data
+    barelymusician_headeronly
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_internal_instrument_processor_test)
 
   add_executable(
     barelymusician_internal_message_queue_test

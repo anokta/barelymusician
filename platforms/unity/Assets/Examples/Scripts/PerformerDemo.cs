@@ -12,7 +12,7 @@ namespace Barely {
       private float _v = 0.0f;
 
       public void OnProcess() {
-        int degree = Random.Range(-2, 2) * scale.PitchCount + Random.Range(0, scale.PitchCount);
+        int degree = Random.Range(-scale.PitchCount, scale.PitchCount);
         double pitch = scale.GetPitch(degree);
         instrument.SetNoteOn(pitch);
         performer.ScheduleOneOffTask(delegate() { instrument.SetNoteOff(pitch); },
@@ -20,7 +20,7 @@ namespace Barely {
 
         text.text = ((int)(12.0 * pitch)).ToString();
         _h = Random.Range(0.0f, 1.0f);
-        _v = 0.1f * (float)(pitch + 2.0);
+        _v = 0.2f * (float)(pitch + 1.0);
       }
 
       private void Update() {

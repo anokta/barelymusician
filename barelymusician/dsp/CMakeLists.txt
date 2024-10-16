@@ -45,16 +45,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_polyphonic_voice
-  polyphonic_voice.cpp
-  polyphonic_voice.h
-)
-target_link_libraries(
-  barelymusician_polyphonic_voice
-  barelymusician_voice
-)
-
-add_library(
   barelymusician_sample_player
   sample_player.cpp
   sample_player.h
@@ -115,17 +105,6 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_oscillator_test)
-
-  add_executable(
-    barelymusician_polyphonic_voice_test
-    polyphonic_voice_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_polyphonic_voice_test
-    barelymusician_polyphonic_voice
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_polyphonic_voice_test)
 
   add_executable(
     barelymusician_sample_player_test

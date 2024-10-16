@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "barelymusician/dsp/gain_processor.h"
-#include "barelymusician/dsp/polyphonic_voice.h"
+#include "barelymusician/dsp/voice.h"
 #include "barelymusician/internal/sample_data.h"
 
 namespace barely {
@@ -57,11 +57,25 @@ class InstrumentProcessor {
   void SetSampleData(SampleData& sample_data) noexcept;
 
  private:
+  // List of voices with their pitch and timestamp. Voice timestamp is used to determine which voice
+  // to steal when there are no free voices available.
+  // TODO(#12): Consider a more optimized implementation for voice stealing.
+  struct VoiceState {
+    Voice voice;
+    double pitch = 0.0;
+    int timestamp = 0;
+  };
+  Voice& AcquireVoice(double pitch) noexcept;
+  std::vector<VoiceState> voice_states_;
+  int voice_count_ = 0;
+
+  GainProcessor gain_processor_;
+  SampleData sample_data_;
+
+  bool should_retrigger_ = false;
+
   double reference_frequency_ = 0.0;
   double pitch_shift_ = 0.0;
-  SampleData sample_data_;
-  GainProcessor gain_processor_;
-  PolyphonicVoice voice_;
 };
 
 }  // namespace barely

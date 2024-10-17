@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -38,18 +38,18 @@ class InstrumentController {
 
   /// Returns a control value.
   ///
-  /// @param id Control identifier.
+  /// @param index Control index.
   /// @return Pointer to control, or nullptr if not found.
-  [[nodiscard]] Control* GetControl(int id) noexcept;
-  [[nodiscard]] const Control* GetControl(int id) const noexcept;
+  [[nodiscard]] Control* GetControl(int index) noexcept;
+  [[nodiscard]] const Control* GetControl(int index) const noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param id Note control identifier.
+  /// @param index Note control index.
   /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] Control* GetNoteControl(double pitch, int id) noexcept;
-  [[nodiscard]] const Control* GetNoteControl(double pitch, int id) const noexcept;
+  [[nodiscard]] Control* GetNoteControl(double pitch, int index) noexcept;
+  [[nodiscard]] const Control* GetNoteControl(double pitch, int index) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -140,11 +140,11 @@ class InstrumentController {
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;
 
-  // Control map.
-  ControlMap control_map_;
+  // Array of controls.
+  std::vector<Control> controls_;
 
-  // Map of note control maps by their pitches.
-  std::unordered_map<double, ControlMap> note_control_maps_;
+  // Array of note control arrays by their pitches.
+  std::unordered_map<double, std::vector<Control>> note_controls_;
 
   // Control event.
   Control::Event control_event_;

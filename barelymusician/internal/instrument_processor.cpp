@@ -48,8 +48,8 @@ void InstrumentProcessor::Process(double* output_samples, int output_channel_cou
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void InstrumentProcessor::SetControl(int id, double value) noexcept {
-  switch (static_cast<InstrumentControl>(id)) {
+void InstrumentProcessor::SetControl(int index, double value) noexcept {
+  switch (static_cast<InstrumentControl>(index)) {
     case InstrumentControl::kGain:
       gain_processor_.SetGain(value);
       break;

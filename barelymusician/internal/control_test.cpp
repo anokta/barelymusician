@@ -12,7 +12,7 @@ namespace {
 TEST(ControlTest, Set) {
   int callback_count = 0;
   Control control(ControlDefinition{0, 15.0, 10.0, 20.0},
-                  [&](int /*id*/, double /*value*/) { ++callback_count; });
+                  [&](int /*index*/, double /*value*/) { ++callback_count; });
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   control.SetValue(12.0);
@@ -58,18 +58,17 @@ TEST(ControlTest, Set) {
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 }
 
-// Tests that the control map is built from an array of control definitions as expected.
-TEST(ControlTest, BuildControlMap) {
+// Tests that the array of controls is built from an array of control definitions as expected.
+TEST(ControlTest, BuildControls) {
   const std::vector<ControlDefinition> control_definitions = {
-      ControlDefinition{2, 1.0},
-      ControlDefinition{10, 5.0},
+      ControlDefinition{0, 1.0},
+      ControlDefinition{1, 5.0},
   };
 
-  const ControlMap control_map =
-      BuildControlMap(control_definitions, [](int /*id*/, double /*value*/) {});
-  ASSERT_EQ(control_map.size(), 2);
-  EXPECT_DOUBLE_EQ(control_map.find(2)->second.GetValue(), 1.0);
-  EXPECT_DOUBLE_EQ(control_map.find(10)->second.GetValue(), 5.0);
+  const auto controls = BuildControls(control_definitions, [](int /*index*/, double /*value*/) {});
+  ASSERT_EQ(controls.size(), 2);
+  EXPECT_DOUBLE_EQ(controls[0].GetValue(), 1.0);
+  EXPECT_DOUBLE_EQ(controls[1].GetValue(), 5.0);
 }
 
 }  // namespace

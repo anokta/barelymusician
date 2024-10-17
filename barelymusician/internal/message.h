@@ -12,8 +12,8 @@ namespace barely {
 
 /// Control message.
 struct ControlMessage {
-  /// Identifier.
-  int id;
+  /// Index.
+  int index;
 
   /// Value.
   double value;
@@ -24,8 +24,8 @@ struct NoteControlMessage {
   /// Pitch.
   double pitch;
 
-  /// Identifier.
-  int id;
+  /// Index.
+  int index;
 
   /// Value.
   double value;

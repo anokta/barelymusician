@@ -133,7 +133,7 @@
 ///   BarelyInstrument_IsNoteOn(instrument, c3_pitch, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, /*id=*/0, /*value=*/0.5);
+///   BarelyInstrument_SetControl(instrument, /*index=*/0, /*value=*/0.5);
 ///
 ///   // Process.
 ///   //
@@ -227,9 +227,9 @@ typedef void (*BarelyControlEventDefinition_DestroyCallback)(void** state);
 /// Control event definition process callback signature.
 ///
 /// @param state Pointer to control event state.
-/// @param id Control identifier.
+/// @param index Control index.
 /// @param value Control value.
-typedef void (*BarelyControlEventDefinition_ProcessCallback)(void** state, int32_t id,
+typedef void (*BarelyControlEventDefinition_ProcessCallback)(void** state, int32_t index,
                                                              double value);
 
 /// Control event definition.
@@ -259,10 +259,10 @@ typedef void (*BarelyNoteControlEventDefinition_DestroyCallback)(void** state);
 ///
 /// @param state Pointer to note control event state.
 /// @param pitch Note pitch.
-/// @param id Note control identifier.
+/// @param index Note control index.
 /// @param value Note control value.
 typedef void (*BarelyNoteControlEventDefinition_ProcessCallback)(void** state, double pitch,
-                                                                 int32_t id, double value);
+                                                                 int32_t index, double value);
 
 /// Note control event definition.
 typedef struct BarelyNoteControlEventDefinition {
@@ -408,21 +408,21 @@ BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrument* instrument);
 /// Gets an instrument control value.
 ///
 /// @param instrument Pointer to instrument.
-/// @param id Control identifier.
+/// @param index Control index.
 /// @param out_value Output control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetControl(const BarelyInstrument* instrument, int32_t id,
+BARELY_EXPORT bool BarelyInstrument_GetControl(const BarelyInstrument* instrument, int32_t index,
                                                double* out_value);
 
 /// Gets an instrument note control value.
 ///
 /// @param instrument Pointer to instrument.
 /// @param pitch Note pitch.
-/// @param id Note control identifier.
+/// @param index Note control index.
 /// @param out_value Output note control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, double pitch,
-                                                   int32_t id, double* out_value);
+                                                   int32_t index, double* out_value);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -463,18 +463,18 @@ BARELY_EXPORT bool BarelyInstrument_ResetAllNoteControls(BarelyInstrument* instr
 /// Resets an instrument control value.
 ///
 /// @param instrument Pointer to instrument.
-/// @param id Control identifier.
+/// @param index Control index.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetControl(BarelyInstrument* instrument, int32_t id);
+BARELY_EXPORT bool BarelyInstrument_ResetControl(BarelyInstrument* instrument, int32_t index);
 
 /// Resets an instrument note control value.
 ///
 /// @param instrument Pointer to instrument.
 /// @param pitch Note pitch.
-/// @param id Control identifier.
+/// @param index Control index.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, double pitch,
-                                                     int32_t id);
+                                                     int32_t index);
 
 /// Sets all instrument notes off.
 ///
@@ -485,10 +485,10 @@ BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrument* instrument)
 /// Sets an instrument control value.
 ///
 /// @param instrument Pointer to instrument.
-/// @param id Control identifier.
+/// @param index Control index.
 /// @param value Control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrument* instrument, int32_t id,
+BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrument* instrument, int32_t index,
                                                double value);
 
 /// Sets the control event of an instrument.
@@ -505,11 +505,11 @@ BARELY_EXPORT bool BarelyInstrument_SetControlEvent(BarelyInstrument* instrument
 ///
 /// @param instrument Pointer to instrument.
 /// @param pitch Note pitch.
-/// @param id Note control identifier.
+/// @param index Note control index.
 /// @param value Note control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, double pitch,
-                                                   int32_t id, double value);
+                                                   int32_t index, double value);
 
 /// Sets the note control event of an instrument.
 ///
@@ -797,9 +797,9 @@ namespace barely {
 struct ControlEventDefinition : public BarelyControlEventDefinition {
   /// Callback signature.
   ///
-  /// @param id Control identifier.
+  /// @param index Control index.
   /// @param value Control value.
-  using Callback = std::function<void(int id, double value)>;
+  using Callback = std::function<void(int index, double value)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyControlEventDefinition_CreateCallback;
@@ -820,9 +820,9 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, int32_t id, double value) noexcept {
+        [](void** state, int32_t index, double value) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
-            callback(id, value);
+            callback(index, value);
           }
         });
   }
@@ -854,9 +854,9 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   /// Callback signature.
   ///
   /// @param pitch Note pitch.
-  /// @param id Note control identifier.
+  /// @param index Note control index.
   /// @param value Note control value.
-  using Callback = std::function<void(double pitch, int id, double value)>;
+  using Callback = std::function<void(double pitch, int index, double value)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteControlEventDefinition_CreateCallback;
@@ -877,9 +877,9 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
           assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch, int32_t id, double value) noexcept {
+        [](void** state, double pitch, int32_t index, double value) noexcept {
           if (const auto& callback = *static_cast<Callback*>(*state); callback) {
-            callback(pitch, id, value);
+            callback(pitch, index, value);
           }
         });
   }
@@ -1328,17 +1328,17 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
 
   /// Returns a control value.
   ///
-  /// @param id Control identifier.
+  /// @param index Control index.
   /// @return Control value.
   template <typename IdType, typename ValueType>
-  [[nodiscard]] ValueType GetControl(IdType id) const noexcept {
+  [[nodiscard]] ValueType GetControl(IdType index) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_GetControl(*this, static_cast<int32_t>(id), &value);
+        BarelyInstrument_GetControl(*this, static_cast<int32_t>(index), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1346,17 +1346,17 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// Returns a control value.
   ///
   /// @param pitch Note pitch.
-  /// @param id Note control identifier.
+  /// @param index Note control index.
   /// @return Note control value.
   template <typename IdType, typename ValueType>
-  [[nodiscard]] ValueType GetNoteControl(double pitch, IdType id) const noexcept {
+  [[nodiscard]] ValueType GetNoteControl(double pitch, IdType index) const noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_GetNoteControl(*this, pitch, static_cast<int32_t>(id), &value);
+        BarelyInstrument_GetNoteControl(*this, pitch, static_cast<int32_t>(index), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1401,26 +1401,26 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
 
   /// Resets a control value.
   ///
-  /// @param id Control identifier.
+  /// @param index Control index.
   template <typename IdType>
-  void ResetControl(IdType id) noexcept {
+  void ResetControl(IdType index) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     [[maybe_unused]] const bool success =
-        BarelyInstrument_ResetControl(*this, static_cast<int32_t>(id));
+        BarelyInstrument_ResetControl(*this, static_cast<int32_t>(index));
     assert(success);
   }
 
   /// Resets a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param id Control identifier.
+  /// @param index Control index.
   template <typename IdType>
-  void ResetNoteControl(double pitch, IdType id) noexcept {
+  void ResetNoteControl(double pitch, IdType index) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     [[maybe_unused]] const bool success =
-        BarelyInstrument_ResetNoteControl(*this, pitch, static_cast<int32_t>(id));
+        BarelyInstrument_ResetNoteControl(*this, pitch, static_cast<int32_t>(index));
     assert(success);
   }
 
@@ -1432,16 +1432,16 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
 
   /// Sets a control value.
   ///
-  /// @param id Control identifier.
+  /// @param index Control index.
   /// @param value Control value.
   template <typename IdType, typename ValueType>
-  void SetControl(IdType id, ValueType value) noexcept {
+  void SetControl(IdType index, ValueType value) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success =
-        BarelyInstrument_SetControl(*this, static_cast<int32_t>(id), static_cast<double>(value));
+        BarelyInstrument_SetControl(*this, static_cast<int32_t>(index), static_cast<double>(value));
     assert(success);
   }
 
@@ -1475,16 +1475,16 @@ class InstrumentPtr : public PtrWrapper<BarelyInstrument> {
   /// Sets a control value.
   ///
   /// @param pitch Note pitch.
-  /// @param id Control identifier.
+  /// @param index Control index.
   /// @param value Control value.
   template <typename IdType, typename ValueType>
-  void SetNoteControl(double pitch, IdType id, ValueType value) noexcept {
+  void SetNoteControl(double pitch, IdType index, ValueType value) noexcept {
     static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
                   "IdType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        *this, pitch, static_cast<int32_t>(id), static_cast<double>(value));
+        *this, pitch, static_cast<int32_t>(index), static_cast<double>(value));
     assert(success);
   }
 

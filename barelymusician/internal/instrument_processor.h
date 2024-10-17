@@ -28,17 +28,17 @@ class InstrumentProcessor {
 
   /// Sets a control value.
   ///
-  /// @param id Control identifier.
+  /// @param index Control index.
   /// @param value Control value.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(int id, double value) noexcept;
+  void SetControl(int index, double value) noexcept;
 
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param id Note control identifier.
+  /// @param index Note control index.
   /// @param value Note control value.
-  void SetNoteControl(double /*pitch*/, int /*id*/, double /*value*/) noexcept {}
+  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/) noexcept {}
 
   /// Sets a note off.
   ///

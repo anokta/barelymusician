@@ -15,27 +15,27 @@ namespace barely {
 struct ControlDefinition {
   /// Constructs a new `ControlDefinition`.
   ///
-  /// @param id Identifier.
+  /// @param index Index.
   /// @param default_value Default value.
   /// @param min_value Minimum value.
   /// @param max_value Maximum value.
-  template <typename IdType, typename ValueType>
-  constexpr ControlDefinition(IdType id, ValueType default_value,
+  template <typename IndexType, typename ValueType>
+  constexpr ControlDefinition(IndexType index, ValueType default_value,
                               ValueType min_value = std::numeric_limits<ValueType>::lowest(),
                               ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
-      : id(static_cast<int32_t>(id)),
+      : index(static_cast<int32_t>(index)),
         default_value(static_cast<double>(default_value)),
         min_value(static_cast<double>(min_value)),
         max_value(static_cast<double>(max_value)) {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
+    static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+                  "IndexType is not supported");
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     assert(default_value >= min_value && default_value <= max_value);
   }
 
-  /// Identifier.
-  int32_t id = 0;
+  /// Index.
+  int32_t index = 0;
 
   /// Default value.
   double default_value = 0.0;
@@ -86,17 +86,14 @@ class Control {
   double value_ = 0.0;
 };
 
-/// Control map alias.
-using ControlMap = std::unordered_map<int, Control>;
-
-/// Builds the corresponding control map for a given array of control `definitions`.
+/// Builds the corresponding array of controls for a given array of control `definitions`.
 ///
 /// @param definitions Spand of control definitions.
 /// @param set_value_callback Set value callback.
-/// @return Control map.
+/// @return Array of controls.
 // NOLINTNEXTLINE(bugprone-exception-escape)
-ControlMap BuildControlMap(std::span<const ControlDefinition> definitions,
-                           const Control::SetValueCallback& set_value_callback) noexcept;
+std::vector<Control> BuildControls(std::span<const ControlDefinition> definitions,
+                                   const Control::SetValueCallback& set_value_callback) noexcept;
 
 }  // namespace barely
 

@@ -114,9 +114,9 @@ namespace Barely {
 
     /// Control event callback.
     ///
-    /// @param id Control identifier.
+    /// @param index Control index.
     /// @param control Control value.
-    public delegate void ControlEventCallback(int id, double value);
+    public delegate void ControlEventCallback(int index, double value);
     public event ControlEventCallback OnControl;
 
     [Serializable]
@@ -126,9 +126,9 @@ namespace Barely {
     /// Note control event callback.
     ///
     /// @param pitch Note pitch.
-    /// @param id Note control identifier.
+    /// @param index Note control index.
     /// @param control Note control value.
-    public delegate void NoteControlEventCallback(double pitch, int id, double value);
+    public delegate void NoteControlEventCallback(double pitch, int index, double value);
     public event NoteControlEventCallback OnNoteControl;
 
     [Serializable]
@@ -167,19 +167,19 @@ namespace Barely {
 
     /// Returns a control value.
     ///
-    /// @param id Control identifier.
+    /// @param index Control index.
     /// @return Control value.
-    public double GetControl(int id) {
-      return Musician.Internal.Instrument_GetControl(_ptr, id);
+    public double GetControl(int index) {
+      return Musician.Internal.Instrument_GetControl(_ptr, index);
     }
 
     /// Returns a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param id Control identifier.
+    /// @param index Control index.
     /// @return Control value.
-    public double GetNoteControl(double pitch, int id) {
-      return Musician.Internal.Instrument_GetNoteControl(_ptr, pitch, id);
+    public double GetNoteControl(double pitch, int index) {
+      return Musician.Internal.Instrument_GetNoteControl(_ptr, pitch, index);
     }
 
     /// Returns whether a note is on or not.
@@ -192,17 +192,17 @@ namespace Barely {
 
     /// Resets a control value.
     ///
-    /// @param id Control identifier.
-    public void ResetControl(int id) {
-      Musician.Internal.Instrument_ResetControl(_ptr, id);
+    /// @param index Control index.
+    public void ResetControl(int index) {
+      Musician.Internal.Instrument_ResetControl(_ptr, index);
     }
 
     /// Resets a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param id Note control identifier.
-    public void ResetNoteControl(double pitch, int id) {
-      Musician.Internal.Instrument_ResetNoteControl(_ptr, pitch, id);
+    /// @param index Note control index.
+    public void ResetNoteControl(double pitch, int index) {
+      Musician.Internal.Instrument_ResetNoteControl(_ptr, pitch, index);
     }
 
     /// Sets all notes off.
@@ -212,19 +212,19 @@ namespace Barely {
 
     /// Sets a control value.
     ///
-    /// @param id Control identifier.
+    /// @param index Control index.
     /// @param value Control value.
-    public void SetControl(int id, double value) {
-      Musician.Internal.Instrument_SetControl(_ptr, id, value);
+    public void SetControl(int index, double value) {
+      Musician.Internal.Instrument_SetControl(_ptr, index, value);
     }
 
     /// Sets a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param id Note control identifier.
+    /// @param index Note control index.
     /// @param value Note control value.
-    public void SetNoteControl(double pitch, int id, double value) {
-      Musician.Internal.Instrument_SetNoteControl(_ptr, pitch, id, value);
+    public void SetNoteControl(double pitch, int index, double value) {
+      Musician.Internal.Instrument_SetNoteControl(_ptr, pitch, index, value);
     }
 
     /// Sets a note off.
@@ -250,16 +250,16 @@ namespace Barely {
       }
 
       /// Internal control event callback.
-      public static void OnControlEvent(Instrument instrument, int id, double value) {
-        instrument.OnControl?.Invoke(id, value);
-        instrument.OnControlEvent?.Invoke(id, (float)value);
+      public static void OnControlEvent(Instrument instrument, int index, double value) {
+        instrument.OnControl?.Invoke(index, value);
+        instrument.OnControlEvent?.Invoke(index, (float)value);
       }
 
       /// Internal note control event callback.
-      public static void OnNoteControlEvent(Instrument instrument, double pitch, int id,
+      public static void OnNoteControlEvent(Instrument instrument, double pitch, int index,
                                             double value) {
-        instrument.OnNoteControl?.Invoke(pitch, id, value);
-        instrument.OnNoteControlEvent?.Invoke((float)pitch, id, (float)value);
+        instrument.OnNoteControl?.Invoke(pitch, index, value);
+        instrument.OnNoteControlEvent?.Invoke((float)pitch, index, (float)value);
       }
 
       /// Internal note off event callback.
@@ -304,17 +304,17 @@ namespace Barely {
 
     private void Update() {
       UpdateSampleData();
-      int id = 0;
-      SetControl(id++, Gain);
-      SetControl(id++, (double)VoiceCount);
-      SetControl(id++, (double)OscillatorType);
-      SetControl(id++, SamplerLoop ? 1.0 : 0.0);
-      SetControl(id++, Attack);
-      SetControl(id++, Decay);
-      SetControl(id++, Sustain);
-      SetControl(id++, Release);
-      SetControl(id++, PitchShift);
-      SetControl(id++, Retrigger ? 1.0 : 0.0);
+      int index = 0;
+      SetControl(index++, Gain);
+      SetControl(index++, (double)VoiceCount);
+      SetControl(index++, (double)OscillatorType);
+      SetControl(index++, SamplerLoop ? 1.0 : 0.0);
+      SetControl(index++, Attack);
+      SetControl(index++, Decay);
+      SetControl(index++, Sustain);
+      SetControl(index++, Release);
+      SetControl(index++, PitchShift);
+      SetControl(index++, Retrigger ? 1.0 : 0.0);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

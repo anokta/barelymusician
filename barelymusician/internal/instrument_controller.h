@@ -39,17 +39,19 @@ class InstrumentController {
   /// Returns a control value.
   ///
   /// @param index Control index.
-  /// @return Pointer to control, or nullptr if not found.
-  [[nodiscard]] Control* GetControl(int index) noexcept;
-  [[nodiscard]] const Control* GetControl(int index) const noexcept;
+  /// @return Pointer to control value, or nullptr if not found.
+  [[nodiscard]] const double* GetControl(int index) const noexcept;
+  [[nodiscard]] bool ResetControl(int index) noexcept;
+  [[nodiscard]] bool SetControl(int index, double value) noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
-  /// @return Pointer to note control, or nullptr if not found.
-  [[nodiscard]] Control* GetNoteControl(double pitch, int index) noexcept;
-  [[nodiscard]] const Control* GetNoteControl(double pitch, int index) const noexcept;
+  /// @return Pointer to note control value, or nullptr if not found.
+  [[nodiscard]] const double* GetNoteControl(double pitch, int index) const noexcept;
+  [[nodiscard]] bool ResetNoteControl(double pitch, int index) noexcept;
+  [[nodiscard]] bool SetNoteControl(double pitch, int index, double value) noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -81,22 +83,10 @@ class InstrumentController {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetAllNotesOff() noexcept;
 
-  /// Sets the control event callback.
-  ///
-  /// @param callback Control event definition.
-  /// @param user_data Pointer to user data.
-  void SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept;
-
   /// Sets the sample data.
   ///
   /// @param sample_data Sample data.
   void SetSampleData(SampleData sample_data) noexcept;
-
-  /// Sets the note control event.
-  ///
-  /// @param definition Note control event definition.
-  /// @param user_data Pointer to user data.
-  void SetNoteControlEvent(NoteControlEventDefinition definition, void* user_data) noexcept;
 
   /// Sets a note off.
   ///
@@ -128,9 +118,6 @@ class InstrumentController {
   void Update(int64_t update_frame) noexcept;
 
  private:
-  // Note control event alias.
-  using NoteControlEvent = Event<NoteControlEventDefinition, double, int, double>;
-
   // Note off event alias.
   using NoteOffEvent = Event<NoteOffEventDefinition, double>;
 
@@ -145,12 +132,6 @@ class InstrumentController {
 
   // Array of note control arrays by their pitches.
   std::unordered_map<double, std::vector<Control>> note_controls_;
-
-  // Control event.
-  Control::Event control_event_;
-
-  // Note control event.
-  NoteControlEvent note_control_event_;
 
   // Note off event.
   NoteOffEvent note_off_event_;

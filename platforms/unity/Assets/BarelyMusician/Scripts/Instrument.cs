@@ -112,29 +112,6 @@ namespace Barely {
     /// Retrigger.
     public bool Retrigger = false;
 
-    /// Control event callback.
-    ///
-    /// @param index Control index.
-    /// @param control Control value.
-    public delegate void ControlEventCallback(int index, double value);
-    public event ControlEventCallback OnControl;
-
-    [Serializable]
-    public class ControlEvent : UnityEngine.Events.UnityEvent<int, float> {}
-    public ControlEvent OnControlEvent;
-
-    /// Note control event callback.
-    ///
-    /// @param pitch Note pitch.
-    /// @param index Note control index.
-    /// @param control Note control value.
-    public delegate void NoteControlEventCallback(double pitch, int index, double value);
-    public event NoteControlEventCallback OnNoteControl;
-
-    [Serializable]
-    public class NoteControlEvent : UnityEngine.Events.UnityEvent<float, int, float> {}
-    public NoteControlEvent OnNoteControlEvent;
-
     /// Note off event callback.
     ///
     /// @param pitch Note pitch.
@@ -247,19 +224,6 @@ namespace Barely {
       /// Returns the pointer.
       public static IntPtr GetPtr(Instrument instrument) {
         return instrument ? instrument._ptr : IntPtr.Zero;
-      }
-
-      /// Internal control event callback.
-      public static void OnControlEvent(Instrument instrument, int index, double value) {
-        instrument.OnControl?.Invoke(index, value);
-        instrument.OnControlEvent?.Invoke(index, (float)value);
-      }
-
-      /// Internal note control event callback.
-      public static void OnNoteControlEvent(Instrument instrument, double pitch, int index,
-                                            double value) {
-        instrument.OnNoteControl?.Invoke(pitch, index, value);
-        instrument.OnNoteControlEvent?.Invoke((float)pitch, index, (float)value);
       }
 
       /// Internal note off event callback.

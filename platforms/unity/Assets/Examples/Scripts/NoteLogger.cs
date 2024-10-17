@@ -7,27 +7,14 @@ namespace Barely {
 
       private void OnEnable() {
         instrument = GetComponent<Instrument>();
-        instrument.OnControl += OnControl;
-        instrument.OnNoteControl += OnNoteControl;
         instrument.OnNoteOff += OnNoteOff;
         instrument.OnNoteOn += OnNoteOn;
       }
 
       private void OnDisable() {
         instrument = GetComponent<Instrument>();
-        instrument.OnControl -= OnControl;
-        instrument.OnNoteControl -= OnNoteControl;
         instrument.OnNoteOff -= OnNoteOff;
         instrument.OnNoteOn -= OnNoteOn;
-      }
-
-      private void OnControl(int index, double value) {
-        Debug.Log(instrument.name + ": Control(" + index + ", " + value.ToString("F1") + ")");
-      }
-
-      private void OnNoteControl(double pitch, int index, double value) {
-        Debug.Log(instrument.name + ": NoteControl(" + pitch.ToString("F1") + ", " + index + ", " +
-                  value.ToString("F1") + ")");
       }
 
       private void OnNoteOff(double pitch) {

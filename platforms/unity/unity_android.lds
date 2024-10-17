@@ -12,9 +12,7 @@ VERS_1.0 {
     BarelyInstrument_ResetNoteControl;
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
-    BarelyInstrument_SetControlEvent;
     BarelyInstrument_SetNoteControl;
-    BarelyInstrument_SetNoteControlEvent;
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOffEvent;
     BarelyInstrument_SetNoteOn;

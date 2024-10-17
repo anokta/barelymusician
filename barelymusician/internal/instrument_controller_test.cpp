@@ -29,19 +29,19 @@ TEST(InstrumentControllerTest, GetControl) {
   ASSERT_EQ(static_cast<int>(InstrumentControl::kGain), 0);
 
   InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(1.0));
 
-  instrument.GetControl(0)->SetValue(0.25);
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 0.25)));
+  EXPECT_TRUE(instrument.SetControl(0, 0.25));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(0.25));
 
-  instrument.GetControl(0)->ResetValue();
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
+  EXPECT_TRUE(instrument.ResetControl(0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(1.0));
 
-  instrument.GetControl(0)->SetValue(-2.0);
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 0.0)));
+  EXPECT_TRUE(instrument.SetControl(0, -2.0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(0.0));
 
   instrument.ResetAllControls();
-  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 1.0)));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(1.0));
 
   // Control does not exist.
   EXPECT_THAT(instrument.GetControl(-1), IsNull());

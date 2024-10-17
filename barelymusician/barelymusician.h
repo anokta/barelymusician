@@ -15,7 +15,7 @@
 ///   #include "barelymusician/barelymusician.h"
 ///
 ///   // Create.
-///   Musician musician(/*frame_rate=*/48000, /*reference_frequency=/440.0);
+///   barely::Musician musician(/*frame_rate=*/48000, /*reference_frequency=/440.0);
 ///
 ///   // Set the tempo.
 ///   musician.SetTempo(/*tempo=*/124.0);

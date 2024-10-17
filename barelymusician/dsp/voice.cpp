@@ -11,6 +11,8 @@ double Voice::Next() noexcept {
   return gain_ * envelope_.Next() * (oscillator_.Next() + sample_player_.Next());
 }
 
+void Voice::Reset() noexcept { envelope_.Reset(); }
+
 void Voice::Start() noexcept {
   oscillator_.Reset();
   sample_player_.Reset();

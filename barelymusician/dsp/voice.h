@@ -26,6 +26,9 @@ class Voice {
   /// @return Output sample.
   double Next() noexcept;
 
+  /// Resets the voice.
+  void Reset() noexcept;
+
   /// Starts the voice.
   void Start() noexcept;
 

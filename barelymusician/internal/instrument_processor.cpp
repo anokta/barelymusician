@@ -58,6 +58,7 @@ void InstrumentProcessor::SetControl(int index, double value) noexcept {
       for (int i = voice_count_; i < voice_count; ++i) {
         // Copy over the voice settings.
         voice_states_[i].voice = voice_states_[0].voice;
+        voice_states_[i].voice.Reset();
       }
       voice_count_ = voice_count;
     } break;

@@ -7,95 +7,96 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Repeater alias.
-typedef struct BarelyRepeater BarelyRepeater;
+/// Repeater handle alias.
+typedef struct BarelyRepeater* BarelyRepeaterHandle;
 
 /// Repeater style enum alias.
 typedef int32_t BarelyRepeaterStyle;
 
 /// Clears all notes.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Clear(BarelyRepeater* repeater);
+BARELY_EXPORT bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater);
 
 /// Creates a new repeater.
 ///
-/// @param musician Pointer to musician.
+/// @param musician Musician handle.
 /// @param process_order Repeater process order.
-/// @param out_repeater Output pointer to repeater.
+/// @param out_repeater Output repeater handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyRepeater_Create(BarelyMusician* musician, int32_t process_order,
-                                         BarelyRepeater** out_repeater);
+                                         BarelyRepeaterHandle* out_repeater);
 
 /// Destroys an repeater.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Destroy(BarelyRepeater* repeater);
+BARELY_EXPORT bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater);
 
 /// Gets whether an repeater is playing or not.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_IsPlaying(const BarelyRepeater* repeater, bool* out_is_playing);
+BARELY_EXPORT bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing);
 
 /// Pops the last note from the end.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeater* repeater);
+BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
 
 /// Pushes a new note to the end.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @param pitch Note pitch.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeater* repeater, double pitch, int32_t length);
+BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length);
 
 /// Pushes silence to the end.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_PushSilence(BarelyRepeater* repeater, int32_t length);
+BARELY_EXPORT bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length);
 
 /// Sets the instrument of an repeater.
 ///
-/// @param repeater Pointer to repeater.
-/// @param instrument Pointer to instrument.
+/// @param repeater Repeater handle.
+/// @param instrument Instrument handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetInstrument(BarelyRepeater* repeater,
+BARELY_EXPORT bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
                                                 BarelyInstrument* instrument);
 
 /// Sets the rate of an repeater.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @param rate Rate in notes per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetRate(BarelyRepeater* repeater, double rate);
+BARELY_EXPORT bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate);
 
 /// Sets the style of an repeater.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @param style Repeater style.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeater* repeater, BarelyRepeaterStyle style);
+BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater,
+                                           BarelyRepeaterStyle style);
 
 /// Starts the repeater.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @param pitch_offset Pitch offset.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeater* repeater, double pitch_offset);
+BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_offset);
 
 /// Stops the repeater.
 ///
-/// @param repeater Pointer to repeater.
+/// @param repeater Repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Stop(BarelyRepeater* repeater);
+BARELY_EXPORT bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -122,10 +123,10 @@ class Repeater {
  public:
   // Constructs a new `Repeater`.
   ///
-  /// @param musician Musician pointer.
+  /// @param musician Musician handle.
   /// @param process_order Process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Repeater(MusicianPtr musician, int process_order = 0) noexcept;
+  explicit Repeater(MusicianHandle musician, int process_order = 0) noexcept;
 
   /// Destroys `Repeater`.
   ~Repeater() noexcept;
@@ -160,7 +161,7 @@ class Repeater {
   /// Sets the instrument.
   ///
   /// @param instrument Optional instrument.
-  void SetInstrument(std::optional<InstrumentPtr> instrument) noexcept;
+  void SetInstrument(std::optional<InstrumentHandle> instrument) noexcept;
 
   /// Sets the rate.
   ///
@@ -190,7 +191,7 @@ class Repeater {
   Performer performer_;
 
   // Instrument.
-  std::optional<InstrumentPtr> instrument_ = std::nullopt;
+  std::optional<InstrumentHandle> instrument_ = std::nullopt;
 
   // Array of pitches to play.
   std::vector<std::pair<std::optional<double>, int>> pitches_;

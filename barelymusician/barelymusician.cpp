@@ -33,7 +33,7 @@ struct BarelyMusician : public Observable<Musician> {
 // Instrument.
 struct BarelyInstrument : public Observable<InstrumentController> {
  public:
-  explicit BarelyInstrument(BarelyMusician* musician) noexcept
+  explicit BarelyInstrument(BarelyMusicianHandle musician) noexcept
       : Observable<InstrumentController>(musician->GetFrameRate(),
                                          musician->GetReferenceFrequency(),
                                          musician->GetUpdateFrame()),
@@ -66,7 +66,7 @@ struct BarelyInstrument : public Observable<InstrumentController> {
 // Performer.
 struct BarelyPerformer : public Observable<Performer> {
  public:
-  BarelyPerformer(BarelyMusician* musician, int process_order) noexcept
+  BarelyPerformer(BarelyMusicianHandle musician, int process_order) noexcept
       : Observable<Performer>(process_order), musician_(musician->Observe()) {
     assert(musician_);
     musician_->AddPerformer(this);
@@ -91,7 +91,7 @@ struct BarelyPerformer : public Observable<Performer> {
 // Task.
 struct BarelyTask : public Task {
  public:
-  BarelyTask(BarelyPerformer* performer, BarelyTaskDefinition definition, double position,
+  BarelyTask(BarelyPerformerHandle performer, BarelyTaskDefinition definition, double position,
              void* user_data) noexcept
       : Task(definition, position, user_data,
              [this](Task* task, double position) { performer_->SetTaskPosition(task, position); }),
@@ -116,7 +116,8 @@ struct BarelyTask : public Task {
   Observer<Performer> performer_;
 };
 
-bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrument** out_instrument) {
+bool BarelyInstrument_Create(BarelyMusicianHandle musician,
+                             BarelyInstrumentHandle* out_instrument) {
   if (!musician) return false;
   if (!out_instrument) return false;
 
@@ -124,14 +125,14 @@ bool BarelyInstrument_Create(BarelyMusician* musician, BarelyInstrument** out_in
   return true;
 }
 
-bool BarelyInstrument_Destroy(BarelyInstrument* instrument) {
+bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
   delete instrument;
   return true;
 }
 
-bool BarelyInstrument_GetControl(const BarelyInstrument* instrument, int32_t index,
+bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t index,
                                  double* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
@@ -143,8 +144,8 @@ bool BarelyInstrument_GetControl(const BarelyInstrument* instrument, int32_t ind
   return false;
 }
 
-bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, double pitch,
-                                     int32_t index, double* out_value) {
+bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
+                                     double* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
 
@@ -155,7 +156,7 @@ bool BarelyInstrument_GetNoteControl(const BarelyInstrument* instrument, double 
   return false;
 }
 
-bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, double pitch,
+bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
                                bool* out_is_note_on) {
   if (!instrument) return false;
   if (!out_is_note_on) return false;
@@ -164,7 +165,7 @@ bool BarelyInstrument_IsNoteOn(const BarelyInstrument* instrument, double pitch,
   return true;
 }
 
-bool BarelyInstrument_Process(BarelyInstrument* instrument, double* output_samples,
+bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
                               int32_t output_channel_count, int32_t output_frame_count,
                               double timestamp) {
   if (!instrument) return false;
@@ -173,59 +174,60 @@ bool BarelyInstrument_Process(BarelyInstrument* instrument, double* output_sampl
                              instrument->musician().GetFramesFromSeconds(timestamp));
 }
 
-bool BarelyInstrument_ResetAllControls(BarelyInstrument* instrument) {
+bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
   instrument->ResetAllControls();
   return true;
 }
 
-bool BarelyInstrument_ResetAllNoteControls(BarelyInstrument* instrument, double pitch) {
+bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument, double pitch) {
   if (!instrument) return false;
 
   return instrument->ResetAllNoteControls(pitch);
 }
 
-bool BarelyInstrument_ResetControl(BarelyInstrument* instrument, int32_t index) {
+bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t index) {
   if (!instrument) return false;
 
   return instrument->ResetControl(index);
 }
 
-bool BarelyInstrument_ResetNoteControl(BarelyInstrument* instrument, double pitch, int32_t index) {
+bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument, double pitch,
+                                       int32_t index) {
   if (!instrument) return false;
 
   return instrument->ResetNoteControl(pitch, index);
 }
 
-bool BarelyInstrument_SetAllNotesOff(BarelyInstrument* instrument) {
+bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
   instrument->SetAllNotesOff();
   return true;
 }
 
-bool BarelyInstrument_SetControl(BarelyInstrument* instrument, int32_t index, double value) {
+bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index, double value) {
   if (!instrument) return false;
 
   return instrument->SetControl(index, value);
 }
 
-bool BarelyInstrument_SetNoteControl(BarelyInstrument* instrument, double pitch, int32_t index,
+bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
                                      double value) {
   if (!instrument) return false;
 
   return instrument->SetNoteControl(pitch, index, value);
 }
 
-bool BarelyInstrument_SetNoteOff(BarelyInstrument* instrument, double pitch) {
+bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch) {
   if (!instrument) return false;
 
   instrument->SetNoteOff(pitch);
   return true;
 }
 
-bool BarelyInstrument_SetNoteOffEvent(BarelyInstrument* instrument,
+bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
                                       BarelyNoteOffEventDefinition definition, void* user_data) {
   if (!instrument) return false;
 
@@ -233,14 +235,14 @@ bool BarelyInstrument_SetNoteOffEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyInstrument* instrument, double pitch, double intensity) {
+bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch, double intensity) {
   if (!instrument) return false;
 
   instrument->SetNoteOn(pitch, intensity);
   return true;
 }
 
-bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
+bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
                                      BarelyNoteOnEventDefinition definition, void* user_data) {
   if (!instrument) return false;
 
@@ -248,7 +250,7 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrument* instrument,
   return true;
 }
 
-bool BarelyInstrument_SetSampleData(BarelyInstrument* instrument,
+bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
                                     const BarelySampleDataDefinition* definitions,
                                     int32_t definition_count) {
   if (!instrument) return false;
@@ -261,7 +263,7 @@ bool BarelyInstrument_SetSampleData(BarelyInstrument* instrument,
 }
 
 bool BarelyMusician_Create(int32_t frame_rate, double reference_frequency,
-                           BarelyMusician** out_musician) {
+                           BarelyMusicianHandle* out_musician) {
   if (frame_rate <= 0) return false;
   if (!out_musician) return false;
 
@@ -269,14 +271,14 @@ bool BarelyMusician_Create(int32_t frame_rate, double reference_frequency,
   return true;
 }
 
-bool BarelyMusician_Destroy(BarelyMusician* musician) {
+bool BarelyMusician_Destroy(BarelyMusicianHandle musician) {
   if (!musician) return false;
 
   delete musician;
   return true;
 }
 
-bool BarelyMusician_GetBeatsFromSeconds(const BarelyMusician* musician, double seconds,
+bool BarelyMusician_GetBeatsFromSeconds(BarelyMusicianHandle musician, double seconds,
                                         double* out_beats) {
   if (!musician) return false;
   if (!out_beats) return false;
@@ -285,7 +287,7 @@ bool BarelyMusician_GetBeatsFromSeconds(const BarelyMusician* musician, double s
   return true;
 }
 
-bool BarelyMusician_GetSecondsFromBeats(const BarelyMusician* musician, double beats,
+bool BarelyMusician_GetSecondsFromBeats(BarelyMusicianHandle musician, double beats,
                                         double* out_seconds) {
   if (!musician) return false;
   if (!out_seconds) return false;
@@ -294,7 +296,7 @@ bool BarelyMusician_GetSecondsFromBeats(const BarelyMusician* musician, double b
   return true;
 }
 
-bool BarelyMusician_GetTempo(const BarelyMusician* musician, double* out_tempo) {
+bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo) {
   if (!musician) return false;
   if (!out_tempo) return false;
 
@@ -302,7 +304,7 @@ bool BarelyMusician_GetTempo(const BarelyMusician* musician, double* out_tempo) 
   return true;
 }
 
-bool BarelyMusician_GetTimestamp(const BarelyMusician* musician, double* out_timestamp) {
+bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, double* out_timestamp) {
   if (!musician) return false;
   if (!out_timestamp) return false;
 
@@ -310,29 +312,29 @@ bool BarelyMusician_GetTimestamp(const BarelyMusician* musician, double* out_tim
   return true;
 }
 
-bool BarelyMusician_SetTempo(BarelyMusician* musician, double tempo) {
+bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo) {
   if (!musician) return false;
 
   musician->SetTempo(tempo);
   return true;
 }
 
-bool BarelyMusician_Update(BarelyMusician* musician, double timestamp) {
+bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   if (!musician) return false;
 
   musician->Update(timestamp);
   return true;
 }
 
-bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformer* performer) {
+bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
   performer->CancelAllOneOffTasks();
   return true;
 }
 
-bool BarelyPerformer_Create(BarelyMusician* musician, int32_t process_order,
-                            BarelyPerformer** out_performer) {
+bool BarelyPerformer_Create(BarelyMusicianHandle musician, int32_t process_order,
+                            BarelyPerformerHandle* out_performer) {
   if (!musician) return false;
   if (!out_performer) return false;
 
@@ -340,14 +342,14 @@ bool BarelyPerformer_Create(BarelyMusician* musician, int32_t process_order,
   return true;
 }
 
-bool BarelyPerformer_Destroy(BarelyPerformer* performer) {
+bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
   delete performer;
   return true;
 }
 
-bool BarelyPerformer_GetLoopBeginPosition(const BarelyPerformer* performer,
+bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
                                           double* out_loop_begin_position) {
   if (!performer) return false;
   if (!out_loop_begin_position) return false;
@@ -356,7 +358,7 @@ bool BarelyPerformer_GetLoopBeginPosition(const BarelyPerformer* performer,
   return true;
 }
 
-bool BarelyPerformer_GetLoopLength(const BarelyPerformer* performer, double* out_loop_length) {
+bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer, double* out_loop_length) {
   if (!performer) return false;
   if (!out_loop_length) return false;
 
@@ -364,7 +366,7 @@ bool BarelyPerformer_GetLoopLength(const BarelyPerformer* performer, double* out
   return true;
 }
 
-bool BarelyPerformer_GetPosition(const BarelyPerformer* performer, double* out_position) {
+bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, double* out_position) {
   if (!performer) return false;
   if (!out_position) return false;
 
@@ -372,7 +374,7 @@ bool BarelyPerformer_GetPosition(const BarelyPerformer* performer, double* out_p
   return true;
 }
 
-bool BarelyPerformer_IsLooping(const BarelyPerformer* performer, bool* out_is_looping) {
+bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool* out_is_looping) {
   if (!performer) return false;
   if (!out_is_looping) return false;
 
@@ -380,7 +382,7 @@ bool BarelyPerformer_IsLooping(const BarelyPerformer* performer, bool* out_is_lo
   return true;
 }
 
-bool BarelyPerformer_IsPlaying(const BarelyPerformer* performer, bool* out_is_playing) {
+bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing) {
   if (!performer) return false;
   if (!out_is_playing) return false;
 
@@ -388,58 +390,60 @@ bool BarelyPerformer_IsPlaying(const BarelyPerformer* performer, bool* out_is_pl
   return true;
 }
 
-bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformer* performer, BarelyTaskDefinition definition,
-                                        double position, void* user_data) {
+bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
+                                        BarelyTaskDefinition definition, double position,
+                                        void* user_data) {
   if (!performer) return false;
 
   performer->ScheduleOneOffTask(definition, position, user_data);
   return true;
 }
 
-bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformer* performer, double loop_begin_position) {
+bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
+                                          double loop_begin_position) {
   if (!performer) return false;
 
   performer->SetLoopBeginPosition(loop_begin_position);
   return true;
 }
 
-bool BarelyPerformer_SetLoopLength(BarelyPerformer* performer, double loop_length) {
+bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer, double loop_length) {
   if (!performer) return false;
 
   performer->SetLoopLength(loop_length);
   return true;
 }
 
-bool BarelyPerformer_SetLooping(BarelyPerformer* performer, bool is_looping) {
+bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping) {
   if (!performer) return false;
 
   performer->SetLooping(is_looping);
   return true;
 }
 
-bool BarelyPerformer_SetPosition(BarelyPerformer* performer, double position) {
+bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position) {
   if (!performer) return false;
 
   performer->SetPosition(position);
   return true;
 }
 
-bool BarelyPerformer_Start(BarelyPerformer* performer) {
+bool BarelyPerformer_Start(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
   performer->Start();
   return true;
 }
 
-bool BarelyPerformer_Stop(BarelyPerformer* performer) {
+bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
   performer->Stop();
   return true;
 }
 
-bool BarelyTask_Create(BarelyPerformer* performer, BarelyTaskDefinition definition, double position,
-                       void* user_data, BarelyTask** out_task) {
+bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
+                       double position, void* user_data, BarelyTask** out_task) {
   if (!performer) return false;
   if (!out_task) return false;
 

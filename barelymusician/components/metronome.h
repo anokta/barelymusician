@@ -17,10 +17,10 @@ class Metronome {
 
   // Creates a new `Metronome`.
   ///
-  /// @param musician Musician pointer.
+  /// @param musician Musician handle.
   /// @param process_order Process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Metronome(MusicianPtr musician, int process_order = -1) noexcept;
+  explicit Metronome(MusicianHandle musician, int process_order = -1) noexcept;
 
   /// Returns whether the metronome is playing or not.
   ///

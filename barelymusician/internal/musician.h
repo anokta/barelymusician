@@ -21,14 +21,14 @@ class Musician {
 
   /// Adds an instrument.
   ///
-  /// @param instrument Pointer to instrument.
+  /// @param instrument Instrument handle.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddInstrument(InstrumentController* instrument) noexcept;
 
   /// Adds a performer.
   ///
   /// @param process_order Process order.
-  /// @param performer Pointer to performer.
+  /// @param performer Performer handle.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(Performer* performer) noexcept;
 

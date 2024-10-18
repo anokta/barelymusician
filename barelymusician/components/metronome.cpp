@@ -7,7 +7,7 @@
 namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Metronome::Metronome(MusicianPtr musician, int process_order) noexcept
+Metronome::Metronome(MusicianHandle musician, int process_order) noexcept
     : performer_(musician, process_order),
       task_(
           performer_,

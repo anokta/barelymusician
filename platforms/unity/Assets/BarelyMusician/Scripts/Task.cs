@@ -17,8 +17,8 @@ namespace Barely {
           _position = value;
           return;
         }
-        Musician.Internal.Task_SetPosition(_ptr, value);
-        _position = Musician.Internal.Task_GetPosition(_ptr);
+        Musician.Internal.Task_SetPosition(_handle, value);
+        _position = Musician.Internal.Task_GetPosition(_handle);
       }
     }
     [SerializeField]
@@ -38,31 +38,31 @@ namespace Barely {
     }
 
     ~Task() {
-      Musician.Internal.Task_Destroy(ref _ptr);
+      Musician.Internal.Task_Destroy(ref _handle);
     }
 
     /// Updates the task.
     ///
     /// @param performer Performer.
     public void Update(Performer performer) {
-      if (_performer == performer && _ptr != IntPtr.Zero) {
+      if (_performer == performer && _handle != IntPtr.Zero) {
         Position = _position;
         return;
       }
-      Musician.Internal.Task_Destroy(ref _ptr);
+      Musician.Internal.Task_Destroy(ref _handle);
       _performer = performer;
       if (_performer != null) {
-        Musician.Internal.Task_Create(Performer.Internal.GetPtr(_performer), delegate() {
+        Musician.Internal.Task_Create(Performer.Internal.GetHandle(_performer), delegate() {
           OnProcess?.Invoke();
           OnProcessEvent?.Invoke();
-        }, _position, ref _ptr);
+        }, _position, ref _handle);
       }
     }
 
     /// Performer.
     private Performer _performer = null;
 
-    // Raw pointer.
-    private IntPtr _ptr = IntPtr.Zero;
+    // Raw handle.
+    private IntPtr _handle = IntPtr.Zero;
   }
 }  // namespace Barely

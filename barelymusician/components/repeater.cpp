@@ -9,13 +9,13 @@
 struct BarelyRepeater : public barely::Repeater {
   // Constructs `BarelyRepeater` with `musician` and `process_order`.
   BarelyRepeater(BarelyMusician* musician, int process_order) noexcept
-      : barely::Repeater(barely::MusicianPtr(musician), process_order) {}
+      : barely::Repeater(barely::MusicianHandle(musician), process_order) {}
 
   // Destroys `BarelyRepeater`.
   ~BarelyRepeater() noexcept { SetInstrument(std::nullopt); }
 };
 
-bool BarelyRepeater_Clear(BarelyRepeater* repeater) {
+bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
   if (!repeater) return false;
 
   repeater->Clear();
@@ -23,78 +23,78 @@ bool BarelyRepeater_Clear(BarelyRepeater* repeater) {
 }
 
 bool BarelyRepeater_Create(BarelyMusician* musician, int32_t process_order,
-                           BarelyRepeater** out_repeater) {
+                           BarelyRepeaterHandle* out_repeater) {
   if (!musician || !out_repeater) return false;
 
   *out_repeater = new BarelyRepeater(musician, static_cast<int>(process_order));
   return true;
 }
 
-bool BarelyRepeater_Destroy(BarelyRepeater* repeater) {
+bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater) {
   if (!repeater) return false;
 
   delete repeater;
   return true;
 }
 
-bool BarelyRepeater_IsPlaying(const BarelyRepeater* repeater, bool* out_is_playing) {
+bool BarelyRepeater_IsPlaying(const BarelyRepeaterHandle repeater, bool* out_is_playing) {
   if (!repeater || !out_is_playing) return false;
 
   *out_is_playing = repeater->IsPlaying();
   return true;
 }
 
-bool BarelyRepeater_Pop(BarelyRepeater* repeater) {
+bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater) {
   if (!repeater) return false;
 
   repeater->Pop();
   return true;
 }
 
-bool BarelyRepeater_Push(BarelyRepeater* repeater, double pitch, int32_t length) {
+bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length) {
   if (!repeater) return false;
 
   repeater->Push(pitch, static_cast<int>(length));
   return true;
 }
 
-bool BarelyRepeater_PushSilence(BarelyRepeater* repeater, int32_t length) {
+bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length) {
   if (!repeater) return false;
 
   repeater->Push(std::nullopt, static_cast<int>(length));
   return true;
 }
 
-bool BarelyRepeater_SetInstrument(BarelyRepeater* repeater, BarelyInstrument* instrument) {
+bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater, BarelyInstrument* instrument) {
   if (!repeater) return false;
 
-  repeater->SetInstrument(instrument != nullptr ? std::optional(barely::InstrumentPtr(instrument))
-                                                : std::nullopt);
+  repeater->SetInstrument(
+      instrument != nullptr ? std::optional(barely::InstrumentHandle(instrument)) : std::nullopt);
   return true;
 }
 
-bool BarelyRepeater_SetRate(BarelyRepeater* repeater, double rate) {
+bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate) {
   if (!repeater) return false;
 
   repeater->SetRate(rate);
   return true;
 }
 
-bool BarelyRepeater_SetStyle(BarelyRepeater* repeater, BarelyRepeaterStyle style) {
+bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style) {
   if (!repeater) return false;
 
   repeater->SetStyle(static_cast<barely::RepeaterStyle>(style));
   return true;
 }
 
-bool BarelyRepeater_Start(BarelyRepeater* repeater, double pitch_offset) {
+bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_offset) {
   if (!repeater) return false;
 
   repeater->Start(pitch_offset);
   return true;
 }
 
-bool BarelyRepeater_Stop(BarelyRepeater* repeater) {
+bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater) {
   if (!repeater) return false;
 
   repeater->Stop();
@@ -104,7 +104,7 @@ bool BarelyRepeater_Stop(BarelyRepeater* repeater) {
 namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(MusicianPtr musician, int process_order) noexcept
+Repeater::Repeater(MusicianHandle musician, int process_order) noexcept
     : performer_(musician, process_order),
       task_(
           performer_,
@@ -151,7 +151,7 @@ void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void Repeater::SetInstrument(std::optional<InstrumentPtr> instrument) noexcept {
+void Repeater::SetInstrument(std::optional<InstrumentHandle> instrument) noexcept {
   if (instrument_.has_value() && IsPlaying()) {
     instrument_->SetAllNotesOff();
   }

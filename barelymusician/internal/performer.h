@@ -22,7 +22,7 @@ class Performer {
 
   /// Adds a task.
   ///
-  /// @param task Pointer to task.
+  /// @param task Task handle.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddTask(Task* task) noexcept;
 
@@ -69,7 +69,7 @@ class Performer {
 
   /// Removes a task.
   ///
-  /// @param task Pointer to task.
+  /// @param task Task handle.
   void RemoveTask(Task* task) noexcept;
 
   /// Schedules a one-off task.
@@ -102,7 +102,7 @@ class Performer {
 
   /// Sets task position.
   ///
-  /// @param task Pointer to task.
+  /// @param task Task handle.
   /// @param position Task position.
   void SetTaskPosition(Task* task, double position) noexcept;
 

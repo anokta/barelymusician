@@ -147,7 +147,7 @@ namespace Barely {
     /// @param index Control index.
     /// @return Control value.
     public double GetControl(int index) {
-      return Musician.Internal.Instrument_GetControl(_ptr, index);
+      return Musician.Internal.Instrument_GetControl(_handle, index);
     }
 
     /// Returns a note control value.
@@ -156,7 +156,7 @@ namespace Barely {
     /// @param index Control index.
     /// @return Control value.
     public double GetNoteControl(double pitch, int index) {
-      return Musician.Internal.Instrument_GetNoteControl(_ptr, pitch, index);
+      return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, index);
     }
 
     /// Returns whether a note is on or not.
@@ -164,14 +164,14 @@ namespace Barely {
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
     public bool IsNoteOn(double pitch) {
-      return Musician.Internal.Instrument_IsNoteOn(_ptr, pitch);
+      return Musician.Internal.Instrument_IsNoteOn(_handle, pitch);
     }
 
     /// Resets a control value.
     ///
     /// @param index Control index.
     public void ResetControl(int index) {
-      Musician.Internal.Instrument_ResetControl(_ptr, index);
+      Musician.Internal.Instrument_ResetControl(_handle, index);
     }
 
     /// Resets a note control value.
@@ -179,12 +179,12 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param index Note control index.
     public void ResetNoteControl(double pitch, int index) {
-      Musician.Internal.Instrument_ResetNoteControl(_ptr, pitch, index);
+      Musician.Internal.Instrument_ResetNoteControl(_handle, pitch, index);
     }
 
     /// Sets all notes off.
     public void SetAllNotesOff() {
-      Musician.Internal.Instrument_SetAllNotesOff(_ptr);
+      Musician.Internal.Instrument_SetAllNotesOff(_handle);
     }
 
     /// Sets a control value.
@@ -192,7 +192,7 @@ namespace Barely {
     /// @param index Control index.
     /// @param value Control value.
     public void SetControl(int index, double value) {
-      Musician.Internal.Instrument_SetControl(_ptr, index, value);
+      Musician.Internal.Instrument_SetControl(_handle, index, value);
     }
 
     /// Sets a note control value.
@@ -201,14 +201,14 @@ namespace Barely {
     /// @param index Note control index.
     /// @param value Note control value.
     public void SetNoteControl(double pitch, int index, double value) {
-      Musician.Internal.Instrument_SetNoteControl(_ptr, pitch, index, value);
+      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, index, value);
     }
 
     /// Sets a note off.
     ///
     /// @param pitch Note pitch.
     public void SetNoteOff(double pitch) {
-      Musician.Internal.Instrument_SetNoteOff(_ptr, pitch);
+      Musician.Internal.Instrument_SetNoteOff(_handle, pitch);
     }
 
     /// Sets a note on.
@@ -216,14 +216,14 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     public void SetNoteOn(double pitch, double intensity = 1.0) {
-      Musician.Internal.Instrument_SetNoteOn(_ptr, pitch, intensity);
+      Musician.Internal.Instrument_SetNoteOn(_handle, pitch, intensity);
     }
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Returns the pointer.
-      public static IntPtr GetPtr(Instrument instrument) {
-        return instrument ? instrument._ptr : IntPtr.Zero;
+      /// Returns the handle.
+      public static IntPtr GetHandle(Instrument instrument) {
+        return instrument ? instrument._handle : IntPtr.Zero;
       }
 
       /// Internal note off event callback.
@@ -255,7 +255,7 @@ namespace Barely {
     }
 
     private void OnEnable() {
-      Musician.Internal.Instrument_Create(this, ref _ptr);
+      Musician.Internal.Instrument_Create(this, ref _handle);
       OnInstrumentCreate?.Invoke();
       Source?.Play();
     }
@@ -263,7 +263,7 @@ namespace Barely {
     private void OnDisable() {
       Source?.Stop();
       OnInstrumentDestroy?.Invoke();
-      Musician.Internal.Instrument_Destroy(ref _ptr);
+      Musician.Internal.Instrument_Destroy(ref _handle);
     }
 
     private void Update() {
@@ -282,18 +282,18 @@ namespace Barely {
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      Musician.Internal.Instrument_Process(_ptr, data, channels);
+      Musician.Internal.Instrument_Process(_handle, data, channels);
     }
 
     private void UpdateSampleData() {
       if (Samplers != null &&
           (Samplers.Count != _samplerCount || Samplers.Any(sampler => sampler.HasChanged))) {
         _samplerCount = Samplers.Count;
-        Musician.Internal.Instrument_SetSampleData(_ptr, Samplers);
+        Musician.Internal.Instrument_SetSampleData(_handle, Samplers);
       }
     }
 
-    // Raw pointer.
-    private IntPtr _ptr = IntPtr.Zero;
+    // Raw handle.
+    private IntPtr _handle = IntPtr.Zero;
   }
 }  // namespace Barely

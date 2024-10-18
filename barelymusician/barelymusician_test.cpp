@@ -24,15 +24,15 @@ TEST(BarelyMusicianTest, CreateDestroyInstrument) {
   ASSERT_TRUE(BarelyMusician_Create(1, 440.0, &musician));
 
   // Failures.
-  EXPECT_FALSE(BarelyInstrument_Create(musician, nullptr));
-  EXPECT_FALSE(BarelyInstrument_Destroy(nullptr));
+  EXPECT_FALSE(BarelyMusician_AddInstrument(musician, nullptr));
+  EXPECT_FALSE(BarelyMusician_RemoveInstrument(musician, nullptr));
 
   // Success.
   BarelyInstrumentHandle instrument = nullptr;
-  EXPECT_TRUE(BarelyInstrument_Create(musician, &instrument));
+  EXPECT_TRUE(BarelyMusician_AddInstrument(musician, &instrument));
   EXPECT_NE(instrument, nullptr);
 
-  EXPECT_TRUE(BarelyInstrument_Destroy(instrument));
+  EXPECT_TRUE(BarelyMusician_RemoveInstrument(musician, instrument));
   EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
@@ -41,28 +41,30 @@ TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   ASSERT_TRUE(BarelyMusician_Create(1, 440.0, &musician));
 
   // Failures.
-  EXPECT_FALSE(BarelyPerformer_Create(musician, 0, nullptr));
-  EXPECT_FALSE(BarelyPerformer_Destroy(nullptr));
+  EXPECT_FALSE(BarelyMusician_AddPerformer(musician, 0, nullptr));
+  EXPECT_FALSE(BarelyMusician_RemovePerformer(musician, nullptr));
 
   // Success.
   BarelyPerformerHandle performer = nullptr;
-  EXPECT_TRUE(BarelyPerformer_Create(musician, 0, &performer));
+  EXPECT_TRUE(BarelyMusician_AddPerformer(musician, 0, &performer));
   EXPECT_NE(performer, nullptr);
 
-  EXPECT_TRUE(BarelyPerformer_Destroy(performer));
+  EXPECT_TRUE(BarelyMusician_RemovePerformer(musician, performer));
   EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
 TEST(MusicianTest, CreateDestroyMusician) { [[maybe_unused]] const Musician musician(1, 440.0); }
 
 TEST(MusicianTest, CreateDestroyInstrument) {
-  const Musician musician(1, 440.0);
-  [[maybe_unused]] const Instrument instrument(musician);
+  Musician musician(1, 440.0);
+  auto instrument = musician.AddInstrument();
+  musician.RemoveInstrument(instrument);
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {
-  const Musician musician(1, 440.0);
-  [[maybe_unused]] const Performer performer(musician);
+  Musician musician(1, 440.0);
+  auto performer = musician.AddPerformer();
+  musician.RemovePerformer(performer);
 }
 
 }  // namespace

@@ -4,7 +4,6 @@
 #include <array>
 #include <cstdint>
 #include <functional>
-#include <memory>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -56,8 +55,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   Musician musician(kFrameRate, kReferenceFrequency);
 
   // Create an instrument.
-  InstrumentController instrument(kFrameRate, kReferenceFrequency, musician.GetUpdateFrame());
-  musician.AddInstrument(&instrument);
+  InstrumentController* instrument = musician.AddInstrument();
 
   // Set the note callbacks.
   double note_on_pitch = 0.0;
@@ -66,8 +64,8 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
-  instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
-                            static_cast<void*>(&note_on_callback));
+  instrument->SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
+                             static_cast<void*>(&note_on_callback));
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
@@ -75,19 +73,19 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
     note_off_pitch = pitch;
   };
-  instrument.SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
-                             static_cast<void*>(&note_off_callback));
+  instrument->SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
+                              static_cast<void*>(&note_off_callback));
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Set a note on.
-  instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_TRUE(instrument.IsNoteOn(kPitch));
+  instrument->SetNoteOn(kPitch, kIntensity);
+  EXPECT_TRUE(instrument->IsNoteOn(kPitch));
 
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   // Remove the instrument.
-  musician.RemoveInstrument(&instrument);
+  musician.RemoveInstrument(instrument);
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
@@ -98,11 +96,9 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     Musician musician(kFrameRate, kReferenceFrequency);
 
     // Create instruments with note off callback.
-    std::vector<std::unique_ptr<InstrumentController>> instruments;
+    std::vector<InstrumentController*> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(std::make_unique<InstrumentController>(kFrameRate, kReferenceFrequency,
-                                                                   musician.GetUpdateFrame()));
-      musician.AddInstrument(instruments[i].get());
+      instruments.push_back(musician.AddInstrument());
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
@@ -120,7 +116,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 
     // Remove instruments.
     for (int i = 0; i < 3; ++i) {
-      musician.RemoveInstrument(instruments[i].get());
+      musician.RemoveInstrument(instruments[i]);
     }
   }
 
@@ -133,12 +129,11 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   Musician musician(kFrameRate, kReferenceFrequency);
 
   // Create a performer.
-  Performer performer(/*process_order=*/0);
-  musician.AddPerformer(&performer);
+  Performer* performer = musician.AddPerformer(/*process_order=*/0);
 
   // Create a task definition.
   double task_position = 0.0;
-  std::function<void()> process_callback = [&]() { task_position = performer.GetPosition(); };
+  std::function<void()> process_callback = [&]() { task_position = performer->GetPosition(); };
   auto definition = TaskDefinition{
       [](void** state, void* user_data) { *state = user_data; },
       [](void** /*state*/) {},
@@ -146,32 +141,32 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   };
 
   // Schedule a task.
-  performer.ScheduleOneOffTask(definition, 1.0, &process_callback);
+  performer->ScheduleOneOffTask(definition, 1.0, &process_callback);
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);
   EXPECT_DOUBLE_EQ(musician.GetTempo(), 60.0);
 
-  EXPECT_FALSE(performer.IsPlaying());
-  performer.Start();
-  EXPECT_TRUE(performer.IsPlaying());
+  EXPECT_FALSE(performer->IsPlaying());
+  performer->Start();
+  EXPECT_TRUE(performer->IsPlaying());
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(1.0));
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(1.0));
   musician.Update(1.0);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.0));
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(0.0));
+  EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp past the task, which should be triggered now.
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(0.0));
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(0.0));
   musician.Update(1.5);
-  EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.5);
+  EXPECT_FALSE(performer->GetDurationToNextTask().has_value());
+  EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Remove the performer.
-  musician.RemovePerformer(&performer);
+  musician.RemovePerformer(performer);
 }
 
 // Tests that the musician sets its tempo as expected.

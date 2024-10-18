@@ -50,7 +50,8 @@ static constexpr std::array<ControlDefinition, static_cast<int>(InstrumentContro
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentController::InstrumentController(int frame_rate, double reference_frequency,
                                            int64_t update_frame) noexcept
-    : controls_(BuildControls(control_definitions)),
+    : frame_rate_(frame_rate),
+      controls_(BuildControls(control_definitions)),
       update_frame_(update_frame),
       processor_(frame_rate, reference_frequency) {
   assert(frame_rate > 0);
@@ -74,6 +75,8 @@ const double* InstrumentController::GetNoteControl(double pitch, int index) cons
   }
   return nullptr;
 }
+
+int InstrumentController::GetFrameRate() const noexcept { return frame_rate_; }
 
 bool InstrumentController::IsNoteOn(double pitch) const noexcept {
   return note_controls_.contains(pitch);

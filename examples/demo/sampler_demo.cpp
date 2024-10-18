@@ -19,7 +19,6 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::InstrumentControl;
 using ::barely::Musician;
 using ::barely::SampleDataDefinition;
@@ -81,7 +80,7 @@ int main(int /*argc*/, char* argv[]) {
 
   Musician musician(kFrameRate);
 
-  Instrument instrument(musician);
+  auto instrument = musician.AddInstrument();
   instrument.SetControl(InstrumentControl::kGain, kGain);
   instrument.SetControl(InstrumentControl::kSamplePlayerLoop, kLoop);
   instrument.SetControl(InstrumentControl::kAttack, kAttack);

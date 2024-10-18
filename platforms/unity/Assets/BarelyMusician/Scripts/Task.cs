@@ -38,7 +38,7 @@ namespace Barely {
     }
 
     ~Task() {
-      Musician.Internal.Task_Destroy(ref _handle);
+      Musician.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _handle);
     }
 
     /// Updates the task.
@@ -49,7 +49,7 @@ namespace Barely {
         Position = _position;
         return;
       }
-      Musician.Internal.Task_Destroy(ref _handle);
+      Musician.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _handle);
       _performer = performer;
       if (_performer != null) {
         Musician.Internal.Task_Create(Performer.Internal.GetHandle(_performer), delegate() {

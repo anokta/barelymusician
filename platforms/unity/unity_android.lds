@@ -1,7 +1,5 @@
 VERS_1.0 {
   global:
-    BarelyInstrument_Create;
-    BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
     BarelyInstrument_GetNoteControl;
     BarelyInstrument_IsNoteOn;
@@ -18,22 +16,26 @@ VERS_1.0 {
     BarelyInstrument_SetNoteOn;
     BarelyInstrument_SetNoteOnEvent;
     BarelyInstrument_SetSampleData;
+    BarelyMusician_AddInstrument;
+    BarelyMusician_AddPerformer;
     BarelyMusician_Create;
     BarelyMusician_Destroy;
     BarelyMusician_GetBeatsFromSeconds;
     BarelyMusician_GetSecondsFromBeats;
     BarelyMusician_GetTempo;
     BarelyMusician_GetTimestamp;
+    BarelyMusician_RemoveInstrument;
+    BarelyMusician_RemovePerformer;
     BarelyMusician_SetTempo;
     BarelyMusician_Update;
+    BarelyPerformer_AddTask;
     BarelyPerformer_CancelAllOneOffTasks;
-    BarelyPerformer_Create;
-    BarelyPerformer_Destroy;
     BarelyPerformer_GetLoopBeginPosition;
     BarelyPerformer_GetLoopLength;
     BarelyPerformer_GetPosition;
     BarelyPerformer_IsLooping;
     BarelyPerformer_IsPlaying;
+    BarelyPerformer_RemoveTask;
     BarelyPerformer_ScheduleOneOffTask;
     BarelyPerformer_SetLoopBeginPosition;
     BarelyPerformer_SetLoopLength;
@@ -41,8 +43,6 @@ VERS_1.0 {
     BarelyPerformer_SetPosition;
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
-    BarelyTask_Create;
-    BarelyTask_Destroy;
     BarelyTask_GetPosition;
     BarelyTask_SetPosition;
 

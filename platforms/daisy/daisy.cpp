@@ -31,7 +31,7 @@ constexpr int kOscCount = static_cast<int>(OscillatorType::kCount);
 static DaisyPod hw;  // Currently targets the Daisy Pod hardware.
 static MidiUsbHandler midi;
 
-static InstrumentHandle instrument_handle = {};
+static InstrumentHandle instrument = {};
 static int osc_index = static_cast<int>(kOscillatorType);
 static std::array<double, kChannelCount * kFrameCount> temp_samples{0.0};
 
@@ -41,12 +41,12 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
     osc_index = (osc_index + increment + kOscCount) % kOscCount;
-    instrument_handle.SetControl(InstrumentControl::kOscillatorType,
-                                 static_cast<OscillatorType>(osc_index));
+    instrument.SetControl(InstrumentControl::kOscillatorType,
+                          static_cast<OscillatorType>(osc_index));
   }
 
   // Process samples.
-  instrument_handle.Process(temp_samples.data(), kChannelCount, size, /*timestamp=*/0.0);
+  instrument.Process(temp_samples.data(), kChannelCount, size, /*timestamp=*/0.0);
   for (int channel = 0; channel < kChannelCount; ++channel) {
     for (int frame = 0; frame < static_cast<int>(size); ++frame) {
       out[channel][frame] = temp_samples[frame * kChannelCount + channel];
@@ -68,14 +68,12 @@ int main(void) {
   // Initialize the instrument.
   Musician musician(kFrameRate);
 
-  Instrument instrument(musician);
+  instrument = musician.AddInstrument();
   instrument.SetControl(InstrumentControl::kGain, kGain);
   instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(InstrumentControl::kAttack, kAttack);
   instrument.SetControl(InstrumentControl::kRelease, kRelease);
   instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
-
-  instrument_handle = instrument;
 
   // Start processing.
   hw.StartAdc();

@@ -1,8 +1,9 @@
 #ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 #define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
-#include <set>
-#include <unordered_set>
+#include <map>
+#include <memory>
+#include <unordered_map>
 #include <utility>
 
 #include "barelymusician/internal/instrument_controller.h"
@@ -21,27 +22,22 @@ class Musician {
 
   /// Adds an instrument.
   ///
-  /// @param instrument Instrument handle.
+  /// @return Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddInstrument(InstrumentController* instrument) noexcept;
+  InstrumentController* AddInstrument() noexcept;
 
   /// Adds a performer.
   ///
   /// @param process_order Process order.
-  /// @param performer Performer handle.
+  /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddPerformer(Performer* performer) noexcept;
+  Performer* AddPerformer(int process_order) noexcept;
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
   /// @param seconds Number of seconds.
   /// @return Number of beats.
   [[nodiscard]] double GetBeatsFromSeconds(double seconds) const noexcept;
-
-  /// Returns frame rate.
-  ///
-  /// @return Frame rate in hertz.
-  [[nodiscard]] int GetFrameRate() const noexcept;
 
   /// Returns reference frequency.
   ///
@@ -70,11 +66,6 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
 
-  /// Returns update frame.
-  ///
-  /// @return Update frame.
-  [[nodiscard]] int64_t GetUpdateFrame() const noexcept;
-
   /// Removes instrument.
   ///
   /// @param instrument Instrument.
@@ -99,11 +90,12 @@ class Musician {
   void Update(double timestamp) noexcept;
 
  private:
-  // Set of pointers to instruments.
-  std::unordered_set<InstrumentController*> instruments_;
+  // Map of pointers to instruments.
+  // TODO(#126): Replace these by memory pools.
+  std::unordered_map<InstrumentController*, std::unique_ptr<InstrumentController>> instruments_;
 
-  // Set of process order-pointer pairs to performers.
-  std::set<std::pair<int, Performer*>> performers_;
+  // Map of process order-pointer pairs to performers.
+  std::map<Performer*, std::pair<int, std::unique_ptr<Performer>>> performers_;
 
   // Frame rate in hertz.
   const int frame_rate_ = 0;

@@ -76,11 +76,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_internal_observable INTERFACE
-  observable.h
-)
-
-add_library(
   barelymusician_internal_performer
   performer.cpp
   performer.h
@@ -193,17 +188,6 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_musician_test)
-
-  add_executable(
-    barelymusician_internal_observable_test
-    observable_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_internal_observable_test
-    barelymusician_internal_observable
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_internal_observable_test)
 
   add_executable(
     barelymusician_internal_performer_test

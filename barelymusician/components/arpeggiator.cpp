@@ -9,14 +9,14 @@
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::Arpeggiator {
   // Constructs `BarelyArpeggiator` with `musician` and `process_order`.
-  BarelyArpeggiator(BarelyMusician* musician, int process_order) noexcept
+  BarelyArpeggiator(BarelyMusicianHandle musician, int process_order) noexcept
       : barely::Arpeggiator(barely::MusicianHandle(musician), process_order) {}
 
   // Destroys `BarelyArpeggiator`.
   ~BarelyArpeggiator() noexcept { SetInstrument(std::nullopt); }
 };
 
-bool BarelyArpeggiator_Create(BarelyMusician* musician, int32_t process_order,
+bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_order,
                               BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!musician || !out_arpeggiator) return false;
 
@@ -101,27 +101,26 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Arpeggiator::Arpeggiator(MusicianHandle musician, int process_order) noexcept
-    : performer_(musician, process_order),
-      task_(
-          performer_,
-          [this]() noexcept {
-            Update();
-            if (!instrument_.has_value()) {
-              return;
-            }
-            const double pitch = pitches_[index_];
-            instrument_->SetNoteOn(pitch);
-            performer_.ScheduleOneOffTask(
-                [this, pitch]() {
-                  if (instrument_ != nullptr) {
-                    instrument_->SetNoteOff(pitch);
-                  }
-                },
-                gate_ratio_ * performer_.GetLoopLength());
-          },
-          0.0) {
+    : performer_(musician.AddPerformer(process_order)) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
+  performer_.AddTask(
+      [this]() noexcept {
+        Update();
+        if (!instrument_.has_value()) {
+          return;
+        }
+        const double pitch = pitches_[index_];
+        instrument_->SetNoteOn(pitch);
+        performer_.ScheduleOneOffTask(
+            [this, pitch]() {
+              if (instrument_ != nullptr) {
+                instrument_->SetNoteOff(pitch);
+              }
+            },
+            gate_ratio_ * performer_.GetLoopLength());
+      },
+      0.0);
 }
 
 Arpeggiator::~Arpeggiator() noexcept { Stop(); }

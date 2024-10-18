@@ -34,8 +34,8 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   // Create.
-///   barely::Instrument instrument(musician);
+///   // Add.
+///   auto instrument = musician.AddInstrument();
 ///
 ///   // Set a note on.
 ///   //
@@ -67,10 +67,10 @@
 /// - Performer:
 ///
 ///   @code{.cpp}
-///   // Create.
-///   barely::Performer performer(musician, /*process_order=*/0);
+///   // Add.
+///   auto performer = musician.AddPerformer(/*process_order=*/0);
 ///
-///   // Create a task.
+///   // Add a task.
 ///   barely::Task task(performer, []() { /*populate this*/ }, /*position=*/0.0);
 ///
 ///   // Set looping on.
@@ -116,9 +116,9 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   // Create.
+///   // Add.
 ///   BarelyInstrumentHandle instrument = nullptr;
-///   BarelyInstrument_Create(musician, &instrument);
+///   BarelyMusician_AddInstrument(musician, &instrument);
 ///
 ///   // Set a note on.
 ///   //
@@ -147,21 +147,21 @@
 ///   BarelyInstrument_Process(instrument, output_samples, output_channel_count, output_frame_count,
 ///                            timestamp);
 ///
-///   // Destroy.
-///   BarelyInstrument_Destroy(instrument);
+///   // Remove.
+///   BarelyMusician_RemoveInstrument(instrument);
 ///   @endcode
 ///
 /// - Performer:
 ///
 ///   @code{.cpp}
-///   // Create.
+///   // Add.
 ///   BarelyPerformerHandle performer = nullptr;
 ///   BarelyPerformer_Create(musician, /*process_order=*/0, &performer);
 ///
-///   // Create a task.
+///   // Add a task.
 ///   BarelyTaskHandle task = nullptr;
-///   BarelyTask_Create(performer, BarelyTaskDefinition{/*populate this*/}, /*position=*/0.0,
-///                     /*user_data=*/nullptr, &task);
+///   BarelyPerformer_AddTask(performer, BarelyTaskDefinition{/*populate this*/}, /*position=*/0.0,
+///                           /*user_data=*/nullptr, &task);
 ///
 ///   // Set looping on.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
@@ -173,11 +173,11 @@
 ///   bool is_playing = false;
 ///   BarelyPerformer_IsPlaying(performer, &is_playing);
 ///
-///   // Destroy the task.
-///   BarelyTask_Destroy(task);
+///   // Remove the task.
+///   BarelyPerformer_RemoveTask(task);
 ///
-///   // Destroy.
-///   BarelyPerformer_Destroy(performer);
+///   // Remove.
+///   BarelyMusician_RemoveTask(performer);
 ///   @endcode
 
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
@@ -484,6 +484,23 @@ BARELY_EXPORT bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrum
                                                   const BarelySampleDataDefinition* definitions,
                                                   int32_t definition_count);
 
+/// Adds an instrument.
+///
+/// @param musician Musician handle.
+/// @param out_instrument Output instrument handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_AddInstrument(BarelyMusicianHandle musician,
+                                                BarelyInstrumentHandle* out_instrument);
+
+/// Adds a performer.
+///
+/// @param musician Musician handle.
+/// @param process_order Process order.
+/// @param out_performer Output performer handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_AddPerformer(BarelyMusicianHandle musician, int32_t process_order,
+                                               BarelyPerformerHandle* out_performer);
+
 /// Creates a new musician.
 ///
 /// @param frame_rate Frame rate in hertz.
@@ -534,6 +551,22 @@ BARELY_EXPORT bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double
 BARELY_EXPORT bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician,
                                                double* out_timestamp);
 
+/// Removes an instrument.
+///
+/// @param musician Musician handle.
+/// @param instrument Instrument handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_RemoveInstrument(BarelyMusicianHandle musician,
+                                                   BarelyInstrumentHandle instrument);
+
+/// Removes a performer.
+///
+/// @param musician Musician handle.
+/// @param performer Performer handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_RemovePerformer(BarelyMusicianHandle musician,
+                                                  BarelyPerformerHandle performer);
+
 /// Sets the tempo of a musician.
 ///
 /// @param musician Musician handle.
@@ -548,7 +581,19 @@ BARELY_EXPORT bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp);
 
-/// Cancels all one-off performer tasks.
+/// Adds a task.
+///
+/// @param performer Performer handle.
+/// @param definition Task definition.
+/// @param position Task position in beats.
+/// @param user_data Pointer to user data.
+/// @param out_task Output task handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_AddTask(BarelyPerformerHandle performer,
+                                           BarelyTaskDefinition definition, double position,
+                                           void* user_data, BarelyTaskHandle* out_task);
+
+/// Cancels all one-off tasks.
 ///
 /// @param performer Performer handle.
 /// @return True if successful, false otherwise.
@@ -606,6 +651,14 @@ BARELY_EXPORT bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bo
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing);
+
+/// Removes a task.
+///
+/// @param performer Performer handle.
+/// @param task Task handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer,
+                                              BarelyTaskHandle task);
 
 /// Schedules a one-off task.
 ///
@@ -986,99 +1039,6 @@ class ScopedHandleWrapper : public HandleWrapperType {
   [[nodiscard]] HandleWrapperType Release() noexcept { return std::move(*this); }
 };
 
-/// Class that wraps a musician handle.
-class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
- public:
-  /// Creates a new `MusicianHandle`.
-  ///
-  /// @param frame_rate Frame rate in hertz.
-  /// @param reference_frequency Reference frequency in hertz.
-  /// @return Musician handle.
-  // TODO(#139): Move the C4 constant somewhere else - likely back to internal with a setter here.
-  [[nodiscard]] static MusicianHandle Create(int frame_rate,
-                                             double reference_frequency = 261.625565301) noexcept {
-    BarelyMusicianHandle musician = nullptr;
-    [[maybe_unused]] const bool success =
-        BarelyMusician_Create(frame_rate, reference_frequency, &musician);
-    assert(success);
-    return MusicianHandle(musician);
-  }
-
-  /// Destroys a `MusicianHandle`.
-  ///
-  /// @param musician Musician.
-  static void Destroy(MusicianHandle musician) noexcept { BarelyMusician_Destroy(musician); }
-
-  /// Default constructor.
-  constexpr MusicianHandle() noexcept = default;
-
-  /// Constructs a new `Musician` from a raw handle.
-  ///
-  /// @param musician Raw handle to musician.
-  explicit constexpr MusicianHandle(BarelyMusicianHandle musician) noexcept
-      : HandleWrapper(musician) {}
-
-  /// Returns the corresponding number of beats for a given number of seconds.
-  ///
-  /// @param seconds Number of seconds.
-  /// @return Number of beats.
-  [[nodiscard]] double GetBeatsFromSeconds(double seconds) {
-    double beats = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyMusician_GetBeatsFromSeconds(*this, seconds, &beats);
-    assert(success);
-    return beats;
-  }
-
-  /// Returns the corresponding number of seconds for a given number of beats.
-  ///
-  /// @param beats Number of beats.
-  /// @return Number of seconds.
-  [[nodiscard]] double GetSecondsFromBeats(double beats) {
-    double seconds = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyMusician_GetSecondsFromBeats(*this, beats, &seconds);
-    assert(success);
-    return seconds;
-  }
-
-  /// Returns the tempo.
-  ///
-  /// @return Tempo in beats per minute.
-  [[nodiscard]] double GetTempo() const noexcept {
-    double tempo = 0.0;
-    [[maybe_unused]] const bool success = BarelyMusician_GetTempo(*this, &tempo);
-    assert(success);
-    return tempo;
-  }
-
-  /// Returns the timestamp.
-  ///
-  /// @return Timestamp in seconds.
-  [[nodiscard]] double GetTimestamp() const noexcept {
-    double timestamp = 0.0;
-    [[maybe_unused]] const bool success = BarelyMusician_GetTimestamp(*this, &timestamp);
-    assert(success);
-    return timestamp;
-  }
-
-  /// Sets the tempo.
-  ///
-  /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept {
-    [[maybe_unused]] const bool success = BarelyMusician_SetTempo(*this, tempo);
-    assert(success);
-  }
-
-  /// Updates the musician at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyMusician_Update(*this, timestamp);
-    assert(success);
-  }
-};
-
 /// Instrument control enum.
 enum class InstrumentControl : int32_t {
   /// Gain.
@@ -1109,24 +1069,6 @@ enum class InstrumentControl : int32_t {
 /// Class that wraps an instrument handle.
 class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
  public:
-  /// Creates a new `InstrumentHandle`.
-  ///
-  /// @param musician Musician handle.
-  /// @return Instrument handle.
-  [[nodiscard]] static InstrumentHandle Create(MusicianHandle musician) noexcept {
-    BarelyInstrumentHandle instrument;
-    [[maybe_unused]] const bool success = BarelyInstrument_Create(musician, &instrument);
-    assert(success);
-    return InstrumentHandle(instrument);
-  }
-
-  /// Destroys an `InstrumentHandle`.
-  ///
-  /// @param instrument Instrument handle.
-  static void Destroy(InstrumentHandle instrument) noexcept {
-    BarelyInstrument_Destroy(instrument);
-  }
-
   /// Default constructor.
   constexpr InstrumentHandle() noexcept = default;
 
@@ -1333,28 +1275,39 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   }
 };
 
+/// Class that wraps a task handle.
+class TaskHandle : public HandleWrapper<BarelyTaskHandle> {
+ public:
+  /// Default constructor.
+  constexpr TaskHandle() noexcept = default;
+
+  /// Constructs a new `TaskHandle` from a raw handle.
+  ///
+  /// @param task Raw handle to task.
+  explicit constexpr TaskHandle(BarelyTaskHandle task) noexcept : HandleWrapper(task) {}
+
+  /// Returns the position.
+  ///
+  /// @return Position in beats.
+  [[nodiscard]] double GetPosition() const noexcept {
+    double position = 0.0;
+    [[maybe_unused]] const bool success = BarelyTask_GetPosition(*this, &position);
+    assert(success);
+    return position;
+  }
+
+  /// Sets the position.
+  ///
+  /// @param position Position in beats.
+  void SetPosition(double position) noexcept {
+    [[maybe_unused]] const bool success = BarelyTask_SetPosition(*this, position);
+    assert(success);
+  }
+};
+
 /// Class that wraps a performer handle.
 class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
  public:
-  /// Creates a new `PerformerHandle`.
-  ///
-  /// @param musician Musician handle.
-  /// @param process_order Process order.
-  /// @return Performer handle.
-  [[nodiscard]] static PerformerHandle Create(MusicianHandle musician,
-                                              int process_order = 0) noexcept {
-    BarelyPerformerHandle performer;
-    [[maybe_unused]] const bool success =
-        BarelyPerformer_Create(musician, process_order, &performer);
-    assert(success);
-    return PerformerHandle(performer);
-  }
-
-  /// Destroys a `PerformerHandle`.
-  ///
-  /// @param performer Performer handle.
-  static void Destroy(PerformerHandle performer) noexcept { BarelyPerformer_Destroy(performer); }
-
   /// Default constructor.
   constexpr PerformerHandle() noexcept = default;
 
@@ -1363,6 +1316,30 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   /// @param performer Raw handle to performer.
   explicit constexpr PerformerHandle(BarelyPerformerHandle performer) noexcept
       : HandleWrapper(performer) {}
+
+  /// Adds a task.
+  ///
+  /// @param definition Task definition.
+  /// @param position Task position in beats.
+  /// @param user_data Pointer to user data.
+  /// @return Task handle.
+  TaskHandle AddTask(TaskDefinition definition, double position,
+                     void* user_data = nullptr) noexcept {
+    BarelyTaskHandle task;
+    [[maybe_unused]] const bool success =
+        BarelyPerformer_AddTask(*this, definition, position, user_data, &task);
+    assert(success);
+    return TaskHandle(task);
+  }
+
+  /// Adds a task with a callback.
+  ///
+  /// @param callback Task callback.
+  /// @param position Task position in beats.
+  /// @return Task handle.
+  TaskHandle AddTask(TaskDefinition::Callback callback, double position) noexcept {
+    return AddTask(TaskDefinition::WithCallback(), position, static_cast<void*>(&callback));
+  }
 
   /// Cancels all one-off tasks.
   void CancelAllOneOffTasks() noexcept {
@@ -1419,6 +1396,14 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
     [[maybe_unused]] const bool success = BarelyPerformer_IsPlaying(*this, &is_playing);
     assert(success);
     return is_playing;
+  }
+
+  /// Removes a task.
+  ///
+  /// @param task Task handle.
+  void RemoveTask(TaskHandle task) noexcept {
+    [[maybe_unused]] const bool success = BarelyPerformer_RemoveTask(*this, task);
+    assert(success);
   }
 
   /// Schedules a one-off task.
@@ -1487,81 +1472,139 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   }
 };
 
-/// Class that wraps a task handle.
-class TaskHandle : public HandleWrapper<BarelyTaskHandle> {
+/// Class that wraps a musician handle.
+class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
  public:
-  /// Creates a new `TaskHandle`.
+  /// Creates a new `MusicianHandle`.
   ///
-  /// @param performer Performer handle.
-  /// @param definition Task definition.
-  /// @param position Task position in beats.
-  /// @param user_data Pointer to user data.
-  /// @return Task handle.
-  [[nodiscard]] static TaskHandle Create(PerformerHandle performer, TaskDefinition definition,
-                                         double position, void* user_data = nullptr) noexcept {
-    BarelyTaskHandle task;
+  /// @param frame_rate Frame rate in hertz.
+  /// @param reference_frequency Reference frequency in hertz.
+  /// @return Musician handle.
+  // TODO(#139): Move the C4 constant somewhere else - likely back to internal with a setter here.
+  [[nodiscard]] static MusicianHandle Create(int frame_rate,
+                                             double reference_frequency = 261.625565301) noexcept {
+    BarelyMusicianHandle musician = nullptr;
     [[maybe_unused]] const bool success =
-        BarelyTask_Create(performer, definition, position, user_data, &task);
+        BarelyMusician_Create(frame_rate, reference_frequency, &musician);
     assert(success);
-    return TaskHandle(task);
+    return MusicianHandle(musician);
   }
 
-  /// Creates a new `TaskHandle` with a callback.
+  /// Destroys a `MusicianHandle`.
   ///
-  /// @param performer Performer handle.
-  /// @param callback Task callback.
-  /// @param position Task position in beats.
-  /// @return Task handle.
-  [[nodiscard]] static TaskHandle Create(PerformerHandle performer,
-                                         TaskDefinition::Callback callback,
-                                         double position) noexcept {
-    return Create(performer, TaskDefinition::WithCallback(), position,
-                  static_cast<void*>(&callback));
-  }
-
-  /// Destroys a `TaskHandle`.
-  ///
-  /// @param task Task handle.
-  static void Destroy(TaskHandle task) noexcept { BarelyTask_Destroy(task); }
+  /// @param musician Musician.
+  static void Destroy(MusicianHandle musician) noexcept { BarelyMusician_Destroy(musician); }
 
   /// Default constructor.
-  constexpr TaskHandle() noexcept = default;
+  constexpr MusicianHandle() noexcept = default;
 
-  /// Constructs a new `TaskHandle` from a raw handle.
+  /// Constructs a new `Musician` from a raw handle.
   ///
-  /// @param task Raw handle to task.
-  explicit constexpr TaskHandle(BarelyTaskHandle task) noexcept : HandleWrapper(task) {}
+  /// @param musician Raw handle to musician.
+  explicit constexpr MusicianHandle(BarelyMusicianHandle musician) noexcept
+      : HandleWrapper(musician) {}
 
-  /// Returns the position.
+  /// Adds an instrument.
   ///
-  /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept {
-    double position = 0.0;
-    [[maybe_unused]] const bool success = BarelyTask_GetPosition(*this, &position);
+  /// @return Instrument handle.
+  InstrumentHandle AddInstrument() noexcept {
+    BarelyInstrumentHandle instrument;
+    [[maybe_unused]] const bool success = BarelyMusician_AddInstrument(*this, &instrument);
     assert(success);
-    return position;
+    return InstrumentHandle(instrument);
   }
 
-  /// Sets the position.
+  /// Adds a performer.
   ///
-  /// @param position Position in beats.
-  void SetPosition(double position) noexcept {
-    [[maybe_unused]] const bool success = BarelyTask_SetPosition(*this, position);
+  /// @param process_order Process order.
+  /// @return Performer handle.
+  PerformerHandle AddPerformer(int process_order = 0) noexcept {
+    BarelyPerformerHandle performer;
+    [[maybe_unused]] const bool success =
+        BarelyMusician_AddPerformer(*this, process_order, &performer);
+    assert(success);
+    return PerformerHandle(performer);
+  }
+
+  /// Returns the corresponding number of beats for a given number of seconds.
+  ///
+  /// @param seconds Number of seconds.
+  /// @return Number of beats.
+  [[nodiscard]] double GetBeatsFromSeconds(double seconds) {
+    double beats = 0.0;
+    [[maybe_unused]] const bool success =
+        BarelyMusician_GetBeatsFromSeconds(*this, seconds, &beats);
+    assert(success);
+    return beats;
+  }
+
+  /// Returns the corresponding number of seconds for a given number of beats.
+  ///
+  /// @param beats Number of beats.
+  /// @return Number of seconds.
+  [[nodiscard]] double GetSecondsFromBeats(double beats) {
+    double seconds = 0.0;
+    [[maybe_unused]] const bool success =
+        BarelyMusician_GetSecondsFromBeats(*this, beats, &seconds);
+    assert(success);
+    return seconds;
+  }
+
+  /// Returns the tempo.
+  ///
+  /// @return Tempo in beats per minute.
+  [[nodiscard]] double GetTempo() const noexcept {
+    double tempo = 0.0;
+    [[maybe_unused]] const bool success = BarelyMusician_GetTempo(*this, &tempo);
+    assert(success);
+    return tempo;
+  }
+
+  /// Returns the timestamp.
+  ///
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestamp() const noexcept {
+    double timestamp = 0.0;
+    [[maybe_unused]] const bool success = BarelyMusician_GetTimestamp(*this, &timestamp);
+    assert(success);
+    return timestamp;
+  }
+
+  /// Removes an instrument.
+  ///
+  /// @param instrument Instrument handle.
+  void RemoveInstrument(InstrumentHandle instrument) noexcept {
+    [[maybe_unused]] const bool success = BarelyMusician_RemoveInstrument(*this, instrument);
+    assert(success);
+  }
+
+  /// Removes a performer.
+  ///
+  /// @param instrument Instrument handle.
+  void RemovePerformer(PerformerHandle performer) noexcept {
+    [[maybe_unused]] const bool success = BarelyMusician_RemovePerformer(*this, performer);
+    assert(success);
+  }
+
+  /// Sets the tempo.
+  ///
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept {
+    [[maybe_unused]] const bool success = BarelyMusician_SetTempo(*this, tempo);
+    assert(success);
+  }
+
+  /// Updates the musician at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void Update(double timestamp) noexcept {
+    [[maybe_unused]] const bool success = BarelyMusician_Update(*this, timestamp);
     assert(success);
   }
 };
 
-/// Scoped instrument alias.
-using Instrument = ScopedHandleWrapper<InstrumentHandle>;
-
 /// Scoped musician alias.
 using Musician = ScopedHandleWrapper<MusicianHandle>;
-
-/// Scoped performer alias.
-using Performer = ScopedHandleWrapper<PerformerHandle>;
-
-/// Scoped task alias.
-using Task = ScopedHandleWrapper<TaskHandle>;
 
 }  // namespace barely
 

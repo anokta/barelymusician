@@ -14,13 +14,11 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::InstrumentControl;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::Performer;
-using ::barely::Task;
 using ::barely::TaskDefinition;
+using ::barely::TaskHandle;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -54,7 +52,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  Instrument instrument(musician);
+  auto instrument = musician.AddInstrument();
   instrument.SetControl(InstrumentControl::kGain, kGain);
   instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(InstrumentControl::kAttack, kAttack);
@@ -62,7 +60,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetNoteOnEvent(
       [](double pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
-  Performer performer(musician);
+  auto performer = musician.AddPerformer();
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
@@ -86,10 +84,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, 11.0 / 12.0));
   score.emplace_back(6.0, play_note_fn(2.0, 1.0));
 
-  std::unordered_map<int, Task> tasks;
+  std::unordered_map<int, TaskHandle> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, Task(performer, callback, position));
+    tasks.emplace(index++, performer.AddTask(callback, position));
   }
 
   // Audio process callback.
@@ -109,11 +107,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
-      if (tasks.erase(index - 1) > 0) {
+      if (const auto it = tasks.find(index - 1); it != tasks.end()) {
+        performer.RemoveTask(it->second);
+        tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, Task(performer, callback, position));
+        tasks.emplace(index - 1, performer.AddTask(callback, position));
         ConsoleLog() << "Added note " << index;
       }
       return;

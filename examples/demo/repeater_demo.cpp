@@ -16,7 +16,6 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::InstrumentControl;
 using ::barely::Musician;
 using ::barely::OscillatorType;
@@ -73,7 +72,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kFrameRate);
   musician.SetTempo(kInitialTempo);
 
-  Instrument instrument(musician);
+  auto instrument = musician.AddInstrument();
   instrument.SetControl(InstrumentControl::kGain, kGain);
   instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(InstrumentControl::kAttack, kAttack);

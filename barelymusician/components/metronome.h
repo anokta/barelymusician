@@ -43,10 +43,7 @@ class Metronome {
 
  private:
   // Performer.
-  Performer performer_;
-
-  // Task.
-  Task task_;
+  PerformerHandle performer_;
 
   // Current beat.
   int beat_ = 0;

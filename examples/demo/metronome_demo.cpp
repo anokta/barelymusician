@@ -14,7 +14,6 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::InstrumentControl;
 using ::barely::Metronome;
 using ::barely::Musician;
@@ -58,7 +57,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  Instrument instrument(musician);
+  auto instrument = musician.AddInstrument();
   instrument.SetControl(InstrumentControl::kGain, kGain);
   instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(InstrumentControl::kAttack, kAttack);

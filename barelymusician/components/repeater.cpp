@@ -8,7 +8,7 @@
 // Repeater.
 struct BarelyRepeater : public barely::Repeater {
   // Constructs `BarelyRepeater` with `musician` and `process_order`.
-  BarelyRepeater(BarelyMusician* musician, int process_order) noexcept
+  BarelyRepeater(BarelyMusicianHandle musician, int process_order) noexcept
       : barely::Repeater(barely::MusicianHandle(musician), process_order) {}
 
   // Destroys `BarelyRepeater`.
@@ -105,25 +105,24 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(MusicianHandle musician, int process_order) noexcept
-    : performer_(musician, process_order),
-      task_(
-          performer_,
-          [this]() noexcept {
-            if (pitches_.empty() || !Update() || !instrument_.has_value()) {
-              return;
-            }
-            const auto& [pitch_or, length] = pitches_[index_];
-            if (!pitches_[index_].first.has_value()) {
-              return;
-            }
-            const double pitch = *pitches_[index_].first + pitch_offset_;
-            instrument_->SetNoteOn(pitch);
-            performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                                          static_cast<double>(length) * performer_.GetLoopLength());
-          },
-          0.0) {
+    : performer_(musician.AddPerformer(process_order)) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
+  performer_.AddTask(
+      [this]() noexcept {
+        if (pitches_.empty() || !Update() || !instrument_.has_value()) {
+          return;
+        }
+        const auto& [pitch_or, length] = pitches_[index_];
+        if (!pitches_[index_].first.has_value()) {
+          return;
+        }
+        const double pitch = *pitches_[index_].first + pitch_offset_;
+        instrument_->SetNoteOn(pitch);
+        performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
+                                      static_cast<double>(length) * performer_.GetLoopLength());
+      },
+      0.0);
 }
 
 Repeater::~Repeater() noexcept { Stop(); }

@@ -53,6 +53,11 @@ class InstrumentController {
   [[nodiscard]] bool ResetNoteControl(double pitch, int index) noexcept;
   [[nodiscard]] bool SetNoteControl(double pitch, int index, double value) noexcept;
 
+  /// Returns frame rate.
+  ///
+  /// @return Frame rate in hertz.
+  [[nodiscard]] int GetFrameRate() const noexcept;
+
   /// Returns whether a note is on or not.
   ///
   /// @param pitch Note pitch.
@@ -123,6 +128,9 @@ class InstrumentController {
 
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
+
+  // Frame rate in hertz.
+  const int frame_rate_ = 0;
 
   // Array of note control definitions.
   const std::vector<ControlDefinition> note_control_definitions_;

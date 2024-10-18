@@ -33,8 +33,8 @@ barely::Musician musician(/*frame_rate=*/48000, /*reference_frequency=*/440.0);
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);
 
-// Create an instrument.
-barely::Instrument instrument(musician);
+// Add an instrument.
+auto instrument = musician.AddInstrument();
 
 // Set the instrument gain to half.
 instrument.SetControl(barely::InstrumentControl::kGain, /*value=*/0.5);
@@ -49,22 +49,20 @@ instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
 
-// Create a performer.
-barely::Performer performer(musician);
+// Add a performer.
+auto performer = musician.AddPerformer();
 
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
-// Create a looping task that plays an instrument note every beat.
-barely::Task task(
-    performer,
-    [&]() {
-      // Set an instrument note on.
-      instrument.SetNoteOn(/*pitch=*/0.0);
-      // Schedule a one-off task to set the instrument note off after half a beat.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/0.0); },
-                                   performer.GetPosition() + 0.5);
-    });
+// Add a looping task that plays an instrument note every beat.
+auto task = performer.AddTask([&]() {
+  // Set an instrument note on.
+  instrument.SetNoteOn(/*pitch=*/0.0);
+  // Schedule a one-off task to set the instrument note off after half a beat.
+  performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/0.0); },
+                               performer.GetPosition() + 0.5);
+});
 
 // Start the performer.
 performer.Start();

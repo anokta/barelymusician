@@ -188,7 +188,7 @@ class Repeater {
   bool Update() noexcept;
 
   // Performer.
-  Performer performer_;
+  PerformerHandle performer_;
 
   // Instrument.
   std::optional<InstrumentHandle> instrument_ = std::nullopt;
@@ -210,9 +210,6 @@ class Repeater {
 
   // Random number generator.
   Random random_;
-
-  // Task.
-  Task task_;
 };
 
 }  // namespace barely

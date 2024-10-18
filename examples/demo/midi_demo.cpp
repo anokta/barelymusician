@@ -19,11 +19,11 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::InstrumentControl;
+using ::barely::InstrumentHandle;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::Performer;
+using ::barely::PerformerHandle;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -51,8 +51,8 @@ constexpr char kMidiFileName[] = "midi/sample.mid";
 constexpr double kTempo = 132.0;
 
 // Builds the score for the given `midi_events`.
-bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instrument& instrument,
-                Performer& performer) {
+bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
+                InstrumentHandle& instrument, PerformerHandle& performer) {
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
@@ -98,14 +98,16 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
 
-  std::vector<std::pair<Instrument, Performer>> tracks;
+  std::vector<std::pair<InstrumentHandle, PerformerHandle>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(Instrument(musician), Performer(musician));
+    tracks.emplace_back(musician.AddInstrument(), musician.AddPerformer());
     auto& [instrument, performer] = tracks.back();
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
+      musician.RemoveInstrument(instrument);
+      musician.RemovePerformer(performer);
       tracks.pop_back();
       continue;
     }

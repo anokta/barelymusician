@@ -51,9 +51,6 @@ class Control {
   /// @return Control value.
   [[nodiscard]] const double& GetValue() const noexcept;
 
-  /// Resets the value.
-  [[nodiscard]] bool ResetValue() noexcept;
-
   /// Sets the value.
   ///
   /// @param value Control value.

@@ -79,32 +79,6 @@ bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_
       static_cast<int>(static_cast<double>(instrument->GetFrameRate()) * timestamp));
 }
 
-bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument) {
-  if (!instrument) return false;
-
-  instrument->ResetAllControls();
-  return true;
-}
-
-bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument, double pitch) {
-  if (!instrument) return false;
-
-  return instrument->ResetAllNoteControls(pitch);
-}
-
-bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t index) {
-  if (!instrument) return false;
-
-  return instrument->ResetControl(index);
-}
-
-bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                       int32_t index) {
-  if (!instrument) return false;
-
-  return instrument->ResetNoteControl(pitch, index);
-}
-
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 

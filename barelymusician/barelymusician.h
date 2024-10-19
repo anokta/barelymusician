@@ -383,36 +383,6 @@ BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
                                             double* output_samples, int32_t output_channel_count,
                                             int32_t output_frame_count, double timestamp);
 
-/// Resets all control values of an instrument.
-///
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument);
-
-/// Resets all control values of an instrument note.
-///
-/// @param instrument Instrument handle.
-/// @param pitch Note pitch.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument,
-                                                         double pitch);
-
-/// Resets an instrument control value.
-///
-/// @param instrument Instrument handle.
-/// @param index Control index.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t index);
-
-/// Resets an instrument note control value.
-///
-/// @param instrument Instrument handle.
-/// @param pitch Note pitch.
-/// @param index Control index.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument,
-                                                     double pitch, int32_t index);
-
 /// Sets all instrument notes off.
 ///
 /// @param instrument Instrument handle.
@@ -1134,45 +1104,6 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
                double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_Process(
         *this, output_samples, output_channel_count, output_frame_count, timestamp);
-    assert(success);
-  }
-
-  /// Resets all control values.
-  void ResetAllControls() noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetAllControls(*this);
-    assert(success);
-  }
-
-  /// Resets all note control values.
-  ///
-  /// @param pitch Note pitch.
-  void ResetAllNoteControls(double pitch) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_ResetAllNoteControls(*this, pitch);
-    assert(success);
-  }
-
-  /// Resets a control value.
-  ///
-  /// @param index Control index.
-  template <typename IdType>
-  void ResetControl(IdType index) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_ResetControl(*this, static_cast<int32_t>(index));
-    assert(success);
-  }
-
-  /// Resets a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param index Control index.
-  template <typename IdType>
-  void ResetNoteControl(double pitch, IdType index) noexcept {
-    static_assert(std::is_integral<IdType>::value || std::is_enum<IdType>::value,
-                  "IdType is not supported");
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_ResetNoteControl(*this, pitch, static_cast<int32_t>(index));
     assert(success);
   }
 

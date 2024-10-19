@@ -37,13 +37,6 @@ TEST(ControlTest, SetValue) {
   EXPECT_FALSE(control.SetValue(50.0));
   EXPECT_FALSE(control.SetValue(20.0));
   EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
-
-  EXPECT_TRUE(control.ResetValue());
-  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
-
-  // The control value is already reset.
-  EXPECT_FALSE(control.ResetValue());
-  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 }
 
 // Tests that the array of controls is built from an array of control definitions as expected.

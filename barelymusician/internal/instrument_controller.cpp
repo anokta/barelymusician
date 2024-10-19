@@ -128,50 +128,6 @@ bool InstrumentController::Process(double* output_samples, int output_channel_co
   return true;
 }
 
-void InstrumentController::ResetAllControls() noexcept {
-  for (int i = 0; i < static_cast<int>(controls_.size()); ++i) {
-    if (controls_[i].ResetValue()) {
-      message_queue_.Add(update_frame_, ControlMessage{i, controls_[i].GetValue()});
-    }
-  }
-}
-
-bool InstrumentController::ResetControl(int index) noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    if (controls_[index].ResetValue()) {
-      message_queue_.Add(update_frame_, ControlMessage{index, controls_[index].GetValue()});
-    }
-    return true;
-  }
-  return false;
-}
-
-bool InstrumentController::ResetAllNoteControls(double pitch) noexcept {
-  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    for (int i = 0; i < static_cast<int>(note_controls->size()); ++i) {
-      if ((*note_controls)[i].ResetValue()) {
-        message_queue_.Add(update_frame_,
-                           NoteControlMessage{pitch, i, (*note_controls)[i].GetValue()});
-      }
-    }
-    return true;
-  }
-  return false;
-}
-
-bool InstrumentController::ResetNoteControl(double pitch, int index) noexcept {
-  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (index >= 0 && index < static_cast<int>(note_controls->size())) {
-      if ((*note_controls)[index].ResetValue()) {
-        message_queue_.Add(update_frame_,
-                           NoteControlMessage{pitch, index, (*note_controls)[index].GetValue()});
-      }
-      return true;
-    }
-  }
-  return false;
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InstrumentController::SetAllNotesOff() noexcept {
   for (const auto& [note, _] : std::exchange(note_controls_, {})) {

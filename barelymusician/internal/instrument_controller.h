@@ -41,7 +41,6 @@ class InstrumentController {
   /// @param index Control index.
   /// @return Pointer to control value, or nullptr if not found.
   [[nodiscard]] const double* GetControl(int index) const noexcept;
-  [[nodiscard]] bool ResetControl(int index) noexcept;
   [[nodiscard]] bool SetControl(int index, double value) noexcept;
 
   /// Returns a note control value.
@@ -50,7 +49,6 @@ class InstrumentController {
   /// @param index Note control index.
   /// @return Pointer to note control value, or nullptr if not found.
   [[nodiscard]] const double* GetNoteControl(double pitch, int index) const noexcept;
-  [[nodiscard]] bool ResetNoteControl(double pitch, int index) noexcept;
   [[nodiscard]] bool SetNoteControl(double pitch, int index, double value) noexcept;
 
   /// Returns frame rate.
@@ -74,15 +72,6 @@ class InstrumentController {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool Process(double* output_samples, int output_channel_count, int output_frame_count,
                int64_t process_frame) noexcept;
-
-  /// Resets all control values.
-  void ResetAllControls() noexcept;
-
-  /// Resets all note control values.
-  ///
-  /// @param pitch Note pitch.
-  /// @return True if successful, false otherwise.
-  bool ResetAllNoteControls(double pitch) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)

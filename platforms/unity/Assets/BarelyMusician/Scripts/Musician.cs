@@ -207,31 +207,6 @@ namespace Barely {
         }
       }
 
-      /// Resets an instrument control value.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      /// @param controlId Control index.
-      public static void Instrument_ResetControl(IntPtr instrumentHandle, int controlId) {
-        if (!BarelyInstrument_ResetControl(instrumentHandle, controlId) &&
-            instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset instrument control " + controlId + " value");
-        }
-      }
-
-      /// Resets an instrument note control value.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      /// @param pitch Note pitch.
-      /// @param controlId Note control index.
-      public static void Instrument_ResetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                     int controlId) {
-        if (!BarelyInstrument_ResetNoteControl(instrumentHandle, pitch, controlId) &&
-            instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset instrument note " + pitch + " control " + controlId +
-                         " value");
-        }
-      }
-
       /// Sets all instrument notes off.
       ///
       /// @param instrumentHandle Instrument handle.
@@ -1095,13 +1070,6 @@ namespace Barely {
                                                           [In, Out] double[] outputSamples,
                                                           Int32 outputChannelCount,
                                                           Int32 outputFrameCount, double timestamp);
-
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetControl")]
-      private static extern bool BarelyInstrument_ResetControl(IntPtr instrument, Int32 index);
-
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetNoteControl")]
-      private static extern bool BarelyInstrument_ResetNoteControl(IntPtr instrument, double pitch,
-                                                                   Int32 index);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
       private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr instrument);

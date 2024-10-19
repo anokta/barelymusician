@@ -34,14 +34,8 @@ TEST(InstrumentControllerTest, GetControl) {
   EXPECT_TRUE(instrument.SetControl(0, 0.25));
   EXPECT_THAT(instrument.GetControl(0), Pointee(0.25));
 
-  EXPECT_TRUE(instrument.ResetControl(0));
-  EXPECT_THAT(instrument.GetControl(0), Pointee(1.0));
-
   EXPECT_TRUE(instrument.SetControl(0, -2.0));
   EXPECT_THAT(instrument.GetControl(0), Pointee(0.0));
-
-  instrument.ResetAllControls();
-  EXPECT_THAT(instrument.GetControl(0), Pointee(1.0));
 
   // Control does not exist.
   EXPECT_THAT(instrument.GetControl(-1), IsNull());

@@ -10,8 +10,10 @@ SamplePlayer::SamplePlayer(int frame_rate) noexcept
 
 double SamplePlayer::GetSpeed() const noexcept { return speed_; }
 
+bool SamplePlayer::IsActive() const noexcept { return data_ != nullptr && cursor_ < length_; }
+
 double SamplePlayer::Next() noexcept {
-  if (!data_ || cursor_ >= length_) {
+  if (!IsActive()) {
     // Nothing to play, skip processing.
     // TODO(#139): Is it worth incrementing the cursor to keep the voice in sync.
     return 0.0;

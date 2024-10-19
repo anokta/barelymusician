@@ -66,6 +66,7 @@ add_barelymusician_demo(
   barelymusician_duration
   barelymusician_scale
   barelymusician_oscillator
+  barelymusician_sample_player
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
@@ -88,6 +89,7 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   sampler_demo
   barelymusician
+  barelymusician_sample_player
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
   barelymusician_examples_input_manager

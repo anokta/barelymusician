@@ -18,6 +18,7 @@ target_link_libraries(
   barelymusician_headeronly
   barelymusician_find_or_null
   barelymusician_oscillator
+  barelymusician_sample_player
 )
 
 add_library(
@@ -31,6 +32,7 @@ target_link_libraries(
   barelymusician_headeronly
   barelymusician_gain_processor
   barelymusician_oscillator
+  barelymusician_sample_player
   barelymusician_voice
 )
 
@@ -119,6 +121,7 @@ if(ENABLE_TESTS)
     barelymusician_internal_instrument_controller
     barelymusician_internal_sample_data
     barelymusician_headeronly
+    barelymusician_sample_player
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_instrument_controller_test)
@@ -132,6 +135,7 @@ if(ENABLE_TESTS)
     barelymusician_internal_instrument_processor
     barelymusician_internal_sample_data
     barelymusician_headeronly
+    barelymusician_sample_player
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_instrument_processor_test)

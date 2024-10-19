@@ -8,6 +8,8 @@
 #include <unordered_map>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/instrument_processor.h"
 #include "barelymusician/internal/message_queue.h"
@@ -152,7 +154,7 @@ class InstrumentController {
       new_value = std::min(std::max(new_value, min_value), max_value);
       if (value != new_value) {
         value = new_value;
-        return value != new_value;
+        return true;
       }
       return false;
     }
@@ -172,16 +174,16 @@ class InstrumentController {
 
   // Array of controls.
   std::array<Control, static_cast<int>(InstrumentControlType::kCount)> controls_ = {
-      Control(1.0, 0.0, 1.0),                            // InstrumentControlType::kGain
-      Control(8, 1, 32),                                 // InstrumentControlType::kVoiceCount
-      {0, 0, static_cast<int>(OscillatorType::kCount)},  // InstrumentControlType::kOscillatorType
-      Control(false),                                    // InstrumentControlType::kSamplePlayerLoop
-      Control(0.05, 0.0, 60.0),                          // InstrumentControlType::kAttack
-      Control(0.0, 0.0, 60.0),                           // InstrumentControlType::kDecay
-      Control(1.0, 0.0, 1.0),                            // InstrumentControlType::kSustain
-      Control(0.25, 0.0, 60.0),                          // InstrumentControlType::kRelease
-      Control(0.0),                                      // InstrumentControlType::kPitchShift
-      Control(false),                                    // InstrumentControlType::kRetrigger
+      Control(1.0, 0.0, 1.0),                                // kGain
+      Control(8, 1, 32),                                     // kVoiceCount
+      {0, 0, static_cast<int>(OscillatorType::kCount)},      // kOscillatorType
+      {0, 0, static_cast<int>(SamplePlaybackMode::kCount)},  // kSamplePlaybackMode
+      Control(0.05, 0.0, 60.0),                              // kAttack
+      Control(0.0, 0.0, 60.0),                               // kDecay
+      Control(1.0, 0.0, 1.0),                                // kSustain
+      Control(0.25, 0.0, 60.0),                              // kRelease
+      Control(0.0),                                          // kPitchShift
+      Control(false),                                        // kRetrigger
   };
 
   // Array of note control arrays by their pitches.

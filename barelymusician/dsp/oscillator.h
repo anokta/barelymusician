@@ -34,12 +34,12 @@ class Oscillator {
   /// Returns the frequency of the oscillator.
   ///
   /// @return Frequency in hertz.
-  double GetFrequency() const noexcept;
+  [[nodiscard]] double GetFrequency() const noexcept;
 
   /// Generates the next output sample.
   ///
   /// @return Next output sample.
-  double Next() noexcept;
+  [[nodiscard]] double Next() noexcept;
 
   /// Resets the state.
   void Reset() noexcept;

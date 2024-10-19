@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
 
 namespace Barely {
@@ -19,6 +20,18 @@ namespace Barely {
     [InspectorName("Noise")] NOISE,
   }
 
+  /// Sample playback mode.
+  public enum SamplePlaybackMode {
+    /// None.
+    [InspectorName("None")] NONE = 0,
+    /// Once.
+    [InspectorName("Once")] ONCE,
+    /// Sustain.
+    [InspectorName("Sustain")] SUSTAIN,
+    /// Loop.
+    [InspectorName("Loop")] LOOP,
+  }
+
   /// Instrument control type enum values.
   public enum InstrumentControlType {
     /// Gain.
@@ -27,8 +40,8 @@ namespace Barely {
     [InspectorName("Voice Count")] VOICE_COUNT,
     /// Oscillator type.
     [InspectorName("Oscillator Type")] OSCILLATOR_TYPE,
-    /// Sample player loop.
-    [InspectorName("Sample Player Loop")] SAMPLE_PLAYER_LOOP,
+    /// Sample playback mode.
+    [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
     /// Envelope attack.
     [InspectorName("Attack")] ATTACK,
     /// Envelope decay.
@@ -41,8 +54,6 @@ namespace Barely {
     [InspectorName("Pitch Shift")] PITCH_SHIFT,
     /// Retrigger.
     [InspectorName("Retrigger")] RETRIGGER,
-    /// Number of control types.
-    [InspectorName("Count")] COUNT,
   }
 
   /// A representation of a musical instrument that can be played in real-time.
@@ -108,12 +119,12 @@ namespace Barely {
     /// Oscillator type.
     public OscillatorType OscillatorType = OscillatorType.NONE;
 
+    /// Sample playback mode.
+    public SamplePlaybackMode SamplePlaybackMode = SamplePlaybackMode.NONE;
+
     /// List of samplers.
     public List<Sampler> Samplers = null;
     private int _samplerCount = 0;
-
-    /// Sample player loop.
-    public bool SamplerLoop = false;
 
     /// Envelope attack in seconds.
     [Range(0.0f, 60.0f)]
@@ -282,7 +293,7 @@ namespace Barely {
       SetControl(InstrumentControlType.GAIN, Gain);
       SetControl(InstrumentControlType.VOICE_COUNT, (double)VoiceCount);
       SetControl(InstrumentControlType.OSCILLATOR_TYPE, (double)OscillatorType);
-      SetControl(InstrumentControlType.SAMPLE_PLAYER_LOOP, SamplerLoop ? 1.0 : 0.0);
+      SetControl(InstrumentControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
       SetControl(InstrumentControlType.ATTACK, Attack);
       SetControl(InstrumentControlType.DECAY, Decay);
       SetControl(InstrumentControlType.SUSTAIN, Sustain);

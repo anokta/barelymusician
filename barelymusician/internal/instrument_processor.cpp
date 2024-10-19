@@ -5,6 +5,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/dsp/voice.h"
 #include "barelymusician/internal/sample_data.h"
 
@@ -53,25 +54,24 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, double value) n
     case InstrumentControlType::kGain:
       gain_processor_.SetGain(value);
       break;
-    case InstrumentControlType::kVoiceCount:
-      if (const int voice_count = static_cast<int>(value); voice_count_ != voice_count) {
-        for (int i = voice_count_; i < voice_count; ++i) {
-          // Copy over the voice settings.
-          voice_states_[i].voice = voice_states_[0].voice;
-          voice_states_[i].voice.Reset();
-        }
-        voice_count_ = voice_count;
+    case InstrumentControlType::kVoiceCount: {
+      const int voice_count = static_cast<int>(value);
+      for (int i = voice_count_; i < voice_count; ++i) {
+        // Copy over the voice settings.
+        voice_states_[i].voice = voice_states_[0].voice;
+        voice_states_[i].voice.Reset();
       }
-      break;
+      voice_count_ = voice_count;
+    } break;
     case InstrumentControlType::kOscillatorType:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.oscillator().SetType(
             static_cast<OscillatorType>(static_cast<int>(value)));
       };
       break;
-    case InstrumentControlType::kSamplePlayerLoop:
+    case InstrumentControlType::kSamplePlaybackMode:
       for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.sample_player().SetLoop(static_cast<bool>(value));
+        voice_states_[i].voice.set_sample_playback_mode(static_cast<SamplePlaybackMode>(value));
       };
       break;
     case InstrumentControlType::kAttack:

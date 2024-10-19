@@ -8,7 +8,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/internal/instrument_processor.h"
 #include "barelymusician/internal/message.h"
 

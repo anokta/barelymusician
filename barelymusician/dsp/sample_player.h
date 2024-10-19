@@ -3,6 +3,20 @@
 
 namespace barely {
 
+/// Sample playback mode.
+enum class SamplePlaybackMode {
+  /// None.
+  kNone = 0,
+  /// Once.
+  kOnce,
+  /// Sustain.
+  kSustain,
+  /// Loop.
+  kLoop,
+  /// Count.
+  kCount,
+};
+
 /// Sample player that generates output samples from the provided mono data.
 class SamplePlayer {
  public:
@@ -14,12 +28,17 @@ class SamplePlayer {
   /// Returns the playback speed.
   ///
   /// @return Playback speed.
-  double GetSpeed() const noexcept;
+  [[nodiscard]] double GetSpeed() const noexcept;
+
+  /// Returns whether the voice is currently active (i.e., playing).
+  ///
+  /// @return True if active.
+  [[nodiscard]] bool IsActive() const noexcept;
 
   /// Generates the next output sample.
   ///
   /// @return Next output sample.
-  double Next() noexcept;
+  [[nodiscard]] double Next() noexcept;
 
   /// Resets the state.
   void Reset() noexcept;

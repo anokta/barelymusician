@@ -224,9 +224,8 @@ enum BarelyInstrumentControlType_Values {
   BarelyInstrumentControlType_kVoiceCount,
   /// Oscillator type.
   BarelyInstrumentControlType_kOscillatorType,
-  /// Sample player loop.
-  // TODO(#139): This could be replaced by `SamplePlaybackMode` with sustained and looped modes.
-  BarelyInstrumentControlType_kSamplePlayerLoop,
+  /// Sample playback mode.
+  BarelyInstrumentControlType_kSamplePlaybackMode,
   /// Envelope attack.
   BarelyInstrumentControlType_kAttack,
   /// Envelope decay.
@@ -1048,9 +1047,8 @@ enum class InstrumentControlType : BarelyInstrumentControlType {
   kVoiceCount = BarelyInstrumentControlType_kVoiceCount,
   /// Oscillator type.
   kOscillatorType = BarelyInstrumentControlType_kOscillatorType,
-  /// Sample player loop.
-  // TODO(#139): This could be replaced by `SamplePlaybackMode` with sustained and looped modes.
-  kSamplePlayerLoop = BarelyInstrumentControlType_kSamplePlayerLoop,
+  /// Sample playback mode.
+  kSamplePlaybackMode = BarelyInstrumentControlType_kSamplePlaybackMode,
   /// Envelope attack.
   kAttack = BarelyInstrumentControlType_kAttack,
   /// Envelope decay.

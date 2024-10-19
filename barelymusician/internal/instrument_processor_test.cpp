@@ -3,6 +3,7 @@
 #include <array>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/internal/sample_data.h"
 #include "gtest/gtest.h"
 
@@ -25,7 +26,8 @@ constexpr std::array<SampleDataDefinition, kVoiceCount> kDefinitions = {
 TEST(InstrumentProcessorTest, SingleVoice) {
   InstrumentProcessor processor(kFrameRate, kReferenceFrequency);
   processor.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
-  processor.SetControl(InstrumentControlType::kSamplePlayerLoop, true);
+  processor.SetControl(InstrumentControlType::kSamplePlaybackMode,
+                       static_cast<double>(SamplePlaybackMode::kLoop));
 
   SampleData sample_data(kDefinitions);
   processor.SetSampleData(sample_data);
@@ -53,7 +55,8 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 TEST(InstrumentProcessorTest, MaxVoices) {
   InstrumentProcessor processor(kFrameRate, kReferenceFrequency);
   processor.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
-  processor.SetControl(InstrumentControlType::kSamplePlayerLoop, true);
+  processor.SetControl(InstrumentControlType::kSamplePlaybackMode,
+                       static_cast<double>(SamplePlaybackMode::kLoop));
 
   SampleData sample_data(kDefinitions);
   processor.SetSampleData(sample_data);

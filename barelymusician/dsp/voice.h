@@ -48,13 +48,18 @@ class Voice {
   [[nodiscard]] double gain() const noexcept { return gain_; }
   void set_gain(double gain) noexcept { gain_ = gain; }
 
+  void set_sample_playback_mode(SamplePlaybackMode sample_playback_mode) noexcept {
+    sample_playback_mode_ = sample_playback_mode;
+    sample_player_.SetLoop(sample_playback_mode_ == SamplePlaybackMode::kLoop);
+  }
+
  private:
   Envelope envelope_;
   Oscillator oscillator_;
   SamplePlayer sample_player_;
 
-  // Voice gain.
   double gain_ = 0.0;
+  SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
 };
 
 }  // namespace barely

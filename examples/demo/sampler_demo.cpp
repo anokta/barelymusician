@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/dsp/sample_player.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -22,6 +23,7 @@ namespace {
 using ::barely::InstrumentControlType;
 using ::barely::Musician;
 using ::barely::SampleDataDefinition;
+using ::barely::SamplePlaybackMode;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -82,7 +84,7 @@ int main(int /*argc*/, char* argv[]) {
 
   auto instrument = musician.AddInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
-  instrument.SetControl(InstrumentControlType::kSamplePlayerLoop, kLoop);
+  instrument.SetControl(InstrumentControlType::kSamplePlaybackMode, SamplePlaybackMode::kLoop);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);

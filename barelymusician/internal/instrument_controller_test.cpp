@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/internal/sample_data.h"
 #include "gtest/gtest.h"
 
@@ -51,6 +52,8 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
       SampleDataDefinition(kPitch, kFrameRate, kSamples)};
 
   InstrumentController instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
+  instrument.SetControl(InstrumentControlType::kSamplePlaybackMode,
+                        static_cast<double>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kDefinitions));
 
   std::vector<double> buffer(kChannelCount * kFrameCount);
@@ -100,6 +103,8 @@ TEST(InstrumentControllerTest, PlayMultipleNotes) {
   };
 
   InstrumentController instrument(1, kReferenceFrequency, 0);
+  instrument.SetControl(InstrumentControlType::kSamplePlaybackMode,
+                        static_cast<double>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kDefinitions));
 
   std::vector<double> buffer(kChannelCount * kFrameRate);

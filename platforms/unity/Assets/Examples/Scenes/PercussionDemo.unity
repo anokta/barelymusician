@@ -455,19 +455,13 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
-  SamplerLoop: 0
+  SamplePlaybackMode: 1
   Attack: 0
   Decay: 0
   Sustain: 1
-  Release: 1
+  Release: 0
   PitchShift: 0
   Retrigger: 1
-  OnControlEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnNoteControlEvent:
-    m_PersistentCalls:
-      m_Calls: []
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

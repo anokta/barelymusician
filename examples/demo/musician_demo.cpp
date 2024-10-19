@@ -16,6 +16,7 @@
 #include "barelymusician/composition/duration.h"
 #include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/dsp/sample_player.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -33,6 +34,7 @@ using ::barely::OscillatorType;
 using ::barely::PerformerHandle;
 using ::barely::Random;
 using ::barely::SampleDataDefinition;
+using ::barely::SamplePlaybackMode;
 using ::barely::ScaleDefinition;
 using ::barely::ScaleType;
 using ::barely::examples::AudioClock;
@@ -260,8 +262,8 @@ int main(int /*argc*/, char* argv[]) {
   auto& percussion = instruments.back();
   percussion.SetControl(InstrumentControlType::kGain, 0.125);
   percussion.SetControl(InstrumentControlType::kAttack, 0.0);
-  percussion.SetControl(InstrumentControlType::kRelease, 0.1);
   percussion.SetControl(InstrumentControlType::kRetrigger, true);
+  percussion.SetControl(InstrumentControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<double, std::string>>& percussion_map) {

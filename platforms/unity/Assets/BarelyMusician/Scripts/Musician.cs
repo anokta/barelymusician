@@ -140,13 +140,14 @@ namespace Barely {
       /// Returns the value of an instrument control.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @param index Control index.
+      /// @param type Control type.
       /// @return Control value.
-      public static double Instrument_GetControl(IntPtr instrumentHandle, int index) {
+      public static double Instrument_GetControl(IntPtr instrumentHandle,
+                                                 InstrumentControlType type) {
         double value = 0.0;
-        if (!BarelyInstrument_GetControl(instrumentHandle, index, ref value) &&
+        if (!BarelyInstrument_GetControl(instrumentHandle, type, ref value) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument control " + index);
+          Debug.LogError("Failed to get instrument control " + type);
         }
         return value;
       }
@@ -155,14 +156,14 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      /// @param index Note control index.
+      /// @param type Note control type.
       /// @return Note control value.
       public static double Instrument_GetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                     int index) {
+                                                     InstrumentControlType type) {
         double value = 0.0;
-        if (!BarelyInstrument_GetNoteControl(instrumentHandle, pitch, index, ref value) &&
+        if (!BarelyInstrument_GetNoteControl(instrumentHandle, pitch, type, ref value) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument note " + pitch + " control " + index + " value");
+          Debug.LogError("Failed to get instrument note " + pitch + " control " + type + " value");
         }
         return value;
       }
@@ -219,37 +220,13 @@ namespace Barely {
       /// Sets an instrument control value.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @param controlId Control index.
+      /// @param type Control type.
       /// @param value Control value.
-      public static void Instrument_SetControl(IntPtr instrumentHandle, int controlId,
+      public static void Instrument_SetControl(IntPtr instrumentHandle, InstrumentControlType type,
                                                double value) {
-        if (!BarelyInstrument_SetControl(instrumentHandle, controlId, value) &&
+        if (!BarelyInstrument_SetControl(instrumentHandle, type, value) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument control " + controlId + " value to " + value);
-        }
-      }
-
-      /// Sets instrument data.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      /// @param samplers List of samplers.
-      public static void Instrument_SetSampleData(IntPtr instrumentHandle,
-                                                  List<Instrument.Sampler> samplers) {
-        SampleDataDefinition[] definitions = null;
-        if (samplers.Count > 0) {
-          definitions = new SampleDataDefinition[samplers.Count];
-          for (int i = 0; i < definitions.Length; ++i) {
-            definitions[i] = new SampleDataDefinition() {
-              rootPitch = samplers[i].RootPitch / 12.0,
-              sampleRate = (samplers[i].Sample != null) ? samplers[i].Sample.frequency : 0,
-              samples = samplers[i].Data,
-              sampleCount = (samplers[i].Sample != null) ? samplers[i].Sample.samples : 0,
-            };
-          }
-        }
-        if (!BarelyInstrument_SetSampleData(instrumentHandle, definitions, samplers.Count) &&
-            instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument sample data");
+          Debug.LogError("Failed to set instrument control " + type + " value to " + value);
         }
       }
 
@@ -257,13 +234,13 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      /// @param controlId Note control index.
+      /// @param type Note control type.
       /// @param value Note control value.
       public static void Instrument_SetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                   int controlId, double value) {
-        if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, controlId, value) &&
+                                                   InstrumentControlType type, double value) {
+        if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, type, value) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument note " + pitch + " control " + controlId +
+          Debug.LogError("Failed to set instrument note " + pitch + " control " + type +
                          " value to " + value);
         }
       }
@@ -289,6 +266,30 @@ namespace Barely {
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
                          " intensity");
+        }
+      }
+
+      /// Sets instrument data.
+      ///
+      /// @param instrumentHandle Instrument handle.
+      /// @param samplers List of samplers.
+      public static void Instrument_SetSampleData(IntPtr instrumentHandle,
+                                                  List<Instrument.Sampler> samplers) {
+        SampleDataDefinition[] definitions = null;
+        if (samplers.Count > 0) {
+          definitions = new SampleDataDefinition[samplers.Count];
+          for (int i = 0; i < definitions.Length; ++i) {
+            definitions[i] = new SampleDataDefinition() {
+              rootPitch = samplers[i].RootPitch / 12.0,
+              sampleRate = (samplers[i].Sample != null) ? samplers[i].Sample.frequency : 0,
+              samples = samplers[i].Data,
+              sampleCount = (samplers[i].Sample != null) ? samplers[i].Sample.samples : 0,
+            };
+          }
+        }
+        if (!BarelyInstrument_SetSampleData(instrumentHandle, definitions, samplers.Count) &&
+            instrumentHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set instrument sample data");
         }
       }
 
@@ -1054,12 +1055,14 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetControl")]
-      private static extern bool BarelyInstrument_GetControl(IntPtr instrument, Int32 index,
+      private static extern bool BarelyInstrument_GetControl(IntPtr instrument,
+                                                             InstrumentControlType type,
                                                              ref double outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
       private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, double pitch,
-                                                                 Int32 index, ref double outValue);
+                                                                 InstrumentControlType type,
+                                                                 ref double outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, double pitch,
@@ -1075,12 +1078,14 @@ namespace Barely {
       private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr instrument);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControl")]
-      private static extern bool BarelyInstrument_SetControl(IntPtr instrument, Int32 index,
+      private static extern bool BarelyInstrument_SetControl(IntPtr instrument,
+                                                             InstrumentControlType type,
                                                              double value);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
-                                                                 Int32 index, double value);
+                                                                 InstrumentControlType type,
+                                                                 double value);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, double pitch);

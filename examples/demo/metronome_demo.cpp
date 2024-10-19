@@ -14,7 +14,7 @@
 
 namespace {
 
-using ::barely::InstrumentControl;
+using ::barely::InstrumentControlType;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
@@ -58,11 +58,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Create the metronome instrument.
   auto instrument = musician.AddInstrument();
-  instrument.SetControl(InstrumentControl::kGain, kGain);
-  instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
-  instrument.SetControl(InstrumentControl::kAttack, kAttack);
-  instrument.SetControl(InstrumentControl::kRelease, kRelease);
-  instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
+  instrument.SetControl(InstrumentControlType::kGain, kGain);
+  instrument.SetControl(InstrumentControlType::kOscillatorType, kOscillatorType);
+  instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
   Metronome metronome(musician);

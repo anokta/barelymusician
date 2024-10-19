@@ -48,53 +48,53 @@ void InstrumentProcessor::Process(double* output_samples, int output_channel_cou
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void InstrumentProcessor::SetControl(int index, double value) noexcept {
-  switch (static_cast<InstrumentControl>(index)) {
-    case InstrumentControl::kGain:
+void InstrumentProcessor::SetControl(InstrumentControlType type, double value) noexcept {
+  switch (type) {
+    case InstrumentControlType::kGain:
       gain_processor_.SetGain(value);
       break;
-    case InstrumentControl::kVoiceCount: {
-      const int voice_count = static_cast<int>(value);
-      for (int i = voice_count_; i < voice_count; ++i) {
-        // Copy over the voice settings.
-        voice_states_[i].voice = voice_states_[0].voice;
-        voice_states_[i].voice.Reset();
+    case InstrumentControlType::kVoiceCount:
+      if (const int voice_count = static_cast<int>(value); voice_count_ != voice_count) {
+        for (int i = voice_count_; i < voice_count; ++i) {
+          // Copy over the voice settings.
+          voice_states_[i].voice = voice_states_[0].voice;
+          voice_states_[i].voice.Reset();
+        }
+        voice_count_ = voice_count;
       }
-      voice_count_ = voice_count;
-    } break;
-    case InstrumentControl::kOscillatorType: {
-      const OscillatorType type = static_cast<OscillatorType>(static_cast<int>(value));
+      break;
+    case InstrumentControlType::kOscillatorType:
       for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.oscillator().SetType(type);
+        voice_states_[i].voice.oscillator().SetType(
+            static_cast<OscillatorType>(static_cast<int>(value)));
       };
-    } break;
-    case InstrumentControl::kSamplePlayerLoop: {
-      const bool loop = static_cast<bool>(value);
+      break;
+    case InstrumentControlType::kSamplePlayerLoop:
       for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.sample_player().SetLoop(loop);
+        voice_states_[i].voice.sample_player().SetLoop(static_cast<bool>(value));
       };
-    } break;
-    case InstrumentControl::kAttack:
+      break;
+    case InstrumentControlType::kAttack:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.envelope().SetAttack(value);
       };
       break;
-    case InstrumentControl::kDecay:
+    case InstrumentControlType::kDecay:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.envelope().SetDecay(value);
       };
       break;
-    case InstrumentControl::kSustain:
+    case InstrumentControlType::kSustain:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.envelope().SetSustain(value);
       };
       break;
-    case InstrumentControl::kRelease:
+    case InstrumentControlType::kRelease:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.envelope().SetRelease(value);
       };
       break;
-    case InstrumentControl::kPitchShift:
+    case InstrumentControlType::kPitchShift:
       // TODO(#139): Simplify pitch shift.
       if (const double pitch_offset = value - pitch_shift_; pitch_offset != 0.0) {
         pitch_shift_ = value;
@@ -107,7 +107,7 @@ void InstrumentProcessor::SetControl(int index, double value) noexcept {
         }
       }
       break;
-    case InstrumentControl::kRetrigger:
+    case InstrumentControlType::kRetrigger:
       should_retrigger_ = static_cast<bool>(value);
       break;
     default:

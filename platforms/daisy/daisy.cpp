@@ -3,7 +3,7 @@
 #include "daisy_pod.h"
 
 using ::barely::Instrument;
-using ::barely::InstrumentControl;
+using ::barely::InstrumentControlType;
 using ::barely::InstrumentHandle;
 using ::barely::Musician;
 using ::barely::OscillatorType;
@@ -41,7 +41,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
     osc_index = (osc_index + increment + kOscCount) % kOscCount;
-    instrument.SetControl(InstrumentControl::kOscillatorType,
+    instrument.SetControl(InstrumentControlType::kOscillatorType,
                           static_cast<OscillatorType>(osc_index));
   }
 
@@ -69,11 +69,11 @@ int main(void) {
   Musician musician(kFrameRate);
 
   instrument = musician.AddInstrument();
-  instrument.SetControl(InstrumentControl::kGain, kGain);
-  instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
-  instrument.SetControl(InstrumentControl::kAttack, kAttack);
-  instrument.SetControl(InstrumentControl::kRelease, kRelease);
-  instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
+  instrument.SetControl(InstrumentControlType::kGain, kGain);
+  instrument.SetControl(InstrumentControlType::kOscillatorType, kOscillatorType);
+  instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   // Start processing.
   hw.StartAdc();

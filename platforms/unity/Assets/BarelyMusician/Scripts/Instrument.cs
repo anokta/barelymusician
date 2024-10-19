@@ -19,6 +19,32 @@ namespace Barely {
     [InspectorName("Noise")] NOISE,
   }
 
+  /// Instrument control type enum values.
+  public enum InstrumentControlType {
+    /// Gain.
+    [InspectorName("Gain")] GAIN = 0,
+    /// Number of voices.
+    [InspectorName("Voice Count")] VOICE_COUNT,
+    /// Oscillator type.
+    [InspectorName("Oscillator Type")] OSCILLATOR_TYPE,
+    /// Sample player loop.
+    [InspectorName("Sample Player Loop")] SAMPLE_PLAYER_LOOP,
+    /// Envelope attack.
+    [InspectorName("Attack")] ATTACK,
+    /// Envelope decay.
+    [InspectorName("Decay")] DECAY,
+    /// Envelope sustain.
+    [InspectorName("Sustain")] SUSTAIN,
+    /// Envelope release.
+    [InspectorName("Release")] RELEASE,
+    /// Pitch shift.
+    [InspectorName("Pitch Shift")] PITCH_SHIFT,
+    /// Retrigger.
+    [InspectorName("Retrigger")] RETRIGGER,
+    /// Number of control types.
+    [InspectorName("Count")] COUNT,
+  }
+
   /// A representation of a musical instrument that can be played in real-time.
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
@@ -144,19 +170,19 @@ namespace Barely {
 
     /// Returns a control value.
     ///
-    /// @param index Control index.
+    /// @param type Control type
     /// @return Control value.
-    public double GetControl(int index) {
-      return Musician.Internal.Instrument_GetControl(_handle, index);
+    public double GetControl(InstrumentControlType type) {
+      return Musician.Internal.Instrument_GetControl(_handle, type);
     }
 
     /// Returns a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param index Control index.
+    /// @param type Control type
     /// @return Control value.
-    public double GetNoteControl(double pitch, int index) {
-      return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, index);
+    public double GetNoteControl(double pitch, InstrumentControlType type) {
+      return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, type);
     }
 
     /// Returns whether a note is on or not.
@@ -174,19 +200,19 @@ namespace Barely {
 
     /// Sets a control value.
     ///
-    /// @param index Control index.
+    /// @param type Control type
     /// @param value Control value.
-    public void SetControl(int index, double value) {
-      Musician.Internal.Instrument_SetControl(_handle, index, value);
+    public void SetControl(InstrumentControlType type, double value) {
+      Musician.Internal.Instrument_SetControl(_handle, type, value);
     }
 
     /// Sets a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param index Note control index.
+    /// @param type Note control type.
     /// @param value Note control value.
-    public void SetNoteControl(double pitch, int index, double value) {
-      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, index, value);
+    public void SetNoteControl(double pitch, InstrumentControlType type, double value) {
+      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, type, value);
     }
 
     /// Sets a note off.
@@ -253,17 +279,16 @@ namespace Barely {
 
     private void Update() {
       UpdateSampleData();
-      int index = 0;
-      SetControl(index++, Gain);
-      SetControl(index++, (double)VoiceCount);
-      SetControl(index++, (double)OscillatorType);
-      SetControl(index++, SamplerLoop ? 1.0 : 0.0);
-      SetControl(index++, Attack);
-      SetControl(index++, Decay);
-      SetControl(index++, Sustain);
-      SetControl(index++, Release);
-      SetControl(index++, PitchShift);
-      SetControl(index++, Retrigger ? 1.0 : 0.0);
+      SetControl(InstrumentControlType.GAIN, Gain);
+      SetControl(InstrumentControlType.VOICE_COUNT, (double)VoiceCount);
+      SetControl(InstrumentControlType.OSCILLATOR_TYPE, (double)OscillatorType);
+      SetControl(InstrumentControlType.SAMPLE_PLAYER_LOOP, SamplerLoop ? 1.0 : 0.0);
+      SetControl(InstrumentControlType.ATTACK, Attack);
+      SetControl(InstrumentControlType.DECAY, Decay);
+      SetControl(InstrumentControlType.SUSTAIN, Sustain);
+      SetControl(InstrumentControlType.RELEASE, Release);
+      SetControl(InstrumentControlType.PITCH_SHIFT, PitchShift);
+      SetControl(InstrumentControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

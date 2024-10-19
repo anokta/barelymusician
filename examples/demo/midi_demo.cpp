@@ -19,7 +19,7 @@
 
 namespace {
 
-using ::barely::InstrumentControl;
+using ::barely::InstrumentControlType;
 using ::barely::InstrumentHandle;
 using ::barely::Musician;
 using ::barely::OscillatorType;
@@ -120,11 +120,11 @@ int main(int /*argc*/, char* argv[]) {
     instrument.SetNoteOffEvent([track_index](double pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
     });
-    instrument.SetControl(InstrumentControl::kGain, kInstrumentGain);
-    instrument.SetControl(InstrumentControl::kOscillatorType, kInstrumentOscillatorType);
-    instrument.SetControl(InstrumentControl::kAttack, kInstrumentEnvelopeAttack);
-    instrument.SetControl(InstrumentControl::kRelease, kInstrumentEnvelopeRelease);
-    instrument.SetControl(InstrumentControl::kVoiceCount, kInstrumentVoiceCount);
+    instrument.SetControl(InstrumentControlType::kGain, kInstrumentGain);
+    instrument.SetControl(InstrumentControlType::kOscillatorType, kInstrumentOscillatorType);
+    instrument.SetControl(InstrumentControlType::kAttack, kInstrumentEnvelopeAttack);
+    instrument.SetControl(InstrumentControlType::kRelease, kInstrumentEnvelopeRelease);
+    instrument.SetControl(InstrumentControlType::kVoiceCount, kInstrumentVoiceCount);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 

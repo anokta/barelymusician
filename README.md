@@ -37,7 +37,7 @@ musician.SetTempo(/*tempo=*/124.0);
 auto instrument = musician.AddInstrument();
 
 // Set the instrument gain to half.
-instrument.SetControl(barely::InstrumentControl::kGain, /*value=*/0.5);
+instrument.SetControl(barely::InstrumentControlType::kGain, /*value=*/0.5);
 
 // Set an instrument note on.
 //

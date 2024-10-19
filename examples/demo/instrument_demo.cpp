@@ -15,7 +15,7 @@
 
 namespace {
 
-using ::barely::InstrumentControl;
+using ::barely::InstrumentControlType;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::examples::AudioOutput;
@@ -61,11 +61,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kFrameRate);
 
   auto instrument = musician.AddInstrument();
-  instrument.SetControl(InstrumentControl::kGain, kGain);
-  instrument.SetControl(InstrumentControl::kOscillatorType, kOscillatorType);
-  instrument.SetControl(InstrumentControl::kAttack, kAttack);
-  instrument.SetControl(InstrumentControl::kRelease, kRelease);
-  instrument.SetControl(InstrumentControl::kVoiceCount, kVoiceCount);
+  instrument.SetControl(InstrumentControlType::kGain, kGain);
+  instrument.SetControl(InstrumentControlType::kOscillatorType, kOscillatorType);
+  instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";

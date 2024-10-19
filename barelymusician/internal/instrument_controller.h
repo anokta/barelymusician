@@ -1,14 +1,13 @@
 #ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
 #define BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
 
+#include <array>
+#include <cassert>
 #include <cstdint>
-#include <memory>
-#include <optional>
+#include <limits>
 #include <unordered_map>
-#include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/control.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/instrument_processor.h"
 #include "barelymusician/internal/message_queue.h"
@@ -38,18 +37,17 @@ class InstrumentController {
 
   /// Returns a control value.
   ///
-  /// @param index Control index.
-  /// @return Pointer to control value, or nullptr if not found.
-  [[nodiscard]] const double* GetControl(int index) const noexcept;
-  [[nodiscard]] bool SetControl(int index, double value) noexcept;
+  /// @param type Control type.
+  /// @return Control value.
+  [[nodiscard]] double GetControl(InstrumentControlType type) const noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param index Note control index.
-  /// @return Pointer to note control value, or nullptr if not found.
-  [[nodiscard]] const double* GetNoteControl(double pitch, int index) const noexcept;
-  [[nodiscard]] bool SetNoteControl(double pitch, int index, double value) noexcept;
+  /// @param type Note control type.
+  /// @return Note control value.
+  [[nodiscard]] const double* GetNoteControl(double pitch,
+                                             InstrumentControlType type) const noexcept;
 
   /// Returns frame rate.
   ///
@@ -77,10 +75,18 @@ class InstrumentController {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetAllNotesOff() noexcept;
 
-  /// Sets the sample data.
+  /// Sets a control value.
   ///
-  /// @param sample_data Sample data.
-  void SetSampleData(SampleData sample_data) noexcept;
+  /// @param type Control type.
+  /// @param value Control value.
+  void SetControl(InstrumentControlType type, double value) noexcept;
+
+  /// Sets a note control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param type Note control type.
+  /// @param value Note control value.
+  void SetNoteControl(double pitch, InstrumentControlType type, double value) noexcept;
 
   /// Sets a note off.
   ///
@@ -106,6 +112,11 @@ class InstrumentController {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
 
+  /// Sets the sample data.
+  ///
+  /// @param sample_data Sample data.
+  void SetSampleData(SampleData sample_data) noexcept;
+
   /// Updates the instrument.
   ///
   /// @param update_frame Update frame.
@@ -118,17 +129,64 @@ class InstrumentController {
   // Note on event alias.
   using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
 
+  // Control.
+  struct Control {
+    /// Constructs a new `Control`.
+    ///
+    /// @param default_value Default value.
+    /// @param min_value Minimum value.
+    /// @param max_value Maximum value.
+    template <typename ValueType>
+    constexpr Control(ValueType default_value,
+                      ValueType min_value = std::numeric_limits<ValueType>::lowest(),
+                      ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
+        : value(static_cast<double>(default_value)),
+          min_value(static_cast<double>(min_value)),
+          max_value(static_cast<double>(max_value)) {
+      static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                    "ValueType is not supported");
+      assert(default_value >= min_value && default_value <= max_value);
+    }
+
+    bool SetValue(double new_value) noexcept {
+      new_value = std::min(std::max(new_value, min_value), max_value);
+      if (value != new_value) {
+        value = new_value;
+        return value != new_value;
+      }
+      return false;
+    }
+
+    // Value.
+    double value = 0.0;
+
+    // Minimum value.
+    double min_value = std::numeric_limits<double>::lowest();
+
+    // Maximum value.
+    double max_value = std::numeric_limits<double>::max();
+  };
+
   // Frame rate in hertz.
   const int frame_rate_ = 0;
 
-  // Array of note control definitions.
-  const std::vector<ControlDefinition> note_control_definitions_;
-
   // Array of controls.
-  std::vector<Control> controls_;
+  std::array<Control, static_cast<int>(InstrumentControlType::kCount)> controls_ = {
+      Control(1.0, 0.0, 1.0),                            // InstrumentControlType::kGain
+      Control(8, 1, 32),                                 // InstrumentControlType::kVoiceCount
+      {0, 0, static_cast<int>(OscillatorType::kCount)},  // InstrumentControlType::kOscillatorType
+      Control(false),                                    // InstrumentControlType::kSamplePlayerLoop
+      Control(0.05, 0.0, 60.0),                          // InstrumentControlType::kAttack
+      Control(0.0, 0.0, 60.0),                           // InstrumentControlType::kDecay
+      Control(1.0, 0.0, 1.0),                            // InstrumentControlType::kSustain
+      Control(0.25, 0.0, 60.0),                          // InstrumentControlType::kRelease
+      Control(0.0),                                      // InstrumentControlType::kPitchShift
+      Control(false),                                    // InstrumentControlType::kRetrigger
+  };
 
   // Array of note control arrays by their pitches.
-  std::unordered_map<double, std::vector<Control>> note_controls_;
+  // TODO(#139): Implement note controls.
+  std::unordered_map<double, std::array<Control, 0>> note_controls_;
 
   // Note off event.
   NoteOffEvent note_off_event_;

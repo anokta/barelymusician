@@ -6,14 +6,15 @@
 #include <variant>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/sample_data.h"
 
 namespace barely {
 
 /// Control message.
 struct ControlMessage {
-  /// Index.
-  int index;
+  /// Type.
+  InstrumentControlType type;
 
   /// Value.
   double value;
@@ -24,8 +25,8 @@ struct NoteControlMessage {
   /// Pitch.
   double pitch;
 
-  /// Index.
-  int index;
+  /// Type.
+  InstrumentControlType type;
 
   /// Value.
   double value;

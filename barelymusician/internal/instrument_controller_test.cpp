@@ -7,38 +7,38 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/control.h"
 #include "barelymusician/internal/sample_data.h"
-#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
-
-using ::testing::IsNull;
-using ::testing::Pointee;
-using ::testing::Property;
 
 constexpr int kFrameRate = 4;
 constexpr int kChannelCount = 1;
 constexpr double kReferenceFrequency = 1.0;
 constexpr std::array<double, kFrameRate> kSamples = {1.0, 2.0, 3.0, 4.0};
 
-// Tests that the instrument returns a control value as expected.
-TEST(InstrumentControllerTest, GetControl) {
-  ASSERT_EQ(static_cast<int>(InstrumentControl::kGain), 0);
-
+// Tests that the instrument sets a control value as expected.
+TEST(InstrumentControllerTest, SetControl) {
   InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
-  EXPECT_THAT(instrument.GetControl(0), Pointee(1.0));
+  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 1.0);
 
-  EXPECT_TRUE(instrument.SetControl(0, 0.25));
-  EXPECT_THAT(instrument.GetControl(0), Pointee(0.25));
+  instrument.SetControl(InstrumentControlType::kGain, 0.25);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 0.25);
 
-  EXPECT_TRUE(instrument.SetControl(0, -2.0));
-  EXPECT_THAT(instrument.GetControl(0), Pointee(0.0));
+  // Verify that the control value is clamped at the minimum value.
+  instrument.SetControl(InstrumentControlType::kGain, -2.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 0.0);
 
-  // Control does not exist.
-  EXPECT_THAT(instrument.GetControl(-1), IsNull());
+  instrument.SetControl(InstrumentControlType::kGain, 0.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 0.0);
+
+  // Verify that the control value is clamped at the maximum value.
+  instrument.SetControl(InstrumentControlType::kGain, 5.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 1.0);
+
+  instrument.SetControl(InstrumentControlType::kGain, 1.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 1.0);
 }
 
 // Tests that the instrument plays a single note as expected.

@@ -15,7 +15,6 @@ bool SamplePlayer::IsActive() const noexcept { return data_ != nullptr && cursor
 double SamplePlayer::Next() noexcept {
   if (!IsActive()) {
     // Nothing to play, skip processing.
-    // TODO(#139): Is it worth incrementing the cursor to keep the voice in sync.
     return 0.0;
   }
   // TODO(#7): Add a better interpolation method here?

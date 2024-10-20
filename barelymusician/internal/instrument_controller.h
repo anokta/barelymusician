@@ -113,6 +113,11 @@ class InstrumentController {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
 
+  /// Sets the reference frequency.
+  ///
+  /// @param reference_frequency Reference frequency in hertz.
+  void SetReferenceFrequency(double reference_frequency) noexcept;
+
   /// Sets the sample data.
   ///
   /// @param sample_data Sample data.

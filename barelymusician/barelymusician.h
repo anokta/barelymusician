@@ -15,7 +15,7 @@
 ///   #include "barelymusician/barelymusician.h"
 ///
 ///   // Create.
-///   barely::Musician musician(/*frame_rate=*/48000, /*reference_frequency=/440.0);
+///   barely::Musician musician(/*frame_rate=*/48000);
 ///
 ///   // Set the tempo.
 ///   musician.SetTempo(/*tempo=*/124.0);
@@ -71,7 +71,7 @@
 ///   auto performer = musician.AddPerformer(/*process_order=*/0);
 ///
 ///   // Add a task.
-///   barely::Task task(performer, []() { /*populate this*/ }, /*position=*/0.0);
+///   auto task = performer.AddTask([]() { /*populate this*/ }, /*position=*/0.0);
 ///
 ///   // Set looping on.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -94,7 +94,7 @@
 ///
 ///   // Create.
 ///   BarelyMusicianHandle musician = nullptr;
-///   BarelyMusician_Create(/*frame_rate=*/48000, /*reference_frequency=/440.0, &musician);
+///   BarelyMusician_Create(/*frame_rate=*/48000, &musician);
 ///
 ///   // Set the tempo.
 ///   BarelyMusician_SetTempo(musician, /*tempo=*/124.0);
@@ -514,11 +514,9 @@ BARELY_EXPORT bool BarelyMusician_AddPerformer(BarelyMusicianHandle musician, in
 /// Creates a new musician.
 ///
 /// @param frame_rate Frame rate in hertz.
-/// @param reference_frequency Reference frequency in hertz.
 /// @param out_musician Output musician handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Create(int32_t frame_rate, double reference_frequency,
-                                         BarelyMusicianHandle* out_musician);
+BARELY_EXPORT bool BarelyMusician_Create(int32_t frame_rate, BarelyMusicianHandle* out_musician);
 
 /// Destroys a musician.
 ///
@@ -535,6 +533,14 @@ BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_GetBeatsFromSeconds(BarelyMusicianHandle musician, double seconds,
                                                       double* out_beats);
+
+/// Gets the reference frequency of a musician.
+///
+/// @param musician Musician handle.
+/// @param out_reference_frequency Output reference frequency in hertz.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_GetReferenceFrequency(BarelyMusicianHandle musician,
+                                                        double* out_reference_frequency);
 
 /// Gets the corresponding number of seconds for a given number of musician
 /// beats.
@@ -576,6 +582,14 @@ BARELY_EXPORT bool BarelyMusician_RemoveInstrument(BarelyMusicianHandle musician
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_RemovePerformer(BarelyMusicianHandle musician,
                                                   BarelyPerformerHandle performer);
+
+/// Sets the reference frequency of a musician.
+///
+/// @param musician Musician handle.
+/// @param reference_frequency Reference frequency in hertz.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_SetReferenceFrequency(BarelyMusicianHandle musician,
+                                                        double reference_frequency);
 
 /// Sets the tempo of a musician.
 ///
@@ -1448,14 +1462,10 @@ class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
   /// Creates a new `MusicianHandle`.
   ///
   /// @param frame_rate Frame rate in hertz.
-  /// @param reference_frequency Reference frequency in hertz.
   /// @return Musician handle.
-  // TODO(#139): Move the C4 constant somewhere else - likely back to internal with a setter here.
-  [[nodiscard]] static MusicianHandle Create(int frame_rate,
-                                             double reference_frequency = 261.625565301) noexcept {
+  [[nodiscard]] static MusicianHandle Create(int frame_rate) noexcept {
     BarelyMusicianHandle musician = nullptr;
-    [[maybe_unused]] const bool success =
-        BarelyMusician_Create(frame_rate, reference_frequency, &musician);
+    [[maybe_unused]] const bool success = BarelyMusician_Create(frame_rate, &musician);
     assert(success);
     return MusicianHandle(musician);
   }
@@ -1553,6 +1563,15 @@ class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
   /// @param instrument Instrument handle.
   void RemovePerformer(PerformerHandle performer) noexcept {
     [[maybe_unused]] const bool success = BarelyMusician_RemovePerformer(*this, performer);
+    assert(success);
+  }
+
+  /// Sets the reference frequency.
+  ///
+  /// @param reference_frequency Reference frequency in hertz.
+  void SetReferenceFrequency(double reference_frequency) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyMusician_SetReferenceFrequency(*this, reference_frequency);
     assert(success);
   }
 

@@ -18,7 +18,6 @@ using ::testing::Optional;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kFrameRate = 48000;
-constexpr double kReferenceFrequency = 440.0;
 
 // Tests that the musician converts between beats and seconds as expected.
 TEST(MusicianTest, BeatsSecondsConversion) {
@@ -28,7 +27,7 @@ TEST(MusicianTest, BeatsSecondsConversion) {
   constexpr std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0, -24.6};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0, -12.3};
 
-  Musician musician(kFrameRate, kReferenceFrequency);
+  Musician musician(kFrameRate);
   musician.SetTempo(kTempo);
 
   for (int i = 0; i < kValueCount; ++i) {
@@ -48,7 +47,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr double kPitch = 0.5;
   constexpr double kIntensity = 0.75;
 
-  Musician musician(kFrameRate, kReferenceFrequency);
+  Musician musician(kFrameRate);
 
   // Create an instrument.
   InstrumentController* instrument = musician.AddInstrument();
@@ -89,7 +88,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   std::vector<double> note_off_pitches;
 
   {
-    Musician musician(kFrameRate, kReferenceFrequency);
+    Musician musician(kFrameRate);
 
     // Create instruments with note off callback.
     std::vector<InstrumentController*> instruments;
@@ -122,7 +121,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySinglePerformer) {
-  Musician musician(kFrameRate, kReferenceFrequency);
+  Musician musician(kFrameRate);
 
   // Create a performer.
   Performer* performer = musician.AddPerformer(/*process_order=*/0);
@@ -167,7 +166,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
 
 // Tests that the musician sets its tempo as expected.
 TEST(MusicianTest, SetTempo) {
-  Musician musician(kFrameRate, kReferenceFrequency);
+  Musician musician(kFrameRate);
   EXPECT_DOUBLE_EQ(musician.GetTempo(), 120.0);
 
   musician.SetTempo(200.0);

@@ -51,6 +51,11 @@ class InstrumentProcessor {
   /// @param intensity Note intensity.
   void SetNoteOn(double pitch, double intensity) noexcept;
 
+  /// Sets the reference frequency.
+  ///
+  /// @param reference_frequency Reference frequency in hertz.
+  void SetReferenceFrequency(double reference_frequency) noexcept;
+
   /// Sets the sample data.
   ///
   /// @param sample_data Sample data.

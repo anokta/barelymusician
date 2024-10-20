@@ -7,6 +7,18 @@ using UnityEngine;
 namespace Barely {
   /// A representation of a musician that governs the tempo for all musical components.
   public static class Musician {
+    /// Reference frequency in hertz (C4 by default).
+    public static double ReferenceFrequency {
+      get { return _referenceFrequency; }
+      set {
+        if (_referenceFrequency != value) {
+          Internal.Musician_SetReferenceFrequency(value);
+          _referenceFrequency = Internal.Musician_GetReferenceFrequency();
+        }
+      }
+    }
+    private static double _referenceFrequency = 440.0 * Math.Pow(2.0, -9.0 / 12.0);
+
     /// Tempo in beats per minute.
     public static double Tempo {
       get { return _tempo; }
@@ -292,19 +304,6 @@ namespace Barely {
         }
       }
 
-      /// Returns the corresponding number of seconds for a given number of musician beats.
-      ///
-      /// @param frames Number of beats.
-      /// @return Number of seconds.
-      public static double Musician_GetSecondsFromBeats(double beats) {
-        double seconds = 0.0;
-        if (!BarelyMusician_GetSecondsFromBeats(Handle, beats, ref seconds) &&
-            _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get seconds for " + beats + " musician beats");
-        }
-        return seconds;
-      }
-
       /// Returns the corresponding number of musician beats for a given number of seconds.
       ///
       /// @param frames Number of seconds.
@@ -316,6 +315,31 @@ namespace Barely {
           Debug.LogError("Failed to get musician beats for " + seconds + " seconds");
         }
         return beats;
+      }
+
+      /// Returns the reference frequency of a musician.
+      ///
+      /// @return Reference frequency in hertz.
+      public static double Musician_GetReferenceFrequency() {
+        double referenceFrequency = 0.0;
+        if (!BarelyMusician_GetReferenceFrequency(Handle, ref referenceFrequency) &&
+            _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician reference frequency");
+        }
+        return referenceFrequency;
+      }
+
+      /// Returns the corresponding number of seconds for a given number of musician beats.
+      ///
+      /// @param frames Number of beats.
+      /// @return Number of seconds.
+      public static double Musician_GetSecondsFromBeats(double beats) {
+        double seconds = 0.0;
+        if (!BarelyMusician_GetSecondsFromBeats(Handle, beats, ref seconds) &&
+            _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get seconds for " + beats + " musician beats");
+        }
+        return seconds;
       }
 
       /// Returns the tempo of a musician.
@@ -356,6 +380,16 @@ namespace Barely {
           _scheduledTaskCallbacks.Add(timestamp, callbacks);
         }
         callbacks?.Add(callback);
+      }
+
+      /// Sets the reference frequency of a musician.
+      ///
+      /// @param referenceFrequency Reference frequency in hertz.
+      public static void Musician_SetReferenceFrequency(double referenceFrequency) {
+        if (!BarelyMusician_SetReferenceFrequency(Handle, referenceFrequency) &&
+            _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set musician reference frequency");
+        }
       }
 
       /// Sets the tempo of a musician.
@@ -1021,10 +1055,11 @@ namespace Barely {
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          if (!BarelyMusician_Create(config.sampleRate, /*C4=*/261.625565301, ref _handle)) {
+          if (!BarelyMusician_Create(config.sampleRate, ref _handle)) {
             Debug.LogError("Failed to initialize BarelyMusician");
             return;
           }
+          BarelyMusician_SetReferenceFrequency(_handle, _referenceFrequency);
           BarelyMusician_SetTempo(_handle, _tempo);
           OutputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
           _latency = (double)config.dspBufferSize / config.sampleRate;
@@ -1114,8 +1149,7 @@ namespace Barely {
                                                              ref IntPtr outPerformer);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
-      private static extern bool BarelyMusician_Create(Int32 frameRate, double referenceFrequency,
-                                                       ref IntPtr outMusician);
+      private static extern bool BarelyMusician_Create(Int32 frameRate, ref IntPtr outMusician);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern bool BarelyMusician_Destroy(IntPtr musician);
@@ -1123,6 +1157,10 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetBeatsFromSeconds")]
       private static extern bool BarelyMusician_GetBeatsFromSeconds(IntPtr musician, double seconds,
                                                                     ref double outBeats);
+
+      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetReferenceFrequency")]
+      private static extern bool BarelyMusician_GetReferenceFrequency(
+          IntPtr musician, ref double outReferenceFrequency);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetSecondsFromBeats")]
       private static extern bool BarelyMusician_GetSecondsFromBeats(IntPtr musician, double beats,
@@ -1141,6 +1179,10 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_RemovePerformer")]
       private static extern bool BarelyMusician_RemovePerformer(IntPtr musician, IntPtr performer);
+
+      [DllImport(pluginName, EntryPoint = "BarelyMusician_SetReferenceFrequency")]
+      private static extern bool BarelyMusician_SetReferenceFrequency(IntPtr musician,
+                                                                      double referenceFrequency);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_SetTempo")]
       private static extern bool BarelyMusician_SetTempo(IntPtr musician, double tempo);

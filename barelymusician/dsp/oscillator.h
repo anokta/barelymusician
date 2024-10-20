@@ -31,11 +31,6 @@ class Oscillator {
   /// @param frame_rate Frame rate in hertz.
   explicit Oscillator(int frame_rate) noexcept;
 
-  /// Returns the frequency of the oscillator.
-  ///
-  /// @return Frequency in hertz.
-  [[nodiscard]] double GetFrequency() const noexcept;
-
   /// Generates the next output sample.
   ///
   /// @return Next output sample.

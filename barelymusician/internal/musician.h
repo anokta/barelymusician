@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 #define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
+#include <cmath>
 #include <map>
 #include <memory>
 #include <unordered_map>
@@ -17,9 +18,8 @@ class Musician {
   /// Constructs a new `Musician`.
   ///
   /// @param frame_rate Frame rate in hertz.
-  /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Musician(int frame_rate, double reference_frequency) noexcept;
+  explicit Musician(int frame_rate) noexcept;
 
   /// Adds an instrument.
   ///
@@ -79,6 +79,11 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void RemovePerformer(Performer* performer) noexcept;
 
+  /// Sets the reference frequency.
+  ///
+  /// @param reference_frequency Reference frequency in hertz.
+  void SetReferenceFrequency(double reference_frequency) noexcept;
+
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
@@ -101,8 +106,8 @@ class Musician {
   // Frame rate in hertz.
   const int frame_rate_ = 0;
 
-  // Reference frequency at zero pitch.
-  const double reference_frequency_ = 0.0f;
+  // Reference frequency at zero pitch (C4 by default).
+  double reference_frequency_ = 440.0 * std::pow(2.0, -9.0 / 12.0);
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

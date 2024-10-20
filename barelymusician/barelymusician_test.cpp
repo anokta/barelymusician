@@ -7,18 +7,18 @@ namespace {
 
 TEST(BarelyMusicianTest, CreateDestroyMusician) {
   // Failures.
-  EXPECT_FALSE(BarelyMusician_Create(0, 0.0, nullptr));
+  EXPECT_FALSE(BarelyMusician_Create(0, nullptr));
   EXPECT_FALSE(BarelyMusician_Destroy(nullptr));
 
   // Success.
   BarelyMusicianHandle musician = nullptr;
-  EXPECT_TRUE(BarelyMusician_Create(1, 440.0, &musician));
+  EXPECT_TRUE(BarelyMusician_Create(1, &musician));
   EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
 TEST(BarelyMusicianTest, CreateDestroyInstrument) {
   BarelyMusicianHandle musician = nullptr;
-  ASSERT_TRUE(BarelyMusician_Create(1, 440.0, &musician));
+  ASSERT_TRUE(BarelyMusician_Create(1, &musician));
 
   // Failures.
   EXPECT_FALSE(BarelyMusician_AddInstrument(musician, nullptr));
@@ -35,7 +35,7 @@ TEST(BarelyMusicianTest, CreateDestroyInstrument) {
 
 TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   BarelyMusicianHandle musician = nullptr;
-  ASSERT_TRUE(BarelyMusician_Create(1, 440.0, &musician));
+  ASSERT_TRUE(BarelyMusician_Create(1, &musician));
 
   // Failures.
   EXPECT_FALSE(BarelyMusician_AddPerformer(musician, 0, nullptr));
@@ -50,16 +50,16 @@ TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
-TEST(MusicianTest, CreateDestroyMusician) { [[maybe_unused]] const Musician musician(1, 440.0); }
+TEST(MusicianTest, CreateDestroyMusician) { [[maybe_unused]] const Musician musician(1); }
 
 TEST(MusicianTest, CreateDestroyInstrument) {
-  Musician musician(1, 440.0);
+  Musician musician(1);
   auto instrument = musician.AddInstrument();
   musician.RemoveInstrument(instrument);
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {
-  Musician musician(1, 440.0);
+  Musician musician(1);
   auto performer = musician.AddPerformer();
   musician.RemovePerformer(performer);
 }

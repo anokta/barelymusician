@@ -19,8 +19,7 @@ using ::barely::internal::Task;
 // Musician.
 struct BarelyMusician : public Musician {
  public:
-  BarelyMusician(int32_t frame_rate, double reference_frequency) noexcept
-      : Musician(frame_rate, reference_frequency) {}
+  explicit BarelyMusician(int32_t frame_rate) noexcept : Musician(frame_rate) {}
   ~BarelyMusician() = default;
 
   // Non-copyable and non-movable.
@@ -167,12 +166,11 @@ bool BarelyMusician_AddPerformer(BarelyMusicianHandle musician, int32_t process_
   return true;
 }
 
-bool BarelyMusician_Create(int32_t frame_rate, double reference_frequency,
-                           BarelyMusicianHandle* out_musician) {
+bool BarelyMusician_Create(int32_t frame_rate, BarelyMusicianHandle* out_musician) {
   if (frame_rate <= 0) return false;
   if (!out_musician) return false;
 
-  *out_musician = new BarelyMusician(frame_rate, reference_frequency);
+  *out_musician = new BarelyMusician(frame_rate);
   return true;
 }
 
@@ -198,6 +196,15 @@ bool BarelyMusician_GetSecondsFromBeats(BarelyMusicianHandle musician, double be
   if (!out_seconds) return false;
 
   *out_seconds = musician->GetSecondsFromBeats(beats);
+  return true;
+}
+
+bool BarelyMusician_GetReferenceFrequency(BarelyMusicianHandle musician,
+                                          double* out_reference_frequency) {
+  if (!musician) return false;
+  if (!out_reference_frequency) return false;
+
+  *out_reference_frequency = musician->GetReferenceFrequency();
   return true;
 }
 
@@ -230,6 +237,14 @@ bool BarelyMusician_RemovePerformer(BarelyMusicianHandle musician,
   if (!performer) return false;
 
   musician->RemovePerformer(performer);
+  return true;
+}
+
+bool BarelyMusician_SetReferenceFrequency(BarelyMusicianHandle musician,
+                                          double reference_frequency) {
+  if (!musician) return false;
+
+  musician->SetReferenceFrequency(reference_frequency);
   return true;
 }
 

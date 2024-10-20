@@ -23,8 +23,7 @@ constexpr double kSecondsFromMinutes = 60.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Musician::Musician(int frame_rate, double reference_frequency) noexcept
-    : frame_rate_(frame_rate), reference_frequency_(reference_frequency) {}
+Musician::Musician(int frame_rate) noexcept : frame_rate_(frame_rate) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentController* Musician::AddInstrument() noexcept {
@@ -80,6 +79,16 @@ double Musician::GetSecondsFromBeats(double beats) const noexcept {
 double Musician::GetTempo() const noexcept { return tempo_; }
 
 double Musician::GetTimestamp() const noexcept { return timestamp_; }
+
+void Musician::SetReferenceFrequency(double reference_frequency) noexcept {
+  reference_frequency = std::max(reference_frequency, 0.0);
+  if (reference_frequency_ != reference_frequency) {
+    reference_frequency_ = reference_frequency;
+    for (auto& [instrument, _] : instruments_) {
+      instrument->SetReferenceFrequency(reference_frequency_);
+    }
+  }
+}
 
 void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 

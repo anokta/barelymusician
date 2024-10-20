@@ -168,6 +168,18 @@ void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
   voice.Start();
 }
 
+void InstrumentProcessor::SetReferenceFrequency(double reference_frequency) noexcept {
+  assert(reference_frequency_ != reference_frequency);
+  reference_frequency_ = reference_frequency;
+  for (int i = 0; i < voice_count_; ++i) {
+    if (auto& voice = voice_states_[i].voice; voice.IsActive()) {
+      const double shifted_pitch =
+          voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
+      voice.oscillator().SetFrequency(FrequencyFromPitch(shifted_pitch, reference_frequency_));
+    }
+  }
+}
+
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   sample_data_.Swap(sample_data);
   for (int i = 0; i < voice_count_; ++i) {

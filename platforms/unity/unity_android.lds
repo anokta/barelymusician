@@ -17,11 +17,13 @@ VERS_1.0 {
     BarelyMusician_Create;
     BarelyMusician_Destroy;
     BarelyMusician_GetBeatsFromSeconds;
+    BarelyMusician_GetReferenceFrequency;
     BarelyMusician_GetSecondsFromBeats;
     BarelyMusician_GetTempo;
     BarelyMusician_GetTimestamp;
     BarelyMusician_RemoveInstrument;
     BarelyMusician_RemovePerformer;
+    BarelyMusician_SetReferenceFrequency;
     BarelyMusician_SetTempo;
     BarelyMusician_Update;
     BarelyPerformer_AddTask;

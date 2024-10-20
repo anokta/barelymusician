@@ -28,7 +28,7 @@ For background about this project, see the original research paper
 #include "barelymusician/barelymusician.h"
 
 // Create the musician.
-barely::Musician musician(/*frame_rate=*/48000, /*reference_frequency=*/440.0);
+barely::Musician musician(/*frame_rate=*/48000);
 
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);
@@ -43,11 +43,11 @@ instrument.SetControl(barely::ControlType::kGain, /*value=*/0.5);
 //
 // Note pitch is centered around the reference frequency, and measured in octaves. Fractional values
 // adjust the frequency logarithmically to maintain perceived pitch intervals in each octave.
-const double a3_pitch = -1.0;
-instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
+const double c3_pitch = -1.0;
+instrument.SetNoteOn(c3_pitch, /*intensity=*/0.25);
 
 // Check if the instrument note is on.
-const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
+const bool is_note_on = instrument.IsNoteOn(c3_pitch);  // will return true.
 
 // Add a performer.
 auto performer = musician.AddPerformer();

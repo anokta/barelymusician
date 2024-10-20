@@ -25,11 +25,6 @@ class SamplePlayer {
   /// @param frame_rate Frame rate in hertz.
   explicit SamplePlayer(int frame_rate) noexcept;
 
-  /// Returns the playback speed.
-  ///
-  /// @return Playback speed.
-  [[nodiscard]] double GetSpeed() const noexcept;
-
   /// Returns whether the voice is currently active (i.e., playing).
   ///
   /// @return True if active.

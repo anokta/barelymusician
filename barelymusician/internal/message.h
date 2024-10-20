@@ -47,6 +47,12 @@ struct NoteOnMessage {
   double intensity;
 };
 
+/// Reference frequency message.
+struct ReferenceFrequencyMessage {
+  /// Reference frequency.
+  double reference_frequency;
+};
+
 /// Sample data message.
 struct SampleDataMessage {
   /// Sample data.
@@ -55,7 +61,7 @@ struct SampleDataMessage {
 
 /// Message alias.
 using Message = std::variant<ControlMessage, NoteControlMessage, NoteOffMessage, NoteOnMessage,
-                             SampleDataMessage>;
+                             ReferenceFrequencyMessage, SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

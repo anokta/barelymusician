@@ -64,9 +64,10 @@ class InstrumentProcessor {
   struct VoiceState {
     Voice voice;
     double pitch = 0.0;
+    double root_pitch = 0.0;
     int timestamp = 0;
   };
-  Voice& AcquireVoice(double pitch) noexcept;
+  VoiceState& AcquireVoice(double pitch) noexcept;
   std::vector<VoiceState> voice_states_;
   int voice_count_ = 0;
 

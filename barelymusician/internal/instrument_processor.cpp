@@ -95,15 +95,13 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, double value) n
       };
       break;
     case InstrumentControlType::kPitchShift:
-      // TODO(#139): Simplify pitch shift.
-      if (const double pitch_offset = value - pitch_shift_; pitch_offset != 0.0) {
-        pitch_shift_ = value;
-        const double frequency_ratio = FrequencyRatioFromPitch(pitch_offset);
-        for (int i = 0; i < voice_count_; ++i) {
-          if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
-            voice.oscillator().SetFrequency(voice.oscillator().GetFrequency() * frequency_ratio);
-            voice.sample_player().SetSpeed(voice.sample_player().GetSpeed() * frequency_ratio);
-          }
+      pitch_shift_ = value;
+      for (int i = 0; i < voice_count_; ++i) {
+        if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
+          const double shifted_pitch = voice_states_[i].pitch + pitch_shift_;
+          voice.oscillator().SetFrequency(FrequencyFromPitch(shifted_pitch, reference_frequency_));
+          voice.sample_player().SetSpeed(
+              FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch));
         }
       }
       break;
@@ -129,11 +127,15 @@ void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
     // No voices available.
     return;
   }
-  Voice& voice = AcquireVoice(pitch);
+  VoiceState& voice_state = AcquireVoice(pitch);
+  voice_state.pitch = pitch;
+  voice_state.timestamp = 0;
 
+  Voice& voice = voice_state.voice;
   const double shifted_pitch = pitch + pitch_shift_;
   voice.oscillator().SetFrequency(FrequencyFromPitch(shifted_pitch, reference_frequency_));
   if (const auto* sample = sample_data_.Select(pitch); sample != nullptr) {
+    voice_state.root_pitch = sample->root_pitch;
     voice.sample_player().SetData(sample->samples, sample->sample_rate, sample->sample_count);
     voice.sample_player().SetSpeed(FrequencyRatioFromPitch(shifted_pitch - sample->root_pitch));
   }
@@ -148,6 +150,7 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
       voice.sample_player().SetData(nullptr, 0, 0);
     } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch);
                sample != nullptr) {
+      voice_states_[i].root_pitch = sample->root_pitch;
       voice.sample_player().SetData(sample->samples, sample->sample_rate, sample->sample_count);
       voice.sample_player().SetSpeed(
           FrequencyRatioFromPitch(voice_states_[i].pitch + pitch_shift_ - sample->root_pitch));
@@ -155,7 +158,7 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   }
 }
 
-Voice& InstrumentProcessor::AcquireVoice(double pitch) noexcept {
+InstrumentProcessor::VoiceState& InstrumentProcessor::AcquireVoice(double pitch) noexcept {
   int voice_index = -1;
   int oldest_voice_index = 0;
   for (int i = 0; i < voice_count_; ++i) {
@@ -179,10 +182,7 @@ Voice& InstrumentProcessor::AcquireVoice(double pitch) noexcept {
     // If no voices are available to acquire, steal the oldest active voice.
     voice_index = oldest_voice_index;
   }
-  VoiceState& voice_state = voice_states_[voice_index];
-  voice_state.pitch = pitch;
-  voice_state.timestamp = 0;
-  return voice_state.voice;
+  return voice_states_[voice_index];
 }
 
 }  // namespace barely

@@ -20,6 +20,7 @@ target_link_libraries(
   barelymusician_envelope
   barelymusician_oscillator
   barelymusician_sample_player
+  barelymusician_headeronly
 )
 
 add_library(
@@ -41,6 +42,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_oscillator
+  barelymusician_headeronly
   barelymusician_random
 )
 

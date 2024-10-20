@@ -3,20 +3,6 @@
 
 namespace barely {
 
-/// Sample playback mode.
-enum class SamplePlaybackMode {
-  /// None.
-  kNone = 0,
-  /// Once.
-  kOnce,
-  /// Sustain.
-  kSustain,
-  /// Loop.
-  kLoop,
-  /// Count.
-  kCount,
-};
-
 /// Sample player that generates output samples from the provided mono data.
 class SamplePlayer {
  public:

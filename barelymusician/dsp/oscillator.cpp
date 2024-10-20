@@ -4,6 +4,8 @@
 #include <cmath>
 #include <numbers>
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
 Oscillator::Oscillator(int frame_rate) noexcept
@@ -13,19 +15,19 @@ Oscillator::Oscillator(int frame_rate) noexcept
 double Oscillator::Next() noexcept {
   double output = 0.0;
   // Generate the next sample.
-  switch (type_) {
-    case OscillatorType::kNone:
+  switch (shape_) {
+    case OscillatorShape::kNone:
       break;
-    case OscillatorType::kSine:
+    case OscillatorShape::kSine:
       output = std::sin(phase_ * 2.0 * std::numbers::pi_v<double>);
       break;
-    case OscillatorType::kSaw:
+    case OscillatorShape::kSaw:
       output = 2.0 * phase_ - 1.0;
       break;
-    case OscillatorType::kSquare:
+    case OscillatorShape::kSquare:
       output = (phase_ < 0.5) ? -1.0 : 1.0;
       break;
-    case OscillatorType::kNoise:
+    case OscillatorShape::kNoise:
       output = random_.DrawUniform(-1.0, 1.0);
       break;
     default:
@@ -46,6 +48,6 @@ void Oscillator::SetFrequency(double frequency) noexcept {
   increment_ = frequency_ * frame_interval_;
 }
 
-void Oscillator::SetType(OscillatorType type) noexcept { type_ = type; }
+void Oscillator::SetShape(OscillatorShape shape) noexcept { shape_ = shape; }
 
 }  // namespace barely

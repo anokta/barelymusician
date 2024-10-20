@@ -182,7 +182,7 @@ class InstrumentController {
   ControlArray controls_ = {
       Control(1.0, 0.0, 1.0),                                // kGain
       Control(8, 1, 32),                                     // kVoiceCount
-      {0, 0, static_cast<int>(OscillatorType::kCount)},      // kOscillatorType
+      {0, 0, static_cast<int>(OscillatorShape::kCount)},     // kOscillatorShape
       {0, 0, static_cast<int>(SamplePlaybackMode::kCount)},  // kSamplePlaybackMode
       Control(0.05, 0.0, 60.0),                              // kAttack
       Control(0.0, 0.0, 60.0),                               // kDecay

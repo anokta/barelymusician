@@ -10,7 +10,6 @@
 #include "MidiEventList.h"
 #include "MidiFile.h"
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/dsp/oscillator.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -22,7 +21,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::InstrumentHandle;
 using ::barely::Musician;
-using ::barely::OscillatorType;
+using ::barely::OscillatorShape;
 using ::barely::PerformerHandle;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -39,7 +38,7 @@ constexpr int kFrameCount = 512;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
+constexpr OscillatorShape kInstrumentOscillatorShape = OscillatorShape::kSquare;
 constexpr double kInstrumentEnvelopeAttack = 0.0;
 constexpr double kInstrumentEnvelopeRelease = 0.2;
 constexpr int kInstrumentVoiceCount = 16;
@@ -121,7 +120,7 @@ int main(int /*argc*/, char* argv[]) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
     });
     instrument.SetControl(ControlType::kGain, kInstrumentGain);
-    instrument.SetControl(ControlType::kOscillatorType, kInstrumentOscillatorType);
+    instrument.SetControl(ControlType::kOscillatorShape, kInstrumentOscillatorShape);
     instrument.SetControl(ControlType::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetControl(ControlType::kRelease, kInstrumentEnvelopeRelease);
     instrument.SetControl(ControlType::kVoiceCount, kInstrumentVoiceCount);

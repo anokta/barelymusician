@@ -63,10 +63,10 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       }
       voice_count_ = voice_count;
     } break;
-    case ControlType::kOscillatorType:
+    case ControlType::kOscillatorShape:
       for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.oscillator().SetType(
-            static_cast<OscillatorType>(static_cast<int>(value)));
+        voice_states_[i].voice.oscillator().SetShape(
+            static_cast<OscillatorShape>(static_cast<int>(value)));
       };
       break;
     case ControlType::kSamplePlaybackMode:

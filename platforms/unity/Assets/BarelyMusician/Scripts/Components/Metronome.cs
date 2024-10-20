@@ -88,7 +88,7 @@ namespace Barely {
         };
         var tempGameObject = new GameObject() { hideFlags = HideFlags.HideAndDontSave };
         var instrument = tempGameObject.AddComponent<Instrument>();
-        instrument.OscillatorType = OscillatorType.SQUARE;
+        instrument.OscillatorShape = OscillatorShape.SQUARE;
         instrument.Gain = 0.25;
         instrument.Attack = 0.0;
         instrument.Release = 0.05;

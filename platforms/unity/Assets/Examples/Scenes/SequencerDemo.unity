@@ -210,9 +210,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 0.20000000298023224
   VoiceCount: 8
-  OscillatorType: 3
-  Samplers: []
+  OscillatorShape: 3
   SamplePlaybackMode: 0
+  Samplers: []
   Attack: 0.05000000074505806
   Decay: 0
   Sustain: 0.800000011920929
@@ -714,7 +714,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 1
   VoiceCount: 4
-  OscillatorType: 0
+  OscillatorShape: 0
+  SamplePlaybackMode: 1
   Samplers:
   - RootPitch: 0
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
@@ -724,7 +725,6 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
-  SamplePlaybackMode: 1
   Attack: 0
   Decay: 0
   Sustain: 1
@@ -1005,9 +1005,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 0.25
   VoiceCount: 8
-  OscillatorType: 1
-  Samplers: []
+  OscillatorShape: 1
   SamplePlaybackMode: 0
+  Samplers: []
   Attack: 0.10000000149011612
   Decay: 0
   Sustain: 1
@@ -1329,9 +1329,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 0.22499999403953552
   VoiceCount: 8
-  OscillatorType: 2
-  Samplers: []
+  OscillatorShape: 2
   SamplePlaybackMode: 0
+  Samplers: []
   Attack: 0
   Decay: 0
   Sustain: 1
@@ -1541,11 +1541,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 1
   VoiceCount: 8
-  OscillatorType: 0
+  OscillatorShape: 0
+  SamplePlaybackMode: 3
   Samplers:
   - RootPitch: 9
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  SamplePlaybackMode: 3
   Attack: 0
   Decay: 0
   Sustain: 1

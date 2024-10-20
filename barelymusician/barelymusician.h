@@ -222,8 +222,8 @@ enum BarelyControlType_Values {
   BarelyControlType_kGain = 0,
   /// Number of voices.
   BarelyControlType_kVoiceCount,
-  /// Oscillator type.
-  BarelyControlType_kOscillatorType,
+  /// Oscillator shape.
+  BarelyControlType_kOscillatorShape,
   /// Sample playback mode.
   BarelyControlType_kSamplePlaybackMode,
   /// Envelope attack.
@@ -251,6 +251,42 @@ enum BarelyNoteControlType_Values {
   BarelyNoteControlType_kPitchShift = 0,
   /// Number of note control types.
   BarelyNoteControlType_kCount,
+};
+
+/// Oscillator shape enum alias.
+typedef int32_t BarelyOscillatorShape;
+
+/// Oscillator shape enum value.
+enum BarelyOscillatorShape_Values {
+  /// None.
+  BarelyOscillatorShape_kNone = 0,
+  /// Sine wave.
+  BarelyOscillatorShape_kSine,
+  /// Sawtooth wave.
+  BarelyOscillatorShape_kSaw,
+  /// Square wave.
+  BarelyOscillatorShape_kSquare,
+  /// White noise.
+  BarelyOscillatorShape_kNoise,
+  /// Count.
+  BarelyOscillatorShape_kCount,
+};
+
+/// Sample playback mode enum alias.
+typedef int32_t BarelySamplePlaybackMode;
+
+/// Sample playback mode enum values.
+enum BarelySamplePlaybackMode_Values {
+  /// None.
+  BarelySamplePlaybackMode_kNone = 0,
+  /// Once.
+  BarelySamplePlaybackMode_kOnce,
+  /// Sustain.
+  BarelySamplePlaybackMode_kSustain,
+  /// Loop.
+  BarelySamplePlaybackMode_kLoop,
+  /// Count.
+  BarelySamplePlaybackMode_kCount,
 };
 
 /// Note off event definition create callback signature.
@@ -792,8 +828,8 @@ enum class ControlType : BarelyControlType {
   kGain = BarelyControlType_kGain,
   /// Number of voices.
   kVoiceCount = BarelyControlType_kVoiceCount,
-  /// Oscillator type.
-  kOscillatorType = BarelyControlType_kOscillatorType,
+  /// Oscillator shape.
+  kOscillatorShape = BarelyControlType_kOscillatorShape,
   /// Sample playback mode.
   kSamplePlaybackMode = BarelyControlType_kSamplePlaybackMode,
   /// Envelope attack.
@@ -818,6 +854,36 @@ enum class NoteControlType : BarelyNoteControlType {
   kPitchShift = BarelyNoteControlType_kPitchShift,
   /// Number of note control types.
   kCount = BarelyNoteControlType_kCount,
+};
+
+/// Oscillator shape enum.
+enum class OscillatorShape : BarelyOscillatorShape {
+  /// None.
+  kNone = BarelyOscillatorShape_kNone,
+  /// Sine wave.
+  kSine = BarelyOscillatorShape_kSine,
+  /// Sawtooth wave.
+  kSaw = BarelyOscillatorShape_kSaw,
+  /// Square wave.
+  kSquare = BarelyOscillatorShape_kSquare,
+  /// White noise.
+  kNoise = BarelyOscillatorShape_kNoise,
+  /// Count.
+  kCount = BarelyOscillatorShape_kCount,
+};
+
+/// Sample playback mode enum.
+enum class SamplePlaybackMode : BarelySamplePlaybackMode {
+  /// None.
+  kNone = BarelySamplePlaybackMode_kNone,
+  /// Once.
+  kOnce = BarelySamplePlaybackMode_kOnce,
+  /// Sustain.
+  kSustain = BarelySamplePlaybackMode_kSustain,
+  /// Loop.
+  kLoop = BarelySamplePlaybackMode_kLoop,
+  /// Count.
+  kCount = BarelySamplePlaybackMode_kCount,
 };
 
 /// Note off event definition.

@@ -6,7 +6,7 @@ using ::barely::ControlType;
 using ::barely::Instrument;
 using ::barely::InstrumentHandle;
 using ::barely::Musician;
-using ::barely::OscillatorType;
+using ::barely::OscillatorShape;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
 using ::daisy::MidiMessageType;
@@ -21,18 +21,18 @@ constexpr size_t kFrameCount = 16;
 
 // Instrument settings.
 constexpr double kGain = 0.125;
-constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
+constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
 constexpr double kAttack = 0.05;
 constexpr double kRelease = 0.125;
 constexpr int kVoiceCount = 16;
 
-constexpr int kOscCount = static_cast<int>(OscillatorType::kCount);
+constexpr int kOscCount = static_cast<int>(OscillatorShape::kCount);
 
 static DaisyPod hw;  // Currently targets the Daisy Pod hardware.
 static MidiUsbHandler midi;
 
 static InstrumentHandle instrument = {};
-static int osc_index = static_cast<int>(kOscillatorType);
+static int osc_index = static_cast<int>(kOscillatorShape);
 static std::array<double, kChannelCount * kFrameCount> temp_samples{0.0};
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
@@ -41,7 +41,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
     osc_index = (osc_index + increment + kOscCount) % kOscCount;
-    instrument.SetControl(ControlType::kOscillatorType, static_cast<OscillatorType>(osc_index));
+    instrument.SetControl(ControlType::kOscillatorShape, static_cast<OscillatorShape>(osc_index));
   }
 
   // Process samples.
@@ -69,7 +69,7 @@ int main(void) {
 
   instrument = musician.AddInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorType, kOscillatorType);
+  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

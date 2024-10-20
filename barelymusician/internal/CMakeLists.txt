@@ -121,7 +121,6 @@ if(ENABLE_TESTS)
     barelymusician_internal_instrument_controller
     barelymusician_internal_sample_data
     barelymusician_headeronly
-    barelymusician_sample_player
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_instrument_controller_test)
@@ -135,7 +134,6 @@ if(ENABLE_TESTS)
     barelymusician_internal_instrument_processor
     barelymusician_internal_sample_data
     barelymusician_headeronly
-    barelymusician_sample_player
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_instrument_processor_test)

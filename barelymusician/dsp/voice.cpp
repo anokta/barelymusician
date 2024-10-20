@@ -1,6 +1,6 @@
 #include "barelymusician/dsp/voice.h"
 
-#include "barelymusician/dsp/sample_player.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barely {
 

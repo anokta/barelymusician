@@ -16,8 +16,6 @@
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/duration.h"
 #include "barelymusician/composition/scale.h"
-#include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/dsp/sample_player.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -31,7 +29,7 @@ using ::barely::ControlType;
 using ::barely::InstrumentHandle;
 using ::barely::Metronome;
 using ::barely::Musician;
-using ::barely::OscillatorType;
+using ::barely::OscillatorShape;
 using ::barely::PerformerHandle;
 using ::barely::Random;
 using ::barely::SampleDataDefinition;
@@ -210,12 +208,12 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::tuple<PerformerHandle, BeatComposerCallback, size_t>> performers;
   std::vector<InstrumentHandle> instruments;
 
-  const auto build_instrument_fn = [&](OscillatorType type, double gain, double attack,
+  const auto build_instrument_fn = [&](OscillatorShape type, double gain, double attack,
                                        double release) {
     instruments.emplace_back(musician.AddInstrument());
     auto& instrument = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
-    instrument.SetControl(ControlType::kOscillatorType, type);
+    instrument.SetControl(ControlType::kOscillatorShape, type);
     instrument.SetControl(ControlType::kAttack, attack);
     instrument.SetControl(ControlType::kRelease, release);
     set_note_callbacks_fn(instruments.size(), instrument);
@@ -230,11 +228,11 @@ int main(int /*argc*/, char* argv[]) {
     ComposeChord(0.5, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorType::kSine, 0.05, 0.125, 0.125);
+  build_instrument_fn(OscillatorShape::kSine, 0.05, 0.125, 0.125);
   performers.emplace_back(musician.AddPerformer(), chords_beat_composer_callback,
                           instruments.size() - 1);
 
-  build_instrument_fn(OscillatorType::kNoise, 0.01, 0.5, 0.025);
+  build_instrument_fn(OscillatorShape::kNoise, 0.01, 0.5, 0.025);
   performers.emplace_back(musician.AddPerformer(), chords_beat_composer_callback,
                           instruments.size() - 1);
 
@@ -244,7 +242,7 @@ int main(int /*argc*/, char* argv[]) {
     ComposeLine(-1, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorType::kSaw, 0.06, 0.0025, 0.125);
+  build_instrument_fn(OscillatorShape::kSaw, 0.06, 0.0025, 0.125);
   performers.emplace_back(musician.AddPerformer(), line_beat_composer_callback,
                           instruments.size() - 1);
 
@@ -254,7 +252,7 @@ int main(int /*argc*/, char* argv[]) {
     ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorType::kSquare, 0.06, 0.05, 0.05);
+  build_instrument_fn(OscillatorShape::kSquare, 0.06, 0.05, 0.05);
   performers.emplace_back(musician.AddPerformer(), line_2_beat_composer_callback,
                           instruments.size() - 1);
 

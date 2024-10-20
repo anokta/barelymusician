@@ -3,25 +3,10 @@
 
 #include <random>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
 
 namespace barely {
-
-/// Oscillator type.
-enum class OscillatorType {
-  /// None.
-  kNone = 0,
-  /// Sine wave.
-  kSine,
-  /// Sawtooth wave.
-  kSaw,
-  /// Square wave.
-  kSquare,
-  /// White noise.
-  kNoise,
-  /// Count.
-  kCount,
-};
 
 /// Simple oscillator that generates output samples of basic waveforms.
 class Oscillator {
@@ -44,10 +29,10 @@ class Oscillator {
   /// @param frequency Oscillator frequency in hertz.
   void SetFrequency(double frequency) noexcept;
 
-  /// Sets the type of the oscillator.
+  /// Sets the shape of the oscillator.
   ///
-  /// @param type Oscillator type.
-  void SetType(OscillatorType type) noexcept;
+  /// @param shape Oscillator shape.
+  void SetShape(OscillatorShape shape) noexcept;
 
  private:
   // Inverse frame rate in seconds.
@@ -56,8 +41,8 @@ class Oscillator {
   // Maximum allowed frequency.
   double max_frequency_ = 0.0;
 
-  // Oscillator type.
-  OscillatorType type_ = OscillatorType::kNone;
+  // Oscillator shape.
+  OscillatorShape shape_ = OscillatorShape::kNone;
 
   // Frequency.
   double frequency_ = 0.0;

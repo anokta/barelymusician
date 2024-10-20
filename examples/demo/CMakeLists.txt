@@ -19,7 +19,6 @@ add_barelymusician_demo(
   arpeggiator_demo
   barelymusician
   barelymusician_arpeggiator
-  barelymusician_oscillator
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
@@ -29,7 +28,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   instrument_demo
   barelymusician
-  barelymusician_oscillator
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
   barelymusician_examples_input_manager
@@ -39,7 +37,6 @@ add_barelymusician_demo(
   metronome_demo
   barelymusician
   barelymusician_metronome
-  barelymusician_oscillator
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
@@ -49,7 +46,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   midi_demo
   barelymusician
-  barelymusician_oscillator
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
@@ -65,8 +61,6 @@ add_barelymusician_demo(
   barelymusician_metronome
   barelymusician_duration
   barelymusician_scale
-  barelymusician_oscillator
-  barelymusician_sample_player
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
@@ -79,7 +73,6 @@ add_barelymusician_demo(
   repeater_demo
   barelymusician
   barelymusician_repeater
-  barelymusician_oscillator
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
@@ -89,7 +82,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   sampler_demo
   barelymusician
-  barelymusician_sample_player
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
   barelymusician_examples_input_manager
@@ -100,7 +92,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   sequencer_demo
   barelymusician
-  barelymusician_oscillator
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
@@ -111,7 +102,6 @@ add_barelymusician_demo(
   trigger_demo
   barelymusician
   barelymusician_scale
-  barelymusician_oscillator
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log

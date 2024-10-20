@@ -7,7 +7,6 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/dsp/oscillator.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -16,7 +15,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Musician;
-using ::barely::OscillatorType;
+using ::barely::OscillatorShape;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -28,7 +27,7 @@ constexpr int kFrameCount = 256;
 
 // Instrument settings.
 constexpr double kGain = 0.125;
-constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
+constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
 constexpr double kAttack = 0.05;
 constexpr double kRelease = 0.125;
 constexpr int kVoiceCount = 16;
@@ -61,7 +60,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = musician.AddInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorType, kOscillatorType);
+  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

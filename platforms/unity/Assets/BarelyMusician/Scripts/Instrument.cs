@@ -4,8 +4,38 @@ using System.Linq;
 using UnityEngine;
 
 namespace Barely {
-  /// Synthesizer oscillator type.
-  public enum OscillatorType {
+  /// Control type.
+  public enum ControlType {
+    /// Gain.
+    [InspectorName("Gain")] GAIN = 0,
+    /// Number of voices.
+    [InspectorName("Voice Count")] VOICE_COUNT,
+    /// Oscillator shape.
+    [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
+    /// Sample playback mode.
+    [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
+    /// Envelope attack.
+    [InspectorName("Attack")] ATTACK,
+    /// Envelope decay.
+    [InspectorName("Decay")] DECAY,
+    /// Envelope sustain.
+    [InspectorName("Sustain")] SUSTAIN,
+    /// Envelope release.
+    [InspectorName("Release")] RELEASE,
+    /// Pitch shift.
+    [InspectorName("Pitch Shift")] PITCH_SHIFT,
+    /// Retrigger.
+    [InspectorName("Retrigger")] RETRIGGER,
+  }
+
+  /// Note control type.
+  public enum NoteControlType {
+    /// Pitch shift.
+    [InspectorName("Pitch Shift")] PITCH_SHIFT = 0,
+  }
+
+  /// Oscillator shape.
+  public enum OscillatorShape {
     /// None.
     [InspectorName("None")] NONE = 0,
     /// Sine wave.
@@ -28,36 +58,6 @@ namespace Barely {
     [InspectorName("Sustain")] SUSTAIN,
     /// Loop.
     [InspectorName("Loop")] LOOP,
-  }
-
-  /// Control type.
-  public enum ControlType {
-    /// Gain.
-    [InspectorName("Gain")] GAIN = 0,
-    /// Number of voices.
-    [InspectorName("Voice Count")] VOICE_COUNT,
-    /// Oscillator type.
-    [InspectorName("Oscillator Type")] OSCILLATOR_TYPE,
-    /// Sample playback mode.
-    [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
-    /// Envelope attack.
-    [InspectorName("Attack")] ATTACK,
-    /// Envelope decay.
-    [InspectorName("Decay")] DECAY,
-    /// Envelope sustain.
-    [InspectorName("Sustain")] SUSTAIN,
-    /// Envelope release.
-    [InspectorName("Release")] RELEASE,
-    /// Pitch shift.
-    [InspectorName("Pitch Shift")] PITCH_SHIFT,
-    /// Retrigger.
-    [InspectorName("Retrigger")] RETRIGGER,
-  }
-
-  /// Note control type.
-  public enum NoteControlType {
-    /// Pitch shift.
-    [InspectorName("Pitch Shift")] PITCH_SHIFT = 0,
   }
 
   /// A representation of a musical instrument that can be played in real-time.
@@ -120,8 +120,8 @@ namespace Barely {
     [Range(1, 32)]
     public int VoiceCount = 8;
 
-    /// Oscillator type.
-    public OscillatorType OscillatorType = OscillatorType.NONE;
+    /// Oscillator shape.
+    public OscillatorShape OscillatorShape = OscillatorShape.NONE;
 
     /// Sample playback mode.
     public SamplePlaybackMode SamplePlaybackMode = SamplePlaybackMode.NONE;
@@ -296,7 +296,7 @@ namespace Barely {
       UpdateSampleData();
       SetControl(ControlType.GAIN, Gain);
       SetControl(ControlType.VOICE_COUNT, (double)VoiceCount);
-      SetControl(ControlType.OSCILLATOR_TYPE, (double)OscillatorType);
+      SetControl(ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
       SetControl(ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
       SetControl(ControlType.ATTACK, Attack);
       SetControl(ControlType.DECAY, Decay);

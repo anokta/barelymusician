@@ -5,7 +5,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/scale.h"
-#include "barelymusician/dsp/oscillator.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -15,7 +14,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Musician;
-using ::barely::OscillatorType;
+using ::barely::OscillatorShape;
 using ::barely::ScaleDefinition;
 using ::barely::ScaleType;
 using ::barely::examples::AudioClock;
@@ -32,7 +31,7 @@ constexpr double kLookahead = 0.05;
 
 // Instrument settings.
 constexpr double kGain = 0.1;
-constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
+constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.1;
 
@@ -52,7 +51,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = musician.AddInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorType, kOscillatorType);
+  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetNoteOnEvent(

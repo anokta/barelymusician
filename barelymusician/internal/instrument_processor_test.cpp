@@ -3,7 +3,6 @@
 #include <array>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/internal/sample_data.h"
 #include "gtest/gtest.h"
 

@@ -8,7 +8,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/components/arpeggiator.h"
-#include "barelymusician/dsp/oscillator.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -20,7 +19,7 @@ using ::barely::Arpeggiator;
 using ::barely::ArpeggiatorStyle;
 using ::barely::ControlType;
 using ::barely::Musician;
-using ::barely::OscillatorType;
+using ::barely::OscillatorShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -35,7 +34,7 @@ constexpr double kLookahead = 0.1;
 
 // Arpeggiator settings.
 constexpr double kGain = 0.125;
-constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
+constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.05;
 constexpr int kVoiceCount = 16;
@@ -75,7 +74,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = musician.AddInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorType, kOscillatorType);
+  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

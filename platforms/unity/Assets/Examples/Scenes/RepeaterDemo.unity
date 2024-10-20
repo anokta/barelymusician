@@ -458,28 +458,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OnControlEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnNoteControlEvent:
-    m_PersistentCalls:
-      m_Calls: []
+  Gain: 1
+  VoiceCount: 8
+  OscillatorShape: 3
+  SamplePlaybackMode: 0
+  Samplers: []
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 0.25
+  PitchShift: 0
+  Retrigger: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Gain: 1
-  VoiceCount: 8
-  OscillatorType: 3
-  Samplers: []
-  SamplerLoop: 0
-  Attack: 0
-  Decay: 0
-  Sustain: 1
-  Release: 0.25
-  PitchShift: 0
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0

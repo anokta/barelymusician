@@ -410,21 +410,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 0.4000000059604645
   VoiceCount: 8
-  OscillatorType: 2
+  OscillatorShape: 2
+  SamplePlaybackMode: 0
   Samplers: []
-  SamplerLoop: 0
   Attack: 0.019999999552965164
   Decay: 0.05000000074505806
   Sustain: 0.25
   Release: 0.02500000037252903
   PitchShift: 0
   Retrigger: 0
-  OnControlEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnNoteControlEvent:
-    m_PersistentCalls:
-      m_Calls: []
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

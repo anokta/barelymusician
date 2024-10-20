@@ -1,6 +1,5 @@
 #include "barelymusician/internal/instrument_controller.h"
 
-#include <array>
 #include <cassert>
 #include <cstdint>
 #include <utility>
@@ -20,6 +19,7 @@ InstrumentController::InstrumentController(int frame_rate, double reference_freq
       update_frame_(update_frame),
       processor_(frame_rate, reference_frequency) {
   assert(frame_rate > 0);
+  // TODO(#139): This is unnecessary work.
   for (int i = 0; i < static_cast<int>(controls_.size()); ++i) {
     processor_.SetControl(static_cast<ControlType>(i), controls_[i].value);
   }
@@ -31,7 +31,8 @@ double InstrumentController::GetControl(ControlType type) const noexcept {
   return controls_[static_cast<int>(type)].value;
 }
 
-const double* InstrumentController::GetNoteControl(double pitch, ControlType type) const noexcept {
+const double* InstrumentController::GetNoteControl(double pitch,
+                                                   NoteControlType type) const noexcept {
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
     return &(*note_controls)[static_cast<int>(type)].value;
   }
@@ -104,7 +105,8 @@ void InstrumentController::SetControl(ControlType type, double value) noexcept {
   }
 }
 
-void InstrumentController::SetNoteControl(double pitch, ControlType type, double value) noexcept {
+void InstrumentController::SetNoteControl(double pitch, NoteControlType type,
+                                          double value) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[static_cast<int>(type)];
         note_control.SetValue(value)) {
@@ -127,13 +129,17 @@ void InstrumentController::SetNoteOffEvent(NoteOffEventDefinition definition,
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InstrumentController::SetNoteOn(double pitch, double intensity) noexcept {
-  // TODO(#139): Implement note controls.
-  if (const auto [it, success] = note_controls_.try_emplace(pitch, std::array<Control, 0>{});
+  if (const auto [it, success] = note_controls_.try_emplace(pitch,
+                                                            NoteControlArray{
+                                                                // kPitchShift
+                                                                Control(0.0),
+                                                            });
       success) {
     note_on_event_.Process(pitch, intensity);
     message_queue_.Add(update_frame_, NoteOnMessage{pitch, intensity});
+    // TODO(#139): This is unnecessary work.
     for (int i = 0; i < static_cast<int>(it->second.size()); ++i) {
-      message_queue_.Add(update_frame_, NoteControlMessage{pitch, static_cast<ControlType>(i),
+      message_queue_.Add(update_frame_, NoteControlMessage{pitch, static_cast<NoteControlType>(i),
                                                            (it->second)[i].value});
     }
   }

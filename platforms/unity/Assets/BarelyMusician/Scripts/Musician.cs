@@ -158,7 +158,7 @@ namespace Barely {
       /// @param type Note control type.
       /// @return Note control value.
       public static double Instrument_GetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                     ControlType type) {
+                                                     NoteControlType type) {
         double value = 0.0;
         if (!BarelyInstrument_GetNoteControl(instrumentHandle, pitch, type, ref value) &&
             instrumentHandle != IntPtr.Zero) {
@@ -236,7 +236,7 @@ namespace Barely {
       /// @param type Note control type.
       /// @param value Note control value.
       public static void Instrument_SetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                   ControlType type, double value) {
+                                                   NoteControlType type, double value) {
         if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, type, value) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument note " + pitch + " control " + type +
@@ -1059,7 +1059,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
       private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, double pitch,
-                                                                 ControlType type,
+                                                                 NoteControlType type,
                                                                  ref double outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
@@ -1081,7 +1081,8 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
-                                                                 ControlType type, double value);
+                                                                 NoteControlType type,
+                                                                 double value);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, double pitch);

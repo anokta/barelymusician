@@ -30,7 +30,7 @@ namespace Barely {
     [InspectorName("Loop")] LOOP,
   }
 
-  /// Control type enum values.
+  /// Control type.
   public enum ControlType {
     /// Gain.
     [InspectorName("Gain")] GAIN = 0,
@@ -52,6 +52,12 @@ namespace Barely {
     [InspectorName("Pitch Shift")] PITCH_SHIFT,
     /// Retrigger.
     [InspectorName("Retrigger")] RETRIGGER,
+  }
+
+  /// Note control type.
+  public enum NoteControlType {
+    /// Pitch shift.
+    [InspectorName("Pitch Shift")] PITCH_SHIFT = 0,
   }
 
   /// A representation of a musical instrument that can be played in real-time.
@@ -188,9 +194,9 @@ namespace Barely {
     /// Returns a note control value.
     ///
     /// @param pitch Note pitch.
-    /// @param type Control type
-    /// @return Control value.
-    public double GetNoteControl(double pitch, ControlType type) {
+    /// @param type Note control type
+    /// @return Note control value.
+    public double GetNoteControl(double pitch, NoteControlType type) {
       return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, type);
     }
 
@@ -220,7 +226,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param type Note control type.
     /// @param value Note control value.
-    public void SetNoteControl(double pitch, ControlType type, double value) {
+    public void SetNoteControl(double pitch, NoteControlType type, double value) {
       Musician.Internal.Instrument_SetNoteControl(_handle, pitch, type, value);
     }
 

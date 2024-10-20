@@ -10,6 +10,7 @@
 
 using ::barely::ControlType;
 using ::barely::InstrumentController;
+using ::barely::NoteControlType;
 using ::barely::internal::Musician;
 using ::barely::internal::Performer;
 using ::barely::internal::Task;
@@ -48,11 +49,12 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyContro
 }
 
 bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                     BarelyControlType type, double* out_value) {
+                                     BarelyNoteControlType type, double* out_value) {
   if (!instrument) return false;
+  if (type < 0 || type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
 
-  if (const auto* value = instrument->GetNoteControl(pitch, static_cast<ControlType>(type));
+  if (const auto* value = instrument->GetNoteControl(pitch, static_cast<NoteControlType>(type));
       value != nullptr) {
     *out_value = *value;
     return true;
@@ -96,11 +98,11 @@ bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyContro
 }
 
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                     BarelyControlType type, double value) {
+                                     BarelyNoteControlType type, double value) {
   if (!instrument) return false;
-  if (type < 0 || type >= BarelyControlType_kCount) return false;
+  if (type < 0 || type >= BarelyNoteControlType_kCount) return false;
 
-  instrument->SetNoteControl(pitch, static_cast<ControlType>(type), value);
+  instrument->SetNoteControl(pitch, static_cast<NoteControlType>(type), value);
   return true;
 }
 

@@ -26,7 +26,7 @@ struct NoteControlMessage {
   double pitch;
 
   /// Type.
-  ControlType type;
+  NoteControlType type;
 
   /// Value.
   double value;

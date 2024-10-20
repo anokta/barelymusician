@@ -98,7 +98,8 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       pitch_shift_ = value;
       for (int i = 0; i < voice_count_; ++i) {
         if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
-          const double shifted_pitch = voice_states_[i].pitch + pitch_shift_;
+          const double shifted_pitch =
+              voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
           voice.oscillator().SetFrequency(FrequencyFromPitch(shifted_pitch, reference_frequency_));
           voice.sample_player().SetSpeed(
               FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch));
@@ -109,7 +110,30 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       should_retrigger_ = static_cast<bool>(value);
       break;
     default:
-      assert(false);
+      assert(!"Invalid control type");
+      break;
+  }
+}
+
+void InstrumentProcessor::SetNoteControl(double pitch, NoteControlType type,
+                                         double value) noexcept {
+  switch (type) {
+    case NoteControlType::kPitchShift:
+      for (int i = 0; i < voice_count_; ++i) {
+        if (Voice& voice = voice_states_[i].voice;
+            voice_states_[i].pitch == pitch && voice.IsActive()) {
+          voice_states_[i].pitch_shift = value;
+          const double shifted_pitch =
+              voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
+          voice.oscillator().SetFrequency(FrequencyFromPitch(shifted_pitch, reference_frequency_));
+          voice.sample_player().SetSpeed(
+              FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch));
+          break;
+        }
+      }
+      break;
+    default:
+      assert(!"Invalid note control type");
       break;
   }
 }
@@ -129,6 +153,7 @@ void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
   }
   VoiceState& voice_state = AcquireVoice(pitch);
   voice_state.pitch = pitch;
+  voice_state.pitch_shift = 0.0;
   voice_state.timestamp = 0;
 
   Voice& voice = voice_state.voice;

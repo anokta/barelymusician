@@ -38,7 +38,7 @@ class InstrumentProcessor {
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @param value Note control value.
-  void SetNoteControl(double /*pitch*/, ControlType /*type*/, double /*value*/) noexcept {}
+  void SetNoteControl(double pitch, NoteControlType type, double value) noexcept;
 
   /// Sets a note off.
   ///
@@ -63,6 +63,7 @@ class InstrumentProcessor {
   struct VoiceState {
     Voice voice;
     double pitch = 0.0;
+    double pitch_shift = 0.0;
     double root_pitch = 0.0;
     int timestamp = 0;
   };

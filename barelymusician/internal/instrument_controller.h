@@ -48,7 +48,7 @@ class InstrumentController {
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @return Note control value.
-  [[nodiscard]] const double* GetNoteControl(double pitch, ControlType type) const noexcept;
+  [[nodiscard]] const double* GetNoteControl(double pitch, NoteControlType type) const noexcept;
 
   /// Returns frame rate.
   ///
@@ -87,7 +87,7 @@ class InstrumentController {
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @param value Note control value.
-  void SetNoteControl(double pitch, ControlType type, double value) noexcept;
+  void SetNoteControl(double pitch, NoteControlType type, double value) noexcept;
 
   /// Sets a note off.
   ///
@@ -167,12 +167,14 @@ class InstrumentController {
     // Maximum value.
     double max_value = std::numeric_limits<double>::max();
   };
+  using ControlArray = std::array<Control, static_cast<int>(ControlType::kCount)>;
+  using NoteControlArray = std::array<Control, static_cast<int>(NoteControlType::kCount)>;
 
   // Frame rate in hertz.
   const int frame_rate_ = 0;
 
   // Array of controls.
-  std::array<Control, static_cast<int>(ControlType::kCount)> controls_ = {
+  ControlArray controls_ = {
       Control(1.0, 0.0, 1.0),                                // kGain
       Control(8, 1, 32),                                     // kVoiceCount
       {0, 0, static_cast<int>(OscillatorType::kCount)},      // kOscillatorType
@@ -185,9 +187,8 @@ class InstrumentController {
       Control(false),                                        // kRetrigger
   };
 
-  // Array of note control arrays by their pitches.
-  // TODO(#139): Implement note controls.
-  std::unordered_map<double, std::array<Control, 0>> note_controls_;
+  // Map of note control arrays by their pitches.
+  std::unordered_map<double, NoteControlArray> note_controls_;
 
   // Note off event.
   NoteOffEvent note_off_event_;

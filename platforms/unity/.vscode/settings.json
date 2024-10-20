@@ -1,5 +1,9 @@
 {
   "clang-format.style": "Google",
+  "cmake.configureOnEdit": false,
+  "cmake.configureOnOpen": false,
+  "cmake.automaticReconfigure": false,
+  "cmake.enableAutomaticKitScan": false,
   "csharp.format.enable": false,
   "editor.insertSpaces": true,
   "editor.tabSize": 2,

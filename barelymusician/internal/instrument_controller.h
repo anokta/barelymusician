@@ -41,15 +41,14 @@ class InstrumentController {
   ///
   /// @param type Control type.
   /// @return Control value.
-  [[nodiscard]] double GetControl(InstrumentControlType type) const noexcept;
+  [[nodiscard]] double GetControl(ControlType type) const noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @return Note control value.
-  [[nodiscard]] const double* GetNoteControl(double pitch,
-                                             InstrumentControlType type) const noexcept;
+  [[nodiscard]] const double* GetNoteControl(double pitch, ControlType type) const noexcept;
 
   /// Returns frame rate.
   ///
@@ -81,14 +80,14 @@ class InstrumentController {
   ///
   /// @param type Control type.
   /// @param value Control value.
-  void SetControl(InstrumentControlType type, double value) noexcept;
+  void SetControl(ControlType type, double value) noexcept;
 
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @param value Note control value.
-  void SetNoteControl(double pitch, InstrumentControlType type, double value) noexcept;
+  void SetNoteControl(double pitch, ControlType type, double value) noexcept;
 
   /// Sets a note off.
   ///
@@ -173,7 +172,7 @@ class InstrumentController {
   const int frame_rate_ = 0;
 
   // Array of controls.
-  std::array<Control, static_cast<int>(InstrumentControlType::kCount)> controls_ = {
+  std::array<Control, static_cast<int>(ControlType::kCount)> controls_ = {
       Control(1.0, 0.0, 1.0),                                // kGain
       Control(8, 1, 32),                                     // kVoiceCount
       {0, 0, static_cast<int>(OscillatorType::kCount)},      // kOscillatorType

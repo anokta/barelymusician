@@ -22,24 +22,24 @@ constexpr std::array<double, kFrameRate> kSamples = {1.0, 2.0, 3.0, 4.0};
 // Tests that the instrument sets a control value as expected.
 TEST(InstrumentControllerTest, SetControl) {
   InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
-  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 1.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(ControlType::kGain), 1.0);
 
-  instrument.SetControl(InstrumentControlType::kGain, 0.25);
-  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 0.25);
+  instrument.SetControl(ControlType::kGain, 0.25);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(ControlType::kGain), 0.25);
 
   // Verify that the control value is clamped at the minimum value.
-  instrument.SetControl(InstrumentControlType::kGain, -2.0);
-  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 0.0);
+  instrument.SetControl(ControlType::kGain, -2.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(ControlType::kGain), 0.0);
 
-  instrument.SetControl(InstrumentControlType::kGain, 0.0);
-  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 0.0);
+  instrument.SetControl(ControlType::kGain, 0.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(ControlType::kGain), 0.0);
 
   // Verify that the control value is clamped at the maximum value.
-  instrument.SetControl(InstrumentControlType::kGain, 5.0);
-  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 1.0);
+  instrument.SetControl(ControlType::kGain, 5.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(ControlType::kGain), 1.0);
 
-  instrument.SetControl(InstrumentControlType::kGain, 1.0);
-  EXPECT_DOUBLE_EQ(instrument.GetControl(InstrumentControlType::kGain), 1.0);
+  instrument.SetControl(ControlType::kGain, 1.0);
+  EXPECT_DOUBLE_EQ(instrument.GetControl(ControlType::kGain), 1.0);
 }
 
 // Tests that the instrument plays a single note as expected.
@@ -52,7 +52,7 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
       SampleDataDefinition(kPitch, kFrameRate, kSamples)};
 
   InstrumentController instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
-  instrument.SetControl(InstrumentControlType::kSamplePlaybackMode,
+  instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<double>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kDefinitions));
 
@@ -103,7 +103,7 @@ TEST(InstrumentControllerTest, PlayMultipleNotes) {
   };
 
   InstrumentController instrument(1, kReferenceFrequency, 0);
-  instrument.SetControl(InstrumentControlType::kSamplePlaybackMode,
+  instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<double>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kDefinitions));
 

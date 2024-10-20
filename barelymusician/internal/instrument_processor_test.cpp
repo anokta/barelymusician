@@ -25,8 +25,8 @@ constexpr std::array<SampleDataDefinition, kVoiceCount> kDefinitions = {
 // Tests that playing a single voice produces the expected output.
 TEST(InstrumentProcessorTest, SingleVoice) {
   InstrumentProcessor processor(kFrameRate, kReferenceFrequency);
-  processor.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
-  processor.SetControl(InstrumentControlType::kSamplePlaybackMode,
+  processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
+  processor.SetControl(ControlType::kSamplePlaybackMode,
                        static_cast<double>(SamplePlaybackMode::kLoop));
 
   SampleData sample_data(kDefinitions);
@@ -54,8 +54,8 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 // Tests that playing voices are capped at maximum allowed number of voices.
 TEST(InstrumentProcessorTest, MaxVoices) {
   InstrumentProcessor processor(kFrameRate, kReferenceFrequency);
-  processor.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
-  processor.SetControl(InstrumentControlType::kSamplePlaybackMode,
+  processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
+  processor.SetControl(ControlType::kSamplePlaybackMode,
                        static_cast<double>(SamplePlaybackMode::kLoop));
 
   SampleData sample_data(kDefinitions);
@@ -88,7 +88,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 // Tests that the processor processor produces silence when there are no available voices set.
 TEST(InstrumentProcessorTest, NoVoice) {
   InstrumentProcessor processor(kFrameRate, kReferenceFrequency);
-  processor.SetControl(InstrumentControlType::kVoiceCount, 0);
+  processor.SetControl(ControlType::kVoiceCount, 0);
 
   SampleData sample_data(kDefinitions);
   processor.SetSampleData(sample_data);

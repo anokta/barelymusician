@@ -49,12 +49,12 @@ void InstrumentProcessor::Process(double* output_samples, int output_channel_cou
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void InstrumentProcessor::SetControl(InstrumentControlType type, double value) noexcept {
+void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
   switch (type) {
-    case InstrumentControlType::kGain:
+    case ControlType::kGain:
       gain_processor_.SetGain(value);
       break;
-    case InstrumentControlType::kVoiceCount: {
+    case ControlType::kVoiceCount: {
       const int voice_count = static_cast<int>(value);
       for (int i = voice_count_; i < voice_count; ++i) {
         // Copy over the voice settings.
@@ -63,38 +63,38 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, double value) n
       }
       voice_count_ = voice_count;
     } break;
-    case InstrumentControlType::kOscillatorType:
+    case ControlType::kOscillatorType:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.oscillator().SetType(
             static_cast<OscillatorType>(static_cast<int>(value)));
       };
       break;
-    case InstrumentControlType::kSamplePlaybackMode:
+    case ControlType::kSamplePlaybackMode:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.set_sample_playback_mode(static_cast<SamplePlaybackMode>(value));
       };
       break;
-    case InstrumentControlType::kAttack:
+    case ControlType::kAttack:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.envelope().SetAttack(value);
       };
       break;
-    case InstrumentControlType::kDecay:
+    case ControlType::kDecay:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.envelope().SetDecay(value);
       };
       break;
-    case InstrumentControlType::kSustain:
+    case ControlType::kSustain:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.envelope().SetSustain(value);
       };
       break;
-    case InstrumentControlType::kRelease:
+    case ControlType::kRelease:
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.envelope().SetRelease(value);
       };
       break;
-    case InstrumentControlType::kPitchShift:
+    case ControlType::kPitchShift:
       pitch_shift_ = value;
       for (int i = 0; i < voice_count_; ++i) {
         if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
@@ -105,7 +105,7 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, double value) n
         }
       }
       break;
-    case InstrumentControlType::kRetrigger:
+    case ControlType::kRetrigger:
       should_retrigger_ = static_cast<bool>(value);
       break;
     default:

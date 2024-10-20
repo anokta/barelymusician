@@ -8,8 +8,8 @@
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
+using ::barely::ControlType;
 using ::barely::InstrumentController;
-using ::barely::InstrumentControlType;
 using ::barely::internal::Musician;
 using ::barely::internal::Performer;
 using ::barely::internal::Task;
@@ -37,23 +37,22 @@ struct BarelyPerformer : public Performer {};
 // Task.
 struct BarelyTask : public Task {};
 
-bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument,
-                                 BarelyInstrumentControlType type, double* out_value) {
+bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
+                                 double* out_value) {
   if (!instrument) return false;
-  if (type < 0 || type >= BarelyInstrumentControlType_kCount) return false;
+  if (type < 0 || type >= BarelyControlType_kCount) return false;
   if (!out_value) return false;
 
-  *out_value = instrument->GetControl(static_cast<InstrumentControlType>(type));
+  *out_value = instrument->GetControl(static_cast<ControlType>(type));
   return true;
 }
 
 bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                     BarelyInstrumentControlType type, double* out_value) {
+                                     BarelyControlType type, double* out_value) {
   if (!instrument) return false;
   if (!out_value) return false;
 
-  if (const auto* value =
-          instrument->GetNoteControl(pitch, static_cast<InstrumentControlType>(type));
+  if (const auto* value = instrument->GetNoteControl(pitch, static_cast<ControlType>(type));
       value != nullptr) {
     *out_value = *value;
     return true;
@@ -87,21 +86,21 @@ bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   return true;
 }
 
-bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
-                                 BarelyInstrumentControlType type, double value) {
+bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
+                                 double value) {
   if (!instrument) return false;
-  if (type < 0 || type >= BarelyInstrumentControlType_kCount) return false;
+  if (type < 0 || type >= BarelyControlType_kCount) return false;
 
-  instrument->SetControl(static_cast<InstrumentControlType>(type), value);
+  instrument->SetControl(static_cast<ControlType>(type), value);
   return true;
 }
 
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                     BarelyInstrumentControlType type, double value) {
+                                     BarelyControlType type, double value) {
   if (!instrument) return false;
-  if (type < 0 || type >= BarelyInstrumentControlType_kCount) return false;
+  if (type < 0 || type >= BarelyControlType_kCount) return false;
 
-  instrument->SetNoteControl(pitch, static_cast<InstrumentControlType>(type), value);
+  instrument->SetNoteControl(pitch, static_cast<ControlType>(type), value);
   return true;
 }
 

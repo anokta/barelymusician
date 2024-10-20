@@ -14,7 +14,7 @@ namespace barely {
 /// Control message.
 struct ControlMessage {
   /// Type.
-  InstrumentControlType type;
+  ControlType type;
 
   /// Value.
   double value;
@@ -26,7 +26,7 @@ struct NoteControlMessage {
   double pitch;
 
   /// Type.
-  InstrumentControlType type;
+  ControlType type;
 
   /// Value.
   double value;

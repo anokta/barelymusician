@@ -49,7 +49,7 @@
 ///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::InstrumentControlType::kGain, /*value=*/0.5);
+///   instrument.SetControl(barely::ControlType::kGain, /*value=*/0.5);
 ///
 ///   // Process.
 ///   //
@@ -133,7 +133,7 @@
 ///   BarelyInstrument_IsNoteOn(instrument, c3_pitch, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, BarelyInstrumentControlType_kGain, /*value=*/0.5);
+///   BarelyInstrument_SetControl(instrument, BarelyControlType_kGain, /*value=*/0.5);
 ///
 ///   // Process.
 ///   //
@@ -213,46 +213,34 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Instrument control type enum alias.
-typedef int32_t BarelyInstrumentControlType;
+/// Control type enum alias.
+typedef int32_t BarelyControlType;
 
-/// Instrument control type enum values.
-enum BarelyInstrumentControlType_Values {
+/// Control type enum values.
+enum BarelyControlType_Values {
   /// Gain.
-  BarelyInstrumentControlType_kGain = 0,
+  BarelyControlType_kGain = 0,
   /// Number of voices.
-  BarelyInstrumentControlType_kVoiceCount,
+  BarelyControlType_kVoiceCount,
   /// Oscillator type.
-  BarelyInstrumentControlType_kOscillatorType,
+  BarelyControlType_kOscillatorType,
   /// Sample playback mode.
-  BarelyInstrumentControlType_kSamplePlaybackMode,
+  BarelyControlType_kSamplePlaybackMode,
   /// Envelope attack.
-  BarelyInstrumentControlType_kAttack,
+  BarelyControlType_kAttack,
   /// Envelope decay.
-  BarelyInstrumentControlType_kDecay,
+  BarelyControlType_kDecay,
   /// Envelope sustain.
-  BarelyInstrumentControlType_kSustain,
+  BarelyControlType_kSustain,
   /// Envelope release.
-  BarelyInstrumentControlType_kRelease,
+  BarelyControlType_kRelease,
   /// Pitch shift.
-  BarelyInstrumentControlType_kPitchShift,
+  BarelyControlType_kPitchShift,
   /// Retrigger.
-  BarelyInstrumentControlType_kRetrigger,
+  BarelyControlType_kRetrigger,
   /// Number of control types.
-  BarelyInstrumentControlType_kCount,
+  BarelyControlType_kCount,
 };
-
-/// Instrument handle alias.
-typedef struct BarelyInstrument* BarelyInstrumentHandle;
-
-/// Musician handle alias.
-typedef struct BarelyMusician* BarelyMusicianHandle;
-
-/// Performer handle alias.
-typedef struct BarelyPerformer* BarelyPerformerHandle;
-
-/// Task handle alias.
-typedef struct BarelyTask* BarelyTaskHandle;
 
 /// Note off event definition create callback signature.
 ///
@@ -357,6 +345,18 @@ typedef struct BarelyTaskDefinition {
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
 
+/// Instrument handle alias.
+typedef struct BarelyInstrument* BarelyInstrumentHandle;
+
+/// Musician handle alias.
+typedef struct BarelyMusician* BarelyMusicianHandle;
+
+/// Performer handle alias.
+typedef struct BarelyPerformer* BarelyPerformerHandle;
+
+/// Task handle alias.
+typedef struct BarelyTask* BarelyTaskHandle;
+
 /// Creates a new instrument.
 ///
 /// @param musician Musician handle.
@@ -378,7 +378,7 @@ BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 /// @param out_value Output control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument,
-                                               BarelyInstrumentControlType type, double* out_value);
+                                               BarelyControlType type, double* out_value);
 
 /// Gets an instrument note control value.
 ///
@@ -388,8 +388,7 @@ BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument
 /// @param out_value Output note control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   BarelyInstrumentControlType type,
-                                                   double* out_value);
+                                                   BarelyControlType type, double* out_value);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -426,7 +425,7 @@ BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instru
 /// @param value Control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
-                                               BarelyInstrumentControlType type, double value);
+                                               BarelyControlType type, double value);
 
 /// Sets an instrument note control value.
 ///
@@ -436,7 +435,7 @@ BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument
 /// @param value Note control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   BarelyInstrumentControlType type, double value);
+                                                   BarelyControlType type, double value);
 
 /// Sets an instrument note off.
 ///
@@ -762,6 +761,32 @@ BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTaskHandle task, double position
 
 namespace barely {
 
+/// Control type enum.
+enum class ControlType : BarelyControlType {
+  /// Gain.
+  kGain = BarelyControlType_kGain,
+  /// Number of voices.
+  kVoiceCount = BarelyControlType_kVoiceCount,
+  /// Oscillator type.
+  kOscillatorType = BarelyControlType_kOscillatorType,
+  /// Sample playback mode.
+  kSamplePlaybackMode = BarelyControlType_kSamplePlaybackMode,
+  /// Envelope attack.
+  kAttack = BarelyControlType_kAttack,
+  /// Envelope decay.
+  kDecay = BarelyControlType_kDecay,
+  /// Envelope sustain.
+  kSustain = BarelyControlType_kSustain,
+  /// Envelope release.
+  kRelease = BarelyControlType_kRelease,
+  /// Pitch shift.
+  kPitchShift = BarelyControlType_kPitchShift,
+  /// Retrigger.
+  kRetrigger = BarelyControlType_kRetrigger,
+  /// Number of control types.
+  kCount = BarelyControlType_kCount,
+};
+
 /// Note off event definition.
 struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
   /// Callback signature.
@@ -1039,32 +1064,6 @@ class ScopedHandleWrapper : public HandleWrapperType {
   [[nodiscard]] HandleWrapperType Release() noexcept { return std::move(*this); }
 };
 
-/// Instrument control type enum.
-enum class InstrumentControlType : BarelyInstrumentControlType {
-  /// Gain.
-  kGain = BarelyInstrumentControlType_kGain,
-  /// Number of voices.
-  kVoiceCount = BarelyInstrumentControlType_kVoiceCount,
-  /// Oscillator type.
-  kOscillatorType = BarelyInstrumentControlType_kOscillatorType,
-  /// Sample playback mode.
-  kSamplePlaybackMode = BarelyInstrumentControlType_kSamplePlaybackMode,
-  /// Envelope attack.
-  kAttack = BarelyInstrumentControlType_kAttack,
-  /// Envelope decay.
-  kDecay = BarelyInstrumentControlType_kDecay,
-  /// Envelope sustain.
-  kSustain = BarelyInstrumentControlType_kSustain,
-  /// Envelope release.
-  kRelease = BarelyInstrumentControlType_kRelease,
-  /// Pitch shift.
-  kPitchShift = BarelyInstrumentControlType_kPitchShift,
-  /// Retrigger.
-  kRetrigger = BarelyInstrumentControlType_kRetrigger,
-  /// Number of control types.
-  kCount = BarelyInstrumentControlType_kCount,
-};
-
 /// Class that wraps an instrument handle.
 class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
  public:
@@ -1082,12 +1081,12 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param type Control type.
   /// @return Control value.
   template <typename ValueType>
-  [[nodiscard]] ValueType GetControl(InstrumentControlType type) const noexcept {
+  [[nodiscard]] ValueType GetControl(ControlType type) const noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     double value = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_GetControl(*this, static_cast<BarelyInstrumentControlType>(type), &value);
+        BarelyInstrument_GetControl(*this, static_cast<BarelyControlType>(type), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1098,12 +1097,12 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param type Note control type.
   /// @return Note control value.
   template <typename ValueType>
-  [[nodiscard]] ValueType GetNoteControl(double pitch, InstrumentControlType type) const noexcept {
+  [[nodiscard]] ValueType GetNoteControl(double pitch, ControlType type) const noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     double value = 0.0;
-    [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControl(
-        *this, pitch, static_cast<BarelyInstrumentControlType>(type), &value);
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_GetNoteControl(*this, pitch, static_cast<BarelyControlType>(type), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1143,11 +1142,11 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param type Control type.
   /// @param value Control value.
   template <typename ValueType>
-  void SetControl(InstrumentControlType type, ValueType value) noexcept {
+  void SetControl(ControlType type, ValueType value) noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
-        *this, static_cast<BarelyInstrumentControlType>(type), static_cast<double>(value));
+        *this, static_cast<BarelyControlType>(type), static_cast<double>(value));
     assert(success);
   }
 
@@ -1167,11 +1166,11 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param type Note control type.
   /// @param value Note control value.
   template <typename ValueType>
-  void SetNoteControl(double pitch, InstrumentControlType type, ValueType value) noexcept {
+  void SetNoteControl(double pitch, ControlType type, ValueType value) noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        *this, pitch, static_cast<BarelyInstrumentControlType>(type), static_cast<double>(value));
+        *this, pitch, static_cast<BarelyControlType>(type), static_cast<double>(value));
     assert(success);
   }
 

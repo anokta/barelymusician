@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
 
 namespace Barely {
@@ -32,8 +30,8 @@ namespace Barely {
     [InspectorName("Loop")] LOOP,
   }
 
-  /// Instrument control type enum values.
-  public enum InstrumentControlType {
+  /// Control type enum values.
+  public enum ControlType {
     /// Gain.
     [InspectorName("Gain")] GAIN = 0,
     /// Number of voices.
@@ -183,7 +181,7 @@ namespace Barely {
     ///
     /// @param type Control type
     /// @return Control value.
-    public double GetControl(InstrumentControlType type) {
+    public double GetControl(ControlType type) {
       return Musician.Internal.Instrument_GetControl(_handle, type);
     }
 
@@ -192,7 +190,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param type Control type
     /// @return Control value.
-    public double GetNoteControl(double pitch, InstrumentControlType type) {
+    public double GetNoteControl(double pitch, ControlType type) {
       return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, type);
     }
 
@@ -213,7 +211,7 @@ namespace Barely {
     ///
     /// @param type Control type
     /// @param value Control value.
-    public void SetControl(InstrumentControlType type, double value) {
+    public void SetControl(ControlType type, double value) {
       Musician.Internal.Instrument_SetControl(_handle, type, value);
     }
 
@@ -222,7 +220,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param type Note control type.
     /// @param value Note control value.
-    public void SetNoteControl(double pitch, InstrumentControlType type, double value) {
+    public void SetNoteControl(double pitch, ControlType type, double value) {
       Musician.Internal.Instrument_SetNoteControl(_handle, pitch, type, value);
     }
 
@@ -290,16 +288,16 @@ namespace Barely {
 
     private void Update() {
       UpdateSampleData();
-      SetControl(InstrumentControlType.GAIN, Gain);
-      SetControl(InstrumentControlType.VOICE_COUNT, (double)VoiceCount);
-      SetControl(InstrumentControlType.OSCILLATOR_TYPE, (double)OscillatorType);
-      SetControl(InstrumentControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
-      SetControl(InstrumentControlType.ATTACK, Attack);
-      SetControl(InstrumentControlType.DECAY, Decay);
-      SetControl(InstrumentControlType.SUSTAIN, Sustain);
-      SetControl(InstrumentControlType.RELEASE, Release);
-      SetControl(InstrumentControlType.PITCH_SHIFT, PitchShift);
-      SetControl(InstrumentControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
+      SetControl(ControlType.GAIN, Gain);
+      SetControl(ControlType.VOICE_COUNT, (double)VoiceCount);
+      SetControl(ControlType.OSCILLATOR_TYPE, (double)OscillatorType);
+      SetControl(ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
+      SetControl(ControlType.ATTACK, Attack);
+      SetControl(ControlType.DECAY, Decay);
+      SetControl(ControlType.SUSTAIN, Sustain);
+      SetControl(ControlType.RELEASE, Release);
+      SetControl(ControlType.PITCH_SHIFT, PitchShift);
+      SetControl(ControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

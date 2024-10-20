@@ -20,7 +20,7 @@
 
 namespace {
 
-using ::barely::InstrumentControlType;
+using ::barely::ControlType;
 using ::barely::Musician;
 using ::barely::SampleDataDefinition;
 using ::barely::SamplePlaybackMode;
@@ -83,11 +83,11 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician(kFrameRate);
 
   auto instrument = musician.AddInstrument();
-  instrument.SetControl(InstrumentControlType::kGain, kGain);
-  instrument.SetControl(InstrumentControlType::kSamplePlaybackMode, SamplePlaybackMode::kLoop);
-  instrument.SetControl(InstrumentControlType::kAttack, kAttack);
-  instrument.SetControl(InstrumentControlType::kRelease, kRelease);
-  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
+  instrument.SetControl(ControlType::kGain, kGain);
+  instrument.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kLoop);
+  instrument.SetControl(ControlType::kAttack, kAttack);
+  instrument.SetControl(ControlType::kRelease, kRelease);
+  instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 

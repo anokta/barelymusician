@@ -26,7 +26,7 @@
 
 namespace {
 
-using ::barely::InstrumentControlType;
+using ::barely::ControlType;
 using ::barely::InstrumentHandle;
 using ::barely::Metronome;
 using ::barely::Musician;
@@ -213,10 +213,10 @@ int main(int /*argc*/, char* argv[]) {
                                        double release) {
     instruments.emplace_back(musician.AddInstrument());
     auto& instrument = instruments.back();
-    instrument.SetControl(InstrumentControlType::kGain, gain);
-    instrument.SetControl(InstrumentControlType::kOscillatorType, type);
-    instrument.SetControl(InstrumentControlType::kAttack, attack);
-    instrument.SetControl(InstrumentControlType::kRelease, release);
+    instrument.SetControl(ControlType::kGain, gain);
+    instrument.SetControl(ControlType::kOscillatorType, type);
+    instrument.SetControl(ControlType::kAttack, attack);
+    instrument.SetControl(ControlType::kRelease, release);
     set_note_callbacks_fn(instruments.size(), instrument);
   };
 
@@ -260,10 +260,10 @@ int main(int /*argc*/, char* argv[]) {
   // Add percussion instrument.
   instruments.push_back(musician.AddInstrument());
   auto& percussion = instruments.back();
-  percussion.SetControl(InstrumentControlType::kGain, 0.125);
-  percussion.SetControl(InstrumentControlType::kAttack, 0.0);
-  percussion.SetControl(InstrumentControlType::kRetrigger, true);
-  percussion.SetControl(InstrumentControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);
+  percussion.SetControl(ControlType::kGain, 0.125);
+  percussion.SetControl(ControlType::kAttack, 0.0);
+  percussion.SetControl(ControlType::kRetrigger, true);
+  percussion.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<double, std::string>>& percussion_map) {

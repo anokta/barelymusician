@@ -21,18 +21,17 @@ InstrumentController::InstrumentController(int frame_rate, double reference_freq
       processor_(frame_rate, reference_frequency) {
   assert(frame_rate > 0);
   for (int i = 0; i < static_cast<int>(controls_.size()); ++i) {
-    processor_.SetControl(static_cast<InstrumentControlType>(i), controls_[i].value);
+    processor_.SetControl(static_cast<ControlType>(i), controls_[i].value);
   }
 }
 
 InstrumentController::~InstrumentController() noexcept { SetAllNotesOff(); }
 
-double InstrumentController::GetControl(InstrumentControlType type) const noexcept {
+double InstrumentController::GetControl(ControlType type) const noexcept {
   return controls_[static_cast<int>(type)].value;
 }
 
-const double* InstrumentController::GetNoteControl(double pitch,
-                                                   InstrumentControlType type) const noexcept {
+const double* InstrumentController::GetNoteControl(double pitch, ControlType type) const noexcept {
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
     return &(*note_controls)[static_cast<int>(type)].value;
   }
@@ -99,14 +98,13 @@ void InstrumentController::SetAllNotesOff() noexcept {
   }
 }
 
-void InstrumentController::SetControl(InstrumentControlType type, double value) noexcept {
+void InstrumentController::SetControl(ControlType type, double value) noexcept {
   if (auto& control = controls_[static_cast<int>(type)]; control.SetValue(value)) {
     message_queue_.Add(update_frame_, ControlMessage{type, control.value});
   }
 }
 
-void InstrumentController::SetNoteControl(double pitch, InstrumentControlType type,
-                                          double value) noexcept {
+void InstrumentController::SetNoteControl(double pitch, ControlType type, double value) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[static_cast<int>(type)];
         note_control.SetValue(value)) {
@@ -135,9 +133,8 @@ void InstrumentController::SetNoteOn(double pitch, double intensity) noexcept {
     note_on_event_.Process(pitch, intensity);
     message_queue_.Add(update_frame_, NoteOnMessage{pitch, intensity});
     for (int i = 0; i < static_cast<int>(it->second.size()); ++i) {
-      message_queue_.Add(
-          update_frame_,
-          NoteControlMessage{pitch, static_cast<InstrumentControlType>(i), (it->second)[i].value});
+      message_queue_.Add(update_frame_, NoteControlMessage{pitch, static_cast<ControlType>(i),
+                                                           (it->second)[i].value});
     }
   }
 }

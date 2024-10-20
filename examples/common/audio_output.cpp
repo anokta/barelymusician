@@ -9,6 +9,7 @@
 
 namespace barely::examples {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 AudioOutput::AudioOutput(int frame_rate, int channel_count, int frame_count) noexcept {
   assert(frame_rate > 0);
   assert(channel_count > 0);

@@ -18,6 +18,7 @@ class Musician {
   ///
   /// @param frame_rate Frame rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   Musician(int frame_rate, double reference_frequency) noexcept;
 
   /// Adds an instrument.

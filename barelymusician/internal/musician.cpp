@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <utility>
 
 #include "barelymusician/internal/instrument_controller.h"
@@ -21,6 +22,7 @@ constexpr double kSecondsFromMinutes = 60.0;
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 Musician::Musician(int frame_rate, double reference_frequency) noexcept
     : frame_rate_(frame_rate), reference_frequency_(reference_frequency) {}
 

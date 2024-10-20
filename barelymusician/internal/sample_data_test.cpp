@@ -21,7 +21,7 @@ TEST(SampleDataTest, Select) {
       SampleDataDefinition(35.0, kSampleRate, kSamples),
   };
 
-  SampleData sample_data(kDefinitions);
+  const SampleData sample_data(kDefinitions);
   for (int i = 0; i <= 40; ++i) {
     EXPECT_THAT(sample_data.Select(static_cast<double>(i)),
                 Pointee(Field(&SampleDataDefinition::root_pitch,

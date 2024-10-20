@@ -18,7 +18,6 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::ScaleDefinition;
 using ::barely::ScaleType;
-using ::barely::TaskHandle;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;

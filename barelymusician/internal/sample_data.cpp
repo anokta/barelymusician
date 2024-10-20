@@ -1,11 +1,13 @@
 #include "barelymusician/internal/sample_data.h"
 
 #include <span>
+#include <vector>
 
 #include "barelymusician/barelymusician.h"
 
 namespace barely {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 SampleData::SampleData(std::span<const SampleDataDefinition> definitions) noexcept {
   data_.reserve(definitions.size());
   for (int i = 0; i < static_cast<int>(definitions.size()); ++i) {

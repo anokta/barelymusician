@@ -37,7 +37,7 @@ bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater) {
   return true;
 }
 
-bool BarelyRepeater_IsPlaying(const BarelyRepeaterHandle repeater, bool* out_is_playing) {
+bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing) {
   if (!repeater || !out_is_playing) return false;
 
   *out_is_playing = repeater->IsPlaying();

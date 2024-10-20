@@ -13,7 +13,6 @@ namespace barely::internal {
 namespace {
 
 using ::testing::Optional;
-using ::testing::Pair;
 
 // Tests that the performer processs a single task as expected.
 TEST(PerformerTest, ProcessSingleTask) {

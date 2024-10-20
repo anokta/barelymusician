@@ -31,7 +31,7 @@ bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator) {
   return true;
 }
 
-bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiatorHandle arpeggiator, double pitch,
+bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch,
                                 bool* out_is_note_on) {
   if (!arpeggiator || !out_is_note_on) return false;
 
@@ -39,7 +39,7 @@ bool BarelyArpeggiator_IsNoteOn(const BarelyArpeggiatorHandle arpeggiator, doubl
   return true;
 }
 
-bool BarelyArpeggiator_IsPlaying(const BarelyArpeggiatorHandle arpeggiator, bool* out_is_playing) {
+bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator, bool* out_is_playing) {
   if (!arpeggiator || !out_is_playing) return false;
 
   *out_is_playing = arpeggiator->IsPlaying();

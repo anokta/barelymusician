@@ -6,7 +6,6 @@
 #include <iterator>
 #include <memory>
 #include <optional>
-#include <set>
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
@@ -14,6 +13,7 @@
 
 namespace barely::internal {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 Performer::Performer(int process_order) noexcept : process_order_(process_order) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

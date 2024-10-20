@@ -1,8 +1,6 @@
 #include "barelymusician/internal/musician.h"
 
-#include <algorithm>
 #include <array>
-#include <cstdint>
 #include <functional>
 #include <vector>
 
@@ -16,9 +14,7 @@ namespace barely::internal {
 namespace {
 
 using ::testing::ElementsAre;
-using ::testing::NotNull;
 using ::testing::Optional;
-using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kFrameRate = 48000;

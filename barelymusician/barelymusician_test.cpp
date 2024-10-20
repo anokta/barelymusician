@@ -1,8 +1,5 @@
 #include "barelymusician/barelymusician.h"
 
-#include <array>
-#include <cmath>
-
 #include "gtest/gtest.h"
 
 namespace barely {

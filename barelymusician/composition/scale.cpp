@@ -1,10 +1,9 @@
 #include "barelymusician/composition/scale.h"
 
+#include <array>
 #include <cassert>
 #include <cmath>
-#include <vector>
-
-#include "barelymusician/barelymusician.h"
+#include <cstdint>
 
 namespace {
 

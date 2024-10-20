@@ -4,6 +4,7 @@
 
 namespace barely::examples {
 
+// NOLINTBEGIN(misc-include-cleaner)
 InputManager::InputManager() : key_down_callback_(nullptr), key_up_callback_(nullptr) {
 #if defined(_WIN32) || defined(__CYGWIN__)
   std_input_handle_ = GetStdHandle(STD_INPUT_HANDLE);
@@ -50,6 +51,7 @@ InputManager::InputManager() : key_down_callback_(nullptr), key_up_callback_(nul
   CGEventTapEnable(event_tap_, true);
 #endif  // defined(__APPLE__)
 }
+// NOLINTEND(misc-include-cleaner)
 
 InputManager::~InputManager() noexcept {
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -68,6 +70,7 @@ void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept {
   key_up_callback_ = std::move(key_up_callback);
 }
 
+// NOLINTBEGIN(misc-include-cleaner)
 void InputManager::Update() {
 #if defined(_WIN32) || defined(__CYGWIN__)
   for (int i = 0; i < 128; ++i) {
@@ -83,6 +86,7 @@ void InputManager::Update() {
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
 #endif  // defined(__APPLE__)
 }
+// NOLINTEND(misc-include-cleaner)
 
 void InputManager::HandleKeyDown(const Key& key) {
   if (pressed_keys_.insert(key).second && key_down_callback_) {

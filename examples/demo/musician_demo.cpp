@@ -8,6 +8,7 @@
 #include <string>
 #include <thread>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -226,7 +227,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto chords_beat_composer_callback = [&](int /*bar*/, int /*beat*/, int /*beat_count*/,
                                                  int harmonic, InstrumentHandle& instrument,
                                                  PerformerHandle& performer) {
-    return ComposeChord(0.5, harmonic, scale, instrument, performer);
+    ComposeChord(0.5, harmonic, scale, instrument, performer);
   };
 
   build_instrument_fn(OscillatorType::kSine, 0.05, 0.125, 0.125);
@@ -240,7 +241,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto line_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                InstrumentHandle& instrument,
                                                PerformerHandle& performer) {
-    return ComposeLine(-1, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
+    ComposeLine(-1, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
   build_instrument_fn(OscillatorType::kSaw, 0.06, 0.0025, 0.125);
@@ -250,7 +251,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                  InstrumentHandle& instrument,
                                                  PerformerHandle& performer) {
-    return ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
+    ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
   build_instrument_fn(OscillatorType::kSquare, 0.06, 0.05, 0.05);
@@ -287,7 +288,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto percussion_beat_composer_callback = [&](int bar, int beat, int beat_count,
                                                      int /*harmonic*/, InstrumentHandle& instrument,
                                                      PerformerHandle& performer) {
-    return ComposeDrums(bar, beat, beat_count, random, instrument, performer);
+    ComposeDrums(bar, beat, beat_count, random, instrument, performer);
   };
 
   performers.emplace_back(musician.AddPerformer(), percussion_beat_composer_callback,

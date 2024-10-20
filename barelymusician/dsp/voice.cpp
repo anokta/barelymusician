@@ -1,5 +1,7 @@
 #include "barelymusician/dsp/voice.h"
 
+#include "barelymusician/dsp/sample_player.h"
+
 namespace barely {
 
 Voice::Voice(int frame_rate) noexcept

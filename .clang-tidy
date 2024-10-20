@@ -18,6 +18,7 @@ Checks: >
   portability-*,
 
   readability-*,
+  -readability-avoid-nested-conditional-operator,
   -readability-function-cognitive-complexity,
   -readability-implicit-bool-conversion,
   -readability-magic-numbers,

@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <span>
 
 #include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/musician.h"
@@ -363,7 +364,7 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
   return true;
 }
 
-bool BarelyTask_GetPosition(const BarelyTaskHandle task, double* out_position) {
+bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
   if (!task) return false;
   if (!out_position) return false;
 

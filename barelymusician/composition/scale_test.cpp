@@ -20,6 +20,7 @@ TEST(ScaleTest, GetPitch) {
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < kPitchCount; ++i) {
       const int degree = octave * kPitchCount + i;
+      // NOLINTNEXTLINE(bugprone-integer-division)
       const double expected_pitch = kRootPitch + octave + (i + kMode) / kPitchCount +
                                     kPitches[(i + kMode) % kPitchCount] - kPitches[kMode];
       EXPECT_EQ(scale.GetPitch(degree), expected_pitch) << degree;

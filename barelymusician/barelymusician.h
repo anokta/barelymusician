@@ -546,16 +546,6 @@ BARELY_EXPORT bool BarelyMusician_Create(int32_t frame_rate, BarelyMusicianHandl
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
 
-/// Gets the corresponding number of musician beats for a given number of
-/// seconds.
-///
-/// @param musician Musician handle.
-/// @param seconds Number of seconds.
-/// @param out_beats Output number of musician beats.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_GetBeatsFromSeconds(BarelyMusicianHandle musician, double seconds,
-                                                      double* out_beats);
-
 /// Gets the reference frequency of a musician.
 ///
 /// @param musician Musician handle.
@@ -563,16 +553,6 @@ BARELY_EXPORT bool BarelyMusician_GetBeatsFromSeconds(BarelyMusicianHandle music
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_GetReferenceFrequency(BarelyMusicianHandle musician,
                                                         double* out_reference_frequency);
-
-/// Gets the corresponding number of seconds for a given number of musician
-/// beats.
-///
-/// @param musician Musician handle.
-/// @param beats Number of musician beats.
-/// @param out_seconds Output number of seconds.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_GetSecondsFromBeats(BarelyMusicianHandle musician, double beats,
-                                                      double* out_seconds);
 
 /// Gets the tempo of a musician.
 ///
@@ -1525,28 +1505,15 @@ class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
     return PerformerHandle(performer);
   }
 
-  /// Returns the corresponding number of beats for a given number of seconds.
+  /// Returns the reference frequency.
   ///
-  /// @param seconds Number of seconds.
-  /// @return Number of beats.
-  [[nodiscard]] double GetBeatsFromSeconds(double seconds) {
-    double beats = 0.0;
+  /// @return Reference frequency in hertz.
+  [[nodiscard]] double GetReferenceFrequency() const noexcept {
+    double reference_frequency = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyMusician_GetBeatsFromSeconds(*this, seconds, &beats);
+        BarelyMusician_GetReferenceFrequency(*this, &reference_frequency);
     assert(success);
-    return beats;
-  }
-
-  /// Returns the corresponding number of seconds for a given number of beats.
-  ///
-  /// @param beats Number of beats.
-  /// @return Number of seconds.
-  [[nodiscard]] double GetSecondsFromBeats(double beats) {
-    double seconds = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyMusician_GetSecondsFromBeats(*this, beats, &seconds);
-    assert(success);
-    return seconds;
+    return reference_frequency;
   }
 
   /// Returns the tempo.

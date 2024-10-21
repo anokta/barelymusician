@@ -179,24 +179,6 @@ bool BarelyMusician_Destroy(BarelyMusicianHandle musician) {
   return true;
 }
 
-bool BarelyMusician_GetBeatsFromSeconds(BarelyMusicianHandle musician, double seconds,
-                                        double* out_beats) {
-  if (!musician) return false;
-  if (!out_beats) return false;
-
-  *out_beats = musician->GetBeatsFromSeconds(seconds);
-  return true;
-}
-
-bool BarelyMusician_GetSecondsFromBeats(BarelyMusicianHandle musician, double beats,
-                                        double* out_seconds) {
-  if (!musician) return false;
-  if (!out_seconds) return false;
-
-  *out_seconds = musician->GetSecondsFromBeats(beats);
-  return true;
-}
-
 bool BarelyMusician_GetReferenceFrequency(BarelyMusicianHandle musician,
                                           double* out_reference_frequency) {
   if (!musician) return false;

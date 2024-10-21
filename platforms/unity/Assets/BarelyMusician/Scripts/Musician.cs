@@ -36,22 +36,6 @@ namespace Barely {
       get { return Internal.Musician_GetTimestamp(); }
     }
 
-    /// Returns the corresponding number of beats for a given number of `seconds`.
-    ///
-    /// @param seconds Number of seconds.
-    /// @return Number of beats.
-    public static double GetBeatsFromSeconds(double seconds) {
-      return Internal.Musician_GetBeatsFromSeconds(seconds);
-    }
-
-    /// Returns the corresponding number of seconds for a given number of `beats`.
-    ///
-    /// @param beats Number of beats.
-    /// @return Number of seconds.
-    public static double GetSecondsFromBeats(double beats) {
-      return Internal.Musician_GetSecondsFromBeats(beats);
-    }
-
     /// Schedules a task at a specific time.
     ///
     /// @param callback Task process callback.
@@ -304,19 +288,6 @@ namespace Barely {
         }
       }
 
-      /// Returns the corresponding number of musician beats for a given number of seconds.
-      ///
-      /// @param frames Number of seconds.
-      /// @return Number of beats.
-      public static double Musician_GetBeatsFromSeconds(double seconds) {
-        double beats = 0.0;
-        if (!BarelyMusician_GetBeatsFromSeconds(Handle, seconds, ref beats) &&
-            _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get musician beats for " + seconds + " seconds");
-        }
-        return beats;
-      }
-
       /// Returns the reference frequency of a musician.
       ///
       /// @return Reference frequency in hertz.
@@ -327,19 +298,6 @@ namespace Barely {
           Debug.LogError("Failed to get musician reference frequency");
         }
         return referenceFrequency;
-      }
-
-      /// Returns the corresponding number of seconds for a given number of musician beats.
-      ///
-      /// @param frames Number of beats.
-      /// @return Number of seconds.
-      public static double Musician_GetSecondsFromBeats(double beats) {
-        double seconds = 0.0;
-        if (!BarelyMusician_GetSecondsFromBeats(Handle, beats, ref seconds) &&
-            _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get seconds for " + beats + " musician beats");
-        }
-        return seconds;
       }
 
       /// Returns the tempo of a musician.
@@ -1154,17 +1112,9 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern bool BarelyMusician_Destroy(IntPtr musician);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetBeatsFromSeconds")]
-      private static extern bool BarelyMusician_GetBeatsFromSeconds(IntPtr musician, double seconds,
-                                                                    ref double outBeats);
-
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetReferenceFrequency")]
       private static extern bool BarelyMusician_GetReferenceFrequency(
           IntPtr musician, ref double outReferenceFrequency);
-
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetSecondsFromBeats")]
-      private static extern bool BarelyMusician_GetSecondsFromBeats(IntPtr musician, double beats,
-                                                                    ref double outSeconds);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTempo")]
       private static extern bool BarelyMusician_GetTempo(IntPtr musician, ref double outTempo);

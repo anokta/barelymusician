@@ -4,22 +4,22 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/components/metronome.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
+#include "examples/performers/metronome.h"
 
 namespace {
 
 using ::barely::ControlType;
-using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
+using ::barely::examples::Metronome;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;

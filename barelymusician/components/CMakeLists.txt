@@ -10,16 +10,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_metronome
-  metronome.cpp
-  metronome.h
-)
-target_link_libraries(
-  barelymusician_metronome
-  barelymusician
-)
-
-add_library(
   barelymusician_repeater
   repeater.cpp
   repeater.h

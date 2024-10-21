@@ -13,7 +13,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
-#include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/duration.h"
 #include "barelymusician/composition/scale.h"
 #include "examples/common/audio_clock.h"
@@ -22,12 +21,12 @@
 #include "examples/common/input_manager.h"
 #include "examples/common/wav_file.h"
 #include "examples/data/data.h"
+#include "examples/performers/metronome.h"
 
 namespace {
 
 using ::barely::ControlType;
 using ::barely::InstrumentHandle;
-using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::PerformerHandle;
@@ -41,6 +40,7 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
 using ::barely::examples::InputManager;
+using ::barely::examples::Metronome;
 using ::barely::examples::WavFile;
 
 // Beat composer callback signature.

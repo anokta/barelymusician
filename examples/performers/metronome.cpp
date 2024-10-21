@@ -1,10 +1,10 @@
-#include "barelymusician/components/metronome.h"
+#include "examples/performers/metronome.h"
 
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
 
-namespace barely {
+namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Metronome::Metronome(MusicianHandle musician, int process_order) noexcept
@@ -35,4 +35,4 @@ void Metronome::Start() noexcept { performer_.Start(); }
 
 void Metronome::Stop() noexcept { performer_.Stop(); }
 
-}  // namespace barely
+}  // namespace barely::examples

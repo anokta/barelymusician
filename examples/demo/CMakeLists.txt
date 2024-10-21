@@ -36,10 +36,10 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   metronome_demo
   barelymusician
-  barelymusician_metronome
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
+  barelymusician_examples_metronome
   barelymusician_examples_input_manager
 )
 
@@ -58,13 +58,13 @@ add_barelymusician_demo(
   musician_demo
   barelymusician
   barelymusician_random
-  barelymusician_metronome
   barelymusician_duration
   barelymusician_scale
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
   barelymusician_examples_input_manager
+  barelymusician_examples_metronome
   barelymusician_examples_wav_file
   barelymusician_examples_data
 )

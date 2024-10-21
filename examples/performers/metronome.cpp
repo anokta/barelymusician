@@ -8,7 +8,7 @@ namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Metronome::Metronome(MusicianHandle musician, int process_order) noexcept
-    : performer_(musician.AddPerformer(process_order)) {
+    : musician_(std::move(musician)), performer_(musician.AddPerformer(process_order)) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
   performer_.AddTask(
@@ -20,6 +20,8 @@ Metronome::Metronome(MusicianHandle musician, int process_order) noexcept
       },
       0.0);
 }
+
+Metronome::~Metronome() noexcept { musician_.RemovePerformer(performer_); }
 
 bool Metronome::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 

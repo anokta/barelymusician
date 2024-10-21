@@ -404,20 +404,6 @@ typedef struct BarelyPerformer* BarelyPerformerHandle;
 /// Task handle alias.
 typedef struct BarelyTask* BarelyTaskHandle;
 
-/// Creates a new instrument.
-///
-/// @param musician Musician handle.
-/// @param out_instrument Output instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusicianHandle musician,
-                                           BarelyInstrumentHandle* out_instrument);
-
-/// Destroys an instrument.
-///
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
-
 /// Gets an instrument control value.
 ///
 /// @param instrument Instrument handle.
@@ -447,7 +433,7 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
                                              bool* out_is_note_on);
 
 /// Processes instrument output samples at timestamp.
-/// @note This is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
+/// @note This is *not* thread-safe during a corresponding `BarelyMusician_RemoveInstrument` call.
 ///
 /// @param instrument Instrument handle.
 /// @param output_samples Array of interleaved output samples.
@@ -659,21 +645,6 @@ BARELY_EXPORT bool BarelyPerformer_AddTask(BarelyPerformerHandle performer,
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer);
 
-/// Creates a new performer.
-///
-/// @param musician Musician handle.
-/// @param process_order Process order.
-/// @param out_performer Output performer handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician, int32_t process_order,
-                                          BarelyPerformerHandle* out_performer);
-
-/// Destroys a performer.
-///
-/// @param performer Performer handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
-
 /// Gets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
@@ -772,24 +743,6 @@ BARELY_EXPORT bool BarelyPerformer_Start(BarelyPerformerHandle performer);
 /// @param performer Performer handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
-
-/// Creates a new task.
-///
-/// @param performer Performer handle.
-/// @param definition Task definition.
-/// @param position Task position in beats.
-/// @param user_data Pointer to user data.
-/// @param out_task Output task handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_Create(BarelyPerformerHandle performer,
-                                     BarelyTaskDefinition definition, double position,
-                                     void* user_data, BarelyTaskHandle* out_task);
-
-/// Destroys a task.
-///
-/// @param task Task handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
 
 /// Gets the position of a task.
 ///

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <optional>
+#include <utility>
 
 #include "barelymusician/barelymusician.h"
 
@@ -61,7 +62,7 @@ bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator, double 
 }
 
 bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                     BarelyInstrument* instrument) {
+                                     BarelyInstrumentHandle instrument) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetInstrument(
@@ -101,7 +102,7 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Arpeggiator::Arpeggiator(MusicianHandle musician, int process_order) noexcept
-    : performer_(musician.AddPerformer(process_order)) {
+    : musician_(std::move(musician)), performer_(musician_.AddPerformer(process_order)) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
   performer_.AddTask(
@@ -123,7 +124,12 @@ Arpeggiator::Arpeggiator(MusicianHandle musician, int process_order) noexcept
       0.0);
 }
 
-Arpeggiator::~Arpeggiator() noexcept { Stop(); }
+Arpeggiator::~Arpeggiator() noexcept {
+  if (IsPlaying() && instrument_.has_value()) {
+    instrument_->SetAllNotesOff();
+  }
+  musician_.RemovePerformer(performer_);
+}
 
 bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();

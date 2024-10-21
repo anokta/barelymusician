@@ -15,12 +15,23 @@ class Metronome {
   /// @param beat Beat.
   using BeatCallback = std::function<void(int beat)>;
 
-  // Creates a new `Metronome`.
+  /// Constructs a new `Metronome`.
   ///
   /// @param musician Musician handle.
   /// @param process_order Process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit Metronome(MusicianHandle musician, int process_order = -1) noexcept;
+
+  /// Destroys `Metronome`.
+  ~Metronome() noexcept;
+
+  /// Non-copyable.
+  Metronome(const Metronome& other) noexcept = delete;
+  Metronome& operator=(const Metronome& other) noexcept = delete;
+
+  /// Movable.
+  Metronome(Metronome&& other) noexcept = default;
+  Metronome& operator=(Metronome&& other) noexcept = default;
 
   /// Returns whether the metronome is playing or not.
   ///
@@ -42,6 +53,9 @@ class Metronome {
   void Stop() noexcept;
 
  private:
+  // Musician.
+  MusicianHandle musician_;
+
   // Performer.
   PerformerHandle performer_;
 

@@ -93,7 +93,7 @@ namespace Barely {
       /// @param component Component.
       /// @param componentHandle Component handle.
       public static void Component_Destroy(Component component, ref IntPtr componentHandle) {
-        if (Handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
+        if (_handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
           return;
         }
         bool success = true;

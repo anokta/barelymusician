@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <utility>
 
 #include "barelymusician/barelymusician.h"
 
@@ -65,7 +66,8 @@ bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length) {
   return true;
 }
 
-bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater, BarelyInstrument* instrument) {
+bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
+                                  BarelyInstrumentHandle instrument) {
   if (!repeater) return false;
 
   repeater->SetInstrument(
@@ -105,7 +107,7 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(MusicianHandle musician, int process_order) noexcept
-    : performer_(musician.AddPerformer(process_order)) {
+    : musician_(std::move(musician)), performer_(musician_.AddPerformer(process_order)) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
   performer_.AddTask(
@@ -125,7 +127,12 @@ Repeater::Repeater(MusicianHandle musician, int process_order) noexcept
       0.0);
 }
 
-Repeater::~Repeater() noexcept { Stop(); }
+Repeater::~Repeater() noexcept {
+  if (IsPlaying() && instrument_.has_value()) {
+    instrument_->SetAllNotesOff();
+  }
+  musician_.RemovePerformer(performer_);
+}
 
 void Repeater::Clear() noexcept { pitches_.clear(); }
 

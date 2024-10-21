@@ -68,7 +68,7 @@ BARELY_EXPORT bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int
 /// @param instrument Instrument handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
-                                                BarelyInstrument* instrument);
+                                                BarelyInstrumentHandle instrument);
 
 /// Sets the rate of an repeater.
 ///
@@ -186,6 +186,9 @@ class Repeater {
  private:
   // Updates the repeater.
   bool Update() noexcept;
+
+  // Musician.
+  MusicianHandle musician_;
 
   // Performer.
   PerformerHandle performer_;

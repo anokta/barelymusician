@@ -65,7 +65,7 @@ BARELY_EXPORT bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpegg
 /// @param instrument Instrument handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                                   BarelyInstrument* instrument);
+                                                   BarelyInstrumentHandle instrument);
 
 /// Sets an arpeggiator note off.
 ///
@@ -194,6 +194,9 @@ class Arpeggiator {
 
   // Updates the arpeggiator.
   void Update() noexcept;
+
+  // Musician.
+  MusicianHandle musician_;
 
   // Performer.
   PerformerHandle performer_;

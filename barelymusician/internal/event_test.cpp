@@ -22,8 +22,8 @@ TEST(EventTest, Process) {
   EXPECT_EQ(test_data.process_count, 0);
 
   {
-    Event<TaskDefinition> event(
-        TaskDefinition{
+    Event<TaskEvent> event(
+        TaskEvent{
             [](void** state, void* user_data) {
               *state = user_data;
               ++static_cast<TestData*>(*state)->create_count;

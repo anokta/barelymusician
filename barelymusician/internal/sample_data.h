@@ -17,13 +17,14 @@ class SampleData {
 
   /// Constructs a new `SampleData`.
   ///
-  /// @param definitions Span of sample data definitions.
-  SampleData(std::span<const SampleDataDefinition> definitions) noexcept;
+  /// @param slices Span of sample data slices.
+  SampleData(std::span<const SampleDataSlice> slices) noexcept;
 
-  /// Selects the sample data for a given pitch.
+  /// Selects the sample data slice for a given pitch.
   ///
   /// @param pitch Note pitch.
-  const SampleDataDefinition* Select(double pitch) const noexcept;
+  /// @return Pointer to sample data slice.
+  const SampleDataSlice* Select(double pitch) const noexcept;
 
   /// Swaps the sample data.
   ///
@@ -31,8 +32,8 @@ class SampleData {
   void Swap(SampleData& other) noexcept;
 
  private:
-  // Array of sample data.
-  std::vector<std::pair<SampleDataDefinition, std::vector<double>>> data_;
+  // Array of sample data slices.
+  std::vector<std::pair<SampleDataSlice, std::vector<double>>> slices_;
 };
 
 }  // namespace barely

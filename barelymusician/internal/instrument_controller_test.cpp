@@ -46,13 +46,13 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
   constexpr double kPitch = 1.0;
   constexpr double kIntensity = 0.5;
   constexpr int64_t kUpdateFrame = 20;
-  constexpr std::array<SampleDataDefinition, 1> kDefinitions = {
-      SampleDataDefinition(kPitch, kFrameRate, kSamples)};
+  constexpr std::array<SampleDataSlice, 1> kSlices = {
+      SampleDataSlice(kPitch, kFrameRate, kSamples)};
 
   InstrumentController instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
   instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<double>(SamplePlaybackMode::kSustain));
-  instrument.SetSampleData(SampleData(kDefinitions));
+  instrument.SetSampleData(SampleData(kSlices));
 
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
@@ -93,17 +93,17 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
 
 // Tests that the instrument plays multiple notes as expected.
 TEST(InstrumentControllerTest, PlayMultipleNotes) {
-  constexpr std::array<SampleDataDefinition, kFrameRate> kDefinitions = {
-      SampleDataDefinition(0.0, kFrameRate, {kSamples.data(), kSamples.data() + 1}),
-      SampleDataDefinition(1.0, kFrameRate, {kSamples.data() + 1, kSamples.data() + 2}),
-      SampleDataDefinition(2.0, kFrameRate, {kSamples.data() + 2, kSamples.data() + 3}),
-      SampleDataDefinition(3.0, kFrameRate, {kSamples.data() + 3, kSamples.data() + 4}),
+  constexpr std::array<SampleDataSlice, kFrameRate> kSlices = {
+      SampleDataSlice(0.0, kFrameRate, {kSamples.data(), kSamples.data() + 1}),
+      SampleDataSlice(1.0, kFrameRate, {kSamples.data() + 1, kSamples.data() + 2}),
+      SampleDataSlice(2.0, kFrameRate, {kSamples.data() + 2, kSamples.data() + 3}),
+      SampleDataSlice(3.0, kFrameRate, {kSamples.data() + 3, kSamples.data() + 4}),
   };
 
   InstrumentController instrument(1, kReferenceFrequency, 0);
   instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<double>(SamplePlaybackMode::kSustain));
-  instrument.SetSampleData(SampleData(kDefinitions));
+  instrument.SetSampleData(SampleData(kSlices));
 
   std::vector<double> buffer(kChannelCount * kFrameRate);
 
@@ -150,12 +150,11 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   // Trigger the note on callback.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch, double intensity) {
+  NoteOnEvent::Callback note_on_callback = [&](double pitch, double intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
-  instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
-                            static_cast<void*>(&note_on_callback));
+  instrument.SetNoteOnEvent(NoteOnEvent::WithCallback(), static_cast<void*>(&note_on_callback));
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
@@ -179,11 +178,8 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
 
   // Trigger the note off callback.
   double note_off_pitch = 0.0;
-  NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
-    note_off_pitch = pitch;
-  };
-  instrument.SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
-                             static_cast<void*>(&note_off_callback));
+  NoteOffEvent::Callback note_off_callback = [&](double pitch) { note_off_pitch = pitch; };
+  instrument.SetNoteOffEvent(NoteOffEvent::WithCallback(), static_cast<void*>(&note_off_callback));
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   instrument.SetNoteOff(kPitch);

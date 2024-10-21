@@ -33,38 +33,36 @@ constexpr std::array<double, kHeptatonicScaleCount> kHarmonicMinorPitches = {
 
 }  // namespace
 
-bool BarelyScale_GetPitch(const BarelyScaleDefinition* definition, int32_t degree,
-                          double* out_pitch) {
-  if (definition == nullptr) return false;
-  if (definition->pitches == nullptr || definition->pitch_count == 0) return false;
-  if (definition->mode < 0 || definition->mode >= definition->pitch_count) return false;
+bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, double* out_pitch) {
+  if (scale == nullptr) return false;
+  if (scale->pitches == nullptr || scale->pitch_count == 0) return false;
+  if (scale->mode < 0 || scale->mode >= scale->pitch_count) return false;
   if (out_pitch == nullptr) return false;
 
-  const int scale_degree = degree + definition->mode;
-  const int pitch_count = static_cast<int>(definition->pitch_count);
+  const int scale_degree = degree + scale->mode;
+  const int pitch_count = static_cast<int>(scale->pitch_count);
   const int octave = static_cast<int>(
       std::floor(static_cast<double>(scale_degree) / static_cast<double>(pitch_count)));
   const int index = scale_degree - octave * pitch_count;
   assert(index >= 0 && index < pitch_count);
-  *out_pitch = definition->root_pitch + static_cast<double>(octave) + definition->pitches[index] -
-               definition->pitches[definition->mode];
+  *out_pitch = scale->root_pitch + static_cast<double>(octave) + scale->pitches[index] -
+               scale->pitches[scale->mode];
   return true;
 }
 
-bool Barely_GetScaleDefinition(BarelyScaleType type, double root_pitch,
-                               BarelyScaleDefinition* out_definition) {
+bool Barely_GetScale(BarelyScaleType type, double root_pitch, BarelyScale* out_scale) {
   if (type < 0 || type >= static_cast<int>(barely::ScaleType::kCount)) return false;
-  if (out_definition == nullptr) return false;
+  if (out_scale == nullptr) return false;
 
   switch (static_cast<barely::ScaleType>(type)) {
     case barely::ScaleType::kChromatic:
-      *out_definition = barely::ScaleDefinition{kSemitones, root_pitch};
+      *out_scale = barely::Scale{kSemitones, root_pitch};
       return true;
     case barely::ScaleType::kDiatonic:
-      *out_definition = barely::ScaleDefinition{kDiatonicPitches, root_pitch};
+      *out_scale = barely::Scale{kDiatonicPitches, root_pitch};
       return true;
     case barely::ScaleType::kHarmonicMinor:
-      *out_definition = barely::ScaleDefinition{kHarmonicMinorPitches, root_pitch};
+      *out_scale = barely::Scale{kHarmonicMinorPitches, root_pitch};
       return true;
     default:
       return false;

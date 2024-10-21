@@ -12,6 +12,7 @@ using ::barely::ControlType;
 using ::barely::InstrumentController;
 using ::barely::NoteControlType;
 using ::barely::Performer;
+using ::barely::SampleDataSlice;
 using ::barely::internal::Musician;
 
 // Musician.
@@ -112,10 +113,10 @@ bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch
 }
 
 bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                      BarelyNoteOffEventDefinition definition, void* user_data) {
+                                      BarelyNoteOffEvent note_off_event, void* user_data) {
   if (!instrument) return false;
 
-  instrument->SetNoteOffEvent(definition, user_data);
+  instrument->SetNoteOffEvent(note_off_event, user_data);
   return true;
 }
 
@@ -127,22 +128,21 @@ bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch,
 }
 
 bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                     BarelyNoteOnEventDefinition definition, void* user_data) {
+                                     BarelyNoteOnEvent note_on_event, void* user_data) {
   if (!instrument) return false;
 
-  instrument->SetNoteOnEvent(definition, user_data);
+  instrument->SetNoteOnEvent(note_on_event, user_data);
   return true;
 }
 
 bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
-                                    const BarelySampleDataDefinition* definitions,
-                                    int32_t definition_count) {
+                                    const BarelySampleDataSlice* slices, int32_t slice_count) {
   if (!instrument) return false;
-  if (definition_count < 0 || (!definitions && definition_count > 0)) return false;
+  if (slice_count < 0 || (!slices && slice_count > 0)) return false;
 
-  instrument->SetSampleData(std::span<const barely::SampleDataDefinition>{
-      reinterpret_cast<const barely::SampleDataDefinition*>(definitions),
-      reinterpret_cast<const barely::SampleDataDefinition*>(definitions + definition_count)});
+  instrument->SetSampleData(std::span<const SampleDataSlice>{
+      reinterpret_cast<const SampleDataSlice*>(slices),
+      reinterpret_cast<const SampleDataSlice*>(slices + slice_count)});
   return true;
 }
 
@@ -242,12 +242,12 @@ bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   return true;
 }
 
-bool BarelyPerformer_AddTask(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
+bool BarelyPerformer_AddTask(BarelyPerformerHandle performer, BarelyTaskEvent task_event,
                              double position, void* user_data, BarelyTaskHandle* out_task) {
   if (!performer) return false;
   if (!out_task) return false;
 
-  *out_task = static_cast<BarelyTask*>(performer->AddTask(definition, position, user_data));
+  *out_task = static_cast<BarelyTask*>(performer->AddTask(task_event, position, user_data));
   return *out_task;
 }
 
@@ -307,12 +307,11 @@ bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer, BarelyTaskHandl
   return true;
 }
 
-bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
-                                        BarelyTaskDefinition definition, double position,
-                                        void* user_data) {
+bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer, BarelyTaskEvent task_event,
+                                        double position, void* user_data) {
   if (!performer) return false;
 
-  performer->ScheduleOneOffTask(definition, position, user_data);
+  performer->ScheduleOneOffTask(task_event, position, user_data);
   return true;
 }
 

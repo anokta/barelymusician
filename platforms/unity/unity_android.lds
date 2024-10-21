@@ -67,7 +67,7 @@ VERS_1.0 {
     BarelyRepeater_Stop;
 
     BarelyScale_GetPitch;
-    Barely_GetScaleDefinition;
+    Barely_GetScale;
 
   local:
     *;

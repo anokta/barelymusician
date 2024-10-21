@@ -31,9 +31,9 @@ using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::PerformerHandle;
 using ::barely::Random;
-using ::barely::SampleDataDefinition;
+using ::barely::SampleDataSlice;
 using ::barely::SamplePlaybackMode;
-using ::barely::ScaleDefinition;
+using ::barely::Scale;
 using ::barely::ScaleType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -78,13 +78,13 @@ constexpr char kDrumsDir[] = "audio/drums/";
 
 // Inserts pad data to a given `data` from a given `file_path`.
 void InsertPadData(double pitch, const std::string& file_path, std::vector<double>& samples,
-                   std::vector<SampleDataDefinition>& definitions) {
+                   std::vector<SampleDataSlice>& slices) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
 
   samples = sample_file.GetData();
-  definitions.emplace_back(pitch, sample_file.GetFrameRate(), samples);
+  slices.emplace_back(pitch, sample_file.GetFrameRate(), samples);
 }
 
 // Schedules performer to play an instrument note.
@@ -96,8 +96,8 @@ void ScheduleNote(double position, double duration, double pitch, double intensi
                                position + duration);
 }
 
-void ComposeChord(double intensity, int harmonic, const ScaleDefinition& scale,
-                  InstrumentHandle& instrument, PerformerHandle& performer) {
+void ComposeChord(double intensity, int harmonic, const Scale& scale, InstrumentHandle& instrument,
+                  PerformerHandle& performer) {
   const auto add_chord_note = [&](int degree) {
     ScheduleNote(0.0, 1.0, scale.GetPitch(degree), intensity, instrument, performer);
   };
@@ -107,7 +107,7 @@ void ComposeChord(double intensity, int harmonic, const ScaleDefinition& scale,
 }
 
 void ComposeLine(int octave_offset, double intensity, int bar, int beat, int beat_count,
-                 int harmonic, const ScaleDefinition& scale, InstrumentHandle& instrument,
+                 int harmonic, const Scale& scale, InstrumentHandle& instrument,
                  PerformerHandle& performer) {
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position, int degree) {
@@ -219,7 +219,7 @@ int main(int /*argc*/, char* argv[]) {
     set_note_callbacks_fn(instruments.size(), instrument);
   };
 
-  const ScaleDefinition scale = barely::GetScaleDefinition(ScaleType::kDiatonic, kRootPitch);
+  const Scale scale = barely::GetScale(ScaleType::kDiatonic, kRootPitch);
 
   // Add synth instruments.
   const auto chords_beat_composer_callback = [&](int /*bar*/, int /*beat*/, int /*beat_count*/,
@@ -266,16 +266,16 @@ int main(int /*argc*/, char* argv[]) {
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<double, std::string>>& percussion_map) {
-        std::vector<SampleDataDefinition> definitions;
+        std::vector<SampleDataSlice> slices;
         std::vector<std::vector<double>> samples;
-        definitions.reserve(percussion_map.size());
+        slices.reserve(percussion_map.size());
         samples.reserve(percussion_map.size());
         for (const auto& [pitch, file_path] : percussion_map) {
           samples.emplace_back();
           InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), samples.back(),
-                        definitions);
+                        slices);
         }
-        percussion.SetSampleData(definitions);
+        percussion.SetSampleData(slices);
       };
   set_percussion_pad_map_fn({
       {kPitchKick, "basic_kick.wav"},

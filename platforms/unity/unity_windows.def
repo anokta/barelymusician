@@ -68,4 +68,4 @@ EXPORTS
   BarelyRepeater_Stop
 
   BarelyScale_GetPitch
-  Barely_GetScaleDefinition
+  Barely_GetScale

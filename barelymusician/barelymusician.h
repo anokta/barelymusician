@@ -160,7 +160,7 @@
 ///
 ///   // Add a task.
 ///   BarelyTaskHandle task = nullptr;
-///   BarelyPerformer_AddTask(performer, BarelyTaskDefinition{/*populate this*/}, /*position=*/0.0,
+///   BarelyPerformer_AddTask(performer, BarelyTaskEvent{/*populate this*/}, /*position=*/0.0,
 ///                           /*user_data=*/nullptr, &task);
 ///
 ///   // Set looping on.
@@ -289,68 +289,67 @@ enum BarelySamplePlaybackMode_Values {
   BarelySamplePlaybackMode_kCount,
 };
 
-/// Note off event definition create callback signature.
+/// Note off event create callback signature.
 ///
-/// @param state Pointer to note off state.
+/// @param state Pointer to note off event state.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyNoteOffEventDefinition_CreateCallback)(void** state, void* user_data);
+typedef void (*BarelyNoteOffEvent_CreateCallback)(void** state, void* user_data);
 
-/// Note off event definition destroy callback signature.
+/// Note off event destroy callback signature.
 ///
-/// @param state Pointer to note off state.
-typedef void (*BarelyNoteOffEventDefinition_DestroyCallback)(void** state);
+/// @param state Pointer to note off event state.
+typedef void (*BarelyNoteOffEvent_DestroyCallback)(void** state);
 
-/// Note off event definition process callback signature.
+/// Note off event process callback signature.
 ///
 /// @param state Pointer to note off event state.
 /// @param pitch Note pitch.
-typedef void (*BarelyNoteOffEventDefinition_ProcessCallback)(void** state, double pitch);
+typedef void (*BarelyNoteOffEvent_ProcessCallback)(void** state, double pitch);
 
-/// Note off event definition.
-typedef struct BarelyNoteOffEventDefinition {
+/// Note off event.
+typedef struct BarelyNoteOffEvent {
   /// Create callback.
-  BarelyNoteOffEventDefinition_CreateCallback create_callback;
+  BarelyNoteOffEvent_CreateCallback create_callback;
 
   /// Destroy callback.
-  BarelyNoteOffEventDefinition_DestroyCallback destroy_callback;
+  BarelyNoteOffEvent_DestroyCallback destroy_callback;
 
   /// Process callback.
-  BarelyNoteOffEventDefinition_ProcessCallback process_callback;
-} BarelyNoteOffEventDefinition;
+  BarelyNoteOffEvent_ProcessCallback process_callback;
+} BarelyNoteOffEvent;
 
-/// Note on event definition create callback signature.
+/// Note on event create callback signature.
 ///
-/// @param state Pointer to note on state.
+/// @param state Pointer to note on event state.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyNoteOnEventDefinition_CreateCallback)(void** state, void* user_data);
+typedef void (*BarelyNoteOnEvent_CreateCallback)(void** state, void* user_data);
 
-/// Note on event definition destroy callback signature.
+/// Note on event destroy callback signature.
 ///
-/// @param state Pointer to note on state.
-typedef void (*BarelyNoteOnEventDefinition_DestroyCallback)(void** state);
+/// @param state Pointer to note on event state.
+typedef void (*BarelyNoteOnEvent_DestroyCallback)(void** state);
 
-/// Note on event definition process callback signature.
+/// Note on event process callback signature.
 ///
 /// @param state Pointer to note on event state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyNoteOnEventDefinition_ProcessCallback)(void** state, double pitch,
-                                                            double intensity);
+typedef void (*BarelyNoteOnEvent_ProcessCallback)(void** state, double pitch, double intensity);
 
-/// Note on event definition.
-typedef struct BarelyNoteOnEventDefinition {
+/// Note on event.
+typedef struct BarelyNoteOnEvent {
   /// Create callback.
-  BarelyNoteOnEventDefinition_CreateCallback create_callback;
+  BarelyNoteOnEvent_CreateCallback create_callback;
 
   /// Destroy callback.
-  BarelyNoteOnEventDefinition_DestroyCallback destroy_callback;
+  BarelyNoteOnEvent_DestroyCallback destroy_callback;
 
   /// Process callback.
-  BarelyNoteOnEventDefinition_ProcessCallback process_callback;
-} BarelyNoteOnEventDefinition;
+  BarelyNoteOnEvent_ProcessCallback process_callback;
+} BarelyNoteOnEvent;
 
-/// Sample data definition.
-typedef struct BarelySampleDataDefinition {
+/// Slice of sample data.
+typedef struct BarelySampleDataSlice {
   /// Root note pitch.
   double root_pitch;
 
@@ -362,35 +361,35 @@ typedef struct BarelySampleDataDefinition {
 
   /// Number of mono samples.
   int32_t sample_count;
-} BarelySampleDataDefinition;
+} BarelySampleDataSlice;
 
-/// Task definition create callback signature.
+/// Task event create callback signature.
 ///
-/// @param state Pointer to task state.
+/// @param state Pointer to task event state.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyTaskDefinition_CreateCallback)(void** state, void* user_data);
+typedef void (*BarelyTaskEvent_CreateCallback)(void** state, void* user_data);
 
-/// Task definition destroy callback signature.
+/// Task event destroy callback signature.
 ///
-/// @param state Pointer to task state.
-typedef void (*BarelyTaskDefinition_DestroyCallback)(void** state);
+/// @param state Pointer to task event state.
+typedef void (*BarelyTaskEvent_DestroyCallback)(void** state);
 
-/// Task definition process callback signature.
+/// Task event process callback signature.
 ///
-/// @param state Pointer to task state.
-typedef void (*BarelyTaskDefinition_ProcessCallback)(void** state);
+/// @param state Pointer to task event state.
+typedef void (*BarelyTaskEvent_ProcessCallback)(void** state);
 
-/// Task definition.
-typedef struct BarelyTaskDefinition {
+/// Task event.
+typedef struct BarelyTaskEvent {
   /// Create callback.
-  BarelyTaskDefinition_CreateCallback create_callback;
+  BarelyTaskEvent_CreateCallback create_callback;
 
   /// Destroy callback.
-  BarelyTaskDefinition_DestroyCallback destroy_callback;
+  BarelyTaskEvent_DestroyCallback destroy_callback;
 
   /// Process callback.
-  BarelyTaskDefinition_ProcessCallback process_callback;
-} BarelyTaskDefinition;
+  BarelyTaskEvent_ProcessCallback process_callback;
+} BarelyTaskEvent;
 
 /// Instrument handle alias.
 typedef struct BarelyInstrument* BarelyInstrumentHandle;
@@ -480,11 +479,11 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument
 /// Sets the note off event of an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @param definition Note off event definition.
+/// @param note_off_event Note off event.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                                    BarelyNoteOffEventDefinition definition,
+                                                    BarelyNoteOffEvent note_off_event,
                                                     void* user_data);
 
 /// Sets an instrument note on.
@@ -499,22 +498,22 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
 /// Sets the note on event of an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @param definition Note on event definition.
+/// @param note_on_event Note on event.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                                   BarelyNoteOnEventDefinition definition,
+                                                   BarelyNoteOnEvent note_on_event,
                                                    void* user_data);
 
 /// Sets instrument sample data.
 ///
 /// @param instrument Instrument handle.
-/// @param definitions Array of sample definitions.
-/// @param definition_count Number of sample definitions.
+/// @param slices Array of sample data slices.
+/// @param sample_data_count Number of sample data slices.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
-                                                  const BarelySampleDataDefinition* definitions,
-                                                  int32_t definition_count);
+                                                  const BarelySampleDataSlice* slices,
+                                                  int32_t slice_count);
 
 /// Adds an instrument.
 ///
@@ -610,13 +609,13 @@ BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, double t
 /// Adds a task.
 ///
 /// @param performer Performer handle.
-/// @param definition Task definition.
+/// @param task_event Task event.
 /// @param position Task position in beats.
 /// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_AddTask(BarelyPerformerHandle performer,
-                                           BarelyTaskDefinition definition, double position,
+                                           BarelyTaskEvent task_event, double position,
                                            void* user_data, BarelyTaskHandle* out_task);
 
 /// Cancels all one-off tasks.
@@ -674,13 +673,13 @@ BARELY_EXPORT bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer,
 /// Schedules a one-off task.
 ///
 /// @param performer Performer handle.
-/// @param definition Task definition.
+/// @param task_event Task event.
 /// @param position Task position in beats.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
-                                                      BarelyTaskDefinition definition,
-                                                      double position, void* user_data);
+                                                      BarelyTaskEvent task_event, double position,
+                                                      void* user_data);
 
 /// Sets the loop begin position of a performer.
 ///
@@ -819,27 +818,27 @@ enum class SamplePlaybackMode : BarelySamplePlaybackMode {
   kCount = BarelySamplePlaybackMode_kCount,
 };
 
-/// Note off event definition.
-struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
+/// Note off event.
+struct NoteOffEvent : public BarelyNoteOffEvent {
   /// Callback signature.
   ///
   /// @param pitch Note pitch.
   using Callback = std::function<void(double pitch)>;
 
   /// Create callback signature.
-  using CreateCallback = BarelyNoteOffEventDefinition_CreateCallback;
+  using CreateCallback = BarelyNoteOffEvent_CreateCallback;
 
   /// Destroy callback signature.
-  using DestroyCallback = BarelyNoteOffEventDefinition_DestroyCallback;
+  using DestroyCallback = BarelyNoteOffEvent_DestroyCallback;
 
   /// Process callback signature.
-  using ProcessCallback = BarelyNoteOffEventDefinition_ProcessCallback;
+  using ProcessCallback = BarelyNoteOffEvent_ProcessCallback;
 
-  /// Returns a new `NoteOffEventDefinition` with `Callback`.
+  /// Returns a new `NoteOffEvent` with `Callback`.
   ///
-  /// @return Note off event definition.
-  static constexpr NoteOffEventDefinition WithCallback() noexcept {
-    return NoteOffEventDefinition(
+  /// @return Note off event.
+  static constexpr NoteOffEvent WithCallback() noexcept {
+    return NoteOffEvent(
         [](void** state, void* user_data) noexcept {
           *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
           assert(*state);
@@ -852,30 +851,29 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
         });
   }
 
-  /// Constructs a new `NoteOffEventDefinition`.
+  /// Constructs a new `NoteOffEvent`.
   ///
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit constexpr NoteOffEventDefinition(CreateCallback create_callback,
-                                            DestroyCallback destroy_callback,
-                                            ProcessCallback process_callback) noexcept
-      : NoteOffEventDefinition(BarelyNoteOffEventDefinition{
+  explicit constexpr NoteOffEvent(CreateCallback create_callback, DestroyCallback destroy_callback,
+                                  ProcessCallback process_callback) noexcept
+      : NoteOffEvent(BarelyNoteOffEvent{
             create_callback,
             destroy_callback,
             process_callback,
         }) {}
 
-  /// Constructs a new `NoteOffEventDefinition` from a raw type.
+  /// Constructs a new `NoteOffEvent` from a raw type.
   ///
-  /// @param definition Raw note off event definition.
+  /// @param note_off_event Raw note off event.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr NoteOffEventDefinition(BarelyNoteOffEventDefinition definition) noexcept
-      : BarelyNoteOffEventDefinition{definition} {}
+  constexpr NoteOffEvent(BarelyNoteOffEvent note_off_event) noexcept
+      : BarelyNoteOffEvent{note_off_event} {}
 };
 
-/// Note on event definition.
-struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
+/// Note on event.
+struct NoteOnEvent : public BarelyNoteOnEvent {
   /// Callback signature.
   ///
   /// @param pitch Note pitch.
@@ -883,19 +881,19 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   using Callback = std::function<void(double pitch, double intensity)>;
 
   /// Create callback signature.
-  using CreateCallback = BarelyNoteOnEventDefinition_CreateCallback;
+  using CreateCallback = BarelyNoteOnEvent_CreateCallback;
 
   /// Destroy callback signature.
-  using DestroyCallback = BarelyNoteOnEventDefinition_DestroyCallback;
+  using DestroyCallback = BarelyNoteOnEvent_DestroyCallback;
 
   /// Process callback signature.
-  using ProcessCallback = BarelyNoteOnEventDefinition_ProcessCallback;
+  using ProcessCallback = BarelyNoteOnEvent_ProcessCallback;
 
-  /// Returns a new `NoteOnEventDefinition` with `Callback`.
+  /// Returns a new `NoteOnEvent` with `Callback`.
   ///
-  /// @return Note on event definition.
-  static constexpr NoteOnEventDefinition WithCallback() noexcept {
-    return NoteOnEventDefinition(
+  /// @return Note on event.
+  static constexpr NoteOnEvent WithCallback() noexcept {
+    return NoteOnEvent(
         [](void** state, void* user_data) noexcept {
           *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
           assert(*state);
@@ -908,69 +906,68 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
         });
   }
 
-  /// Constructs a new `NoteOnEventDefinition`.
+  /// Constructs a new `NoteOnEvent`.
   ///
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit constexpr NoteOnEventDefinition(CreateCallback create_callback,
-                                           DestroyCallback destroy_callback,
-                                           ProcessCallback process_callback) noexcept
-      : NoteOnEventDefinition(BarelyNoteOnEventDefinition{
+  explicit constexpr NoteOnEvent(CreateCallback create_callback, DestroyCallback destroy_callback,
+                                 ProcessCallback process_callback) noexcept
+      : NoteOnEvent(BarelyNoteOnEvent{
             create_callback,
             destroy_callback,
             process_callback,
         }) {}
 
-  /// Constructs a new `NoteOnEventDefinition` from a raw type.
+  /// Constructs a new `NoteOnEvent` from a raw type.
   ///
-  /// @param definition Raw note on event definition.
+  /// @param note_on_event Raw note on event.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr NoteOnEventDefinition(BarelyNoteOnEventDefinition definition) noexcept
-      : BarelyNoteOnEventDefinition{definition} {}
+  constexpr NoteOnEvent(BarelyNoteOnEvent note_on_event) noexcept
+      : BarelyNoteOnEvent{note_on_event} {}
 };
 
-/// Sample data definition.
-struct SampleDataDefinition : public BarelySampleDataDefinition {
-  /// Constructs a new `SampleDataDefinition`.
+/// Sample data slice.
+struct SampleDataSlice : public BarelySampleDataSlice {
+  /// Constructs a new `SampleDataSlice`.
   ///
   /// @param root_pitch Root pich.
   /// @param sample_rate Sampling rate in hertz.
   /// @param samples Span of mono samples.
-  explicit constexpr SampleDataDefinition(double root_pitch, int sample_rate,
-                                          std::span<const double> samples) noexcept
-      : SampleDataDefinition(
+  explicit constexpr SampleDataSlice(double root_pitch, int sample_rate,
+                                     std::span<const double> samples) noexcept
+      : SampleDataSlice(
             {root_pitch, sample_rate, samples.data(), static_cast<int>(samples.size())}) {
     assert(sample_rate >= 0);
   }
 
-  /// Constructs a new `SampleDataDefinition` from a raw type.
+  /// Constructs a new `SampleDataSlice` from a raw type.
   ///
-  /// @param definition Raw sample definition.
+  /// @param sample_data_slice Raw sample data slice.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr SampleDataDefinition(BarelySampleDataDefinition definition) noexcept
-      : BarelySampleDataDefinition{definition} {}
+  constexpr SampleDataSlice(BarelySampleDataSlice sample_data_slice) noexcept
+      : BarelySampleDataSlice{sample_data_slice} {}
 };
 
-/// Task definition.
-struct TaskDefinition : public BarelyTaskDefinition {
+/// Task event.
+struct TaskEvent : public BarelyTaskEvent {
   /// Callback signature.
   using Callback = std::function<void()>;
 
   /// Create callback signature.
-  using CreateCallback = BarelyTaskDefinition_CreateCallback;
+  using CreateCallback = BarelyTaskEvent_CreateCallback;
 
   /// Destroy callback signature.
-  using DestroyCallback = BarelyTaskDefinition_DestroyCallback;
+  using DestroyCallback = BarelyTaskEvent_DestroyCallback;
 
   /// Process callback signature.
-  using ProcessCallback = BarelyTaskDefinition_ProcessCallback;
+  using ProcessCallback = BarelyTaskEvent_ProcessCallback;
 
-  /// Returns a new `TaskDefinition` with `Callback`.
+  /// Returns a new `Task` with `Callback`.
   ///
-  /// @return Task definition.
-  static constexpr TaskDefinition WithCallback() noexcept {
-    return TaskDefinition(
+  /// @return Task event.
+  static constexpr TaskEvent WithCallback() noexcept {
+    return TaskEvent(
         [](void** state, void* user_data) noexcept {
           *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
           assert(*state);
@@ -983,26 +980,24 @@ struct TaskDefinition : public BarelyTaskDefinition {
         });
   }
 
-  /// Constructs a new `TaskDefinition`.
+  /// Constructs a new `TaskEvent`.
   ///
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit constexpr TaskDefinition(CreateCallback create_callback,
-                                    DestroyCallback destroy_callback,
-                                    ProcessCallback process_callback) noexcept
-      : TaskDefinition(BarelyTaskDefinition{
+  explicit constexpr TaskEvent(CreateCallback create_callback, DestroyCallback destroy_callback,
+                               ProcessCallback process_callback) noexcept
+      : TaskEvent(BarelyTaskEvent{
             create_callback,
             destroy_callback,
             process_callback,
         }) {}
 
-  /// Constructs a new `TaskDefinition` from a raw type.
+  /// Constructs a new `Task` from a raw type.
   ///
-  /// @param definition Raw task definition.
+  /// @param task_event Raw task event.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr TaskDefinition(BarelyTaskDefinition definition) noexcept
-      : BarelyTaskDefinition{definition} {}
+  constexpr TaskEvent(BarelyTaskEvent task_event) noexcept : BarelyTaskEvent{task_event} {}
 };
 
 /// Handle wrapper template.
@@ -1182,16 +1177,6 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
-  /// Sets the sample data.
-  ///
-  /// @param definitions Span of sample data definitions.
-  void SetSampleData(std::span<const SampleDataDefinition> definitions) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetSampleData(
-        *this, reinterpret_cast<const BarelySampleDataDefinition*>(definitions.data()),
-        static_cast<int32_t>(definitions.size()));
-    assert(success);
-  }
-
   /// Sets a control value.
   ///
   /// @param pitch Note pitch.
@@ -1216,19 +1201,19 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the note off event.
   ///
-  /// @param definition Note off event definition.
+  /// @param note_off_event Note off event.
   /// @param user_data Pointer to user data.
-  void SetNoteOffEvent(NoteOffEventDefinition definition, void* user_data = nullptr) noexcept {
+  void SetNoteOffEvent(NoteOffEvent note_off_event, void* user_data = nullptr) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOffEvent(*this, definition, user_data);
+        BarelyInstrument_SetNoteOffEvent(*this, note_off_event, user_data);
     assert(success);
   }
 
   /// Sets the note off event with a callback.
   ///
   /// @param callback Note off event callback.
-  void SetNoteOffEvent(NoteOffEventDefinition::Callback callback) noexcept {
-    SetNoteOffEvent(NoteOffEventDefinition::WithCallback(), static_cast<void*>(&callback));
+  void SetNoteOffEvent(NoteOffEvent::Callback callback) noexcept {
+    SetNoteOffEvent(NoteOffEvent::WithCallback(), static_cast<void*>(&callback));
   }
 
   /// Sets a note on.
@@ -1242,19 +1227,29 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the note on event.
   ///
-  /// @param definition Note on event definition.
+  /// @param note_on_event Note on event.
   /// @param user_data Pointer to user data.
-  void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data = nullptr) noexcept {
+  void SetNoteOnEvent(NoteOnEvent note_on_event, void* user_data = nullptr) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOnEvent(*this, definition, user_data);
+        BarelyInstrument_SetNoteOnEvent(*this, note_on_event, user_data);
     assert(success);
   }
 
   /// Sets the note off event with a callback.
   ///
   /// @param callback Note off event callback.
-  void SetNoteOnEvent(NoteOnEventDefinition::Callback callback) noexcept {
-    SetNoteOnEvent(NoteOnEventDefinition::WithCallback(), static_cast<void*>(&callback));
+  void SetNoteOnEvent(NoteOnEvent::Callback callback) noexcept {
+    SetNoteOnEvent(NoteOnEvent::WithCallback(), static_cast<void*>(&callback));
+  }
+
+  /// Sets the sample data.
+  ///
+  /// @param sample_data Span of sample data slices.
+  void SetSampleData(std::span<const SampleDataSlice> slices) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetSampleData(
+        *this, reinterpret_cast<const BarelySampleDataSlice*>(slices.data()),
+        static_cast<int32_t>(slices.size()));
+    assert(success);
   }
 };
 
@@ -1302,15 +1297,14 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
 
   /// Adds a task.
   ///
-  /// @param definition Task definition.
+  /// @param task_event Task event.
   /// @param position Task position in beats.
   /// @param user_data Pointer to user data.
   /// @return Task handle.
-  TaskHandle AddTask(TaskDefinition definition, double position,
-                     void* user_data = nullptr) noexcept {
+  TaskHandle AddTask(TaskEvent task_event, double position, void* user_data = nullptr) noexcept {
     BarelyTaskHandle task;
     [[maybe_unused]] const bool success =
-        BarelyPerformer_AddTask(*this, definition, position, user_data, &task);
+        BarelyPerformer_AddTask(*this, task_event, position, user_data, &task);
     assert(success);
     return TaskHandle(task);
   }
@@ -1320,8 +1314,8 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   /// @param callback Task callback.
   /// @param position Task position in beats.
   /// @return Task handle.
-  TaskHandle AddTask(TaskDefinition::Callback callback, double position) noexcept {
-    return AddTask(TaskDefinition::WithCallback(), position, static_cast<void*>(&callback));
+  TaskHandle AddTask(TaskEvent::Callback callback, double position) noexcept {
+    return AddTask(TaskEvent::WithCallback(), position, static_cast<void*>(&callback));
   }
 
   /// Cancels all one-off tasks.
@@ -1391,13 +1385,13 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
 
   /// Schedules a one-off task.
   ///
-  /// @param definition Task definition.
+  /// @param task_event Task event.
   /// @param position Task position in beats.
   /// @param user_data Pointer to user data.
-  void ScheduleOneOffTask(TaskDefinition definition, double position,
+  void ScheduleOneOffTask(TaskEvent task_event, double position,
                           void* user_data = nullptr) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyPerformer_ScheduleOneOffTask(*this, definition, position, user_data);
+        BarelyPerformer_ScheduleOneOffTask(*this, task_event, position, user_data);
     assert(success);
   }
 
@@ -1405,8 +1399,8 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   ///
   /// @param callback Task callback.
   /// @param position Task position in beats.
-  void ScheduleOneOffTask(TaskDefinition::Callback callback, double position) noexcept {
-    ScheduleOneOffTask(TaskDefinition::WithCallback(), position, static_cast<void*>(&callback));
+  void ScheduleOneOffTask(TaskEvent::Callback callback, double position) noexcept {
+    ScheduleOneOffTask(TaskEvent::WithCallback(), position, static_cast<void*>(&callback));
   }
 
   /// Sets the loop begin position.

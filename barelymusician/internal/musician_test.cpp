@@ -55,21 +55,17 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   // Set the note callbacks.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch, double intensity) {
+  NoteOnEvent::Callback note_on_callback = [&](double pitch, double intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
-  instrument->SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
-                             static_cast<void*>(&note_on_callback));
+  instrument->SetNoteOnEvent(NoteOnEvent::WithCallback(), static_cast<void*>(&note_on_callback));
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
   double note_off_pitch = 0.0;
-  NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
-    note_off_pitch = pitch;
-  };
-  instrument->SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
-                              static_cast<void*>(&note_off_callback));
+  NoteOffEvent::Callback note_off_callback = [&](double pitch) { note_off_pitch = pitch; };
+  instrument->SetNoteOffEvent(NoteOffEvent::WithCallback(), static_cast<void*>(&note_off_callback));
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Set a note on.
@@ -94,10 +90,10 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     std::vector<InstrumentController*> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(musician.AddInstrument());
-      NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
+      NoteOffEvent::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
-      instruments[i]->SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
+      instruments[i]->SetNoteOffEvent(NoteOffEvent::WithCallback(),
                                       static_cast<void*>(&note_off_callback));
     }
 
@@ -126,17 +122,17 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   // Create a performer.
   Performer* performer = musician.AddPerformer(/*process_order=*/0);
 
-  // Create a task definition.
+  // Create a task event.
   double task_position = 0.0;
   std::function<void()> process_callback = [&]() { task_position = performer->GetPosition(); };
-  auto definition = TaskDefinition{
+  auto task_event = TaskEvent{
       [](void** state, void* user_data) { *state = user_data; },
       [](void** /*state*/) {},
       [](void** state) { (*static_cast<std::function<void()>*>(*state))(); },
   };
 
   // Schedule a task.
-  performer->ScheduleOneOffTask(definition, 1.0, &process_callback);
+  performer->ScheduleOneOffTask(task_event, 1.0, &process_callback);
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);

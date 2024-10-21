@@ -16,15 +16,15 @@ namespace barely {
 class Performer {
  public:
   /// Task.
-  struct Task : public Event<TaskDefinition> {
+  struct Task : public Event<TaskEvent> {
     /// Constructs a new `Task`.
     ///
     /// @param performer Performer.
-    /// @param definition Task definition.
+    /// @param task_event Task event.
     /// @param position Task position.
     /// @param user_data Pointer to user data.
     /// @param set_position_callback Set position callback.
-    Task(Performer& performer, const TaskDefinition& definition, double position,
+    Task(Performer& performer, const TaskEvent& task_event, double position,
          void* user_data) noexcept;
 
     /// Returns the position.
@@ -52,12 +52,12 @@ class Performer {
 
   /// Adds a task.
   ///
-  /// @param definition Task definition.
+  /// @param task_event Task event.
   /// @param position Task position.
   /// @param user_data Pointer to user data.
   /// @return Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Task* AddTask(const TaskDefinition& definition, double position, void* user_data) noexcept;
+  Task* AddTask(const TaskEvent& task_event, double position, void* user_data) noexcept;
 
   /// Cancels all one-off tasks.
   void CancelAllOneOffTasks() noexcept;
@@ -107,10 +107,10 @@ class Performer {
 
   /// Schedules a one-off task.
   ///
-  /// @param definition Task definition.
+  /// @param task_event Task event.
   /// @param position Task position in beats.
   /// @param user_data Pointer to user data.
-  void ScheduleOneOffTask(TaskDefinition definition, double position, void* user_data) noexcept;
+  void ScheduleOneOffTask(TaskEvent task_event, double position, void* user_data) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -152,9 +152,6 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
-  // One-off task alias.
-  using OneOffTask = Event<TaskDefinition>;
-
   // Recurring task map alias.
   using RecurringTaskMap = std::map<std::pair<double, Task*>, std::unique_ptr<Task>>;
 
@@ -186,7 +183,7 @@ class Performer {
   int process_order_ = 0;
 
   // Map of tasks.
-  std::multimap<double, OneOffTask> one_off_tasks_;
+  std::multimap<double, Event<TaskEvent>> one_off_tasks_;
   RecurringTaskMap recurring_tasks_;
 
   // Last processed recurring task iterator.

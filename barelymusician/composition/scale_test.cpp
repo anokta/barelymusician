@@ -14,7 +14,7 @@ TEST(ScaleTest, GetPitch) {
   constexpr double kRootPitch = 1.75;
   constexpr int kMode = 1;
 
-  const ScaleDefinition scale = {kPitches, kRootPitch, kMode};
+  const Scale scale = {kPitches, kRootPitch, kMode};
 
   constexpr int kOctaveRange = 2;
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {

@@ -20,7 +20,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Musician;
-using ::barely::SampleDataDefinition;
+using ::barely::SampleDataSlice;
 using ::barely::SamplePlaybackMode;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -51,13 +51,13 @@ constexpr double kRootPitch = 0.0;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the sample data from a given `file_path`.
-std::vector<SampleDataDefinition> GetSampleData(const std::string& file_path) {
+std::vector<SampleDataSlice> GetSampleData(const std::string& file_path) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
 
   const static std::vector<double> samples = sample_file.GetData();
-  return {SampleDataDefinition(kRootPitch, sample_file.GetFrameRate(), samples)};
+  return {SampleDataSlice(kRootPitch, sample_file.GetFrameRate(), samples)};
 }
 
 // Returns the pitch for a given `key`.

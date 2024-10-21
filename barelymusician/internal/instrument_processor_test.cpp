@@ -14,11 +14,11 @@ constexpr int kReferenceFrequency = 1;
 
 constexpr int kVoiceCount = 4;
 constexpr std::array<double, kVoiceCount> kSamples = {0.5};
-constexpr std::array<SampleDataDefinition, kVoiceCount> kDefinitions = {
-    SampleDataDefinition(0.0, kFrameRate, kSamples),
-    SampleDataDefinition(1.0, kFrameRate, kSamples),
-    SampleDataDefinition(2.0, kFrameRate, kSamples),
-    SampleDataDefinition(3.0, kFrameRate, kSamples),
+constexpr std::array<SampleDataSlice, kVoiceCount> kSlices = {
+    SampleDataSlice(0.0, kFrameRate, kSamples),
+    SampleDataSlice(1.0, kFrameRate, kSamples),
+    SampleDataSlice(2.0, kFrameRate, kSamples),
+    SampleDataSlice(3.0, kFrameRate, kSamples),
 };
 
 // Tests that playing a single voice produces the expected output.
@@ -28,7 +28,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.SetControl(ControlType::kSamplePlaybackMode,
                        static_cast<double>(SamplePlaybackMode::kLoop));
 
-  SampleData sample_data(kDefinitions);
+  SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
   double output = 0.0;
@@ -57,7 +57,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   processor.SetControl(ControlType::kSamplePlaybackMode,
                        static_cast<double>(SamplePlaybackMode::kLoop));
 
-  SampleData sample_data(kDefinitions);
+  SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
   double output = 0.0;
@@ -89,7 +89,7 @@ TEST(InstrumentProcessorTest, NoVoice) {
   InstrumentProcessor processor(kFrameRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, 0);
 
-  SampleData sample_data(kDefinitions);
+  SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
   double output = 0.0;

@@ -96,9 +96,9 @@ class InstrumentController {
 
   /// Sets the note off event.
   ///
-  /// @param definition Note off event definition.
+  /// @param note_off_event Note off event.
   /// @param user_data Pointer to user data.
-  void SetNoteOffEvent(NoteOffEventDefinition definition, void* user_data) noexcept;
+  void SetNoteOffEvent(NoteOffEvent note_off_event, void* user_data) noexcept;
 
   /// Sets a note on.
   ///
@@ -109,9 +109,9 @@ class InstrumentController {
 
   /// Sets the note on event.
   ///
-  /// @param definition Note on event definition.
+  /// @param note_on_event Note on event.
   /// @param user_data Pointer to user data.
-  void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
+  void SetNoteOnEvent(NoteOnEvent note_on_event, void* user_data) noexcept;
 
   /// Sets the reference frequency.
   ///
@@ -129,12 +129,6 @@ class InstrumentController {
   void Update(int64_t update_frame) noexcept;
 
  private:
-  // Note off event alias.
-  using NoteOffEvent = Event<NoteOffEventDefinition, double>;
-
-  // Note on event alias.
-  using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
-
   // Control.
   struct Control {
     /// Constructs a new `Control`.
@@ -196,10 +190,10 @@ class InstrumentController {
   std::unordered_map<double, NoteControlArray> note_controls_;
 
   // Note off event.
-  NoteOffEvent note_off_event_;
+  Event<NoteOffEvent, double> note_off_event_;
 
   // Note on event.
-  NoteOnEvent note_on_event_;
+  Event<NoteOnEvent, double, double> note_on_event_;
 
   // Update frame.
   int64_t update_frame_ = 0;

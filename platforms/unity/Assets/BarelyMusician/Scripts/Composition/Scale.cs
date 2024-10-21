@@ -10,14 +10,6 @@ namespace Barely {
     [InspectorName("Custom")] CUSTOM = -1,
   }
 
-  [StructLayout(LayoutKind.Sequential)]
-  struct ScaleDefinition {
-    public IntPtr pitches;
-    public Int32 pitchCount;
-    public double rootPitch;
-    public Int32 mode;
-  }
-
   /// A representation of a musical scale.
   [CreateAssetMenu(fileName = "NewScale", menuName = "BarelyMusician/Scale")]
   public class Scale : ScriptableObject {
@@ -33,7 +25,7 @@ namespace Barely {
 
     /// Number of pitches.
     public int PitchCount {
-      get { return _definition.pitchCount; }
+      get { return _scale.pitchCount; }
     }
 
     /// Returns the pitch for a given scale degree.
@@ -42,7 +34,7 @@ namespace Barely {
     /// @return Note pitch.
     public double GetPitch(int degree) {
       double pitch = 0.0;
-      if (!BarelyScale_GetPitch(ref _definition, degree, ref pitch)) {
+      if (!BarelyScale_GetPitch(ref _scale, degree, ref pitch)) {
         Debug.LogError("Failed to get the scale note with a degree " + degree);
       }
       return pitch;
@@ -53,13 +45,22 @@ namespace Barely {
     }
 
     private void OnValidate() {
-      if (!Barely_GetScaleDefinition(type, rootPitch, ref _definition) && Application.isPlaying) {
-        Debug.LogError("Failed to parse the scale definition");
+      if (!Barely_GetScale(type, rootPitch, ref _scale) && Application.isPlaying) {
+        Debug.LogError("Failed to parse the scale");
       }
     }
 
-    // Definition.
-    private ScaleDefinition _definition = new ScaleDefinition();
+    /// Class that wraps the internal api.
+    public static class Internal {
+      [StructLayout(LayoutKind.Sequential)]
+      public struct Scale {
+        public IntPtr pitches;
+        public Int32 pitchCount;
+        public double rootPitch;
+        public Int32 mode;
+      }
+    }
+    private Internal.Scale _scale = new Internal.Scale();
 
 #if !UNITY_EDITOR && UNITY_IOS
     private const string pluginName = "__Internal";
@@ -68,11 +69,11 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
     [DllImport(pluginName, EntryPoint = "BarelyScale_GetPitch")]
-    private static extern bool BarelyScale_GetPitch(ref ScaleDefinition definition, Int32 degree,
+    private static extern bool BarelyScale_GetPitch(ref Internal.Scale scale, Int32 degree,
                                                     ref double outPitch);
 
-    [DllImport(pluginName, EntryPoint = "Barely_GetScaleDefinition")]
-    private static extern bool Barely_GetScaleDefinition(ScaleType scaleType, double rootPitch,
-                                                         ref ScaleDefinition outDefinition);
+    [DllImport(pluginName, EntryPoint = "Barely_GetScale")]
+    private static extern bool Barely_GetScale(ScaleType scaleType, double rootPitch,
+                                               ref Internal.Scale outScale);
   }
 }  // namespace Barely

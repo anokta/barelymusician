@@ -15,7 +15,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
-using ::barely::ScaleDefinition;
+using ::barely::Scale;
 using ::barely::ScaleType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -61,7 +61,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto performer = musician.AddPerformer();
 
-  const ScaleDefinition scale = barely::GetScaleDefinition(ScaleType::kDiatonic);
+  const Scale scale = barely::GetScale(ScaleType::kDiatonic);
 
   const auto play_note_fn = [&](int degree, double duration) {
     return [&instrument, &performer, duration, pitch = scale.GetPitch(degree)]() {

@@ -8,13 +8,43 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/task.h"
+#include "barelymusician/internal/event.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that wraps a performer.
 class Performer {
  public:
+  /// Task.
+  struct Task : public Event<TaskDefinition> {
+    /// Constructs a new `Task`.
+    ///
+    /// @param performer Performer.
+    /// @param definition Task definition.
+    /// @param position Task position.
+    /// @param user_data Pointer to user data.
+    /// @param set_position_callback Set position callback.
+    Task(Performer& performer, const TaskDefinition& definition, double position,
+         void* user_data) noexcept;
+
+    /// Returns the position.
+    ///
+    /// @return Position in beats.
+    double GetPosition() const noexcept { return position_; }
+
+    /// Sets the position.
+    ///
+    /// @param position Position in beats.
+    void SetPosition(double position) noexcept;
+
+   private:
+    // Performer.
+    Performer& performer_;
+
+    // Position.
+    double position_;
+  };
+
   /// Constructs a new `Performer`.
   ///
   /// @param process_order Process order.
@@ -163,6 +193,6 @@ class Performer {
   std::optional<RecurringTaskMap::const_iterator> last_processed_recurring_task_it_;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INTERNAL_PERFORMER_H_

@@ -5,11 +5,10 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/task.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 using ::testing::Optional;
@@ -34,7 +33,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   };
 
   // Create a recurring task.
-  Task* task = performer.AddTask(definition, 0.25, &task_process_count);
+  auto* task = performer.AddTask(definition, 0.25, &task_process_count);
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
@@ -203,4 +202,4 @@ TEST(PerformerTest, SetPosition) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

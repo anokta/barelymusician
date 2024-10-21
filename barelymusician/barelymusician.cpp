@@ -7,14 +7,12 @@
 #include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/musician.h"
 #include "barelymusician/internal/performer.h"
-#include "barelymusician/internal/task.h"
 
 using ::barely::ControlType;
 using ::barely::InstrumentController;
 using ::barely::NoteControlType;
+using ::barely::Performer;
 using ::barely::internal::Musician;
-using ::barely::internal::Performer;
-using ::barely::internal::Task;
 
 // Musician.
 struct BarelyMusician : public Musician {
@@ -36,7 +34,7 @@ struct BarelyInstrument : public InstrumentController {};
 struct BarelyPerformer : public Performer {};
 
 // Task.
-struct BarelyTask : public Task {};
+struct BarelyTask : public Performer::Task {};
 
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
                                  double* out_value) {

@@ -97,8 +97,7 @@ class InstrumentController {
   /// Sets the note off event.
   ///
   /// @param note_off_event Note off event.
-  /// @param user_data Pointer to user data.
-  void SetNoteOffEvent(NoteOffEvent note_off_event, void* user_data) noexcept;
+  void SetNoteOffEvent(NoteOffEvent note_off_event) noexcept;
 
   /// Sets a note on.
   ///
@@ -110,8 +109,7 @@ class InstrumentController {
   /// Sets the note on event.
   ///
   /// @param note_on_event Note on event.
-  /// @param user_data Pointer to user data.
-  void SetNoteOnEvent(NoteOnEvent note_on_event, void* user_data) noexcept;
+  void SetNoteOnEvent(NoteOnEvent note_on_event) noexcept;
 
   /// Sets the reference frequency.
   ///

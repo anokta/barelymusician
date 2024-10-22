@@ -59,13 +59,13 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
-  instrument->SetNoteOnEvent(NoteOnEvent::WithCallback(), static_cast<void*>(&note_on_callback));
+  instrument->SetNoteOnEvent(EventWithCallback<NoteOnEvent, double, double>(note_on_callback));
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
   double note_off_pitch = 0.0;
   NoteOffEvent::Callback note_off_callback = [&](double pitch) { note_off_pitch = pitch; };
-  instrument->SetNoteOffEvent(NoteOffEvent::WithCallback(), static_cast<void*>(&note_off_callback));
+  instrument->SetNoteOffEvent(EventWithCallback<NoteOffEvent, double>(note_off_callback));
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Set a note on.
@@ -93,8 +93,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
       NoteOffEvent::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
-      instruments[i]->SetNoteOffEvent(NoteOffEvent::WithCallback(),
-                                      static_cast<void*>(&note_off_callback));
+      instruments[i]->SetNoteOffEvent(EventWithCallback<NoteOffEvent, double>(note_off_callback));
     }
 
     // Start multiple notes, then immediately stop some of them.
@@ -129,10 +128,11 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
       [](void** state, void* user_data) { *state = user_data; },
       [](void** /*state*/) {},
       [](void** state) { (*static_cast<std::function<void()>*>(*state))(); },
+      &process_callback,
   };
 
   // Schedule a task.
-  performer->ScheduleOneOffTask(task_event, 1.0, &process_callback);
+  performer->ScheduleOneOffTask(task_event, 1.0);
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);

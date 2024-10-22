@@ -126,8 +126,8 @@ void InstrumentController::SetNoteOff(double pitch) noexcept {
   }
 }
 
-void InstrumentController::SetNoteOffEvent(NoteOffEvent note_off_event, void* user_data) noexcept {
-  note_off_event_ = {note_off_event, user_data};
+void InstrumentController::SetNoteOffEvent(NoteOffEvent note_off_event) noexcept {
+  note_off_event_ = note_off_event;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -148,8 +148,8 @@ void InstrumentController::SetNoteOn(double pitch, double intensity) noexcept {
   }
 }
 
-void InstrumentController::SetNoteOnEvent(NoteOnEvent note_on_event, void* user_data) noexcept {
-  note_on_event_ = {note_on_event, user_data};
+void InstrumentController::SetNoteOnEvent(NoteOnEvent note_on_event) noexcept {
+  note_on_event_ = note_on_event;
 }
 
 void InstrumentController::SetReferenceFrequency(double reference_frequency) noexcept {

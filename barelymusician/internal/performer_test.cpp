@@ -30,10 +30,11 @@ TEST(PerformerTest, ProcessSingleTask) {
         int& count = *static_cast<int*>(*state);
         ++count;
       },
+      &task_process_count,
   };
 
   // Create a recurring task.
-  auto* task = performer.AddTask(task_event, 0.25, &task_process_count);
+  auto* task = performer.AddTask(task_event, 0.25);
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
@@ -128,8 +129,9 @@ TEST(PerformerTest, ProcessMultipleTasks) {
                   std::move(*static_cast<std::function<void()>*>(user_data)));
             },
             [](void** state) { delete static_cast<std::function<void()>*>(*state); },
-            [](void** state) { (*static_cast<std::function<void()>*>(*state))(); }),
-        static_cast<double>(i), static_cast<void*>(&callback));
+            [](void** state) { (*static_cast<std::function<void()>*>(*state))(); },
+            static_cast<void*>(&callback)),
+        static_cast<double>(i));
   };
   for (int i = 1; i <= 4; ++i) {
     create_task_fn(i);

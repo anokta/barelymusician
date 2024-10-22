@@ -13,9 +13,8 @@
 
 namespace barely {
 
-Performer::Task::Task(Performer& performer, const TaskEvent& task_event, double position,
-                      void* user_data) noexcept
-    : Event<TaskEvent>(task_event, user_data), performer_(performer), position_(position) {}
+Performer::Task::Task(Performer& performer, const TaskEvent& task_event, double position) noexcept
+    : Event<TaskEvent>(task_event), performer_(performer), position_(position) {}
 
 void Performer::Task::SetPosition(double position) noexcept {
   if (position != position_) {
@@ -28,9 +27,8 @@ void Performer::Task::SetPosition(double position) noexcept {
 Performer::Performer(int process_order) noexcept : process_order_(process_order) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer::Task* Performer::AddTask(const TaskEvent& task_event, double position,
-                                    void* user_data) noexcept {
-  auto task = std::make_unique<Task>(*this, task_event, position, user_data);
+Performer::Task* Performer::AddTask(const TaskEvent& task_event, double position) noexcept {
+  auto task = std::make_unique<Task>(*this, task_event, position);
   Task* task_ptr = task.get();
   [[maybe_unused]] const bool success =
       recurring_tasks_.emplace(std::pair{position, task_ptr}, std::move(task)).second;
@@ -117,12 +115,11 @@ void Performer::RemoveTask(Task* task) noexcept {
   }
 }
 
-void Performer::ScheduleOneOffTask(TaskEvent task_event, double position,
-                                   void* user_data) noexcept {
+void Performer::ScheduleOneOffTask(TaskEvent task_event, double position) noexcept {
   if (position < position_) {
     return;
   }
-  one_off_tasks_.emplace(position, Event<TaskEvent>(task_event, user_data));
+  one_off_tasks_.emplace(position, Event<TaskEvent>(task_event));
 }
 
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {

@@ -15,8 +15,7 @@ class Event {
   /// Constructs a new `Event`.
   ///
   /// @param event Event.
-  /// @param user_data Pointer to user data.
-  Event(const EventType& event, void* user_data) noexcept;
+  Event(const EventType& event) noexcept;
 
   /// Destroys `Event`.
   ~Event() noexcept;
@@ -73,10 +72,10 @@ Event<EventType, EventArgs...>& Event<EventType, EventArgs...>::operator=(
 }
 
 template <typename EventType, typename... EventArgs>
-Event<EventType, EventArgs...>::Event(const EventType& event, void* user_data) noexcept
+Event<EventType, EventArgs...>::Event(const EventType& event) noexcept
     : destroy_callback_(event.destroy_callback), process_callback_(event.process_callback) {
   if (event.create_callback) {
-    event.create_callback(&state_, user_data);
+    event.create_callback(&state_, event.user_data);
   }
 }
 

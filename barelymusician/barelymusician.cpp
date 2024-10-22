@@ -113,10 +113,10 @@ bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch
 }
 
 bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                      BarelyNoteOffEvent note_off_event, void* user_data) {
+                                      BarelyNoteOffEvent note_off_event) {
   if (!instrument) return false;
 
-  instrument->SetNoteOffEvent(note_off_event, user_data);
+  instrument->SetNoteOffEvent(note_off_event);
   return true;
 }
 
@@ -128,10 +128,10 @@ bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch,
 }
 
 bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                     BarelyNoteOnEvent note_on_event, void* user_data) {
+                                     BarelyNoteOnEvent note_on_event) {
   if (!instrument) return false;
 
-  instrument->SetNoteOnEvent(note_on_event, user_data);
+  instrument->SetNoteOnEvent(note_on_event);
   return true;
 }
 
@@ -243,11 +243,11 @@ bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
 }
 
 bool BarelyPerformer_AddTask(BarelyPerformerHandle performer, BarelyTaskEvent task_event,
-                             double position, void* user_data, BarelyTaskHandle* out_task) {
+                             double position, BarelyTaskHandle* out_task) {
   if (!performer) return false;
   if (!out_task) return false;
 
-  *out_task = static_cast<BarelyTask*>(performer->AddTask(task_event, position, user_data));
+  *out_task = static_cast<BarelyTask*>(performer->AddTask(task_event, position));
   return *out_task;
 }
 
@@ -308,10 +308,10 @@ bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer, BarelyTaskHandl
 }
 
 bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer, BarelyTaskEvent task_event,
-                                        double position, void* user_data) {
+                                        double position) {
   if (!performer) return false;
 
-  performer->ScheduleOneOffTask(task_event, position, user_data);
+  performer->ScheduleOneOffTask(task_event, position);
   return true;
 }
 

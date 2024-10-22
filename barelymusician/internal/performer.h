@@ -22,10 +22,8 @@ class Performer {
     /// @param performer Performer.
     /// @param task_event Task event.
     /// @param position Task position.
-    /// @param user_data Pointer to user data.
     /// @param set_position_callback Set position callback.
-    Task(Performer& performer, const TaskEvent& task_event, double position,
-         void* user_data) noexcept;
+    Task(Performer& performer, const TaskEvent& task_event, double position) noexcept;
 
     /// Returns the position.
     ///
@@ -54,10 +52,9 @@ class Performer {
   ///
   /// @param task_event Task event.
   /// @param position Task position.
-  /// @param user_data Pointer to user data.
   /// @return Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Task* AddTask(const TaskEvent& task_event, double position, void* user_data) noexcept;
+  Task* AddTask(const TaskEvent& task_event, double position) noexcept;
 
   /// Cancels all one-off tasks.
   void CancelAllOneOffTasks() noexcept;
@@ -109,8 +106,7 @@ class Performer {
   ///
   /// @param task_event Task event.
   /// @param position Task position in beats.
-  /// @param user_data Pointer to user data.
-  void ScheduleOneOffTask(TaskEvent task_event, double position, void* user_data) noexcept;
+  void ScheduleOneOffTask(TaskEvent task_event, double position) noexcept;
 
   /// Sets loop begin position.
   ///

@@ -22,19 +22,18 @@ TEST(EventTest, Process) {
   EXPECT_EQ(test_data.process_count, 0);
 
   {
-    Event<TaskEvent> event(
-        TaskEvent{
-            [](void** state, void* user_data) {
-              *state = user_data;
-              ++static_cast<TestData*>(*state)->create_count;
-            },
-            [](void** state) { ++static_cast<TestData*>(*state)->destroy_count; },
-            [](void** state) {
-              auto& test_data = *static_cast<TestData*>(*state);
-              ++test_data.process_count;
-            },
+    Event<TaskEvent> event(TaskEvent{
+        [](void** state, void* user_data) {
+          *state = user_data;
+          ++static_cast<TestData*>(*state)->create_count;
         },
-        static_cast<void*>(&test_data));
+        [](void** state) { ++static_cast<TestData*>(*state)->destroy_count; },
+        [](void** state) {
+          auto& test_data = *static_cast<TestData*>(*state);
+          ++test_data.process_count;
+        },
+        static_cast<void*>(&test_data),
+    });
 
     // Event should be created.
     EXPECT_EQ(test_data.create_count, 1);

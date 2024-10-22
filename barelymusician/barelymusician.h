@@ -161,7 +161,7 @@
 ///   // Add a task.
 ///   BarelyTaskHandle task = nullptr;
 ///   BarelyPerformer_AddTask(performer, BarelyTaskEvent{/*populate this*/}, /*position=*/0.0,
-///                           /*user_data=*/nullptr, &task);
+///                           &task);
 ///
 ///   // Set looping on.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
@@ -316,6 +316,9 @@ typedef struct BarelyNoteOffEvent {
 
   /// Process callback.
   BarelyNoteOffEvent_ProcessCallback process_callback;
+
+  /// Pointer to user data.
+  void* user_data;
 } BarelyNoteOffEvent;
 
 /// Note on event create callback signature.
@@ -346,6 +349,9 @@ typedef struct BarelyNoteOnEvent {
 
   /// Process callback.
   BarelyNoteOnEvent_ProcessCallback process_callback;
+
+  /// Pointer to user data.
+  void* user_data;
 } BarelyNoteOnEvent;
 
 /// Slice of sample data.
@@ -389,6 +395,9 @@ typedef struct BarelyTaskEvent {
 
   /// Process callback.
   BarelyTaskEvent_ProcessCallback process_callback;
+
+  /// Pointer to user data.
+  void* user_data;
 } BarelyTaskEvent;
 
 /// Instrument handle alias.
@@ -480,11 +489,9 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument
 ///
 /// @param instrument Instrument handle.
 /// @param note_off_event Note off event.
-/// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                                    BarelyNoteOffEvent note_off_event,
-                                                    void* user_data);
+                                                    BarelyNoteOffEvent note_off_event);
 
 /// Sets an instrument note on.
 ///
@@ -499,11 +506,9 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
 ///
 /// @param instrument Instrument handle.
 /// @param note_on_event Note on event.
-/// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                                   BarelyNoteOnEvent note_on_event,
-                                                   void* user_data);
+                                                   BarelyNoteOnEvent note_on_event);
 
 /// Sets instrument sample data.
 ///
@@ -611,12 +616,11 @@ BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, double t
 /// @param performer Performer handle.
 /// @param task_event Task event.
 /// @param position Task position in beats.
-/// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_AddTask(BarelyPerformerHandle performer,
                                            BarelyTaskEvent task_event, double position,
-                                           void* user_data, BarelyTaskHandle* out_task);
+                                           BarelyTaskHandle* out_task);
 
 /// Cancels all one-off tasks.
 ///
@@ -675,11 +679,9 @@ BARELY_EXPORT bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer,
 /// @param performer Performer handle.
 /// @param task_event Task event.
 /// @param position Task position in beats.
-/// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
-                                                      BarelyTaskEvent task_event, double position,
-                                                      void* user_data);
+                                                      BarelyTaskEvent task_event, double position);
 
 /// Sets the loop begin position of a performer.
 ///
@@ -834,35 +836,17 @@ struct NoteOffEvent : public BarelyNoteOffEvent {
   /// Process callback signature.
   using ProcessCallback = BarelyNoteOffEvent_ProcessCallback;
 
-  /// Returns a new `NoteOffEvent` with `Callback`.
-  ///
-  /// @return Note off event.
-  static constexpr NoteOffEvent WithCallback() noexcept {
-    return NoteOffEvent(
-        [](void** state, void* user_data) noexcept {
-          *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
-          assert(*state);
-        },
-        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch) noexcept {
-          if (const auto& callback = *static_cast<Callback*>(*state); callback) {
-            callback(pitch);
-          }
-        });
-  }
-
   /// Constructs a new `NoteOffEvent`.
   ///
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
+  /// @param user_data Pointer to user data.
   explicit constexpr NoteOffEvent(CreateCallback create_callback, DestroyCallback destroy_callback,
-                                  ProcessCallback process_callback) noexcept
-      : NoteOffEvent(BarelyNoteOffEvent{
-            create_callback,
-            destroy_callback,
-            process_callback,
-        }) {}
+                                  ProcessCallback process_callback,
+                                  void* user_data = nullptr) noexcept
+      : NoteOffEvent(
+            BarelyNoteOffEvent{create_callback, destroy_callback, process_callback, user_data}) {}
 
   /// Constructs a new `NoteOffEvent` from a raw type.
   ///
@@ -889,35 +873,17 @@ struct NoteOnEvent : public BarelyNoteOnEvent {
   /// Process callback signature.
   using ProcessCallback = BarelyNoteOnEvent_ProcessCallback;
 
-  /// Returns a new `NoteOnEvent` with `Callback`.
-  ///
-  /// @return Note on event.
-  static constexpr NoteOnEvent WithCallback() noexcept {
-    return NoteOnEvent(
-        [](void** state, void* user_data) noexcept {
-          *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
-          assert(*state);
-        },
-        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch, double intensity) noexcept {
-          if (const auto& callback = *static_cast<Callback*>(*state); callback) {
-            callback(pitch, intensity);
-          }
-        });
-  }
-
   /// Constructs a new `NoteOnEvent`.
   ///
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
+  /// @param user_data Pointer to user data.
   explicit constexpr NoteOnEvent(CreateCallback create_callback, DestroyCallback destroy_callback,
-                                 ProcessCallback process_callback) noexcept
-      : NoteOnEvent(BarelyNoteOnEvent{
-            create_callback,
-            destroy_callback,
-            process_callback,
-        }) {}
+                                 ProcessCallback process_callback,
+                                 void* user_data = nullptr) noexcept
+      : NoteOnEvent(
+            BarelyNoteOnEvent{create_callback, destroy_callback, process_callback, user_data}) {}
 
   /// Constructs a new `NoteOnEvent` from a raw type.
   ///
@@ -963,35 +929,16 @@ struct TaskEvent : public BarelyTaskEvent {
   /// Process callback signature.
   using ProcessCallback = BarelyTaskEvent_ProcessCallback;
 
-  /// Returns a new `Task` with `Callback`.
-  ///
-  /// @return Task event.
-  static constexpr TaskEvent WithCallback() noexcept {
-    return TaskEvent(
-        [](void** state, void* user_data) noexcept {
-          *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
-          assert(*state);
-        },
-        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state) noexcept {
-          if (const auto& callback = *static_cast<Callback*>(*state); callback) {
-            callback();
-          }
-        });
-  }
-
   /// Constructs a new `TaskEvent`.
   ///
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
+  /// @param user_data Pointer to user data.
   explicit constexpr TaskEvent(CreateCallback create_callback, DestroyCallback destroy_callback,
-                               ProcessCallback process_callback) noexcept
-      : TaskEvent(BarelyTaskEvent{
-            create_callback,
-            destroy_callback,
-            process_callback,
-        }) {}
+                               ProcessCallback process_callback, void* user_data = nullptr) noexcept
+      : TaskEvent(BarelyTaskEvent{create_callback, destroy_callback, process_callback, user_data}) {
+  }
 
   /// Constructs a new `Task` from a raw type.
   ///
@@ -1090,6 +1037,27 @@ class ScopedHandleWrapper : public HandleWrapperType {
   /// @return Handle wrapper.
   [[nodiscard]] HandleWrapperType Release() noexcept { return std::move(*this); }
 };
+
+/// Creates an event of type with a callback.
+///
+/// @param event_callback Event callback.
+/// @return Event.
+template <typename EventType, typename... EventArgs>
+static constexpr EventType EventWithCallback(typename EventType::Callback& event_callback) {
+  return EventType(
+      [](void** state, void* user_data) noexcept {
+        *state = new (std::nothrow) typename EventType::Callback(
+            std::move(*static_cast<typename EventType::Callback*>(user_data)));
+        assert(*state);
+      },
+      [](void** state) noexcept { delete static_cast<typename EventType::Callback*>(*state); },
+      [](void** state, EventArgs... args) noexcept {
+        if (const auto& callback = *static_cast<typename EventType::Callback*>(*state); callback) {
+          callback(args...);
+        }
+      },
+      static_cast<void*>(&event_callback));
+}
 
 /// Class that wraps an instrument handle.
 class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
@@ -1202,10 +1170,8 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// Sets the note off event.
   ///
   /// @param note_off_event Note off event.
-  /// @param user_data Pointer to user data.
-  void SetNoteOffEvent(NoteOffEvent note_off_event, void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOffEvent(*this, note_off_event, user_data);
+  void SetNoteOffEvent(NoteOffEvent note_off_event) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOffEvent(*this, note_off_event);
     assert(success);
   }
 
@@ -1213,7 +1179,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   ///
   /// @param callback Note off event callback.
   void SetNoteOffEvent(NoteOffEvent::Callback callback) noexcept {
-    SetNoteOffEvent(NoteOffEvent::WithCallback(), static_cast<void*>(&callback));
+    SetNoteOffEvent(EventWithCallback<NoteOffEvent, double>(callback));
   }
 
   /// Sets a note on.
@@ -1228,10 +1194,8 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// Sets the note on event.
   ///
   /// @param note_on_event Note on event.
-  /// @param user_data Pointer to user data.
-  void SetNoteOnEvent(NoteOnEvent note_on_event, void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOnEvent(*this, note_on_event, user_data);
+  void SetNoteOnEvent(NoteOnEvent note_on_event) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOnEvent(*this, note_on_event);
     assert(success);
   }
 
@@ -1239,7 +1203,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   ///
   /// @param callback Note off event callback.
   void SetNoteOnEvent(NoteOnEvent::Callback callback) noexcept {
-    SetNoteOnEvent(NoteOnEvent::WithCallback(), static_cast<void*>(&callback));
+    SetNoteOnEvent(EventWithCallback<NoteOnEvent, double, double>(callback));
   }
 
   /// Sets the sample data.
@@ -1299,12 +1263,11 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   ///
   /// @param task_event Task event.
   /// @param position Task position in beats.
-  /// @param user_data Pointer to user data.
   /// @return Task handle.
-  TaskHandle AddTask(TaskEvent task_event, double position, void* user_data = nullptr) noexcept {
+  TaskHandle AddTask(TaskEvent task_event, double position) noexcept {
     BarelyTaskHandle task;
     [[maybe_unused]] const bool success =
-        BarelyPerformer_AddTask(*this, task_event, position, user_data, &task);
+        BarelyPerformer_AddTask(*this, task_event, position, &task);
     assert(success);
     return TaskHandle(task);
   }
@@ -1315,7 +1278,7 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   /// @param position Task position in beats.
   /// @return Task handle.
   TaskHandle AddTask(TaskEvent::Callback callback, double position) noexcept {
-    return AddTask(TaskEvent::WithCallback(), position, static_cast<void*>(&callback));
+    return AddTask(EventWithCallback<TaskEvent>(callback), position);
   }
 
   /// Cancels all one-off tasks.
@@ -1387,11 +1350,9 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   ///
   /// @param task_event Task event.
   /// @param position Task position in beats.
-  /// @param user_data Pointer to user data.
-  void ScheduleOneOffTask(TaskEvent task_event, double position,
-                          void* user_data = nullptr) noexcept {
+  void ScheduleOneOffTask(TaskEvent task_event, double position) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyPerformer_ScheduleOneOffTask(*this, task_event, position, user_data);
+        BarelyPerformer_ScheduleOneOffTask(*this, task_event, position);
     assert(success);
   }
 
@@ -1400,7 +1361,7 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   /// @param callback Task callback.
   /// @param position Task position in beats.
   void ScheduleOneOffTask(TaskEvent::Callback callback, double position) noexcept {
-    ScheduleOneOffTask(TaskEvent::WithCallback(), position, static_cast<void*>(&callback));
+    ScheduleOneOffTask(EventWithCallback<TaskEvent>(callback), position);
   }
 
   /// Sets the loop begin position.

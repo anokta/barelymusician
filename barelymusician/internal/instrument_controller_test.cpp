@@ -154,7 +154,7 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
-  instrument.SetNoteOnEvent(NoteOnEvent::WithCallback(), static_cast<void*>(&note_on_callback));
+  instrument.SetNoteOnEvent(EventWithCallback<NoteOnEvent, double, double>(note_on_callback));
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
@@ -179,7 +179,7 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   // Trigger the note off callback.
   double note_off_pitch = 0.0;
   NoteOffEvent::Callback note_off_callback = [&](double pitch) { note_off_pitch = pitch; };
-  instrument.SetNoteOffEvent(NoteOffEvent::WithCallback(), static_cast<void*>(&note_off_callback));
+  instrument.SetNoteOffEvent(EventWithCallback<NoteOffEvent, double>(note_off_callback));
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   instrument.SetNoteOff(kPitch);

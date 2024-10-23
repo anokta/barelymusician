@@ -289,6 +289,21 @@ enum BarelySamplePlaybackMode_Values {
   BarelySamplePlaybackMode_kCount,
 };
 
+/// Slice of sample data.
+typedef struct BarelySampleDataSlice {
+  /// Root note pitch.
+  double root_pitch;
+
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
+
+  /// Array of mono samples.
+  const double* samples;
+
+  /// Number of mono samples.
+  int32_t sample_count;
+} BarelySampleDataSlice;
+
 /// Note off event create callback signature.
 ///
 /// @param state Pointer to note off event state.
@@ -353,21 +368,6 @@ typedef struct BarelyNoteOnEvent {
   /// Pointer to user data.
   void* user_data;
 } BarelyNoteOnEvent;
-
-/// Slice of sample data.
-typedef struct BarelySampleDataSlice {
-  /// Root note pitch.
-  double root_pitch;
-
-  /// Sampling rate in hertz.
-  int32_t sample_rate;
-
-  /// Array of mono samples.
-  const double* samples;
-
-  /// Number of mono samples.
-  int32_t sample_count;
-} BarelySampleDataSlice;
 
 /// Task event create callback signature.
 ///
@@ -821,6 +821,28 @@ enum class SamplePlaybackMode : BarelySamplePlaybackMode {
   kCount = BarelySamplePlaybackMode_kCount,
 };
 
+/// Slice of sample data.
+struct SampleDataSlice : public BarelySampleDataSlice {
+  /// Constructs a new `SampleDataSlice`.
+  ///
+  /// @param root_pitch Root pich.
+  /// @param sample_rate Sampling rate in hertz.
+  /// @param samples Span of mono samples.
+  explicit constexpr SampleDataSlice(double root_pitch, int sample_rate,
+                                     std::span<const double> samples) noexcept
+      : SampleDataSlice(
+            {root_pitch, sample_rate, samples.data(), static_cast<int>(samples.size())}) {
+    assert(sample_rate >= 0);
+  }
+
+  /// Constructs a new `SampleDataSlice` from a raw type.
+  ///
+  /// @param sample_data_slice Raw sample data slice.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr SampleDataSlice(BarelySampleDataSlice sample_data_slice) noexcept
+      : BarelySampleDataSlice{sample_data_slice} {}
+};
+
 /// Note off event.
 struct NoteOffEvent : public BarelyNoteOffEvent {
   /// Callback signature.
@@ -894,28 +916,6 @@ struct NoteOnEvent : public BarelyNoteOnEvent {
       : BarelyNoteOnEvent{note_on_event} {}
 };
 
-/// Sample data slice.
-struct SampleDataSlice : public BarelySampleDataSlice {
-  /// Constructs a new `SampleDataSlice`.
-  ///
-  /// @param root_pitch Root pich.
-  /// @param sample_rate Sampling rate in hertz.
-  /// @param samples Span of mono samples.
-  explicit constexpr SampleDataSlice(double root_pitch, int sample_rate,
-                                     std::span<const double> samples) noexcept
-      : SampleDataSlice(
-            {root_pitch, sample_rate, samples.data(), static_cast<int>(samples.size())}) {
-    assert(sample_rate >= 0);
-  }
-
-  /// Constructs a new `SampleDataSlice` from a raw type.
-  ///
-  /// @param sample_data_slice Raw sample data slice.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr SampleDataSlice(BarelySampleDataSlice sample_data_slice) noexcept
-      : BarelySampleDataSlice{sample_data_slice} {}
-};
-
 /// Task event.
 struct TaskEvent : public BarelyTaskEvent {
   /// Callback signature.
@@ -947,6 +947,27 @@ struct TaskEvent : public BarelyTaskEvent {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr TaskEvent(BarelyTaskEvent task_event) noexcept : BarelyTaskEvent{task_event} {}
 };
+
+/// Creates an event of type with a callback.
+///
+/// @param event_callback Event callback.
+/// @return Event.
+template <typename EventType, typename... EventArgs>
+static constexpr EventType EventWithCallback(typename EventType::Callback& event_callback) {
+  return EventType(
+      [](void** state, void* user_data) noexcept {
+        *state = new (std::nothrow) typename EventType::Callback(
+            std::move(*static_cast<typename EventType::Callback*>(user_data)));
+        assert(*state);
+      },
+      [](void** state) noexcept { delete static_cast<typename EventType::Callback*>(*state); },
+      [](void** state, EventArgs... args) noexcept {
+        if (const auto& callback = *static_cast<typename EventType::Callback*>(*state); callback) {
+          callback(args...);
+        }
+      },
+      static_cast<void*>(&event_callback));
+}
 
 /// Handle wrapper template.
 template <typename HandleType>
@@ -1038,27 +1059,6 @@ class ScopedHandleWrapper : public HandleWrapperType {
   /// @return Handle wrapper.
   [[nodiscard]] HandleWrapperType Release() noexcept { return std::move(*this); }
 };
-
-/// Creates an event of type with a callback.
-///
-/// @param event_callback Event callback.
-/// @return Event.
-template <typename EventType, typename... EventArgs>
-static constexpr EventType EventWithCallback(typename EventType::Callback& event_callback) {
-  return EventType(
-      [](void** state, void* user_data) noexcept {
-        *state = new (std::nothrow) typename EventType::Callback(
-            std::move(*static_cast<typename EventType::Callback*>(user_data)));
-        assert(*state);
-      },
-      [](void** state) noexcept { delete static_cast<typename EventType::Callback*>(*state); },
-      [](void** state, EventArgs... args) noexcept {
-        if (const auto& callback = *static_cast<typename EventType::Callback*>(*state); callback) {
-          callback(args...);
-        }
-      },
-      static_cast<void*>(&event_callback));
-}
 
 /// Class that wraps an instrument handle.
 class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {

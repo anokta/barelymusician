@@ -110,6 +110,7 @@ if(ENABLE_TESTS)
     barelymusician_internal_instrument_controller
     barelymusician_internal_sample_data
     barelymusician_headeronly
+    gmock
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_instrument_controller_test)

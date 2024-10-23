@@ -106,7 +106,7 @@ class Performer {
   ///
   /// @param task_event Task event.
   /// @param position Task position in beats.
-  void ScheduleOneOffTask(TaskEvent task_event, double position) noexcept;
+  void ScheduleOneOffTask(const TaskEvent& task_event, double position) noexcept;
 
   /// Sets loop begin position.
   ///

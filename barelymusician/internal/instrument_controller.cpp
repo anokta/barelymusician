@@ -7,6 +7,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
+#include "barelymusician/internal/event.h"
 #include "barelymusician/internal/instrument_processor.h"
 #include "barelymusician/internal/message.h"
 #include "barelymusician/internal/sample_data.h"
@@ -126,8 +127,8 @@ void InstrumentController::SetNoteOff(double pitch) noexcept {
   }
 }
 
-void InstrumentController::SetNoteOffEvent(NoteOffEvent note_off_event) noexcept {
-  note_off_event_ = note_off_event;
+void InstrumentController::SetNoteOffEvent(const NoteOffEvent* note_off_event) noexcept {
+  note_off_event_ = (note_off_event != nullptr) ? *note_off_event : Event<NoteOffEvent, double>{};
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -148,8 +149,9 @@ void InstrumentController::SetNoteOn(double pitch, double intensity) noexcept {
   }
 }
 
-void InstrumentController::SetNoteOnEvent(NoteOnEvent note_on_event) noexcept {
-  note_on_event_ = note_on_event;
+void InstrumentController::SetNoteOnEvent(const NoteOnEvent* note_on_event) noexcept {
+  note_on_event_ =
+      (note_on_event != nullptr) ? *note_on_event : Event<NoteOnEvent, double, double>{};
 }
 
 void InstrumentController::SetReferenceFrequency(double reference_frequency) noexcept {

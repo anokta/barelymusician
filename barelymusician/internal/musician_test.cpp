@@ -15,6 +15,7 @@ namespace {
 
 using ::testing::ElementsAre;
 using ::testing::Optional;
+using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kFrameRate = 48000;
@@ -52,31 +53,42 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   // Create an instrument.
   InstrumentController* instrument = musician.AddInstrument();
 
-  // Set the note callbacks.
-  double note_on_pitch = 0.0;
-  double note_on_intensity = 0.0;
-  NoteOnEvent::Callback note_on_callback = [&](double pitch, double intensity) {
-    note_on_pitch = pitch;
-    note_on_intensity = intensity;
+  // Set the note events.
+  std::pair<double, double> note_on_state = {0.0, 0.0};
+  const auto note_on_event = NoteOnEvent{
+      [](void** state, void* user_data) { *state = user_data; },
+      [](void**) {},
+      [](void** state, double pitch, double intensity) {
+        auto& note_on_state = *static_cast<std::pair<double, double>*>(*state);
+        note_on_state.first = pitch;
+        note_on_state.second = intensity;
+      },
+      static_cast<void*>(&note_on_state),
   };
-  instrument->SetNoteOnEvent(EventWithCallback<NoteOnEvent, double, double>(note_on_callback));
-  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
+  instrument->SetNoteOnEvent(&note_on_event);
+  EXPECT_THAT(note_on_state, Pair(0.0, 0.0));
 
   double note_off_pitch = 0.0;
-  NoteOffEvent::Callback note_off_callback = [&](double pitch) { note_off_pitch = pitch; };
-  instrument->SetNoteOffEvent(EventWithCallback<NoteOffEvent, double>(note_off_callback));
+  const auto note_off_event = NoteOffEvent{
+      [](void** state, void* user_data) { *state = user_data; },
+      [](void**) {},
+      [](void** state, double pitch) {
+        auto& note_off_pitch = *static_cast<double*>(*state);
+        note_off_pitch = pitch;
+      },
+      static_cast<void*>(&note_off_pitch),
+  };
+  instrument->SetNoteOffEvent(&note_off_event);
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Set a note on.
   instrument->SetNoteOn(kPitch, kIntensity);
   EXPECT_TRUE(instrument->IsNoteOn(kPitch));
-
-  EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
+  EXPECT_THAT(note_on_state, Pair(kPitch, kIntensity));
 
   // Remove the instrument.
   musician.RemoveInstrument(instrument);
+  EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
@@ -86,14 +98,23 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   {
     Musician musician(kFrameRate);
 
-    // Create instruments with note off callback.
+    // Create instruments with note off event.
+    const auto note_off_event = NoteOffEvent{
+        [](void** state, void* user_data) { *state = user_data; },
+        [](void**) {},
+        [](void** state, double pitch) {
+          auto& note_off_pitches = *static_cast<std::vector<double>*>(*state);
+          note_off_pitches.push_back(pitch);
+        },
+        static_cast<void*>(&note_off_pitches),
+    };
     std::vector<InstrumentController*> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(musician.AddInstrument());
       NoteOffEvent::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
-      instruments[i]->SetNoteOffEvent(EventWithCallback<NoteOffEvent, double>(note_off_callback));
+      instruments[i]->SetNoteOffEvent(&note_off_event);
     }
 
     // Start multiple notes, then immediately stop some of them.

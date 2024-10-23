@@ -3,14 +3,18 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/sample_data.h"
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
+
+using ::testing::Pair;
 
 constexpr int kFrameRate = 4;
 constexpr int kChannelCount = 1;
@@ -148,38 +152,45 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   InstrumentController instrument(1, kReferenceFrequency, 0);
 
   // Trigger the note on callback.
-  double note_on_pitch = 0.0;
-  double note_on_intensity = 0.0;
-  NoteOnEvent::Callback note_on_callback = [&](double pitch, double intensity) {
-    note_on_pitch = pitch;
-    note_on_intensity = intensity;
+  std::pair<double, double> note_on_state = {0.0, 0.0};
+  const auto note_on_event = NoteOnEvent{
+      [](void** state, void* user_data) { *state = user_data; },
+      [](void**) {},
+      [](void** state, double pitch, double intensity) {
+        auto& note_on_state = *static_cast<std::pair<double, double>*>(*state);
+        note_on_state.first = pitch;
+        note_on_state.second = intensity;
+      },
+      static_cast<void*>(&note_on_state),
   };
-  instrument.SetNoteOnEvent(EventWithCallback<NoteOnEvent, double, double>(note_on_callback));
-  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
+  instrument.SetNoteOnEvent(&note_on_event);
+  EXPECT_THAT(note_on_state, Pair(0.0, 0.0));
 
   instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
+  EXPECT_THAT(note_on_state, Pair(kPitch, kIntensity));
 
   // This should not trigger the callback since the note is already on.
-  note_on_pitch = 0.0;
-  note_on_intensity = 0.0;
+  note_on_state = {0.0, 0.0};
   instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
+  EXPECT_THAT(note_on_state, Pair(0.0, 0.0));
 
   // Trigger the note on callback again with another note.
-  note_on_pitch = 0.0;
-  note_on_intensity = 0.0;
+  note_on_state = {0.0, 0.0};
   instrument.SetNoteOn(kPitch + 2, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_pitch, kPitch + 2.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
+  EXPECT_THAT(note_on_state, Pair(kPitch + 2.0, kIntensity));
 
   // Trigger the note off callback.
   double note_off_pitch = 0.0;
-  NoteOffEvent::Callback note_off_callback = [&](double pitch) { note_off_pitch = pitch; };
-  instrument.SetNoteOffEvent(EventWithCallback<NoteOffEvent, double>(note_off_callback));
+  const auto note_off_event = NoteOffEvent{
+      [](void** state, void* user_data) { *state = user_data; },
+      [](void**) {},
+      [](void** state, double pitch) {
+        auto& note_off_pitch = *static_cast<double*>(*state);
+        note_off_pitch = pitch;
+      },
+      static_cast<void*>(&note_off_pitch),
+  };
+  instrument.SetNoteOffEvent(&note_off_event);
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   instrument.SetNoteOff(kPitch);

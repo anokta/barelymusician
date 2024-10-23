@@ -488,10 +488,10 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument
 /// Sets the note off event of an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @param note_off_event Note off event.
+/// @param note_off_event Pointer to note off event.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                                    BarelyNoteOffEvent note_off_event);
+                                                    const BarelyNoteOffEvent* note_off_event);
 
 /// Sets an instrument note on.
 ///
@@ -505,10 +505,10 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
 /// Sets the note on event of an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @param note_on_event Note on event.
+/// @param note_on_event Pointer to note on event.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                                   BarelyNoteOnEvent note_on_event);
+                                                   const BarelyNoteOnEvent* note_on_event);
 
 /// Sets instrument sample data.
 ///
@@ -614,12 +614,12 @@ BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, double t
 /// Adds a task.
 ///
 /// @param performer Performer handle.
-/// @param task_event Task event.
+/// @param task_event Pointer to task event.
 /// @param position Task position in beats.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_AddTask(BarelyPerformerHandle performer,
-                                           BarelyTaskEvent task_event, double position,
+                                           const BarelyTaskEvent* task_event, double position,
                                            BarelyTaskHandle* out_task);
 
 /// Cancels all one-off tasks.
@@ -677,11 +677,12 @@ BARELY_EXPORT bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer,
 /// Schedules a one-off task.
 ///
 /// @param performer Performer handle.
-/// @param task_event Task event.
+/// @param task_event Pointer to task event.
 /// @param position Task position in beats.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
-                                                      BarelyTaskEvent task_event, double position);
+                                                      const BarelyTaskEvent* task_event,
+                                                      double position);
 
 /// Sets the loop begin position of a performer.
 ///
@@ -1169,8 +1170,8 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the note off event.
   ///
-  /// @param note_off_event Note off event.
-  void SetNoteOffEvent(NoteOffEvent note_off_event) noexcept {
+  /// @param note_off_event Pointer to note off event.
+  void SetNoteOffEvent(const NoteOffEvent* note_off_event) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOffEvent(*this, note_off_event);
     assert(success);
   }
@@ -1179,7 +1180,12 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   ///
   /// @param callback Note off event callback.
   void SetNoteOffEvent(NoteOffEvent::Callback callback) noexcept {
-    SetNoteOffEvent(EventWithCallback<NoteOffEvent, double>(callback));
+    if (callback) {
+      const auto note_off_event = EventWithCallback<NoteOffEvent, double>(callback);
+      SetNoteOffEvent(&note_off_event);
+    } else {
+      SetNoteOffEvent(nullptr);
+    }
   }
 
   /// Sets a note on.
@@ -1193,8 +1199,8 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the note on event.
   ///
-  /// @param note_on_event Note on event.
-  void SetNoteOnEvent(NoteOnEvent note_on_event) noexcept {
+  /// @param note_on_event Pointer to note on event.
+  void SetNoteOnEvent(const NoteOnEvent* note_on_event) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOnEvent(*this, note_on_event);
     assert(success);
   }
@@ -1203,7 +1209,12 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   ///
   /// @param callback Note off event callback.
   void SetNoteOnEvent(NoteOnEvent::Callback callback) noexcept {
-    SetNoteOnEvent(EventWithCallback<NoteOnEvent, double, double>(callback));
+    if (callback) {
+      const auto note_on_event = EventWithCallback<NoteOnEvent, double, double>(callback);
+      SetNoteOnEvent(&note_on_event);
+    } else {
+      SetNoteOnEvent(nullptr);
+    }
   }
 
   /// Sets the sample data.
@@ -1264,10 +1275,10 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   /// @param task_event Task event.
   /// @param position Task position in beats.
   /// @return Task handle.
-  TaskHandle AddTask(TaskEvent task_event, double position) noexcept {
+  TaskHandle AddTask(const TaskEvent& task_event, double position) noexcept {
     BarelyTaskHandle task;
     [[maybe_unused]] const bool success =
-        BarelyPerformer_AddTask(*this, task_event, position, &task);
+        BarelyPerformer_AddTask(*this, &task_event, position, &task);
     assert(success);
     return TaskHandle(task);
   }
@@ -1278,6 +1289,7 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   /// @param position Task position in beats.
   /// @return Task handle.
   TaskHandle AddTask(TaskEvent::Callback callback, double position) noexcept {
+    assert(callback);
     return AddTask(EventWithCallback<TaskEvent>(callback), position);
   }
 
@@ -1350,9 +1362,9 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   ///
   /// @param task_event Task event.
   /// @param position Task position in beats.
-  void ScheduleOneOffTask(TaskEvent task_event, double position) noexcept {
+  void ScheduleOneOffTask(const TaskEvent& task_event, double position) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyPerformer_ScheduleOneOffTask(*this, task_event, position);
+        BarelyPerformer_ScheduleOneOffTask(*this, &task_event, position);
     assert(success);
   }
 
@@ -1361,6 +1373,7 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   /// @param callback Task callback.
   /// @param position Task position in beats.
   void ScheduleOneOffTask(TaskEvent::Callback callback, double position) noexcept {
+    assert(callback);
     ScheduleOneOffTask(EventWithCallback<TaskEvent>(callback), position);
   }
 

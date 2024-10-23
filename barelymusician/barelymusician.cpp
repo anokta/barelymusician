@@ -11,6 +11,8 @@
 using ::barely::ControlType;
 using ::barely::InstrumentController;
 using ::barely::NoteControlType;
+using ::barely::NoteOffEvent;
+using ::barely::NoteOnEvent;
 using ::barely::Performer;
 using ::barely::SampleDataSlice;
 using ::barely::internal::Musician;
@@ -113,10 +115,10 @@ bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch
 }
 
 bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                      BarelyNoteOffEvent note_off_event) {
+                                      const BarelyNoteOffEvent* note_off_event) {
   if (!instrument) return false;
 
-  instrument->SetNoteOffEvent(note_off_event);
+  instrument->SetNoteOffEvent(static_cast<const NoteOffEvent*>(note_off_event));
   return true;
 }
 
@@ -128,10 +130,10 @@ bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch,
 }
 
 bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                     BarelyNoteOnEvent note_on_event) {
+                                     const BarelyNoteOnEvent* note_on_event) {
   if (!instrument) return false;
 
-  instrument->SetNoteOnEvent(note_on_event);
+  instrument->SetNoteOnEvent(static_cast<const NoteOnEvent*>(note_on_event));
   return true;
 }
 
@@ -242,12 +244,13 @@ bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   return true;
 }
 
-bool BarelyPerformer_AddTask(BarelyPerformerHandle performer, BarelyTaskEvent task_event,
+bool BarelyPerformer_AddTask(BarelyPerformerHandle performer, const BarelyTaskEvent* task_event,
                              double position, BarelyTaskHandle* out_task) {
   if (!performer) return false;
+  if (!task_event) return false;
   if (!out_task) return false;
 
-  *out_task = static_cast<BarelyTask*>(performer->AddTask(task_event, position));
+  *out_task = static_cast<BarelyTask*>(performer->AddTask(*task_event, position));
   return *out_task;
 }
 
@@ -307,11 +310,12 @@ bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer, BarelyTaskHandl
   return true;
 }
 
-bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer, BarelyTaskEvent task_event,
-                                        double position) {
+bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
+                                        const BarelyTaskEvent* task_event, double position) {
   if (!performer) return false;
+  if (!task_event) return false;
 
-  performer->ScheduleOneOffTask(task_event, position);
+  performer->ScheduleOneOffTask(*task_event, position);
   return true;
 }
 

@@ -96,8 +96,8 @@ class InstrumentController {
 
   /// Sets the note off event.
   ///
-  /// @param note_off_event Note off event.
-  void SetNoteOffEvent(NoteOffEvent note_off_event) noexcept;
+  /// @param note_off_event Pointer to note off event.
+  void SetNoteOffEvent(const NoteOffEvent* note_off_event) noexcept;
 
   /// Sets a note on.
   ///
@@ -108,8 +108,8 @@ class InstrumentController {
 
   /// Sets the note on event.
   ///
-  /// @param note_on_event Note on event.
-  void SetNoteOnEvent(NoteOnEvent note_on_event) noexcept;
+  /// @param note_on_event Pointer to note on event.
+  void SetNoteOnEvent(const NoteOnEvent* note_on_event) noexcept;
 
   /// Sets the reference frequency.
   ///

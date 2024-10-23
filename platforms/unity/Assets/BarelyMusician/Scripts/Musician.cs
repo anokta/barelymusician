@@ -112,11 +112,11 @@ namespace Barely {
           return;
         }
         _noteOffEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(instrument));
-        if (!BarelyInstrument_SetNoteOffEvent(instrumentHandle, _noteOffEvent)) {
+        if (!BarelyInstrument_SetNoteOffEvent(instrumentHandle, ref _noteOffEvent)) {
           GCHandle.FromIntPtr(_noteOffEvent.userData).Free();
         }
         _noteOnEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(instrument));
-        if (!BarelyInstrument_SetNoteOnEvent(instrumentHandle, _noteOnEvent)) {
+        if (!BarelyInstrument_SetNoteOnEvent(instrumentHandle, ref _noteOnEvent)) {
           GCHandle.FromIntPtr(_noteOnEvent.userData).Free();
         }
       }
@@ -474,7 +474,7 @@ namespace Barely {
           return;
         }
         _taskEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(callback));
-        if (!BarelyPerformer_ScheduleOneOffTask(performerHandle, _taskEvent, position)) {
+        if (!BarelyPerformer_ScheduleOneOffTask(performerHandle, ref _taskEvent, position)) {
           GCHandle.FromIntPtr(_taskEvent.userData).Free();
           if (performerHandle != IntPtr.Zero) {
             Debug.LogError("Failed to set performer loop begin position");
@@ -557,7 +557,7 @@ namespace Barely {
           return;
         }
         _taskEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(callback));
-        if (!BarelyPerformer_AddTask(performerHandle, _taskEvent, position, ref taskHandle)) {
+        if (!BarelyPerformer_AddTask(performerHandle, ref _taskEvent, position, ref taskHandle)) {
           GCHandle.FromIntPtr(_taskEvent.userData).Free();
         }
       }
@@ -1093,7 +1093,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffEvent")]
       private static extern bool BarelyInstrument_SetNoteOffEvent(IntPtr instrument,
-                                                                  NoteOffEvent noteOffEvent);
+                                                                  ref NoteOffEvent noteOffEvent);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
       private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, double pitch,
@@ -1101,7 +1101,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEvent")]
       private static extern bool BarelyInstrument_SetNoteOnEvent(IntPtr instrument,
-                                                                 NoteOnEvent noteOnEvent);
+                                                                 ref NoteOnEvent noteOnEvent);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
       private static extern bool BarelyInstrument_SetSampleData(IntPtr instrument,
@@ -1151,7 +1151,7 @@ namespace Barely {
       private static extern bool BarelyMusician_Update(IntPtr musician, double timestamp);
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_AddTask")]
-      private static extern bool BarelyPerformer_AddTask(IntPtr performer, TaskEvent taskEvent,
+      private static extern bool BarelyPerformer_AddTask(IntPtr performer, ref TaskEvent taskEvent,
                                                          double position, ref IntPtr outTask);
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_CancelAllOneOffTasks")]
@@ -1180,7 +1180,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_ScheduleOneOffTask")]
       private static extern bool BarelyPerformer_ScheduleOneOffTask(IntPtr performer,
-                                                                    TaskEvent taskEvent,
+                                                                    ref TaskEvent taskEvent,
                                                                     double position);
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]

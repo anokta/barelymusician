@@ -115,7 +115,7 @@ void Performer::RemoveTask(Task* task) noexcept {
   }
 }
 
-void Performer::ScheduleOneOffTask(TaskEvent task_event, double position) noexcept {
+void Performer::ScheduleOneOffTask(const TaskEvent& task_event, double position) noexcept {
   if (position < position_) {
     return;
   }

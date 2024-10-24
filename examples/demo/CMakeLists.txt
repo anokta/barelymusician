@@ -59,7 +59,6 @@ add_barelymusician_demo(
   barelymusician
   barelymusician_random
   barelymusician_duration
-  barelymusician_scale
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log
@@ -101,7 +100,6 @@ add_barelymusician_demo(
 add_barelymusician_demo(
   trigger_demo
   barelymusician
-  barelymusician_scale
   barelymusician_examples_audio_clock
   barelymusician_examples_audio_output
   barelymusician_examples_console_log

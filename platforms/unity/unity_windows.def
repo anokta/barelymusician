@@ -40,6 +40,7 @@ EXPORTS
   BarelyPerformer_SetPosition
   BarelyPerformer_Start
   BarelyPerformer_Stop
+  BarelyScale_GetPitch
   BarelyTask_GetPosition
   BarelyTask_SetPosition
 
@@ -66,6 +67,3 @@ EXPORTS
   BarelyRepeater_SetStyle
   BarelyRepeater_Start
   BarelyRepeater_Stop
-
-  BarelyScale_GetPitch
-  Barely_GetScale

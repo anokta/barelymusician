@@ -304,6 +304,21 @@ typedef struct BarelySampleDataSlice {
   int32_t sample_count;
 } BarelySampleDataSlice;
 
+/// A musical scale.
+typedef struct BarelyScale {
+  /// Array of note pitches relative to the root note pitch.
+  const double* pitches;
+
+  /// Number of note pitches.
+  int32_t pitch_count;
+
+  /// Root note pitch of the scale.
+  double root_pitch;
+
+  /// Mode index.
+  int32_t mode;
+} BarelyScale;
+
 /// Note off event create callback signature.
 ///
 /// @param state Pointer to note off event state.
@@ -726,6 +741,15 @@ BARELY_EXPORT bool BarelyPerformer_Start(BarelyPerformerHandle performer);
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 
+/// Gets a scale note pitch for a given degree.
+///
+/// @param scale Pointer to scale.
+/// @param degree Scale degree.
+/// @param out_pitch Output note pitch.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree,
+                                        double* out_pitch);
+
 /// Gets the position of a task.
 ///
 /// @param task Task handle.
@@ -841,6 +865,50 @@ struct SampleDataSlice : public BarelySampleDataSlice {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr SampleDataSlice(BarelySampleDataSlice sample_data_slice) noexcept
       : BarelySampleDataSlice{sample_data_slice} {}
+};
+
+/// A musical scale.
+struct Scale : public BarelyScale {
+ public:
+  /// Default constructor.
+  constexpr Scale() noexcept = default;
+
+  /// Constructs a new `Scale`.
+  ///
+  /// @param pitches Span of pitches.
+  /// @param root_pitch Root pitch.
+  /// @param mode Mode.
+  constexpr Scale(std::span<const double> pitches, double root_pitch = 0.0, int mode = 0) noexcept
+      : Scale(BarelyScale{pitches.data(), static_cast<int32_t>(pitches.size()), root_pitch,
+                          static_cast<int32_t>(mode)}) {}
+
+  /// Constructs a new `Scale` from a raw type.
+  ///
+  /// @param scale Raw scale.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr Scale(BarelyScale scale) noexcept : BarelyScale{scale} {
+    assert(scale.pitches != nullptr);
+    assert(scale.pitch_count > 0);
+    assert(scale.mode >= 0 && scale.mode < scale.pitch_count);
+  }
+
+  /// Returns the pitch for a given degree.
+  ///
+  /// @param degree Degree.
+  /// @return Pitch.
+  [[nodiscard]] double GetPitch(int degree) const noexcept {
+    double pitch = 0.0;
+    [[maybe_unused]] const bool success = BarelyScale_GetPitch(this, degree, &pitch);
+    assert(success);
+    return pitch;
+  }
+
+  /// Returns the number of pitches in the scale.
+  ///
+  /// @return Number of pitches.
+  [[nodiscard]] constexpr int GetPitchCount() const noexcept {
+    return static_cast<int>(pitch_count);
+  }
 };
 
 /// Note off event.

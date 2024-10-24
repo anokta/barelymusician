@@ -508,7 +508,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   randomSequencer: {fileID: 2031085264}
-  scale: {fileID: 11400000, guid: 8d46e355adb6b6146b88eba7485b6cec, type: 2}
+  scale: {fileID: 11400000, guid: a5047b1d47b95764e9e8e0073af88448, type: 2}
 --- !u!1 &685451361
 GameObject:
   m_ObjectHideFlags: 0

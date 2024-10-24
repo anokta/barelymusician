@@ -2,6 +2,7 @@
 
 #include <array>
 #include <functional>
+#include <utility>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -111,7 +112,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     std::vector<InstrumentController*> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(musician.AddInstrument());
-      NoteOffEvent::Callback note_off_callback = [&](double pitch) {
+      const NoteOffEvent::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
       instruments[i]->SetNoteOffEvent(&note_off_event);

@@ -39,6 +39,7 @@ VERS_1.0 {
     BarelyPerformer_SetPosition;
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
+    BarelyScale_GetPitch;
     BarelyTask_GetPosition;
     BarelyTask_SetPosition;
 
@@ -65,9 +66,6 @@ VERS_1.0 {
     BarelyRepeater_SetStyle;
     BarelyRepeater_Start;
     BarelyRepeater_Stop;
-
-    BarelyScale_GetPitch;
-    Barely_GetScale;
 
   local:
     *;

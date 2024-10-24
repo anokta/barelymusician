@@ -583,7 +583,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   instrument: {fileID: 2014543005}
   performer: {fileID: 2014543008}
-  scale: {fileID: 11400000, guid: 87eab8b15d214ad48a382fde9c32060a, type: 2}
+  scale: {fileID: 11400000, guid: bbcfd3c579a86784398dcefbda8946a9, type: 2}
   text: {fileID: 84924158}
 --- !u!114 &2014543010
 MonoBehaviour:

@@ -4,16 +4,6 @@ add_library(
   duration.h
 )
 
-add_library(
-  barelymusician_scale
-  scale.cpp
-  scale.h
-)
-target_link_libraries(
-  barelymusician_scale
-  barelymusician
-)
-
 if(ENABLE_TESTS)
   add_executable(
     barelymusician_duration_test
@@ -25,15 +15,4 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_duration_test)
-
-  add_executable(
-    barelymusician_scale_test
-    scale_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_scale_test
-    barelymusician_scale
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_scale_test)
 endif()

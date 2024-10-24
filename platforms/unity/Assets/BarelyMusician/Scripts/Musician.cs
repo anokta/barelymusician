@@ -545,6 +545,23 @@ namespace Barely {
         }
       }
 
+      /// Gets a scale note pitch for a given degree.
+      ///
+      /// @param scale Pointer to scale.
+      /// @param degree Scale degree.
+      /// @return Output note pitch.
+      public static double Scale_GetPitch(Barely.Scale scale, int degree) {
+        double pitch = 0.0;
+        _scale.pitches = scale.Pitches;
+        _scale.pitchCount = scale.PitchCount;
+        _scale.rootPitch = scale.RootPitch;
+        _scale.mode = scale.Mode;
+        if (!BarelyScale_GetPitch(ref _scale, degree, ref pitch)) {
+          Debug.LogError("Failed to get scale " + scale + " note pitch with a degree " + degree);
+        }
+        return pitch;
+      }
+
       /// Creates a new task.
       ///
       /// @param performerHandle Performer handle.
@@ -885,6 +902,21 @@ namespace Barely {
         public Int32 sampleCount;
       }
 
+      [StructLayout(LayoutKind.Sequential)]
+      private struct Scale {
+        // Array of note pitches relative to the root note pitch.
+        public double[] pitches;
+
+        // Number of note pitches.
+        public Int32 pitchCount;
+
+        // Root note pitch of the scale.
+        public double rootPitch;
+
+        // Mode index.
+        public Int32 mode;
+      }
+
       // Task event create callback.
       private delegate void TaskEvent_CreateCallback(ref IntPtr state, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(TaskEvent_CreateCallback))]
@@ -941,6 +973,14 @@ namespace Barely {
         }
       }
       private static IntPtr _handle = IntPtr.Zero;
+
+      // Scale.
+      private static Scale _scale = new Scale {
+        pitches = null,
+        pitchCount = 0,
+        rootPitch = 0.0,
+        mode = 0,
+      };
 
       // Note off event.
       private static NoteOffEvent _noteOffEvent = new NoteOffEvent() {
@@ -1201,6 +1241,10 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Stop")]
       private static extern bool BarelyPerformer_Stop(IntPtr performer);
+
+      [DllImport(pluginName, EntryPoint = "BarelyScale_GetPitch")]
+      private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
+                                                      ref double outPitch);
 
       [DllImport(pluginName, EntryPoint = "BarelyTask_GetPosition")]
       private static extern bool BarelyTask_GetPosition(IntPtr task, ref double outPosition);

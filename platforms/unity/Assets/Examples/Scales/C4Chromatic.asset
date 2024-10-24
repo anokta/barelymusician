@@ -10,7 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8bb4124fe640ada429392cc44e77d7ef, type: 3}
-  m_Name: ChromaticScale
+  m_Name: C4Chromatic
   m_EditorClassIdentifier: 
-  type: 0
-  rootNote: C4
+  RootPitch: 0
+  Mode: 0
+  Pitches:
+  - 0
+  - 0.0833333333333333
+  - 0.166666666666667
+  - 0.25
+  - 0.333333333333333
+  - 0.416666666666667
+  - 0.5
+  - 0.583333333333333
+  - 0.666666666666667
+  - 0.75
+  - 0.833333333333333
+  - 0.916666666666667

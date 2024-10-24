@@ -12,5 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bb4124fe640ada429392cc44e77d7ef, type: 3}
   m_Name: C4Major
   m_EditorClassIdentifier: 
-  type: 1
-  rootNote: C4
+  RootPitch: 0
+  Mode: 0
+  Pitches:
+  - 0
+  - 0.166666666666667
+  - 0.333333333333333
+  - 0.416666666666667
+  - 0.583333333333333
+  - 0.75
+  - 0.916666666666667

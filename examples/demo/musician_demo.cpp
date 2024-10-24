@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cctype>
 #include <chrono>
@@ -14,7 +15,6 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/composition/duration.h"
-#include "barelymusician/composition/scale.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -34,7 +34,6 @@ using ::barely::Random;
 using ::barely::SampleDataSlice;
 using ::barely::SamplePlaybackMode;
 using ::barely::Scale;
-using ::barely::ScaleType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -66,8 +65,28 @@ constexpr double kLookahead = 0.15;
 constexpr double kTempo = 124.0;
 constexpr int kBeatCount = 3;
 
+// Number of semitones in an octave.
+constexpr int kSemitoneCount = 12;
+
+// Number of pitches in a heptatonic scale.
+constexpr int kHeptatonicScaleCount = 7;
+
+/// Common musical scale ratios.
+constexpr std::array<double, kSemitoneCount> kSemitones = {
+    0.0 / static_cast<double>(kSemitoneCount),  1.0 / static_cast<double>(kSemitoneCount),
+    2.0 / static_cast<double>(kSemitoneCount),  3.0 / static_cast<double>(kSemitoneCount),
+    4.0 / static_cast<double>(kSemitoneCount),  5.0 / static_cast<double>(kSemitoneCount),
+    6.0 / static_cast<double>(kSemitoneCount),  7.0 / static_cast<double>(kSemitoneCount),
+    8.0 / static_cast<double>(kSemitoneCount),  9.0 / static_cast<double>(kSemitoneCount),
+    10.0 / static_cast<double>(kSemitoneCount), 11.0 / static_cast<double>(kSemitoneCount),
+};
+constexpr std::array<double, kHeptatonicScaleCount> kDiatonicPitches = {
+    kSemitones[0], kSemitones[2], kSemitones[4],  kSemitones[5],
+    kSemitones[7], kSemitones[9], kSemitones[11],
+};
+
 // Ensemble settings.
-constexpr double kRootPitch = 2.0 / 12.0;
+constexpr double kRootPitch = kSemitones[2];
 
 constexpr double kPitchKick = 0.0;
 constexpr double kPitchSnare = 1.0;
@@ -219,7 +238,7 @@ int main(int /*argc*/, char* argv[]) {
     set_note_callbacks_fn(instruments.size(), instrument);
   };
 
-  const Scale scale = barely::GetScale(ScaleType::kDiatonic, kRootPitch);
+  Scale scale = {kDiatonicPitches, kRootPitch};
 
   // Add synth instruments.
   const auto chords_beat_composer_callback = [&](int /*bar*/, int /*beat*/, int /*beat_count*/,
@@ -390,6 +409,18 @@ int main(int /*argc*/, char* argv[]) {
             {kPitchHihatClosed, "basic_hihat_closed.wav"},
             {kPitchHihatOpen, "basic_hihat_open.wav"},
         });
+        break;
+      case 'Q':
+        scale.mode = (scale.mode - 1 + scale.GetPitchCount()) % scale.GetPitchCount();
+        ConsoleLog() << "Scale mode set to " << scale.mode;
+        break;
+      case 'W':
+        scale.mode = 0;
+        ConsoleLog() << "Scale mode reset to " << scale.mode;
+        break;
+      case 'E':
+        scale.mode = (scale.mode + 1) % scale.GetPitchCount();
+        ConsoleLog() << "Scale mode set to " << scale.mode;
         break;
       default:
         break;

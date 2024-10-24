@@ -11,7 +11,6 @@ target_link_libraries(
   barelymusician
   barelymusician_arpeggiator
   barelymusician_repeater
-  barelymusician_scale
 )
 if(MSVC)
   target_sources(

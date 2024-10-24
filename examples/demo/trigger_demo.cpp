@@ -1,10 +1,10 @@
+#include <array>
 #include <chrono>
 #include <thread>
 #include <utility>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/scale.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -16,7 +16,6 @@ using ::barely::ControlType;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::Scale;
-using ::barely::ScaleType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -28,6 +27,10 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
 constexpr double kLookahead = 0.05;
+
+constexpr std::array<double, 7> kMajor = {
+    0.0, 2.0 / 12.0, 4.0 / 12.0, 5.0 / 12.0, 7.0 / 12.0, 9.0 / 12.0, 11.0 / 12.0,
+};
 
 // Instrument settings.
 constexpr double kGain = 0.1;
@@ -61,10 +64,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto performer = musician.AddPerformer();
 
-  const Scale scale = barely::GetScale(ScaleType::kDiatonic);
-
   const auto play_note_fn = [&](int degree, double duration) {
-    return [&instrument, &performer, duration, pitch = scale.GetPitch(degree)]() {
+    return [&instrument, &performer, duration, pitch = Scale(kMajor).GetPitch(degree)]() {
       instrument.SetNoteOn(pitch);
       performer.ScheduleOneOffTask(
           [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },

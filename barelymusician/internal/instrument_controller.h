@@ -15,7 +15,7 @@
 #include "barelymusician/internal/message_queue.h"
 #include "barelymusician/internal/sample_data.h"
 
-namespace barely {
+namespace barely::internal {
 
 /// Class that controls an instrument.
 class InstrumentController {
@@ -203,6 +203,6 @@ class InstrumentController {
   InstrumentProcessor processor_;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_

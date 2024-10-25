@@ -11,7 +11,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/event.h"
 
-namespace barely {
+namespace barely::internal {
 
 Performer::Task::Task(Performer& performer, const TaskEvent& task_event, double position) noexcept
     : Event<TaskEvent>(task_event), performer_(performer), position_(position) {}
@@ -242,4 +242,4 @@ void Performer::PrevLastProcessedRecurringTaskIt() noexcept {
   }
 }
 
-}  // namespace barely
+}  // namespace barely::internal

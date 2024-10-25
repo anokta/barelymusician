@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_DURATION_H_
 #define BARELYMUSICIAN_COMPOSITION_DURATION_H_
 
+// TODO(#141): Expose public functionality and move the rest into the internal namespace.
 namespace barely {
 
 /// Common note values in relation to quarter note beat duration.

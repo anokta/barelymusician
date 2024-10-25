@@ -3,7 +3,7 @@
 
 #include <utility>
 
-namespace barely {
+namespace barely::internal {
 
 /// Template that wraps an event.
 template <typename EventType, typename... EventArgs>
@@ -93,6 +93,6 @@ void Event<EventType, EventArgs...>::Process(EventArgs... args) noexcept {
   }
 }
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_INTERNAL_EVENT_H_

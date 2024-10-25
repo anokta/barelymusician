@@ -6,7 +6,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
 
-namespace barely {
+namespace barely::internal {
 
 /// Simple oscillator that generates output samples of basic waveforms.
 class Oscillator {
@@ -57,6 +57,6 @@ class Oscillator {
   Random random_;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_DSP_OSCILLATOR_H_

@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
 #define BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
 
-namespace barely {
+namespace barely::internal {
 
 /// Sample player that generates output samples from the provided mono data.
 class SamplePlayer {
@@ -70,6 +70,6 @@ class SamplePlayer {
   bool loop_ = false;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_

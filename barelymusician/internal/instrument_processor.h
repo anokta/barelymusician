@@ -7,7 +7,7 @@
 #include "barelymusician/dsp/voice.h"
 #include "barelymusician/internal/sample_data.h"
 
-namespace barely {
+namespace barely::internal {
 
 /// Class that wraps the audio processing of an instrument.
 class InstrumentProcessor {
@@ -85,6 +85,6 @@ class InstrumentProcessor {
   double pitch_shift_ = 0.0;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_

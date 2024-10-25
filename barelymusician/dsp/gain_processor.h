@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_GAIN_PROCESSOR_H_
 #define BARELYMUSICIAN_DSP_GAIN_PROCESSOR_H_
 
-namespace barely {
+namespace barely::internal {
 
 /// Gain processor with a linear ramp.
 class GainProcessor {
@@ -37,6 +37,6 @@ class GainProcessor {
   double target_gain_ = 1.0;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_DSP_GAIN_PROCESSOR_H_

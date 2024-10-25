@@ -10,7 +10,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/event.h"
 
-namespace barely {
+namespace barely::internal {
 
 /// Class that wraps a performer.
 class Performer {
@@ -186,6 +186,6 @@ class Performer {
   std::optional<RecurringTaskMap::const_iterator> last_processed_recurring_task_it_;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_INTERNAL_PERFORMER_H_

@@ -7,7 +7,7 @@
 #include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/dsp/voice.h"
 
-namespace barely {
+namespace barely::internal {
 
 /// Class that wraps an instrument voice.
 class Voice {
@@ -63,6 +63,6 @@ class Voice {
   SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_DSP_VOICE_H_

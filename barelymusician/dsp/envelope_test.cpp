@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barely::internal {
 namespace {
 
 // Frame rate.
@@ -77,4 +77,4 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barely::internal

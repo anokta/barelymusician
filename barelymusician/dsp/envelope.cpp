@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace barely {
+namespace barely::internal {
 
 Envelope::Envelope(int frame_rate) noexcept
     : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate) : 0.0) {}
@@ -108,4 +108,4 @@ void Envelope::Stop() noexcept {
   }
 }
 
-}  // namespace barely
+}  // namespace barely::internal

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace barely {
+namespace barely::internal {
 
 double OnePoleFilter::Next(double input) noexcept {
   output_ = coefficient_ * (output_ - input) + input;
@@ -32,4 +32,4 @@ double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept {
   return 0.0;
 }
 
-}  // namespace barely
+}  // namespace barely::internal

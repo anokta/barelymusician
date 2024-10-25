@@ -6,7 +6,7 @@
 #include "barelymusician/internal/sample_data.h"
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barely::internal {
 namespace {
 
 constexpr int kFrameRate = 1;
@@ -104,4 +104,4 @@ TEST(InstrumentProcessorTest, NoVoice) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barely::internal

@@ -106,6 +106,7 @@ BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiato
 
 #include "barelymusician/common/random.h"
 
+// TODO(#141): Expose public functionality and move the rest into the internal namespace.
 namespace barely {
 
 /// Arpeggiator style.

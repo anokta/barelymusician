@@ -12,7 +12,7 @@
 #include "barelymusician/internal/message.h"
 #include "barelymusician/internal/sample_data.h"
 
-namespace barely {
+namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentController::InstrumentController(int frame_rate, double reference_frequency,
@@ -167,4 +167,4 @@ void InstrumentController::Update(int64_t update_frame) noexcept {
   update_frame_ = update_frame;
 }
 
-}  // namespace barely
+}  // namespace barely::internal

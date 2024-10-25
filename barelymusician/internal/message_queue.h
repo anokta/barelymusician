@@ -8,7 +8,7 @@
 
 #include "barelymusician/internal/message.h"
 
-namespace barely {
+namespace barely::internal {
 
 /// Single-consumer single-producer message queue.
 class MessageQueue {
@@ -40,6 +40,6 @@ class MessageQueue {
   std::atomic<int> write_index_ = 0;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_INTERNAL_MESSAGE_QUEUE_H_

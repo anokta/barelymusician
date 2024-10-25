@@ -5,7 +5,7 @@
 
 #include "barelymusician/internal/message.h"
 
-namespace barely {
+namespace barely::internal {
 
 bool MessageQueue::Add(int64_t frame, Message message) noexcept {
   const int index = write_index_;
@@ -27,4 +27,4 @@ std::pair<int64_t, Message>* MessageQueue::GetNext(int64_t end_frame) noexcept {
   return &messages_[index];
 }
 
-}  // namespace barely
+}  // namespace barely::internal

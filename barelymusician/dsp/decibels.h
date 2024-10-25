@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_DECIBELS_H_
 #define BARELYMUSICIAN_DSP_DECIBELS_H_
 
-namespace barely {
+namespace barely::internal {
 
 /// Minimum decibel threshold.
 inline constexpr double kMinDecibels = -80.0;
@@ -18,6 +18,6 @@ double AmplitudeFromDecibels(double decibels) noexcept;
 /// @return Value in decibels.
 double DecibelsFromAmplitude(double amplitude) noexcept;
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_DSP_DECIBELS_H_

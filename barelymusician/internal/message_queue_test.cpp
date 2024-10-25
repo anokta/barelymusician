@@ -12,7 +12,7 @@ using ::testing::Pair;
 using ::testing::Pointee;
 using ::testing::VariantWith;
 
-namespace barely {
+namespace barely::internal {
 namespace {
 
 // Tests that adding a single message is queued as expected.
@@ -56,4 +56,4 @@ TEST(MessageQueueTest, AddMultipleMessages) {
 // TODO(#97): Add more tests with concurrency.
 
 }  // namespace
-}  // namespace barely
+}  // namespace barely::internal

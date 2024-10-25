@@ -6,7 +6,7 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barely {
+namespace barely::internal {
 
 Oscillator::Oscillator(int frame_rate) noexcept
     : frame_interval_(frame_rate > 0 ? 1.0 / static_cast<double>(frame_rate) : 0.0),
@@ -50,4 +50,4 @@ void Oscillator::SetFrequency(double frequency) noexcept {
 
 void Oscillator::SetShape(OscillatorShape shape) noexcept { shape_ = shape; }
 
-}  // namespace barely
+}  // namespace barely::internal

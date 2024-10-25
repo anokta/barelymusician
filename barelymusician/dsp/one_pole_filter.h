@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 #define BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 
-namespace barely {
+namespace barely::internal {
 
 /// One-pole filter type.
 enum class FilterType {
@@ -49,6 +49,6 @@ class OnePoleFilter {
 /// @return Filter coefficient.
 double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept;
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_

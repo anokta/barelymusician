@@ -7,7 +7,7 @@
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barely::internal {
 namespace {
 
 using ::testing::ElementsAre;
@@ -90,4 +90,4 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoStartSymbolRule) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barely::internal

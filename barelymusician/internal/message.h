@@ -9,7 +9,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/sample_data.h"
 
-namespace barely {
+namespace barely::internal {
 
 /// Control message.
 struct ControlMessage {
@@ -71,6 +71,6 @@ struct MessageVisitor : MessageTypes... {
 template <typename... MessageTypes>
 MessageVisitor(MessageTypes...) -> MessageVisitor<MessageTypes...>;
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_INTERNAL_MESSAGE_H_

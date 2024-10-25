@@ -5,7 +5,7 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barely {
+namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 SampleData::SampleData(std::span<const SampleDataSlice> slices) noexcept {
@@ -35,4 +35,4 @@ const SampleDataSlice* SampleData::Select(double pitch) const noexcept {
 
 void SampleData::Swap(SampleData& other) noexcept { slices_.swap(other.slices_); }
 
-}  // namespace barely
+}  // namespace barely::internal

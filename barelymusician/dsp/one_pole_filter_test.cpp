@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barely::internal {
 namespace {
 
 // Test input (single impulse).
@@ -83,4 +83,4 @@ TEST(OnePoleFilterTest, GetFilterCoefficient) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barely::internal

@@ -10,16 +10,13 @@
 #include "barelymusician/internal/performer.h"
 
 using ::barely::ControlType;
-using ::barely::InstrumentController;
 using ::barely::NoteControlType;
 using ::barely::NoteOffEvent;
 using ::barely::NoteOnEvent;
-using ::barely::Performer;
 using ::barely::SampleDataSlice;
-using ::barely::internal::Musician;
 
 // Musician.
-struct BarelyMusician : public Musician {
+struct BarelyMusician : public barely::internal::Musician {
  public:
   explicit BarelyMusician(int32_t frame_rate) noexcept : Musician(frame_rate) {}
   ~BarelyMusician() = default;
@@ -32,13 +29,13 @@ struct BarelyMusician : public Musician {
 };
 
 // Instrument.
-struct BarelyInstrument : public InstrumentController {};
+struct BarelyInstrument : public barely::internal::InstrumentController {};
 
 // Performer.
-struct BarelyPerformer : public Performer {};
+struct BarelyPerformer : public barely::internal::Performer {};
 
 // Task.
-struct BarelyTask : public Performer::Task {};
+struct BarelyTask : public barely::internal::Performer::Task {};
 
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
                                  double* out_value) {

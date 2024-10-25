@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_ENVELOPE_H_
 #define BARELYMUSICIAN_DSP_ENVELOPE_H_
 
-namespace barely {
+namespace barely::internal {
 
 /// Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output samples according to
 /// its current state.
@@ -77,6 +77,6 @@ class Envelope {
   State state_ = State::kIdle;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_DSP_ENVELOPE_H_

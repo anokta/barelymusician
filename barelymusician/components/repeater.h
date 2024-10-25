@@ -109,6 +109,7 @@ BARELY_EXPORT bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
 
 #include "barelymusician/common/random.h"
 
+// TODO(#141): Expose public functionality and move the rest into the internal namespace.
 namespace barely {
 
 /// Repeater style.

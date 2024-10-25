@@ -8,7 +8,7 @@
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barely::internal {
 namespace {
 
 using ::testing::Optional;
@@ -204,4 +204,4 @@ TEST(PerformerTest, SetPosition) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barely::internal

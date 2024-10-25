@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace barely {
+namespace barely::internal {
 
 SamplePlayer::SamplePlayer(int frame_rate) noexcept
     : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate) : 0.0) {}
@@ -46,4 +46,4 @@ void SamplePlayer::CalculateIncrementPerSample() noexcept {
   increment_ = speed_ * frequency_ * frame_interval_;
 }
 
-}  // namespace barely
+}  // namespace barely::internal

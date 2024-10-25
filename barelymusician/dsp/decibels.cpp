@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-namespace barely {
+namespace barely::internal {
 
 double AmplitudeFromDecibels(double decibels) noexcept {
   if (decibels > kMinDecibels) {
@@ -21,4 +21,4 @@ double DecibelsFromAmplitude(double amplitude) noexcept {
   return kMinDecibels;
 }
 
-}  // namespace barely
+}  // namespace barely::internal

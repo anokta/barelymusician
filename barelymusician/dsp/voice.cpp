@@ -2,7 +2,7 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barely {
+namespace barely::internal {
 
 Voice::Voice(int frame_rate) noexcept
     : envelope_(frame_rate), oscillator_(frame_rate), sample_player_(frame_rate) {}
@@ -34,4 +34,4 @@ void Voice::Stop() noexcept {
   }
 }
 
-}  // namespace barely
+}  // namespace barely::internal

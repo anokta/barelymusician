@@ -9,7 +9,7 @@
 #include "barelymusician/dsp/voice.h"
 #include "barelymusician/internal/sample_data.h"
 
-namespace barely {
+namespace barely::internal {
 
 namespace {
 
@@ -222,4 +222,4 @@ InstrumentProcessor::VoiceState& InstrumentProcessor::AcquireVoice(double pitch)
   return voice_states_[voice_index];
 }
 
-}  // namespace barely
+}  // namespace barely::internal

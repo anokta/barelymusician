@@ -7,7 +7,7 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barely {
+namespace barely::internal {
 
 /// Class that wraps sample data.
 class SampleData {
@@ -36,6 +36,6 @@ class SampleData {
   std::vector<std::pair<SampleDataSlice, std::vector<double>>> slices_;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_INTERNAL_SAMPLE_DATA_H_

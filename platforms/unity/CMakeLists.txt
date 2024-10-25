@@ -9,8 +9,8 @@ target_compile_definitions(
 target_link_libraries(
   barelymusicianunity PUBLIC
   barelymusician
-  barelymusician_arpeggiator
-  barelymusician_repeater
+  barelymusician_components_arpeggiator
+  barelymusician_components_repeater
 )
 if(MSVC)
   target_sources(

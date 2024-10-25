@@ -1,5 +1,5 @@
 function(add_barelymusician_demo demo_name)
-  set(DEMO_TARGET_NAME barelymusician_examples_${demo_name})
+  set(DEMO_TARGET_NAME examples_demo_${demo_name})
   add_executable(
     ${DEMO_TARGET_NAME}
     ${demo_name}.cpp
@@ -18,91 +18,91 @@ endfunction()
 add_barelymusician_demo(
   arpeggiator_demo
   barelymusician
-  barelymusician_arpeggiator
-  barelymusician_examples_audio_clock
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_input_manager
+  barelymusician_components_arpeggiator
+  examples_common_audio_clock
+  examples_common_audio_output
+  examples_common_console_log
+  examples_common_input_manager
 )
 
 add_barelymusician_demo(
   instrument_demo
   barelymusician
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_input_manager
+  examples_common_audio_output
+  examples_common_console_log
+  examples_common_input_manager
 )
 
 add_barelymusician_demo(
   metronome_demo
   barelymusician
-  barelymusician_examples_audio_clock
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_metronome
-  barelymusician_examples_input_manager
+  examples_common_audio_clock
+  examples_common_audio_output
+  examples_common_console_log
+  examples_performers_metronome
+  examples_common_input_manager
 )
 
 add_barelymusician_demo(
   midi_demo
   barelymusician
-  barelymusician_examples_audio_clock
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_input_manager
-  barelymusician_examples_data
+  examples_common_audio_clock
+  examples_common_audio_output
+  examples_common_console_log
+  examples_common_input_manager
+  examples_data_data
   midifile
 )
 
 add_barelymusician_demo(
   musician_demo
   barelymusician
-  barelymusician_random
-  barelymusician_duration
-  barelymusician_examples_audio_clock
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_input_manager
-  barelymusician_examples_metronome
-  barelymusician_examples_wav_file
-  barelymusician_examples_data
+  barelymusician_common_random
+  barelymusician_composition_duration
+  examples_common_audio_clock
+  examples_common_audio_output
+  examples_common_console_log
+  examples_common_input_manager
+  examples_performers_metronome
+  examples_common_wav_file
+  examples_data_data
 )
 
 add_barelymusician_demo(
   repeater_demo
   barelymusician
-  barelymusician_repeater
-  barelymusician_examples_audio_clock
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_input_manager
+  barelymusician_components_repeater
+  examples_common_audio_clock
+  examples_common_audio_output
+  examples_common_console_log
+  examples_common_input_manager
 )
 
 add_barelymusician_demo(
   sampler_demo
   barelymusician
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_input_manager
-  barelymusician_examples_wav_file
-  barelymusician_examples_data
+  examples_common_audio_output
+  examples_common_console_log
+  examples_common_input_manager
+  examples_common_wav_file
+  examples_data_data
 )
 
 add_barelymusician_demo(
   sequencer_demo
   barelymusician
-  barelymusician_examples_audio_clock
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_input_manager
+  examples_common_audio_clock
+  examples_common_audio_output
+  examples_common_console_log
+  examples_common_input_manager
 )
 
 add_barelymusician_demo(
   trigger_demo
   barelymusician
-  barelymusician_examples_audio_clock
-  barelymusician_examples_audio_output
-  barelymusician_examples_console_log
-  barelymusician_examples_input_manager
+  examples_common_audio_clock
+  examples_common_audio_output
+  examples_common_console_log
+  examples_common_input_manager
 )
 

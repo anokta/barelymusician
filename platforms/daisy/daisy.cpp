@@ -1,9 +1,7 @@
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/dsp/oscillator.h"
 #include "daisy_pod.h"
 
 using ::barely::ControlType;
-using ::barely::Instrument;
 using ::barely::InstrumentHandle;
 using ::barely::Musician;
 using ::barely::OscillatorShape;

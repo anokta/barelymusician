@@ -15,10 +15,10 @@ target_link_libraries(
   barelymusician_internal_message
   barelymusician_internal_message_queue
   barelymusician_internal_sample_data
+  barelymusician_common_find_or_null
+  barelymusician_dsp_oscillator
+  barelymusician_dsp_sample_player
   barelymusician_headeronly
-  barelymusician_find_or_null
-  barelymusician_oscillator
-  barelymusician_sample_player
 )
 
 add_library(
@@ -29,11 +29,11 @@ add_library(
 target_link_libraries(
   barelymusician_internal_instrument_processor
   barelymusician_internal_sample_data
+  barelymusician_dsp_gain_processor
+  barelymusician_dsp_oscillator
+  barelymusician_dsp_sample_player
+  barelymusician_dsp_voice
   barelymusician_headeronly
-  barelymusician_gain_processor
-  barelymusician_oscillator
-  barelymusician_sample_player
-  barelymusician_voice
 )
 
 add_library(

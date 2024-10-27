@@ -1,7 +1,6 @@
 #include "barelymusician/barelymusician.h"
 
 #include <cassert>
-#include <cmath>
 #include <cstdint>
 #include <span>
 
@@ -357,23 +356,6 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
   performer->Stop();
-  return true;
-}
-
-bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, double* out_pitch) {
-  if (scale == nullptr) return false;
-  if (scale->pitches == nullptr || scale->pitch_count == 0) return false;
-  if (scale->mode < 0 || scale->mode >= scale->pitch_count) return false;
-  if (out_pitch == nullptr) return false;
-
-  const int scale_degree = degree + scale->mode;
-  const int pitch_count = static_cast<int>(scale->pitch_count);
-  const int octave = static_cast<int>(
-      std::floor(static_cast<double>(scale_degree) / static_cast<double>(pitch_count)));
-  const int index = scale_degree - octave * pitch_count;
-  assert(index >= 0 && index < pitch_count);
-  *out_pitch = scale->root_pitch + static_cast<double>(octave) + scale->pitches[index] -
-               scale->pitches[scale->mode];
   return true;
 }
 

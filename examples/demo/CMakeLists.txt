@@ -17,8 +17,8 @@ endfunction()
 
 add_barelymusician_demo(
   arpeggiator_demo
+  barelycomposer
   barelymusician
-  barelymusician_components_arpeggiator
   examples_common_audio_clock
   examples_common_audio_output
   examples_common_console_log
@@ -56,6 +56,7 @@ add_barelymusician_demo(
 
 add_barelymusician_demo(
   musician_demo
+  barelycomposer
   barelymusician
   barelymusician_common_random
   barelymusician_composition_duration
@@ -70,8 +71,8 @@ add_barelymusician_demo(
 
 add_barelymusician_demo(
   repeater_demo
+  barelycomposer
   barelymusician
-  barelymusician_components_repeater
   examples_common_audio_clock
   examples_common_audio_output
   examples_common_console_log
@@ -99,6 +100,7 @@ add_barelymusician_demo(
 
 add_barelymusician_demo(
   trigger_demo
+  barelycomposer
   barelymusician
   examples_common_audio_clock
   examples_common_audio_output

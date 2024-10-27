@@ -1,133 +1,27 @@
 #ifndef BARELYMUSICIAN_COMPONENTS_REPEATER_H_
 #define BARELYMUSICIAN_COMPONENTS_REPEATER_H_
 
-#include "barelymusician/barelymusician.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif  // __cplusplus
-
-/// Repeater handle alias.
-typedef struct BarelyRepeater* BarelyRepeaterHandle;
-
-/// Repeater style enum alias.
-typedef int32_t BarelyRepeaterStyle;
-
-/// Clears all notes.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater);
-
-/// Creates a new repeater.
-///
-/// @param musician Musician handle.
-/// @param process_order Repeater process order.
-/// @param out_repeater Output repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Create(BarelyMusician* musician, int32_t process_order,
-                                         BarelyRepeaterHandle* out_repeater);
-
-/// Destroys an repeater.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater);
-
-/// Gets whether an repeater is playing or not.
-///
-/// @param repeater Repeater handle.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing);
-
-/// Pops the last note from the end.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
-
-/// Pushes a new note to the end.
-///
-/// @param repeater Repeater handle.
-/// @param pitch Note pitch.
-/// @param length Note length.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length);
-
-/// Pushes silence to the end.
-///
-/// @param repeater Repeater handle.
-/// @param length Note length.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length);
-
-/// Sets the instrument of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
-                                                BarelyInstrumentHandle instrument);
-
-/// Sets the rate of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param rate Rate in notes per beat.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate);
-
-/// Sets the style of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param style Repeater style.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater,
-                                           BarelyRepeaterStyle style);
-
-/// Starts the repeater.
-///
-/// @param repeater Repeater handle.
-/// @param pitch_offset Pitch offset.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_offset);
-
-/// Stops the repeater.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
-
-#ifdef __cplusplus
-}  // extern "C"
-#endif  // __cplusplus
-
-#ifdef __cplusplus
 #include <optional>
 #include <utility>
 #include <vector>
 
+#include "barelymusician/barelycomposer.h"
 #include "barelymusician/common/random.h"
+#include "barelymusician/internal/instrument_controller.h"
+#include "barelymusician/internal/musician.h"
+#include "barelymusician/internal/performer.h"
 
-// TODO(#141): Expose public functionality and move the rest into the internal namespace.
-namespace barely {
+namespace barely::internal {
 
-/// Repeater style.
-enum class RepeaterStyle : BarelyRepeaterStyle {
-  kForward = 0,
-  kBackward = 1,
-  kRandom = 2,
-};
-
-/// Simple repeater that repeats notes in sequence.
+/// Class that wraps a repeater.
 class Repeater {
  public:
   // Constructs a new `Repeater`.
   ///
-  /// @param musician Musician handle.
+  /// @param musician Musician.
   /// @param process_order Process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Repeater(MusicianHandle musician, int process_order = 0) noexcept;
+  explicit Repeater(Musician& musician, int process_order = 0) noexcept;
 
   /// Destroys `Repeater`.
   ~Repeater() noexcept;
@@ -161,8 +55,8 @@ class Repeater {
 
   /// Sets the instrument.
   ///
-  /// @param instrument Optional instrument.
-  void SetInstrument(std::optional<InstrumentHandle> instrument) noexcept;
+  /// @param instrument Pointer to instrument.
+  void SetInstrument(InstrumentController* instrument) noexcept;
 
   /// Sets the rate.
   ///
@@ -189,13 +83,13 @@ class Repeater {
   bool Update() noexcept;
 
   // Musician.
-  MusicianHandle musician_;
+  Musician& musician_;
 
   // Performer.
-  PerformerHandle performer_;
+  Performer* performer_ = nullptr;
 
   // Instrument.
-  std::optional<InstrumentHandle> instrument_ = std::nullopt;
+  InstrumentController* instrument_ = nullptr;
 
   // Array of pitches to play.
   std::vector<std::pair<std::optional<double>, int>> pitches_;
@@ -216,7 +110,6 @@ class Repeater {
   Random random_;
 };
 
-}  // namespace barely
-#endif  // __cplusplus
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_COMPONENTS_REPEATER_H_

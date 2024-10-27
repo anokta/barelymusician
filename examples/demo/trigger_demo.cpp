@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include "barelymusician/barelycomposer.h"
 #include "barelymusician/barelymusician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"

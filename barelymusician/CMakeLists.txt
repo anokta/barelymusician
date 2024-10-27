@@ -1,6 +1,36 @@
 set(CMAKE_FOLDER barelymusician)
 
 add_library(
+  barelycomposer STATIC
+  barelycomposer.cpp
+)
+set_target_properties(
+  barelycomposer PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+)
+target_compile_definitions(
+  barelycomposer
+  PUBLIC BARELYMUSICIAN_EXPORTS
+)
+target_link_libraries(
+  barelycomposer
+  barelymusician
+  barelymusician_components_arpeggiator
+  barelymusician_components_repeater
+  barelymusician_internal_instrument_controller
+  barelymusician_internal_musician
+)
+
+add_library(
+  barelycomposer_headeronly INTERFACE
+  barelycomposer.h
+)
+target_link_libraries(
+  barelycomposer_headeronly INTERFACE
+  barelymusician_headeronly
+)
+
+add_library(
   barelymusician STATIC
   barelymusician.cpp
 )
@@ -26,16 +56,27 @@ add_library(
 )
 
 if(ENABLE_TESTS)
-  add_executable(
-    barelymusician_test
-    barelymusician_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_test
-    barelymusician
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_test)
+add_executable(
+  barelycomposer_test
+  barelycomposer_test.cpp
+)
+target_link_libraries(
+  barelycomposer_test
+  barelycomposer
+  gtest_main
+)
+gtest_discover_tests(barelycomposer_test)
+
+add_executable(
+  barelymusician_test
+  barelymusician_test.cpp
+)
+target_link_libraries(
+  barelymusician_test
+  barelymusician
+  gtest_main
+)
+gtest_discover_tests(barelymusician_test)
 endif()
 
 add_subdirectory(algorithm)

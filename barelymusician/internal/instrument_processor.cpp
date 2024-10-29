@@ -111,7 +111,7 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       break;
     default:
       assert(!"Invalid control type");
-      break;
+      return;
   }
 }
 

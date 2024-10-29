@@ -416,8 +416,8 @@ class ArpeggiatorHandle : public HandleWrapper<BarelyArpeggiatorHandle> {
   ///
   /// @param instrument Optional instrument.
   void SetInstrument(std::optional<InstrumentHandle> instrument) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyArpeggiator_SetInstrument(*this, instrument ? *instrument : nullptr);
+    [[maybe_unused]] const bool success = BarelyArpeggiator_SetInstrument(
+        *this, instrument ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
     assert(success);
   }
 
@@ -597,8 +597,8 @@ class RepeaterHandle : public HandleWrapper<BarelyRepeaterHandle> {
   ///
   /// @param instrument Optional instrument.
   void SetInstrument(std::optional<InstrumentHandle> instrument) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyRepeater_SetInstrument(*this, instrument ? *instrument : nullptr);
+    [[maybe_unused]] const bool success = BarelyRepeater_SetInstrument(
+        *this, instrument ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
     assert(success);
   }
 

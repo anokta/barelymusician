@@ -96,7 +96,10 @@ void Arpeggiator::SetRate(double rate) noexcept {
   performer_->SetLoopLength(length);
 }
 
-void Arpeggiator::SetStyle(ArpeggiatorStyle style) noexcept { style_ = style; }
+void Arpeggiator::SetStyle(ArpeggiatorStyle style) noexcept {
+  assert(style != ArpeggiatorStyle::kCount);
+  style_ = style;
+}
 
 void Arpeggiator::Update() noexcept {
   const int size = static_cast<int>(pitches_.size());
@@ -109,6 +112,10 @@ void Arpeggiator::Update() noexcept {
       break;
     case ArpeggiatorStyle::kRandom:
       index_ = random_.DrawUniform(0, size - 1);
+      break;
+    default:
+      assert(!"Invalid arpeggiator style");
+      return;
   }
 }
 

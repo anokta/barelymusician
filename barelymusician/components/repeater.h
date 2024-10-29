@@ -31,8 +31,8 @@ class Repeater {
   Repeater& operator=(const Repeater& other) noexcept = delete;
 
   /// Movable.
-  Repeater(Repeater&& other) noexcept = default;
-  Repeater& operator=(Repeater&& other) noexcept = default;
+  Repeater(Repeater&& other) noexcept = delete;
+  Repeater& operator=(Repeater&& other) noexcept = delete;
 
   /// Clears all notes.
   void Clear() noexcept;

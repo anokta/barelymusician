@@ -83,7 +83,10 @@ void Repeater::SetRate(double rate) noexcept {
   performer_->SetLoopLength(length);
 }
 
-void Repeater::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
+void Repeater::SetStyle(RepeaterStyle style) noexcept {
+  assert(style != RepeaterStyle::kCount);
+  style_ = style;
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Start(double pitch_offset) noexcept {
@@ -122,6 +125,10 @@ bool Repeater::Update() noexcept {
       break;
     case RepeaterStyle::kRandom:
       index_ = random_.DrawUniform(0, size - 1);
+      break;
+    default:
+      assert(!"Invalid repeater style");
+      return false;
   }
   remaining_length_ = pitches_[index_].second;
   return true;

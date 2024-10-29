@@ -29,8 +29,8 @@ class Arpeggiator {
   Arpeggiator& operator=(const Arpeggiator& other) noexcept = delete;
 
   /// Movable.
-  Arpeggiator(Arpeggiator&& other) noexcept = default;
-  Arpeggiator& operator=(Arpeggiator&& other) noexcept = default;
+  Arpeggiator(Arpeggiator&& other) noexcept = delete;
+  Arpeggiator& operator=(Arpeggiator&& other) noexcept = delete;
 
   /// Returns whether a note is on or not.
   ///

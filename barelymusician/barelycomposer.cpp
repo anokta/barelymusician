@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/random.h"
 #include "barelymusician/components/arpeggiator.h"
 #include "barelymusician/components/repeater.h"
 #include "barelymusician/internal/instrument_controller.h"
@@ -13,13 +14,18 @@
 
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::internal::Arpeggiator {
-  BarelyArpeggiator(barely::internal::Musician& musician, int process_order)
+  BarelyArpeggiator(barely::internal::Musician& musician, int process_order) noexcept
       : barely::internal::Arpeggiator(musician, process_order) {}
+};
+
+// Random.
+struct BarelyRandom : public barely::internal::Random {
+  BarelyRandom(int seed) noexcept : barely::internal::Random(seed) {}
 };
 
 // Repeater.
 struct BarelyRepeater : public barely::internal::Repeater {
-  BarelyRepeater(barely::internal::Musician& musician, int process_order)
+  BarelyRepeater(barely::internal::Musician& musician, int process_order) noexcept
       : barely::internal::Repeater(musician, process_order) {}
 };
 
@@ -102,6 +108,54 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeg
   if (!arpeggiator) return false;
 
   arpeggiator->SetStyle(static_cast<barely::ArpeggiatorStyle>(style));
+  return true;
+}
+
+bool BarelyRandom_Create(int32_t seed, BarelyRandomHandle* out_random) {
+  if (!out_random) return false;
+
+  *out_random = new BarelyRandom(static_cast<int>(seed));
+  return true;
+}
+
+bool BarelyRandom_Destroy(BarelyRandomHandle random) {
+  if (!random) return false;
+
+  delete random;
+  return true;
+}
+
+bool BarelyRandom_DrawNormal(BarelyRandomHandle random, double mean, double variance,
+                             double* out_number) {
+  if (!random || !out_number) return false;
+
+  *out_number = random->DrawNormal(mean, variance);
+  return true;
+}
+
+bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_t min, int32_t max,
+                                 int32_t* out_number) {
+  if (!random || !out_number) return false;
+  if (min > max) return false;
+
+  *out_number =
+      static_cast<int32_t>(random->DrawUniform(static_cast<int>(min), static_cast<int>(max)));
+  return true;
+}
+
+bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, double min, double max,
+                                  double* out_number) {
+  if (!random || !out_number) return false;
+  if (min > max) return false;
+
+  *out_number = random->DrawUniform(min, max);
+  return true;
+}
+
+bool BarelyRandom_Reset(BarelyRandomHandle random, int32_t seed) {
+  if (!random) return false;
+
+  random->Reset(static_cast<int>(seed));
   return true;
 }
 

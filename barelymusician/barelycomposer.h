@@ -56,6 +56,9 @@ typedef struct BarelyScale {
 /// Arpeggiator handle alias.
 typedef struct BarelyArpeggiator* BarelyArpeggiatorHandle;
 
+/// Random handle alias.
+typedef struct BarelyRandom* BarelyRandomHandle;
+
 /// Repeater handle alias.
 typedef struct BarelyRepeater* BarelyRepeaterHandle;
 
@@ -141,6 +144,56 @@ BARELY_EXPORT bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
                                               BarelyArpeggiatorStyle style);
+
+/// Creates a new random number generator.
+///
+/// @param seed Seed value.
+/// @param out_random Output random handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRandom_Create(int32_t seed, BarelyRandomHandle* out_random);
+
+/// Destroys a random number generator.
+///
+/// @param random Random handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRandom_Destroy(BarelyRandomHandle random);
+
+/// Draws a random number with normal distribution.
+///
+/// @param random Random handle.
+/// @param mean Distrubition mean value.
+/// @param variance Distrubition variance.
+/// @param out_number Output random number.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRandom_DrawNormal(BarelyRandomHandle random, double mean, double variance,
+                                           double* out_number);
+
+/// Draws a number with discrete uniform distribution in range [min, max].
+///
+/// @param random Random handle.
+/// @param min Minimum value (inclusive).
+/// @param max Maximum value (inclusive).
+/// @param out_number Output random number.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_t min, int32_t max,
+                                               int32_t* out_number);
+
+/// Draws a number with continuous uniform distribution in range [min, max).
+///
+/// @param random Random handle.
+/// @param min Minimum value (inclusive).
+/// @param max Maximum value (exclusive).
+/// @param out_number Output random number.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, double min, double max,
+                                                double* out_number);
+
+/// Resets a random number generator with a new seed.
+///
+/// @param random Random handle.
+/// @param seed Seed value.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyRandom_Reset(BarelyRandomHandle random, int32_t seed);
 
 /// Clears all notes.
 ///
@@ -244,6 +297,7 @@ BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree
 #include <cassert>
 #include <cstdint>
 #include <optional>
+#include <random>
 #include <span>
 
 namespace barely {
@@ -385,7 +439,79 @@ class ArpeggiatorHandle : public HandleWrapper<BarelyArpeggiatorHandle> {
   }
 };
 
-/// Arpeggiator handle.
+/// Random handle.
+class RandomHandle : public HandleWrapper<BarelyRandomHandle> {
+ public:
+  /// Creates a new `RandomHandle`.
+  ///
+  /// @param seed Seed value.
+  /// @return Random handle.
+  [[nodiscard]] static RandomHandle Create(
+      int seed = static_cast<int>(std::default_random_engine::default_seed)) noexcept {
+    BarelyRandomHandle random = nullptr;
+    [[maybe_unused]] const bool success = BarelyRandom_Create(static_cast<int32_t>(seed), &random);
+    assert(success);
+    return RandomHandle(random);
+  }
+
+  /// Destroys a `RandomHandle`.
+  ///
+  /// @param random Random handle.
+  static void Destroy(RandomHandle random) noexcept { BarelyRandom_Destroy(random); }
+
+  /// Default constructor.
+  constexpr RandomHandle() noexcept = default;
+
+  /// Creates a new `RandomHandle` from a raw handle.
+  ///
+  /// @param random Raw handle to random.
+  explicit constexpr RandomHandle(BarelyRandomHandle random) noexcept : HandleWrapper(random) {}
+
+  /// Draws a number with normal distribution.
+  ///
+  /// @param mean Distrubition mean value.
+  /// @param variance Distrubition variance.
+  /// @return Random double number.
+  double DrawNormal(double mean, double variance) noexcept {
+    double number = 0.0;
+    [[maybe_unused]] const bool success = BarelyRandom_DrawNormal(*this, mean, variance, &number);
+    assert(success);
+    return number;
+  }
+
+  /// Draws a number with continuous uniform distribution in range [min, max).
+  ///
+  /// @param min Minimum value (inclusive).
+  /// @param max Maximum value (exclusive).
+  /// @return Random double number.
+  double DrawUniform(double min, double max) noexcept {
+    double number = 0.0;
+    [[maybe_unused]] const bool success = BarelyRandom_DrawUniformReal(*this, min, max, &number);
+    assert(success);
+    return number;
+  }
+
+  /// Draws a number with discrete uniform distribution in range [min, max].
+  ///
+  /// @param min Minimum value (inclusive).
+  /// @param max Maximum value (inclusive).
+  /// @return Random integer number.
+  int DrawUniform(int min, int max) noexcept {
+    int32_t number = 0;
+    [[maybe_unused]] const bool success = BarelyRandom_DrawUniformInt(
+        *this, static_cast<int32_t>(min), static_cast<int32_t>(max), &number);
+    assert(success);
+    return static_cast<int>(number);
+  }
+
+  /// Resets the random number generator with a new seed.
+  void Reset(int seed) noexcept {
+    [[maybe_unused]] const bool success = BarelyRandom_Reset(*this, static_cast<int32_t>(seed));
+    assert(success);
+  }
+};
+
+/// Repeater handle.
 class RepeaterHandle : public HandleWrapper<BarelyRepeaterHandle> {
  public:
   /// Creates a new `RepeaterHandle`.
@@ -536,6 +662,9 @@ struct Scale : public BarelyScale {
 
 /// Scoped arpeggiator alias.
 using Arpeggiator = ScopedHandleWrapper<ArpeggiatorHandle>;
+
+/// Scoped random alias.
+using Random = ScopedHandleWrapper<RandomHandle>;
 
 /// Scoped repeater alias.
 using Repeater = ScopedHandleWrapper<RepeaterHandle>;

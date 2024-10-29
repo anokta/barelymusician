@@ -14,7 +14,6 @@
 
 #include "barelymusician/barelycomposer.h"
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/random.h"
 #include "barelymusician/composition/duration.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"

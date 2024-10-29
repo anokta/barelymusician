@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barely::internal {
 namespace {
 
 // Tests that the generated uniform numbers are always within a given range.
@@ -45,4 +45,4 @@ TEST(RandomTest, Reset) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barely::internal

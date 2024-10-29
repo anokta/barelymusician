@@ -15,6 +15,7 @@ target_compile_definitions(
 target_link_libraries(
   barelycomposer
   barelymusician
+  barelymusician_common_random
   barelymusician_components_arpeggiator
   barelymusician_components_repeater
   barelymusician_internal_instrument_controller

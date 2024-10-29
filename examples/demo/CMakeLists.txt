@@ -58,7 +58,6 @@ add_barelymusician_demo(
   musician_demo
   barelycomposer
   barelymusician
-  barelymusician_common_random
   barelymusician_composition_duration
   examples_common_audio_clock
   examples_common_audio_output

@@ -3,10 +3,9 @@
 
 #include <random>
 
-namespace barely {
+namespace barely::internal {
 
-/// Pseudo-random number generator.
-// TODO(#141): Expose public functionality and move the rest into the internal namespace.
+/// Class that wraps a random number generator.
 class Random {
  public:
   /// Constructs a new `Random`.
@@ -50,6 +49,6 @@ class Random {
   std::uniform_int_distribution<int> uniform_int_distribution_;
 };
 
-}  // namespace barely
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_COMMON_RANDOM_H_

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <numbers>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 
 namespace barely::internal {
 

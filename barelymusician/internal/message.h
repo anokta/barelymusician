@@ -6,7 +6,7 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/internal/sample_data.h"
 
 namespace barely::internal {

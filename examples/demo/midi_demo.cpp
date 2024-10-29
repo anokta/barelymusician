@@ -9,7 +9,7 @@
 
 #include "MidiEventList.h"
 #include "MidiFile.h"
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"

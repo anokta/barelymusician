@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/performer.h"
 #include "gmock/gmock-matchers.h"

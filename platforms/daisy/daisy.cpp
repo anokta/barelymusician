@@ -1,4 +1,4 @@
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "daisy_pod.h"
 
 using ::barely::ControlType;

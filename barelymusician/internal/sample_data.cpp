@@ -3,7 +3,7 @@
 #include <span>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 
 namespace barely::internal {
 

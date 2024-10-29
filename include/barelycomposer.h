@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_BARELYCOMPOSER_H_
 #define BARELYMUSICIAN_BARELYCOMPOSER_H_
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 
 #ifdef __cplusplus
 extern "C" {

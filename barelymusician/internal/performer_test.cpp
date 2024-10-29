@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 

@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 
 namespace barely::examples {
 

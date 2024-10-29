@@ -1,5 +1,5 @@
 
-#include "barelymusician/barelycomposer.h"
+#include "barelycomposer.h"
 
 #include <array>
 

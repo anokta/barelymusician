@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/internal/sample_data.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"

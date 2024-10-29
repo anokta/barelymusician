@@ -23,15 +23,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelycomposer_headeronly INTERFACE
-  barelycomposer.h
-)
-target_link_libraries(
-  barelycomposer_headeronly INTERFACE
-  barelymusician_headeronly
-)
-
-add_library(
   barelymusician STATIC
   barelymusician.cpp
 )
@@ -49,11 +40,6 @@ target_link_libraries(
   barelymusician_internal_instrument_controller
   barelymusician_internal_musician
   barelymusician_internal_performer
-)
-
-add_library(
-  barelymusician_headeronly INTERFACE
-  barelymusician.h
 )
 
 if(ENABLE_TESTS)

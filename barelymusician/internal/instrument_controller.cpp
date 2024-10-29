@@ -5,7 +5,7 @@
 #include <utility>
 #include <variant>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/instrument_processor.h"

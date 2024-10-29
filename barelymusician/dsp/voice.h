@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_VOICE_H_
 #define BARELYMUSICIAN_DSP_VOICE_H_
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/sample_player.h"

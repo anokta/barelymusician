@@ -1,4 +1,4 @@
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 
 #include <cassert>
 #include <cstdint>

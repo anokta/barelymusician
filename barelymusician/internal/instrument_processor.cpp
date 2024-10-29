@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/dsp/voice.h"

@@ -138,7 +138,10 @@ if(ENABLE_TESTS)
 endif()
 
 include_directories(.)
+# TODO(#141): Use `target_include_directories` instead.
+include_directories(include)
 
+add_subdirectory(include)
 add_subdirectory(barelymusician)
 
 if(ENABLE_EXAMPLES)

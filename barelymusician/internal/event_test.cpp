@@ -1,6 +1,6 @@
 #include "barelymusician/internal/event.h"
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {

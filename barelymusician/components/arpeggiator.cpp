@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include "barelymusician/barelycomposer.h"
-#include "barelymusician/barelymusician.h"
+#include "barelycomposer.h"
+#include "barelymusician.h"
 #include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/musician.h"
 

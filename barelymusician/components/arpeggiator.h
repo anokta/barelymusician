@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "barelymusician/barelycomposer.h"
+#include "barelycomposer.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/internal/instrument_controller.h"
 #include "barelymusician/internal/musician.h"

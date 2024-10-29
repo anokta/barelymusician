@@ -12,7 +12,7 @@
 /// - Musician:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician/barelymusician.h"
+///   #include "barelymusician.h"
 ///
 ///   // Create.
 ///   barely::Musician musician(/*frame_rate=*/48000);
@@ -90,7 +90,7 @@
 /// - Musician:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician/barelymusician.h"
+///   #include "barelymusician.h"
 ///
 ///   // Create.
 ///   BarelyMusicianHandle musician = nullptr;

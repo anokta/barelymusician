@@ -7,7 +7,7 @@
 #include <limits>
 #include <unordered_map>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/internal/event.h"

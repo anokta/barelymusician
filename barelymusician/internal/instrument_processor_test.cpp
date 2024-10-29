@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/internal/sample_data.h"
 #include "gtest/gtest.h"
 

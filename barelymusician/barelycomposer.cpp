@@ -1,11 +1,11 @@
-#include "barelymusician/barelycomposer.h"
+#include "barelycomposer.h"
 
 #include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <optional>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/components/arpeggiator.h"
 #include "barelymusician/components/repeater.h"

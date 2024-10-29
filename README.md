@@ -12,8 +12,7 @@ accurate way.
 This repository includes build targets for Linux, OSX, Windows, Android, and Daisy platforms, in
 addition to a native Unity game engine plugin[*][iOS].
 
-To use in a project, simply include
-[barelymusician/barelymusician.h](barelymusician/barelymusician.h).
+To use in a project, simply include [barelymusician.h](include/barelymusician.h).
 
 To use in Unity, download the latest version of
 [barelymusician.unitypackage](https://github.com/anokta/barelymusician/releases/latest/download/barelymusician.unitypackage).
@@ -25,7 +24,7 @@ For background about this project, see the original research paper
 ## Example usage
 
 ```cpp
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 
 // Create the musician.
 barely::Musician musician(/*frame_rate=*/48000);

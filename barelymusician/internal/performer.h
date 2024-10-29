@@ -7,7 +7,7 @@
 #include <optional>
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/internal/event.h"
 
 namespace barely::internal {

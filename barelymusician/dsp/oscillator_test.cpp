@@ -1,6 +1,6 @@
 #include "barelymusician/dsp/oscillator.h"
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {

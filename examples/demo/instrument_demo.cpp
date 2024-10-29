@@ -6,7 +6,7 @@
 #include <optional>
 #include <thread>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"

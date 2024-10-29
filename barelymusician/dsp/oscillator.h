@@ -3,7 +3,7 @@
 
 #include <random>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 #include "barelymusician/common/random.h"
 
 namespace barely::internal {

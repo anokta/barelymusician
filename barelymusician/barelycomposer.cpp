@@ -20,7 +20,7 @@ struct BarelyArpeggiator : public barely::internal::Arpeggiator {
 
 // Random.
 struct BarelyRandom : public barely::internal::Random {
-  BarelyRandom(int seed) noexcept : barely::internal::Random(seed) {}
+  explicit BarelyRandom(int seed) noexcept : barely::internal::Random(seed) {}
 };
 
 // Repeater.
@@ -108,6 +108,18 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeg
   if (!arpeggiator) return false;
 
   arpeggiator->SetStyle(static_cast<barely::ArpeggiatorStyle>(style));
+  return true;
+}
+
+bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization, double position,
+                                    double* out_position) {
+  if (!quantization || !out_position) return false;
+  if (quantization->resolution <= 0.0) return false;
+  if (quantization->amount < 0.0 || quantization->amount > 1.0) return false;
+
+  *out_position = std::lerp(
+      position, quantization->resolution * std::round(position / quantization->resolution),
+      quantization->amount);
   return true;
 }
 

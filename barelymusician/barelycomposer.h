@@ -38,6 +38,15 @@ enum BarelyRepeaterStyle_Values {
   BarelyRepeaterStyle_kCount,
 };
 
+/// A musical quantization.
+typedef struct BarelyQuantization {
+  /// Resolution.
+  double resolution;
+
+  /// Amount.
+  double amount;
+} BarelyQuantization;
+
 /// A musical scale.
 typedef struct BarelyScale {
   /// Array of note pitches relative to the root note pitch.
@@ -144,6 +153,15 @@ BARELY_EXPORT bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
                                               BarelyArpeggiatorStyle style);
+
+/// Gets a quantized position.
+///
+/// @param quantization Pointer to quantization.
+/// @param position Position.
+/// @param out_position Output position.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
+                                                  double position, double* out_position);
 
 /// Creates a new random number generator.
 ///
@@ -616,6 +634,42 @@ class RepeaterHandle : public HandleWrapper<BarelyRepeaterHandle> {
   }
 };
 
+/// A musical quantization.
+struct Quantization : public BarelyQuantization {
+ public:
+  /// Default constructor.
+  constexpr Quantization() noexcept = default;
+
+  /// Constructs a new `Quantization`.
+  ///
+  /// @param resolution Resolution.
+  /// @param amount Amount.
+  constexpr Quantization(double resolution, double amount = 1.0) noexcept
+      : Quantization(BarelyQuantization{resolution, amount}) {}
+
+  /// Constructs a new `Quantization` from a raw type.
+  ///
+  /// @param quantization Raw quantization.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr Quantization(BarelyQuantization quantization) noexcept
+      : BarelyQuantization{quantization} {
+    assert(resolution > 0.0);
+    assert(amount >= 0.0 && amount <= 1.0);
+  }
+
+  /// Returns the quantized position.
+  ///
+  /// @param position Position.
+  /// @return Quantized position.
+  [[nodiscard]] double GetPosition(double position) const noexcept {
+    double quantized_position = 0.0;
+    [[maybe_unused]] const bool success =
+        BarelyQuantization_GetPosition(this, position, &quantized_position);
+    assert(success);
+    return quantized_position;
+  }
+};
+
 /// A musical scale.
 struct Scale : public BarelyScale {
  public:
@@ -636,9 +690,9 @@ struct Scale : public BarelyScale {
   /// @param scale Raw scale.
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr Scale(BarelyScale scale) noexcept : BarelyScale{scale} {
-    assert(scale.pitches != nullptr);
-    assert(scale.pitch_count > 0);
-    assert(scale.mode >= 0 && scale.mode < scale.pitch_count);
+    assert(pitches != nullptr);
+    assert(pitch_count > 0);
+    assert(mode >= 0 && mode < pitch_count);
   }
 
   /// Returns the pitch for a given degree.

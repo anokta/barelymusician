@@ -142,7 +142,7 @@ include_directories(.)
 include_directories(include)
 
 add_subdirectory(include)
-add_subdirectory(barelymusician)
+add_subdirectory(src)
 
 if(ENABLE_EXAMPLES)
   set(CMAKE_FOLDER external)

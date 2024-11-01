@@ -1,4 +1,4 @@
-function(add_barelymusician_demo demo_name)
+function(add_demo demo_name)
   set(DEMO_TARGET_NAME examples_demo_${demo_name})
   add_executable(
     ${DEMO_TARGET_NAME}
@@ -15,7 +15,7 @@ function(add_barelymusician_demo demo_name)
   )
 endfunction()
 
-add_barelymusician_demo(
+add_demo(
   arpeggiator_demo
   barelycomposer
   barelymusician
@@ -25,7 +25,7 @@ add_barelymusician_demo(
   examples_common_input_manager
 )
 
-add_barelymusician_demo(
+add_demo(
   instrument_demo
   barelymusician
   examples_common_audio_output
@@ -33,7 +33,7 @@ add_barelymusician_demo(
   examples_common_input_manager
 )
 
-add_barelymusician_demo(
+add_demo(
   metronome_demo
   barelymusician
   examples_common_audio_clock
@@ -43,7 +43,7 @@ add_barelymusician_demo(
   examples_common_input_manager
 )
 
-add_barelymusician_demo(
+add_demo(
   midi_demo
   barelymusician
   examples_common_audio_clock
@@ -54,7 +54,7 @@ add_barelymusician_demo(
   midifile
 )
 
-add_barelymusician_demo(
+add_demo(
   musician_demo
   barelycomposer
   barelymusician
@@ -67,7 +67,7 @@ add_barelymusician_demo(
   examples_data_data
 )
 
-add_barelymusician_demo(
+add_demo(
   repeater_demo
   barelycomposer
   barelymusician
@@ -77,7 +77,7 @@ add_barelymusician_demo(
   examples_common_input_manager
 )
 
-add_barelymusician_demo(
+add_demo(
   sampler_demo
   barelymusician
   examples_common_audio_output
@@ -87,7 +87,7 @@ add_barelymusician_demo(
   examples_data_data
 )
 
-add_barelymusician_demo(
+add_demo(
   sequencer_demo
   barelymusician
   examples_common_audio_clock
@@ -96,7 +96,7 @@ add_barelymusician_demo(
   examples_common_input_manager
 )
 
-add_barelymusician_demo(
+add_demo(
   trigger_demo
   barelycomposer
   barelymusician

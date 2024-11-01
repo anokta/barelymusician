@@ -1,5 +1,5 @@
 
-#include "examples/common/audio_clock.h"
+#include "common/audio_clock.h"
 
 namespace barely::examples {
 

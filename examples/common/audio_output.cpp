@@ -1,5 +1,5 @@
 
-#include "examples/common/audio_output.h"
+#include "common/audio_output.h"
 
 #include <cassert>
 #include <utility>

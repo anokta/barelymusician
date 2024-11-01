@@ -1,3 +1,5 @@
+set(CMAKE_FOLDER src)
+
 include_directories(.)
 
 add_library(

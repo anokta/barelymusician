@@ -1,4 +1,4 @@
-#include "examples/performers/metronome.h"
+#include "performers/metronome.h"
 
 #include <utility>
 

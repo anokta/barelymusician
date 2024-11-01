@@ -1,6 +1,15 @@
 include_directories(.)
 
 add_library(
+  barelycomposer_headeronly INTERFACE
+  ${CMAKE_SOURCE_DIR}/include/barelycomposer.h
+)
+target_link_libraries(
+  barelycomposer_headeronly INTERFACE
+  barelymusician_headeronly
+)
+
+add_library(
   barelycomposer STATIC
   barelycomposer.cpp
 )
@@ -20,6 +29,11 @@ target_link_libraries(
   barelymusician_components_repeater
   barelymusician_internal_instrument_controller
   barelymusician_internal_musician
+)
+
+add_library(
+  barelymusician_headeronly INTERFACE
+  ${CMAKE_SOURCE_DIR}/include/barelymusician.h
 )
 
 add_library(

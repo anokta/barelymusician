@@ -141,9 +141,6 @@ include_directories(.)
 # TODO(#141): Use `target_include_directories` instead.
 include_directories(include)
 
-add_subdirectory(include)
-add_subdirectory(src)
-
 if(ENABLE_EXAMPLES)
   set(CMAKE_FOLDER external)
   FetchContent_Declare(
@@ -192,3 +189,5 @@ if(ENABLE_EXAMPLES)
 endif()
 
 add_subdirectory(platforms)
+
+add_subdirectory(src)

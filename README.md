@@ -42,11 +42,11 @@ instrument.SetControl(barely::ControlType::kGain, /*value=*/0.5);
 //
 // Note pitch is centered around the reference frequency, and measured in octaves. Fractional values
 // adjust the frequency logarithmically to maintain perceived pitch intervals in each octave.
-const double c3_pitch = -1.0;
-instrument.SetNoteOn(c3_pitch, /*intensity=*/0.25);
+constexpr double kC4Pitch = 0.0;
+instrument.SetNoteOn(kC4Pitch, /*intensity=*/0.25);
 
 // Check if the instrument note is on.
-const bool is_note_on = instrument.IsNoteOn(c3_pitch);  // will return true.
+const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
 
 // Add a performer.
 auto performer = musician.AddPerformer();
@@ -55,13 +55,15 @@ auto performer = musician.AddPerformer();
 performer.SetLooping(/*is_looping=*/true);
 
 // Add a looping task that plays an instrument note every beat.
-auto task = performer.AddTask([&]() {
-  // Set an instrument note on.
-  instrument.SetNoteOn(/*pitch=*/0.0);
-  // Schedule a one-off task to set the instrument note off after half a beat.
-  performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/0.0); },
-                               performer.GetPosition() + 0.5);
-});
+auto task = performer.AddTask(
+    [&]() {
+      // Set an instrument note on.
+      instrument.SetNoteOn(/*pitch=*/1.0);
+      // Schedule a one-off task to set the instrument note off after half a beat.
+      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/1.0); },
+                                   performer.GetPosition() + 0.5);
+    },
+    /*position=*/0.0);
 
 // Start the performer.
 performer.Start();
@@ -73,18 +75,18 @@ performer.Start();
 // compensate for this, `Update` should typically be called from a main thread update callback with
 // an additional "lookahead" to avoid potential thread synchronization issues that could arise in
 // real-time audio applications.
-const double lookahead = 0.1;
+constexpr double kLookahead = 0.1;
 double timestamp = 0.0;
-musician.Update(timestamp + lookahead);
+musician.Update(timestamp + kLookahead);
 
 // Process the next output samples of the instrument.
 //
 // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process` should
 // typically be called from an audio thread process callback in real-time audio applications.
-const int channel_count = 2;
-const int frame_count = 1024;
-std::vector<double> output_samples(channel_count * frame_count, 0.0);
-instrument.Process(output_samples.data(), channel_count, frame_count, timestamp);
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 1024;
+double output_samples[kChannelCount * kFrameCount];
+instrument.Process(output_samples, kChannelCount, kFrameCount, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

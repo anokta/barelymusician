@@ -328,8 +328,6 @@ enum class ArpeggiatorStyle : BarelyArpeggiatorStyle {
   kDown = BarelyArpeggiatorStyle_kDown,
   /// Random.
   kRandom = BarelyArpeggiatorStyle_kRandom,
-  /// Number of arpeggiator styles.
-  kCount = BarelyArpeggiatorStyle_kCount,
 };
 
 /// Repeater style enum.
@@ -340,8 +338,6 @@ enum class RepeaterStyle : BarelyRepeaterStyle {
   kBackward = BarelyRepeaterStyle_kBackward,
   /// Random.
   kRandom = BarelyRepeaterStyle_kRandom,
-  /// Number of repeater styles.
-  kCount = BarelyRepeaterStyle_kCount,
 };
 
 /// Arpeggiator handle.

@@ -84,7 +84,6 @@ void Repeater::SetRate(double rate) noexcept {
 }
 
 void Repeater::SetStyle(RepeaterStyle style) noexcept {
-  assert(style != RepeaterStyle::kCount);
   style_ = style;
 }
 

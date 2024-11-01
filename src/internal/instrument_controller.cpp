@@ -30,7 +30,6 @@ InstrumentController::InstrumentController(int frame_rate, double reference_freq
 InstrumentController::~InstrumentController() noexcept { SetAllNotesOff(); }
 
 double InstrumentController::GetControl(ControlType type) const noexcept {
-  assert(type != ControlType::kCount);
   return controls_[static_cast<int>(type)].value;
 }
 
@@ -106,7 +105,6 @@ void InstrumentController::SetAllNotesOff() noexcept {
 }
 
 void InstrumentController::SetControl(ControlType type, double value) noexcept {
-  assert(type != ControlType::kCount);
   if (auto& control = controls_[static_cast<int>(type)]; control.SetValue(value)) {
     message_queue_.Add(update_frame_, ControlMessage{type, control.value});
   }
@@ -114,7 +112,6 @@ void InstrumentController::SetControl(ControlType type, double value) noexcept {
 
 void InstrumentController::SetNoteControl(double pitch, NoteControlType type,
                                           double value) noexcept {
-  assert(type != NoteControlType::kCount);
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[static_cast<int>(type)];
         note_control.SetValue(value)) {

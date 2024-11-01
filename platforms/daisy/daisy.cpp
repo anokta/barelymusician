@@ -24,7 +24,7 @@ constexpr double kAttack = 0.05;
 constexpr double kRelease = 0.125;
 constexpr int kVoiceCount = 16;
 
-constexpr int kOscCount = static_cast<int>(OscillatorShape::kCount);
+constexpr int kOscCount = static_cast<int>(BarelyOscillatorShape_kCount);
 
 static DaisyPod hw;  // Currently targets the Daisy Pod hardware.
 static MidiUsbHandler midi;

@@ -97,7 +97,6 @@ void Arpeggiator::SetRate(double rate) noexcept {
 }
 
 void Arpeggiator::SetStyle(ArpeggiatorStyle style) noexcept {
-  assert(style != ArpeggiatorStyle::kCount);
   style_ = style;
 }
 

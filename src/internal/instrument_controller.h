@@ -164,24 +164,24 @@ class InstrumentController {
     // Maximum value.
     double max_value = std::numeric_limits<double>::max();
   };
-  using ControlArray = std::array<Control, static_cast<int>(ControlType::kCount)>;
-  using NoteControlArray = std::array<Control, static_cast<int>(NoteControlType::kCount)>;
+  using ControlArray = std::array<Control, static_cast<int>(BarelyControlType_kCount)>;
+  using NoteControlArray = std::array<Control, static_cast<int>(BarelyNoteControlType_kCount)>;
 
   // Frame rate in hertz.
   const int frame_rate_ = 0;
 
   // Array of controls.
   ControlArray controls_ = {
-      Control(1.0, 0.0, 1.0),                                // kGain
-      Control(8, 1, 32),                                     // kVoiceCount
-      {0, 0, static_cast<int>(OscillatorShape::kCount)},     // kOscillatorShape
-      {0, 0, static_cast<int>(SamplePlaybackMode::kCount)},  // kSamplePlaybackMode
-      Control(0.05, 0.0, 60.0),                              // kAttack
-      Control(0.0, 0.0, 60.0),                               // kDecay
-      Control(1.0, 0.0, 1.0),                                // kSustain
-      Control(0.25, 0.0, 60.0),                              // kRelease
-      Control(0.0),                                          // kPitchShift
-      Control(false),                                        // kRetrigger
+      Control(1.0, 0.0, 1.0),                                                // kGain
+      Control(8, 1, 32),                                                     // kVoiceCount
+      Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),     // kOscillatorShape
+      Control(0, 0, static_cast<int>(BarelySamplePlaybackMode_kCount) - 1),  // kSamplePlaybackMode
+      Control(0.05, 0.0, 60.0),                                              // kAttack
+      Control(0.0, 0.0, 60.0),                                               // kDecay
+      Control(1.0, 0.0, 1.0),                                                // kSustain
+      Control(0.25, 0.0, 60.0),                                              // kRelease
+      Control(0.0),                                                          // kPitchShift
+      Control(false),                                                        // kRetrigger
   };
 
   // Map of note control arrays by their pitches.

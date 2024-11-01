@@ -779,16 +779,12 @@ enum class ControlType : BarelyControlType {
   kPitchShift = BarelyControlType_kPitchShift,
   /// Retrigger.
   kRetrigger = BarelyControlType_kRetrigger,
-  /// Number of control types.
-  kCount = BarelyControlType_kCount,
 };
 
 /// Note control type enum.
 enum class NoteControlType : BarelyNoteControlType {
   /// Pitch shift.
   kPitchShift = BarelyNoteControlType_kPitchShift,
-  /// Number of note control types.
-  kCount = BarelyNoteControlType_kCount,
 };
 
 /// Oscillator shape enum.
@@ -803,8 +799,6 @@ enum class OscillatorShape : BarelyOscillatorShape {
   kSquare = BarelyOscillatorShape_kSquare,
   /// White noise.
   kNoise = BarelyOscillatorShape_kNoise,
-  /// Number of oscillator shapes.
-  kCount = BarelyOscillatorShape_kCount,
 };
 
 /// Sample playback mode enum.
@@ -817,8 +811,6 @@ enum class SamplePlaybackMode : BarelySamplePlaybackMode {
   kSustain = BarelySamplePlaybackMode_kSustain,
   /// Loop.
   kLoop = BarelySamplePlaybackMode_kLoop,
-  /// Number of playback modes.
-  kCount = BarelySamplePlaybackMode_kCount,
 };
 
 /// Slice of sample data.

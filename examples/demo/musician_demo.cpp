@@ -12,16 +12,15 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/common/random.h"
-#include "barelymusician/composition/duration.h"
-#include "examples/common/audio_clock.h"
-#include "examples/common/audio_output.h"
-#include "examples/common/console_log.h"
-#include "examples/common/input_manager.h"
-#include "examples/common/wav_file.h"
-#include "examples/data/data.h"
-#include "examples/performers/metronome.h"
+#include "barelycomposer.h"
+#include "barelymusician.h"
+#include "common/audio_clock.h"
+#include "common/audio_output.h"
+#include "common/console_log.h"
+#include "common/input_manager.h"
+#include "common/wav_file.h"
+#include "data/data.h"
+#include "performers/metronome.h"
 
 namespace {
 
@@ -84,6 +83,9 @@ constexpr std::array<double, kHeptatonicScaleCount> kDiatonicPitches = {
     kSemitones[0], kSemitones[2], kSemitones[4],  kSemitones[5],
     kSemitones[7], kSemitones[9], kSemitones[11],
 };
+
+/// Number of sixteenth notes in a quarter note beat duration.
+constexpr double kSixteenthNotesPerBeat = 4.0;
 
 // Ensemble settings.
 constexpr double kRootPitch = kSemitones[2];
@@ -154,9 +156,7 @@ void ComposeLine(int octave_offset, double intensity, int bar, int beat, int bea
 
 void ComposeDrums(int bar, int beat, int beat_count, Random& random, InstrumentHandle& instrument,
                   PerformerHandle& performer) {
-  const auto get_beat = [](int step) {
-    return static_cast<double>(step) / barely::kSixteenthNotesPerBeat;
-  };
+  const auto get_beat = [](int step) { return static_cast<double>(step) / kSixteenthNotesPerBeat; };
   const auto add_note = [&](double begin_position, double end_position, double pitch,
                             double intensity) {
     ScheduleNote(begin_position, end_position - begin_position, pitch, intensity, instrument,

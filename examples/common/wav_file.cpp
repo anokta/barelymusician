@@ -1,4 +1,4 @@
-#include "examples/common/wav_file.h"
+#include "common/wav_file.h"
 
 #include <algorithm>
 #include <string>

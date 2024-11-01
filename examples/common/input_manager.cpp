@@ -1,4 +1,4 @@
-#include "examples/common/input_manager.h"
+#include "common/input_manager.h"
 
 #include <utility>
 

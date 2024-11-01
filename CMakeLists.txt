@@ -20,6 +20,12 @@ if(NOT DEFINED ENABLE_UNITY)
 endif()
 option(ENABLE_UNITY "Build Unity platform" ${ENABLE_UNITY})
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER predefined)
 
@@ -30,7 +36,7 @@ if(ENABLE_DAISY)
   FetchContent_Declare(
     libdaisy
     GIT_REPOSITORY https://github.com/electro-smith/libDaisy.git
-    GIT_TAG 8d106a2c822f687bcb8c86bed0b6f2c22f680999
+    GIT_TAG 15e1dd53368f23c4207ecc4b17ce1a529166fa5a
   )
   FetchContent_MakeAvailable(libdaisy)
   target_compile_definitions(
@@ -50,12 +56,6 @@ project(
   DESCRIPTION "a real-time music engine for interactive systems"
   HOMEPAGE_URL "https://github.com/anokta/barelymusician"
 )
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 if(MSVC)
   add_compile_options(
@@ -137,54 +137,11 @@ if(ENABLE_TESTS)
   include(GoogleTest)
 endif()
 
-include_directories(.)
+include_directories(include)
 
-add_subdirectory(barelymusician)
+add_subdirectory(src)
 
 if(ENABLE_EXAMPLES)
-  set(CMAKE_FOLDER external)
-  FetchContent_Declare(
-    dr_libs
-    GIT_REPOSITORY https://github.com/mackron/dr_libs.git
-    GIT_TAG da35f9d6c7374a95353fd1df1d394d44ab66cf01
-  )
-  FetchContent_MakeAvailable(dr_libs)
-  add_library(
-    dr_wav INTERFACE
-    ${dr_libs_SOURCE_DIR}/dr_wav.h
-  )
-  include_directories(${dr_libs_SOURCE_DIR})
-
-  set(CMAKE_FOLDER external)
-  FetchContent_Declare(
-    midifile
-    GIT_REPOSITORY https://github.com/craigsapp/midifile.git
-    GIT_TAG f79e8ea395b858ceb6e0d8f353885ff80773dc76
-  )
-  FetchContent_MakeAvailable(midifile)
-  target_compile_options(
-    midifile PUBLIC
-    -w
-  )
-  include_directories(${midifile_SOURCE_DIR}/include)
-
-  set(CMAKE_FOLDER external)
-  FetchContent_Declare(
-    miniaudio
-    GIT_REPOSITORY https://github.com/mackron/miniaudio.git
-    GIT_TAG 4a5b74bef029b3592c54b6048650ee5f972c1a48
-  )
-  FetchContent_MakeAvailable(miniaudio)
-  add_library(
-    miniaudio INTERFACE
-    ${miniaudio_SOURCE_DIR}/miniaudio.h
-  )
-  target_compile_options(
-    miniaudio INTERFACE
-    -w
-  )
-  include_directories(${miniaudio_SOURCE_DIR})
-
   add_subdirectory(examples)
 endif()
 

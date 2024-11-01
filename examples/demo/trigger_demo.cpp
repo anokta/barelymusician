@@ -4,11 +4,12 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
-#include "examples/common/audio_clock.h"
-#include "examples/common/audio_output.h"
-#include "examples/common/console_log.h"
-#include "examples/common/input_manager.h"
+#include "barelycomposer.h"
+#include "barelymusician.h"
+#include "common/audio_clock.h"
+#include "common/audio_output.h"
+#include "common/console_log.h"
+#include "common/input_manager.h"
 
 namespace {
 

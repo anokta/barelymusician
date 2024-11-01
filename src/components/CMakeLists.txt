@@ -1,0 +1,29 @@
+add_library(
+  barelymusician_components_arpeggiator
+  arpeggiator.cpp
+  arpeggiator.h
+)
+target_link_libraries(
+  barelymusician_components_arpeggiator
+  barelycomposer_headeronly
+  barelymusician_headeronly
+  barelymusician_common_random
+  barelymusician_internal_instrument_controller
+  barelymusician_internal_musician
+  barelymusician_internal_performer
+)
+
+add_library(
+  barelymusician_components_repeater
+  repeater.cpp
+  repeater.h
+)
+target_link_libraries(
+  barelymusician_components_repeater
+  barelycomposer_headeronly
+  barelymusician_headeronly
+  barelymusician_common_random
+  barelymusician_internal_instrument_controller
+  barelymusician_internal_musician
+  barelymusician_internal_performer
+)

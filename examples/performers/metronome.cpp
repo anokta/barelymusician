@@ -1,8 +1,8 @@
-#include "examples/performers/metronome.h"
+#include "performers/metronome.h"
 
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician.h"
 
 namespace barely::examples {
 

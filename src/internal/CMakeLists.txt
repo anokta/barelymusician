@@ -65,6 +65,7 @@ target_link_libraries(
   barelymusician_internal_musician
   barelymusician_internal_instrument
   barelymusician_internal_performer
+  barelymusician_headeronly
 )
 
 add_library(

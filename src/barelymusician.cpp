@@ -14,28 +14,6 @@ using ::barely::NoteOffEvent;
 using ::barely::NoteOnEvent;
 using ::barely::SampleDataSlice;
 
-// Musician.
-struct BarelyMusician : public barely::internal::Musician {
- public:
-  explicit BarelyMusician(int32_t frame_rate) noexcept : Musician(frame_rate) {}
-  ~BarelyMusician() = default;
-
-  // Non-copyable and non-movable.
-  BarelyMusician(const BarelyMusician& other) noexcept = delete;
-  BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
-  BarelyMusician(BarelyMusician&& other) noexcept = delete;
-  BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
-};
-
-// Instrument.
-struct BarelyInstrument : public barely::internal::Instrument {};
-
-// Performer.
-struct BarelyPerformer : public barely::internal::Performer {};
-
-// Task.
-struct BarelyTask : public barely::internal::Performer::Task {};
-
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
                                  double* out_value) {
   if (!instrument) return false;

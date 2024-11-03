@@ -205,4 +205,7 @@ class Instrument {
 
 }  // namespace barely::internal
 
+struct BarelyInstrument : public barely::internal::Instrument {};
+static_assert(sizeof(BarelyInstrument) == sizeof(barely::internal::Instrument));
+
 #endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_

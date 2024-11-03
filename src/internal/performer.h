@@ -188,4 +188,10 @@ class Performer {
 
 }  // namespace barely::internal
 
+struct BarelyPerformer : public barely::internal::Performer {};
+static_assert(sizeof(BarelyPerformer) == sizeof(barely::internal::Performer));
+
+struct BarelyTask : public barely::internal::Performer::Task {};
+static_assert(sizeof(BarelyTask) == sizeof(barely::internal::Performer::Task));
+
 #endif  // BARELYMUSICIAN_INTERNAL_PERFORMER_H_

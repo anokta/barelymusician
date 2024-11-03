@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "barelymusician.h"
 #include "internal/instrument.h"
 #include "internal/performer.h"
 
@@ -120,5 +121,18 @@ class Musician {
 };
 
 }  // namespace barely::internal
+
+struct BarelyMusician : public barely::internal::Musician {
+ public:
+  explicit BarelyMusician(int32_t frame_rate) noexcept : Musician(frame_rate) {}
+  ~BarelyMusician() = default;
+
+  // Non-copyable and non-movable.
+  BarelyMusician(const BarelyMusician& other) noexcept = delete;
+  BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
+  BarelyMusician(BarelyMusician&& other) noexcept = delete;
+  BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
+};
+static_assert(sizeof(BarelyMusician) == sizeof(barely::internal::Musician));
 
 #endif  // BARELYMUSICIAN_INTERNAL_MUSICIAN_H_

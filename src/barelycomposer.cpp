@@ -33,8 +33,7 @@ bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_ord
                               BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!musician || !out_arpeggiator) return false;
 
-  *out_arpeggiator = new BarelyArpeggiator(*reinterpret_cast<barely::internal::Musician*>(musician),
-                                           static_cast<int>(process_order));
+  *out_arpeggiator = new BarelyArpeggiator(*musician, static_cast<int>(process_order));
   return true;
 }
 
@@ -78,8 +77,7 @@ bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
                                      BarelyInstrumentHandle instrument) {
   if (!arpeggiator) return false;
 
-  // TODO(#141): Can this cast be safer?
-  arpeggiator->SetInstrument(reinterpret_cast<barely::internal::Instrument*>(instrument));
+  arpeggiator->SetInstrument(instrument);
   return true;
 }
 
@@ -182,9 +180,7 @@ bool BarelyRepeater_Create(BarelyMusicianHandle musician, int32_t process_order,
                            BarelyRepeaterHandle* out_repeater) {
   if (!musician || !out_repeater) return false;
 
-  // TODO(#141): Can this cast be safer?
-  *out_repeater = new BarelyRepeater(*reinterpret_cast<barely::internal::Musician*>(musician),
-                                     static_cast<int>(process_order));
+  *out_repeater = new BarelyRepeater(*musician, static_cast<int>(process_order));
   return true;
 }
 
@@ -227,8 +223,7 @@ bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
                                   BarelyInstrumentHandle instrument) {
   if (!repeater) return false;
 
-  // TODO(#141): Can this cast be safer?
-  repeater->SetInstrument(reinterpret_cast<barely::internal::Instrument*>(instrument));
+  repeater->SetInstrument(instrument);
   return true;
 }
 

@@ -5,7 +5,7 @@
 
 #include "barelycomposer.h"
 #include "barelymusician.h"
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 #include "internal/musician.h"
 
 namespace barely::internal {
@@ -71,7 +71,7 @@ void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void Repeater::SetInstrument(InstrumentController* instrument) noexcept {
+void Repeater::SetInstrument(Instrument* instrument) noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
@@ -83,9 +83,7 @@ void Repeater::SetRate(double rate) noexcept {
   performer_->SetLoopLength(length);
 }
 
-void Repeater::SetStyle(RepeaterStyle style) noexcept {
-  style_ = style;
-}
+void Repeater::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Start(double pitch_offset) noexcept {

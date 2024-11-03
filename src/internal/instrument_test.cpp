@@ -1,4 +1,4 @@
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 
 #include <algorithm>
 #include <array>
@@ -22,8 +22,8 @@ constexpr double kReferenceFrequency = 1.0;
 constexpr std::array<double, kFrameRate> kSamples = {1.0, 2.0, 3.0, 4.0};
 
 // Tests that the instrument sets a control value as expected.
-TEST(InstrumentControllerTest, SetControl) {
-  InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
+TEST(InstrumentTest, SetControl) {
+  Instrument instrument(kFrameRate, kReferenceFrequency, 0);
   EXPECT_DOUBLE_EQ(instrument.GetControl(ControlType::kGain), 1.0);
 
   instrument.SetControl(ControlType::kGain, 0.25);
@@ -45,7 +45,7 @@ TEST(InstrumentControllerTest, SetControl) {
 }
 
 // Tests that the instrument plays a single note as expected.
-TEST(InstrumentControllerTest, PlaySingleNote) {
+TEST(InstrumentTest, PlaySingleNote) {
   constexpr int kFrameCount = 5;
   constexpr double kPitch = 1.0;
   constexpr double kIntensity = 0.5;
@@ -53,7 +53,7 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
   constexpr std::array<SampleDataSlice, 1> kSlices = {
       SampleDataSlice(kPitch, kFrameRate, kSamples)};
 
-  InstrumentController instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
+  Instrument instrument(kFrameRate, kReferenceFrequency, kUpdateFrame);
   instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<double>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kSlices));
@@ -96,7 +96,7 @@ TEST(InstrumentControllerTest, PlaySingleNote) {
 }
 
 // Tests that the instrument plays multiple notes as expected.
-TEST(InstrumentControllerTest, PlayMultipleNotes) {
+TEST(InstrumentTest, PlayMultipleNotes) {
   constexpr std::array<SampleDataSlice, kFrameRate> kSlices = {
       SampleDataSlice(0.0, kFrameRate, {kSamples.data(), kSamples.data() + 1}),
       SampleDataSlice(1.0, kFrameRate, {kSamples.data() + 1, kSamples.data() + 2}),
@@ -104,7 +104,7 @@ TEST(InstrumentControllerTest, PlayMultipleNotes) {
       SampleDataSlice(3.0, kFrameRate, {kSamples.data() + 3, kSamples.data() + 4}),
   };
 
-  InstrumentController instrument(1, kReferenceFrequency, 0);
+  Instrument instrument(1, kReferenceFrequency, 0);
   instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<double>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kSlices));
@@ -145,11 +145,11 @@ TEST(InstrumentControllerTest, PlayMultipleNotes) {
 }
 
 // Tests that the instrument triggers its note callbacks as expected.
-TEST(InstrumentControllerTest, SetNoteCallbacks) {
+TEST(InstrumentTest, SetNoteCallbacks) {
   constexpr double kPitch = 3.3;
   constexpr double kIntensity = 0.25;
 
-  InstrumentController instrument(1, kReferenceFrequency, 0);
+  Instrument instrument(1, kReferenceFrequency, 0);
 
   // Trigger the note on callback.
   std::pair<double, double> note_on_state = {0.0, 0.0};
@@ -207,11 +207,11 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
 }
 
 // Tests that the instrument stops all notes as expected.
-TEST(InstrumentControllerTest, SetAllNotesOff) {
+TEST(InstrumentTest, SetAllNotesOff) {
   constexpr std::array<double, 3> kPitches = {1.0, 2.0, 3.0};
   constexpr double kIntensity = 1.0;
 
-  InstrumentController instrument(kFrameRate, kReferenceFrequency, 0);
+  Instrument instrument(kFrameRate, kReferenceFrequency, 0);
   for (const double pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

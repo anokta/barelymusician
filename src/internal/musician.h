@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 #include "internal/performer.h"
 
 namespace barely::internal {
@@ -25,7 +25,7 @@ class Musician {
   ///
   /// @return Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentController* AddInstrument() noexcept;
+  Instrument* AddInstrument() noexcept;
 
   /// Adds a performer.
   ///
@@ -71,7 +71,7 @@ class Musician {
   ///
   /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveInstrument(InstrumentController* instrument) noexcept;
+  void RemoveInstrument(Instrument* instrument) noexcept;
 
   /// Removes a performer.
   ///
@@ -98,7 +98,7 @@ class Musician {
  private:
   // Map of pointers to instruments.
   // TODO(#126): Replace these by memory pools.
-  std::unordered_map<InstrumentController*, std::unique_ptr<InstrumentController>> instruments_;
+  std::unordered_map<Instrument*, std::unique_ptr<Instrument>> instruments_;
 
   // Map of process order-pointer pairs to performers.
   std::map<Performer*, std::pair<int, std::unique_ptr<Performer>>> performers_;

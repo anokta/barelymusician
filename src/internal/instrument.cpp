@@ -1,4 +1,4 @@
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 
 #include <cassert>
 #include <cstdint>
@@ -15,8 +15,7 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentController::InstrumentController(int frame_rate, double reference_frequency,
-                                           int64_t update_frame) noexcept
+Instrument::Instrument(int frame_rate, double reference_frequency, int64_t update_frame) noexcept
     : frame_rate_(frame_rate),
       update_frame_(update_frame),
       processor_(frame_rate, reference_frequency) {
@@ -27,29 +26,26 @@ InstrumentController::InstrumentController(int frame_rate, double reference_freq
   }
 }
 
-InstrumentController::~InstrumentController() noexcept { SetAllNotesOff(); }
+Instrument::~Instrument() noexcept { SetAllNotesOff(); }
 
-double InstrumentController::GetControl(ControlType type) const noexcept {
+double Instrument::GetControl(ControlType type) const noexcept {
   return controls_[static_cast<int>(type)].value;
 }
 
-const double* InstrumentController::GetNoteControl(double pitch,
-                                                   NoteControlType type) const noexcept {
+const double* Instrument::GetNoteControl(double pitch, NoteControlType type) const noexcept {
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
     return &(*note_controls)[static_cast<int>(type)].value;
   }
   return nullptr;
 }
 
-int InstrumentController::GetFrameRate() const noexcept { return frame_rate_; }
+int Instrument::GetFrameRate() const noexcept { return frame_rate_; }
 
-bool InstrumentController::IsNoteOn(double pitch) const noexcept {
-  return note_controls_.contains(pitch);
-}
+bool Instrument::IsNoteOn(double pitch) const noexcept { return note_controls_.contains(pitch); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool InstrumentController::Process(double* output_samples, int output_channel_count,
-                                   int output_frame_count, int64_t process_frame) noexcept {
+bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
+                         int64_t process_frame) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {
     return false;
@@ -97,21 +93,20 @@ bool InstrumentController::Process(double* output_samples, int output_channel_co
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void InstrumentController::SetAllNotesOff() noexcept {
+void Instrument::SetAllNotesOff() noexcept {
   for (const auto& [note, _] : std::exchange(note_controls_, {})) {
     note_off_event_.Process(note);
     message_queue_.Add(update_frame_, NoteOffMessage{note});
   }
 }
 
-void InstrumentController::SetControl(ControlType type, double value) noexcept {
+void Instrument::SetControl(ControlType type, double value) noexcept {
   if (auto& control = controls_[static_cast<int>(type)]; control.SetValue(value)) {
     message_queue_.Add(update_frame_, ControlMessage{type, control.value});
   }
 }
 
-void InstrumentController::SetNoteControl(double pitch, NoteControlType type,
-                                          double value) noexcept {
+void Instrument::SetNoteControl(double pitch, NoteControlType type, double value) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[static_cast<int>(type)];
         note_control.SetValue(value)) {
@@ -120,19 +115,19 @@ void InstrumentController::SetNoteControl(double pitch, NoteControlType type,
   }
 }
 
-void InstrumentController::SetNoteOff(double pitch) noexcept {
+void Instrument::SetNoteOff(double pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
     note_off_event_.Process(pitch);
     message_queue_.Add(update_frame_, NoteOffMessage{pitch});
   }
 }
 
-void InstrumentController::SetNoteOffEvent(const NoteOffEvent* note_off_event) noexcept {
+void Instrument::SetNoteOffEvent(const NoteOffEvent* note_off_event) noexcept {
   note_off_event_ = (note_off_event != nullptr) ? *note_off_event : Event<NoteOffEvent, double>{};
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void InstrumentController::SetNoteOn(double pitch, double intensity) noexcept {
+void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
   if (const auto [it, success] = note_controls_.try_emplace(pitch,
                                                             NoteControlArray{
                                                                 // kPitchShift
@@ -149,20 +144,20 @@ void InstrumentController::SetNoteOn(double pitch, double intensity) noexcept {
   }
 }
 
-void InstrumentController::SetNoteOnEvent(const NoteOnEvent* note_on_event) noexcept {
+void Instrument::SetNoteOnEvent(const NoteOnEvent* note_on_event) noexcept {
   note_on_event_ =
       (note_on_event != nullptr) ? *note_on_event : Event<NoteOnEvent, double, double>{};
 }
 
-void InstrumentController::SetReferenceFrequency(double reference_frequency) noexcept {
+void Instrument::SetReferenceFrequency(double reference_frequency) noexcept {
   message_queue_.Add(update_frame_, ReferenceFrequencyMessage{reference_frequency});
 }
 
-void InstrumentController::SetSampleData(SampleData sample_data) noexcept {
+void Instrument::SetSampleData(SampleData sample_data) noexcept {
   message_queue_.Add(update_frame_, SampleDataMessage{std::move(sample_data)});
 }
 
-void InstrumentController::Update(int64_t update_frame) noexcept {
+void Instrument::Update(int64_t update_frame) noexcept {
   assert(update_frame >= update_frame_);
   update_frame_ = update_frame;
 }

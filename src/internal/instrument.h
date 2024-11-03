@@ -18,24 +18,24 @@
 namespace barely::internal {
 
 /// Class that controls an instrument.
-class InstrumentController {
+class Instrument {
  public:
-  /// Constructs a new `InstrumentController`.
+  /// Constructs a new `Instrument`.
   ///
   /// @param frame_rate Frame rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   /// @param update_frame Update frame.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentController(int frame_rate, double reference_frequency, int64_t update_frame) noexcept;
+  Instrument(int frame_rate, double reference_frequency, int64_t update_frame) noexcept;
 
-  /// Destroys `InstrumentController`.
-  ~InstrumentController() noexcept;
+  /// Destroys `Instrument`.
+  ~Instrument() noexcept;
 
   /// Non-copyable and non-movable.
-  InstrumentController(const InstrumentController& other) noexcept = delete;
-  InstrumentController& operator=(const InstrumentController& other) noexcept = delete;
-  InstrumentController(InstrumentController&& other) noexcept = delete;
-  InstrumentController& operator=(InstrumentController&& other) noexcept = delete;
+  Instrument(const Instrument& other) noexcept = delete;
+  Instrument& operator=(const Instrument& other) noexcept = delete;
+  Instrument(Instrument&& other) noexcept = delete;
+  Instrument& operator=(Instrument&& other) noexcept = delete;
 
   /// Returns a control value.
   ///

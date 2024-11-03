@@ -29,7 +29,7 @@ target_link_libraries(
   barelymusician_common_random
   barelymusician_components_arpeggiator
   barelymusician_components_repeater
-  barelymusician_internal_instrument_controller
+  barelymusician_internal_instrument
   barelymusician_internal_musician
 )
 
@@ -53,7 +53,7 @@ target_compile_definitions(
 target_link_libraries(
   barelymusician
   barelymusician_headeronly
-  barelymusician_internal_instrument_controller
+  barelymusician_internal_instrument
   barelymusician_internal_musician
   barelymusician_internal_performer
 )

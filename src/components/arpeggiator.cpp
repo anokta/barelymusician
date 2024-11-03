@@ -4,7 +4,7 @@
 
 #include "barelycomposer.h"
 #include "barelymusician.h"
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 #include "internal/musician.h"
 
 namespace barely::internal {
@@ -63,7 +63,7 @@ void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
   gate_ratio_ = std::min(std::max(gate_ratio, 0.0), 1.0);
 }
 
-void Arpeggiator::SetInstrument(InstrumentController* instrument) noexcept {
+void Arpeggiator::SetInstrument(Instrument* instrument) noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
@@ -96,9 +96,7 @@ void Arpeggiator::SetRate(double rate) noexcept {
   performer_->SetLoopLength(length);
 }
 
-void Arpeggiator::SetStyle(ArpeggiatorStyle style) noexcept {
-  style_ = style;
-}
+void Arpeggiator::SetStyle(ArpeggiatorStyle style) noexcept { style_ = style; }
 
 void Arpeggiator::Update() noexcept {
   const int size = static_cast<int>(pitches_.size());

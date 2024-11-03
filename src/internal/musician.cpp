@@ -7,7 +7,7 @@
 #include <memory>
 #include <utility>
 
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 #include "internal/performer.h"
 
 namespace barely::internal {
@@ -26,10 +26,9 @@ constexpr double kSecondsFromMinutes = 60.0;
 Musician::Musician(int frame_rate) noexcept : frame_rate_(frame_rate) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentController* Musician::AddInstrument() noexcept {
-  auto instrument =
-      std::make_unique<InstrumentController>(frame_rate_, reference_frequency_, update_frame_);
-  InstrumentController* instrument_ptr = instrument.get();
+Instrument* Musician::AddInstrument() noexcept {
+  auto instrument = std::make_unique<Instrument>(frame_rate_, reference_frequency_, update_frame_);
+  Instrument* instrument_ptr = instrument.get();
   [[maybe_unused]] const bool success =
       instruments_.emplace(instrument_ptr, std::move(instrument)).second;
   assert(success);
@@ -47,7 +46,7 @@ Performer* Musician::AddPerformer(int process_order) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::RemoveInstrument(InstrumentController* instrument) noexcept {
+void Musician::RemoveInstrument(Instrument* instrument) noexcept {
   assert(instrument != nullptr);
   [[maybe_unused]] const bool success = (instruments_.erase(instrument) == 1);
   assert(success);

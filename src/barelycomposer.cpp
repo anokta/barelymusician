@@ -9,7 +9,7 @@
 #include "common/random.h"
 #include "components/arpeggiator.h"
 #include "components/repeater.h"
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 #include "internal/musician.h"
 
 // Arpeggiator.
@@ -79,7 +79,7 @@ bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
   if (!arpeggiator) return false;
 
   // TODO(#141): Can this cast be safer?
-  arpeggiator->SetInstrument(reinterpret_cast<barely::internal::InstrumentController*>(instrument));
+  arpeggiator->SetInstrument(reinterpret_cast<barely::internal::Instrument*>(instrument));
   return true;
 }
 
@@ -228,7 +228,7 @@ bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
   if (!repeater) return false;
 
   // TODO(#141): Can this cast be safer?
-  repeater->SetInstrument(reinterpret_cast<barely::internal::InstrumentController*>(instrument));
+  repeater->SetInstrument(reinterpret_cast<barely::internal::Instrument*>(instrument));
   return true;
 }
 

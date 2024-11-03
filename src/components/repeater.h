@@ -7,7 +7,7 @@
 
 #include "barelycomposer.h"
 #include "common/random.h"
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 #include "internal/musician.h"
 #include "internal/performer.h"
 
@@ -56,7 +56,7 @@ class Repeater {
   /// Sets the instrument.
   ///
   /// @param instrument Pointer to instrument.
-  void SetInstrument(InstrumentController* instrument) noexcept;
+  void SetInstrument(Instrument* instrument) noexcept;
 
   /// Sets the rate.
   ///
@@ -89,7 +89,7 @@ class Repeater {
   Performer* performer_ = nullptr;
 
   // Instrument.
-  InstrumentController* instrument_ = nullptr;
+  Instrument* instrument_ = nullptr;
 
   // Array of pitches to play.
   std::vector<std::pair<std::optional<double>, int>> pitches_;

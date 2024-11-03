@@ -8,7 +8,7 @@ target_link_libraries(
   barelycomposer_headeronly
   barelymusician_headeronly
   barelymusician_common_random
-  barelymusician_internal_instrument_controller
+  barelymusician_internal_instrument
   barelymusician_internal_musician
   barelymusician_internal_performer
 )
@@ -23,7 +23,7 @@ target_link_libraries(
   barelycomposer_headeronly
   barelymusician_headeronly
   barelymusician_common_random
-  barelymusician_internal_instrument_controller
+  barelymusician_internal_instrument
   barelymusician_internal_musician
   barelymusician_internal_performer
 )

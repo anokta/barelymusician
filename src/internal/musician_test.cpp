@@ -8,7 +8,7 @@
 #include "barelymusician.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 #include "internal/performer.h"
 
 namespace barely::internal {
@@ -52,7 +52,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   Musician musician(kFrameRate);
 
   // Create an instrument.
-  InstrumentController* instrument = musician.AddInstrument();
+  Instrument* instrument = musician.AddInstrument();
 
   // Set the note events.
   std::pair<double, double> note_on_state = {0.0, 0.0};
@@ -109,7 +109,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
         },
         static_cast<void*>(&note_off_pitches),
     };
-    std::vector<InstrumentController*> instruments;
+    std::vector<Instrument*> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(musician.AddInstrument());
       const NoteOffEvent::Callback note_off_callback = [&](double pitch) {

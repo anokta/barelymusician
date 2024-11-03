@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <span>
 
-#include "internal/instrument_controller.h"
+#include "internal/instrument.h"
 #include "internal/musician.h"
 #include "internal/performer.h"
 
@@ -28,7 +28,7 @@ struct BarelyMusician : public barely::internal::Musician {
 };
 
 // Instrument.
-struct BarelyInstrument : public barely::internal::InstrumentController {};
+struct BarelyInstrument : public barely::internal::Instrument {};
 
 // Performer.
 struct BarelyPerformer : public barely::internal::Performer {};

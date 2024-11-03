@@ -3,6 +3,7 @@
 
 #include "barelymusician.h"
 #include "dsp/envelope.h"
+#include "dsp/one_pole_filter.h"
 #include "dsp/oscillator.h"
 #include "dsp/sample_player.h"
 #include "dsp/voice.h"
@@ -40,6 +41,9 @@ class Voice {
   [[nodiscard]] const Envelope& envelope() const noexcept { return envelope_; }
   [[nodiscard]] Envelope& envelope() noexcept { return envelope_; }
 
+  [[nodiscard]] const OnePoleFilter& filter() const noexcept { return filter_; }
+  [[nodiscard]] OnePoleFilter& filter() noexcept { return filter_; }
+
   [[nodiscard]] const Oscillator& oscillator() const noexcept { return oscillator_; }
   [[nodiscard]] Oscillator& oscillator() noexcept { return oscillator_; }
 
@@ -56,6 +60,7 @@ class Voice {
 
  private:
   Envelope envelope_;
+  OnePoleFilter filter_;
   Oscillator oscillator_;
   SamplePlayer sample_player_;
 

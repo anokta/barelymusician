@@ -83,6 +83,8 @@ class InstrumentProcessor {
 
   double reference_frequency_ = 0.0;
   double pitch_shift_ = 0.0;
+
+  int frame_rate_ = 0;
 };
 
 }  // namespace barely::internal

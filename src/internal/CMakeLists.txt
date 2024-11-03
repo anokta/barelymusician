@@ -30,8 +30,7 @@ target_link_libraries(
   barelymusician_internal_instrument_processor
   barelymusician_internal_sample_data
   barelymusician_dsp_gain_processor
-  barelymusician_dsp_oscillator
-  barelymusician_dsp_sample_player
+  barelymusician_dsp_one_pole_filter
   barelymusician_dsp_voice
   barelymusician_headeronly
 )

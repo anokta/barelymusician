@@ -26,6 +26,20 @@ namespace Barely {
     [InspectorName("Pitch Shift")] PITCH_SHIFT,
     /// Retrigger.
     [InspectorName("Retrigger")] RETRIGGER,
+    /// Filter type.
+    [InspectorName("Filter Type")] FILTER_TYPE,
+    /// Filter frequency.
+    [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
+  }
+
+  /// Filter type.
+  public enum FilterType {
+    /// None.
+    [InspectorName("None")] NONE,
+    /// Low-pass.
+    [InspectorName("Low-pass")] LOW_PASS,
+    /// High-pass.
+    [InspectorName("High-pass")] HIGH_PASS,
   }
 
   /// Note control type.
@@ -152,6 +166,13 @@ namespace Barely {
 
     /// Retrigger.
     public bool Retrigger = false;
+
+    /// Filter type.
+    public FilterType FilterType = FilterType.NONE;
+
+    /// Filter frequency.
+    [Range(0.0f, 48000.0f)]
+    public double FilterFrequency = 0.0;
 
     /// Note off event callback.
     ///
@@ -304,6 +325,8 @@ namespace Barely {
       SetControl(ControlType.RELEASE, Release);
       SetControl(ControlType.PITCH_SHIFT, PitchShift);
       SetControl(ControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
+      SetControl(ControlType.FILTER_TYPE, (double)FilterType);
+      SetControl(ControlType.FILTER_FREQUENCY, FilterFrequency);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

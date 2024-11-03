@@ -1086,7 +1086,7 @@ namespace Barely {
 
         // Returns the next timestamp to update.
         private double GetNextTimestamp() {
-          double lookahead = Math.Max(_latency, (double)Time.fixedDeltaTime);
+          double lookahead = Math.Max(_latency, 0.5 * (double)Time.fixedDeltaTime);
           return AudioSettings.dspTime + lookahead;
         }
       }

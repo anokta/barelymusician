@@ -238,8 +238,27 @@ enum BarelyControlType_Values {
   BarelyControlType_kPitchShift,
   /// Retrigger.
   BarelyControlType_kRetrigger,
+  /// Filter type.
+  BarelyControlType_kFilterType,
+  /// Filter frequency.
+  BarelyControlType_kFilterFrequency,
   /// Number of control types.
   BarelyControlType_kCount,
+};
+
+/// Filter type enum alias.
+typedef int32_t BarelyFilterType;
+
+/// Filter type enum values.
+enum BarelyFilterType_Values {
+  /// None.
+  BarelyFilterType_kNone = 0,
+  /// Low pass.
+  BarelyFilterType_kLowPass,
+  /// High pass.
+  BarelyFilterType_kHighPass,
+  /// Number of filters.
+  BarelyFilterType_kCount,
 };
 
 /// Note control type enum alias.
@@ -779,6 +798,20 @@ enum class ControlType : BarelyControlType {
   kPitchShift = BarelyControlType_kPitchShift,
   /// Retrigger.
   kRetrigger = BarelyControlType_kRetrigger,
+  /// Filter type.
+  kFilterType = BarelyControlType_kFilterType,
+  /// Filter frequency.
+  kFilterFrequency = BarelyControlType_kFilterFrequency,
+};
+
+/// Filter type enum.
+enum class FilterType : BarelyFilterType {
+  /// None.
+  kNone = BarelyFilterType_kNone,
+  /// Low pass.
+  kLowPass = BarelyFilterType_kLowPass,
+  /// High pass.
+  kHighPass = BarelyFilterType_kHighPass,
 };
 
 /// Note control type enum.

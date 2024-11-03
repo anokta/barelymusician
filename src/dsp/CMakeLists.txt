@@ -21,6 +21,10 @@ add_library(
   one_pole_filter.cpp
   one_pole_filter.h
 )
+target_link_libraries(
+  barelymusician_dsp_one_pole_filter
+  barelymusician_headeronly
+)
 
 add_library(
   barelymusician_dsp_oscillator
@@ -47,6 +51,7 @@ add_library(
 target_link_libraries(
   barelymusician_dsp_voice
   barelymusician_dsp_envelope
+  barelymusician_dsp_one_pole_filter
   barelymusician_dsp_oscillator
   barelymusician_dsp_sample_player
   barelymusician_headeronly

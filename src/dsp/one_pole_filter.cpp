@@ -4,9 +4,14 @@
 #include <cmath>
 #include <numbers>
 
+#include "barelymusician.h"
+
 namespace barely::internal {
 
 double OnePoleFilter::Next(double input) noexcept {
+  if (type_ == FilterType::kNone) {
+    return input;
+  }
   output_ = coefficient_ * (output_ - input) + input;
   if (type_ == FilterType::kHighPass) {
     return input - output_;

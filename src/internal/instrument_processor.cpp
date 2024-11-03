@@ -4,8 +4,7 @@
 #include <cmath>
 
 #include "barelymusician.h"
-#include "dsp/oscillator.h"
-#include "dsp/sample_player.h"
+#include "dsp/one_pole_filter.h"
 #include "dsp/voice.h"
 #include "internal/sample_data.h"
 
@@ -30,7 +29,10 @@ double FrequencyFromPitch(double pitch, double reference_frequency) noexcept {
 InstrumentProcessor::InstrumentProcessor(int frame_rate, double reference_frequency) noexcept
     : voice_states_(kMaxVoiceCount, {Voice(frame_rate)}),
       gain_processor_(frame_rate),
-      reference_frequency_(reference_frequency) {}
+      reference_frequency_(reference_frequency),
+      frame_rate_(frame_rate) {
+  assert(frame_rate > 0);
+}
 
 void InstrumentProcessor::Process(double* output_samples, int output_channel_count,
                                   int output_frame_count) noexcept {
@@ -109,6 +111,17 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
     case ControlType::kRetrigger:
       should_retrigger_ = static_cast<bool>(value);
       break;
+    case ControlType::kFilterType:
+      for (int i = 0; i < voice_count_; ++i) {
+        voice_states_[i].voice.filter().SetType(static_cast<FilterType>(value));
+      };
+      break;
+    case ControlType::kFilterFrequency: {
+      const double coefficient = GetFilterCoefficient(frame_rate_, value);
+      for (int i = 0; i < voice_count_; ++i) {
+        voice_states_[i].voice.filter().SetCoefficient(coefficient);
+      };
+    } break;
     default:
       assert(!"Invalid control type");
       return;

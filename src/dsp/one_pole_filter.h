@@ -1,13 +1,9 @@
 #ifndef BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 #define BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 
-namespace barely::internal {
+#include "barelymusician.h"
 
-/// One-pole filter type.
-enum class FilterType {
-  kLowPass,   // Low-pass filter.
-  kHighPass,  // High-pass filter.
-};
+namespace barely::internal {
 
 /// One-pole filter that features basic low-pass and high-pass filtering.
 class OnePoleFilter {
@@ -39,7 +35,7 @@ class OnePoleFilter {
   double output_ = 0.0;
 
   // Filter type.
-  FilterType type_ = FilterType::kLowPass;
+  FilterType type_ = FilterType::kNone;
 };
 
 /// Returns one-pole filter coefficient for a given cutoff frequency.

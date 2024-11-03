@@ -13,14 +13,16 @@ double Voice::Next() noexcept {
   if (sample_playback_mode_ == SamplePlaybackMode::kOnce && !sample_player_.IsActive()) {
     envelope_.Reset();
   }
-  return gain_ * envelope_.Next() *
-         (oscillator_.Next() +
-          ((sample_playback_mode_ != SamplePlaybackMode::kNone) ? sample_player_.Next() : 0.0));
+  return filter_.Next(
+      gain_ * envelope_.Next() *
+      (oscillator_.Next() +
+       ((sample_playback_mode_ != SamplePlaybackMode::kNone) ? sample_player_.Next() : 0.0)));
 }
 
 void Voice::Reset() noexcept { envelope_.Reset(); }
 
 void Voice::Start() noexcept {
+  filter_.Reset();
   oscillator_.Reset();
   sample_player_.Reset();
   envelope_.Start();

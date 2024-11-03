@@ -8,10 +8,17 @@ namespace Barely {
       public Scale scale;
       public TextMesh text;
 
+      private int _beat = 0;
+
       private float _h = 0.0f;
       private float _v = 0.0f;
 
       public void OnProcess() {
+        if (_beat % 4 == 0) {
+          instrument.FilterType = (_beat % 8 == 0) ? FilterType.LOW_PASS : FilterType.HIGH_PASS;
+        }
+        _beat = (_beat + 1) % 8;
+
         int degree = Random.Range(-scale.PitchCount, scale.PitchCount);
         double pitch = scale.GetPitch(degree);
         instrument.SetNoteOn(pitch);

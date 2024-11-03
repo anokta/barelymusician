@@ -182,6 +182,8 @@ class Instrument {
       Control(0.25, 0.0, 60.0),                                              // kRelease
       Control(0.0),                                                          // kPitchShift
       Control(false),                                                        // kRetrigger
+      Control(0, 0, static_cast<int>(BarelyFilterType_kCount) - 1),          // kFilterType
+      Control(0.0, 0.0),                                                     // kFilterFrequency
   };
 
   // Map of note control arrays by their pitches.

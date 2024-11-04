@@ -1,5 +1,6 @@
 #include "components/repeater.h"
 
+#include <cassert>
 #include <optional>
 #include <utility>
 

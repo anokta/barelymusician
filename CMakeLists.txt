@@ -5,11 +5,6 @@ if(NOT DEFINED ENABLE_EXAMPLES)
 endif()
 option(ENABLE_EXAMPLES "Build examples" ${ENABLE_EXAMPLES})
 
-if(NOT DEFINED ENABLE_TESTS)
-  set(ENABLE_TESTS OFF CACHE BOOL "Build tests" FORCE)
-endif()
-option(ENABLE_TESTS "Build tests" ${ENABLE_TESTS})
-
 if(NOT DEFINED ENABLE_DAISY)
   set(ENABLE_DAISY OFF CACHE BOOL "Build Daisy platform" FORCE)
 endif()
@@ -19,6 +14,16 @@ if(NOT DEFINED ENABLE_UNITY)
   set(ENABLE_UNITY OFF CACHE BOOL "Build Unity platform" FORCE)
 endif()
 option(ENABLE_UNITY "Build Unity platform" ${ENABLE_UNITY})
+
+if(NOT DEFINED ENABLE_BENCHMARKS)
+  set(ENABLE_BENCHMARKS OFF CACHE BOOL "Build benchmarks" FORCE)
+endif()
+option(ENABLE_BENCHMARKS "Build benchmarks" ${ENABLE_BENCHMARKS})
+
+if(NOT DEFINED ENABLE_TESTS)
+  set(ENABLE_TESTS OFF CACHE BOOL "Build tests" FORCE)
+endif()
+option(ENABLE_TESTS "Build tests" ${ENABLE_TESTS})
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,13 +37,16 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER predefined)
 include(FetchContent)
 
 if(ENABLE_DAISY)
-  set(CMAKE_FOLDER external)
   FetchContent_Declare(
     libdaisy
     GIT_REPOSITORY https://github.com/electro-smith/libDaisy.git
     GIT_TAG 15e1dd53368f23c4207ecc4b17ce1a529166fa5a
   )
   FetchContent_MakeAvailable(libdaisy)
+  set_target_properties(
+    daisy PROPERTIES
+    FOLDER external
+  )
   target_compile_definitions(
     daisy PUBLIC
     BOOT_APP # Use the Daisy bootloader.
@@ -120,29 +128,12 @@ if(ENABLE_TSAN)
   endif()
 endif()
 
-if(ENABLE_TESTS)
-  enable_testing()
-
-  set(CMAKE_FOLDER external)
-  FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG b514bdc898e2951020cbdca1304b75f5950d1f59
-  )
-  if(MSVC)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  endif()
-  FetchContent_MakeAvailable(googletest)
-
-  include(GoogleTest)
-endif()
-
 include_directories(include)
 
 add_subdirectory(src)
+add_subdirectory(platforms)
 
 if(ENABLE_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-add_subdirectory(platforms)

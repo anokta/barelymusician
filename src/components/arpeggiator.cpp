@@ -1,6 +1,7 @@
 #include "components/arpeggiator.h"
 
 #include <algorithm>
+#include <cassert>
 
 #include "barelycomposer.h"
 #include "barelymusician.h"

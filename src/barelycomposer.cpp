@@ -9,7 +9,6 @@
 #include "common/random.h"
 #include "components/arpeggiator.h"
 #include "components/repeater.h"
-#include "internal/instrument.h"
 #include "internal/musician.h"
 
 // Arpeggiator.

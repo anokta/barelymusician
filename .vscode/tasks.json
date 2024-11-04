@@ -54,7 +54,7 @@
     {
       "label": "barelymusician: test all",
       "type": "shell",
-      "command": "python build.py --examples --test --unity",
+      "command": "python build.py --examples --benchmark --test --unity",
       "problemMatcher": [],
       "group": {
         "kind": "test",

@@ -29,7 +29,6 @@ target_link_libraries(
   barelymusician_common_random
   barelymusician_components_arpeggiator
   barelymusician_components_repeater
-  barelymusician_internal_instrument
   barelymusician_internal_musician
 )
 
@@ -58,28 +57,74 @@ target_link_libraries(
   barelymusician_internal_performer
 )
 
-if(ENABLE_TESTS)
-add_executable(
-  barelycomposer_test
-  barelycomposer_test.cpp
-)
-target_link_libraries(
-  barelycomposer_test
-  barelycomposer
-  gtest_main
-)
-gtest_discover_tests(barelycomposer_test)
+if(ENABLE_BENCHMARKS)
+  set(CMAKE_FOLDER external)
 
-add_executable(
-  barelymusician_test
-  barelymusician_test.cpp
-)
-target_link_libraries(
-  barelymusician_test
-  barelymusician
-  gtest_main
-)
-gtest_discover_tests(barelymusician_test)
+  FetchContent_Declare(
+      benchmark
+      GIT_REPOSITORY https://github.com/google/benchmark.git
+      GIT_TAG        v1.9.0
+  )
+  set(BENCHMARK_ENABLE_TESTING OFF)
+  FetchContent_MakeAvailable(benchmark)
+  target_compile_options(
+    benchmark PUBLIC
+    -w
+  )
+  include_directories(${benchmark_SOURCE_DIR}/include)
+
+  set(CMAKE_FOLDER src)
+
+  add_executable(
+    barelymusician_benchmark
+    barelymusician_benchmark.cpp
+  )
+  target_link_libraries(
+    barelymusician_benchmark
+    barelymusician
+    benchmark_main
+  )
+endif()
+
+if(ENABLE_TESTS)
+  enable_testing()
+
+  set(CMAKE_FOLDER external)
+
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.15.2
+  )
+  if(MSVC)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  endif()
+  FetchContent_MakeAvailable(googletest)
+  include(GoogleTest)
+
+  set(CMAKE_FOLDER src)
+
+  add_executable(
+    barelycomposer_test
+    barelycomposer_test.cpp
+  )
+  target_link_libraries(
+    barelycomposer_test
+    barelycomposer
+    gtest_main
+  )
+  gtest_discover_tests(barelycomposer_test)
+
+  add_executable(
+    barelymusician_test
+    barelymusician_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_test
+    barelymusician
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_test)
 endif()
 
 add_subdirectory(algorithm)

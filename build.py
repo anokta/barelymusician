@@ -71,6 +71,11 @@ def parse_args():
         help="specify the daisy toolchain prefix for the daisy program",
     )
     parser.add_argument(
+        "--unity",
+        action="store_true",
+        help="build the unity native plugins for the selected platforms",
+    )
+    parser.add_argument(
         "--examples",
         action="store_true",
         help="build the examples for the selected platforms",
@@ -81,14 +86,14 @@ def parse_args():
         help="specify the examples demo to run (defaults to none)",
     )
     parser.add_argument(
+        "--benchmark",
+        action="store_true",
+        help="build the benchmarks for the selected platforms",
+    )
+    parser.add_argument(
         "--test",
         action="store_true",
         help="build and run the unit tests for the selected platforms",
-    )
-    parser.add_argument(
-        "--unity",
-        action="store_true",
-        help="build the unity native plugins for the selected platforms",
     )
     parser.add_argument(
         "--clean",
@@ -190,6 +195,8 @@ def build(args, source_dir, build_dir):
     elif args.config == "tsan":
         common_cmake_options.append("-DENABLE_TSAN=ON")
 
+    if args.benchmark:
+        common_cmake_options.append("-DENABLE_BENCHMARKS=ON")
     if args.test:
         common_cmake_options.append("-DENABLE_TESTS=ON -DGTEST_COLOR=1")
     if args.examples or args.run_demo:
@@ -234,7 +241,9 @@ def run_demo(args, build_dir):
             or (platform == "Mac" and sys.platform.startswith("darwin"))
             or (platform == "Windows" and sys.platform.startswith("win"))
         ):
-            demo_dir = f"{build_dir}/{platform}/bin/{get_build_config(args)}"
+            demo_dir = f"{build_dir}/{platform}/bin"
+            if platform != "Linux":
+                demo_dir = os.path.join(demo_dir, f"{get_build_config(args)}")
             demo_path = os.path.join(demo_dir, args.run_demo)
             if platform == "Windows":
                 demo_path += ".exe"
@@ -253,6 +262,23 @@ def run_tests(build_dir):
             run_command(ctest_command, os.path.join(build_dir, platform))
 
 
+def run_benchmarks(args, build_dir):
+    for platform in os.listdir(build_dir):
+        if (
+            (platform == "Linux" and sys.platform.startswith("linux"))
+            or (platform == "Mac" and sys.platform.startswith("darwin"))
+            or (platform == "Windows" and sys.platform.startswith("win"))
+        ):
+            benchmark_dir = f"{build_dir}/{platform}/src"
+            if platform != "Linux":
+                benchmark_dir = os.path.join(benchmark_dir, f"{get_build_config(args)}")
+            benchmark_path = os.path.join(benchmark_dir, "barelymusician_benchmark")
+            if platform == "Windows":
+                benchmark_path += ".exe"
+            run_command(benchmark_path, benchmark_dir)
+            break
+
+
 def main():
     args = parse_args()
     root_dir = os.path.abspath(os.path.dirname(__file__))
@@ -262,6 +288,9 @@ def main():
 
     if args.test:
         run_tests(build_dir)
+
+    if args.benchmark:
+        run_benchmarks(args, build_dir)
 
     if args.daisy:
         run_daisy_program(build_dir)

@@ -35,7 +35,7 @@ CheckOptions:
   - key: readability-identifier-length.IgnoredParameterNames
     value: '[abint]|i[dt]'
   - key: readability-identifier-length.IgnoredVariableNames
-    value: 'i[dt]'
+    value: '_|[abint]|i[dt]'
 
 FormatStyle: 'file'
 ...

@@ -20,10 +20,6 @@ Instrument::Instrument(int frame_rate, double reference_frequency, int64_t updat
       update_frame_(update_frame),
       processor_(frame_rate, reference_frequency) {
   assert(frame_rate > 0);
-  // TODO(#139): This is unnecessary work.
-  for (int i = 0; i < static_cast<int>(controls_.size()); ++i) {
-    processor_.SetControl(static_cast<ControlType>(i), controls_[i].value);
-  }
 }
 
 Instrument::~Instrument() noexcept { SetAllNotesOff(); }
@@ -130,17 +126,11 @@ void Instrument::SetNoteOffEvent(const NoteOffEvent* note_off_event) noexcept {
 void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
   if (const auto [it, success] = note_controls_.try_emplace(pitch,
                                                             NoteControlArray{
-                                                                // kPitchShift
-                                                                Control(0.0),
+                                                                Control(0.0),  // kPitchShift
                                                             });
       success) {
     note_on_event_.Process(pitch, intensity);
     message_queue_.Add(update_frame_, NoteOnMessage{pitch, intensity});
-    // TODO(#139): This is unnecessary work.
-    for (int i = 0; i < static_cast<int>(it->second.size()); ++i) {
-      message_queue_.Add(update_frame_, NoteControlMessage{pitch, static_cast<NoteControlType>(i),
-                                                           (it->second)[i].value});
-    }
   }
 }
 

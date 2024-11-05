@@ -74,7 +74,7 @@ class InstrumentProcessor {
   };
   VoiceState& AcquireVoice(double pitch) noexcept;
   std::vector<VoiceState> voice_states_;
-  int voice_count_ = 0;
+  int voice_count_ = 8;
 
   GainProcessor gain_processor_;
   SampleData sample_data_;

@@ -176,10 +176,10 @@ class Instrument {
       Control(8, 1, 32),                                                     // kVoiceCount
       Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),     // kOscillatorShape
       Control(0, 0, static_cast<int>(BarelySamplePlaybackMode_kCount) - 1),  // kSamplePlaybackMode
-      Control(0.05, 0.0, 60.0),                                              // kAttack
+      Control(0.0, 0.0, 60.0),                                               // kAttack
       Control(0.0, 0.0, 60.0),                                               // kDecay
       Control(1.0, 0.0, 1.0),                                                // kSustain
-      Control(0.25, 0.0, 60.0),                                              // kRelease
+      Control(0.0, 0.0, 60.0),                                               // kRelease
       Control(0.0),                                                          // kPitchShift
       Control(false),                                                        // kRetrigger
       Control(0, 0, static_cast<int>(BarelyFilterType_kCount) - 1),          // kFilterType

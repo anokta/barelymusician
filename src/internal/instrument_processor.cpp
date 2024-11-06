@@ -1,5 +1,6 @@
 #include "internal/instrument_processor.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 
@@ -36,16 +37,21 @@ InstrumentProcessor::InstrumentProcessor(int frame_rate, double reference_freque
 
 void InstrumentProcessor::Process(double* output_samples, int output_channel_count,
                                   int output_frame_count) noexcept {
-  for (int frame = 0; frame < output_frame_count; ++frame) {
-    double mono_sample = 0.0;
-    for (int i = 0; i < voice_count_; ++i) {
-      if (voice_states_[i].voice.IsActive()) {
-        mono_sample += voice_states_[i].voice.Next();
+  bool has_active_voice = true;
+  for (int i = 0; i < voice_count_; ++i) {
+    if (voice_states_[i].voice.IsActive()) {
+      if (has_active_voice) {
+        voice_states_[i].voice.Process<true>(output_samples, output_channel_count,
+                                             output_frame_count);
+      } else {
+        voice_states_[i].voice.Process<false>(output_samples, output_channel_count,
+                                              output_frame_count);
+        has_active_voice = true;
       }
     }
-    for (int channel = 0; channel < output_channel_count; ++channel) {
-      output_samples[output_channel_count * frame + channel] = mono_sample;
-    }
+  }
+  if (!has_active_voice) {
+    std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0);
   }
   gain_processor_.Process(output_samples, output_channel_count, output_frame_count);
 }

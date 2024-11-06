@@ -29,6 +29,7 @@ void BM_BarelyInstrument_Process_SingleNote(State& state) {
   Musician musician(kFrameRate);
 
   auto instrument = musician.AddInstrument();
+  instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
   instrument.SetNoteOn(0.0);
 
   std::array<double, kChannelCount * kFrameCount> output;
@@ -38,6 +39,25 @@ void BM_BarelyInstrument_Process_SingleNote(State& state) {
   }
 }
 BENCHMARK(BM_BarelyInstrument_Process_SingleNote);
+
+void BM_BarelyInstrument_Process_MultipleNotes(State& state) {
+  Musician musician(kFrameRate);
+
+  auto instrument = musician.AddInstrument();
+  instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
+
+  const int voice_count = instrument.GetControl<int>(ControlType::kVoiceCount);
+  for (int i = 0; i < voice_count; ++i) {
+    instrument.SetNoteOn(static_cast<double>(i));
+  }
+
+  std::array<double, kChannelCount * kFrameCount> output;
+
+  for (auto _ : state) {
+    instrument.Process(output.data(), kChannelCount, kFrameCount, 0.0);
+  }
+}
+BENCHMARK(BM_BarelyInstrument_Process_MultipleNotes);
 
 void BM_BarelyInstrument_SetControl(State& state) {
   Musician musician(kFrameRate);

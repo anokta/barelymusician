@@ -37,7 +37,7 @@ InstrumentProcessor::InstrumentProcessor(int frame_rate, double reference_freque
 
 void InstrumentProcessor::Process(double* output_samples, int output_channel_count,
                                   int output_frame_count) noexcept {
-  bool has_active_voice = true;
+  bool has_active_voice = false;
   for (int i = 0; i < voice_count_; ++i) {
     if (voice_states_[i].voice.IsActive()) {
       if (has_active_voice) {

@@ -58,23 +58,6 @@ target_link_libraries(
 )
 
 if(ENABLE_BENCHMARKS)
-  set(CMAKE_FOLDER external)
-
-  FetchContent_Declare(
-      benchmark
-      GIT_REPOSITORY https://github.com/google/benchmark.git
-      GIT_TAG        v1.9.0
-  )
-  set(BENCHMARK_ENABLE_TESTING OFF)
-  FetchContent_MakeAvailable(benchmark)
-  target_compile_options(
-    benchmark PUBLIC
-    -w
-  )
-  include_directories(${benchmark_SOURCE_DIR}/include)
-
-  set(CMAKE_FOLDER src)
-
   add_executable(
     barelymusician_benchmark
     barelymusician_benchmark.cpp
@@ -87,23 +70,6 @@ if(ENABLE_BENCHMARKS)
 endif()
 
 if(ENABLE_TESTS)
-  enable_testing()
-
-  set(CMAKE_FOLDER external)
-
-  FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG v1.15.2
-  )
-  if(MSVC)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  endif()
-  FetchContent_MakeAvailable(googletest)
-  include(GoogleTest)
-
-  set(CMAKE_FOLDER src)
-
   add_executable(
     barelycomposer_test
     barelycomposer_test.cpp

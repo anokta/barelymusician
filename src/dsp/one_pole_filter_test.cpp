@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 
+#include "barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {

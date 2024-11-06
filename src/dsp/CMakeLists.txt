@@ -98,6 +98,7 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_dsp_one_pole_filter_test
     barelymusician_dsp_one_pole_filter
+    barelymusician
     gtest_main
   )
   gtest_discover_tests(barelymusician_dsp_one_pole_filter_test)

@@ -10,8 +10,8 @@ class AudioClock {
  public:
   /// Constructs new `AudioClock`.
   ///
-  /// @param frame_rate Frame rate in hertz.
-  explicit AudioClock(int frame_rate) noexcept;
+  /// @param sample_rate Sampling rate in hertz.
+  explicit AudioClock(int sample_rate) noexcept;
 
   /// Returns the timestamp.
   ///
@@ -20,12 +20,12 @@ class AudioClock {
 
   /// Updates the clock.
   ///
-  /// @param frame_count Number of frames to iterate.
-  void Update(int frame_count) noexcept;
+  /// @param sample_count Number of samples to iterate.
+  void Update(int sample_count) noexcept;
 
  private:
-  // Frame rate in hertz.
-  const int frame_rate_;
+  // Sampling rate in hertz.
+  const int sample_rate_;
 
   // Monothonic timestamp in seconds.
   std::atomic<double> timestamp_;

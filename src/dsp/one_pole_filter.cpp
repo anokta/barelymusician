@@ -27,12 +27,12 @@ void OnePoleFilter::SetCoefficient(double coefficient) noexcept {
 
 void OnePoleFilter::SetType(FilterType type) noexcept { type_ = type; }
 
-double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept {
-  if (const double frame_rate_double = static_cast<double>(frame_rate);
-      frame_rate_double > 0.0 && cuttoff_frequency < frame_rate_double) {
+double GetFilterCoefficient(int sample_rate, double cuttoff_frequency) noexcept {
+  if (const double sample_rate_double = static_cast<double>(sample_rate);
+      sample_rate_double > 0.0 && cuttoff_frequency < sample_rate_double) {
     // c = exp(-2 * pi * fc / fs).
     // TODO(#8): Verify if this *a proper way* to calculate the coefficient?
-    return std::exp(-2.0 * std::numbers::pi_v<double> * cuttoff_frequency / frame_rate_double);
+    return std::exp(-2.0 * std::numbers::pi_v<double> * cuttoff_frequency / sample_rate_double);
   }
   return 0.0;
 }

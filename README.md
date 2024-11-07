@@ -27,7 +27,7 @@ For background about this project, see the original research paper
 #include "barelymusician.h"
 
 // Create the musician.
-barely::Musician musician(/*frame_rate=*/48000);
+barely::Musician musician(/*sample_rate=*/48000);
 
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);
@@ -83,10 +83,8 @@ musician.Update(timestamp + kLookahead);
 //
 // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process` should
 // typically be called from an audio thread process callback in real-time audio applications.
-constexpr int kChannelCount = 2;
-constexpr int kFrameCount = 1024;
-double output_samples[kChannelCount * kFrameCount];
-instrument.Process(output_samples, kChannelCount, kFrameCount, timestamp);
+double output_samples[1024];
+instrument.Process(output_samples, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

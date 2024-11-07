@@ -48,13 +48,12 @@ bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
 }
 
 bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
-                              int32_t output_channel_count, int32_t output_frame_count,
-                              double timestamp) {
+                              int32_t output_sample_count, double timestamp) {
   if (!instrument) return false;
 
   return instrument->Process(
-      output_samples, output_channel_count, output_frame_count,
-      static_cast<int>(static_cast<double>(instrument->GetFrameRate()) * timestamp));
+      {output_samples, output_samples + output_sample_count},
+      static_cast<int>(static_cast<double>(instrument->GetSampleRate()) * timestamp));
 }
 
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
@@ -141,11 +140,11 @@ bool BarelyMusician_AddPerformer(BarelyMusicianHandle musician, int32_t process_
   return true;
 }
 
-bool BarelyMusician_Create(int32_t frame_rate, BarelyMusicianHandle* out_musician) {
-  if (frame_rate <= 0) return false;
+bool BarelyMusician_Create(int32_t sample_rate, BarelyMusicianHandle* out_musician) {
+  if (sample_rate <= 0) return false;
   if (!out_musician) return false;
 
-  *out_musician = new BarelyMusician(frame_rate);
+  *out_musician = new BarelyMusician(sample_rate);
   return true;
 }
 

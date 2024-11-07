@@ -9,8 +9,8 @@ class Envelope {
  public:
   /// Constructs new `Envelope`.
   ///
-  /// @param frame_rate Frame rate in hertz.
-  explicit Envelope(int frame_rate) noexcept;
+  /// @param sample_rate Sampling rate in hertz.
+  explicit Envelope(int sample_rate) noexcept;
 
   /// Returns whether the envelope is currently active (i.e., not idle).
   ///
@@ -55,8 +55,8 @@ class Envelope {
   // Envelope state.
   enum class State { kAttack, kDecay, kSustain, kRelease, kIdle };
 
-  // Inverse frame rate in seconds.
-  double frame_interval_ = 0.0;
+  // Inverse sampling rate in seconds.
+  double sample_interval_ = 0.0;
 
   // Current ADSR values.
   double attack_increment_ = 0.0;

@@ -40,10 +40,10 @@ class OnePoleFilter {
 
 /// Returns one-pole filter coefficient for a given cutoff frequency.
 ///
-/// @param frame_rate Frame rate in hertz.
+/// @param sample_rate Sampling rate in hertz.
 /// @param cuttoff_frequency Cutoff frequency in hertz.
 /// @return Filter coefficient.
-double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept;
+double GetFilterCoefficient(int sample_rate, double cuttoff_frequency) noexcept;
 
 }  // namespace barely::internal
 

@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <span>
 #include <unordered_map>
 
 #include "barelymusician.h"
@@ -22,11 +23,11 @@ class Instrument {
  public:
   /// Constructs a new `Instrument`.
   ///
-  /// @param frame_rate Frame rate in hertz.
+  /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
-  /// @param update_frame Update frame.
+  /// @param update_sample Update sample.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(int frame_rate, double reference_frequency, int64_t update_frame) noexcept;
+  Instrument(int sample_rate, double reference_frequency, int64_t update_sample) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -50,10 +51,10 @@ class Instrument {
   /// @return Note control value.
   [[nodiscard]] const double* GetNoteControl(double pitch, NoteControlType type) const noexcept;
 
-  /// Returns frame rate.
+  /// Returns sampling rate.
   ///
-  /// @return Frame rate in hertz.
-  [[nodiscard]] int GetFrameRate() const noexcept;
+  /// @return Sampling rate in hertz.
+  [[nodiscard]] int GetSampleRate() const noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -63,14 +64,11 @@ class Instrument {
 
   /// Processes output samples.
   ///
-  /// @param output_samples Array of interleaved output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
-  /// @param process_frame Process frame.
+  /// @param output_samples Span of mono output samples.
+  /// @param process_sample Process sample.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool Process(double* output_samples, int output_channel_count, int output_frame_count,
-               int64_t process_frame) noexcept;
+  bool Process(std::span<double> output_samples, int64_t process_sample) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -123,8 +121,8 @@ class Instrument {
 
   /// Updates the instrument.
   ///
-  /// @param update_frame Update frame.
-  void Update(int64_t update_frame) noexcept;
+  /// @param update_sample Update sample.
+  void Update(int64_t update_sample) noexcept;
 
  private:
   // Control.
@@ -167,8 +165,8 @@ class Instrument {
   using ControlArray = std::array<Control, static_cast<int>(BarelyControlType_kCount)>;
   using NoteControlArray = std::array<Control, static_cast<int>(BarelyNoteControlType_kCount)>;
 
-  // Frame rate in hertz.
-  const int frame_rate_ = 0;
+  // Sampling rate in hertz.
+  const int sample_rate_ = 0;
 
   // Array of controls.
   ControlArray controls_ = {
@@ -195,8 +193,8 @@ class Instrument {
   // Note on event.
   Event<NoteOnEvent, double, double> note_on_event_;
 
-  // Update frame.
-  int64_t update_frame_ = 0;
+  // Update sample.
+  int64_t update_sample_ = 0;
 
   // Message queue.
   MessageQueue message_queue_;

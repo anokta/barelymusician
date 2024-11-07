@@ -4,6 +4,7 @@
 #include <chrono>
 #include <iterator>
 #include <optional>
+#include <span>
 #include <thread>
 
 #include "barelycomposer.h"
@@ -26,9 +27,8 @@ using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
-constexpr int kChannelCount = 2;
-constexpr int kFrameCount = 256;
+constexpr int kSampleRate = 48000;
+constexpr int kSampleCount = 256;
 
 constexpr double kLookahead = 0.1;
 
@@ -65,10 +65,10 @@ std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& ke
 int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
-  AudioClock audio_clock(kFrameRate);
-  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
+  AudioClock audio_clock(kSampleRate);
+  AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kFrameRate);
+  Musician musician(kSampleRate);
   musician.SetTempo(kInitialTempo);
 
   auto instrument = musician.AddInstrument();
@@ -90,9 +90,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
-    audio_clock.Update(kFrameCount);
+  audio_output.SetProcessCallback([&](std::span<double> output_samples) {
+    instrument.Process(output_samples, audio_clock.GetTimestamp());
+    audio_clock.Update(static_cast<int>(output_samples.size()));
   });
 
   // Key down callback.

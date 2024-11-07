@@ -27,33 +27,30 @@ double FrequencyFromPitch(double pitch, double reference_frequency) noexcept {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentProcessor::InstrumentProcessor(int frame_rate, double reference_frequency) noexcept
-    : voice_states_(kMaxVoiceCount, {Voice(frame_rate)}),
-      gain_processor_(frame_rate),
+InstrumentProcessor::InstrumentProcessor(int sample_rate, double reference_frequency) noexcept
+    : voice_states_(kMaxVoiceCount, {Voice(sample_rate)}),
+      gain_processor_(sample_rate),
       reference_frequency_(reference_frequency),
-      frame_rate_(frame_rate) {
-  assert(frame_rate > 0);
+      sample_rate_(sample_rate) {
+  assert(sample_rate > 0);
 }
 
-void InstrumentProcessor::Process(double* output_samples, int output_channel_count,
-                                  int output_frame_count) noexcept {
+void InstrumentProcessor::Process(double* output_samples, int output_sample_count) noexcept {
   bool has_active_voice = false;
   for (int i = 0; i < voice_count_; ++i) {
     if (voice_states_[i].voice.IsActive()) {
       if (has_active_voice) {
-        voice_states_[i].voice.Process<true>(output_samples, output_channel_count,
-                                             output_frame_count);
+        voice_states_[i].voice.Process<true>(output_samples, output_sample_count);
       } else {
-        voice_states_[i].voice.Process<false>(output_samples, output_channel_count,
-                                              output_frame_count);
+        voice_states_[i].voice.Process<false>(output_samples, output_sample_count);
         has_active_voice = true;
       }
     }
   }
   if (!has_active_voice) {
-    std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0);
+    std::fill_n(output_samples, output_sample_count, 0.0);
   }
-  gain_processor_.Process(output_samples, output_channel_count, output_frame_count);
+  gain_processor_.Process(output_samples, output_sample_count);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -123,7 +120,7 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       };
       break;
     case ControlType::kFilterFrequency: {
-      const double coefficient = GetFilterCoefficient(frame_rate_, value);
+      const double coefficient = GetFilterCoefficient(sample_rate_, value);
       for (int i = 0; i < voice_count_; ++i) {
         voice_states_[i].voice.filter().SetCoefficient(coefficient);
       };

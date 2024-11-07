@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstring>
 #include <functional>
+#include <span>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -54,11 +55,10 @@ using BeatComposerCallback =
                        InstrumentHandle& instrument, PerformerHandle& performer)>;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
-constexpr int kChannelCount = 2;
-constexpr int kFrameCount = 1024;
+constexpr int kSampleRate = 48000;
+constexpr int kSampleCount = 1024;
 
-constexpr double kLookahead = 0.15;
+constexpr double kLookahead = 0.1;
 
 // Performer settings.
 constexpr double kTempo = 124.0;
@@ -105,7 +105,7 @@ void InsertPadData(double pitch, const std::string& file_path, std::vector<doubl
   assert(success);
 
   samples = sample_file.GetData();
-  slices.emplace_back(pitch, sample_file.GetFrameRate(), samples);
+  slices.emplace_back(pitch, sample_file.GetSampleRate(), samples);
 }
 
 // Schedules performer to play an instrument note.
@@ -205,10 +205,10 @@ int main(int /*argc*/, char* argv[]) {
 
   Random random;
 
-  AudioClock clock(kFrameRate);
-  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
+  AudioClock clock(kSampleRate);
+  AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kFrameRate);
+  Musician musician(kSampleRate);
   musician.SetTempo(kTempo);
 
   // Note on callback.
@@ -344,14 +344,15 @@ int main(int /*argc*/, char* argv[]) {
   metronome.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  std::vector<double> temp_buffer(kChannelCount * kFrameCount);
-  const auto process_callback = [&](double* output) {
-    std::fill_n(output, kChannelCount * kFrameCount, 0.0);
+  std::vector<double> temp_buffer(kSampleCount);
+  const auto process_callback = [&](std::span<double> output_samples) {
+    std::fill_n(output_samples.begin(), kSampleCount, 0.0);
     for (auto& instrument : instruments) {
-      instrument.Process(temp_buffer.data(), kChannelCount, kFrameCount, clock.GetTimestamp());
-      std::transform(temp_buffer.begin(), temp_buffer.end(), output, output, std::plus());
+      instrument.Process(temp_buffer, clock.GetTimestamp());
+      std::transform(temp_buffer.begin(), temp_buffer.end(), output_samples.begin(),
+                     output_samples.begin(), std::plus());
     }
-    clock.Update(kFrameCount);
+    clock.Update(static_cast<int>(output_samples.size()));
   };
   audio_output.SetProcessCallback(process_callback);
 

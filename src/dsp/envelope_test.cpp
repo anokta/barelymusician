@@ -5,8 +5,8 @@
 namespace barely::internal {
 namespace {
 
-// Frame rate.
-constexpr int kFrameRate = 1000;
+// Sampling rate.
+constexpr int kSampleRate = 1000;
 
 // Envelope ADSR.
 constexpr double kAttack = 0.02;
@@ -20,7 +20,7 @@ constexpr double kEpsilon = 1e-3;
 // Tests that the envelope generates the expected output samples when initialized with the default
 // constructor.
 TEST(EnvelopeTest, ProcessDefault) {
-  Envelope envelope(kFrameRate);
+  Envelope envelope(kSampleRate);
   EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 
   envelope.Start();
@@ -32,12 +32,12 @@ TEST(EnvelopeTest, ProcessDefault) {
 
 // Tests that the envelope generates the expected output samples consistently over multiple samples.
 TEST(EnvelopeTest, ProcessMultiSamples) {
-  constexpr int kAttackSampleCount = static_cast<int>(kFrameRate * kAttack);
-  constexpr int kDecaySampleCount = static_cast<int>(kFrameRate * kDecay);
+  constexpr int kAttackSampleCount = static_cast<int>(kSampleRate * kAttack);
+  constexpr int kDecaySampleCount = static_cast<int>(kSampleRate * kDecay);
   constexpr int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
-  constexpr int kReleaseSampleCount = static_cast<int>(kFrameRate * kRelease);
+  constexpr int kReleaseSampleCount = static_cast<int>(kSampleRate * kRelease);
 
-  Envelope envelope(kFrameRate);
+  Envelope envelope(kSampleRate);
   envelope.SetAttack(kAttack);
   envelope.SetDecay(kDecay);
   envelope.SetSustain(kSustain);
@@ -47,7 +47,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   double expected_sample = 0.0;
 
   envelope.Start();
-  for (int i = 0; i < kSustainSampleCount + kFrameRate; ++i) {
+  for (int i = 0; i < kSustainSampleCount + kSampleRate; ++i) {
     if (i < kAttackSampleCount) {
       // Attack.
       expected_sample = static_cast<double>(i) / static_cast<double>(kAttackSampleCount);
@@ -63,7 +63,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   }
 
   envelope.Stop();
-  for (int i = 0; i < kReleaseSampleCount + kFrameRate; ++i) {
+  for (int i = 0; i < kReleaseSampleCount + kSampleRate; ++i) {
     if (i < kReleaseSampleCount) {
       // Release.
       expected_sample =

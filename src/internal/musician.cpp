@@ -23,11 +23,12 @@ constexpr double kSecondsFromMinutes = 60.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Musician::Musician(int frame_rate) noexcept : frame_rate_(frame_rate) {}
+Musician::Musician(int sample_rate) noexcept : sample_rate_(sample_rate) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Instrument* Musician::AddInstrument() noexcept {
-  auto instrument = std::make_unique<Instrument>(frame_rate_, reference_frequency_, update_frame_);
+  auto instrument = std::make_unique<Instrument>(sample_rate_, reference_frequency_,
+                                                 GetSamplesFromSeconds(timestamp_));
   Instrument* instrument_ptr = instrument.get();
   [[maybe_unused]] const bool success =
       instruments_.emplace(instrument_ptr, std::move(instrument)).second;
@@ -65,8 +66,8 @@ double Musician::GetBeatsFromSeconds(double seconds) const noexcept {
 
 double Musician::GetReferenceFrequency() const noexcept { return reference_frequency_; }
 
-int64_t Musician::GetFramesFromSeconds(double seconds) const noexcept {
-  return static_cast<int64_t>(seconds * static_cast<double>(frame_rate_));
+int64_t Musician::GetSamplesFromSeconds(double seconds) const noexcept {
+  return static_cast<int64_t>(seconds * static_cast<double>(sample_rate_));
 }
 
 double Musician::GetSecondsFromBeats(double beats) const noexcept {
@@ -112,9 +113,9 @@ void Musician::Update(double timestamp) noexcept {
         }
 
         timestamp_ += GetSecondsFromBeats(update_duration);
-        update_frame_ = GetFramesFromSeconds(timestamp_);
+        const int64_t update_sample = GetSamplesFromSeconds(timestamp_);
         for (const auto& [instrument, _] : instruments_) {
-          instrument->Update(update_frame_);
+          instrument->Update(update_sample);
         }
       }
 
@@ -125,9 +126,9 @@ void Musician::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      update_frame_ = GetFramesFromSeconds(timestamp_);
+      const int64_t update_sample = GetSamplesFromSeconds(timestamp_);
       for (const auto& [instrument, _] : instruments_) {
-        instrument->Update(update_frame_);
+        instrument->Update(update_sample);
       }
     }
   }

@@ -13,8 +13,8 @@ class Oscillator {
  public:
   /// Constructs new `Oscillator`.
   ///
-  /// @param frame_rate Frame rate in hertz.
-  explicit Oscillator(int frame_rate) noexcept;
+  /// @param sample_rate Sampling rate in hertz.
+  explicit Oscillator(int sample_rate) noexcept;
 
   /// Generates the next output sample.
   ///
@@ -35,8 +35,8 @@ class Oscillator {
   void SetShape(OscillatorShape shape) noexcept;
 
  private:
-  // Inverse frame rate in seconds.
-  double frame_interval_ = 0.0;
+  // Inverse sampling rate in seconds.
+  double sample_interval_ = 0.0;
 
   // Maximum allowed frequency.
   double max_frequency_ = 0.0;

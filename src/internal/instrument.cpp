@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <span>
 #include <utility>
 #include <variant>
 
@@ -15,11 +16,11 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument::Instrument(int frame_rate, double reference_frequency, int64_t update_frame) noexcept
-    : frame_rate_(frame_rate),
-      update_frame_(update_frame),
-      processor_(frame_rate, reference_frequency) {
-  assert(frame_rate > 0);
+Instrument::Instrument(int sample_rate, double reference_frequency, int64_t update_sample) noexcept
+    : sample_rate_(sample_rate),
+      update_sample_(update_sample),
+      processor_(sample_rate, reference_frequency) {
+  assert(sample_rate > 0);
 }
 
 Instrument::~Instrument() noexcept { SetAllNotesOff(); }
@@ -35,27 +36,26 @@ const double* Instrument::GetNoteControl(double pitch, NoteControlType type) con
   return nullptr;
 }
 
-int Instrument::GetFrameRate() const noexcept { return frame_rate_; }
+int Instrument::GetSampleRate() const noexcept { return sample_rate_; }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept { return note_controls_.contains(pitch); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Instrument::Process(double* output_samples, int output_channel_count, int output_frame_count,
-                         int64_t process_frame) noexcept {
-  if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
-      output_channel_count < 0 || output_frame_count < 0) {
+bool Instrument::Process(std::span<double> output_samples, int64_t process_sample) noexcept {
+  if (output_samples.empty()) {
     return false;
   }
-  int frame = 0;
-  // Process *all* messages before the end frame.
-  const int64_t end_frame = process_frame + output_frame_count;
-  for (auto* message = message_queue_.GetNext(end_frame); message;
-       message = message_queue_.GetNext(end_frame)) {
-    if (const int message_frame = static_cast<int>(message->first - process_frame);
-        frame < message_frame) {
-      processor_.Process(&output_samples[frame * output_channel_count], output_channel_count,
-                         message_frame - frame);
-      frame = message_frame;
+  const int output_sample_count = static_cast<int>(output_samples.size());
+
+  int current_sample = 0;
+  // Process *all* messages before the end sample.
+  const int64_t end_sample = process_sample + output_sample_count;
+  for (auto* message = message_queue_.GetNext(end_sample); message;
+       message = message_queue_.GetNext(end_sample)) {
+    if (const int message_sample = static_cast<int>(message->first - process_sample);
+        current_sample < message_sample) {
+      processor_.Process(&output_samples[current_sample], message_sample - current_sample);
+      current_sample = message_sample;
     }
     std::visit(
         MessageVisitor{
@@ -80,10 +80,9 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
             }},
         message->second);
   }
-  // Process the rest of the buffer.
-  if (frame < output_frame_count) {
-    processor_.Process(&output_samples[frame * output_channel_count], output_channel_count,
-                       output_frame_count - frame);
+  // Process the rest of the samples.
+  if (current_sample < output_sample_count) {
+    processor_.Process(&output_samples[current_sample], output_sample_count - current_sample);
   }
   return true;
 }
@@ -92,13 +91,13 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
 void Instrument::SetAllNotesOff() noexcept {
   for (const auto& [note, _] : std::exchange(note_controls_, {})) {
     note_off_event_.Process(note);
-    message_queue_.Add(update_frame_, NoteOffMessage{note});
+    message_queue_.Add(update_sample_, NoteOffMessage{note});
   }
 }
 
 void Instrument::SetControl(ControlType type, double value) noexcept {
   if (auto& control = controls_[static_cast<int>(type)]; control.SetValue(value)) {
-    message_queue_.Add(update_frame_, ControlMessage{type, control.value});
+    message_queue_.Add(update_sample_, ControlMessage{type, control.value});
   }
 }
 
@@ -106,7 +105,7 @@ void Instrument::SetNoteControl(double pitch, NoteControlType type, double value
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[static_cast<int>(type)];
         note_control.SetValue(value)) {
-      message_queue_.Add(update_frame_, NoteControlMessage{pitch, type, note_control.value});
+      message_queue_.Add(update_sample_, NoteControlMessage{pitch, type, note_control.value});
     }
   }
 }
@@ -114,7 +113,7 @@ void Instrument::SetNoteControl(double pitch, NoteControlType type, double value
 void Instrument::SetNoteOff(double pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
     note_off_event_.Process(pitch);
-    message_queue_.Add(update_frame_, NoteOffMessage{pitch});
+    message_queue_.Add(update_sample_, NoteOffMessage{pitch});
   }
 }
 
@@ -130,7 +129,7 @@ void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
                                                             });
       success) {
     note_on_event_.Process(pitch, intensity);
-    message_queue_.Add(update_frame_, NoteOnMessage{pitch, intensity});
+    message_queue_.Add(update_sample_, NoteOnMessage{pitch, intensity});
   }
 }
 
@@ -140,16 +139,16 @@ void Instrument::SetNoteOnEvent(const NoteOnEvent* note_on_event) noexcept {
 }
 
 void Instrument::SetReferenceFrequency(double reference_frequency) noexcept {
-  message_queue_.Add(update_frame_, ReferenceFrequencyMessage{reference_frequency});
+  message_queue_.Add(update_sample_, ReferenceFrequencyMessage{reference_frequency});
 }
 
 void Instrument::SetSampleData(SampleData sample_data) noexcept {
-  message_queue_.Add(update_frame_, SampleDataMessage{std::move(sample_data)});
+  message_queue_.Add(update_sample_, SampleDataMessage{std::move(sample_data)});
 }
 
-void Instrument::Update(int64_t update_frame) noexcept {
-  assert(update_frame >= update_frame_);
-  update_frame_ = update_frame;
+void Instrument::Update(int64_t update_sample) noexcept {
+  assert(update_sample >= update_sample_);
+  update_sample_ = update_sample;
 }
 
 }  // namespace barely::internal

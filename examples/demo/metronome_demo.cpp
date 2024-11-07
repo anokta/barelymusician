@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <span>
 #include <thread>
 
 #include "barelymusician.h"
@@ -22,9 +23,8 @@ using ::barely::examples::InputManager;
 using ::barely::examples::Metronome;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
-constexpr int kChannelCount = 2;
-constexpr int kFrameCount = 1024;
+constexpr int kSampleRate = 48000;
+constexpr int kSampleCount = 1024;
 
 constexpr double kLookahead = 0.1;
 
@@ -48,10 +48,10 @@ constexpr double kTempoIncrement = 10.0;
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   InputManager input_manager;
 
-  AudioClock audio_clock(kFrameRate);
-  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
+  AudioClock audio_clock(kSampleRate);
+  AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kFrameRate);
+  Musician musician(kSampleRate);
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
@@ -74,9 +74,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   });
 
   // Audio process callback.
-  const auto process_callback = [&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
-    audio_clock.Update(kFrameCount);
+  const auto process_callback = [&](std::span<double> output_samples) {
+    instrument.Process(output_samples, audio_clock.GetTimestamp());
+    audio_clock.Update(static_cast<int>(output_samples.size()));
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -122,7 +122,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       default:
         return;
     }
-    tempo = std::clamp(tempo, 0.0, static_cast<double>(kFrameRate));
+    tempo = std::clamp(tempo, 0.0, static_cast<double>(kSampleRate));
     musician.SetTempo(tempo);
     ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
   };

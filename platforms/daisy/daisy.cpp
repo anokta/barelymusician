@@ -13,7 +13,7 @@ using ::daisy::MidiUsbTransport;
 using ::daisy::SaiHandle;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
+constexpr int kSampleRate = 48000;
 constexpr size_t kChannelCount = 2;
 constexpr size_t kFrameCount = 16;
 
@@ -31,7 +31,7 @@ static MidiUsbHandler midi;
 
 static InstrumentHandle instrument = {};
 static int osc_index = static_cast<int>(kOscillatorShape);
-static std::array<double, kChannelCount * kFrameCount> temp_samples{0.0};
+static std::array<double, kFrameCount> temp_samples{0.0};
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
@@ -43,10 +43,10 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   }
 
   // Process samples.
-  instrument.Process(temp_samples.data(), kChannelCount, size, /*timestamp=*/0.0);
+  instrument.Process({temp_samples.begin(), temp_samples.begin() + size}, /*timestamp=*/0.0);
   for (int channel = 0; channel < kChannelCount; ++channel) {
     for (int frame = 0; frame < static_cast<int>(size); ++frame) {
-      out[channel][frame] = temp_samples[frame * kChannelCount + channel];
+      out[channel][frame] = temp_samples[frame];
     }
   }
 }
@@ -63,7 +63,7 @@ int main(void) {
   midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  Musician musician(kFrameRate);
+  Musician musician(kSampleRate);
 
   instrument = musician.AddInstrument();
   instrument.SetControl(ControlType::kGain, kGain);

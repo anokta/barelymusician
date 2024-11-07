@@ -8,9 +8,9 @@
 
 namespace barely::internal {
 
-Oscillator::Oscillator(int frame_rate) noexcept
-    : frame_interval_(frame_rate > 0 ? 1.0 / static_cast<double>(frame_rate) : 0.0),
-      max_frequency_(static_cast<double>(frame_rate / 2)) {}  // NOLINT(bugprone-integer-division)
+Oscillator::Oscillator(int sample_rate) noexcept
+    : sample_interval_(sample_rate > 0 ? 1.0 / static_cast<double>(sample_rate) : 0.0),
+      max_frequency_(static_cast<double>(sample_rate / 2)) {}  // NOLINT(bugprone-integer-division)
 
 double Oscillator::Next() noexcept {
   double output = 0.0;
@@ -45,7 +45,7 @@ void Oscillator::Reset() noexcept { phase_ = 0.0; }
 
 void Oscillator::SetFrequency(double frequency) noexcept {
   frequency_ = std::min(std::max(frequency, 0.0), max_frequency_);
-  increment_ = frequency_ * frame_interval_;
+  increment_ = frequency_ * sample_interval_;
 }
 
 void Oscillator::SetShape(OscillatorShape shape) noexcept { shape_ = shape; }

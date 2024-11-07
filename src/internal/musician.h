@@ -18,9 +18,9 @@ class Musician {
  public:
   /// Constructs a new `Musician`.
   ///
-  /// @param frame_rate Frame rate in hertz.
+  /// @param sample_rate Sampling rate in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Musician(int frame_rate) noexcept;
+  explicit Musician(int sample_rate) noexcept;
 
   /// Adds an instrument.
   ///
@@ -46,11 +46,11 @@ class Musician {
   /// @return Reference frequency in hertz.
   [[nodiscard]] double GetReferenceFrequency() const noexcept;
 
-  /// Returns the corresponding number of frames for a given number of seconds.
+  /// Returns the corresponding number of samples for a given number of seconds.
   ///
   /// @param seconds Number of seconds.
-  /// @return Number of frames.
-  [[nodiscard]] int64_t GetFramesFromSeconds(double seconds) const noexcept;
+  /// @return Number of samples.
+  [[nodiscard]] int64_t GetSamplesFromSeconds(double seconds) const noexcept;
 
   /// Returns the corresponding number of seconds for a given number of beats.
   ///
@@ -104,8 +104,8 @@ class Musician {
   // Map of process order-pointer pairs to performers.
   std::map<Performer*, std::pair<int, std::unique_ptr<Performer>>> performers_;
 
-  // Frame rate in hertz.
-  const int frame_rate_ = 0;
+  // Sampling rate in hertz.
+  const int sample_rate_ = 0;
 
   // Reference frequency at zero pitch (C4 by default).
   double reference_frequency_ = 440.0 * std::pow(2.0, -9.0 / 12.0);
@@ -115,16 +115,13 @@ class Musician {
 
   // Timestamp in seconds.
   double timestamp_ = 0.0;
-
-  // Update frame.
-  int64_t update_frame_ = 0;
 };
 
 }  // namespace barely::internal
 
 struct BarelyMusician : public barely::internal::Musician {
  public:
-  explicit BarelyMusician(int32_t frame_rate) noexcept : Musician(frame_rate) {}
+  explicit BarelyMusician(int32_t sample_rate) noexcept : Musician(sample_rate) {}
   ~BarelyMusician() = default;
 
   // Non-copyable and non-movable.

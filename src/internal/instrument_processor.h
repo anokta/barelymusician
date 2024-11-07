@@ -14,17 +14,16 @@ class InstrumentProcessor {
  public:
   /// Constructs a new `InstrumentProcessor`.
   ///
-  /// @param frame_rate Frame rate in hertz.
+  /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentProcessor(int frame_rate, double reference_frequency) noexcept;
+  InstrumentProcessor(int sample_rate, double reference_frequency) noexcept;
 
-  /// Processes output samples.
+  /// Processes the next output samples.
   ///
-  /// @param output_samples Array of interleaved output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
-  void Process(double* output_samples, int output_channel_count, int output_frame_count) noexcept;
+  /// @param output_samples Array of mono output samples.
+  /// @param output_sample_count Number of output samples.
+  void Process(double* output_samples, int output_sample_count) noexcept;
 
   /// Sets a control value.
   ///
@@ -84,7 +83,7 @@ class InstrumentProcessor {
   double reference_frequency_ = 0.0;
   double pitch_shift_ = 0.0;
 
-  int frame_rate_ = 0;
+  int sample_rate_ = 0;
 };
 
 }  // namespace barely::internal

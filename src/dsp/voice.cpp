@@ -4,8 +4,8 @@
 
 namespace barely::internal {
 
-Voice::Voice(int frame_rate) noexcept
-    : envelope_(frame_rate), oscillator_(frame_rate), sample_player_(frame_rate) {}
+Voice::Voice(int sample_rate) noexcept
+    : envelope_(sample_rate), oscillator_(sample_rate), sample_player_(sample_rate) {}
 
 bool Voice::IsActive() const noexcept { return envelope_.IsActive(); }
 

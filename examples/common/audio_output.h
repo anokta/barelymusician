@@ -2,6 +2,7 @@
 #define EXAMPLES_COMMON_AUDIO_OUTPUT_H_
 
 #include <functional>
+#include <span>
 #include <vector>
 
 #include "miniaudio.h"
@@ -13,15 +14,14 @@ class AudioOutput {
  public:
   /// Audio process callback signature.
   ///
-  /// @param output Output buffer.
-  using ProcessCallback = std::function<void(double* output)>;
+  /// @param output_samples Span of mono output samples.
+  using ProcessCallback = std::function<void(std::span<double> output_samples)>;
 
   /// Constructs new `AudioOutput`.
   ///
-  /// @param frame_rate Frame rate in hertz.
-  /// @param channel_count Number of output channels.
-  /// @param frame_count Number of output frames per buffer.
-  AudioOutput(int frame_rate, int channel_count, int frame_count) noexcept;
+  /// @param sample_rate Sampling rate in hertz.
+  /// @param sample_count Number of samples per buffer.
+  AudioOutput(int sample_rate, int sample_count) noexcept;
 
   /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;

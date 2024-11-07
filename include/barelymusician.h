@@ -15,7 +15,7 @@
 ///   #include "barelymusician.h"
 ///
 ///   // Create.
-///   barely::Musician musician(/*frame_rate=*/48000);
+///   barely::Musician musician(/*sample_rate=*/48000);
 ///
 ///   // Set the tempo.
 ///   musician.SetTempo(/*tempo=*/124.0);
@@ -56,12 +56,9 @@
 ///   // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process`
 ///   // should typically be called from an audio thread process callback in real-time audio
 ///   // applications.
-///   const int output_channel_count = 2;
-///   const int output_frame_count = 1024;
-///   std::vector<double> output_samples(output_channel_count * output_frame_count, 0.0);
+///   double output_samples[1024];
 ///   double timestamp = 0.0;
-///   instrument.Process(output_samples.data(), output_channel_count, output_frame_count,
-///                      timestamp);
+///   instrument.Process(output_samples, timestamp);
 ///   @endcode
 ///
 /// - Performer:
@@ -94,7 +91,7 @@
 ///
 ///   // Create.
 ///   BarelyMusicianHandle musician = nullptr;
-///   BarelyMusician_Create(/*frame_rate=*/48000, &musician);
+///   BarelyMusician_Create(/*sample_rate=*/48000, &musician);
 ///
 ///   // Set the tempo.
 ///   BarelyMusician_SetTempo(musician, /*tempo=*/124.0);
@@ -140,12 +137,9 @@
 ///   // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process`
 ///   // should typically be called from an audio thread process callback in real-time audio
 ///   // applications.
-///   double output_samples[2 * 1024];
-///   int output_channel_count = 2;
-///   int output_frame_count = 1024;
+///   double output_samples[1024];
 ///   double timestamp = 0.0;
-///   BarelyInstrument_Process(instrument, output_samples, output_channel_count, output_frame_count,
-///                            timestamp);
+///   BarelyInstrument_Process(instrument, output_samples, /*output_sample_count=*/1024, timestamp);
 ///
 ///   // Remove.
 ///   BarelyMusician_RemoveInstrument(instrument);
@@ -463,14 +457,13 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
 /// @note This is *not* thread-safe during a corresponding `BarelyMusician_RemoveInstrument` call.
 ///
 /// @param instrument Instrument handle.
-/// @param output_samples Array of interleaved output samples.
-/// @param output_channel_count Number of output channels.
-/// @param output_frame_count Number of output frames.
+/// @param output_samples Array of mono output samples.
+/// @param output_sample_count Number of output samples.
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
-                                            double* output_samples, int32_t output_channel_count,
-                                            int32_t output_frame_count, double timestamp);
+                                            double* output_samples, int32_t output_sample_count,
+                                            double timestamp);
 
 /// Sets all instrument notes off.
 ///
@@ -558,10 +551,10 @@ BARELY_EXPORT bool BarelyMusician_AddPerformer(BarelyMusicianHandle musician, in
 
 /// Creates a new musician.
 ///
-/// @param frame_rate Frame rate in hertz.
+/// @param sample_rate Sampling rate in hertz.
 /// @param out_musician Output musician handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Create(int32_t frame_rate, BarelyMusicianHandle* out_musician);
+BARELY_EXPORT bool BarelyMusician_Create(int32_t sample_rate, BarelyMusicianHandle* out_musician);
 
 /// Destroys a musician.
 ///
@@ -1141,14 +1134,11 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Processes output samples at timestamp.
   ///
-  /// @param output_samples Interleaved array of output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
+  /// @param output_samples Span of mono output samples.
   /// @param timestamp Timestamp in seconds.
-  void Process(double* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept {
+  void Process(std::span<double> output_samples, double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_Process(
-        *this, output_samples, output_channel_count, output_frame_count, timestamp);
+        *this, output_samples.data(), static_cast<int32_t>(output_samples.size()), timestamp);
     assert(success);
   }
 
@@ -1453,11 +1443,12 @@ class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
  public:
   /// Creates a new `MusicianHandle`.
   ///
-  /// @param frame_rate Frame rate in hertz.
+  /// @param sample_rate Sampling rate in hertz.
   /// @return Musician handle.
-  [[nodiscard]] static MusicianHandle Create(int frame_rate) noexcept {
+  [[nodiscard]] static MusicianHandle Create(int sample_rate) noexcept {
     BarelyMusicianHandle musician = nullptr;
-    [[maybe_unused]] const bool success = BarelyMusician_Create(frame_rate, &musician);
+    [[maybe_unused]] const bool success =
+        BarelyMusician_Create(static_cast<int32_t>(sample_rate), &musician);
     assert(success);
     return MusicianHandle(musician);
   }

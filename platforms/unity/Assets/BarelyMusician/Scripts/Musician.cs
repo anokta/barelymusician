@@ -192,11 +192,13 @@ namespace Barely {
           }
           return;
         }
-        if (BarelyInstrument_Process(instrumentHandle, OutputSamples, outputChannelCount,
-                                     outputSamples.Length / outputChannelCount,
+        int outputFrameCount = outputSamples.Length / outputChannelCount;
+        if (BarelyInstrument_Process(instrumentHandle, _outputSamples, outputFrameCount,
                                      AudioSettings.dspTime)) {
-          for (int i = 0; i < outputSamples.Length; ++i) {
-            outputSamples[i] *= (float)OutputSamples[i];
+          for (int frame = 0; frame < outputFrameCount; ++frame) {
+            for (int channel = 0; channel < outputChannelCount; ++channel) {
+              outputSamples[frame * outputChannelCount + channel] *= (float)_outputSamples[frame];
+            }
           }
         } else {
           for (int i = 0; i < outputSamples.Length; ++i) {
@@ -806,9 +808,6 @@ namespace Barely {
         }
       }
 
-      // Internal output samples.
-      public static double[] OutputSamples { get; private set; } = null;
-
       // Note off event create callback.
       private delegate void NoteOffEvent_CreateCallback(ref IntPtr state, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(NoteOffEvent_CreateCallback))]
@@ -1012,6 +1011,9 @@ namespace Barely {
       // Latency in seconds.
       private static double _latency = 0.0;
 
+      // Array of mono output samples.
+      public static double[] _outputSamples = null;
+
       // Map of scheduled list of task callbacks by their timestamps.
       private static SortedDictionary<double, List<Action>> _scheduledTaskCallbacks = null;
 
@@ -1070,7 +1072,7 @@ namespace Barely {
           }
           BarelyMusician_SetReferenceFrequency(_handle, _referenceFrequency);
           BarelyMusician_SetTempo(_handle, _tempo);
-          OutputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
+          _outputSamples = new double[config.dspBufferSize];
           _latency = (double)config.dspBufferSize / config.sampleRate;
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, GetNextTimestamp());
@@ -1086,7 +1088,7 @@ namespace Barely {
 
         // Returns the next timestamp to update.
         private double GetNextTimestamp() {
-          double lookahead = Math.Max(_latency, 0.5 * (double)Time.fixedDeltaTime);
+          double lookahead = Math.Max(_latency, (double)Time.fixedDeltaTime);
           return AudioSettings.dspTime + lookahead;
         }
       }
@@ -1113,8 +1115,8 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Process")]
       private static extern bool BarelyInstrument_Process(IntPtr instrument,
                                                           [In, Out] double[] outputSamples,
-                                                          Int32 outputChannelCount,
-                                                          Int32 outputFrameCount, double timestamp);
+                                                          Int32 outputSampleCount,
+                                                          double timestamp);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
       private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr instrument);
@@ -1157,7 +1159,7 @@ namespace Barely {
                                                              ref IntPtr outPerformer);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
-      private static extern bool BarelyMusician_Create(Int32 frameRate, ref IntPtr outMusician);
+      private static extern bool BarelyMusician_Create(Int32 sampleRate, ref IntPtr outMusician);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern bool BarelyMusician_Destroy(IntPtr musician);

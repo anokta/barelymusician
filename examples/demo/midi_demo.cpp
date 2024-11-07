@@ -2,6 +2,7 @@
 #include <cassert>
 #include <chrono>
 #include <functional>
+#include <span>
 #include <string>
 #include <thread>
 #include <utility>
@@ -31,9 +32,8 @@ using ::barely::examples::InputManager;
 using ::smf::MidiFile;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
-constexpr int kChannelCount = 2;
-constexpr int kFrameCount = 512;
+constexpr int kSampleRate = 48000;
+constexpr int kSampleCount = 512;
 
 constexpr double kLookahead = 0.1;
 
@@ -91,10 +91,10 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Initializing " << kMidiFileName << " for MIDI playback (" << track_count
                << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  AudioClock clock(kFrameRate);
-  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
+  AudioClock clock(kSampleRate);
+  AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kFrameRate);
+  Musician musician(kSampleRate);
   musician.SetTempo(kTempo);
 
   std::vector<std::pair<InstrumentHandle, PerformerHandle>> tracks;
@@ -128,14 +128,15 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<double> mix_buffer(kChannelCount * kFrameCount);
-  const auto process_callback = [&](double* output) {
-    std::fill_n(output, kChannelCount * kFrameCount, 0.0);
+  std::vector<double> mix_buffer(kSampleCount);
+  const auto process_callback = [&](std::span<double> output_samples) {
+    std::fill_n(output_samples.begin(), kSampleCount, 0.0);
     for (auto& [instrument, performer] : tracks) {
-      instrument.Process(mix_buffer.data(), kChannelCount, kFrameCount, clock.GetTimestamp());
-      std::transform(mix_buffer.begin(), mix_buffer.end(), output, output, std::plus<>());
+      instrument.Process(mix_buffer, clock.GetTimestamp());
+      std::transform(mix_buffer.begin(), mix_buffer.end(), output_samples.begin(),
+                     output_samples.begin(), std::plus<>());
     }
-    clock.Update(kFrameCount);
+    clock.Update(static_cast<int>(output_samples.size()));
   };
   audio_output.SetProcessCallback(process_callback);
 

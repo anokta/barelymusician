@@ -59,6 +59,36 @@ void BM_BarelyInstrument_Process_MultipleNotes(State& state) {
 }
 BENCHMARK(BM_BarelyInstrument_Process_MultipleNotes);
 
+void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
+  Musician musician(kFrameRate);
+
+  auto instrument = musician.AddInstrument();
+  instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
+
+  std::array<double, kChannelCount * kFrameCount> output;
+  double timestamp = 0.0;
+
+  constexpr int kUpdateCount = 10;
+  constexpr double kTimestampIncrement =
+      static_cast<double>(kFrameCount) / static_cast<double>(kFrameRate);
+
+  for (auto _ : state) {
+    state.PauseTiming();
+    timestamp += kTimestampIncrement;
+    for (int i = 0; i < kUpdateCount; ++i) {
+      const double pitch = static_cast<double>(i) / static_cast<double>(kUpdateCount);
+      instrument.SetNoteOn(pitch);
+      instrument.SetNoteControl(pitch, NoteControlType::kPitchShift, static_cast<double>(i));
+      musician.Update(timestamp + kTimestampIncrement * static_cast<double>(i) /
+                                      static_cast<double>(kUpdateCount));
+      instrument.SetNoteOff(pitch);
+    }
+    state.ResumeTiming();
+    instrument.Process(output.data(), kChannelCount, kFrameCount, timestamp);
+  }
+}
+BENCHMARK(BM_BarelyInstrument_Process_FrequentUpdates);
+
 void BM_BarelyInstrument_SetControl(State& state) {
   Musician musician(kFrameRate);
 

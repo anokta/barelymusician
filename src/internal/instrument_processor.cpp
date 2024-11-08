@@ -28,7 +28,8 @@ double FrequencyFromPitch(double pitch, double reference_frequency) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(int sample_rate, double reference_frequency) noexcept
-    : voice_states_(kMaxVoiceCount, {Voice(sample_rate)}),
+    : voice_data_(sample_rate),
+      voice_states_(kMaxVoiceCount, {Voice(sample_rate, voice_data_)}),
       gain_processor_(sample_rate),
       reference_frequency_(reference_frequency),
       sample_rate_(sample_rate) {
@@ -62,42 +63,27 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
     case ControlType::kVoiceCount: {
       const int voice_count = static_cast<int>(value);
       for (int i = voice_count_; i < voice_count; ++i) {
-        // Copy over the voice settings.
-        voice_states_[i].voice = voice_states_[0].voice;
         voice_states_[i].voice.Reset();
       }
       voice_count_ = voice_count;
     } break;
     case ControlType::kOscillatorShape:
-      for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.oscillator().SetShape(
-            static_cast<OscillatorShape>(static_cast<int>(value)));
-      };
+      voice_data_.oscillator_shape = static_cast<OscillatorShape>(static_cast<int>(value));
       break;
     case ControlType::kSamplePlaybackMode:
-      for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.set_sample_playback_mode(static_cast<SamplePlaybackMode>(value));
-      };
+      voice_data_.sample_playback_mode = static_cast<SamplePlaybackMode>(value);
       break;
     case ControlType::kAttack:
-      for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.envelope().SetAttack(value);
-      };
+      voice_data_.adsr.SetAttack(value);
       break;
     case ControlType::kDecay:
-      for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.envelope().SetDecay(value);
-      };
+      voice_data_.adsr.SetDecay(value);
       break;
     case ControlType::kSustain:
-      for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.envelope().SetSustain(value);
-      };
+      voice_data_.adsr.SetSustain(value);
       break;
     case ControlType::kRelease:
-      for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.envelope().SetRelease(value);
-      };
+      voice_data_.adsr.SetRelease(value);
       break;
     case ControlType::kPitchShift:
       pitch_shift_ = value;
@@ -115,15 +101,10 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       should_retrigger_ = static_cast<bool>(value);
       break;
     case ControlType::kFilterType:
-      for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.filter().SetType(static_cast<FilterType>(value));
-      };
+      voice_data_.filter_type = static_cast<FilterType>(value);
       break;
     case ControlType::kFilterFrequency: {
-      const double coefficient = GetFilterCoefficient(sample_rate_, value);
-      for (int i = 0; i < voice_count_; ++i) {
-        voice_states_[i].voice.filter().SetCoefficient(coefficient);
-      };
+      voice_data_.filter_coefficient = GetFilterCoefficient(sample_rate_, value);
     } break;
     default:
       assert(!"Invalid control type");

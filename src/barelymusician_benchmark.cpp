@@ -67,7 +67,7 @@ void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
   std::array<double, kSampleCount> output_samples;
   double timestamp = 0.0;
 
-  constexpr int kUpdateCount = 10;
+  constexpr int kUpdateCount = 20;
   constexpr double kTimestampIncrement =
       static_cast<double>(kSampleCount) / static_cast<double>(kSampleRate);
 
@@ -75,12 +75,14 @@ void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
     state.PauseTiming();
     timestamp += kTimestampIncrement;
     for (int i = 0; i < kUpdateCount; ++i) {
+      instrument.SetControl(ControlType::kAttack, 0.001 * static_cast<double>(i));
       const double pitch = static_cast<double>(i) / static_cast<double>(kUpdateCount);
       instrument.SetNoteOn(pitch);
       instrument.SetNoteControl(pitch, NoteControlType::kPitchShift, static_cast<double>(i));
       musician.Update(timestamp + kTimestampIncrement * static_cast<double>(i) /
                                       static_cast<double>(kUpdateCount));
       instrument.SetNoteOff(pitch);
+      instrument.SetControl(ControlType::kAttack, 0.01 * static_cast<double>(i));
     }
     state.ResumeTiming();
     instrument.Process(output_samples, timestamp);

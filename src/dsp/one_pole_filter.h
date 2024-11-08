@@ -11,31 +11,17 @@ class OnePoleFilter {
   /// Filters the next input sample.
   ///
   /// @param input Input sample.
+  /// @param coefficient Filter coefficient.
+  /// @param type Filter type.
   /// @return Filtered output sample.
-  double Next(double input) noexcept;
+  double Next(double input, double coefficient, FilterType type) noexcept;
 
   /// Resets module state.
   void Reset() noexcept;
 
-  /// Sets the coefficent of the filter.
-  ///
-  /// @param coefficient Filter coefficient.
-  void SetCoefficient(double coefficient) noexcept;
-
-  /// Sets the type of the filter.
-  ///
-  /// @param type Filter type.
-  void SetType(FilterType type) noexcept;
-
  private:
-  // Transfer function coefficient of the filter.
-  double coefficient_ = 1.0;
-
   // The last output sample.
   double output_ = 0.0;
-
-  // Filter type.
-  FilterType type_ = FilterType::kNone;
 };
 
 /// Returns one-pole filter coefficient for a given cutoff frequency.

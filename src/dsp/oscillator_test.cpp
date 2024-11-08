@@ -11,25 +11,24 @@ TEST(OscillatorTest, Next) {
   constexpr double kCycleCount = 5;
 
   Oscillator oscillator(8);
-  oscillator.SetShape(OscillatorShape::kSaw);
   oscillator.SetFrequency(2);
   for (int cycle = 0; cycle < kCycleCount; ++cycle) {
     for (int i = -2; i < 2; ++i) {
-      EXPECT_DOUBLE_EQ(oscillator.Next(), static_cast<double>(i) * 0.5);
+      EXPECT_DOUBLE_EQ(oscillator.Next(OscillatorShape::kSaw), static_cast<double>(i) * 0.5);
     }
   }
 }
 
 // Tests that the oscillator clamps its maximum frequency as expected.
 TEST(OscillatorTest, MaxFrequency) {
+  constexpr OscillatorShape kShape = OscillatorShape::kSquare;
   constexpr double kCycleCount = 10;
 
   Oscillator oscillator(2);
-  oscillator.SetShape(OscillatorShape::kSquare);
   oscillator.SetFrequency(1234);
   for (int i = 0; i < kCycleCount; ++i) {
-    EXPECT_DOUBLE_EQ(oscillator.Next(), -1.0);
-    EXPECT_DOUBLE_EQ(oscillator.Next(), 1.0);
+    EXPECT_DOUBLE_EQ(oscillator.Next(kShape), -1.0);
+    EXPECT_DOUBLE_EQ(oscillator.Next(kShape), 1.0);
   }
 }
 

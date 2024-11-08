@@ -18,8 +18,9 @@ class Oscillator {
 
   /// Generates the next output sample.
   ///
+  /// @param shape Oscillator shape.
   /// @return Next output sample.
-  [[nodiscard]] double Next() noexcept;
+  [[nodiscard]] double Next(OscillatorShape shape) noexcept;
 
   /// Resets the state.
   void Reset() noexcept;
@@ -29,20 +30,12 @@ class Oscillator {
   /// @param frequency Oscillator frequency in hertz.
   void SetFrequency(double frequency) noexcept;
 
-  /// Sets the shape of the oscillator.
-  ///
-  /// @param shape Oscillator shape.
-  void SetShape(OscillatorShape shape) noexcept;
-
  private:
   // Inverse sampling rate in seconds.
   double sample_interval_ = 0.0;
 
   // Maximum allowed frequency.
   double max_frequency_ = 0.0;
-
-  // Oscillator shape.
-  OscillatorShape shape_ = OscillatorShape::kNone;
 
   // Frequency.
   double frequency_ = 0.0;

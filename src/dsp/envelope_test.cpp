@@ -20,7 +20,9 @@ constexpr double kEpsilon = 1e-3;
 // Tests that the envelope generates the expected output samples when initialized with the default
 // constructor.
 TEST(EnvelopeTest, ProcessDefault) {
-  Envelope envelope(kSampleRate);
+  const Envelope::Adsr adsr(kSampleRate);
+
+  Envelope envelope(adsr);
   EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 
   envelope.Start();
@@ -37,11 +39,13 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   constexpr int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
   constexpr int kReleaseSampleCount = static_cast<int>(kSampleRate * kRelease);
 
-  Envelope envelope(kSampleRate);
-  envelope.SetAttack(kAttack);
-  envelope.SetDecay(kDecay);
-  envelope.SetSustain(kSustain);
-  envelope.SetRelease(kRelease);
+  Envelope::Adsr adsr(kSampleRate);
+
+  Envelope envelope(adsr);
+  adsr.SetAttack(kAttack);
+  adsr.SetDecay(kDecay);
+  adsr.SetSustain(kSustain);
+  adsr.SetRelease(kRelease);
   EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 
   double expected_sample = 0.0;

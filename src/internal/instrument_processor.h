@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "dsp/envelope.h"
 #include "dsp/gain_processor.h"
 #include "dsp/voice.h"
 #include "internal/sample_data.h"
@@ -72,6 +73,7 @@ class InstrumentProcessor {
     int timestamp = 0;
   };
   VoiceState& AcquireVoice(double pitch) noexcept;
+  VoiceData voice_data_;
   std::vector<VoiceState> voice_states_;
   int voice_count_ = 8;
 

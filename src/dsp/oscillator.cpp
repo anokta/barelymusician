@@ -12,10 +12,10 @@ Oscillator::Oscillator(int sample_rate) noexcept
     : sample_interval_(sample_rate > 0 ? 1.0 / static_cast<double>(sample_rate) : 0.0),
       max_frequency_(static_cast<double>(sample_rate / 2)) {}  // NOLINT(bugprone-integer-division)
 
-double Oscillator::Next() noexcept {
+double Oscillator::Next(OscillatorShape shape) noexcept {
   double output = 0.0;
   // Generate the next sample.
-  switch (shape_) {
+  switch (shape) {
     case OscillatorShape::kNone:
       break;
     case OscillatorShape::kSine:
@@ -47,7 +47,5 @@ void Oscillator::SetFrequency(double frequency) noexcept {
   frequency_ = std::min(std::max(frequency, 0.0), max_frequency_);
   increment_ = frequency_ * sample_interval_;
 }
-
-void Oscillator::SetShape(OscillatorShape shape) noexcept { shape_ = shape; }
 
 }  // namespace barely::internal

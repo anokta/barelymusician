@@ -12,13 +12,24 @@
 
 namespace barely::internal {
 
+struct VoiceData {
+  VoiceData(int sample_rate) noexcept : adsr(sample_rate) {}
+
+  Envelope::Adsr adsr;
+  double filter_coefficient = 1.0;
+  FilterType filter_type = FilterType::kNone;
+  OscillatorShape oscillator_shape = OscillatorShape::kNone;
+  SamplePlaybackMode sample_playback_mode = SamplePlaybackMode::kNone;
+};
+
 /// Class that wraps an instrument voice.
 class Voice {
  public:
   /// Constructs a new `Voice` with the given `sample_rate`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  explicit Voice(int sample_rate) noexcept;
+  /// @param adsr Adsr.
+  Voice(int sample_rate, const VoiceData& voice_data) noexcept;
 
   /// Returns whether the voice is currently active (i.e., playing).
   ///
@@ -47,9 +58,6 @@ class Voice {
   void Stop() noexcept;
 
   /// Inline getter/setter functions.
-  [[nodiscard]] const Envelope& envelope() const noexcept { return envelope_; }
-  [[nodiscard]] Envelope& envelope() noexcept { return envelope_; }
-
   [[nodiscard]] const OnePoleFilter& filter() const noexcept { return filter_; }
   [[nodiscard]] OnePoleFilter& filter() noexcept { return filter_; }
 
@@ -62,19 +70,14 @@ class Voice {
   [[nodiscard]] double gain() const noexcept { return gain_; }
   void set_gain(double gain) noexcept { gain_ = gain; }
 
-  void set_sample_playback_mode(SamplePlaybackMode sample_playback_mode) noexcept {
-    sample_playback_mode_ = sample_playback_mode;
-    sample_player_.SetLoop(sample_playback_mode_ == SamplePlaybackMode::kLoop);
-  }
-
  private:
   Envelope envelope_;
   OnePoleFilter filter_;
   Oscillator oscillator_;
   SamplePlayer sample_player_;
+  const VoiceData& voice_data_;
 
   double gain_ = 0.0;
-  SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
 };
 
 template <bool kShouldAccumulate>

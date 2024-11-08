@@ -18,8 +18,9 @@ class SamplePlayer {
 
   /// Generates the next output sample.
   ///
+  /// @param loop True if looping.
   /// @return Next output sample.
-  [[nodiscard]] double Next() noexcept;
+  [[nodiscard]] double Next(bool loop) noexcept;
 
   /// Resets the state.
   void Reset() noexcept;
@@ -30,11 +31,6 @@ class SamplePlayer {
   /// @param frequency Data sampling frequency in hertz.
   /// @param length Data length in samples.
   void SetData(const double* data, int frequency, int length) noexcept;
-
-  /// Sets whether the playback should be looping.
-  ///
-  /// @param loop True if looping.
-  void SetLoop(bool loop) noexcept;
 
   /// Sets the playback speed.
   ///
@@ -65,9 +61,6 @@ class SamplePlayer {
 
   // Increment per sample.
   double increment_ = 0.0;
-
-  // Denotes whether the playback is looping or not.
-  bool loop_ = false;
 };
 
 }  // namespace barely::internal

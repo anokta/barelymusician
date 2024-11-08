@@ -91,6 +91,11 @@ def parse_args():
         help="build the benchmarks for the selected platforms",
     )
     parser.add_argument(
+        "--benchmark_out",
+        default="benchmark.json",
+        help="specify the benchmark json output file path",
+    )
+    parser.add_argument(
         "--test",
         action="store_true",
         help="build and run the unit tests for the selected platforms",
@@ -275,7 +280,10 @@ def run_benchmarks(args, build_dir):
             benchmark_path = os.path.join(benchmark_dir, "barelymusician_benchmark")
             if platform == "Windows":
                 benchmark_path += ".exe"
-            run_command(benchmark_path, benchmark_dir)
+            benchmark_command = (
+                f"{benchmark_path} --benchmark_out={args.benchmark_out} --benchmark_out_format=json"
+            )
+            run_command(benchmark_command, benchmark_dir)
             break
 
 

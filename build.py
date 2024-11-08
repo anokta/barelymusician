@@ -93,7 +93,7 @@ def parse_args():
     parser.add_argument(
         "--benchmark_out",
         default="benchmark.json",
-        help="specify the benchmark json output file path",
+        help="specify the json output file path for the benchmarks",
     )
     parser.add_argument(
         "--test",

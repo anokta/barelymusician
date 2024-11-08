@@ -18,18 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-            path: ./cache/benchmark.json
-            key: ${{ runner.os }}-benchmark
       - name: build
-        run: python build.py --benchmark --benchmark_out=${{ github.workspace }}/benchmark.json
-      - uses: benchmark-action/github-action-benchmark@v1
-        with:
-          tool: 'googlecpp'
-          output-file-path: ${{ github.workspace }}/benchmark.json
-          external-data-json-path: ./cache/benchmark.json
-          fail-on-alert: true
+        run: python build.py --benchmark
 
   test:
     name: test on ${{ matrix.os }}

@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: build
         shell: bash
-        run: python build.py --examples
+        run: python build.py --config=release --examples
       - uses: actions/upload-artifact@v4
         with:
           name: examples-${{ matrix.os }}
@@ -42,7 +42,7 @@ jobs:
       - uses: seanmiddleditch/gha-setup-ninja@master
       - name: build
         shell: bash
-        run: python build.py --android --unity
+        run: python build.py --config=release --android --unity
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       - uses: actions/upload-artifact@v4

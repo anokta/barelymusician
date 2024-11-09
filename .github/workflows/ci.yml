@@ -23,10 +23,12 @@ jobs:
         with:
           path: benchmark.json
           key: ${{ runner.os }}-benchmark
-      - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-        continue-on-error: true
+      - if: ${{ steps.cache.outputs.cache-hit == 'true' }}
+        name: install
         shell: bash
-        run: mv benchmark.json benchmark_cached.json
+        run: |
+          pip install numpy scipy
+          mv benchmark.json benchmark_cached.json
       - name: build
         shell: bash
         run: |

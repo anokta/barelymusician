@@ -18,8 +18,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: benchmark.json
+          key: ${{ runner.os }}-benchmark
+      - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        shell: bash
+        run: mv benchmark.json benchmark_cached.json
       - name: build
-        run: python build.py --benchmark
+        shell: bash
+        run: |
+          python build.py --benchmark \
+            --benchmark_out="${{ github.workspace }}/benchmark.json" \
+            --benchmark_compare="${{ github.workspace }}/benchmark_cached.json"
 
   test:
     name: test on ${{ matrix.os }}

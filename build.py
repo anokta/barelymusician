@@ -289,7 +289,7 @@ def run_benchmarks(args, build_dir):
                 f"{benchmark_path} --benchmark_out={args.benchmark_out} --benchmark_out_format=json"
             )
             run_command(benchmark_command, benchmark_dir)
-            if args.benchmark_compare is not None:
+            if args.benchmark_compare is not None and os.path.exists(args.benchmark_compare):
                 compare_path = (
                     f"{build_dir}/{platform}/_deps/benchmark-src/tools/compare.py benchmarks"
                 )

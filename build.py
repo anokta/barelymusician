@@ -21,7 +21,7 @@ def parse_args():
         "-c",
         "--config",
         choices=["debug", "release", "relwithdebuginfo", "asan", "msan", "tsan"],
-        default="relwithdebuginfo",
+        default="release",
         help="specify the build configuration (defaults to release)",
     )
     parser.add_argument(

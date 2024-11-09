@@ -32,7 +32,7 @@ jobs:
       - name: build
         shell: bash
         run: |
-          python build.py --config=release --benchmark \
+          python build.py --benchmark \
             --benchmark_out="${{ github.workspace }}/benchmark.json" \
             --benchmark_compare="${{ github.workspace }}/benchmark_cached.json"
 

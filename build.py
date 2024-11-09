@@ -91,14 +91,14 @@ def parse_args():
         help="build the benchmarks for the selected platforms",
     )
     parser.add_argument(
-        "--benchmark_compare",
-        default=None,
-        help="specify the other json file path to compare for the benchmarks (defaults to none)",
-    )
-    parser.add_argument(
         "--benchmark_out",
         default="benchmark.json",
         help="specify the json output file path for the benchmarks",
+    )
+    parser.add_argument(
+        "--benchmark_compare",
+        default="benchmark_other.json",
+        help="specify the other json file path to compare for the benchmarks",
     )
     parser.add_argument(
         "--test",
@@ -289,7 +289,9 @@ def run_benchmarks(args, build_dir):
                 f"{benchmark_path} --benchmark_out={args.benchmark_out} --benchmark_out_format=json"
             )
             run_command(benchmark_command, benchmark_dir)
-            if args.benchmark_compare is not None and os.path.exists(args.benchmark_compare):
+            if os.path.exists(
+                os.path.join(benchmark_dir, args.benchmark_compare)
+            ) or os.path.exists(args.benchmark_compare):
                 compare_path = (
                     f"{build_dir}/{platform}/_deps/benchmark-src/tools/compare.py benchmarks"
                 )

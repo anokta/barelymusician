@@ -219,6 +219,8 @@ MonoBehaviour:
   Release: 0.5
   PitchShift: 0
   Retrigger: 0
+  FilterType: 0
+  FilterFrequency: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -731,6 +733,8 @@ MonoBehaviour:
   Release: 0
   PitchShift: 0
   Retrigger: 1
+  FilterType: 0
+  FilterFrequency: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1014,6 +1018,8 @@ MonoBehaviour:
   Release: 0.5
   PitchShift: 0
   Retrigger: 0
+  FilterType: 0
+  FilterFrequency: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1338,6 +1344,8 @@ MonoBehaviour:
   Release: 0.05000000074505806
   PitchShift: 0
   Retrigger: 0
+  FilterType: 0
+  FilterFrequency: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1542,7 +1550,7 @@ MonoBehaviour:
   Gain: 1
   VoiceCount: 8
   OscillatorShape: 0
-  SamplePlaybackMode: 3
+  SamplePlaybackMode: 2
   Samplers:
   - RootPitch: 9
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
@@ -1552,6 +1560,8 @@ MonoBehaviour:
   Release: 0.07500000298023224
   PitchShift: 0
   Retrigger: 0
+  FilterType: 0
+  FilterFrequency: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

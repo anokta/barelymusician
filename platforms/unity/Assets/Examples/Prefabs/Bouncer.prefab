@@ -225,7 +225,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Gain: 0.20000000298023224
-  VoiceCount: 16
+  VoiceCount: 8
   OscillatorShape: 1
   SamplePlaybackMode: 0
   Samplers: []
@@ -235,6 +235,8 @@ MonoBehaviour:
   Release: 0.800000011920929
   PitchShift: 0
   Retrigger: 0
+  FilterType: 0
+  FilterFrequency: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

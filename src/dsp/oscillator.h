@@ -1,54 +1,36 @@
 #ifndef BARELYMUSICIAN_DSP_OSCILLATOR_H_
 #define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
-#include <random>
+#include <array>
+#include <cmath>
+#include <numbers>
 
 #include "barelymusician.h"
 #include "common/random.h"
 
 namespace barely::internal {
 
-/// Simple oscillator that generates output samples of basic waveforms.
-class Oscillator {
- public:
-  /// Constructs new `Oscillator`.
-  ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit Oscillator(int sample_rate) noexcept;
+/// Oscillator callback signature alias.
+///
+/// @param phase Phase in range [0, 1).
+using OscillatorCallback = double (*)(double phase);
 
-  /// Generates the next output sample.
-  ///
-  /// @param shape Oscillator shape.
-  /// @return Next output sample.
-  [[nodiscard]] double Next(OscillatorShape shape) noexcept;
-
-  /// Resets the state.
-  void Reset() noexcept;
-
-  /// Sets the frequency of the oscillator.
-  ///
-  /// @param frequency Oscillator frequency in hertz.
-  void SetFrequency(double frequency) noexcept;
-
- private:
-  // Inverse sampling rate in seconds.
-  double sample_interval_ = 0.0;
-
-  // Maximum allowed frequency.
-  double max_frequency_ = 0.0;
-
-  // Frequency.
-  double frequency_ = 0.0;
-
-  // Increment per sample.
-  double increment_ = 0.0;
-
-  // Internal clock.
-  double phase_ = 0.0;
-
-  // White noise random number generator.
-  Random random_;
-};
+/// Array of oscillator callbacks for each shape.
+inline constexpr std::array<OscillatorCallback, static_cast<int>(BarelyOscillatorShape_kCount)>
+    kOscillatorCallbacks = {
+        // BarelyOscillatorShape_kNone
+        [](double /*phase*/) { return 0.0; },
+        // BarelyOscillatorShape_kSine
+        [](double phase) { return std::sin(phase * 2.0 * std::numbers::pi_v<double>); },
+        // BarelyOscillatorShape_kSaw
+        [](double phase) { return 2.0 * phase - 1.0; },
+        // BarelyOscillatorShape_kSquare
+        [](double phase) { return (phase < 0.5) ? -1.0 : 1.0; },
+        // BarelyOscillatorShape_kRandom
+        [](double /*phase*/) {
+          static Random random;
+          return random.DrawUniform(-1.0, 1.0);
+        }};
 
 }  // namespace barely::internal
 

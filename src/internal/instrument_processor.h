@@ -86,6 +86,7 @@ class InstrumentProcessor {
   double pitch_shift_ = 0.0;
 
   int sample_rate_ = 0;
+  double sample_interval_ = 0.0;
 };
 
 }  // namespace barely::internal

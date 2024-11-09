@@ -12,13 +12,15 @@
 
 namespace barely::internal {
 
+using OscillatorFunc = double (*)(double phase);
+
 struct VoiceData {
   VoiceData(int sample_rate) noexcept : adsr(sample_rate) {}
 
   Envelope::Adsr adsr;
   double filter_coefficient = 1.0;
   FilterType filter_type = FilterType::kNone;
-  OscillatorShape oscillator_shape = OscillatorShape::kNone;
+  OscillatorFunc oscillator_callback = [](double) { return 0.0; };
   SamplePlaybackMode sample_playback_mode = SamplePlaybackMode::kNone;
 };
 
@@ -61,23 +63,25 @@ class Voice {
   [[nodiscard]] const OnePoleFilter& filter() const noexcept { return filter_; }
   [[nodiscard]] OnePoleFilter& filter() noexcept { return filter_; }
 
-  [[nodiscard]] const Oscillator& oscillator() const noexcept { return oscillator_; }
-  [[nodiscard]] Oscillator& oscillator() noexcept { return oscillator_; }
-
   [[nodiscard]] const SamplePlayer& sample_player() const noexcept { return sample_player_; }
   [[nodiscard]] SamplePlayer& sample_player() noexcept { return sample_player_; }
 
   [[nodiscard]] double gain() const noexcept { return gain_; }
   void set_gain(double gain) noexcept { gain_ = gain; }
 
+  void set_oscillator_increment(double oscillator_increment) noexcept {
+    oscillator_increment_ = oscillator_increment;
+  }
+
  private:
   Envelope envelope_;
   OnePoleFilter filter_;
-  Oscillator oscillator_;
   SamplePlayer sample_player_;
   const VoiceData& voice_data_;
 
   double gain_ = 0.0;
+  double oscillator_increment_ = 0.0;
+  double oscillator_phase_ = 0.0;
 };
 
 template <bool kShouldAccumulate>

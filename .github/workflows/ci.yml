@@ -35,6 +35,10 @@ jobs:
           python build.py --benchmark \
             --benchmark_out="${{ github.workspace }}/benchmark.json" \
             --benchmark_compare="${{ github.workspace }}/benchmark_cached.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-${{ matrix.os }}-${{ github.sha }}
+          path: benchmark.json
 
   test:
     name: test on ${{ matrix.os }}

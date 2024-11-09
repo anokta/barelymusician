@@ -20,7 +20,7 @@ struct VoiceData {
   Envelope::Adsr adsr;
   double filter_coefficient = 1.0;
   FilterType filter_type = FilterType::kNone;
-  OscillatorFunc oscillator_callback = [](double) { return 0.0; };
+  OscillatorFunc oscillator_callback = kOscillatorCallbacks[BarelyOscillatorShape_kNone];
   SamplePlaybackMode sample_playback_mode = SamplePlaybackMode::kNone;
 };
 

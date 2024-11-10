@@ -1,5 +1,7 @@
 #include "dsp/oscillator.h"
 
+#include <cmath>
+
 #include "barelymusician.h"
 #include "gtest/gtest.h"
 
@@ -14,8 +16,8 @@ TEST(OscillatorTest, Next) {
   double phase = 0.0;
   for (int cycle = 0; cycle < kCycleCount; ++cycle) {
     for (int i = -2; i < 2; ++i) {
-      EXPECT_DOUBLE_EQ(Oscillator<OscillatorShape::kSaw>(kIncrement, phase),
-                       static_cast<double>(i) * 0.5);
+      EXPECT_DOUBLE_EQ(Oscillator<OscillatorShape::kSaw>(phase), static_cast<double>(i) * 0.5);
+      phase = std::fmod(phase + kIncrement, 1.0);
     }
   }
 }

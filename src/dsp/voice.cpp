@@ -15,10 +15,15 @@ double Voice::Next() noexcept {
   }
   const double output =
       gain_ * envelope_.Next() *
-      (voice_data_.oscillator_callback(oscillator_increment_, oscillator_phase_) +
+      (voice_data_.oscillator_callback(oscillator_phase_) +
        ((voice_data_.sample_playback_mode != SamplePlaybackMode::kNone)
             ? sample_player_.Next(voice_data_.sample_playback_mode == SamplePlaybackMode::kLoop)
             : 0.0));
+  // Update the phasor.
+  oscillator_phase_ += oscillator_increment_;
+  if (oscillator_phase_ >= 1.0) {
+    oscillator_phase_ -= 1.0;
+  }
   return voice_data_.filter_callback(output, voice_data_.filter_coefficient, filter_state_);
 }
 

@@ -46,6 +46,34 @@ namespace Barely {
 
     /// Class that wraps the internal api.
     public static class Internal {
+      /// Control type.
+      public enum ControlType {
+        /// Gain.
+        [InspectorName("Gain")] GAIN = 0,
+        /// Number of voices.
+        [InspectorName("Voice Count")] VOICE_COUNT,
+        /// Oscillator shape.
+        [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
+        /// Sample playback mode.
+        [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
+        /// Envelope attack.
+        [InspectorName("Attack")] ATTACK,
+        /// Envelope decay.
+        [InspectorName("Decay")] DECAY,
+        /// Envelope sustain.
+        [InspectorName("Sustain")] SUSTAIN,
+        /// Envelope release.
+        [InspectorName("Release")] RELEASE,
+        /// Pitch shift.
+        [InspectorName("Pitch Shift")] PITCH_SHIFT,
+        /// Retrigger.
+        [InspectorName("Retrigger")] RETRIGGER,
+        /// Filter type.
+        [InspectorName("Filter Type")] FILTER_TYPE,
+        /// Filter frequency.
+        [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
+      }
+
       /// Creates a new component.
       ///
       /// @param component Component.

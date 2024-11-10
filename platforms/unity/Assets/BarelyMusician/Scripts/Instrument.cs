@@ -4,34 +4,6 @@ using System.Linq;
 using UnityEngine;
 
 namespace Barely {
-  /// Control type.
-  public enum ControlType {
-    /// Gain.
-    [InspectorName("Gain")] GAIN = 0,
-    /// Number of voices.
-    [InspectorName("Voice Count")] VOICE_COUNT,
-    /// Oscillator shape.
-    [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
-    /// Sample playback mode.
-    [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
-    /// Envelope attack.
-    [InspectorName("Attack")] ATTACK,
-    /// Envelope decay.
-    [InspectorName("Decay")] DECAY,
-    /// Envelope sustain.
-    [InspectorName("Sustain")] SUSTAIN,
-    /// Envelope release.
-    [InspectorName("Release")] RELEASE,
-    /// Pitch shift.
-    [InspectorName("Pitch Shift")] PITCH_SHIFT,
-    /// Retrigger.
-    [InspectorName("Retrigger")] RETRIGGER,
-    /// Filter type.
-    [InspectorName("Filter Type")] FILTER_TYPE,
-    /// Filter frequency.
-    [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
-  }
-
   /// Filter type.
   public enum FilterType {
     /// None.
@@ -204,14 +176,6 @@ namespace Barely {
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
 
-    /// Returns a control value.
-    ///
-    /// @param type Control type
-    /// @return Control value.
-    public double GetControl(ControlType type) {
-      return Musician.Internal.Instrument_GetControl(_handle, type);
-    }
-
     /// Returns a note control value.
     ///
     /// @param pitch Note pitch.
@@ -232,14 +196,6 @@ namespace Barely {
     /// Sets all notes off.
     public void SetAllNotesOff() {
       Musician.Internal.Instrument_SetAllNotesOff(_handle);
-    }
-
-    /// Sets a control value.
-    ///
-    /// @param type Control type
-    /// @param value Control value.
-    public void SetControl(ControlType type, double value) {
-      Musician.Internal.Instrument_SetControl(_handle, type, value);
     }
 
     /// Sets a note control value.
@@ -315,22 +271,30 @@ namespace Barely {
 
     private void Update() {
       UpdateSampleData();
-      SetControl(ControlType.GAIN, Gain);
-      SetControl(ControlType.VOICE_COUNT, (double)VoiceCount);
-      SetControl(ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
-      SetControl(ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
-      SetControl(ControlType.ATTACK, Attack);
-      SetControl(ControlType.DECAY, Decay);
-      SetControl(ControlType.SUSTAIN, Sustain);
-      SetControl(ControlType.RELEASE, Release);
-      SetControl(ControlType.PITCH_SHIFT, PitchShift);
-      SetControl(ControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
-      SetControl(ControlType.FILTER_TYPE, (double)FilterType);
-      SetControl(ControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Musician.Internal.ControlType.GAIN, Gain);
+      SetControl(Musician.Internal.ControlType.VOICE_COUNT, (double)VoiceCount);
+      SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
+      SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
+      SetControl(Musician.Internal.ControlType.ATTACK, Attack);
+      SetControl(Musician.Internal.ControlType.DECAY, Decay);
+      SetControl(Musician.Internal.ControlType.SUSTAIN, Sustain);
+      SetControl(Musician.Internal.ControlType.RELEASE, Release);
+      SetControl(Musician.Internal.ControlType.PITCH_SHIFT, PitchShift);
+      SetControl(Musician.Internal.ControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
+      SetControl(Musician.Internal.ControlType.FILTER_TYPE, (double)FilterType);
+      SetControl(Musician.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
       Musician.Internal.Instrument_Process(_handle, data, channels);
+    }
+
+    private double GetControl(Musician.Internal.ControlType type) {
+      return Musician.Internal.Instrument_GetControl(_handle, type);
+    }
+
+    private void SetControl(Musician.Internal.ControlType type, double value) {
+      Musician.Internal.Instrument_SetControl(_handle, type, value);
     }
 
     private void UpdateSampleData() {

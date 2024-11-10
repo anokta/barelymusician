@@ -24,7 +24,26 @@ void BM_BarelyInstrument_Process_Empty(State& state) {
 }
 BENCHMARK(BM_BarelyInstrument_Process_Empty);
 
-void BM_BarelyInstrument_Process_SingleNote(State& state) {
+void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
+  constexpr std::array<double, 5> kSamples = {-0.5, -0.25, 0.0, 0.25, 1.0};
+  const std::array<SampleDataSlice, 1> kSlices = {SampleDataSlice(0.0, kSampleRate, kSamples)};
+
+  Musician musician(kSampleRate);
+
+  auto instrument = musician.AddInstrument();
+  instrument.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kLoop);
+  instrument.SetSampleData(kSlices);
+  instrument.SetNoteOn(1.0);
+
+  std::array<double, kSampleCount> output_samples;
+
+  for (auto _ : state) {
+    instrument.Process(output_samples, 0.0);
+  }
+}
+BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithLoopingSample);
+
+void BM_BarelyInstrument_Process_SingleNoteWithSineOscillator(State& state) {
   Musician musician(kSampleRate);
 
   auto instrument = musician.AddInstrument();
@@ -37,9 +56,9 @@ void BM_BarelyInstrument_Process_SingleNote(State& state) {
     instrument.Process(output_samples, 0.0);
   }
 }
-BENCHMARK(BM_BarelyInstrument_Process_SingleNote);
+BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithSineOscillator);
 
-void BM_BarelyInstrument_Process_MultipleNotes(State& state) {
+void BM_BarelyInstrument_Process_MultipleNotesWithSineOscillator(State& state) {
   Musician musician(kSampleRate);
 
   auto instrument = musician.AddInstrument();
@@ -56,7 +75,7 @@ void BM_BarelyInstrument_Process_MultipleNotes(State& state) {
     instrument.Process(output_samples, 0.0);
   }
 }
-BENCHMARK(BM_BarelyInstrument_Process_MultipleNotes);
+BENCHMARK(BM_BarelyInstrument_Process_MultipleNotesWithSineOscillator);
 
 void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
   Musician musician(kSampleRate);

@@ -15,7 +15,7 @@ namespace barely::internal {
 namespace {
 
 // Maximum number of voices allowed to be set.
-constexpr int kMaxVoiceCount = 32;
+constexpr int kMaxVoiceCount = 20;
 
 // Returns the frequency ratio of a given `pitch`.
 double FrequencyRatioFromPitch(double pitch) { return std::pow(2.0, pitch); }

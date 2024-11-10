@@ -171,7 +171,7 @@ class Instrument {
   // Array of controls.
   ControlArray controls_ = {
       Control(1.0, 0.0, 1.0),                                                // kGain
-      Control(8, 1, 32),                                                     // kVoiceCount
+      Control(8, 1, 20),                                                     // kVoiceCount
       Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),     // kOscillatorShape
       Control(0, 0, static_cast<int>(BarelySamplePlaybackMode_kCount) - 1),  // kSamplePlaybackMode
       Control(0.0, 0.0, 60.0),                                               // kAttack

@@ -131,7 +131,7 @@ namespace Barely {
     public double Gain = 1.0;
 
     /// Number of voices.
-    [Range(1, 32)]
+    [Range(1, 20)]
     public int VoiceCount = 8;
 
     /// Oscillator shape.

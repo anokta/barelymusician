@@ -12,15 +12,13 @@
 
 namespace barely::internal {
 
-using OscillatorFunc = double (*)(double phase);
-
 struct VoiceData {
   VoiceData(int sample_rate) noexcept : adsr(sample_rate) {}
 
   Envelope::Adsr adsr;
   double filter_coefficient = 1.0;
   FilterCallback filter_callback = kFilterCallbacks[BarelyFilterType_kNone];
-  OscillatorFunc oscillator_callback = kOscillatorCallbacks[BarelyOscillatorShape_kNone];
+  OscillatorCallback oscillator_callback = kOscillatorCallbacks[BarelyOscillatorShape_kNone];
   SamplePlaybackMode sample_playback_mode = SamplePlaybackMode::kNone;
 };
 

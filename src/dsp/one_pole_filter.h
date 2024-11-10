@@ -20,6 +20,7 @@ using FilterCallback = double (*)(double input, double coefficient, double& stat
 
 /// Filters the next input sample.
 ///
+/// @tparam kType Filter type.
 /// @param input Input sample.
 /// @param coefficient Filter coefficient.
 /// @param state Mutable filter state.

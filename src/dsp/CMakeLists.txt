@@ -102,6 +102,17 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_dsp_one_pole_filter_test)
 
   add_executable(
+    barelymusician_dsp_oscillator_test
+    oscillator_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_dsp_oscillator_test
+    barelymusician_dsp_oscillator
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_dsp_oscillator_test)
+
+  add_executable(
     barelymusician_dsp_sample_player_test
     sample_player_test.cpp
   )

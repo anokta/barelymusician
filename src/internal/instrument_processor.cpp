@@ -6,6 +6,7 @@
 
 #include "barelymusician.h"
 #include "dsp/one_pole_filter.h"
+#include "dsp/oscillator.h"
 #include "dsp/voice.h"
 #include "internal/sample_data.h"
 
@@ -103,7 +104,7 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       should_retrigger_ = static_cast<bool>(value);
       break;
     case ControlType::kFilterType:
-      voice_data_.filter_type = static_cast<FilterType>(value);
+      voice_data_.filter_callback = kFilterCallbacks[static_cast<int>(value)];
       break;
     case ControlType::kFilterFrequency: {
       voice_data_.filter_coefficient = GetFilterCoefficient(sample_rate_, value);

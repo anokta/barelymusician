@@ -19,7 +19,7 @@ struct VoiceData {
 
   Envelope::Adsr adsr;
   double filter_coefficient = 1.0;
-  FilterType filter_type = FilterType::kNone;
+  FilterCallback filter_callback = kFilterCallbacks[BarelyFilterType_kNone];
   OscillatorFunc oscillator_callback = kOscillatorCallbacks[BarelyOscillatorShape_kNone];
   SamplePlaybackMode sample_playback_mode = SamplePlaybackMode::kNone;
 };
@@ -60,9 +60,6 @@ class Voice {
   void Stop() noexcept;
 
   /// Inline getter/setter functions.
-  [[nodiscard]] const OnePoleFilter& filter() const noexcept { return filter_; }
-  [[nodiscard]] OnePoleFilter& filter() noexcept { return filter_; }
-
   [[nodiscard]] const SamplePlayer& sample_player() const noexcept { return sample_player_; }
   [[nodiscard]] SamplePlayer& sample_player() noexcept { return sample_player_; }
 
@@ -75,11 +72,13 @@ class Voice {
 
  private:
   Envelope envelope_;
-  OnePoleFilter filter_;
   SamplePlayer sample_player_;
   const VoiceData& voice_data_;
 
+  double filter_state_ = 0.0;
+
   double gain_ = 0.0;
+
   double oscillator_increment_ = 0.0;
   double oscillator_phase_ = 0.0;
 };

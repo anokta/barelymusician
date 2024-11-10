@@ -17,12 +17,11 @@ add_library(
 )
 
 add_library(
-  barelymusician_dsp_one_pole_filter
-  one_pole_filter.cpp
+  barelymusician_dsp_one_pole_filter INTERFACE
   one_pole_filter.h
 )
 target_link_libraries(
-  barelymusician_dsp_one_pole_filter
+  barelymusician_dsp_one_pole_filter INTERFACE
   barelymusician_headeronly
 )
 

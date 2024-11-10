@@ -1,35 +1,63 @@
 #ifndef BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 #define BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <numbers>
+
 #include "barelymusician.h"
 
 namespace barely::internal {
 
-/// One-pole filter that features basic low-pass and high-pass filtering.
-class OnePoleFilter {
- public:
-  /// Filters the next input sample.
-  ///
-  /// @param input Input sample.
-  /// @param coefficient Filter coefficient.
-  /// @param type Filter type.
-  /// @return Filtered output sample.
-  double Next(double input, double coefficient, FilterType type) noexcept;
+/// Filter callback signature alias.
+///
+/// @param input Input sample.
+/// @param coefficient Filter coefficient.
+/// @param state Mutable filter state.
+/// @return Filtered output sample.
+using FilterCallback = double (*)(double input, double coefficient, double& state);
 
-  /// Resets module state.
-  void Reset() noexcept;
+/// Filters the next input sample.
+///
+/// @param input Input sample.
+/// @param coefficient Filter coefficient.
+/// @param state Mutable filter state.
+/// @return Filtered output sample.
+template <FilterType kType>
+double Filter(double input, [[maybe_unused]] double coefficient, double& state) noexcept {
+  if constexpr (kType == FilterType::kNone) {
+    state = input;
+  } else {
+    state = coefficient * (state - input) + input;
+  }
+  if constexpr (kType == FilterType::kHighPass) {
+    return input - state;
+  } else {
+    return state;
+  }
+}
 
- private:
-  // The last output sample.
-  double output_ = 0.0;
+/// Array of filter callbacks for each shape.
+inline constexpr std::array<FilterCallback, static_cast<int>(BarelyFilterType_kCount)>
+    kFilterCallbacks = {
+        &Filter<FilterType::kNone>,
+        &Filter<FilterType::kLowPass>,
+        &Filter<FilterType::kHighPass>,
 };
 
-/// Returns one-pole filter coefficient for a given cutoff frequency.
+/// Returns the corresponding one-pole filter coefficient for a given cutoff frequency.
 ///
 /// @param sample_rate Sampling rate in hertz.
 /// @param cuttoff_frequency Cutoff frequency in hertz.
 /// @return Filter coefficient.
-double GetFilterCoefficient(int sample_rate, double cuttoff_frequency) noexcept;
+inline double GetFilterCoefficient(int sample_rate, double cuttoff_frequency) noexcept {
+  // c = exp(-2 * pi * fc / fs).
+  // TODO(#8): Verify if this *a proper way* to calculate the coefficient?
+  return std::clamp(std::exp(-2.0 * std::numbers::pi_v<double> * cuttoff_frequency /
+                             static_cast<double>(sample_rate)),
+                    0.0, 1.0);
+}
 
 }  // namespace barely::internal
 

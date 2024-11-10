@@ -24,13 +24,13 @@ double Voice::Next() noexcept {
   if (oscillator_phase_ >= 1.0) {
     oscillator_phase_ -= 1.0;
   }
-  return filter_.Next(output, voice_data_.filter_coefficient, voice_data_.filter_type);
+  return voice_data_.filter_callback(output, voice_data_.filter_coefficient, filter_state_);
 }
 
 void Voice::Reset() noexcept { envelope_.Reset(); }
 
 void Voice::Start() noexcept {
-  filter_.Reset();
+  filter_state_ = 0.0;
   oscillator_phase_ = 0.0;
   sample_player_.Reset();
   envelope_.Start();

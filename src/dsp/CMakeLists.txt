@@ -36,18 +36,20 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_dsp_sample_player
-  sample_player.cpp
+  barelymusician_dsp_sample_player INTERFACE
   sample_player.h
+)
+target_link_libraries(
+  barelymusician_dsp_sample_player INTERFACE
+  barelymusician_headeronly
 )
 
 add_library(
-  barelymusician_dsp_voice
-  voice.cpp
+  barelymusician_dsp_voice INTERFACE
   voice.h
 )
 target_link_libraries(
-  barelymusician_dsp_voice
+  barelymusician_dsp_voice INTERFACE
   barelymusician_dsp_envelope
   barelymusician_dsp_one_pole_filter
   barelymusician_dsp_oscillator
@@ -119,6 +121,7 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_dsp_sample_player_test
     barelymusician_dsp_sample_player
+    barelymusician
     gtest_main
   )
   gtest_discover_tests(barelymusician_dsp_sample_player_test)

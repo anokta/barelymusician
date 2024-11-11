@@ -73,14 +73,33 @@ class InstrumentProcessor {
     int timestamp = 0;
   };
   VoiceState& AcquireVoice(double pitch) noexcept;
+  VoiceCallback voice_callback_ = kVoiceCallbacks[BarelySamplePlaybackMode_kNone];
   VoiceData voice_data_;
   std::vector<VoiceState> voice_states_;
   int voice_count_ = 8;
+
+  template <bool kShouldAccumulate>
+  void ProcessVoice(Voice& voice, double* output_samples, int output_sample_count) noexcept {
+    for (int i = 0; i < output_sample_count; ++i) {
+      if (!voice.IsActive()) {
+        if constexpr (!kShouldAccumulate) {
+          std::fill(output_samples + i, output_samples + output_sample_count, 0.0);
+        }
+        return;
+      }
+      if constexpr (kShouldAccumulate) {
+        output_samples[i] += voice_callback_(voice);
+      } else {
+        output_samples[i] = voice_callback_(voice);
+      }
+    }
+  }
 
   GainProcessor gain_processor_;
   SampleData sample_data_;
 
   bool should_retrigger_ = false;
+  bool is_sample_played_once_ = false;
 
   double reference_frequency_ = 0.0;
   double pitch_shift_ = 0.0;

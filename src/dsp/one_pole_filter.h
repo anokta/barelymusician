@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cmath>
 #include <numbers>
 
@@ -30,6 +31,8 @@ double Filter(double input, [[maybe_unused]] double coefficient, double& state) 
   if constexpr (kType == FilterType::kNone) {
     state = input;
   } else {
+    assert(coefficient >= 0.0);
+    assert(coefficient <= 1.0);
     state = coefficient * (state - input) + input;
   }
   if constexpr (kType == FilterType::kHighPass) {
@@ -53,6 +56,8 @@ inline constexpr std::array<FilterCallback, static_cast<int>(BarelyFilterType_kC
 /// @param cuttoff_frequency Cutoff frequency in hertz.
 /// @return Filter coefficient.
 inline double GetFilterCoefficient(int sample_rate, double cuttoff_frequency) noexcept {
+  assert(sample_rate > 0);
+  assert(cuttoff_frequency >= 0.0);
   // c = exp(-2 * pi * fc / fs).
   // TODO(#8): Verify if this *a proper way* to calculate the coefficient?
   return std::clamp(std::exp(-2.0 * std::numbers::pi_v<double> * cuttoff_frequency /

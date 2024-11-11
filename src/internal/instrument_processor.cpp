@@ -30,7 +30,7 @@ double FrequencyFromPitch(double pitch, double reference_frequency) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(int sample_rate, double reference_frequency) noexcept
     : voice_data_(sample_rate),
-      voice_states_(kMaxVoiceCount, {Voice(sample_rate, voice_data_)}),
+      voice_states_(kMaxVoiceCount, {Voice(voice_data_)}),
       gain_processor_(sample_rate),
       reference_frequency_(reference_frequency),
       sample_rate_(sample_rate),
@@ -43,9 +43,9 @@ void InstrumentProcessor::Process(double* output_samples, int output_sample_coun
   for (int i = 0; i < voice_count_; ++i) {
     if (voice_states_[i].voice.IsActive()) {
       if (has_active_voice) {
-        voice_states_[i].voice.Process<true>(output_samples, output_sample_count);
+        ProcessVoice<true>(voice_states_[i].voice, output_samples, output_sample_count);
       } else {
-        voice_states_[i].voice.Process<false>(output_samples, output_sample_count);
+        ProcessVoice<false>(voice_states_[i].voice, output_samples, output_sample_count);
         has_active_voice = true;
       }
     }
@@ -73,7 +73,9 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       voice_data_.oscillator_callback = kOscillatorCallbacks[static_cast<int>(value)];
       break;
     case ControlType::kSamplePlaybackMode:
-      voice_data_.sample_playback_mode = static_cast<SamplePlaybackMode>(value);
+      is_sample_played_once_ =
+          (static_cast<SamplePlaybackMode>(value) == SamplePlaybackMode::kOnce);
+      voice_callback_ = kVoiceCallbacks[static_cast<int>(value)];
       break;
     case ControlType::kAttack:
       voice_data_.adsr.SetAttack(value);
@@ -95,8 +97,9 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
           voice.set_oscillator_increment(FrequencyFromPitch(shifted_pitch, reference_frequency_) *
                                          sample_interval_);
-          voice.sample_player().SetSpeed(
-              FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch));
+          voice.set_sample_player_speed(
+              FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch),
+              sample_interval_);
         }
       }
       break;
@@ -127,8 +130,9 @@ void InstrumentProcessor::SetNoteControl(double pitch, NoteControlType type,
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
           voice.set_oscillator_increment(FrequencyFromPitch(shifted_pitch, reference_frequency_) *
                                          sample_interval_);
-          voice.sample_player().SetSpeed(
-              FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch));
+          voice.set_sample_player_speed(
+              FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch),
+              sample_interval_);
           break;
         }
       }
@@ -142,7 +146,11 @@ void InstrumentProcessor::SetNoteControl(double pitch, NoteControlType type,
 void InstrumentProcessor::SetNoteOff(double pitch) noexcept {
   for (int i = 0; i < voice_count_; ++i) {
     if (voice_states_[i].pitch == pitch && voice_states_[i].voice.IsActive()) {
-      voice_states_[i].voice.Stop();
+      if (is_sample_played_once_) {
+        voice_states_[i].voice.Stop<true>();
+      } else {
+        voice_states_[i].voice.Stop<false>();
+      }
     }
   }
 }
@@ -163,8 +171,9 @@ void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
                                  sample_interval_);
   if (const auto* sample = sample_data_.Select(pitch); sample != nullptr) {
     voice_state.root_pitch = sample->root_pitch;
-    voice.sample_player().SetData(sample->samples, sample->sample_rate, sample->sample_count);
-    voice.sample_player().SetSpeed(FrequencyRatioFromPitch(shifted_pitch - sample->root_pitch));
+    voice.set_sample_player_slice(sample);
+    voice.set_sample_player_speed(FrequencyRatioFromPitch(shifted_pitch - sample->root_pitch),
+                                  sample_interval_);
   }
   voice.set_gain(intensity);
   voice.Start();
@@ -187,13 +196,14 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   sample_data_.Swap(sample_data);
   for (int i = 0; i < voice_count_; ++i) {
     if (Voice& voice = voice_states_[i].voice; !voice.IsActive()) {
-      voice.sample_player().SetData(nullptr, 0, 0);
+      voice.set_sample_player_slice(nullptr);
     } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch);
                sample != nullptr) {
       voice_states_[i].root_pitch = sample->root_pitch;
-      voice.sample_player().SetData(sample->samples, sample->sample_rate, sample->sample_count);
-      voice.sample_player().SetSpeed(
-          FrequencyRatioFromPitch(voice_states_[i].pitch + pitch_shift_ - sample->root_pitch));
+      voice.set_sample_player_slice(sample);
+      voice.set_sample_player_speed(
+          FrequencyRatioFromPitch(voice_states_[i].pitch + pitch_shift_ - sample->root_pitch),
+          sample_interval_);
     }
   }
 }

@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
 #include <array>
+#include <cassert>
 #include <cmath>
 #include <numbers>
 
@@ -23,6 +24,8 @@ using OscillatorCallback = double (*)(double phase);
 /// @return Next output sample.
 template <OscillatorShape kShape>
 double Oscillator(double phase) noexcept {
+  assert(phase >= 0.0);
+  assert(phase < 1.0);
   if constexpr (kShape == OscillatorShape::kNone) {
     return 0.0;
   } else if constexpr (kShape == OscillatorShape::kSine) {

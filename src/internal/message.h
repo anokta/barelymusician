@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "barelymusician.h"
-#include "internal/sample_data.h"
+#include "dsp/sample_data.h"
 
 namespace barely::internal {
 

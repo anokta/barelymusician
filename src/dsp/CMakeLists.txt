@@ -16,6 +16,21 @@ add_library(
 )
 
 add_library(
+  barelymusician_dsp_instrument_processor
+  instrument_processor.cpp
+  instrument_processor.h
+)
+target_link_libraries(
+  barelymusician_dsp_instrument_processor
+  barelymusician_dsp_sample_data
+  barelymusician_dsp_envelope
+  barelymusician_dsp_gain_processor
+  barelymusician_dsp_one_pole_filter
+  barelymusician_dsp_voice
+  barelymusician_headeronly
+)
+
+add_library(
   barelymusician_dsp_one_pole_filter INTERFACE
   one_pole_filter.h
 )
@@ -31,6 +46,16 @@ add_library(
 target_link_libraries(
   barelymusician_dsp_oscillator INTERFACE
   barelymusician_common_random
+  barelymusician_headeronly
+)
+
+add_library(
+  barelymusician_dsp_sample_data
+  sample_data.cpp
+  sample_data.h
+)
+target_link_libraries(
+  barelymusician_dsp_sample_data
   barelymusician_headeronly
 )
 
@@ -91,6 +116,19 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_dsp_gain_processor_test)
 
   add_executable(
+    barelymusician_dsp_instrument_processor_test
+    instrument_processor_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_dsp_instrument_processor_test
+    barelymusician_dsp_instrument_processor
+    barelymusician_dsp_sample_data
+    barelymusician_headeronly
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_dsp_instrument_processor_test)
+
+  add_executable(
     barelymusician_dsp_one_pole_filter_test
     one_pole_filter_test.cpp
   )
@@ -112,6 +150,19 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_dsp_oscillator_test)
+
+  add_executable(
+    barelymusician_dsp_sample_data_test
+    sample_data_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_dsp_sample_data_test
+    barelymusician_dsp_sample_data
+    barelymusician_headeronly
+    gmock
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_dsp_sample_data_test)
 
   add_executable(
     barelymusician_dsp_sample_player_test

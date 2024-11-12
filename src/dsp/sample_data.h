@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_SAMPLE_DATA_H_
-#define BARELYMUSICIAN_INTERNAL_SAMPLE_DATA_H_
+#ifndef BARELYMUSICIAN_DSP_SAMPLE_DATA_H_
+#define BARELYMUSICIAN_DSP_SAMPLE_DATA_H_
 
 #include <span>
 #include <utility>
@@ -40,4 +40,4 @@ class SampleData {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_INTERNAL_SAMPLE_DATA_H_
+#endif  // BARELYMUSICIAN_DSP_SAMPLE_DATA_H_

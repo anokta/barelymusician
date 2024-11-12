@@ -1,14 +1,15 @@
-#ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
-#define BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
+#ifndef BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_
+#define BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_
 
 #include <array>
 
 #include "dsp/envelope.h"
 #include "dsp/gain_processor.h"
+#include "dsp/sample_data.h"
 #include "dsp/voice.h"
-#include "internal/sample_data.h"
 
 namespace barely::internal {
+
 /// Voice callback signature alias.
 ///
 /// @param voice Mutable voice.
@@ -124,4 +125,4 @@ class InstrumentProcessor {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
+#endif  // BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_

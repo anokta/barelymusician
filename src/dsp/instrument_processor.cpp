@@ -1,4 +1,4 @@
-#include "internal/instrument_processor.h"
+#include "dsp/instrument_processor.h"
 
 #include <algorithm>
 #include <cassert>
@@ -6,8 +6,8 @@
 
 #include "barelymusician.h"
 #include "dsp/one_pole_filter.h"
+#include "dsp/sample_data.h"
 #include "dsp/voice.h"
-#include "internal/sample_data.h"
 
 namespace barely::internal {
 

@@ -10,29 +10,12 @@ add_library(
 )
 target_link_libraries(
   barelymusician_internal_instrument
-  barelymusician_internal_instrument_processor
   barelymusician_internal_event
   barelymusician_internal_message
   barelymusician_internal_message_queue
-  barelymusician_internal_sample_data
   barelymusician_common_find_or_null
-  barelymusician_dsp_oscillator
-  barelymusician_dsp_sample_player
-  barelymusician_headeronly
-)
-
-add_library(
-  barelymusician_internal_instrument_processor
-  instrument_processor.cpp
-  instrument_processor.h
-)
-target_link_libraries(
-  barelymusician_internal_instrument_processor
-  barelymusician_internal_sample_data
-  barelymusician_dsp_envelope
-  barelymusician_dsp_gain_processor
-  barelymusician_dsp_one_pole_filter
-  barelymusician_dsp_voice
+  barelymusician_dsp_instrument_processor
+  barelymusician_dsp_sample_data
   barelymusician_headeronly
 )
 
@@ -42,7 +25,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_internal_message INTERFACE
-  barelymusician_internal_sample_data
+  barelymusician_dsp_sample_data
   barelymusician_headeronly
 )
 
@@ -79,16 +62,6 @@ target_link_libraries(
   barelymusician_headeronly
 )
 
-add_library(
-  barelymusician_internal_sample_data
-  sample_data.cpp
-  sample_data.h
-)
-target_link_libraries(
-  barelymusician_internal_sample_data
-  barelymusician_headeronly
-)
-
 if(ENABLE_TESTS)
   add_executable(
     barelymusician_internal_event_test
@@ -109,25 +82,12 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_internal_instrument_test
     barelymusician_internal_instrument
-    barelymusician_internal_sample_data
+    barelymusician_dsp_sample_data
     barelymusician_headeronly
     gmock
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_instrument_test)
-
-  add_executable(
-    barelymusician_internal_instrument_processor_test
-    instrument_processor_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_internal_instrument_processor_test
-    barelymusician_internal_instrument_processor
-    barelymusician_internal_sample_data
-    barelymusician_headeronly
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_internal_instrument_processor_test)
 
   add_executable(
     barelymusician_internal_message_queue_test
@@ -169,17 +129,4 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_internal_performer_test)
-
-  add_executable(
-    barelymusician_internal_sample_data_test
-    sample_data_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_internal_sample_data_test
-    barelymusician_internal_sample_data
-    barelymusician_headeronly
-    gmock
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_internal_sample_data_test)
 endif()

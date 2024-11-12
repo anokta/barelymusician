@@ -8,10 +8,10 @@
 
 #include "barelymusician.h"
 #include "common/find_or_null.h"
+#include "dsp/instrument_processor.h"
+#include "dsp/sample_data.h"
 #include "internal/event.h"
-#include "internal/instrument_processor.h"
 #include "internal/message.h"
-#include "internal/sample_data.h"
 
 namespace barely::internal {
 

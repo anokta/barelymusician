@@ -1,4 +1,4 @@
-#include "internal/sample_data.h"
+#include "dsp/sample_data.h"
 
 #include <array>
 

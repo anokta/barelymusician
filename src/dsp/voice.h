@@ -38,7 +38,7 @@ class Voice {
   void Start(const Envelope::Adsr& adsr, double intensity) noexcept {
     if (intensity > 0.0) {
       gain_ = intensity;
-      filter_state_ = 0.0;
+      filter_.Reset();
       oscillator_.Reset();
       sample_player_cursor_ = 0.0;
       envelope_.Start(adsr);
@@ -83,7 +83,7 @@ class Voice {
         (oscillator_.Next<kOscillatorShape>() +
          PlaySample<kSamplePlaybackMode>(*sample_player_slice_, sample_player_increment_,
                                          sample_player_cursor_));
-    return Filter<kFilterType>(output, filter_coefficient, filter_state_);
+    return filter_.Next<kFilterType>(output, filter_coefficient);
   }
 
   [[nodiscard]] bool is_sample_player_active() const noexcept {
@@ -91,12 +91,10 @@ class Voice {
     return static_cast<int>(sample_player_cursor_) < sample_player_slice_->sample_count;
   }
 
-  Envelope envelope_;
-
-  double filter_state_ = 0.0;
-
   double gain_ = 0.0;
 
+  Envelope envelope_;
+  OnePoleFilter filter_;
   Oscillator oscillator_;
 
   const SampleDataSlice* sample_player_slice_ = nullptr;

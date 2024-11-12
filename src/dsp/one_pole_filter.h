@@ -10,28 +10,38 @@
 
 namespace barely::internal {
 
-/// Filters the next input sample.
-///
-/// @tparam kType Filter type.
-/// @param input Input sample.
-/// @param coefficient Filter coefficient.
-/// @param state Mutable filter state.
-/// @return Filtered output sample.
-template <FilterType kType>
-double Filter(double input, [[maybe_unused]] double coefficient, double& state) noexcept {
-  if constexpr (kType == FilterType::kNone) {
-    state = input;
-  } else {
-    assert(coefficient >= 0.0);
-    assert(coefficient <= 1.0);
-    state = coefficient * (state - input) + input;
+/// One-pole filter that processes basic low-pass and high-pass filtering.
+class OnePoleFilter {
+ public:
+  /// Filters the next input sample.
+  ///
+  /// @tparam kType Filter type.
+  /// @param input Input sample.
+  /// @param coefficient Filter coefficient.
+  /// @return Filtered output sample.
+  template <FilterType kType>
+  [[nodiscard]] double Next(double input, double coefficient) noexcept {
+    if constexpr (kType == FilterType::kNone) {
+      output_ = input;
+    } else {
+      assert(coefficient >= 0.0);
+      assert(coefficient <= 1.0);
+      output_ = coefficient * (output_ - input) + input;
+    }
+    if constexpr (kType == FilterType::kHighPass) {
+      return input - output_;
+    } else {
+      return output_;
+    }
   }
-  if constexpr (kType == FilterType::kHighPass) {
-    return input - state;
-  } else {
-    return state;
-  }
-}
+
+  /// Resets the filter output.
+  void Reset() noexcept { output_ = 0.0; }
+
+ private:
+  // The last output sample.
+  double output_ = 0.0;
+};
 
 /// Returns the corresponding one-pole filter coefficient for a given cutoff frequency.
 ///

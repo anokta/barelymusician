@@ -39,16 +39,16 @@ class Voice {
     if (intensity > 0.0) {
       gain_ = intensity;
       filter_state_ = 0.0;
-      oscillator_phase_ = 0.0;
+      oscillator_.Reset();
       sample_player_cursor_ = 0.0;
       envelope_.Start(adsr);
     }
   }
 
   /// Stops the voice.
-  template <bool IsSamplePlayedOnce>
+  template <bool kIsSamplePlayedOnce>
   void Stop() noexcept {
-    if constexpr (!IsSamplePlayedOnce) {
+    if constexpr (!kIsSamplePlayedOnce) {
       envelope_.Stop();
     } else if (!is_sample_player_active()) {
       envelope_.Reset();
@@ -56,7 +56,7 @@ class Voice {
   }
 
   void set_oscillator_increment(double oscillator_increment) noexcept {
-    oscillator_increment_ = oscillator_increment;
+    oscillator_.SetIncrement(oscillator_increment);
   }
   void set_sample_player_slice(const SampleDataSlice* sample_player_slice) noexcept {
     sample_player_slice_ = sample_player_slice;
@@ -80,14 +80,9 @@ class Voice {
     }
     const double output =
         gain_ * envelope_.Next(adsr) *
-        (Oscillator<kOscillatorShape>(oscillator_phase_) +
+        (oscillator_.Next<kOscillatorShape>() +
          PlaySample<kSamplePlaybackMode>(*sample_player_slice_, sample_player_increment_,
                                          sample_player_cursor_));
-    // Update the phasor.
-    oscillator_phase_ += oscillator_increment_;
-    if (oscillator_phase_ >= 1.0) {
-      oscillator_phase_ -= 1.0;
-    }
     return Filter<kFilterType>(output, filter_coefficient, filter_state_);
   }
 
@@ -102,8 +97,7 @@ class Voice {
 
   double gain_ = 0.0;
 
-  double oscillator_increment_ = 0.0;
-  double oscillator_phase_ = 0.0;
+  Oscillator oscillator_;
 
   const SampleDataSlice* sample_player_slice_ = nullptr;
   double sample_player_cursor_ = 0.0;

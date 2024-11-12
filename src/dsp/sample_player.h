@@ -9,19 +9,19 @@
 namespace barely::internal {
 
 template <SamplePlaybackMode kMode>
-double PlaySample(const SampleDataSlice* slice, double increment, double& cursor) {
+double PlaySample(const SampleDataSlice& slice, double increment, double& cursor) {
   if constexpr (kMode != SamplePlaybackMode::kNone) {
     assert(cursor >= 0.0);
     assert(increment >= 0.0);
-    if (slice == nullptr || static_cast<int>(cursor) >= slice->sample_count) {
+    if (static_cast<int>(cursor) >= slice.sample_count) {
       return 0.0;
     }
     // TODO(#7): Add a better interpolation method here?
-    const double output = slice->samples[static_cast<int>(cursor)];
+    const double output = slice.samples[static_cast<int>(cursor)];
     cursor += increment;
     if constexpr (kMode == SamplePlaybackMode::kLoop) {
-      if (static_cast<int>(cursor) >= slice->sample_count) {
-        cursor = std::fmod(cursor, static_cast<double>(slice->sample_count));
+      if (static_cast<int>(cursor) >= slice.sample_count) {
+        cursor = std::fmod(cursor, static_cast<double>(slice.sample_count));
       }
     }
     return output;

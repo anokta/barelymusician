@@ -19,10 +19,10 @@ TEST(SamplePlayerTest, SimplePlayback) {
 
   double cursor = 0.0;
   for (int i = 0; i < kDataLength; ++i) {
-    EXPECT_DOUBLE_EQ(PlaySample<SamplePlaybackMode::kOnce>(&kSlice, kIncrement, cursor), kData[i])
+    EXPECT_DOUBLE_EQ(PlaySample<SamplePlaybackMode::kOnce>(kSlice, kIncrement, cursor), kData[i])
         << "at index " << i;
   }
-  EXPECT_DOUBLE_EQ(PlaySample<SamplePlaybackMode::kOnce>(&kSlice, kIncrement, cursor), 0.0);
+  EXPECT_DOUBLE_EQ(PlaySample<SamplePlaybackMode::kOnce>(kSlice, kIncrement, cursor), 0.0);
 }
 
 // Tests that the sample data is played back as expected, when set to loop.
@@ -32,7 +32,7 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
 
   double cursor = 0.0;
   for (int i = 0; i < kDataLength * kLoopCount; ++i) {
-    EXPECT_DOUBLE_EQ(PlaySample<SamplePlaybackMode::kLoop>(&kSlice, kIncrement, cursor),
+    EXPECT_DOUBLE_EQ(PlaySample<SamplePlaybackMode::kLoop>(kSlice, kIncrement, cursor),
                      kData[i % kDataLength])
         << "at index " << i;
   }
@@ -46,7 +46,7 @@ TEST(SamplePlayerTest, SetSpeed) {
     double cursor = 0.0;
     for (int i = 0; i < kDataLength; ++i) {
       const int expected_index = static_cast<int>(static_cast<double>(i) * increment);
-      EXPECT_DOUBLE_EQ(PlaySample<SamplePlaybackMode::kLoop>(&kSlice, increment, cursor),
+      EXPECT_DOUBLE_EQ(PlaySample<SamplePlaybackMode::kLoop>(kSlice, increment, cursor),
                        kData[expected_index % kDataLength])
           << "at index " << i << ", where increment is: " << increment;
     }

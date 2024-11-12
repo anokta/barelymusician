@@ -20,11 +20,13 @@ class SampleData {
   /// @param slices Span of sample data slices.
   SampleData(std::span<const SampleDataSlice> slices) noexcept;
 
+  [[nodiscard]] bool empty() const noexcept { return slices_.empty(); }
+
   /// Selects the sample data slice for a given pitch.
   ///
   /// @param pitch Note pitch.
   /// @return Pointer to sample data slice.
-  const SampleDataSlice* Select(double pitch) const noexcept;
+  [[nodiscard]] const SampleDataSlice* Select(double pitch) const noexcept;
 
   /// Swaps the sample data.
   ///

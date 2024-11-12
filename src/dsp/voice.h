@@ -18,8 +18,8 @@ class Voice {
  public:
   template <FilterType kFilterType, OscillatorShape kOscillatorShape,
             SamplePlaybackMode kSamplePlaybackMode>
-  static double ProcessVoice(Voice& voice, const Envelope::Adsr& adsr,
-                             double filter_coefficient) noexcept {
+  [[nodiscard]] static double ProcessVoice(Voice& voice, const Envelope::Adsr& adsr,
+                                           double filter_coefficient) noexcept {
     return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(adsr, filter_coefficient);
   }
 
@@ -58,11 +58,6 @@ class Voice {
   void set_oscillator_increment(double oscillator_increment) noexcept {
     oscillator_increment_ = oscillator_increment;
   }
-
-  bool is_sample_player_active() const noexcept {
-    return sample_player_slice_ != nullptr &&
-           static_cast<int>(sample_player_cursor_) < sample_player_slice_->sample_count;
-  }
   void set_sample_player_slice(const SampleDataSlice* sample_player_slice) noexcept {
     sample_player_slice_ = sample_player_slice;
   }
@@ -76,7 +71,7 @@ class Voice {
  private:
   template <FilterType kFilterType, OscillatorShape kOscillatorShape,
             SamplePlaybackMode kSamplePlaybackMode>
-  double Next(const Envelope::Adsr& adsr, double filter_coefficient) noexcept {
+  [[nodiscard]] double Next(const Envelope::Adsr& adsr, double filter_coefficient) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!is_sample_player_active()) {
         envelope_.Reset();
@@ -86,7 +81,7 @@ class Voice {
     const double output =
         gain_ * envelope_.Next(adsr) *
         (Oscillator<kOscillatorShape>(oscillator_phase_) +
-         PlaySample<kSamplePlaybackMode>(sample_player_slice_, sample_player_increment_,
+         PlaySample<kSamplePlaybackMode>(*sample_player_slice_, sample_player_increment_,
                                          sample_player_cursor_));
     // Update the phasor.
     oscillator_phase_ += oscillator_increment_;
@@ -94,6 +89,11 @@ class Voice {
       oscillator_phase_ -= 1.0;
     }
     return Filter<kFilterType>(output, filter_coefficient, filter_state_);
+  }
+
+  [[nodiscard]] bool is_sample_player_active() const noexcept {
+    assert(sample_player_slice_ != nullptr);
+    return static_cast<int>(sample_player_cursor_) < sample_player_slice_->sample_count;
   }
 
   Envelope envelope_;

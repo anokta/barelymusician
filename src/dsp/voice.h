@@ -40,7 +40,7 @@ class Voice {
       gain_ = intensity;
       filter_.Reset();
       oscillator_.Reset();
-      sample_player_cursor_ = 0.0;
+      sample_player_.Reset();
       envelope_.Start(adsr);
     }
   }
@@ -50,7 +50,7 @@ class Voice {
   void Stop() noexcept {
     if constexpr (!kIsSamplePlayedOnce) {
       envelope_.Stop();
-    } else if (!is_sample_player_active()) {
+    } else if (!sample_player_.IsActive()) {
       envelope_.Reset();
     }
   }
@@ -59,13 +59,10 @@ class Voice {
     oscillator_.SetIncrement(oscillator_increment);
   }
   void set_sample_player_slice(const SampleDataSlice* sample_player_slice) noexcept {
-    sample_player_slice_ = sample_player_slice;
+    sample_player_.SetSlice(sample_player_slice);
   }
   void set_sample_player_speed(double speed, double sample_interval) noexcept {
-    sample_player_increment_ =
-        (sample_player_slice_ != nullptr && sample_player_slice_->sample_count > 0)
-            ? speed * sample_player_slice_->sample_rate * sample_interval
-            : 0.0;
+    sample_player_.SetIncrement(speed, sample_interval);
   }
 
  private:
@@ -73,33 +70,22 @@ class Voice {
             SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] double Next(const Envelope::Adsr& adsr, double filter_coefficient) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
-      if (!is_sample_player_active()) {
+      if (!sample_player_.IsActive()) {
         envelope_.Reset();
         return 0.0;
       }
     }
     const double output =
         gain_ * envelope_.Next(adsr) *
-        (oscillator_.Next<kOscillatorShape>() +
-         PlaySample<kSamplePlaybackMode>(*sample_player_slice_, sample_player_increment_,
-                                         sample_player_cursor_));
+        (oscillator_.Next<kOscillatorShape>() + sample_player_.Next<kSamplePlaybackMode>());
     return filter_.Next<kFilterType>(output, filter_coefficient);
   }
 
-  [[nodiscard]] bool is_sample_player_active() const noexcept {
-    assert(sample_player_slice_ != nullptr);
-    return static_cast<int>(sample_player_cursor_) < sample_player_slice_->sample_count;
-  }
-
   double gain_ = 0.0;
-
   Envelope envelope_;
   OnePoleFilter filter_;
   Oscillator oscillator_;
-
-  const SampleDataSlice* sample_player_slice_ = nullptr;
-  double sample_player_cursor_ = 0.0;
-  double sample_player_increment_ = 0.0;
+  SamplePlayer sample_player_;
 };
 
 }  // namespace barely::internal

@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
 #define BARELYMUSICIAN_INTERNAL_INSTRUMENT_PROCESSOR_H_
 
-#include <vector>
+#include <array>
 
 #include "dsp/envelope.h"
 #include "dsp/gain_processor.h"
@@ -14,7 +14,8 @@ namespace barely::internal {
 /// @param voice Mutable voice.
 /// @return Processed output value.
 // TODO(#144): Clean this up by calling each carrier by template types.
-using VoiceCallback = double (*)(Voice& voice, double filter_coefficient);
+using VoiceCallback = double (*)(Voice& voice, const Envelope::Adsr& adsr,
+                                 double filter_coefficient);
 
 /// Class that wraps the audio processing of an instrument.
 class InstrumentProcessor {
@@ -68,6 +69,7 @@ class InstrumentProcessor {
   void SetSampleData(SampleData& sample_data) noexcept;
 
  private:
+  static constexpr int kMaxVoiceCount = 20;
   // List of voices with their pitch and timestamp. Voice timestamp is used to determine which voice
   // to steal when there are no free voices available.
   // TODO(#12): Consider a more optimized implementation for voice stealing.
@@ -82,7 +84,7 @@ class InstrumentProcessor {
   VoiceCallback voice_callback_ =
       Voice::ProcessVoice<FilterType::kNone, OscillatorShape::kNone, SamplePlaybackMode::kNone>;
   Envelope::Adsr adsr_;
-  std::vector<VoiceState> voice_states_;
+  std::array<VoiceState, kMaxVoiceCount> voice_states_;
   int voice_count_ = 8;
 
   template <bool kShouldAccumulate>
@@ -95,9 +97,9 @@ class InstrumentProcessor {
         return;
       }
       if constexpr (kShouldAccumulate) {
-        output_samples[i] += voice_callback_(voice, filter_coefficient_);
+        output_samples[i] += voice_callback_(voice, adsr_, filter_coefficient_);
       } else {
-        output_samples[i] = voice_callback_(voice, filter_coefficient_);
+        output_samples[i] = voice_callback_(voice, adsr_, filter_coefficient_);
       }
     }
   }

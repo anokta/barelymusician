@@ -5,8 +5,7 @@ add_library(
 )
 
 add_library(
-  barelymusician_dsp_envelope
-  envelope.cpp
+  barelymusician_dsp_envelope INTERFACE
   envelope.h
 )
 

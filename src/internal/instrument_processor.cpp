@@ -14,9 +14,6 @@ namespace barely::internal {
 
 namespace {
 
-// Maximum number of voices allowed to be set.
-constexpr int kMaxVoiceCount = 20;
-
 // Returns the frequency ratio of a given `pitch`.
 double FrequencyRatioFromPitch(double pitch) { return std::pow(2.0, pitch); }
 
@@ -38,7 +35,7 @@ VoiceCallback GetVoiceCallback(SamplePlaybackMode sample_playback_mode) {
       return Voice::ProcessVoice<kFilterType, kOscillatorShape, SamplePlaybackMode::kLoop>;
     default:
       assert(!"Invalid sample playback mode");
-      return nullptr;
+      return Voice::ProcessVoice<kFilterType, kOscillatorShape, SamplePlaybackMode::kNone>;
   }
 }
 
@@ -58,7 +55,7 @@ VoiceCallback GetVoiceCallback(OscillatorShape oscillator_shape,
       return GetVoiceCallback<kFilterType, OscillatorShape::kNoise>(sample_playback_mode);
     default:
       assert(!"Invalid oscillator shape");
-      return nullptr;
+      return GetVoiceCallback<kFilterType, OscillatorShape::kNone>(sample_playback_mode);
   }
 }
 
@@ -73,7 +70,7 @@ VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorShape oscillato
       return GetVoiceCallback<FilterType::kHighPass>(oscillator_shape, sample_playback_mode);
     default:
       assert(!"Invalid filter type");
-      return nullptr;
+      return GetVoiceCallback<FilterType::kNone>(oscillator_shape, sample_playback_mode);
   }
 }
 
@@ -82,7 +79,6 @@ VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorShape oscillato
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(int sample_rate, double reference_frequency) noexcept
     : adsr_(sample_rate),
-      voice_states_(kMaxVoiceCount, {Voice(adsr_)}),
       gain_processor_(sample_rate),
       reference_frequency_(reference_frequency),
       sample_rate_(sample_rate),
@@ -228,8 +224,7 @@ void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
     voice.set_sample_player_speed(FrequencyRatioFromPitch(shifted_pitch - sample->root_pitch),
                                   sample_interval_);
   }
-  voice.set_gain(intensity);
-  voice.Start();
+  voice.Start(adsr_, intensity);
 }
 
 void InstrumentProcessor::SetReferenceFrequency(double reference_frequency) noexcept {

@@ -18,14 +18,10 @@ class Voice {
  public:
   template <FilterType kFilterType, OscillatorShape kOscillatorShape,
             SamplePlaybackMode kSamplePlaybackMode>
-  static double ProcessVoice(Voice& voice, double filter_coefficient) noexcept {
-    return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(filter_coefficient);
+  static double ProcessVoice(Voice& voice, const Envelope::Adsr& adsr,
+                             double filter_coefficient) noexcept {
+    return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(adsr, filter_coefficient);
   }
-
-  /// Constructs a new `Voice`.
-  ///
-  /// @param voice_data Voice data.
-  Voice(const Envelope::Adsr& adsr) noexcept : envelope_(adsr) {}
 
   /// Returns whether the voice is currently active (i.e., playing).
   ///
@@ -36,11 +32,17 @@ class Voice {
   void Reset() noexcept { return envelope_.Reset(); }
 
   /// Starts the voice.
-  void Start() noexcept {
-    filter_state_ = 0.0;
-    oscillator_phase_ = 0.0;
-    sample_player_cursor_ = 0.0;
-    envelope_.Start();
+  ///
+  /// @param adsr Adsr.
+  /// @param intensity Note intensity.
+  void Start(const Envelope::Adsr& adsr, double intensity) noexcept {
+    if (intensity > 0.0) {
+      gain_ = intensity;
+      filter_state_ = 0.0;
+      oscillator_phase_ = 0.0;
+      sample_player_cursor_ = 0.0;
+      envelope_.Start(adsr);
+    }
   }
 
   /// Stops the voice.
@@ -52,9 +54,6 @@ class Voice {
       envelope_.Reset();
     }
   }
-
-  [[nodiscard]] double gain() const noexcept { return gain_; }
-  void set_gain(double gain) noexcept { gain_ = gain; }
 
   void set_oscillator_increment(double oscillator_increment) noexcept {
     oscillator_increment_ = oscillator_increment;
@@ -77,7 +76,7 @@ class Voice {
  private:
   template <FilterType kFilterType, OscillatorShape kOscillatorShape,
             SamplePlaybackMode kSamplePlaybackMode>
-  double Next(double filter_coefficient) noexcept {
+  double Next(const Envelope::Adsr& adsr, double filter_coefficient) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!is_sample_player_active()) {
         envelope_.Reset();
@@ -85,7 +84,7 @@ class Voice {
       }
     }
     const double output =
-        gain_ * envelope_.Next() *
+        gain_ * envelope_.Next(adsr) *
         (Oscillator<kOscillatorShape>(oscillator_phase_) +
          PlaySample<kSamplePlaybackMode>(sample_player_slice_, sample_player_increment_,
                                          sample_player_cursor_));

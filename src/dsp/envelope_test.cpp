@@ -22,14 +22,14 @@ constexpr double kEpsilon = 1e-3;
 TEST(EnvelopeTest, ProcessDefault) {
   const Envelope::Adsr adsr(kSampleRate);
 
-  Envelope envelope(adsr);
-  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
+  Envelope envelope;
+  EXPECT_DOUBLE_EQ(envelope.Next(adsr), 0.0);
 
-  envelope.Start();
-  EXPECT_DOUBLE_EQ(envelope.Next(), 1.0);
+  envelope.Start(adsr);
+  EXPECT_DOUBLE_EQ(envelope.Next(adsr), 1.0);
 
   envelope.Stop();
-  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
+  EXPECT_DOUBLE_EQ(envelope.Next(adsr), 0.0);
 }
 
 // Tests that the envelope generates the expected output samples consistently over multiple samples.
@@ -41,16 +41,16 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
 
   Envelope::Adsr adsr(kSampleRate);
 
-  Envelope envelope(adsr);
+  Envelope envelope;
   adsr.SetAttack(kAttack);
   adsr.SetDecay(kDecay);
   adsr.SetSustain(kSustain);
   adsr.SetRelease(kRelease);
-  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
+  EXPECT_DOUBLE_EQ(envelope.Next(adsr), 0.0);
 
   double expected_sample = 0.0;
 
-  envelope.Start();
+  envelope.Start(adsr);
   for (int i = 0; i < kSustainSampleCount + kSampleRate; ++i) {
     if (i < kAttackSampleCount) {
       // Attack.
@@ -63,7 +63,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
       // Sustain.
       expected_sample = kSustain;
     }
-    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
+    EXPECT_NEAR(envelope.Next(adsr), expected_sample, kEpsilon);
   }
 
   envelope.Stop();
@@ -76,7 +76,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
       // Idle.
       expected_sample = 0.0;
     }
-    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
+    EXPECT_NEAR(envelope.Next(adsr), expected_sample, kEpsilon);
   }
 }
 

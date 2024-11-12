@@ -61,7 +61,7 @@ void Arpeggiator::SetAllNotesOff() noexcept {
 }
 
 void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
-  gate_ratio_ = std::min(std::max(gate_ratio, 0.0), 1.0);
+  gate_ratio_ = std::clamp(gate_ratio, 0.0, 1.0);
 }
 
 void Arpeggiator::SetInstrument(Instrument* instrument) noexcept {

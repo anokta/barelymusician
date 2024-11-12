@@ -145,7 +145,7 @@ class Instrument {
     }
 
     bool SetValue(double new_value) noexcept {
-      new_value = std::min(std::max(new_value, min_value), max_value);
+      new_value = std::clamp(new_value, min_value, max_value);
       if (value != new_value) {
         value = new_value;
         return true;

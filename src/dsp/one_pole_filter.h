@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <cmath>
 #include <numbers>
@@ -10,14 +9,6 @@
 #include "barelymusician.h"
 
 namespace barely::internal {
-
-/// Filter callback signature alias.
-///
-/// @param input Input sample.
-/// @param coefficient Filter coefficient.
-/// @param state Mutable filter state.
-/// @return Filtered output sample.
-using FilterCallback = double (*)(double input, double coefficient, double& state);
 
 /// Filters the next input sample.
 ///
@@ -41,14 +32,6 @@ double Filter(double input, [[maybe_unused]] double coefficient, double& state) 
     return state;
   }
 }
-
-/// Array of filter callbacks for each shape.
-inline constexpr std::array<FilterCallback, static_cast<int>(BarelyFilterType_kCount)>
-    kFilterCallbacks = {
-        &Filter<FilterType::kNone>,
-        &Filter<FilterType::kLowPass>,
-        &Filter<FilterType::kHighPass>,
-};
 
 /// Returns the corresponding one-pole filter coefficient for a given cutoff frequency.
 ///

@@ -9,6 +9,12 @@
 #include "internal/sample_data.h"
 
 namespace barely::internal {
+/// Voice callback signature alias.
+///
+/// @param voice Mutable voice.
+/// @return Processed output value.
+// TODO(#144): Clean this up by calling each carrier by template types.
+using VoiceCallback = double (*)(Voice& voice, double filter_coefficient);
 
 /// Class that wraps the audio processing of an instrument.
 class InstrumentProcessor {
@@ -73,8 +79,9 @@ class InstrumentProcessor {
     int timestamp = 0;
   };
   VoiceState& AcquireVoice(double pitch) noexcept;
-  VoiceCallback voice_callback_ = kVoiceCallbacks[BarelySamplePlaybackMode_kNone];
-  VoiceData voice_data_;
+  VoiceCallback voice_callback_ =
+      Voice::ProcessVoice<FilterType::kNone, OscillatorShape::kNone, SamplePlaybackMode::kNone>;
+  Envelope::Adsr adsr_;
   std::vector<VoiceState> voice_states_;
   int voice_count_ = 8;
 
@@ -88,9 +95,9 @@ class InstrumentProcessor {
         return;
       }
       if constexpr (kShouldAccumulate) {
-        output_samples[i] += voice_callback_(voice);
+        output_samples[i] += voice_callback_(voice, filter_coefficient_);
       } else {
-        output_samples[i] = voice_callback_(voice);
+        output_samples[i] = voice_callback_(voice, filter_coefficient_);
       }
     }
   }
@@ -98,8 +105,13 @@ class InstrumentProcessor {
   GainProcessor gain_processor_;
   SampleData sample_data_;
 
+  FilterType filter_type_ = FilterType::kNone;
+  OscillatorShape oscillator_shape_ = OscillatorShape::kNone;
+  SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
+
+  double filter_coefficient_ = 1.0;
+
   bool should_retrigger_ = false;
-  bool is_sample_played_once_ = false;
 
   double reference_frequency_ = 0.0;
   double pitch_shift_ = 0.0;

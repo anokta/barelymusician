@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_DSP_OSCILLATOR_H_
 #define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
-#include <array>
 #include <cassert>
 #include <cmath>
 #include <numbers>
@@ -10,12 +9,6 @@
 #include "common/random.h"
 
 namespace barely::internal {
-
-/// Oscillator callback signature alias.
-///
-/// @param phase Mutable phase in range [0, 1).
-/// @return Output sample.
-using OscillatorCallback = double (*)(double phase);
 
 /// Generates the next oscillator output.
 ///
@@ -39,14 +32,6 @@ double Oscillator(double phase) noexcept {
     return random.DrawUniform(-1.0, 1.0);
   }
 }
-
-/// Array of oscillator callbacks for each shape.
-inline constexpr std::array<OscillatorCallback, static_cast<int>(BarelyOscillatorShape_kCount)>
-    kOscillatorCallbacks = {
-        &Oscillator<OscillatorShape::kNone>,  &Oscillator<OscillatorShape::kSine>,
-        &Oscillator<OscillatorShape::kSaw>,   &Oscillator<OscillatorShape::kSquare>,
-        &Oscillator<OscillatorShape::kNoise>,
-};
 
 }  // namespace barely::internal
 

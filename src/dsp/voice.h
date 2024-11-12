@@ -13,57 +13,24 @@
 
 namespace barely::internal {
 
-struct VoiceData {
-  VoiceData(int sample_rate) noexcept : adsr(sample_rate) {}
-
-  Envelope::Adsr adsr;
-  double filter_coefficient = 1.0;
-  FilterCallback filter_callback = kFilterCallbacks[BarelyFilterType_kNone];
-  OscillatorCallback oscillator_callback = kOscillatorCallbacks[BarelyOscillatorShape_kNone];
-};
-
 /// Class that wraps an instrument voice.
 class Voice {
  public:
-  template <SamplePlaybackMode kSamplePlaybackMode>
-  static double ProcessVoice(Voice& voice) noexcept {
-    return voice.Next<kSamplePlaybackMode>();
+  template <FilterType kFilterType, OscillatorShape kOscillatorShape,
+            SamplePlaybackMode kSamplePlaybackMode>
+  static double ProcessVoice(Voice& voice, double filter_coefficient) noexcept {
+    return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(filter_coefficient);
   }
 
   /// Constructs a new `Voice`.
   ///
   /// @param voice_data Voice data.
-  Voice(const VoiceData& voice_data) noexcept
-      : envelope_(voice_data.adsr), voice_data_(voice_data) {}
+  Voice(const Envelope::Adsr& adsr) noexcept : envelope_(adsr) {}
 
   /// Returns whether the voice is currently active (i.e., playing).
   ///
   /// @return True if active.
   [[nodiscard]] bool IsActive() const noexcept { return envelope_.IsActive(); }
-
-  /// Returns the next output sample.
-  ///
-  /// @return Output sample.
-  template <SamplePlaybackMode kSamplePlaybackMode>
-  double Next() noexcept {
-    if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
-      if (!is_sample_player_active()) {
-        envelope_.Reset();
-        return 0.0;
-      }
-    }
-    const double output =
-        gain_ * envelope_.Next() *
-        (voice_data_.oscillator_callback(oscillator_phase_) +
-         PlaySample<kSamplePlaybackMode>(sample_player_slice_, sample_player_increment_,
-                                         sample_player_cursor_));
-    // Update the phasor.
-    oscillator_phase_ += oscillator_increment_;
-    if (oscillator_phase_ >= 1.0) {
-      oscillator_phase_ -= 1.0;
-    }
-    return voice_data_.filter_callback(output, voice_data_.filter_coefficient, filter_state_);
-  }
 
   /// Resets the voice.
   void Reset() noexcept { return envelope_.Reset(); }
@@ -108,8 +75,29 @@ class Voice {
   }
 
  private:
+  template <FilterType kFilterType, OscillatorShape kOscillatorShape,
+            SamplePlaybackMode kSamplePlaybackMode>
+  double Next(double filter_coefficient) noexcept {
+    if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
+      if (!is_sample_player_active()) {
+        envelope_.Reset();
+        return 0.0;
+      }
+    }
+    const double output =
+        gain_ * envelope_.Next() *
+        (Oscillator<kOscillatorShape>(oscillator_phase_) +
+         PlaySample<kSamplePlaybackMode>(sample_player_slice_, sample_player_increment_,
+                                         sample_player_cursor_));
+    // Update the phasor.
+    oscillator_phase_ += oscillator_increment_;
+    if (oscillator_phase_ >= 1.0) {
+      oscillator_phase_ -= 1.0;
+    }
+    return Filter<kFilterType>(output, filter_coefficient, filter_state_);
+  }
+
   Envelope envelope_;
-  const VoiceData& voice_data_;
 
   double filter_state_ = 0.0;
 
@@ -121,22 +109,6 @@ class Voice {
   const SampleDataSlice* sample_player_slice_ = nullptr;
   double sample_player_cursor_ = 0.0;
   double sample_player_increment_ = 0.0;
-};
-
-/// Voice callback signature alias.
-///
-/// @param voice Mutable voice.
-/// @return Processed output value.
-// TODO(#144): Clean this up by calling each carrier by template types.
-using VoiceCallback = double (*)(Voice& voice);
-
-/// Array of voice callbacks for each mode.
-inline constexpr std::array<VoiceCallback, static_cast<int>(BarelySamplePlaybackMode_kCount)>
-    kVoiceCallbacks = {
-        &Voice::ProcessVoice<SamplePlaybackMode::kNone>,
-        &Voice::ProcessVoice<SamplePlaybackMode::kOnce>,
-        &Voice::ProcessVoice<SamplePlaybackMode::kSustain>,
-        &Voice::ProcessVoice<SamplePlaybackMode::kLoop>,
 };
 
 }  // namespace barely::internal

@@ -19,16 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
-        id: cache
         with:
           path: benchmark.json
-          key: ${{ runner.os }}-benchmark
-      - if: ${{ steps.cache.outputs.cache-hit == 'true' }}
-        name: install
+          key: benchmark-${{ matrix.os }}-${{ github.sha }}
+          restore-keys: benchmark-${{ matrix.os }}-
+      - name: install
         shell: bash
         run: |
-          pip install numpy scipy
-          mv benchmark.json benchmark_cached.json
+          if [ -f benchmark.json ]; then
+            pip install numpy scipy
+            mv benchmark.json benchmark_cached.json
+          fi
       - name: build
         shell: bash
         run: |

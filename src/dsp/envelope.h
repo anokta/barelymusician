@@ -41,9 +41,9 @@ class Envelope {
     ///
     /// @param  release Release in seconds.
     void SetRelease(double release) noexcept {
-      release_increment_ = (release > 0.0) ? sample_interval_ / release : 0.0;
-      if (release_increment_ > 1.0) {
-        release_increment_ = 0.0;
+      release_decrement_ = (release > 0.0) ? -sample_interval_ / release : 0.0;
+      if (release_decrement_ < -1.0) {
+        release_decrement_ = 0.0;
       }
     }
 
@@ -62,7 +62,7 @@ class Envelope {
     double attack_increment_ = 0.0;
     double decay_increment_ = 0.0;
     double sustain_ = 1.0;
-    double release_increment_ = 0.0;
+    double release_decrement_ = 0.0;
   };
 
   /// Returns whether the envelope is currently active (i.e., not idle).
@@ -101,7 +101,6 @@ class Envelope {
         }
         return output_;
       }
-      phase_ = 0.0;
       state_ = State::kSustain;
     }
     if (state_ == State::kSustain) {
@@ -109,16 +108,15 @@ class Envelope {
       return output_;
     }
     if (state_ == State::kRelease) {
-      if (adsr_->release_increment_ > 0.0) {
-        output_ = (1.0 - phase_) * release_output_;
-        phase_ += adsr_->release_increment_;
-        if (phase_ >= 1.0) {
+      if (adsr_->release_decrement_ < 0.0) {
+        output_ = phase_ * release_output_;
+        phase_ += adsr_->release_decrement_;
+        if (phase_ <= 0.0) {
           phase_ = 0.0;
           state_ = State::kIdle;
         }
         return output_;
       }
-      phase_ = 0.0;
       state_ = State::kIdle;
     }
     return 0.0;
@@ -140,7 +138,7 @@ class Envelope {
   /// Stops the envelope.
   void Stop() noexcept {
     if (state_ != State::kIdle && state_ != State::kRelease) {
-      phase_ = 0.0;
+      phase_ = 1.0;
       release_output_ = output_;
       state_ = State::kRelease;
     }

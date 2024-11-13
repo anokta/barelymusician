@@ -33,6 +33,4 @@ const SampleDataSlice* SampleData::Select(double pitch) const noexcept {
   return &slices_.back().first;
 }
 
-void SampleData::Swap(SampleData& other) noexcept { slices_.swap(other.slices_); }
-
 }  // namespace barely::internal

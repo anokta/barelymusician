@@ -1,6 +1,5 @@
 add_library(
-  barelymusician_dsp_decibels
-  decibels.cpp
+  barelymusician_dsp_decibels INTERFACE
   decibels.h
 )
 

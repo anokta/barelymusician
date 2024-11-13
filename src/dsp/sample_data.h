@@ -31,7 +31,7 @@ class SampleData {
   /// Swaps the sample data.
   ///
   /// @param other Other sample data.
-  void Swap(SampleData& other) noexcept;
+  void Swap(SampleData& other) noexcept { slices_.swap(other.slices_); }
 
  private:
   // Array of sample data slices.

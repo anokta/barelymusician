@@ -443,9 +443,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 1
+  Gain: -18
   VoiceCount: 4
-  OscillatorType: 0
+  OscillatorShape: 0
+  SamplePlaybackMode: 1
   Samplers:
   - RootPitch: 0
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
@@ -455,13 +456,14 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
-  SamplePlaybackMode: 1
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0
   PitchShift: 0
   Retrigger: 1
+  FilterType: 0
+  FilterFrequency: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -480,7 +482,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.125
+  m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0

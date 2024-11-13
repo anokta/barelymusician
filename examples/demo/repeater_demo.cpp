@@ -33,7 +33,7 @@ constexpr int kSampleCount = 256;
 constexpr double kLookahead = 0.1;
 
 // Arpeggiator settings.
-constexpr double kGain = 0.125;
+constexpr double kGain = -18.0;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.05;

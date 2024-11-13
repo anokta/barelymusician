@@ -42,7 +42,7 @@ constexpr OscillatorShape kInstrumentOscillatorShape = OscillatorShape::kSquare;
 constexpr double kInstrumentEnvelopeAttack = 0.0;
 constexpr double kInstrumentEnvelopeRelease = 0.2;
 constexpr int kInstrumentVoiceCount = 16;
-constexpr double kInstrumentGain = 1.0 / static_cast<double>(kInstrumentVoiceCount);
+constexpr double kInstrumentGain = -6.0 * static_cast<double>(kInstrumentVoiceCount);
 
 // Midi file name.
 constexpr char kMidiFileName[] = "midi/sample.mid";

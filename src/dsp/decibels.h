@@ -12,7 +12,7 @@ inline constexpr double kMinDecibels = -80.0;
 ///
 /// @param decibels Value in decibels.
 /// @return Value in linear amplitude.
-double AmplitudeFromDecibels(double decibels) noexcept {
+inline double AmplitudeFromDecibels(double decibels) noexcept {
   if (decibels > kMinDecibels) {
     // amplitude = 10 ^ (decibels / 20).
     return std::pow(10.0, 0.05 * decibels);
@@ -24,7 +24,7 @@ double AmplitudeFromDecibels(double decibels) noexcept {
 ///
 /// @param amplitude Value in linear amplitude.
 /// @return Value in decibels.
-double DecibelsFromAmplitude(double amplitude) noexcept {
+inline double DecibelsFromAmplitude(double amplitude) noexcept {
   if (amplitude > 0.0) {
     // decibels = 20 * log(amplitude).
     return 20.0 * std::log10(amplitude);

@@ -247,11 +247,11 @@ int main(int /*argc*/, char* argv[]) {
     ComposeChord(0.5, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorShape::kSine, 0.05, 0.125, 0.125);
+  build_instrument_fn(OscillatorShape::kSine, -25.0, 0.125, 0.125);
   performers.emplace_back(musician.AddPerformer(), chords_beat_composer_callback,
                           instruments.size() - 1);
 
-  build_instrument_fn(OscillatorShape::kNoise, 0.01, 0.5, 0.025);
+  build_instrument_fn(OscillatorShape::kNoise, -40.0, 0.5, 0.025);
   performers.emplace_back(musician.AddPerformer(), chords_beat_composer_callback,
                           instruments.size() - 1);
 
@@ -261,7 +261,7 @@ int main(int /*argc*/, char* argv[]) {
     ComposeLine(-1, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorShape::kSaw, 0.06, 0.0025, 0.125);
+  build_instrument_fn(OscillatorShape::kSaw, -24.0, 0.0025, 0.125);
   performers.emplace_back(musician.AddPerformer(), line_beat_composer_callback,
                           instruments.size() - 1);
 
@@ -271,14 +271,14 @@ int main(int /*argc*/, char* argv[]) {
     ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorShape::kSquare, 0.06, 0.05, 0.05);
+  build_instrument_fn(OscillatorShape::kSquare, -24.0, 0.05, 0.05);
   performers.emplace_back(musician.AddPerformer(), line_2_beat_composer_callback,
                           instruments.size() - 1);
 
   // Add percussion instrument.
   instruments.push_back(musician.AddInstrument());
   auto& percussion = instruments.back();
-  percussion.SetControl(ControlType::kGain, 0.125);
+  percussion.SetControl(ControlType::kGain, -18.0);
   percussion.SetControl(ControlType::kAttack, 0.0);
   percussion.SetControl(ControlType::kRetrigger, true);
   percussion.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);

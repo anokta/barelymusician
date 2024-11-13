@@ -8,6 +8,7 @@
 
 #include "barelymusician.h"
 #include "common/find_or_null.h"
+#include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/sample_data.h"
@@ -154,6 +155,8 @@ void Instrument::Update(int64_t update_sample) noexcept {
 
 ControlMessage Instrument::BuildControlMessage(ControlType type, double value) const noexcept {
   switch (type) {
+    case ControlType::kGain:
+      return ControlMessage{type, AmplitudeFromDecibels(value)};
     case ControlType::kFilterFrequency:
       return ControlMessage{type, GetFilterCoefficient(sample_rate_, value)};
     default:

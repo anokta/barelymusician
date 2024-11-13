@@ -1,5 +1,6 @@
 #include "dsp/sample_player.h"
 
+#include <cmath>
 #include <vector>
 
 #include "barelymusician.h"

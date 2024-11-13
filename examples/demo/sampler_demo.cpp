@@ -34,7 +34,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kSampleCount = 256;
 
 // Instrument settings.
-constexpr double kGain = 0.25;
+constexpr double kGain = -12.0;
 constexpr bool kLoop = true;
 constexpr double kAttack = 0.0125;
 constexpr double kRelease = 0.125;

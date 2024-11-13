@@ -18,7 +18,7 @@ constexpr size_t kChannelCount = 2;
 constexpr size_t kFrameCount = 16;
 
 // Instrument settings.
-constexpr double kGain = 0.125;
+constexpr double kGain = -18.0;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
 constexpr double kAttack = 0.05;
 constexpr double kRelease = 0.125;

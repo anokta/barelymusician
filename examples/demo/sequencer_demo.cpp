@@ -31,7 +31,7 @@ constexpr int kSampleCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr double kGain = 0.1;
+constexpr double kGain = -20.0;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.1;

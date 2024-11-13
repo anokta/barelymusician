@@ -1,7 +1,5 @@
 #include "dsp/oscillator.h"
 
-#include <cmath>
-
 #include "barelymusician.h"
 #include "gtest/gtest.h"
 

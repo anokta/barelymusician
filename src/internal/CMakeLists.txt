@@ -14,6 +14,7 @@ target_link_libraries(
   barelymusician_internal_message
   barelymusician_internal_message_queue
   barelymusician_common_find_or_null
+  barelymusician_dsp_decibels
   barelymusician_dsp_instrument_processor
   barelymusician_dsp_one_pole_filter
   barelymusician_dsp_sample_data
@@ -83,6 +84,7 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_internal_instrument_test
     barelymusician_internal_instrument
+    barelymusician_dsp_decibels
     barelymusician_dsp_sample_data
     barelymusician_headeronly
     gmock

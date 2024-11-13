@@ -26,7 +26,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kSampleCount = 256;
 
 // Instrument settings.
-constexpr double kGain = 0.125;
+constexpr double kGain = -18.0;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
 constexpr double kAttack = 0.05;
 constexpr double kRelease = 0.125;

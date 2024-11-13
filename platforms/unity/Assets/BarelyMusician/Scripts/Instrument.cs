@@ -98,9 +98,9 @@ namespace Barely {
       private AudioClip _sample = null;
     }
 
-    /// Gain.
-    [Range(0.0f, 1.0f)]
-    public double Gain = 1.0;
+    /// Gain in decibels.
+    [Range(-80.0f, 0.0f)]
+    public double Gain = 0.0;
 
     /// Number of voices.
     [Range(1, 20)]
@@ -142,7 +142,7 @@ namespace Barely {
     /// Filter type.
     public FilterType FilterType = FilterType.NONE;
 
-    /// Filter frequency.
+    /// Filter frequency in hertz.
     [Range(0.0f, 48000.0f)]
     public double FilterFrequency = 0.0;
 

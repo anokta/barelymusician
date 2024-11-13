@@ -48,7 +48,7 @@ namespace Barely {
     public static class Internal {
       /// Control type.
       public enum ControlType {
-        /// Gain.
+        /// Gain in decibels.
         [InspectorName("Gain")] GAIN = 0,
         /// Number of voices.
         [InspectorName("Voice Count")] VOICE_COUNT,
@@ -56,13 +56,13 @@ namespace Barely {
         [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
         /// Sample playback mode.
         [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
-        /// Envelope attack.
+        /// Envelope attack in seconds.
         [InspectorName("Attack")] ATTACK,
-        /// Envelope decay.
+        /// Envelope decay in seconds.
         [InspectorName("Decay")] DECAY,
         /// Envelope sustain.
         [InspectorName("Sustain")] SUSTAIN,
-        /// Envelope release.
+        /// Envelope release in seconds.
         [InspectorName("Release")] RELEASE,
         /// Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
@@ -70,7 +70,7 @@ namespace Barely {
         [InspectorName("Retrigger")] RETRIGGER,
         /// Filter type.
         [InspectorName("Filter Type")] FILTER_TYPE,
-        /// Filter frequency.
+        /// Filter frequency in hertz.
         [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
       }
 

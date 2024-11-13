@@ -128,7 +128,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.25
+  m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -224,15 +224,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.20000000298023224
-  VoiceCount: 8
+  Gain: -24
+  VoiceCount: 2
   OscillatorShape: 1
   SamplePlaybackMode: 0
   Samplers: []
   Attack: 0
   Decay: 0
   Sustain: 1
-  Release: 0.800000011920929
+  Release: 0.5
   PitchShift: 0
   Retrigger: 0
   FilterType: 0

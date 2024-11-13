@@ -603,8 +603,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.5
-  VoiceCount: 8
+  Gain: -6
+  VoiceCount: 4
   OscillatorShape: 1
   SamplePlaybackMode: 0
   Samplers: []
@@ -614,6 +614,8 @@ MonoBehaviour:
   Release: 0.20000000298023224
   PitchShift: 0
   Retrigger: 0
+  FilterType: 0
+  FilterFrequency: 0
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

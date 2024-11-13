@@ -49,7 +49,7 @@
 ///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::ControlType::kGain, /*value=*/0.5);
+///   instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0);
 ///
 ///   // Process.
 ///   //
@@ -130,7 +130,7 @@
 ///   BarelyInstrument_IsNoteOn(instrument, c3_pitch, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, BarelyControlType_kGain, /*value=*/0.5);
+///   BarelyInstrument_SetControl(instrument, BarelyControlType_kGain, /*value=*/-6.0);
 ///
 ///   // Process.
 ///   //
@@ -212,7 +212,7 @@ typedef int32_t BarelyControlType;
 
 /// Control type enum values.
 enum BarelyControlType_Values {
-  /// Gain.
+  /// Gain in decibels.
   BarelyControlType_kGain = 0,
   /// Number of voices.
   BarelyControlType_kVoiceCount,
@@ -220,13 +220,13 @@ enum BarelyControlType_Values {
   BarelyControlType_kOscillatorShape,
   /// Sample playback mode.
   BarelyControlType_kSamplePlaybackMode,
-  /// Envelope attack.
+  /// Envelope attack in seconds.
   BarelyControlType_kAttack,
-  /// Envelope decay.
+  /// Envelope decay in seconds.
   BarelyControlType_kDecay,
   /// Envelope sustain.
   BarelyControlType_kSustain,
-  /// Envelope release.
+  /// Envelope release in seconds.
   BarelyControlType_kRelease,
   /// Pitch shift.
   BarelyControlType_kPitchShift,
@@ -234,7 +234,7 @@ enum BarelyControlType_Values {
   BarelyControlType_kRetrigger,
   /// Filter type.
   BarelyControlType_kFilterType,
-  /// Filter frequency.
+  /// Filter frequency in hertz.
   BarelyControlType_kFilterFrequency,
   /// Number of control types.
   BarelyControlType_kCount,
@@ -771,7 +771,7 @@ namespace barely {
 
 /// Control type enum.
 enum class ControlType : BarelyControlType {
-  /// Gain.
+  /// Gain in decibels.
   kGain = BarelyControlType_kGain,
   /// Number of voices.
   kVoiceCount = BarelyControlType_kVoiceCount,
@@ -779,13 +779,13 @@ enum class ControlType : BarelyControlType {
   kOscillatorShape = BarelyControlType_kOscillatorShape,
   /// Sample playback mode.
   kSamplePlaybackMode = BarelyControlType_kSamplePlaybackMode,
-  /// Envelope attack.
+  /// Envelope attack in seconds.
   kAttack = BarelyControlType_kAttack,
-  /// Envelope decay.
+  /// Envelope decay in seconds.
   kDecay = BarelyControlType_kDecay,
   /// Envelope sustain.
   kSustain = BarelyControlType_kSustain,
-  /// Envelope release.
+  /// Envelope release in seconds.
   kRelease = BarelyControlType_kRelease,
   /// Pitch shift.
   kPitchShift = BarelyControlType_kPitchShift,
@@ -793,7 +793,7 @@ enum class ControlType : BarelyControlType {
   kRetrigger = BarelyControlType_kRetrigger,
   /// Filter type.
   kFilterType = BarelyControlType_kFilterType,
-  /// Filter frequency.
+  /// Filter frequency in hertz.
   kFilterFrequency = BarelyControlType_kFilterFrequency,
 };
 

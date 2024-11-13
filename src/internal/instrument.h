@@ -163,6 +163,9 @@ class Instrument {
   using ControlArray = std::array<Control, static_cast<int>(BarelyControlType_kCount)>;
   using NoteControlArray = std::array<Control, static_cast<int>(BarelyNoteControlType_kCount)>;
 
+  /// Builds a control message to be passed into the instrument processor.
+  ControlMessage BuildControlMessage(ControlType type, double value) const noexcept;
+
   // Sampling rate in hertz.
   const int sample_rate_ = 0;
 

@@ -2,6 +2,8 @@
 #define BARELYMUSICIAN_DSP_ENVELOPE_H_
 
 #include <algorithm>
+#include <cassert>
+
 namespace barely::internal {
 
 /// Envelope that generates output samples according to its current state.
@@ -12,9 +14,8 @@ class Envelope {
    public:
     /// Constructs new `Adsr`.
     ///
-    /// @param sample_rate Sampling rate in hertz.
-    explicit Adsr(int sample_rate) noexcept
-        : sample_interval_((sample_rate > 0) ? 1.0 / static_cast<double>(sample_rate) : 0.0) {}
+    /// @param sample_interval Sample interval in seconds.
+    explicit Adsr(double sample_interval) noexcept : sample_interval_(sample_interval) {}
 
     /// Sets the attack.
     ///
@@ -54,7 +55,7 @@ class Envelope {
    private:
     friend class Envelope;
 
-    // Inverse sampling rate in seconds.
+    // Sample interval in seconds.
     double sample_interval_ = 0.0;
 
     // ADSR values.
@@ -71,16 +72,16 @@ class Envelope {
 
   /// Generates the next output sample.
   ///
-  /// @param adsr Adsr.
   /// @return Next output sample.
-  double Next(const Adsr& adsr) noexcept {
+  double Next() noexcept {
     if (state_ == State::kIdle) {
       return 0.0;
     }
+    assert(adsr_ != nullptr);
     if (state_ == State::kAttack) {
-      if (adsr.attack_increment_ > 0.0) {
+      if (adsr_->attack_increment_ > 0.0) {
         output_ = phase_;
-        phase_ += adsr.attack_increment_;
+        phase_ += adsr_->attack_increment_;
         if (phase_ >= 1.0) {
           phase_ = 0.0;
           state_ = State::kDecay;
@@ -91,9 +92,9 @@ class Envelope {
       state_ = State::kDecay;
     }
     if (state_ == State::kDecay) {
-      if (adsr.decay_increment_ > 0.0) {
-        output_ = 1.0 - phase_ * (1.0 - adsr.sustain_);
-        phase_ += adsr.decay_increment_;
+      if (adsr_->decay_increment_ > 0.0) {
+        output_ = 1.0 - phase_ * (1.0 - adsr_->sustain_);
+        phase_ += adsr_->decay_increment_;
         if (phase_ >= 1.0) {
           phase_ = 0.0;
           state_ = State::kSustain;
@@ -104,13 +105,13 @@ class Envelope {
       state_ = State::kSustain;
     }
     if (state_ == State::kSustain) {
-      output_ = adsr.sustain_;
+      output_ = adsr_->sustain_;
       return output_;
     }
     if (state_ == State::kRelease) {
-      if (adsr.release_increment_ > 0.0) {
+      if (adsr_->release_increment_ > 0.0) {
         output_ = (1.0 - phase_) * release_output_;
-        phase_ += adsr.release_increment_;
+        phase_ += adsr_->release_increment_;
         if (phase_ >= 1.0) {
           phase_ = 0.0;
           state_ = State::kIdle;
@@ -130,9 +131,10 @@ class Envelope {
   ///
   /// @param adsr Adsr.
   void Start(const Adsr& adsr) noexcept {
+    adsr_ = &adsr;
+    output_ = adsr_->sustain_;
     phase_ = 0.0;
     state_ = State::kAttack;
-    output_ = adsr.sustain_;
   }
 
   /// Stops the envelope.
@@ -147,6 +149,9 @@ class Envelope {
  private:
   // Envelope state.
   enum class State { kAttack, kDecay, kSustain, kRelease, kIdle };
+
+  // Pointer to adsr.
+  const Adsr* adsr_ = nullptr;
 
   // Last output value.
   double output_ = 0.0;

@@ -2,10 +2,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 
 #include "barelymusician.h"
-#include "dsp/one_pole_filter.h"
 #include "dsp/sample_data.h"
 #include "dsp/voice.h"
 
@@ -13,26 +11,18 @@ namespace barely::internal {
 
 namespace {
 
-// Returns the frequency ratio of a given `pitch`.
-double FrequencyRatioFromPitch(double pitch) { return std::pow(2.0, pitch); }
-
-// Returns the frequency of a given `pitch`.
-double FrequencyFromPitch(double pitch, double reference_frequency) noexcept {
-  return reference_frequency * FrequencyRatioFromPitch(pitch);
-}
-
 template <OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
 VoiceCallback GetVoiceCallback(FilterType filter_type) {
   switch (filter_type) {
     case FilterType::kNone:
-      return Voice::ProcessVoice<FilterType::kNone, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kNone, kOscillatorShape, kSamplePlaybackMode>;
     case FilterType::kLowPass:
-      return Voice::ProcessVoice<FilterType::kLowPass, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kLowPass, kOscillatorShape, kSamplePlaybackMode>;
     case FilterType::kHighPass:
-      return Voice::ProcessVoice<FilterType::kHighPass, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kHighPass, kOscillatorShape, kSamplePlaybackMode>;
     default:
       assert(!"Invalid filter type");
-      return Voice::ProcessVoice<FilterType::kNone, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kNone, kOscillatorShape, kSamplePlaybackMode>;
   }
 }
 
@@ -80,11 +70,10 @@ VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorShape oscillato
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(int sample_rate, double reference_frequency) noexcept
-    : adsr_(sample_rate),
+    : sample_interval_(1.0 / static_cast<double>(sample_rate)),
+      adsr_(sample_interval_),
       gain_processor_(sample_rate),
-      reference_frequency_(reference_frequency),
-      sample_rate_(sample_rate),
-      sample_interval_(1.0 / static_cast<double>(sample_rate)) {
+      reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
 }
 
@@ -147,11 +136,8 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
         if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
           const double shifted_pitch =
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-          voice.set_oscillator_increment(FrequencyFromPitch(shifted_pitch, reference_frequency_) *
-                                         sample_interval_);
-          voice.set_sample_player_speed(
-              FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch),
-              sample_interval_);
+          voice.set_oscillator_increment(shifted_pitch, reference_frequency_, sample_interval_);
+          voice.set_sample_player_increment(shifted_pitch, sample_interval_);
         }
       }
       break;
@@ -164,7 +150,7 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
           GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
       break;
     case ControlType::kFilterFrequency: {
-      filter_coefficient_ = GetFilterCoefficient(sample_rate_, value);
+      filter_coefficient_ = value;
     } break;
     default:
       assert(!"Invalid control type");
@@ -182,11 +168,8 @@ void InstrumentProcessor::SetNoteControl(double pitch, NoteControlType type,
           voice_states_[i].pitch_shift = value;
           const double shifted_pitch =
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-          voice.set_oscillator_increment(FrequencyFromPitch(shifted_pitch, reference_frequency_) *
-                                         sample_interval_);
-          voice.set_sample_player_speed(
-              FrequencyRatioFromPitch(shifted_pitch - voice_states_[i].root_pitch),
-              sample_interval_);
+          voice.set_oscillator_increment(shifted_pitch, reference_frequency_, sample_interval_);
+          voice.set_sample_player_increment(shifted_pitch, sample_interval_);
           break;
         }
       }
@@ -214,20 +197,12 @@ void InstrumentProcessor::SetNoteOn(double pitch, double intensity) noexcept {
     // No voices available.
     return;
   }
-  VoiceState& voice_state = AcquireVoice(pitch);
-  voice_state.pitch = pitch;
-  voice_state.pitch_shift = 0.0;
-  voice_state.timestamp = 0;
-
-  Voice& voice = voice_state.voice;
+  Voice& voice = AcquireVoice(pitch);
   const double shifted_pitch = pitch + pitch_shift_;
-  voice.set_oscillator_increment(FrequencyFromPitch(shifted_pitch, reference_frequency_) *
-                                 sample_interval_);
+  voice.set_oscillator_increment(shifted_pitch, reference_frequency_, sample_interval_);
   if (const auto* sample = sample_data_.Select(pitch); sample != nullptr) {
-    voice_state.root_pitch = sample->root_pitch;
     voice.set_sample_player_slice(sample);
-    voice.set_sample_player_speed(FrequencyRatioFromPitch(shifted_pitch - sample->root_pitch),
-                                  sample_interval_);
+    voice.set_sample_player_increment(shifted_pitch, sample_interval_);
   }
   voice.Start(adsr_, intensity);
 }
@@ -239,8 +214,7 @@ void InstrumentProcessor::SetReferenceFrequency(double reference_frequency) noex
     if (auto& voice = voice_states_[i].voice; voice.IsActive()) {
       const double shifted_pitch =
           voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-      voice.set_oscillator_increment(FrequencyFromPitch(shifted_pitch, reference_frequency_) *
-                                     sample_interval_);
+      voice.set_oscillator_increment(shifted_pitch, reference_frequency_, sample_interval_);
     }
   }
 }
@@ -254,16 +228,15 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
       voice.set_sample_player_slice(nullptr);
     } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch);
                sample != nullptr) {
-      voice_states_[i].root_pitch = sample->root_pitch;
+      const double shifted_pitch =
+          voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
       voice.set_sample_player_slice(sample);
-      voice.set_sample_player_speed(
-          FrequencyRatioFromPitch(voice_states_[i].pitch + pitch_shift_ - sample->root_pitch),
-          sample_interval_);
+      voice.set_sample_player_increment(shifted_pitch, sample_interval_);
     }
   }
 }
 
-InstrumentProcessor::VoiceState& InstrumentProcessor::AcquireVoice(double pitch) noexcept {
+Voice& InstrumentProcessor::AcquireVoice(double pitch) noexcept {
   int voice_index = -1;
   int oldest_voice_index = 0;
   for (int i = 0; i < voice_count_; ++i) {
@@ -287,7 +260,11 @@ InstrumentProcessor::VoiceState& InstrumentProcessor::AcquireVoice(double pitch)
     // If no voices are available to acquire, steal the oldest active voice.
     voice_index = oldest_voice_index;
   }
-  return voice_states_[voice_index];
+  VoiceState& voice_state = voice_states_[voice_index];
+  voice_state.pitch = pitch;
+  voice_state.pitch_shift = 0.0;
+  voice_state.timestamp = 0;
+  return voice_state.voice;
 }
 
 }  // namespace barely::internal

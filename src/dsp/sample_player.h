@@ -54,14 +54,14 @@ class SamplePlayer {
 
   /// Sets the increment per sample.
   ///
-  /// @param speed Sample playback speed.
+  /// @param pitch Note pitch.
   /// @param sample_interval Sample interval in seconds.
-  void SetIncrement(double speed, double sample_interval) noexcept {
+  void SetIncrement(double pitch, double sample_interval) noexcept {
     assert(sample_interval >= 0.0);
-    assert(speed >= 0.0);
-    increment_ = (slice_ != nullptr && slice_->sample_count > 0)
-                     ? speed * slice_->sample_rate * sample_interval
-                     : 0.0;
+    increment_ =
+        (slice_ != nullptr && slice_->sample_count > 0)
+            ? std::pow(2.0, pitch - slice_->root_pitch) * slice_->sample_rate * sample_interval
+            : 0.0;
   }
 
  private:

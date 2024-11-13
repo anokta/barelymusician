@@ -11,10 +11,12 @@ namespace {
 // Tests that the oscillator generates sawtooth samples as expected.
 TEST(OscillatorTest, Next) {
   constexpr double kCycleCount = 5;
-  constexpr double kIncrement = 0.25;
+  constexpr double kPitch = 0.0;
+  constexpr double kReferenceFrequency = 100.0;
+  constexpr double kSampleInterval = 0.0025;
 
   Oscillator oscillator;
-  oscillator.SetIncrement(kIncrement);
+  oscillator.SetIncrement(kPitch, kReferenceFrequency, kSampleInterval);
 
   for (int cycle = 0; cycle < kCycleCount; ++cycle) {
     for (int i = -2; i < 2; ++i) {

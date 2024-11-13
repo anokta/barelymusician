@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 
 #include "barelymusician.h"
 #include "dsp/envelope.h"
@@ -16,11 +17,18 @@ namespace barely::internal {
 /// Class that wraps an instrument voice.
 class Voice {
  public:
+  /// Returns the next output sample.
+  ///
+  /// @tparam kFilterType Filter type.
+  /// @tparam kOscillatorShape Oscillator shape.
+  /// @tparam kSamplePlaybackMode Sample playback mode.
+  /// @param voice Voice.
+  /// @param filter_coefficient Filter coefficient.
+  /// @return Next output value.
   template <FilterType kFilterType, OscillatorShape kOscillatorShape,
             SamplePlaybackMode kSamplePlaybackMode>
-  [[nodiscard]] static double ProcessVoice(Voice& voice, const Envelope::Adsr& adsr,
-                                           double filter_coefficient) noexcept {
-    return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(adsr, filter_coefficient);
+  [[nodiscard]] static double Next(Voice& voice, double filter_coefficient) noexcept {
+    return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(filter_coefficient);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -55,20 +63,21 @@ class Voice {
     }
   }
 
-  void set_oscillator_increment(double oscillator_increment) noexcept {
-    oscillator_.SetIncrement(oscillator_increment);
+  void set_oscillator_increment(double pitch, double reference_frequency,
+                                double sample_interval) noexcept {
+    oscillator_.SetIncrement(pitch, reference_frequency, sample_interval);
+  }
+  void set_sample_player_increment(double pitch, double sample_interval) noexcept {
+    sample_player_.SetIncrement(pitch, sample_interval);
   }
   void set_sample_player_slice(const SampleDataSlice* sample_player_slice) noexcept {
     sample_player_.SetSlice(sample_player_slice);
-  }
-  void set_sample_player_speed(double speed, double sample_interval) noexcept {
-    sample_player_.SetIncrement(speed, sample_interval);
   }
 
  private:
   template <FilterType kFilterType, OscillatorShape kOscillatorShape,
             SamplePlaybackMode kSamplePlaybackMode>
-  [[nodiscard]] double Next(const Envelope::Adsr& adsr, double filter_coefficient) noexcept {
+  [[nodiscard]] double Next(double filter_coefficient) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!sample_player_.IsActive()) {
         envelope_.Reset();
@@ -76,7 +85,7 @@ class Voice {
       }
     }
     const double output =
-        gain_ * envelope_.Next(adsr) *
+        gain_ * envelope_.Next() *
         (oscillator_.Next<kOscillatorShape>() + sample_player_.Next<kSamplePlaybackMode>());
     return filter_.Next<kFilterType>(output, filter_coefficient);
   }
@@ -87,6 +96,13 @@ class Voice {
   Oscillator oscillator_;
   SamplePlayer sample_player_;
 };
+
+/// Voice callback signature alias.
+///
+/// @param voice Mutable voice.
+/// @param filter_coefficient Filter coefficient.
+/// @return Processed output value.
+using VoiceCallback = double (*)(Voice& voice, double filter_coefficient);
 
 }  // namespace barely::internal
 

@@ -9,6 +9,7 @@
 #include "barelymusician.h"
 #include "common/find_or_null.h"
 #include "dsp/instrument_processor.h"
+#include "dsp/one_pole_filter.h"
 #include "dsp/sample_data.h"
 #include "internal/event.h"
 #include "internal/message.h"
@@ -97,7 +98,7 @@ void Instrument::SetAllNotesOff() noexcept {
 
 void Instrument::SetControl(ControlType type, double value) noexcept {
   if (auto& control = controls_[static_cast<int>(type)]; control.SetValue(value)) {
-    message_queue_.Add(update_sample_, ControlMessage{type, control.value});
+    message_queue_.Add(update_sample_, BuildControlMessage(type, control.value));
   }
 }
 
@@ -149,6 +150,16 @@ void Instrument::SetSampleData(SampleData sample_data) noexcept {
 void Instrument::Update(int64_t update_sample) noexcept {
   assert(update_sample >= update_sample_);
   update_sample_ = update_sample;
+}
+
+ControlMessage Instrument::BuildControlMessage(ControlType type, double value) const noexcept {
+  switch (type) {
+    case ControlType::kFilterFrequency:
+      return ControlMessage{type, GetFilterCoefficient(sample_rate_, value)};
+    default:
+      break;
+  }
+  return ControlMessage{type, value};
 }
 
 }  // namespace barely::internal

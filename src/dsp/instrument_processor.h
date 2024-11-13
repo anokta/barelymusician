@@ -10,14 +10,6 @@
 
 namespace barely::internal {
 
-/// Voice callback signature alias.
-///
-/// @param voice Mutable voice.
-/// @return Processed output value.
-// TODO(#144): Clean this up by calling each carrier by template types.
-using VoiceCallback = double (*)(Voice& voice, const Envelope::Adsr& adsr,
-                                 double filter_coefficient);
-
 /// Class that wraps the audio processing of an instrument.
 class InstrumentProcessor {
  public:
@@ -71,6 +63,7 @@ class InstrumentProcessor {
 
  private:
   static constexpr int kMaxVoiceCount = 20;
+
   // List of voices with their pitch and timestamp. Voice timestamp is used to determine which voice
   // to steal when there are no free voices available.
   // TODO(#12): Consider a more optimized implementation for voice stealing.
@@ -78,15 +71,11 @@ class InstrumentProcessor {
     Voice voice;
     double pitch = 0.0;
     double pitch_shift = 0.0;
-    double root_pitch = 0.0;
     int timestamp = 0;
   };
-  VoiceState& AcquireVoice(double pitch) noexcept;
-  VoiceCallback voice_callback_ =
-      Voice::ProcessVoice<FilterType::kNone, OscillatorShape::kNone, SamplePlaybackMode::kNone>;
-  Envelope::Adsr adsr_;
-  std::array<VoiceState, kMaxVoiceCount> voice_states_;
-  int voice_count_ = 8;
+
+  /// Acquires a new voice.
+  Voice& AcquireVoice(double pitch) noexcept;
 
   template <bool kShouldAccumulate>
   void ProcessVoice(Voice& voice, double* output_samples, int output_sample_count) noexcept {
@@ -98,12 +87,20 @@ class InstrumentProcessor {
         return;
       }
       if constexpr (kShouldAccumulate) {
-        output_samples[i] += voice_callback_(voice, adsr_, filter_coefficient_);
+        output_samples[i] += voice_callback_(voice, filter_coefficient_);
       } else {
-        output_samples[i] = voice_callback_(voice, adsr_, filter_coefficient_);
+        output_samples[i] = voice_callback_(voice, filter_coefficient_);
       }
     }
   }
+
+  VoiceCallback voice_callback_ =
+      Voice::Next<FilterType::kNone, OscillatorShape::kNone, SamplePlaybackMode::kNone>;
+  std::array<VoiceState, kMaxVoiceCount> voice_states_;
+  int voice_count_ = 8;
+
+  double sample_interval_ = 0.0;
+  Envelope::Adsr adsr_;
 
   GainProcessor gain_processor_;
   SampleData sample_data_;
@@ -116,11 +113,8 @@ class InstrumentProcessor {
 
   bool should_retrigger_ = false;
 
-  double reference_frequency_ = 0.0;
   double pitch_shift_ = 0.0;
-
-  int sample_rate_ = 0;
-  double sample_interval_ = 0.0;
+  double reference_frequency_ = 0.0;
 };
 
 }  // namespace barely::internal

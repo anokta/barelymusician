@@ -41,10 +41,13 @@ class Oscillator {
 
   /// Sets the increment per sample.
   ///
-  /// @param increment Increment per sample.
-  void SetIncrement(double increment) noexcept {
-    assert(increment >= 0.0);
-    increment_ = increment;
+  /// @param pitch Note pitch.
+  /// @param reference_frequency Reference frequency in hertz.
+  /// @param sample_interval Sample interval in seconds.
+  void SetIncrement(double pitch, double reference_frequency, double sample_interval) noexcept {
+    assert(reference_frequency >= 0.0);
+    assert(sample_interval >= 0.0);
+    increment_ = std::pow(2.0, pitch) * reference_frequency * sample_interval;
   }
 
  private:

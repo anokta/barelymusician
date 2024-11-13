@@ -11,15 +11,15 @@ namespace {
 // Sample data.
 constexpr int kDataLength = 5;
 constexpr double kData[kDataLength] = {1.0, 2.0, 3.0, 4.0, 5.0};
-constexpr SampleDataSlice kSlice = SampleDataSlice(0.0, 1, kData);
+constexpr double kPitch = 0.0;
 constexpr double kSampleInterval = 1;
-constexpr double kSpeed = 1.0;
+constexpr SampleDataSlice kSlice = SampleDataSlice(kPitch, 1, kData);
 
 // Tests that the sample data is played back once as expected.
 TEST(SamplePlayerTest, SimplePlayback) {
   SamplePlayer sample_player;
   sample_player.SetSlice(&kSlice);
-  sample_player.SetIncrement(kSpeed, kSampleInterval);
+  sample_player.SetIncrement(kPitch, kSampleInterval);
 
   for (int i = 0; i < kDataLength; ++i) {
     EXPECT_DOUBLE_EQ(sample_player.Next<SamplePlaybackMode::kOnce>(), kData[i]) << "at index " << i;
@@ -33,7 +33,7 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
 
   SamplePlayer sample_player;
   sample_player.SetSlice(&kSlice);
-  sample_player.SetIncrement(kSpeed, kSampleInterval);
+  sample_player.SetIncrement(kPitch, kSampleInterval);
 
   for (int i = 0; i < kDataLength * kLoopCount; ++i) {
     EXPECT_DOUBLE_EQ(sample_player.Next<SamplePlaybackMode::kLoop>(), kData[i % kDataLength])
@@ -43,19 +43,20 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
 
 // Tests that the sample data is played back as expected at different speeds.
 TEST(SamplePlayerTest, SetSpeed) {
-  const std::vector<double> kSpeeds = {0.0, 0.4, 1.0, 1.25, 2.0, 3.3};
+  const std::vector<double> kPitches = {-1.0, 0.0, 0.4, 1.0, 1.25, 2.0, 3.3};
 
   SamplePlayer sample_player;
   sample_player.SetSlice(&kSlice);
 
-  for (const double speed : kSpeeds) {
+  for (const double pitch : kPitches) {
     sample_player.Reset();
-    sample_player.SetIncrement(speed, kSampleInterval);
+    sample_player.SetIncrement(pitch, kSampleInterval);
     for (int i = 0; i < kDataLength; ++i) {
-      const int expected_index = static_cast<int>(static_cast<double>(i) * speed);
+      const int expected_index =
+          static_cast<int>(static_cast<double>(i) * std::pow(2.0, pitch - kPitch));
       EXPECT_DOUBLE_EQ(sample_player.Next<SamplePlaybackMode::kLoop>(),
                        kData[expected_index % kDataLength])
-          << "at index " << i << ", where speed is: " << speed;
+          << "at index " << i << ", where pitch is: " << pitch;
     }
   }
 }
@@ -64,7 +65,7 @@ TEST(SamplePlayerTest, SetSpeed) {
 TEST(SamplePlayerTest, Reset) {
   SamplePlayer sample_player;
   sample_player.SetSlice(&kSlice);
-  sample_player.SetIncrement(kSpeed, kSampleInterval);
+  sample_player.SetIncrement(kPitch, kSampleInterval);
 
   const double first_sample = sample_player.Next<SamplePlaybackMode::kOnce>();
   EXPECT_NE(sample_player.Next<SamplePlaybackMode::kOnce>(), first_sample);

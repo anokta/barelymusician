@@ -5,8 +5,8 @@
 namespace barely::internal {
 namespace {
 
-// Sampling rate.
 constexpr int kSampleRate = 1000;
+constexpr double kSampleInterval = 1.0 / kSampleRate;
 
 // Envelope ADSR.
 constexpr double kAttack = 0.02;
@@ -20,16 +20,16 @@ constexpr double kEpsilon = 1e-3;
 // Tests that the envelope generates the expected output samples when initialized with the default
 // constructor.
 TEST(EnvelopeTest, ProcessDefault) {
-  const Envelope::Adsr adsr(kSampleRate);
+  const Envelope::Adsr adsr(kSampleInterval);
 
   Envelope envelope;
-  EXPECT_DOUBLE_EQ(envelope.Next(adsr), 0.0);
+  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 
   envelope.Start(adsr);
-  EXPECT_DOUBLE_EQ(envelope.Next(adsr), 1.0);
+  EXPECT_DOUBLE_EQ(envelope.Next(), 1.0);
 
   envelope.Stop();
-  EXPECT_DOUBLE_EQ(envelope.Next(adsr), 0.0);
+  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 }
 
 // Tests that the envelope generates the expected output samples consistently over multiple samples.
@@ -39,14 +39,15 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   constexpr int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
   constexpr int kReleaseSampleCount = static_cast<int>(kSampleRate * kRelease);
 
-  Envelope::Adsr adsr(kSampleRate);
-
-  Envelope envelope;
+  Envelope::Adsr adsr(kSampleInterval);
   adsr.SetAttack(kAttack);
   adsr.SetDecay(kDecay);
   adsr.SetSustain(kSustain);
   adsr.SetRelease(kRelease);
-  EXPECT_DOUBLE_EQ(envelope.Next(adsr), 0.0);
+
+  Envelope envelope;
+
+  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 
   double expected_sample = 0.0;
 
@@ -63,7 +64,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
       // Sustain.
       expected_sample = kSustain;
     }
-    EXPECT_NEAR(envelope.Next(adsr), expected_sample, kEpsilon);
+    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
   }
 
   envelope.Stop();
@@ -76,7 +77,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
       // Idle.
       expected_sample = 0.0;
     }
-    EXPECT_NEAR(envelope.Next(adsr), expected_sample, kEpsilon);
+    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
   }
 }
 

@@ -50,16 +50,9 @@ void GainProcessor::Process(double* samples, int sample_count) noexcept {
   int i = 0;
   // Apply linear ramp.
   if (gain_ != target_gain_) {
-    if (is_initialized_) {
-      i = static_cast<int>(unity_ramp_sample_count_ * std::abs(target_gain_ - gain_));
-      if (i > 0) {
-        gain_ = ApplyLinearRamp(gain_, target_gain_, i, samples, sample_count);
-      }
-    } else {
-      gain_ = target_gain_;
-    }
+    i = static_cast<int>(unity_ramp_sample_count_ * std::abs(target_gain_ - gain_));
+    gain_ = (i > 0) ? ApplyLinearRamp(gain_, target_gain_, i, samples, sample_count) : target_gain_;
   }
-  is_initialized_ = true;
   // Apply constant gain to the rest of the samples.
   if (i < sample_count) {
     ApplyConstantGain(gain_, &samples[i], sample_count - i);

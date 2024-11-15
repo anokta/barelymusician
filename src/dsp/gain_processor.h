@@ -24,10 +24,7 @@ class GainProcessor {
 
  private:
   // Current gain in amplitude.
-  double gain_ = 1.0;
-
-  // Denotes whether processor started processing or not.
-  bool is_initialized_ = false;
+  double gain_ = 0.0;
 
   // Total number of ramp samples for unity gain.
   double unity_ramp_sample_count_ = 0.0;

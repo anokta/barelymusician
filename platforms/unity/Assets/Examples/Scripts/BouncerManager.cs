@@ -10,18 +10,17 @@ namespace Barely {
       [Min(0.0f)]
       public float spawnLatency = 1.0f;
 
-      private void Start() {
-        if (shouldAutoGenerate) {
-          InvokeRepeating("InstantiateNewBouncer", 0.0f, spawnLatency);
-        }
-      }
-
       private void Update() {
         if (((Application.platform == RuntimePlatform.Android ||
               Application.platform == RuntimePlatform.IPhonePlayer) &&
              Input.GetMouseButtonDown(0)) ||
             Input.GetKeyDown(KeyCode.Space)) {
           InstantiateNewBouncer();
+        }
+        if (shouldAutoGenerate && !IsInvoking("InstantiateNewBouncer")) {
+          InvokeRepeating("InstantiateNewBouncer", 0.0f, spawnLatency);
+        } else if (!shouldAutoGenerate && IsInvoking("InstantiateNewBouncer")) {
+          CancelInvoke();
         }
       }
 

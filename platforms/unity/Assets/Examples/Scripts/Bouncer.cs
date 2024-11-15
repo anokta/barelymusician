@@ -7,6 +7,7 @@ namespace Barely {
       public Scale scale;
 
       private int _lastIndex = 0;
+      private double _lastPitch = 0.0;
 
       private void Update() {
         if (transform.position.y < -10.0f) {
@@ -15,10 +16,14 @@ namespace Barely {
       }
 
       private void OnCollisionEnter(Collision collision) {
-        double pitch = scale.GetPitch(_lastIndex++);
+        _lastPitch = scale.GetPitch(_lastIndex);
         double intensity = (double)Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
-        instrument.SetNoteOn(pitch, intensity);
-        instrument.SetNoteOff(pitch);
+        instrument.SetNoteOn(_lastPitch, intensity);
+      }
+
+      private void OnCollisionExit(Collision collision) {
+        instrument.SetNoteOff(_lastPitch);
+        ++_lastIndex;
       }
     }
   }  // namespace Examples

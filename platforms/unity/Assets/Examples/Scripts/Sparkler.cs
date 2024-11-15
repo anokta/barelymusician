@@ -10,6 +10,12 @@ namespace Barely {
       private Color noteOffColor = Color.white;
       private Color targetColor = Color.white;
 
+      private Renderer _renderer = null;
+
+      private void Awake() {
+        _renderer = GetComponent<Renderer>();
+      }
+
       private void OnEnable() {
         targetInstrument.OnNoteOff += OnNoteOff;
         targetInstrument.OnNoteOn += OnNoteOn;
@@ -21,13 +27,13 @@ namespace Barely {
       }
 
       private void Start() {
-        noteOffColor = GetComponent<Renderer>().material.color;
+        noteOffColor = _renderer.material.color;
         targetColor = noteOffColor;
       }
 
       private void Update() {
-        GetComponent<Renderer>().material.color =
-            Color.Lerp(GetComponent<Renderer>().material.color, targetColor, 8 * Time.deltaTime);
+        _renderer.material.color =
+            Color.Lerp(_renderer.material.color, targetColor, 8 * Time.deltaTime);
       }
 
       private void OnNoteOff(double pitch) {
@@ -36,7 +42,7 @@ namespace Barely {
 
       private void OnNoteOn(double pitch, double intensity) {
         targetColor = Color.Lerp(noteOffColor, noteOnColor, (float)intensity);
-        GetComponent<Renderer>().material.color = targetColor;
+        _renderer.material.color = targetColor;
       }
     }
   }  // namespace Examples

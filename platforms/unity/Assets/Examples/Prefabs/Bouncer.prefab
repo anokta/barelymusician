@@ -225,11 +225,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Gain: -24
-  VoiceCount: 2
+  VoiceCount: 8
   OscillatorShape: 1
   SamplePlaybackMode: 0
   Samplers: []
-  Attack: 0
+  Attack: 0.004999999888241291
   Decay: 0
   Sustain: 1
   Release: 0.5

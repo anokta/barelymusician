@@ -10,7 +10,7 @@ namespace Barely {
       private double _lastPitch = 0.0;
 
       private void Update() {
-        if (transform.position.y < -10.0f) {
+        if (transform.position.y < -100.0f) {
           GameObject.Destroy(gameObject);
         }
       }

@@ -1073,7 +1073,7 @@ namespace Barely {
           }
         }
 
-        private void FixedUpdate() {
+        private void LateUpdate() {
           double nextTimestamp = GetNextTimestamp();
           while (_scheduledTaskCallbacks.Count > 0) {
             double taskTimestamp = _scheduledTaskCallbacks.ElementAt(0).Key;
@@ -1101,7 +1101,7 @@ namespace Barely {
           BarelyMusician_SetReferenceFrequency(_handle, _referenceFrequency);
           BarelyMusician_SetTempo(_handle, _tempo);
           _outputSamples = new double[config.dspBufferSize];
-          _latency = (double)config.dspBufferSize / config.sampleRate;
+          _latency = (double)(config.dspBufferSize + 1) / config.sampleRate;
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, GetNextTimestamp());
         }
@@ -1116,8 +1116,7 @@ namespace Barely {
 
         // Returns the next timestamp to update.
         private double GetNextTimestamp() {
-          double lookahead = Math.Max(_latency, (double)Time.fixedDeltaTime);
-          return AudioSettings.dspTime + lookahead;
+          return AudioSettings.dspTime + _latency;
         }
       }
 

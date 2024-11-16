@@ -301,22 +301,22 @@ namespace Barely {
       /// Sets instrument data.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @param samplers List of samplers.
+      /// @param slices List of slices.
       public static void Instrument_SetSampleData(IntPtr instrumentHandle,
-                                                  List<Instrument.Sampler> samplers) {
-        SampleData[] sampleData = null;
-        if (samplers.Count > 0) {
-          sampleData = new SampleData[samplers.Count];
-          for (int i = 0; i < sampleData.Length; ++i) {
-            sampleData[i] = new SampleData() {
-              rootPitch = samplers[i].RootPitch / 12.0,
-              sampleRate = (samplers[i].Sample != null) ? samplers[i].Sample.frequency : 0,
-              samples = samplers[i].Data,
-              sampleCount = (samplers[i].Sample != null) ? samplers[i].Sample.samples : 0,
+                                                  List<Instrument.Slice> slices) {
+        SampleDataSlice[] sampleDataSlices = null;
+        if (slices.Count > 0) {
+          sampleDataSlices = new SampleDataSlice[slices.Count];
+          for (int i = 0; i < sampleDataSlices.Length; ++i) {
+            sampleDataSlices[i] = new SampleDataSlice() {
+              rootPitch = slices[i].RootPitch / 12.0,
+              sampleRate = (slices[i].Sample != null) ? slices[i].Sample.frequency : 0,
+              samples = slices[i].Data,
+              sampleCount = (slices[i].Sample != null) ? slices[i].Sample.samples : 0,
             };
           }
         }
-        if (!BarelyInstrument_SetSampleData(instrumentHandle, sampleData, samplers.Count) &&
+        if (!BarelyInstrument_SetSampleData(instrumentHandle, sampleDataSlices, slices.Count) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument sample data");
         }
@@ -917,7 +917,7 @@ namespace Barely {
 
       // Sample data.
       [StructLayout(LayoutKind.Sequential)]
-      private struct SampleData {
+      private struct SampleDataSlice {
         // Root note pitch.
         public double rootPitch;
 
@@ -1176,8 +1176,8 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
       private static extern bool BarelyInstrument_SetSampleData(IntPtr instrument,
-                                                                [In] SampleData[] sampleData,
-                                                                Int32 sampleDataCount);
+                                                                [In] SampleDataSlice[] slices,
+                                                                Int32 sliceCount);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_AddInstrument")]
       private static extern bool BarelyMusician_AddInstrument(IntPtr musician,

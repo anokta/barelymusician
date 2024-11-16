@@ -9,6 +9,7 @@ namespace Barely {
       public Color color = Color.white;
 
       public Arpeggiator arpeggiator = null;
+      public bool enableModeSwitch = false;
       public OscillatorShape oscillatorShape = OscillatorShape.SINE;
       public SamplePlaybackMode samplePlaybackMode = SamplePlaybackMode.LOOP;
 
@@ -18,8 +19,10 @@ namespace Barely {
       private float[,] _targetAlphas = null;
 
       private void Awake() {
-        controller.instrument.OscillatorShape = oscillatorShape;
-        controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
+        if (enableModeSwitch) {
+          controller.instrument.OscillatorShape = oscillatorShape;
+          controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
+        }
       }
 
       private void OnEnable() {
@@ -52,6 +55,9 @@ namespace Barely {
       }
 
       private void Update() {
+        if (!enableModeSwitch) {
+          return;
+        }
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
           controller.instrument.OscillatorShape = oscillatorShape;
           controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;

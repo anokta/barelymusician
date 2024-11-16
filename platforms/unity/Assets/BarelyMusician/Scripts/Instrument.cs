@@ -49,9 +49,9 @@ namespace Barely {
   /// A representation of a musical instrument that can be played in real-time.
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
-    /// Sampler.
+    /// Slice.
     [Serializable]
-    public class Sampler {
+    public class Slice {
       /// Root note pitch.
       public int RootPitch = 0;
 
@@ -102,23 +102,18 @@ namespace Barely {
     [Range(-80.0f, 0.0f)]
     public double Gain = 0.0;
 
+    /// Pitch shift.
+    [Range(-1.0f, 1.0f)]
+    public double PitchShift = 0.0;
+
+    /// Retrigger.
+    public bool Retrigger = false;
+
     /// Number of voices.
     [Range(1, 20)]
     public int VoiceCount = 8;
 
-    /// Oscillator shape.
-    public OscillatorShape OscillatorShape = OscillatorShape.NONE;
-
-    /// Pulse width.
-    [Range(0.0f, 1.0f)]
-    public double PulseWidth = 0.5;
-
-    /// Sample playback mode.
-    public SamplePlaybackMode SamplePlaybackMode = SamplePlaybackMode.NONE;
-
-    /// List of samplers.
-    public List<Sampler> Samplers = null;
-    private int _samplerCount = 0;
+    [Header("Envelope")]
 
     /// Envelope attack in seconds.
     [Range(0.0f, 60.0f)]
@@ -136,12 +131,25 @@ namespace Barely {
     [Range(0.0f, 60.0f)]
     public double Release = 0.25;
 
-    /// Pitch shift.
-    [Range(-1.0f, 1.0f)]
-    public double PitchShift = 0.0;
+    [Header("Oscillator")]
 
-    /// Retrigger.
-    public bool Retrigger = false;
+    /// Oscillator shape.
+    public OscillatorShape OscillatorShape = OscillatorShape.NONE;
+
+    /// Pulse width.
+    [Range(0.0f, 1.0f)]
+    public double PulseWidth = 0.5;
+
+    [Header("Sample Player")]
+
+    /// Sample playback mode.
+    public SamplePlaybackMode SamplePlaybackMode = SamplePlaybackMode.NONE;
+
+    /// List of sample data slices.
+    public List<Slice> Slices = null;
+    private int _sliceCount = 0;
+
+    [Header("Filter")]
 
     /// Filter type.
     public FilterType FilterType = FilterType.NONE;
@@ -303,10 +311,10 @@ namespace Barely {
     }
 
     private void UpdateSampleData() {
-      if (Samplers != null &&
-          (Samplers.Count != _samplerCount || Samplers.Any(sampler => sampler.HasChanged))) {
-        _samplerCount = Samplers.Count;
-        Musician.Internal.Instrument_SetSampleData(_handle, Samplers);
+      if (Slices != null &&
+          (Slices.Count != _sliceCount || Slices.Any(slice => slice.HasChanged))) {
+        _sliceCount = Slices.Count;
+        Musician.Internal.Instrument_SetSampleData(_handle, Slices);
       }
     }
 

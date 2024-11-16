@@ -8,10 +8,19 @@ namespace Barely {
       public Texture2D pixel = null;
       public Color color = Color.white;
 
+      public Arpeggiator arpeggiator = null;
+      public OscillatorShape oscillatorShape = OscillatorShape.SINE;
+      public SamplePlaybackMode samplePlaybackMode = SamplePlaybackMode.LOOP;
+
       private const int N = 4;
       private Dictionary<double, Vector2> _activeNotes = null;
       private float[,] _alphas = null;
       private float[,] _targetAlphas = null;
+
+      private void Awake() {
+        controller.instrument.OscillatorShape = oscillatorShape;
+        controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
+      }
 
       private void OnEnable() {
         _activeNotes = new Dictionary<double, Vector2>();
@@ -38,6 +47,27 @@ namespace Barely {
             GUI.DrawTexture(new Rect(x * Screen.width / N, y * Screen.height / N, Screen.width / N,
                                      Screen.height / N),
                             pixel);
+          }
+        }
+      }
+
+      private void Update() {
+        if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
+          controller.instrument.OscillatorShape = oscillatorShape;
+          controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
+        } else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
+          controller.instrument.OscillatorShape = OscillatorShape.NONE;
+          controller.instrument.SamplePlaybackMode = samplePlaybackMode;
+        } else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
+          controller.instrument.OscillatorShape = oscillatorShape;
+          controller.instrument.SamplePlaybackMode = samplePlaybackMode;
+        } else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) {
+          if (controller.arpeggiator != null) {
+            controller.arpeggiator.SetAllNotesOff();
+            controller.arpeggiator = null;
+          } else {
+            controller.instrument.SetAllNotesOff();
+            controller.arpeggiator = arpeggiator;
           }
         }
       }

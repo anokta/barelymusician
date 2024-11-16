@@ -54,6 +54,8 @@ namespace Barely {
         [InspectorName("Voice Count")] VOICE_COUNT,
         /// Oscillator shape.
         [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
+        /// Pulse width.
+        [InspectorName("Pulse Width")] PULSE_WIDTH,
         /// Sample playback mode.
         [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
         /// Envelope attack in seconds.

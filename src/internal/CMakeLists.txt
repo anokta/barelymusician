@@ -17,6 +17,7 @@ target_link_libraries(
   barelymusician_dsp_decibels
   barelymusician_dsp_instrument_processor
   barelymusician_dsp_one_pole_filter
+  barelymusician_dsp_oscillator
   barelymusician_dsp_sample_data
   barelymusician_headeronly
 )

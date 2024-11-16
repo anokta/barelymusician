@@ -16,16 +16,17 @@ class Oscillator {
   /// Generates the next output sample.
   ///
   /// @tparam kShape Oscillator shape.
+  /// @param pulse_width Pulse width.
   /// @return Next output sample.
   template <OscillatorShape kShape>
-  [[nodiscard]] double Next() noexcept {
+  [[nodiscard]] double Next([[maybe_unused]] double pulse_width) noexcept {
     double output = 0.0;
     if constexpr (kShape == OscillatorShape::kSine) {
       output = std::sin(phase_ * 2.0 * std::numbers::pi_v<double>);
     } else if constexpr (kShape == OscillatorShape::kSaw) {
       output = 2.0 * phase_ - 1.0;
     } else if constexpr (kShape == OscillatorShape::kSquare) {
-      output = (phase_ < 0.5) ? -1.0 : 1.0;
+      output = (phase_ < pulse_width) ? -1.0 : 1.0;
     } else if constexpr (kShape == OscillatorShape::kNoise) {
       output = random_.DrawUniform(-1.0, 1.0);
     }
@@ -60,6 +61,11 @@ class Oscillator {
   // White noise random number generator.
   inline static Random random_ = Random();
 };
+
+/// Normalizes the pulse width into audible range.
+///
+/// @param pulse_width Pulse width.
+inline double NormalizePulseWidth(double pulse_width) noexcept { return 0.01 + pulse_width * 0.98; }
 
 }  // namespace barely::internal
 

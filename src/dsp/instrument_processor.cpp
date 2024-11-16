@@ -113,6 +113,9 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       voice_callback_ =
           GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
       break;
+    case ControlType::kPulseWidth:
+      pulse_width_ = value;
+      break;
     case ControlType::kSamplePlaybackMode:
       sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
       voice_callback_ =

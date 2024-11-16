@@ -12,13 +12,15 @@ TEST(OscillatorTest, Next) {
   constexpr double kPitch = 0.0;
   constexpr double kReferenceFrequency = 100.0;
   constexpr double kSampleInterval = 0.0025;
+  constexpr double kPulseWidth = 0.5;
 
   Oscillator oscillator;
   oscillator.SetIncrement(kPitch, kReferenceFrequency, kSampleInterval);
 
   for (int cycle = 0; cycle < kCycleCount; ++cycle) {
     for (int i = -2; i < 2; ++i) {
-      EXPECT_DOUBLE_EQ(oscillator.Next<OscillatorShape::kSaw>(), static_cast<double>(i) * 0.5);
+      EXPECT_DOUBLE_EQ(oscillator.Next<OscillatorShape::kSaw>(kPulseWidth),
+                       static_cast<double>(i) * 0.5);
     }
   }
 }

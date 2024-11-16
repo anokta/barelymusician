@@ -218,6 +218,8 @@ enum BarelyControlType_Values {
   BarelyControlType_kVoiceCount,
   /// Oscillator shape.
   BarelyControlType_kOscillatorShape,
+  /// Pulse width.
+  BarelyControlType_kPulseWidth,
   /// Sample playback mode.
   BarelyControlType_kSamplePlaybackMode,
   /// Envelope attack in seconds.
@@ -777,6 +779,8 @@ enum class ControlType : BarelyControlType {
   kVoiceCount = BarelyControlType_kVoiceCount,
   /// Oscillator shape.
   kOscillatorShape = BarelyControlType_kOscillatorShape,
+  /// Pulse width.
+  kPulseWidth = BarelyControlType_kPulseWidth,
   /// Sample playback mode.
   kSamplePlaybackMode = BarelyControlType_kSamplePlaybackMode,
   /// Envelope attack in seconds.

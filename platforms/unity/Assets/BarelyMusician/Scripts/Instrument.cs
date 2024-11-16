@@ -109,6 +109,10 @@ namespace Barely {
     /// Oscillator shape.
     public OscillatorShape OscillatorShape = OscillatorShape.NONE;
 
+    /// Pulse width.
+    [Range(0.0f, 1.0f)]
+    public double PulseWidth = 0.5;
+
     /// Sample playback mode.
     public SamplePlaybackMode SamplePlaybackMode = SamplePlaybackMode.NONE;
 
@@ -274,6 +278,7 @@ namespace Barely {
       SetControl(Musician.Internal.ControlType.GAIN, Gain);
       SetControl(Musician.Internal.ControlType.VOICE_COUNT, (double)VoiceCount);
       SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
+      SetControl(Musician.Internal.ControlType.PULSE_WIDTH, PulseWidth);
       SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
       SetControl(Musician.Internal.ControlType.ATTACK, Attack);
       SetControl(Musician.Internal.ControlType.DECAY, Decay);

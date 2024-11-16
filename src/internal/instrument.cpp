@@ -11,6 +11,7 @@
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/one_pole_filter.h"
+#include "dsp/oscillator.h"
 #include "dsp/sample_data.h"
 #include "internal/event.h"
 #include "internal/message.h"
@@ -159,6 +160,8 @@ ControlMessage Instrument::BuildControlMessage(ControlType type, double value) c
       return ControlMessage{type, AmplitudeFromDecibels(value)};
     case ControlType::kFilterFrequency:
       return ControlMessage{type, GetFilterCoefficient(sample_rate_, value)};
+    case ControlType::kPulseWidth:
+      return ControlMessage{type, NormalizePulseWidth(value)};
     default:
       break;
   }

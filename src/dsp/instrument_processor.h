@@ -87,9 +87,9 @@ class InstrumentProcessor {
         return;
       }
       if constexpr (kShouldAccumulate) {
-        output_samples[i] += voice_callback_(voice, filter_coefficient_);
+        output_samples[i] += voice_callback_(voice, filter_coefficient_, pulse_width_);
       } else {
-        output_samples[i] = voice_callback_(voice, filter_coefficient_);
+        output_samples[i] = voice_callback_(voice, filter_coefficient_, pulse_width_);
       }
     }
   }
@@ -110,6 +110,7 @@ class InstrumentProcessor {
   SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
 
   double filter_coefficient_ = 1.0;
+  double pulse_width_ = 0.5;
 
   bool should_retrigger_ = false;
 

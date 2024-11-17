@@ -111,19 +111,22 @@ namespace Barely {
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(this);
       }
-    }
-
-    private void OnDisable() {
-      Musician.Internal.Performer_Destroy(ref _handle);
-      for (int i = 0; i < Tasks.Count; ++i) {
-        Tasks[i].Update(null);
-      }
-    }
-
-    void Start() {
       if (PlayOnAwake) {
         Play();
       }
+    }
+
+    private void Start() {
+      if (PlayOnAwake && !IsPlaying) {
+        Play();
+      }
+    }
+
+    private void OnDisable() {
+      for (int i = 0; i < Tasks.Count; ++i) {
+        Tasks[i].Update(null);
+      }
+      Musician.Internal.Performer_Destroy(ref _handle);
     }
 
     private void Update() {

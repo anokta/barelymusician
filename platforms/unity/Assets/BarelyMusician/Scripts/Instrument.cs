@@ -256,12 +256,6 @@ namespace Barely {
 
     private void Awake() {
       Source = GetComponent<AudioSource>();
-      Source.clip = AudioClip.Create("[DO NOT EDIT]", 64, 1, AudioSettings.outputSampleRate, false);
-      float[] ones = new float[64];
-      for (int i = 0; i < ones.Length; ++i) {
-        ones[i] = 1.0f;
-      }
-      Source.clip.SetData(ones, 0);
       Source.loop = true;
     }
 
@@ -272,13 +266,21 @@ namespace Barely {
     private void OnEnable() {
       Musician.Internal.Instrument_Create(this, ref _handle);
       OnInstrumentCreate?.Invoke();
-      Source?.Play();
+      Source.clip = AudioClip.Create("[DO NOT EDIT]", 64, 1, AudioSettings.outputSampleRate, false);
+      float[] ones = new float[64];
+      for (int i = 0; i < ones.Length; ++i) {
+        ones[i] = 1.0f;
+      }
+      Source.clip.SetData(ones, 0);
+      Source.Play();
     }
 
     private void OnDisable() {
-      Source?.Stop();
+      Source.Stop();
+      Source.clip = null;
       OnInstrumentDestroy?.Invoke();
       Musician.Internal.Instrument_Destroy(ref _handle);
+      _sliceCount = 0;
     }
 
     private void Update() {

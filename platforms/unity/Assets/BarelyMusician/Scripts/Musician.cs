@@ -1035,11 +1035,14 @@ namespace Barely {
         userData = IntPtr.Zero,
       };
 
+      // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
+      private const double _minLookahead = 0.025;
+
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
 
-      // Latency in seconds.
-      private static double _latency = 0.0;
+      // DSP latency in seconds.
+      private static double _dspLatency = 0.0;
 
       // Array of mono output samples.
       public static double[] _outputSamples = null;
@@ -1065,6 +1068,10 @@ namespace Barely {
 
         private void OnAudioConfigurationChanged(bool deviceWasChanged) {
           Shutdown();
+          var performers = FindObjectsOfType<Performer>();
+          for (int i = 0; i < performers.Length; ++i) {
+            performers[i].enabled = false;
+          }
           var instruments = FindObjectsOfType<Instrument>();
           for (int i = 0; i < instruments.Length; ++i) {
             instruments[i].enabled = false;
@@ -1072,6 +1079,9 @@ namespace Barely {
           Initialize();
           for (int i = 0; i < instruments.Length; ++i) {
             instruments[i].enabled = true;
+          }
+          for (int i = 0; i < performers.Length; ++i) {
+            performers[i].enabled = true;
           }
         }
 
@@ -1092,7 +1102,7 @@ namespace Barely {
           BarelyMusician_Update(_handle, nextTimestamp);
         }
 
-        // Initializes the native state.
+        // Initializes the internal state.
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
@@ -1103,12 +1113,12 @@ namespace Barely {
           BarelyMusician_SetReferenceFrequency(_handle, _referenceFrequency);
           BarelyMusician_SetTempo(_handle, _tempo);
           _outputSamples = new double[config.dspBufferSize];
-          _latency = (double)(config.dspBufferSize + 1) / config.sampleRate;
+          _dspLatency = (double)(config.dspBufferSize + 1) / config.sampleRate;
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, GetNextTimestamp());
         }
 
-        // Shuts down the native state.
+        // Shuts down the internal state.
         private void Shutdown() {
           _isShuttingDown = true;
           BarelyMusician_Destroy(_handle);
@@ -1118,249 +1128,250 @@ namespace Barely {
 
         // Returns the next timestamp to update.
         private double GetNextTimestamp() {
-          return AudioSettings.dspTime + _latency;
+          return AudioSettings.dspTime +
+                 Math.Max(Math.Max(_dspLatency, (double)Time.deltaTime), _minLookahead);
         }
       }
 
 #if !UNITY_EDITOR && UNITY_IOS
-      private const string pluginName = "__Internal";
+      private const string _pluginName = "__Internal";
 #else
-      private const string pluginName = "barelymusicianunity";
+      private const string _pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetControl")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetControl")]
       private static extern bool BarelyInstrument_GetControl(IntPtr instrument, ControlType type,
                                                              ref double outValue);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
       private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, double pitch,
                                                                  NoteControlType type,
                                                                  ref double outValue);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, double pitch,
                                                            ref bool outIsNoteOn);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_Process")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Process")]
       private static extern bool BarelyInstrument_Process(IntPtr instrument,
                                                           [In, Out] double[] outputSamples,
                                                           Int32 outputSampleCount,
                                                           double timestamp);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
       private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr instrument);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControl")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetControl")]
       private static extern bool BarelyInstrument_SetControl(IntPtr instrument, ControlType type,
                                                              double value);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
                                                                  NoteControlType type,
                                                                  double value);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, double pitch);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffEvent")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOffEvent")]
       private static extern bool BarelyInstrument_SetNoteOffEvent(IntPtr instrument,
                                                                   ref NoteOffEvent noteOffEvent);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
       private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, double pitch,
                                                             double intensity);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEvent")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEvent")]
       private static extern bool BarelyInstrument_SetNoteOnEvent(IntPtr instrument,
                                                                  ref NoteOnEvent noteOnEvent);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
       private static extern bool BarelyInstrument_SetSampleData(IntPtr instrument,
                                                                 [In] SampleDataSlice[] slices,
                                                                 Int32 sliceCount);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_AddInstrument")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_AddInstrument")]
       private static extern bool BarelyMusician_AddInstrument(IntPtr musician,
                                                               ref IntPtr outInstrument);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_AddPerformer")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_AddPerformer")]
       private static extern bool BarelyMusician_AddPerformer(IntPtr musician, Int32 processOrder,
                                                              ref IntPtr outPerformer);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_Create")]
       private static extern bool BarelyMusician_Create(Int32 sampleRate, ref IntPtr outMusician);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern bool BarelyMusician_Destroy(IntPtr musician);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetReferenceFrequency")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_GetReferenceFrequency")]
       private static extern bool BarelyMusician_GetReferenceFrequency(
           IntPtr musician, ref double outReferenceFrequency);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTempo")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_GetTempo")]
       private static extern bool BarelyMusician_GetTempo(IntPtr musician, ref double outTempo);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTimestamp")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_GetTimestamp")]
       private static extern bool BarelyMusician_GetTimestamp(IntPtr musician,
                                                              ref double outTimestamp);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_RemoveInstrument")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_RemoveInstrument")]
       private static extern bool BarelyMusician_RemoveInstrument(IntPtr musician,
                                                                  IntPtr instrument);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_RemovePerformer")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_RemovePerformer")]
       private static extern bool BarelyMusician_RemovePerformer(IntPtr musician, IntPtr performer);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_SetReferenceFrequency")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_SetReferenceFrequency")]
       private static extern bool BarelyMusician_SetReferenceFrequency(IntPtr musician,
                                                                       double referenceFrequency);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_SetTempo")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_SetTempo")]
       private static extern bool BarelyMusician_SetTempo(IntPtr musician, double tempo);
 
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_Update")]
+      [DllImport(_pluginName, EntryPoint = "BarelyMusician_Update")]
       private static extern bool BarelyMusician_Update(IntPtr musician, double timestamp);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_AddTask")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_AddTask")]
       private static extern bool BarelyPerformer_AddTask(IntPtr performer, ref TaskEvent taskEvent,
                                                          double position, ref IntPtr outTask);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_CancelAllOneOffTasks")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_CancelAllOneOffTasks")]
       private static extern bool BarelyPerformer_CancelAllOneOffTasks(IntPtr performer);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
       private static extern bool BarelyPerformer_GetLoopBeginPosition(
           IntPtr performer, ref double outLoopBeginPosition);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetLoopLength")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopLength")]
       private static extern bool BarelyPerformer_GetLoopLength(IntPtr performer,
                                                                ref double outLoopLength);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
       private static extern bool BarelyPerformer_GetPosition(IntPtr performer,
                                                              ref double outPosition);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_IsLooping")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsLooping")]
       private static extern bool BarelyPerformer_IsLooping(IntPtr performer, ref bool outIsLooping);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
       private static extern bool BarelyPerformer_IsPlaying(IntPtr performer, ref bool outIsPlaying);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_RemoveTask")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_RemoveTask")]
       private static extern bool BarelyPerformer_RemoveTask(IntPtr performer, IntPtr task);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_ScheduleOneOffTask")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_ScheduleOneOffTask")]
       private static extern bool BarelyPerformer_ScheduleOneOffTask(IntPtr performer,
                                                                     ref TaskEvent taskEvent,
                                                                     double position);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
       private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr performer,
                                                                       double loopBeginPosition);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetLoopLength")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopLength")]
       private static extern bool BarelyPerformer_SetLoopLength(IntPtr performer, double loopLength);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetLooping")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLooping")]
       private static extern bool BarelyPerformer_SetLooping(IntPtr performer, bool isLooping);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetPosition")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetPosition")]
       private static extern bool BarelyPerformer_SetPosition(IntPtr performer, double position);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_Start")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Start")]
       private static extern bool BarelyPerformer_Start(IntPtr performer);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_Stop")]
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Stop")]
       private static extern bool BarelyPerformer_Stop(IntPtr performer);
 
-      [DllImport(pluginName, EntryPoint = "BarelyScale_GetPitch")]
+      [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
       private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
                                                       ref double outPitch);
 
-      [DllImport(pluginName, EntryPoint = "BarelyTask_GetPosition")]
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPosition")]
       private static extern bool BarelyTask_GetPosition(IntPtr task, ref double outPosition);
 
-      [DllImport(pluginName, EntryPoint = "BarelyTask_SetPosition")]
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPosition")]
       private static extern bool BarelyTask_SetPosition(IntPtr task, double position);
 
       // Components.
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_Create")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Create")]
       private static extern bool BarelyArpeggiator_Create(IntPtr musician, Int32 processOrder,
                                                           ref IntPtr outArpeggiator);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
       private static extern bool BarelyArpeggiator_Destroy(IntPtr arpeggiator);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_IsNoteOn")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsNoteOn")]
       private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, double pitch,
                                                             ref bool outIsNoteOn);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
       private static extern bool BarelyArpeggiator_IsPlaying(IntPtr arpeggiator,
                                                              ref bool outIsPlaying);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetAllNotesOff")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetAllNotesOff")]
       private static extern bool BarelyArpeggiator_SetAllNotesOff(IntPtr arpeggiator);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetGateRatio")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetGateRatio")]
       private static extern bool BarelyArpeggiator_SetGateRatio(IntPtr arpeggiator,
                                                                 double gateRatio);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetInstrument")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetInstrument")]
       private static extern bool BarelyArpeggiator_SetInstrument(IntPtr arpeggiator,
                                                                  IntPtr instrument);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOff")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOff")]
       private static extern bool BarelyArpeggiator_SetNoteOff(IntPtr arpeggiator, double gateRatio);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOn")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOn")]
       private static extern bool BarelyArpeggiator_SetNoteOn(IntPtr arpeggiator, double gateRatio);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetRate")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetRate")]
       private static extern bool BarelyArpeggiator_SetRate(IntPtr arpeggiator, double rate);
 
-      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetStyle")]
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetStyle")]
       private static extern bool BarelyArpeggiator_SetStyle(IntPtr arpeggiator,
                                                             ArpeggiatorStyle style);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Clear")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Clear")]
       private static extern bool BarelyRepeater_Clear(IntPtr repeater);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Create")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Create")]
       private static extern bool BarelyRepeater_Create(IntPtr musician, Int32 processOrder,
                                                        ref IntPtr outRepeater);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Destroy")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Destroy")]
       private static extern bool BarelyRepeater_Destroy(IntPtr repeater);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_IsPlaying")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_IsPlaying")]
       private static extern bool BarelyRepeater_IsPlaying(IntPtr repeater, ref bool outIsPlaying);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Pop")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Pop")]
       private static extern bool BarelyRepeater_Pop(IntPtr repeater);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Push")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Push")]
       private static extern bool BarelyRepeater_Push(IntPtr repeater, double pitch, Int32 length);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_PushSilence")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_PushSilence")]
       private static extern bool BarelyRepeater_PushSilence(IntPtr repeater, Int32 length);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_SetGateRatio")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_SetGateRatio")]
       private static extern bool BarelyRepeater_SetGateRatio(IntPtr repeater, double gateRatio);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_SetInstrument")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_SetInstrument")]
       private static extern bool BarelyRepeater_SetInstrument(IntPtr repeater, IntPtr instrument);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_SetRate")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_SetRate")]
       private static extern bool BarelyRepeater_SetRate(IntPtr repeater, double rate);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_SetStyle")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_SetStyle")]
       private static extern bool BarelyRepeater_SetStyle(IntPtr repeater, RepeaterStyle style);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Start")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Start")]
       private static extern bool BarelyRepeater_Start(IntPtr repeater, double pitchOffset);
 
-      [DllImport(pluginName, EntryPoint = "BarelyRepeater_Stop")]
+      [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Stop")]
       private static extern bool BarelyRepeater_Stop(IntPtr repeater);
     }
   }

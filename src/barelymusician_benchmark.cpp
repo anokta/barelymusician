@@ -92,8 +92,8 @@ void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
 
   for (auto _ : state) {
     state.PauseTiming();
-    timestamp += kTimestampIncrement;
     for (int i = 0; i < kUpdateCount; ++i) {
+      musician.Update(timestamp);
       instrument.SetControl(ControlType::kAttack, 0.001 * static_cast<double>(i));
       const double pitch = static_cast<double>(i) / static_cast<double>(kUpdateCount);
       instrument.SetNoteOn(pitch);
@@ -105,6 +105,7 @@ void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
     }
     state.ResumeTiming();
     instrument.Process(output_samples, timestamp);
+    timestamp += kTimestampIncrement;
   }
 }
 BENCHMARK(BM_BarelyInstrument_Process_FrequentUpdates);

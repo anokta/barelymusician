@@ -273,6 +273,7 @@ namespace Barely {
       }
       Source.clip.SetData(ones, 0);
       Source.Play();
+      Update();
     }
 
     private void OnDisable() {

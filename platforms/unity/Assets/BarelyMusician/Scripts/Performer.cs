@@ -105,12 +105,7 @@ namespace Barely {
 
     private void OnEnable() {
       Musician.Internal.Performer_Create(this, ref _handle);
-      Loop = _loop;
-      LoopBeginPosition = _loopBeginPosition;
-      LoopLength = _loopLength;
-      for (int i = 0; i < Tasks.Count; ++i) {
-        Tasks[i].Update(this);
-      }
+      Update();
       if (PlayOnAwake) {
         Play();
       }

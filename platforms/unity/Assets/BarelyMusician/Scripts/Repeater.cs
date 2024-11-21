@@ -59,6 +59,7 @@ namespace Barely {
       _instrument.OnInstrumentCreate += OnInstrumentCreate;
       _instrument.OnInstrumentDestroy += OnInstrumentDestroy;
       Musician.Internal.Repeater_SetInstrument(_handle, _instrument);
+      Update();
     }
 
     private void OnDisable() {

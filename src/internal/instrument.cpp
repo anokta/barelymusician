@@ -158,10 +158,10 @@ ControlMessage Instrument::BuildControlMessage(ControlType type, double value) c
   switch (type) {
     case ControlType::kGain:
       return ControlMessage{type, AmplitudeFromDecibels(value)};
-    case ControlType::kFilterFrequency:
-      return ControlMessage{type, GetFilterCoefficient(sample_rate_, value)};
     case ControlType::kPulseWidth:
       return ControlMessage{type, NormalizePulseWidth(value)};
+    case ControlType::kFilterFrequency:
+      return ControlMessage{type, GetFilterCoefficient(sample_rate_, value)};
     default:
       break;
   }

@@ -50,14 +50,12 @@ namespace Barely {
       public enum ControlType {
         /// Gain in decibels.
         [InspectorName("Gain")] GAIN = 0,
+        /// Pitch shift.
+        [InspectorName("Pitch Shift")] PITCH_SHIFT,
+        /// Retrigger.
+        [InspectorName("Retrigger")] RETRIGGER,
         /// Number of voices.
         [InspectorName("Voice Count")] VOICE_COUNT,
-        /// Oscillator shape.
-        [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
-        /// Pulse width.
-        [InspectorName("Pulse Width")] PULSE_WIDTH,
-        /// Sample playback mode.
-        [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
         /// Envelope attack in seconds.
         [InspectorName("Attack")] ATTACK,
         /// Envelope decay in seconds.
@@ -66,10 +64,12 @@ namespace Barely {
         [InspectorName("Sustain")] SUSTAIN,
         /// Envelope release in seconds.
         [InspectorName("Release")] RELEASE,
-        /// Pitch shift.
-        [InspectorName("Pitch Shift")] PITCH_SHIFT,
-        /// Retrigger.
-        [InspectorName("Retrigger")] RETRIGGER,
+        /// Oscillator shape.
+        [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
+        /// Pulse width.
+        [InspectorName("Pulse Width")] PULSE_WIDTH,
+        /// Sample playback mode.
+        [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
         /// Filter type.
         [InspectorName("Filter Type")] FILTER_TYPE,
         /// Filter frequency in hertz.

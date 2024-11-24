@@ -101,38 +101,6 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
     case ControlType::kGain:
       gain_processor_.SetGain(value);
       break;
-    case ControlType::kVoiceCount: {
-      const int voice_count = static_cast<int>(value);
-      for (int i = voice_count_; i < voice_count; ++i) {
-        voice_states_[i].voice.Reset();
-      }
-      voice_count_ = voice_count;
-    } break;
-    case ControlType::kOscillatorShape:
-      oscillator_shape_ = static_cast<OscillatorShape>(value);
-      voice_callback_ =
-          GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
-      break;
-    case ControlType::kPulseWidth:
-      pulse_width_ = value;
-      break;
-    case ControlType::kSamplePlaybackMode:
-      sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
-      voice_callback_ =
-          GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
-      break;
-    case ControlType::kAttack:
-      adsr_.SetAttack(value);
-      break;
-    case ControlType::kDecay:
-      adsr_.SetDecay(value);
-      break;
-    case ControlType::kSustain:
-      adsr_.SetSustain(value);
-      break;
-    case ControlType::kRelease:
-      adsr_.SetRelease(value);
-      break;
     case ControlType::kPitchShift:
       pitch_shift_ = value;
       for (int i = 0; i < voice_count_; ++i) {
@@ -146,6 +114,38 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
       break;
     case ControlType::kRetrigger:
       should_retrigger_ = static_cast<bool>(value);
+      break;
+    case ControlType::kVoiceCount: {
+      const int voice_count = static_cast<int>(value);
+      for (int i = voice_count_; i < voice_count; ++i) {
+        voice_states_[i].voice.Reset();
+      }
+      voice_count_ = voice_count;
+    } break;
+    case ControlType::kAttack:
+      adsr_.SetAttack(value);
+      break;
+    case ControlType::kDecay:
+      adsr_.SetDecay(value);
+      break;
+    case ControlType::kSustain:
+      adsr_.SetSustain(value);
+      break;
+    case ControlType::kRelease:
+      adsr_.SetRelease(value);
+      break;
+    case ControlType::kOscillatorShape:
+      oscillator_shape_ = static_cast<OscillatorShape>(value);
+      voice_callback_ =
+          GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
+      break;
+    case ControlType::kPulseWidth:
+      pulse_width_ = value;
+      break;
+    case ControlType::kSamplePlaybackMode:
+      sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
+      voice_callback_ =
+          GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
       break;
     case ControlType::kFilterType:
       filter_type_ = static_cast<FilterType>(value);

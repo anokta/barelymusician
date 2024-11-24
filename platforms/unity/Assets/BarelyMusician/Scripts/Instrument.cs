@@ -287,16 +287,16 @@ namespace Barely {
     private void Update() {
       UpdateSampleData();
       SetControl(Musician.Internal.ControlType.GAIN, Gain);
+      SetControl(Musician.Internal.ControlType.PITCH_SHIFT, PitchShift);
+      SetControl(Musician.Internal.ControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
       SetControl(Musician.Internal.ControlType.VOICE_COUNT, (double)VoiceCount);
-      SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
-      SetControl(Musician.Internal.ControlType.PULSE_WIDTH, PulseWidth);
-      SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
       SetControl(Musician.Internal.ControlType.ATTACK, Attack);
       SetControl(Musician.Internal.ControlType.DECAY, Decay);
       SetControl(Musician.Internal.ControlType.SUSTAIN, Sustain);
       SetControl(Musician.Internal.ControlType.RELEASE, Release);
-      SetControl(Musician.Internal.ControlType.PITCH_SHIFT, PitchShift);
-      SetControl(Musician.Internal.ControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
+      SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
+      SetControl(Musician.Internal.ControlType.PULSE_WIDTH, PulseWidth);
+      SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
       SetControl(Musician.Internal.ControlType.FILTER_TYPE, (double)FilterType);
       SetControl(Musician.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
     }

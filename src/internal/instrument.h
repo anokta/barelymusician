@@ -173,16 +173,16 @@ class Instrument {
   // Array of controls.
   ControlArray controls_ = {
       Control(0.0, kMinDecibels, 0.0),                                       // kGain
+      Control(0.0),                                                          // kPitchShift
+      Control(false),                                                        // kRetrigger
       Control(8, 1, 20),                                                     // kVoiceCount
-      Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),     // kOscillatorShape
-      Control(0.5, 0.0, 1.0),                                                // kPulseWidth
-      Control(0, 0, static_cast<int>(BarelySamplePlaybackMode_kCount) - 1),  // kSamplePlaybackMode
       Control(0.0, 0.0, 60.0),                                               // kAttack
       Control(0.0, 0.0, 60.0),                                               // kDecay
       Control(1.0, 0.0, 1.0),                                                // kSustain
       Control(0.0, 0.0, 60.0),                                               // kRelease
-      Control(0.0),                                                          // kPitchShift
-      Control(false),                                                        // kRetrigger
+      Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),     // kOscillatorShape
+      Control(0.5, 0.0, 1.0),                                                // kPulseWidth
+      Control(0, 0, static_cast<int>(BarelySamplePlaybackMode_kCount) - 1),  // kSamplePlaybackMode
       Control(0, 0, static_cast<int>(BarelyFilterType_kCount) - 1),          // kFilterType
       Control(0.0, 0.0),                                                     // kFilterFrequency
   };

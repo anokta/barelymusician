@@ -214,14 +214,12 @@ typedef int32_t BarelyControlType;
 enum BarelyControlType_Values {
   /// Gain in decibels.
   BarelyControlType_kGain = 0,
+  /// Pitch shift.
+  BarelyControlType_kPitchShift,
+  /// Retrigger.
+  BarelyControlType_kRetrigger,
   /// Number of voices.
   BarelyControlType_kVoiceCount,
-  /// Oscillator shape.
-  BarelyControlType_kOscillatorShape,
-  /// Pulse width.
-  BarelyControlType_kPulseWidth,
-  /// Sample playback mode.
-  BarelyControlType_kSamplePlaybackMode,
   /// Envelope attack in seconds.
   BarelyControlType_kAttack,
   /// Envelope decay in seconds.
@@ -230,10 +228,12 @@ enum BarelyControlType_Values {
   BarelyControlType_kSustain,
   /// Envelope release in seconds.
   BarelyControlType_kRelease,
-  /// Pitch shift.
-  BarelyControlType_kPitchShift,
-  /// Retrigger.
-  BarelyControlType_kRetrigger,
+  /// Oscillator shape.
+  BarelyControlType_kOscillatorShape,
+  /// Pulse width.
+  BarelyControlType_kPulseWidth,
+  /// Sample playback mode.
+  BarelyControlType_kSamplePlaybackMode,
   /// Filter type.
   BarelyControlType_kFilterType,
   /// Filter frequency in hertz.
@@ -775,14 +775,12 @@ namespace barely {
 enum class ControlType : BarelyControlType {
   /// Gain in decibels.
   kGain = BarelyControlType_kGain,
+  /// Pitch shift.
+  kPitchShift = BarelyControlType_kPitchShift,
+  /// Retrigger.
+  kRetrigger = BarelyControlType_kRetrigger,
   /// Number of voices.
   kVoiceCount = BarelyControlType_kVoiceCount,
-  /// Oscillator shape.
-  kOscillatorShape = BarelyControlType_kOscillatorShape,
-  /// Pulse width.
-  kPulseWidth = BarelyControlType_kPulseWidth,
-  /// Sample playback mode.
-  kSamplePlaybackMode = BarelyControlType_kSamplePlaybackMode,
   /// Envelope attack in seconds.
   kAttack = BarelyControlType_kAttack,
   /// Envelope decay in seconds.
@@ -791,10 +789,12 @@ enum class ControlType : BarelyControlType {
   kSustain = BarelyControlType_kSustain,
   /// Envelope release in seconds.
   kRelease = BarelyControlType_kRelease,
-  /// Pitch shift.
-  kPitchShift = BarelyControlType_kPitchShift,
-  /// Retrigger.
-  kRetrigger = BarelyControlType_kRetrigger,
+  /// Oscillator shape.
+  kOscillatorShape = BarelyControlType_kOscillatorShape,
+  /// Pulse width.
+  kPulseWidth = BarelyControlType_kPulseWidth,
+  /// Sample playback mode.
+  kSamplePlaybackMode = BarelyControlType_kSamplePlaybackMode,
   /// Filter type.
   kFilterType = BarelyControlType_kFilterType,
   /// Filter frequency in hertz.

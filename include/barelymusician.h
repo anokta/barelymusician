@@ -228,6 +228,10 @@ enum BarelyControlType_Values {
   BarelyControlType_kSustain,
   /// Envelope release in seconds.
   BarelyControlType_kRelease,
+  /// Oscillator mix.
+  BarelyControlType_kOscillatorMix,
+  /// Oscillator pitch shift.
+  BarelyControlType_kOscillatorPitchShift,
   /// Oscillator shape.
   BarelyControlType_kOscillatorShape,
   /// Pulse width.
@@ -789,6 +793,10 @@ enum class ControlType : BarelyControlType {
   kSustain = BarelyControlType_kSustain,
   /// Envelope release in seconds.
   kRelease = BarelyControlType_kRelease,
+  /// Oscillator mix.
+  kOscillatorMix = BarelyControlType_kOscillatorMix,
+  /// Oscillator pitch shift.
+  kOscillatorPitchShift = BarelyControlType_kOscillatorPitchShift,
   /// Oscillator shape.
   kOscillatorShape = BarelyControlType_kOscillatorShape,
   /// Pulse width.

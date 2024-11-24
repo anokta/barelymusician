@@ -64,6 +64,10 @@ namespace Barely {
         [InspectorName("Sustain")] SUSTAIN,
         /// Envelope release in seconds.
         [InspectorName("Release")] RELEASE,
+        /// Oscillator mix.
+        [InspectorName("Oscillator Mix")] OSCILLATOR_MIX,
+        /// Oscillator pitch shift.
+        [InspectorName("Oscillator Pitch Shift")] OSCILLATOR_PITCH_SHIFT,
         /// Oscillator shape.
         [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
         /// Pulse width.

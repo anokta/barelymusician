@@ -24,14 +24,15 @@ class Voice {
   /// @tparam kSamplePlaybackMode Sample playback mode.
   /// @param voice Voice.
   /// @param filter_coefficient Filter coefficient.
+  /// @param oscillator_mix Oscillator mix.
   /// @param pulse_width Pulse width.
   /// @return Next output value.
   template <FilterType kFilterType, OscillatorShape kOscillatorShape,
             SamplePlaybackMode kSamplePlaybackMode>
-  [[nodiscard]] static double Next(Voice& voice, double filter_coefficient,
+  [[nodiscard]] static double Next(Voice& voice, double filter_coefficient, double oscillator_mix,
                                    double pulse_width) noexcept {
-    return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(filter_coefficient,
-                                                                          pulse_width);
+    return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(
+        filter_coefficient, oscillator_mix, pulse_width);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -80,16 +81,18 @@ class Voice {
  private:
   template <FilterType kFilterType, OscillatorShape kOscillatorShape,
             SamplePlaybackMode kSamplePlaybackMode>
-  [[nodiscard]] double Next(double filter_coefficient, double pulse_width) noexcept {
+  [[nodiscard]] double Next(double filter_coefficient, double oscillator_mix,
+                            double pulse_width) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!sample_player_.IsActive()) {
         envelope_.Reset();
         return 0.0;
       }
     }
-    const double output = gain_ * envelope_.Next() *
-                          (oscillator_.Next<kOscillatorShape>(pulse_width) +
-                           sample_player_.Next<kSamplePlaybackMode>());
+    const double output =
+        gain_ * envelope_.Next() *
+        ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_.Next<kOscillatorShape>(pulse_width) +
+         (1.0 - std::max(0.0, oscillator_mix)) * sample_player_.Next<kSamplePlaybackMode>());
     return filter_.Next<kFilterType>(output, filter_coefficient);
   }
 
@@ -104,9 +107,11 @@ class Voice {
 ///
 /// @param voice Mutable voice.
 /// @param filter_coefficient Filter coefficient.
+/// @param oscillator_mix Oscillator mix.
 /// @param pulse_width Pulse width.
 /// @return Processed output value.
-using VoiceCallback = double (*)(Voice& voice, double filter_coefficient, double pulse_width);
+using VoiceCallback = double (*)(Voice& voice, double filter_coefficient, double oscillator_mix,
+                                 double pulse_width);
 
 }  // namespace barely::internal
 

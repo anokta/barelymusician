@@ -87,9 +87,11 @@ class InstrumentProcessor {
         return;
       }
       if constexpr (kShouldAccumulate) {
-        output_samples[i] += voice_callback_(voice, filter_coefficient_, pulse_width_);
+        output_samples[i] +=
+            voice_callback_(voice, filter_coefficient_, oscillator_mix_, pulse_width_);
       } else {
-        output_samples[i] = voice_callback_(voice, filter_coefficient_, pulse_width_);
+        output_samples[i] =
+            voice_callback_(voice, filter_coefficient_, oscillator_mix_, pulse_width_);
       }
     }
   }
@@ -110,11 +112,13 @@ class InstrumentProcessor {
   SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
 
   double filter_coefficient_ = 1.0;
+  double oscillator_mix_ = 0.0;
   double pulse_width_ = 0.5;
 
   bool should_retrigger_ = false;
 
   double pitch_shift_ = 0.0;
+  double oscillator_pitch_shift_ = 0.0;
   double reference_frequency_ = 0.0;
 };
 

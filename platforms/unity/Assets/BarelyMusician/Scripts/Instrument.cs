@@ -133,6 +133,14 @@ namespace Barely {
 
     [Header("Oscillator")]
 
+    /// Oscillator mix.
+    [Range(-1.0f, 1.0f)]
+    public double OscillatorMix = 0.0;
+
+    /// Oscillator pitch shift.
+    [Range(-1.0f, 1.0f)]
+    public double OscillatorPitchShift = 0.0;
+
     /// Oscillator shape.
     public OscillatorShape OscillatorShape = OscillatorShape.NONE;
 
@@ -294,6 +302,8 @@ namespace Barely {
       SetControl(Musician.Internal.ControlType.DECAY, Decay);
       SetControl(Musician.Internal.ControlType.SUSTAIN, Sustain);
       SetControl(Musician.Internal.ControlType.RELEASE, Release);
+      SetControl(Musician.Internal.ControlType.OSCILLATOR_MIX, OscillatorMix);
+      SetControl(Musician.Internal.ControlType.OSCILLATOR_PITCH_SHIFT, OscillatorPitchShift);
       SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
       SetControl(Musician.Internal.ControlType.PULSE_WIDTH, PulseWidth);
       SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);

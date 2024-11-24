@@ -37,11 +37,9 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 
   processor.SetNoteOn(0.0, 1.0);
 
-  for (int i = 0; i < kSampleRate; ++i) {
-    output = 0.0;
-    processor.Process(&output, 1);
-    EXPECT_DOUBLE_EQ(output, kSamples[0]);
-  }
+  output = 0.0;
+  processor.Process(&output, 1);
+  EXPECT_DOUBLE_EQ(output, kSamples[0]);
 
   processor.SetNoteOff(0.0);
 

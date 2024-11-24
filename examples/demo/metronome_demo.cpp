@@ -32,7 +32,7 @@ constexpr double kLookahead = 0.1;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
 constexpr double kGain = -12.0;
 constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.025;
+constexpr double kRelease = 0.05;
 constexpr int kVoiceCount = 1;
 
 constexpr double kBarPitch = 1.0;

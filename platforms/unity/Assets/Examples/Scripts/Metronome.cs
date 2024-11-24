@@ -22,7 +22,7 @@ namespace Barely {
       public double intensity = 1.0f;
 
       /// True if logging to console, false otherwise.
-      public bool isLoggingToConsole = true;
+      public bool isLoggingToConsole = false;
 
       /// True if ticking, false otherwise.
       public bool isTicking = false;
@@ -86,6 +86,13 @@ namespace Barely {
           OnBeat?.Invoke(bar, beat);
           OnBeatEvent?.Invoke(bar, beat);
         };
+      }
+
+      private void OnDestroy() {
+        _beatEventCallback = null;
+      }
+
+      private void OnEnable() {
         var tempGameObject = new GameObject() { hideFlags = HideFlags.HideAndDontSave };
         var instrument = tempGameObject.AddComponent<Instrument>();
         instrument.OscillatorShape = OscillatorShape.SQUARE;
@@ -112,10 +119,9 @@ namespace Barely {
         }, 0.0, ProcessOrder));
       }
 
-      private void OnDestroy() {
+      private void OnDisable() {
         GameObject.Destroy(_performer.gameObject);
         _performer = null;
-        _beatEventCallback = null;
       }
 
       private void Update() {

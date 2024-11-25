@@ -77,7 +77,7 @@ const std::vector<SymbolType>* ContextFreeGrammar<SymbolType>::GetSubstitution(
     const std::vector<std::vector<SymbolType>>& substitutions, Random& random) const noexcept {
   // Select a substitution randomly with equal probability for each selection.
   if (!substitutions.empty()) {
-    const int index = random.DrawUniform(0, static_cast<int>(substitutions.size()) - 1);
+    const int index = random.DrawUniform(0, static_cast<int>(substitutions.size()));
     return &substitutions[index];
   }
   return nullptr;

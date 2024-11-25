@@ -17,7 +17,7 @@ TEST(RandomTest, DrawUniformMinMax) {
   for (int i = 0; i < kValueCount; ++i) {
     const int value = random.DrawUniform(kMin, kMax);
     EXPECT_GE(value, kMin);
-    EXPECT_LE(value, kMax);
+    EXPECT_LT(value, kMax);
   }
 }
 

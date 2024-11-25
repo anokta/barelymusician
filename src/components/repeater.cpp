@@ -122,7 +122,7 @@ bool Repeater::Update() noexcept {
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
     case RepeaterStyle::kRandom:
-      index_ = random_.DrawUniform(0, size - 1);
+      index_ = random_.DrawUniform(0, size);
       break;
     default:
       assert(!"Invalid repeater style");

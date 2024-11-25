@@ -190,7 +190,7 @@ BARELY_EXPORT bool BarelyRandom_DrawNormal(BarelyRandomHandle random, double mea
 ///
 /// @param random Random handle.
 /// @param min Minimum value (inclusive).
-/// @param max Maximum value (inclusive).
+/// @param max Maximum value (exclusive).
 /// @param out_number Output random number.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_t min, int32_t max,

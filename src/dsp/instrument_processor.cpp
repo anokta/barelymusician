@@ -11,58 +11,93 @@ namespace barely::internal {
 
 namespace {
 
-template <OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
+template <OscillatorMode kOscillatorMode, OscillatorShape kOscillatorShape,
+          SamplePlaybackMode kSamplePlaybackMode>
 VoiceCallback GetVoiceCallback(FilterType filter_type) {
   switch (filter_type) {
     case FilterType::kNone:
-      return Voice::Next<FilterType::kNone, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kNone, kOscillatorMode, kOscillatorShape, kSamplePlaybackMode>;
     case FilterType::kLowPass:
-      return Voice::Next<FilterType::kLowPass, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kLowPass, kOscillatorMode, kOscillatorShape,
+                         kSamplePlaybackMode>;
     case FilterType::kHighPass:
-      return Voice::Next<FilterType::kHighPass, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kHighPass, kOscillatorMode, kOscillatorShape,
+                         kSamplePlaybackMode>;
     default:
       assert(!"Invalid filter type");
-      return Voice::Next<FilterType::kNone, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kNone, kOscillatorMode, kOscillatorShape, kSamplePlaybackMode>;
+  }
+}
+
+template <OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
+VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorMode oscillator_mode) {
+  switch (oscillator_mode) {
+    case OscillatorMode::kMix:
+      return GetVoiceCallback<OscillatorMode::kMix, kOscillatorShape, kSamplePlaybackMode>(
+          filter_type);
+    case OscillatorMode::kAm:
+      return GetVoiceCallback<OscillatorMode::kAm, kOscillatorShape, kSamplePlaybackMode>(
+          filter_type);
+    case OscillatorMode::kRing:
+      return GetVoiceCallback<OscillatorMode::kRing, kOscillatorShape, kSamplePlaybackMode>(
+          filter_type);
+    default:
+      assert(!"Invalid oscillator mode");
+      return GetVoiceCallback<OscillatorMode::kMix, kOscillatorShape, kSamplePlaybackMode>(
+          filter_type);
   }
 }
 
 template <SamplePlaybackMode kSamplePlaybackMode>
-VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorShape oscillator_shape) {
+VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorMode oscillator_mode,
+                               OscillatorShape oscillator_shape) {
   switch (oscillator_shape) {
     case OscillatorShape::kNone:
-      return GetVoiceCallback<OscillatorShape::kNone, kSamplePlaybackMode>(filter_type);
+      return GetVoiceCallback<OscillatorShape::kNone, kSamplePlaybackMode>(filter_type,
+                                                                           oscillator_mode);
     case OscillatorShape::kSine:
-      return GetVoiceCallback<OscillatorShape::kSine, kSamplePlaybackMode>(filter_type);
+      return GetVoiceCallback<OscillatorShape::kSine, kSamplePlaybackMode>(filter_type,
+                                                                           oscillator_mode);
     case OscillatorShape::kSaw:
-      return GetVoiceCallback<OscillatorShape::kSaw, kSamplePlaybackMode>(filter_type);
+      return GetVoiceCallback<OscillatorShape::kSaw, kSamplePlaybackMode>(filter_type,
+                                                                          oscillator_mode);
     case OscillatorShape::kSquare:
-      return GetVoiceCallback<OscillatorShape::kSquare, kSamplePlaybackMode>(filter_type);
+      return GetVoiceCallback<OscillatorShape::kSquare, kSamplePlaybackMode>(filter_type,
+                                                                             oscillator_mode);
     case OscillatorShape::kNoise:
-      return GetVoiceCallback<OscillatorShape::kNoise, kSamplePlaybackMode>(filter_type);
+      return GetVoiceCallback<OscillatorShape::kNoise, kSamplePlaybackMode>(filter_type,
+                                                                            oscillator_mode);
     default:
       assert(!"Invalid oscillator shape");
-      return GetVoiceCallback<OscillatorShape::kNone, kSamplePlaybackMode>(filter_type);
+      return GetVoiceCallback<OscillatorShape::kNone, kSamplePlaybackMode>(filter_type,
+                                                                           oscillator_mode);
   }
 }
 
-VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorShape oscillator_shape,
-                               const SampleData& sample_data,
+VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorMode oscillator_mode,
+                               OscillatorShape oscillator_shape, const SampleData& sample_data,
                                SamplePlaybackMode sample_playback_mode) {
   if (sample_data.empty()) {
-    return GetVoiceCallback<SamplePlaybackMode::kNone>(filter_type, oscillator_shape);
+    return GetVoiceCallback<SamplePlaybackMode::kNone>(filter_type, oscillator_mode,
+                                                       oscillator_shape);
   }
   switch (sample_playback_mode) {
     case SamplePlaybackMode::kNone:
-      return GetVoiceCallback<SamplePlaybackMode::kNone>(filter_type, oscillator_shape);
+      return GetVoiceCallback<SamplePlaybackMode::kNone>(filter_type, oscillator_mode,
+                                                         oscillator_shape);
     case SamplePlaybackMode::kOnce:
-      return GetVoiceCallback<SamplePlaybackMode::kOnce>(filter_type, oscillator_shape);
+      return GetVoiceCallback<SamplePlaybackMode::kOnce>(filter_type, oscillator_mode,
+                                                         oscillator_shape);
     case SamplePlaybackMode::kSustain:
-      return GetVoiceCallback<SamplePlaybackMode::kSustain>(filter_type, oscillator_shape);
+      return GetVoiceCallback<SamplePlaybackMode::kSustain>(filter_type, oscillator_mode,
+                                                            oscillator_shape);
     case SamplePlaybackMode::kLoop:
-      return GetVoiceCallback<SamplePlaybackMode::kLoop>(filter_type, oscillator_shape);
+      return GetVoiceCallback<SamplePlaybackMode::kLoop>(filter_type, oscillator_mode,
+                                                         oscillator_shape);
     default:
       assert(!"Invalid sample playback mode");
-      return GetVoiceCallback<SamplePlaybackMode::kNone>(filter_type, oscillator_shape);
+      return GetVoiceCallback<SamplePlaybackMode::kNone>(filter_type, oscillator_mode,
+                                                         oscillator_shape);
   }
 }
 
@@ -152,23 +187,28 @@ void InstrumentProcessor::SetControl(ControlType type, double value) noexcept {
         }
       }
       break;
+    case ControlType::kOscillatorMode:
+      oscillator_mode_ = static_cast<OscillatorMode>(value);
+      voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
+                                         sample_data_, sample_playback_mode_);
+      break;
     case ControlType::kOscillatorShape:
       oscillator_shape_ = static_cast<OscillatorShape>(value);
-      voice_callback_ =
-          GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
+      voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
+                                         sample_data_, sample_playback_mode_);
       break;
     case ControlType::kPulseWidth:
       pulse_width_ = value;
       break;
     case ControlType::kSamplePlaybackMode:
       sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
-      voice_callback_ =
-          GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
+      voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
+                                         sample_data_, sample_playback_mode_);
       break;
     case ControlType::kFilterType:
       filter_type_ = static_cast<FilterType>(value);
-      voice_callback_ =
-          GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
+      voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
+                                         sample_data_, sample_playback_mode_);
       break;
     case ControlType::kFilterFrequency: {
       filter_coefficient_ = value;
@@ -247,8 +287,8 @@ void InstrumentProcessor::SetReferenceFrequency(double reference_frequency) noex
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   sample_data_.Swap(sample_data);
-  voice_callback_ =
-      GetVoiceCallback(filter_type_, oscillator_shape_, sample_data_, sample_playback_mode_);
+  voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
+                                     sample_data_, sample_playback_mode_);
   for (int i = 0; i < voice_count_; ++i) {
     if (Voice& voice = voice_states_[i].voice; !voice.IsActive()) {
       voice.set_sample_player_slice(nullptr);

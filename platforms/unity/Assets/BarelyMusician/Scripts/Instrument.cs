@@ -20,6 +20,16 @@ namespace Barely {
     [InspectorName("Pitch Shift")] PITCH_SHIFT = 0,
   }
 
+  /// Oscillator mode.
+  public enum OscillatorMode {
+    /// Mix.
+    [InspectorName("Mix")] MIX = 0,
+    /// Amplitude modulation.
+    [InspectorName("AM")] AM,
+    /// Ring modulation.
+    [InspectorName("Ring")] RING,
+  }
+
   /// Oscillator shape.
   public enum OscillatorShape {
     /// None.
@@ -132,6 +142,9 @@ namespace Barely {
     public double Release = 0.25;
 
     [Header("Oscillator")]
+
+    /// Oscillator mode.
+    public OscillatorMode OscillatorMode = OscillatorMode.MIX;
 
     /// Oscillator mix.
     [Range(-1.0f, 1.0f)]
@@ -303,6 +316,7 @@ namespace Barely {
       SetControl(Musician.Internal.ControlType.SUSTAIN, Sustain);
       SetControl(Musician.Internal.ControlType.RELEASE, Release);
       SetControl(Musician.Internal.ControlType.OSCILLATOR_MIX, OscillatorMix);
+      SetControl(Musician.Internal.ControlType.OSCILLATOR_MODE, (double)OscillatorMode);
       SetControl(Musician.Internal.ControlType.OSCILLATOR_PITCH_SHIFT, OscillatorPitchShift);
       SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
       SetControl(Musician.Internal.ControlType.PULSE_WIDTH, PulseWidth);

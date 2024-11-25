@@ -66,6 +66,8 @@ namespace Barely {
         [InspectorName("Release")] RELEASE,
         /// Oscillator mix.
         [InspectorName("Oscillator Mix")] OSCILLATOR_MIX,
+        /// Oscillator mix.
+        [InspectorName("Oscillator Mode")] OSCILLATOR_MODE,
         /// Oscillator pitch shift.
         [InspectorName("Oscillator Pitch Shift")] OSCILLATOR_PITCH_SHIFT,
         /// Oscillator shape.

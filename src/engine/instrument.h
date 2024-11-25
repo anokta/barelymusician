@@ -181,6 +181,7 @@ class Instrument {
       Control(1.0, 0.0, 1.0),                                             // kSustain
       Control(0.0, 0.0, 60.0),                                            // kRelease
       Control(0.0, -1.0, 1.0),                                            // kOscillatorMix
+      Control(0, 0, static_cast<int>(BarelyOscillatorMode_kCount) - 1),   // kOscillatorMode
       Control(0.0),                                                       // kOscillatorPitchShift
       Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),  // kOscillatorShape
       Control(0.5, 0.0, 1.0),                                             // kPulseWidth

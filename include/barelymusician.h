@@ -230,6 +230,8 @@ enum BarelyControlType_Values {
   BarelyControlType_kRelease,
   /// Oscillator mix.
   BarelyControlType_kOscillatorMix,
+  /// Oscillator mode.
+  BarelyControlType_kOscillatorMode,
   /// Oscillator pitch shift.
   BarelyControlType_kOscillatorPitchShift,
   /// Oscillator shape.
@@ -270,6 +272,24 @@ enum BarelyNoteControlType_Values {
   BarelyNoteControlType_kPitchShift = 0,
   /// Number of note control types.
   BarelyNoteControlType_kCount,
+};
+
+/// Oscillator mode enum alias.
+typedef int32_t BarelyOscillatorMode;
+
+/// Oscillator mode enum value.
+enum BarelyOscillatorMode_Values {
+  /// Mix.
+  BarelyOscillatorMode_kMix = 0,
+  /// Amplitude modulation.
+  BarelyOscillatorMode_kAm,
+  // TODO(#146): Add FM support once voice pitch calculation is cleaned up.
+  // /// Frequency modulation.
+  // BarelyOscillatorMode_kFm,
+  /// Ring modulation.
+  BarelyOscillatorMode_kRing,
+  /// Number of oscillator modes.
+  BarelyOscillatorMode_kCount,
 };
 
 /// Oscillator shape enum alias.
@@ -795,6 +815,8 @@ enum class ControlType : BarelyControlType {
   kRelease = BarelyControlType_kRelease,
   /// Oscillator mix.
   kOscillatorMix = BarelyControlType_kOscillatorMix,
+  /// Oscillator mode.
+  kOscillatorMode = BarelyControlType_kOscillatorMode,
   /// Oscillator pitch shift.
   kOscillatorPitchShift = BarelyControlType_kOscillatorPitchShift,
   /// Oscillator shape.
@@ -823,6 +845,19 @@ enum class FilterType : BarelyFilterType {
 enum class NoteControlType : BarelyNoteControlType {
   /// Pitch shift.
   kPitchShift = BarelyNoteControlType_kPitchShift,
+};
+
+/// Oscillator mode enum.
+enum class OscillatorMode : BarelyOscillatorMode {
+  /// Mix.
+  kMix = BarelyOscillatorMode_kMix,
+  /// Amplitude modulation.
+  kAm = BarelyOscillatorMode_kAm,
+  // TODO(#146): Add FM support once voice pitch calculation is cleaned up.
+  // /// Frequency modulation.
+  // kFm = BarelyOscillatorMode_kFm,
+  /// Ring modulation.
+  kRing = BarelyOscillatorMode_kRing,
 };
 
 /// Oscillator shape enum.

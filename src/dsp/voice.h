@@ -20,6 +20,7 @@ class Voice {
   /// Returns the next output sample.
   ///
   /// @tparam kFilterType Filter type.
+  /// @tparam kOscillatorMode Oscillator mode.
   /// @tparam kOscillatorShape Oscillator shape.
   /// @tparam kSamplePlaybackMode Sample playback mode.
   /// @param voice Voice.
@@ -27,11 +28,11 @@ class Voice {
   /// @param oscillator_mix Oscillator mix.
   /// @param pulse_width Pulse width.
   /// @return Next output value.
-  template <FilterType kFilterType, OscillatorShape kOscillatorShape,
-            SamplePlaybackMode kSamplePlaybackMode>
+  template <FilterType kFilterType, OscillatorMode kOscillatorMode,
+            OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] static double Next(Voice& voice, double filter_coefficient, double oscillator_mix,
                                    double pulse_width) noexcept {
-    return voice.Next<kFilterType, kOscillatorShape, kSamplePlaybackMode>(
+    return voice.Next<kFilterType, kOscillatorMode, kOscillatorShape, kSamplePlaybackMode>(
         filter_coefficient, oscillator_mix, pulse_width);
   }
 
@@ -79,8 +80,8 @@ class Voice {
   }
 
  private:
-  template <FilterType kFilterType, OscillatorShape kOscillatorShape,
-            SamplePlaybackMode kSamplePlaybackMode>
+  template <FilterType kFilterType, OscillatorMode kOscillatorMode,
+            OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] double Next(double filter_coefficient, double oscillator_mix,
                             double pulse_width) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
@@ -89,10 +90,20 @@ class Voice {
         return 0.0;
       }
     }
-    const double output =
-        gain_ * envelope_.Next() *
-        ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_.Next<kOscillatorShape>(pulse_width) +
-         (1.0 - std::max(0.0, oscillator_mix)) * sample_player_.Next<kSamplePlaybackMode>());
+
+    const double sample_player_output = sample_player_.Next<kSamplePlaybackMode>();
+    double oscillator_output = oscillator_.Next<kOscillatorShape>(pulse_width);
+    double output = gain_ * envelope_.Next();
+    if constexpr (kOscillatorMode == OscillatorMode::kMix) {
+      output *= ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_output +
+                 (1.0 - std::max(0.0, oscillator_mix)) * sample_player_output);
+    } else {  // amplitude or ring modulation.
+      if constexpr (kOscillatorMode == OscillatorMode::kAm) {
+        oscillator_output = std::abs(oscillator_output);
+      }
+      output *= ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_output * sample_player_output +
+                 (1.0 - std::max(0.0, oscillator_mix)) * sample_player_output);
+    }
     return filter_.Next<kFilterType>(output, filter_coefficient);
   }
 

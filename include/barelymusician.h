@@ -283,6 +283,8 @@ enum BarelyOscillatorMode_Values {
   BarelyOscillatorMode_kMix = 0,
   /// Amplitude modulation.
   BarelyOscillatorMode_kAm,
+  /// Envelope follower.
+  BarelyOscillatorMode_kEnvelopeFollower,
   // TODO(#146): Add FM support once voice pitch calculation is cleaned up.
   // /// Frequency modulation.
   // BarelyOscillatorMode_kFm,
@@ -853,6 +855,8 @@ enum class OscillatorMode : BarelyOscillatorMode {
   kMix = BarelyOscillatorMode_kMix,
   /// Amplitude modulation.
   kAm = BarelyOscillatorMode_kAm,
+  /// Envelope follower.
+  kEnvelopeFollower = BarelyOscillatorMode_kEnvelopeFollower,
   // TODO(#146): Add FM support once voice pitch calculation is cleaned up.
   // /// Frequency modulation.
   // kFm = BarelyOscillatorMode_kFm,

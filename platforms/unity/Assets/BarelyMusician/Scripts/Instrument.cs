@@ -26,6 +26,8 @@ namespace Barely {
     [InspectorName("Mix")] MIX = 0,
     /// Amplitude modulation.
     [InspectorName("AM")] AM,
+    /// Envelope follower.
+    [InspectorName("Envlope Follower")] ENVELOPE_FOLLOWER,
     /// Ring modulation.
     [InspectorName("Ring")] RING,
   }

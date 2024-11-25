@@ -38,6 +38,9 @@ VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorMode oscillator
     case OscillatorMode::kAm:
       return GetVoiceCallback<OscillatorMode::kAm, kOscillatorShape, kSamplePlaybackMode>(
           filter_type);
+    case OscillatorMode::kEnvelopeFollower:
+      return GetVoiceCallback<OscillatorMode::kEnvelopeFollower, kOscillatorShape,
+                              kSamplePlaybackMode>(filter_type);
     case OscillatorMode::kRing:
       return GetVoiceCallback<OscillatorMode::kRing, kOscillatorShape, kSamplePlaybackMode>(
           filter_type);

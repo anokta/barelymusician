@@ -91,18 +91,21 @@ class Voice {
       }
     }
 
-    const double sample_player_output = sample_player_.Next<kSamplePlaybackMode>();
-    double oscillator_output = oscillator_.Next<kOscillatorShape>(pulse_width);
+    double oscillator_sample = oscillator_.Next<kOscillatorShape>(pulse_width);
+    double sample_player_sample = sample_player_.Next<kSamplePlaybackMode>();
+    const double sample_player_output =
+        (1.0 - std::max(0.0, oscillator_mix)) * sample_player_sample;
     double output = gain_ * envelope_.Next();
     if constexpr (kOscillatorMode == OscillatorMode::kMix) {
-      output *= ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_output +
-                 (1.0 - std::max(0.0, oscillator_mix)) * sample_player_output);
-    } else {  // amplitude or ring modulation.
+      output *= ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_sample + sample_player_output);
+    } else {
       if constexpr (kOscillatorMode == OscillatorMode::kAm) {
-        oscillator_output = std::abs(oscillator_output);
+        oscillator_sample = std::abs(oscillator_sample);
+      } else if constexpr (kOscillatorMode == OscillatorMode::kEnvelopeFollower) {
+        sample_player_sample = std::abs(sample_player_sample);
       }
-      output *= ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_output * sample_player_output +
-                 (1.0 - std::max(0.0, oscillator_mix)) * sample_player_output);
+      output *= ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_sample * sample_player_sample +
+                 sample_player_output);
     }
     return filter_.Next<kFilterType>(output, filter_coefficient);
   }

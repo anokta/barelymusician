@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "barelymusician.h"
+#include "common/random.h"
 
 namespace barely::internal {
 
@@ -36,6 +37,9 @@ class SampleData {
  private:
   // Array of sample data slices.
   std::vector<std::pair<SampleDataSlice, std::vector<double>>> slices_;
+
+  // Random number generator for picking sample data slices.
+  inline static Random random_ = Random();
 };
 
 }  // namespace barely::internal

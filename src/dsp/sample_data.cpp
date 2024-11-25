@@ -22,15 +22,33 @@ const SampleDataSlice* SampleData::Select(double pitch) const noexcept {
   if (slices_.empty()) {
     return nullptr;
   }
+  const int slice_count = static_cast<int>(slices_.size());
   // TODO(#139): `std::upper_bound` turned out to be slow here, but this may be optimized further.
-  for (int i = 0; i < static_cast<int>(slices_.size()); ++i) {
-    if (const auto* current = &slices_[i].first; pitch <= current->root_pitch) {
-      return (i == 0 || pitch - slices_[i - 1].first.root_pitch > current->root_pitch - pitch)
-                 ? current
-                 : &slices_[i - 1].first;
+  double current_pitch = slices_.front().first.root_pitch;
+  int current_start_index = 0;
+  for (int i = 0; i < slice_count; ++i) {
+    const auto* current = &slices_[i].first;
+    if (current_pitch != current->root_pitch) {
+      if (pitch <= current->root_pitch) {
+        if (pitch - current_pitch > current->root_pitch - pitch) {
+          current_start_index = i;
+          while (i < slice_count && slices_[i].first.root_pitch == current->root_pitch) {
+            ++i;
+          }
+        }
+        return &slices_[(current_start_index + 1 == i)
+                            ? current_start_index
+                            : random_.DrawUniform(current_start_index, i)]
+                    .first;
+      }
+      current_pitch = current->root_pitch;
+      current_start_index = i;
     }
   }
-  return &slices_.back().first;
+  return &slices_[(current_start_index + 1 == slice_count)
+                      ? current_start_index
+                      : random_.DrawUniform(current_start_index, slice_count)]
+              .first;
 }
 
 }  // namespace barely::internal

@@ -54,6 +54,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_dsp_sample_data
+  barelymusician_common_random
   barelymusician_headeronly
 )
 

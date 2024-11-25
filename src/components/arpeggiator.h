@@ -5,9 +5,9 @@
 
 #include "barelycomposer.h"
 #include "common/random.h"
-#include "internal/instrument.h"
-#include "internal/musician.h"
-#include "internal/performer.h"
+#include "engine/instrument.h"
+#include "engine/musician.h"
+#include "engine/performer.h"
 
 namespace barely::internal {
 

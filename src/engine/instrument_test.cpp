@@ -1,4 +1,4 @@
-#include "internal/instrument.h"
+#include "engine/instrument.h"
 
 #include <algorithm>
 #include <array>

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
-#define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
+#ifndef BARELYMUSICIAN_ENGINE_MUSICIAN_H_
+#define BARELYMUSICIAN_ENGINE_MUSICIAN_H_
 
 #include <cmath>
 #include <map>
@@ -8,8 +8,8 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "internal/instrument.h"
-#include "internal/performer.h"
+#include "engine/instrument.h"
+#include "engine/performer.h"
 
 namespace barely::internal {
 
@@ -132,4 +132,4 @@ struct BarelyMusician : public barely::internal::Musician {
 };
 static_assert(sizeof(BarelyMusician) == sizeof(barely::internal::Musician));
 
-#endif  // BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
+#endif  // BARELYMUSICIAN_ENGINE_MUSICIAN_H_

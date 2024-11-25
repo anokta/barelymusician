@@ -1,9 +1,9 @@
-#include "internal/message_queue.h"
+#include "engine/message_queue.h"
 
 #include <cstdint>
 #include <utility>
 
-#include "internal/message.h"
+#include "engine/message.h"
 
 namespace barely::internal {
 

@@ -1,4 +1,4 @@
-#include "internal/musician.h"
+#include "engine/musician.h"
 
 #include <array>
 #include <functional>
@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "barelymusician.h"
+#include "engine/instrument.h"
+#include "engine/performer.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "internal/instrument.h"
-#include "internal/performer.h"
 
 namespace barely::internal {
 namespace {

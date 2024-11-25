@@ -9,7 +9,7 @@
 #include "common/random.h"
 #include "components/arpeggiator.h"
 #include "components/repeater.h"
-#include "internal/musician.h"
+#include "engine/musician.h"
 
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::internal::Arpeggiator {

@@ -1,4 +1,4 @@
-#include "internal/instrument.h"
+#include "engine/instrument.h"
 
 #include <cassert>
 #include <cstdint>
@@ -13,8 +13,8 @@
 #include "dsp/one_pole_filter.h"
 #include "dsp/oscillator.h"
 #include "dsp/sample_data.h"
-#include "internal/event.h"
-#include "internal/message.h"
+#include "engine/event.h"
+#include "engine/message.h"
 
 namespace barely::internal {
 

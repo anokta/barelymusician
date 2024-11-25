@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_PERFORMER_H_
-#define BARELYMUSICIAN_INTERNAL_PERFORMER_H_
+#ifndef BARELYMUSICIAN_ENGINE_PERFORMER_H_
+#define BARELYMUSICIAN_ENGINE_PERFORMER_H_
 
 #include <compare>
 #include <map>
@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "internal/event.h"
+#include "engine/event.h"
 
 namespace barely::internal {
 
@@ -194,4 +194,4 @@ static_assert(sizeof(BarelyPerformer) == sizeof(barely::internal::Performer));
 struct BarelyTask : public barely::internal::Performer::Task {};
 static_assert(sizeof(BarelyTask) == sizeof(barely::internal::Performer::Task));
 
-#endif  // BARELYMUSICIAN_INTERNAL_PERFORMER_H_
+#endif  // BARELYMUSICIAN_ENGINE_PERFORMER_H_

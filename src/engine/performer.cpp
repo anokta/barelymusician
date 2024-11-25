@@ -1,4 +1,4 @@
-#include "internal/performer.h"
+#include "engine/performer.h"
 
 #include <algorithm>
 #include <cassert>
@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "internal/event.h"
+#include "engine/event.h"
 
 namespace barely::internal {
 

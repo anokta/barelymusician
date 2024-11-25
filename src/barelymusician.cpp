@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <span>
 
-#include "internal/instrument.h"
-#include "internal/musician.h"
-#include "internal/performer.h"
+#include "engine/instrument.h"
+#include "engine/musician.h"
+#include "engine/performer.h"
 
 using ::barely::ControlType;
 using ::barely::NoteControlType;

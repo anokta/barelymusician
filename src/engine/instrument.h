@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
-#define BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
 #include <array>
 #include <cassert>
@@ -12,8 +12,8 @@
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/sample_data.h"
-#include "internal/event.h"
-#include "internal/message_queue.h"
+#include "engine/event.h"
+#include "engine/message_queue.h"
 
 namespace barely::internal {
 
@@ -213,4 +213,4 @@ class Instrument {
 struct BarelyInstrument : public barely::internal::Instrument {};
 static_assert(sizeof(BarelyInstrument) == sizeof(barely::internal::Instrument));
 
-#endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_

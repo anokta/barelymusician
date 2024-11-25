@@ -1,4 +1,4 @@
-#include "internal/musician.h"
+#include "engine/musician.h"
 
 #include <algorithm>
 #include <cassert>
@@ -7,8 +7,8 @@
 #include <memory>
 #include <utility>
 
-#include "internal/instrument.h"
-#include "internal/performer.h"
+#include "engine/instrument.h"
+#include "engine/performer.h"
 
 namespace barely::internal {
 

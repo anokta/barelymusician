@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_EVENT_H_
-#define BARELYMUSICIAN_INTERNAL_EVENT_H_
+#ifndef BARELYMUSICIAN_ENGINE_EVENT_H_
+#define BARELYMUSICIAN_ENGINE_EVENT_H_
 
 #include <utility>
 
@@ -95,4 +95,4 @@ void Event<EventType, EventArgs...>::Process(EventArgs... args) noexcept {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_INTERNAL_EVENT_H_
+#endif  // BARELYMUSICIAN_ENGINE_EVENT_H_

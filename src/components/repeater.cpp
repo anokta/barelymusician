@@ -6,8 +6,8 @@
 
 #include "barelycomposer.h"
 #include "barelymusician.h"
-#include "internal/instrument.h"
-#include "internal/musician.h"
+#include "engine/instrument.h"
+#include "engine/musician.h"
 
 namespace barely::internal {
 

@@ -76,4 +76,5 @@
   },
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
+  "dotnet.preferCSharpExtension": true,
 }

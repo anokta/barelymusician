@@ -61,4 +61,5 @@
     "Temp/": true
   },
   "files.insertFinalNewline": true,
+  "dotnet.preferCSharpExtension": true,
 }

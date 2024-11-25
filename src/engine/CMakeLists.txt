@@ -65,6 +65,11 @@ target_link_libraries(
   barelymusician_headeronly
 )
 
+add_library(
+  barelymusician_engine_pool INTERFACE
+  pool.h
+)
+
 if(ENABLE_TESTS)
   add_executable(
     barelymusician_engine_event_test

@@ -30,13 +30,13 @@ constexpr double kLookahead = 0.1;
 
 // Metronome settings.
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
-constexpr double kGain = -12.0;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.05;
+constexpr float kGain = -12.0f;
+constexpr float kAttack = 0.0f;
+constexpr float kRelease = 0.05f;
 constexpr int kVoiceCount = 1;
 
-constexpr double kBarPitch = 1.0;
-constexpr double kBeatPitch = 0.0;
+constexpr float kBarPitch = 1.0f;
+constexpr float kBeatPitch = 0.0f;
 
 constexpr int kBeatCount = 4;
 constexpr double kInitialTempo = 120.0;
@@ -68,13 +68,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
+    const float pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
     instrument.SetNoteOn(pitch);
     instrument.SetNoteOff(pitch);
   });
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<double> output_samples) {
+  const auto process_callback = [&](std::span<float> output_samples) {
     instrument.Process(output_samples, audio_clock.GetTimestamp());
     audio_clock.Update(static_cast<int>(output_samples.size()));
   };

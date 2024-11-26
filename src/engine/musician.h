@@ -44,7 +44,7 @@ class Musician {
   /// Returns reference frequency.
   ///
   /// @return Reference frequency in hertz.
-  [[nodiscard]] double GetReferenceFrequency() const noexcept;
+  [[nodiscard]] float GetReferenceFrequency() const noexcept;
 
   /// Returns the corresponding number of samples for a given number of seconds.
   ///
@@ -83,7 +83,7 @@ class Musician {
   /// Sets the reference frequency.
   ///
   /// @param reference_frequency Reference frequency in hertz.
-  void SetReferenceFrequency(double reference_frequency) noexcept;
+  void SetReferenceFrequency(float reference_frequency) noexcept;
 
   /// Sets the tempo.
   ///
@@ -108,7 +108,7 @@ class Musician {
   const int sample_rate_ = 0;
 
   // Reference frequency at zero pitch (C4 by default).
-  double reference_frequency_ = 440.0 * std::pow(2.0, -9.0 / 12.0);
+  float reference_frequency_ = 440.0f * std::pow(2.0f, -9.0f / 12.0f);
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

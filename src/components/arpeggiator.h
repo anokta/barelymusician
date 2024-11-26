@@ -36,7 +36,7 @@ class Arpeggiator {
   ///
   /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
-  bool IsNoteOn(double pitch) const noexcept;
+  bool IsNoteOn(float pitch) const noexcept;
 
   /// Returns whether the arpeggiator is playing or not.
   ///
@@ -49,7 +49,7 @@ class Arpeggiator {
   /// Sets the gate ratio.
   ///
   /// @param gate Gate ratio.
-  void SetGateRatio(double gate_ratio) noexcept;
+  void SetGateRatio(float gate_ratio) noexcept;
 
   /// Sets the instrument.
   ///
@@ -60,13 +60,13 @@ class Arpeggiator {
   ///
   /// @param pitch Note pitch.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOff(double pitch) noexcept;
+  void SetNoteOff(float pitch) noexcept;
 
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch) noexcept;
+  void SetNoteOn(float pitch) noexcept;
 
   /// Sets the rate.
   ///
@@ -95,10 +95,10 @@ class Arpeggiator {
   Instrument* instrument_ = nullptr;
 
   // Array of pitches to play.
-  std::vector<double> pitches_;
+  std::vector<float> pitches_;
 
   // Gate ratio.
-  double gate_ratio_ = 1.0;
+  float gate_ratio_ = 1.0f;
 
   // Style.
   ArpeggiatorStyle style_ = ArpeggiatorStyle::kUp;

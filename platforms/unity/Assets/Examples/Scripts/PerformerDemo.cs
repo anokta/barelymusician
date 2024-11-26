@@ -20,14 +20,14 @@ namespace Barely {
         _beat = (_beat + 1) % 8;
 
         int degree = Random.Range(-scale.PitchCount, scale.PitchCount);
-        double pitch = scale.GetPitch(degree);
+        float pitch = scale.GetPitch(degree);
         instrument.SetNoteOn(pitch);
         performer.ScheduleOneOffTask(delegate() { instrument.SetNoteOff(pitch); },
                                      performer.LoopLength);
 
-        text.text = ((int)(12.0 * pitch)).ToString();
+        text.text = ((int)(12.0f * pitch)).ToString();
         _h = Random.Range(0.0f, 1.0f);
-        _v = 0.2f * (float)(pitch + 1.0);
+        _v = 0.2f * (pitch + 1.0f);
       }
 
       private void Update() {

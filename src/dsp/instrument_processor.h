@@ -18,43 +18,43 @@ class InstrumentProcessor {
   /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentProcessor(int sample_rate, double reference_frequency) noexcept;
+  InstrumentProcessor(int sample_rate, float reference_frequency) noexcept;
 
   /// Processes the next output samples.
   ///
   /// @param output_samples Array of mono output samples.
   /// @param output_sample_count Number of output samples.
-  void Process(double* output_samples, int output_sample_count) noexcept;
+  void Process(float* output_samples, int output_sample_count) noexcept;
 
   /// Sets a control value.
   ///
   /// @param type Control type.
   /// @param value Control value.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(ControlType type, double value) noexcept;
+  void SetControl(ControlType type, float value) noexcept;
 
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @param value Note control value.
-  void SetNoteControl(double pitch, NoteControlType type, double value) noexcept;
+  void SetNoteControl(float pitch, NoteControlType type, float value) noexcept;
 
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(double pitch) noexcept;
+  void SetNoteOff(float pitch) noexcept;
 
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  void SetNoteOn(double pitch, double intensity) noexcept;
+  void SetNoteOn(float pitch, float intensity) noexcept;
 
   /// Sets the reference frequency.
   ///
   /// @param reference_frequency Reference frequency in hertz.
-  void SetReferenceFrequency(double reference_frequency) noexcept;
+  void SetReferenceFrequency(float reference_frequency) noexcept;
 
   /// Sets the sample data.
   ///
@@ -69,20 +69,20 @@ class InstrumentProcessor {
   // TODO(#12): Consider a more optimized implementation for voice stealing.
   struct VoiceState {
     Voice voice;
-    double pitch = 0.0;
-    double pitch_shift = 0.0;
+    float pitch = 0.0f;
+    float pitch_shift = 0.0f;
     int timestamp = 0;
   };
 
   /// Acquires a new voice.
-  Voice& AcquireVoice(double pitch) noexcept;
+  Voice& AcquireVoice(float pitch) noexcept;
 
   template <bool kShouldAccumulate>
-  void ProcessVoice(Voice& voice, double* output_samples, int output_sample_count) noexcept {
+  void ProcessVoice(Voice& voice, float* output_samples, int output_sample_count) noexcept {
     for (int i = 0; i < output_sample_count; ++i) {
       if (!voice.IsActive()) {
         if constexpr (!kShouldAccumulate) {
-          std::fill(output_samples + i, output_samples + output_sample_count, 0.0);
+          std::fill(output_samples + i, output_samples + output_sample_count, 0.0f);
         }
         return;
       }
@@ -101,7 +101,7 @@ class InstrumentProcessor {
   std::array<VoiceState, kMaxVoiceCount> voice_states_;
   int voice_count_ = 8;
 
-  double sample_interval_ = 0.0;
+  float sample_interval_ = 0.0f;
   Envelope::Adsr adsr_;
 
   GainProcessor gain_processor_;
@@ -112,15 +112,15 @@ class InstrumentProcessor {
   OscillatorShape oscillator_shape_ = OscillatorShape::kNone;
   SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
 
-  double filter_coefficient_ = 1.0;
-  double oscillator_mix_ = 0.0;
-  double pulse_width_ = 0.5;
+  float filter_coefficient_ = 1.0f;
+  float oscillator_mix_ = 0.0f;
+  float pulse_width_ = 0.5f;
 
   bool should_retrigger_ = false;
 
-  double pitch_shift_ = 0.0;
-  double oscillator_pitch_shift_ = 0.0;
-  double reference_frequency_ = 0.0;
+  float pitch_shift_ = 0.0f;
+  float oscillator_pitch_shift_ = 0.0f;
+  float reference_frequency_ = 0.0f;
 };
 
 }  // namespace barely::internal

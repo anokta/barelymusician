@@ -13,7 +13,7 @@ namespace barely::internal {
 
 namespace {
 
-constexpr double kNoteIntensity = 1.0;
+constexpr float kNoteIntensity = 1.0f;
 
 }  // namespace
 
@@ -31,7 +31,7 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
     if (!pitches_[index_].first.has_value()) {
       return;
     }
-    const double pitch = *pitches_[index_].first + pitch_offset_;
+    const float pitch = *pitches_[index_].first + pitch_offset_;
     instrument_->SetNoteOn(pitch, kNoteIntensity);
     TaskEvent::Callback note_off_callback = [this, pitch]() noexcept {
       instrument_->SetNoteOff(pitch);
@@ -68,7 +68,7 @@ void Repeater::Pop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
+void Repeater::Push(std::optional<float> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
@@ -87,7 +87,7 @@ void Repeater::SetRate(double rate) noexcept {
 void Repeater::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Start(double pitch_offset) noexcept {
+void Repeater::Start(float pitch_offset) noexcept {
   if (IsPlaying()) {
     return;
   }

@@ -13,7 +13,7 @@ constexpr int kSampleRate = 1;
 constexpr int kReferenceFrequency = 1;
 
 constexpr int kVoiceCount = 4;
-constexpr std::array<double, kVoiceCount> kSamples = {0.5};
+constexpr std::array<float, kVoiceCount> kSamples = {0.5f};
 constexpr std::array<SampleDataSlice, kVoiceCount> kSlices = {
     SampleDataSlice(0.0, kSampleRate, kSamples),
     SampleDataSlice(1.0, kSampleRate, kSamples),
@@ -26,26 +26,26 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSamplePlaybackMode,
-                       static_cast<double>(SamplePlaybackMode::kLoop));
+                       static_cast<float>(SamplePlaybackMode::kLoop));
 
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  double output = 0.0;
+  float output = 0.0f;
   processor.Process(&output, 1);
-  EXPECT_DOUBLE_EQ(output, 0.0);
+  EXPECT_FLOAT_EQ(output, 0.0f);
 
-  processor.SetNoteOn(0.0, 1.0);
+  processor.SetNoteOn(0.0f, 1.0f);
 
-  output = 0.0;
+  output = 0.0f;
   processor.Process(&output, 1);
-  EXPECT_DOUBLE_EQ(output, kSamples[0]);
+  EXPECT_FLOAT_EQ(output, kSamples[0]);
 
-  processor.SetNoteOff(0.0);
+  processor.SetNoteOff(0.0f);
 
-  output = 0.0;
+  output = 0.0f;
   processor.Process(&output, 1);
-  EXPECT_DOUBLE_EQ(output, 0.0);
+  EXPECT_FLOAT_EQ(output, 0.0f);
 }
 
 // Tests that playing voices are capped at maximum allowed number of voices.
@@ -53,32 +53,32 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSamplePlaybackMode,
-                       static_cast<double>(SamplePlaybackMode::kLoop));
+                       static_cast<float>(SamplePlaybackMode::kLoop));
 
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  double output = 0.0;
+  float output = 0.0f;
   processor.Process(&output, 1);
-  EXPECT_DOUBLE_EQ(output, 0.0);
+  EXPECT_FLOAT_EQ(output, 0.0f);
 
-  double expected_output = 0.0;
+  float expected_output = 0.0f;
   for (int i = 0; i < kVoiceCount; ++i) {
-    processor.SetNoteOn(static_cast<double>(i), 1.0);
+    processor.SetNoteOn(static_cast<float>(i), 1.0f);
 
-    output = 0.0;
+    output = 0.0f;
     processor.Process(&output, 1);
 
     expected_output += kSamples[i];
-    EXPECT_DOUBLE_EQ(output, expected_output) << i;
+    EXPECT_FLOAT_EQ(output, expected_output) << i;
   }
 
   for (int i = 0; i < kSampleRate; ++i) {
-    processor.SetNoteOn(static_cast<double>(kVoiceCount), 1.0);
+    processor.SetNoteOn(static_cast<float>(kVoiceCount), 1.0f);
 
-    output = 0.0;
+    output = 0.0f;
     processor.Process(&output, 1);
-    EXPECT_DOUBLE_EQ(output, expected_output);
+    EXPECT_FLOAT_EQ(output, expected_output);
   }
 }
 
@@ -90,15 +90,15 @@ TEST(InstrumentProcessorTest, NoVoice) {
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  double output = 0.0;
+  float output = 0.0f;
   processor.Process(&output, 1);
-  EXPECT_DOUBLE_EQ(output, 0.0);
+  EXPECT_FLOAT_EQ(output, 0.0f);
 
-  processor.SetNoteOn(0.0, 1.0);
+  processor.SetNoteOn(0.0f, 1.0f);
 
-  output = 0.0;
+  output = 0.0f;
   processor.Process(&output, 1);
-  EXPECT_DOUBLE_EQ(output, 0.0);
+  EXPECT_FLOAT_EQ(output, 0.0f);
 }
 
 }  // namespace

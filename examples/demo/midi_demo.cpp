@@ -39,10 +39,10 @@ constexpr double kLookahead = 0.1;
 
 // Instrument settings.
 constexpr OscillatorShape kInstrumentOscillatorShape = OscillatorShape::kSquare;
-constexpr double kInstrumentEnvelopeAttack = 0.0;
-constexpr double kInstrumentEnvelopeRelease = 0.2;
+constexpr float kInstrumentEnvelopeAttack = 0.0f;
+constexpr float kInstrumentEnvelopeRelease = 0.2f;
 constexpr int kInstrumentVoiceCount = 16;
-constexpr double kInstrumentGain = -20.0;
+constexpr float kInstrumentGain = -20.0f;
 
 // Midi file name.
 constexpr char kMidiFileName[] = "midi/sample.mid";
@@ -61,8 +61,8 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
     if (midi_event.isNoteOn()) {
       const double position = get_position_fn(midi_event.tick);
       const double duration = get_position_fn(midi_event.getTickDuration());
-      const double pitch = static_cast<double>(midi_event.getKeyNumber() - 60) / 12.0;
-      const double intensity = static_cast<double>(midi_event.getVelocity()) / 127.0;
+      const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
+      const float intensity = static_cast<float>(midi_event.getVelocity()) / 127.0f;
       performer.ScheduleOneOffTask(
           [&instrument, pitch, intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
           position);
@@ -112,11 +112,11 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Set the instrument settings.
     const auto track_index = tracks.size() + 1;
-    instrument.SetNoteOnEvent([track_index](double pitch, double intensity) {
+    instrument.SetNoteOnEvent([track_index](float pitch, float intensity) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(" << pitch << ", " << intensity
                    << ")";
     });
-    instrument.SetNoteOffEvent([track_index](double pitch) {
+    instrument.SetNoteOffEvent([track_index](float pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
     });
     instrument.SetControl(ControlType::kGain, kInstrumentGain);
@@ -128,9 +128,9 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<double> mix_buffer(kSampleCount);
-  const auto process_callback = [&](std::span<double> output_samples) {
-    std::fill_n(output_samples.begin(), kSampleCount, 0.0);
+  std::vector<float> mix_buffer(kSampleCount);
+  const auto process_callback = [&](std::span<float> output_samples) {
+    std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
     for (auto& [instrument, performer] : tracks) {
       instrument.Process(mix_buffer, clock.GetTimestamp());
       std::transform(mix_buffer.begin(), mix_buffer.end(), output_samples.begin(),

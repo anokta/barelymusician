@@ -14,18 +14,18 @@ using ::testing::Pointee;
 
 TEST(SampleDataTest, Select) {
   constexpr int kSampleRate = 1;
-  constexpr std::array<double, 1> kSamples = {1.0};
+  constexpr std::array<float, 1> kSamples = {1.0f};
   const std::array<SampleDataSlice, 3> kSlices = {
-      SampleDataSlice(5.0, kSampleRate, kSamples),
-      SampleDataSlice(15.0, kSampleRate, kSamples),
-      SampleDataSlice(35.0, kSampleRate, kSamples),
+      SampleDataSlice(5.0f, kSampleRate, kSamples),
+      SampleDataSlice(15.0f, kSampleRate, kSamples),
+      SampleDataSlice(35.0f, kSampleRate, kSamples),
   };
 
   const SampleData sample_data(kSlices);
   for (int i = 0; i <= 40; ++i) {
-    EXPECT_THAT(
-        sample_data.Select(static_cast<double>(i)),
-        Pointee(Field(&SampleDataSlice::root_pitch, ((i <= 10) ? 5.0 : (i <= 25.0 ? 15.0 : 35.0)))))
+    EXPECT_THAT(sample_data.Select(static_cast<float>(i)),
+                Pointee(Field(&SampleDataSlice::root_pitch,
+                              ((i <= 10) ? 5.0f : (i <= 25.0f ? 15.0f : 35.0f)))))
         << i;
   }
 }

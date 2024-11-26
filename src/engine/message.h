@@ -17,40 +17,40 @@ struct ControlMessage {
   ControlType type;
 
   /// Value.
-  double value;
+  float value;
 };
 
 /// Note control message.
 struct NoteControlMessage {
   /// Pitch.
-  double pitch;
+  float pitch;
 
   /// Type.
   NoteControlType type;
 
   /// Value.
-  double value;
+  float value;
 };
 
 /// Note off message.
 struct NoteOffMessage {
   /// Pitch.
-  double pitch;
+  float pitch;
 };
 
 /// Note on message.
 struct NoteOnMessage {
   /// Pitch.
-  double pitch;
+  float pitch;
 
   /// Intensity.
-  double intensity;
+  float intensity;
 };
 
 /// Reference frequency message.
 struct ReferenceFrequencyMessage {
   /// Reference frequency.
-  double reference_frequency;
+  float reference_frequency;
 };
 
 /// Sample data message.

@@ -6,16 +6,16 @@ namespace barely::internal {
 namespace {
 
 constexpr int kSampleRate = 1000;
-constexpr double kSampleInterval = 1.0 / kSampleRate;
+constexpr float kSampleInterval = 1.0f / kSampleRate;
 
 // Envelope ADSR.
-constexpr double kAttack = 0.02;
-constexpr double kDecay = 1.0;
-constexpr double kSustain = 0.5;
-constexpr double kRelease = 0.8;
+constexpr float kAttack = 0.02f;
+constexpr float kDecay = 1.0f;
+constexpr float kSustain = 0.5f;
+constexpr float kRelease = 0.8f;
 
 // Tolerated error margin.
-constexpr double kEpsilon = 1e-3;
+constexpr float kEpsilon = 1e-3f;
 
 // Tests that the envelope generates the expected output samples when initialized with the default
 // constructor.
@@ -23,13 +23,13 @@ TEST(EnvelopeTest, ProcessDefault) {
   const Envelope::Adsr adsr(kSampleInterval);
 
   Envelope envelope;
-  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
+  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
 
   envelope.Start(adsr);
-  EXPECT_DOUBLE_EQ(envelope.Next(), 1.0);
+  EXPECT_FLOAT_EQ(envelope.Next(), 1.0f);
 
   envelope.Stop();
-  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
+  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
 }
 
 // Tests that the envelope generates the expected output samples consistently over multiple samples.
@@ -47,19 +47,19 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
 
   Envelope envelope;
 
-  EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
+  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
 
-  double expected_sample = 0.0;
+  float expected_sample = 0.0f;
 
   envelope.Start(adsr);
   for (int i = 0; i < kSustainSampleCount + kSampleRate; ++i) {
     if (i < kAttackSampleCount) {
       // Attack.
-      expected_sample = static_cast<double>(i) / static_cast<double>(kAttackSampleCount);
+      expected_sample = static_cast<float>(i) / static_cast<float>(kAttackSampleCount);
     } else if (i < kSustainSampleCount) {
       // Decay.
-      expected_sample = 1.0 - kSustain * static_cast<double>(i - kAttackSampleCount) /
-                                  static_cast<double>(kDecaySampleCount);
+      expected_sample = 1.0f - kSustain * static_cast<float>(i - kAttackSampleCount) /
+                                   static_cast<float>(kDecaySampleCount);
     } else {
       // Sustain.
       expected_sample = kSustain;
@@ -72,10 +72,10 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
     if (i < kReleaseSampleCount) {
       // Release.
       expected_sample =
-          (1.0 - static_cast<double>(i) / static_cast<double>(kReleaseSampleCount)) * kSustain;
+          (1.0f - static_cast<float>(i) / static_cast<float>(kReleaseSampleCount)) * kSustain;
     } else {
       // Idle.
-      expected_sample = 0.0;
+      expected_sample = 0.0f;
     }
     EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
   }

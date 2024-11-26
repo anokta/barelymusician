@@ -19,7 +19,7 @@ namespace Barely {
 
       // Note intensity.
       [Range(0.0f, 1.0f)]
-      public double noteIntensity = 1.0;
+      public float noteIntensity = 1.0f;
 
       [Range(1, 4)]
       public int repeaterNoteLength = 1;
@@ -68,9 +68,9 @@ namespace Barely {
         }
         // Adjust note intensity.
         if (Input.GetKeyDown(KeyCode.C)) {
-          noteIntensity = (double)Mathf.Max((float)noteIntensity - 0.2f, 0.0f);
+          noteIntensity = Mathf.Max(noteIntensity - 0.2f, 0.0f);
         } else if (Input.GetKeyDown(KeyCode.V)) {
-          noteIntensity = (double)Mathf.Min((float)noteIntensity + 0.2f, 1.0f);
+          noteIntensity = Mathf.Min(noteIntensity + 0.2f, 1.0f);
         }
         // Play notes.
         for (int i = 0; i < _octaveKeys.Length; ++i) {
@@ -79,7 +79,7 @@ namespace Barely {
               arpeggiator.SetNoteOn(GetPitchFromKeyIndex(i));
             } else if (_isRepeaterActive) {
               repeater.Stop();
-              repeater.Play(octaveOffset + i / 12.0);
+              repeater.Play(octaveOffset + i / 12.0f);
             } else if (instrument != null) {
               instrument.SetNoteOn(GetPitchFromKeyIndex(i), noteIntensity);
               if (repeater != null) {
@@ -105,8 +105,8 @@ namespace Barely {
       }
 
       // Returns the corresponding pitch for the given key.
-      private double GetPitchFromKeyIndex(int keyIndex) {
-        return (double)octaveOffset + (double)keyIndex / 12.0;
+      private float GetPitchFromKeyIndex(int keyIndex) {
+        return (float)octaveOffset + (float)keyIndex / 12.0f;
       }
     }
   }  // namespace Examples

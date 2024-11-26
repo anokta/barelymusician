@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "barelymusician.h"
 #include "daisy_pod.h"
 
@@ -14,14 +16,13 @@ using ::daisy::SaiHandle;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
-constexpr size_t kChannelCount = 2;
 constexpr size_t kFrameCount = 16;
 
 // Instrument settings.
-constexpr double kGain = -18.0;
+constexpr float kGain = -18.0f;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
-constexpr double kAttack = 0.05;
-constexpr double kRelease = 0.125;
+constexpr float kAttack = 0.05f;
+constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
 
 constexpr int kOscCount = static_cast<int>(BarelyOscillatorShape_kCount);
@@ -31,7 +32,6 @@ static MidiUsbHandler midi;
 
 static InstrumentHandle instrument = {};
 static int osc_index = static_cast<int>(kOscillatorShape);
-static std::array<double, kFrameCount> temp_samples{0.0};
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
@@ -43,12 +43,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   }
 
   // Process samples.
-  instrument.Process({temp_samples.begin(), temp_samples.begin() + size}, /*timestamp=*/0.0);
-  for (int channel = 0; channel < kChannelCount; ++channel) {
-    for (int frame = 0; frame < static_cast<int>(size); ++frame) {
-      out[channel][frame] = temp_samples[frame];
-    }
-  }
+  instrument.Process({out[0], out[0] + size}, /*timestamp=*/0.0);
+  std::copy_n(out[0], size, out[1]);  // copy onto stereo buffer.
 }
 
 int main(void) {

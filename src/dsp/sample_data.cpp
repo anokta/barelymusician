@@ -11,20 +11,19 @@ namespace barely::internal {
 SampleData::SampleData(std::span<const SampleDataSlice> slices) noexcept {
   slices_.reserve(slices.size());
   for (int i = 0; i < static_cast<int>(slices.size()); ++i) {
-    slices_.emplace_back(
-        slices[i],
-        std::vector<double>(slices[i].samples, slices[i].samples + slices[i].sample_count));
+    slices_.emplace_back(slices[i], std::vector<float>(slices[i].samples,
+                                                       slices[i].samples + slices[i].sample_count));
     slices_[i].first.samples = slices_[i].second.data();
   }
 }
 
-const SampleDataSlice* SampleData::Select(double pitch) const noexcept {
+const SampleDataSlice* SampleData::Select(float pitch) const noexcept {
   if (slices_.empty()) {
     return nullptr;
   }
   const int slice_count = static_cast<int>(slices_.size());
   // TODO(#139): `std::upper_bound` turned out to be slow here, but this may be optimized further.
-  double current_pitch = slices_.front().first.root_pitch;
+  float current_pitch = slices_.front().first.root_pitch;
   int current_start_index = 0;
   for (int i = 0; i < slice_count; ++i) {
     const auto* current = &slices_[i].first;

@@ -43,7 +43,7 @@ bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator) {
   return true;
 }
 
-bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch,
+bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch,
                                 bool* out_is_note_on) {
   if (!arpeggiator || !out_is_note_on) return false;
 
@@ -65,7 +65,7 @@ bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator) {
   return true;
 }
 
-bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator, double gate_ratio) {
+bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator, float gate_ratio) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetGateRatio(gate_ratio);
@@ -80,14 +80,14 @@ bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
   return true;
 }
 
-bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, double pitch) {
+bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, float pitch) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetNoteOff(pitch);
   return true;
 }
 
-bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch) {
+bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch) {
   if (!arpeggiator) return false;
 
   arpeggiator->SetNoteOn(pitch);
@@ -116,7 +116,7 @@ bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization, doub
 
   *out_position = std::lerp(
       position, quantization->resolution * std::round(position / quantization->resolution),
-      quantization->amount);
+      static_cast<double>(quantization->amount));
   return true;
 }
 
@@ -134,8 +134,8 @@ bool BarelyRandom_Destroy(BarelyRandomHandle random) {
   return true;
 }
 
-bool BarelyRandom_DrawNormal(BarelyRandomHandle random, double mean, double variance,
-                             double* out_number) {
+bool BarelyRandom_DrawNormal(BarelyRandomHandle random, float mean, float variance,
+                             float* out_number) {
   if (!random || !out_number) return false;
 
   *out_number = random->DrawNormal(mean, variance);
@@ -152,8 +152,8 @@ bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_t min, int32_t
   return true;
 }
 
-bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, double min, double max,
-                                  double* out_number) {
+bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, float min, float max,
+                                  float* out_number) {
   if (!random || !out_number) return false;
   if (min > max) return false;
 
@@ -204,7 +204,7 @@ bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater) {
   return true;
 }
 
-bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length) {
+bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, float pitch, int32_t length) {
   if (!repeater) return false;
 
   repeater->Push(pitch, static_cast<int>(length));
@@ -240,7 +240,7 @@ bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle 
   return true;
 }
 
-bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_offset) {
+bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, float pitch_offset) {
   if (!repeater) return false;
 
   repeater->Start(pitch_offset);
@@ -254,7 +254,7 @@ bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater) {
   return true;
 }
 
-bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, double* out_pitch) {
+bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch) {
   if (scale == nullptr) return false;
   if (scale->pitches == nullptr || scale->pitch_count == 0) return false;
   if (scale->mode < 0 || scale->mode >= scale->pitch_count) return false;
@@ -263,10 +263,10 @@ bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, double* out_
   const int scale_degree = degree + scale->mode;
   const int pitch_count = static_cast<int>(scale->pitch_count);
   const int octave = static_cast<int>(
-      std::floor(static_cast<double>(scale_degree) / static_cast<double>(pitch_count)));
+      std::floor(static_cast<float>(scale_degree) / static_cast<float>(pitch_count)));
   const int index = scale_degree - octave * pitch_count;
   assert(index >= 0 && index < pitch_count);
-  *out_pitch = scale->root_pitch + static_cast<double>(octave) + scale->pitches[index] -
+  *out_pitch = scale->root_pitch + static_cast<float>(octave) + scale->pitches[index] -
                scale->pitches[scale->mode];
   return true;
 }

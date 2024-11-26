@@ -36,14 +36,14 @@ musician.SetTempo(/*tempo=*/124.0);
 auto instrument = musician.AddInstrument();
 
 // Set the instrument gain to -6dB.
-instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0);
+instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0f);
 
 // Set an instrument note on.
 //
 // Note pitch is centered around the reference frequency, and measured in octaves. Fractional values
 // adjust the frequency logarithmically to maintain perceived pitch intervals in each octave.
-constexpr double kC4Pitch = 0.0;
-instrument.SetNoteOn(kC4Pitch, /*intensity=*/0.25);
+constexpr float kC4Pitch = 0.0f;
+instrument.SetNoteOn(kC4Pitch, /*intensity=*/0.25f);
 
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
@@ -58,9 +58,9 @@ performer.SetLooping(/*is_looping=*/true);
 auto task = performer.AddTask(
     [&]() {
       // Set an instrument note on.
-      instrument.SetNoteOn(/*pitch=*/1.0);
+      instrument.SetNoteOn(/*pitch=*/1.0f);
       // Schedule a one-off task to set the instrument note off after half a beat.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/1.0); },
+      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/1.0f); },
                                    performer.GetPosition() + 0.5);
     },
     /*position=*/0.0);
@@ -83,7 +83,7 @@ musician.Update(timestamp + kLookahead);
 //
 // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process` should
 // typically be called from an audio thread process callback in real-time audio applications.
-double output_samples[1024];
+float output_samples[1024];
 instrument.Process(output_samples, timestamp);
 ```
 

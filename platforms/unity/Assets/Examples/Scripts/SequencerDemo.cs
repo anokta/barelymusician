@@ -9,9 +9,9 @@ namespace Barely {
       public void Randomize() {
         randomSequencer.notes[0].pitch =
             Mathf.RoundToInt(12.0f * (float)scale.GetPitch(Random.Range(0, scale.PitchCount)));
-        randomSequencer.notes[0].intensity = 0.5 * (double)Random.Range(0, 3);
-        // randomSequencer.notes[0].position = (double)Random.Range(0, 2) * 0.5;
-        randomSequencer.notes[0].duration = 0.125f + (double)Random.Range(1, 3) * 0.125;
+        randomSequencer.notes[0].intensity = 0.5f * Random.Range(0, 3);
+        randomSequencer.notes[0].position = 0.0;
+        randomSequencer.notes[0].duration = 0.125 * Random.Range(2, 4);
       }
 
       private void Update() {

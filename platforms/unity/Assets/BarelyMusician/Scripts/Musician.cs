@@ -8,7 +8,7 @@ namespace Barely {
   /// A representation of a musician that governs the tempo for all musical components.
   public static class Musician {
     /// Reference frequency in hertz (C4 by default).
-    public static double ReferenceFrequency {
+    public static float ReferenceFrequency {
       get { return _referenceFrequency; }
       set {
         if (_referenceFrequency != value) {
@@ -17,7 +17,7 @@ namespace Barely {
         }
       }
     }
-    private static double _referenceFrequency = 440.0 * Math.Pow(2.0, -9.0 / 12.0);
+    private static float _referenceFrequency = 440.0f * Mathf.Pow(2.0f, -9.0f / 12.0f);
 
     /// Tempo in beats per minute.
     public static double Tempo {
@@ -176,8 +176,8 @@ namespace Barely {
       /// @param instrumentHandle Instrument handle.
       /// @param type Control type.
       /// @return Control value.
-      public static double Instrument_GetControl(IntPtr instrumentHandle, ControlType type) {
-        double value = 0.0;
+      public static float Instrument_GetControl(IntPtr instrumentHandle, ControlType type) {
+        float value = 0.0f;
         if (!BarelyInstrument_GetControl(instrumentHandle, type, ref value) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to get instrument control " + type);
@@ -191,9 +191,9 @@ namespace Barely {
       /// @param pitch Note pitch.
       /// @param type Note control type.
       /// @return Note control value.
-      public static double Instrument_GetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                     NoteControlType type) {
-        double value = 0.0;
+      public static float Instrument_GetNoteControl(IntPtr instrumentHandle, float pitch,
+                                                    NoteControlType type) {
+        float value = 0.0f;
         if (!BarelyInstrument_GetNoteControl(instrumentHandle, pitch, type, ref value) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to get instrument note " + pitch + " control " + type + " value");
@@ -206,7 +206,7 @@ namespace Barely {
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
       /// @return True if on, false otherwise.
-      public static bool Instrument_IsNoteOn(IntPtr instrumentHandle, double pitch) {
+      public static bool Instrument_IsNoteOn(IntPtr instrumentHandle, float pitch) {
         bool isNoteOn = false;
         if (!BarelyInstrument_IsNoteOn(instrumentHandle, pitch, ref isNoteOn) &&
             instrumentHandle != IntPtr.Zero) {
@@ -233,7 +233,7 @@ namespace Barely {
                                      AudioSettings.dspTime)) {
           for (int frame = 0; frame < outputFrameCount; ++frame) {
             for (int channel = 0; channel < outputChannelCount; ++channel) {
-              outputSamples[frame * outputChannelCount + channel] *= (float)_outputSamples[frame];
+              outputSamples[frame * outputChannelCount + channel] *= _outputSamples[frame];
             }
           }
         } else {
@@ -258,7 +258,7 @@ namespace Barely {
       /// @param type Control type.
       /// @param value Control value.
       public static void Instrument_SetControl(IntPtr instrumentHandle, ControlType type,
-                                               double value) {
+                                               float value) {
         if (!BarelyInstrument_SetControl(instrumentHandle, type, value) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument control " + type + " value to " + value);
@@ -271,8 +271,8 @@ namespace Barely {
       /// @param pitch Note pitch.
       /// @param type Note control type.
       /// @param value Note control value.
-      public static void Instrument_SetNoteControl(IntPtr instrumentHandle, double pitch,
-                                                   NoteControlType type, double value) {
+      public static void Instrument_SetNoteControl(IntPtr instrumentHandle, float pitch,
+                                                   NoteControlType type, float value) {
         if (!BarelyInstrument_SetNoteControl(instrumentHandle, pitch, type, value) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument note " + pitch + " control " + type +
@@ -284,7 +284,7 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      public static void Instrument_SetNoteOff(IntPtr instrumentHandle, double pitch) {
+      public static void Instrument_SetNoteOff(IntPtr instrumentHandle, float pitch) {
         if (!BarelyInstrument_SetNoteOff(instrumentHandle, pitch) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to stop instrument note " + pitch + "");
@@ -295,8 +295,8 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      public static void Instrument_SetNoteOn(IntPtr instrumentHandle, double pitch,
-                                              double intensity) {
+      public static void Instrument_SetNoteOn(IntPtr instrumentHandle, float pitch,
+                                              float intensity) {
         if (!BarelyInstrument_SetNoteOn(instrumentHandle, pitch, intensity) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
@@ -315,7 +315,7 @@ namespace Barely {
           sampleDataSlices = new SampleDataSlice[slices.Count];
           for (int i = 0; i < sampleDataSlices.Length; ++i) {
             sampleDataSlices[i] = new SampleDataSlice() {
-              rootPitch = slices[i].RootPitch / 12.0,
+              rootPitch = slices[i].RootPitch / 12.0f,
               sampleRate = (slices[i].Sample != null) ? slices[i].Sample.frequency : 0,
               samples = slices[i].Data,
               sampleCount = (slices[i].Sample != null) ? slices[i].Sample.samples : 0,
@@ -331,8 +331,8 @@ namespace Barely {
       /// Returns the reference frequency of a musician.
       ///
       /// @return Reference frequency in hertz.
-      public static double Musician_GetReferenceFrequency() {
-        double referenceFrequency = 0.0;
+      public static float Musician_GetReferenceFrequency() {
+        float referenceFrequency = 0.0f;
         if (!BarelyMusician_GetReferenceFrequency(Handle, ref referenceFrequency) &&
             _handle != IntPtr.Zero) {
           Debug.LogError("Failed to get musician reference frequency");
@@ -383,7 +383,7 @@ namespace Barely {
       /// Sets the reference frequency of a musician.
       ///
       /// @param referenceFrequency Reference frequency in hertz.
-      public static void Musician_SetReferenceFrequency(double referenceFrequency) {
+      public static void Musician_SetReferenceFrequency(float referenceFrequency) {
         if (!BarelyMusician_SetReferenceFrequency(Handle, referenceFrequency) &&
             _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set musician reference frequency");
@@ -588,8 +588,8 @@ namespace Barely {
       /// @param scale Pointer to scale.
       /// @param degree Scale degree.
       /// @return Output note pitch.
-      public static double Scale_GetPitch(Barely.Scale scale, int degree) {
-        double pitch = 0.0;
+      public static float Scale_GetPitch(Barely.Scale scale, int degree) {
+        float pitch = 0.0f;
         _scale.pitches = scale.Pitches;
         _scale.pitchCount = scale.PitchCount;
         _scale.rootPitch = scale.RootPitch;
@@ -658,7 +658,7 @@ namespace Barely {
       /// @param arpeggiatorHandle Arpeggiator handle.
       /// @param pitch Note pitch.
       /// @return True if on, false otherwise.
-      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorHandle, double pitch) {
+      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorHandle, float pitch) {
         bool isNoteOn = false;
         if (!BarelyArpeggiator_IsNoteOn(arpeggiatorHandle, pitch, ref isNoteOn) &&
             arpeggiatorHandle != IntPtr.Zero) {
@@ -694,7 +694,7 @@ namespace Barely {
       ///
       /// @param arpeggiatorHandle Arpeggiator handle.
       /// @param gateRatio Gate ratio.
-      public static void Arpeggiator_SetGateRatio(IntPtr arpeggiatorHandle, double gateRatio) {
+      public static void Arpeggiator_SetGateRatio(IntPtr arpeggiatorHandle, float gateRatio) {
         if (!BarelyArpeggiator_SetGateRatio(arpeggiatorHandle, gateRatio) &&
             arpeggiatorHandle != IntPtr.Zero) {
           Debug.LogError("Failed to stop arpeggiator gate ratio " + gateRatio);
@@ -718,7 +718,7 @@ namespace Barely {
       ///
       /// @param arpeggiatorHandle Arpeggiator handle.
       /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorHandle, double pitch) {
+      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorHandle, float pitch) {
         if (!BarelyArpeggiator_SetNoteOff(arpeggiatorHandle, pitch) &&
             arpeggiatorHandle != IntPtr.Zero) {
           Debug.LogError("Failed to stop arpeggiator note " + pitch);
@@ -729,7 +729,7 @@ namespace Barely {
       ///
       /// @param arpeggiatorHandle Arpeggiator handle.
       /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorHandle, double pitch) {
+      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorHandle, float pitch) {
         if (!BarelyArpeggiator_SetNoteOn(arpeggiatorHandle, pitch) &&
             arpeggiatorHandle != IntPtr.Zero) {
           Debug.LogError("Failed to start arpeggiator note " + pitch);
@@ -785,7 +785,7 @@ namespace Barely {
       /// @param repeaterHandle Repeater handle.
       /// @param pitchOr Note pitch value or silence.
       /// @param length Note length in beats.
-      public static void Repeater_Push(IntPtr repeaterHandle, double? pitchOr, int length) {
+      public static void Repeater_Push(IntPtr repeaterHandle, float? pitchOr, int length) {
         if ((pitchOr.HasValue && !BarelyRepeater_Push(repeaterHandle, pitchOr.Value, length)) ||
             (!pitchOr.HasValue && !BarelyRepeater_PushSilence(repeaterHandle, length)) &&
                 repeaterHandle != IntPtr.Zero) {
@@ -829,7 +829,7 @@ namespace Barely {
       ///
       /// @param repeaterHandle Repeater handle.
       /// @param pitchOffset Pitch offset.
-      public static void Repeater_Start(IntPtr repeaterHandle, double pitchOffset) {
+      public static void Repeater_Start(IntPtr repeaterHandle, float pitchOffset) {
         if (!BarelyRepeater_Start(repeaterHandle, pitchOffset) && repeaterHandle != IntPtr.Zero) {
           Debug.LogError("Failed to start repeater with a pitch offset" + pitchOffset);
         }
@@ -859,9 +859,9 @@ namespace Barely {
       }
 
       // Note off event process callback.
-      private delegate void NoteOffEvent_ProcessCallback(ref IntPtr state, double pitch);
+      private delegate void NoteOffEvent_ProcessCallback(ref IntPtr state, float pitch);
       [AOT.MonoPInvokeCallback(typeof(NoteOffEvent_ProcessCallback))]
-      private static void NoteOffEvent_OnProcess(ref IntPtr state, double pitch) {
+      private static void NoteOffEvent_OnProcess(ref IntPtr state, float pitch) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnNoteOffEvent(instrument, pitch);
       }
@@ -897,10 +897,10 @@ namespace Barely {
       }
 
       // Note on event process callback.
-      private delegate void NoteOnEvent_ProcessCallback(ref IntPtr state, double pitch,
-                                                        double intensity);
+      private delegate void NoteOnEvent_ProcessCallback(ref IntPtr state, float pitch,
+                                                        float intensity);
       [AOT.MonoPInvokeCallback(typeof(NoteOnEvent_ProcessCallback))]
-      private static void NoteOnEvent_OnProcess(ref IntPtr state, double pitch, double intensity) {
+      private static void NoteOnEvent_OnProcess(ref IntPtr state, float pitch, float intensity) {
         Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
         Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
       }
@@ -925,13 +925,13 @@ namespace Barely {
       [StructLayout(LayoutKind.Sequential)]
       private struct SampleDataSlice {
         // Root note pitch.
-        public double rootPitch;
+        public float rootPitch;
 
         // Sampling rate in hertz.
         public Int32 sampleRate;
 
         // Array of mono samples.
-        public double[] samples;
+        public float[] samples;
 
         // Number of mono samples.
         public Int32 sampleCount;
@@ -940,13 +940,13 @@ namespace Barely {
       [StructLayout(LayoutKind.Sequential)]
       private struct Scale {
         // Array of note pitches relative to the root note pitch.
-        public double[] pitches;
+        public float[] pitches;
 
         // Number of note pitches.
         public Int32 pitchCount;
 
         // Root note pitch of the scale.
-        public double rootPitch;
+        public float rootPitch;
 
         // Mode index.
         public Int32 mode;
@@ -1013,7 +1013,7 @@ namespace Barely {
       private static Scale _scale = new Scale {
         pitches = null,
         pitchCount = 0,
-        rootPitch = 0.0,
+        rootPitch = 0.0f,
         mode = 0,
       };
 
@@ -1051,7 +1051,7 @@ namespace Barely {
       private static double _dspLatency = 0.0;
 
       // Array of mono output samples.
-      public static double[] _outputSamples = null;
+      public static float[] _outputSamples = null;
 
       // Map of scheduled list of task callbacks by their timestamps.
       private static SortedDictionary<double, List<Action>> _scheduledTaskCallbacks = null;
@@ -1118,8 +1118,8 @@ namespace Barely {
           }
           BarelyMusician_SetReferenceFrequency(_handle, _referenceFrequency);
           BarelyMusician_SetTempo(_handle, _tempo);
-          _outputSamples = new double[config.dspBufferSize];
-          _dspLatency = (double)(config.dspBufferSize + 1) / config.sampleRate;
+          _outputSamples = new float[config.dspBufferSize];
+          _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, GetNextTimestamp());
         }
@@ -1147,20 +1147,20 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetControl")]
       private static extern bool BarelyInstrument_GetControl(IntPtr instrument, ControlType type,
-                                                             ref double outValue);
+                                                             ref float outValue);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
-      private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, double pitch,
+      private static extern bool BarelyInstrument_GetNoteControl(IntPtr instrument, float pitch,
                                                                  NoteControlType type,
-                                                                 ref double outValue);
+                                                                 ref float outValue);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
-      private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, double pitch,
+      private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, float pitch,
                                                            ref bool outIsNoteOn);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Process")]
       private static extern bool BarelyInstrument_Process(IntPtr instrument,
-                                                          [In, Out] double[] outputSamples,
+                                                          [In, Out] float[] outputSamples,
                                                           Int32 outputSampleCount,
                                                           double timestamp);
 
@@ -1169,23 +1169,22 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetControl")]
       private static extern bool BarelyInstrument_SetControl(IntPtr instrument, ControlType type,
-                                                             double value);
+                                                             float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
-      private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, double pitch,
-                                                                 NoteControlType type,
-                                                                 double value);
+      private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, float pitch,
+                                                                 NoteControlType type, float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
-      private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, double pitch);
+      private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, float pitch);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOffEvent")]
       private static extern bool BarelyInstrument_SetNoteOffEvent(IntPtr instrument,
                                                                   ref NoteOffEvent noteOffEvent);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
-      private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, double pitch,
-                                                            double intensity);
+      private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, float pitch,
+                                                            float intensity);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEvent")]
       private static extern bool BarelyInstrument_SetNoteOnEvent(IntPtr instrument,
@@ -1212,7 +1211,7 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_GetReferenceFrequency")]
       private static extern bool BarelyMusician_GetReferenceFrequency(
-          IntPtr musician, ref double outReferenceFrequency);
+          IntPtr musician, ref float outReferenceFrequency);
 
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_GetTempo")]
       private static extern bool BarelyMusician_GetTempo(IntPtr musician, ref double outTempo);
@@ -1230,7 +1229,7 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_SetReferenceFrequency")]
       private static extern bool BarelyMusician_SetReferenceFrequency(IntPtr musician,
-                                                                      double referenceFrequency);
+                                                                      float referenceFrequency);
 
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_SetTempo")]
       private static extern bool BarelyMusician_SetTempo(IntPtr musician, double tempo);
@@ -1292,7 +1291,7 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
       private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
-                                                      ref double outPitch);
+                                                      ref float outPitch);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPosition")]
       private static extern bool BarelyTask_GetPosition(IntPtr task, ref double outPosition);
@@ -1309,7 +1308,7 @@ namespace Barely {
       private static extern bool BarelyArpeggiator_Destroy(IntPtr arpeggiator);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsNoteOn")]
-      private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, double pitch,
+      private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, float pitch,
                                                             ref bool outIsNoteOn);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
@@ -1321,17 +1320,17 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetGateRatio")]
       private static extern bool BarelyArpeggiator_SetGateRatio(IntPtr arpeggiator,
-                                                                double gateRatio);
+                                                                float gateRatio);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetInstrument")]
       private static extern bool BarelyArpeggiator_SetInstrument(IntPtr arpeggiator,
                                                                  IntPtr instrument);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOff")]
-      private static extern bool BarelyArpeggiator_SetNoteOff(IntPtr arpeggiator, double gateRatio);
+      private static extern bool BarelyArpeggiator_SetNoteOff(IntPtr arpeggiator, float gateRatio);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOn")]
-      private static extern bool BarelyArpeggiator_SetNoteOn(IntPtr arpeggiator, double gateRatio);
+      private static extern bool BarelyArpeggiator_SetNoteOn(IntPtr arpeggiator, float gateRatio);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetRate")]
       private static extern bool BarelyArpeggiator_SetRate(IntPtr arpeggiator, double rate);
@@ -1357,13 +1356,13 @@ namespace Barely {
       private static extern bool BarelyRepeater_Pop(IntPtr repeater);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Push")]
-      private static extern bool BarelyRepeater_Push(IntPtr repeater, double pitch, Int32 length);
+      private static extern bool BarelyRepeater_Push(IntPtr repeater, float pitch, Int32 length);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_PushSilence")]
       private static extern bool BarelyRepeater_PushSilence(IntPtr repeater, Int32 length);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_SetGateRatio")]
-      private static extern bool BarelyRepeater_SetGateRatio(IntPtr repeater, double gateRatio);
+      private static extern bool BarelyRepeater_SetGateRatio(IntPtr repeater, float gateRatio);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_SetInstrument")]
       private static extern bool BarelyRepeater_SetInstrument(IntPtr repeater, IntPtr instrument);
@@ -1375,7 +1374,7 @@ namespace Barely {
       private static extern bool BarelyRepeater_SetStyle(IntPtr repeater, RepeaterStyle style);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Start")]
-      private static extern bool BarelyRepeater_Start(IntPtr repeater, double pitchOffset);
+      private static extern bool BarelyRepeater_Start(IntPtr repeater, float pitchOffset);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Stop")]
       private static extern bool BarelyRepeater_Stop(IntPtr repeater);

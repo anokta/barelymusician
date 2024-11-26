@@ -33,10 +33,10 @@ constexpr int kSampleCount = 256;
 constexpr double kLookahead = 0.1;
 
 // Arpeggiator settings.
-constexpr double kGain = -18.0;
+constexpr float kGain = -18.0f;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.05;
+constexpr float kAttack = 0.0f;
+constexpr float kRelease = 0.05f;
 constexpr int kVoiceCount = 16;
 
 constexpr double kInitialRate = 2.0;
@@ -46,17 +46,17 @@ constexpr RepeaterStyle kInitialStyle = RepeaterStyle::kForward;
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kRootPitch = 0.0;
+constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& key) {
+std::optional<float> PitchFromKey(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return kRootPitch + static_cast<double>(octave_shift) +
-         static_cast<double>(std::distance(kOctaveKeys.begin(), it)) / 12.0;
+  return kRootPitch + static_cast<float>(octave_shift) +
+         static_cast<float>(std::distance(kOctaveKeys.begin(), it)) / 12.0f;
 }
 
 }  // namespace
@@ -83,14 +83,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteOnEvent([&repeater](double pitch, double /*intensity*/) {
+  instrument.SetNoteOnEvent([&repeater](float pitch, float /*intensity*/) {
     if (repeater.IsPlaying()) {
       ConsoleLog() << "Note(" << pitch << ")";
     }
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](std::span<double> output_samples) {
+  audio_output.SetProcessCallback([&](std::span<float> output_samples) {
     instrument.Process(output_samples, audio_clock.GetTimestamp());
     audio_clock.Update(static_cast<int>(output_samples.size()));
   });
@@ -124,7 +124,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch_or = PitchFromKey(octave_shift, key)) {
-      const double pitch = *pitch_or;
+      const float pitch = *pitch_or;
       if (!repeater.IsPlaying()) {
         instrument.SetNoteOn(pitch);
       }

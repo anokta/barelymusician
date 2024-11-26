@@ -26,7 +26,7 @@ class Instrument {
   /// @param reference_frequency Reference frequency in hertz.
   /// @param update_sample Update sample.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(int sample_rate, double reference_frequency, int64_t update_sample) noexcept;
+  Instrument(int sample_rate, float reference_frequency, int64_t update_sample) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -41,14 +41,14 @@ class Instrument {
   ///
   /// @param type Control type.
   /// @return Control value.
-  [[nodiscard]] double GetControl(ControlType type) const noexcept;
+  [[nodiscard]] float GetControl(ControlType type) const noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @return Note control value.
-  [[nodiscard]] const double* GetNoteControl(double pitch, NoteControlType type) const noexcept;
+  [[nodiscard]] const float* GetNoteControl(float pitch, NoteControlType type) const noexcept;
 
   /// Returns sampling rate.
   ///
@@ -59,7 +59,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
+  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept;
 
   /// Processes output samples.
   ///
@@ -67,7 +67,7 @@ class Instrument {
   /// @param process_sample Process sample.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool Process(std::span<double> output_samples, int64_t process_sample) noexcept;
+  bool Process(std::span<float> output_samples, int64_t process_sample) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -77,19 +77,19 @@ class Instrument {
   ///
   /// @param type Control type.
   /// @param value Control value.
-  void SetControl(ControlType type, double value) noexcept;
+  void SetControl(ControlType type, float value) noexcept;
 
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @param value Note control value.
-  void SetNoteControl(double pitch, NoteControlType type, double value) noexcept;
+  void SetNoteControl(float pitch, NoteControlType type, float value) noexcept;
 
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(double pitch) noexcept;
+  void SetNoteOff(float pitch) noexcept;
 
   /// Sets the note off event.
   ///
@@ -101,7 +101,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch, double intensity) noexcept;
+  void SetNoteOn(float pitch, float intensity) noexcept;
 
   /// Sets the note on event.
   ///
@@ -111,7 +111,7 @@ class Instrument {
   /// Sets the reference frequency.
   ///
   /// @param reference_frequency Reference frequency in hertz.
-  void SetReferenceFrequency(double reference_frequency) noexcept;
+  void SetReferenceFrequency(float reference_frequency) noexcept;
 
   /// Sets the sample data.
   ///
@@ -135,15 +135,15 @@ class Instrument {
     constexpr Control(ValueType default_value,
                       ValueType min_value = std::numeric_limits<ValueType>::lowest(),
                       ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
-        : value(static_cast<double>(default_value)),
-          min_value(static_cast<double>(min_value)),
-          max_value(static_cast<double>(max_value)) {
+        : value(static_cast<float>(default_value)),
+          min_value(static_cast<float>(min_value)),
+          max_value(static_cast<float>(max_value)) {
       static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                     "ValueType is not supported");
       assert(default_value >= min_value && default_value <= max_value);
     }
 
-    bool SetValue(double new_value) noexcept {
+    bool SetValue(float new_value) noexcept {
       new_value = std::clamp(new_value, min_value, max_value);
       if (value != new_value) {
         value = new_value;
@@ -153,51 +153,51 @@ class Instrument {
     }
 
     // Value.
-    double value = 0.0;
+    float value = 0.0f;
 
     // Minimum value.
-    double min_value = std::numeric_limits<double>::lowest();
+    float min_value = std::numeric_limits<float>::lowest();
 
     // Maximum value.
-    double max_value = std::numeric_limits<double>::max();
+    float max_value = std::numeric_limits<float>::max();
   };
   using ControlArray = std::array<Control, static_cast<int>(BarelyControlType_kCount)>;
   using NoteControlArray = std::array<Control, static_cast<int>(BarelyNoteControlType_kCount)>;
 
   /// Builds a control message to be passed into the instrument processor.
-  ControlMessage BuildControlMessage(ControlType type, double value) const noexcept;
+  ControlMessage BuildControlMessage(ControlType type, float value) const noexcept;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;
 
   // Array of controls.
   ControlArray controls_ = {
-      Control(0.0, kMinDecibels, 0.0),                                    // kGain
-      Control(0.0),                                                       // kPitchShift
+      Control(0.0f, kMinDecibels, 0.0f),                                  // kGain
+      Control(0.0f),                                                      // kPitchShift
       Control(false),                                                     // kRetrigger
       Control(8, 1, 20),                                                  // kVoiceCount
-      Control(0.0, 0.0, 60.0),                                            // kAttack
-      Control(0.0, 0.0, 60.0),                                            // kDecay
-      Control(1.0, 0.0, 1.0),                                             // kSustain
-      Control(0.0, 0.0, 60.0),                                            // kRelease
-      Control(0.0, -1.0, 1.0),                                            // kOscillatorMix
+      Control(0.0f, 0.0f, 60.0f),                                         // kAttack
+      Control(0.0f, 0.0f, 60.0f),                                         // kDecay
+      Control(1.0f, 0.0f, 1.0f),                                          // kSustain
+      Control(0.0f, 0.0f, 60.0f),                                         // kRelease
+      Control(0.0f, -1.0f, 1.0f),                                         // kOscillatorMix
       Control(0, 0, static_cast<int>(BarelyOscillatorMode_kCount) - 1),   // kOscillatorMode
-      Control(0.0),                                                       // kOscillatorPitchShift
+      Control(0.0f),                                                      // kOscillatorPitchShift
       Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),  // kOscillatorShape
-      Control(0.5, 0.0, 1.0),                                             // kPulseWidth
+      Control(0.5f, 0.0f, 1.0f),                                          // kPulseWidth
       Control(0, 0, static_cast<int>(BarelySamplePlaybackMode_kCount) - 1),  // kSamplePlaybackMode
       Control(0, 0, static_cast<int>(BarelyFilterType_kCount) - 1),          // kFilterType
-      Control(0.0, 0.0),                                                     // kFilterFrequency
+      Control(0.0f, 0.0f),                                                   // kFilterFrequency
   };
 
   // Map of note control arrays by their pitches.
-  std::unordered_map<double, NoteControlArray> note_controls_;
+  std::unordered_map<float, NoteControlArray> note_controls_;
 
   // Note off event.
-  Event<NoteOffEvent, double> note_off_event_;
+  Event<NoteOffEvent, float> note_off_event_;
 
   // Note on event.
-  Event<NoteOnEvent, double, double> note_on_event_;
+  Event<NoteOnEvent, float, float> note_on_event_;
 
   // Update sample.
   int64_t update_sample_ = 0;

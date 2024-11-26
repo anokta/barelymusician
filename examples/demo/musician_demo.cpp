@@ -71,15 +71,15 @@ constexpr int kSemitoneCount = 12;
 constexpr int kHeptatonicScaleCount = 7;
 
 /// Common musical scale ratios.
-constexpr std::array<double, kSemitoneCount> kSemitones = {
-    0.0 / static_cast<double>(kSemitoneCount),  1.0 / static_cast<double>(kSemitoneCount),
-    2.0 / static_cast<double>(kSemitoneCount),  3.0 / static_cast<double>(kSemitoneCount),
-    4.0 / static_cast<double>(kSemitoneCount),  5.0 / static_cast<double>(kSemitoneCount),
-    6.0 / static_cast<double>(kSemitoneCount),  7.0 / static_cast<double>(kSemitoneCount),
-    8.0 / static_cast<double>(kSemitoneCount),  9.0 / static_cast<double>(kSemitoneCount),
-    10.0 / static_cast<double>(kSemitoneCount), 11.0 / static_cast<double>(kSemitoneCount),
+constexpr std::array<float, kSemitoneCount> kSemitones = {
+    0.0f / static_cast<float>(kSemitoneCount),  1.0f / static_cast<float>(kSemitoneCount),
+    2.0f / static_cast<float>(kSemitoneCount),  3.0f / static_cast<float>(kSemitoneCount),
+    4.0f / static_cast<float>(kSemitoneCount),  5.0f / static_cast<float>(kSemitoneCount),
+    6.0f / static_cast<float>(kSemitoneCount),  7.0f / static_cast<float>(kSemitoneCount),
+    8.0f / static_cast<float>(kSemitoneCount),  9.0f / static_cast<float>(kSemitoneCount),
+    10.0f / static_cast<float>(kSemitoneCount), 11.0f / static_cast<float>(kSemitoneCount),
 };
-constexpr std::array<double, kHeptatonicScaleCount> kDiatonicPitches = {
+constexpr std::array<float, kHeptatonicScaleCount> kDiatonicPitches = {
     kSemitones[0], kSemitones[2], kSemitones[4],  kSemitones[5],
     kSemitones[7], kSemitones[9], kSemitones[11],
 };
@@ -88,17 +88,17 @@ constexpr std::array<double, kHeptatonicScaleCount> kDiatonicPitches = {
 constexpr double kSixteenthNotesPerBeat = 4.0;
 
 // Ensemble settings.
-constexpr double kRootPitch = kSemitones[2];
+constexpr float kRootPitch = kSemitones[2];
 
-constexpr double kPitchKick = 0.0;
-constexpr double kPitchSnare = 1.0;
-constexpr double kPitchHihatClosed = 2.0;
-constexpr double kPitchHihatOpen = 3.0;
+constexpr float kPitchKick = 0.0f;
+constexpr float kPitchSnare = 1.0f;
+constexpr float kPitchHihatClosed = 2.0f;
+constexpr float kPitchHihatOpen = 3.0f;
 
 constexpr char kDrumsDir[] = "audio/drums/";
 
 // Inserts pad data to a given `data` from a given `file_path`.
-void InsertPadData(double pitch, const std::string& file_path, std::vector<double>& samples,
+void InsertPadData(float pitch, const std::string& file_path, std::vector<float>& samples,
                    std::vector<SampleDataSlice>& slices) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
@@ -109,7 +109,7 @@ void InsertPadData(double pitch, const std::string& file_path, std::vector<doubl
 }
 
 // Schedules performer to play an instrument note.
-void ScheduleNote(double position, double duration, double pitch, double intensity,
+void ScheduleNote(double position, double duration, float pitch, float intensity,
                   InstrumentHandle& instrument, PerformerHandle& performer) {
   performer.ScheduleOneOffTask(
       [pitch, intensity, &instrument]() { instrument.SetNoteOn(pitch, intensity); }, position);
@@ -117,7 +117,7 @@ void ScheduleNote(double position, double duration, double pitch, double intensi
                                position + duration);
 }
 
-void ComposeChord(double intensity, int harmonic, const Scale& scale, InstrumentHandle& instrument,
+void ComposeChord(float intensity, int harmonic, const Scale& scale, InstrumentHandle& instrument,
                   PerformerHandle& performer) {
   const auto add_chord_note = [&](int degree) {
     ScheduleNote(0.0, 1.0, scale.GetPitch(degree), intensity, instrument, performer);
@@ -127,7 +127,7 @@ void ComposeChord(double intensity, int harmonic, const Scale& scale, Instrument
   add_chord_note(harmonic + 4);
 }
 
-void ComposeLine(int octave_offset, double intensity, int bar, int beat, int beat_count,
+void ComposeLine(int octave_offset, float intensity, int bar, int beat, int beat_count,
                  int harmonic, const Scale& scale, InstrumentHandle& instrument,
                  PerformerHandle& performer) {
   const int note_offset = beat;
@@ -157,33 +157,33 @@ void ComposeLine(int octave_offset, double intensity, int bar, int beat, int bea
 void ComposeDrums(int bar, int beat, int beat_count, Random& random, InstrumentHandle& instrument,
                   PerformerHandle& performer) {
   const auto get_beat = [](int step) { return static_cast<double>(step) / kSixteenthNotesPerBeat; };
-  const auto add_note = [&](double begin_position, double end_position, double pitch,
-                            double intensity) {
+  const auto add_note = [&](double begin_position, double end_position, float pitch,
+                            float intensity) {
     ScheduleNote(begin_position, end_position - begin_position, pitch, intensity, instrument,
                  performer);
   };
 
   // Kick.
   if (beat % 2 == 0) {
-    add_note(get_beat(0), get_beat(2), kPitchKick, 1.0);
+    add_note(get_beat(0), get_beat(2), kPitchKick, 1.0f);
     if (bar % 2 == 1 && beat == 0) {
-      add_note(get_beat(2), get_beat(4), kPitchKick, 1.0);
+      add_note(get_beat(2), get_beat(4), kPitchKick, 1.0f);
     }
   }
   // Snare.
   if (beat % 2 == 1) {
-    add_note(get_beat(0), get_beat(2), kPitchSnare, 1.0);
+    add_note(get_beat(0), get_beat(2), kPitchSnare, 1.0f);
   }
   if (beat + 1 == beat_count) {
-    add_note(get_beat(2), get_beat(4), kPitchSnare, 0.75);
+    add_note(get_beat(2), get_beat(4), kPitchSnare, 0.75f);
     if (bar % 4 == 3) {
-      add_note(get_beat(1), get_beat(2), kPitchSnare, 1.0);
-      add_note(get_beat(3), get_beat(4), kPitchSnare, 0.75);
+      add_note(get_beat(1), get_beat(2), kPitchSnare, 1.0f);
+      add_note(get_beat(3), get_beat(4), kPitchSnare, 0.75f);
     }
   }
   // Hihat Closed.
-  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, random.DrawUniform(0.5, 0.75));
-  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, random.DrawUniform(0.25, 0.75));
+  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, random.DrawUniform(0.5f, 0.75f));
+  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, random.DrawUniform(0.25f, 0.75f));
   // Hihat Open.
   if (beat + 1 == beat_count) {
     if (bar % 4 == 3) {
@@ -213,10 +213,10 @@ int main(int /*argc*/, char* argv[]) {
 
   // Note on callback.
   const auto set_note_callbacks_fn = [&](auto index, InstrumentHandle& instrument) {
-    instrument.SetNoteOffEvent([index](double pitch) {
+    instrument.SetNoteOffEvent([index](float pitch) {
       ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
     });
-    instrument.SetNoteOnEvent([index](double pitch, double intensity) {
+    instrument.SetNoteOnEvent([index](float pitch, float intensity) {
       ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", " << intensity << ")";
     });
   };
@@ -227,8 +227,8 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::tuple<PerformerHandle, BeatComposerCallback, size_t>> performers;
   std::vector<InstrumentHandle> instruments;
 
-  const auto build_instrument_fn = [&](OscillatorShape type, double gain, double attack,
-                                       double release) {
+  const auto build_instrument_fn = [&](OscillatorShape type, float gain, float attack,
+                                       float release) {
     instruments.emplace_back(musician.AddInstrument());
     auto& instrument = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
@@ -247,46 +247,46 @@ int main(int /*argc*/, char* argv[]) {
     ComposeChord(0.5, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorShape::kSine, -25.0, 0.125, 0.125);
+  build_instrument_fn(OscillatorShape::kSine, -25.0f, 0.125f, 0.125f);
   performers.emplace_back(musician.AddPerformer(), chords_beat_composer_callback,
                           instruments.size() - 1);
 
-  build_instrument_fn(OscillatorShape::kNoise, -40.0, 0.5, 0.025);
+  build_instrument_fn(OscillatorShape::kNoise, -40.0f, 0.5f, 0.025f);
   performers.emplace_back(musician.AddPerformer(), chords_beat_composer_callback,
                           instruments.size() - 1);
 
   const auto line_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                InstrumentHandle& instrument,
                                                PerformerHandle& performer) {
-    ComposeLine(-1, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
+    ComposeLine(-1, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorShape::kSaw, -24.0, 0.0025, 0.125);
+  build_instrument_fn(OscillatorShape::kSaw, -24.0f, 0.0025f, 0.125f);
   performers.emplace_back(musician.AddPerformer(), line_beat_composer_callback,
                           instruments.size() - 1);
 
   const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                  InstrumentHandle& instrument,
                                                  PerformerHandle& performer) {
-    ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, instrument, performer);
+    ComposeLine(0, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer);
   };
 
-  build_instrument_fn(OscillatorShape::kSquare, -24.0, 0.05, 0.05);
+  build_instrument_fn(OscillatorShape::kSquare, -24.0f, 0.05f, 0.05f);
   performers.emplace_back(musician.AddPerformer(), line_2_beat_composer_callback,
                           instruments.size() - 1);
 
   // Add percussion instrument.
   instruments.push_back(musician.AddInstrument());
   auto& percussion = instruments.back();
-  percussion.SetControl(ControlType::kGain, -18.0);
-  percussion.SetControl(ControlType::kAttack, 0.0);
+  percussion.SetControl(ControlType::kGain, -18.0f);
+  percussion.SetControl(ControlType::kAttack, 0.0f);
   percussion.SetControl(ControlType::kRetrigger, true);
   percussion.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
-      [&](const std::vector<std::pair<double, std::string>>& percussion_map) {
+      [&](const std::vector<std::pair<float, std::string>>& percussion_map) {
         std::vector<SampleDataSlice> slices;
-        std::vector<std::vector<double>> samples;
+        std::vector<std::vector<float>> samples;
         slices.reserve(percussion_map.size());
         samples.reserve(percussion_map.size());
         for (const auto& [pitch, file_path] : percussion_map) {
@@ -344,9 +344,9 @@ int main(int /*argc*/, char* argv[]) {
   metronome.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  std::vector<double> temp_buffer(kSampleCount);
-  const auto process_callback = [&](std::span<double> output_samples) {
-    std::fill_n(output_samples.begin(), kSampleCount, 0.0);
+  std::vector<float> temp_buffer(kSampleCount);
+  const auto process_callback = [&](std::span<float> output_samples) {
+    std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
     for (auto& instrument : instruments) {
       instrument.Process(temp_buffer, clock.GetTimestamp());
       std::transform(temp_buffer.begin(), temp_buffer.end(), output_samples.begin(),

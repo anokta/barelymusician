@@ -16,7 +16,7 @@ void BM_BarelyInstrument_Process_Empty(State& state) {
 
   auto instrument = musician.AddInstrument();
 
-  std::array<double, kSampleCount> output_samples;
+  std::array<float, kSampleCount> output_samples;
 
   for (auto _ : state) {
     instrument.Process(output_samples, 0.0);
@@ -25,7 +25,7 @@ void BM_BarelyInstrument_Process_Empty(State& state) {
 BENCHMARK(BM_BarelyInstrument_Process_Empty);
 
 void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
-  constexpr std::array<double, 5> kSamples = {-0.5, -0.25, 0.0, 0.25, 1.0};
+  constexpr std::array<float, 5> kSamples = {-0.5f, -0.25f, 0.0f, 0.25f, 1.0f};
   const std::array<SampleDataSlice, 1> kSlices = {SampleDataSlice(0.0, kSampleRate, kSamples)};
 
   Musician musician(kSampleRate);
@@ -35,7 +35,7 @@ void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
   instrument.SetSampleData(kSlices);
   instrument.SetNoteOn(1.0);
 
-  std::array<double, kSampleCount> output_samples;
+  std::array<float, kSampleCount> output_samples;
 
   for (auto _ : state) {
     instrument.Process(output_samples, 0.0);
@@ -50,7 +50,7 @@ void BM_BarelyInstrument_Process_SingleNoteWithSineOscillator(State& state) {
   instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
   instrument.SetNoteOn(0.0);
 
-  std::array<double, kSampleCount> output_samples;
+  std::array<float, kSampleCount> output_samples;
 
   for (auto _ : state) {
     instrument.Process(output_samples, 0.0);
@@ -66,10 +66,10 @@ void BM_BarelyInstrument_Process_MultipleNotesWithSineOscillator(State& state) {
 
   const int voice_count = instrument.GetControl<int>(ControlType::kVoiceCount);
   for (int i = 0; i < voice_count; ++i) {
-    instrument.SetNoteOn(static_cast<double>(i));
+    instrument.SetNoteOn(static_cast<float>(i));
   }
 
-  std::array<double, kSampleCount> output_samples;
+  std::array<float, kSampleCount> output_samples;
 
   for (auto _ : state) {
     instrument.Process(output_samples, 0.0);
@@ -83,7 +83,7 @@ void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
   auto instrument = musician.AddInstrument();
   instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
 
-  std::array<double, kSampleCount> output_samples;
+  std::array<float, kSampleCount> output_samples;
   double timestamp = 0.0;
 
   constexpr int kUpdateCount = 20;
@@ -94,14 +94,14 @@ void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
     state.PauseTiming();
     for (int i = 0; i < kUpdateCount; ++i) {
       musician.Update(timestamp);
-      instrument.SetControl(ControlType::kAttack, 0.001 * static_cast<double>(i));
-      const double pitch = static_cast<double>(i) / static_cast<double>(kUpdateCount);
+      instrument.SetControl(ControlType::kAttack, 0.001f * static_cast<float>(i));
+      const float pitch = static_cast<float>(i) / static_cast<float>(kUpdateCount);
       instrument.SetNoteOn(pitch);
-      instrument.SetNoteControl(pitch, NoteControlType::kPitchShift, static_cast<double>(i));
+      instrument.SetNoteControl(pitch, NoteControlType::kPitchShift, static_cast<float>(i));
       musician.Update(timestamp + kTimestampIncrement * static_cast<double>(i) /
                                       static_cast<double>(kUpdateCount));
       instrument.SetNoteOff(pitch);
-      instrument.SetControl(ControlType::kAttack, 0.01 * static_cast<double>(i));
+      instrument.SetControl(ControlType::kAttack, 0.01f * static_cast<float>(i));
     }
     state.ResumeTiming();
     instrument.Process(output_samples, timestamp);
@@ -119,7 +119,7 @@ void BM_BarelyInstrument_SetControl(State& state) {
   for (auto _ : state) {
     state.PauseTiming();
     const ControlType type = static_cast<ControlType>(i % BarelyControlType_kCount);
-    const double value = i++;
+    const float value = static_cast<float>(i++);
     state.ResumeTiming();
     instrument.SetControl(type, value);
   }

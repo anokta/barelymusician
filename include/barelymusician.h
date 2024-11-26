@@ -42,21 +42,21 @@
 //    // Note pitch is centered around the reference frequency, and measured in octaves. Fractional
 ///   // values adjust the frequency logarithmically to maintain perceived pitch intervals in each
 ///   // octave.
-///   const double c3_pitch = -1.0;
-///   instrument.SetNoteOn(c3_pitch, /*intensity=*/0.25);
+///   const float c3_pitch = -1.0f;
+///   instrument.SetNoteOn(c3_pitch, /*intensity=*/0.25f);
 ///
 ///   // Check if the note is on.
 ///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0);
+///   instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0f);
 ///
 ///   // Process.
 ///   //
 ///   // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process`
 ///   // should typically be called from an audio thread process callback in real-time audio
 ///   // applications.
-///   double output_samples[1024];
+///   float output_samples[1024];
 ///   double timestamp = 0.0;
 ///   instrument.Process(output_samples, timestamp);
 ///   @endcode
@@ -122,22 +122,22 @@
 //    // Note pitch is centered around the reference frequency, and measured in octaves. Fractional
 ///   // values adjust the frequency logarithmically to maintain perceived pitch intervals in each
 ///   // octave.
-///   double c3_pitch = -1.0;
-///   BarelyInstrument_SetNoteOn(instrument, c3_pitch, /*intensity=*/0.25);
+///   float c3_pitch = -1.0f;
+///   BarelyInstrument_SetNoteOn(instrument, c3_pitch, /*intensity=*/0.25f);
 ///
 ///   // Check if the note is on.
 ///   bool is_note_on = false;
 ///   BarelyInstrument_IsNoteOn(instrument, c3_pitch, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, BarelyControlType_kGain, /*value=*/-6.0);
+///   BarelyInstrument_SetControl(instrument, BarelyControlType_kGain, /*value=*/-6.0f);
 ///
 ///   // Process.
 ///   //
 ///   // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process`
 ///   // should typically be called from an audio thread process callback in real-time audio
 ///   // applications.
-///   double output_samples[1024];
+///   float output_samples[1024];
 ///   double timestamp = 0.0;
 ///   BarelyInstrument_Process(instrument, output_samples, /*output_sample_count=*/1024, timestamp);
 ///
@@ -333,13 +333,13 @@ enum BarelySamplePlaybackMode_Values {
 /// Slice of sample data.
 typedef struct BarelySampleDataSlice {
   /// Root note pitch.
-  double root_pitch;
+  float root_pitch;
 
   /// Sampling rate in hertz.
   int32_t sample_rate;
 
   /// Array of mono samples.
-  const double* samples;
+  const float* samples;
 
   /// Number of mono samples.
   int32_t sample_count;
@@ -360,7 +360,7 @@ typedef void (*BarelyNoteOffEvent_DestroyCallback)(void** state);
 ///
 /// @param state Pointer to note off event state.
 /// @param pitch Note pitch.
-typedef void (*BarelyNoteOffEvent_ProcessCallback)(void** state, double pitch);
+typedef void (*BarelyNoteOffEvent_ProcessCallback)(void** state, float pitch);
 
 /// Note off event.
 typedef struct BarelyNoteOffEvent {
@@ -393,7 +393,7 @@ typedef void (*BarelyNoteOnEvent_DestroyCallback)(void** state);
 /// @param state Pointer to note on event state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyNoteOnEvent_ProcessCallback)(void** state, double pitch, double intensity);
+typedef void (*BarelyNoteOnEvent_ProcessCallback)(void** state, float pitch, float intensity);
 
 /// Note on event.
 typedef struct BarelyNoteOnEvent {
@@ -460,7 +460,7 @@ typedef struct BarelyTask* BarelyTaskHandle;
 /// @param out_value Output control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument,
-                                               BarelyControlType type, double* out_value);
+                                               BarelyControlType type, float* out_value);
 
 /// Gets an instrument note control value.
 ///
@@ -469,8 +469,8 @@ BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument
 /// @param type Note control type.
 /// @param out_value Output note control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   BarelyNoteControlType type, double* out_value);
+BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, float pitch,
+                                                   BarelyNoteControlType type, float* out_value);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -478,7 +478,7 @@ BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instru
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
+BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, float pitch,
                                              bool* out_is_note_on);
 
 /// Processes instrument output samples at timestamp.
@@ -490,7 +490,7 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
-                                            double* output_samples, int32_t output_sample_count,
+                                            float* output_samples, int32_t output_sample_count,
                                             double timestamp);
 
 /// Sets all instrument notes off.
@@ -506,7 +506,7 @@ BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instru
 /// @param value Control value.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
-                                               BarelyControlType type, double value);
+                                               BarelyControlType type, float value);
 
 /// Sets an instrument note control value.
 ///
@@ -515,15 +515,15 @@ BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument
 /// @param type Note control type.
 /// @param value Note control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                                   BarelyNoteControlType type, double value);
+BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
+                                                   BarelyNoteControlType type, float value);
 
 /// Sets an instrument note off.
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch);
+BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch);
 
 /// Sets the note off event of an instrument.
 ///
@@ -539,8 +539,8 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instr
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch,
-                                              double intensity);
+BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
+                                              float intensity);
 
 /// Sets the note on event of an instrument.
 ///
@@ -596,7 +596,7 @@ BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
 /// @param out_reference_frequency Output reference frequency in hertz.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_GetReferenceFrequency(BarelyMusicianHandle musician,
-                                                        double* out_reference_frequency);
+                                                        float* out_reference_frequency);
 
 /// Gets the tempo of a musician.
 ///
@@ -635,7 +635,7 @@ BARELY_EXPORT bool BarelyMusician_RemovePerformer(BarelyMusicianHandle musician,
 /// @param reference_frequency Reference frequency in hertz.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyMusician_SetReferenceFrequency(BarelyMusicianHandle musician,
-                                                        double reference_frequency);
+                                                        float reference_frequency);
 
 /// Sets the tempo of a musician.
 ///
@@ -897,8 +897,8 @@ struct SampleDataSlice : public BarelySampleDataSlice {
   /// @param root_pitch Root pich.
   /// @param sample_rate Sampling rate in hertz.
   /// @param samples Span of mono samples.
-  explicit constexpr SampleDataSlice(double root_pitch, int sample_rate,
-                                     std::span<const double> samples) noexcept
+  explicit constexpr SampleDataSlice(float root_pitch, int sample_rate,
+                                     std::span<const float> samples) noexcept
       : SampleDataSlice(
             {root_pitch, sample_rate, samples.data(), static_cast<int>(samples.size())}) {
     assert(sample_rate >= 0);
@@ -917,7 +917,7 @@ struct NoteOffEvent : public BarelyNoteOffEvent {
   /// Callback signature.
   ///
   /// @param pitch Note pitch.
-  using Callback = std::function<void(double pitch)>;
+  using Callback = std::function<void(float pitch)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteOffEvent_CreateCallback;
@@ -954,7 +954,7 @@ struct NoteOnEvent : public BarelyNoteOnEvent {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  using Callback = std::function<void(double pitch, double intensity)>;
+  using Callback = std::function<void(float pitch, float intensity)>;
 
   /// Create callback signature.
   using CreateCallback = BarelyNoteOnEvent_CreateCallback;
@@ -1149,7 +1149,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   [[nodiscard]] ValueType GetControl(ControlType type) const noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
-    double value = 0.0;
+    float value = 0.0f;
     [[maybe_unused]] const bool success =
         BarelyInstrument_GetControl(*this, static_cast<BarelyControlType>(type), &value);
     assert(success);
@@ -1162,10 +1162,10 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param type Note control type.
   /// @return Note control value.
   template <typename ValueType>
-  [[nodiscard]] ValueType GetNoteControl(double pitch, NoteControlType type) const noexcept {
+  [[nodiscard]] ValueType GetNoteControl(float pitch, NoteControlType type) const noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
-    double value = 0.0;
+    float value = 0.0f;
     [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControl(
         *this, pitch, static_cast<BarelyNoteControlType>(type), &value);
     assert(success);
@@ -1176,7 +1176,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
+  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept {
     bool is_note_on = false;
     [[maybe_unused]] const bool success = BarelyInstrument_IsNoteOn(*this, pitch, &is_note_on);
     assert(success);
@@ -1187,7 +1187,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   ///
   /// @param output_samples Span of mono output samples.
   /// @param timestamp Timestamp in seconds.
-  void Process(std::span<double> output_samples, double timestamp) noexcept {
+  void Process(std::span<float> output_samples, double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_Process(
         *this, output_samples.data(), static_cast<int32_t>(output_samples.size()), timestamp);
     assert(success);
@@ -1208,7 +1208,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
-        *this, static_cast<BarelyControlType>(type), static_cast<double>(value));
+        *this, static_cast<BarelyControlType>(type), static_cast<float>(value));
     assert(success);
   }
 
@@ -1218,18 +1218,18 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param type Note control type.
   /// @param value Note control value.
   template <typename ValueType>
-  void SetNoteControl(double pitch, NoteControlType type, ValueType value) noexcept {
+  void SetNoteControl(float pitch, NoteControlType type, ValueType value) noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        *this, pitch, static_cast<BarelyNoteControlType>(type), static_cast<double>(value));
+        *this, pitch, static_cast<BarelyNoteControlType>(type), static_cast<float>(value));
     assert(success);
   }
 
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(double pitch) noexcept {
+  void SetNoteOff(float pitch) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOff(*this, pitch);
     assert(success);
   }
@@ -1247,7 +1247,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param callback Note off event callback.
   void SetNoteOffEvent(NoteOffEvent::Callback callback) noexcept {
     if (callback) {
-      const auto note_off_event = EventWithCallback<NoteOffEvent, double>(callback);
+      const auto note_off_event = EventWithCallback<NoteOffEvent, float>(callback);
       SetNoteOffEvent(&note_off_event);
     } else {
       SetNoteOffEvent(nullptr);
@@ -1258,7 +1258,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  void SetNoteOn(double pitch, double intensity = 1.0) noexcept {
+  void SetNoteOn(float pitch, float intensity = 1.0f) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(*this, pitch, intensity);
     assert(success);
   }
@@ -1276,7 +1276,7 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param callback Note off event callback.
   void SetNoteOnEvent(NoteOnEvent::Callback callback) noexcept {
     if (callback) {
-      const auto note_on_event = EventWithCallback<NoteOnEvent, double, double>(callback);
+      const auto note_on_event = EventWithCallback<NoteOnEvent, float, float>(callback);
       SetNoteOnEvent(&note_on_event);
     } else {
       SetNoteOnEvent(nullptr);
@@ -1543,8 +1543,8 @@ class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
   /// Returns the reference frequency.
   ///
   /// @return Reference frequency in hertz.
-  [[nodiscard]] double GetReferenceFrequency() const noexcept {
-    double reference_frequency = 0.0;
+  [[nodiscard]] float GetReferenceFrequency() const noexcept {
+    float reference_frequency = 0.0f;
     [[maybe_unused]] const bool success =
         BarelyMusician_GetReferenceFrequency(*this, &reference_frequency);
     assert(success);
@@ -1590,7 +1590,7 @@ class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
   /// Sets the reference frequency.
   ///
   /// @param reference_frequency Reference frequency in hertz.
-  void SetReferenceFrequency(double reference_frequency) noexcept {
+  void SetReferenceFrequency(float reference_frequency) noexcept {
     [[maybe_unused]] const bool success =
         BarelyMusician_SetReferenceFrequency(*this, reference_frequency);
     assert(success);

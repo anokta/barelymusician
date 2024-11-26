@@ -27,7 +27,7 @@ class SampleData {
   ///
   /// @param pitch Note pitch.
   /// @return Pointer to sample data slice.
-  [[nodiscard]] const SampleDataSlice* Select(double pitch) const noexcept;
+  [[nodiscard]] const SampleDataSlice* Select(float pitch) const noexcept;
 
   /// Swaps the sample data.
   ///
@@ -36,7 +36,7 @@ class SampleData {
 
  private:
   // Array of sample data slices.
-  std::vector<std::pair<SampleDataSlice, std::vector<double>>> slices_;
+  std::vector<std::pair<SampleDataSlice, std::vector<float>>> slices_;
 
   // Random number generator for picking sample data slices.
   inline static Random random_ = Random();

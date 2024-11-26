@@ -12,7 +12,7 @@ class Pool {
  public:
   Pool() noexcept {
     static_assert(kCapacity > 0, "Pool capacity must be greater than 0");
-    for (int i = 0; i < kCapacity, ++i) {
+    for (int i = 0; i < kCapacity; ++i) {
       free_items_[i] = &items_[i];
     }
   }

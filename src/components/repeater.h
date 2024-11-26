@@ -51,7 +51,7 @@ class Repeater {
   /// @param pitch_or Note pitch or silence.
   /// @param length Note length.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Push(std::optional<double> pitch_or, int length = 1) noexcept;
+  void Push(std::optional<float> pitch_or, int length = 1) noexcept;
 
   /// Sets the instrument.
   ///
@@ -72,7 +72,7 @@ class Repeater {
   ///
   /// @param pitch_offset Pitch offset.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Start(double pitch_offset = 0.0) noexcept;
+  void Start(float pitch_offset = 0.0) noexcept;
 
   /// Stop the repeater.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -92,7 +92,7 @@ class Repeater {
   Instrument* instrument_ = nullptr;
 
   // Array of pitches to play.
-  std::vector<std::pair<std::optional<double>, int>> pitches_;
+  std::vector<std::pair<std::optional<float>, int>> pitches_;
 
   // Style.
   RepeaterStyle style_ = RepeaterStyle::kForward;
@@ -101,7 +101,7 @@ class Repeater {
   int index_ = -1;
 
   // Pitch offset.
-  double pitch_offset_ = 0.0;
+  float pitch_offset_ = 0.0;
 
   // Remaining length;
   int remaining_length_ = 0;

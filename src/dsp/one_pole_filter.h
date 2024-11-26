@@ -20,12 +20,12 @@ class OnePoleFilter {
   /// @param coefficient Filter coefficient.
   /// @return Filtered output sample.
   template <FilterType kType>
-  [[nodiscard]] double Next(double input, double coefficient) noexcept {
+  [[nodiscard]] float Next(float input, float coefficient) noexcept {
     if constexpr (kType == FilterType::kNone) {
       output_ = input;
     } else {
-      assert(coefficient >= 0.0);
-      assert(coefficient <= 1.0);
+      assert(coefficient >= 0.0f);
+      assert(coefficient <= 1.0f);
       output_ = coefficient * (output_ - input) + input;
     }
     if constexpr (kType == FilterType::kHighPass) {
@@ -36,11 +36,11 @@ class OnePoleFilter {
   }
 
   /// Resets the filter output.
-  void Reset() noexcept { output_ = 0.0; }
+  void Reset() noexcept { output_ = 0.0f; }
 
  private:
   // The last output sample.
-  double output_ = 0.0;
+  float output_ = 0.0f;
 };
 
 /// Returns the corresponding one-pole filter coefficient for a given cutoff frequency.
@@ -48,14 +48,14 @@ class OnePoleFilter {
 /// @param sample_rate Sampling rate in hertz.
 /// @param cuttoff_frequency Cutoff frequency in hertz.
 /// @return Filter coefficient.
-inline double GetFilterCoefficient(int sample_rate, double cuttoff_frequency) noexcept {
+inline float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) noexcept {
   assert(sample_rate > 0);
-  assert(cuttoff_frequency >= 0.0);
+  assert(cuttoff_frequency >= 0.0f);
   // c = exp(-2 * pi * fc / fs).
   // TODO(#8): Verify if this *a proper way* to calculate the coefficient?
-  return std::clamp(std::exp(-2.0 * std::numbers::pi_v<double> * cuttoff_frequency /
-                             static_cast<double>(sample_rate)),
-                    0.0, 1.0);
+  return std::clamp(std::exp(-2.0f * std::numbers::pi_v<float> * cuttoff_frequency /
+                             static_cast<float>(sample_rate)),
+                    0.0f, 1.0f);
 }
 
 }  // namespace barely::internal

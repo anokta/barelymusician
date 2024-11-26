@@ -15,54 +15,54 @@ class Envelope {
     /// Constructs new `Adsr`.
     ///
     /// @param sample_interval Sample interval in seconds.
-    explicit Adsr(double sample_interval) noexcept : sample_interval_(sample_interval) {}
+    explicit Adsr(float sample_interval) noexcept : sample_interval_(sample_interval) {}
 
     /// Sets the attack.
     ///
     /// @param attack Attack in seconds.
-    void SetAttack(double attack) noexcept {
-      attack_increment_ = (attack > 0.0) ? sample_interval_ / attack : 0.0;
-      if (attack_increment_ > 1.0) {
-        attack_increment_ = 0.0;
+    void SetAttack(float attack) noexcept {
+      attack_increment_ = (attack > 0.0f) ? sample_interval_ / attack : 0.0f;
+      if (attack_increment_ > 1.0f) {
+        attack_increment_ = 0.0f;
       }
     }
 
     /// Sets the decay.
     ///
     /// @param  decay Attack in seconds.
-    void SetDecay(double decay) noexcept {
-      decay_increment_ = (decay > 0.0) ? sample_interval_ / decay : 0.0;
-      if (decay_increment_ > 1.0) {
-        decay_increment_ = 0.0;
+    void SetDecay(float decay) noexcept {
+      decay_increment_ = (decay > 0.0f) ? sample_interval_ / decay : 0.0f;
+      if (decay_increment_ > 1.0f) {
+        decay_increment_ = 0.0f;
       }
     }
 
     /// Sets the release.
     ///
     /// @param  release Release in seconds.
-    void SetRelease(double release) noexcept {
-      release_decrement_ = (release > 0.0) ? -sample_interval_ / release : 0.0;
-      if (release_decrement_ < -1.0) {
-        release_decrement_ = 0.0;
+    void SetRelease(float release) noexcept {
+      release_decrement_ = (release > 0.0f) ? -sample_interval_ / release : 0.0f;
+      if (release_decrement_ < -1.0f) {
+        release_decrement_ = 0.0f;
       }
     }
 
     /// Sets the sustain of the envelope in amplitude.
     ///
     /// @param  sustain Sustain in amplitude range [0, 1].
-    void SetSustain(double sustain) noexcept { sustain_ = std::clamp(sustain, 0.0, 1.0); }
+    void SetSustain(float sustain) noexcept { sustain_ = std::clamp(sustain, 0.0f, 1.0f); }
 
    private:
     friend class Envelope;
 
     // Sample interval in seconds.
-    double sample_interval_ = 0.0;
+    float sample_interval_ = 0.0f;
 
     // ADSR values.
-    double attack_increment_ = 0.0;
-    double decay_increment_ = 0.0;
-    double sustain_ = 1.0;
-    double release_decrement_ = 0.0;
+    float attack_increment_ = 0.0f;
+    float decay_increment_ = 0.0f;
+    float sustain_ = 1.0f;
+    float release_decrement_ = 0.0f;
   };
 
   /// Returns whether the envelope is currently active (i.e., not idle).
@@ -73,30 +73,30 @@ class Envelope {
   /// Generates the next output sample.
   ///
   /// @return Next output sample.
-  double Next() noexcept {
+  float Next() noexcept {
     if (state_ == State::kIdle) {
       return 0.0;
     }
     assert(adsr_ != nullptr);
     if (state_ == State::kAttack) {
-      if (adsr_->attack_increment_ > 0.0) {
+      if (adsr_->attack_increment_ > 0.0f) {
         output_ = phase_;
         phase_ += adsr_->attack_increment_;
-        if (phase_ >= 1.0) {
-          phase_ = 0.0;
+        if (phase_ >= 1.0f) {
+          phase_ = 0.0f;
           state_ = State::kDecay;
         }
         return output_;
       }
-      phase_ = 0.0;
+      phase_ = 0.0f;
       state_ = State::kDecay;
     }
     if (state_ == State::kDecay) {
-      if (adsr_->decay_increment_ > 0.0) {
-        output_ = 1.0 - phase_ * (1.0 - adsr_->sustain_);
+      if (adsr_->decay_increment_ > 0.0f) {
+        output_ = 1.0f - phase_ * (1.0f - adsr_->sustain_);
         phase_ += adsr_->decay_increment_;
-        if (phase_ >= 1.0) {
-          phase_ = 0.0;
+        if (phase_ >= 1.0f) {
+          phase_ = 0.0f;
           state_ = State::kSustain;
         }
         return output_;
@@ -108,18 +108,18 @@ class Envelope {
       return output_;
     }
     if (state_ == State::kRelease) {
-      if (adsr_->release_decrement_ < 0.0) {
+      if (adsr_->release_decrement_ < 0.0f) {
         output_ = phase_ * release_output_;
         phase_ += adsr_->release_decrement_;
-        if (phase_ <= 0.0) {
-          phase_ = 0.0;
+        if (phase_ <= 0.0f) {
+          phase_ = 0.0f;
           state_ = State::kIdle;
         }
         return output_;
       }
       state_ = State::kIdle;
     }
-    return 0.0;
+    return 0.0f;
   }
 
   /// Resets the state.
@@ -131,17 +131,17 @@ class Envelope {
   void Start(const Adsr& adsr) noexcept {
     adsr_ = &adsr;
     output_ = adsr_->sustain_;
-    phase_ = 0.0;
+    phase_ = 0.0f;
     state_ = State::kAttack;
   }
 
   /// Stops the envelope.
   void Stop() noexcept {
     if (state_ != State::kIdle && state_ != State::kRelease) {
-      if (state_ == State::kAttack && adsr_->attack_increment_ > 0.0) {
+      if (state_ == State::kAttack && adsr_->attack_increment_ > 0.0f) {
         state_ = State::kIdle;
       } else {
-        phase_ = 1.0;
+        phase_ = 1.0f;
         release_output_ = output_;
         state_ = State::kRelease;
       }
@@ -156,13 +156,13 @@ class Envelope {
   const Adsr* adsr_ = nullptr;
 
   // Last output value.
-  double output_ = 0.0;
+  float output_ = 0.0f;
 
   // Last output value on release.
-  double release_output_ = 0.0;
+  float release_output_ = 0.0f;
 
   // Internal clock.
-  double phase_ = 0.0;
+  float phase_ = 0.0f;
 
   // Current state.
   State state_ = State::kIdle;

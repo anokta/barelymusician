@@ -33,13 +33,13 @@ constexpr int kSampleCount = 256;
 constexpr double kLookahead = 0.1;
 
 // Arpeggiator settings.
-constexpr double kGain = -18.0;
+constexpr float kGain = -18.0f;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.05;
+constexpr float kAttack = 0.0f;
+constexpr float kRelease = 0.05f;
 constexpr int kVoiceCount = 16;
 
-constexpr double kInitialGateRatio = 0.5;
+constexpr float kInitialGateRatio = 0.5f;
 constexpr double kInitialRate = 4.0;
 constexpr double kInitialTempo = 100.0;
 constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kUp;
@@ -47,17 +47,17 @@ constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kUp;
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kRootPitch = 0.0;
+constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& key) {
+std::optional<float> PitchFromKey(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return kRootPitch + static_cast<double>(octave_shift) +
-         static_cast<double>(std::distance(kOctaveKeys.begin(), it)) / 12.0;
+  return kRootPitch + static_cast<float>(octave_shift) +
+         static_cast<float>(std::distance(kOctaveKeys.begin(), it)) / 12.0f;
 }
 
 }  // namespace
@@ -80,7 +80,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
   instrument.SetNoteOnEvent(
-      [](double pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
+      [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   Arpeggiator arpeggiator(musician);
   arpeggiator.SetInstrument(instrument);
@@ -89,7 +89,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   arpeggiator.SetStyle(kInitialStyle);
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](std::span<double> output_samples) {
+  audio_output.SetProcessCallback([&](std::span<float> output_samples) {
     instrument.Process(output_samples, audio_clock.GetTimestamp());
     audio_clock.Update(static_cast<int>(output_samples.size()));
   });

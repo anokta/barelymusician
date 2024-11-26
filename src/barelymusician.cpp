@@ -15,7 +15,7 @@ using ::barely::NoteOnEvent;
 using ::barely::SampleDataSlice;
 
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
-                                 double* out_value) {
+                                 float* out_value) {
   if (!instrument) return false;
   if (type < 0 || type >= BarelyControlType_kCount) return false;
   if (!out_value) return false;
@@ -24,8 +24,8 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyContro
   return true;
 }
 
-bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                     BarelyNoteControlType type, double* out_value) {
+bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, float pitch,
+                                     BarelyNoteControlType type, float* out_value) {
   if (!instrument) return false;
   if (type < 0 || type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
@@ -38,7 +38,7 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double p
   return false;
 }
 
-bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
+bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, float pitch,
                                bool* out_is_note_on) {
   if (!instrument) return false;
   if (!out_is_note_on) return false;
@@ -47,7 +47,7 @@ bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
   return true;
 }
 
-bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
+bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, float* output_samples,
                               int32_t output_sample_count, double timestamp) {
   if (!instrument) return false;
 
@@ -64,7 +64,7 @@ bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
 }
 
 bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
-                                 double value) {
+                                 float value) {
   if (!instrument) return false;
   if (type < 0 || type >= BarelyControlType_kCount) return false;
 
@@ -72,8 +72,8 @@ bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyContro
   return true;
 }
 
-bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                     BarelyNoteControlType type, double value) {
+bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
+                                     BarelyNoteControlType type, float value) {
   if (!instrument) return false;
   if (type < 0 || type >= BarelyNoteControlType_kCount) return false;
 
@@ -81,7 +81,7 @@ bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double p
   return true;
 }
 
-bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch) {
+bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch) {
   if (!instrument) return false;
 
   instrument->SetNoteOff(pitch);
@@ -96,7 +96,7 @@ bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch, double intensity) {
+bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch, float intensity) {
   if (!instrument) return false;
 
   instrument->SetNoteOn(pitch, intensity);
@@ -156,7 +156,7 @@ bool BarelyMusician_Destroy(BarelyMusicianHandle musician) {
 }
 
 bool BarelyMusician_GetReferenceFrequency(BarelyMusicianHandle musician,
-                                          double* out_reference_frequency) {
+                                          float* out_reference_frequency) {
   if (!musician) return false;
   if (!out_reference_frequency) return false;
 
@@ -197,7 +197,7 @@ bool BarelyMusician_RemovePerformer(BarelyMusicianHandle musician,
 }
 
 bool BarelyMusician_SetReferenceFrequency(BarelyMusicianHandle musician,
-                                          double reference_frequency) {
+                                          float reference_frequency) {
   if (!musician) return false;
 
   musician->SetReferenceFrequency(reference_frequency);

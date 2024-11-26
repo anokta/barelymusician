@@ -31,10 +31,10 @@ constexpr int kSampleCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr double kGain = -20.0;
+constexpr float kGain = -20.0f;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.1;
+constexpr float kAttack = 0.0f;
+constexpr float kRelease = 0.1f;
 
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
@@ -57,14 +57,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetNoteOnEvent(
-      [](double pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
+      [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   auto performer = musician.AddPerformer();
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
-  const auto play_note_fn = [&](double duration, double pitch) {
+  const auto play_note_fn = [&](double duration, float pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
       performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
@@ -73,15 +73,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   };
 
   std::vector<std::pair<double, TaskEvent::Callback>> score;
-  score.emplace_back(0.0, play_note_fn(1.0, 0.0));
-  score.emplace_back(1.0, play_note_fn(1.0, 2.0 / 12.0));
-  score.emplace_back(2.0, play_note_fn(1.0, 4.0 / 12.0));
-  score.emplace_back(3.0, play_note_fn(1.0, 5.0 / 12.0));
-  score.emplace_back(4.0, play_note_fn(1.0, 7.0 / 12.0));
-  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, 7.0 / 12.0));
-  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, 9.0 / 12.0));
-  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, 11.0 / 12.0));
-  score.emplace_back(6.0, play_note_fn(2.0, 1.0));
+  score.emplace_back(0.0, play_note_fn(1.0, 0.0f));
+  score.emplace_back(1.0, play_note_fn(1.0, 2.0f / 12.0f));
+  score.emplace_back(2.0, play_note_fn(1.0, 4.0f / 12.0f));
+  score.emplace_back(3.0, play_note_fn(1.0, 5.0f / 12.0f));
+  score.emplace_back(4.0, play_note_fn(1.0, 7.0f / 12.0f));
+  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, 7.0f / 12.0f));
+  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, 9.0f / 12.0f));
+  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, 11.0f / 12.0f));
+  score.emplace_back(6.0, play_note_fn(2.0, 1.0f));
 
   std::unordered_map<int, TaskHandle> tasks;
   int index = 0;
@@ -90,7 +90,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<double> output_samples) {
+  const auto process_callback = [&](std::span<float> output_samples) {
     instrument.Process(output_samples, audio_clock.GetTimestamp());
     audio_clock.Update(static_cast<int>(output_samples.size()));
   };

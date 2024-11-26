@@ -10,7 +10,7 @@ namespace Barely {
 
       public void OnGUI() {
         color.a =
-            Mathf.Lerp(color.a, instrument.IsNoteOn(0.0) ? 1.0f : 0.0f, 8.0f * Time.deltaTime);
+            Mathf.Lerp(color.a, instrument.IsNoteOn(0.0f) ? 1.0f : 0.0f, 8.0f * Time.deltaTime);
         GUI.color = color;
         float size = 0.05f * Mathf.Min(Screen.width, Screen.height);
         GUI.DrawTexture(new Rect(Input.mousePosition.x - 0.5f * size,
@@ -20,12 +20,12 @@ namespace Barely {
 
       public void Update() {
         instrument.PitchShift =
-            2.0 * (double)Mathf.Clamp(Input.mousePosition.x / Screen.width, 0.0f, 1.0f) - 1.0;
-        instrument.Gain = 20.0 * (double)Mathf.Log10(Input.mousePosition.y / Screen.height);
+            2.0f * Mathf.Clamp(Input.mousePosition.x / Screen.width, 0.0f, 1.0f) - 1.0f;
+        instrument.Gain = 20.0f * Mathf.Log10(Input.mousePosition.y / Screen.height);
         if (Input.GetMouseButtonDown(0)) {
-          instrument.SetNoteOn(0.0, 1.0);
+          instrument.SetNoteOn(0.0f, 1.0f);
         } else if (Input.GetMouseButtonUp(0)) {
-          instrument.SetNoteOff(0.0);
+          instrument.SetNoteOff(0.0f);
         }
       }
     }

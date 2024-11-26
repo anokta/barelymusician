@@ -71,7 +71,7 @@ namespace Barely {
       public AudioClip Sample = null;
 
       /// Internal data.
-      public double[] Data {
+      public float[] Data {
         get {
           if (_data == null || HasChanged) {
             _rootPitch = RootPitch;
@@ -81,22 +81,22 @@ namespace Barely {
               return _data;
             }
             if (_data == null || _sample.samples != _data.Length) {
-              _data = new double[_sample.samples];
+              _data = new float[_sample.samples];
             }
             // Write the sample data.
             float[] sampleData = new float[_sample.samples * _sample.channels];
             _sample.GetData(sampleData, 0);
             for (int frame = 0; frame < _sample.samples; ++frame) {
-              _data[frame] = 0.0;
+              _data[frame] = 0.0f;
               for (int channel = 0; channel < _sample.channels; ++channel) {
-                _data[frame] += (double)sampleData[frame * _sample.channels + channel];
+                _data[frame] += sampleData[frame * _sample.channels + channel];
               }
             }
           }
           return _data;
         }
       }
-      private double[] _data = null;
+      private float[] _data = null;
 
       /// Denotes whether any changes has occured since the last update.
       public bool HasChanged {
@@ -104,7 +104,7 @@ namespace Barely {
       }
 
       /// Current root pitch.
-      private double _rootPitch = 0.0;
+      private float _rootPitch = 0.0f;
 
       // Current sample.
       private AudioClip _sample = null;
@@ -112,11 +112,11 @@ namespace Barely {
 
     /// Gain in decibels.
     [Range(-80.0f, 0.0f)]
-    public double Gain = 0.0;
+    public float Gain = 0.0f;
 
     /// Pitch shift.
     [Range(-1.0f, 1.0f)]
-    public double PitchShift = 0.0;
+    public float PitchShift = 0.0f;
 
     /// Retrigger.
     public bool Retrigger = false;
@@ -129,19 +129,19 @@ namespace Barely {
 
     /// Envelope attack in seconds.
     [Range(0.0f, 60.0f)]
-    public double Attack = 0.05;
+    public float Attack = 0.05f;
 
     /// Envelope decay in seconds.
     [Range(0.0f, 60.0f)]
-    public double Decay = 0.0;
+    public float Decay = 0.0f;
 
     /// Envelope sustain.
     [Range(0.0f, 1.0f)]
-    public double Sustain = 1.0;
+    public float Sustain = 1.0f;
 
     /// Envelope release in seconds.
     [Range(0.0f, 60.0f)]
-    public double Release = 0.25;
+    public float Release = 0.25f;
 
     [Header("Oscillator")]
 
@@ -150,18 +150,18 @@ namespace Barely {
 
     /// Oscillator mix.
     [Range(-1.0f, 1.0f)]
-    public double OscillatorMix = 0.0;
+    public float OscillatorMix = 0.0f;
 
     /// Oscillator pitch shift.
     [Range(-1.0f, 1.0f)]
-    public double OscillatorPitchShift = 0.0;
+    public float OscillatorPitchShift = 0.0f;
 
     /// Oscillator shape.
     public OscillatorShape OscillatorShape = OscillatorShape.NONE;
 
     /// Pulse width.
     [Range(0.0f, 1.0f)]
-    public double PulseWidth = 0.5;
+    public float PulseWidth = 0.5f;
 
     [Header("Sample Player")]
 
@@ -179,12 +179,12 @@ namespace Barely {
 
     /// Filter frequency in hertz.
     [Range(0.0f, 48000.0f)]
-    public double FilterFrequency = 0.0;
+    public float FilterFrequency = 0.0f;
 
     /// Note off event callback.
     ///
     /// @param pitch Note pitch.
-    public delegate void NoteOffEventCallback(double pitch);
+    public delegate void NoteOffEventCallback(float pitch);
     public event NoteOffEventCallback OnNoteOff;
 
     [Serializable]
@@ -195,7 +195,7 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public delegate void NoteOnEventCallback(double pitch, double intensity);
+    public delegate void NoteOnEventCallback(float pitch, float intensity);
     public event NoteOnEventCallback OnNoteOn;
 
     [Serializable]
@@ -216,7 +216,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param type Note control type
     /// @return Note control value.
-    public double GetNoteControl(double pitch, NoteControlType type) {
+    public float GetNoteControl(float pitch, NoteControlType type) {
       return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, type);
     }
 
@@ -224,7 +224,7 @@ namespace Barely {
     ///
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
-    public bool IsNoteOn(double pitch) {
+    public bool IsNoteOn(float pitch) {
       return Musician.Internal.Instrument_IsNoteOn(_handle, pitch);
     }
 
@@ -238,14 +238,14 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param type Note control type.
     /// @param value Note control value.
-    public void SetNoteControl(double pitch, NoteControlType type, double value) {
+    public void SetNoteControl(float pitch, NoteControlType type, float value) {
       Musician.Internal.Instrument_SetNoteControl(_handle, pitch, type, value);
     }
 
     /// Sets a note off.
     ///
     /// @param pitch Note pitch.
-    public void SetNoteOff(double pitch) {
+    public void SetNoteOff(float pitch) {
       Musician.Internal.Instrument_SetNoteOff(_handle, pitch);
     }
 
@@ -253,7 +253,7 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void SetNoteOn(double pitch, double intensity = 1.0) {
+    public void SetNoteOn(float pitch, float intensity = 1.0f) {
       Musician.Internal.Instrument_SetNoteOn(_handle, pitch, intensity);
     }
 
@@ -265,15 +265,15 @@ namespace Barely {
       }
 
       /// Internal note off event callback.
-      public static void OnNoteOffEvent(Instrument instrument, double pitch) {
+      public static void OnNoteOffEvent(Instrument instrument, float pitch) {
         instrument.OnNoteOff?.Invoke(pitch);
-        instrument.OnNoteOffEvent?.Invoke((float)pitch);
+        instrument.OnNoteOffEvent?.Invoke(pitch);
       }
 
       /// Internal note on event callback.
-      public static void OnNoteOnEvent(Instrument instrument, double pitch, double intensity) {
+      public static void OnNoteOnEvent(Instrument instrument, float pitch, float intensity) {
         instrument.OnNoteOn?.Invoke(pitch, intensity);
-        instrument.OnNoteOnEvent?.Invoke((float)pitch, (float)intensity);
+        instrument.OnNoteOnEvent?.Invoke(pitch, intensity);
       }
     }
 
@@ -311,19 +311,19 @@ namespace Barely {
       UpdateSampleData();
       SetControl(Musician.Internal.ControlType.GAIN, Gain);
       SetControl(Musician.Internal.ControlType.PITCH_SHIFT, PitchShift);
-      SetControl(Musician.Internal.ControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
-      SetControl(Musician.Internal.ControlType.VOICE_COUNT, (double)VoiceCount);
+      SetControl(Musician.Internal.ControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
+      SetControl(Musician.Internal.ControlType.VOICE_COUNT, (float)VoiceCount);
       SetControl(Musician.Internal.ControlType.ATTACK, Attack);
       SetControl(Musician.Internal.ControlType.DECAY, Decay);
       SetControl(Musician.Internal.ControlType.SUSTAIN, Sustain);
       SetControl(Musician.Internal.ControlType.RELEASE, Release);
       SetControl(Musician.Internal.ControlType.OSCILLATOR_MIX, OscillatorMix);
-      SetControl(Musician.Internal.ControlType.OSCILLATOR_MODE, (double)OscillatorMode);
+      SetControl(Musician.Internal.ControlType.OSCILLATOR_MODE, (float)OscillatorMode);
       SetControl(Musician.Internal.ControlType.OSCILLATOR_PITCH_SHIFT, OscillatorPitchShift);
-      SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (double)OscillatorShape);
+      SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (float)OscillatorShape);
       SetControl(Musician.Internal.ControlType.PULSE_WIDTH, PulseWidth);
-      SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (double)SamplePlaybackMode);
-      SetControl(Musician.Internal.ControlType.FILTER_TYPE, (double)FilterType);
+      SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (float)SamplePlaybackMode);
+      SetControl(Musician.Internal.ControlType.FILTER_TYPE, (float)FilterType);
       SetControl(Musician.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
     }
 
@@ -331,11 +331,11 @@ namespace Barely {
       Musician.Internal.Instrument_Process(_handle, data, channels);
     }
 
-    private double GetControl(Musician.Internal.ControlType type) {
+    private float GetControl(Musician.Internal.ControlType type) {
       return Musician.Internal.Instrument_GetControl(_handle, type);
     }
 
-    private void SetControl(Musician.Internal.ControlType type, double value) {
+    private void SetControl(Musician.Internal.ControlType type, float value) {
       Musician.Internal.Instrument_SetControl(_handle, type, value);
     }
 

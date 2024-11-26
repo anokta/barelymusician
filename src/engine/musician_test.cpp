@@ -46,8 +46,8 @@ TEST(MusicianTest, BeatsSecondsConversion) {
 
 // Tests that a single instrument is created and destroyed as expected.
 TEST(MusicianTest, CreateDestroySingleInstrument) {
-  constexpr double kPitch = 0.5;
-  constexpr double kIntensity = 0.75;
+  constexpr float kPitch = 0.5;
+  constexpr float kIntensity = 0.75;
 
   Musician musician(kSampleRate);
 
@@ -55,32 +55,32 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   Instrument* instrument = musician.AddInstrument();
 
   // Set the note events.
-  std::pair<double, double> note_on_state = {0.0, 0.0};
+  std::pair<float, float> note_on_state = {0.0f, 0.0f};
   const auto note_on_event = NoteOnEvent{
       [](void** state, void* user_data) { *state = user_data; },
       [](void**) {},
-      [](void** state, double pitch, double intensity) {
-        auto& note_on_state = *static_cast<std::pair<double, double>*>(*state);
+      [](void** state, float pitch, float intensity) {
+        auto& note_on_state = *static_cast<std::pair<float, float>*>(*state);
         note_on_state.first = pitch;
         note_on_state.second = intensity;
       },
       static_cast<void*>(&note_on_state),
   };
   instrument->SetNoteOnEvent(&note_on_event);
-  EXPECT_THAT(note_on_state, Pair(0.0, 0.0));
+  EXPECT_THAT(note_on_state, Pair(0.0f, 0.0f));
 
-  double note_off_pitch = 0.0;
+  float note_off_pitch = 0.0f;
   const auto note_off_event = NoteOffEvent{
       [](void** state, void* user_data) { *state = user_data; },
       [](void**) {},
-      [](void** state, double pitch) {
-        auto& note_off_pitch = *static_cast<double*>(*state);
+      [](void** state, float pitch) {
+        auto& note_off_pitch = *static_cast<float*>(*state);
         note_off_pitch = pitch;
       },
       static_cast<void*>(&note_off_pitch),
   };
   instrument->SetNoteOffEvent(&note_off_event);
-  EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
+  EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
 
   // Set a note on.
   instrument->SetNoteOn(kPitch, kIntensity);
@@ -89,12 +89,12 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
 
   // Remove the instrument.
   musician.RemoveInstrument(instrument);
-  EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
+  EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
 TEST(MusicianTest, CreateDestroyMultipleInstruments) {
-  std::vector<double> note_off_pitches;
+  std::vector<float> note_off_pitches;
 
   {
     Musician musician(kSampleRate);
@@ -103,8 +103,8 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     const auto note_off_event = NoteOffEvent{
         [](void** state, void* user_data) { *state = user_data; },
         [](void**) {},
-        [](void** state, double pitch) {
-          auto& note_off_pitches = *static_cast<std::vector<double>*>(*state);
+        [](void** state, float pitch) {
+          auto& note_off_pitches = *static_cast<std::vector<float>*>(*state);
           note_off_pitches.push_back(pitch);
         },
         static_cast<void*>(&note_off_pitches),
@@ -112,7 +112,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     std::vector<Instrument*> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(musician.AddInstrument());
-      const NoteOffEvent::Callback note_off_callback = [&](double pitch) {
+      const NoteOffEvent::Callback note_off_callback = [&](float pitch) {
         note_off_pitches.push_back(pitch);
       };
       instruments[i]->SetNoteOffEvent(&note_off_event);
@@ -120,9 +120,9 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
 
     // Start multiple notes, then immediately stop some of them.
     for (int i = 0; i < 3; ++i) {
-      instruments[i]->SetNoteOn(static_cast<double>(i + 1), 1.0);
-      instruments[i]->SetNoteOn(static_cast<double>(-i - 1), 1.0);
-      instruments[i]->SetNoteOff(static_cast<double>(i + 1));
+      instruments[i]->SetNoteOn(static_cast<float>(i + 1), 1.0f);
+      instruments[i]->SetNoteOn(static_cast<float>(-i - 1), 1.0f);
+      instruments[i]->SetNoteOff(static_cast<float>(i + 1));
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1, 2, 3));
 
@@ -133,7 +133,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   }
 
   // Remaining active notes should be stopped once the musician goes out of scope.
-  EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
+  EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0f, -2.0f, -1.0f, 1.0f, 2.0f, 3.0f));
 }
 
 // Tests that a single performer is created and destroyed as expected.

@@ -15,22 +15,22 @@ class GainProcessor {
   ///
   /// @param samples Array of mono samples.
   /// @param sample_count Number of samples.
-  void Process(double* samples, int sample_count) noexcept;
+  void Process(float* samples, int sample_count) noexcept;
 
   /// Sets gain.
   ///
   /// @param gain Gain in amplitude.
-  void SetGain(double gain) noexcept;
+  void SetGain(float gain) noexcept;
 
  private:
   // Current gain in amplitude.
-  double gain_ = 0.0;
+  float gain_ = 0.0f;
 
   // Total number of ramp samples for unity gain.
-  double unity_ramp_sample_count_ = 0.0;
+  float unity_ramp_sample_count_ = 0.0f;
 
   // Target gain in amplitude.
-  double target_gain_ = 1.0;
+  float target_gain_ = 1.0f;
 };
 
 }  // namespace barely::internal

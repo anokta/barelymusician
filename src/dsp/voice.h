@@ -30,8 +30,8 @@ class Voice {
   /// @return Next output value.
   template <FilterType kFilterType, OscillatorMode kOscillatorMode,
             OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
-  [[nodiscard]] static double Next(Voice& voice, double filter_coefficient, double oscillator_mix,
-                                   double pulse_width) noexcept {
+  [[nodiscard]] static float Next(Voice& voice, float filter_coefficient, float oscillator_mix,
+                                  float pulse_width) noexcept {
     return voice.Next<kFilterType, kOscillatorMode, kOscillatorShape, kSamplePlaybackMode>(
         filter_coefficient, oscillator_mix, pulse_width);
   }
@@ -48,8 +48,8 @@ class Voice {
   ///
   /// @param adsr Adsr.
   /// @param intensity Note intensity.
-  void Start(const Envelope::Adsr& adsr, double intensity) noexcept {
-    if (intensity > 0.0) {
+  void Start(const Envelope::Adsr& adsr, float intensity) noexcept {
+    if (intensity > 0.0f) {
       gain_ = intensity;
       filter_.Reset();
       oscillator_.Reset();
@@ -68,11 +68,11 @@ class Voice {
     }
   }
 
-  void set_oscillator_increment(double pitch, double reference_frequency,
-                                double sample_interval) noexcept {
+  void set_oscillator_increment(float pitch, float reference_frequency,
+                                float sample_interval) noexcept {
     oscillator_.SetIncrement(pitch, reference_frequency, sample_interval);
   }
-  void set_sample_player_increment(double pitch, double sample_interval) noexcept {
+  void set_sample_player_increment(float pitch, float sample_interval) noexcept {
     sample_player_.SetIncrement(pitch, sample_interval);
   }
   void set_sample_player_slice(const SampleDataSlice* sample_player_slice) noexcept {
@@ -82,35 +82,37 @@ class Voice {
  private:
   template <FilterType kFilterType, OscillatorMode kOscillatorMode,
             OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
-  [[nodiscard]] double Next(double filter_coefficient, double oscillator_mix,
-                            double pulse_width) noexcept {
+  [[nodiscard]] float Next(float filter_coefficient, float oscillator_mix,
+                           float pulse_width) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!sample_player_.IsActive()) {
         envelope_.Reset();
-        return 0.0;
+        return 0.0f;
       }
     }
 
-    double oscillator_sample = oscillator_.Next<kOscillatorShape>(pulse_width);
-    double sample_player_sample = sample_player_.Next<kSamplePlaybackMode>();
-    const double sample_player_output =
-        (1.0 - std::max(0.0, oscillator_mix)) * sample_player_sample;
-    double output = gain_ * envelope_.Next();
+    float oscillator_sample = oscillator_.Next<kOscillatorShape>(pulse_width);
+    float sample_player_sample = sample_player_.Next<kSamplePlaybackMode>();
+    const float sample_player_output =
+        (1.0f - std::max(0.0f, oscillator_mix)) * sample_player_sample;
+    float output = gain_ * envelope_.Next();
     if constexpr (kOscillatorMode == OscillatorMode::kMix) {
-      output *= ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_sample + sample_player_output);
+      output *=
+          ((1.0f - std::max(0.0f, -oscillator_mix)) * oscillator_sample + sample_player_output);
     } else {
       if constexpr (kOscillatorMode == OscillatorMode::kAm) {
         oscillator_sample = std::abs(oscillator_sample);
       } else if constexpr (kOscillatorMode == OscillatorMode::kEnvelopeFollower) {
         sample_player_sample = std::abs(sample_player_sample);
       }
-      output *= ((1.0 - std::max(0.0, -oscillator_mix)) * oscillator_sample * sample_player_sample +
-                 sample_player_output);
+      output *=
+          ((1.0f - std::max(0.0f, -oscillator_mix)) * oscillator_sample * sample_player_sample +
+           sample_player_output);
     }
     return filter_.Next<kFilterType>(output, filter_coefficient);
   }
 
-  double gain_ = 0.0;
+  float gain_ = 0.0f;
   Envelope envelope_;
   OnePoleFilter filter_;
   Oscillator oscillator_;
@@ -124,8 +126,8 @@ class Voice {
 /// @param oscillator_mix Oscillator mix.
 /// @param pulse_width Pulse width.
 /// @return Processed output value.
-using VoiceCallback = double (*)(Voice& voice, double filter_coefficient, double oscillator_mix,
-                                 double pulse_width);
+using VoiceCallback = float (*)(Voice& voice, float filter_coefficient, float oscillator_mix,
+                                float pulse_width);
 
 }  // namespace barely::internal
 

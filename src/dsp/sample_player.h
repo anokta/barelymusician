@@ -24,28 +24,28 @@ class SamplePlayer {
   /// @tparam kMode Sample playback mode.
   /// @return Next output sample.
   template <SamplePlaybackMode kMode>
-  [[nodiscard]] double Next() noexcept {
+  [[nodiscard]] float Next() noexcept {
     if constexpr (kMode != SamplePlaybackMode::kNone) {
       assert(slice_ != nullptr);
       if (static_cast<int>(cursor_) >= slice_->sample_count) {
-        return 0.0;
+        return 0.0f;
       }
       // TODO(#7): Add a better interpolation method here?
-      const double output = slice_->samples[static_cast<int>(cursor_)];
+      const float output = slice_->samples[static_cast<int>(cursor_)];
       cursor_ += increment_;
       if constexpr (kMode == SamplePlaybackMode::kLoop) {
         if (static_cast<int>(cursor_) >= slice_->sample_count) {
-          cursor_ = std::fmod(cursor_, static_cast<double>(slice_->sample_count));
+          cursor_ = std::fmod(cursor_, static_cast<float>(slice_->sample_count));
         }
       }
       return output;
     } else {
-      return 0.0;
+      return 0.0f;
     }
   }
 
   /// Resets the state.
-  void Reset() noexcept { cursor_ = 0.0; }
+  void Reset() noexcept { cursor_ = 0.0f; }
 
   /// Sets the slice.
   ///
@@ -56,12 +56,12 @@ class SamplePlayer {
   ///
   /// @param pitch Note pitch.
   /// @param sample_interval Sample interval in seconds.
-  void SetIncrement(double pitch, double sample_interval) noexcept {
-    assert(sample_interval >= 0.0);
+  void SetIncrement(float pitch, float sample_interval) noexcept {
+    assert(sample_interval >= 0.0f);
     increment_ =
         (slice_ != nullptr && slice_->sample_count > 0)
-            ? std::pow(2.0, pitch - slice_->root_pitch) * slice_->sample_rate * sample_interval
-            : 0.0;
+            ? std::pow(2.0f, pitch - slice_->root_pitch) * slice_->sample_rate * sample_interval
+            : 0.0f;
   }
 
  private:
@@ -69,10 +69,10 @@ class SamplePlayer {
   const SampleDataSlice* slice_ = nullptr;
 
   // Playback cursor.
-  double cursor_ = 0.0;
+  float cursor_ = 0.0f;
 
   // Increment per sample.
-  double increment_ = 0.0;
+  float increment_ = 0.0f;
 };
 
 }  // namespace barely::internal

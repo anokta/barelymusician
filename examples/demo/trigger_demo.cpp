@@ -29,15 +29,15 @@ constexpr int kSampleCount = 512;
 
 constexpr double kLookahead = 0.05;
 
-constexpr std::array<double, 7> kMajor = {
-    0.0, 2.0 / 12.0, 4.0 / 12.0, 5.0 / 12.0, 7.0 / 12.0, 9.0 / 12.0, 11.0 / 12.0,
+constexpr std::array<float, 7> kMajor = {
+    0.0f, 2.0f / 12.0f, 4.0f / 12.0f, 5.0f / 12.0f, 7.0f / 12.0f, 9.0f / 12.0f, 11.0f / 12.0f,
 };
 
 // Instrument settings.
-constexpr double kGain = -20.0;
+constexpr float kGain = -20.0f;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
-constexpr double kAttack = 0.0;
-constexpr double kRelease = 0.1;
+constexpr float kAttack = 0.0f;
+constexpr float kRelease = 0.1f;
 
 constexpr double kInitialTempo = 120.0;
 
@@ -59,7 +59,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetNoteOnEvent(
-      [](double pitch, double /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
+      [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   std::vector<std::pair<double, double>> triggers;
 
@@ -97,7 +97,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.AddTask(play_note_fn(8, 2.0), 5.0);
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<double> output_samples) {
+  const auto process_callback = [&](std::span<float> output_samples) {
     instrument.Process(output_samples, audio_clock.GetTimestamp());
     audio_clock.Update(static_cast<int>(output_samples.size()));
   };

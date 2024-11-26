@@ -24,7 +24,7 @@ namespace Barely {
 
     /// Gate ratio.
     [Range(0.0f, 1.0f)]
-    public double GateRatio = 0.5;
+    public float GateRatio = 0.5f;
 
     /// Rate.
     [Range(0.0f, 8.0f)]
@@ -42,7 +42,7 @@ namespace Barely {
     ///
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
-    public bool IsNoteOn(double pitch) {
+    public bool IsNoteOn(float pitch) {
       return Musician.Internal.Arpeggiator_IsNoteOn(_handle, pitch);
     }
 
@@ -54,7 +54,7 @@ namespace Barely {
     /// Sets a note off.
     ///
     /// @param pitch Note pitch.
-    public void SetNoteOff(double pitch) {
+    public void SetNoteOff(float pitch) {
       Musician.Internal.Arpeggiator_SetNoteOff(_handle, pitch);
     }
 
@@ -62,7 +62,7 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void SetNoteOn(double pitch) {
+    public void SetNoteOn(float pitch) {
       Musician.Internal.Arpeggiator_SetNoteOn(_handle, pitch);
     }
 

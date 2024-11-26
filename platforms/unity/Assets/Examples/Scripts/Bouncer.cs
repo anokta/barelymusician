@@ -8,7 +8,7 @@ namespace Barely {
       public Sparkler sparkler;
 
       private int _lastIndex = 0;
-      private double _lastPitch = 0.0;
+      private float _lastPitch = 0.0f;
 
       private void Awake() {
         Color.RGBToHSV(sparkler.noteOnColor, out float h, out float s, out float v);
@@ -24,7 +24,7 @@ namespace Barely {
 
       private void OnCollisionEnter(Collision collision) {
         _lastPitch = scale.GetPitch(_lastIndex);
-        double intensity = (double)Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
+        float intensity = Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
         instrument.SetNoteOn(_lastPitch, intensity);
       }
 

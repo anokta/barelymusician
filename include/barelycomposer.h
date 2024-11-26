@@ -44,19 +44,19 @@ typedef struct BarelyQuantization {
   double resolution;
 
   /// Amount.
-  double amount;
+  float amount;
 } BarelyQuantization;
 
 /// A musical scale.
 typedef struct BarelyScale {
   /// Array of note pitches relative to the root note pitch.
-  const double* pitches;
+  const float* pitches;
 
   /// Number of note pitches.
   int32_t pitch_count;
 
   /// Root note pitch of the scale.
-  double root_pitch;
+  float root_pitch;
 
   /// Mode index.
   int32_t mode;
@@ -92,7 +92,7 @@ BARELY_EXPORT bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch,
+BARELY_EXPORT bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch,
                                               bool* out_is_note_on);
 
 /// Gets whether an arpeggiator is playing or not.
@@ -115,7 +115,7 @@ BARELY_EXPORT bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpe
 /// @param gate_ratio Gate ratio.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
-                                                  double gate_ratio);
+                                                  float gate_ratio);
 
 /// Sets the instrument of an arpeggiator.
 ///
@@ -130,14 +130,14 @@ BARELY_EXPORT bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeg
 /// @param arpeggiator Arpeggiator handle.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, double pitch);
+BARELY_EXPORT bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, float pitch);
 
 /// Sets an arpeggiator note on.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch);
+BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch);
 
 /// Sets the rate of an arpeggiator.
 ///
@@ -183,8 +183,8 @@ BARELY_EXPORT bool BarelyRandom_Destroy(BarelyRandomHandle random);
 /// @param variance Distrubition variance.
 /// @param out_number Output random number.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRandom_DrawNormal(BarelyRandomHandle random, double mean, double variance,
-                                           double* out_number);
+BARELY_EXPORT bool BarelyRandom_DrawNormal(BarelyRandomHandle random, float mean, float variance,
+                                           float* out_number);
 
 /// Draws a number with discrete uniform distribution in range [min, max].
 ///
@@ -203,8 +203,8 @@ BARELY_EXPORT bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_
 /// @param max Maximum value (exclusive).
 /// @param out_number Output random number.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, double min, double max,
-                                                double* out_number);
+BARELY_EXPORT bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, float min, float max,
+                                                float* out_number);
 
 /// Resets a random number generator with a new seed.
 ///
@@ -253,7 +253,7 @@ BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
 /// @param pitch Note pitch.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, double pitch, int32_t length);
+BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, float pitch, int32_t length);
 
 /// Pushes silence to the end.
 ///
@@ -290,7 +290,7 @@ BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater,
 /// @param repeater Repeater handle.
 /// @param pitch_offset Pitch offset.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, double pitch_offset);
+BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, float pitch_offset);
 
 /// Stops the repeater.
 ///
@@ -304,8 +304,7 @@ BARELY_EXPORT bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
 /// @param degree Scale degree.
 /// @param out_pitch Output note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree,
-                                        double* out_pitch);
+BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -377,7 +376,7 @@ class ArpeggiatorHandle : public HandleWrapper<BarelyArpeggiatorHandle> {
   ///
   /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
-  bool IsNoteOn(double pitch) const noexcept {
+  bool IsNoteOn(float pitch) const noexcept {
     bool is_note_on = false;
     [[maybe_unused]] const bool success = BarelyArpeggiator_IsNoteOn(*this, pitch, &is_note_on);
     assert(success);
@@ -403,7 +402,7 @@ class ArpeggiatorHandle : public HandleWrapper<BarelyArpeggiatorHandle> {
   /// Sets the gate ratio.
   ///
   /// @param gate Gate ratio.
-  void SetGateRatio(double gate_ratio) noexcept {
+  void SetGateRatio(float gate_ratio) noexcept {
     [[maybe_unused]] const bool success = BarelyArpeggiator_SetGateRatio(*this, gate_ratio);
     assert(success);
   }
@@ -421,7 +420,7 @@ class ArpeggiatorHandle : public HandleWrapper<BarelyArpeggiatorHandle> {
   ///
   /// @param pitch Note pitch.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOff(double pitch) noexcept {
+  void SetNoteOff(float pitch) noexcept {
     [[maybe_unused]] const bool success = BarelyArpeggiator_SetNoteOff(*this, pitch);
     assert(success);
   }
@@ -430,7 +429,7 @@ class ArpeggiatorHandle : public HandleWrapper<BarelyArpeggiatorHandle> {
   ///
   /// @param pitch Note pitch.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch) noexcept {
+  void SetNoteOn(float pitch) noexcept {
     [[maybe_unused]] const bool success = BarelyArpeggiator_SetNoteOn(*this, pitch);
     assert(success);
   }
@@ -485,9 +484,9 @@ class RandomHandle : public HandleWrapper<BarelyRandomHandle> {
   ///
   /// @param mean Distrubition mean value.
   /// @param variance Distrubition variance.
-  /// @return Random double number.
-  double DrawNormal(double mean, double variance) noexcept {
-    double number = 0.0;
+  /// @return Random float number.
+  float DrawNormal(float mean, float variance) noexcept {
+    float number = 0.0f;
     [[maybe_unused]] const bool success = BarelyRandom_DrawNormal(*this, mean, variance, &number);
     assert(success);
     return number;
@@ -499,7 +498,16 @@ class RandomHandle : public HandleWrapper<BarelyRandomHandle> {
   /// @param max Maximum value (exclusive).
   /// @return Random double number.
   double DrawUniform(double min, double max) noexcept {
-    double number = 0.0;
+    return static_cast<double>(DrawUniform(static_cast<float>(min), static_cast<float>(max)));
+  }
+
+  /// Draws a number with continuous uniform distribution in range [min, max).
+  ///
+  /// @param min Minimum value (inclusive).
+  /// @param max Maximum value (exclusive).
+  /// @return Random float number.
+  float DrawUniform(float min, float max) noexcept {
+    float number = 0.0f;
     [[maybe_unused]] const bool success = BarelyRandom_DrawUniformReal(*this, min, max, &number);
     assert(success);
     return number;
@@ -583,7 +591,7 @@ class RepeaterHandle : public HandleWrapper<BarelyRepeaterHandle> {
   /// @param pitch_or Note pitch or silence.
   /// @param length Note length.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Push(std::optional<double> pitch_or, int length = 1) noexcept {
+  void Push(std::optional<float> pitch_or, int length = 1) noexcept {
     [[maybe_unused]] const bool success = pitch_or ? BarelyRepeater_Push(*this, *pitch_or, length)
                                                    : BarelyRepeater_PushSilence(*this, length);
     assert(success);
@@ -618,7 +626,7 @@ class RepeaterHandle : public HandleWrapper<BarelyRepeaterHandle> {
   /// Starts the repeater.
   ///
   /// @param pitch_offset Pitch offset.
-  void Start(double pitch_offset = 0.0) noexcept {
+  void Start(float pitch_offset = 0.0f) noexcept {
     [[maybe_unused]] const bool success = BarelyRepeater_Start(*this, pitch_offset);
     assert(success);
   }
@@ -640,7 +648,7 @@ struct Quantization : public BarelyQuantization {
   ///
   /// @param resolution Resolution.
   /// @param amount Amount.
-  constexpr Quantization(double resolution, double amount = 1.0) noexcept
+  constexpr Quantization(double resolution, float amount = 1.0f) noexcept
       : Quantization(BarelyQuantization{resolution, amount}) {}
 
   /// Constructs a new `Quantization` from a raw type.
@@ -677,7 +685,7 @@ struct Scale : public BarelyScale {
   /// @param pitches Span of pitches.
   /// @param root_pitch Root pitch.
   /// @param mode Mode.
-  constexpr Scale(std::span<const double> pitches, double root_pitch = 0.0, int mode = 0) noexcept
+  constexpr Scale(std::span<const float> pitches, float root_pitch = 0.0f, int mode = 0) noexcept
       : Scale(BarelyScale{pitches.data(), static_cast<int32_t>(pitches.size()), root_pitch,
                           static_cast<int32_t>(mode)}) {}
 
@@ -695,8 +703,8 @@ struct Scale : public BarelyScale {
   ///
   /// @param degree Degree.
   /// @return Pitch.
-  [[nodiscard]] double GetPitch(int degree) const noexcept {
-    double pitch = 0.0;
+  [[nodiscard]] float GetPitch(int degree) const noexcept {
+    float pitch = 0.0f;
     [[maybe_unused]] const bool success = BarelyScale_GetPitch(this, degree, &pitch);
     assert(success);
     return pitch;

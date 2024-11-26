@@ -7,14 +7,14 @@ namespace Barely {
   [CreateAssetMenu(fileName = "NewScale", menuName = "BarelyMusician/Scale")]
   public class Scale : ScriptableObject {
     /// Root note pitch.
-    public double RootPitch = 0.0;
+    public float RootPitch = 0.0f;
 
     /// Mode.
     [Min(0)]
     public int Mode = 0;
 
     /// Array of note pitches relative to the root note pitch.
-    public double[] Pitches = null;
+    public float[] Pitches = null;
 
     /// Number of pitches.
     public int PitchCount {
@@ -25,7 +25,7 @@ namespace Barely {
     ///
     /// @param degree Scale degree.
     /// @return Note pitch.
-    public double GetPitch(int degree) {
+    public float GetPitch(int degree) {
       return Musician.Internal.Scale_GetPitch(this, degree);
     }
   }

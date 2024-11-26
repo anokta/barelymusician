@@ -64,7 +64,7 @@ double Musician::GetBeatsFromSeconds(double seconds) const noexcept {
   return tempo_ * seconds * kMinutesFromSeconds;
 }
 
-double Musician::GetReferenceFrequency() const noexcept { return reference_frequency_; }
+float Musician::GetReferenceFrequency() const noexcept { return reference_frequency_; }
 
 int64_t Musician::GetSamplesFromSeconds(double seconds) const noexcept {
   return static_cast<int64_t>(seconds * static_cast<double>(sample_rate_));
@@ -80,8 +80,8 @@ double Musician::GetTempo() const noexcept { return tempo_; }
 
 double Musician::GetTimestamp() const noexcept { return timestamp_; }
 
-void Musician::SetReferenceFrequency(double reference_frequency) noexcept {
-  reference_frequency = std::max(reference_frequency, 0.0);
+void Musician::SetReferenceFrequency(float reference_frequency) noexcept {
+  reference_frequency = std::max(reference_frequency, 0.0f);
   if (reference_frequency_ != reference_frequency) {
     reference_frequency_ = reference_frequency;
     for (auto& [instrument, _] : instruments_) {

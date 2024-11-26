@@ -3,7 +3,6 @@
 
 #include <functional>
 #include <span>
-#include <vector>
 
 #include "miniaudio.h"
 
@@ -15,7 +14,7 @@ class AudioOutput {
   /// Audio process callback signature.
   ///
   /// @param output_samples Span of mono output samples.
-  using ProcessCallback = std::function<void(std::span<double> output_samples)>;
+  using ProcessCallback = std::function<void(std::span<float> output_samples)>;
 
   /// Constructs new `AudioOutput`.
   ///
@@ -44,18 +43,11 @@ class AudioOutput {
   void SetProcessCallback(ProcessCallback process_callback) noexcept;
 
  private:
-  // Process data.
-  struct ProcessData {
-    // Buffer.
-    std::vector<double> buffer;
-
-    // Callback.
-    ProcessCallback callback = nullptr;
-  };
-  ProcessData process_data_;
-
   // Audio device.
   ma_device device_;
+
+  // Process callback.
+  ProcessCallback process_callback_ = nullptr;
 };
 
 }  // namespace barely::examples

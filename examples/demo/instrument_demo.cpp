@@ -26,26 +26,26 @@ constexpr int kSampleRate = 48000;
 constexpr int kSampleCount = 256;
 
 // Instrument settings.
-constexpr double kGain = -18.0;
+constexpr float kGain = -18.0f;
 constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
-constexpr double kAttack = 0.05;
-constexpr double kRelease = 0.125;
+constexpr float kAttack = 0.05f;
+constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr double kRootPitch = 0.0;
+constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the pitch for a given `key`.
-std::optional<double> PitchFromKey(int octave_shift, const InputManager::Key& key) {
+std::optional<float> PitchFromKey(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return kRootPitch + static_cast<double>(octave_shift) +
-         static_cast<double>(std::distance(kOctaveKeys.begin(), it)) / 12.0;
+  return kRootPitch + static_cast<float>(octave_shift) +
+         static_cast<float>(std::distance(kOctaveKeys.begin(), it)) / 12.0f;
 }
 
 }  // namespace
@@ -65,18 +65,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEvent([](double pitch, double intensity) {
+  instrument.SetNoteOnEvent([](float pitch, float intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
   });
-  instrument.SetNoteOffEvent([](double pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
+  instrument.SetNoteOffEvent([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](std::span<double> output_samples) {
+  audio_output.SetProcessCallback([&](std::span<float> output_samples) {
     instrument.Process(output_samples, /*timestamp=*/0.0);
   });
 
   // Key down callback.
-  double intensity = 1.0;
+  float intensity = 1.0f;
   int octave_shift = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -102,11 +102,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (upper_key == 'C' || upper_key == 'V') {
       // Change intensity.
       if (upper_key == 'C') {
-        intensity -= 0.25;
+        intensity -= 0.25f;
       } else {
-        intensity += 0.25;
+        intensity += 0.25f;
       }
-      intensity = std::clamp(intensity, 0.0, 1.0);
+      intensity = std::clamp(intensity, 0.0f, 1.0f);
       ConsoleLog() << "Note intensity set to " << intensity;
       return;
     }

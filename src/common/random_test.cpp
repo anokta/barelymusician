@@ -25,13 +25,13 @@ TEST(RandomTest, DrawUniformMinMax) {
 TEST(RandomTest, Reset) {
   constexpr int kSeed = 1;
   constexpr int kValueCount = 10;
-  constexpr double kMean = -0.5;
-  constexpr double kVariance = 10.0;
+  constexpr float kMean = -0.5f;
+  constexpr float kVariance = 10.0f;
 
   Random random(kSeed);
 
   // Generate some random values.
-  std::vector<double> values(kValueCount);
+  std::vector<float> values(kValueCount);
   for (int i = 0; i < kValueCount; ++i) {
     values[i] = random.DrawNormal(kMean, kVariance);
   }
@@ -40,7 +40,7 @@ TEST(RandomTest, Reset) {
   random.Reset(kSeed);
   // Validate that the same numbers are generated for the next `kValueCount`.
   for (int i = 0; i < kValueCount; ++i) {
-    EXPECT_DOUBLE_EQ(random.DrawNormal(kMean, kVariance), values[i]);
+    EXPECT_FLOAT_EQ(random.DrawNormal(kMean, kVariance), values[i]);
   }
 }
 

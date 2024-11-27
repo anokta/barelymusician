@@ -1,6 +1,6 @@
 barelymusician
 [![ci](https://github.com/anokta/barelymusician/actions/workflows/ci.yml/badge.svg)](https://github.com/anokta/barelymusician/actions/workflows/ci.yml)
-[![](https://img.shields.io/static/v1?label=sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/anokta)
+[![sponsor](https://img.shields.io/static/v1?label=sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/anokta)
 ==============
 
 barelymusician is a real-time music engine for interactive systems.
@@ -8,9 +8,9 @@ barelymusician is a real-time music engine for interactive systems.
 It provides a modern C/C++ API to generate and perform musical sounds from scratch in a sample
 accurate way.
 
-[iOS]: ## "see issue #112 for the status of the upcoming iOS platform support"
 This repository includes build targets for Linux, OSX, Windows, Android, and Daisy platforms, in
 addition to a native Unity game engine plugin[*][iOS].
+[iOS]: ## "see issue #112 for the status of the upcoming iOS platform support"
 
 To use in a project, simply include [barelymusician.h](include/barelymusician.h).
 
@@ -21,7 +21,8 @@ For background about this project, see the original research paper
 [here](http://www.aes.org/e-lib/browse.cfm?elib=17598), and the legacy Unity implementation
 [here](https://github.com/anokta/barelyMusicianLegacy).
 
-## Example usage
+Example usage
+-------------
 
 ```cpp
 #include "barelymusician.h"
@@ -89,6 +90,7 @@ instrument.Process(output_samples, timestamp);
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the
 [instrument_demo.cpp](examples/demo/instrument_demo.cpp):
-```
+
+```sh
 python build.py --run_demo instrument_demo
 ```

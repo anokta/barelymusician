@@ -2,14 +2,16 @@
 #define BARELYMUSICIAN_ENGINE_MUSICIAN_H_
 
 #include <cmath>
-#include <map>
 #include <memory>
-#include <unordered_map>
+#include <set>
+#include <unordered_set>
 #include <utility>
 
 #include "barelymusician.h"
+#include "engine/config.h"
 #include "engine/instrument.h"
 #include "engine/performer.h"
+#include "engine/pool.h"
 
 namespace barely::internal {
 
@@ -97,12 +99,13 @@ class Musician {
   void Update(double timestamp) noexcept;
 
  private:
-  // Map of pointers to instruments.
-  // TODO(#126): Replace these by memory pools.
-  std::unordered_map<Instrument*, std::unique_ptr<Instrument>> instruments_;
+  // Set of instruments.
+  Pool<Instrument> instrument_pool_;
+  std::unordered_set<Instrument*> instruments_;
 
-  // Map of process order-pointer pairs to performers.
-  std::map<Performer*, std::pair<int, std::unique_ptr<Performer>>> performers_;
+  // Set of process order-performer pairs.
+  Pool<Performer> performer_pool_;
+  std::set<std::pair<int, Performer*>> performers_;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;

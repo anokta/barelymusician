@@ -1,42 +1,66 @@
 #ifndef BARELYMUSICIAN_ENGINE_POOL_H_
 #define BARELYMUSICIAN_ENGINE_POOL_H_
 
-#include <array>
 #include <cassert>
+#include <cstddef>
+#include <memory>
+#include <new>
+#include <vector>
 
 namespace barely::internal {
 
 /// Memory pool template.
-template <typename Type, int kCapacity>
+template <typename Type>
 class Pool {
  public:
-  Pool() noexcept {
-    static_assert(kCapacity > 0, "Pool capacity must be greater than 0");
-    for (int i = 0; i < kCapacity; ++i) {
-      free_items_[i] = &items_[i];
+  explicit Pool(int capacity) noexcept {
+    assert(capacity > 0 && "Pool capacity must be greater than 0");
+    raw_items_ = static_cast<std::byte*>(
+        ::operator new(sizeof(Type) * capacity, std::align_val_t(alignof(Type))));
+    items_.resize(capacity);
+    for (int i = 0; i < capacity; ++i) {
+      items_[i] = reinterpret_cast<Type*>(raw_items_) + i;
     }
   }
 
-  Type* Allocate() noexcept {
-    assert(free_index_ < kCapacity && "Pool capacity exceeded");
-    return free_items_[free_index_++];
+  ~Pool() noexcept {
+    for (int i = 0; i < free_index_; ++i) {
+      std::destroy_at(items_[i]);
+    }
+    ::operator delete(raw_items_, std::align_val_t(alignof(Type)));
   }
 
-  void Deallocate(Type* item) noexcept {
+  /// Non-copyable and non-movable.
+  Pool(const Pool& other) noexcept = delete;
+  Pool& operator=(const Pool& other) noexcept = delete;
+  Pool(Pool&& other) noexcept = delete;
+  Pool& operator=(Pool&& other) noexcept = delete;
+
+  template <typename... Args>
+  Type* Construct(Args&&... args) noexcept {
+    assert(free_index_ < static_cast<int>(items_.size()) && "Pool capacity exceeded");
+    Type* item = new (items_[free_index_]) Type(args...);
+    ++free_index_;
+    return item;
+    return nullptr;
+  }
+
+  void Destruct(Type* item) noexcept {
     assert(free_index_ > 0 && "Pool underflow");
-    assert(item - items_.data() < kCapacity && "Invalid item");
-    free_items_[free_index_--] = item;
+    assert(item - static_cast<Type*>(raw_items_) < items_.size() && "Invalid item");
+    items_[--free_index_] = item;
+    std::destroy_at(item);
   }
 
  private:
-  // Array of free items available to allocate.
-  std::array<Type*, kCapacity> free_items_;
+  // Array of pointers to pool items.
+  std::vector<Type*> items_;
 
   // Free item index.
   int free_index_ = 0;
 
-  // Array of statically allocated pool items.
-  std::array<Type, kCapacity> items_;
+  // Raw allocation of pool items.
+  std::byte* raw_items_ = nullptr;
 };
 
 }  // namespace barely::internal

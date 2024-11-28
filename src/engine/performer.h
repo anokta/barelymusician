@@ -5,10 +5,12 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <set>
 #include <utility>
 
 #include "barelymusician.h"
 #include "engine/event.h"
+#include "engine/pool.h"
 
 namespace barely::internal {
 
@@ -148,11 +150,11 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
-  // Recurring task map alias.
-  using RecurringTaskMap = std::map<std::pair<double, Task*>, std::unique_ptr<Task>>;
+  // Recurring task set alias.
+  using RecurringTaskSet = std::set<std::pair<double, Task*>>;
 
   // Returns an iterator to the next recurring task to process.
-  [[nodiscard]] RecurringTaskMap::const_iterator GetNextRecurringTask() const noexcept;
+  [[nodiscard]] RecurringTaskSet::const_iterator GetNextRecurringTask() const noexcept;
 
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
@@ -180,10 +182,11 @@ class Performer {
 
   // Map of tasks.
   std::multimap<double, Event<TaskEvent>> one_off_tasks_;
-  RecurringTaskMap recurring_tasks_;
+  Pool<Task> recurring_task_pool_;
+  RecurringTaskSet recurring_tasks_;
 
   // Last processed recurring task iterator.
-  std::optional<RecurringTaskMap::const_iterator> last_processed_recurring_task_it_;
+  std::optional<RecurringTaskSet::const_iterator> last_processed_recurring_task_it_;
 };
 
 }  // namespace barely::internal

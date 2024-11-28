@@ -68,7 +68,9 @@ add_library(
 )
 target_link_libraries(
   barelymusician_engine_performer
+  barelymusician_engine_config
   barelymusician_engine_event
+  barelymusician_engine_pool
   barelymusician_headeronly
 )
 

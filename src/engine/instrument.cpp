@@ -92,9 +92,11 @@ bool Instrument::Process(std::span<float> output_samples, int64_t process_sample
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::SetAllNotesOff() noexcept {
-  for (const auto& [note, _] : std::exchange(note_controls_, {})) {
-    note_off_event_.Process(note);
-    message_queue_.Add(update_sample_, NoteOffMessage{note});
+  for (const auto& [pitch, _] : std::exchange(note_controls_, {})) {
+    if (note_off_event_.callback) {
+      note_off_event_.callback(pitch, note_off_event_.user_data);
+    }
+    message_queue_.Add(update_sample_, NoteOffMessage{pitch});
   }
 }
 
@@ -115,13 +117,15 @@ void Instrument::SetNoteControl(float pitch, NoteControlType type, float value) 
 
 void Instrument::SetNoteOff(float pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
-    note_off_event_.Process(pitch);
+    if (note_off_event_.callback) {
+      note_off_event_.callback(pitch, note_off_event_.user_data);
+    }
     message_queue_.Add(update_sample_, NoteOffMessage{pitch});
   }
 }
 
-void Instrument::SetNoteOffEvent(const NoteOffEvent* note_off_event) noexcept {
-  note_off_event_ = (note_off_event != nullptr) ? *note_off_event : Event<NoteOffEvent, float>{};
+void Instrument::SetNoteOffEvent(const NoteOffEvent& note_off_event) noexcept {
+  note_off_event_ = note_off_event;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -131,13 +135,15 @@ void Instrument::SetNoteOn(float pitch, float intensity) noexcept {
                                                                 Control(0.0f),  // kPitchShift
                                                             });
       success) {
-    note_on_event_.Process(pitch, intensity);
+    if (note_on_event_.callback != nullptr) {
+      note_on_event_.callback(pitch, intensity, note_on_event_.user_data);
+    }
     message_queue_.Add(update_sample_, NoteOnMessage{pitch, intensity});
   }
 }
 
-void Instrument::SetNoteOnEvent(const NoteOnEvent* note_on_event) noexcept {
-  note_on_event_ = (note_on_event != nullptr) ? *note_on_event : Event<NoteOnEvent, float, float>{};
+void Instrument::SetNoteOnEvent(const NoteOnEvent& note_on_event) noexcept {
+  note_on_event_ = note_on_event;
 }
 
 void Instrument::SetReferenceFrequency(float reference_frequency) noexcept {

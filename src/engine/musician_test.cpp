@@ -56,30 +56,21 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
 
   // Set the note events.
   std::pair<float, float> note_on_state = {0.0f, 0.0f};
-  const auto note_on_event = NoteOnEvent{
-      [](void** state, void* user_data) { *state = user_data; },
-      [](void**) {},
-      [](void** state, float pitch, float intensity) {
-        auto& note_on_state = *static_cast<std::pair<float, float>*>(*state);
+  instrument->SetNoteOnEvent({
+      [](float pitch, float intensity, void* user_data) {
+        auto& note_on_state = *static_cast<std::pair<float, float>*>(user_data);
         note_on_state.first = pitch;
         note_on_state.second = intensity;
       },
       static_cast<void*>(&note_on_state),
-  };
-  instrument->SetNoteOnEvent(&note_on_event);
+  });
   EXPECT_THAT(note_on_state, Pair(0.0f, 0.0f));
 
   float note_off_pitch = 0.0f;
-  const auto note_off_event = NoteOffEvent{
-      [](void** state, void* user_data) { *state = user_data; },
-      [](void**) {},
-      [](void** state, float pitch) {
-        auto& note_off_pitch = *static_cast<float*>(*state);
-        note_off_pitch = pitch;
-      },
+  instrument->SetNoteOffEvent({
+      [](float pitch, void* user_data) { *static_cast<float*>(user_data) = pitch; },
       static_cast<void*>(&note_off_pitch),
-  };
-  instrument->SetNoteOffEvent(&note_off_event);
+  });
   EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
 
   // Set a note on.
@@ -100,22 +91,15 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     Musician musician(kSampleRate);
 
     // Create instruments with note off event.
-    const auto note_off_event = NoteOffEvent{
-        [](void** state, void* user_data) { *state = user_data; },
-        [](void**) {},
-        [](void** state, float pitch) {
-          auto& note_off_pitches = *static_cast<std::vector<float>*>(*state);
-          note_off_pitches.push_back(pitch);
-        },
-        static_cast<void*>(&note_off_pitches),
-    };
     std::vector<Instrument*> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(musician.AddInstrument());
-      const NoteOffEvent::Callback note_off_callback = [&](float pitch) {
-        note_off_pitches.push_back(pitch);
-      };
-      instruments[i]->SetNoteOffEvent(&note_off_event);
+      instruments[i]->SetNoteOffEvent({
+          [](float pitch, void* user_data) {
+            static_cast<std::vector<float>*>(user_data)->push_back(pitch);
+          },
+          static_cast<void*>(&note_off_pitches),
+      });
     }
 
     // Start multiple notes, then immediately stop some of them.

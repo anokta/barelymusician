@@ -92,7 +92,7 @@ bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
                                       const BarelyNoteOffEvent* note_off_event) {
   if (!instrument) return false;
 
-  instrument->SetNoteOffEvent(static_cast<const NoteOffEvent*>(note_off_event));
+  instrument->SetNoteOffEvent((note_off_event != nullptr) ? *note_off_event : NoteOffEvent{});
   return true;
 }
 
@@ -107,7 +107,7 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
                                      const BarelyNoteOnEvent* note_on_event) {
   if (!instrument) return false;
 
-  instrument->SetNoteOnEvent(static_cast<const NoteOnEvent*>(note_on_event));
+  instrument->SetNoteOnEvent((note_on_event != nullptr) ? *note_on_event : NoteOnEvent{});
   return true;
 }
 

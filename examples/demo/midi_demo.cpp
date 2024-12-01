@@ -97,11 +97,11 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician(kSampleRate);
   musician.SetTempo(kTempo);
 
-  std::vector<std::pair<InstrumentHandle, PerformerHandle>> tracks;
+  std::vector<std::tuple<InstrumentHandle, PerformerHandle, size_t>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(musician.AddInstrument(), musician.AddPerformer());
-    auto& [instrument, performer] = tracks.back();
+    tracks.emplace_back(musician.AddInstrument(), musician.AddPerformer(), tracks.size() + 1);
+    auto& [instrument, performer, track_index] = tracks.back();
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
@@ -111,14 +111,16 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Set the instrument settings.
-    const auto track_index = tracks.size() + 1;
-    instrument.SetNoteOnEvent([track_index](float pitch, float intensity) {
-      ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(" << pitch << ", " << intensity
-                   << ")";
-    });
-    instrument.SetNoteOffEvent([track_index](float pitch) {
-      ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
-    });
+    instrument.SetNoteOnEvent({[](float pitch, float intensity, void* user_data) {
+                                 ConsoleLog() << "MIDI track #" << *static_cast<size_t*>(user_data)
+                                              << ": NoteOn(" << pitch << ", " << intensity << ")";
+                               },
+                               static_cast<void*>(&track_index)});
+    instrument.SetNoteOffEvent({[](float pitch, void* user_data) {
+                                  ConsoleLog() << "MIDI track #" << *static_cast<size_t*>(user_data)
+                                               << ": NoteOff(" << pitch << ")";
+                                },
+                                static_cast<void*>(&track_index)});
     instrument.SetControl(ControlType::kGain, kInstrumentGain);
     instrument.SetControl(ControlType::kOscillatorShape, kInstrumentOscillatorShape);
     instrument.SetControl(ControlType::kAttack, kInstrumentEnvelopeAttack);
@@ -131,7 +133,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> mix_buffer(kSampleCount);
   const auto process_callback = [&](std::span<float> output_samples) {
     std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
-    for (auto& [instrument, performer] : tracks) {
+    for (auto& [instrument, performer, _] : tracks) {
       instrument.Process(mix_buffer, clock.GetTimestamp());
       std::transform(mix_buffer.begin(), mix_buffer.end(), output_samples.begin(),
                      output_samples.begin(), std::plus<>());
@@ -155,7 +157,7 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
   musician.Update(kLookahead);
-  for (auto& [instrument, performer] : tracks) {
+  for (auto& [instrument, performer, _] : tracks) {
     performer.Start();
   }
 
@@ -167,7 +169,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  for (auto& [instrument, performer] : tracks) {
+  for (auto& [instrument, performer, _] : tracks) {
     performer.Stop();
     instrument.SetAllNotesOff();
   }

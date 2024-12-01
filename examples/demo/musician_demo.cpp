@@ -212,12 +212,20 @@ int main(int /*argc*/, char* argv[]) {
   musician.SetTempo(kTempo);
 
   // Note on callback.
-  const auto set_note_callbacks_fn = [&](auto index, InstrumentHandle& instrument) {
-    instrument.SetNoteOffEvent([index](float pitch) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
+  const auto set_note_callbacks_fn = [&](size_t& index, InstrumentHandle& instrument) {
+    instrument.SetNoteOffEvent({
+        [](float pitch, void* user_data) {
+          ConsoleLog() << "Instrument #" << *static_cast<size_t*>(user_data) << ": NoteOff("
+                       << pitch << ")";
+        },
+        static_cast<void*>(&index),
     });
-    instrument.SetNoteOnEvent([index](float pitch, float intensity) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", " << intensity << ")";
+    instrument.SetNoteOnEvent({
+        [](float pitch, float intensity, void* user_data) {
+          ConsoleLog() << "Instrument #" << *static_cast<size_t*>(user_data) << ": NoteOn(" << pitch
+                       << ", " << intensity << ")";
+        },
+        static_cast<void*>(&index),
     });
   };
 
@@ -225,17 +233,17 @@ int main(int /*argc*/, char* argv[]) {
 
   // Initialize performers.
   std::vector<std::tuple<PerformerHandle, BeatComposerCallback, size_t>> performers;
-  std::vector<InstrumentHandle> instruments;
+  std::vector<std::pair<InstrumentHandle, size_t>> instruments;
 
   const auto build_instrument_fn = [&](OscillatorShape type, float gain, float attack,
                                        float release) {
-    instruments.emplace_back(musician.AddInstrument());
-    auto& instrument = instruments.back();
+    instruments.emplace_back(musician.AddInstrument(), instruments.size() + 1);
+    auto& [instrument, index] = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
     instrument.SetControl(ControlType::kOscillatorShape, type);
     instrument.SetControl(ControlType::kAttack, attack);
     instrument.SetControl(ControlType::kRelease, release);
-    set_note_callbacks_fn(instruments.size(), instrument);
+    set_note_callbacks_fn(index, instrument);
   };
 
   Scale scale = {kDiatonicPitches, kRootPitch};
@@ -276,13 +284,13 @@ int main(int /*argc*/, char* argv[]) {
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.push_back(musician.AddInstrument());
-  auto& percussion = instruments.back();
+  instruments.emplace_back(musician.AddInstrument(), instruments.size() + 1);
+  auto& [percussion, percussion_index] = instruments.back();
   percussion.SetControl(ControlType::kGain, -18.0f);
   percussion.SetControl(ControlType::kAttack, 0.0f);
   percussion.SetControl(ControlType::kRetrigger, true);
   percussion.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);
-  set_note_callbacks_fn(instruments.size(), percussion);
+  set_note_callbacks_fn(percussion_index, percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<float, std::string>>& percussion_map) {
         std::vector<SampleDataSlice> slices;
@@ -335,7 +343,8 @@ int main(int /*argc*/, char* argv[]) {
     for (auto& [performer, beat_composer_callback, index] : performers) {
       // Compose next beat notes.
       if (beat_composer_callback) {
-        beat_composer_callback(bar, beat, kBeatCount, harmonic, instruments[index], performer);
+        beat_composer_callback(bar, beat, kBeatCount, harmonic, instruments[index].first,
+                               performer);
       }
     }
   };
@@ -347,7 +356,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> temp_buffer(kSampleCount);
   const auto process_callback = [&](std::span<float> output_samples) {
     std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
-    for (auto& instrument : instruments) {
+    for (auto& [instrument, _] : instruments) {
       instrument.Process(temp_buffer, clock.GetTimestamp());
       std::transform(temp_buffer.begin(), temp_buffer.end(), output_samples.begin(),
                      output_samples.begin(), std::plus());
@@ -371,7 +380,7 @@ int main(int /*argc*/, char* argv[]) {
           for (auto& [performer, beat_composer_callback, index] : performers) {
             performer.Stop();
           }
-          for (auto& instrument : instruments) {
+          for (auto& [instrument, _] : instruments) {
             instrument.SetAllNotesOff();
           }
           ConsoleLog() << "Stopped playback";

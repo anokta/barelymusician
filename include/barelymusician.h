@@ -345,66 +345,32 @@ typedef struct BarelySampleDataSlice {
   int32_t sample_count;
 } BarelySampleDataSlice;
 
-/// Note off event create callback signature.
-///
-/// @param state Pointer to note off event state.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyNoteOffEvent_CreateCallback)(void** state, void* user_data);
-
-/// Note off event destroy callback signature.
-///
-/// @param state Pointer to note off event state.
-typedef void (*BarelyNoteOffEvent_DestroyCallback)(void** state);
-
 /// Note off event process callback signature.
 ///
-/// @param state Pointer to note off event state.
 /// @param pitch Note pitch.
-typedef void (*BarelyNoteOffEvent_ProcessCallback)(void** state, float pitch);
+/// @param user_data Pointer to user data.
+typedef void (*BarelyNoteOffEvent_Callback)(float pitch, void* user_data);
 
 /// Note off event.
 typedef struct BarelyNoteOffEvent {
-  /// Create callback.
-  BarelyNoteOffEvent_CreateCallback create_callback;
-
-  /// Destroy callback.
-  BarelyNoteOffEvent_DestroyCallback destroy_callback;
-
-  /// Process callback.
-  BarelyNoteOffEvent_ProcessCallback process_callback;
+  /// Callback.
+  BarelyNoteOffEvent_Callback callback;
 
   /// Pointer to user data.
   void* user_data;
 } BarelyNoteOffEvent;
 
-/// Note on event create callback signature.
-///
-/// @param state Pointer to note on event state.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyNoteOnEvent_CreateCallback)(void** state, void* user_data);
-
-/// Note on event destroy callback signature.
-///
-/// @param state Pointer to note on event state.
-typedef void (*BarelyNoteOnEvent_DestroyCallback)(void** state);
-
 /// Note on event process callback signature.
 ///
-/// @param state Pointer to note on event state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyNoteOnEvent_ProcessCallback)(void** state, float pitch, float intensity);
+/// @param user_data Pointer to user data.
+typedef void (*BarelyNoteOnEvent_Callback)(float pitch, float intensity, void* user_data);
 
 /// Note on event.
 typedef struct BarelyNoteOnEvent {
-  /// Create callback.
-  BarelyNoteOnEvent_CreateCallback create_callback;
-
-  /// Destroy callback.
-  BarelyNoteOnEvent_DestroyCallback destroy_callback;
-
-  /// Process callback.
-  BarelyNoteOnEvent_ProcessCallback process_callback;
+  /// Callback.
+  BarelyNoteOnEvent_Callback callback;
 
   /// Pointer to user data.
   void* user_data;
@@ -915,30 +881,14 @@ struct SampleDataSlice : public BarelySampleDataSlice {
 /// Note off event.
 struct NoteOffEvent : public BarelyNoteOffEvent {
   /// Callback signature.
-  ///
-  /// @param pitch Note pitch.
-  using Callback = std::function<void(float pitch)>;
-
-  /// Create callback signature.
-  using CreateCallback = BarelyNoteOffEvent_CreateCallback;
-
-  /// Destroy callback signature.
-  using DestroyCallback = BarelyNoteOffEvent_DestroyCallback;
-
-  /// Process callback signature.
-  using ProcessCallback = BarelyNoteOffEvent_ProcessCallback;
+  using Callback = BarelyNoteOffEvent_Callback;
 
   /// Constructs a new `NoteOffEvent`.
   ///
-  /// @param create_callback Create callback.
-  /// @param destroy_callback Destroy callback.
-  /// @param process_callback Process callback.
+  /// @param callback Callback.
   /// @param user_data Pointer to user data.
-  explicit constexpr NoteOffEvent(CreateCallback create_callback, DestroyCallback destroy_callback,
-                                  ProcessCallback process_callback,
-                                  void* user_data = nullptr) noexcept
-      : NoteOffEvent(
-            BarelyNoteOffEvent{create_callback, destroy_callback, process_callback, user_data}) {}
+  constexpr NoteOffEvent(Callback callback = nullptr, void* user_data = nullptr) noexcept
+      : NoteOffEvent(BarelyNoteOffEvent{callback, user_data}) {}
 
   /// Constructs a new `NoteOffEvent` from a raw type.
   ///
@@ -951,31 +901,14 @@ struct NoteOffEvent : public BarelyNoteOffEvent {
 /// Note on event.
 struct NoteOnEvent : public BarelyNoteOnEvent {
   /// Callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  using Callback = std::function<void(float pitch, float intensity)>;
-
-  /// Create callback signature.
-  using CreateCallback = BarelyNoteOnEvent_CreateCallback;
-
-  /// Destroy callback signature.
-  using DestroyCallback = BarelyNoteOnEvent_DestroyCallback;
-
-  /// Process callback signature.
-  using ProcessCallback = BarelyNoteOnEvent_ProcessCallback;
+  using Callback = BarelyNoteOnEvent_Callback;
 
   /// Constructs a new `NoteOnEvent`.
   ///
-  /// @param create_callback Create callback.
-  /// @param destroy_callback Destroy callback.
-  /// @param process_callback Process callback.
+  /// @param callback Callback.
   /// @param user_data Pointer to user data.
-  explicit constexpr NoteOnEvent(CreateCallback create_callback, DestroyCallback destroy_callback,
-                                 ProcessCallback process_callback,
-                                 void* user_data = nullptr) noexcept
-      : NoteOnEvent(
-            BarelyNoteOnEvent{create_callback, destroy_callback, process_callback, user_data}) {}
+  constexpr NoteOnEvent(Callback callback = nullptr, void* user_data = nullptr) noexcept
+      : NoteOnEvent(BarelyNoteOnEvent{callback, user_data}) {}
 
   /// Constructs a new `NoteOnEvent` from a raw type.
   ///
@@ -1237,21 +1170,9 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// Sets the note off event.
   ///
   /// @param note_off_event Pointer to note off event.
-  void SetNoteOffEvent(const NoteOffEvent* note_off_event) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOffEvent(*this, note_off_event);
+  void SetNoteOffEvent(const NoteOffEvent& note_off_event) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOffEvent(*this, &note_off_event);
     assert(success);
-  }
-
-  /// Sets the note off event with a callback.
-  ///
-  /// @param callback Note off event callback.
-  void SetNoteOffEvent(NoteOffEvent::Callback callback) noexcept {
-    if (callback) {
-      const auto note_off_event = EventWithCallback<NoteOffEvent, float>(callback);
-      SetNoteOffEvent(&note_off_event);
-    } else {
-      SetNoteOffEvent(nullptr);
-    }
   }
 
   /// Sets a note on.
@@ -1266,21 +1187,9 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
   /// Sets the note on event.
   ///
   /// @param note_on_event Pointer to note on event.
-  void SetNoteOnEvent(const NoteOnEvent* note_on_event) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOnEvent(*this, note_on_event);
+  void SetNoteOnEvent(const NoteOnEvent& note_on_event) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOnEvent(*this, &note_on_event);
     assert(success);
-  }
-
-  /// Sets the note off event with a callback.
-  ///
-  /// @param callback Note off event callback.
-  void SetNoteOnEvent(NoteOnEvent::Callback callback) noexcept {
-    if (callback) {
-      const auto note_on_event = EventWithCallback<NoteOnEvent, float, float>(callback);
-      SetNoteOnEvent(&note_on_event);
-    } else {
-      SetNoteOnEvent(nullptr);
-    }
   }
 
   /// Sets the sample data.

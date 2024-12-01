@@ -83,10 +83,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteOnEvent([&repeater](float pitch, float /*intensity*/) {
-    if (repeater.IsPlaying()) {
-      ConsoleLog() << "Note(" << pitch << ")";
-    }
+  instrument.SetNoteOnEvent({
+      [](float pitch, float /*intensity*/, void* user_data) {
+        if (static_cast<Repeater*>(user_data)->IsPlaying()) {
+          ConsoleLog() << "Note(" << pitch << ")";
+        }
+      },
+      static_cast<void*>(&repeater),
   });
 
   // Audio process callback.

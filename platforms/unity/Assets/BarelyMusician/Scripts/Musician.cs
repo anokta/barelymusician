@@ -147,14 +147,11 @@ namespace Barely {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
         }
-        _noteOffEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(instrument));
-        if (!BarelyInstrument_SetNoteOffEvent(instrumentHandle, ref _noteOffEvent)) {
-          GCHandle.FromIntPtr(_noteOffEvent.userData).Free();
-        }
-        _noteOnEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(instrument));
-        if (!BarelyInstrument_SetNoteOnEvent(instrumentHandle, ref _noteOnEvent)) {
-          GCHandle.FromIntPtr(_noteOnEvent.userData).Free();
-        }
+        _instruments.Add(instrumentHandle, instrument);
+        _noteOffEvent.userData = instrumentHandle;
+        BarelyInstrument_SetNoteOffEvent(instrumentHandle, ref _noteOffEvent);
+        _noteOnEvent.userData = instrumentHandle;
+        BarelyInstrument_SetNoteOnEvent(instrumentHandle, ref _noteOnEvent);
       }
 
       /// Destroys an instrument.
@@ -168,6 +165,7 @@ namespace Barely {
         if (!BarelyMusician_RemoveInstrument(_handle, instrumentHandle)) {
           Debug.LogError("Failed to destroy instrument");
         }
+        _instruments.Remove(instrumentHandle);
         instrumentHandle = IntPtr.Zero;
       }
 
@@ -844,78 +842,39 @@ namespace Barely {
         }
       }
 
-      // Note off event create callback.
-      private delegate void NoteOffEvent_CreateCallback(ref IntPtr state, IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(NoteOffEvent_CreateCallback))]
-      private static void NoteOffEvent_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = userData;
-      }
-
-      // Note off event destroy callback.
-      private delegate void NoteOffEvent_DestroyCallback(ref IntPtr state);
-      [AOT.MonoPInvokeCallback(typeof(NoteOffEvent_DestroyCallback))]
-      private static void NoteOffEvent_OnDestroy(ref IntPtr state) {
-        GCHandle.FromIntPtr(state).Free();
-      }
-
-      // Note off event process callback.
-      private delegate void NoteOffEvent_ProcessCallback(ref IntPtr state, float pitch);
-      [AOT.MonoPInvokeCallback(typeof(NoteOffEvent_ProcessCallback))]
-      private static void NoteOffEvent_OnProcess(ref IntPtr state, float pitch) {
-        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
-        Instrument.Internal.OnNoteOffEvent(instrument, pitch);
+      // Note off event callback.
+      private delegate void NoteOffEvent_Callback(float pitch, IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(NoteOffEvent_Callback))]
+      private static void NoteOffEvent_OnCallback(float pitch, IntPtr userData) {
+        if (_instruments.TryGetValue(userData, out var instrument)) {
+          Instrument.Internal.OnNoteOffEvent(instrument, pitch);
+        }
       }
 
       // Note off event.
       [StructLayout(LayoutKind.Sequential)]
       private struct NoteOffEvent {
-        // Create callback.
-        public NoteOffEvent_CreateCallback createCallback;
-
-        // Destroy callback.
-        public NoteOffEvent_DestroyCallback destroyCallback;
-
-        // Process callback.
-        public NoteOffEvent_ProcessCallback processCallback;
+        // Callback.
+        public NoteOffEvent_Callback callback;
 
         // Pointer to user data.
         public IntPtr userData;
       }
 
-      // Note on event create callback.
-      private delegate void NoteOnEvent_CreateCallback(ref IntPtr state, IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(NoteOnEvent_CreateCallback))]
-      private static void NoteOnEvent_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = userData;
-      }
-
-      // Note on event destroy callback.
-      private delegate void NoteOnEvent_DestroyCallback(ref IntPtr state);
-      [AOT.MonoPInvokeCallback(typeof(NoteOnEvent_DestroyCallback))]
-      private static void NoteOnEvent_OnDestroy(ref IntPtr state) {
-        GCHandle.FromIntPtr(state).Free();
-      }
-
-      // Note on event process callback.
-      private delegate void NoteOnEvent_ProcessCallback(ref IntPtr state, float pitch,
-                                                        float intensity);
-      [AOT.MonoPInvokeCallback(typeof(NoteOnEvent_ProcessCallback))]
-      private static void NoteOnEvent_OnProcess(ref IntPtr state, float pitch, float intensity) {
-        Instrument instrument = GCHandle.FromIntPtr(state).Target as Instrument;
-        Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
+      // Note on event callback.
+      private delegate void NoteOnEvent_Callback(float pitch, float intensity, IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(NoteOnEvent_Callback))]
+      private static void NoteOnEvent_OnCallback(float pitch, float intensity, IntPtr userData) {
+        if (_instruments.TryGetValue(userData, out var instrument)) {
+          Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
+        }
       }
 
       // Note on event.
       [StructLayout(LayoutKind.Sequential)]
       private struct NoteOnEvent {
-        // Create callback.
-        public NoteOnEvent_CreateCallback createCallback;
-
-        // Destroy callback.
-        public NoteOnEvent_DestroyCallback destroyCallback;
-
-        // Process callback.
-        public NoteOnEvent_ProcessCallback processCallback;
+        // Callback.
+        public NoteOnEvent_Callback callback;
 
         // Pointer to user data.
         public IntPtr userData;
@@ -1019,17 +978,13 @@ namespace Barely {
 
       // Note off event.
       private static NoteOffEvent _noteOffEvent = new NoteOffEvent() {
-        createCallback = NoteOffEvent_OnCreate,
-        destroyCallback = NoteOffEvent_OnDestroy,
-        processCallback = NoteOffEvent_OnProcess,
+        callback = NoteOffEvent_OnCallback,
         userData = IntPtr.Zero,
       };
 
       // Note on event.
       private static NoteOnEvent _noteOnEvent = new NoteOnEvent() {
-        createCallback = NoteOnEvent_OnCreate,
-        destroyCallback = NoteOnEvent_OnDestroy,
-        processCallback = NoteOnEvent_OnProcess,
+        callback = NoteOnEvent_OnCallback,
         userData = IntPtr.Zero,
       };
 
@@ -1049,6 +1004,9 @@ namespace Barely {
 
       // DSP latency in seconds.
       private static double _dspLatency = 0.0;
+
+      // Map of instruments by their handles.
+      private static Dictionary<IntPtr, Instrument> _instruments = null;
 
       // Array of mono output samples.
       public static float[] _outputSamples = null;
@@ -1078,12 +1036,12 @@ namespace Barely {
           for (int i = 0; i < performers.Length; ++i) {
             performers[i].enabled = false;
           }
-          var instruments = FindObjectsOfType<Instrument>();
-          for (int i = 0; i < instruments.Length; ++i) {
+          var instruments = new List<Instrument>(_instruments.Values);
+          for (int i = 0; i < instruments.Count; ++i) {
             instruments[i].enabled = false;
           }
           Initialize();
-          for (int i = 0; i < instruments.Length; ++i) {
+          for (int i = 0; i < instruments.Count; ++i) {
             instruments[i].enabled = true;
           }
           for (int i = 0; i < performers.Length; ++i) {
@@ -1120,6 +1078,7 @@ namespace Barely {
           BarelyMusician_SetTempo(_handle, _tempo);
           _outputSamples = new float[config.dspBufferSize];
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
+          _instruments = new Dictionary<IntPtr, Instrument>();
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, GetNextTimestamp());
         }

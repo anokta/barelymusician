@@ -56,8 +56,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
-  instrument.SetNoteOnEvent(
-      [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
+  instrument.SetNoteOnEvent({[](float pitch, float /*intensity*/, void* /*user_data*/) {
+    ConsoleLog() << "Note(" << pitch << ")";
+  }});
 
   auto performer = musician.AddPerformer();
   performer.SetLooping(true);

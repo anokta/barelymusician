@@ -19,7 +19,8 @@ namespace Barely {
               Application.platform == RuntimePlatform.IPhonePlayer) &&
              Input.GetMouseButtonDown(0)) ||
             Input.GetKeyDown(KeyCode.Space)) {
-          foreach (var sequencer in GameObject.FindObjectsOfType<Sequencer>()) {
+          foreach (var sequencer in GameObject.FindObjectsByType<Sequencer>(
+                       FindObjectsSortMode.None)) {
             if (sequencer.IsPlaying) {
               sequencer.Pause();
             } else {
@@ -27,7 +28,8 @@ namespace Barely {
             }
           }
         } else if (Input.GetKeyDown(KeyCode.Backspace)) {
-          foreach (var sequencer in GameObject.FindObjectsOfType<Sequencer>()) {
+          foreach (var sequencer in GameObject.FindObjectsByType<Sequencer>(
+                       FindObjectsSortMode.None)) {
             sequencer.Stop();
           }
         }

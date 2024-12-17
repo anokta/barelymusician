@@ -1032,7 +1032,7 @@ namespace Barely {
 
         private void OnAudioConfigurationChanged(bool deviceWasChanged) {
           Shutdown();
-          var performers = FindObjectsOfType<Performer>();
+          var performers = FindObjectsByType<Performer>(FindObjectsSortMode.None);
           for (int i = 0; i < performers.Length; ++i) {
             performers[i].enabled = false;
           }

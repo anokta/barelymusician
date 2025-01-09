@@ -42,12 +42,12 @@ class Pool {
     Type* item = new (items_[free_index_]) Type(args...);
     ++free_index_;
     return item;
-    return nullptr;
   }
 
   void Destruct(Type* item) noexcept {
     assert(free_index_ > 0 && "Pool underflow");
-    assert(item - static_cast<Type*>(raw_items_) < items_.size() && "Invalid item");
+    assert(item - reinterpret_cast<Type*>(raw_items_) < static_cast<int>(items_.size()) &&
+           "Invalid item");
     items_[--free_index_] = item;
     std::destroy_at(item);
   }

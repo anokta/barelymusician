@@ -68,8 +68,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto play_note_fn = [&](double duration, float pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
-      performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-                                   performer.GetPosition() + duration);
+      // TODO(#147): Temp hack to make sure the note is stopped before the next beat.
+      performer.AddTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+                        performer.GetPosition() + duration - 1e-6);
     };
   };
 

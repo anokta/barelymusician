@@ -21,6 +21,7 @@ namespace Barely.Examples {
       int degree = Random.Range(-scale.PitchCount, scale.PitchCount);
       float pitch = scale.GetPitch(degree);
       instrument.SetNoteOn(pitch);
+      // TODO(#147): Update this with the task refactor.
       performer.ScheduleOneOffTask(delegate() { instrument.SetNoteOff(pitch); },
                                    performer.LoopLength);
 

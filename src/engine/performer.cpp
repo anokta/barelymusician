@@ -36,8 +36,6 @@ Performer::Task* Performer::AddTask(const TaskEvent& task_event, double position
   return task;
 }
 
-void Performer::CancelAllOneOffTasks() noexcept { one_off_tasks_.clear(); }
-
 std::optional<double> Performer::GetDurationToNextTask() const noexcept {
   if (!is_playing_) {
     return std::nullopt;
@@ -58,12 +56,6 @@ std::optional<double> Performer::GetDurationToNextTask() const noexcept {
         next_task_position = std::nullopt;
       }
     }
-  }
-  // Check one-off tasks.
-  if (const auto next_one_off_task = one_off_tasks_.begin();
-      next_one_off_task != one_off_tasks_.end() &&
-      (!next_task_position || next_one_off_task->first <= *next_task_position)) {
-    next_task_position = next_one_off_task->first;
   }
 
   if (next_task_position) {
@@ -88,13 +80,6 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
   if (!is_playing_) {
     return;
   }
-  if (const auto it = one_off_tasks_.begin();
-      it != one_off_tasks_.end() && it->first == position_) {
-    // Process the next one-off task.
-    it->second.Process();
-    one_off_tasks_.erase(it);
-    return;
-  }
   if (const auto it = GetNextRecurringTask();
       it != recurring_tasks_.end() && it->second->GetPosition() == position_ &&
       (!last_processed_recurring_task_it_ || **last_processed_recurring_task_it_ < *it)) {
@@ -112,13 +97,6 @@ void Performer::RemoveTask(Task* task) noexcept {
   } else {
     recurring_tasks_.erase({task->GetPosition(), task});
   }
-}
-
-void Performer::ScheduleOneOffTask(const TaskEvent& task_event, double position) noexcept {
-  if (position < position_) {
-    return;
-  }
-  one_off_tasks_.emplace(position, Event<TaskEvent>(task_event));
 }
 
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
@@ -167,18 +145,8 @@ void Performer::SetPosition(double position) noexcept {
   if (position_ == position) {
     return;
   }
-  one_off_tasks_.erase(one_off_tasks_.begin(), one_off_tasks_.lower_bound(position));
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
-    if (!one_off_tasks_.empty()) {
-      // Reset all remaining one-off tasks back to the beginning.
-      for (auto it = one_off_tasks_.begin(); it != one_off_tasks_.end();) {
-        auto current = it++;
-        auto node = one_off_tasks_.extract(current);
-        node.key() = std::max(node.key() - loop_length_, loop_begin_position_);
-        one_off_tasks_.insert(std::move(node));
-      }
-    }
-    position_ = LoopAround(position);
+      position_ = LoopAround(position);
   } else {
     position_ = position;
   }

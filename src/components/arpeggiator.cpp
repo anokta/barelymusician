@@ -34,8 +34,12 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
         instrument_->SetNoteOff(pitch);
       }
     };
-    performer_->ScheduleOneOffTask(EventWithCallback<TaskEvent>(note_off_callback),
-                                   static_cast<double>(gate_ratio_) * performer_->GetLoopLength());
+    if (note_off_task_ != nullptr) {
+      performer_->RemoveTask(note_off_task_);
+    }
+    note_off_task_ =
+        performer_->AddTask(EventWithCallback<TaskEvent>(note_off_callback),
+                            static_cast<double>(gate_ratio_) * performer_->GetLoopLength());
   };
   performer_->AddTask(EventWithCallback<TaskEvent>(callback), 0.0);
 }
@@ -119,7 +123,9 @@ void Arpeggiator::Update() noexcept {
 
 void Arpeggiator::Stop() noexcept {
   performer_->Stop();
-  performer_->CancelAllOneOffTasks();
+  if (note_off_task_ != nullptr) {
+    performer_->RemoveTask(note_off_task_);
+  }
   performer_->SetPosition(0.0);
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();

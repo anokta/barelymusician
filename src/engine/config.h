@@ -10,7 +10,7 @@ inline constexpr int kMaxInstrumentCount = 128;
 inline constexpr int kMaxPerformerCount = 128;
 
 /// Maximum number of recurring tasks allowed per performer in the engine.
-inline constexpr int kMaxRecurringTaskPerPerformerCount = 32;
+inline constexpr int kMaxRecurringTaskPerPerformerCount = 4096;
 
 }  // namespace barely::internal
 

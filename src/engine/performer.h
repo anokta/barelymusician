@@ -58,9 +58,6 @@ class Performer {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Task* AddTask(const TaskEvent& task_event, double position) noexcept;
 
-  /// Cancels all one-off tasks.
-  void CancelAllOneOffTasks() noexcept;
-
   /// Returns the duration to next task.
   ///
   /// @return Optional duration in beats.
@@ -103,12 +100,6 @@ class Performer {
   ///
   /// @param task Pointer to task.
   void RemoveTask(Task* task) noexcept;
-
-  /// Schedules a one-off task.
-  ///
-  /// @param task_event Task event.
-  /// @param position Task position in beats.
-  void ScheduleOneOffTask(const TaskEvent& task_event, double position) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -181,7 +172,6 @@ class Performer {
   int process_order_ = 0;
 
   // Map of tasks.
-  std::multimap<double, Event<TaskEvent>> one_off_tasks_;
   Pool<Task> recurring_task_pool_;
   RecurringTaskSet recurring_tasks_;
 

@@ -63,11 +63,11 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double duration = get_position_fn(midi_event.getTickDuration());
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float intensity = static_cast<float>(midi_event.getVelocity()) / 127.0f;
-      performer.ScheduleOneOffTask(
-          [&instrument, pitch, intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
-          position);
-      performer.ScheduleOneOffTask([&instrument, pitch]() mutable { instrument.SetNoteOff(pitch); },
-                                   position + duration);
+      performer.AddTask([&instrument, duration, pitch,
+                         intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
+                        position);
+      performer.AddTask([&instrument, pitch]() mutable { instrument.SetNoteOff(pitch); },
+                        position + duration);
       has_notes = true;
     }
   }

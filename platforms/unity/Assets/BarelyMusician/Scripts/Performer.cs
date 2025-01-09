@@ -78,15 +78,6 @@ namespace Barely {
       Musician.Internal.Performer_CancelAllOneOffTasks(_handle);
     }
 
-    /// Schedules a one-off task at a specific position.
-    ///
-    /// @param callback Task process callback.
-    /// @param position Task position in beats.
-    /// @param processOrder Task process order.
-    public void ScheduleOneOffTask(Action callback, double position) {
-      Musician.Internal.Performer_ScheduleOneOffTask(_handle, callback, position);
-    }
-
     /// Stops the performer.
     public void Stop() {
       Musician.Internal.Performer_Stop(_handle);

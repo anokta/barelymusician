@@ -69,33 +69,48 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto play_note_fn = [&](int degree, double duration) {
     return [&instrument, &performer, duration, pitch = Scale(kMajor).GetPitch(degree)]() {
       instrument.SetNoteOn(pitch);
-      performer.ScheduleOneOffTask(
-          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
-          performer.GetPosition() + duration);
+      performer.AddTask([&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
+                        performer.GetPosition() + duration);
     };
+  };
+
+  // TODO(#147): This can probably be simplified after task refactor.
+  double stop_position = 0.0;
+  const auto stop_fn = [&]() {
+    if (performer.GetPosition() == stop_position) {
+      performer.Stop();
+      instrument.SetAllNotesOff();
+    }
   };
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
   performer.AddTask(play_note_fn(0, 1.0), 0.0);
+  performer.AddTask(play_note_fn(0, 1.0), 0.0);
+  performer.AddTask(stop_fn, 1.0);
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
   performer.AddTask(play_note_fn(1, 1.0), 1.0);
+  performer.AddTask(stop_fn, 2.0);
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
   performer.AddTask(play_note_fn(2, 1.0), 2.0);
+  performer.AddTask(stop_fn, 3.0);
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
   performer.AddTask(play_note_fn(3, 0.66), 3.0);
   performer.AddTask(play_note_fn(4, 0.34), 3.66);
+  performer.AddTask(stop_fn, 4.0);
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
   performer.AddTask(play_note_fn(5, 0.33), 4.0);
   performer.AddTask(play_note_fn(6, 0.33), 4.33);
   performer.AddTask(play_note_fn(7, 0.34), 4.66);
+  performer.AddTask(stop_fn, 5.0);
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
   performer.AddTask(play_note_fn(8, 2.0), 5.0);
+  performer.AddTask(stop_fn, 1.0);
 
   // Audio process callback.
   const auto process_callback = [&](std::span<float> output_samples) {
@@ -115,15 +130,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '1');
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
-      performer.CancelAllOneOffTasks();
       instrument.SetAllNotesOff();
       performer.SetPosition(triggers[index].first);
-      performer.ScheduleOneOffTask(
-          [&]() {
-            performer.Stop();
-            instrument.SetAllNotesOff();
-          },
-          triggers[index].first + triggers[index].second);
+      stop_position = triggers[index].first + triggers[index].second;
       performer.Start();
       return;
     }

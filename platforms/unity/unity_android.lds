@@ -52,14 +52,12 @@ VERS_1.0 {
     BarelyMusician_SetTempo;
     BarelyMusician_Update;
     BarelyPerformer_AddTask;
-    BarelyPerformer_CancelAllOneOffTasks;
     BarelyPerformer_GetLoopBeginPosition;
     BarelyPerformer_GetLoopLength;
     BarelyPerformer_GetPosition;
     BarelyPerformer_IsLooping;
     BarelyPerformer_IsPlaying;
     BarelyPerformer_RemoveTask;
-    BarelyPerformer_ScheduleOneOffTask;
     BarelyPerformer_SetLoopBeginPosition;
     BarelyPerformer_SetLoopLength;
     BarelyPerformer_SetLooping;

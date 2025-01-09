@@ -499,25 +499,6 @@ namespace Barely {
         return isPlaying;
       }
 
-      /// Schedules a one-off task.
-      ///
-      /// @param performerHandle Performer handle.
-      /// @param callback Task callback.
-      /// @param position Task position.
-      public static void Performer_ScheduleOneOffTask(IntPtr performerHandle, Action callback,
-                                                      double position) {
-        if (Handle == null || callback == null) {
-          return;
-        }
-        _taskEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(callback));
-        if (!BarelyPerformer_ScheduleOneOffTask(performerHandle, ref _taskEvent, position)) {
-          GCHandle.FromIntPtr(_taskEvent.userData).Free();
-          if (performerHandle != IntPtr.Zero) {
-            Debug.LogError("Failed to set performer loop begin position");
-          }
-        }
-      }
-
       /// Sets the loop begin position of a performer.
       ///
       /// @param performerHandle Performer handle.
@@ -1223,11 +1204,6 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_RemoveTask")]
       private static extern bool BarelyPerformer_RemoveTask(IntPtr performer, IntPtr task);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_ScheduleOneOffTask")]
-      private static extern bool BarelyPerformer_ScheduleOneOffTask(IntPtr performer,
-                                                                    ref TaskEvent taskEvent,
-                                                                    double position);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
       private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr performer,

@@ -138,7 +138,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   };
 
   // Schedule a task.
-  performer->ScheduleOneOffTask(task_event, 1.0);
+  performer->AddTask(task_event, 1.0);
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);

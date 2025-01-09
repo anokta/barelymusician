@@ -24,20 +24,20 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
   performer_->SetLoopLength(1.0);
   // TODO(#126): This should not need `TaskEvent::Callback`.
   TaskEvent::Callback callback = [this]() noexcept {
-    if (pitches_.empty() || !Update() || instrument_ == nullptr) {
+    if (pitches_.empty() || instrument_ == nullptr) {
+      return;
+    }
+    if (index_ != -1 && pitches_[index_].first.has_value() && remaining_length_ == 1) {
+      instrument_->SetNoteOff(*pitches_[index_].first + pitch_offset_);
+    }
+    if (!Update()) {
       return;
     }
     const auto& [pitch_or, length] = pitches_[index_];
     if (!pitches_[index_].first.has_value()) {
       return;
     }
-    const float pitch = *pitches_[index_].first + pitch_offset_;
-    instrument_->SetNoteOn(pitch, kNoteIntensity);
-    TaskEvent::Callback note_off_callback = [this, pitch]() noexcept {
-      instrument_->SetNoteOff(pitch);
-    };
-    performer_->ScheduleOneOffTask(EventWithCallback<TaskEvent>(note_off_callback),
-                                   static_cast<double>(length) * performer_->GetLoopLength());
+    instrument_->SetNoteOn(*pitches_[index_].first + pitch_offset_, kNoteIntensity);
   };
   performer_->AddTask(EventWithCallback<TaskEvent>(callback), 0.0);
 }

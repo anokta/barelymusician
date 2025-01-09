@@ -628,12 +628,6 @@ BARELY_EXPORT bool BarelyPerformer_AddTask(BarelyPerformerHandle performer,
                                            const BarelyTaskEvent* task_event, double position,
                                            BarelyTaskHandle* out_task);
 
-/// Cancels all one-off tasks.
-///
-/// @param performer Performer handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer);
-
 /// Gets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
@@ -679,16 +673,6 @@ BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bo
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer,
                                               BarelyTaskHandle task);
-
-/// Schedules a one-off task.
-///
-/// @param performer Performer handle.
-/// @param task_event Pointer to task event.
-/// @param position Task position in beats.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
-                                                      const BarelyTaskEvent* task_event,
-                                                      double position);
 
 /// Sets the loop begin position of a performer.
 ///
@@ -1268,12 +1252,6 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
     return AddTask(EventWithCallback<TaskEvent>(callback), position);
   }
 
-  /// Cancels all one-off tasks.
-  void CancelAllOneOffTasks() noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_CancelAllOneOffTasks(*this);
-    assert(success);
-  }
-
   /// Returns the loop begin position.
   ///
   /// @return Loop begin position in beats.
@@ -1331,25 +1309,6 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   void RemoveTask(TaskHandle task) noexcept {
     [[maybe_unused]] const bool success = BarelyPerformer_RemoveTask(*this, task);
     assert(success);
-  }
-
-  /// Schedules a one-off task.
-  ///
-  /// @param task_event Task event.
-  /// @param position Task position in beats.
-  void ScheduleOneOffTask(const TaskEvent& task_event, double position) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyPerformer_ScheduleOneOffTask(*this, &task_event, position);
-    assert(success);
-  }
-
-  /// Schedules a one-off task with a callback.
-  ///
-  /// @param callback Task callback.
-  /// @param position Task position in beats.
-  void ScheduleOneOffTask(TaskEvent::Callback callback, double position) noexcept {
-    assert(callback);
-    ScheduleOneOffTask(EventWithCallback<TaskEvent>(callback), position);
   }
 
   /// Sets the loop begin position.

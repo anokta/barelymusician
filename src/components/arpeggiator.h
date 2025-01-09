@@ -106,6 +106,9 @@ class Arpeggiator {
   // Current index.
   int index_ = -1;
 
+  // Note off task.
+  Performer::Task* note_off_task_;
+
   // Random number generator.
   Random random_;
 };

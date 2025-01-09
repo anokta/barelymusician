@@ -62,6 +62,7 @@ auto task = performer.AddTask(
       // Set an instrument note on.
       instrument.SetNoteOn(/*pitch=*/1.0f);
       // Schedule a one-off task to set the instrument note off after half a beat.
+      // TODO(#147): Update this with the task refactor.
       performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/1.0f); },
                                    performer.GetPosition() + 0.5);
     },

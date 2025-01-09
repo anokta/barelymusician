@@ -228,13 +228,6 @@ bool BarelyPerformer_AddTask(BarelyPerformerHandle performer, const BarelyTaskEv
   return *out_task;
 }
 
-bool BarelyPerformer_CancelAllOneOffTasks(BarelyPerformerHandle performer) {
-  if (!performer) return false;
-
-  performer->CancelAllOneOffTasks();
-  return true;
-}
-
 bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
                                           double* out_loop_begin_position) {
   if (!performer) return false;
@@ -281,15 +274,6 @@ bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer, BarelyTaskHandl
   if (!task) return false;
 
   performer->RemoveTask(task);
-  return true;
-}
-
-bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
-                                        const BarelyTaskEvent* task_event, double position) {
-  if (!performer) return false;
-  if (!task_event) return false;
-
-  performer->ScheduleOneOffTask(*task_event, position);
   return true;
 }
 

@@ -20,26 +20,11 @@ constexpr float kNoteIntensity = 1.0f;
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Musician& musician, int process_order) noexcept
     : musician_(musician), performer_(musician_.AddPerformer(process_order)) {
-  performer_->SetLooping(true);
-  performer_->SetLoopLength(1.0);
-  // TODO(#126): This should not need `TaskEvent::Callback`.
-  TaskEvent::Callback callback = [this]() noexcept {
-    if (pitches_.empty() || instrument_ == nullptr) {
-      return;
-    }
-    if (index_ != -1 && pitches_[index_].first.has_value() && remaining_length_ == 1) {
-      instrument_->SetNoteOff(*pitches_[index_].first + pitch_offset_);
-    }
-    if (!Update()) {
-      return;
-    }
-    const auto& [pitch_or, length] = pitches_[index_];
-    if (!pitches_[index_].first.has_value()) {
-      return;
-    }
-    instrument_->SetNoteOn(*pitches_[index_].first + pitch_offset_, kNoteIntensity);
-  };
-  performer_->AddTask(EventWithCallback<TaskEvent>(callback), 0.0);
+  performer_->SetBeatEvent({[](double /*position*/, void* user_data) noexcept {
+                              auto& repeater = *static_cast<Repeater*>(user_data);
+                              repeater.OnBeat();
+                            },
+                            this});
 }
 
 Repeater::~Repeater() noexcept {
@@ -107,6 +92,23 @@ void Repeater::Stop() noexcept {
   }
   index_ = -1;
   remaining_length_ = 0;
+}
+
+void Repeater::OnBeat() noexcept {
+  if (pitches_.empty() || instrument_ == nullptr) {
+    return;
+  }
+  if (index_ != -1 && pitches_[index_].first.has_value() && remaining_length_ == 1) {
+    instrument_->SetNoteOff(*pitches_[index_].first + pitch_offset_);
+  }
+  if (!Update()) {
+    return;
+  }
+  const auto& [pitch_or, length] = pitches_[index_];
+  if (!pitches_[index_].first.has_value()) {
+    return;
+  }
+  instrument_->SetNoteOn(*pitches_[index_].first + pitch_offset_, kNoteIntensity);
 }
 
 bool Repeater::Update() noexcept {

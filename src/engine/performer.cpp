@@ -58,6 +58,23 @@ std::optional<double> Performer::GetDurationToNextTask() const noexcept {
     }
   }
 
+  // Check beat callback.
+  // TODO(#147): POC-only, this can be cleaned up after task refactor.
+  if (beat_event_.callback) {
+    double next_beat_position =
+        (last_beat_position_ == position_) ? std::ceil(position_ + 1.0) : std::ceil(position_);
+    if (is_looping_ && next_beat_position > loop_begin_position_ + loop_length_) {
+      const double first_beat_offset = std::ceil(loop_begin_position_) - loop_begin_position_;
+      next_beat_position = (loop_length_ > first_beat_offset)
+                               ? first_beat_offset + loop_begin_position_ + loop_length_
+                               : std::numeric_limits<double>::max();
+    }
+    if (next_beat_position < std::numeric_limits<double>::max() &&
+        (!next_task_position.has_value() || next_beat_position < *next_task_position)) {
+      next_task_position = next_beat_position;
+    }
+  }
+
   if (next_task_position) {
     return *next_task_position - position_;
   }
@@ -80,6 +97,12 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
   if (!is_playing_) {
     return;
   }
+  // TODO(#147): POC-only, this can be cleaned up after task refactor.
+  if (beat_event_.callback && last_beat_position_ != position_ &&
+      std::ceil(position_) == position_) {
+    last_beat_position_ = position_;
+    beat_event_.callback(position_, beat_event_.user_data);
+  }
   if (const auto it = GetNextRecurringTask();
       it != recurring_tasks_.end() && it->second->GetPosition() == position_ &&
       (!last_processed_recurring_task_it_ || **last_processed_recurring_task_it_ < *it)) {
@@ -99,6 +122,8 @@ void Performer::RemoveTask(Task* task) noexcept {
   }
 }
 
+void Performer::SetBeatEvent(const BeatEvent& beat_event) noexcept { beat_event_ = beat_event; }
+
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) {
     return;
@@ -107,6 +132,7 @@ void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (is_looping_ && position_ > loop_begin_position_) {
     if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
       last_processed_recurring_task_it_ = std::nullopt;
+      last_beat_position_ = std::nullopt;
     }
     position_ = LoopAround(position_);
   }
@@ -120,6 +146,7 @@ void Performer::SetLoopLength(double loop_length) noexcept {
   loop_length_ = loop_length;
   if (is_looping_ && position_ > loop_begin_position_) {
     if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
+      last_beat_position_ = std::nullopt;
       last_processed_recurring_task_it_ = std::nullopt;
     }
     position_ = LoopAround(position_);
@@ -133,6 +160,7 @@ void Performer::SetLooping(bool is_looping) noexcept {
   is_looping_ = is_looping;
   if (is_looping_ && position_ > loop_begin_position_) {
     if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
+      last_beat_position_ = std::nullopt;
       last_processed_recurring_task_it_ = std::nullopt;
     }
     position_ = LoopAround(position_);
@@ -141,12 +169,13 @@ void Performer::SetLooping(bool is_looping) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::SetPosition(double position) noexcept {
+  last_beat_position_ = std::nullopt;
   last_processed_recurring_task_it_ = std::nullopt;
   if (position_ == position) {
     return;
   }
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
-      position_ = LoopAround(position);
+    position_ = LoopAround(position);
   } else {
     position_ = position;
   }
@@ -165,6 +194,7 @@ void Performer::Start() noexcept { is_playing_ = true; }
 
 void Performer::Stop() noexcept {
   is_playing_ = false;
+  last_beat_position_ = std::nullopt;
   last_processed_recurring_task_it_ = std::nullopt;
 }
 

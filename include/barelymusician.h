@@ -345,7 +345,22 @@ typedef struct BarelySampleDataSlice {
   int32_t sample_count;
 } BarelySampleDataSlice;
 
-/// Note off event process callback signature.
+/// Beat event callback signature.
+///
+/// @param position Position in beats.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyBeatEvent_Callback)(double position, void* user_data);
+
+/// Beat event.
+typedef struct BarelyBeatEvent {
+  /// Callback.
+  BarelyBeatEvent_Callback callback;
+
+  /// Pointer to user data.
+  void* user_data;
+} BarelyBeatEvent;
+
+/// Note off event callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
@@ -360,7 +375,7 @@ typedef struct BarelyNoteOffEvent {
   void* user_data;
 } BarelyNoteOffEvent;
 
-/// Note on event process callback signature.
+/// Note on event callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
@@ -674,6 +689,14 @@ BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bo
 BARELY_EXPORT bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer,
                                               BarelyTaskHandle task);
 
+/// Sets the beat event of a performer.
+///
+/// @param performer Performer handle.
+/// @param beat_event Pointer to beat event.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_SetBeatEvent(BarelyPerformerHandle performer,
+                                                const BarelyBeatEvent* beat_event);
+
 /// Sets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
@@ -860,6 +883,25 @@ struct SampleDataSlice : public BarelySampleDataSlice {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr SampleDataSlice(BarelySampleDataSlice sample_data_slice) noexcept
       : BarelySampleDataSlice{sample_data_slice} {}
+};
+
+/// Beat event.
+struct BeatEvent : public BarelyBeatEvent {
+  /// Callback signature.
+  using Callback = BarelyBeatEvent_Callback;
+
+  /// Constructs a new `BeatEvent`.
+  ///
+  /// @param callback Callback.
+  /// @param user_data Pointer to user data.
+  constexpr BeatEvent(Callback callback = nullptr, void* user_data = nullptr) noexcept
+      : BeatEvent(BarelyBeatEvent{callback, user_data}) {}
+
+  /// Constructs a new `BeatEvent` from a raw type.
+  ///
+  /// @param beat_event Raw beat event.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr BeatEvent(BarelyBeatEvent beat_event) noexcept : BarelyBeatEvent{beat_event} {}
 };
 
 /// Note off event.
@@ -1308,6 +1350,14 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   /// @param task Task handle.
   void RemoveTask(TaskHandle task) noexcept {
     [[maybe_unused]] const bool success = BarelyPerformer_RemoveTask(*this, task);
+    assert(success);
+  }
+
+  /// Sets the beat event.
+  ///
+  /// @param beat_event Pointer to beat event.
+  void SetBeatEvent(const BeatEvent& beat_event) noexcept {
+    [[maybe_unused]] const bool success = BarelyPerformer_SetBeatEvent(*this, &beat_event);
     assert(success);
   }
 

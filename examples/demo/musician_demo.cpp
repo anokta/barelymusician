@@ -21,7 +21,6 @@
 #include "common/input_manager.h"
 #include "common/wav_file.h"
 #include "data/data.h"
-#include "performers/metronome.h"
 
 namespace {
 
@@ -40,7 +39,6 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
 using ::barely::examples::InputManager;
-using ::barely::examples::Metronome;
 using ::barely::examples::WavFile;
 
 // Beat composer callback signature.
@@ -115,11 +113,9 @@ void ScheduleNote(double position, double duration, float pitch, float intensity
                   std::vector<TaskHandle>& tasks) {
   tasks.emplace_back(performer.AddTask(
       [pitch, intensity, duration, &instrument]() { instrument.SetNoteOn(pitch, intensity); },
-      position));
-  // TODO(#147): Temp hack to make sure the note is stopped before the next beat.
-  assert(duration >= 1e-6);
-  tasks.emplace_back(performer.AddTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-                                       position + duration - 1e-6));
+      performer.GetPosition() + position));
+  performer.AddTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
+                    performer.GetPosition() + position + duration);
 }
 
 void ComposeChord(float intensity, int harmonic, const Scale& scale, InstrumentHandle& instrument,
@@ -327,10 +323,6 @@ int main(int /*argc*/, char* argv[]) {
   performers.emplace_back(musician.AddPerformer(), std::vector<TaskHandle>{},
                           percussion_beat_composer_callback, instruments.size() - 1);
 
-  for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
-    performer.SetLooping(true);
-  }
-
   // Bar callback.
   const auto bar_composer_callback = [&progression](int bar) -> int {
     return progression[bar % progression.size()];
@@ -338,7 +330,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Beat callback.
   int harmonic = 0;
-  const auto beat_callback = [&](int beat) {
+  std::function<void(int)> beat_callback = [&](int beat) {
     // Update transport.
     const int bar = beat / kBeatCount;
     beat = beat % kBeatCount;
@@ -351,18 +343,18 @@ int main(int /*argc*/, char* argv[]) {
     for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
       // Compose next beat notes.
       if (beat_composer_callback) {
-        for (auto& task : tasks) {
-          performer.RemoveTask(task);
-        }
-        tasks.clear();
         beat_composer_callback(bar, beat, kBeatCount, harmonic, instruments[index].first, performer,
                                tasks);
       }
     }
   };
 
-  Metronome metronome(musician, -10);
-  metronome.SetBeatCallback(beat_callback);
+  auto metronome = musician.AddPerformer(-10);
+  metronome.SetBeatEvent({[](double position, void* user_data) {
+                            auto callback = *static_cast<std::function<void(int)>*>(user_data);
+                            callback(static_cast<int>(position));
+                          },
+                          &beat_callback});
 
   // Audio process callback.
   std::vector<float> temp_buffer(kSampleCount);

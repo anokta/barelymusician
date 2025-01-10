@@ -8,6 +8,7 @@
 #include "engine/musician.h"
 #include "engine/performer.h"
 
+using ::barely::BeatEvent;
 using ::barely::ControlType;
 using ::barely::NoteControlType;
 using ::barely::NoteOffEvent;
@@ -274,6 +275,14 @@ bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer, BarelyTaskHandl
   if (!task) return false;
 
   performer->RemoveTask(task);
+  return true;
+}
+
+bool BarelyPerformer_SetBeatEvent(BarelyPerformerHandle performer,
+                                  const BarelyBeatEvent* beat_event) {
+  if (!performer) return false;
+
+  performer->SetBeatEvent((beat_event != nullptr) ? *beat_event : BeatEvent{});
   return true;
 }
 

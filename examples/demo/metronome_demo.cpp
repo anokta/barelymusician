@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <cmath>
 #include <span>
 #include <thread>
 
@@ -9,18 +10,17 @@
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
-#include "performers/metronome.h"
 
 namespace {
 
 using ::barely::ControlType;
+using ::barely::InstrumentHandle;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::Metronome;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -63,15 +63,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  Metronome metronome(musician);
-  metronome.SetBeatCallback([&](int beat) {
-    const int current_bar = (beat / kBeatCount) + 1;
-    const int current_beat = (beat % kBeatCount) + 1;
-    ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const float pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
-    instrument.SetNoteOn(pitch);
-    instrument.SetNoteOff(pitch);
-  });
+  auto metronome = musician.AddPerformer(-1);
+  metronome.SetBeatEvent({[](double position, void* user_data) {
+                            const int beat = static_cast<int>(position);
+                            const int current_bar = (beat / kBeatCount) + 1;
+                            const int current_beat = (beat % kBeatCount) + 1;
+                            ConsoleLog() << "Tick " << current_bar << "." << current_beat;
+                            const float pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
+                            auto& instrument = *static_cast<InstrumentHandle*>(user_data);
+                            instrument.SetNoteOn(pitch);
+                            instrument.SetNoteOff(pitch);
+                          },
+                          &instrument});
 
   // Audio process callback.
   const auto process_callback = [&](std::span<float> output_samples) {
@@ -101,7 +104,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
         }
         return;
       case '\r':
-        metronome.Reset();
+        metronome.Stop();
+        metronome.SetPosition(0.0);
         ConsoleLog() << "Metronome reset";
         return;
       case 'O':

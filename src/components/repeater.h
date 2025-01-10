@@ -79,6 +79,8 @@ class Repeater {
   void Stop() noexcept;
 
  private:
+  void OnBeat() noexcept;
+
   // Updates the repeater.
   bool Update() noexcept;
 
@@ -99,9 +101,6 @@ class Repeater {
 
   // Current index.
   int index_ = -1;
-
-  // Note off task.
-  Performer::Task* note_off_task_;
 
   // Pitch offset.
   float pitch_offset_ = 0.0;

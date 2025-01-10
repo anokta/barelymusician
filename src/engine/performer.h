@@ -101,6 +101,11 @@ class Performer {
   /// @param task Pointer to task.
   void RemoveTask(Task* task) noexcept;
 
+  /// Sets the beat event.
+  ///
+  /// @param beat_event Beat event.
+  void SetBeatEvent(const BeatEvent& beat_event) noexcept;
+
   /// Sets loop begin position.
   ///
   /// @param loop_begin_position Loop begin position in beats.
@@ -153,6 +158,9 @@ class Performer {
   // Decremments the last processed recurring task iterator to its predecessor.
   void PrevLastProcessedRecurringTaskIt() noexcept;
 
+  // Beat event.
+  BeatEvent beat_event_ = {};
+
   // Denotes whether performer is looping or not.
   bool is_looping_ = false;
 
@@ -177,6 +185,8 @@ class Performer {
 
   // Last processed recurring task iterator.
   std::optional<RecurringTaskSet::const_iterator> last_processed_recurring_task_it_;
+
+  std::optional<double> last_beat_position_;
 };
 
 }  // namespace barely::internal

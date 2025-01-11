@@ -1045,47 +1045,52 @@ class HandleWrapper {
   HandleType handle_ = nullptr;
 };
 
-/// Scoped handle wrapper template.
-template <typename HandleWrapperType>
-class ScopedHandleWrapper : public HandleWrapperType {
+/// Handle wrapper template 2.
+template <typename HandleType>
+class ScopedHandleWrapper {
  public:
+  /// Default constructor.
+  constexpr ScopedHandleWrapper() noexcept = default;
+
   /// Constructs a new `ScopedHandleWrapper`.
-  template <typename... Args>
-  explicit ScopedHandleWrapper(Args&&... args) noexcept
-      : ScopedHandleWrapper(HandleWrapperType::Create(args...)) {}
-
-  /// Constructs a new `ScopedHandleWrapper` from an existing `HandleWrapper`.
   ///
-  /// @param handle_wrapper Handle wrapper.
-  explicit ScopedHandleWrapper(HandleWrapperType handle_wrapper) noexcept
-      : HandleWrapperType(handle_wrapper) {}
+  /// @param handle Raw handle.
+  explicit constexpr ScopedHandleWrapper(HandleType handle) noexcept : handle_(handle) {
+    assert(handle != nullptr);
+  }
 
-  /// Destroys `ScopedHandleWrapper`.
-  ~ScopedHandleWrapper() noexcept { HandleWrapperType::Destroy(*this); }
+  /// Default destructor.
+  constexpr ~ScopedHandleWrapper() noexcept = default;
 
   /// Non-copyable.
-  ScopedHandleWrapper(const ScopedHandleWrapper& other) noexcept = delete;
-  ScopedHandleWrapper& operator=(const ScopedHandleWrapper& other) noexcept = delete;
+  constexpr ScopedHandleWrapper(const ScopedHandleWrapper& other) noexcept = delete;
+  constexpr ScopedHandleWrapper& operator=(const ScopedHandleWrapper& other) noexcept = delete;
 
-  /// Default move constructor.
-  ScopedHandleWrapper(ScopedHandleWrapper&& other) noexcept = default;
+  /// Constructs a new `ScopedHandleWrapper` via move.
+  ///
+  /// @param other Other handle wrapper.
+  constexpr ScopedHandleWrapper(ScopedHandleWrapper&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)) {}
 
   /// Assigns `ScopedHandleWrapper` via move.
   ///
   /// @param other Other.
-  /// @return Scoped handle wrapper.
-  ScopedHandleWrapper& operator=(ScopedHandleWrapper&& other) noexcept {
+  /// @return Handle wrapper.
+  constexpr ScopedHandleWrapper& operator=(ScopedHandleWrapper&& other) noexcept {
     if (this != &other) {
-      HandleWrapperType::Destroy(*this);
-      HandleWrapperType::operator=(std::move(other));
+      handle_ = std::exchange(other.handle_, nullptr);
     }
     return *this;
   }
 
-  /// Releases the scope.
+  /// Returns the raw handle.
   ///
-  /// @return Handle wrapper.
-  [[nodiscard]] HandleWrapperType Release() noexcept { return std::move(*this); }
+  /// @return Raw handle.
+  constexpr operator HandleType() const noexcept { return handle_; }
+
+ private:
+  // Raw handle.
+  HandleType handle_ = nullptr;
 };
 
 /// Class that wraps an instrument handle.
@@ -1407,34 +1412,47 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
   }
 };
 
-/// Class that wraps a musician handle.
-class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
+/// A class that wraps a musician handle.
+class Musician : public ScopedHandleWrapper<BarelyMusicianHandle> {
  public:
-  /// Creates a new `MusicianHandle`.
+  /// Constructs a new `Musician`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @return Musician handle.
-  [[nodiscard]] static MusicianHandle Create(int sample_rate) noexcept {
-    BarelyMusicianHandle musician = nullptr;
-    [[maybe_unused]] const bool success =
-        BarelyMusician_Create(static_cast<int32_t>(sample_rate), &musician);
-    assert(success);
-    return MusicianHandle(musician);
-  }
-
-  /// Destroys a `MusicianHandle`.
-  ///
-  /// @param musician Musician handle.
-  static void Destroy(MusicianHandle musician) noexcept { BarelyMusician_Destroy(musician); }
-
-  /// Default constructor.
-  constexpr MusicianHandle() noexcept = default;
+  explicit Musician(int sample_rate) noexcept
+      : ScopedHandleWrapper([&]() {
+          BarelyMusicianHandle musician = nullptr;
+          [[maybe_unused]] const bool success =
+              BarelyMusician_Create(static_cast<int32_t>(sample_rate), &musician);
+          assert(success);
+          return musician;
+        }()) {}
 
   /// Constructs a new `Musician` from a raw handle.
   ///
   /// @param musician Raw handle to musician.
-  explicit constexpr MusicianHandle(BarelyMusicianHandle musician) noexcept
-      : HandleWrapper(musician) {}
+  explicit Musician(BarelyMusicianHandle musician) noexcept : ScopedHandleWrapper(musician) {}
+
+  /// Destroys `Musician`.
+  ~Musician() noexcept { BarelyMusician_Destroy(*this); }
+
+  /// Non-copyable.
+  Musician(const Musician& other) noexcept = delete;
+  Musician& operator=(const Musician& other) noexcept = delete;
+
+  /// Default move constructor.
+  Musician(Musician&& other) noexcept = default;
+
+  /// Assigns `Musician` via move.
+  ///
+  /// @param other Other musician.
+  /// @return Musician.
+  Musician& operator=(Musician&& other) noexcept {
+    if (this != &other) {
+      BarelyMusician_Destroy(*this);
+      ScopedHandleWrapper::operator=(std::move(other));
+    }
+    return *this;
+  }
 
   /// Adds an instrument.
   ///
@@ -1530,9 +1548,6 @@ class MusicianHandle : public HandleWrapper<BarelyMusicianHandle> {
     assert(success);
   }
 };
-
-/// Scoped musician alias.
-using Musician = ScopedHandleWrapper<MusicianHandle>;
 
 }  // namespace barely
 

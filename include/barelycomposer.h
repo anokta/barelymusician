@@ -339,38 +339,49 @@ enum class RepeaterStyle : BarelyRepeaterStyle {
   kRandom = BarelyRepeaterStyle_kRandom,
 };
 
-/// Arpeggiator handle.
-class ArpeggiatorHandle : public HandleWrapper<BarelyArpeggiatorHandle> {
+/// A class that wraps an arpeggiator handle.
+class Arpeggiator : public ScopedHandleWrapper<BarelyArpeggiatorHandle> {
  public:
-  /// Creates a new `ArpeggiatorHandle`.
+  /// Creates a new `Arpeggiator`.
   ///
-  /// @param musician Musician handle.
+  /// @param musician Musician.
   /// @param process_order Process order.
-  /// @return Arpeggiator handle.
-  [[nodiscard]] static ArpeggiatorHandle Create(MusicianHandle musician,
-                                                int process_order = 0) noexcept {
-    BarelyArpeggiatorHandle arpeggiator = nullptr;
-    [[maybe_unused]] const bool success =
-        BarelyArpeggiator_Create(musician, static_cast<int32_t>(process_order), &arpeggiator);
-    assert(success);
-    return ArpeggiatorHandle(arpeggiator);
-  }
+  explicit Arpeggiator(Musician& musician, int process_order = 0) noexcept
+      : ScopedHandleWrapper([&]() {
+          BarelyArpeggiatorHandle arpeggiator = nullptr;
+          [[maybe_unused]] const bool success =
+              BarelyArpeggiator_Create(musician, static_cast<int32_t>(process_order), &arpeggiator);
+          assert(success);
+          return arpeggiator;
+        }()) {}
 
-  /// Destroys a `ArpeggiatorHandle`.
-  ///
-  /// @param arpeggiator Arpeggiator handle.
-  static void Destroy(ArpeggiatorHandle arpeggiator) noexcept {
-    BarelyArpeggiator_Destroy(arpeggiator);
-  }
-
-  /// Default constructor.
-  constexpr ArpeggiatorHandle() noexcept = default;
-
-  /// Creates a new `ArpeggiatorHandle` from a raw handle.
+  /// Creates a new `Arpeggiator` from a raw handle.
   ///
   /// @param arpeggiator Raw handle to arpeggiator.
-  explicit constexpr ArpeggiatorHandle(BarelyArpeggiatorHandle arpeggiator) noexcept
-      : HandleWrapper(arpeggiator) {}
+  explicit Arpeggiator(BarelyArpeggiatorHandle arpeggiator) noexcept
+      : ScopedHandleWrapper(arpeggiator) {}
+
+  /// Destroys `Arpeggiator`.
+  ~Arpeggiator() noexcept { BarelyArpeggiator_Destroy(*this); }
+
+  /// Non-copyable.
+  Arpeggiator(const Arpeggiator& other) noexcept = delete;
+  Arpeggiator& operator=(const Arpeggiator& other) noexcept = delete;
+
+  /// Default move constructor.
+  Arpeggiator(Arpeggiator&& other) noexcept = default;
+
+  /// Assigns `Arpeggiator` via move.
+  ///
+  /// @param other Other arpeggiator.
+  /// @return Arpeggiator.
+  Arpeggiator& operator=(Arpeggiator&& other) noexcept {
+    if (this != &other) {
+      BarelyArpeggiator_Destroy(*this);
+      ScopedHandleWrapper::operator=(std::move(other));
+    }
+    return *this;
+  }
 
   /// Returns whether a note is on or not.
   ///
@@ -452,33 +463,47 @@ class ArpeggiatorHandle : public HandleWrapper<BarelyArpeggiatorHandle> {
   }
 };
 
-/// Random handle.
-class RandomHandle : public HandleWrapper<BarelyRandomHandle> {
+/// A class that wraps a random handle.
+class Random : public ScopedHandleWrapper<BarelyRandomHandle> {
  public:
-  /// Creates a new `RandomHandle`.
+  /// Creates a new `Random`.
   ///
   /// @param seed Seed value.
-  /// @return Random handle.
-  [[nodiscard]] static RandomHandle Create(
-      int seed = static_cast<int>(std::default_random_engine::default_seed)) noexcept {
-    BarelyRandomHandle random = nullptr;
-    [[maybe_unused]] const bool success = BarelyRandom_Create(static_cast<int32_t>(seed), &random);
-    assert(success);
-    return RandomHandle(random);
-  }
+  explicit Random(int seed = static_cast<int>(std::default_random_engine::default_seed)) noexcept
+      : ScopedHandleWrapper([&]() {
+          BarelyRandomHandle random = nullptr;
+          [[maybe_unused]] const bool success =
+              BarelyRandom_Create(static_cast<int32_t>(seed), &random);
+          assert(success);
+          return random;
+        }()) {}
 
-  /// Destroys a `RandomHandle`.
-  ///
-  /// @param random Random handle.
-  static void Destroy(RandomHandle random) noexcept { BarelyRandom_Destroy(random); }
-
-  /// Default constructor.
-  constexpr RandomHandle() noexcept = default;
-
-  /// Creates a new `RandomHandle` from a raw handle.
+  /// Creates a new `Random` from a raw handle.
   ///
   /// @param random Raw handle to random.
-  explicit constexpr RandomHandle(BarelyRandomHandle random) noexcept : HandleWrapper(random) {}
+  explicit Random(BarelyRandomHandle random) noexcept : ScopedHandleWrapper(random) {}
+
+  /// Destroys `Random`.
+  ~Random() noexcept { BarelyRandom_Destroy(*this); }
+
+  /// Non-copyable.
+  Random(const Random& other) noexcept = delete;
+  Random& operator=(const Random& other) noexcept = delete;
+
+  /// Default move constructor.
+  Random(Random&& other) noexcept = default;
+
+  /// Assigns `Random` via move.
+  ///
+  /// @param other Other random.
+  /// @return Random.
+  Random& operator=(Random&& other) noexcept {
+    if (this != &other) {
+      BarelyRandom_Destroy(*this);
+      ScopedHandleWrapper::operator=(std::move(other));
+    }
+    return *this;
+  }
 
   /// Draws a number with normal distribution.
   ///
@@ -533,36 +558,48 @@ class RandomHandle : public HandleWrapper<BarelyRandomHandle> {
   }
 };
 
-/// Repeater handle.
-class RepeaterHandle : public HandleWrapper<BarelyRepeaterHandle> {
+/// A class that wraps a repeater handle.
+class Repeater : public ScopedHandleWrapper<BarelyRepeaterHandle> {
  public:
-  /// Creates a new `RepeaterHandle`.
+  /// Creates a new `Repeater`.
   ///
-  /// @param musician Musician handle.
+  /// @param musician Musician.
   /// @param process_order Process order.
-  /// @return Repeater handle.
-  [[nodiscard]] static RepeaterHandle Create(MusicianHandle musician,
-                                             int process_order = 0) noexcept {
-    BarelyRepeaterHandle repeater = nullptr;
-    [[maybe_unused]] const bool success =
-        BarelyRepeater_Create(musician, static_cast<int32_t>(process_order), &repeater);
-    assert(success);
-    return RepeaterHandle(repeater);
-  }
+  explicit Repeater(Musician& musician, int process_order = 0) noexcept
+      : ScopedHandleWrapper([&]() {
+          BarelyRepeaterHandle repeater = nullptr;
+          [[maybe_unused]] const bool success =
+              BarelyRepeater_Create(musician, static_cast<int32_t>(process_order), &repeater);
+          assert(success);
+          return repeater;
+        }()) {}
 
-  /// Destroys a `RepeaterHandle`.
-  ///
-  /// @param repeater Repeater handle.
-  static void Destroy(RepeaterHandle repeater) noexcept { BarelyRepeater_Destroy(repeater); }
-
-  /// Default constructor.
-  constexpr RepeaterHandle() noexcept = default;
-
-  /// Creates a new `RepeaterHandle` from a raw handle.
+  /// Creates a new `Repeater` from a raw handle.
   ///
   /// @param repeater Raw handle to repeater.
-  explicit constexpr RepeaterHandle(BarelyRepeaterHandle repeater) noexcept
-      : HandleWrapper(repeater) {}
+  explicit Repeater(BarelyRepeaterHandle repeater) noexcept : ScopedHandleWrapper(repeater) {}
+
+  /// Destroys `Repeater`.
+  ~Repeater() noexcept { BarelyRepeater_Destroy(*this); }
+
+  /// Non-copyable.
+  Repeater(const Repeater& other) noexcept = delete;
+  Repeater& operator=(const Repeater& other) noexcept = delete;
+
+  /// Default move constructor.
+  Repeater(Repeater&& other) noexcept = default;
+
+  /// Assigns `Repeater` via move.
+  ///
+  /// @param other Other repeater.
+  /// @return Repeater.
+  Repeater& operator=(Repeater&& other) noexcept {
+    if (this != &other) {
+      BarelyRepeater_Destroy(*this);
+      ScopedHandleWrapper::operator=(std::move(other));
+    }
+    return *this;
+  }
 
   /// Clears all notes.
   void Clear() noexcept {
@@ -717,15 +754,6 @@ struct Scale : public BarelyScale {
     return static_cast<int>(pitch_count);
   }
 };
-
-/// Scoped arpeggiator alias.
-using Arpeggiator = ScopedHandleWrapper<ArpeggiatorHandle>;
-
-/// Scoped random alias.
-using Random = ScopedHandleWrapper<RandomHandle>;
-
-/// Scoped repeater alias.
-using Repeater = ScopedHandleWrapper<RepeaterHandle>;
 
 }  // namespace barely
 #endif  // __cplusplus

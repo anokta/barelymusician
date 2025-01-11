@@ -15,6 +15,24 @@ using ::barely::NoteOffEvent;
 using ::barely::NoteOnEvent;
 using ::barely::SampleDataSlice;
 
+bool BarelyInstrument_Create(BarelyMusicianHandle musician,
+                             BarelyInstrumentHandle* out_instrument) {
+  if (!musician) return false;
+  if (!out_instrument) return false;
+
+  *out_instrument = static_cast<BarelyInstrument*>(musician->AddInstrument());
+  // TODO(#147): Temp hack to allow destroying by handle.
+  (*out_instrument)->musician = musician;
+  return true;
+}
+
+bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
+  if (!instrument) return false;
+
+  instrument->musician->RemoveInstrument(instrument);
+  return true;
+}
+
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
                                  float* out_value) {
   if (!instrument) return false;
@@ -123,24 +141,6 @@ bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
   return true;
 }
 
-bool BarelyMusician_AddInstrument(BarelyMusicianHandle musician,
-                                  BarelyInstrumentHandle* out_instrument) {
-  if (!musician) return false;
-  if (!out_instrument) return false;
-
-  *out_instrument = static_cast<BarelyInstrument*>(musician->AddInstrument());
-  return true;
-}
-
-bool BarelyMusician_AddPerformer(BarelyMusicianHandle musician, int32_t process_order,
-                                 BarelyPerformerHandle* out_performer) {
-  if (!musician) return false;
-  if (!out_performer) return false;
-
-  *out_performer = static_cast<BarelyPerformer*>(musician->AddPerformer(process_order));
-  return true;
-}
-
 bool BarelyMusician_Create(int32_t sample_rate, BarelyMusicianHandle* out_musician) {
   if (sample_rate <= 0) return false;
   if (!out_musician) return false;
@@ -181,22 +181,6 @@ bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, double* out_time
   return true;
 }
 
-bool BarelyMusician_RemoveInstrument(BarelyMusicianHandle musician,
-                                     BarelyInstrumentHandle instrument) {
-  if (!instrument) return false;
-
-  musician->RemoveInstrument(instrument);
-  return true;
-}
-
-bool BarelyMusician_RemovePerformer(BarelyMusicianHandle musician,
-                                    BarelyPerformerHandle performer) {
-  if (!performer) return false;
-
-  musician->RemovePerformer(performer);
-  return true;
-}
-
 bool BarelyMusician_SetReferenceFrequency(BarelyMusicianHandle musician,
                                           float reference_frequency) {
   if (!musician) return false;
@@ -219,14 +203,21 @@ bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   return true;
 }
 
-bool BarelyPerformer_AddTask(BarelyPerformerHandle performer, const BarelyTaskEvent* task_event,
-                             double position, BarelyTaskHandle* out_task) {
-  if (!performer) return false;
-  if (!task_event) return false;
-  if (!out_task) return false;
+bool BarelyPerformer_Create(BarelyMusicianHandle musician, int32_t process_order,
+                            BarelyPerformerHandle* out_performer) {
+  if (!musician) return false;
+  if (!out_performer) return false;
 
-  *out_task = static_cast<BarelyTask*>(performer->AddTask(*task_event, position));
-  return *out_task;
+  *out_performer = static_cast<BarelyPerformer*>(musician->AddPerformer(process_order));
+  (*out_performer)->musician = musician;
+  return true;
+}
+
+bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
+  if (!performer) return false;
+
+  performer->musician->RemovePerformer(performer);
+  return true;
 }
 
 bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
@@ -267,14 +258,6 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
   if (!out_is_playing) return false;
 
   *out_is_playing = performer->IsPlaying();
-  return true;
-}
-
-bool BarelyPerformer_RemoveTask(BarelyPerformerHandle performer, BarelyTaskHandle task) {
-  if (!performer) return false;
-  if (!task) return false;
-
-  performer->RemoveTask(task);
   return true;
 }
 
@@ -326,6 +309,25 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
   performer->Stop();
+  return true;
+}
+
+bool BarelyTask_Create(BarelyPerformerHandle performer, const BarelyTaskEvent* task_event,
+                       double position, BarelyTaskHandle* out_task) {
+  if (!performer) return false;
+  if (!task_event) return false;
+  if (!out_task) return false;
+
+  *out_task = static_cast<BarelyTask*>(performer->AddTask(*task_event, position));
+  // TODO(#147): Temp hack to allow destroying by handle.
+  (*out_task)->performer = performer;
+  return *out_task;
+}
+
+bool BarelyTask_Destroy(BarelyTaskHandle task) {
+  if (!task) return false;
+
+  task->performer->RemoveTask(task);
   return true;
 }
 

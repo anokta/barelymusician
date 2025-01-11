@@ -27,6 +27,8 @@ VERS_1.0 {
     BarelyScale_GetPitch;
 
     /* barelymusician */
+    BarelyInstrument_Create;
+    BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
     BarelyInstrument_GetNoteControl;
     BarelyInstrument_IsNoteOn;
@@ -39,31 +41,29 @@ VERS_1.0 {
     BarelyInstrument_SetNoteOn;
     BarelyInstrument_SetNoteOnEvent;
     BarelyInstrument_SetSampleData;
-    BarelyMusician_AddInstrument;
-    BarelyMusician_AddPerformer;
     BarelyMusician_Create;
     BarelyMusician_Destroy;
     BarelyMusician_GetReferenceFrequency;
     BarelyMusician_GetTempo;
     BarelyMusician_GetTimestamp;
-    BarelyMusician_RemoveInstrument;
-    BarelyMusician_RemovePerformer;
     BarelyMusician_SetReferenceFrequency;
     BarelyMusician_SetTempo;
     BarelyMusician_Update;
-    BarelyPerformer_AddTask;
+    BarelyPerformer_Create;
+    BarelyPerformer_Destroy;
     BarelyPerformer_GetLoopBeginPosition;
     BarelyPerformer_GetLoopLength;
     BarelyPerformer_GetPosition;
     BarelyPerformer_IsLooping;
     BarelyPerformer_IsPlaying;
-    BarelyPerformer_RemoveTask;
     BarelyPerformer_SetLoopBeginPosition;
     BarelyPerformer_SetLoopLength;
     BarelyPerformer_SetLooping;
     BarelyPerformer_SetPosition;
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
+    BarelyTask_Create;
+    BarelyTask_Destroy;
     BarelyTask_GetPosition;
     BarelyTask_SetPosition;
   local:

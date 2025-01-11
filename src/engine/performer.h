@@ -43,6 +43,10 @@ class Performer {
 
     // Position.
     double position_;
+
+    // TODO(#147): Temp hack to allow destroying by handle.
+   public:
+    BarelyPerformerHandle performer = nullptr;
   };
 
   /// Constructs a new `Performer`.
@@ -187,6 +191,10 @@ class Performer {
   std::optional<RecurringTaskSet::const_iterator> last_processed_recurring_task_it_;
 
   std::optional<double> last_beat_position_;
+
+  // TODO(#147): Temp hack to allow destroying by handle.
+ public:
+  BarelyMusicianHandle musician = nullptr;
 };
 
 }  // namespace barely::internal

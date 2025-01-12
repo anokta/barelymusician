@@ -71,7 +71,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kSampleRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
@@ -79,17 +79,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
   Repeater repeater(musician);
-  repeater.SetInstrument(instrument);
+  repeater.SetInstrument(&instrument);
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteOnEvent({
-      [](float pitch, float /*intensity*/, void* user_data) {
-        if (static_cast<Repeater*>(user_data)->IsPlaying()) {
-          ConsoleLog() << "Note(" << pitch << ")";
-        }
-      },
-      static_cast<void*>(&repeater),
+  instrument.SetNoteOnEvent([&repeater](float pitch, float /*intensity*/) {
+    if (repeater.IsPlaying()) {
+      ConsoleLog() << "Note(" << pitch << ")";
+    }
   });
 
   // Audio process callback.

@@ -72,7 +72,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kSampleRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
@@ -84,7 +84,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }});
 
   Arpeggiator arpeggiator(musician);
-  arpeggiator.SetInstrument(instrument);
+  arpeggiator.SetInstrument(&instrument);
   arpeggiator.SetGateRatio(kInitialGateRatio);
   arpeggiator.SetRate(kInitialRate);
   arpeggiator.SetStyle(kInitialStyle);

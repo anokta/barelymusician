@@ -18,7 +18,7 @@ constexpr float kNoteIntensity = 1.0f;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
-    : musician_(musician), performer_(musician_.AddPerformer(process_order)) {
+    : musician_(&musician), performer_(musician_->CreatePerformer(process_order)) {
   performer_->SetLooping(true);
   performer_->SetLoopLength(1.0);
   // TODO(#126): This should not need `TaskEvent::Callback`.
@@ -35,20 +35,20 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
       }
     };
     if (note_off_task_ != nullptr) {
-      performer_->RemoveTask(note_off_task_);
+      performer_->DestroyTask(note_off_task_);
     }
     note_off_task_ =
-        performer_->AddTask(EventWithCallback<TaskEvent>(note_off_callback),
-                            static_cast<double>(gate_ratio_) * performer_->GetLoopLength());
+        performer_->CreateTask(EventWithCallback<TaskEvent>(note_off_callback),
+                               static_cast<double>(gate_ratio_) * performer_->GetLoopLength());
   };
-  performer_->AddTask(EventWithCallback<TaskEvent>(callback), 0.0);
+  performer_->CreateTask(EventWithCallback<TaskEvent>(callback), 0.0);
 }
 
 Arpeggiator::~Arpeggiator() noexcept {
   if (IsPlaying() && instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
-  musician_.RemovePerformer(performer_);
+  musician_->DestroyPerformer(performer_);
 }
 
 bool Arpeggiator::IsNoteOn(float pitch) const noexcept {
@@ -124,7 +124,7 @@ void Arpeggiator::Update() noexcept {
 void Arpeggiator::Stop() noexcept {
   performer_->Stop();
   if (note_off_task_ != nullptr) {
-    performer_->RemoveTask(note_off_task_);
+    performer_->DestroyTask(note_off_task_);
   }
   performer_->SetPosition(0.0);
   if (instrument_ != nullptr) {

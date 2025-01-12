@@ -420,10 +420,11 @@ class Arpeggiator : public ScopedHandleWrapper<BarelyArpeggiatorHandle> {
 
   /// Sets the instrument.
   ///
-  /// @param instrument Optional instrument.
-  void SetInstrument(std::optional<InstrumentHandle> instrument) noexcept {
+  /// @param instrument Pointer to instrument.
+  void SetInstrument(Instrument* instrument) noexcept {
     [[maybe_unused]] const bool success = BarelyArpeggiator_SetInstrument(
-        *this, instrument ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
+        *this,
+        (instrument != nullptr) ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
     assert(success);
   }
 
@@ -636,10 +637,11 @@ class Repeater : public ScopedHandleWrapper<BarelyRepeaterHandle> {
 
   /// Sets the instrument.
   ///
-  /// @param instrument Optional instrument.
-  void SetInstrument(std::optional<InstrumentHandle> instrument) noexcept {
+  /// @param instrument Pointer to instrument.
+  void SetInstrument(Instrument* instrument) noexcept {
     [[maybe_unused]] const bool success = BarelyRepeater_SetInstrument(
-        *this, instrument ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
+        *this,
+        (instrument != nullptr) ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
     assert(success);
   }
 

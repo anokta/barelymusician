@@ -20,10 +20,11 @@
 namespace {
 
 using ::barely::ControlType;
-using ::barely::InstrumentHandle;
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
-using ::barely::PerformerHandle;
+using ::barely::Performer;
+using ::barely::Task;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -50,12 +51,13 @@ constexpr char kMidiFileName[] = "midi/sample.mid";
 constexpr double kTempo = 132.0;
 
 // Builds the score for the given `midi_events`.
-bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
-                InstrumentHandle& instrument, PerformerHandle& performer) {
+bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instrument& instrument,
+                Performer& performer, std::vector<Task>& tasks) {
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
   bool has_notes = false;
+  tasks.reserve(2 * midi_events.size());
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
@@ -63,11 +65,12 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double duration = get_position_fn(midi_event.getTickDuration());
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float intensity = static_cast<float>(midi_event.getVelocity()) / 127.0f;
-      performer.AddTask([&instrument, duration, pitch,
-                         intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
-                        position);
-      performer.AddTask([&instrument, pitch]() mutable { instrument.SetNoteOff(pitch); },
-                        position + duration);
+      tasks.emplace_back(
+          performer.CreateTask([&instrument, duration, pitch,
+                                intensity]() mutable { instrument.SetNoteOn(pitch, intensity); },
+                               position));
+      tasks.emplace_back(performer.CreateTask(
+          [&instrument, pitch]() mutable { instrument.SetNoteOff(pitch); }, position + duration));
       has_notes = true;
     }
   }
@@ -97,30 +100,26 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician(kSampleRate);
   musician.SetTempo(kTempo);
 
-  std::vector<std::tuple<InstrumentHandle, PerformerHandle, size_t>> tracks;
+  std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(musician.AddInstrument(), musician.AddPerformer(), tracks.size() + 1);
-    auto& [instrument, performer, track_index] = tracks.back();
+    tracks.emplace_back(musician.CreateInstrument(), musician.CreatePerformer(),
+                        std::vector<Task>{}, tracks.size() + 1);
+    auto& [instrument, performer, tasks, track_index] = tracks.back();
     // Build the score to perform.
-    if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {
+    if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer, tasks)) {
       ConsoleLog() << "Empty MIDI track: " << i;
-      musician.RemoveInstrument(instrument);
-      musician.RemovePerformer(performer);
       tracks.pop_back();
       continue;
     }
     // Set the instrument settings.
-    instrument.SetNoteOnEvent({[](float pitch, float intensity, void* user_data) {
-                                 ConsoleLog() << "MIDI track #" << *static_cast<size_t*>(user_data)
-                                              << ": NoteOn(" << pitch << ", " << intensity << ")";
-                               },
-                               static_cast<void*>(&track_index)});
-    instrument.SetNoteOffEvent({[](float pitch, void* user_data) {
-                                  ConsoleLog() << "MIDI track #" << *static_cast<size_t*>(user_data)
-                                               << ": NoteOff(" << pitch << ")";
-                                },
-                                static_cast<void*>(&track_index)});
+    instrument.SetNoteOnEvent([track_index](float pitch, float intensity) {
+      ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(" << pitch << ", " << intensity
+                   << ")";
+    });
+    instrument.SetNoteOffEvent([track_index](float pitch) {
+      ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
+    });
     instrument.SetControl(ControlType::kGain, kInstrumentGain);
     instrument.SetControl(ControlType::kOscillatorShape, kInstrumentOscillatorShape);
     instrument.SetControl(ControlType::kAttack, kInstrumentEnvelopeAttack);
@@ -133,7 +132,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> mix_buffer(kSampleCount);
   const auto process_callback = [&](std::span<float> output_samples) {
     std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
-    for (auto& [instrument, performer, _] : tracks) {
+    for (auto& [instrument, performer, tasks, _] : tracks) {
       instrument.Process(mix_buffer, clock.GetTimestamp());
       std::transform(mix_buffer.begin(), mix_buffer.end(), output_samples.begin(),
                      output_samples.begin(), std::plus<>());
@@ -157,7 +156,7 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
   musician.Update(kLookahead);
-  for (auto& [instrument, performer, _] : tracks) {
+  for (auto& [instrument, performer, tasks, _] : tracks) {
     performer.Start();
   }
 
@@ -169,8 +168,9 @@ int main(int /*argc*/, char* argv[]) {
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  for (auto& [instrument, performer, _] : tracks) {
+  for (auto& [instrument, performer, tasks, _] : tracks) {
     performer.Stop();
+    tasks.clear();
     instrument.SetAllNotesOff();
   }
   audio_output.Stop();

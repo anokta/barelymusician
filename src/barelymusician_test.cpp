@@ -54,14 +54,12 @@ TEST(MusicianTest, CreateDestroyMusician) { [[maybe_unused]] const Musician musi
 
 TEST(MusicianTest, CreateDestroyInstrument) {
   Musician musician(1);
-  auto instrument = musician.AddInstrument();
-  musician.RemoveInstrument(instrument);
+  [[maybe_unused]] const auto instrument = musician.CreateInstrument();
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {
   Musician musician(1);
-  auto performer = musician.AddPerformer();
-  musician.RemovePerformer(performer);
+  [[maybe_unused]] const auto performer = musician.CreatePerformer();
 }
 
 }  // namespace

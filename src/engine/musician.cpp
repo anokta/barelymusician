@@ -32,7 +32,7 @@ Musician::Musician(int sample_rate) noexcept
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument* Musician::AddInstrument() noexcept {
+Instrument* Musician::CreateInstrument() noexcept {
   Instrument* instrument = instrument_pool_.Construct(sample_rate_, reference_frequency_,
                                                       GetSamplesFromSeconds(timestamp_));
   [[maybe_unused]] const bool success = instruments_.emplace(instrument).second;
@@ -41,7 +41,7 @@ Instrument* Musician::AddInstrument() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer* Musician::AddPerformer(int process_order) noexcept {
+Performer* Musician::CreatePerformer(int process_order) noexcept {
   Performer* performer = performer_pool_.Construct(process_order);
   [[maybe_unused]] const bool success = performers_.emplace(process_order, performer).second;
   assert(success);
@@ -49,7 +49,7 @@ Performer* Musician::AddPerformer(int process_order) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::RemoveInstrument(Instrument* instrument) noexcept {
+void Musician::DestroyInstrument(Instrument* instrument) noexcept {
   assert(instrument != nullptr);
   [[maybe_unused]] const bool success = (instruments_.erase(instrument) == 1);
   assert(success);
@@ -57,7 +57,7 @@ void Musician::RemoveInstrument(Instrument* instrument) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::RemovePerformer(Performer* performer) noexcept {
+void Musician::DestroyPerformer(Performer* performer) noexcept {
   assert(performer != nullptr);
   [[maybe_unused]] const bool success =
       (performers_.erase({performer->GetProcessOrder(), performer}) == 1);

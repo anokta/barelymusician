@@ -35,7 +35,7 @@
 ///
 ///   @code{.cpp}
 ///   // Add.
-///   auto instrument = musician.AddInstrument();
+///   auto instrument = musician.CreateInstrument();
 ///
 ///   // Set a note on.
 ///   //
@@ -65,10 +65,10 @@
 ///
 ///   @code{.cpp}
 ///   // Add.
-///   auto performer = musician.AddPerformer(/*process_order=*/0);
+///   auto performer = musician.CreatePerformer(/*process_order=*/0);
 ///
 ///   // Add a task.
-///   auto task = performer.AddTask([]() { /*populate this*/ }, /*position=*/0.0);
+///   auto task = performer.CreateTask([]() { /*populate this*/ }, /*position=*/0.0);
 ///
 ///   // Set looping on.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -991,54 +991,6 @@ static constexpr EventType EventWithCallback(typename EventType::Callback& event
       static_cast<void*>(&event_callback));
 }
 
-/// Handle wrapper template.
-template <typename HandleType>
-class HandleWrapper {
- public:
-  /// Default constructor.
-  constexpr HandleWrapper() noexcept = default;
-
-  /// Constructs a new `HandleWrapper`.
-  ///
-  /// @param handle Raw handle.
-  explicit constexpr HandleWrapper(HandleType handle) noexcept : handle_(handle) {
-    assert(handle != nullptr);
-  }
-
-  /// Default destructor.
-  constexpr ~HandleWrapper() noexcept = default;
-
-  /// Copyable.
-  constexpr HandleWrapper(const HandleWrapper& other) noexcept = default;
-  constexpr HandleWrapper& operator=(const HandleWrapper& other) noexcept = default;
-
-  /// Constructs a new `HandleWrapper` via move.
-  ///
-  /// @param other Other handle wrapper.
-  constexpr HandleWrapper(HandleWrapper&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
-
-  /// Assigns `HandleWrapper` via move.
-  ///
-  /// @param other Other.
-  /// @return Handle wrapper.
-  constexpr HandleWrapper& operator=(HandleWrapper&& other) noexcept {
-    if (this != &other) {
-      handle_ = std::exchange(other.handle_, nullptr);
-    }
-    return *this;
-  }
-
-  /// Returns the raw handle.
-  ///
-  /// @return Raw handle.
-  constexpr operator HandleType() const noexcept { return handle_; }
-
- private:
-  // Raw handle.
-  HandleType handle_ = nullptr;
-};
-
 /// Handle wrapper template 2.
 template <typename HandleType>
 class ScopedHandleWrapper {
@@ -1088,16 +1040,50 @@ class ScopedHandleWrapper {
 };
 
 /// Class that wraps an instrument handle.
-class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
+class Instrument : public ScopedHandleWrapper<BarelyInstrumentHandle> {
  public:
-  /// Default constructor.
-  constexpr InstrumentHandle() noexcept = default;
+  // TODO(#147): Clean the aliases up after task refactor.
+  using NoteOnEventCallback = std::function<void(float pitch, float intensity)>;
+  using NoteOffEventCallback = std::function<void(float pitch)>;
 
-  /// Creates a new `InstrumentHandle` from a raw handle.
+  /// Constructs a new `Instrument`.
+  ///
+  /// @param musician Raw musician handle.
+  explicit Instrument(BarelyMusicianHandle musician) noexcept
+      : ScopedHandleWrapper([&]() {
+          BarelyInstrumentHandle instrument = nullptr;
+          [[maybe_unused]] const bool success = BarelyInstrument_Create(musician, &instrument);
+          assert(success);
+          return instrument;
+        }()) {}
+
+  /// Constructs a new `Instrument` from a raw handle.
   ///
   /// @param instrument Raw handle to instrument.
-  explicit constexpr InstrumentHandle(BarelyInstrumentHandle instrument) noexcept
-      : HandleWrapper(instrument) {}
+  explicit Instrument(BarelyInstrumentHandle instrument) noexcept
+      : ScopedHandleWrapper(instrument) {}
+
+  /// Destroys `Instrument`.
+  ~Instrument() noexcept { BarelyInstrument_Destroy(*this); }
+
+  /// Non-copyable.
+  Instrument(const Instrument& other) noexcept = delete;
+  Instrument& operator=(const Instrument& other) noexcept = delete;
+
+  /// Default move constructor.
+  Instrument(Instrument&& other) noexcept = default;
+
+  /// Assigns `Instrument` via move.
+  ///
+  /// @param other Other instrument.
+  /// @return Instrument.
+  Instrument& operator=(Instrument&& other) noexcept {
+    if (this != &other) {
+      BarelyInstrument_Destroy(*this);
+      ScopedHandleWrapper::operator=(std::move(other));
+    }
+    return *this;
+  }
 
   /// Returns a control value.
   ///
@@ -1200,6 +1186,18 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
+  /// Sets the note off event with a callback.
+  ///
+  /// @param note_off_event_callback Note off event callback.
+  void SetNoteOffEvent(NoteOffEventCallback note_off_event_callback) noexcept {
+    note_off_event_callback_ = std::move(note_off_event_callback);
+    return SetNoteOffEvent(NoteOffEvent(
+        [](float pitch, void* user_data) {
+          (*static_cast<NoteOffEventCallback*>(user_data))(pitch);
+        },
+        &note_off_event_callback_));
+  }
+
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
@@ -1217,6 +1215,18 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
+  /// Sets the note on event with a callback.
+  ///
+  /// @param note_on_event_callback Note on event callback.
+  void SetNoteOnEvent(NoteOnEventCallback note_on_event_callback) noexcept {
+    note_on_event_callback_ = std::move(note_on_event_callback);
+    return SetNoteOnEvent(NoteOnEvent(
+        [](float pitch, float intensity, void* user_data) {
+          (*static_cast<NoteOnEventCallback*>(user_data))(pitch, intensity);
+        },
+        &note_on_event_callback_));
+  }
+
   /// Sets the sample data.
   ///
   /// @param sample_data Span of sample data slices.
@@ -1226,18 +1236,58 @@ class InstrumentHandle : public HandleWrapper<BarelyInstrumentHandle> {
         static_cast<int32_t>(slices.size()));
     assert(success);
   }
+
+ private:
+  // Note off event callback.
+  NoteOffEventCallback note_off_event_callback_;
+
+  // Note on event callback.
+  NoteOnEventCallback note_on_event_callback_;
 };
 
 /// Class that wraps a task handle.
-class TaskHandle : public HandleWrapper<BarelyTaskHandle> {
+class Task : public ScopedHandleWrapper<BarelyTaskHandle> {
  public:
-  /// Default constructor.
-  constexpr TaskHandle() noexcept = default;
+  /// Constructs a new `Task`.
+  ///
+  /// @param performer Raw performer handle.
+  /// @param task_event Task event.
+  /// @param position Task position in beats.
+  Task(BarelyPerformerHandle performer, const TaskEvent& task_event, double position) noexcept
+      : ScopedHandleWrapper([&]() {
+          BarelyTaskHandle task = nullptr;
+          [[maybe_unused]] const bool success =
+              BarelyTask_Create(performer, &task_event, position, &task);
+          assert(success);
+          return task;
+        }()) {}
 
-  /// Constructs a new `TaskHandle` from a raw handle.
+  /// Constructs a new `Task` from a raw handle.
   ///
   /// @param task Raw handle to task.
-  explicit constexpr TaskHandle(BarelyTaskHandle task) noexcept : HandleWrapper(task) {}
+  explicit Task(BarelyTaskHandle task) noexcept : ScopedHandleWrapper(task) {}
+
+  /// Destroys `Task`.
+  ~Task() noexcept { BarelyTask_Destroy(*this); }
+
+  /// Non-copyable.
+  Task(const Task& other) noexcept = delete;
+  Task& operator=(const Task& other) noexcept = delete;
+
+  /// Default move constructor.
+  Task(Task&& other) noexcept = default;
+
+  /// Assigns `Task` via move.
+  ///
+  /// @param other Other task.
+  /// @return Task.
+  Task& operator=(Task&& other) noexcept {
+    if (this != &other) {
+      BarelyTask_Destroy(*this);
+      ScopedHandleWrapper::operator=(std::move(other));
+    }
+    return *this;
+  }
 
   /// Returns the position.
   ///
@@ -1259,37 +1309,65 @@ class TaskHandle : public HandleWrapper<BarelyTaskHandle> {
 };
 
 /// Class that wraps a performer handle.
-class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
+class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
  public:
-  /// Default constructor.
-  constexpr PerformerHandle() noexcept = default;
+  /// Constructs a new `Performer`.
+  ///
+  /// @param musician Raw musician handle.
+  /// @param process_order Process order.
+  explicit Performer(BarelyMusicianHandle musician, int process_order = 0) noexcept
+      : ScopedHandleWrapper([&]() {
+          BarelyPerformerHandle performer = nullptr;
+          [[maybe_unused]] const bool success =
+              BarelyPerformer_Create(musician, static_cast<int32_t>(process_order), &performer);
+          assert(success);
+          return performer;
+        }()) {}
 
-  /// Creates a new `PerformerHandle` from a raw handle.
+  /// Constructs a new `Performer` from a raw handle.
   ///
   /// @param performer Raw handle to performer.
-  explicit constexpr PerformerHandle(BarelyPerformerHandle performer) noexcept
-      : HandleWrapper(performer) {}
+  explicit Performer(BarelyPerformerHandle performer) noexcept : ScopedHandleWrapper(performer) {}
 
-  /// Adds a task.
+  /// Destroys `Performer`.
+  ~Performer() noexcept { BarelyPerformer_Destroy(*this); }
+
+  /// Non-copyable.
+  Performer(const Performer& other) noexcept = delete;
+  Performer& operator=(const Performer& other) noexcept = delete;
+
+  /// Default move constructor.
+  Performer(Performer&& other) noexcept = default;
+
+  /// Assigns `Performer` via move.
+  ///
+  /// @param other Other performer.
+  /// @return Performer.
+  Performer& operator=(Performer&& other) noexcept {
+    if (this != &other) {
+      BarelyPerformer_Destroy(*this);
+      ScopedHandleWrapper::operator=(std::move(other));
+    }
+    return *this;
+  }
+
+  /// Creates a new task.
   ///
   /// @param task_event Task event.
   /// @param position Task position in beats.
-  /// @return Task handle.
-  TaskHandle AddTask(const TaskEvent& task_event, double position) noexcept {
-    BarelyTaskHandle task;
-    [[maybe_unused]] const bool success = BarelyTask_Create(*this, &task_event, position, &task);
-    assert(success);
-    return TaskHandle(task);
+  /// @return Task.
+  [[nodiscard]] Task CreateTask(const TaskEvent& task_event, double position) noexcept {
+    return Task(*this, task_event, position);
   }
 
-  /// Adds a task with a callback.
+  /// Creates a new task with a callback.
   ///
   /// @param callback Task callback.
   /// @param position Task position in beats.
-  /// @return Task handle.
-  TaskHandle AddTask(TaskEvent::Callback callback, double position) noexcept {
+  /// @return Task.
+  [[nodiscard]] Task CreateTask(TaskEvent::Callback callback, double position) noexcept {
     assert(callback);
-    return AddTask(EventWithCallback<TaskEvent>(callback), position);
+    return CreateTask(EventWithCallback<TaskEvent>(callback), position);
   }
 
   /// Returns the loop begin position.
@@ -1341,14 +1419,6 @@ class PerformerHandle : public HandleWrapper<BarelyPerformerHandle> {
     [[maybe_unused]] const bool success = BarelyPerformer_IsPlaying(*this, &is_playing);
     assert(success);
     return is_playing;
-  }
-
-  /// Removes a task.
-  ///
-  /// @param task Task handle.
-  void RemoveTask(TaskHandle task) noexcept {
-    [[maybe_unused]] const bool success = BarelyTask_Destroy(task);
-    assert(success);
   }
 
   /// Sets the beat event.
@@ -1447,25 +1517,17 @@ class Musician : public ScopedHandleWrapper<BarelyMusicianHandle> {
     return *this;
   }
 
-  /// Adds an instrument.
+  /// Creates a new instrument.
   ///
-  /// @return Instrument handle.
-  InstrumentHandle AddInstrument() noexcept {
-    BarelyInstrumentHandle instrument;
-    [[maybe_unused]] const bool success = BarelyInstrument_Create(*this, &instrument);
-    assert(success);
-    return InstrumentHandle(instrument);
-  }
+  /// @return Instrument.
+  Instrument CreateInstrument() noexcept { return Instrument(*this); }
 
-  /// Adds a performer.
+  /// Creates a performer.
   ///
   /// @param process_order Process order.
-  /// @return Performer handle.
-  PerformerHandle AddPerformer(int process_order = 0) noexcept {
-    BarelyPerformerHandle performer;
-    [[maybe_unused]] const bool success = BarelyPerformer_Create(*this, process_order, &performer);
-    assert(success);
-    return PerformerHandle(performer);
+  /// @return Performer.
+  [[nodiscard]] Performer CreatePerformer(int process_order = 0) noexcept {
+    return Performer(*this, process_order);
   }
 
   /// Returns the reference frequency.
@@ -1497,22 +1559,6 @@ class Musician : public ScopedHandleWrapper<BarelyMusicianHandle> {
     [[maybe_unused]] const bool success = BarelyMusician_GetTimestamp(*this, &timestamp);
     assert(success);
     return timestamp;
-  }
-
-  /// Removes an instrument.
-  ///
-  /// @param instrument Instrument handle.
-  void RemoveInstrument(InstrumentHandle instrument) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_Destroy(instrument);
-    assert(success);
-  }
-
-  /// Removes a performer.
-  ///
-  /// @param instrument Instrument handle.
-  void RemovePerformer(PerformerHandle performer) noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_Destroy(performer);
-    assert(success);
   }
 
   /// Sets the reference frequency.

@@ -20,7 +20,7 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician,
   if (!musician) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = static_cast<BarelyInstrument*>(musician->AddInstrument());
+  *out_instrument = static_cast<BarelyInstrument*>(musician->CreateInstrument());
   // TODO(#147): Temp hack to allow destroying by handle.
   (*out_instrument)->musician = musician;
   return true;
@@ -29,7 +29,7 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician,
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  instrument->musician->RemoveInstrument(instrument);
+  instrument->musician->DestroyInstrument(instrument);
   return true;
 }
 
@@ -208,7 +208,7 @@ bool BarelyPerformer_Create(BarelyMusicianHandle musician, int32_t process_order
   if (!musician) return false;
   if (!out_performer) return false;
 
-  *out_performer = static_cast<BarelyPerformer*>(musician->AddPerformer(process_order));
+  *out_performer = static_cast<BarelyPerformer*>(musician->CreatePerformer(process_order));
   (*out_performer)->musician = musician;
   return true;
 }
@@ -216,7 +216,7 @@ bool BarelyPerformer_Create(BarelyMusicianHandle musician, int32_t process_order
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  performer->musician->RemovePerformer(performer);
+  performer->musician->DestroyPerformer(performer);
   return true;
 }
 
@@ -318,7 +318,7 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, const BarelyTaskEvent* t
   if (!task_event) return false;
   if (!out_task) return false;
 
-  *out_task = static_cast<BarelyTask*>(performer->AddTask(*task_event, position));
+  *out_task = static_cast<BarelyTask*>(performer->CreateTask(*task_event, position));
   // TODO(#147): Temp hack to allow destroying by handle.
   (*out_task)->performer = performer;
   return *out_task;
@@ -327,7 +327,7 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, const BarelyTaskEvent* t
 bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
-  task->performer->RemoveTask(task);
+  task->performer->DestroyTask(task);
   return true;
 }
 

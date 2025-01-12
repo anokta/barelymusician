@@ -29,11 +29,21 @@ Performer::Performer(int process_order) noexcept
     : process_order_(process_order), recurring_task_pool_(kMaxRecurringTaskPerPerformerCount) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer::Task* Performer::AddTask(const TaskEvent& task_event, double position) noexcept {
+Performer::Task* Performer::CreateTask(const TaskEvent& task_event, double position) noexcept {
   Task* task = recurring_task_pool_.Construct(*this, task_event, position);
   [[maybe_unused]] const bool success = recurring_tasks_.emplace(position, task).second;
   assert(success);
   return task;
+}
+
+void Performer::DestroyTask(Task* task) noexcept {
+  if (last_processed_recurring_task_it_ && (*last_processed_recurring_task_it_)->second == task) {
+    const auto recurring_task_it = *last_processed_recurring_task_it_;
+    PrevLastProcessedRecurringTaskIt();
+    recurring_tasks_.erase(recurring_task_it);
+  } else {
+    recurring_tasks_.erase({task->GetPosition(), task});
+  }
 }
 
 std::optional<double> Performer::GetDurationToNextTask() const noexcept {
@@ -109,16 +119,6 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     // Process the next recurring task.
     it->second->Process();
     last_processed_recurring_task_it_ = it;
-  }
-}
-
-void Performer::RemoveTask(Task* task) noexcept {
-  if (last_processed_recurring_task_it_ && (*last_processed_recurring_task_it_)->second == task) {
-    const auto recurring_task_it = *last_processed_recurring_task_it_;
-    PrevLastProcessedRecurringTaskIt();
-    recurring_tasks_.erase(recurring_task_it);
-  } else {
-    recurring_tasks_.erase({task->GetPosition(), task});
   }
 }
 

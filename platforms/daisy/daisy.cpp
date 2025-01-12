@@ -4,7 +4,7 @@
 #include "daisy_pod.h"
 
 using ::barely::ControlType;
-using ::barely::InstrumentHandle;
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::daisy::AudioHandle;
@@ -30,7 +30,7 @@ constexpr int kOscCount = static_cast<int>(BarelyOscillatorShape_kCount);
 static DaisyPod hw;  // Currently targets the Daisy Pod hardware.
 static MidiUsbHandler midi;
 
-static InstrumentHandle instrument = {};
+static Instrument* instrument_ptr = nullptr;
 static int osc_index = static_cast<int>(kOscillatorShape);
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
@@ -39,11 +39,12 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
     osc_index = (osc_index + increment + kOscCount) % kOscCount;
-    instrument.SetControl(ControlType::kOscillatorShape, static_cast<OscillatorShape>(osc_index));
+    instrument_ptr->SetControl(ControlType::kOscillatorShape,
+                               static_cast<OscillatorShape>(osc_index));
   }
 
   // Process samples.
-  instrument.Process({out[0], out[0] + size}, /*timestamp=*/0.0);
+  instrument_ptr->Process({out[0], out[0] + size}, /*timestamp=*/0.0);
   std::copy_n(out[0], size, out[1]);  // copy onto stereo buffer.
 }
 
@@ -61,12 +62,13 @@ int main(void) {
   // Initialize the instrument.
   Musician musician(kSampleRate);
 
-  instrument = musician.AddInstrument();
+  Instrument instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
+  instrument_ptr = &instrument;
 
   // Start processing.
   hw.StartAdc();

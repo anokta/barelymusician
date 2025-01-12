@@ -24,18 +24,30 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit Musician(int sample_rate) noexcept;
 
-  /// Adds an instrument.
+  /// Creates a new instrument.
   ///
   /// @return Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument* AddInstrument() noexcept;
+  Instrument* CreateInstrument() noexcept;
 
-  /// Adds a performer.
+  /// Creates a new performer.
   ///
   /// @param process_order Process order.
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Performer* AddPerformer(int process_order) noexcept;
+  Performer* CreatePerformer(int process_order) noexcept;
+
+  /// Destroys an instrument.
+  ///
+  /// @param instrument Pointer to instrument.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void DestroyInstrument(Instrument* instrument) noexcept;
+
+  /// Destroys a performer.
+  ///
+  /// @param performer Pointer to performer.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void DestroyPerformer(Performer* performer) noexcept;
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
@@ -69,18 +81,6 @@ class Musician {
   ///
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
-
-  /// Removes instrument.
-  ///
-  /// @param instrument Instrument.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveInstrument(Instrument* instrument) noexcept;
-
-  /// Removes a performer.
-  ///
-  /// @param performer Performer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemovePerformer(Performer* performer) noexcept;
 
   /// Sets the reference frequency.
   ///

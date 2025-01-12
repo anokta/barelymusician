@@ -34,7 +34,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   };
 
   // Create a recurring task.
-  auto* task = performer.AddTask(task_event, 0.25);
+  auto* task = performer.CreateTask(task_event, 0.25);
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
@@ -122,15 +122,16 @@ TEST(PerformerTest, ProcessMultipleTasks) {
       EXPECT_DOUBLE_EQ(position, static_cast<double>(i));
       positions.push_back(position);
     };
-    performer.AddTask(TaskEvent(
-                          [](void** state, void* user_data) {
-                            *state = new std::function<void()>(
-                                std::move(*static_cast<std::function<void()>*>(user_data)));
-                          },
-                          [](void** state) { delete static_cast<std::function<void()>*>(*state); },
-                          [](void** state) { (*static_cast<std::function<void()>*>(*state))(); },
-                          static_cast<void*>(&callback)),
-                      static_cast<double>(i));
+    performer.CreateTask(
+        TaskEvent(
+            [](void** state, void* user_data) {
+              *state = new std::function<void()>(
+                  std::move(*static_cast<std::function<void()>*>(user_data)));
+            },
+            [](void** state) { delete static_cast<std::function<void()>*>(*state); },
+            [](void** state) { (*static_cast<std::function<void()>*>(*state))(); },
+            static_cast<void*>(&callback)),
+        static_cast<double>(i));
   };
   for (int i = 1; i <= 4; ++i) {
     create_task_fn(i);

@@ -54,13 +54,18 @@ class Performer {
   /// @param process_order Process order.
   explicit Performer(int process_order) noexcept;
 
-  /// Adds a task.
+  /// Creates a new task.
   ///
   /// @param task_event Task event.
   /// @param position Task position.
   /// @return Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Task* AddTask(const TaskEvent& task_event, double position) noexcept;
+  Task* CreateTask(const TaskEvent& task_event, double position) noexcept;
+
+  /// Destroys a task.
+  ///
+  /// @param task Pointer to task.
+  void DestroyTask(Task* task) noexcept;
 
   /// Returns the duration to next task.
   ///
@@ -100,11 +105,6 @@ class Performer {
   /// Processes the next task at the current position.
   void ProcessNextTaskAtPosition() noexcept;
 
-  /// Removes a task.
-  ///
-  /// @param task Pointer to task.
-  void RemoveTask(Task* task) noexcept;
-
   /// Sets the beat event.
   ///
   /// @param beat_event Beat event.
@@ -133,7 +133,7 @@ class Performer {
 
   /// Sets task position.
   ///
-  /// @param task Task handle.
+  /// @param task Pointer to task.
   /// @param position Task position.
   void SetTaskPosition(Task* task, double position) noexcept;
 

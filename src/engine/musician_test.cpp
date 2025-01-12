@@ -52,7 +52,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   Musician musician(kSampleRate);
 
   // Create an instrument.
-  Instrument* instrument = musician.AddInstrument();
+  Instrument* instrument = musician.CreateInstrument();
 
   // Set the note events.
   std::pair<float, float> note_on_state = {0.0f, 0.0f};
@@ -78,8 +78,8 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_TRUE(instrument->IsNoteOn(kPitch));
   EXPECT_THAT(note_on_state, Pair(kPitch, kIntensity));
 
-  // Remove the instrument.
-  musician.RemoveInstrument(instrument);
+  // Destroy the instrument.
+  musician.DestroyInstrument(instrument);
   EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
 }
 
@@ -93,7 +93,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     // Create instruments with note off event.
     std::vector<Instrument*> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(musician.AddInstrument());
+      instruments.push_back(musician.CreateInstrument());
       instruments[i]->SetNoteOffEvent({
           [](float pitch, void* user_data) {
             static_cast<std::vector<float>*>(user_data)->push_back(pitch);
@@ -110,9 +110,9 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1, 2, 3));
 
-    // Remove instruments.
+    // Destroy instruments.
     for (int i = 0; i < 3; ++i) {
-      musician.RemoveInstrument(instruments[i]);
+      musician.DestroyInstrument(instruments[i]);
     }
   }
 
@@ -125,7 +125,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   Musician musician(kSampleRate);
 
   // Create a performer.
-  Performer* performer = musician.AddPerformer(/*process_order=*/0);
+  Performer* performer = musician.CreatePerformer(/*process_order=*/0);
 
   // Create a task event.
   double task_position = 0.0;
@@ -138,7 +138,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   };
 
   // Schedule a task.
-  performer->AddTask(task_event, 1.0);
+  performer->CreateTask(task_event, 1.0);
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);
@@ -163,7 +163,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Remove the performer.
-  musician.RemovePerformer(performer);
+  musician.DestroyPerformer(performer);
 }
 
 // Tests that the musician sets its tempo as expected.

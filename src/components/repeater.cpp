@@ -19,7 +19,7 @@ constexpr float kNoteIntensity = 1.0f;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Musician& musician, int process_order) noexcept
-    : musician_(musician), performer_(musician_.AddPerformer(process_order)) {
+    : musician_(&musician), performer_(musician_->CreatePerformer(process_order)) {
   performer_->SetBeatEvent({[](double /*position*/, void* user_data) noexcept {
                               auto& repeater = *static_cast<Repeater*>(user_data);
                               repeater.OnBeat();
@@ -31,7 +31,7 @@ Repeater::~Repeater() noexcept {
   if (IsPlaying() && instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
-  musician_.RemovePerformer(performer_);
+  musician_->DestroyPerformer(performer_);
 }
 
 void Repeater::Clear() noexcept { pitches_.clear(); }

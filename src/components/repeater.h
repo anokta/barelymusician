@@ -85,7 +85,7 @@ class Repeater {
   bool Update() noexcept;
 
   // Musician.
-  Musician& musician_;
+  Musician* musician_ = nullptr;
 
   // Performer.
   Performer* performer_ = nullptr;

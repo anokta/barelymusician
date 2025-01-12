@@ -25,15 +25,15 @@
 namespace {
 
 using ::barely::ControlType;
-using ::barely::InstrumentHandle;
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
-using ::barely::PerformerHandle;
+using ::barely::Performer;
 using ::barely::Random;
 using ::barely::SampleDataSlice;
 using ::barely::SamplePlaybackMode;
 using ::barely::Scale;
-using ::barely::TaskHandle;
+using ::barely::Task;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -49,9 +49,9 @@ using ::barely::examples::WavFile;
 // @param harmonic Harmonic index.
 // @param instrument Instrument handle.
 // @param performer Performer handle.
-using BeatComposerCallback = std::function<void(
-    int bar, int beat, int beat_count, int harmonic, InstrumentHandle& instrument,
-    PerformerHandle& performer, std::vector<TaskHandle>& tasks)>;
+using BeatComposerCallback =
+    std::function<void(int bar, int beat, int beat_count, int harmonic, Instrument& instrument,
+                       Performer& performer, std::vector<Task>& tasks)>;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -109,17 +109,16 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
 
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, float pitch, float intensity,
-                  InstrumentHandle& instrument, PerformerHandle& performer,
-                  std::vector<TaskHandle>& tasks) {
-  tasks.emplace_back(performer.AddTask(
+                  Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
+  tasks.emplace_back(performer.CreateTask(
       [pitch, intensity, duration, &instrument]() { instrument.SetNoteOn(pitch, intensity); },
       performer.GetPosition() + position));
-  performer.AddTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-                    performer.GetPosition() + position + duration);
+  tasks.emplace_back(performer.CreateTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
+                                          performer.GetPosition() + position + duration));
 }
 
-void ComposeChord(float intensity, int harmonic, const Scale& scale, InstrumentHandle& instrument,
-                  PerformerHandle& performer, std::vector<TaskHandle>& tasks) {
+void ComposeChord(float intensity, int harmonic, const Scale& scale, Instrument& instrument,
+                  Performer& performer, std::vector<Task>& tasks) {
   const auto add_chord_note = [&](int degree) {
     ScheduleNote(0.0, 1.0, scale.GetPitch(degree), intensity, instrument, performer, tasks);
   };
@@ -129,8 +128,8 @@ void ComposeChord(float intensity, int harmonic, const Scale& scale, InstrumentH
 }
 
 void ComposeLine(int octave_offset, float intensity, int bar, int beat, int beat_count,
-                 int harmonic, const Scale& scale, InstrumentHandle& instrument,
-                 PerformerHandle& performer, std::vector<TaskHandle>& tasks) {
+                 int harmonic, const Scale& scale, Instrument& instrument, Performer& performer,
+                 std::vector<Task>& tasks) {
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position, int degree) {
     ScheduleNote(begin_position, end_position - begin_position,
@@ -155,8 +154,8 @@ void ComposeLine(int octave_offset, float intensity, int bar, int beat, int beat
   }
 }
 
-void ComposeDrums(int bar, int beat, int beat_count, Random& random, InstrumentHandle& instrument,
-                  PerformerHandle& performer, std::vector<TaskHandle>& tasks) {
+void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument& instrument,
+                  Performer& performer, std::vector<Task>& tasks) {
   const auto get_beat = [](int step) { return static_cast<double>(step) / kSixteenthNotesPerBeat; };
   const auto add_note = [&](double begin_position, double end_position, float pitch,
                             float intensity) {
@@ -213,88 +212,79 @@ int main(int /*argc*/, char* argv[]) {
   musician.SetTempo(kTempo);
 
   // Note on callback.
-  const auto set_note_callbacks_fn = [&](size_t& index, InstrumentHandle& instrument) {
-    instrument.SetNoteOffEvent({
-        [](float pitch, void* user_data) {
-          ConsoleLog() << "Instrument #" << *static_cast<size_t*>(user_data) << ": NoteOff("
-                       << pitch << ")";
-        },
-        static_cast<void*>(&index),
+  const auto set_note_callbacks_fn = [&](size_t index, Instrument& instrument) {
+    instrument.SetNoteOffEvent([index](float pitch) {
+      ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
     });
-    instrument.SetNoteOnEvent({
-        [](float pitch, float intensity, void* user_data) {
-          ConsoleLog() << "Instrument #" << *static_cast<size_t*>(user_data) << ": NoteOn(" << pitch
-                       << ", " << intensity << ")";
-        },
-        static_cast<void*>(&index),
+    instrument.SetNoteOnEvent([index](float pitch, float intensity) {
+      ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", " << intensity << ")";
     });
   };
 
   const std::vector<int> progression = {0, 3, 4, 0};
 
   // Initialize performers.
-  std::vector<std::tuple<PerformerHandle, std::vector<TaskHandle>, BeatComposerCallback, size_t>>
-      performers;
-  std::vector<std::pair<InstrumentHandle, size_t>> instruments;
+  std::vector<std::tuple<Performer, std::vector<Task>, BeatComposerCallback, size_t>> performers;
+  std::vector<Instrument> instruments;
   // TODO(#147): This should not be necessary after C++ handle refactor.
   instruments.reserve(16);
 
   const auto build_instrument_fn = [&](OscillatorShape type, float gain, float attack,
                                        float release) {
-    instruments.emplace_back(musician.AddInstrument(), instruments.size() + 1);
-    auto& [instrument, index] = instruments.back();
+    instruments.emplace_back(musician.CreateInstrument());
+    auto& instrument = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
     instrument.SetControl(ControlType::kOscillatorShape, type);
     instrument.SetControl(ControlType::kAttack, attack);
     instrument.SetControl(ControlType::kRelease, release);
-    set_note_callbacks_fn(index, instrument);
+    set_note_callbacks_fn(instruments.size(), instrument);
   };
 
   Scale scale = {kDiatonicPitches, kRootPitch};
 
   // Add synth instruments.
-  const auto chords_beat_composer_callback =
-      [&](int /*bar*/, int /*beat*/, int /*beat_count*/, int harmonic, InstrumentHandle& instrument,
-          PerformerHandle& performer, std::vector<TaskHandle>& tasks) {
-        ComposeChord(0.5, harmonic, scale, instrument, performer, tasks);
-      };
+  const auto chords_beat_composer_callback = [&](int /*bar*/, int /*beat*/, int /*beat_count*/,
+                                                 int harmonic, Instrument& instrument,
+                                                 Performer& performer, std::vector<Task>& tasks) {
+    ComposeChord(0.5, harmonic, scale, instrument, performer, tasks);
+  };
 
   build_instrument_fn(OscillatorShape::kSine, -25.0f, 0.125f, 0.125f);
-  performers.emplace_back(musician.AddPerformer(), std::vector<TaskHandle>{},
+  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
   build_instrument_fn(OscillatorShape::kNoise, -40.0f, 0.5f, 0.025f);
-  performers.emplace_back(musician.AddPerformer(), std::vector<TaskHandle>{},
+  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
-  const auto line_beat_composer_callback =
-      [&](int bar, int beat, int beat_count, int harmonic, InstrumentHandle& instrument,
-          PerformerHandle& performer, std::vector<TaskHandle>& tasks) {
-        ComposeLine(-1, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer, tasks);
-      };
+  const auto line_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
+                                               Instrument& instrument, Performer& performer,
+                                               std::vector<Task>& tasks) {
+    ComposeLine(-1, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer, tasks);
+  };
 
   build_instrument_fn(OscillatorShape::kSaw, -24.0f, 0.0025f, 0.125f);
-  performers.emplace_back(musician.AddPerformer(), std::vector<TaskHandle>{},
+  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
                           line_beat_composer_callback, instruments.size() - 1);
 
-  const auto line_2_beat_composer_callback =
-      [&](int bar, int beat, int beat_count, int harmonic, InstrumentHandle& instrument,
-          PerformerHandle& performer, std::vector<TaskHandle>& tasks) {
-        ComposeLine(0, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer, tasks);
-      };
+  const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
+                                                 Instrument& instrument, Performer& performer,
+                                                 std::vector<Task>& tasks) {
+    ComposeLine(0, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer, tasks);
+  };
 
   build_instrument_fn(OscillatorShape::kSquare, -24.0f, 0.05f, 0.05f);
-  performers.emplace_back(musician.AddPerformer(), std::vector<TaskHandle>{},
+  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
                           line_2_beat_composer_callback, instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.emplace_back(musician.AddInstrument(), instruments.size() + 1);
-  auto& [percussion, percussion_index] = instruments.back();
+  instruments.emplace_back(musician.CreateInstrument());
+  auto& percussion = instruments.back();
   percussion.SetControl(ControlType::kGain, -18.0f);
   percussion.SetControl(ControlType::kAttack, 0.0f);
   percussion.SetControl(ControlType::kRetrigger, true);
   percussion.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);
-  set_note_callbacks_fn(percussion_index, percussion);
+  set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<float, std::string>>& percussion_map) {
         std::vector<SampleDataSlice> slices;
@@ -315,12 +305,12 @@ int main(int /*argc*/, char* argv[]) {
       {kPitchHihatOpen, "basic_hihat_open.wav"},
   });
   const auto percussion_beat_composer_callback =
-      [&](int bar, int beat, int beat_count, int /*harmonic*/, InstrumentHandle& instrument,
-          PerformerHandle& performer, std::vector<TaskHandle>& tasks) {
+      [&](int bar, int beat, int beat_count, int /*harmonic*/, Instrument& instrument,
+          Performer& performer, std::vector<Task>& tasks) {
         ComposeDrums(bar, beat, beat_count, random, instrument, performer, tasks);
       };
 
-  performers.emplace_back(musician.AddPerformer(), std::vector<TaskHandle>{},
+  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
                           percussion_beat_composer_callback, instruments.size() - 1);
 
   // Bar callback.
@@ -343,13 +333,13 @@ int main(int /*argc*/, char* argv[]) {
     for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
       // Compose next beat notes.
       if (beat_composer_callback) {
-        beat_composer_callback(bar, beat, kBeatCount, harmonic, instruments[index].first, performer,
+        beat_composer_callback(bar, beat, kBeatCount, harmonic, instruments[index], performer,
                                tasks);
       }
     }
   };
 
-  auto metronome = musician.AddPerformer(-10);
+  auto metronome = musician.CreatePerformer(-10);
   metronome.SetBeatEvent({[](double position, void* user_data) {
                             auto callback = *static_cast<std::function<void(int)>*>(user_data);
                             callback(static_cast<int>(position));
@@ -360,7 +350,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> temp_buffer(kSampleCount);
   const auto process_callback = [&](std::span<float> output_samples) {
     std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
-    for (auto& [instrument, _] : instruments) {
+    for (auto& instrument : instruments) {
       instrument.Process(temp_buffer, clock.GetTimestamp());
       std::transform(temp_buffer.begin(), temp_buffer.end(), output_samples.begin(),
                      output_samples.begin(), std::plus());
@@ -384,7 +374,7 @@ int main(int /*argc*/, char* argv[]) {
           for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
             performer.Stop();
           }
-          for (auto& [instrument, _] : instruments) {
+          for (auto& instrument : instruments) {
             instrument.SetAllNotesOff();
           }
           ConsoleLog() << "Stopped playback";
@@ -460,6 +450,10 @@ int main(int /*argc*/, char* argv[]) {
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
   metronome.Stop();
+  for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
+    performer.Stop();
+    tasks.clear();
+  }
   audio_output.Stop();
 
   return 0;

@@ -34,8 +34,8 @@ barely::Musician musician(/*sample_rate=*/48000);
 // Set the global tempo to 124 beats per minute.
 musician.SetTempo(/*tempo=*/124.0);
 
-// Add an instrument.
-auto instrument = musician.AddInstrument();
+// Create a new instrument.
+auto instrument = musician.CreateInstrument();
 
 // Set the instrument gain to -6dB.
 instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0f);
@@ -50,14 +50,14 @@ instrument.SetNoteOn(kC4Pitch, /*intensity=*/0.25f);
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
 
-// Add a performer.
-auto performer = musician.AddPerformer();
+// Create a new performer.
+auto performer = musician.CreatePerformer();
 
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
 // Add a looping task that plays an instrument note every beat.
-auto task = performer.AddTask(
+auto task = performer.CreateTask(
     [&]() {
       // Set an instrument note on.
       instrument.SetNoteOn(/*pitch=*/1.0f);

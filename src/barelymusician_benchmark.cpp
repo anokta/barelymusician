@@ -14,7 +14,7 @@ constexpr int kSampleCount = 1024;
 void BM_BarelyInstrument_Process_Empty(State& state) {
   Musician musician(kSampleRate);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
 
   std::array<float, kSampleCount> output_samples;
 
@@ -30,7 +30,7 @@ void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
 
   Musician musician(kSampleRate);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kLoop);
   instrument.SetSampleData(kSlices);
   instrument.SetNoteOn(1.0);
@@ -46,7 +46,7 @@ BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithLoopingSample);
 void BM_BarelyInstrument_Process_SingleNoteWithSineOscillator(State& state) {
   Musician musician(kSampleRate);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
   instrument.SetNoteOn(0.0);
 
@@ -61,7 +61,7 @@ BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithSineOscillator);
 void BM_BarelyInstrument_Process_MultipleNotesWithSineOscillator(State& state) {
   Musician musician(kSampleRate);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
 
   const int voice_count = instrument.GetControl<int>(ControlType::kVoiceCount);
@@ -80,7 +80,7 @@ BENCHMARK(BM_BarelyInstrument_Process_MultipleNotesWithSineOscillator);
 void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
   Musician musician(kSampleRate);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
 
   std::array<float, kSampleCount> output_samples;
@@ -113,7 +113,7 @@ BENCHMARK(BM_BarelyInstrument_Process_FrequentUpdates);
 void BM_BarelyInstrument_SetControl(State& state) {
   Musician musician(kSampleRate);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   int i = 0;
 
   for (auto _ : state) {
@@ -130,7 +130,7 @@ void BM_BarelyMusician_AddRemoveInstrument(State& state) {
   Musician musician(kSampleRate);
 
   for (auto _ : state) {
-    musician.RemoveInstrument(musician.AddInstrument());
+    [[maybe_unused]] const auto instrument = musician.CreateInstrument();
   }
 }
 BENCHMARK(BM_BarelyMusician_AddRemoveInstrument);
@@ -139,7 +139,7 @@ void BM_BarelyMusician_AddRemovePerformer(State& state) {
   Musician musician(kSampleRate);
 
   for (auto _ : state) {
-    musician.RemovePerformer(musician.AddPerformer());
+    [[maybe_unused]] const auto performer = musician.CreatePerformer();
   }
 }
 BENCHMARK(BM_BarelyMusician_AddRemovePerformer);

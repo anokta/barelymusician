@@ -14,7 +14,7 @@
 namespace {
 
 using ::barely::ControlType;
-using ::barely::InstrumentHandle;
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::examples::AudioClock;
@@ -55,7 +55,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
@@ -63,14 +63,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  auto metronome = musician.AddPerformer(-1);
+  auto metronome = musician.CreatePerformer(-1);
   metronome.SetBeatEvent({[](double position, void* user_data) {
                             const int beat = static_cast<int>(position);
                             const int current_bar = (beat / kBeatCount) + 1;
                             const int current_beat = (beat % kBeatCount) + 1;
                             ConsoleLog() << "Tick " << current_bar << "." << current_beat;
                             const float pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
-                            auto& instrument = *static_cast<InstrumentHandle*>(user_data);
+                            auto& instrument = *static_cast<Instrument*>(user_data);
                             instrument.SetNoteOn(pitch);
                             instrument.SetNoteOff(pitch);
                           },

@@ -58,7 +58,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Musician musician(kSampleRate);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);

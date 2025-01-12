@@ -18,6 +18,7 @@ using ::barely::ControlType;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::Scale;
+using ::barely::Task;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -53,7 +54,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kSampleRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
@@ -63,14 +64,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }});
 
   std::vector<std::pair<double, double>> triggers;
+  std::vector<Task> tasks;
 
-  auto performer = musician.AddPerformer();
+  auto performer = musician.CreatePerformer();
 
   const auto play_note_fn = [&](int degree, double duration) {
-    return [&instrument, &performer, duration, pitch = Scale(kMajor).GetPitch(degree)]() {
+    return [&, duration, pitch = Scale(kMajor).GetPitch(degree)]() {
       instrument.SetNoteOn(pitch);
-      performer.AddTask([&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
-                        performer.GetPosition() + duration);
+      tasks.emplace_back(
+          performer.CreateTask([&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
+                               performer.GetPosition() + duration));
     };
   };
 
@@ -85,32 +88,32 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  performer.AddTask(play_note_fn(0, 1.0), 0.0);
-  performer.AddTask(play_note_fn(0, 1.0), 0.0);
-  performer.AddTask(stop_fn, 1.0);
+  tasks.emplace_back(performer.CreateTask(play_note_fn(0, 1.0), 0.0));
+  tasks.emplace_back(performer.CreateTask(play_note_fn(0, 1.0), 0.0));
+  tasks.emplace_back(performer.CreateTask(stop_fn, 1.0));
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  performer.AddTask(play_note_fn(1, 1.0), 1.0);
-  performer.AddTask(stop_fn, 2.0);
+  tasks.emplace_back(performer.CreateTask(play_note_fn(1, 1.0), 1.0));
+  tasks.emplace_back(performer.CreateTask(stop_fn, 2.0));
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  performer.AddTask(play_note_fn(2, 1.0), 2.0);
-  performer.AddTask(stop_fn, 3.0);
+  tasks.emplace_back(performer.CreateTask(play_note_fn(2, 1.0), 2.0));
+  tasks.emplace_back(performer.CreateTask(stop_fn, 3.0));
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  performer.AddTask(play_note_fn(3, 0.66), 3.0);
-  performer.AddTask(play_note_fn(4, 0.34), 3.66);
-  performer.AddTask(stop_fn, 4.0);
+  tasks.emplace_back(performer.CreateTask(play_note_fn(3, 0.66), 3.0));
+  tasks.emplace_back(performer.CreateTask(play_note_fn(4, 0.34), 3.66));
+  tasks.emplace_back(performer.CreateTask(stop_fn, 4.0));
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  performer.AddTask(play_note_fn(5, 0.33), 4.0);
-  performer.AddTask(play_note_fn(6, 0.33), 4.33);
-  performer.AddTask(play_note_fn(7, 0.34), 4.66);
-  performer.AddTask(stop_fn, 5.0);
+  tasks.emplace_back(performer.CreateTask(play_note_fn(5, 0.33), 4.0));
+  tasks.emplace_back(performer.CreateTask(play_note_fn(6, 0.33), 4.33));
+  tasks.emplace_back(performer.CreateTask(play_note_fn(7, 0.34), 4.66));
+  tasks.emplace_back(performer.CreateTask(stop_fn, 5.0));
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  performer.AddTask(play_note_fn(8, 2.0), 5.0);
-  performer.AddTask(stop_fn, 1.0);
+  tasks.emplace_back(performer.CreateTask(play_note_fn(8, 2.0), 5.0));
+  tasks.emplace_back(performer.CreateTask(stop_fn, 1.0));
 
   // Audio process callback.
   const auto process_callback = [&](std::span<float> output_samples) {
@@ -153,6 +156,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
   performer.Stop();
+  tasks.clear();
   audio_output.Stop();
 
   return 0;

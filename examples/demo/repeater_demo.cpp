@@ -83,7 +83,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteOnEvent([&repeater](float pitch, float /*intensity*/) {
+  instrument.SetNoteOnCallback([&repeater](float pitch, float /*intensity*/) {
     if (repeater.IsPlaying()) {
       ConsoleLog() << "Note(" << pitch << ")";
     }

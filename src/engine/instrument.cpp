@@ -124,8 +124,9 @@ void Instrument::SetNoteOff(float pitch) noexcept {
   }
 }
 
-void Instrument::SetNoteOffEvent(const NoteOffEvent& note_off_event) noexcept {
-  note_off_event_ = note_off_event;
+void Instrument::SetNoteOffCallback(BarelyNoteOffCallback note_off_callback,
+                                    void* user_data) noexcept {
+  note_off_event_ = {note_off_callback, user_data};
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -142,8 +143,9 @@ void Instrument::SetNoteOn(float pitch, float intensity) noexcept {
   }
 }
 
-void Instrument::SetNoteOnEvent(const NoteOnEvent& note_on_event) noexcept {
-  note_on_event_ = note_on_event;
+void Instrument::SetNoteOnCallback(BarelyNoteOnCallback note_on_callback,
+                                   void* user_data) noexcept {
+  note_on_event_ = {note_on_callback, user_data};
 }
 
 void Instrument::SetReferenceFrequency(float reference_frequency) noexcept {

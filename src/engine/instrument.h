@@ -91,10 +91,11 @@ class Instrument {
   /// @param pitch Note pitch.
   void SetNoteOff(float pitch) noexcept;
 
-  /// Sets the note off event.
+  /// Sets the note off callback.
   ///
-  /// @param note_off_event Note off event.
-  void SetNoteOffEvent(const NoteOffEvent& note_off_event) noexcept;
+  /// @param note_off_callback Note off callback.
+  /// @param user_data Pointer to user data.
+  void SetNoteOffCallback(BarelyNoteOffCallback note_off_callback, void* user_data) noexcept;
 
   /// Sets a note on.
   ///
@@ -103,10 +104,11 @@ class Instrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetNoteOn(float pitch, float intensity) noexcept;
 
-  /// Sets the note on event.
+  /// Sets the note on callback.
   ///
-  /// @param note_on_event Note on event.
-  void SetNoteOnEvent(const NoteOnEvent& note_on_event) noexcept;
+  /// @param note_on_callback Note on callback.
+  /// @param user_data Pointer to user data.
+  void SetNoteOnCallback(BarelyNoteOnCallback note_on_callback, void* user_data) noexcept;
 
   /// Sets the reference frequency.
   ///
@@ -194,9 +196,17 @@ class Instrument {
   std::unordered_map<float, NoteControlArray> note_controls_;
 
   // Note off event.
+  struct NoteOffEvent {
+    BarelyNoteOffCallback callback = nullptr;
+    void* user_data = nullptr;
+  };
   NoteOffEvent note_off_event_ = {};
 
   // Note on event.
+  struct NoteOnEvent {
+    BarelyNoteOnCallback callback = nullptr;
+    void* user_data = nullptr;
+  };
   NoteOnEvent note_on_event_ = {};
 
   // Update sample.

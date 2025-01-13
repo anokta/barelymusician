@@ -113,11 +113,11 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Set the instrument settings.
-    instrument.SetNoteOnEvent([track_index](float pitch, float intensity) {
+    instrument.SetNoteOnCallback([track_index](float pitch, float intensity) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(" << pitch << ", " << intensity
                    << ")";
     });
-    instrument.SetNoteOffEvent([track_index](float pitch) {
+    instrument.SetNoteOffCallback([track_index](float pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
     });
     instrument.SetControl(ControlType::kGain, kInstrumentGain);

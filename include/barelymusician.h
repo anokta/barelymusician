@@ -344,36 +344,18 @@ typedef struct BarelyTask* BarelyTaskHandle;
 /// @param user_data Pointer to user data.
 typedef void (*BarelyBeatCallback)(void* user_data);
 
-/// Note off event callback signature.
+/// Note off callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyNoteOffEvent_Callback)(float pitch, void* user_data);
+typedef void (*BarelyNoteOffCallback)(float pitch, void* user_data);
 
-/// Note off event.
-typedef struct BarelyNoteOffEvent {
-  /// Callback.
-  BarelyNoteOffEvent_Callback callback;
-
-  /// Pointer to user data.
-  void* user_data;
-} BarelyNoteOffEvent;
-
-/// Note on event callback signature.
+/// Note on callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyNoteOnEvent_Callback)(float pitch, float intensity, void* user_data);
-
-/// Note on event.
-typedef struct BarelyNoteOnEvent {
-  /// Callback.
-  BarelyNoteOnEvent_Callback callback;
-
-  /// Pointer to user data.
-  void* user_data;
-} BarelyNoteOnEvent;
+typedef void (*BarelyNoteOnCallback)(float pitch, float intensity, void* user_data);
 
 /// Task event create callback signature.
 ///
@@ -492,13 +474,15 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instru
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch);
 
-/// Sets the note off event of an instrument.
+/// Sets the note off callback of an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @param note_off_event Pointer to note off event.
+/// @param note_off_callback Note off callback.
+/// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                                    const BarelyNoteOffEvent* note_off_event);
+BARELY_EXPORT bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
+                                                       BarelyNoteOffCallback note_off_callback,
+                                                       void* user_data);
 
 /// Sets an instrument note on.
 ///
@@ -509,13 +493,15 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instr
 BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
                                               float intensity);
 
-/// Sets the note on event of an instrument.
+/// Sets the note on callback of an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @param note_on_event Pointer to note on event.
+/// @param note_on_callback Note on callback.
+/// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                                   const BarelyNoteOnEvent* note_on_event);
+BARELY_EXPORT bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
+                                                      BarelyNoteOnCallback note_on_callback,
+                                                      void* user_data);
 
 /// Sets instrument sample data.
 ///
@@ -853,46 +839,6 @@ struct SampleDataSlice : public BarelySampleDataSlice {
       : BarelySampleDataSlice{sample_data_slice} {}
 };
 
-/// Note off event.
-struct NoteOffEvent : public BarelyNoteOffEvent {
-  /// Callback signature.
-  using Callback = BarelyNoteOffEvent_Callback;
-
-  /// Constructs a new `NoteOffEvent`.
-  ///
-  /// @param callback Callback.
-  /// @param user_data Pointer to user data.
-  constexpr NoteOffEvent(Callback callback = nullptr, void* user_data = nullptr) noexcept
-      : NoteOffEvent(BarelyNoteOffEvent{callback, user_data}) {}
-
-  /// Constructs a new `NoteOffEvent` from a raw type.
-  ///
-  /// @param note_off_event Raw note off event.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr NoteOffEvent(BarelyNoteOffEvent note_off_event) noexcept
-      : BarelyNoteOffEvent{note_off_event} {}
-};
-
-/// Note on event.
-struct NoteOnEvent : public BarelyNoteOnEvent {
-  /// Callback signature.
-  using Callback = BarelyNoteOnEvent_Callback;
-
-  /// Constructs a new `NoteOnEvent`.
-  ///
-  /// @param callback Callback.
-  /// @param user_data Pointer to user data.
-  constexpr NoteOnEvent(Callback callback = nullptr, void* user_data = nullptr) noexcept
-      : NoteOnEvent(BarelyNoteOnEvent{callback, user_data}) {}
-
-  /// Constructs a new `NoteOnEvent` from a raw type.
-  ///
-  /// @param note_on_event Raw note on event.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr NoteOnEvent(BarelyNoteOnEvent note_on_event) noexcept
-      : BarelyNoteOnEvent{note_on_event} {}
-};
-
 /// Task event.
 struct TaskEvent : public BarelyTaskEvent {
   /// Callback signature.
@@ -946,38 +892,38 @@ static constexpr EventType EventWithCallback(typename EventType::Callback& event
       static_cast<void*>(&event_callback));
 }
 
-/// Handle wrapper template 2.
+/// Handle wrapper template.
 template <typename HandleType>
-class ScopedHandleWrapper {
+class HandleWrapper {
  public:
   /// Default constructor.
-  constexpr ScopedHandleWrapper() noexcept = default;
+  constexpr HandleWrapper() noexcept = default;
 
-  /// Constructs a new `ScopedHandleWrapper`.
+  /// Constructs a new `HandleWrapper`.
   ///
   /// @param handle Raw handle.
-  explicit constexpr ScopedHandleWrapper(HandleType handle) noexcept : handle_(handle) {
+  explicit constexpr HandleWrapper(HandleType handle) noexcept : handle_(handle) {
     assert(handle != nullptr);
   }
 
   /// Default destructor.
-  constexpr ~ScopedHandleWrapper() noexcept = default;
+  constexpr ~HandleWrapper() noexcept = default;
 
   /// Non-copyable.
-  constexpr ScopedHandleWrapper(const ScopedHandleWrapper& other) noexcept = delete;
-  constexpr ScopedHandleWrapper& operator=(const ScopedHandleWrapper& other) noexcept = delete;
+  constexpr HandleWrapper(const HandleWrapper& other) noexcept = delete;
+  constexpr HandleWrapper& operator=(const HandleWrapper& other) noexcept = delete;
 
-  /// Constructs a new `ScopedHandleWrapper` via move.
+  /// Constructs a new `HandleWrapper` via move.
   ///
   /// @param other Other handle wrapper.
-  constexpr ScopedHandleWrapper(ScopedHandleWrapper&& other) noexcept
+  constexpr HandleWrapper(HandleWrapper&& other) noexcept
       : handle_(std::exchange(other.handle_, nullptr)) {}
 
-  /// Assigns `ScopedHandleWrapper` via move.
+  /// Assigns `HandleWrapper` via move.
   ///
   /// @param other Other.
   /// @return Handle wrapper.
-  constexpr ScopedHandleWrapper& operator=(ScopedHandleWrapper&& other) noexcept {
+  constexpr HandleWrapper& operator=(HandleWrapper&& other) noexcept {
     if (this != &other) {
       handle_ = std::exchange(other.handle_, nullptr);
     }
@@ -995,17 +941,17 @@ class ScopedHandleWrapper {
 };
 
 /// Class that wraps an instrument handle.
-class Instrument : public ScopedHandleWrapper<BarelyInstrumentHandle> {
+class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
  public:
   // TODO(#147): Clean the aliases up after task refactor.
-  using NoteOnEventCallback = std::function<void(float pitch, float intensity)>;
-  using NoteOffEventCallback = std::function<void(float pitch)>;
+  using NoteOffCallback = std::function<void(float pitch)>;
+  using NoteOnCallback = std::function<void(float pitch, float intensity)>;
 
   /// Constructs a new `Instrument`.
   ///
   /// @param musician Raw musician handle.
   explicit Instrument(BarelyMusicianHandle musician) noexcept
-      : ScopedHandleWrapper([&]() {
+      : HandleWrapper([&]() {
           BarelyInstrumentHandle instrument = nullptr;
           [[maybe_unused]] const bool success = BarelyInstrument_Create(musician, &instrument);
           assert(success);
@@ -1015,8 +961,7 @@ class Instrument : public ScopedHandleWrapper<BarelyInstrumentHandle> {
   /// Constructs a new `Instrument` from a raw handle.
   ///
   /// @param instrument Raw handle to instrument.
-  explicit Instrument(BarelyInstrumentHandle instrument) noexcept
-      : ScopedHandleWrapper(instrument) {}
+  explicit Instrument(BarelyInstrumentHandle instrument) noexcept : HandleWrapper(instrument) {}
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept { BarelyInstrument_Destroy(*this); }
@@ -1025,8 +970,21 @@ class Instrument : public ScopedHandleWrapper<BarelyInstrumentHandle> {
   Instrument(const Instrument& other) noexcept = delete;
   Instrument& operator=(const Instrument& other) noexcept = delete;
 
-  /// Default move constructor.
-  Instrument(Instrument&& other) noexcept = default;
+  /// Constructs a new `Instrument` via move.
+  ///
+  /// @param other Other instrument.
+  /// @return Instrument.
+  Instrument(Instrument&& other) noexcept
+      : note_off_callback_(std::exchange(other.note_off_callback_, {})),
+        note_on_callback_(std::exchange(other.note_on_callback_, {})),
+        HandleWrapper(std::move(other)) {
+    if (note_off_callback_) {
+      SetNoteOffCallback(note_off_callback_);
+    }
+    if (note_on_callback_) {
+      SetNoteOnCallback(note_on_callback_);
+    }
+  }
 
   /// Assigns `Instrument` via move.
   ///
@@ -1035,7 +993,15 @@ class Instrument : public ScopedHandleWrapper<BarelyInstrumentHandle> {
   Instrument& operator=(Instrument&& other) noexcept {
     if (this != &other) {
       BarelyInstrument_Destroy(*this);
-      ScopedHandleWrapper::operator=(std::move(other));
+      note_off_callback_ = std::exchange(other.note_off_callback_, {});
+      note_on_callback_ = std::exchange(other.note_on_callback_, {});
+      HandleWrapper::operator=(std::move(other));
+      if (note_off_callback_) {
+        SetNoteOffCallback(note_off_callback_);
+      }
+      if (note_on_callback_) {
+        SetNoteOnCallback(note_on_callback_);
+      }
     }
     return *this;
   }
@@ -1133,24 +1099,24 @@ class Instrument : public ScopedHandleWrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
-  /// Sets the note off event.
+  /// Sets the note off callback.
   ///
-  /// @param note_off_event Pointer to note off event.
-  void SetNoteOffEvent(const NoteOffEvent& note_off_event) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOffEvent(*this, &note_off_event);
-    assert(success);
-  }
-
-  /// Sets the note off event with a callback.
-  ///
-  /// @param note_off_event_callback Note off event callback.
-  void SetNoteOffEvent(NoteOffEventCallback note_off_event_callback) noexcept {
-    note_off_event_callback_ = std::move(note_off_event_callback);
-    return SetNoteOffEvent(NoteOffEvent(
-        [](float pitch, void* user_data) {
-          (*static_cast<NoteOffEventCallback*>(user_data))(pitch);
-        },
-        &note_off_event_callback_));
+  /// @param note_off_callback Note off callback.
+  void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept {
+    note_off_callback_ = std::move(note_off_callback);
+    [[maybe_unused]] bool success = false;
+    if (note_off_callback_) {
+      success = BarelyInstrument_SetNoteOffCallback(
+          *this,
+          [](float pitch, void* user_data) noexcept {
+            assert(user_data != nullptr && "Invalid user data in note off callback");
+            (*static_cast<NoteOffCallback*>(user_data))(pitch);
+          },
+          &note_off_callback_);
+    } else {
+      success = BarelyInstrument_SetNoteOffCallback(*this, nullptr, nullptr);
+    }
+    assert(success && "BarelyInstrument_SetNoteOffCallback failed");
   }
 
   /// Sets a note on.
@@ -1164,22 +1130,22 @@ class Instrument : public ScopedHandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the note on event.
   ///
-  /// @param note_on_event Pointer to note on event.
-  void SetNoteOnEvent(const NoteOnEvent& note_on_event) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOnEvent(*this, &note_on_event);
-    assert(success);
-  }
-
-  /// Sets the note on event with a callback.
-  ///
-  /// @param note_on_event_callback Note on event callback.
-  void SetNoteOnEvent(NoteOnEventCallback note_on_event_callback) noexcept {
-    note_on_event_callback_ = std::move(note_on_event_callback);
-    return SetNoteOnEvent(NoteOnEvent(
-        [](float pitch, float intensity, void* user_data) {
-          (*static_cast<NoteOnEventCallback*>(user_data))(pitch, intensity);
-        },
-        &note_on_event_callback_));
+  /// @param note_on_callback Note on callback.
+  void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept {
+    note_on_callback_ = std::move(note_on_callback);
+    [[maybe_unused]] bool success = false;
+    if (note_on_callback_) {
+      success = BarelyInstrument_SetNoteOnCallback(
+          *this,
+          [](float pitch, float intensity, void* user_data) noexcept {
+            assert(user_data != nullptr && "Invalid user data in note on callback");
+            (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity);
+          },
+          &note_on_callback_);
+    } else {
+      success = BarelyInstrument_SetNoteOnCallback(*this, nullptr, nullptr);
+    }
+    assert(success && "BarelyInstrument_SetNoteOnCallback failed");
   }
 
   /// Sets the sample data.
@@ -1193,15 +1159,15 @@ class Instrument : public ScopedHandleWrapper<BarelyInstrumentHandle> {
   }
 
  private:
-  // Note off event callback.
-  NoteOffEventCallback note_off_event_callback_;
+  // Note off callback.
+  NoteOffCallback note_off_callback_;
 
-  // Note on event callback.
-  NoteOnEventCallback note_on_event_callback_;
+  // Note on callback.
+  NoteOnCallback note_on_callback_;
 };
 
 /// Class that wraps a task handle.
-class Task : public ScopedHandleWrapper<BarelyTaskHandle> {
+class Task : public HandleWrapper<BarelyTaskHandle> {
  public:
   /// Constructs a new `Task`.
   ///
@@ -1209,7 +1175,7 @@ class Task : public ScopedHandleWrapper<BarelyTaskHandle> {
   /// @param task_event Task event.
   /// @param position Task position in beats.
   Task(BarelyPerformerHandle performer, const TaskEvent& task_event, double position) noexcept
-      : ScopedHandleWrapper([&]() {
+      : HandleWrapper([&]() {
           BarelyTaskHandle task = nullptr;
           [[maybe_unused]] const bool success =
               BarelyTask_Create(performer, &task_event, position, &task);
@@ -1220,7 +1186,7 @@ class Task : public ScopedHandleWrapper<BarelyTaskHandle> {
   /// Constructs a new `Task` from a raw handle.
   ///
   /// @param task Raw handle to task.
-  explicit Task(BarelyTaskHandle task) noexcept : ScopedHandleWrapper(task) {}
+  explicit Task(BarelyTaskHandle task) noexcept : HandleWrapper(task) {}
 
   /// Destroys `Task`.
   ~Task() noexcept { BarelyTask_Destroy(*this); }
@@ -1239,7 +1205,7 @@ class Task : public ScopedHandleWrapper<BarelyTaskHandle> {
   Task& operator=(Task&& other) noexcept {
     if (this != &other) {
       BarelyTask_Destroy(*this);
-      ScopedHandleWrapper::operator=(std::move(other));
+      HandleWrapper::operator=(std::move(other));
     }
     return *this;
   }
@@ -1264,9 +1230,9 @@ class Task : public ScopedHandleWrapper<BarelyTaskHandle> {
 };
 
 /// Class that wraps a performer handle.
-class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
+class Performer : public HandleWrapper<BarelyPerformerHandle> {
  public:
-  // TODO(#147): Clean up the callbacks after task refactor.
+  // TODO(#147): Clean the aliases up after task refactor.
   using BeatCallback = std::function<void()>;
 
   /// Constructs a new `Performer`.
@@ -1274,7 +1240,7 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
   /// @param musician Raw musician handle.
   /// @param process_order Process order.
   explicit Performer(BarelyMusicianHandle musician, int process_order = 0) noexcept
-      : ScopedHandleWrapper([&]() {
+      : HandleWrapper([&]() {
           BarelyPerformerHandle performer = nullptr;
           [[maybe_unused]] const bool success =
               BarelyPerformer_Create(musician, static_cast<int32_t>(process_order), &performer);
@@ -1285,7 +1251,7 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
   /// Constructs a new `Performer` from a raw handle.
   ///
   /// @param performer Raw handle to performer.
-  explicit Performer(BarelyPerformerHandle performer) noexcept : ScopedHandleWrapper(performer) {}
+  explicit Performer(BarelyPerformerHandle performer) noexcept : HandleWrapper(performer) {}
 
   /// Destroys `Performer`.
   ~Performer() noexcept { BarelyPerformer_Destroy(*this); }
@@ -1299,8 +1265,11 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
   /// @param other Other performer.
   /// @return Performer.
   Performer(Performer&& other) noexcept
-      : beat_callback_(std::exchange(other.beat_callback_, {})),
-        ScopedHandleWrapper(std::move(other)) {}
+      : beat_callback_(std::exchange(other.beat_callback_, {})), HandleWrapper(std::move(other)) {
+    if (beat_callback_) {
+      SetBeatCallback(beat_callback_);
+    }
+  }
 
   /// Assigns `Performer` via move.
   ///
@@ -1310,7 +1279,10 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
     if (this != &other) {
       BarelyPerformer_Destroy(*this);
       beat_callback_ = std::exchange(other.beat_callback_, {});
-      ScopedHandleWrapper::operator=(std::move(other));
+      HandleWrapper::operator=(std::move(other));
+      if (beat_callback_) {
+        SetBeatCallback(beat_callback_);
+      }
     }
     return *this;
   }
@@ -1390,13 +1362,19 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
   /// @param beat_callback Beat callback.
   void SetBeatCallback(BeatCallback beat_callback) noexcept {
     beat_callback_ = std::move(beat_callback);
-    [[maybe_unused]] const bool success = BarelyPerformer_SetBeatCallback(
-        *this,
-        beat_callback_
-            ? [](void* user_data) noexcept { (*static_cast<BeatCallback*>(user_data))(); }
-            : nullptr,
-        beat_callback_ ? &beat_callback_ : nullptr);
-    assert(success);
+    [[maybe_unused]] bool success = false;
+    if (beat_callback_) {
+      success = BarelyPerformer_SetBeatCallback(
+          *this,
+          [](void* user_data) noexcept {
+            assert(user_data != nullptr && "Invalid user data in beat callback");
+            (*static_cast<BeatCallback*>(user_data))();
+          },
+          &beat_callback_);
+    } else {
+      success = BarelyPerformer_SetBeatCallback(*this, nullptr, nullptr);
+    }
+    assert(success && "BarelyPerformer_SetBeatCallback failed");
   }
 
   /// Sets the loop begin position.
@@ -1450,13 +1428,13 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
 };
 
 /// A class that wraps a musician handle.
-class Musician : public ScopedHandleWrapper<BarelyMusicianHandle> {
+class Musician : public HandleWrapper<BarelyMusicianHandle> {
  public:
   /// Constructs a new `Musician`.
   ///
   /// @param sample_rate Sampling rate in hertz.
   explicit Musician(int sample_rate) noexcept
-      : ScopedHandleWrapper([&]() {
+      : HandleWrapper([&]() {
           BarelyMusicianHandle musician = nullptr;
           [[maybe_unused]] const bool success =
               BarelyMusician_Create(static_cast<int32_t>(sample_rate), &musician);
@@ -1467,7 +1445,7 @@ class Musician : public ScopedHandleWrapper<BarelyMusicianHandle> {
   /// Constructs a new `Musician` from a raw handle.
   ///
   /// @param musician Raw handle to musician.
-  explicit Musician(BarelyMusicianHandle musician) noexcept : ScopedHandleWrapper(musician) {}
+  explicit Musician(BarelyMusicianHandle musician) noexcept : HandleWrapper(musician) {}
 
   /// Destroys `Musician`.
   ~Musician() noexcept { BarelyMusician_Destroy(*this); }
@@ -1486,7 +1464,7 @@ class Musician : public ScopedHandleWrapper<BarelyMusicianHandle> {
   Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
       BarelyMusician_Destroy(*this);
-      ScopedHandleWrapper::operator=(std::move(other));
+      HandleWrapper::operator=(std::move(other));
     }
     return *this;
   }

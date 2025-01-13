@@ -89,11 +89,10 @@ int main(int /*argc*/, char* argv[]) {
 
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
-  instrument.SetNoteOnEvent({[](float pitch, float intensity, void* /*user_data*/) {
+  instrument.SetNoteOnCallback([](float pitch, float intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-  }});
-  instrument.SetNoteOffEvent(
-      {[](float pitch, void* /*user_data*/) { ConsoleLog() << "NoteOff(" << pitch << ") "; }});
+  });
+  instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](std::span<float> output_samples) {

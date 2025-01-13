@@ -37,9 +37,9 @@ VERS_1.0 {
     BarelyInstrument_SetControl;
     BarelyInstrument_SetNoteControl;
     BarelyInstrument_SetNoteOff;
-    BarelyInstrument_SetNoteOffEvent;
+    BarelyInstrument_SetNoteOffCallback;
     BarelyInstrument_SetNoteOn;
-    BarelyInstrument_SetNoteOnEvent;
+    BarelyInstrument_SetNoteOnCallback;
     BarelyInstrument_SetSampleData;
     BarelyMusician_Create;
     BarelyMusician_Destroy;
@@ -56,6 +56,7 @@ VERS_1.0 {
     BarelyPerformer_GetPosition;
     BarelyPerformer_IsLooping;
     BarelyPerformer_IsPlaying;
+    BarelyPerformer_SetBeatCallback;
     BarelyPerformer_SetLoopBeginPosition;
     BarelyPerformer_SetLoopLength;
     BarelyPerformer_SetLooping;

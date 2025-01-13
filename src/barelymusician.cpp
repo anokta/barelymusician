@@ -10,8 +10,6 @@
 
 using ::barely::ControlType;
 using ::barely::NoteControlType;
-using ::barely::NoteOffEvent;
-using ::barely::NoteOnEvent;
 using ::barely::SampleDataSlice;
 
 bool BarelyInstrument_Create(BarelyMusicianHandle musician,
@@ -106,11 +104,11 @@ bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch)
   return true;
 }
 
-bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
-                                      const BarelyNoteOffEvent* note_off_event) {
+bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
+                                         BarelyNoteOffCallback note_off_callback, void* user_data) {
   if (!instrument) return false;
 
-  instrument->SetNoteOffEvent((note_off_event != nullptr) ? *note_off_event : NoteOffEvent{});
+  instrument->SetNoteOffCallback(note_off_callback, user_data);
   return true;
 }
 
@@ -121,11 +119,11 @@ bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch, 
   return true;
 }
 
-bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
-                                     const BarelyNoteOnEvent* note_on_event) {
+bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
+                                        BarelyNoteOnCallback note_on_callback, void* user_data) {
   if (!instrument) return false;
 
-  instrument->SetNoteOnEvent((note_on_event != nullptr) ? *note_on_event : NoteOnEvent{});
+  instrument->SetNoteOnCallback(note_on_callback, user_data);
   return true;
 }
 

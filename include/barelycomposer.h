@@ -334,14 +334,14 @@ enum class RepeaterStyle {
 };
 
 /// A class that wraps an arpeggiator handle.
-class Arpeggiator : public ScopedHandleWrapper<BarelyArpeggiatorHandle> {
+class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
  public:
   /// Creates a new `Arpeggiator`.
   ///
   /// @param musician Musician.
   /// @param process_order Process order.
   explicit Arpeggiator(Musician& musician, int process_order = 0) noexcept
-      : ScopedHandleWrapper([&]() {
+      : HandleWrapper([&]() {
           BarelyArpeggiatorHandle arpeggiator = nullptr;
           [[maybe_unused]] const bool success =
               BarelyArpeggiator_Create(musician, static_cast<int32_t>(process_order), &arpeggiator);
@@ -352,8 +352,7 @@ class Arpeggiator : public ScopedHandleWrapper<BarelyArpeggiatorHandle> {
   /// Creates a new `Arpeggiator` from a raw handle.
   ///
   /// @param arpeggiator Raw handle to arpeggiator.
-  explicit Arpeggiator(BarelyArpeggiatorHandle arpeggiator) noexcept
-      : ScopedHandleWrapper(arpeggiator) {}
+  explicit Arpeggiator(BarelyArpeggiatorHandle arpeggiator) noexcept : HandleWrapper(arpeggiator) {}
 
   /// Destroys `Arpeggiator`.
   ~Arpeggiator() noexcept { BarelyArpeggiator_Destroy(*this); }
@@ -372,7 +371,7 @@ class Arpeggiator : public ScopedHandleWrapper<BarelyArpeggiatorHandle> {
   Arpeggiator& operator=(Arpeggiator&& other) noexcept {
     if (this != &other) {
       BarelyArpeggiator_Destroy(*this);
-      ScopedHandleWrapper::operator=(std::move(other));
+      HandleWrapper::operator=(std::move(other));
     }
     return *this;
   }
@@ -459,13 +458,13 @@ class Arpeggiator : public ScopedHandleWrapper<BarelyArpeggiatorHandle> {
 };
 
 /// A class that wraps a random handle.
-class Random : public ScopedHandleWrapper<BarelyRandomHandle> {
+class Random : public HandleWrapper<BarelyRandomHandle> {
  public:
   /// Creates a new `Random`.
   ///
   /// @param seed Seed value.
   explicit Random(int seed = static_cast<int>(std::default_random_engine::default_seed)) noexcept
-      : ScopedHandleWrapper([&]() {
+      : HandleWrapper([&]() {
           BarelyRandomHandle random = nullptr;
           [[maybe_unused]] const bool success =
               BarelyRandom_Create(static_cast<int32_t>(seed), &random);
@@ -476,7 +475,7 @@ class Random : public ScopedHandleWrapper<BarelyRandomHandle> {
   /// Creates a new `Random` from a raw handle.
   ///
   /// @param random Raw handle to random.
-  explicit Random(BarelyRandomHandle random) noexcept : ScopedHandleWrapper(random) {}
+  explicit Random(BarelyRandomHandle random) noexcept : HandleWrapper(random) {}
 
   /// Destroys `Random`.
   ~Random() noexcept { BarelyRandom_Destroy(*this); }
@@ -495,7 +494,7 @@ class Random : public ScopedHandleWrapper<BarelyRandomHandle> {
   Random& operator=(Random&& other) noexcept {
     if (this != &other) {
       BarelyRandom_Destroy(*this);
-      ScopedHandleWrapper::operator=(std::move(other));
+      HandleWrapper::operator=(std::move(other));
     }
     return *this;
   }
@@ -554,14 +553,14 @@ class Random : public ScopedHandleWrapper<BarelyRandomHandle> {
 };
 
 /// A class that wraps a repeater handle.
-class Repeater : public ScopedHandleWrapper<BarelyRepeaterHandle> {
+class Repeater : public HandleWrapper<BarelyRepeaterHandle> {
  public:
   /// Creates a new `Repeater`.
   ///
   /// @param musician Musician.
   /// @param process_order Process order.
   explicit Repeater(Musician& musician, int process_order = 0) noexcept
-      : ScopedHandleWrapper([&]() {
+      : HandleWrapper([&]() {
           BarelyRepeaterHandle repeater = nullptr;
           [[maybe_unused]] const bool success =
               BarelyRepeater_Create(musician, static_cast<int32_t>(process_order), &repeater);
@@ -572,7 +571,7 @@ class Repeater : public ScopedHandleWrapper<BarelyRepeaterHandle> {
   /// Creates a new `Repeater` from a raw handle.
   ///
   /// @param repeater Raw handle to repeater.
-  explicit Repeater(BarelyRepeaterHandle repeater) noexcept : ScopedHandleWrapper(repeater) {}
+  explicit Repeater(BarelyRepeaterHandle repeater) noexcept : HandleWrapper(repeater) {}
 
   /// Destroys `Repeater`.
   ~Repeater() noexcept { BarelyRepeater_Destroy(*this); }
@@ -591,7 +590,7 @@ class Repeater : public ScopedHandleWrapper<BarelyRepeaterHandle> {
   Repeater& operator=(Repeater&& other) noexcept {
     if (this != &other) {
       BarelyRepeater_Destroy(*this);
-      ScopedHandleWrapper::operator=(std::move(other));
+      HandleWrapper::operator=(std::move(other));
     }
     return *this;
   }

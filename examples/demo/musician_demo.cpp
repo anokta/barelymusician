@@ -319,11 +319,13 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   // Beat callback.
+  auto metronome = musician.CreatePerformer(-10);
   int harmonic = 0;
-  std::function<void(int)> beat_callback = [&](int beat) {
+  metronome.SetBeatCallback([&]() {
     // Update transport.
+    int beat = static_cast<int>(metronome.GetPosition());
     const int bar = beat / kBeatCount;
-    beat = beat % kBeatCount;
+    beat %= kBeatCount;
 
     if (beat == 0) {
       // Compose next bar.
@@ -337,14 +339,7 @@ int main(int /*argc*/, char* argv[]) {
                                tasks);
       }
     }
-  };
-
-  auto metronome = musician.CreatePerformer(-10);
-  metronome.SetBeatEvent({[](double position, void* user_data) {
-                            auto callback = *static_cast<std::function<void(int)>*>(user_data);
-                            callback(static_cast<int>(position));
-                          },
-                          &beat_callback});
+  });
 
   // Audio process callback.
   std::vector<float> temp_buffer(kSampleCount);

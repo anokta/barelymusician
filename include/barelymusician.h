@@ -327,20 +327,22 @@ typedef struct BarelySampleDataSlice {
   int32_t sample_count;
 } BarelySampleDataSlice;
 
-/// Beat event callback signature.
+/// Instrument handle alias.
+typedef struct BarelyInstrument* BarelyInstrumentHandle;
+
+/// Musician handle alias.
+typedef struct BarelyMusician* BarelyMusicianHandle;
+
+/// Performer handle alias.
+typedef struct BarelyPerformer* BarelyPerformerHandle;
+
+/// Task handle alias.
+typedef struct BarelyTask* BarelyTaskHandle;
+
+/// Beat callback signature.
 ///
-/// @param position Position in beats.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyBeatEvent_Callback)(double position, void* user_data);
-
-/// Beat event.
-typedef struct BarelyBeatEvent {
-  /// Callback.
-  BarelyBeatEvent_Callback callback;
-
-  /// Pointer to user data.
-  void* user_data;
-} BarelyBeatEvent;
+typedef void (*BarelyBeatCallback)(void* user_data);
 
 /// Note off event callback signature.
 ///
@@ -403,18 +405,6 @@ typedef struct BarelyTaskEvent {
   /// Pointer to user data.
   void* user_data;
 } BarelyTaskEvent;
-
-/// Instrument handle alias.
-typedef struct BarelyInstrument* BarelyInstrumentHandle;
-
-/// Musician handle alias.
-typedef struct BarelyMusician* BarelyMusicianHandle;
-
-/// Performer handle alias.
-typedef struct BarelyPerformer* BarelyPerformerHandle;
-
-/// Task handle alias.
-typedef struct BarelyTask* BarelyTaskHandle;
 
 /// Creates a new instrument.
 ///
@@ -648,13 +638,15 @@ BARELY_EXPORT bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bo
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing);
 
-/// Sets the beat event of a performer.
+/// Sets the beat callback of a performer.
 ///
 /// @param performer Performer handle.
-/// @param beat_event Pointer to beat event.
+/// @param beat_callback Pointer to beat callback.
+/// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_SetBeatEvent(BarelyPerformerHandle performer,
-                                                const BarelyBeatEvent* beat_event);
+BARELY_EXPORT bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
+                                                   BarelyBeatCallback beat_callback,
+                                                   void* user_data);
 
 /// Sets the loop begin position of a performer.
 ///
@@ -859,25 +851,6 @@ struct SampleDataSlice : public BarelySampleDataSlice {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr SampleDataSlice(BarelySampleDataSlice sample_data_slice) noexcept
       : BarelySampleDataSlice{sample_data_slice} {}
-};
-
-/// Beat event.
-struct BeatEvent : public BarelyBeatEvent {
-  /// Callback signature.
-  using Callback = BarelyBeatEvent_Callback;
-
-  /// Constructs a new `BeatEvent`.
-  ///
-  /// @param callback Callback.
-  /// @param user_data Pointer to user data.
-  constexpr BeatEvent(Callback callback = nullptr, void* user_data = nullptr) noexcept
-      : BeatEvent(BarelyBeatEvent{callback, user_data}) {}
-
-  /// Constructs a new `BeatEvent` from a raw type.
-  ///
-  /// @param beat_event Raw beat event.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr BeatEvent(BarelyBeatEvent beat_event) noexcept : BarelyBeatEvent{beat_event} {}
 };
 
 /// Note off event.
@@ -1293,6 +1266,9 @@ class Task : public ScopedHandleWrapper<BarelyTaskHandle> {
 /// Class that wraps a performer handle.
 class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
  public:
+  // TODO(#147): Clean up the callbacks after task refactor.
+  using BeatCallback = std::function<void()>;
+
   /// Constructs a new `Performer`.
   ///
   /// @param musician Raw musician handle.
@@ -1318,8 +1294,13 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
   Performer(const Performer& other) noexcept = delete;
   Performer& operator=(const Performer& other) noexcept = delete;
 
-  /// Default move constructor.
-  Performer(Performer&& other) noexcept = default;
+  /// Constructs a new `Performer` via move.
+  ///
+  /// @param other Other performer.
+  /// @return Performer.
+  Performer(Performer&& other) noexcept
+      : beat_callback_(std::exchange(other.beat_callback_, {})),
+        ScopedHandleWrapper(std::move(other)) {}
 
   /// Assigns `Performer` via move.
   ///
@@ -1328,6 +1309,7 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
   Performer& operator=(Performer&& other) noexcept {
     if (this != &other) {
       BarelyPerformer_Destroy(*this);
+      beat_callback_ = std::exchange(other.beat_callback_, {});
       ScopedHandleWrapper::operator=(std::move(other));
     }
     return *this;
@@ -1403,11 +1385,17 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
     return is_playing;
   }
 
-  /// Sets the beat event.
+  /// Sets the beat callback.
   ///
-  /// @param beat_event Pointer to beat event.
-  void SetBeatEvent(const BeatEvent& beat_event) noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_SetBeatEvent(*this, &beat_event);
+  /// @param beat_callback Beat callback.
+  void SetBeatCallback(BeatCallback beat_callback) noexcept {
+    beat_callback_ = std::move(beat_callback);
+    [[maybe_unused]] const bool success = BarelyPerformer_SetBeatCallback(
+        *this,
+        beat_callback_
+            ? [](void* user_data) noexcept { (*static_cast<BeatCallback*>(user_data))(); }
+            : nullptr,
+        beat_callback_ ? &beat_callback_ : nullptr);
     assert(success);
   }
 
@@ -1455,6 +1443,10 @@ class Performer : public ScopedHandleWrapper<BarelyPerformerHandle> {
     [[maybe_unused]] const bool success = BarelyPerformer_Stop(*this);
     assert(success);
   }
+
+ private:
+  // Beat callback.
+  BeatCallback beat_callback_;
 };
 
 /// A class that wraps a musician handle.

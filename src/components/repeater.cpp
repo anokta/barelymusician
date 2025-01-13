@@ -20,11 +20,12 @@ constexpr float kNoteIntensity = 1.0f;
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Musician& musician, int process_order) noexcept
     : musician_(&musician), performer_(musician_->CreatePerformer(process_order)) {
-  performer_->SetBeatEvent({[](double /*position*/, void* user_data) noexcept {
-                              auto& repeater = *static_cast<Repeater*>(user_data);
-                              repeater.OnBeat();
-                            },
-                            this});
+  performer_->SetBeatCallback(
+      [](void* user_data) noexcept {
+        auto& repeater = *static_cast<Repeater*>(user_data);
+        repeater.OnBeat();
+      },
+      this);
 }
 
 Repeater::~Repeater() noexcept {

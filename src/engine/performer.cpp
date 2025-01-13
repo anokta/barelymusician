@@ -111,7 +111,7 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
   if (beat_event_.callback && last_beat_position_ != position_ &&
       std::ceil(position_) == position_) {
     last_beat_position_ = position_;
-    beat_event_.callback(position_, beat_event_.user_data);
+    beat_event_.callback(beat_event_.user_data);
   }
   if (const auto it = GetNextRecurringTask();
       it != recurring_tasks_.end() && it->second->GetPosition() == position_ &&
@@ -122,7 +122,9 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
   }
 }
 
-void Performer::SetBeatEvent(const BeatEvent& beat_event) noexcept { beat_event_ = beat_event; }
+void Performer::SetBeatCallback(BarelyBeatCallback beat_callback, void* user_data) noexcept {
+  beat_event_ = {beat_callback, user_data};
+}
 
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) {

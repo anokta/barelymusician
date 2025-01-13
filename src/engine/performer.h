@@ -105,10 +105,11 @@ class Performer {
   /// Processes the next task at the current position.
   void ProcessNextTaskAtPosition() noexcept;
 
-  /// Sets the beat event.
+  /// Sets the beat callback.
   ///
-  /// @param beat_event Beat event.
-  void SetBeatEvent(const BeatEvent& beat_event) noexcept;
+  /// @param beat_callback Beat callback.
+  /// @param user_data Pointer to user data.
+  void SetBeatCallback(BarelyBeatCallback beat_callback, void* user_data) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -163,6 +164,10 @@ class Performer {
   void PrevLastProcessedRecurringTaskIt() noexcept;
 
   // Beat event.
+  struct BeatEvent {
+    BarelyBeatCallback callback;
+    void* user_data;
+  };
   BeatEvent beat_event_ = {};
 
   // Denotes whether performer is looping or not.

@@ -8,7 +8,6 @@
 #include "engine/musician.h"
 #include "engine/performer.h"
 
-using ::barely::BeatEvent;
 using ::barely::ControlType;
 using ::barely::NoteControlType;
 using ::barely::NoteOffEvent;
@@ -261,11 +260,11 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
   return true;
 }
 
-bool BarelyPerformer_SetBeatEvent(BarelyPerformerHandle performer,
-                                  const BarelyBeatEvent* beat_event) {
+bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
+                                     BarelyBeatCallback beat_callback, void* user_data) {
   if (!performer) return false;
 
-  performer->SetBeatEvent((beat_event != nullptr) ? *beat_event : BeatEvent{});
+  performer->SetBeatCallback(beat_callback, user_data);
   return true;
 }
 

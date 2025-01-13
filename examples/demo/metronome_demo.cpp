@@ -64,17 +64,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Create the metronome with a beat callback.
   auto metronome = musician.CreatePerformer(-1);
-  metronome.SetBeatEvent({[](double position, void* user_data) {
-                            const int beat = static_cast<int>(position);
-                            const int current_bar = (beat / kBeatCount) + 1;
-                            const int current_beat = (beat % kBeatCount) + 1;
-                            ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-                            const float pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
-                            auto& instrument = *static_cast<Instrument*>(user_data);
-                            instrument.SetNoteOn(pitch);
-                            instrument.SetNoteOff(pitch);
-                          },
-                          &instrument});
+  metronome.SetBeatCallback([&]() {
+    const int beat = static_cast<int>(metronome.GetPosition());
+    const int current_bar = (beat / kBeatCount) + 1;
+    const int current_beat = (beat % kBeatCount) + 1;
+    ConsoleLog() << "Tick " << current_bar << "." << current_beat;
+    const float pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
+    instrument.SetNoteOn(pitch);
+    instrument.SetNoteOff(pitch);
+  });
 
   // Audio process callback.
   const auto process_callback = [&](std::span<float> output_samples) {

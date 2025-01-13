@@ -8,11 +8,8 @@ extern "C" {
 #endif  // __cplusplus
 
 /// Arpeggiator style enum alias.
-typedef int32_t BarelyArpeggiatorStyle;
-
-/// Arpeggiator style enum values.
 // TODO(#142): Add more arpeggiator styles.
-enum BarelyArpeggiatorStyle_Values {
+typedef enum BarelyArpeggiatorStyle {
   /// Up.
   BarelyArpeggiatorStyle_kUp = 0,
   /// Down.
@@ -21,13 +18,10 @@ enum BarelyArpeggiatorStyle_Values {
   BarelyArpeggiatorStyle_kRandom,
   /// Number of arpeggiator styles.
   BarelyArpeggiatorStyle_kCount,
-};
+} BarelyArpeggiatorStyle;
 
 /// Repeater style enum alias.
-typedef int32_t BarelyRepeaterStyle;
-
-/// Repeater style enum values.
-enum BarelyRepeaterStyle_Values {
+typedef enum BarelyRepeaterStyle {
   /// Forward.
   BarelyRepeaterStyle_kForward = 0,
   /// Backward.
@@ -36,7 +30,7 @@ enum BarelyRepeaterStyle_Values {
   BarelyRepeaterStyle_kRandom,
   /// Number of repeater styles.
   BarelyRepeaterStyle_kCount,
-};
+} BarelyRepeaterStyle;
 
 /// A musical quantization.
 typedef struct BarelyQuantization {
@@ -320,7 +314,7 @@ BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree
 namespace barely {
 
 /// Arpeggiator style enum.
-enum class ArpeggiatorStyle : BarelyArpeggiatorStyle {
+enum class ArpeggiatorStyle {
   /// Up.
   kUp = BarelyArpeggiatorStyle_kUp,
   /// Down.
@@ -330,7 +324,7 @@ enum class ArpeggiatorStyle : BarelyArpeggiatorStyle {
 };
 
 /// Repeater style enum.
-enum class RepeaterStyle : BarelyRepeaterStyle {
+enum class RepeaterStyle {
   /// Forward.
   kForward = BarelyRepeaterStyle_kForward,
   /// Backward.

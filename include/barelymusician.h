@@ -208,10 +208,7 @@ extern "C" {
 #endif  // __cplusplus
 
 /// Control type enum alias.
-typedef int32_t BarelyControlType;
-
-/// Control type enum values.
-enum BarelyControlType_Values {
+typedef enum BarelyControlType {
   /// Gain in decibels.
   BarelyControlType_kGain = 0,
   /// Pitch shift.
@@ -246,13 +243,10 @@ enum BarelyControlType_Values {
   BarelyControlType_kFilterFrequency,
   /// Number of control types.
   BarelyControlType_kCount,
-};
+} BarelyControlType;
 
 /// Filter type enum alias.
-typedef int32_t BarelyFilterType;
-
-/// Filter type enum values.
-enum BarelyFilterType_Values {
+typedef enum BarelyFilterType {
   /// None.
   BarelyFilterType_kNone = 0,
   /// Low pass.
@@ -261,24 +255,18 @@ enum BarelyFilterType_Values {
   BarelyFilterType_kHighPass,
   /// Number of filters.
   BarelyFilterType_kCount,
-};
+} BarelyFilterType;
 
 /// Note control type enum alias.
-typedef int32_t BarelyNoteControlType;
-
-/// Note control type enum values.
-enum BarelyNoteControlType_Values {
+typedef enum BarelyNoteControlType {
   /// Pitch shift.
   BarelyNoteControlType_kPitchShift = 0,
   /// Number of note control types.
   BarelyNoteControlType_kCount,
-};
+} BarelyNoteControlType;
 
 /// Oscillator mode enum alias.
-typedef int32_t BarelyOscillatorMode;
-
-/// Oscillator mode enum value.
-enum BarelyOscillatorMode_Values {
+typedef enum BarelyOscillatorMode {
   /// Mix.
   BarelyOscillatorMode_kMix = 0,
   /// Amplitude modulation.
@@ -292,13 +280,10 @@ enum BarelyOscillatorMode_Values {
   BarelyOscillatorMode_kRing,
   /// Number of oscillator modes.
   BarelyOscillatorMode_kCount,
-};
+} BarelyOscillatorMode;
 
 /// Oscillator shape enum alias.
-typedef int32_t BarelyOscillatorShape;
-
-/// Oscillator shape enum value.
-enum BarelyOscillatorShape_Values {
+typedef enum BarelyOscillatorShape {
   /// None.
   BarelyOscillatorShape_kNone = 0,
   /// Sine wave.
@@ -311,13 +296,10 @@ enum BarelyOscillatorShape_Values {
   BarelyOscillatorShape_kNoise,
   /// Number of oscillator shapes.
   BarelyOscillatorShape_kCount,
-};
+} BarelyOscillatorShape;
 
 /// Sample playback mode enum alias.
-typedef int32_t BarelySamplePlaybackMode;
-
-/// Sample playback mode enum values.
-enum BarelySamplePlaybackMode_Values {
+typedef enum BarelySamplePlaybackMode {
   /// None.
   BarelySamplePlaybackMode_kNone = 0,
   /// Once.
@@ -328,7 +310,7 @@ enum BarelySamplePlaybackMode_Values {
   BarelySamplePlaybackMode_kLoop,
   /// Number of playback modes.
   BarelySamplePlaybackMode_kCount,
-};
+} BarelySamplePlaybackMode;
 
 /// Slice of sample data.
 typedef struct BarelySampleDataSlice {
@@ -765,7 +747,7 @@ BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTaskHandle task, double position
 namespace barely {
 
 /// Control type enum.
-enum class ControlType : BarelyControlType {
+enum class ControlType {
   /// Gain in decibels.
   kGain = BarelyControlType_kGain,
   /// Pitch shift.
@@ -801,7 +783,7 @@ enum class ControlType : BarelyControlType {
 };
 
 /// Filter type enum.
-enum class FilterType : BarelyFilterType {
+enum class FilterType {
   /// None.
   kNone = BarelyFilterType_kNone,
   /// Low pass.
@@ -811,13 +793,13 @@ enum class FilterType : BarelyFilterType {
 };
 
 /// Note control type enum.
-enum class NoteControlType : BarelyNoteControlType {
+enum class NoteControlType {
   /// Pitch shift.
   kPitchShift = BarelyNoteControlType_kPitchShift,
 };
 
 /// Oscillator mode enum.
-enum class OscillatorMode : BarelyOscillatorMode {
+enum class OscillatorMode {
   /// Mix.
   kMix = BarelyOscillatorMode_kMix,
   /// Amplitude modulation.
@@ -832,7 +814,7 @@ enum class OscillatorMode : BarelyOscillatorMode {
 };
 
 /// Oscillator shape enum.
-enum class OscillatorShape : BarelyOscillatorShape {
+enum class OscillatorShape {
   /// None.
   kNone = BarelyOscillatorShape_kNone,
   /// Sine wave.
@@ -846,7 +828,7 @@ enum class OscillatorShape : BarelyOscillatorShape {
 };
 
 /// Sample playback mode enum.
-enum class SamplePlaybackMode : BarelySamplePlaybackMode {
+enum class SamplePlaybackMode {
   /// None.
   kNone = BarelySamplePlaybackMode_kNone,
   /// Once.

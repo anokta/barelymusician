@@ -935,6 +935,25 @@ class HandleWrapper {
   /// @return Raw handle.
   constexpr operator HandleType() const noexcept { return handle_; }
 
+ protected:
+  // Helper function to set a callback.
+  template <typename SetCallbackFn, typename... CallbackArgs>
+  void SetCallback(SetCallbackFn set_callback_fn, std::function<void(CallbackArgs...)>& callback) {
+    [[maybe_unused]] bool success = false;
+    if (callback) {
+      success = set_callback_fn(
+          handle_,
+          [](CallbackArgs... args, void* user_data) noexcept {
+            assert(user_data != nullptr && "Invalid callback user data");
+            (*static_cast<std::function<void(CallbackArgs...)>*>(user_data))(args...);
+          },
+          &callback);
+    } else {
+      success = set_callback_fn(handle_, nullptr, nullptr);
+    }
+    assert(success && "HandleWrapper::SetCallback failed");
+  }
+
  private:
   // Raw handle.
   HandleType handle_ = nullptr;
@@ -979,10 +998,10 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
         note_on_callback_(std::exchange(other.note_on_callback_, {})),
         HandleWrapper(std::move(other)) {
     if (note_off_callback_) {
-      SetNoteOffCallback(note_off_callback_);
+      SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
     }
     if (note_on_callback_) {
-      SetNoteOnCallback(note_on_callback_);
+      SetCallback(BarelyInstrument_SetNoteOnCallback, note_on_callback_);
     }
   }
 
@@ -997,10 +1016,10 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
       note_on_callback_ = std::exchange(other.note_on_callback_, {});
       HandleWrapper::operator=(std::move(other));
       if (note_off_callback_) {
-        SetNoteOffCallback(note_off_callback_);
+        SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
       }
       if (note_on_callback_) {
-        SetNoteOnCallback(note_on_callback_);
+        SetCallback(BarelyInstrument_SetNoteOnCallback, note_on_callback_);
       }
     }
     return *this;
@@ -1104,19 +1123,7 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param note_off_callback Note off callback.
   void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept {
     note_off_callback_ = std::move(note_off_callback);
-    [[maybe_unused]] bool success = false;
-    if (note_off_callback_) {
-      success = BarelyInstrument_SetNoteOffCallback(
-          *this,
-          [](float pitch, void* user_data) noexcept {
-            assert(user_data != nullptr && "Invalid user data in note off callback");
-            (*static_cast<NoteOffCallback*>(user_data))(pitch);
-          },
-          &note_off_callback_);
-    } else {
-      success = BarelyInstrument_SetNoteOffCallback(*this, nullptr, nullptr);
-    }
-    assert(success && "BarelyInstrument_SetNoteOffCallback failed");
+    SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
   }
 
   /// Sets a note on.
@@ -1128,24 +1135,12 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
-  /// Sets the note on event.
+  /// Sets the note on callback.
   ///
   /// @param note_on_callback Note on callback.
   void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept {
     note_on_callback_ = std::move(note_on_callback);
-    [[maybe_unused]] bool success = false;
-    if (note_on_callback_) {
-      success = BarelyInstrument_SetNoteOnCallback(
-          *this,
-          [](float pitch, float intensity, void* user_data) noexcept {
-            assert(user_data != nullptr && "Invalid user data in note on callback");
-            (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity);
-          },
-          &note_on_callback_);
-    } else {
-      success = BarelyInstrument_SetNoteOnCallback(*this, nullptr, nullptr);
-    }
-    assert(success && "BarelyInstrument_SetNoteOnCallback failed");
+    SetCallback(BarelyInstrument_SetNoteOnCallback, note_on_callback_);
   }
 
   /// Sets the sample data.
@@ -1267,7 +1262,7 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   Performer(Performer&& other) noexcept
       : beat_callback_(std::exchange(other.beat_callback_, {})), HandleWrapper(std::move(other)) {
     if (beat_callback_) {
-      SetBeatCallback(beat_callback_);
+      SetCallback(BarelyPerformer_SetBeatCallback, beat_callback_);
     }
   }
 
@@ -1362,19 +1357,7 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @param beat_callback Beat callback.
   void SetBeatCallback(BeatCallback beat_callback) noexcept {
     beat_callback_ = std::move(beat_callback);
-    [[maybe_unused]] bool success = false;
-    if (beat_callback_) {
-      success = BarelyPerformer_SetBeatCallback(
-          *this,
-          [](void* user_data) noexcept {
-            assert(user_data != nullptr && "Invalid user data in beat callback");
-            (*static_cast<BeatCallback*>(user_data))();
-          },
-          &beat_callback_);
-    } else {
-      success = BarelyPerformer_SetBeatCallback(*this, nullptr, nullptr);
-    }
-    assert(success && "BarelyPerformer_SetBeatCallback failed");
+    SetCallback(BarelyPerformer_SetBeatCallback, beat_callback_);
   }
 
   /// Sets the loop begin position.

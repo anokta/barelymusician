@@ -74,9 +74,6 @@ namespace Barely.Examples {
       }
     }
 
-    // Process order.
-    private const int ProcessOrder = -1000;
-
     // Performer.
     private Performer _performer = null;
 
@@ -115,7 +112,7 @@ namespace Barely.Examples {
         }
         _beatEventCallback(bar, beat);
         ++_beat;
-      }, 0.0, ProcessOrder));
+      }, 0.0));
     }
 
     private void OnDisable() {

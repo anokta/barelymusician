@@ -17,9 +17,8 @@ class Arpeggiator {
   // Constructs a new `Arpeggiator`.
   ///
   /// @param musician Musician.
-  /// @param process_order Process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Arpeggiator(Musician& musician, int process_order = -1) noexcept;
+  explicit Arpeggiator(Musician& musician) noexcept;
 
   /// Destroys `Arpeggiator`.
   ~Arpeggiator() noexcept;

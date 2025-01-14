@@ -15,7 +15,7 @@ using ::testing::Optional;
 
 // Tests that the performer processs a single task as expected.
 TEST(PerformerTest, ProcessSingleTask) {
-  Performer performer(/*process_order=*/0);
+  Performer performer;
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
@@ -108,7 +108,7 @@ TEST(PerformerTest, ProcessSingleTask) {
 
 // Tests that the performer processs multiple tasks as expected.
 TEST(PerformerTest, ProcessMultipleTasks) {
-  Performer performer(/*process_order=*/0);
+  Performer performer;
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
@@ -171,7 +171,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
 // Tests that the performer sets its current position as expected.
 TEST(PerformerTest, SetPosition) {
-  Performer performer(/*process_order=*/0);
+  Performer performer;
   EXPECT_EQ(performer.GetPosition(), 0.0);
 
   performer.SetPosition(2.75);

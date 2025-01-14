@@ -200,12 +200,11 @@ bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   return true;
 }
 
-bool BarelyPerformer_Create(BarelyMusicianHandle musician, int32_t process_order,
-                            BarelyPerformerHandle* out_performer) {
+bool BarelyPerformer_Create(BarelyMusicianHandle musician, BarelyPerformerHandle* out_performer) {
   if (!musician) return false;
   if (!out_performer) return false;
 
-  *out_performer = static_cast<BarelyPerformer*>(musician->CreatePerformer(process_order));
+  *out_performer = static_cast<BarelyPerformer*>(musician->CreatePerformer());
   (*out_performer)->musician = musician;
   return true;
 }

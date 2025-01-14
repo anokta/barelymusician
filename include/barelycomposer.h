@@ -68,10 +68,9 @@ typedef struct BarelyRepeater* BarelyRepeaterHandle;
 /// Creates a new arpeggiator.
 ///
 /// @param musician Musician handle.
-/// @param process_order Arpeggiator process order.
 /// @param out_arpeggiator Output arpeggiator handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_Create(BarelyMusician* musician, int32_t process_order,
+BARELY_EXPORT bool BarelyArpeggiator_Create(BarelyMusician* musician,
                                             BarelyArpeggiatorHandle* out_arpeggiator);
 
 /// Destroys an arpeggiator.
@@ -216,10 +215,9 @@ BARELY_EXPORT bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater);
 /// Creates a new repeater.
 ///
 /// @param musician Musician handle.
-/// @param process_order Repeater process order.
 /// @param out_repeater Output repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Create(BarelyMusician* musician, int32_t process_order,
+BARELY_EXPORT bool BarelyRepeater_Create(BarelyMusician* musician,
                                          BarelyRepeaterHandle* out_repeater);
 
 /// Destroys an repeater.
@@ -339,12 +337,10 @@ class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
   /// Creates a new `Arpeggiator`.
   ///
   /// @param musician Musician.
-  /// @param process_order Process order.
-  explicit Arpeggiator(Musician& musician, int process_order = 0) noexcept
+  explicit Arpeggiator(Musician& musician) noexcept
       : HandleWrapper([&]() {
           BarelyArpeggiatorHandle arpeggiator = nullptr;
-          [[maybe_unused]] const bool success =
-              BarelyArpeggiator_Create(musician, static_cast<int32_t>(process_order), &arpeggiator);
+          [[maybe_unused]] const bool success = BarelyArpeggiator_Create(musician, &arpeggiator);
           assert(success);
           return arpeggiator;
         }()) {}
@@ -558,12 +554,10 @@ class Repeater : public HandleWrapper<BarelyRepeaterHandle> {
   /// Creates a new `Repeater`.
   ///
   /// @param musician Musician.
-  /// @param process_order Process order.
-  explicit Repeater(Musician& musician, int process_order = 0) noexcept
+  explicit Repeater(Musician& musician) noexcept
       : HandleWrapper([&]() {
           BarelyRepeaterHandle repeater = nullptr;
-          [[maybe_unused]] const bool success =
-              BarelyRepeater_Create(musician, static_cast<int32_t>(process_order), &repeater);
+          [[maybe_unused]] const bool success = BarelyRepeater_Create(musician, &repeater);
           assert(success);
           return repeater;
         }()) {}

@@ -20,8 +20,6 @@ namespace Barely {
   /// notes in sequence.
   [RequireComponent(typeof(Instrument))]
   public class Arpeggiator : MonoBehaviour {
-    public int ProcessOrder = 0;
-
     /// Gate ratio.
     [Range(0.0f, 1.0f)]
     public float GateRatio = 0.5f;

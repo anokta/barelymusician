@@ -19,9 +19,8 @@ class Repeater {
   // Constructs a new `Repeater`.
   ///
   /// @param musician Musician.
-  /// @param process_order Process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Repeater(Musician& musician, int process_order = 0) noexcept;
+  explicit Repeater(Musician& musician) noexcept;
 
   /// Destroys `Repeater`.
   ~Repeater() noexcept;

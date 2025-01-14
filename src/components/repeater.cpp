@@ -18,8 +18,8 @@ constexpr float kNoteIntensity = 1.0f;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(Musician& musician, int process_order) noexcept
-    : musician_(&musician), performer_(musician_->CreatePerformer(process_order)) {
+Repeater::Repeater(Musician& musician) noexcept
+    : musician_(&musician), performer_(musician_->CreatePerformer()) {
   performer_->SetBeatCallback({
       [](void* user_data) noexcept {
         auto& repeater = *static_cast<Repeater*>(user_data);

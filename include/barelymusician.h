@@ -65,7 +65,7 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   auto performer = musician.CreatePerformer(/*process_order=*/0);
+///   auto performer = musician.CreatePerformer();
 ///
 ///   // Create a task.
 ///   auto task = performer.CreateTask([]() { /*populate this*/ }, /*position=*/0.0);
@@ -150,7 +150,7 @@
 ///   @code{.cpp}
 ///   // Create.
 ///   BarelyPerformerHandle performer = nullptr;
-///   BarelyPerformer_Create(musician, /*process_order=*/0, &performer);
+///   BarelyPerformer_Create(musician, &performer);
 ///
 ///   // Create a task.
 ///   BarelyTaskHandle task = nullptr;
@@ -574,10 +574,9 @@ BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, double t
 /// Creates a performer.
 ///
 /// @param musician Musician handle.
-/// @param process_order Process order.
 /// @param out_performer Output performer handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician, int32_t process_order,
+BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician,
                                           BarelyPerformerHandle* out_performer);
 
 /// Destroys a performer.
@@ -1233,12 +1232,10 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// Constructs a new `Performer`.
   ///
   /// @param musician Raw musician handle.
-  /// @param process_order Process order.
-  explicit Performer(BarelyMusicianHandle musician, int process_order = 0) noexcept
+  explicit Performer(BarelyMusicianHandle musician) noexcept
       : HandleWrapper([&]() {
           BarelyPerformerHandle performer = nullptr;
-          [[maybe_unused]] const bool success =
-              BarelyPerformer_Create(musician, static_cast<int32_t>(process_order), &performer);
+          [[maybe_unused]] const bool success = BarelyPerformer_Create(musician, &performer);
           assert(success);
           return performer;
         }()) {}
@@ -1459,11 +1456,8 @@ class Musician : public HandleWrapper<BarelyMusicianHandle> {
 
   /// Creates a performer.
   ///
-  /// @param process_order Process order.
   /// @return Performer.
-  [[nodiscard]] Performer CreatePerformer(int process_order = 0) noexcept {
-    return Performer(*this, process_order);
-  }
+  [[nodiscard]] Performer CreatePerformer() noexcept { return Performer(*this); }
 
   /// Returns the reference frequency.
   ///

@@ -41,9 +41,9 @@ Instrument* Musician::CreateInstrument() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer* Musician::CreatePerformer(int process_order) noexcept {
-  Performer* performer = performer_pool_.Construct(process_order);
-  [[maybe_unused]] const bool success = performers_.emplace(process_order, performer).second;
+Performer* Musician::CreatePerformer() noexcept {
+  Performer* performer = performer_pool_.Construct();
+  [[maybe_unused]] const bool success = performers_.emplace(performer).second;
   assert(success);
   return performer;
 }
@@ -59,8 +59,7 @@ void Musician::DestroyInstrument(Instrument* instrument) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Musician::DestroyPerformer(Performer* performer) noexcept {
   assert(performer != nullptr);
-  [[maybe_unused]] const bool success =
-      (performers_.erase({performer->GetProcessOrder(), performer}) == 1);
+  [[maybe_unused]] const bool success = (performers_.erase(performer) == 1);
   assert(success);
   performer_pool_.Destruct(performer);
 }
@@ -103,7 +102,7 @@ void Musician::Update(double timestamp) noexcept {
     if (tempo_ > 0.0) {
       double update_duration = GetBeatsFromSeconds(timestamp - timestamp_);
       bool has_tasks_to_process = false;
-      for (const auto& [_, performer] : performers_) {
+      for (const auto& performer : performers_) {
         if (const auto maybe_duration = performer->GetDurationToNextTask();
             maybe_duration && maybe_duration < update_duration) {
           has_tasks_to_process = true;
@@ -113,7 +112,7 @@ void Musician::Update(double timestamp) noexcept {
       assert(update_duration > 0.0 || has_tasks_to_process);
 
       if (update_duration > 0) {
-        for (const auto& [_, performer] : performers_) {
+        for (const auto& performer : performers_) {
           performer->Update(update_duration);
         }
 
@@ -125,7 +124,7 @@ void Musician::Update(double timestamp) noexcept {
       }
 
       if (has_tasks_to_process) {
-        for (const auto& [_, performer] : performers_) {
+        for (const auto& performer : performers_) {
           performer->ProcessNextTaskAtPosition();
         }
       }

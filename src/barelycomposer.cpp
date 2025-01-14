@@ -13,8 +13,8 @@
 
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::internal::Arpeggiator {
-  BarelyArpeggiator(barely::internal::Musician& musician, int process_order) noexcept
-      : barely::internal::Arpeggiator(musician, process_order) {}
+  BarelyArpeggiator(barely::internal::Musician& musician) noexcept
+      : barely::internal::Arpeggiator(musician) {}
 };
 
 // Random.
@@ -24,15 +24,15 @@ struct BarelyRandom : public barely::internal::Random {
 
 // Repeater.
 struct BarelyRepeater : public barely::internal::Repeater {
-  BarelyRepeater(barely::internal::Musician& musician, int process_order) noexcept
-      : barely::internal::Repeater(musician, process_order) {}
+  BarelyRepeater(barely::internal::Musician& musician) noexcept
+      : barely::internal::Repeater(musician) {}
 };
 
-bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_order,
+bool BarelyArpeggiator_Create(BarelyMusicianHandle musician,
                               BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!musician || !out_arpeggiator) return false;
 
-  *out_arpeggiator = new BarelyArpeggiator(*musician, static_cast<int>(process_order));
+  *out_arpeggiator = new BarelyArpeggiator(*musician);
   return true;
 }
 
@@ -175,11 +175,10 @@ bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
   return true;
 }
 
-bool BarelyRepeater_Create(BarelyMusicianHandle musician, int32_t process_order,
-                           BarelyRepeaterHandle* out_repeater) {
+bool BarelyRepeater_Create(BarelyMusicianHandle musician, BarelyRepeaterHandle* out_repeater) {
   if (!musician || !out_repeater) return false;
 
-  *out_repeater = new BarelyRepeater(*musician, static_cast<int>(process_order));
+  *out_repeater = new BarelyRepeater(*musician);
   return true;
 }
 

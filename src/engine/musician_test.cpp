@@ -125,7 +125,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   Musician musician(kSampleRate);
 
   // Create a performer.
-  Performer* performer = musician.CreatePerformer(/*process_order=*/0);
+  Performer* performer = musician.CreatePerformer();
 
   // Create a task event.
   double task_position = 0.0;

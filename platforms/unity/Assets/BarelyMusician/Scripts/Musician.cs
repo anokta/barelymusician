@@ -92,12 +92,12 @@ namespace Barely {
         }
         switch (component) {
           case Arpeggiator arpeggiator:
-            if (BarelyArpeggiator_Create(_handle, arpeggiator.ProcessOrder, ref componentHandle)) {
+            if (BarelyArpeggiator_Create(_handle, ref componentHandle)) {
               return;
             }
             break;
           case Repeater repeater:
-            if (BarelyRepeater_Create(_handle, repeater.ProcessOrder, ref componentHandle)) {
+            if (BarelyRepeater_Create(_handle, ref componentHandle)) {
               return;
             }
             break;
@@ -415,7 +415,7 @@ namespace Barely {
         if (Handle == IntPtr.Zero || performerHandle != IntPtr.Zero) {
           return;
         }
-        if (!BarelyMusician_AddPerformer(Handle, /*processOrder=*/0, ref performerHandle)) {
+        if (!BarelyMusician_AddPerformer(Handle, ref performerHandle)) {
           Debug.LogError("Failed to create performer '" + performer.name + "'");
         }
       }
@@ -1140,7 +1140,7 @@ namespace Barely {
                                                               ref IntPtr outInstrument);
 
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_AddPerformer")]
-      private static extern bool BarelyMusician_AddPerformer(IntPtr musician, Int32 processOrder,
+      private static extern bool BarelyMusician_AddPerformer(IntPtr musician,
                                                              ref IntPtr outPerformer);
 
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_Create")]
@@ -1236,7 +1236,7 @@ namespace Barely {
 
       // Components.
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Create")]
-      private static extern bool BarelyArpeggiator_Create(IntPtr musician, Int32 processOrder,
+      private static extern bool BarelyArpeggiator_Create(IntPtr musician,
                                                           ref IntPtr outArpeggiator);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
@@ -1278,8 +1278,7 @@ namespace Barely {
       private static extern bool BarelyRepeater_Clear(IntPtr repeater);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Create")]
-      private static extern bool BarelyRepeater_Create(IntPtr musician, Int32 processOrder,
-                                                       ref IntPtr outRepeater);
+      private static extern bool BarelyRepeater_Create(IntPtr musician, ref IntPtr outRepeater);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Destroy")]
       private static extern bool BarelyRepeater_Destroy(IntPtr repeater);

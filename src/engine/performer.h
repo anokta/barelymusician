@@ -54,9 +54,7 @@ class Performer {
   };
 
   /// Constructs a new `Performer`.
-  ///
-  /// @param process_order Process order.
-  explicit Performer(int process_order) noexcept;
+  Performer() noexcept;
 
   /// Creates a new task.
   ///
@@ -90,11 +88,6 @@ class Performer {
   ///
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept;
-
-  /// Returns process order.
-  ///
-  /// @return Process order.
-  [[nodiscard]] int GetProcessOrder() const noexcept;
 
   /// Returns whether performer is looping or not.
   ///
@@ -183,9 +176,6 @@ class Performer {
 
   // Position in beats.
   double position_ = 0.0;
-
-  // Process order.
-  int process_order_ = 0;
 
   // Map of tasks.
   Pool<Task> recurring_task_pool_;

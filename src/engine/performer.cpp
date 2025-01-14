@@ -25,8 +25,7 @@ void Performer::Task::SetPosition(double position) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer::Performer(int process_order) noexcept
-    : process_order_(process_order), recurring_task_pool_(kMaxRecurringTaskPerPerformerCount) {}
+Performer::Performer() noexcept : recurring_task_pool_(kMaxRecurringTaskPerPerformerCount) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Performer::Task* Performer::CreateTask(const TaskEvent& task_event, double position) noexcept {
@@ -96,8 +95,6 @@ double Performer::GetLoopBeginPosition() const noexcept { return loop_begin_posi
 double Performer::GetLoopLength() const noexcept { return loop_length_; }
 
 double Performer::GetPosition() const noexcept { return position_; }
-
-int Performer::GetProcessOrder() const noexcept { return process_order_; }
 
 bool Performer::IsLooping() const noexcept { return is_looping_; }
 

@@ -17,8 +17,8 @@ constexpr float kNoteIntensity = 1.0f;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
-    : musician_(&musician), performer_(musician_->CreatePerformer(process_order)) {
+Arpeggiator::Arpeggiator(Musician& musician) noexcept
+    : musician_(&musician), performer_(musician_->CreatePerformer()) {
   performer_->SetLooping(true);
   performer_->SetLoopLength(1.0);
   // TODO(#126): This should not need `TaskEvent::Callback`.

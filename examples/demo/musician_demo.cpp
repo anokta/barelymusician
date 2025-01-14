@@ -319,7 +319,7 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   // Beat callback.
-  auto metronome = musician.CreatePerformer(-10);
+  auto metronome = musician.CreatePerformer();
   int harmonic = 0;
   metronome.SetBeatCallback([&]() {
     // Update transport.

@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <memory>
-#include <set>
 #include <unordered_set>
 #include <utility>
 
@@ -32,10 +31,9 @@ class Musician {
 
   /// Creates a new performer.
   ///
-  /// @param process_order Process order.
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Performer* CreatePerformer(int process_order) noexcept;
+  Performer* CreatePerformer() noexcept;
 
   /// Destroys an instrument.
   ///
@@ -103,9 +101,9 @@ class Musician {
   Pool<Instrument> instrument_pool_;
   std::unordered_set<Instrument*> instruments_;
 
-  // Set of process order-performer pairs.
+  // Set of performers.
   Pool<Performer> performer_pool_;
-  std::set<std::pair<int, Performer*>> performers_;
+  std::unordered_set<Performer*> performers_;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;

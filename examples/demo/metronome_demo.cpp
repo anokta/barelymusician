@@ -63,7 +63,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  auto metronome = musician.CreatePerformer(-1);
+  auto metronome = musician.CreatePerformer();
   metronome.SetBeatCallback([&]() {
     const int beat = static_cast<int>(metronome.GetPosition());
     const int current_bar = (beat / kBeatCount) + 1;

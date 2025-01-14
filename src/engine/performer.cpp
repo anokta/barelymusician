@@ -70,7 +70,7 @@ std::optional<double> Performer::GetDurationToNextTask() const noexcept {
 
   // Check beat callback.
   // TODO(#147): POC-only, this can be cleaned up after task refactor.
-  if (beat_event_.callback) {
+  if (beat_callback_) {
     double next_beat_position =
         (last_beat_position_ == position_) ? std::ceil(position_ + 1.0) : std::ceil(position_);
     if (is_looping_ && next_beat_position > loop_begin_position_ + loop_length_) {
@@ -108,10 +108,9 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     return;
   }
   // TODO(#147): POC-only, this can be cleaned up after task refactor.
-  if (beat_event_.callback && last_beat_position_ != position_ &&
-      std::ceil(position_) == position_) {
+  if (last_beat_position_ != position_ && std::ceil(position_) == position_) {
     last_beat_position_ = position_;
-    beat_event_.callback(beat_event_.user_data);
+    beat_callback_();
   }
   if (const auto it = GetNextRecurringTask();
       it != recurring_tasks_.end() && it->second->GetPosition() == position_ &&
@@ -122,8 +121,8 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
   }
 }
 
-void Performer::SetBeatCallback(BarelyBeatCallback beat_callback, void* user_data) noexcept {
-  beat_event_ = {beat_callback, user_data};
+void Performer::SetBeatCallback(BeatCallback beat_callback) noexcept {
+  beat_callback_ = beat_callback;
 }
 
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {

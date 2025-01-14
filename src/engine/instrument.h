@@ -12,7 +12,7 @@
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/sample_data.h"
-#include "engine/event.h"
+#include "engine/callback.h"
 #include "engine/message_queue.h"
 
 namespace barely::internal {
@@ -20,6 +20,12 @@ namespace barely::internal {
 /// Class that controls an instrument.
 class Instrument {
  public:
+  /// Note off callback alias.
+  using NoteOffCallback = Callback<BarelyNoteOffCallback>;
+
+  /// Note on callback alias.
+  using NoteOnCallback = Callback<BarelyNoteOnCallback>;
+
   /// Constructs a new `Instrument`.
   ///
   /// @param sample_rate Sampling rate in hertz.
@@ -94,8 +100,7 @@ class Instrument {
   /// Sets the note off callback.
   ///
   /// @param note_off_callback Note off callback.
-  /// @param user_data Pointer to user data.
-  void SetNoteOffCallback(BarelyNoteOffCallback note_off_callback, void* user_data) noexcept;
+  void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept;
 
   /// Sets a note on.
   ///
@@ -107,8 +112,7 @@ class Instrument {
   /// Sets the note on callback.
   ///
   /// @param note_on_callback Note on callback.
-  /// @param user_data Pointer to user data.
-  void SetNoteOnCallback(BarelyNoteOnCallback note_on_callback, void* user_data) noexcept;
+  void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept;
 
   /// Sets the reference frequency.
   ///
@@ -195,19 +199,11 @@ class Instrument {
   // Map of note control arrays by their pitches.
   std::unordered_map<float, NoteControlArray> note_controls_;
 
-  // Note off event.
-  struct NoteOffEvent {
-    BarelyNoteOffCallback callback = nullptr;
-    void* user_data = nullptr;
-  };
-  NoteOffEvent note_off_event_ = {};
+  // Note off callback.
+  NoteOffCallback note_off_callback_ = {};
 
-  // Note on event.
-  struct NoteOnEvent {
-    BarelyNoteOnCallback callback = nullptr;
-    void* user_data = nullptr;
-  };
-  NoteOnEvent note_on_event_ = {};
+  // Note on callback.
+  NoteOnCallback note_on_callback_ = {};
 
   // Update sample.
   int64_t update_sample_ = 0;

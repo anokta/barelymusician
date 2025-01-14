@@ -13,7 +13,6 @@
 #include "dsp/one_pole_filter.h"
 #include "dsp/oscillator.h"
 #include "dsp/sample_data.h"
-#include "engine/event.h"
 #include "engine/message.h"
 
 namespace barely::internal {
@@ -93,9 +92,7 @@ bool Instrument::Process(std::span<float> output_samples, int64_t process_sample
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::SetAllNotesOff() noexcept {
   for (const auto& [pitch, _] : std::exchange(note_controls_, {})) {
-    if (note_off_event_.callback) {
-      note_off_event_.callback(pitch, note_off_event_.user_data);
-    }
+    note_off_callback_(pitch);
     message_queue_.Add(update_sample_, NoteOffMessage{pitch});
   }
 }
@@ -117,16 +114,13 @@ void Instrument::SetNoteControl(float pitch, NoteControlType type, float value) 
 
 void Instrument::SetNoteOff(float pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
-    if (note_off_event_.callback) {
-      note_off_event_.callback(pitch, note_off_event_.user_data);
-    }
+    note_off_callback_(pitch);
     message_queue_.Add(update_sample_, NoteOffMessage{pitch});
   }
 }
 
-void Instrument::SetNoteOffCallback(BarelyNoteOffCallback note_off_callback,
-                                    void* user_data) noexcept {
-  note_off_event_ = {note_off_callback, user_data};
+void Instrument::SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept {
+  note_off_callback_ = note_off_callback;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -136,16 +130,13 @@ void Instrument::SetNoteOn(float pitch, float intensity) noexcept {
                                                                 Control(0.0f),  // kPitchShift
                                                             });
       success) {
-    if (note_on_event_.callback != nullptr) {
-      note_on_event_.callback(pitch, intensity, note_on_event_.user_data);
-    }
+    note_on_callback_(pitch, intensity);
     message_queue_.Add(update_sample_, NoteOnMessage{pitch, intensity});
   }
 }
 
-void Instrument::SetNoteOnCallback(BarelyNoteOnCallback note_on_callback,
-                                   void* user_data) noexcept {
-  note_on_event_ = {note_on_callback, user_data};
+void Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept {
+  note_on_callback_ = note_on_callback;
 }
 
 void Instrument::SetReferenceFrequency(float reference_frequency) noexcept {

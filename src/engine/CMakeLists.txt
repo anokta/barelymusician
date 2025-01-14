@@ -1,4 +1,9 @@
 add_library(
+  barelymusician_engine_callback INTERFACE
+  callback.h
+)
+
+add_library(
   barelymusician_engine_config INTERFACE
   config.h
 )
@@ -15,7 +20,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_engine_instrument
-  barelymusician_engine_event
+  barelymusician_engine_callback
   barelymusician_engine_message
   barelymusician_engine_message_queue
   barelymusician_common_find_or_null
@@ -68,6 +73,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_engine_performer
+  barelymusician_engine_callback
   barelymusician_engine_config
   barelymusician_engine_event
   barelymusician_engine_pool

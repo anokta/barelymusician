@@ -34,7 +34,7 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   // Add.
+///   // Create.
 ///   auto instrument = musician.CreateInstrument();
 ///
 ///   // Set a note on.
@@ -64,10 +64,10 @@
 /// - Performer:
 ///
 ///   @code{.cpp}
-///   // Add.
+///   // Create.
 ///   auto performer = musician.CreatePerformer(/*process_order=*/0);
 ///
-///   // Add a task.
+///   // Create a task.
 ///   auto task = performer.CreateTask([]() { /*populate this*/ }, /*position=*/0.0);
 ///
 ///   // Set looping on.

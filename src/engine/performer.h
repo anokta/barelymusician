@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "barelymusician.h"
+#include "engine/callback.h"
 #include "engine/event.h"
 #include "engine/pool.h"
 
@@ -17,6 +18,9 @@ namespace barely::internal {
 /// Class that wraps a performer.
 class Performer {
  public:
+  /// Beat callback alias.
+  using BeatCallback = Callback<BarelyBeatCallback>;
+
   /// Task.
   struct Task : public Event<TaskEvent> {
     /// Constructs a new `Task`.
@@ -108,8 +112,7 @@ class Performer {
   /// Sets the beat callback.
   ///
   /// @param beat_callback Beat callback.
-  /// @param user_data Pointer to user data.
-  void SetBeatCallback(BarelyBeatCallback beat_callback, void* user_data) noexcept;
+  void SetBeatCallback(BeatCallback beat_callback) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -163,12 +166,8 @@ class Performer {
   // Decremments the last processed recurring task iterator to its predecessor.
   void PrevLastProcessedRecurringTaskIt() noexcept;
 
-  // Beat event.
-  struct BeatEvent {
-    BarelyBeatCallback callback;
-    void* user_data;
-  };
-  BeatEvent beat_event_ = {};
+  // Beat callback.
+  BeatCallback beat_callback_ = {};
 
   // Denotes whether performer is looping or not.
   bool is_looping_ = false;

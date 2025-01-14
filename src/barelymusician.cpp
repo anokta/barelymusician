@@ -108,7 +108,7 @@ bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
                                          BarelyNoteOffCallback note_off_callback, void* user_data) {
   if (!instrument) return false;
 
-  instrument->SetNoteOffCallback(note_off_callback, user_data);
+  instrument->SetNoteOffCallback({note_off_callback, user_data});
   return true;
 }
 
@@ -123,7 +123,7 @@ bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
                                         BarelyNoteOnCallback note_on_callback, void* user_data) {
   if (!instrument) return false;
 
-  instrument->SetNoteOnCallback(note_on_callback, user_data);
+  instrument->SetNoteOnCallback({note_on_callback, user_data});
   return true;
 }
 
@@ -262,7 +262,7 @@ bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
                                      BarelyBeatCallback beat_callback, void* user_data) {
   if (!performer) return false;
 
-  performer->SetBeatCallback(beat_callback, user_data);
+  performer->SetBeatCallback({beat_callback, user_data});
   return true;
 }
 

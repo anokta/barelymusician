@@ -4,11 +4,6 @@ add_library(
 )
 
 add_library(
-  barelymusician_engine_config INTERFACE
-  config.h
-)
-
-add_library(
   barelymusician_engine_event INTERFACE
   event.h
 )
@@ -59,10 +54,8 @@ add_library(
 )
 target_link_libraries(
   barelymusician_engine_musician
-  barelymusician_engine_config
   barelymusician_engine_instrument
   barelymusician_engine_performer
-  barelymusician_engine_pool
   barelymusician_headeronly
 )
 
@@ -74,15 +67,8 @@ add_library(
 target_link_libraries(
   barelymusician_engine_performer
   barelymusician_engine_callback
-  barelymusician_engine_config
   barelymusician_engine_event
-  barelymusician_engine_pool
   barelymusician_headeronly
-)
-
-add_library(
-  barelymusician_engine_pool INTERFACE
-  pool.h
 )
 
 if(ENABLE_TESTS)

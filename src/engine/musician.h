@@ -7,10 +7,8 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "engine/config.h"
 #include "engine/instrument.h"
 #include "engine/performer.h"
-#include "engine/pool.h"
 
 namespace barely::internal {
 
@@ -97,13 +95,11 @@ class Musician {
   void Update(double timestamp) noexcept;
 
  private:
-  // Set of instruments.
-  Pool<Instrument> instrument_pool_;
-  std::unordered_set<Instrument*> instruments_;
+  // Map of instruments by their pointers.
+  std::unordered_map<Instrument*, std::unique_ptr<Instrument>> instruments_;
 
-  // Set of performers.
-  Pool<Performer> performer_pool_;
-  std::unordered_set<Performer*> performers_;
+  // Map of performers by their pointers.
+  std::unordered_map<Performer*, std::unique_ptr<Performer>> performers_;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;

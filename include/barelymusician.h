@@ -207,7 +207,7 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Control type enum alias.
+/// Control type enum.
 typedef enum BarelyControlType {
   /// Gain in decibels.
   BarelyControlType_kGain = 0,
@@ -245,7 +245,7 @@ typedef enum BarelyControlType {
   BarelyControlType_kCount,
 } BarelyControlType;
 
-/// Filter type enum alias.
+/// Filter type enum.
 typedef enum BarelyFilterType {
   /// None.
   BarelyFilterType_kNone = 0,
@@ -257,7 +257,7 @@ typedef enum BarelyFilterType {
   BarelyFilterType_kCount,
 } BarelyFilterType;
 
-/// Note control type enum alias.
+/// Note control type enum.
 typedef enum BarelyNoteControlType {
   /// Pitch shift.
   BarelyNoteControlType_kPitchShift = 0,
@@ -265,7 +265,7 @@ typedef enum BarelyNoteControlType {
   BarelyNoteControlType_kCount,
 } BarelyNoteControlType;
 
-/// Oscillator mode enum alias.
+/// Oscillator mode enum.
 typedef enum BarelyOscillatorMode {
   /// Mix.
   BarelyOscillatorMode_kMix = 0,
@@ -282,7 +282,7 @@ typedef enum BarelyOscillatorMode {
   BarelyOscillatorMode_kCount,
 } BarelyOscillatorMode;
 
-/// Oscillator shape enum alias.
+/// Oscillator shape enum.
 typedef enum BarelyOscillatorShape {
   /// None.
   BarelyOscillatorShape_kNone = 0,
@@ -298,7 +298,7 @@ typedef enum BarelyOscillatorShape {
   BarelyOscillatorShape_kCount,
 } BarelyOscillatorShape;
 
-/// Sample playback mode enum alias.
+/// Sample playback mode enum.
 typedef enum BarelySamplePlaybackMode {
   /// None.
   BarelySamplePlaybackMode_kNone = 0,
@@ -339,23 +339,23 @@ typedef struct BarelyPerformer* BarelyPerformerHandle;
 /// Task handle alias.
 typedef struct BarelyTask* BarelyTaskHandle;
 
-/// Beat callback signature.
-///
-/// @param user_data Pointer to user data.
-typedef void (*BarelyBeatCallback)(void* user_data);
-
-/// Note off callback signature.
+/// Instrument note off callback alias.
 ///
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyNoteOffCallback)(float pitch, void* user_data);
+typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, void* user_data);
 
-/// Note on callback signature.
+/// Instrument note on callback alias.
 ///
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyNoteOnCallback)(float pitch, float intensity, void* user_data);
+typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity, void* user_data);
+
+/// Performer beat callback alias.
+///
+/// @param user_data Pointer to user data.
+typedef void (*BarelyPerformer_BeatCallback)(void* user_data);
 
 /// Task event create callback signature.
 ///
@@ -477,11 +477,11 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument
 /// Sets the note off callback of an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @param note_off_callback Note off callback.
+/// @param callback Note off callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
-                                                       BarelyNoteOffCallback note_off_callback,
+                                                       BarelyInstrument_NoteOffCallback callback,
                                                        void* user_data);
 
 /// Sets an instrument note on.
@@ -496,11 +496,11 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
 /// Sets the note on callback of an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @param note_on_callback Note on callback.
+/// @param callback Note on callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
-                                                      BarelyNoteOnCallback note_on_callback,
+                                                      BarelyInstrument_NoteOnCallback callback,
                                                       void* user_data);
 
 /// Sets instrument sample data.
@@ -626,11 +626,11 @@ BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bo
 /// Sets the beat callback of a performer.
 ///
 /// @param performer Performer handle.
-/// @param beat_callback Pointer to beat callback.
+/// @param callback Beat callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
-                                                   BarelyBeatCallback beat_callback,
+                                                   BarelyPerformer_BeatCallback callback,
                                                    void* user_data);
 
 /// Sets the loop begin position of a performer.
@@ -961,8 +961,16 @@ class HandleWrapper {
 /// Class that wraps an instrument handle.
 class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
  public:
-  // TODO(#147): Clean the aliases up after task refactor.
+  /// Instrument note off callback alias.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
   using NoteOffCallback = std::function<void(float pitch)>;
+
+  /// Instrument note on callback alias.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
   using NoteOnCallback = std::function<void(float pitch, float intensity)>;
 
   /// Constructs a new `Instrument`.
@@ -1119,9 +1127,9 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the note off callback.
   ///
-  /// @param note_off_callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept {
-    note_off_callback_ = std::move(note_off_callback);
+  /// @param callback Note off callback.
+  void SetNoteOffCallback(NoteOffCallback callback) noexcept {
+    note_off_callback_ = std::move(callback);
     SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
   }
 
@@ -1136,9 +1144,9 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the note on callback.
   ///
-  /// @param note_on_callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept {
-    note_on_callback_ = std::move(note_on_callback);
+  /// @param callback Note on callback.
+  void SetNoteOnCallback(NoteOnCallback callback) noexcept {
+    note_on_callback_ = std::move(callback);
     SetCallback(BarelyInstrument_SetNoteOnCallback, note_on_callback_);
   }
 
@@ -1226,7 +1234,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
 /// Class that wraps a performer handle.
 class Performer : public HandleWrapper<BarelyPerformerHandle> {
  public:
-  // TODO(#147): Clean the aliases up after task refactor.
+  /// Beat callback function alias.
   using BeatCallback = std::function<void()>;
 
   /// Constructs a new `Performer`.

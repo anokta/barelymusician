@@ -117,9 +117,7 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
   }
 }
 
-void Performer::SetBeatCallback(BeatCallback beat_callback) noexcept {
-  beat_callback_ = beat_callback;
-}
+void Performer::SetBeatCallback(BeatCallback callback) noexcept { beat_callback_ = callback; }
 
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) {

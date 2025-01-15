@@ -21,10 +21,10 @@ namespace barely::internal {
 class Instrument {
  public:
   /// Note off callback alias.
-  using NoteOffCallback = Callback<BarelyNoteOffCallback>;
+  using NoteOffCallback = Callback<BarelyInstrument_NoteOffCallback>;
 
   /// Note on callback alias.
-  using NoteOnCallback = Callback<BarelyNoteOnCallback>;
+  using NoteOnCallback = Callback<BarelyInstrument_NoteOnCallback>;
 
   /// Constructs a new `Instrument`.
   ///
@@ -99,8 +99,8 @@ class Instrument {
 
   /// Sets the note off callback.
   ///
-  /// @param note_off_callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept;
+  /// @param callback Note off callback.
+  void SetNoteOffCallback(NoteOffCallback callback) noexcept;
 
   /// Sets a note on.
   ///
@@ -111,8 +111,8 @@ class Instrument {
 
   /// Sets the note on callback.
   ///
-  /// @param note_on_callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept;
+  /// @param callback Note on callback.
+  void SetNoteOnCallback(NoteOnCallback callback) noexcept;
 
   /// Sets the reference frequency.
   ///

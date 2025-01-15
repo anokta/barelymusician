@@ -105,10 +105,11 @@ bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch)
 }
 
 bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
-                                         BarelyNoteOffCallback note_off_callback, void* user_data) {
+                                         BarelyInstrument_NoteOffCallback callback,
+                                         void* user_data) {
   if (!instrument) return false;
 
-  instrument->SetNoteOffCallback({note_off_callback, user_data});
+  instrument->SetNoteOffCallback({callback, user_data});
   return true;
 }
 
@@ -120,10 +121,10 @@ bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch, 
 }
 
 bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
-                                        BarelyNoteOnCallback note_on_callback, void* user_data) {
+                                        BarelyInstrument_NoteOnCallback callback, void* user_data) {
   if (!instrument) return false;
 
-  instrument->SetNoteOnCallback({note_on_callback, user_data});
+  instrument->SetNoteOnCallback({callback, user_data});
   return true;
 }
 
@@ -258,10 +259,10 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
 }
 
 bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
-                                     BarelyBeatCallback beat_callback, void* user_data) {
+                                     BarelyPerformer_BeatCallback callback, void* user_data) {
   if (!performer) return false;
 
-  performer->SetBeatCallback({beat_callback, user_data});
+  performer->SetBeatCallback({callback, user_data});
   return true;
 }
 

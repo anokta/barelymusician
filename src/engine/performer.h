@@ -17,7 +17,7 @@ namespace barely::internal {
 class Performer {
  public:
   /// Beat callback alias.
-  using BeatCallback = Callback<BarelyBeatCallback>;
+  using BeatCallback = Callback<BarelyPerformer_BeatCallback>;
 
   /// Task.
   struct Task : public Event<TaskEvent> {
@@ -26,7 +26,6 @@ class Performer {
     /// @param performer Performer.
     /// @param task_event Task event.
     /// @param position Task position.
-    /// @param set_position_callback Set position callback.
     Task(Performer& performer, const TaskEvent& task_event, double position) noexcept;
 
     /// Returns the position.
@@ -99,8 +98,8 @@ class Performer {
 
   /// Sets the beat callback.
   ///
-  /// @param beat_callback Beat callback.
-  void SetBeatCallback(BeatCallback beat_callback) noexcept;
+  /// @param callback Beat callback.
+  void SetBeatCallback(BeatCallback callback) noexcept;
 
   /// Sets loop begin position.
   ///

@@ -167,8 +167,8 @@ class Instrument {
     // Maximum value.
     float max_value = std::numeric_limits<float>::max();
   };
-  using ControlArray = std::array<Control, static_cast<int>(BarelyControlType_kCount)>;
-  using NoteControlArray = std::array<Control, static_cast<int>(BarelyNoteControlType_kCount)>;
+  using ControlArray = std::array<Control, BarelyControlType_kCount>;
+  using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
 
   /// Builds a control message to be passed into the instrument processor.
   ControlMessage BuildControlMessage(ControlType type, float value) const noexcept;
@@ -178,22 +178,22 @@ class Instrument {
 
   // Array of controls.
   ControlArray controls_ = {
-      Control(0.0f, kMinDecibels, 0.0f),                                  // kGain
-      Control(0.0f),                                                      // kPitchShift
-      Control(false),                                                     // kRetrigger
-      Control(8, 1, 20),                                                  // kVoiceCount
-      Control(0.0f, 0.0f, 60.0f),                                         // kAttack
-      Control(0.0f, 0.0f, 60.0f),                                         // kDecay
-      Control(1.0f, 0.0f, 1.0f),                                          // kSustain
-      Control(0.0f, 0.0f, 60.0f),                                         // kRelease
-      Control(0.0f, -1.0f, 1.0f),                                         // kOscillatorMix
-      Control(0, 0, static_cast<int>(BarelyOscillatorMode_kCount) - 1),   // kOscillatorMode
-      Control(0.0f),                                                      // kOscillatorPitchShift
-      Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),  // kOscillatorShape
-      Control(0.5f, 0.0f, 1.0f),                                          // kPulseWidth
-      Control(0, 0, static_cast<int>(BarelySamplePlaybackMode_kCount) - 1),  // kSamplePlaybackMode
-      Control(0, 0, static_cast<int>(BarelyFilterType_kCount) - 1),          // kFilterType
-      Control(0.0f, 0.0f),                                                   // kFilterFrequency
+      Control(0.0f, kMinDecibels, 0.0f),                   // kGain
+      Control(0.0f),                                       // kPitchShift
+      Control(false),                                      // kRetrigger
+      Control(8, 1, 20),                                   // kVoiceCount
+      Control(0.0f, 0.0f, 60.0f),                          // kAttack
+      Control(0.0f, 0.0f, 60.0f),                          // kDecay
+      Control(1.0f, 0.0f, 1.0f),                           // kSustain
+      Control(0.0f, 0.0f, 60.0f),                          // kRelease
+      Control(0.0f, -1.0f, 1.0f),                          // kOscillatorMix
+      Control(0, 0, BarelyOscillatorMode_kCount - 1),      // kOscillatorMode
+      Control(0.0f),                                       // kOscillatorPitchShift
+      Control(0, 0, BarelyOscillatorShape_kCount - 1),     // kOscillatorShape
+      Control(0.5f, 0.0f, 1.0f),                           // kPulseWidth
+      Control(0, 0, BarelySamplePlaybackMode_kCount - 1),  // kSamplePlaybackMode
+      Control(0, 0, BarelyFilterType_kCount - 1),          // kFilterType
+      Control(0.0f, 0.0f),                                 // kFilterFrequency
   };
 
   // Map of note control arrays by their pitches.

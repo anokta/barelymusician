@@ -65,8 +65,12 @@ VERS_1.0 {
     BarelyPerformer_Stop;
     BarelyTask_Create;
     BarelyTask_Destroy;
+    BarelyTask_GetDuration;
     BarelyTask_GetPosition;
+    BarelyTask_IsActive;
+    BarelyTask_SetDuration;
     BarelyTask_SetPosition;
+    BarelyTask_SetProcessCallback;
   local:
     *;
 };

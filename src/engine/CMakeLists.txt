@@ -4,11 +4,6 @@ add_library(
 )
 
 add_library(
-  barelymusician_engine_event INTERFACE
-  event.h
-)
-
-add_library(
   barelymusician_engine_instrument
   instrument.cpp
   instrument.h
@@ -67,23 +62,10 @@ add_library(
 target_link_libraries(
   barelymusician_engine_performer
   barelymusician_engine_callback
-  barelymusician_engine_event
   barelymusician_headeronly
 )
 
 if(ENABLE_TESTS)
-  add_executable(
-    barelymusician_engine_event_test
-    event_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_engine_event_test
-    barelymusician_engine_event
-    barelymusician_headeronly
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_engine_event_test)
-
   add_executable(
     barelymusician_engine_instrument_test
     instrument_test.cpp

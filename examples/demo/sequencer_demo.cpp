@@ -18,7 +18,7 @@ using ::barely::ControlType;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::Task;
-using ::barely::TaskEvent;
+using ::barely::TaskState;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -80,14 +80,21 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.emplace_back(5 + 2.0 / 3.0, 1.0 / 3.0, 11.0f / 12.0f);
   score.emplace_back(6.0, 2.0, 1.0f);
 
-  std::unordered_map<int, std::pair<Task, Task>> tasks;
-  const auto build_note_fn = [&](const SequencerNote& note) -> std::pair<Task, Task> {
-    return std::pair{
-        performer.CreateTask([&instrument, pitch = note.pitch]() { instrument.SetNoteOn(pitch); },
-                             note.position),
-        // TODO(#147): Temp hack to make sure the note is stopped before the next beat.
-        performer.CreateTask([&instrument, pitch = note.pitch]() { instrument.SetNoteOff(pitch); },
-                             note.position + note.duration - 1e-6)};
+  std::unordered_map<int, Task> tasks;
+  const auto build_note_fn = [&](const SequencerNote& note) {
+    return performer.CreateTask(note.position, note.duration,
+                                [&instrument, pitch = note.pitch](TaskState state) {
+                                  switch (state) {
+                                    case TaskState::kBegin:
+                                      instrument.SetNoteOn(pitch);
+                                      break;
+                                    case TaskState::kEnd:
+                                      instrument.SetNoteOff(pitch);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
   };
   for (int i = 0; i < static_cast<int>(score.size()); ++i) {
     tasks.emplace(i, build_note_fn(score[i]));
@@ -111,11 +118,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
       if (const auto it = tasks.find(index - 1); it != tasks.end()) {
-        if (const double position = performer.GetPosition();
-            position >= score[index - 1].position &&
-            position < score[index - 1].position + score[index - 1].duration) {
-          instrument.SetNoteOff(score[index - 1].pitch);
-        }
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {
@@ -130,7 +132,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (performer.IsPlaying()) {
           performer.Stop();
-          instrument.SetAllNotesOff();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();

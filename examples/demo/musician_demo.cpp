@@ -34,6 +34,7 @@ using ::barely::SampleDataSlice;
 using ::barely::SamplePlaybackMode;
 using ::barely::Scale;
 using ::barely::Task;
+using ::barely::TaskState;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -110,11 +111,15 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, float pitch, float intensity,
                   Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
-  tasks.emplace_back(performer.CreateTask(
-      [pitch, intensity, duration, &instrument]() { instrument.SetNoteOn(pitch, intensity); },
-      performer.GetPosition() + position));
-  tasks.emplace_back(performer.CreateTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-                                          performer.GetPosition() + position + duration));
+  tasks.emplace_back(
+      performer.CreateTask(performer.GetPosition() + position, duration,
+                           [pitch, intensity, &instrument](TaskState state) noexcept {
+                             if (state == TaskState::kBegin) {
+                               instrument.SetNoteOn(pitch, intensity);
+                             } else if (state == TaskState::kEnd) {
+                               instrument.SetNoteOff(pitch);
+                             }
+                           }));
 }
 
 void ComposeChord(float intensity, int harmonic, const Scale& scale, Instrument& instrument,
@@ -226,8 +231,6 @@ int main(int /*argc*/, char* argv[]) {
   // Initialize performers.
   std::vector<std::tuple<Performer, std::vector<Task>, BeatComposerCallback, size_t>> performers;
   std::vector<Instrument> instruments;
-  // TODO(#147): This should not be necessary after C++ handle refactor.
-  instruments.reserve(16);
 
   const auto build_instrument_fn = [&](OscillatorShape type, float gain, float attack,
                                        float release) {

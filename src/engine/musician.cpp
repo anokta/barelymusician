@@ -101,7 +101,7 @@ void Musician::Update(double timestamp) noexcept {
       double update_duration = GetBeatsFromSeconds(timestamp - timestamp_);
       bool has_tasks_to_process = false;
       for (const auto& [performer, _] : performers_) {
-        if (const auto maybe_duration = performer->GetDurationToNextTask();
+        if (const auto maybe_duration = performer->GetNextDuration();
             maybe_duration && maybe_duration < update_duration) {
           has_tasks_to_process = true;
           update_duration = *maybe_duration;
@@ -123,7 +123,7 @@ void Musician::Update(double timestamp) noexcept {
 
       if (has_tasks_to_process) {
         for (const auto& [performer, _] : performers_) {
-          performer->ProcessNextTaskAtPosition();
+          performer->ProcessAllTasksAtPosition();
         }
       }
     } else if (timestamp_ < timestamp) {

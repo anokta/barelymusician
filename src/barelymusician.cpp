@@ -309,13 +309,15 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
   return true;
 }
 
-bool BarelyTask_Create(BarelyPerformerHandle performer, const BarelyTaskEvent* task_event,
-                       double position, BarelyTaskHandle* out_task) {
+bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double duration,
+                       BarelyTask_ProcessCallback callback, void* user_data,
+                       BarelyTaskHandle* out_task) {
   if (!performer) return false;
-  if (!task_event) return false;
+  if (duration < 0.0) return false;
   if (!out_task) return false;
 
-  *out_task = static_cast<BarelyTask*>(performer->CreateTask(*task_event, position));
+  *out_task =
+      static_cast<BarelyTask*>(performer->CreateTask(position, duration, {callback, user_data}));
   // TODO(#147): Temp hack to allow destroying by handle.
   (*out_task)->performer = performer;
   return *out_task;
@@ -328,6 +330,14 @@ bool BarelyTask_Destroy(BarelyTaskHandle task) {
   return true;
 }
 
+bool BarelyTask_GetDuration(BarelyTaskHandle task, double* out_duration) {
+  if (!task) return false;
+  if (!out_duration) return false;
+
+  *out_duration = task->GetDuration();
+  return true;
+}
+
 bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
   if (!task) return false;
   if (!out_position) return false;
@@ -336,9 +346,32 @@ bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
   return true;
 }
 
+bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active) {
+  if (!task) return false;
+  if (!out_is_active) false;
+
+  *out_is_active = task->IsActive();
+  return true;
+}
+
+bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration) {
+  if (!task) return false;
+
+  task->SetDuration(duration);
+  return true;
+}
+
 bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
   if (!task) return false;
 
   task->SetPosition(position);
+  return true;
+}
+
+bool BarelyTask_SetProcessCallback(BarelyTaskHandle task, BarelyTask_ProcessCallback callback,
+                                   void* user_data) {
+  if (!task) return false;
+
+  task->SetProcessCallback({callback, user_data});
   return true;
 }

@@ -78,6 +78,12 @@ class Arpeggiator {
   void SetStyle(ArpeggiatorStyle style) noexcept;
 
  private:
+  // Helper function to set the next note off.
+  void SetNextNoteOff() noexcept;
+
+  // Helper function to set the next note on.
+  void SetNextNoteOn() noexcept;
+
   // Stop the arpeggiator.
   void Stop() noexcept;
 
@@ -89,6 +95,9 @@ class Arpeggiator {
 
   // Performer.
   Performer* performer_ = nullptr;
+
+  // Task.
+  Performer::Task* task_ = nullptr;
 
   // Instrument.
   Instrument* instrument_ = nullptr;
@@ -105,8 +114,8 @@ class Arpeggiator {
   // Current index.
   int index_ = -1;
 
-  // Note off task.
-  Performer::Task* note_off_task_;
+  // Current pitch.
+  float pitch_ = 0.0f;
 
   // Random number generator.
   Random random_;

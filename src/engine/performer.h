@@ -5,11 +5,11 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <set>
 #include <utility>
 
 #include "barelymusician.h"
 #include "engine/callback.h"
-#include "engine/event.h"
 
 namespace barely::internal {
 
@@ -20,30 +20,95 @@ class Performer {
   using BeatCallback = Callback<BarelyPerformer_BeatCallback>;
 
   /// Task.
-  struct Task : public Event<TaskEvent> {
+  class Task {
+   public:
+    /// Process callback alias.
+    using ProcessCallback = Callback<BarelyTask_ProcessCallback>;
+
     /// Constructs a new `Task`.
     ///
     /// @param performer Performer.
-    /// @param task_event Task event.
     /// @param position Task position.
-    Task(Performer& performer, const TaskEvent& task_event, double position) noexcept;
+    /// @param duration Task duration.
+    /// @param callback Task process callback.
+    Task(Performer& performer, double position, double duration, ProcessCallback callback) noexcept
+        : performer_(performer),
+          position_(position),
+          duration_(duration),
+          process_callback_(callback) {}
+
+    /// Returns the duration.
+    ///
+    /// @return Duration in beats.
+    double GetDuration() const noexcept { return duration_; }
 
     /// Returns the position.
     ///
     /// @return Position in beats.
     double GetPosition() const noexcept { return position_; }
 
+    /// Returns the end position.
+    ///
+    /// @return End position in beats.
+    double GetEndPosition() const noexcept { return position_ + duration_; }
+
+    /// Returns whether the task is currently active or not.
+    ///
+    /// @return True if active, false otherwise.
+    bool IsActive() const noexcept { return is_active_; }
+
+    /// Returns whether a position is inside the task boundaries.
+    ///
+    /// @return True if inside, false otherwise.
+    bool IsInside(double position) const noexcept {
+      return position >= position_ && position < GetEndPosition();
+    }
+
+    /// Processes the task.
+    ///
+    /// @param state Task state.
+    void Process(TaskState state) noexcept {
+      process_callback_(static_cast<BarelyTaskState>(state));
+    }
+
+    /// Sets whether the task is currently active or not.
+    ///
+    /// @param is_active True if active, false otherwise.
+    void SetActive(bool is_active) noexcept {
+      is_active_ = is_active;
+      Process(is_active_ ? TaskState::kBegin : TaskState::kEnd);
+    }
+
+    /// Sets the duration.
+    ///
+    /// @param duration Duration in beats.
+    void SetDuration(double duration) noexcept;
+
     /// Sets the position.
     ///
     /// @param position Position in beats.
     void SetPosition(double position) noexcept;
 
+    /// Sets the process callback.
+    ///
+    /// @param callback Task process callback.
+    void SetProcessCallback(ProcessCallback callback) noexcept;
+
    private:
     // Performer.
     Performer& performer_;
 
-    // Position.
+    // Position in beats.
     double position_;
+
+    // Duration in beats.
+    double duration_;
+
+    // Process callback.
+    ProcessCallback process_callback_;
+
+    // Denotes whether the task is active or not.
+    bool is_active_ = false;
 
     // TODO(#147): Temp hack to allow destroying by handle.
    public:
@@ -52,21 +117,22 @@ class Performer {
 
   /// Creates a new task.
   ///
-  /// @param task_event Task event.
-  /// @param position Task position.
+  /// @param position Task position in beats.
+  /// @param duration Task duration in beats.
+  /// @param callback Task process callback.
   /// @return Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Task* CreateTask(const TaskEvent& task_event, double position) noexcept;
+  Task* CreateTask(double position, double duration, Task::ProcessCallback callback) noexcept;
 
   /// Destroys a task.
   ///
   /// @param task Pointer to task.
   void DestroyTask(Task* task) noexcept;
 
-  /// Returns the duration to next task.
+  /// Returns the duration to next callback.
   ///
   /// @return Optional duration in beats.
-  [[nodiscard]] std::optional<double> GetDurationToNextTask() const noexcept;
+  [[nodiscard]] std::optional<double> GetNextDuration() const noexcept;
 
   /// Returns loop begin position.
   ///
@@ -93,8 +159,8 @@ class Performer {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept;
 
-  /// Processes the next task at the current position.
-  void ProcessNextTaskAtPosition() noexcept;
+  /// Processes all tasks at the current position.
+  void ProcessAllTasksAtPosition() noexcept;
 
   /// Sets the beat callback.
   ///
@@ -122,11 +188,23 @@ class Performer {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetPosition(double position) noexcept;
 
+  /// Sets whether the task active is active or not.
+  ///
+  /// @param it Iterator to task.
+  /// @param is_active True if active, false otherwise.
+  void SetTaskActive(std::set<std::pair<double, Task*>>::iterator it, bool is_active) noexcept;
+
+  /// Sets task duration.
+  ///
+  /// @param task Pointer to task.
+  /// @param old_duration Old task duration.
+  void SetTaskDuration(Task* task, double old_position) noexcept;
+
   /// Sets task position.
   ///
   /// @param task Pointer to task.
-  /// @param position Task position.
-  void SetTaskPosition(Task* task, double position) noexcept;
+  /// @param old_position Old task position.
+  void SetTaskPosition(Task* task, double old_position) noexcept;
 
   /// Stops performer.
   void Start() noexcept;
@@ -141,17 +219,12 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
-  // Recurring task map alias.
-  using RecurringTaskMap = std::map<std::pair<double, Task*>, std::unique_ptr<Task>>;
-
-  // Returns an iterator to the next recurring task to process.
-  [[nodiscard]] RecurringTaskMap::const_iterator GetNextRecurringTask() const noexcept;
+  //  Returns an iterator to the next inactive task to process.
+  [[nodiscard]] std::set<std::pair<double, Task*>>::const_iterator GetNextInactiveTask()
+      const noexcept;
 
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
-
-  // Decremments the last processed recurring task iterator to its predecessor.
-  void PrevLastProcessedRecurringTaskIt() noexcept;
 
   // Beat callback.
   BeatCallback beat_callback_ = {};
@@ -171,13 +244,15 @@ class Performer {
   // Position in beats.
   double position_ = 0.0;
 
-  // Map of tasks by their position-pointer pairs.
-  RecurringTaskMap recurring_tasks_;
+  // Map of tasks with their position-pointer pairs.
+  std::unordered_map<Task*, std::unique_ptr<Task>> tasks_;
+  std::set<std::pair<double, Task*>> active_tasks_;
+  std::set<std::pair<double, Task*>> inactive_tasks_;
 
-  // Last processed recurring task iterator.
-  std::optional<RecurringTaskMap::const_iterator> last_processed_recurring_task_it_;
+  // Last processed task iterator.
+  // std::optional<TaskMap::const_iterator> last_processed_task_it_;
 
-  std::optional<double> last_beat_position_;
+  std::optional<double> last_beat_position_ = std::nullopt;
 
   // TODO(#147): Temp hack to allow destroying by handle.
  public:

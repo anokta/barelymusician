@@ -56,17 +56,15 @@ auto performer = musician.CreatePerformer();
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
-// Add a looping task that plays an instrument note every beat.
-auto task = performer.CreateTask(
-    [&]() {
-      // Set an instrument note on.
-      instrument.SetNoteOn(/*pitch=*/1.0f);
-      // Schedule a one-off task to set the instrument note off after half a beat.
-      // TODO(#147): Update this with the task refactor.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/1.0f); },
-                                   performer.GetPosition() + 0.5);
-    },
-    /*position=*/0.0);
+// Create a new task that plays an instrument note every beat.
+auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, [&](barely::TaskState state) {
+  constexpr float kC3Pitch = -1.0f;
+  if (state == barely::TaskState::kBegin) {
+    instrument.SetNoteOn(kC3Pitch);
+  } else if (state == barely::TaskState::kEnd) {
+    instrument.SetNoteOff(kC3Pitch);
+  }
+});
 
 // Start the performer.
 performer.Start();

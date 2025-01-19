@@ -66,8 +66,8 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
       const double duration = get_position_fn(midi_event.getTickDuration());
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float intensity = static_cast<float>(midi_event.getVelocity()) / 127.0f;
-      tasks.emplace_back(performer.CreateTask(
-          position, duration, [&, pitch, intensity](TaskState state) noexcept {
+      tasks.emplace_back(
+          performer.CreateTask(position, duration, [&, pitch, intensity](TaskState state) noexcept {
             if (state == TaskState::kBegin) {
               instrument.SetNoteOn(pitch, intensity);
             } else if (state == TaskState::kEnd) {

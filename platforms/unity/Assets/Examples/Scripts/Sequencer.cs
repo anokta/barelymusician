@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -80,13 +81,16 @@ namespace Barely.Examples {
         if (note.muted) {
           continue;
         }
-        _performer.Tasks.Add(new Task(delegate() {
-          float pitch = note.pitch / 12.0f;
-          instrument?.SetNoteOn(pitch, note.intensity);
-          // TODO(#147): Update this with the task refactor.
-          _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(pitch); },
-                                        _performer.Position + note.duration);
-        }, note.position));
+        // TODO(#147): Support zero duration.
+        _performer.Tasks.Add(
+            new Task(note.position, Math.Max(note.duration, 0.01), delegate(TaskState state) {
+              float pitch = note.pitch / 12.0f;
+              if (state == TaskState.BEGIN) {
+                instrument?.SetNoteOn(pitch, note.intensity);
+              } else if (state == TaskState.END) {
+                instrument?.SetNoteOff(pitch);
+              }
+            }));
       }
     }
   }

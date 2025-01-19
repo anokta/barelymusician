@@ -2,13 +2,19 @@ using System;
 using UnityEngine;
 
 namespace Barely {
+  /// Task state.
+  public enum TaskState {
+    /// Begin.
+    [InspectorName("Begin")] BEGIN = 0,
+    /// End.
+    [InspectorName("End")] END,
+    /// Update.
+    [InspectorName("Update")] UPDATE,
+  }
+
   /// A representation of a recurring task that can performed by a musical performer in real-time.
   [Serializable]
   public class Task {
-    /// Process callback.
-    public Action OnProcess;
-    public UnityEngine.Events.UnityEvent OnProcessEvent;
-
     /// Position in beats.
     public double Position {
       get { return _position; }
@@ -24,16 +30,41 @@ namespace Barely {
     [SerializeField]
     private double _position = 0.0;
 
+    /// Duration in beats.
+    public double Duration {
+      get { return _duration; }
+      set {
+        if (_performer == null) {
+          _duration = value;
+          return;
+        }
+        Musician.Internal.Task_SetDuration(_handle, value);
+        _duration = Musician.Internal.Task_GetDuration(_handle);
+      }
+    }
+    [SerializeField]
+    private double _duration = 0.0;
+
+    /// Process callback.
+    public delegate void ProcessCallback(TaskState state);
+    public event ProcessCallback OnProcess;
+
+    [Serializable]
+    public class ProcessEvent : UnityEngine.Events.UnityEvent<TaskState> {}
+    public ProcessEvent OnProcessEvent;
+
     /// Constructs a new `Task`.
     ///
-    /// @param callback Task process callback.
     /// @param position Task position in beats.
+    /// @param duration Task duration in beats.
+    /// @param callback Task process callback.
     /// @param onProcessEvent Task process event.
-    public Task(Action callback, double position,
-                UnityEngine.Events.UnityEvent onProcessEvent = null) {
+    public Task(double position, double duration, ProcessCallback callback,
+                ProcessEvent onProcessEvent = null) {
+      _position = position;
+      _duration = duration;
       OnProcess = callback;
       OnProcessEvent = onProcessEvent;
-      _position = position;
     }
 
     ~Task() {
@@ -46,15 +77,23 @@ namespace Barely {
     public void Update(Performer performer) {
       if (_performer == performer && _handle != IntPtr.Zero) {
         Position = _position;
+        Duration = _duration;
         return;
       }
       Musician.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _handle);
       _performer = performer;
       if (_performer != null) {
-        Musician.Internal.Task_Create(Performer.Internal.GetHandle(_performer), delegate() {
-          OnProcess?.Invoke();
-          OnProcessEvent?.Invoke();
-        }, _position, ref _handle);
+        Musician.Internal.Task_Create(this, Performer.Internal.GetHandle(_performer), _position,
+                                      _duration, ref _handle);
+      }
+    }
+
+    /// Class that wraps the internal api.
+    public static class Internal {
+      /// Internal process callback.
+      public static void OnProcess(Task task, TaskState state) {
+        task.OnProcess?.Invoke(state);
+        task.OnProcessEvent?.Invoke(state);
       }
     }
 

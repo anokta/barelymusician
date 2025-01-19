@@ -234,6 +234,7 @@ MonoBehaviour:
   pixel: {fileID: 2800000, guid: 831f86318f630fc4db677a7235341f4d, type: 3}
   color: {r: 1, g: 0.7019608, b: 0.7294118, a: 1}
   arpeggiator: {fileID: 0}
+  enableModeSwitch: 0
   oscillatorShape: 1
   samplePlaybackMode: 3
 --- !u!114 &675413002
@@ -468,7 +469,7 @@ MonoBehaviour:
   repeater: {fileID: 1737834384}
   octaveOffset: 0
   noteIntensity: 1
-  repeaterNoteLength: 2
+  repeaterNoteLength: 1
 --- !u!114 &1737834380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -482,16 +483,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Gain: -18
+  PitchShift: 0
+  Retrigger: 0
   VoiceCount: 8
-  OscillatorShape: 3
-  SamplePlaybackMode: 0
-  Samplers: []
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0.25
-  PitchShift: 0
-  Retrigger: 0
+  OscillatorMode: 0
+  OscillatorMix: 0
+  OscillatorPitchShift: 0
+  OscillatorShape: 3
+  PulseWidth: 0.5
+  SamplePlaybackMode: 0
+  Slices: []
   FilterType: 0
   FilterFrequency: 0
   OnNoteOffEvent:
@@ -635,6 +640,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55b4eaa008fa35b4aaadc06152397690, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ProcessOrder: 0
   Rate: 4
   Style: 0

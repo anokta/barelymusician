@@ -129,35 +129,42 @@ class Performer {
   /// @param task Pointer to task.
   void DestroyTask(Task* task) noexcept;
 
-  /// Returns the duration to next callback.
-  ///
-  /// @return Optional duration in beats.
-  [[nodiscard]] std::optional<double> GetNextDuration() const noexcept;
-
   /// Returns loop begin position.
   ///
   /// @return Loop begin position in beats.
-  [[nodiscard]] double GetLoopBeginPosition() const noexcept;
+  [[nodiscard]] double GetLoopBeginPosition() const noexcept { return loop_begin_position_; }
+
+  /// Returns loop end position.
+  ///
+  /// @return Loop end position in beats.
+  [[nodiscard]] double GetLoopEndPosition() const noexcept {
+    return loop_begin_position_ + loop_length_;
+  }
 
   /// Returns loop length.
   ///
   /// @return Loop length in beats.
-  [[nodiscard]] double GetLoopLength() const noexcept;
+  [[nodiscard]] double GetLoopLength() const noexcept { return loop_length_; }
 
   /// Returns position.
   ///
   /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept;
+  [[nodiscard]] double GetPosition() const noexcept { return position_; }
 
   /// Returns whether performer is looping or not.
   ///
   /// @return True if looping, false otherwise.
-  [[nodiscard]] bool IsLooping() const noexcept;
+  [[nodiscard]] bool IsLooping() const noexcept { return is_looping_; }
 
   /// Returns whether performer is playing or not.
   ///
   /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept;
+  [[nodiscard]] bool IsPlaying() const noexcept { return is_playing_; }
+
+  /// Returns the duration to next callback.
+  ///
+  /// @return Optional duration in beats.
+  [[nodiscard]] std::optional<double> GetNextDuration() const noexcept;
 
   /// Processes all tasks at the current position.
   void ProcessAllTasksAtPosition() noexcept;

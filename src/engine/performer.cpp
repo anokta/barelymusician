@@ -88,8 +88,11 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
 
   // Check active tasks.
   if (!active_tasks_.empty()) {
-    if (!next_position || active_tasks_.begin()->first < *next_position) {
-      next_position = active_tasks_.begin()->first;
+    if (const double next_active_task_position =
+            is_looping_ ? std::min(active_tasks_.begin()->first, GetLoopEndPosition())
+                        : active_tasks_.begin()->first;
+        !next_position.has_value() || next_active_task_position < *next_position) {
+      next_position = next_active_task_position;
     }
   }
 
@@ -97,12 +100,11 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
   if (beat_callback_) {
     std::optional<double> next_beat_position =
         (last_beat_position_ == position_) ? std::ceil(position_ + 1.0) : std::ceil(position_);
-    if (is_looping_ && next_beat_position > loop_begin_position_ + loop_length_) {
+    if (is_looping_ && next_beat_position > GetLoopEndPosition()) {
       const double first_beat_offset = std::ceil(loop_begin_position_) - loop_begin_position_;
-      next_beat_position =
-          (loop_length_ > first_beat_offset)
-              ? std::optional<double>{first_beat_offset + loop_begin_position_ + loop_length_}
-              : std::nullopt;
+      next_beat_position = (loop_length_ > first_beat_offset)
+                               ? std::optional<double>{first_beat_offset + GetLoopEndPosition()}
+                               : std::nullopt;
     }
     if (next_beat_position && (!next_position || *next_beat_position < *next_position)) {
       next_position = next_beat_position;
@@ -115,16 +117,6 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
   }
   return std::nullopt;
 }
-
-double Performer::GetLoopBeginPosition() const noexcept { return loop_begin_position_; }
-
-double Performer::GetLoopLength() const noexcept { return loop_length_; }
-
-double Performer::GetPosition() const noexcept { return position_; }
-
-bool Performer::IsLooping() const noexcept { return is_looping_; }
-
-bool Performer::IsPlaying() const noexcept { return is_playing_; }
 
 void Performer::ProcessAllTasksAtPosition() noexcept {
   if (!is_playing_) {
@@ -183,7 +175,7 @@ void Performer::SetPosition(double position) noexcept {
     return;
   }
   last_beat_position_ = std::nullopt;
-  if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
+  if (is_looping_ && position >= GetLoopEndPosition()) {
     position_ = LoopAround(position);
     while (!active_tasks_.empty()) {
       SetTaskActive(active_tasks_.begin(), false);
@@ -222,7 +214,7 @@ void Performer::SetTaskDuration(Task* task, double old_duration) noexcept {
 
 void Performer::SetTaskPosition(Task* task, double old_position) noexcept {
   if (task->IsActive() && !task->IsInside(position_)) {
-    SetTaskActive(active_tasks_.find({old_position, task}), false);
+    SetTaskActive(active_tasks_.find({old_position + task->GetDuration(), task}), false);
   }
 }
 
@@ -260,7 +252,7 @@ std::set<std::pair<double, Performer::Task*>>::const_iterator Performer::GetNext
   }
   // Loop back to the beginning if needed.
   if ((is_looping_) &&
-      (next_it == inactive_tasks_.end() || next_it->first >= loop_begin_position_ + loop_length_)) {
+      (next_it == inactive_tasks_.end() || next_it->first >= GetLoopEndPosition())) {
     next_it = inactive_tasks_.lower_bound({loop_begin_position_, nullptr});
   }
   return next_it;

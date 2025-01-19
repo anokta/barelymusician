@@ -376,7 +376,7 @@ class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
   ///
   /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
-  bool IsNoteOn(float pitch) const noexcept {
+  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept {
     bool is_note_on = false;
     [[maybe_unused]] const bool success = BarelyArpeggiator_IsNoteOn(*this, pitch, &is_note_on);
     assert(success);
@@ -386,7 +386,7 @@ class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
   /// Returns whether the arpeggiator is playing or not.
   ///
   /// @return True if playing, false otherwise.
-  bool IsPlaying() const noexcept {
+  [[nodiscard]] bool IsPlaying() const noexcept {
     bool is_playing = false;
     [[maybe_unused]] const bool success = BarelyArpeggiator_IsPlaying(*this, &is_playing);
     assert(success);
@@ -500,7 +500,7 @@ class Random : public HandleWrapper<BarelyRandomHandle> {
   /// @param mean Distrubition mean value.
   /// @param variance Distrubition variance.
   /// @return Random float number.
-  float DrawNormal(float mean, float variance) noexcept {
+  [[nodiscard]] float DrawNormal(float mean, float variance) noexcept {
     float number = 0.0f;
     [[maybe_unused]] const bool success = BarelyRandom_DrawNormal(*this, mean, variance, &number);
     assert(success);
@@ -512,7 +512,7 @@ class Random : public HandleWrapper<BarelyRandomHandle> {
   /// @param min Minimum value (inclusive).
   /// @param max Maximum value (exclusive).
   /// @return Random double number.
-  double DrawUniform(double min, double max) noexcept {
+  [[nodiscard]] double DrawUniform(double min, double max) noexcept {
     return static_cast<double>(DrawUniform(static_cast<float>(min), static_cast<float>(max)));
   }
 
@@ -521,7 +521,7 @@ class Random : public HandleWrapper<BarelyRandomHandle> {
   /// @param min Minimum value (inclusive).
   /// @param max Maximum value (exclusive).
   /// @return Random float number.
-  float DrawUniform(float min, float max) noexcept {
+  [[nodiscard]] float DrawUniform(float min, float max) noexcept {
     float number = 0.0f;
     [[maybe_unused]] const bool success = BarelyRandom_DrawUniformReal(*this, min, max, &number);
     assert(success);
@@ -533,7 +533,7 @@ class Random : public HandleWrapper<BarelyRandomHandle> {
   /// @param min Minimum value (inclusive).
   /// @param max Maximum value (inclusive).
   /// @return Random integer number.
-  int DrawUniform(int min, int max) noexcept {
+  [[nodiscard]] int DrawUniform(int min, int max) noexcept {
     int32_t number = 0;
     [[maybe_unused]] const bool success = BarelyRandom_DrawUniformInt(
         *this, static_cast<int32_t>(min), static_cast<int32_t>(max), &number);
@@ -598,7 +598,7 @@ class Repeater : public HandleWrapper<BarelyRepeaterHandle> {
   /// Returns whether the repeater is playing or not.
   ///
   /// @return True if playing, false otherwise.
-  bool IsPlaying() const noexcept {
+  [[nodiscard]] bool IsPlaying() const noexcept {
     bool is_playing = false;
     [[maybe_unused]] const bool success = BarelyRepeater_IsPlaying(*this, &is_playing);
     assert(success);

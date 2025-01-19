@@ -31,13 +31,13 @@ Example usage
 // Create the musician.
 barely::Musician musician(/*sample_rate=*/48000);
 
-// Set the global tempo to 124 beats per minute.
+// Set the global tempo.
 musician.SetTempo(/*tempo=*/124.0);
 
 // Create a new instrument.
 auto instrument = musician.CreateInstrument();
 
-// Set the instrument gain to -6dB.
+// Set the instrument gain.
 instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0f);
 
 // Set an instrument note on.

@@ -68,7 +68,7 @@
 ///   auto performer = musician.CreatePerformer();
 ///
 ///   // Create a task.
-///   auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/0.0,
+///   auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0,
 ///                                    [](barely::TaskState state) { /*populate this*/ });
 ///
 ///   // Set looping on.
@@ -735,8 +735,6 @@ BARELY_EXPORT bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
 #include <cassert>
 #include <cstdint>
 #include <functional>
-#include <limits>
-#include <new>
 #include <span>
 #include <type_traits>
 #include <utility>
@@ -909,7 +907,7 @@ class HandleWrapper {
   /// Returns the raw handle.
   ///
   /// @return Raw handle.
-  constexpr operator HandleType() const noexcept { return handle_; }
+  [[nodiscard]] constexpr operator HandleType() const noexcept { return handle_; }
 
  protected:
   // Helper functions to set a callback.
@@ -980,9 +978,9 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param other Other instrument.
   /// @return Instrument.
   Instrument(Instrument&& other) noexcept
-      : note_off_callback_(std::exchange(other.note_off_callback_, {})),
-        note_on_callback_(std::exchange(other.note_on_callback_, {})),
-        HandleWrapper(std::move(other)) {
+      : HandleWrapper(std::move(other)),
+        note_off_callback_(std::exchange(other.note_off_callback_, {})),
+        note_on_callback_(std::exchange(other.note_on_callback_, {})) {
     if (note_off_callback_) {
       SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
     }
@@ -998,9 +996,9 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   Instrument& operator=(Instrument&& other) noexcept {
     if (this != &other) {
       BarelyInstrument_Destroy(*this);
+      HandleWrapper::operator=(std::move(other));
       note_off_callback_ = std::exchange(other.note_off_callback_, {});
       note_on_callback_ = std::exchange(other.note_on_callback_, {});
-      HandleWrapper::operator=(std::move(other));
       if (note_off_callback_) {
         SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
       }
@@ -1163,7 +1161,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   /// @param callback Task process callback.
   Task(BarelyPerformerHandle performer, double position, double duration,
        ProcessCallback callback) noexcept
-      : process_callback_(std::move(callback)), HandleWrapper([&]() {
+      : HandleWrapper([&]() {
           BarelyTaskHandle task = nullptr;
           [[maybe_unused]] const bool success = BarelyTask_Create(
               performer, position, duration,
@@ -1175,7 +1173,8 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
               &process_callback_, &task);
           assert(success);
           return task;
-        }()) {}
+        }()),
+        process_callback_(std::move(callback)) {}
 
   /// Constructs a new `Task` from a raw handle.
   ///
@@ -1194,8 +1193,8 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   /// @param other Other task.
   /// @return Task.
   Task(Task&& other) noexcept
-      : process_callback_(std::exchange(other.process_callback_, {})),
-        HandleWrapper(std::move(other)) {
+      : HandleWrapper(std::move(other)),
+        process_callback_(std::exchange(other.process_callback_, {})) {
     if (process_callback_) {
       SetProcessCallback();
     }
@@ -1208,8 +1207,8 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   Task& operator=(Task&& other) noexcept {
     if (this != &other) {
       BarelyTask_Destroy(*this);
-      process_callback_ = std::exchange(other.process_callback_, {});
       HandleWrapper::operator=(std::move(other));
+      process_callback_ = std::exchange(other.process_callback_, {});
       if (process_callback_) {
         SetProcessCallback();
       }
@@ -1319,7 +1318,7 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @param other Other performer.
   /// @return Performer.
   Performer(Performer&& other) noexcept
-      : beat_callback_(std::exchange(other.beat_callback_, {})), HandleWrapper(std::move(other)) {
+      : HandleWrapper(std::move(other)), beat_callback_(std::exchange(other.beat_callback_, {})) {
     if (beat_callback_) {
       SetCallback(BarelyPerformer_SetBeatCallback, beat_callback_);
     }
@@ -1332,8 +1331,8 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   Performer& operator=(Performer&& other) noexcept {
     if (this != &other) {
       BarelyPerformer_Destroy(*this);
-      beat_callback_ = std::exchange(other.beat_callback_, {});
       HandleWrapper::operator=(std::move(other));
+      beat_callback_ = std::exchange(other.beat_callback_, {});
       if (beat_callback_) {
         SetCallback(BarelyPerformer_SetBeatCallback, beat_callback_);
       }

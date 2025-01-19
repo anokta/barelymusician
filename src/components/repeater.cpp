@@ -106,7 +106,6 @@ void Repeater::OnBeat() noexcept {
   if (!Update()) {
     return;
   }
-  const auto& [pitch_or, length] = pitches_[index_];
   if (!pitches_[index_].first.has_value()) {
     return;
   }

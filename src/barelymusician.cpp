@@ -33,7 +33,7 @@ bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
                                  float* out_value) {
   if (!instrument) return false;
-  if (type < 0 || type >= BarelyControlType_kCount) return false;
+  if (type >= BarelyControlType_kCount) return false;
   if (!out_value) return false;
 
   *out_value = instrument->GetControl(static_cast<ControlType>(type));
@@ -43,7 +43,7 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyContro
 bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, float pitch,
                                      BarelyNoteControlType type, float* out_value) {
   if (!instrument) return false;
-  if (type < 0 || type >= BarelyNoteControlType_kCount) return false;
+  if (type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
 
   if (const auto* value = instrument->GetNoteControl(pitch, static_cast<NoteControlType>(type));
@@ -82,7 +82,7 @@ bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
 bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
                                  float value) {
   if (!instrument) return false;
-  if (type < 0 || type >= BarelyControlType_kCount) return false;
+  if (type >= BarelyControlType_kCount) return false;
 
   instrument->SetControl(static_cast<ControlType>(type), value);
   return true;
@@ -91,7 +91,7 @@ bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyContro
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
                                      BarelyNoteControlType type, float value) {
   if (!instrument) return false;
-  if (type < 0 || type >= BarelyNoteControlType_kCount) return false;
+  if (type >= BarelyNoteControlType_kCount) return false;
 
   instrument->SetNoteControl(pitch, static_cast<NoteControlType>(type), value);
   return true;
@@ -348,7 +348,7 @@ bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
 
 bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active) {
   if (!task) return false;
-  if (!out_is_active) false;
+  if (!out_is_active) return false;
 
   *out_is_active = task->IsActive();
   return true;

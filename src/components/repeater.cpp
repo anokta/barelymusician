@@ -11,12 +11,6 @@
 
 namespace barely::internal {
 
-namespace {
-
-constexpr float kNoteIntensity = 1.0f;
-
-}  // namespace
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Musician& musician) noexcept
     : musician_(&musician), performer_(musician_->CreatePerformer()) {
@@ -109,6 +103,7 @@ void Repeater::OnBeat() noexcept {
   if (!pitches_[index_].first.has_value()) {
     return;
   }
+  static constexpr float kNoteIntensity = 1.0f;
   instrument_->SetNoteOn(*pitches_[index_].first + pitch_offset_, kNoteIntensity);
 }
 

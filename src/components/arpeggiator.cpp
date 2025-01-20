@@ -10,12 +10,6 @@
 
 namespace barely::internal {
 
-namespace {
-
-constexpr float kNoteIntensity = 1.0f;
-
-}  // namespace
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Arpeggiator::Arpeggiator(Musician& musician) noexcept
     : musician_(&musician), performer_(musician_->CreatePerformer()) {
@@ -98,6 +92,7 @@ void Arpeggiator::SetNextNoteOff() noexcept {
 
 void Arpeggiator::SetNextNoteOn() noexcept {
   if (instrument_ != nullptr) {
+    static constexpr float kNoteIntensity = 1.0f;
     instrument_->SetNoteOn(pitch_, kNoteIntensity);
   }
 }

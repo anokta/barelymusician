@@ -13,6 +13,7 @@
 namespace barely::internal {
 
 void Performer::Task::SetDuration(double duration) noexcept {
+  assert(duration > 0.0 && "Invalid task duration");
   if (duration != duration_) {
     const double old_duration = duration_;
     duration_ = duration;
@@ -44,7 +45,7 @@ Performer::Task* Performer::CreateTask(double position, double duration,
   auto task = std::make_unique<Task>(*this, position, duration, callback);
   Task* task_ptr = task.get();
   [[maybe_unused]] const bool success = tasks_.emplace(task_ptr, std::move(task)).second;
-  assert(success);
+  assert(success && "Failed to create task");
   inactive_tasks_.emplace(position, task_ptr);
   return task_ptr;
 }
@@ -53,11 +54,11 @@ void Performer::DestroyTask(Task* task) noexcept {
   if (task->IsActive()) {
     [[maybe_unused]] const bool success =
         (active_tasks_.erase({task->GetEndPosition(), task}) == 1);
-    assert(success);
+    assert(success && "Failed to destroy active task");
     task->SetActive(false);
   } else {
     [[maybe_unused]] const bool success = (inactive_tasks_.erase({task->GetPosition(), task}) == 1);
-    assert(success);
+    assert(success && "Failed to destroy inactive task");
   }
   tasks_.erase(task);
 }
@@ -76,7 +77,7 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
       return 0.0;
     }
     next_position = next_it->first;
-    if (is_looping_ && *next_position < position_) {
+    if (is_looping_ && next_it->first < position_) {
       // Loop around.
       if (loop_length_ > 0.0) {
         *next_position += loop_length_;
@@ -126,12 +127,8 @@ void Performer::ProcessAllTasksAtPosition() noexcept {
     last_beat_position_ = position_;
     beat_callback_();
   }
-  while (!active_tasks_.empty() && active_tasks_.begin()->first <= position_) {
-    SetTaskActive(active_tasks_.begin(), false);
-  }
-  for (auto it = GetNextInactiveTask(); it != inactive_tasks_.end() && it->first <= position_ &&
-                                        it->second->GetEndPosition() > position_;
-       it = GetNextInactiveTask()) {
+  for (auto it = GetNextInactiveTask();
+       it != inactive_tasks_.end() && it->second->IsInside(position_); it = GetNextInactiveTask()) {
     SetTaskActive(it, true);
   }
 }
@@ -171,10 +168,10 @@ void Performer::SetLooping(bool is_looping) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::SetPosition(double position) noexcept {
+  last_beat_position_ = std::nullopt;
   if (position_ == position) {
     return;
   }
-  last_beat_position_ = std::nullopt;
   if (is_looping_ && position >= GetLoopEndPosition()) {
     position_ = LoopAround(position);
     while (!active_tasks_.empty()) {
@@ -251,8 +248,7 @@ std::set<std::pair<double, Performer::Task*>>::const_iterator Performer::GetNext
     }
   }
   // Loop back to the beginning if needed.
-  if ((is_looping_) &&
-      (next_it == inactive_tasks_.end() || next_it->first >= GetLoopEndPosition())) {
+  if (is_looping_ && (next_it == inactive_tasks_.end() || next_it->first >= GetLoopEndPosition())) {
     next_it = inactive_tasks_.lower_bound({loop_begin_position_, nullptr});
   }
   return next_it;

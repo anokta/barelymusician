@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_PERFORMER_H_
 #define BARELYMUSICIAN_ENGINE_PERFORMER_H_
 
+#include <cassert>
 #include <compare>
 #include <map>
 #include <memory>
@@ -35,7 +36,9 @@ class Performer {
         : performer_(performer),
           position_(position),
           duration_(duration),
-          process_callback_(callback) {}
+          process_callback_(callback) {
+      assert(duration > 0.0 && "Invalid task duration");
+    }
 
     /// Returns the duration.
     ///
@@ -255,9 +258,6 @@ class Performer {
   std::unordered_map<Task*, std::unique_ptr<Task>> tasks_;
   std::set<std::pair<double, Task*>> active_tasks_;
   std::set<std::pair<double, Task*>> inactive_tasks_;
-
-  // Last processed task iterator.
-  // std::optional<TaskMap::const_iterator> last_processed_task_it_;
 
   std::optional<double> last_beat_position_ = std::nullopt;
 

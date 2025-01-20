@@ -313,7 +313,7 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double 
                        BarelyTask_ProcessCallback callback, void* user_data,
                        BarelyTaskHandle* out_task) {
   if (!performer) return false;
-  if (duration < 0.0) return false;
+  if (duration <= 0.0) return false;
   if (!out_task) return false;
 
   *out_task =
@@ -356,6 +356,7 @@ bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active) {
 
 bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration) {
   if (!task) return false;
+  if (duration <= 0.0) return false;
 
   task->SetDuration(duration);
   return true;

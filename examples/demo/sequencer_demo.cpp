@@ -70,15 +70,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
     float pitch;
   };
   std::vector<SequencerNote> score;
-  score.emplace_back(0.0, 1.0, 0.0f);
-  score.emplace_back(1.0, 1.0, 2.0f / 12.0f);
-  score.emplace_back(2.0, 1.0, 4.0f / 12.0f);
-  score.emplace_back(3.0, 1.0, 5.0f / 12.0f);
-  score.emplace_back(4.0, 1.0, 7.0f / 12.0f);
-  score.emplace_back(5.0, 1.0 / 3.0, 7.0f / 12.0f);
-  score.emplace_back(5 + 1.0 / 3.0, 1.0 / 3.0, 9.0f / 12.0f);
-  score.emplace_back(5 + 2.0 / 3.0, 1.0 / 3.0, 11.0f / 12.0f);
-  score.emplace_back(6.0, 2.0, 1.0f);
+  score.push_back({0.0, 1.0, 0.0f});
+  score.push_back({1.0, 1.0, 2.0f / 12.0f});
+  score.push_back({2.0, 1.0, 4.0f / 12.0f});
+  score.push_back({3.0, 1.0, 5.0f / 12.0f});
+  score.push_back({4.0, 1.0, 7.0f / 12.0f});
+  score.push_back({5.0, 1.0 / 3.0, 7.0f / 12.0f});
+  score.push_back({5 + 1.0 / 3.0, 1.0 / 3.0, 9.0f / 12.0f});
+  score.push_back({5 + 2.0 / 3.0, 1.0 / 3.0, 11.0f / 12.0f});
+  score.push_back({6.0, 2.0, 1.0f});
 
   std::unordered_map<int, Task> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {

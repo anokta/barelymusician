@@ -22,11 +22,11 @@
 ///
 ///   // Update the timestamp.
 ///   //
-///   // Timestamp updates must happen before processing instruments with their respective
-///   // timestamps. Otherwise, such `Process` calls will be *late* to receive the relevant state
-///   // changes. To compensate for this, `Update` should typically be called from a main thread
-///   // update callback with an additional "lookahead" to avoid potential thread synchronization
-///   // issues that could arise in real-time audio applications.
+///   // Timestamp updates must occur before processing instruments with their respective
+///   // timestamps. Otherwise, `Process` calls may be *late* in receiving the relevant changes to
+///   // the instruments. To address this, `Update` should typically be called from the main thread
+///   // update callback using a lookahead to prevent potential thread synchronization issues in
+///   // real-time audio applications.
 ///   double timestamp = 1.0;
 ///   musician.Update(timestamp);
 ///   @endcode
@@ -39,9 +39,9 @@
 ///
 ///   // Set a note on.
 ///   //
-//    // Note pitch is centered around the reference frequency, and measured in octaves. Fractional
-///   // values adjust the frequency logarithmically to maintain perceived pitch intervals in each
-///   // octave.
+///   // The note pitch is centered around the reference frequency and measured in octaves.
+///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
+///   // pitch intervals within each octave.
 ///   const float c3_pitch = -1.0f;
 ///   instrument.SetNoteOn(c3_pitch, /*intensity=*/0.25f);
 ///
@@ -71,7 +71,7 @@
 ///   auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0,
 ///                                    [](barely::TaskState state) { /*populate this*/ });
 ///
-///   // Set looping on.
+///   // Set to looping.
 ///   performer.SetLooping(/*is_looping=*/true);
 ///
 ///   // Start.
@@ -99,11 +99,11 @@
 ///
 ///   // Update the timestamp.
 ///   //
-///   // Timestamp updates must happen before processing instruments with their respective
-///   // timestamps. Otherwise, such `Process` calls will be *late* to receive the relevant state
-///   // changes. To compensate for this, `Update` should typically be called from a main thread
-///   // update callback with an additional "lookahead" to avoid potential thread synchronization
-///   // issues that could arise in real-time audio applications.
+///   // Timestamp updates must occur before processing instruments with their respective
+///   // timestamps. Otherwise, `Process` calls may be *late* in receiving the relevant changes to
+///   // the instruments. To address this, `Update` should typically be called from the main thread
+///   // update callback using a lookahead to prevent potential thread synchronization issues in
+///   // real-time audio applications.
 ///   double timestamp = 1.0;
 ///   BarelyMusician_Update(musician, timestamp);
 ///
@@ -120,9 +120,9 @@
 ///
 ///   // Set a note on.
 ///   //
-//    // Note pitch is centered around the reference frequency, and measured in octaves. Fractional
-///   // values adjust the frequency logarithmically to maintain perceived pitch intervals in each
-///   // octave.
+///   // The note pitch is centered around the reference frequency and measured in octaves.
+///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
+///   // pitch intervals within each octave.
 ///   float c3_pitch = -1.0f;
 ///   BarelyInstrument_SetNoteOn(instrument, c3_pitch, /*intensity=*/0.25f);
 ///
@@ -158,7 +158,7 @@
 ///   BarelyTask_ProcessCallback process_callback{ /*populate this*/ };
 ///   BarelyTask_Create(performer, /*position=*/0.0, /*duration=*/1.0, process_callback, &task);
 ///
-///   // Set looping on.
+///   // Set to looping.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
 ///
 ///   // Start.
@@ -340,37 +340,37 @@ typedef struct BarelySampleDataSlice {
   int32_t sample_count;
 } BarelySampleDataSlice;
 
-/// Instrument handle alias.
+/// Instrument handle.
 typedef struct BarelyInstrument* BarelyInstrumentHandle;
 
-/// Musician handle alias.
+/// Musician handle.
 typedef struct BarelyMusician* BarelyMusicianHandle;
 
-/// Performer handle alias.
+/// Performer handle.
 typedef struct BarelyPerformer* BarelyPerformerHandle;
 
-/// Task handle alias.
+/// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
 
-/// Instrument note off callback alias.
+/// Instrument note off callback.
 ///
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
 typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, void* user_data);
 
-/// Instrument note on callback alias.
+/// Instrument note on callback.
 ///
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @param user_data Pointer to user data.
 typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity, void* user_data);
 
-/// Performer beat callback alias.
+/// Performer beat callback.
 ///
 /// @param user_data Pointer to user data.
 typedef void (*BarelyPerformer_BeatCallback)(void* user_data);
 
-/// Task process callback alias.
+/// Task process callback.
 ///
 /// @param state Task state.
 /// @param user_data Pointer to user data.
@@ -938,13 +938,13 @@ class HandleWrapper {
 /// Class that wraps an instrument handle.
 class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
  public:
-  /// Note off callback function alias.
+  /// Note off callback function.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   using NoteOffCallback = std::function<void(float pitch)>;
 
-  /// Note on callback function alias.
+  /// Note on callback function.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
@@ -1148,7 +1148,7 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 /// Class that wraps a task handle.
 class Task : public HandleWrapper<BarelyTaskHandle> {
  public:
-  /// Process callback function alias.
+  /// Process callback function.
   ///
   /// @param state Task state.
   using ProcessCallback = std::function<void(TaskState state)>;
@@ -1287,7 +1287,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
 /// Class that wraps a performer handle.
 class Performer : public HandleWrapper<BarelyPerformerHandle> {
  public:
-  /// Beat callback function alias.
+  /// Beat callback function.
   using BeatCallback = std::function<void()>;
 
   /// Constructs a new `Performer`.

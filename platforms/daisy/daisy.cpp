@@ -27,7 +27,7 @@ constexpr int kVoiceCount = 16;
 
 constexpr int kOscCount = static_cast<int>(BarelyOscillatorShape_kCount);
 
-static DaisyPod hw;  // Currently targets the Daisy Pod hardware.
+static DaisyPod hw;  // target the Daisy Pod hardware.
 static MidiUsbHandler midi;
 
 static Instrument* instrument_ptr = nullptr;

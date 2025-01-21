@@ -77,8 +77,7 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
       return 0.0;
     }
     if (is_looping_ && next_it->first < position_) {
-      if (loop_length_ > 0.0) {
-        // Loop around.
+      if (loop_length_ > 0.0) {  // loop around.
         next_position = next_it->first + loop_length_;
       }
     } else {

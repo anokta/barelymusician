@@ -104,7 +104,7 @@ NavMeshSettings:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_BuildSettings:
-    serializedVersion: 2
+    serializedVersion: 3
     agentTypeID: 0
     agentRadius: 0.5
     agentHeight: 2
@@ -117,7 +117,7 @@ NavMeshSettings:
     cellSize: 0.16666667
     manualTileSize: 0
     tileSize: 256
-    accuratePlacement: 0
+    buildHeightMesh: 0
     maxJobWorkers: 0
     preserveTilesOutsideBounds: 0
     debug:
@@ -174,6 +174,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -214,6 +215,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -1, z: 1}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -259,9 +261,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -298,6 +308,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -449,13 +460,15 @@ MonoBehaviour:
   _loopBeginPosition: 0
   _loopLength: 1
   Tasks:
-  - OnProcessEvent:
+  - _position: 0
+    _duration: 0
+    OnProcessEvent:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 1482507603}
-          m_TargetAssemblyTypeName: SyncAudioSource, Assembly-CSharp
+          m_TargetAssemblyTypeName: Barely.Examples.SyncAudioSource, Assembly-CSharp
           m_MethodName: PlayNote
-          m_Mode: 1
+          m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -464,14 +477,15 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-    _position: 0
-  - OnProcessEvent:
+  - _position: 0.5
+    _duration: 0
+    OnProcessEvent:
       m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 1482507603}
-          m_TargetAssemblyTypeName: SyncAudioSource, Assembly-CSharp
+          m_TargetAssemblyTypeName: Barely.Examples.SyncAudioSource, Assembly-CSharp
           m_MethodName: PlayNote
-          m_Mode: 1
+          m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -480,7 +494,9 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-    _position: 0.5
+  OnBeatEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!23 &1482507600
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -492,6 +508,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -540,6 +557,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -604,16 +622,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Gain: -6
-  VoiceCount: 4
-  OscillatorShape: 1
-  SamplePlaybackMode: 0
-  Samplers: []
-  Attack: 0
-  Decay: 0.10000000149011612
-  Sustain: 0.8999999761581421
-  Release: 0.20000000298023224
   PitchShift: 0
   Retrigger: 0
+  VoiceCount: 4
+  Attack: 0
+  Decay: 0.1
+  Sustain: 0.9
+  Release: 0.2
+  OscillatorMode: 0
+  OscillatorMix: 0
+  OscillatorPitchShift: 0
+  OscillatorShape: 1
+  PulseWidth: 0.5
+  SamplePlaybackMode: 0
+  Slices: []
   FilterType: 0
   FilterFrequency: 0
   OnNoteOffEvent:
@@ -728,6 +750,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2

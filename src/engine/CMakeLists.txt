@@ -1,11 +1,6 @@
 add_library(
-  barelymusician_engine_config INTERFACE
-  config.h
-)
-
-add_library(
-  barelymusician_engine_event INTERFACE
-  event.h
+  barelymusician_engine_callback INTERFACE
+  callback.h
 )
 
 add_library(
@@ -15,7 +10,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_engine_instrument
-  barelymusician_engine_event
+  barelymusician_engine_callback
   barelymusician_engine_message
   barelymusician_engine_message_queue
   barelymusician_common_find_or_null
@@ -54,10 +49,8 @@ add_library(
 )
 target_link_libraries(
   barelymusician_engine_musician
-  barelymusician_engine_config
   barelymusician_engine_instrument
   barelymusician_engine_performer
-  barelymusician_engine_pool
   barelymusician_headeronly
 )
 
@@ -68,30 +61,11 @@ add_library(
 )
 target_link_libraries(
   barelymusician_engine_performer
-  barelymusician_engine_config
-  barelymusician_engine_event
-  barelymusician_engine_pool
+  barelymusician_engine_callback
   barelymusician_headeronly
 )
 
-add_library(
-  barelymusician_engine_pool INTERFACE
-  pool.h
-)
-
 if(ENABLE_TESTS)
-  add_executable(
-    barelymusician_engine_event_test
-    event_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_engine_event_test
-    barelymusician_engine_event
-    barelymusician_headeronly
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_engine_event_test)
-
   add_executable(
     barelymusician_engine_instrument_test
     instrument_test.cpp

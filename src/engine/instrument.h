@@ -12,7 +12,7 @@
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/sample_data.h"
-#include "engine/event.h"
+#include "engine/callback.h"
 #include "engine/message_queue.h"
 
 namespace barely::internal {
@@ -20,6 +20,12 @@ namespace barely::internal {
 /// Class that controls an instrument.
 class Instrument {
  public:
+  /// Note off callback alias.
+  using NoteOffCallback = Callback<BarelyInstrument_NoteOffCallback>;
+
+  /// Note on callback alias.
+  using NoteOnCallback = Callback<BarelyInstrument_NoteOnCallback>;
+
   /// Constructs a new `Instrument`.
   ///
   /// @param sample_rate Sampling rate in hertz.
@@ -91,10 +97,10 @@ class Instrument {
   /// @param pitch Note pitch.
   void SetNoteOff(float pitch) noexcept;
 
-  /// Sets the note off event.
+  /// Sets the note off callback.
   ///
-  /// @param note_off_event Note off event.
-  void SetNoteOffEvent(const NoteOffEvent& note_off_event) noexcept;
+  /// @param callback Note off callback.
+  void SetNoteOffCallback(NoteOffCallback callback) noexcept;
 
   /// Sets a note on.
   ///
@@ -103,10 +109,10 @@ class Instrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetNoteOn(float pitch, float intensity) noexcept;
 
-  /// Sets the note on event.
+  /// Sets the note on callback.
   ///
-  /// @param note_on_event Note on event.
-  void SetNoteOnEvent(const NoteOnEvent& note_on_event) noexcept;
+  /// @param callback Note on callback.
+  void SetNoteOnCallback(NoteOnCallback callback) noexcept;
 
   /// Sets the reference frequency.
   ///
@@ -161,8 +167,8 @@ class Instrument {
     // Maximum value.
     float max_value = std::numeric_limits<float>::max();
   };
-  using ControlArray = std::array<Control, static_cast<int>(BarelyControlType_kCount)>;
-  using NoteControlArray = std::array<Control, static_cast<int>(BarelyNoteControlType_kCount)>;
+  using ControlArray = std::array<Control, BarelyControlType_kCount>;
+  using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
 
   /// Builds a control message to be passed into the instrument processor.
   ControlMessage BuildControlMessage(ControlType type, float value) const noexcept;
@@ -172,32 +178,32 @@ class Instrument {
 
   // Array of controls.
   ControlArray controls_ = {
-      Control(0.0f, kMinDecibels, 0.0f),                                  // kGain
-      Control(0.0f),                                                      // kPitchShift
-      Control(false),                                                     // kRetrigger
-      Control(8, 1, 20),                                                  // kVoiceCount
-      Control(0.0f, 0.0f, 60.0f),                                         // kAttack
-      Control(0.0f, 0.0f, 60.0f),                                         // kDecay
-      Control(1.0f, 0.0f, 1.0f),                                          // kSustain
-      Control(0.0f, 0.0f, 60.0f),                                         // kRelease
-      Control(0.0f, -1.0f, 1.0f),                                         // kOscillatorMix
-      Control(0, 0, static_cast<int>(BarelyOscillatorMode_kCount) - 1),   // kOscillatorMode
-      Control(0.0f),                                                      // kOscillatorPitchShift
-      Control(0, 0, static_cast<int>(BarelyOscillatorShape_kCount) - 1),  // kOscillatorShape
-      Control(0.5f, 0.0f, 1.0f),                                          // kPulseWidth
-      Control(0, 0, static_cast<int>(BarelySamplePlaybackMode_kCount) - 1),  // kSamplePlaybackMode
-      Control(0, 0, static_cast<int>(BarelyFilterType_kCount) - 1),          // kFilterType
-      Control(0.0f, 0.0f),                                                   // kFilterFrequency
+      Control(0.0f, kMinDecibels, 0.0f),                   // kGain
+      Control(0.0f),                                       // kPitchShift
+      Control(false),                                      // kRetrigger
+      Control(8, 1, 20),                                   // kVoiceCount
+      Control(0.0f, 0.0f, 60.0f),                          // kAttack
+      Control(0.0f, 0.0f, 60.0f),                          // kDecay
+      Control(1.0f, 0.0f, 1.0f),                           // kSustain
+      Control(0.0f, 0.0f, 60.0f),                          // kRelease
+      Control(0.0f, -1.0f, 1.0f),                          // kOscillatorMix
+      Control(0, 0, BarelyOscillatorMode_kCount - 1),      // kOscillatorMode
+      Control(0.0f),                                       // kOscillatorPitchShift
+      Control(0, 0, BarelyOscillatorShape_kCount - 1),     // kOscillatorShape
+      Control(0.5f, 0.0f, 1.0f),                           // kPulseWidth
+      Control(0, 0, BarelySamplePlaybackMode_kCount - 1),  // kSamplePlaybackMode
+      Control(0, 0, BarelyFilterType_kCount - 1),          // kFilterType
+      Control(0.0f, 0.0f),                                 // kFilterFrequency
   };
 
   // Map of note control arrays by their pitches.
   std::unordered_map<float, NoteControlArray> note_controls_;
 
-  // Note off event.
-  NoteOffEvent note_off_event_ = {};
+  // Note off callback.
+  NoteOffCallback note_off_callback_ = {};
 
-  // Note on event.
-  NoteOnEvent note_on_event_ = {};
+  // Note on callback.
+  NoteOnCallback note_on_callback_ = {};
 
   // Update sample.
   int64_t update_sample_ = 0;
@@ -207,6 +213,10 @@ class Instrument {
 
   // Processor.
   InstrumentProcessor processor_;
+
+  // TODO(#126): Temp hack to allow destroying by handle.
+ public:
+  BarelyMusicianHandle musician = nullptr;
 };
 
 }  // namespace barely::internal

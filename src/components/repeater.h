@@ -19,9 +19,8 @@ class Repeater {
   // Constructs a new `Repeater`.
   ///
   /// @param musician Musician.
-  /// @param process_order Process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Repeater(Musician& musician, int process_order = 0) noexcept;
+  explicit Repeater(Musician& musician) noexcept;
 
   /// Destroys `Repeater`.
   ~Repeater() noexcept;
@@ -79,11 +78,13 @@ class Repeater {
   void Stop() noexcept;
 
  private:
+  void OnBeat() noexcept;
+
   // Updates the repeater.
   bool Update() noexcept;
 
   // Musician.
-  Musician& musician_;
+  Musician* musician_ = nullptr;
 
   // Performer.
   Performer* performer_ = nullptr;

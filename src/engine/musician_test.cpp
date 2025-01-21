@@ -52,11 +52,11 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   Musician musician(kSampleRate);
 
   // Create an instrument.
-  Instrument* instrument = musician.AddInstrument();
+  Instrument* instrument = musician.CreateInstrument();
 
-  // Set the note events.
+  // Set the note callbacks.
   std::pair<float, float> note_on_state = {0.0f, 0.0f};
-  instrument->SetNoteOnEvent({
+  instrument->SetNoteOnCallback({
       [](float pitch, float intensity, void* user_data) {
         auto& note_on_state = *static_cast<std::pair<float, float>*>(user_data);
         note_on_state.first = pitch;
@@ -67,7 +67,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_THAT(note_on_state, Pair(0.0f, 0.0f));
 
   float note_off_pitch = 0.0f;
-  instrument->SetNoteOffEvent({
+  instrument->SetNoteOffCallback({
       [](float pitch, void* user_data) { *static_cast<float*>(user_data) = pitch; },
       static_cast<void*>(&note_off_pitch),
   });
@@ -78,8 +78,8 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   EXPECT_TRUE(instrument->IsNoteOn(kPitch));
   EXPECT_THAT(note_on_state, Pair(kPitch, kIntensity));
 
-  // Remove the instrument.
-  musician.RemoveInstrument(instrument);
+  // Destroy the instrument.
+  musician.DestroyInstrument(instrument);
   EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
 }
 
@@ -90,11 +90,11 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   {
     Musician musician(kSampleRate);
 
-    // Create instruments with note off event.
+    // Create instruments with note off callbacks.
     std::vector<Instrument*> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(musician.AddInstrument());
-      instruments[i]->SetNoteOffEvent({
+      instruments.push_back(musician.CreateInstrument());
+      instruments[i]->SetNoteOffCallback({
           [](float pitch, void* user_data) {
             static_cast<std::vector<float>*>(user_data)->push_back(pitch);
           },
@@ -110,9 +110,9 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1, 2, 3));
 
-    // Remove instruments.
+    // Destroy instruments.
     for (int i = 0; i < 3; ++i) {
-      musician.RemoveInstrument(instruments[i]);
+      musician.DestroyInstrument(instruments[i]);
     }
   }
 
@@ -125,45 +125,66 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   Musician musician(kSampleRate);
 
   // Create a performer.
-  Performer* performer = musician.AddPerformer(/*process_order=*/0);
+  Performer* performer = musician.CreatePerformer();
 
-  // Create a task event.
+  // Create a task.
+  TaskState task_state = TaskState::kEnd;
   double task_position = 0.0;
-  std::function<void()> process_callback = [&]() { task_position = performer->GetPosition(); };
-  auto task_event = TaskEvent{
-      [](void** state, void* user_data) { *state = user_data; },
-      [](void** /*state*/) {},
-      [](void** state) { (*static_cast<std::function<void()>*>(*state))(); },
-      &process_callback,
+  std::function<void(TaskState)> process_callback = [&](TaskState state) {
+    // `kUpdate` can only be called after `kBegin`, and not the other way around.
+    EXPECT_TRUE(task_state != TaskState::kBegin || state == TaskState::kUpdate);
+    EXPECT_TRUE(task_state != TaskState::kUpdate || state != TaskState::kBegin);
+    task_state = state;
+    task_position = performer->GetPosition();
   };
-
-  // Schedule a task.
-  performer->ScheduleOneOffTask(task_event, 1.0);
+  auto* task = performer->CreateTask(1.0, 2.0,
+                                     {
+                                         [](BarelyTaskState state, void* user_data) {
+                                           (*static_cast<std::function<void(TaskState)>*>(
+                                               user_data))(static_cast<TaskState>(state));
+                                         },
+                                         &process_callback,
+                                     });
 
   // Start the performer with a tempo of one beat per second.
   musician.SetTempo(60.0);
   EXPECT_DOUBLE_EQ(musician.GetTempo(), 60.0);
 
   EXPECT_FALSE(performer->IsPlaying());
+  EXPECT_FALSE(task->IsActive());
   performer->Start();
   EXPECT_TRUE(performer->IsPlaying());
+  EXPECT_FALSE(task->IsActive());
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(1.0));
+  EXPECT_THAT(performer->GetNextDuration(), Optional(1.0));
   musician.Update(1.0);
-  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(0.0));
+  EXPECT_THAT(performer->GetNextDuration(), Optional(0.0));
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
+  EXPECT_FALSE(task->IsActive());
+  EXPECT_EQ(task_state, TaskState::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
-  // Update the timestamp past the task, which should be triggered now.
-  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(0.0));
-  musician.Update(1.5);
-  EXPECT_FALSE(performer->GetDurationToNextTask().has_value());
-  EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.5);
-  EXPECT_DOUBLE_EQ(task_position, 1.0);
+  // Update the timestamp inside the task, which should be triggered now.
+  EXPECT_THAT(performer->GetNextDuration(), Optional(0.0));
+  musician.Update(2.5);
+  EXPECT_THAT(performer->GetNextDuration(), Optional(0.5));
+  EXPECT_DOUBLE_EQ(performer->GetPosition(), 2.5);
+  EXPECT_TRUE(task->IsActive());
+  EXPECT_EQ(task_state, TaskState::kUpdate);
+  EXPECT_DOUBLE_EQ(task_position, 2.5);
+
+  // Update the timestamp just past the task, which should not be active anymore.
+  EXPECT_THAT(performer->GetNextDuration(), Optional(0.5));
+  musician.Update(3.0);
+  EXPECT_FALSE(performer->GetNextDuration().has_value());
+  EXPECT_DOUBLE_EQ(performer->GetPosition(), 3.0);
+  EXPECT_FALSE(task->IsActive());
+  EXPECT_EQ(task_state, TaskState::kEnd);
+  EXPECT_DOUBLE_EQ(task_position, 3.0);
 
   // Remove the performer.
-  musician.RemovePerformer(performer);
+  musician.DestroyPerformer(performer);
 }
 
 // Tests that the musician sets its tempo as expected.

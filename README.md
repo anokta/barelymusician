@@ -8,10 +8,8 @@ barelymusician is a real-time music engine for interactive systems.
 It provides a modern C/C++ API to generate and perform musical sounds from scratch in a sample
 accurate way.
 
-This repository includes build targets for Linux, OSX, Windows, Android, and Daisy platforms, in
-addition to a native Unity game engine plugin[*][iOS].
-
-[iOS]: ## "see issue #112 for the status of the upcoming iOS platform support"
+This repository includes the build targets for Linux, macOS, Windows, Android, and Daisy platforms,
+in addition to a native Unity game engine plugin.
 
 To use in a project, simply include [barelymusician.h](include/barelymusician.h).
 
@@ -31,41 +29,41 @@ Example usage
 // Create the musician.
 barely::Musician musician(/*sample_rate=*/48000);
 
-// Set the global tempo to 124 beats per minute.
+// Set the global tempo.
 musician.SetTempo(/*tempo=*/124.0);
 
-// Add an instrument.
-auto instrument = musician.AddInstrument();
+// Create a new instrument.
+auto instrument = musician.CreateInstrument();
 
-// Set the instrument gain to -6dB.
+// Set the instrument gain.
 instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0f);
 
 // Set an instrument note on.
 //
-// Note pitch is centered around the reference frequency, and measured in octaves. Fractional values
-// adjust the frequency logarithmically to maintain perceived pitch intervals in each octave.
+// The note pitch is centered around the reference frequency and measured in octaves. Fractional
+// note values adjust the frequency logarithmically to ensure equally perceived pitch intervals
+// within each octave.
 constexpr float kC4Pitch = 0.0f;
 instrument.SetNoteOn(kC4Pitch, /*intensity=*/0.25f);
 
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
 
-// Add a performer.
-auto performer = musician.AddPerformer();
+// Create a new performer.
+auto performer = musician.CreatePerformer();
 
-// Set the performer to loop.
+// Set the performer to looping.
 performer.SetLooping(/*is_looping=*/true);
 
-// Add a looping task that plays an instrument note every beat.
-auto task = performer.AddTask(
-    [&]() {
-      // Set an instrument note on.
-      instrument.SetNoteOn(/*pitch=*/1.0f);
-      // Schedule a one-off task to set the instrument note off after half a beat.
-      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(/*pitch=*/1.0f); },
-                                   performer.GetPosition() + 0.5);
-    },
-    /*position=*/0.0);
+// Create a new task that plays an instrument note every beat.
+auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, [&](barely::TaskState state) {
+  constexpr float kC3Pitch = -1.0f;
+  if (state == barely::TaskState::kBegin) {
+    instrument.SetNoteOn(kC3Pitch);
+  } else if (state == barely::TaskState::kEnd) {
+    instrument.SetNoteOff(kC3Pitch);
+  }
+});
 
 // Start the performer.
 performer.Start();
@@ -73,10 +71,9 @@ performer.Start();
 // Update the musician timestamp in seconds.
 //
 // Timestamp updates must occur before processing instruments with their respective timestamps.
-// Otherwise, such `Process` calls will be *late* to receive the relevant state changes. To
-// compensate for this, `Update` should typically be called from a main thread update callback with
-// an additional "lookahead" to avoid potential thread synchronization issues that could arise in
-// real-time audio applications.
+// Otherwise, `Process` calls may be *late* in receiving the relevant changes to the instruments. To
+// address this, `Update` should typically be called from the main thread update callback using a
+// lookahead to prevent potential thread synchronization issues in real-time audio applications.
 constexpr double kLookahead = 0.1;
 double timestamp = 0.0;
 musician.Update(timestamp + kLookahead);

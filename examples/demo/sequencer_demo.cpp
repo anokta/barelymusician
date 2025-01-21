@@ -17,8 +17,8 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
-using ::barely::TaskEvent;
-using ::barely::TaskHandle;
+using ::barely::Task;
+using ::barely::TaskState;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -51,43 +51,53 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kSampleRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
-  instrument.SetNoteOnEvent({[](float pitch, float /*intensity*/, void* /*user_data*/) {
-    ConsoleLog() << "Note(" << pitch << ")";
-  }});
+  instrument.SetNoteOnCallback(
+      [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
-  auto performer = musician.AddPerformer();
+  auto performer = musician.CreatePerformer();
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
-  const auto play_note_fn = [&](double duration, float pitch) {
-    return [&instrument, &performer, pitch, duration]() {
-      instrument.SetNoteOn(pitch);
-      performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-                                   performer.GetPosition() + duration);
-    };
+  struct SequencerNote {
+    double position;
+    double duration;
+    float pitch;
   };
+  std::vector<SequencerNote> score;
+  score.push_back({0.0, 1.0, 0.0f});
+  score.push_back({1.0, 1.0, 2.0f / 12.0f});
+  score.push_back({2.0, 1.0, 4.0f / 12.0f});
+  score.push_back({3.0, 1.0, 5.0f / 12.0f});
+  score.push_back({4.0, 1.0, 7.0f / 12.0f});
+  score.push_back({5.0, 1.0 / 3.0, 7.0f / 12.0f});
+  score.push_back({5 + 1.0 / 3.0, 1.0 / 3.0, 9.0f / 12.0f});
+  score.push_back({5 + 2.0 / 3.0, 1.0 / 3.0, 11.0f / 12.0f});
+  score.push_back({6.0, 2.0, 1.0f});
 
-  std::vector<std::pair<double, TaskEvent::Callback>> score;
-  score.emplace_back(0.0, play_note_fn(1.0, 0.0f));
-  score.emplace_back(1.0, play_note_fn(1.0, 2.0f / 12.0f));
-  score.emplace_back(2.0, play_note_fn(1.0, 4.0f / 12.0f));
-  score.emplace_back(3.0, play_note_fn(1.0, 5.0f / 12.0f));
-  score.emplace_back(4.0, play_note_fn(1.0, 7.0f / 12.0f));
-  score.emplace_back(5.0, play_note_fn(1.0 / 3.0, 7.0f / 12.0f));
-  score.emplace_back(5 + 1.0 / 3.0, play_note_fn(1.0 / 3.0, 9.0f / 12.0f));
-  score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, 11.0f / 12.0f));
-  score.emplace_back(6.0, play_note_fn(2.0, 1.0f));
-
-  std::unordered_map<int, TaskHandle> tasks;
-  int index = 0;
-  for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, performer.AddTask(callback, position));
+  std::unordered_map<int, Task> tasks;
+  const auto build_note_fn = [&](const SequencerNote& note) {
+    return performer.CreateTask(note.position, note.duration,
+                                [&instrument, pitch = note.pitch](TaskState state) {
+                                  switch (state) {
+                                    case TaskState::kBegin:
+                                      instrument.SetNoteOn(pitch);
+                                      break;
+                                    case TaskState::kEnd:
+                                      instrument.SetNoteOff(pitch);
+                                      break;
+                                    default:
+                                      break;
+                                  }
+                                });
+  };
+  for (int i = 0; i < static_cast<int>(score.size()); ++i) {
+    tasks.emplace(i, build_note_fn(score[i]));
   }
 
   // Audio process callback.
@@ -108,12 +118,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
       if (const auto it = tasks.find(index - 1); it != tasks.end()) {
-        performer.RemoveTask(it->second);
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {
-        const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, performer.AddTask(callback, position));
+        tasks.emplace(index - 1, build_note_fn(score[index - 1]));
         ConsoleLog() << "Added note " << index;
       }
       return;
@@ -124,7 +132,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (performer.IsPlaying()) {
           performer.Stop();
-          instrument.SetAllNotesOff();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();

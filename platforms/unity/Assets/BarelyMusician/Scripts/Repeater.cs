@@ -14,8 +14,6 @@ namespace Barely {
   /// repeating sequence of notes.
   [RequireComponent(typeof(Instrument))]
   public class Repeater : MonoBehaviour {
-    public int ProcessOrder = 0;
-
     /// Rate.
     [Range(0.0f, 8.0f)]
     public double Rate = 1.0;

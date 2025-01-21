@@ -92,12 +92,12 @@ namespace Barely {
         }
         switch (component) {
           case Arpeggiator arpeggiator:
-            if (BarelyArpeggiator_Create(_handle, arpeggiator.ProcessOrder, ref componentHandle)) {
+            if (BarelyArpeggiator_Create(_handle, ref componentHandle)) {
               return;
             }
             break;
           case Repeater repeater:
-            if (BarelyRepeater_Create(_handle, repeater.ProcessOrder, ref componentHandle)) {
+            if (BarelyRepeater_Create(_handle, ref componentHandle)) {
               return;
             }
             break;
@@ -142,16 +142,15 @@ namespace Barely {
         if (Handle == IntPtr.Zero || instrumentHandle != IntPtr.Zero) {
           return;
         }
-        bool success = BarelyMusician_AddInstrument(Handle, ref instrumentHandle);
+        bool success = BarelyInstrument_Create(Handle, ref instrumentHandle);
         if (!success) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
         }
         _instruments.Add(instrumentHandle, instrument);
-        _noteOffEvent.userData = instrumentHandle;
-        BarelyInstrument_SetNoteOffEvent(instrumentHandle, ref _noteOffEvent);
-        _noteOnEvent.userData = instrumentHandle;
-        BarelyInstrument_SetNoteOnEvent(instrumentHandle, ref _noteOnEvent);
+        BarelyInstrument_SetNoteOffCallback(instrumentHandle, Instrument_OnNoteOff,
+                                            instrumentHandle);
+        BarelyInstrument_SetNoteOnCallback(instrumentHandle, Instrument_OnNoteOn, instrumentHandle);
       }
 
       /// Destroys an instrument.
@@ -162,7 +161,7 @@ namespace Barely {
           instrumentHandle = IntPtr.Zero;
           return;
         }
-        if (!BarelyMusician_RemoveInstrument(_handle, instrumentHandle)) {
+        if (!BarelyInstrument_Destroy(instrumentHandle)) {
           Debug.LogError("Failed to destroy instrument");
         }
         _instruments.Remove(instrumentHandle);
@@ -397,16 +396,6 @@ namespace Barely {
         }
       }
 
-      /// Cancels all one-off tasks.
-      ///
-      /// @param performerHandle Performer handle.
-      public static void Performer_CancelAllOneOffTasks(IntPtr performerHandle) {
-        if (!BarelyPerformer_CancelAllOneOffTasks(performerHandle) &&
-            performerHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to cancel all one-off tasks");
-        }
-      }
-
       /// Creates a new performer.
       ///
       /// @param performer Performer.
@@ -415,9 +404,11 @@ namespace Barely {
         if (Handle == IntPtr.Zero || performerHandle != IntPtr.Zero) {
           return;
         }
-        if (!BarelyMusician_AddPerformer(Handle, /*processOrder=*/0, ref performerHandle)) {
+        if (!BarelyPerformer_Create(Handle, ref performerHandle)) {
           Debug.LogError("Failed to create performer '" + performer.name + "'");
         }
+        _performers.Add(performerHandle, performer);
+        BarelyPerformer_SetBeatCallback(performerHandle, Performer_OnBeat, performerHandle);
       }
 
       /// Destroys a performer.
@@ -428,9 +419,10 @@ namespace Barely {
           performerHandle = IntPtr.Zero;
           return;
         }
-        if (!BarelyMusician_RemovePerformer(_handle, performerHandle)) {
+        if (!BarelyPerformer_Destroy(performerHandle)) {
           Debug.LogError("Failed to destroy performer");
         }
+        _performers.Remove(performerHandle);
         performerHandle = IntPtr.Zero;
       }
 
@@ -497,25 +489,6 @@ namespace Barely {
           Debug.LogError("Failed to get if performer is playing");
         }
         return isPlaying;
-      }
-
-      /// Schedules a one-off task.
-      ///
-      /// @param performerHandle Performer handle.
-      /// @param callback Task callback.
-      /// @param position Task position.
-      public static void Performer_ScheduleOneOffTask(IntPtr performerHandle, Action callback,
-                                                      double position) {
-        if (Handle == null || callback == null) {
-          return;
-        }
-        _taskEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(callback));
-        if (!BarelyPerformer_ScheduleOneOffTask(performerHandle, ref _taskEvent, position)) {
-          GCHandle.FromIntPtr(_taskEvent.userData).Free();
-          if (performerHandle != IntPtr.Zero) {
-            Debug.LogError("Failed to set performer loop begin position");
-          }
-        }
       }
 
       /// Sets the loop begin position of a performer.
@@ -600,19 +573,24 @@ namespace Barely {
 
       /// Creates a new task.
       ///
+      /// @param task Task.
       /// @param performerHandle Performer handle.
-      /// @param callback Task callback.
       /// @param position Task position.
+      /// @param duration Task duration.
+      /// @param callback Task process callback.
       /// @param taskHandle Task handle.
-      public static void Task_Create(IntPtr performerHandle, Action callback, double position,
-                                     ref IntPtr taskHandle) {
+      public static void Task_Create(Task task, IntPtr performerHandle, double position,
+                                     double duration, ref IntPtr taskHandle) {
         if (Handle == IntPtr.Zero || taskHandle != IntPtr.Zero) {
           return;
         }
-        _taskEvent.userData = GCHandle.ToIntPtr(GCHandle.Alloc(callback));
-        if (!BarelyPerformer_AddTask(performerHandle, ref _taskEvent, position, ref taskHandle)) {
-          GCHandle.FromIntPtr(_taskEvent.userData).Free();
+        if (!BarelyTask_Create(performerHandle, position, Math.Max(duration, _minTaskDuration),
+                               Task_OnProcess, IntPtr.Zero, ref taskHandle)) {
+          Debug.LogError("Failed to create task '" + task + "'");
+          return;
         }
+        _tasks.Add(taskHandle, task);
+        BarelyTask_SetProcessCallback(taskHandle, Task_OnProcess, taskHandle);
       }
 
       /// Destroys a task.
@@ -623,10 +601,23 @@ namespace Barely {
           taskHandle = IntPtr.Zero;
           return;
         }
-        if (!BarelyPerformer_RemoveTask(performerHandle, taskHandle)) {
+        if (!BarelyTask_Destroy(taskHandle)) {
           Debug.LogError("Failed to destroy performer task");
         }
+        _tasks.Remove(taskHandle);
         taskHandle = IntPtr.Zero;
+      }
+
+      /// Returns the duration of a task.
+      ///
+      /// @param taskHandle Task handle.
+      /// @return Duration in beats.
+      public static double Task_GetDuration(IntPtr taskHandle) {
+        double duration = 0.0;
+        if (!BarelyTask_GetDuration(taskHandle, ref duration) && taskHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer task duration");
+        }
+        return (duration > _minTaskDuration) ? duration : 0.0;
       }
 
       /// Returns the position of a task.
@@ -639,6 +630,29 @@ namespace Barely {
           Debug.LogError("Failed to get performer task position");
         }
         return position;
+      }
+
+      /// Returns whether a task is active or not.
+      ///
+      /// @param taskHandle Task handle.
+      /// @return True if active, false otherwise.
+      public static bool Task_IsActive(IntPtr taskHandle) {
+        bool isActive = false;
+        if (!BarelyTask_IsActive(taskHandle, ref isActive) && taskHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get if performer task is active");
+        }
+        return isActive;
+      }
+
+      /// Sets the duration of a task.
+      ///
+      /// @param taskHandle Task handle.
+      /// @param duration Duration in beats.
+      public static void Task_SetDuration(IntPtr taskHandle, double duration) {
+        if (!BarelyTask_SetDuration(taskHandle, Math.Max(duration, _minTaskDuration)) &&
+            taskHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer task duration");
+        }
       }
 
       /// Sets the position of a task.
@@ -842,42 +856,41 @@ namespace Barely {
         }
       }
 
-      // Note off event callback.
-      private delegate void NoteOffEvent_Callback(float pitch, IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(NoteOffEvent_Callback))]
-      private static void NoteOffEvent_OnCallback(float pitch, IntPtr userData) {
+      // Instrument note off callback.
+      private delegate void Instrument_NoteOffCallback(float pitch, IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOffCallback))]
+      private static void Instrument_OnNoteOff(float pitch, IntPtr userData) {
         if (_instruments.TryGetValue(userData, out var instrument)) {
-          Instrument.Internal.OnNoteOffEvent(instrument, pitch);
+          Instrument.Internal.OnNoteOff(instrument, pitch);
         }
       }
 
-      // Note off event.
-      [StructLayout(LayoutKind.Sequential)]
-      private struct NoteOffEvent {
-        // Callback.
-        public NoteOffEvent_Callback callback;
-
-        // Pointer to user data.
-        public IntPtr userData;
-      }
-
-      // Note on event callback.
-      private delegate void NoteOnEvent_Callback(float pitch, float intensity, IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(NoteOnEvent_Callback))]
-      private static void NoteOnEvent_OnCallback(float pitch, float intensity, IntPtr userData) {
+      // Instrument note on callback.
+      private delegate void Instrument_NoteOnCallback(float pitch, float intensity,
+                                                      IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOnCallback))]
+      private static void Instrument_OnNoteOn(float pitch, float intensity, IntPtr userData) {
         if (_instruments.TryGetValue(userData, out var instrument)) {
-          Instrument.Internal.OnNoteOnEvent(instrument, pitch, intensity);
+          Instrument.Internal.OnNoteOn(instrument, pitch, intensity);
         }
       }
 
-      // Note on event.
-      [StructLayout(LayoutKind.Sequential)]
-      private struct NoteOnEvent {
-        // Callback.
-        public NoteOnEvent_Callback callback;
+      // Performer beat callback.
+      private delegate void Performer_BeatCallback(IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(Performer_BeatCallback))]
+      private static void Performer_OnBeat(IntPtr userData) {
+        if (_performers.TryGetValue(userData, out var performer)) {
+          Performer.Internal.OnBeat(performer);
+        }
+      }
 
-        // Pointer to user data.
-        public IntPtr userData;
+      // Task process callback.
+      private delegate void Task_ProcessCallback(TaskState state, IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(Task_ProcessCallback))]
+      private static void Task_OnProcess(TaskState state, IntPtr userData) {
+        if (_tasks.TryGetValue(userData, out var task)) {
+          Task.Internal.OnProcess(task, state);
+        }
       }
 
       // Sample data.
@@ -911,43 +924,6 @@ namespace Barely {
         public Int32 mode;
       }
 
-      // Task event create callback.
-      private delegate void TaskEvent_CreateCallback(ref IntPtr state, IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(TaskEvent_CreateCallback))]
-      private static void Task_OnCreate(ref IntPtr state, IntPtr userData) {
-        state = userData;
-      }
-
-      // Task event destroy callback.
-      private delegate void TaskEvent_DestroyCallback(ref IntPtr state);
-      [AOT.MonoPInvokeCallback(typeof(TaskEvent_DestroyCallback))]
-      private static void Task_OnDestroy(ref IntPtr state) {
-        GCHandle.FromIntPtr(state).Free();
-      }
-
-      // Task event process callback.
-      private delegate void TaskEvent_ProcessCallback(ref IntPtr state);
-      [AOT.MonoPInvokeCallback(typeof(TaskEvent_ProcessCallback))]
-      private static void Task_OnProcess(ref IntPtr state) {
-        (GCHandle.FromIntPtr(state).Target as Action)?.Invoke();
-      }
-
-      // Task event.
-      [StructLayout(LayoutKind.Sequential)]
-      private struct TaskEvent {
-        // Create callback.
-        public TaskEvent_CreateCallback createCallback;
-
-        // Destroy callback.
-        public TaskEvent_DestroyCallback destroyCallback;
-
-        // Process callback.
-        public TaskEvent_ProcessCallback processCallback;
-
-        // Pointer to user data.
-        public IntPtr userData;
-      }
-
       // Singleton musician handle.
       private static IntPtr Handle {
         get {
@@ -976,28 +952,12 @@ namespace Barely {
         mode = 0,
       };
 
-      // Note off event.
-      private static NoteOffEvent _noteOffEvent = new NoteOffEvent() {
-        callback = NoteOffEvent_OnCallback,
-        userData = IntPtr.Zero,
-      };
-
-      // Note on event.
-      private static NoteOnEvent _noteOnEvent = new NoteOnEvent() {
-        callback = NoteOnEvent_OnCallback,
-        userData = IntPtr.Zero,
-      };
-
-      // Task event.
-      private static TaskEvent _taskEvent = new TaskEvent() {
-        createCallback = Task_OnCreate,
-        destroyCallback = Task_OnDestroy,
-        processCallback = Task_OnProcess,
-        userData = IntPtr.Zero,
-      };
-
       // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
       private const double _minLookahead = 0.025;
+
+      // Minimum task duration to avoid zero duration tasks.
+      // TODO(#148): This can be removed once trigger tasks are supported.
+      private const double _minTaskDuration = 1e-6;
 
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
@@ -1011,8 +971,14 @@ namespace Barely {
       // Array of mono output samples.
       public static float[] _outputSamples = null;
 
+      // Map of performers by their handles.
+      private static Dictionary<IntPtr, Performer> _performers = null;
+
       // Map of scheduled list of task callbacks by their timestamps.
       private static SortedDictionary<double, List<Action>> _scheduledTaskCallbacks = null;
+
+      // Map of tasks by their handles.
+      private static Dictionary<IntPtr, Task> _tasks = null;
 
       // Component that manages internal state.
       private class State : MonoBehaviour {
@@ -1032,8 +998,8 @@ namespace Barely {
 
         private void OnAudioConfigurationChanged(bool deviceWasChanged) {
           Shutdown();
-          var performers = FindObjectsByType<Performer>(FindObjectsSortMode.None);
-          for (int i = 0; i < performers.Length; ++i) {
+          var performers = new List<Performer>(_performers.Values);
+          for (int i = 0; i < performers.Count; ++i) {
             performers[i].enabled = false;
           }
           var instruments = new List<Instrument>(_instruments.Values);
@@ -1044,7 +1010,7 @@ namespace Barely {
           for (int i = 0; i < instruments.Count; ++i) {
             instruments[i].enabled = true;
           }
-          for (int i = 0; i < performers.Length; ++i) {
+          for (int i = 0; i < performers.Count; ++i) {
             performers[i].enabled = true;
           }
         }
@@ -1079,7 +1045,9 @@ namespace Barely {
           _outputSamples = new float[config.dspBufferSize];
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<IntPtr, Instrument>();
+          _performers = new Dictionary<IntPtr, Performer>();
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
+          _tasks = new Dictionary<IntPtr, Task>();
           BarelyMusician_Update(_handle, GetNextTimestamp());
         }
 
@@ -1103,6 +1071,12 @@ namespace Barely {
 #else
       private const string _pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
+
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Create")]
+      private static extern bool BarelyInstrument_Create(IntPtr musician, ref IntPtr outInstrument);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
+      private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetControl")]
       private static extern bool BarelyInstrument_GetControl(IntPtr instrument, ControlType type,
@@ -1137,30 +1111,22 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, float pitch);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOffEvent")]
-      private static extern bool BarelyInstrument_SetNoteOffEvent(IntPtr instrument,
-                                                                  ref NoteOffEvent noteOffEvent);
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOffCallback")]
+      private static extern bool BarelyInstrument_SetNoteOffCallback(
+          IntPtr instrument, Instrument_NoteOffCallback callback, IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
       private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, float pitch,
                                                             float intensity);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEvent")]
-      private static extern bool BarelyInstrument_SetNoteOnEvent(IntPtr instrument,
-                                                                 ref NoteOnEvent noteOnEvent);
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOnCallback")]
+      private static extern bool BarelyInstrument_SetNoteOnCallback(
+          IntPtr instrument, Instrument_NoteOnCallback callback, IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
       private static extern bool BarelyInstrument_SetSampleData(IntPtr instrument,
                                                                 [In] SampleDataSlice[] slices,
                                                                 Int32 sliceCount);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_AddInstrument")]
-      private static extern bool BarelyMusician_AddInstrument(IntPtr musician,
-                                                              ref IntPtr outInstrument);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_AddPerformer")]
-      private static extern bool BarelyMusician_AddPerformer(IntPtr musician, Int32 processOrder,
-                                                             ref IntPtr outPerformer);
 
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_Create")]
       private static extern bool BarelyMusician_Create(Int32 sampleRate, ref IntPtr outMusician);
@@ -1179,13 +1145,6 @@ namespace Barely {
       private static extern bool BarelyMusician_GetTimestamp(IntPtr musician,
                                                              ref double outTimestamp);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_RemoveInstrument")]
-      private static extern bool BarelyMusician_RemoveInstrument(IntPtr musician,
-                                                                 IntPtr instrument);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_RemovePerformer")]
-      private static extern bool BarelyMusician_RemovePerformer(IntPtr musician, IntPtr performer);
-
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_SetReferenceFrequency")]
       private static extern bool BarelyMusician_SetReferenceFrequency(IntPtr musician,
                                                                       float referenceFrequency);
@@ -1196,12 +1155,11 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyMusician_Update")]
       private static extern bool BarelyMusician_Update(IntPtr musician, double timestamp);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_AddTask")]
-      private static extern bool BarelyPerformer_AddTask(IntPtr performer, ref TaskEvent taskEvent,
-                                                         double position, ref IntPtr outTask);
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Create")]
+      private static extern bool BarelyPerformer_Create(IntPtr musician, ref IntPtr outPerformer);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_CancelAllOneOffTasks")]
-      private static extern bool BarelyPerformer_CancelAllOneOffTasks(IntPtr performer);
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Destroy")]
+      private static extern bool BarelyPerformer_Destroy(IntPtr performer);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
       private static extern bool BarelyPerformer_GetLoopBeginPosition(
@@ -1221,13 +1179,10 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
       private static extern bool BarelyPerformer_IsPlaying(IntPtr performer, ref bool outIsPlaying);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_RemoveTask")]
-      private static extern bool BarelyPerformer_RemoveTask(IntPtr performer, IntPtr task);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_ScheduleOneOffTask")]
-      private static extern bool BarelyPerformer_ScheduleOneOffTask(IntPtr performer,
-                                                                    ref TaskEvent taskEvent,
-                                                                    double position);
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetBeatCallback")]
+      private static extern bool BarelyPerformer_SetBeatCallback(IntPtr performer,
+                                                                 Performer_BeatCallback callback,
+                                                                 IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
       private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr performer,
@@ -1252,15 +1207,37 @@ namespace Barely {
       private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
                                                       ref float outPitch);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_Create")]
+      private static extern bool BarelyTask_Create(IntPtr performer, double position,
+                                                   double duration, Task_ProcessCallback callback,
+                                                   IntPtr userData, ref IntPtr outTask);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
+      private static extern bool BarelyTask_Destroy(IntPtr task);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetDuration")]
+      private static extern bool BarelyTask_GetDuration(IntPtr task, ref double outDuration);
+
       [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPosition")]
       private static extern bool BarelyTask_GetPosition(IntPtr task, ref double outPosition);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_IsActive")]
+      private static extern bool BarelyTask_IsActive(IntPtr performer, ref bool outIsActive);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetDuration")]
+      private static extern bool BarelyTask_SetDuration(IntPtr task, double duration);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPosition")]
       private static extern bool BarelyTask_SetPosition(IntPtr task, double position);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetProcessCallback")]
+      private static extern bool BarelyTask_SetProcessCallback(IntPtr task,
+                                                               Task_ProcessCallback callback,
+                                                               IntPtr userData);
+
       // Components.
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Create")]
-      private static extern bool BarelyArpeggiator_Create(IntPtr musician, Int32 processOrder,
+      private static extern bool BarelyArpeggiator_Create(IntPtr musician,
                                                           ref IntPtr outArpeggiator);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
@@ -1302,8 +1279,7 @@ namespace Barely {
       private static extern bool BarelyRepeater_Clear(IntPtr repeater);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Create")]
-      private static extern bool BarelyRepeater_Create(IntPtr musician, Int32 processOrder,
-                                                       ref IntPtr outRepeater);
+      private static extern bool BarelyRepeater_Create(IntPtr musician, ref IntPtr outRepeater);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Destroy")]
       private static extern bool BarelyRepeater_Destroy(IntPtr repeater);

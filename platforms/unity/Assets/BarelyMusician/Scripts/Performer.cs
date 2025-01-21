@@ -54,37 +54,31 @@ namespace Barely {
     [Min(0.0f)]
     private double _loopLength = 1.0;
 
-    /// Position in beats.
-    public double Position {
-      get { return Musician.Internal.Performer_GetPosition(_handle); }
-      set { Musician.Internal.Performer_SetPosition(_handle, value); }
-    }
-
     /// List of recurring tasks.
     public List<Task> Tasks = new List<Task>();
+
+    /// Beat callback.
+    public delegate void BeatCallback();
+    public event BeatCallback OnBeat;
+
+    [Serializable]
+    public class BeatEvent : UnityEngine.Events.UnityEvent {}
+    public BeatEvent OnBeatEvent;
 
     /// True if playing, false otherwise.
     public bool IsPlaying {
       get { return Musician.Internal.Performer_IsPlaying(_handle); }
     }
 
+    /// Position in beats.
+    public double Position {
+      get { return Musician.Internal.Performer_GetPosition(_handle); }
+      set { Musician.Internal.Performer_SetPosition(_handle, value); }
+    }
+
     /// Starts the performer.
     public void Play() {
       Musician.Internal.Performer_Start(_handle);
-    }
-
-    /// Cancels all one-off tasks.
-    public void CancelAllOneOffTasks() {
-      Musician.Internal.Performer_CancelAllOneOffTasks(_handle);
-    }
-
-    /// Schedules a one-off task at a specific position.
-    ///
-    /// @param callback Task process callback.
-    /// @param position Task position in beats.
-    /// @param processOrder Task process order.
-    public void ScheduleOneOffTask(Action callback, double position) {
-      Musician.Internal.Performer_ScheduleOneOffTask(_handle, callback, position);
     }
 
     /// Stops the performer.
@@ -97,6 +91,12 @@ namespace Barely {
       /// Returns the handle.
       public static IntPtr GetHandle(Performer performer) {
         return performer ? performer._handle : IntPtr.Zero;
+      }
+
+      /// Internal beat callback.
+      public static void OnBeat(Performer performer) {
+        performer.OnBeat?.Invoke();
+        performer.OnBeatEvent?.Invoke();
       }
     }
 

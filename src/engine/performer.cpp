@@ -9,128 +9,139 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "engine/config.h"
-#include "engine/event.h"
 
 namespace barely::internal {
 
-Performer::Task::Task(Performer& performer, const TaskEvent& task_event, double position) noexcept
-    : Event<TaskEvent>(task_event), performer_(performer), position_(position) {}
+void Performer::Task::SetDuration(double duration) noexcept {
+  assert(duration > 0.0 && "Invalid task duration");
+  if (duration != duration_) {
+    const double old_duration = duration_;
+    duration_ = duration;
+    performer_.SetTaskDuration(this, old_duration);
+  }
+}
 
 void Performer::Task::SetPosition(double position) noexcept {
   if (position != position_) {
-    performer_.SetTaskPosition(this, position);
+    const double old_position = position_;
     position_ = position;
+    performer_.SetTaskPosition(this, old_position);
+  }
+}
+
+void Performer::Task::SetProcessCallback(ProcessCallback callback) noexcept {
+  if (is_active_) {
+    Process(TaskState::kEnd);
+  }
+  process_callback_ = callback;
+  if (is_active_) {
+    Process(TaskState::kBegin);
   }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer::Performer(int process_order) noexcept
-    : process_order_(process_order), recurring_task_pool_(kMaxRecurringTaskPerPerformerCount) {}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Performer::Task* Performer::AddTask(const TaskEvent& task_event, double position) noexcept {
-  Task* task = recurring_task_pool_.Construct(*this, task_event, position);
-  [[maybe_unused]] const bool success = recurring_tasks_.emplace(position, task).second;
-  assert(success);
-  return task;
+Performer::Task* Performer::CreateTask(double position, double duration,
+                                       Task::ProcessCallback callback) noexcept {
+  auto task = std::make_unique<Task>(*this, position, duration, callback);
+  Task* task_ptr = task.get();
+  [[maybe_unused]] const bool success = tasks_.emplace(task_ptr, std::move(task)).second;
+  assert(success && "Failed to create task");
+  inactive_tasks_.emplace(position, task_ptr);
+  return task_ptr;
 }
 
-void Performer::CancelAllOneOffTasks() noexcept { one_off_tasks_.clear(); }
+void Performer::DestroyTask(Task* task) noexcept {
+  if (task->IsActive()) {
+    [[maybe_unused]] const bool success =
+        (active_tasks_.erase({task->GetEndPosition(), task}) == 1);
+    assert(success && "Failed to destroy active task");
+    task->SetActive(false);
+  } else {
+    [[maybe_unused]] const bool success = (inactive_tasks_.erase({task->GetPosition(), task}) == 1);
+    assert(success && "Failed to destroy inactive task");
+  }
+  tasks_.erase(task);
+}
 
-std::optional<double> Performer::GetDurationToNextTask() const noexcept {
+std::optional<double> Performer::GetNextDuration() const noexcept {
   if (!is_playing_) {
     return std::nullopt;
   }
 
-  // Check recurring tasks.
-  std::optional<double> next_task_position = std::nullopt;
-  if (const auto next_recurring_task = GetNextRecurringTask();
-      next_recurring_task != recurring_tasks_.end()) {
-    next_task_position = next_recurring_task->first;
-    if (is_looping_ && (*next_task_position < position_ ||
-                        (last_processed_recurring_task_it_ &&
-                         *next_recurring_task <= **last_processed_recurring_task_it_))) {
-      // Loop around.
-      if (loop_length_ > 0.0) {
-        *next_task_position += loop_length_;
-      } else {
-        next_task_position = std::nullopt;
+  std::optional<double> next_position = std::nullopt;
+
+  // Check inactive tasks.
+  if (const auto next_it = GetNextInactiveTask(); next_it != inactive_tasks_.end()) {
+    if (next_it->second->IsInside(position_)) {
+      // Performer position is inside an inactive task, we can return immediately.
+      return 0.0;
+    }
+    if (is_looping_ && next_it->first < position_) {
+      if (loop_length_ > 0.0) {  // loop around.
+        next_position = next_it->first + loop_length_;
       }
+    } else {
+      next_position = next_it->first;
     }
   }
-  // Check one-off tasks.
-  if (const auto next_one_off_task = one_off_tasks_.begin();
-      next_one_off_task != one_off_tasks_.end() &&
-      (!next_task_position || next_one_off_task->first <= *next_task_position)) {
-    next_task_position = next_one_off_task->first;
+
+  // Check active tasks.
+  if (!active_tasks_.empty()) {
+    if (const double next_active_task_position =
+            is_looping_ ? std::min(active_tasks_.begin()->first, GetLoopEndPosition())
+                        : active_tasks_.begin()->first;
+        !next_position.has_value() || next_active_task_position < *next_position) {
+      next_position = next_active_task_position;
+    }
   }
 
-  if (next_task_position) {
-    return *next_task_position - position_;
+  // Check beat callback.
+  if (beat_callback_) {
+    std::optional<double> next_beat_position =
+        (last_beat_position_ == position_) ? std::ceil(position_ + 1.0) : std::ceil(position_);
+    if (is_looping_ && *next_beat_position >= GetLoopEndPosition()) {
+      const double first_beat_offset = std::ceil(loop_begin_position_) - loop_begin_position_;
+      next_beat_position = (loop_length_ > first_beat_offset)
+                               ? std::optional<double>{first_beat_offset + GetLoopEndPosition()}
+                               : std::nullopt;
+    }
+    if (next_beat_position.has_value() &&
+        (!next_position.has_value() || *next_beat_position < *next_position)) {
+      next_position = next_beat_position;
+    }
+  }
+
+  if (next_position) {
+    assert(*next_position >= position_ && "Invalid next duration");
+    return *next_position - position_;
   }
   return std::nullopt;
 }
 
-double Performer::GetLoopBeginPosition() const noexcept { return loop_begin_position_; }
-
-double Performer::GetLoopLength() const noexcept { return loop_length_; }
-
-double Performer::GetPosition() const noexcept { return position_; }
-
-int Performer::GetProcessOrder() const noexcept { return process_order_; }
-
-bool Performer::IsLooping() const noexcept { return is_looping_; }
-
-bool Performer::IsPlaying() const noexcept { return is_playing_; }
-
-void Performer::ProcessNextTaskAtPosition() noexcept {
+void Performer::ProcessAllTasksAtPosition() noexcept {
   if (!is_playing_) {
     return;
   }
-  if (const auto it = one_off_tasks_.begin();
-      it != one_off_tasks_.end() && it->first == position_) {
-    // Process the next one-off task.
-    it->second.Process();
-    one_off_tasks_.erase(it);
-    return;
+  if (last_beat_position_ != position_ && std::ceil(position_) == position_) {
+    last_beat_position_ = position_;
+    beat_callback_();
   }
-  if (const auto it = GetNextRecurringTask();
-      it != recurring_tasks_.end() && it->second->GetPosition() == position_ &&
-      (!last_processed_recurring_task_it_ || **last_processed_recurring_task_it_ < *it)) {
-    // Process the next recurring task.
-    it->second->Process();
-    last_processed_recurring_task_it_ = it;
+  // Active tasks get processed in `SetPosition`, so we only need to process inactive tasks here.
+  for (auto it = GetNextInactiveTask();
+       it != inactive_tasks_.end() && it->second->IsInside(position_); it = GetNextInactiveTask()) {
+    SetTaskActive(it, true);
   }
 }
 
-void Performer::RemoveTask(Task* task) noexcept {
-  if (last_processed_recurring_task_it_ && (*last_processed_recurring_task_it_)->second == task) {
-    const auto recurring_task_it = *last_processed_recurring_task_it_;
-    PrevLastProcessedRecurringTaskIt();
-    recurring_tasks_.erase(recurring_task_it);
-  } else {
-    recurring_tasks_.erase({task->GetPosition(), task});
-  }
-}
-
-void Performer::ScheduleOneOffTask(const TaskEvent& task_event, double position) noexcept {
-  if (position < position_) {
-    return;
-  }
-  one_off_tasks_.emplace(position, Event<TaskEvent>(task_event));
-}
+void Performer::SetBeatCallback(BeatCallback callback) noexcept { beat_callback_ = callback; }
 
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) {
     return;
   }
   loop_begin_position_ = loop_begin_position;
-  if (is_looping_ && position_ > loop_begin_position_) {
-    if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
-      last_processed_recurring_task_it_ = std::nullopt;
-    }
-    position_ = LoopAround(position_);
+  if (is_looping_ && position_ >= GetLoopEndPosition()) {
+    SetPosition(LoopAround(position_));
   }
 }
 
@@ -140,11 +151,8 @@ void Performer::SetLoopLength(double loop_length) noexcept {
     return;
   }
   loop_length_ = loop_length;
-  if (is_looping_ && position_ > loop_begin_position_) {
-    if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
-      last_processed_recurring_task_it_ = std::nullopt;
-    }
-    position_ = LoopAround(position_);
+  if (is_looping_ && position_ >= GetLoopEndPosition()) {
+    SetPosition(LoopAround(position_));
   }
 }
 
@@ -153,51 +161,68 @@ void Performer::SetLooping(bool is_looping) noexcept {
     return;
   }
   is_looping_ = is_looping;
-  if (is_looping_ && position_ > loop_begin_position_) {
-    if (loop_length_ > 0.0 && position_ > loop_begin_position_ + loop_length_) {
-      last_processed_recurring_task_it_ = std::nullopt;
-    }
-    position_ = LoopAround(position_);
+  if (is_looping_ && position_ >= GetLoopEndPosition()) {
+    SetPosition(LoopAround(position_));
   }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::SetPosition(double position) noexcept {
-  last_processed_recurring_task_it_ = std::nullopt;
+  last_beat_position_ = std::nullopt;
   if (position_ == position) {
     return;
   }
-  one_off_tasks_.erase(one_off_tasks_.begin(), one_off_tasks_.lower_bound(position));
-  if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
-    if (!one_off_tasks_.empty()) {
-      // Reset all remaining one-off tasks back to the beginning.
-      for (auto it = one_off_tasks_.begin(); it != one_off_tasks_.end();) {
-        auto current = it++;
-        auto node = one_off_tasks_.extract(current);
-        node.key() = std::max(node.key() - loop_length_, loop_begin_position_);
-        one_off_tasks_.insert(std::move(node));
-      }
-    }
+  if (is_looping_ && position >= GetLoopEndPosition()) {
     position_ = LoopAround(position);
+    while (!active_tasks_.empty()) {
+      SetTaskActive(active_tasks_.begin(), false);
+    }
   } else {
     position_ = position;
+    for (auto it = active_tasks_.begin(); it != active_tasks_.end();) {
+      // Copy the values in case `it` gets invalidated after the `Process` call.
+      auto [end_position, task] = *it;
+      if (!task->IsInside(position_)) {
+        SetTaskActive(it, false);
+      } else {
+        task->Process(TaskState::kUpdate);
+      }
+      it = active_tasks_.upper_bound({end_position, task});
+    }
   }
 }
 
-void Performer::SetTaskPosition(Task* task, double position) noexcept {
-  if (last_processed_recurring_task_it_ && task == (*last_processed_recurring_task_it_)->second) {
-    PrevLastProcessedRecurringTaskIt();
+void Performer::SetTaskActive(std::set<std::pair<double, Task*>>::iterator it,
+                              bool is_active) noexcept {
+  Task* task = it->second;
+  assert(!is_playing_ ||
+         ((is_active && task->IsInside(position_)) || (!is_active && !task->IsInside(position_))));
+  auto node = (is_active ? inactive_tasks_ : active_tasks_).extract(it);
+  node.value().first = is_active ? task->GetEndPosition() : task->GetPosition();
+  (is_active ? active_tasks_ : inactive_tasks_).insert(std::move(node));
+  task->SetActive(is_active);
+}
+
+void Performer::SetTaskDuration(Task* task, double old_duration) noexcept {
+  if (task->IsActive() && !task->IsInside(position_)) {
+    SetTaskActive(active_tasks_.find({task->GetPosition() + old_duration, task}), false);
   }
-  auto node = recurring_tasks_.extract({task->GetPosition(), task});
-  node.value().first = position;
-  recurring_tasks_.insert(std::move(node));
+}
+
+void Performer::SetTaskPosition(Task* task, double old_position) noexcept {
+  if (task->IsActive() && !task->IsInside(position_)) {
+    SetTaskActive(active_tasks_.find({old_position + task->GetDuration(), task}), false);
+  }
 }
 
 void Performer::Start() noexcept { is_playing_ = true; }
 
 void Performer::Stop() noexcept {
   is_playing_ = false;
-  last_processed_recurring_task_it_ = std::nullopt;
+  last_beat_position_ = std::nullopt;
+  while (!active_tasks_.empty()) {
+    SetTaskActive(active_tasks_.begin(), false);
+  }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -205,22 +230,24 @@ void Performer::Update(double duration) noexcept {
   if (!is_playing_) {
     return;
   }
-  assert(duration >= 0.0 &&
-         // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-         (!GetDurationToNextTask() || duration <= GetDurationToNextTask()));
-  if (const double next_position = position_ + duration; next_position > position_) {
-    SetPosition(next_position);
-  }
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  assert(duration > 0.0 && (!GetNextDuration() || duration <= GetNextDuration()));
+  SetPosition(position_ + duration);
 }
 
-Performer::RecurringTaskSet::const_iterator Performer::GetNextRecurringTask() const noexcept {
-  auto next_it = last_processed_recurring_task_it_
-                     ? std::next(*last_processed_recurring_task_it_)
-                     : recurring_tasks_.lower_bound({position_, nullptr});
-  if (is_looping_ && (next_it == recurring_tasks_.end() ||
-                      next_it->first >= loop_begin_position_ + loop_length_)) {
-    // Loop back to the beginning.
-    next_it = recurring_tasks_.lower_bound({loop_begin_position_, nullptr});
+std::set<std::pair<double, Performer::Task*>>::const_iterator Performer::GetNextInactiveTask()
+    const noexcept {
+  auto next_it = inactive_tasks_.lower_bound({position_, nullptr});
+  // Check if any inactive task became active (in case a new position was set).
+  // TODO(#147): This may be optimized further using an interval tree.
+  for (auto it = inactive_tasks_.begin(); it != next_it; ++it) {
+    if (it->second->GetEndPosition() > position_) {
+      return it;
+    }
+  }
+  // Loop back to the beginning if needed.
+  if (is_looping_ && (next_it == inactive_tasks_.end() || next_it->first >= GetLoopEndPosition())) {
+    next_it = inactive_tasks_.lower_bound({loop_begin_position_, nullptr});
   }
   return next_it;
 }
@@ -229,15 +256,6 @@ double Performer::LoopAround(double position) const noexcept {
   return loop_length_ > 0.0
              ? loop_begin_position_ + std::fmod(position - loop_begin_position_, loop_length_)
              : loop_begin_position_;
-}
-
-void Performer::PrevLastProcessedRecurringTaskIt() noexcept {
-  assert(last_processed_recurring_task_it_.has_value());
-  if (*last_processed_recurring_task_it_ != recurring_tasks_.begin()) {
-    --(*last_processed_recurring_task_it_);
-  } else {
-    last_processed_recurring_task_it_ = std::nullopt;
-  }
 }
 
 }  // namespace barely::internal

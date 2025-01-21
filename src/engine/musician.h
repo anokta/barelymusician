@@ -3,15 +3,12 @@
 
 #include <cmath>
 #include <memory>
-#include <set>
 #include <unordered_set>
 #include <utility>
 
 #include "barelymusician.h"
-#include "engine/config.h"
 #include "engine/instrument.h"
 #include "engine/performer.h"
-#include "engine/pool.h"
 
 namespace barely::internal {
 
@@ -24,18 +21,29 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit Musician(int sample_rate) noexcept;
 
-  /// Adds an instrument.
+  /// Creates a new instrument.
   ///
   /// @return Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument* AddInstrument() noexcept;
+  Instrument* CreateInstrument() noexcept;
 
-  /// Adds a performer.
+  /// Creates a new performer.
   ///
-  /// @param process_order Process order.
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Performer* AddPerformer(int process_order) noexcept;
+  Performer* CreatePerformer() noexcept;
+
+  /// Destroys an instrument.
+  ///
+  /// @param instrument Pointer to instrument.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void DestroyInstrument(Instrument* instrument) noexcept;
+
+  /// Destroys a performer.
+  ///
+  /// @param performer Pointer to performer.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void DestroyPerformer(Performer* performer) noexcept;
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
@@ -70,18 +78,6 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
 
-  /// Removes instrument.
-  ///
-  /// @param instrument Instrument.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveInstrument(Instrument* instrument) noexcept;
-
-  /// Removes a performer.
-  ///
-  /// @param performer Performer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemovePerformer(Performer* performer) noexcept;
-
   /// Sets the reference frequency.
   ///
   /// @param reference_frequency Reference frequency in hertz.
@@ -99,13 +95,11 @@ class Musician {
   void Update(double timestamp) noexcept;
 
  private:
-  // Set of instruments.
-  Pool<Instrument> instrument_pool_;
-  std::unordered_set<Instrument*> instruments_;
+  // Map of instruments by their pointers.
+  std::unordered_map<Instrument*, std::unique_ptr<Instrument>> instruments_;
 
-  // Set of process order-performer pairs.
-  Pool<Performer> performer_pool_;
-  std::set<std::pair<int, Performer*>> performers_;
+  // Map of performers by their pointers.
+  std::unordered_map<Performer*, std::unique_ptr<Performer>> performers_;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;

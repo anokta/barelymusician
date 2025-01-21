@@ -1,7 +1,7 @@
 # Build artifacts.
 build/
 
-# OSX.
+# macOS.
 .DS_Store
 
 # VS Code.

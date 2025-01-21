@@ -17,9 +17,8 @@ class Arpeggiator {
   // Constructs a new `Arpeggiator`.
   ///
   /// @param musician Musician.
-  /// @param process_order Process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Arpeggiator(Musician& musician, int process_order = -1) noexcept;
+  explicit Arpeggiator(Musician& musician) noexcept;
 
   /// Destroys `Arpeggiator`.
   ~Arpeggiator() noexcept;
@@ -79,6 +78,12 @@ class Arpeggiator {
   void SetStyle(ArpeggiatorStyle style) noexcept;
 
  private:
+  // Helper function to set the next note off.
+  void SetNextNoteOff() noexcept;
+
+  // Helper function to set the next note on.
+  void SetNextNoteOn() noexcept;
+
   // Stop the arpeggiator.
   void Stop() noexcept;
 
@@ -86,10 +91,13 @@ class Arpeggiator {
   void Update() noexcept;
 
   // Musician.
-  Musician& musician_;
+  Musician* musician_ = nullptr;
 
   // Performer.
   Performer* performer_ = nullptr;
+
+  // Task.
+  Performer::Task* task_ = nullptr;
 
   // Instrument.
   Instrument* instrument_ = nullptr;
@@ -105,6 +113,9 @@ class Arpeggiator {
 
   // Current index.
   int index_ = -1;
+
+  // Current pitch.
+  float pitch_ = 0.0f;
 
   // Random number generator.
   Random random_;

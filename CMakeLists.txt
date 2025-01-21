@@ -41,7 +41,7 @@ if(ENABLE_DAISY)
   FetchContent_Declare(
     libdaisy
     GIT_REPOSITORY https://github.com/electro-smith/libDaisy.git
-    GIT_TAG 15e1dd53368f23c4207ecc4b17ce1a529166fa5a
+    GIT_TAG 8d106a2c822f687bcb8c86bed0b6f2c22f680999
   )
   FetchContent_MakeAvailable(libdaisy)
   set_target_properties(

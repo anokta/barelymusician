@@ -119,7 +119,7 @@ class Voice {
   SamplePlayer sample_player_;
 };
 
-/// Voice callback signature alias.
+/// Voice callback alias.
 ///
 /// @param voice Mutable voice.
 /// @param filter_coefficient Filter coefficient.

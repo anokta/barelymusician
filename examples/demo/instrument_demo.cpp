@@ -58,18 +58,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Musician musician(kSampleRate);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEvent({[](float pitch, float intensity, void* /*user_data*/) {
+  instrument.SetNoteOnCallback([](float pitch, float intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-  }});
-  instrument.SetNoteOffEvent(
-      {[](float pitch, void* /*user_data*/) { ConsoleLog() << "NoteOff(" << pitch << ") "; }});
+  });
+  instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](std::span<float> output_samples) {

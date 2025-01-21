@@ -7,7 +7,7 @@ namespace Barely {
   /// Filter type.
   public enum FilterType {
     /// None.
-    [InspectorName("None")] NONE,
+    [InspectorName("None")] NONE = 0,
     /// Low-pass.
     [InspectorName("Low-pass")] LOW_PASS,
     /// High-pass.
@@ -181,22 +181,22 @@ namespace Barely {
     [Range(0.0f, 48000.0f)]
     public float FilterFrequency = 0.0f;
 
-    /// Note off event callback.
+    /// Note off callback.
     ///
     /// @param pitch Note pitch.
-    public delegate void NoteOffEventCallback(float pitch);
-    public event NoteOffEventCallback OnNoteOff;
+    public delegate void NoteOffCallback(float pitch);
+    public event NoteOffCallback OnNoteOff;
 
     [Serializable]
     public class NoteOffEvent : UnityEngine.Events.UnityEvent<float> {}
     public NoteOffEvent OnNoteOffEvent;
 
-    /// Note on event callback.
+    /// Note on callback.
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public delegate void NoteOnEventCallback(float pitch, float intensity);
-    public event NoteOnEventCallback OnNoteOn;
+    public delegate void NoteOnCallback(float pitch, float intensity);
+    public event NoteOnCallback OnNoteOn;
 
     [Serializable]
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<float, float> {}
@@ -264,14 +264,14 @@ namespace Barely {
         return instrument ? instrument._handle : IntPtr.Zero;
       }
 
-      /// Internal note off event callback.
-      public static void OnNoteOffEvent(Instrument instrument, float pitch) {
+      /// Internal note off callback.
+      public static void OnNoteOff(Instrument instrument, float pitch) {
         instrument.OnNoteOff?.Invoke(pitch);
         instrument.OnNoteOffEvent?.Invoke(pitch);
       }
 
-      /// Internal note on event callback.
-      public static void OnNoteOnEvent(Instrument instrument, float pitch, float intensity) {
+      /// Internal note on callback.
+      public static void OnNoteOn(Instrument instrument, float pitch, float intensity) {
         instrument.OnNoteOn?.Invoke(pitch, intensity);
         instrument.OnNoteOnEvent?.Invoke(pitch, intensity);
       }

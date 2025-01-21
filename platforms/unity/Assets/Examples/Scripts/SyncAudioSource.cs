@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditorInternal;
+using UnityEngine;
 
 namespace Barely.Examples {
   public class SyncAudioSource : MonoBehaviour {
@@ -27,9 +28,11 @@ namespace Barely.Examples {
       _pitch = Mathf.PingPong(0.5f * Time.time, 2.0f);
     }
 
-    public void PlayNote() {
-      instrument.SetNoteOn(_pitch);
-      instrument.SetNoteOff(_pitch);
+    public void PlayNote(TaskState state) {
+      if (state == TaskState.BEGIN) {
+        instrument.SetNoteOn(_pitch);
+        instrument.SetNoteOff(_pitch);
+      }
     }
   }
 }  // namespace Barely.Examples

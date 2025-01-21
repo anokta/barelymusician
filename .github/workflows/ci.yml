@@ -17,13 +17,16 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: env
+        shell: bash
+        run: echo "ref_name=${GITHUB_REF_NAME//\//-}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
         with:
           path: benchmark.json
-          key: benchmark-${{ matrix.os }}-${{ github.ref_name }}-${{ github.sha }}
+          key: benchmark-${{ matrix.os }}-${{ env.ref_name }}-${{ github.sha }}
           restore-keys: |
-            benchmark-${{ matrix.os }}-${{ github.ref_name }}
+            benchmark-${{ matrix.os }}-${{ env.ref_name }}
             benchmark-${{ matrix.os }}
       - name: install
         shell: bash
@@ -40,7 +43,7 @@ jobs:
             --benchmark_compare="${{ github.workspace }}/benchmark_cached.json"
       - uses: actions/upload-artifact@v4
         with:
-          name: benchmark-${{ matrix.os }}-${{ github.ref_name }}-${{ github.sha }}
+          name: benchmark-${{ matrix.os }}-${{ env.ref_name }}-${{ github.sha }}
           path: benchmark.json
 
   test:

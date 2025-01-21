@@ -18,6 +18,8 @@ using ::barely::ControlType;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::Scale;
+using ::barely::Task;
+using ::barely::TaskState;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -53,49 +55,59 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kSampleRate);
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
-  instrument.SetNoteOnEvent({[](float pitch, float /*intensity*/, void* /*user_data*/) {
-    ConsoleLog() << "Note(" << pitch << ")";
-  }});
+  instrument.SetNoteOnCallback(
+      [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   std::vector<std::pair<double, double>> triggers;
+  std::vector<Task> tasks;
 
-  auto performer = musician.AddPerformer();
+  auto performer = musician.CreatePerformer();
+  double stop_position = 0.0;
 
-  const auto play_note_fn = [&](int degree, double duration) {
-    return [&instrument, &performer, duration, pitch = Scale(kMajor).GetPitch(degree)]() {
-      instrument.SetNoteOn(pitch);
-      performer.ScheduleOneOffTask(
-          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
-          performer.GetPosition() + duration);
+  const auto play_note_fn = [&](int degree) {
+    return [&, pitch = Scale(kMajor).GetPitch(degree)](TaskState state) {
+      switch (state) {
+        case TaskState::kBegin:
+          instrument.SetNoteOn(pitch);
+          break;
+        case TaskState::kEnd:
+          instrument.SetNoteOff(pitch);
+          if (stop_position == performer.GetPosition()) {
+            performer.Stop();
+          }
+          break;
+        default:
+          break;
+      }
     };
   };
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  performer.AddTask(play_note_fn(0, 1.0), 0.0);
+  tasks.emplace_back(performer.CreateTask(0.0, 1.0, play_note_fn(0)));
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  performer.AddTask(play_note_fn(1, 1.0), 1.0);
+  tasks.emplace_back(performer.CreateTask(1.0, 1.0, play_note_fn(1)));
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  performer.AddTask(play_note_fn(2, 1.0), 2.0);
+  tasks.emplace_back(performer.CreateTask(2.0, 1.0, play_note_fn(2)));
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  performer.AddTask(play_note_fn(3, 0.66), 3.0);
-  performer.AddTask(play_note_fn(4, 0.34), 3.66);
+  tasks.emplace_back(performer.CreateTask(3.0, 0.66, play_note_fn(3)));
+  tasks.emplace_back(performer.CreateTask(3.66, 0.34, play_note_fn(4)));
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  performer.AddTask(play_note_fn(5, 0.33), 4.0);
-  performer.AddTask(play_note_fn(6, 0.33), 4.33);
-  performer.AddTask(play_note_fn(7, 0.34), 4.66);
+  tasks.emplace_back(performer.CreateTask(4.0, 0.33, play_note_fn(5)));
+  tasks.emplace_back(performer.CreateTask(4.33, 0.33, play_note_fn(6)));
+  tasks.emplace_back(performer.CreateTask(4.66, 0.34, play_note_fn(7)));
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  performer.AddTask(play_note_fn(8, 2.0), 5.0);
+  tasks.emplace_back(performer.CreateTask(5.0, 2.0, play_note_fn(8)));
 
   // Audio process callback.
   const auto process_callback = [&](std::span<float> output_samples) {
@@ -115,15 +127,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '1');
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
-      performer.CancelAllOneOffTasks();
-      instrument.SetAllNotesOff();
       performer.SetPosition(triggers[index].first);
-      performer.ScheduleOneOffTask(
-          [&]() {
-            performer.Stop();
-            instrument.SetAllNotesOff();
-          },
-          triggers[index].first + triggers[index].second);
+      stop_position = triggers[index].first + triggers[index].second;
       performer.Start();
       return;
     }
@@ -144,6 +149,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
   performer.Stop();
+  tasks.clear();
   audio_output.Stop();
 
   return 0;

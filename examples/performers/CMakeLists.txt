@@ -1,9 +1,0 @@
-add_library(
-  examples_performers_metronome
-  metronome.cpp
-  metronome.h
-)
-target_link_libraries(
-  examples_performers_metronome
-  barelymusician
-)

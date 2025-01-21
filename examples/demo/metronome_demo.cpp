@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <cmath>
 #include <span>
 #include <thread>
 
@@ -9,18 +10,17 @@
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
-#include "performers/metronome.h"
 
 namespace {
 
 using ::barely::ControlType;
+using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::Metronome;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -55,7 +55,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  auto instrument = musician.AddInstrument();
+  auto instrument = musician.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
@@ -63,8 +63,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  Metronome metronome(musician);
-  metronome.SetBeatCallback([&](int beat) {
+  auto metronome = musician.CreatePerformer();
+  metronome.SetBeatCallback([&]() {
+    const int beat = static_cast<int>(metronome.GetPosition());
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
@@ -101,7 +102,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
         }
         return;
       case '\r':
-        metronome.Reset();
+        metronome.Stop();
+        metronome.SetPosition(0.0);
         ConsoleLog() << "Metronome reset";
         return;
       case 'O':

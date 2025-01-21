@@ -39,7 +39,6 @@ add_demo(
   examples_common_audio_clock
   examples_common_audio_output
   examples_common_console_log
-  examples_performers_metronome
   examples_common_input_manager
 )
 
@@ -62,7 +61,6 @@ add_demo(
   examples_common_audio_output
   examples_common_console_log
   examples_common_input_manager
-  examples_performers_metronome
   examples_common_wav_file
   examples_data_data
 )

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -80,12 +81,14 @@ namespace Barely.Examples {
         if (note.muted) {
           continue;
         }
-        _performer.Tasks.Add(new Task(delegate() {
+        _performer.Tasks.Add(new Task(note.position, note.duration, delegate(TaskState state) {
           float pitch = note.pitch / 12.0f;
-          instrument?.SetNoteOn(pitch, note.intensity);
-          _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(pitch); },
-                                        _performer.Position + note.duration);
-        }, note.position));
+          if (state == TaskState.BEGIN) {
+            instrument?.SetNoteOn(pitch, note.intensity);
+          } else if (state == TaskState.END) {
+            instrument?.SetNoteOff(pitch);
+          }
+        }));
       }
     }
   }

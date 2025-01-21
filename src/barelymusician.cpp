@@ -18,7 +18,7 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician,
   if (!out_instrument) return false;
 
   *out_instrument = static_cast<BarelyInstrument*>(musician->CreateInstrument());
-  // TODO(#147): Temp hack to allow destroying by handle.
+  // TODO(#126): Temp hack to allow destroying by handle.
   (*out_instrument)->musician = musician;
   return true;
 }
@@ -318,7 +318,7 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double 
 
   *out_task =
       static_cast<BarelyTask*>(performer->CreateTask(position, duration, {callback, user_data}));
-  // TODO(#147): Temp hack to allow destroying by handle.
+  // TODO(#126): Temp hack to allow destroying by handle.
   (*out_task)->performer = performer;
   return *out_task;
 }

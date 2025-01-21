@@ -81,16 +81,14 @@ namespace Barely.Examples {
         if (note.muted) {
           continue;
         }
-        // TODO(#147): Support zero duration.
-        _performer.Tasks.Add(
-            new Task(note.position, Math.Max(note.duration, 0.01), delegate(TaskState state) {
-              float pitch = note.pitch / 12.0f;
-              if (state == TaskState.BEGIN) {
-                instrument?.SetNoteOn(pitch, note.intensity);
-              } else if (state == TaskState.END) {
-                instrument?.SetNoteOff(pitch);
-              }
-            }));
+        _performer.Tasks.Add(new Task(note.position, note.duration, delegate(TaskState state) {
+          float pitch = note.pitch / 12.0f;
+          if (state == TaskState.BEGIN) {
+            instrument?.SetNoteOn(pitch, note.intensity);
+          } else if (state == TaskState.END) {
+            instrument?.SetNoteOff(pitch);
+          }
+        }));
       }
     }
   }

@@ -43,6 +43,7 @@ namespace Barely {
       }
     }
     [SerializeField]
+    [Min(0.0f)]
     private double _duration = 0.0;
 
     /// Process callback.

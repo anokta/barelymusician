@@ -461,7 +461,7 @@ MonoBehaviour:
   _loopLength: 1
   Tasks:
   - _position: 0
-    _duration: 0.5
+    _duration: 0
     OnProcessEvent:
       m_PersistentCalls:
         m_Calls:
@@ -478,7 +478,7 @@ MonoBehaviour:
             m_BoolArgument: 0
           m_CallState: 2
   - _position: 0.5
-    _duration: 0.5
+    _duration: 0
     OnProcessEvent:
       m_PersistentCalls:
         m_Calls:

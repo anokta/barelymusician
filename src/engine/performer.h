@@ -62,6 +62,7 @@ class Performer {
 
     /// Returns whether a position is inside the task boundaries.
     ///
+    /// @param position Position in beats.
     /// @return True if inside, false otherwise.
     bool IsInside(double position) const noexcept {
       return position >= position_ && position < GetEndPosition();
@@ -113,7 +114,7 @@ class Performer {
     // Denotes whether the task is active or not.
     bool is_active_ = false;
 
-    // TODO(#147): Temp hack to allow destroying by handle.
+    // TODO(#126): Temp hack to allow destroying by handle.
    public:
     BarelyPerformerHandle performer = nullptr;
   };
@@ -261,7 +262,7 @@ class Performer {
 
   std::optional<double> last_beat_position_ = std::nullopt;
 
-  // TODO(#147): Temp hack to allow destroying by handle.
+  // TODO(#126): Temp hack to allow destroying by handle.
  public:
   BarelyMusicianHandle musician = nullptr;
 };

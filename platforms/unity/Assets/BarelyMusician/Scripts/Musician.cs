@@ -584,8 +584,8 @@ namespace Barely {
         if (Handle == IntPtr.Zero || taskHandle != IntPtr.Zero) {
           return;
         }
-        if (!BarelyTask_Create(performerHandle, position, duration, Task_OnProcess, IntPtr.Zero,
-                               ref taskHandle)) {
+        if (!BarelyTask_Create(performerHandle, position, Math.Max(duration, _minTaskDuration),
+                               Task_OnProcess, IntPtr.Zero, ref taskHandle)) {
           Debug.LogError("Failed to create task '" + task + "'");
           return;
         }
@@ -617,7 +617,7 @@ namespace Barely {
         if (!BarelyTask_GetDuration(taskHandle, ref duration) && taskHandle != IntPtr.Zero) {
           Debug.LogError("Failed to get performer task duration");
         }
-        return duration;
+        return (duration > _minTaskDuration) ? duration : 0.0;
       }
 
       /// Returns the position of a task.
@@ -649,7 +649,8 @@ namespace Barely {
       /// @param taskHandle Task handle.
       /// @param duration Duration in beats.
       public static void Task_SetDuration(IntPtr taskHandle, double duration) {
-        if (!BarelyTask_SetDuration(taskHandle, duration) && taskHandle != IntPtr.Zero) {
+        if (!BarelyTask_SetDuration(taskHandle, Math.Max(duration, _minTaskDuration)) &&
+            taskHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer task duration");
         }
       }
@@ -953,6 +954,10 @@ namespace Barely {
 
       // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
       private const double _minLookahead = 0.025;
+
+      // Minimum task duration to avoid zero duration tasks.
+      // TODO(#148): This can be removed once trigger tasks are supported.
+      private const double _minTaskDuration = 1e-6;
 
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;

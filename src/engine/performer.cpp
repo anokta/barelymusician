@@ -76,14 +76,13 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
       // Performer position is inside an inactive task, we can return immediately.
       return 0.0;
     }
-    next_position = next_it->first;
     if (is_looping_ && next_it->first < position_) {
-      // Loop around.
       if (loop_length_ > 0.0) {
-        *next_position += loop_length_;
-      } else {
-        next_position = std::nullopt;
+        // Loop around.
+        next_position = next_it->first + loop_length_;
       }
+    } else {
+      next_position = next_it->first;
     }
   }
 
@@ -101,13 +100,14 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
   if (beat_callback_) {
     std::optional<double> next_beat_position =
         (last_beat_position_ == position_) ? std::ceil(position_ + 1.0) : std::ceil(position_);
-    if (is_looping_ && next_beat_position > GetLoopEndPosition()) {
+    if (is_looping_ && *next_beat_position >= GetLoopEndPosition()) {
       const double first_beat_offset = std::ceil(loop_begin_position_) - loop_begin_position_;
       next_beat_position = (loop_length_ > first_beat_offset)
                                ? std::optional<double>{first_beat_offset + GetLoopEndPosition()}
                                : std::nullopt;
     }
-    if (next_beat_position && (!next_position || *next_beat_position < *next_position)) {
+    if (next_beat_position.has_value() &&
+        (!next_position.has_value() || *next_beat_position < *next_position)) {
       next_position = next_beat_position;
     }
   }
@@ -127,6 +127,7 @@ void Performer::ProcessAllTasksAtPosition() noexcept {
     last_beat_position_ = position_;
     beat_callback_();
   }
+  // Active tasks get processed in `SetPosition`, so we only need to process inactive tasks here.
   for (auto it = GetNextInactiveTask();
        it != inactive_tasks_.end() && it->second->IsInside(position_); it = GetNextInactiveTask()) {
     SetTaskActive(it, true);
@@ -140,7 +141,7 @@ void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
     return;
   }
   loop_begin_position_ = loop_begin_position;
-  if (is_looping_ && position_ > loop_begin_position_) {
+  if (is_looping_ && position_ >= GetLoopEndPosition()) {
     SetPosition(LoopAround(position_));
   }
 }
@@ -151,7 +152,7 @@ void Performer::SetLoopLength(double loop_length) noexcept {
     return;
   }
   loop_length_ = loop_length;
-  if (is_looping_ && position_ > loop_begin_position_) {
+  if (is_looping_ && position_ >= GetLoopEndPosition()) {
     SetPosition(LoopAround(position_));
   }
 }
@@ -161,7 +162,7 @@ void Performer::SetLooping(bool is_looping) noexcept {
     return;
   }
   is_looping_ = is_looping;
-  if (is_looping_ && position_ > loop_begin_position_) {
+  if (is_looping_ && position_ >= GetLoopEndPosition()) {
     SetPosition(LoopAround(position_));
   }
 }
@@ -179,16 +180,16 @@ void Performer::SetPosition(double position) noexcept {
     }
   } else {
     position_ = position;
-  }
-  for (auto it = active_tasks_.begin(); it != active_tasks_.end();) {
-    // Copy the values in case `it` gets invalidated after the `Process` call.
-    auto [end_position, task] = *it;
-    if (!task->IsInside(position_)) {
-      SetTaskActive(it, false);
-    } else {
-      task->Process(TaskState::kUpdate);
+    for (auto it = active_tasks_.begin(); it != active_tasks_.end();) {
+      // Copy the values in case `it` gets invalidated after the `Process` call.
+      auto [end_position, task] = *it;
+      if (!task->IsInside(position_)) {
+        SetTaskActive(it, false);
+      } else {
+        task->Process(TaskState::kUpdate);
+      }
+      it = active_tasks_.upper_bound({end_position, task});
     }
-    it = active_tasks_.upper_bound({end_position, task});
   }
 }
 
@@ -231,10 +232,8 @@ void Performer::Update(double duration) noexcept {
     return;
   }
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-  assert(duration >= 0.0 && (!GetNextDuration() || duration <= GetNextDuration()));
-  if (const double next_position = position_ + duration; next_position > position_) {
-    SetPosition(next_position);
-  }
+  assert(duration > 0.0 && (!GetNextDuration() || duration <= GetNextDuration()));
+  SetPosition(position_ + duration);
 }
 
 std::set<std::pair<double, Performer::Task*>>::const_iterator Performer::GetNextInactiveTask()

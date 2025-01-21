@@ -574,8 +574,8 @@ MonoBehaviour:
   _loopBeginPosition: 0
   _loopLength: 0.5
   Tasks:
-  - _duration: 1
-    _position: 0
+  - _position: 0
+    _duration: 1
     OnProcessEvent:
       m_PersistentCalls:
         m_Calls:

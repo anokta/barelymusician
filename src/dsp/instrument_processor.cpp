@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include "barelymusician.h"
 #include "dsp/sample_data.h"
@@ -175,7 +176,7 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       adsr_.SetRelease(value);
       break;
     case ControlType::kOscillatorMix:
-      oscillator_mix_ = value;
+      voice_params_.oscillator_mix = value;
       break;
     case ControlType::kOscillatorPitchShift:
       oscillator_pitch_shift_ = value;
@@ -201,7 +202,7 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
                                          sample_data_, sample_playback_mode_);
       break;
     case ControlType::kPulseWidth:
-      pulse_width_ = value;
+      voice_params_.pulse_width = value;
       break;
     case ControlType::kSamplePlaybackMode:
       sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
@@ -213,9 +214,16 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
                                          sample_data_, sample_playback_mode_);
       break;
-    case ControlType::kFilterFrequency: {
-      filter_coefficient_ = value;
-    } break;
+    case ControlType::kFilterFrequency:
+      voice_params_.filter_coefficient = value;
+      break;
+    case ControlType::kBitCrusherDepth:
+      // Offset the bit depth by 1 to normalize the range.
+      voice_params_.bit_crusher_range = (value < 16.0f) ? std::pow(2.0f, value - 1.0f) : 0.0f;
+      break;
+    case ControlType::kBitCrusherRate:
+      voice_params_.bit_crusher_increment = value;
+      break;
     default:
       assert(!"Invalid control type");
       return;

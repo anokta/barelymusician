@@ -13,7 +13,7 @@
 
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::internal::Arpeggiator {
-  BarelyArpeggiator(barely::internal::Musician& musician) noexcept
+  explicit BarelyArpeggiator(barely::internal::Musician& musician) noexcept
       : barely::internal::Arpeggiator(musician) {}
 };
 
@@ -24,7 +24,7 @@ struct BarelyRandom : public barely::internal::Random {
 
 // Repeater.
 struct BarelyRepeater : public barely::internal::Repeater {
-  BarelyRepeater(barely::internal::Musician& musician) noexcept
+  explicit BarelyRepeater(barely::internal::Musician& musician) noexcept
       : barely::internal::Repeater(musician) {}
 };
 

@@ -3,7 +3,6 @@
 #include <span>
 #include <thread>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "barelymusician.h"

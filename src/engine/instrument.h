@@ -194,6 +194,8 @@ class Instrument {
       Control(0, 0, BarelySamplePlaybackMode_kCount - 1),  // kSamplePlaybackMode
       Control(0, 0, BarelyFilterType_kCount - 1),          // kFilterType
       Control(0.0f, 0.0f),                                 // kFilterFrequency
+      Control(16.0f, 1.0f, 16.0f),                         // kBitCrusherDepth
+      Control(1.0f, 0.0f, 1.0f),                           // kBitCrusherRate
   };
 
   // Map of note control arrays by their pitches.

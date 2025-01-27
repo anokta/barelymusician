@@ -187,8 +187,8 @@ namespace Barely {
     [Range(1.0f, 16.0f)]
     public float BitCrusherDepth = 16.0f;
 
-    /// Bit crusher rate.
-    [Range(1.0f, 200.0f)]
+    /// Normalized bit crusher rate.
+    [Range(0.0f, 1.0f)]
     public float BitCrusherRate = 1.0f;
 
     /// Note off callback.

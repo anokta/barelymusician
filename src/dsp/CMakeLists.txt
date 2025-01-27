@@ -89,6 +89,17 @@ target_link_libraries(
 
 if(ENABLE_TESTS)
   add_executable(
+    barelymusician_dsp_bit_crusher_test
+    bit_crusher_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_dsp_bit_crusher_test
+    barelymusician_dsp_bit_crusher
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_dsp_bit_crusher_test)
+
+  add_executable(
     barelymusician_dsp_decibels_test
     decibels_test.cpp
   )

@@ -87,11 +87,9 @@ class InstrumentProcessor {
         return;
       }
       if constexpr (kShouldAccumulate) {
-        output_samples[i] += voice_callback_(voice, bit_crusher_max_value_, bit_crusher_step_,
-                                             filter_coefficient_, oscillator_mix_, pulse_width_);
+        output_samples[i] += voice_callback_(voice, voice_params_);
       } else {
-        output_samples[i] = voice_callback_(voice, bit_crusher_max_value_, bit_crusher_step_,
-                                            filter_coefficient_, oscillator_mix_, pulse_width_);
+        output_samples[i] = voice_callback_(voice, voice_params_);
       }
     }
   }
@@ -112,11 +110,7 @@ class InstrumentProcessor {
   OscillatorShape oscillator_shape_ = OscillatorShape::kNone;
   SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
 
-  float bit_crusher_max_value_ = 1.0f;
-  float bit_crusher_step_ = 1.0f;
-  float filter_coefficient_ = 1.0f;
-  float oscillator_mix_ = 0.0f;
-  float pulse_width_ = 0.5f;
+  Voice::Params voice_params_ = {};
 
   bool should_retrigger_ = false;
 

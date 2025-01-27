@@ -244,7 +244,7 @@ typedef enum BarelyControlType {
   BarelyControlType_kFilterFrequency,
   /// Bit crusher depth.
   BarelyControlType_kBitCrusherDepth,
-  /// Bit crusher rate.
+  /// Normalized bit crusher rate.
   BarelyControlType_kBitCrusherRate,
   /// Number of control types.
   BarelyControlType_kCount,
@@ -781,7 +781,7 @@ enum class ControlType {
   kFilterFrequency = BarelyControlType_kFilterFrequency,
   /// Bit crusher depth.
   kBitCrusherDepth = BarelyControlType_kBitCrusherDepth,
-  /// Bit crusher rate.
+  /// Normalized bit crusher rate.
   kBitCrusherRate = BarelyControlType_kBitCrusherRate,
 };
 

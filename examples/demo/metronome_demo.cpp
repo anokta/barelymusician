@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
-#include <cmath>
 #include <span>
 #include <thread>
 
@@ -14,7 +13,6 @@
 namespace {
 
 using ::barely::ControlType;
-using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::examples::AudioClock;

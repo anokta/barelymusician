@@ -112,7 +112,6 @@ InstrumentProcessor::InstrumentProcessor(int sample_rate, float reference_freque
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       adsr_(sample_interval_),
       gain_processor_(sample_rate),
-      bit_crusher_max_value_(0.0f),
       reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
 }
@@ -177,7 +176,7 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       adsr_.SetRelease(value);
       break;
     case ControlType::kOscillatorMix:
-      oscillator_mix_ = value;
+      voice_params_.oscillator_mix = value;
       break;
     case ControlType::kOscillatorPitchShift:
       oscillator_pitch_shift_ = value;
@@ -203,7 +202,7 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
                                          sample_data_, sample_playback_mode_);
       break;
     case ControlType::kPulseWidth:
-      pulse_width_ = value;
+      voice_params_.pulse_width = value;
       break;
     case ControlType::kSamplePlaybackMode:
       sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
@@ -216,14 +215,14 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
                                          sample_data_, sample_playback_mode_);
       break;
     case ControlType::kFilterFrequency:
-      filter_coefficient_ = value;
+      voice_params_.filter_coefficient = value;
       break;
     case ControlType::kBitCrusherDepth:
-      bit_crusher_max_value_ =
-          (value < 16.0f) ? std::pow(2.0f, value - 1.0f) : 0.0f;  // offset by 1 to normalize range
+      // Offset the bit depth by 1 to normalize the range.
+      voice_params_.bit_crusher_range = (value < 16.0f) ? std::pow(2.0f, value - 1.0f) : 0.0f;
       break;
     case ControlType::kBitCrusherRate:
-      bit_crusher_step_ = 1.0f / value;
+      voice_params_.bit_crusher_increment = value;
       break;
     default:
       assert(!"Invalid control type");

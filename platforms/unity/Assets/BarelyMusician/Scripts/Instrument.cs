@@ -181,6 +181,16 @@ namespace Barely {
     [Range(0.0f, 48000.0f)]
     public float FilterFrequency = 0.0f;
 
+    [Header("Bit Crusher")]
+
+    /// Bit crusher depth.
+    [Range(1.0f, 16.0f)]
+    public float BitCrusherDepth = 16.0f;
+
+    /// Bit crusher rate.
+    [Range(1.0f, 200.0f)]
+    public float BitCrusherRate = 1.0f;
+
     /// Note off callback.
     ///
     /// @param pitch Note pitch.
@@ -325,6 +335,10 @@ namespace Barely {
       SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (float)SamplePlaybackMode);
       SetControl(Musician.Internal.ControlType.FILTER_TYPE, (float)FilterType);
       SetControl(Musician.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Musician.Internal.ControlType.FILTER_TYPE, (float)FilterType);
+      SetControl(Musician.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Musician.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
+      SetControl(Musician.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

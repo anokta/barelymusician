@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 
 #include "barelymusician.h"
 #include "dsp/sample_data.h"
@@ -111,6 +112,7 @@ InstrumentProcessor::InstrumentProcessor(int sample_rate, float reference_freque
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       adsr_(sample_interval_),
       gain_processor_(sample_rate),
+      bit_crusher_max_value_(0.0f),
       reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
 }
@@ -213,9 +215,16 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
                                          sample_data_, sample_playback_mode_);
       break;
-    case ControlType::kFilterFrequency: {
+    case ControlType::kFilterFrequency:
       filter_coefficient_ = value;
-    } break;
+      break;
+    case ControlType::kBitCrusherDepth:
+      bit_crusher_max_value_ =
+          (value < 16.0f) ? std::pow(2.0f, value - 1.0f) : 0.0f;  // offset by 1 to normalize range
+      break;
+    case ControlType::kBitCrusherRate:
+      bit_crusher_step_ = 1.0f / value;
+      break;
     default:
       assert(!"Invalid control type");
       return;

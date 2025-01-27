@@ -1,4 +1,9 @@
 add_library(
+  barelymusician_dsp_bit_crusher INTERFACE
+  bit_crusher.h
+)
+
+add_library(
   barelymusician_dsp_decibels INTERFACE
   decibels.h
 )
@@ -21,9 +26,10 @@ add_library(
 )
 target_link_libraries(
   barelymusician_dsp_instrument_processor
-  barelymusician_dsp_sample_data
+  barelymusician_dsp_bit_crusher
   barelymusician_dsp_envelope
   barelymusician_dsp_gain_processor
+  barelymusician_dsp_sample_data
   barelymusician_dsp_voice
   barelymusician_headeronly
 )
@@ -73,6 +79,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_dsp_voice INTERFACE
+  barelymusician_dsp_bit_crusher
   barelymusician_dsp_envelope
   barelymusician_dsp_one_pole_filter
   barelymusician_dsp_oscillator

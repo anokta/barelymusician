@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include "barelymusician.h"
+#include "dsp/bit_crusher.h"
 #include "dsp/envelope.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/oscillator.h"
@@ -30,10 +31,11 @@ class Voice {
   /// @return Next output value.
   template <FilterType kFilterType, OscillatorMode kOscillatorMode,
             OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
-  [[nodiscard]] static float Next(Voice& voice, float filter_coefficient, float oscillator_mix,
+  [[nodiscard]] static float Next(Voice& voice, float bit_crusher_max_value, float bit_crusher_step,
+                                  float filter_coefficient, float oscillator_mix,
                                   float pulse_width) noexcept {
     return voice.Next<kFilterType, kOscillatorMode, kOscillatorShape, kSamplePlaybackMode>(
-        filter_coefficient, oscillator_mix, pulse_width);
+        bit_crusher_max_value, bit_crusher_step, filter_coefficient, oscillator_mix, pulse_width);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -51,6 +53,7 @@ class Voice {
   void Start(const Envelope::Adsr& adsr, float intensity) noexcept {
     if (intensity > 0.0f) {
       gain_ = intensity;
+      bit_crusher_.Reset();
       filter_.Reset();
       oscillator_.Reset();
       sample_player_.Reset();
@@ -82,7 +85,8 @@ class Voice {
  private:
   template <FilterType kFilterType, OscillatorMode kOscillatorMode,
             OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
-  [[nodiscard]] float Next(float filter_coefficient, float oscillator_mix,
+  [[nodiscard]] float Next(float bit_crusher_max_value, float bit_crusher_step,
+                           float filter_coefficient, float oscillator_mix,
                            float pulse_width) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!sample_player_.IsActive()) {
@@ -109,10 +113,12 @@ class Voice {
           ((1.0f - std::max(0.0f, -oscillator_mix)) * oscillator_sample * sample_player_sample +
            sample_player_output);
     }
-    return filter_.Next<kFilterType>(output, filter_coefficient);
+    return bit_crusher_.Next(filter_.Next<kFilterType>(output, filter_coefficient),
+                             bit_crusher_max_value, bit_crusher_step);
   }
 
   float gain_ = 0.0f;
+  BitCrusher bit_crusher_;
   Envelope envelope_;
   OnePoleFilter filter_;
   Oscillator oscillator_;
@@ -126,8 +132,8 @@ class Voice {
 /// @param oscillator_mix Oscillator mix.
 /// @param pulse_width Pulse width.
 /// @return Processed output value.
-using VoiceCallback = float (*)(Voice& voice, float filter_coefficient, float oscillator_mix,
-                                float pulse_width);
+using VoiceCallback = float (*)(Voice& voice, float bit_crusher_max_value, float bit_crusher_step,
+                                float filter_coefficient, float oscillator_mix, float pulse_width);
 
 }  // namespace barely::internal
 

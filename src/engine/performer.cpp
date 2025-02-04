@@ -125,6 +125,7 @@ void Performer::ProcessAllTasksAtPosition() noexcept {
   if (last_beat_position_ != position_ && std::ceil(position_) == position_) {
     last_beat_position_ = position_;
     beat_callback_();
+    return;
   }
   // Active tasks get processed in `SetPosition`, so we only need to process inactive tasks here.
   for (auto it = GetNextInactiveTask();

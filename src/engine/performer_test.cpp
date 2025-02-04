@@ -221,6 +221,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
     performer.Update(*performer.GetNextDuration());
     EXPECT_DOUBLE_EQ(performer.GetPosition(), static_cast<double>(i));
 
+    performer.ProcessAllTasksAtPosition();  // beat callback
     performer.ProcessAllTasksAtPosition();
     for (int j = 1; j <= kTaskCount; ++j) {
       EXPECT_EQ(task_callbacks[j - 1].second, i == j);

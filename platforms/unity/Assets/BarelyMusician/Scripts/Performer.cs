@@ -7,6 +7,7 @@ namespace Barely {
   public class Performer : MonoBehaviour {
     /// True if playing on awake, false otherwise.
     public bool PlayOnAwake = false;
+    private bool _playOnEnable = false;
 
     /// True if looping, false otherwise.
     public bool Loop {
@@ -78,11 +79,13 @@ namespace Barely {
 
     /// Starts the performer.
     public void Play() {
+      _playOnEnable = (_handle == IntPtr.Zero);
       Musician.Internal.Performer_Start(_handle);
     }
 
     /// Stops the performer.
     public void Stop() {
+      _playOnEnable = false;
       Musician.Internal.Performer_Stop(_handle);
     }
 
@@ -106,7 +109,7 @@ namespace Barely {
     private void OnEnable() {
       Musician.Internal.Performer_Create(this, ref _handle);
       Update();
-      if (PlayOnAwake) {
+      if (PlayOnAwake || _playOnEnable) {
         Play();
       }
     }

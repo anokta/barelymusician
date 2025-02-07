@@ -117,7 +117,7 @@ namespace Barely {
       /// @param component Component.
       /// @param componentHandle Component handle.
       public static void Component_Destroy(Component component, ref IntPtr componentHandle) {
-        if (_handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
+        if (Handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
           return;
         }
         bool success = true;
@@ -161,7 +161,7 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       public static void Instrument_Destroy(ref IntPtr instrumentHandle) {
-        if (_handle == IntPtr.Zero || instrumentHandle == IntPtr.Zero) {
+        if (Handle == IntPtr.Zero || instrumentHandle == IntPtr.Zero) {
           instrumentHandle = IntPtr.Zero;
           return;
         }
@@ -223,7 +223,7 @@ namespace Barely {
       /// @param outputChannelCount Number of output channels.
       public static void Instrument_Process(IntPtr instrumentHandle, float[] outputSamples,
                                             int outputChannelCount) {
-        if (_handle == IntPtr.Zero) {
+        if (Handle == IntPtr.Zero) {
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;
           }
@@ -419,7 +419,7 @@ namespace Barely {
       ///
       /// @param performerHandle Performer handle.
       public static void Performer_Destroy(ref IntPtr performerHandle) {
-        if (_handle == IntPtr.Zero || performerHandle == IntPtr.Zero) {
+        if (Handle == IntPtr.Zero || performerHandle == IntPtr.Zero) {
           performerHandle = IntPtr.Zero;
           return;
         }
@@ -601,7 +601,7 @@ namespace Barely {
       ///
       /// @param taskHandle Task handle.
       public static void Task_Destroy(IntPtr performerHandle, ref IntPtr taskHandle) {
-        if (_handle == IntPtr.Zero || performerHandle == IntPtr.Zero || taskHandle == IntPtr.Zero) {
+        if (Handle == IntPtr.Zero || performerHandle == IntPtr.Zero || taskHandle == IntPtr.Zero) {
           taskHandle = IntPtr.Zero;
           return;
         }

@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <iterator>
 #include <memory>
 #include <optional>
+#include <set>
 #include <utility>
 
 #include "barelymusician.h"
@@ -75,7 +75,8 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
     if (next_it->second->IsInside(position_)) {
       // Performer position is inside an inactive task, we can return immediately.
       return 0.0;
-    } else if (is_looping_ && next_it->first < position_) {
+    }
+    if (is_looping_ && next_it->first < position_) {
       if (loop_length_ > 0.0) {  // loop around.
         next_position = next_it->first + loop_length_;
       }
@@ -264,7 +265,7 @@ double Performer::LoopAround(double position) const noexcept {
              : loop_begin_position_;
 }
 
-void Performer::SetTaskActive(std::set<std::pair<double, Task*>>::iterator it,
+void Performer::SetTaskActive(const std::set<std::pair<double, Task*>>::iterator& it,
                               bool is_active) noexcept {
   Task* task = it->second;
   assert(!is_playing_ ||

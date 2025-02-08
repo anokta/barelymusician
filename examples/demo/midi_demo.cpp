@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
-#include <cstdint>
+#include <cstddef>
 #include <functional>
 #include <span>
 #include <string>

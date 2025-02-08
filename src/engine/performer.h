@@ -203,7 +203,7 @@ class Performer {
   ///
   /// @param task Pointer to task.
   /// @param old_duration Old task duration.
-  void SetTaskDuration(Task* task, double old_position) noexcept;
+  void SetTaskDuration(Task* task, double old_duration) noexcept;
 
   /// Sets task position.
   ///
@@ -232,7 +232,8 @@ class Performer {
   [[nodiscard]] double LoopAround(double position) const noexcept;
 
   /// Sets the active status of a task.
-  void SetTaskActive(std::set<std::pair<double, Task*>>::iterator it, bool is_active) noexcept;
+  void SetTaskActive(const std::set<std::pair<double, Task*>>::iterator& it,
+                     bool is_active) noexcept;
 
   /// Updates the key of an active task.
   void UpdateActiveTaskKey(double old_end_position, Task* task) noexcept;

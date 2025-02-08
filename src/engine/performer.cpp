@@ -75,8 +75,7 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
     if (next_it->second->IsInside(position_)) {
       // Performer position is inside an inactive task, we can return immediately.
       return 0.0;
-    }
-    if (is_looping_ && next_it->first < position_) {
+    } else if (is_looping_ && next_it->first < position_) {
       if (loop_length_ > 0.0) {  // loop around.
         next_position = next_it->first + loop_length_;
       }
@@ -85,10 +84,12 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
     }
   }
 
+  const double loop_end_position = GetLoopEndPosition();
+
   // Check active tasks.
   if (!active_tasks_.empty()) {
     if (const double next_active_task_position =
-            is_looping_ ? std::min(active_tasks_.begin()->first, GetLoopEndPosition())
+            is_looping_ ? std::min(active_tasks_.begin()->first, loop_end_position)
                         : active_tasks_.begin()->first;
         !next_position.has_value() || next_active_task_position < *next_position) {
       next_position = next_active_task_position;
@@ -99,10 +100,10 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
   if (beat_callback_) {
     std::optional<double> next_beat_position =
         (last_beat_position_ == position_) ? std::ceil(position_ + 1.0) : std::ceil(position_);
-    if (is_looping_ && *next_beat_position >= GetLoopEndPosition()) {
+    if (is_looping_ && *next_beat_position >= loop_end_position) {
       const double first_beat_offset = std::ceil(loop_begin_position_) - loop_begin_position_;
       next_beat_position = (loop_length_ > first_beat_offset)
-                               ? std::optional<double>{first_beat_offset + GetLoopEndPosition()}
+                               ? std::optional<double>{first_beat_offset + loop_end_position}
                                : std::nullopt;
     }
     if (next_beat_position.has_value() &&
@@ -193,26 +194,27 @@ void Performer::SetPosition(double position) noexcept {
   }
 }
 
-void Performer::SetTaskActive(std::set<std::pair<double, Task*>>::iterator it,
-                              bool is_active) noexcept {
-  Task* task = it->second;
-  assert(!is_playing_ ||
-         ((is_active && task->IsInside(position_)) || (!is_active && !task->IsInside(position_))));
-  auto node = (is_active ? inactive_tasks_ : active_tasks_).extract(it);
-  node.value().first = is_active ? task->GetEndPosition() : task->GetPosition();
-  (is_active ? active_tasks_ : inactive_tasks_).insert(std::move(node));
-  task->SetActive(is_active);
-}
-
 void Performer::SetTaskDuration(Task* task, double old_duration) noexcept {
-  if (task->IsActive() && !task->IsInside(position_)) {
-    SetTaskActive(active_tasks_.find({task->GetPosition() + old_duration, task}), false);
+  if (task->IsActive()) {
+    const double old_end_position = task->GetPosition() + old_duration;
+    if (task->IsInside(position_)) {
+      UpdateActiveTaskKey(old_end_position, task);
+    } else {
+      SetTaskActive(active_tasks_.find({old_end_position, task}), false);
+    }
   }
 }
 
 void Performer::SetTaskPosition(Task* task, double old_position) noexcept {
-  if (task->IsActive() && !task->IsInside(position_)) {
-    SetTaskActive(active_tasks_.find({old_position + task->GetDuration(), task}), false);
+  if (task->IsActive()) {
+    const double old_end_position = old_position + task->GetDuration();
+    if (task->IsInside(position_)) {
+      UpdateActiveTaskKey(old_end_position, task);
+    } else {
+      SetTaskActive(active_tasks_.find({old_end_position, task}), false);
+    }
+  } else {
+    UpdateInactiveTaskKey(old_position, task);
   }
 }
 
@@ -238,6 +240,9 @@ void Performer::Update(double duration) noexcept {
 
 std::set<std::pair<double, Performer::Task*>>::const_iterator Performer::GetNextInactiveTask()
     const noexcept {
+  if (!is_playing_) {
+    return inactive_tasks_.end();
+  }
   auto next_it = inactive_tasks_.lower_bound({position_, nullptr});
   // Check if any inactive task became active (in case a new position was set).
   // TODO(#147): This may be optimized further using an interval tree.
@@ -257,6 +262,29 @@ double Performer::LoopAround(double position) const noexcept {
   return loop_length_ > 0.0
              ? loop_begin_position_ + std::fmod(position - loop_begin_position_, loop_length_)
              : loop_begin_position_;
+}
+
+void Performer::SetTaskActive(std::set<std::pair<double, Task*>>::iterator it,
+                              bool is_active) noexcept {
+  Task* task = it->second;
+  assert(!is_playing_ ||
+         ((is_active && task->IsInside(position_)) || (!is_active && !task->IsInside(position_))));
+  auto node = (is_active ? inactive_tasks_ : active_tasks_).extract(it);
+  node.value().first = is_active ? task->GetEndPosition() : task->GetPosition();
+  (is_active ? active_tasks_ : inactive_tasks_).insert(std::move(node));
+  task->SetActive(is_active);
+}
+
+void Performer::UpdateActiveTaskKey(double old_end_position, Task* task) noexcept {
+  auto node = active_tasks_.extract({old_end_position, task});
+  node.value().first = task->GetEndPosition();
+  active_tasks_.insert(std::move(node));
+}
+
+void Performer::UpdateInactiveTaskKey(double old_position, Task* task) noexcept {
+  auto node = inactive_tasks_.extract({old_position, task});
+  node.value().first = task->GetPosition();
+  inactive_tasks_.insert(std::move(node));
 }
 
 }  // namespace barely::internal

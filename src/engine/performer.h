@@ -199,12 +199,6 @@ class Performer {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetPosition(double position) noexcept;
 
-  /// Sets whether the task active is active or not.
-  ///
-  /// @param it Iterator to task.
-  /// @param is_active True if active, false otherwise.
-  void SetTaskActive(std::set<std::pair<double, Task*>>::iterator it, bool is_active) noexcept;
-
   /// Sets task duration.
   ///
   /// @param task Pointer to task.
@@ -236,6 +230,15 @@ class Performer {
 
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
+
+  /// Sets the active status of a task.
+  void SetTaskActive(std::set<std::pair<double, Task*>>::iterator it, bool is_active) noexcept;
+
+  /// Updates the key of an active task.
+  void UpdateActiveTaskKey(double old_end_position, Task* task) noexcept;
+
+  /// Updates the key of an inactive task.
+  void UpdateInactiveTaskKey(double old_position, Task* task) noexcept;
 
   // Beat callback.
   BeatCallback beat_callback_ = {};

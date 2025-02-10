@@ -68,6 +68,7 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
     return std::nullopt;
   }
 
+  const double loop_end_position = GetLoopEndPosition();
   std::optional<double> next_position = std::nullopt;
 
   // Check inactive tasks.
@@ -76,16 +77,12 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
       // Performer position is inside an inactive task, we can return immediately.
       return 0.0;
     }
-    if (is_looping_ && next_it->first < position_) {
-      if (loop_length_ > 0.0) {  // loop around.
-        next_position = next_it->first + loop_length_;
-      }
-    } else {
+    if (next_it->first < position_) {  // loop around.
+      next_position = next_it->first + loop_length_;
+    } else if (!is_looping_ || next_it->first < loop_end_position) {
       next_position = next_it->first;
     }
   }
-
-  const double loop_end_position = GetLoopEndPosition();
 
   // Check active tasks.
   if (!active_tasks_.empty()) {

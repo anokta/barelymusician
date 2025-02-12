@@ -1,31 +1,31 @@
-#include "common/random.h"
+#include "common/random_impl.h"
 
 #include <cassert>
 #include <random>
 
 namespace barely::internal {
 
-Random::Random(int seed) noexcept : engine_(static_cast<unsigned int>(seed)) {}
+RandomImpl::RandomImpl(int seed) noexcept : engine_(static_cast<unsigned int>(seed)) {}
 
-float Random::DrawNormal(float mean, float variance) noexcept {
+float RandomImpl::DrawNormal(float mean, float variance) noexcept {
   assert(variance > 0.0);
   const std::normal_distribution<float>::param_type param(mean, variance);
   return normal_distribution_(engine_, param);
 }
 
-float Random::DrawUniform(float min, float max) noexcept {
+float RandomImpl::DrawUniform(float min, float max) noexcept {
   assert(min < max);
   const std::uniform_real_distribution<float>::param_type param(min, max);
   return uniform_real_distribution_(engine_, param);
 }
 
-int Random::DrawUniform(int min, int max) noexcept {
+int RandomImpl::DrawUniform(int min, int max) noexcept {
   assert(min < max);
   const std::uniform_int_distribution<int>::param_type param(min, max - 1);
   return uniform_int_distribution_(engine_, param);
 }
 
-void Random::Reset(int seed) noexcept {
+void RandomImpl::Reset(int seed) noexcept {
   assert(seed >= 0);
   engine_.seed(static_cast<unsigned int>(seed));
 }

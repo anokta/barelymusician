@@ -1,4 +1,4 @@
-#include "components/repeater.h"
+#include "components/repeater_impl.h"
 
 #include <cassert>
 #include <optional>
@@ -6,36 +6,36 @@
 
 #include "barelycomposer.h"
 #include "barelymusician.h"
-#include "engine/engine.h"
-#include "engine/instrument.h"
+#include "internal/engine_impl.h"
+#include "internal/instrument_impl.h"
 
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(Engine& engine) noexcept
+RepeaterImpl::RepeaterImpl(EngineImpl& engine) noexcept
     : engine_(&engine), performer_(engine_->CreatePerformer()) {
   performer_->SetBeatCallback({
       [](void* user_data) noexcept {
-        auto& repeater = *static_cast<Repeater*>(user_data);
+        auto& repeater = *static_cast<RepeaterImpl*>(user_data);
         repeater.OnBeat();
       },
       this,
   });
 }
 
-Repeater::~Repeater() noexcept {
+RepeaterImpl::~RepeaterImpl() noexcept {
   if (IsPlaying() && instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
   engine_->DestroyPerformer(performer_);
 }
 
-void Repeater::Clear() noexcept { pitches_.clear(); }
+void RepeaterImpl::Clear() noexcept { pitches_.clear(); }
 
-bool Repeater::IsPlaying() const noexcept { return performer_->IsPlaying(); }
+bool RepeaterImpl::IsPlaying() const noexcept { return performer_->IsPlaying(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Pop() noexcept {
+void RepeaterImpl::Pop() noexcept {
   if (pitches_.empty()) {
     return;
   }
@@ -49,26 +49,26 @@ void Repeater::Pop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Push(std::optional<float> pitch_or, int length) noexcept {
+void RepeaterImpl::Push(std::optional<float> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void Repeater::SetInstrument(Instrument* instrument) noexcept {
+void RepeaterImpl::SetInstrument(InstrumentImpl* instrument) noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
   instrument_ = instrument;
 }
 
-void Repeater::SetRate(double rate) noexcept {
+void RepeaterImpl::SetRate(double rate) noexcept {
   const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
   performer_->SetLoopLength(length);
 }
 
-void Repeater::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
+void RepeaterImpl::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Start(float pitch_offset) noexcept {
+void RepeaterImpl::Start(float pitch_offset) noexcept {
   if (IsPlaying()) {
     return;
   }
@@ -77,7 +77,7 @@ void Repeater::Start(float pitch_offset) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Stop() noexcept {
+void RepeaterImpl::Stop() noexcept {
   if (!IsPlaying()) {
     return;
   }
@@ -90,7 +90,7 @@ void Repeater::Stop() noexcept {
   remaining_length_ = 0;
 }
 
-void Repeater::OnBeat() noexcept {
+void RepeaterImpl::OnBeat() noexcept {
   if (pitches_.empty() || instrument_ == nullptr) {
     return;
   }
@@ -107,7 +107,7 @@ void Repeater::OnBeat() noexcept {
   instrument_->SetNoteOn(*pitches_[index_].first + pitch_offset_, kNoteIntensity);
 }
 
-bool Repeater::Update() noexcept {
+bool RepeaterImpl::Update() noexcept {
   if (--remaining_length_ > 0 || pitches_.empty()) {
     return false;
   }

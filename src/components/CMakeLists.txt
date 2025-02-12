@@ -1,29 +1,29 @@
 add_library(
-  barelymusician_components_arpeggiator
-  arpeggiator.cpp
-  arpeggiator.h
+  barelymusician_components_arpeggiator_impl
+  arpeggiator_impl.cpp
+  arpeggiator_impl.h
 )
 target_link_libraries(
-  barelymusician_components_arpeggiator
+  barelymusician_components_arpeggiator_impl
   barelycomposer_headeronly
   barelymusician_headeronly
-  barelymusician_common_random
-  barelymusician_engine_engine
-  barelymusician_engine_instrument
-  barelymusician_engine_performer
+  barelymusician_common_random_impl
+  barelymusician_internal_engine_impl
+  barelymusician_internal_instrument_impl
+  barelymusician_internal_performer_impl
 )
 
 add_library(
-  barelymusician_components_repeater
-  repeater.cpp
-  repeater.h
+  barelymusician_components_repeater_impl
+  repeater_impl.cpp
+  repeater_impl.h
 )
 target_link_libraries(
-  barelymusician_components_repeater
+  barelymusician_components_repeater_impl
   barelycomposer_headeronly
   barelymusician_headeronly
-  barelymusician_common_random
-  barelymusician_engine_engine
-  barelymusician_engine_instrument
-  barelymusician_engine_performer
+  barelymusician_common_random_impl
+  barelymusician_internal_engine_impl
+  barelymusician_internal_instrument_impl
+  barelymusician_internal_performer_impl
 )

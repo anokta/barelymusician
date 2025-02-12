@@ -1,4 +1,4 @@
-#include "common/random.h"
+#include "common/random_impl.h"
 
 #include <vector>
 
@@ -8,12 +8,12 @@ namespace barely::internal {
 namespace {
 
 // Tests that the generated uniform numbers are always within a given range.
-TEST(RandomTest, DrawUniformMinMax) {
+TEST(RandomImplTest, DrawUniformMinMax) {
   constexpr int kValueCount = 1000;
   constexpr int kMin = -7;
   constexpr int kMax = 35;
 
-  Random random;
+  RandomImpl random;
   for (int i = 0; i < kValueCount; ++i) {
     const int value = random.DrawUniform(kMin, kMax);
     EXPECT_GE(value, kMin);
@@ -22,13 +22,13 @@ TEST(RandomTest, DrawUniformMinMax) {
 }
 
 // Tests that the same values are generated when reset with the same seed.
-TEST(RandomTest, Reset) {
+TEST(RandomImplTest, Reset) {
   constexpr int kSeed = 1;
   constexpr int kValueCount = 10;
   constexpr float kMean = -0.5f;
   constexpr float kVariance = 10.0f;
 
-  Random random(kSeed);
+  RandomImpl random(kSeed);
 
   // Generate some random values.
   std::vector<float> values(kValueCount);

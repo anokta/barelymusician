@@ -1,4 +1,4 @@
-#include "engine/performer.h"
+#include "internal/performer_impl.h"
 
 #include <array>
 #include <functional>
@@ -15,7 +15,7 @@ using ::testing::Optional;
 
 // Tests that the performer processs a single task as expected.
 TEST(PerformerTest, ProcessSingleTask) {
-  Performer performer;
+  PerformerImpl performer;
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
@@ -170,7 +170,7 @@ TEST(PerformerTest, ProcessSingleTask) {
 TEST(PerformerTest, ProcessMultipleTasks) {
   constexpr int kTaskCount = 4;
 
-  Performer performer;
+  PerformerImpl performer;
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
@@ -238,7 +238,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
 // Tests that the performer sets its current position as expected.
 TEST(PerformerTest, SetPosition) {
-  Performer performer;
+  PerformerImpl performer;
   EXPECT_EQ(performer.GetPosition(), 0.0);
 
   performer.SetPosition(2.75);

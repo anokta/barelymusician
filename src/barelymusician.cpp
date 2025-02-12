@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <span>
 
-#include "engine/engine.h"
-#include "engine/instrument.h"
-#include "engine/performer.h"
+#include "internal/engine_impl.h"
+#include "internal/instrument_impl.h"
+#include "internal/performer_impl.h"
 
 using ::barely::ControlType;
 using ::barely::NoteControlType;

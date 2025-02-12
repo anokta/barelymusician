@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "common/find_or_null.h"
-#include "common/random.h"
+#include "common/random_impl.h"
 
 namespace barely::internal {
 
@@ -31,12 +31,12 @@ class ContextFreeGrammar {
   /// @return Generated symbol sequence.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   std::vector<SymbolType> GenerateSequence(const SymbolType& start_symbol,
-                                           Random& random) const noexcept;
+                                           RandomImpl& random) const noexcept;
 
  private:
   // Returns a substitution from a given `substitutions` with a `random` draw.
   const std::vector<SymbolType>* GetSubstitution(
-      const std::vector<std::vector<SymbolType>>& substitutions, Random& random) const noexcept;
+      const std::vector<std::vector<SymbolType>>& substitutions, RandomImpl& random) const noexcept;
 
   // Grammar rules that map symbols to their corresponding substitutions.
   std::unordered_map<SymbolType, std::vector<std::vector<SymbolType>>> rules_;
@@ -51,7 +51,7 @@ void ContextFreeGrammar<SymbolType>::AddRule(
 // NOLINTNEXTLINE(bugprone-exception-escape)
 template <typename SymbolType>
 std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
-    const SymbolType& start_symbol, Random& random) const noexcept {
+    const SymbolType& start_symbol, RandomImpl& random) const noexcept {
   std::vector<SymbolType> sequence;
   // Add `start_symbol` to the beginning of the sequence.
   sequence.push_back(start_symbol);
@@ -74,7 +74,7 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
 
 template <typename SymbolType>
 const std::vector<SymbolType>* ContextFreeGrammar<SymbolType>::GetSubstitution(
-    const std::vector<std::vector<SymbolType>>& substitutions, Random& random) const noexcept {
+    const std::vector<std::vector<SymbolType>>& substitutions, RandomImpl& random) const noexcept {
   // Select a substitution randomly with equal probability for each selection.
   if (!substitutions.empty()) {
     const int index = random.DrawUniform(0, static_cast<int>(substitutions.size()));

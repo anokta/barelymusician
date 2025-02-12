@@ -6,7 +6,7 @@
 #include <numbers>
 
 #include "barelymusician.h"
-#include "common/random.h"
+#include "common/random_impl.h"
 
 namespace barely::internal {
 
@@ -59,7 +59,7 @@ class Oscillator {
   float phase_ = 0.0f;
 
   // White noise random number generator.
-  inline static Random random_ = Random();
+  inline static RandomImpl random_ = RandomImpl();
 };
 
 /// Normalizes the pulse width into audible range.

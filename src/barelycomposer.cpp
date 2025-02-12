@@ -6,26 +6,26 @@
 #include <optional>
 
 #include "barelymusician.h"
-#include "common/random.h"
-#include "components/arpeggiator.h"
-#include "components/repeater.h"
-#include "engine/engine.h"
+#include "common/random_impl.h"
+#include "components/arpeggiator_impl.h"
+#include "components/repeater_impl.h"
+#include "internal/engine_impl.h"
 
 // Arpeggiator.
-struct BarelyArpeggiator : public barely::internal::Arpeggiator {
-  explicit BarelyArpeggiator(barely::internal::Engine& engine) noexcept
-      : barely::internal::Arpeggiator(engine) {}
+struct BarelyArpeggiator : public barely::internal::ArpeggiatorImpl {
+  explicit BarelyArpeggiator(barely::internal::EngineImpl& engine) noexcept
+      : barely::internal::ArpeggiatorImpl(engine) {}
 };
 
 // Random.
-struct BarelyRandom : public barely::internal::Random {
-  explicit BarelyRandom(int seed) noexcept : barely::internal::Random(seed) {}
+struct BarelyRandom : public barely::internal::RandomImpl {
+  explicit BarelyRandom(int seed) noexcept : barely::internal::RandomImpl(seed) {}
 };
 
 // Repeater.
-struct BarelyRepeater : public barely::internal::Repeater {
-  explicit BarelyRepeater(barely::internal::Engine& engine) noexcept
-      : barely::internal::Repeater(engine) {}
+struct BarelyRepeater : public barely::internal::RepeaterImpl {
+  explicit BarelyRepeater(barely::internal::EngineImpl& engine) noexcept
+      : barely::internal::RepeaterImpl(engine) {}
 };
 
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {

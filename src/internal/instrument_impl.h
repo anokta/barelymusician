@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_IMPL_H_
+#define BARELYMUSICIAN_INTERNAL_INSTRUMENT_IMPL_H_
 
 #include <array>
 #include <cassert>
@@ -12,13 +12,13 @@
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/sample_data.h"
-#include "engine/callback.h"
-#include "engine/message_queue.h"
+#include "internal/callback.h"
+#include "internal/message_queue.h"
 
 namespace barely::internal {
 
-/// Class that controls an instrument.
-class Instrument {
+/// Class that implements an instrument.
+class InstrumentImpl {
  public:
   /// Note off callback alias.
   using NoteOffCallback = Callback<BarelyInstrument_NoteOffCallback>;
@@ -26,22 +26,22 @@ class Instrument {
   /// Note on callback alias.
   using NoteOnCallback = Callback<BarelyInstrument_NoteOnCallback>;
 
-  /// Constructs a new `Instrument`.
+  /// Constructs a new `InstrumentImpl`.
   ///
   /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   /// @param update_sample Update sample.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(int sample_rate, float reference_frequency, int64_t update_sample) noexcept;
+  InstrumentImpl(int sample_rate, float reference_frequency, int64_t update_sample) noexcept;
 
-  /// Destroys `Instrument`.
-  ~Instrument() noexcept;
+  /// Destroys `InstrumentImpl`.
+  ~InstrumentImpl() noexcept;
 
   /// Non-copyable and non-movable.
-  Instrument(const Instrument& other) noexcept = delete;
-  Instrument& operator=(const Instrument& other) noexcept = delete;
-  Instrument(Instrument&& other) noexcept = delete;
-  Instrument& operator=(Instrument&& other) noexcept = delete;
+  InstrumentImpl(const InstrumentImpl& other) noexcept = delete;
+  InstrumentImpl& operator=(const InstrumentImpl& other) noexcept = delete;
+  InstrumentImpl(InstrumentImpl&& other) noexcept = delete;
+  InstrumentImpl& operator=(InstrumentImpl&& other) noexcept = delete;
 
   /// Returns a control value.
   ///
@@ -223,7 +223,7 @@ class Instrument {
 
 }  // namespace barely::internal
 
-struct BarelyInstrument : public barely::internal::Instrument {};
-static_assert(sizeof(BarelyInstrument) == sizeof(barely::internal::Instrument));
+struct BarelyInstrument : public barely::internal::InstrumentImpl {};
+static_assert(sizeof(BarelyInstrument) == sizeof(barely::internal::InstrumentImpl));
 
-#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_IMPL_H_

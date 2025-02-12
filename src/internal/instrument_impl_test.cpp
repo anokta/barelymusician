@@ -1,4 +1,4 @@
-#include "engine/instrument.h"
+#include "internal/instrument_impl.h"
 
 #include <algorithm>
 #include <array>
@@ -22,8 +22,8 @@ constexpr float kReferenceFrequency = 1.0f;
 constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that the instrument sets a control value as expected.
-TEST(InstrumentTest, SetControl) {
-  Instrument instrument(kSampleRate, kReferenceFrequency, 0);
+TEST(InstrumentImplTest, SetControl) {
+  InstrumentImpl instrument(kSampleRate, kReferenceFrequency, 0);
   EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.0f);
 
   instrument.SetControl(ControlType::kGain, -12.0f);
@@ -45,7 +45,7 @@ TEST(InstrumentTest, SetControl) {
 }
 
 // Tests that the instrument plays a single note as expected.
-TEST(InstrumentTest, PlaySingleNote) {
+TEST(InstrumentImplTest, PlaySingleNote) {
   constexpr int kSampleCount = 5;
   constexpr float kPitch = 1.0f;
   constexpr float kIntensity = 0.5f;
@@ -53,7 +53,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   constexpr std::array<SampleDataSlice, 1> kSlices = {
       SampleDataSlice(kPitch, kSampleRate, kSamples)};
 
-  Instrument instrument(kSampleRate, kReferenceFrequency, kUpdateSample);
+  InstrumentImpl instrument(kSampleRate, kReferenceFrequency, kUpdateSample);
   instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<float>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kSlices));
@@ -89,7 +89,7 @@ TEST(InstrumentTest, PlaySingleNote) {
 }
 
 // Tests that the instrument plays multiple notes as expected.
-TEST(InstrumentTest, PlayMultipleNotes) {
+TEST(InstrumentImplTest, PlayMultipleNotes) {
   constexpr std::array<SampleDataSlice, kSampleRate> kSlices = {
       SampleDataSlice(0.0f, kSampleRate, {kSamples.data(), kSamples.data() + 1}),
       SampleDataSlice(1.0f, kSampleRate, {kSamples.data() + 1, kSamples.data() + 2}),
@@ -97,7 +97,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
       SampleDataSlice(3.0f, kSampleRate, {kSamples.data() + 3, kSamples.data() + 4}),
   };
 
-  Instrument instrument(1, kReferenceFrequency, 0);
+  InstrumentImpl instrument(1, kReferenceFrequency, 0);
   instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<float>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kSlices));
@@ -132,11 +132,11 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 }
 
 // Tests that the instrument triggers its note callbacks as expected.
-TEST(InstrumentTest, SetNoteCallbacks) {
+TEST(InstrumentImplTest, SetNoteCallbacks) {
   constexpr float kPitch = 3.3f;
   constexpr float kIntensity = 0.25f;
 
-  Instrument instrument(1, kReferenceFrequency, 0);
+  InstrumentImpl instrument(1, kReferenceFrequency, 0);
 
   // Trigger the note on callback.
   std::pair<float, float> note_on_state = {0.0f, 0.0f};
@@ -185,11 +185,11 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 }
 
 // Tests that the instrument stops all notes as expected.
-TEST(InstrumentTest, SetAllNotesOff) {
+TEST(InstrumentImplTest, SetAllNotesOff) {
   constexpr std::array<float, 3> kPitches = {1.0f, 2.0f, 3.0f};
   constexpr float kIntensity = 1.0f;
 
-  Instrument instrument(kSampleRate, kReferenceFrequency, 0);
+  InstrumentImpl instrument(kSampleRate, kReferenceFrequency, 0);
   for (const float pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

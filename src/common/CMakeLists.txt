@@ -4,9 +4,9 @@ add_library(
 )
 
 add_library(
-  barelymusician_common_random
-  random.cpp
-  random.h
+  barelymusician_common_random_impl
+  random_impl.cpp
+  random_impl.h
 )
 
 if(ENABLE_TESTS)
@@ -22,13 +22,13 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_common_find_or_null_test)
 
   add_executable(
-    barelymusician_common_random_test
-    random_test.cpp
+    barelymusician_common_random_impl_test
+    random_impl_test.cpp
   )
   target_link_libraries(
-    barelymusician_common_random_test
-    barelymusician_common_random
+    barelymusician_common_random_impl_test
+    barelymusician_common_random_impl
     gtest_main
   )
-  gtest_discover_tests(barelymusician_common_random_test)
+  gtest_discover_tests(barelymusician_common_random_impl_test)
 endif()

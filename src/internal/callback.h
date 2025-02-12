@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_CALLBACK_H_
-#define BARELYMUSICIAN_ENGINE_CALLBACK_H_
+#ifndef BARELYMUSICIAN_INTERNAL_CALLBACK_H_
+#define BARELYMUSICIAN_INTERNAL_CALLBACK_H_
 
 namespace barely::internal {
 
@@ -30,4 +30,4 @@ struct Callback {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_CALLBACK_H_
+#endif  // BARELYMUSICIAN_INTERNAL_CALLBACK_H_

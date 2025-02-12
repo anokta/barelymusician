@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
-#define BARELYMUSICIAN_ENGINE_ENGINE_H_
+#ifndef BARELYMUSICIAN_INTERNAL_ENGINE_IMPL_H_
+#define BARELYMUSICIAN_INTERNAL_ENGINE_IMPL_H_
 
 #include <cmath>
 #include <memory>
@@ -7,43 +7,43 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "engine/instrument.h"
-#include "engine/performer.h"
+#include "internal/instrument_impl.h"
+#include "internal/performer_impl.h"
 
 namespace barely::internal {
 
-/// Class that wraps an engine.
-class Engine {
+/// Class that implements an engine.
+class EngineImpl {
  public:
-  /// Constructs a new `Engine`.
+  /// Constructs a new `EngineImpl`.
   ///
   /// @param sample_rate Sampling rate in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Engine(int sample_rate) noexcept;
+  explicit EngineImpl(int sample_rate) noexcept;
 
   /// Creates a new instrument.
   ///
   /// @return Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument* CreateInstrument() noexcept;
+  InstrumentImpl* CreateInstrument() noexcept;
 
   /// Creates a new performer.
   ///
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Performer* CreatePerformer() noexcept;
+  PerformerImpl* CreatePerformer() noexcept;
 
   /// Destroys an instrument.
   ///
   /// @param instrument Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyInstrument(Instrument* instrument) noexcept;
+  void DestroyInstrument(InstrumentImpl* instrument) noexcept;
 
   /// Destroys a performer.
   ///
   /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyPerformer(Performer* performer) noexcept;
+  void DestroyPerformer(PerformerImpl* performer) noexcept;
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
@@ -96,10 +96,10 @@ class Engine {
 
  private:
   // Map of instruments by their pointers.
-  std::unordered_map<Instrument*, std::unique_ptr<Instrument>> instruments_;
+  std::unordered_map<InstrumentImpl*, std::unique_ptr<InstrumentImpl>> instruments_;
 
   // Map of performers by their pointers.
-  std::unordered_map<Performer*, std::unique_ptr<Performer>> performers_;
+  std::unordered_map<PerformerImpl*, std::unique_ptr<PerformerImpl>> performers_;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;
@@ -116,9 +116,9 @@ class Engine {
 
 }  // namespace barely::internal
 
-struct BarelyEngine : public barely::internal::Engine {
+struct BarelyEngine : public barely::internal::EngineImpl {
  public:
-  explicit BarelyEngine(int32_t sample_rate) noexcept : Engine(sample_rate) {}
+  explicit BarelyEngine(int32_t sample_rate) noexcept : EngineImpl(sample_rate) {}
   ~BarelyEngine() = default;
 
   // Non-copyable and non-movable.
@@ -127,6 +127,6 @@ struct BarelyEngine : public barely::internal::Engine {
   BarelyEngine(BarelyEngine&& other) noexcept = delete;
   BarelyEngine& operator=(BarelyEngine&& other) noexcept = delete;
 };
-static_assert(sizeof(BarelyEngine) == sizeof(barely::internal::Engine));
+static_assert(sizeof(BarelyEngine) == sizeof(barely::internal::EngineImpl));
 
-#endif  // BARELYMUSICIAN_ENGINE_ENGINE_H_
+#endif  // BARELYMUSICIAN_INTERNAL_ENGINE_IMPL_H_

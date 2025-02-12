@@ -1,4 +1,4 @@
-#include "engine/engine.h"
+#include "internal/engine_impl.h"
 
 #include <array>
 #include <functional>
@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "barelymusician.h"
-#include "engine/instrument.h"
-#include "engine/performer.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
+#include "internal/instrument_impl.h"
+#include "internal/performer_impl.h"
 
 namespace barely::internal {
 namespace {
@@ -29,7 +29,7 @@ TEST(EngineTest, BeatsSecondsConversion) {
   constexpr std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0, -24.6};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0, -12.3};
 
-  Engine engine(kSampleRate);
+  EngineImpl engine(kSampleRate);
   engine.SetTempo(kTempo);
 
   for (int i = 0; i < kValueCount; ++i) {
@@ -48,10 +48,10 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   constexpr float kPitch = 0.5;
   constexpr float kIntensity = 0.75;
 
-  Engine engine(kSampleRate);
+  EngineImpl engine(kSampleRate);
 
   // Create an instrument.
-  Instrument* instrument = engine.CreateInstrument();
+  InstrumentImpl* instrument = engine.CreateInstrument();
 
   // Set the note callbacks.
   std::pair<float, float> note_on_state = {0.0f, 0.0f};
@@ -87,10 +87,10 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
   std::vector<float> note_off_pitches;
 
   {
-    Engine engine(kSampleRate);
+    EngineImpl engine(kSampleRate);
 
     // Create instruments with note off callbacks.
-    std::vector<Instrument*> instruments;
+    std::vector<InstrumentImpl*> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(engine.CreateInstrument());
       instruments[i]->SetNoteOffCallback({
@@ -121,10 +121,10 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
-  Engine engine(kSampleRate);
+  EngineImpl engine(kSampleRate);
 
   // Create a performer.
-  Performer* performer = engine.CreatePerformer();
+  PerformerImpl* performer = engine.CreatePerformer();
 
   // Create a task.
   TaskState task_state = TaskState::kEnd;
@@ -188,7 +188,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
 // Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
-  Engine engine(kSampleRate);
+  EngineImpl engine(kSampleRate);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
 
   engine.SetTempo(200.0);

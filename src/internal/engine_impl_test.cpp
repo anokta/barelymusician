@@ -11,7 +11,7 @@
 #include "internal/instrument_impl.h"
 #include "internal/performer_impl.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 using ::testing::ElementsAre;
@@ -202,4 +202,4 @@ TEST(EngineTest, SetTempo) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

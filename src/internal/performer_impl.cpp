@@ -10,7 +10,7 @@
 
 #include "barelymusician.h"
 
-namespace barely::internal {
+namespace barely {
 
 void PerformerImpl::TaskImpl::SetDuration(double duration) noexcept {
   assert(duration > 0.0 && "Invalid task duration");
@@ -285,4 +285,4 @@ void PerformerImpl::UpdateInactiveTaskKey(double old_position, TaskImpl* task) n
   inactive_tasks_.insert(std::move(node));
 }
 
-}  // namespace barely::internal
+}  // namespace barely

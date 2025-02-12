@@ -9,7 +9,7 @@
 #include "internal/engine_impl.h"
 #include "internal/instrument_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 RepeaterImpl::RepeaterImpl(EngineImpl& engine) noexcept
@@ -130,4 +130,4 @@ bool RepeaterImpl::Update() noexcept {
   return true;
 }
 
-}  // namespace barely::internal
+}  // namespace barely

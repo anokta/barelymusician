@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace barely::internal {
+namespace barely {
 
 /// Envelope that generates output samples according to its current state.
 class Envelope {
@@ -168,6 +168,6 @@ class Envelope {
   State state_ = State::kIdle;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_ENVELOPE_H_

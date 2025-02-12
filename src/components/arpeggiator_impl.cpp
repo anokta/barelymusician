@@ -8,7 +8,7 @@
 #include "internal/engine_impl.h"
 #include "internal/instrument_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 ArpeggiatorImpl::ArpeggiatorImpl(EngineImpl& engine) noexcept
@@ -123,4 +123,4 @@ void ArpeggiatorImpl::Update() noexcept {
   pitch_ = pitches_[index_];
 }
 
-}  // namespace barely::internal
+}  // namespace barely

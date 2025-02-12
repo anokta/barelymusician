@@ -13,7 +13,7 @@
 #include "dsp/sample_player.h"
 #include "dsp/voice.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that wraps an instrument voice.
 class Voice {
@@ -143,6 +143,6 @@ class Voice {
 /// @return Processed output value.
 using VoiceCallback = float (*)(Voice& voice, const Voice::Params& params);
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_VOICE_H_

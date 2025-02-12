@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace barely::internal {
+namespace barely {
 
 namespace {
 
@@ -61,4 +61,4 @@ void GainProcessor::Process(float* samples, int sample_count) noexcept {
 
 void GainProcessor::SetGain(float gain) noexcept { target_gain_ = gain; }
 
-}  // namespace barely::internal
+}  // namespace barely

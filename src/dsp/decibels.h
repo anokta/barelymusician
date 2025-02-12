@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-namespace barely::internal {
+namespace barely {
 
 /// Minimum decibel threshold.
 inline constexpr float kMinDecibels = -80.0f;
@@ -32,6 +32,6 @@ inline float DecibelsFromAmplitude(float amplitude) noexcept {
   return kMinDecibels;
 }
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_DECIBELS_H_

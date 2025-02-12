@@ -8,7 +8,7 @@
 
 #include "barelymusician.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// One-pole filter that processes basic low-pass and high-pass filtering.
 class OnePoleFilter {
@@ -58,6 +58,6 @@ inline float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) noex
                     0.0f, 1.0f);
 }
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_

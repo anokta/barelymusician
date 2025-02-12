@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_INTERNAL_CALLBACK_H_
 #define BARELYMUSICIAN_INTERNAL_CALLBACK_H_
 
-namespace barely::internal {
+namespace barely {
 
 /// Callback template.
 template <typename CallbackType>
@@ -28,6 +28,6 @@ struct Callback {
   }
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INTERNAL_CALLBACK_H_

@@ -12,20 +12,19 @@
 #include "internal/engine_impl.h"
 
 // Arpeggiator.
-struct BarelyArpeggiator : public barely::internal::ArpeggiatorImpl {
-  explicit BarelyArpeggiator(barely::internal::EngineImpl& engine) noexcept
-      : barely::internal::ArpeggiatorImpl(engine) {}
+struct BarelyArpeggiator : public barely::ArpeggiatorImpl {
+  explicit BarelyArpeggiator(barely::EngineImpl& engine) noexcept
+      : barely::ArpeggiatorImpl(engine) {}
 };
 
 // Random.
-struct BarelyRandom : public barely::internal::RandomImpl {
-  explicit BarelyRandom(int seed) noexcept : barely::internal::RandomImpl(seed) {}
+struct BarelyRandom : public barely::RandomImpl {
+  explicit BarelyRandom(int seed) noexcept : barely::RandomImpl(seed) {}
 };
 
 // Repeater.
-struct BarelyRepeater : public barely::internal::RepeaterImpl {
-  explicit BarelyRepeater(barely::internal::EngineImpl& engine) noexcept
-      : barely::internal::RepeaterImpl(engine) {}
+struct BarelyRepeater : public barely::RepeaterImpl {
+  explicit BarelyRepeater(barely::EngineImpl& engine) noexcept : barely::RepeaterImpl(engine) {}
 };
 
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {

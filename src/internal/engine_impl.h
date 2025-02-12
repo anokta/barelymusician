@@ -10,7 +10,7 @@
 #include "internal/instrument_impl.h"
 #include "internal/performer_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that implements an engine.
 class EngineImpl {
@@ -114,9 +114,9 @@ class EngineImpl {
   double timestamp_ = 0.0;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
-struct BarelyEngine : public barely::internal::EngineImpl {
+struct BarelyEngine : public barely::EngineImpl {
  public:
   explicit BarelyEngine(int32_t sample_rate) noexcept : EngineImpl(sample_rate) {}
   ~BarelyEngine() = default;
@@ -127,6 +127,6 @@ struct BarelyEngine : public barely::internal::EngineImpl {
   BarelyEngine(BarelyEngine&& other) noexcept = delete;
   BarelyEngine& operator=(BarelyEngine&& other) noexcept = delete;
 };
-static_assert(sizeof(BarelyEngine) == sizeof(barely::internal::EngineImpl));
+static_assert(sizeof(BarelyEngine) == sizeof(barely::EngineImpl));
 
 #endif  // BARELYMUSICIAN_INTERNAL_ENGINE_IMPL_H_

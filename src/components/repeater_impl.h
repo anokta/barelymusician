@@ -11,7 +11,7 @@
 #include "internal/instrument_impl.h"
 #include "internal/performer_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that wraps a repeater.
 class RepeaterImpl {
@@ -111,6 +111,6 @@ class RepeaterImpl {
   RandomImpl random_;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMPONENTS_REPEATER_H_

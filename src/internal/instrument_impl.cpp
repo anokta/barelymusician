@@ -15,7 +15,7 @@
 #include "dsp/sample_data.h"
 #include "internal/message.h"
 
-namespace barely::internal {
+namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentImpl::InstrumentImpl(int sample_rate, float reference_frequency,
@@ -167,4 +167,4 @@ ControlMessage InstrumentImpl::BuildControlMessage(ControlType type, float value
   return ControlMessage{type, value};
 }
 
-}  // namespace barely::internal
+}  // namespace barely

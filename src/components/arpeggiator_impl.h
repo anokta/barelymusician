@@ -9,7 +9,7 @@
 #include "internal/instrument_impl.h"
 #include "internal/performer_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that implements an arpeggiator.
 class ArpeggiatorImpl {
@@ -121,6 +121,6 @@ class ArpeggiatorImpl {
   RandomImpl random_;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_IMPL_H_

@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 // Tests that amplitude/decibels conversion returns expected results.
@@ -32,4 +32,4 @@ TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

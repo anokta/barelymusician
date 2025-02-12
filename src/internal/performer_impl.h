@@ -12,7 +12,7 @@
 #include "barelymusician.h"
 #include "internal/callback.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that implements a performer.
 class PerformerImpl {
@@ -273,12 +273,12 @@ class PerformerImpl {
   BarelyEngineHandle engine = nullptr;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
-struct BarelyPerformer : public barely::internal::PerformerImpl {};
-static_assert(sizeof(BarelyPerformer) == sizeof(barely::internal::PerformerImpl));
+struct BarelyPerformer : public barely::PerformerImpl {};
+static_assert(sizeof(BarelyPerformer) == sizeof(barely::PerformerImpl));
 
-struct BarelyTask : public barely::internal::PerformerImpl::TaskImpl {};
-static_assert(sizeof(BarelyTask) == sizeof(barely::internal::PerformerImpl::TaskImpl));
+struct BarelyTask : public barely::PerformerImpl::TaskImpl {};
+static_assert(sizeof(BarelyTask) == sizeof(barely::PerformerImpl::TaskImpl));
 
 #endif  // BARELYMUSICIAN_INTERNAL_PERFORMER_IMPL_H_

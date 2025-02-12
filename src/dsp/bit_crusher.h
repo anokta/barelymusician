@@ -6,7 +6,7 @@
 
 #include "barelymusician.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Bit crusher effect with bit depth and sample rate reduction.
 class BitCrusher {
@@ -43,6 +43,6 @@ class BitCrusher {
   float phase_ = 0.0f;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_BIT_CRUSHER_H_

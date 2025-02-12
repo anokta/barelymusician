@@ -3,7 +3,7 @@
 #include "barelymusician.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 // Tests that the oscillator generates sawtooth samples as expected.
@@ -26,4 +26,4 @@ TEST(OscillatorTest, Next) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

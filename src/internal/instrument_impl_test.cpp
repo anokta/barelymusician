@@ -12,7 +12,7 @@
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 using ::testing::Pair;
@@ -208,4 +208,4 @@ TEST(InstrumentImplTest, SetAllNotesOff) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

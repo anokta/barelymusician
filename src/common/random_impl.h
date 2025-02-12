@@ -3,7 +3,7 @@
 
 #include <random>
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that implements a random number generator.
 class RandomImpl {
@@ -50,6 +50,6 @@ class RandomImpl {
   std::uniform_int_distribution<int> uniform_int_distribution_;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMMON_RANDOM_IMPL_H_

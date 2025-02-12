@@ -15,7 +15,7 @@
 #include "internal/callback.h"
 #include "internal/message_queue.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that implements an instrument.
 class InstrumentImpl {
@@ -221,9 +221,9 @@ class InstrumentImpl {
   BarelyEngineHandle engine = nullptr;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
-struct BarelyInstrument : public barely::internal::InstrumentImpl {};
-static_assert(sizeof(BarelyInstrument) == sizeof(barely::internal::InstrumentImpl));
+struct BarelyInstrument : public barely::InstrumentImpl {};
+static_assert(sizeof(BarelyInstrument) == sizeof(barely::InstrumentImpl));
 
 #endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_IMPL_H_

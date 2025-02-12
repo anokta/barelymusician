@@ -10,7 +10,7 @@
 #include "internal/instrument_impl.h"
 #include "internal/performer_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 namespace {
 
@@ -136,4 +136,4 @@ void EngineImpl::Update(double timestamp) noexcept {
   }
 }
 
-}  // namespace barely::internal
+}  // namespace barely

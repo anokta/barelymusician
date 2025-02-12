@@ -8,7 +8,7 @@
 #include "barelymusician.h"
 #include "common/random_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that wraps sample data.
 class SampleData {
@@ -42,6 +42,6 @@ class SampleData {
   inline static RandomImpl random_ = RandomImpl();
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_SAMPLE_DATA_H_

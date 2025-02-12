@@ -1,12 +1,12 @@
-#ifndef BARELYMUSICIAN_INTERNAL_MESSAGE_QUEUE_H_
-#define BARELYMUSICIAN_INTERNAL_MESSAGE_QUEUE_H_
+#ifndef BARELYMUSICIAN_COMMON_MESSAGE_QUEUE_H_
+#define BARELYMUSICIAN_COMMON_MESSAGE_QUEUE_H_
 
 #include <array>
 #include <atomic>
 #include <cstdint>
 #include <utility>
 
-#include "internal/message.h"
+#include "common/message.h"
 
 namespace barely {
 
@@ -42,4 +42,4 @@ class MessageQueue {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_INTERNAL_MESSAGE_QUEUE_H_
+#endif  // BARELYMUSICIAN_COMMON_MESSAGE_QUEUE_H_

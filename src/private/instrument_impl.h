@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_INSTRUMENT_IMPL_H_
-#define BARELYMUSICIAN_INTERNAL_INSTRUMENT_IMPL_H_
+#ifndef BARELYMUSICIAN_PRIVATE_INSTRUMENT_IMPL_H_
+#define BARELYMUSICIAN_PRIVATE_INSTRUMENT_IMPL_H_
 
 #include <array>
 #include <cassert>
@@ -9,11 +9,11 @@
 #include <unordered_map>
 
 #include "barelymusician.h"
+#include "common/callback.h"
+#include "common/message_queue.h"
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/sample_data.h"
-#include "internal/callback.h"
-#include "internal/message_queue.h"
 
 namespace barely {
 
@@ -226,4 +226,4 @@ class InstrumentImpl {
 struct BarelyInstrument : public barely::InstrumentImpl {};
 static_assert(sizeof(BarelyInstrument) == sizeof(barely::InstrumentImpl));
 
-#endif  // BARELYMUSICIAN_INTERNAL_INSTRUMENT_IMPL_H_
+#endif  // BARELYMUSICIAN_PRIVATE_INSTRUMENT_IMPL_H_

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_PERFORMER_IMPL_H_
-#define BARELYMUSICIAN_INTERNAL_PERFORMER_IMPL_H_
+#ifndef BARELYMUSICIAN_PRIVATE_PERFORMER_IMPL_H_
+#define BARELYMUSICIAN_PRIVATE_PERFORMER_IMPL_H_
 
 #include <cassert>
 #include <compare>
@@ -10,7 +10,7 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "internal/callback.h"
+#include "common/callback.h"
 
 namespace barely {
 
@@ -281,4 +281,4 @@ static_assert(sizeof(BarelyPerformer) == sizeof(barely::PerformerImpl));
 struct BarelyTask : public barely::PerformerImpl::TaskImpl {};
 static_assert(sizeof(BarelyTask) == sizeof(barely::PerformerImpl::TaskImpl));
 
-#endif  // BARELYMUSICIAN_INTERNAL_PERFORMER_IMPL_H_
+#endif  // BARELYMUSICIAN_PRIVATE_PERFORMER_IMPL_H_

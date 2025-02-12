@@ -1,19 +1,19 @@
-#ifndef BARELYMUSICIAN_COMPONENTS_REPEATER_H_
-#define BARELYMUSICIAN_COMPONENTS_REPEATER_H_
+#ifndef BARELYMUSICIAN_PRIVATE_REPEATER_H_
+#define BARELYMUSICIAN_PRIVATE_REPEATER_H_
 
 #include <optional>
 #include <utility>
 #include <vector>
 
 #include "barelycomposer.h"
-#include "common/random_impl.h"
-#include "internal/engine_impl.h"
-#include "internal/instrument_impl.h"
-#include "internal/performer_impl.h"
+#include "private/engine_impl.h"
+#include "private/instrument_impl.h"
+#include "private/performer_impl.h"
+#include "private/random_impl.h"
 
 namespace barely {
 
-/// Class that wraps a repeater.
+/// Class that implements a repeater.
 class RepeaterImpl {
  public:
   // Constructs a new `RepeaterImpl`.
@@ -113,4 +113,4 @@ class RepeaterImpl {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMPONENTS_REPEATER_H_
+#endif  // BARELYMUSICIAN_PRIVATE_REPEATER_H_

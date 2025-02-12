@@ -6,10 +6,10 @@
 #include <optional>
 
 #include "barelymusician.h"
-#include "common/random_impl.h"
-#include "components/arpeggiator_impl.h"
-#include "components/repeater_impl.h"
-#include "internal/engine_impl.h"
+#include "private/arpeggiator_impl.h"
+#include "private/engine_impl.h"
+#include "private/random_impl.h"
+#include "private/repeater_impl.h"
 
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::ArpeggiatorImpl {

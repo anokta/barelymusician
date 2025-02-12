@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "barelymusician.h"
-#include "common/random_impl.h"
+#include "private/random_impl.h"
 
 namespace barely {
 

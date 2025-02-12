@@ -1,4 +1,4 @@
-#include "internal/instrument_impl.h"
+#include "private/instrument_impl.h"
 
 #include <cassert>
 #include <cstdint>
@@ -8,12 +8,12 @@
 
 #include "barelymusician.h"
 #include "common/find_or_null.h"
+#include "common/message.h"
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/oscillator.h"
 #include "dsp/sample_data.h"
-#include "internal/message.h"
 
 namespace barely {
 

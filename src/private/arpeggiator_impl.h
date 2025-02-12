@@ -1,13 +1,13 @@
-#ifndef BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_IMPL_H_
-#define BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_IMPL_H_
+#ifndef BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_IMPL_H_
+#define BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_IMPL_H_
 
 #include <vector>
 
 #include "barelycomposer.h"
-#include "common/random_impl.h"
-#include "internal/engine_impl.h"
-#include "internal/instrument_impl.h"
-#include "internal/performer_impl.h"
+#include "private/engine_impl.h"
+#include "private/instrument_impl.h"
+#include "private/performer_impl.h"
+#include "private/random_impl.h"
 
 namespace barely {
 
@@ -123,4 +123,4 @@ class ArpeggiatorImpl {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_IMPL_H_
+#endif  // BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_IMPL_H_

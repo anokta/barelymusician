@@ -49,8 +49,8 @@ add_library(
 )
 target_link_libraries(
   barelymusician_dsp_oscillator INTERFACE
-  barelymusician_common_random_impl
   barelymusician_headeronly
+  barelymusician_private_random_impl
 )
 
 add_library(
@@ -60,8 +60,8 @@ add_library(
 )
 target_link_libraries(
   barelymusician_dsp_sample_data
-  barelymusician_common_random_impl
   barelymusician_headeronly
+  barelymusician_private_random_impl
 )
 
 add_library(

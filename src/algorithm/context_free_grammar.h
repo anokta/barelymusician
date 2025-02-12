@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "common/find_or_null.h"
-#include "common/random_impl.h"
+#include "private/random_impl.h"
 
 namespace barely {
 

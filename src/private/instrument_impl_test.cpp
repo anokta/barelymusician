@@ -1,4 +1,4 @@
-#include "internal/instrument_impl.h"
+#include "private/instrument_impl.h"
 
 #include <algorithm>
 #include <array>

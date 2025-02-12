@@ -1,8 +1,8 @@
-#include "internal/message_queue.h"
+#include "common/message_queue.h"
 
+#include "common/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "internal/message.h"
 
 using ::testing::AllOf;
 using ::testing::Field;

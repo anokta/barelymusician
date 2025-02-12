@@ -5,7 +5,7 @@ add_library(
 target_link_libraries(
   barelymusician_algorithm_context_free_grammar INTERFACE
   barelymusician_common_find_or_null
-  barelymusician_common_random_impl
+  barelymusician_private_random_impl
 )
 
 if(ENABLE_TESTS)
@@ -16,7 +16,7 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_algorithm_context_free_grammar_test
     barelymusician_algorithm_context_free_grammar
-    barelymusician_common_random_impl
+    barelymusician_private_random_impl
     gmock
     gtest_main
   )

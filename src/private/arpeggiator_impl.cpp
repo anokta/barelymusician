@@ -1,12 +1,12 @@
-#include "components/arpeggiator_impl.h"
+#include "private/arpeggiator_impl.h"
 
 #include <algorithm>
 #include <cassert>
 
 #include "barelycomposer.h"
 #include "barelymusician.h"
-#include "internal/engine_impl.h"
-#include "internal/instrument_impl.h"
+#include "private/engine_impl.h"
+#include "private/instrument_impl.h"
 
 namespace barely {
 

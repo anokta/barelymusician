@@ -26,10 +26,10 @@ target_compile_definitions(
 target_link_libraries(
   barelycomposer
   barelymusician
-  barelymusician_common_random_impl
-  barelymusician_components_arpeggiator_impl
-  barelymusician_components_repeater_impl
-  barelymusician_internal_engine_impl
+  barelymusician_private_arpeggiator_impl
+  barelymusician_private_engine_impl
+  barelymusician_private_random_impl
+  barelymusician_private_repeater_impl
 )
 
 add_library(
@@ -52,9 +52,9 @@ target_compile_definitions(
 target_link_libraries(
   barelymusician
   barelymusician_headeronly
-  barelymusician_internal_engine_impl
-  barelymusician_internal_instrument_impl
-  barelymusician_internal_performer_impl
+  barelymusician_private_engine_impl
+  barelymusician_private_instrument_impl
+  barelymusician_private_performer_impl
 )
 
 if(ENABLE_BENCHMARKS)
@@ -95,6 +95,5 @@ endif()
 
 add_subdirectory(algorithm)
 add_subdirectory(common)
-add_subdirectory(components)
 add_subdirectory(dsp)
-add_subdirectory(internal)
+add_subdirectory(private)

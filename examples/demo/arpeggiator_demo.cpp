@@ -19,7 +19,7 @@ namespace {
 using ::barely::Arpeggiator;
 using ::barely::ArpeggiatorStyle;
 using ::barely::ControlType;
-using ::barely::Musician;
+using ::barely::Engine;
 using ::barely::OscillatorShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -69,10 +69,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kSampleRate);
-  musician.SetTempo(kInitialTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument();
+  auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
@@ -82,7 +82,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetNoteOnCallback(
       [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
-  Arpeggiator arpeggiator(musician);
+  Arpeggiator arpeggiator(engine);
   arpeggiator.SetInstrument(&instrument);
   arpeggiator.SetGateRatio(kInitialGateRatio);
   arpeggiator.SetRate(kInitialRate);
@@ -137,7 +137,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
-  musician.Update(kLookahead);
+  engine.Update(kLookahead);
 
   ConsoleLog() << "Play the arpeggiator using the keyboard keys:";
   ConsoleLog() << "  * Use ASDFFGHJK keys to play the white notes in an octave";
@@ -146,7 +146,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(audio_clock.GetTimestamp() + kLookahead);
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

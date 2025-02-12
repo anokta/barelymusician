@@ -9,12 +9,12 @@
 #include "common/random.h"
 #include "components/arpeggiator.h"
 #include "components/repeater.h"
-#include "engine/musician.h"
+#include "engine/engine.h"
 
 // Arpeggiator.
 struct BarelyArpeggiator : public barely::internal::Arpeggiator {
-  explicit BarelyArpeggiator(barely::internal::Musician& musician) noexcept
-      : barely::internal::Arpeggiator(musician) {}
+  explicit BarelyArpeggiator(barely::internal::Engine& engine) noexcept
+      : barely::internal::Arpeggiator(engine) {}
 };
 
 // Random.
@@ -24,15 +24,14 @@ struct BarelyRandom : public barely::internal::Random {
 
 // Repeater.
 struct BarelyRepeater : public barely::internal::Repeater {
-  explicit BarelyRepeater(barely::internal::Musician& musician) noexcept
-      : barely::internal::Repeater(musician) {}
+  explicit BarelyRepeater(barely::internal::Engine& engine) noexcept
+      : barely::internal::Repeater(engine) {}
 };
 
-bool BarelyArpeggiator_Create(BarelyMusicianHandle musician,
-                              BarelyArpeggiatorHandle* out_arpeggiator) {
-  if (!musician || !out_arpeggiator) return false;
+bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
+  if (!engine || !out_arpeggiator) return false;
 
-  *out_arpeggiator = new BarelyArpeggiator(*musician);
+  *out_arpeggiator = new BarelyArpeggiator(*engine);
   return true;
 }
 
@@ -175,10 +174,10 @@ bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
   return true;
 }
 
-bool BarelyRepeater_Create(BarelyMusicianHandle musician, BarelyRepeaterHandle* out_repeater) {
-  if (!musician || !out_repeater) return false;
+bool BarelyRepeater_Create(BarelyEngineHandle engine, BarelyRepeaterHandle* out_repeater) {
+  if (!engine || !out_repeater) return false;
 
-  *out_repeater = new BarelyRepeater(*musician);
+  *out_repeater = new BarelyRepeater(*engine);
   return true;
 }
 

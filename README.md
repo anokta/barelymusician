@@ -26,14 +26,14 @@ Example usage
 ```cpp
 #include "barelymusician.h"
 
-// Create the musician.
-barely::Musician musician(/*sample_rate=*/48000);
+// Create the engine.
+barely::Engine engine(/*sample_rate=*/48000);
 
 // Set the global tempo.
-musician.SetTempo(/*tempo=*/124.0);
+engine.SetTempo(/*tempo=*/124.0);
 
 // Create a new instrument.
-auto instrument = musician.CreateInstrument();
+auto instrument = engine.CreateInstrument();
 
 // Set the instrument gain.
 instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0f);
@@ -50,7 +50,7 @@ instrument.SetNoteOn(kC4Pitch, /*intensity=*/0.25f);
 const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
 
 // Create a new performer.
-auto performer = musician.CreatePerformer();
+auto performer = engine.CreatePerformer();
 
 // Set the performer to looping.
 performer.SetLooping(/*is_looping=*/true);
@@ -68,7 +68,7 @@ auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, [&](barely:
 // Start the performer.
 performer.Start();
 
-// Update the musician timestamp in seconds.
+// Update the engine timestamp in seconds.
 //
 // Timestamp updates must occur before processing instruments with their respective timestamps.
 // Otherwise, `Process` calls may be *late* in receiving the relevant changes to the instruments. To
@@ -76,7 +76,7 @@ performer.Start();
 // lookahead to prevent potential thread synchronization issues in real-time audio applications.
 constexpr double kLookahead = 0.1;
 double timestamp = 0.0;
-musician.Update(timestamp + kLookahead);
+engine.Update(timestamp + kLookahead);
 
 // Process the next output samples of the instrument.
 //

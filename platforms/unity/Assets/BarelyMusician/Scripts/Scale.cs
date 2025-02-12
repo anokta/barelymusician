@@ -26,7 +26,7 @@ namespace Barely {
     /// @param degree Scale degree.
     /// @return Note pitch.
     public float GetPitch(int degree) {
-      return Musician.Internal.Scale_GetPitch(this, degree);
+      return Engine.Internal.Scale_GetPitch(this, degree);
     }
   }
 }  // namespace Barely

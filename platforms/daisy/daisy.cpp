@@ -4,8 +4,8 @@
 #include "daisy_pod.h"
 
 using ::barely::ControlType;
+using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
@@ -60,9 +60,9 @@ int main(void) {
   midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  Musician musician(kSampleRate);
+  Engine engine(kSampleRate);
 
-  Instrument instrument = musician.CreateInstrument();
+  Instrument instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);

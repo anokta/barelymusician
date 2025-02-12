@@ -227,7 +227,7 @@ namespace Barely {
     /// @param type Note control type
     /// @return Note control value.
     public float GetNoteControl(float pitch, NoteControlType type) {
-      return Musician.Internal.Instrument_GetNoteControl(_handle, pitch, type);
+      return Engine.Internal.Instrument_GetNoteControl(_handle, pitch, type);
     }
 
     /// Returns whether a note is on or not.
@@ -235,12 +235,12 @@ namespace Barely {
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
     public bool IsNoteOn(float pitch) {
-      return Musician.Internal.Instrument_IsNoteOn(_handle, pitch);
+      return Engine.Internal.Instrument_IsNoteOn(_handle, pitch);
     }
 
     /// Sets all notes off.
     public void SetAllNotesOff() {
-      Musician.Internal.Instrument_SetAllNotesOff(_handle);
+      Engine.Internal.Instrument_SetAllNotesOff(_handle);
     }
 
     /// Sets a note control value.
@@ -249,14 +249,14 @@ namespace Barely {
     /// @param type Note control type.
     /// @param value Note control value.
     public void SetNoteControl(float pitch, NoteControlType type, float value) {
-      Musician.Internal.Instrument_SetNoteControl(_handle, pitch, type, value);
+      Engine.Internal.Instrument_SetNoteControl(_handle, pitch, type, value);
     }
 
     /// Sets a note off.
     ///
     /// @param pitch Note pitch.
     public void SetNoteOff(float pitch) {
-      Musician.Internal.Instrument_SetNoteOff(_handle, pitch);
+      Engine.Internal.Instrument_SetNoteOff(_handle, pitch);
     }
 
     /// Sets a note on.
@@ -264,7 +264,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     public void SetNoteOn(float pitch, float intensity = 1.0f) {
-      Musician.Internal.Instrument_SetNoteOn(_handle, pitch, intensity);
+      Engine.Internal.Instrument_SetNoteOn(_handle, pitch, intensity);
     }
 
     /// Class that wraps the internal api.
@@ -297,7 +297,7 @@ namespace Barely {
     }
 
     private void OnEnable() {
-      Musician.Internal.Instrument_Create(this, ref _handle);
+      Engine.Internal.Instrument_Create(this, ref _handle);
       OnInstrumentCreate?.Invoke();
       Source.clip = AudioClip.Create("[DO NOT EDIT]", 64, 1, AudioSettings.outputSampleRate, false);
       float[] ones = new float[64];
@@ -313,51 +313,51 @@ namespace Barely {
       Source.Stop();
       Source.clip = null;
       OnInstrumentDestroy?.Invoke();
-      Musician.Internal.Instrument_Destroy(ref _handle);
+      Engine.Internal.Instrument_Destroy(ref _handle);
       _sliceCount = 0;
     }
 
     private void Update() {
       UpdateSampleData();
-      SetControl(Musician.Internal.ControlType.GAIN, Gain);
-      SetControl(Musician.Internal.ControlType.PITCH_SHIFT, PitchShift);
-      SetControl(Musician.Internal.ControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
-      SetControl(Musician.Internal.ControlType.VOICE_COUNT, (float)VoiceCount);
-      SetControl(Musician.Internal.ControlType.ATTACK, Attack);
-      SetControl(Musician.Internal.ControlType.DECAY, Decay);
-      SetControl(Musician.Internal.ControlType.SUSTAIN, Sustain);
-      SetControl(Musician.Internal.ControlType.RELEASE, Release);
-      SetControl(Musician.Internal.ControlType.OSCILLATOR_MIX, OscillatorMix);
-      SetControl(Musician.Internal.ControlType.OSCILLATOR_MODE, (float)OscillatorMode);
-      SetControl(Musician.Internal.ControlType.OSCILLATOR_PITCH_SHIFT, OscillatorPitchShift);
-      SetControl(Musician.Internal.ControlType.OSCILLATOR_SHAPE, (float)OscillatorShape);
-      SetControl(Musician.Internal.ControlType.PULSE_WIDTH, PulseWidth);
-      SetControl(Musician.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (float)SamplePlaybackMode);
-      SetControl(Musician.Internal.ControlType.FILTER_TYPE, (float)FilterType);
-      SetControl(Musician.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
-      SetControl(Musician.Internal.ControlType.FILTER_TYPE, (float)FilterType);
-      SetControl(Musician.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
-      SetControl(Musician.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
-      SetControl(Musician.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
+      SetControl(Engine.Internal.ControlType.GAIN, Gain);
+      SetControl(Engine.Internal.ControlType.PITCH_SHIFT, PitchShift);
+      SetControl(Engine.Internal.ControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
+      SetControl(Engine.Internal.ControlType.VOICE_COUNT, (float)VoiceCount);
+      SetControl(Engine.Internal.ControlType.ATTACK, Attack);
+      SetControl(Engine.Internal.ControlType.DECAY, Decay);
+      SetControl(Engine.Internal.ControlType.SUSTAIN, Sustain);
+      SetControl(Engine.Internal.ControlType.RELEASE, Release);
+      SetControl(Engine.Internal.ControlType.OSCILLATOR_MIX, OscillatorMix);
+      SetControl(Engine.Internal.ControlType.OSCILLATOR_MODE, (float)OscillatorMode);
+      SetControl(Engine.Internal.ControlType.OSCILLATOR_PITCH_SHIFT, OscillatorPitchShift);
+      SetControl(Engine.Internal.ControlType.OSCILLATOR_SHAPE, (float)OscillatorShape);
+      SetControl(Engine.Internal.ControlType.PULSE_WIDTH, PulseWidth);
+      SetControl(Engine.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (float)SamplePlaybackMode);
+      SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
+      SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
+      SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
+      SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      Musician.Internal.Instrument_Process(_handle, data, channels);
+      Engine.Internal.Instrument_Process(_handle, data, channels);
     }
 
-    private float GetControl(Musician.Internal.ControlType type) {
-      return Musician.Internal.Instrument_GetControl(_handle, type);
+    private float GetControl(Engine.Internal.ControlType type) {
+      return Engine.Internal.Instrument_GetControl(_handle, type);
     }
 
-    private void SetControl(Musician.Internal.ControlType type, float value) {
-      Musician.Internal.Instrument_SetControl(_handle, type, value);
+    private void SetControl(Engine.Internal.ControlType type, float value) {
+      Engine.Internal.Instrument_SetControl(_handle, type, value);
     }
 
     private void UpdateSampleData() {
       if (Slices != null &&
           (Slices.Count != _sliceCount || Slices.Any(slice => slice.HasChanged))) {
         _sliceCount = Slices.Count;
-        Musician.Internal.Instrument_SetSampleData(_handle, Slices);
+        Engine.Internal.Instrument_SetSampleData(_handle, Slices);
       }
     }
 

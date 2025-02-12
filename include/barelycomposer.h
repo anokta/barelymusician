@@ -67,10 +67,10 @@ typedef struct BarelyRepeater* BarelyRepeaterHandle;
 
 /// Creates a new arpeggiator.
 ///
-/// @param musician Musician handle.
+/// @param engine Engine handle.
 /// @param out_arpeggiator Output arpeggiator handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_Create(BarelyMusician* musician,
+BARELY_EXPORT bool BarelyArpeggiator_Create(BarelyEngineHandle engine,
                                             BarelyArpeggiatorHandle* out_arpeggiator);
 
 /// Destroys an arpeggiator.
@@ -214,10 +214,10 @@ BARELY_EXPORT bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater);
 
 /// Creates a new repeater.
 ///
-/// @param musician Musician handle.
+/// @param engine Engine handle.
 /// @param out_repeater Output repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Create(BarelyMusician* musician,
+BARELY_EXPORT bool BarelyRepeater_Create(BarelyEngineHandle engine,
                                          BarelyRepeaterHandle* out_repeater);
 
 /// Destroys an repeater.
@@ -336,11 +336,11 @@ class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
  public:
   /// Creates a new `Arpeggiator`.
   ///
-  /// @param musician Musician.
-  explicit Arpeggiator(Musician& musician) noexcept
+  /// @param engine Engine.
+  explicit Arpeggiator(Engine& engine) noexcept
       : HandleWrapper([&]() {
           BarelyArpeggiatorHandle arpeggiator = nullptr;
-          [[maybe_unused]] const bool success = BarelyArpeggiator_Create(musician, &arpeggiator);
+          [[maybe_unused]] const bool success = BarelyArpeggiator_Create(engine, &arpeggiator);
           assert(success);
           return arpeggiator;
         }()) {}
@@ -553,11 +553,11 @@ class Repeater : public HandleWrapper<BarelyRepeaterHandle> {
  public:
   /// Creates a new `Repeater`.
   ///
-  /// @param musician Musician.
-  explicit Repeater(Musician& musician) noexcept
+  /// @param engine Engine.
+  explicit Repeater(Engine& engine) noexcept
       : HandleWrapper([&]() {
           BarelyRepeaterHandle repeater = nullptr;
-          [[maybe_unused]] const bool success = BarelyRepeater_Create(musician, &repeater);
+          [[maybe_unused]] const bool success = BarelyRepeater_Create(engine, &repeater);
           assert(success);
           return repeater;
         }()) {}

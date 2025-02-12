@@ -17,7 +17,7 @@
 namespace {
 
 using ::barely::ControlType;
-using ::barely::Musician;
+using ::barely::Engine;
 using ::barely::OscillatorShape;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
@@ -68,17 +68,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kSampleRate);
-  musician.SetTempo(kInitialTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument();
+  auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
-  Repeater repeater(musician);
+  Repeater repeater(engine);
   repeater.SetInstrument(&instrument);
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
@@ -184,7 +184,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
-  musician.Update(kLookahead);
+  engine.Update(kLookahead);
 
   ConsoleLog() << "Play the repeater using the keyboard keys:";
   ConsoleLog() << "  * Use space key to start or stop the repeater";
@@ -197,7 +197,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(audio_clock.GetTimestamp() + kLookahead);
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

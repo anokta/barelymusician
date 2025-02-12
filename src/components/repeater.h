@@ -7,8 +7,8 @@
 
 #include "barelycomposer.h"
 #include "common/random.h"
+#include "engine/engine.h"
 #include "engine/instrument.h"
-#include "engine/musician.h"
 #include "engine/performer.h"
 
 namespace barely::internal {
@@ -18,9 +18,9 @@ class Repeater {
  public:
   // Constructs a new `Repeater`.
   ///
-  /// @param musician Musician.
+  /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Repeater(Musician& musician) noexcept;
+  explicit Repeater(Engine& engine) noexcept;
 
   /// Destroys `Repeater`.
   ~Repeater() noexcept;
@@ -83,8 +83,8 @@ class Repeater {
   // Updates the repeater.
   bool Update() noexcept;
 
-  // Musician.
-  Musician* musician_ = nullptr;
+  // Engine.
+  Engine* engine_ = nullptr;
 
   // Performer.
   Performer* performer_ = nullptr;

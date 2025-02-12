@@ -8,8 +8,8 @@ target_link_libraries(
   barelycomposer_headeronly
   barelymusician_headeronly
   barelymusician_common_random
+  barelymusician_engine_engine
   barelymusician_engine_instrument
-  barelymusician_engine_musician
   barelymusician_engine_performer
 )
 
@@ -23,7 +23,7 @@ target_link_libraries(
   barelycomposer_headeronly
   barelymusician_headeronly
   barelymusician_common_random
+  barelymusician_engine_engine
   barelymusician_engine_instrument
-  barelymusician_engine_musician
   barelymusician_engine_performer
 )

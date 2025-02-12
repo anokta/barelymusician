@@ -15,7 +15,7 @@
 namespace {
 
 using ::barely::ControlType;
-using ::barely::Musician;
+using ::barely::Engine;
 using ::barely::OscillatorShape;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -56,9 +56,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kSampleRate);
+  Engine engine(kSampleRate);
 
-  auto instrument = musician.CreateInstrument();
+  auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);

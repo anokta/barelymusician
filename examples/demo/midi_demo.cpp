@@ -22,8 +22,8 @@
 namespace {
 
 using ::barely::ControlType;
+using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::Performer;
 using ::barely::Task;
@@ -102,14 +102,14 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kSampleRate);
-  musician.SetTempo(kTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kTempo);
 
   std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(musician.CreateInstrument(), musician.CreatePerformer(),
-                        std::vector<Task>{}, tracks.size() + 1);
+    tracks.emplace_back(engine.CreateInstrument(), engine.CreatePerformer(), std::vector<Task>{},
+                        tracks.size() + 1);
     auto& [instrument, performer, tasks, track_index] = tracks.back();
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer, tasks)) {
@@ -160,14 +160,14 @@ int main(int /*argc*/, char* argv[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
-  musician.Update(kLookahead);
+  engine.Update(kLookahead);
   for (auto& [instrument, performer, tasks, _] : tracks) {
     performer.Start();
   }
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(clock.GetTimestamp() + kLookahead);
+    engine.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

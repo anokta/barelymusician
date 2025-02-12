@@ -6,14 +6,14 @@
 
 #include "barelycomposer.h"
 #include "barelymusician.h"
+#include "engine/engine.h"
 #include "engine/instrument.h"
-#include "engine/musician.h"
 
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(Musician& musician) noexcept
-    : musician_(&musician), performer_(musician_->CreatePerformer()) {
+Repeater::Repeater(Engine& engine) noexcept
+    : engine_(&engine), performer_(engine_->CreatePerformer()) {
   performer_->SetBeatCallback({
       [](void* user_data) noexcept {
         auto& repeater = *static_cast<Repeater*>(user_data);
@@ -27,7 +27,7 @@ Repeater::~Repeater() noexcept {
   if (IsPlaying() && instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
-  musician_->DestroyPerformer(performer_);
+  engine_->DestroyPerformer(performer_);
 }
 
 void Repeater::Clear() noexcept { pitches_.clear(); }

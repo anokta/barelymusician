@@ -4,6 +4,18 @@ add_library(
 )
 
 add_library(
+  barelymusician_engine_engine
+  engine.cpp
+  engine.h
+)
+target_link_libraries(
+  barelymusician_engine_engine
+  barelymusician_engine_instrument
+  barelymusician_engine_performer
+  barelymusician_headeronly
+)
+
+add_library(
   barelymusician_engine_instrument
   instrument.cpp
   instrument.h
@@ -43,18 +55,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_engine_musician
-  musician.cpp
-  musician.h
-)
-target_link_libraries(
-  barelymusician_engine_musician
-  barelymusician_engine_instrument
-  barelymusician_engine_performer
-  barelymusician_headeronly
-)
-
-add_library(
   barelymusician_engine_performer
   performer.cpp
   performer.h
@@ -66,6 +66,21 @@ target_link_libraries(
 )
 
 if(ENABLE_TESTS)
+  add_executable(
+    barelymusician_engine_engine_test
+    engine_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_engine_engine_test
+    barelymusician_engine_engine
+    barelymusician_engine_instrument
+    barelymusician_engine_performer
+    barelymusician_headeronly
+    gmock
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_engine_engine_test)
+
   add_executable(
     barelymusician_engine_instrument_test
     instrument_test.cpp
@@ -93,21 +108,6 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_engine_message_queue_test)
-
-  add_executable(
-    barelymusician_engine_musician_test
-    musician_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_engine_musician_test
-    barelymusician_engine_instrument
-    barelymusician_engine_musician
-    barelymusician_engine_performer
-    barelymusician_headeronly
-    gmock
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_engine_musician_test)
 
   add_executable(
     barelymusician_engine_performer_test

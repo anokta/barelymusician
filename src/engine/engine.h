@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_MUSICIAN_H_
-#define BARELYMUSICIAN_ENGINE_MUSICIAN_H_
+#ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
+#define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
 #include <cmath>
 #include <memory>
@@ -12,14 +12,14 @@
 
 namespace barely::internal {
 
-/// Class that wraps a musician.
-class Musician {
+/// Class that wraps an engine.
+class Engine {
  public:
-  /// Constructs a new `Musician`.
+  /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Musician(int sample_rate) noexcept;
+  explicit Engine(int sample_rate) noexcept;
 
   /// Creates a new instrument.
   ///
@@ -88,7 +88,7 @@ class Musician {
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept;
 
-  /// Updates the musician at timestamp.
+  /// Updates the engine at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -116,17 +116,17 @@ class Musician {
 
 }  // namespace barely::internal
 
-struct BarelyMusician : public barely::internal::Musician {
+struct BarelyEngine : public barely::internal::Engine {
  public:
-  explicit BarelyMusician(int32_t sample_rate) noexcept : Musician(sample_rate) {}
-  ~BarelyMusician() = default;
+  explicit BarelyEngine(int32_t sample_rate) noexcept : Engine(sample_rate) {}
+  ~BarelyEngine() = default;
 
   // Non-copyable and non-movable.
-  BarelyMusician(const BarelyMusician& other) noexcept = delete;
-  BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
-  BarelyMusician(BarelyMusician&& other) noexcept = delete;
-  BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
+  BarelyEngine(const BarelyEngine& other) noexcept = delete;
+  BarelyEngine& operator=(const BarelyEngine& other) noexcept = delete;
+  BarelyEngine(BarelyEngine&& other) noexcept = delete;
+  BarelyEngine& operator=(BarelyEngine&& other) noexcept = delete;
 };
-static_assert(sizeof(BarelyMusician) == sizeof(barely::internal::Musician));
+static_assert(sizeof(BarelyEngine) == sizeof(barely::internal::Engine));
 
-#endif  // BARELYMUSICIAN_ENGINE_MUSICIAN_H_
+#endif  // BARELYMUSICIAN_ENGINE_ENGINE_H_

@@ -1,4 +1,4 @@
-#include "engine/musician.h"
+#include "engine/engine.h"
 
 #include <algorithm>
 #include <cassert>
@@ -23,10 +23,10 @@ constexpr double kSecondsFromMinutes = 60.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Musician::Musician(int sample_rate) noexcept : sample_rate_(sample_rate) {}
+Engine::Engine(int sample_rate) noexcept : sample_rate_(sample_rate) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument* Musician::CreateInstrument() noexcept {
+Instrument* Engine::CreateInstrument() noexcept {
   auto instrument = std::make_unique<Instrument>(sample_rate_, reference_frequency_,
                                                  GetSamplesFromSeconds(timestamp_));
   auto* instrument_ptr = instrument.get();
@@ -37,7 +37,7 @@ Instrument* Musician::CreateInstrument() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer* Musician::CreatePerformer() noexcept {
+Performer* Engine::CreatePerformer() noexcept {
   auto performer = std::make_unique<Performer>();
   auto* performer_ptr = performer.get();
   [[maybe_unused]] const bool success =
@@ -47,7 +47,7 @@ Performer* Musician::CreatePerformer() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::DestroyInstrument(Instrument* instrument) noexcept {
+void Engine::DestroyInstrument(Instrument* instrument) noexcept {
   assert(instrument != nullptr);
   [[maybe_unused]] const bool success = (instruments_.erase(instrument) == 1);
   assert(success);
@@ -55,34 +55,34 @@ void Musician::DestroyInstrument(Instrument* instrument) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::DestroyPerformer(Performer* performer) noexcept {
+void Engine::DestroyPerformer(Performer* performer) noexcept {
   assert(performer != nullptr);
   [[maybe_unused]] const bool success = (performers_.erase(performer) == 1);
   assert(success);
   performers_.erase(performer);
 }
 
-double Musician::GetBeatsFromSeconds(double seconds) const noexcept {
+double Engine::GetBeatsFromSeconds(double seconds) const noexcept {
   return tempo_ * seconds * kMinutesFromSeconds;
 }
 
-float Musician::GetReferenceFrequency() const noexcept { return reference_frequency_; }
+float Engine::GetReferenceFrequency() const noexcept { return reference_frequency_; }
 
-int64_t Musician::GetSamplesFromSeconds(double seconds) const noexcept {
+int64_t Engine::GetSamplesFromSeconds(double seconds) const noexcept {
   return static_cast<int64_t>(seconds * static_cast<double>(sample_rate_));
 }
 
-double Musician::GetSecondsFromBeats(double beats) const noexcept {
+double Engine::GetSecondsFromBeats(double beats) const noexcept {
   return (tempo_ > 0.0) ? beats * kSecondsFromMinutes / tempo_
                         : (beats > 0.0 ? std::numeric_limits<double>::max()
                                        : std::numeric_limits<double>::lowest());
 }
 
-double Musician::GetTempo() const noexcept { return tempo_; }
+double Engine::GetTempo() const noexcept { return tempo_; }
 
-double Musician::GetTimestamp() const noexcept { return timestamp_; }
+double Engine::GetTimestamp() const noexcept { return timestamp_; }
 
-void Musician::SetReferenceFrequency(float reference_frequency) noexcept {
+void Engine::SetReferenceFrequency(float reference_frequency) noexcept {
   reference_frequency = std::max(reference_frequency, 0.0f);
   if (reference_frequency_ != reference_frequency) {
     reference_frequency_ = reference_frequency;
@@ -92,10 +92,10 @@ void Musician::SetReferenceFrequency(float reference_frequency) noexcept {
   }
 }
 
-void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
+void Engine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::Update(double timestamp) noexcept {
+void Engine::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
       double update_duration = GetBeatsFromSeconds(timestamp - timestamp_);

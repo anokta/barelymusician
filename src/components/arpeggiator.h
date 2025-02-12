@@ -5,8 +5,8 @@
 
 #include "barelycomposer.h"
 #include "common/random.h"
+#include "engine/engine.h"
 #include "engine/instrument.h"
-#include "engine/musician.h"
 #include "engine/performer.h"
 
 namespace barely::internal {
@@ -16,9 +16,9 @@ class Arpeggiator {
  public:
   // Constructs a new `Arpeggiator`.
   ///
-  /// @param musician Musician.
+  /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Arpeggiator(Musician& musician) noexcept;
+  explicit Arpeggiator(Engine& engine) noexcept;
 
   /// Destroys `Arpeggiator`.
   ~Arpeggiator() noexcept;
@@ -90,8 +90,8 @@ class Arpeggiator {
   // Updates the arpeggiator.
   void Update() noexcept;
 
-  // Musician.
-  Musician* musician_ = nullptr;
+  // Engine.
+  Engine* engine_ = nullptr;
 
   // Performer.
   Performer* performer_ = nullptr;

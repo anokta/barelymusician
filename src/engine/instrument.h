@@ -218,7 +218,7 @@ class Instrument {
 
   // TODO(#126): Temp hack to allow destroying by handle.
  public:
-  BarelyMusicianHandle musician = nullptr;
+  BarelyEngineHandle engine = nullptr;
 };
 
 }  // namespace barely::internal

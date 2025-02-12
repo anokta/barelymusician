@@ -13,7 +13,7 @@
 namespace {
 
 using ::barely::ControlType;
-using ::barely::Musician;
+using ::barely::Engine;
 using ::barely::OscillatorShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -49,11 +49,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kSampleRate);
-  musician.SetTempo(kInitialTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  auto instrument = musician.CreateInstrument();
+  auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
@@ -61,7 +61,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  auto metronome = musician.CreatePerformer();
+  auto metronome = engine.CreatePerformer();
   metronome.SetBeatCallback([&]() {
     const int beat = static_cast<int>(metronome.GetPosition());
     const int current_bar = (beat / kBeatCount) + 1;
@@ -88,7 +88,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetTempo();
+    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (metronome.IsPlaying()) {
@@ -123,15 +123,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
         return;
     }
     tempo = std::clamp(tempo, 0.0, static_cast<double>(kSampleRate));
-    musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
+    engine.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
-  musician.Update(kLookahead);
+  engine.Update(kLookahead);
   metronome.Start();
 
   ConsoleLog() << "Play the metronome using the keyboard keys:";
@@ -143,7 +143,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(audio_clock.GetTimestamp() + kLookahead);
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

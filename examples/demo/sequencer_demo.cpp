@@ -14,7 +14,7 @@
 namespace {
 
 using ::barely::ControlType;
-using ::barely::Musician;
+using ::barely::Engine;
 using ::barely::OscillatorShape;
 using ::barely::Task;
 using ::barely::TaskState;
@@ -47,10 +47,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kSampleRate);
-  musician.SetTempo(kInitialTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument();
+  auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
   instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
@@ -58,7 +58,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetNoteOnCallback(
       [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
 
-  auto performer = musician.CreatePerformer();
+  auto performer = engine.CreatePerformer();
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
@@ -126,7 +126,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetTempo();
+    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (performer.IsPlaying()) {
@@ -162,20 +162,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
+    engine.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
-  musician.Update(kLookahead);
+  engine.Update(kLookahead);
   performer.Start();
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(audio_clock.GetTimestamp() + kLookahead);
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

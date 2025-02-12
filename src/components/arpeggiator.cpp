@@ -5,14 +5,14 @@
 
 #include "barelycomposer.h"
 #include "barelymusician.h"
+#include "engine/engine.h"
 #include "engine/instrument.h"
-#include "engine/musician.h"
 
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Arpeggiator::Arpeggiator(Musician& musician) noexcept
-    : musician_(&musician), performer_(musician_->CreatePerformer()) {
+Arpeggiator::Arpeggiator(Engine& engine) noexcept
+    : engine_(&engine), performer_(engine_->CreatePerformer()) {
   performer_->SetLooping(true);
   performer_->SetLoopLength(1.0);
   task_ = performer_->CreateTask(0.0, 1.0,
@@ -28,7 +28,7 @@ Arpeggiator::Arpeggiator(Musician& musician) noexcept
                                   this});
 }
 
-Arpeggiator::~Arpeggiator() noexcept { musician_->DestroyPerformer(performer_); }
+Arpeggiator::~Arpeggiator() noexcept { engine_->DestroyPerformer(performer_); }
 
 bool Arpeggiator::IsNoteOn(float pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();

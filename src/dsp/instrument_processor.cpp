@@ -8,7 +8,7 @@
 #include "dsp/sample_data.h"
 #include "dsp/voice.h"
 
-namespace barely::internal {
+namespace barely {
 
 namespace {
 
@@ -342,4 +342,4 @@ Voice& InstrumentProcessor::AcquireVoice(float pitch) noexcept {
   return voice_state.voice;
 }
 
-}  // namespace barely::internal
+}  // namespace barely

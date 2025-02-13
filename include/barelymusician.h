@@ -9,16 +9,16 @@
 /// Example C++ Usage
 /// -----------------
 ///
-/// - Musician:
+/// - Engine:
 ///
 ///   @code{.cpp}
 ///   #include "barelymusician.h"
 ///
 ///   // Create.
-///   barely::Musician musician(/*sample_rate=*/48000);
+///   barely::Engine engine(/*sample_rate=*/48000);
 ///
 ///   // Set the tempo.
-///   musician.SetTempo(/*tempo=*/124.0);
+///   engine.SetTempo(/*tempo=*/124.0);
 ///
 ///   // Update the timestamp.
 ///   //
@@ -28,14 +28,14 @@
 ///   // update callback using a lookahead to prevent potential thread synchronization issues in
 ///   // real-time audio applications.
 ///   double timestamp = 1.0;
-///   musician.Update(timestamp);
+///   engine.Update(timestamp);
 ///   @endcode
 ///
 /// - Instrument:
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   auto instrument = musician.CreateInstrument();
+///   auto instrument = engine.CreateInstrument();
 ///
 ///   // Set a note on.
 ///   //
@@ -65,7 +65,7 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   auto performer = musician.CreatePerformer();
+///   auto performer = engine.CreatePerformer();
 ///
 ///   // Create a task.
 ///   auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0,
@@ -85,17 +85,17 @@
 /// Example C Usage
 /// ---------------
 ///
-/// - Musician:
+/// - Engine:
 ///
 ///   @code{.cpp}
 ///   #include "barelymusician.h"
 ///
 ///   // Create.
-///   BarelyMusicianHandle musician = nullptr;
-///   BarelyMusician_Create(/*sample_rate=*/48000, &musician);
+///   BarelyEngineHandle engine = nullptr;
+///   BarelyEngine_Create(/*sample_rate=*/48000, &engine);
 ///
 ///   // Set the tempo.
-///   BarelyMusician_SetTempo(musician, /*tempo=*/124.0);
+///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
 ///
 ///   // Update the timestamp.
 ///   //
@@ -105,10 +105,10 @@
 ///   // update callback using a lookahead to prevent potential thread synchronization issues in
 ///   // real-time audio applications.
 ///   double timestamp = 1.0;
-///   BarelyMusician_Update(musician, timestamp);
+///   BarelyEngine_Update(engine, timestamp);
 ///
 ///   // Destroy.
-///   BarelyMusician_Destroy(musician);
+///   BarelyEngine_Destroy(engine);
 ///   @endcode
 ///
 /// - Instrument:
@@ -116,7 +116,7 @@
 ///   @code{.cpp}
 ///   // Create.
 ///   BarelyInstrumentHandle instrument = nullptr;
-///   BarelyInstrument_Create(musician, &instrument);
+///   BarelyInstrument_Create(engine, &instrument);
 ///
 ///   // Set a note on.
 ///   //
@@ -151,7 +151,7 @@
 ///   @code{.cpp}
 ///   // Create.
 ///   BarelyPerformerHandle performer = nullptr;
-///   BarelyPerformer_Create(musician, &performer);
+///   BarelyPerformer_Create(engine, &performer);
 ///
 ///   // Create a task.
 ///   BarelyTaskHandle task = nullptr;
@@ -344,11 +344,11 @@ typedef struct BarelySampleDataSlice {
   int32_t sample_count;
 } BarelySampleDataSlice;
 
+/// Engine handle.
+typedef struct BarelyEngine* BarelyEngineHandle;
+
 /// Instrument handle.
 typedef struct BarelyInstrument* BarelyInstrumentHandle;
-
-/// Musician handle.
-typedef struct BarelyMusician* BarelyMusicianHandle;
 
 /// Performer handle.
 typedef struct BarelyPerformer* BarelyPerformerHandle;
@@ -380,12 +380,77 @@ typedef void (*BarelyPerformer_BeatCallback)(void* user_data);
 /// @param user_data Pointer to user data.
 typedef void (*BarelyTask_ProcessCallback)(BarelyTaskState state, void* user_data);
 
+/// Creates a new engine.
+///
+/// @param sample_rate Sampling rate in hertz.
+/// @param out_engine Output engine handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEngine_Create(int32_t sample_rate, BarelyEngineHandle* out_engine);
+
+/// Destroys an engine.
+///
+/// @param engine Engine handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEngine_Destroy(BarelyEngineHandle engine);
+
+/// Gets the reference frequency of an engine.
+///
+/// @param engine Engine handle.
+/// @param out_reference_frequency Output reference frequency in hertz.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEngine_GetReferenceFrequency(BarelyEngineHandle engine,
+                                                      float* out_reference_frequency);
+
+/// Gets the tempo of an engine.
+///
+/// @param engine Engine handle.
+/// @param out_tempo Output tempo in beats per minute.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo);
+
+/// Gets the timestamp of an engine.
+///
+/// @param engine Engine handle.
+/// @param out_timestamp Output timestamp in seconds.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
+
+/// Sets the reference frequency of an engine.
+///
+/// @param engine Engine handle.
+/// @param reference_frequency Reference frequency in hertz.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine,
+                                                      float reference_frequency);
+
+/// Sets the tempo of an engine.
+///
+/// @param engine Engine handle.
+/// @param tempo Tempo in beats per minute.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo);
+
+/// Updates an engine at timestamp.
+///
+/// @param engine Engine handle.
+/// @param timestamp Timestamp in seconds.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp);
+
+/// Creates a performer.
+///
+/// @param engine Engine handle.
+/// @param out_performer Output performer handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_Create(BarelyEngineHandle engine,
+                                          BarelyPerformerHandle* out_performer);
+
 /// Creates a new instrument.
 ///
-/// @param musician Musician handle.
+/// @param engine Engine handle.
 /// @param out_instrument Output instrument handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusicianHandle musician,
+BARELY_EXPORT bool BarelyInstrument_Create(BarelyEngineHandle engine,
                                            BarelyInstrumentHandle* out_instrument);
 
 /// Destroys an instrument.
@@ -504,72 +569,6 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle ins
 BARELY_EXPORT bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
                                                   const BarelySampleDataSlice* slices,
                                                   int32_t slice_count);
-
-/// Creates a new musician.
-///
-/// @param sample_rate Sampling rate in hertz.
-/// @param out_musician Output musician handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Create(int32_t sample_rate, BarelyMusicianHandle* out_musician);
-
-/// Destroys a musician.
-///
-/// @param musician Musician handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
-
-/// Gets the reference frequency of a musician.
-///
-/// @param musician Musician handle.
-/// @param out_reference_frequency Output reference frequency in hertz.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_GetReferenceFrequency(BarelyMusicianHandle musician,
-                                                        float* out_reference_frequency);
-
-/// Gets the tempo of a musician.
-///
-/// @param musician Musician handle.
-/// @param out_tempo Output tempo in beats per minute.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo);
-
-/// Gets the timestamp of a musician.
-///
-/// @param musician Musician handle.
-/// @param out_timestamp Output timestamp in seconds.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician,
-                                               double* out_timestamp);
-
-/// Sets the reference frequency of a musician.
-///
-/// @param musician Musician handle.
-/// @param reference_frequency Reference frequency in hertz.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_SetReferenceFrequency(BarelyMusicianHandle musician,
-                                                        float reference_frequency);
-
-/// Sets the tempo of a musician.
-///
-/// @param musician Musician handle.
-/// @param tempo Tempo in beats per minute.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo);
-
-/// Updates a musician at timestamp.
-///
-/// @param musician Musician handle.
-/// @param timestamp Timestamp in seconds.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp);
-
-/// Creates a performer.
-///
-/// @param musician Musician handle.
-/// @param out_performer Output performer handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician,
-                                          BarelyPerformerHandle* out_performer);
 
 /// Destroys a performer.
 ///
@@ -960,11 +959,11 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Constructs a new `Instrument`.
   ///
-  /// @param musician Raw musician handle.
-  explicit Instrument(BarelyMusicianHandle musician) noexcept
+  /// @param engine Raw engine handle.
+  explicit Instrument(BarelyEngineHandle engine) noexcept
       : HandleWrapper([&]() {
           BarelyInstrumentHandle instrument = nullptr;
-          [[maybe_unused]] const bool success = BarelyInstrument_Create(musician, &instrument);
+          [[maybe_unused]] const bool success = BarelyInstrument_Create(engine, &instrument);
           assert(success);
           return instrument;
         }()) {}
@@ -1300,11 +1299,11 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
 
   /// Constructs a new `Performer`.
   ///
-  /// @param musician Raw musician handle.
-  explicit Performer(BarelyMusicianHandle musician) noexcept
+  /// @param engine Raw engine handle.
+  explicit Performer(BarelyEngineHandle engine) noexcept
       : HandleWrapper([&]() {
           BarelyPerformerHandle performer = nullptr;
-          [[maybe_unused]] const bool success = BarelyPerformer_Create(musician, &performer);
+          [[maybe_unused]] const bool success = BarelyPerformer_Create(engine, &performer);
           assert(success);
           return performer;
         }()) {}
@@ -1468,43 +1467,43 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   BeatCallback beat_callback_;
 };
 
-/// A class that wraps a musician handle.
-class Musician : public HandleWrapper<BarelyMusicianHandle> {
+/// A class that wraps an engine handle.
+class Engine : public HandleWrapper<BarelyEngineHandle> {
  public:
-  /// Constructs a new `Musician`.
+  /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  explicit Musician(int sample_rate) noexcept
+  explicit Engine(int sample_rate) noexcept
       : HandleWrapper([&]() {
-          BarelyMusicianHandle musician = nullptr;
+          BarelyEngineHandle engine = nullptr;
           [[maybe_unused]] const bool success =
-              BarelyMusician_Create(static_cast<int32_t>(sample_rate), &musician);
+              BarelyEngine_Create(static_cast<int32_t>(sample_rate), &engine);
           assert(success);
-          return musician;
+          return engine;
         }()) {}
 
-  /// Constructs a new `Musician` from a raw handle.
+  /// Constructs a new `Engine` from a raw handle.
   ///
-  /// @param musician Raw handle to musician.
-  explicit Musician(BarelyMusicianHandle musician) noexcept : HandleWrapper(musician) {}
+  /// @param engine Raw handle to engine.
+  explicit Engine(BarelyEngineHandle engine) noexcept : HandleWrapper(engine) {}
 
-  /// Destroys `Musician`.
-  ~Musician() noexcept { BarelyMusician_Destroy(*this); }
+  /// Destroys `Engine`.
+  ~Engine() noexcept { BarelyEngine_Destroy(*this); }
 
   /// Non-copyable.
-  Musician(const Musician& other) noexcept = delete;
-  Musician& operator=(const Musician& other) noexcept = delete;
+  Engine(const Engine& other) noexcept = delete;
+  Engine& operator=(const Engine& other) noexcept = delete;
 
   /// Default move constructor.
-  Musician(Musician&& other) noexcept = default;
+  Engine(Engine&& other) noexcept = default;
 
-  /// Assigns `Musician` via move.
+  /// Assigns `Engine` via move.
   ///
-  /// @param other Other musician.
-  /// @return Musician.
-  Musician& operator=(Musician&& other) noexcept {
+  /// @param other Other engine.
+  /// @return Engine.
+  Engine& operator=(Engine&& other) noexcept {
     if (this != &other) {
-      BarelyMusician_Destroy(*this);
+      BarelyEngine_Destroy(*this);
       HandleWrapper::operator=(std::move(other));
     }
     return *this;
@@ -1526,7 +1525,7 @@ class Musician : public HandleWrapper<BarelyMusicianHandle> {
   [[nodiscard]] float GetReferenceFrequency() const noexcept {
     float reference_frequency = 0.0f;
     [[maybe_unused]] const bool success =
-        BarelyMusician_GetReferenceFrequency(*this, &reference_frequency);
+        BarelyEngine_GetReferenceFrequency(*this, &reference_frequency);
     assert(success);
     return reference_frequency;
   }
@@ -1536,7 +1535,7 @@ class Musician : public HandleWrapper<BarelyMusicianHandle> {
   /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept {
     double tempo = 0.0;
-    [[maybe_unused]] const bool success = BarelyMusician_GetTempo(*this, &tempo);
+    [[maybe_unused]] const bool success = BarelyEngine_GetTempo(*this, &tempo);
     assert(success);
     return tempo;
   }
@@ -1546,7 +1545,7 @@ class Musician : public HandleWrapper<BarelyMusicianHandle> {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept {
     double timestamp = 0.0;
-    [[maybe_unused]] const bool success = BarelyMusician_GetTimestamp(*this, &timestamp);
+    [[maybe_unused]] const bool success = BarelyEngine_GetTimestamp(*this, &timestamp);
     assert(success);
     return timestamp;
   }
@@ -1556,7 +1555,7 @@ class Musician : public HandleWrapper<BarelyMusicianHandle> {
   /// @param reference_frequency Reference frequency in hertz.
   void SetReferenceFrequency(float reference_frequency) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyMusician_SetReferenceFrequency(*this, reference_frequency);
+        BarelyEngine_SetReferenceFrequency(*this, reference_frequency);
     assert(success);
   }
 
@@ -1564,15 +1563,15 @@ class Musician : public HandleWrapper<BarelyMusicianHandle> {
   ///
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept {
-    [[maybe_unused]] const bool success = BarelyMusician_SetTempo(*this, tempo);
+    [[maybe_unused]] const bool success = BarelyEngine_SetTempo(*this, tempo);
     assert(success);
   }
 
-  /// Updates the musician at timestamp.
+  /// Updates the engine at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyMusician_Update(*this, timestamp);
+    [[maybe_unused]] const bool success = BarelyEngine_Update(*this, timestamp);
     assert(success);
   }
 };

@@ -1,4 +1,4 @@
-#include "engine/performer.h"
+#include "private/performer_impl.h"
 
 #include <algorithm>
 #include <cassert>
@@ -10,9 +10,9 @@
 
 #include "barelymusician.h"
 
-namespace barely::internal {
+namespace barely {
 
-void Performer::Task::SetDuration(double duration) noexcept {
+void PerformerImpl::TaskImpl::SetDuration(double duration) noexcept {
   assert(duration > 0.0 && "Invalid task duration");
   if (duration != duration_) {
     const double old_duration = duration_;
@@ -21,7 +21,7 @@ void Performer::Task::SetDuration(double duration) noexcept {
   }
 }
 
-void Performer::Task::SetPosition(double position) noexcept {
+void PerformerImpl::TaskImpl::SetPosition(double position) noexcept {
   if (position != position_) {
     const double old_position = position_;
     position_ = position;
@@ -29,7 +29,7 @@ void Performer::Task::SetPosition(double position) noexcept {
   }
 }
 
-void Performer::Task::SetProcessCallback(ProcessCallback callback) noexcept {
+void PerformerImpl::TaskImpl::SetProcessCallback(ProcessCallback callback) noexcept {
   if (is_active_) {
     Process(TaskState::kEnd);
   }
@@ -40,17 +40,17 @@ void Performer::Task::SetProcessCallback(ProcessCallback callback) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer::Task* Performer::CreateTask(double position, double duration,
-                                       Task::ProcessCallback callback) noexcept {
-  auto task = std::make_unique<Task>(*this, position, duration, callback);
-  Task* task_ptr = task.get();
+PerformerImpl::TaskImpl* PerformerImpl::CreateTask(double position, double duration,
+                                                   TaskImpl::ProcessCallback callback) noexcept {
+  auto task = std::make_unique<TaskImpl>(*this, position, duration, callback);
+  TaskImpl* task_ptr = task.get();
   [[maybe_unused]] const bool success = tasks_.emplace(task_ptr, std::move(task)).second;
   assert(success && "Failed to create task");
   inactive_tasks_.emplace(position, task_ptr);
   return task_ptr;
 }
 
-void Performer::DestroyTask(Task* task) noexcept {
+void PerformerImpl::DestroyTask(TaskImpl* task) noexcept {
   if (task->IsActive()) {
     [[maybe_unused]] const bool success =
         (active_tasks_.erase({task->GetEndPosition(), task}) == 1);
@@ -63,7 +63,7 @@ void Performer::DestroyTask(Task* task) noexcept {
   tasks_.erase(task);
 }
 
-std::optional<double> Performer::GetNextDuration() const noexcept {
+std::optional<double> PerformerImpl::GetNextDuration() const noexcept {
   if (!is_playing_) {
     return std::nullopt;
   }
@@ -74,7 +74,7 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
   // Check inactive tasks.
   if (const auto next_it = GetNextInactiveTask(); next_it != inactive_tasks_.end()) {
     if (next_it->second->IsInside(position_)) {
-      // Performer position is inside an inactive task, we can return immediately.
+      // PerformerImpl position is inside an inactive task, we can return immediately.
       return 0.0;
     }
     if (next_it->first < position_) {  // loop around.
@@ -117,7 +117,7 @@ std::optional<double> Performer::GetNextDuration() const noexcept {
   return std::nullopt;
 }
 
-void Performer::ProcessAllTasksAtPosition() noexcept {
+void PerformerImpl::ProcessAllTasksAtPosition() noexcept {
   if (!is_playing_) {
     return;
   }
@@ -133,9 +133,9 @@ void Performer::ProcessAllTasksAtPosition() noexcept {
   }
 }
 
-void Performer::SetBeatCallback(BeatCallback callback) noexcept { beat_callback_ = callback; }
+void PerformerImpl::SetBeatCallback(BeatCallback callback) noexcept { beat_callback_ = callback; }
 
-void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
+void PerformerImpl::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) {
     return;
   }
@@ -145,7 +145,7 @@ void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   }
 }
 
-void Performer::SetLoopLength(double loop_length) noexcept {
+void PerformerImpl::SetLoopLength(double loop_length) noexcept {
   loop_length = std::max(loop_length, 0.0);
   if (loop_length_ == loop_length) {
     return;
@@ -156,7 +156,7 @@ void Performer::SetLoopLength(double loop_length) noexcept {
   }
 }
 
-void Performer::SetLooping(bool is_looping) noexcept {
+void PerformerImpl::SetLooping(bool is_looping) noexcept {
   if (is_looping_ == is_looping) {
     return;
   }
@@ -167,7 +167,7 @@ void Performer::SetLooping(bool is_looping) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Performer::SetPosition(double position) noexcept {
+void PerformerImpl::SetPosition(double position) noexcept {
   last_beat_position_ = std::nullopt;
   if (position_ == position) {
     return;
@@ -192,7 +192,7 @@ void Performer::SetPosition(double position) noexcept {
   }
 }
 
-void Performer::SetTaskDuration(Task* task, double old_duration) noexcept {
+void PerformerImpl::SetTaskDuration(TaskImpl* task, double old_duration) noexcept {
   if (task->IsActive()) {
     const double old_end_position = task->GetPosition() + old_duration;
     if (task->IsInside(position_)) {
@@ -203,7 +203,7 @@ void Performer::SetTaskDuration(Task* task, double old_duration) noexcept {
   }
 }
 
-void Performer::SetTaskPosition(Task* task, double old_position) noexcept {
+void PerformerImpl::SetTaskPosition(TaskImpl* task, double old_position) noexcept {
   if (task->IsActive()) {
     const double old_end_position = old_position + task->GetDuration();
     if (task->IsInside(position_)) {
@@ -216,9 +216,9 @@ void Performer::SetTaskPosition(Task* task, double old_position) noexcept {
   }
 }
 
-void Performer::Start() noexcept { is_playing_ = true; }
+void PerformerImpl::Start() noexcept { is_playing_ = true; }
 
-void Performer::Stop() noexcept {
+void PerformerImpl::Stop() noexcept {
   is_playing_ = false;
   last_beat_position_ = std::nullopt;
   while (!active_tasks_.empty()) {
@@ -227,7 +227,7 @@ void Performer::Stop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Performer::Update(double duration) noexcept {
+void PerformerImpl::Update(double duration) noexcept {
   if (!is_playing_) {
     return;
   }
@@ -236,8 +236,8 @@ void Performer::Update(double duration) noexcept {
   SetPosition(position_ + duration);
 }
 
-std::set<std::pair<double, Performer::Task*>>::const_iterator Performer::GetNextInactiveTask()
-    const noexcept {
+std::set<std::pair<double, PerformerImpl::TaskImpl*>>::const_iterator
+PerformerImpl::GetNextInactiveTask() const noexcept {
   if (!is_playing_) {
     return inactive_tasks_.end();
   }
@@ -256,15 +256,15 @@ std::set<std::pair<double, Performer::Task*>>::const_iterator Performer::GetNext
   return next_it;
 }
 
-double Performer::LoopAround(double position) const noexcept {
+double PerformerImpl::LoopAround(double position) const noexcept {
   return loop_length_ > 0.0
              ? loop_begin_position_ + std::fmod(position - loop_begin_position_, loop_length_)
              : loop_begin_position_;
 }
 
-void Performer::SetTaskActive(const std::set<std::pair<double, Task*>>::iterator& it,
-                              bool is_active) noexcept {
-  Task* task = it->second;
+void PerformerImpl::SetTaskActive(const std::set<std::pair<double, TaskImpl*>>::iterator& it,
+                                  bool is_active) noexcept {
+  TaskImpl* task = it->second;
   assert(!is_playing_ ||
          ((is_active && task->IsInside(position_)) || (!is_active && !task->IsInside(position_))));
   auto node = (is_active ? inactive_tasks_ : active_tasks_).extract(it);
@@ -273,16 +273,16 @@ void Performer::SetTaskActive(const std::set<std::pair<double, Task*>>::iterator
   task->SetActive(is_active);
 }
 
-void Performer::UpdateActiveTaskKey(double old_end_position, Task* task) noexcept {
+void PerformerImpl::UpdateActiveTaskKey(double old_end_position, TaskImpl* task) noexcept {
   auto node = active_tasks_.extract({old_end_position, task});
   node.value().first = task->GetEndPosition();
   active_tasks_.insert(std::move(node));
 }
 
-void Performer::UpdateInactiveTaskKey(double old_position, Task* task) noexcept {
+void PerformerImpl::UpdateInactiveTaskKey(double old_position, TaskImpl* task) noexcept {
   auto node = inactive_tasks_.extract({old_position, task});
   node.value().first = task->GetPosition();
   inactive_tasks_.insert(std::move(node));
 }
 
-}  // namespace barely::internal
+}  // namespace barely

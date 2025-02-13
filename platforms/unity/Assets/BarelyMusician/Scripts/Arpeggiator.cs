@@ -33,7 +33,7 @@ namespace Barely {
 
     /// True if playing, false otherwise.
     public bool IsPlaying {
-      get { return Musician.Internal.Arpeggiator_IsPlaying(_handle); }
+      get { return Engine.Internal.Arpeggiator_IsPlaying(_handle); }
     }
 
     /// Returns whether a note is on or not.
@@ -41,19 +41,19 @@ namespace Barely {
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
     public bool IsNoteOn(float pitch) {
-      return Musician.Internal.Arpeggiator_IsNoteOn(_handle, pitch);
+      return Engine.Internal.Arpeggiator_IsNoteOn(_handle, pitch);
     }
 
     /// Sets all notes off.
     public void SetAllNotesOff() {
-      Musician.Internal.Arpeggiator_SetAllNotesOff(_handle);
+      Engine.Internal.Arpeggiator_SetAllNotesOff(_handle);
     }
 
     /// Sets a note off.
     ///
     /// @param pitch Note pitch.
     public void SetNoteOff(float pitch) {
-      Musician.Internal.Arpeggiator_SetNoteOff(_handle, pitch);
+      Engine.Internal.Arpeggiator_SetNoteOff(_handle, pitch);
     }
 
     /// Sets a note on.
@@ -61,37 +61,37 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     public void SetNoteOn(float pitch) {
-      Musician.Internal.Arpeggiator_SetNoteOn(_handle, pitch);
+      Engine.Internal.Arpeggiator_SetNoteOn(_handle, pitch);
     }
 
     private void OnEnable() {
-      Musician.Internal.Component_Create(this, ref _handle);
+      Engine.Internal.Component_Create(this, ref _handle);
       _instrument = GetComponent<Instrument>();
       _instrument.OnInstrumentCreate += OnInstrumentCreate;
       _instrument.OnInstrumentDestroy += OnInstrumentDestroy;
-      Musician.Internal.Arpeggiator_SetInstrument(_handle, _instrument);
+      Engine.Internal.Arpeggiator_SetInstrument(_handle, _instrument);
       Update();
     }
 
     private void OnDisable() {
-      Musician.Internal.Component_Destroy(this, ref _handle);
+      Engine.Internal.Component_Destroy(this, ref _handle);
       _instrument.OnInstrumentCreate -= OnInstrumentCreate;
       _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
       _instrument = null;
     }
 
     private void Update() {
-      Musician.Internal.Arpeggiator_SetGateRatio(_handle, GateRatio);
-      Musician.Internal.Arpeggiator_SetRate(_handle, Rate);
-      Musician.Internal.Arpeggiator_SetStyle(_handle, Style);
+      Engine.Internal.Arpeggiator_SetGateRatio(_handle, GateRatio);
+      Engine.Internal.Arpeggiator_SetRate(_handle, Rate);
+      Engine.Internal.Arpeggiator_SetStyle(_handle, Style);
     }
 
     private void OnInstrumentCreate() {
-      Musician.Internal.Arpeggiator_SetInstrument(_handle, _instrument);
+      Engine.Internal.Arpeggiator_SetInstrument(_handle, _instrument);
     }
 
     private void OnInstrumentDestroy() {
-      Musician.Internal.Arpeggiator_SetInstrument(_handle, null);
+      Engine.Internal.Arpeggiator_SetInstrument(_handle, null);
     }
 
     // Current instrument.

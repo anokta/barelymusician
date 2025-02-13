@@ -5,15 +5,15 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// A representation of a musician that governs the tempo for all musical components.
-  public static class Musician {
+  /// A representation of an engine that governs all musical components.
+  public static class Engine {
     /// Reference frequency in hertz (C4 by default).
     public static float ReferenceFrequency {
       get { return _referenceFrequency; }
       set {
         if (_referenceFrequency != value) {
-          Internal.Musician_SetReferenceFrequency(value);
-          _referenceFrequency = Internal.Musician_GetReferenceFrequency();
+          Internal.Engine_SetReferenceFrequency(value);
+          _referenceFrequency = Internal.Engine_GetReferenceFrequency();
         }
       }
     }
@@ -24,8 +24,8 @@ namespace Barely {
       get { return _tempo; }
       set {
         if (_tempo != value) {
-          Internal.Musician_SetTempo(value);
-          _tempo = Internal.Musician_GetTempo();
+          Internal.Engine_SetTempo(value);
+          _tempo = Internal.Engine_GetTempo();
         }
       }
     }
@@ -33,7 +33,7 @@ namespace Barely {
 
     /// Timestamp in seconds.
     public static double Timestamp {
-      get { return Internal.Musician_GetTimestamp(); }
+      get { return Internal.Engine_GetTimestamp(); }
     }
 
     /// Schedules a task at a specific time.
@@ -41,7 +41,7 @@ namespace Barely {
     /// @param callback Task process callback.
     /// @param dspTime Time in seconds.
     public static void ScheduleTask(Action callback, double dspTime) {
-      Internal.Musician_ScheduleTask(callback, dspTime);
+      Internal.Engine_ScheduleTask(callback, dspTime);
     }
 
     /// Class that wraps the internal api.
@@ -136,6 +136,77 @@ namespace Barely {
           Debug.LogError("Failed to destroy component '" + component.name + "'");
         }
         componentHandle = IntPtr.Zero;
+      }
+
+      /// Returns the reference frequency of an engine.
+      ///
+      /// @return Reference frequency in hertz.
+      public static float Engine_GetReferenceFrequency() {
+        float referenceFrequency = 0.0f;
+        if (!BarelyEngine_GetReferenceFrequency(Handle, ref referenceFrequency) &&
+            _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get engine reference frequency");
+        }
+        return referenceFrequency;
+      }
+
+      /// Returns the tempo of an engine.
+      ///
+      /// @return Tempo in beats per minute.
+      public static double Engine_GetTempo() {
+        double tempo = 0.0;
+        if (!BarelyEngine_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get engine tempo");
+        }
+        return tempo;
+      }
+
+      /// Returns the timestamp of an engine.
+      ///
+      /// @return Timestamp in seconds.
+      public static double Engine_GetTimestamp() {
+        double timestamp = 0.0;
+        if (!BarelyEngine_GetTimestamp(Handle, ref timestamp) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get engine timestamp");
+        }
+        return timestamp;
+      }
+
+      /// Schedules a new engine task.
+      ///
+      /// @param callback Task process callback.
+      /// @param timestamp Task timestamp in seconds.
+      public static void Engine_ScheduleTask(Action callback, double timestamp) {
+        if (timestamp < Timestamp) {
+          Debug.LogError("Failed to create engine task at " + timestamp);
+          return;
+        }
+        List<Action> callbacks = null;
+        if (_scheduledTaskCallbacks != null &&
+            !_scheduledTaskCallbacks.TryGetValue(timestamp, out callbacks)) {
+          callbacks = new List<Action>();
+          _scheduledTaskCallbacks.Add(timestamp, callbacks);
+        }
+        callbacks?.Add(callback);
+      }
+
+      /// Sets the reference frequency of an engine.
+      ///
+      /// @param referenceFrequency Reference frequency in hertz.
+      public static void Engine_SetReferenceFrequency(float referenceFrequency) {
+        if (!BarelyEngine_SetReferenceFrequency(Handle, referenceFrequency) &&
+            _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set engine reference frequency");
+        }
+      }
+
+      /// Sets the tempo of an engine.
+      ///
+      /// @param tempo Tempo in beats per minute.
+      public static void Engine_SetTempo(double tempo) {
+        if (!BarelyEngine_SetTempo(Handle, tempo) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set engine tempo");
+        }
       }
 
       /// Creates a new instrument.
@@ -326,77 +397,6 @@ namespace Barely {
         if (!BarelyInstrument_SetSampleData(instrumentHandle, sampleDataSlices, slices.Count) &&
             instrumentHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set instrument sample data");
-        }
-      }
-
-      /// Returns the reference frequency of a musician.
-      ///
-      /// @return Reference frequency in hertz.
-      public static float Musician_GetReferenceFrequency() {
-        float referenceFrequency = 0.0f;
-        if (!BarelyMusician_GetReferenceFrequency(Handle, ref referenceFrequency) &&
-            _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get musician reference frequency");
-        }
-        return referenceFrequency;
-      }
-
-      /// Returns the tempo of a musician.
-      ///
-      /// @return Tempo in beats per minute.
-      public static double Musician_GetTempo() {
-        double tempo = 0.0;
-        if (!BarelyMusician_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get musician tempo");
-        }
-        return tempo;
-      }
-
-      /// Returns the timestamp of a musician.
-      ///
-      /// @return Timestamp in seconds.
-      public static double Musician_GetTimestamp() {
-        double timestamp = 0.0;
-        if (!BarelyMusician_GetTimestamp(Handle, ref timestamp) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get musician timestamp");
-        }
-        return timestamp;
-      }
-
-      /// Schedules a new musician task.
-      ///
-      /// @param callback Task process callback.
-      /// @param timestamp Task timestamp in seconds.
-      public static void Musician_ScheduleTask(Action callback, double timestamp) {
-        if (timestamp < Timestamp) {
-          Debug.LogError("Failed to create musician task at " + timestamp);
-          return;
-        }
-        List<Action> callbacks = null;
-        if (_scheduledTaskCallbacks != null &&
-            !_scheduledTaskCallbacks.TryGetValue(timestamp, out callbacks)) {
-          callbacks = new List<Action>();
-          _scheduledTaskCallbacks.Add(timestamp, callbacks);
-        }
-        callbacks?.Add(callback);
-      }
-
-      /// Sets the reference frequency of a musician.
-      ///
-      /// @param referenceFrequency Reference frequency in hertz.
-      public static void Musician_SetReferenceFrequency(float referenceFrequency) {
-        if (!BarelyMusician_SetReferenceFrequency(Handle, referenceFrequency) &&
-            _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set musician reference frequency");
-        }
-      }
-
-      /// Sets the tempo of a musician.
-      ///
-      /// @param tempo Tempo in beats per minute.
-      public static void Musician_SetTempo(double tempo) {
-        if (!BarelyMusician_SetTempo(Handle, tempo) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set musician tempo");
         }
       }
 
@@ -928,7 +928,7 @@ namespace Barely {
         public Int32 mode;
       }
 
-      // Singleton musician handle.
+      // Singleton engine handle.
       private static IntPtr Handle {
         get {
           if (_isShuttingDown) {
@@ -1026,39 +1026,39 @@ namespace Barely {
             if (taskTimestamp > nextTimestamp) {
               break;
             }
-            BarelyMusician_Update(_handle, taskTimestamp);
+            BarelyEngine_Update(_handle, taskTimestamp);
             var callbacks = _scheduledTaskCallbacks.ElementAt(0).Value;
             for (int i = 0; i < callbacks.Count; ++i) {
               callbacks[i]?.Invoke();
             }
             _scheduledTaskCallbacks.Remove(taskTimestamp);
           }
-          BarelyMusician_Update(_handle, nextTimestamp);
+          BarelyEngine_Update(_handle, nextTimestamp);
         }
 
         // Initializes the internal state.
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          if (!BarelyMusician_Create(config.sampleRate, ref _handle)) {
-            Debug.LogError("Failed to initialize BarelyMusician");
+          if (!BarelyEngine_Create(config.sampleRate, ref _handle)) {
+            Debug.LogError("Failed to initialize BarelyEngine");
             return;
           }
-          BarelyMusician_SetReferenceFrequency(_handle, _referenceFrequency);
-          BarelyMusician_SetTempo(_handle, _tempo);
+          BarelyEngine_SetReferenceFrequency(_handle, _referenceFrequency);
+          BarelyEngine_SetTempo(_handle, _tempo);
           _outputSamples = new float[config.dspBufferSize];
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<IntPtr, Instrument>();
           _performers = new Dictionary<IntPtr, Performer>();
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           _tasks = new Dictionary<IntPtr, Task>();
-          BarelyMusician_Update(_handle, GetNextTimestamp());
+          BarelyEngine_Update(_handle, GetNextTimestamp());
         }
 
         // Shuts down the internal state.
         private void Shutdown() {
           _isShuttingDown = true;
-          BarelyMusician_Destroy(_handle);
+          BarelyEngine_Destroy(_handle);
           _handle = IntPtr.Zero;
           _scheduledTaskCallbacks = null;
         }
@@ -1076,8 +1076,34 @@ namespace Barely {
       private const string _pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
+      private static extern bool BarelyEngine_Create(Int32 sampleRate, ref IntPtr outEngine);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
+      private static extern bool BarelyEngine_Destroy(IntPtr engine);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetReferenceFrequency")]
+      private static extern bool BarelyEngine_GetReferenceFrequency(
+          IntPtr engine, ref float outReferenceFrequency);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
+      private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTimestamp")]
+      private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetReferenceFrequency")]
+      private static extern bool BarelyEngine_SetReferenceFrequency(IntPtr engine,
+                                                                    float referenceFrequency);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
+      private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_Update")]
+      private static extern bool BarelyEngine_Update(IntPtr engine, double timestamp);
+
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Create")]
-      private static extern bool BarelyInstrument_Create(IntPtr musician, ref IntPtr outInstrument);
+      private static extern bool BarelyInstrument_Create(IntPtr engine, ref IntPtr outInstrument);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
@@ -1132,35 +1158,8 @@ namespace Barely {
                                                                 [In] SampleDataSlice[] slices,
                                                                 Int32 sliceCount);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_Create")]
-      private static extern bool BarelyMusician_Create(Int32 sampleRate, ref IntPtr outMusician);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_Destroy")]
-      private static extern bool BarelyMusician_Destroy(IntPtr musician);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_GetReferenceFrequency")]
-      private static extern bool BarelyMusician_GetReferenceFrequency(
-          IntPtr musician, ref float outReferenceFrequency);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_GetTempo")]
-      private static extern bool BarelyMusician_GetTempo(IntPtr musician, ref double outTempo);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_GetTimestamp")]
-      private static extern bool BarelyMusician_GetTimestamp(IntPtr musician,
-                                                             ref double outTimestamp);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_SetReferenceFrequency")]
-      private static extern bool BarelyMusician_SetReferenceFrequency(IntPtr musician,
-                                                                      float referenceFrequency);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_SetTempo")]
-      private static extern bool BarelyMusician_SetTempo(IntPtr musician, double tempo);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyMusician_Update")]
-      private static extern bool BarelyMusician_Update(IntPtr musician, double timestamp);
-
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Create")]
-      private static extern bool BarelyPerformer_Create(IntPtr musician, ref IntPtr outPerformer);
+      private static extern bool BarelyPerformer_Create(IntPtr engine, ref IntPtr outPerformer);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Destroy")]
       private static extern bool BarelyPerformer_Destroy(IntPtr performer);
@@ -1241,8 +1240,7 @@ namespace Barely {
 
       // Components.
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Create")]
-      private static extern bool BarelyArpeggiator_Create(IntPtr musician,
-                                                          ref IntPtr outArpeggiator);
+      private static extern bool BarelyArpeggiator_Create(IntPtr engine, ref IntPtr outArpeggiator);
 
       [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
       private static extern bool BarelyArpeggiator_Destroy(IntPtr arpeggiator);
@@ -1283,7 +1281,7 @@ namespace Barely {
       private static extern bool BarelyRepeater_Clear(IntPtr repeater);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Create")]
-      private static extern bool BarelyRepeater_Create(IntPtr musician, ref IntPtr outRepeater);
+      private static extern bool BarelyRepeater_Create(IntPtr engine, ref IntPtr outRepeater);
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Destroy")]
       private static extern bool BarelyRepeater_Destroy(IntPtr repeater);

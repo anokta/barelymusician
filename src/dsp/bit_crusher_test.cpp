@@ -6,7 +6,7 @@
 #include "barelymusician.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 // Test input.
@@ -50,4 +50,4 @@ TEST(BitCrusherTest, SampleRate) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

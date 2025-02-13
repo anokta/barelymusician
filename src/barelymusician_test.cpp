@@ -5,61 +5,61 @@
 namespace barely {
 namespace {
 
-TEST(BarelyMusicianTest, CreateDestroyMusician) {
+TEST(BarelyEngineTest, CreateDestroyEngine) {
   // Failures.
-  EXPECT_FALSE(BarelyMusician_Create(0, nullptr));
-  EXPECT_FALSE(BarelyMusician_Destroy(nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(0, nullptr));
+  EXPECT_FALSE(BarelyEngine_Destroy(nullptr));
 
   // Success.
-  BarelyMusicianHandle musician = nullptr;
-  EXPECT_TRUE(BarelyMusician_Create(1, &musician));
-  EXPECT_TRUE(BarelyMusician_Destroy(musician));
+  BarelyEngineHandle engine = nullptr;
+  EXPECT_TRUE(BarelyEngine_Create(1, &engine));
+  EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
-TEST(BarelyMusicianTest, CreateDestroyInstrument) {
-  BarelyMusicianHandle musician = nullptr;
-  ASSERT_TRUE(BarelyMusician_Create(1, &musician));
+TEST(BarelyEngineTest, CreateDestroyInstrument) {
+  BarelyEngineHandle engine = nullptr;
+  ASSERT_TRUE(BarelyEngine_Create(1, &engine));
 
   // Failures.
-  EXPECT_FALSE(BarelyInstrument_Create(musician, nullptr));
+  EXPECT_FALSE(BarelyInstrument_Create(engine, nullptr));
   EXPECT_FALSE(BarelyInstrument_Destroy(nullptr));
 
   // Success.
   BarelyInstrumentHandle instrument = nullptr;
-  EXPECT_TRUE(BarelyInstrument_Create(musician, &instrument));
+  EXPECT_TRUE(BarelyInstrument_Create(engine, &instrument));
   EXPECT_NE(instrument, nullptr);
 
   EXPECT_TRUE(BarelyInstrument_Destroy(instrument));
-  EXPECT_TRUE(BarelyMusician_Destroy(musician));
+  EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
-TEST(BarelyMusicianTest, CreateDestroyPerformer) {
-  BarelyMusicianHandle musician = nullptr;
-  ASSERT_TRUE(BarelyMusician_Create(1, &musician));
+TEST(BarelyEngineTest, CreateDestroyPerformer) {
+  BarelyEngineHandle engine = nullptr;
+  ASSERT_TRUE(BarelyEngine_Create(1, &engine));
 
   // Failures.
-  EXPECT_FALSE(BarelyPerformer_Create(musician, nullptr));
+  EXPECT_FALSE(BarelyPerformer_Create(engine, nullptr));
   EXPECT_FALSE(BarelyPerformer_Destroy(nullptr));
 
   // Success.
   BarelyPerformerHandle performer = nullptr;
-  EXPECT_TRUE(BarelyPerformer_Create(musician, &performer));
+  EXPECT_TRUE(BarelyPerformer_Create(engine, &performer));
   EXPECT_NE(performer, nullptr);
 
   EXPECT_TRUE(BarelyPerformer_Destroy(performer));
-  EXPECT_TRUE(BarelyMusician_Destroy(musician));
+  EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
-TEST(MusicianTest, CreateDestroyMusician) { [[maybe_unused]] const Musician musician(1); }
+TEST(EngineTest, CreateDestroyEngine) { [[maybe_unused]] const Engine engine(1); }
 
-TEST(MusicianTest, CreateDestroyInstrument) {
-  Musician musician(1);
-  [[maybe_unused]] const auto instrument = musician.CreateInstrument();
+TEST(EngineTest, CreateDestroyInstrument) {
+  Engine engine(1);
+  [[maybe_unused]] const auto instrument = engine.CreateInstrument();
 }
 
-TEST(MusicianTest, CreateDestroyPerformer) {
-  Musician musician(1);
-  [[maybe_unused]] const auto performer = musician.CreatePerformer();
+TEST(EngineTest, CreateDestroyPerformer) {
+  Engine engine(1);
+  [[maybe_unused]] const auto performer = engine.CreatePerformer();
 }
 
 }  // namespace

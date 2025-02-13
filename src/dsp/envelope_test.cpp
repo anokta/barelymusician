@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 constexpr int kSampleRate = 1000;
@@ -82,4 +82,4 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

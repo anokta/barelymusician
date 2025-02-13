@@ -6,7 +6,7 @@
 #include "dsp/sample_data.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 constexpr int kSampleRate = 1;
@@ -102,4 +102,4 @@ TEST(InstrumentProcessorTest, NoVoice) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

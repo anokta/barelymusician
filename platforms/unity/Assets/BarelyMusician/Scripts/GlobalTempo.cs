@@ -8,7 +8,7 @@ namespace Barely {
     public float Bpm = 120.0f;
 
     private void Update() {
-      Musician.Tempo = (double)Bpm;
+      Engine.Tempo = (double)Bpm;
     }
   }
 }  // namespace Barely

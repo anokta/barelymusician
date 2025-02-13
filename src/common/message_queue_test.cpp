@@ -1,6 +1,6 @@
-#include "engine/message_queue.h"
+#include "common/message_queue.h"
 
-#include "engine/message.h"
+#include "common/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -12,7 +12,7 @@ using ::testing::Pair;
 using ::testing::Pointee;
 using ::testing::VariantWith;
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 // Tests that adding a single message is queued as expected.
@@ -56,4 +56,4 @@ TEST(MessageQueueTest, AddMultipleMessages) {
 // TODO(#97): Add more tests with concurrency.
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

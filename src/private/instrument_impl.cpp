@@ -1,4 +1,4 @@
-#include "engine/instrument.h"
+#include "private/instrument_impl.h"
 
 #include <cassert>
 #include <cstdint>
@@ -8,42 +8,43 @@
 
 #include "barelymusician.h"
 #include "common/find_or_null.h"
+#include "common/message.h"
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/oscillator.h"
 #include "dsp/sample_data.h"
-#include "engine/message.h"
 
-namespace barely::internal {
+namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument::Instrument(int sample_rate, float reference_frequency, int64_t update_sample) noexcept
+InstrumentImpl::InstrumentImpl(int sample_rate, float reference_frequency,
+                               int64_t update_sample) noexcept
     : sample_rate_(sample_rate),
       update_sample_(update_sample),
       processor_(sample_rate, reference_frequency) {
   assert(sample_rate > 0);
 }
 
-Instrument::~Instrument() noexcept { SetAllNotesOff(); }
+InstrumentImpl::~InstrumentImpl() noexcept { SetAllNotesOff(); }
 
-float Instrument::GetControl(ControlType type) const noexcept {
+float InstrumentImpl::GetControl(ControlType type) const noexcept {
   return controls_[static_cast<int>(type)].value;
 }
 
-const float* Instrument::GetNoteControl(float pitch, NoteControlType type) const noexcept {
+const float* InstrumentImpl::GetNoteControl(float pitch, NoteControlType type) const noexcept {
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
     return &(*note_controls)[static_cast<int>(type)].value;
   }
   return nullptr;
 }
 
-int Instrument::GetSampleRate() const noexcept { return sample_rate_; }
+int InstrumentImpl::GetSampleRate() const noexcept { return sample_rate_; }
 
-bool Instrument::IsNoteOn(float pitch) const noexcept { return note_controls_.contains(pitch); }
+bool InstrumentImpl::IsNoteOn(float pitch) const noexcept { return note_controls_.contains(pitch); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Instrument::Process(std::span<float> output_samples, int64_t process_sample) noexcept {
+bool InstrumentImpl::Process(std::span<float> output_samples, int64_t process_sample) noexcept {
   if (output_samples.empty()) {
     return false;
   }
@@ -90,20 +91,20 @@ bool Instrument::Process(std::span<float> output_samples, int64_t process_sample
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetAllNotesOff() noexcept {
+void InstrumentImpl::SetAllNotesOff() noexcept {
   for (const auto& [pitch, _] : std::exchange(note_controls_, {})) {
     note_off_callback_(pitch);
     message_queue_.Add(update_sample_, NoteOffMessage{pitch});
   }
 }
 
-void Instrument::SetControl(ControlType type, float value) noexcept {
+void InstrumentImpl::SetControl(ControlType type, float value) noexcept {
   if (auto& control = controls_[static_cast<int>(type)]; control.SetValue(value)) {
     message_queue_.Add(update_sample_, BuildControlMessage(type, control.value));
   }
 }
 
-void Instrument::SetNoteControl(float pitch, NoteControlType type, float value) noexcept {
+void InstrumentImpl::SetNoteControl(float pitch, NoteControlType type, float value) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[static_cast<int>(type)];
         note_control.SetValue(value)) {
@@ -112,19 +113,19 @@ void Instrument::SetNoteControl(float pitch, NoteControlType type, float value) 
   }
 }
 
-void Instrument::SetNoteOff(float pitch) noexcept {
+void InstrumentImpl::SetNoteOff(float pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
     note_off_callback_(pitch);
     message_queue_.Add(update_sample_, NoteOffMessage{pitch});
   }
 }
 
-void Instrument::SetNoteOffCallback(NoteOffCallback callback) noexcept {
+void InstrumentImpl::SetNoteOffCallback(NoteOffCallback callback) noexcept {
   note_off_callback_ = callback;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(float pitch, float intensity) noexcept {
+void InstrumentImpl::SetNoteOn(float pitch, float intensity) noexcept {
   if (const auto [it, success] = note_controls_.try_emplace(pitch,
                                                             NoteControlArray{
                                                                 Control(0.0f),  // kPitchShift
@@ -135,24 +136,24 @@ void Instrument::SetNoteOn(float pitch, float intensity) noexcept {
   }
 }
 
-void Instrument::SetNoteOnCallback(NoteOnCallback callback) noexcept {
+void InstrumentImpl::SetNoteOnCallback(NoteOnCallback callback) noexcept {
   note_on_callback_ = callback;
 }
 
-void Instrument::SetReferenceFrequency(float reference_frequency) noexcept {
+void InstrumentImpl::SetReferenceFrequency(float reference_frequency) noexcept {
   message_queue_.Add(update_sample_, ReferenceFrequencyMessage{reference_frequency});
 }
 
-void Instrument::SetSampleData(SampleData sample_data) noexcept {
+void InstrumentImpl::SetSampleData(SampleData sample_data) noexcept {
   message_queue_.Add(update_sample_, SampleDataMessage{std::move(sample_data)});
 }
 
-void Instrument::Update(int64_t update_sample) noexcept {
+void InstrumentImpl::Update(int64_t update_sample) noexcept {
   assert(update_sample >= update_sample_);
   update_sample_ = update_sample;
 }
 
-ControlMessage Instrument::BuildControlMessage(ControlType type, float value) const noexcept {
+ControlMessage InstrumentImpl::BuildControlMessage(ControlType type, float value) const noexcept {
   switch (type) {
     case ControlType::kGain:
       return ControlMessage{type, AmplitudeFromDecibels(value)};
@@ -166,4 +167,4 @@ ControlMessage Instrument::BuildControlMessage(ControlType type, float value) co
   return ControlMessage{type, value};
 }
 
-}  // namespace barely::internal
+}  // namespace barely

@@ -4,29 +4,88 @@
 #include <cstdint>
 #include <span>
 
-#include "engine/instrument.h"
-#include "engine/musician.h"
-#include "engine/performer.h"
+#include "private/engine_impl.h"
+#include "private/instrument_impl.h"
+#include "private/performer_impl.h"
 
 using ::barely::ControlType;
 using ::barely::NoteControlType;
 using ::barely::SampleDataSlice;
 
-bool BarelyInstrument_Create(BarelyMusicianHandle musician,
-                             BarelyInstrumentHandle* out_instrument) {
-  if (!musician) return false;
+bool BarelyEngine_Create(int32_t sample_rate, BarelyEngineHandle* out_engine) {
+  if (sample_rate <= 0) return false;
+  if (!out_engine) return false;
+
+  *out_engine = new BarelyEngine(sample_rate);
+  return true;
+}
+
+bool BarelyEngine_Destroy(BarelyEngineHandle engine) {
+  if (!engine) return false;
+
+  delete engine;
+  return true;
+}
+
+bool BarelyEngine_GetReferenceFrequency(BarelyEngineHandle engine, float* out_reference_frequency) {
+  if (!engine) return false;
+  if (!out_reference_frequency) return false;
+
+  *out_reference_frequency = engine->GetReferenceFrequency();
+  return true;
+}
+
+bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo) {
+  if (!engine) return false;
+  if (!out_tempo) return false;
+
+  *out_tempo = engine->GetTempo();
+  return true;
+}
+
+bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp) {
+  if (!engine) return false;
+  if (!out_timestamp) return false;
+
+  *out_timestamp = engine->GetTimestamp();
+  return true;
+}
+
+bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine, float reference_frequency) {
+  if (!engine) return false;
+
+  engine->SetReferenceFrequency(reference_frequency);
+  return true;
+}
+
+bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo) {
+  if (!engine) return false;
+
+  engine->SetTempo(tempo);
+  return true;
+}
+
+bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp) {
+  if (!engine) return false;
+
+  engine->Update(timestamp);
+  return true;
+}
+
+bool BarelyInstrument_Create(BarelyEngineHandle engine, BarelyInstrumentHandle* out_instrument) {
+  if (!engine) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = static_cast<BarelyInstrument*>(musician->CreateInstrument());
+  *out_instrument = static_cast<BarelyInstrument*>(engine->CreateInstrument());
   // TODO(#126): Temp hack to allow destroying by handle.
-  (*out_instrument)->musician = musician;
+  (*out_instrument)->engine = engine;
   return true;
 }
 
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  instrument->musician->DestroyInstrument(instrument);
+  instrument->engine->DestroyInstrument(instrument);
   return true;
 }
 
@@ -139,81 +198,19 @@ bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
   return true;
 }
 
-bool BarelyMusician_Create(int32_t sample_rate, BarelyMusicianHandle* out_musician) {
-  if (sample_rate <= 0) return false;
-  if (!out_musician) return false;
-
-  *out_musician = new BarelyMusician(sample_rate);
-  return true;
-}
-
-bool BarelyMusician_Destroy(BarelyMusicianHandle musician) {
-  if (!musician) return false;
-
-  delete musician;
-  return true;
-}
-
-bool BarelyMusician_GetReferenceFrequency(BarelyMusicianHandle musician,
-                                          float* out_reference_frequency) {
-  if (!musician) return false;
-  if (!out_reference_frequency) return false;
-
-  *out_reference_frequency = musician->GetReferenceFrequency();
-  return true;
-}
-
-bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo) {
-  if (!musician) return false;
-  if (!out_tempo) return false;
-
-  *out_tempo = musician->GetTempo();
-  return true;
-}
-
-bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, double* out_timestamp) {
-  if (!musician) return false;
-  if (!out_timestamp) return false;
-
-  *out_timestamp = musician->GetTimestamp();
-  return true;
-}
-
-bool BarelyMusician_SetReferenceFrequency(BarelyMusicianHandle musician,
-                                          float reference_frequency) {
-  if (!musician) return false;
-
-  musician->SetReferenceFrequency(reference_frequency);
-  return true;
-}
-
-bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo) {
-  if (!musician) return false;
-
-  musician->SetTempo(tempo);
-  return true;
-}
-
-bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
-  if (!musician) return false;
-
-  musician->Update(timestamp);
-  return true;
-}
-
-bool BarelyPerformer_Create(BarelyMusicianHandle musician, BarelyPerformerHandle* out_performer) {
-  if (!musician) return false;
+bool BarelyPerformer_Create(BarelyEngineHandle engine, BarelyPerformerHandle* out_performer) {
+  if (!engine) return false;
   if (!out_performer) return false;
 
-  *out_performer = static_cast<BarelyPerformer*>(musician->CreatePerformer());
-  (*out_performer)->musician = musician;
+  *out_performer = static_cast<BarelyPerformer*>(engine->CreatePerformer());
+  (*out_performer)->engine = engine;
   return true;
 }
 
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  performer->musician->DestroyPerformer(performer);
+  performer->engine->DestroyPerformer(performer);
   return true;
 }
 

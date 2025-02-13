@@ -1,23 +1,23 @@
-#include "components/arpeggiator.h"
+#include "private/arpeggiator_impl.h"
 
 #include <algorithm>
 #include <cassert>
 
 #include "barelycomposer.h"
 #include "barelymusician.h"
-#include "engine/instrument.h"
-#include "engine/musician.h"
+#include "private/engine_impl.h"
+#include "private/instrument_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Arpeggiator::Arpeggiator(Musician& musician) noexcept
-    : musician_(&musician), performer_(musician_->CreatePerformer()) {
+ArpeggiatorImpl::ArpeggiatorImpl(EngineImpl& engine) noexcept
+    : engine_(&engine), performer_(engine_->CreatePerformer()) {
   performer_->SetLooping(true);
   performer_->SetLoopLength(1.0);
   task_ = performer_->CreateTask(0.0, 1.0,
                                  {[](BarelyTaskState state, void* user_data) {
-                                    auto& arpeggiator = *static_cast<Arpeggiator*>(user_data);
+                                    auto& arpeggiator = *static_cast<ArpeggiatorImpl*>(user_data);
                                     if (state == BarelyTaskState_kBegin) {
                                       arpeggiator.Update();
                                       arpeggiator.SetNextNoteOn();
@@ -28,27 +28,27 @@ Arpeggiator::Arpeggiator(Musician& musician) noexcept
                                   this});
 }
 
-Arpeggiator::~Arpeggiator() noexcept { musician_->DestroyPerformer(performer_); }
+ArpeggiatorImpl::~ArpeggiatorImpl() noexcept { engine_->DestroyPerformer(performer_); }
 
-bool Arpeggiator::IsNoteOn(float pitch) const noexcept {
+bool ArpeggiatorImpl::IsNoteOn(float pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();
 }
 
-bool Arpeggiator::IsPlaying() const noexcept { return performer_->IsPlaying(); }
+bool ArpeggiatorImpl::IsPlaying() const noexcept { return performer_->IsPlaying(); }
 
-void Arpeggiator::SetAllNotesOff() noexcept {
+void ArpeggiatorImpl::SetAllNotesOff() noexcept {
   if (!pitches_.empty()) {
     pitches_.clear();
     Stop();
   }
 }
 
-void Arpeggiator::SetGateRatio(float gate_ratio) noexcept {
+void ArpeggiatorImpl::SetGateRatio(float gate_ratio) noexcept {
   gate_ratio_ = std::clamp(gate_ratio, 0.0f, 1.0f);
   task_->SetDuration(gate_ratio_ * performer_->GetLoopLength());
 }
 
-void Arpeggiator::SetInstrument(Instrument* instrument) noexcept {
+void ArpeggiatorImpl::SetInstrument(InstrumentImpl* instrument) noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
@@ -56,7 +56,7 @@ void Arpeggiator::SetInstrument(Instrument* instrument) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Arpeggiator::SetNoteOff(float pitch) noexcept {
+void ArpeggiatorImpl::SetNoteOff(float pitch) noexcept {
   if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch); it != pitches_.end()) {
     pitches_.erase(it);
     if (pitches_.empty() && IsPlaying()) {
@@ -66,7 +66,7 @@ void Arpeggiator::SetNoteOff(float pitch) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Arpeggiator::SetNoteOn(float pitch) noexcept {
+void ArpeggiatorImpl::SetNoteOn(float pitch) noexcept {
   if (const auto it = std::lower_bound(pitches_.begin(), pitches_.end(), pitch);
       it == pitches_.end() || *it != pitch) {
     pitches_.insert(it, pitch);
@@ -76,34 +76,34 @@ void Arpeggiator::SetNoteOn(float pitch) noexcept {
   }
 }
 
-void Arpeggiator::SetRate(double rate) noexcept {
+void ArpeggiatorImpl::SetRate(double rate) noexcept {
   const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
   performer_->SetLoopLength(length);
   task_->SetDuration(gate_ratio_ * performer_->GetLoopLength());
 }
 
-void Arpeggiator::SetStyle(ArpeggiatorStyle style) noexcept { style_ = style; }
+void ArpeggiatorImpl::SetStyle(ArpeggiatorStyle style) noexcept { style_ = style; }
 
-void Arpeggiator::SetNextNoteOff() noexcept {
+void ArpeggiatorImpl::SetNextNoteOff() noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetNoteOff(pitch_);
   }
 }
 
-void Arpeggiator::SetNextNoteOn() noexcept {
+void ArpeggiatorImpl::SetNextNoteOn() noexcept {
   if (instrument_ != nullptr) {
     static constexpr float kNoteIntensity = 1.0f;
     instrument_->SetNoteOn(pitch_, kNoteIntensity);
   }
 }
 
-void Arpeggiator::Stop() noexcept {
+void ArpeggiatorImpl::Stop() noexcept {
   performer_->Stop();
   performer_->SetPosition(0.0);
   index_ = -1;
 }
 
-void Arpeggiator::Update() noexcept {
+void ArpeggiatorImpl::Update() noexcept {
   const int size = static_cast<int>(pitches_.size());
   switch (style_) {
     case ArpeggiatorStyle::kUp:
@@ -123,4 +123,4 @@ void Arpeggiator::Update() noexcept {
   pitch_ = pitches_[index_];
 }
 
-}  // namespace barely::internal
+}  // namespace barely

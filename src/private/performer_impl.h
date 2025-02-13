@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_PERFORMER_H_
-#define BARELYMUSICIAN_ENGINE_PERFORMER_H_
+#ifndef BARELYMUSICIAN_PRIVATE_PERFORMER_IMPL_H_
+#define BARELYMUSICIAN_PRIVATE_PERFORMER_IMPL_H_
 
 #include <cassert>
 #include <compare>
@@ -10,29 +10,30 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "engine/callback.h"
+#include "common/callback.h"
 
-namespace barely::internal {
+namespace barely {
 
-/// Class that wraps a performer.
-class Performer {
+/// Class that implements a performer.
+class PerformerImpl {
  public:
   /// Beat callback alias.
   using BeatCallback = Callback<BarelyPerformer_BeatCallback>;
 
-  /// Task.
-  class Task {
+  /// TaskImpl.
+  class TaskImpl {
    public:
     /// Process callback alias.
     using ProcessCallback = Callback<BarelyTask_ProcessCallback>;
 
-    /// Constructs a new `Task`.
+    /// Constructs a new `TaskImpl`.
     ///
-    /// @param performer Performer.
-    /// @param position Task position.
-    /// @param duration Task duration.
-    /// @param callback Task process callback.
-    Task(Performer& performer, double position, double duration, ProcessCallback callback) noexcept
+    /// @param performer PerformerImpl.
+    /// @param position TaskImpl position.
+    /// @param duration TaskImpl duration.
+    /// @param callback TaskImpl process callback.
+    TaskImpl(PerformerImpl& performer, double position, double duration,
+             ProcessCallback callback) noexcept
         : performer_(performer),
           position_(position),
           duration_(duration),
@@ -70,7 +71,7 @@ class Performer {
 
     /// Processes the task.
     ///
-    /// @param state Task state.
+    /// @param state TaskImpl state.
     void Process(TaskState state) noexcept {
       process_callback_(static_cast<BarelyTaskState>(state));
     }
@@ -95,12 +96,12 @@ class Performer {
 
     /// Sets the process callback.
     ///
-    /// @param callback Task process callback.
+    /// @param callback TaskImpl process callback.
     void SetProcessCallback(ProcessCallback callback) noexcept;
 
    private:
-    // Performer.
-    Performer& performer_;
+    // PerformerImpl.
+    PerformerImpl& performer_;
 
     // Position in beats.
     double position_;
@@ -121,17 +122,18 @@ class Performer {
 
   /// Creates a new task.
   ///
-  /// @param position Task position in beats.
-  /// @param duration Task duration in beats.
-  /// @param callback Task process callback.
+  /// @param position TaskImpl position in beats.
+  /// @param duration TaskImpl duration in beats.
+  /// @param callback TaskImpl process callback.
   /// @return Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Task* CreateTask(double position, double duration, Task::ProcessCallback callback) noexcept;
+  TaskImpl* CreateTask(double position, double duration,
+                       TaskImpl::ProcessCallback callback) noexcept;
 
   /// Destroys a task.
   ///
   /// @param task Pointer to task.
-  void DestroyTask(Task* task) noexcept;
+  void DestroyTask(TaskImpl* task) noexcept;
 
   /// Returns loop begin position.
   ///
@@ -203,13 +205,13 @@ class Performer {
   ///
   /// @param task Pointer to task.
   /// @param old_duration Old task duration.
-  void SetTaskDuration(Task* task, double old_duration) noexcept;
+  void SetTaskDuration(TaskImpl* task, double old_duration) noexcept;
 
   /// Sets task position.
   ///
   /// @param task Pointer to task.
   /// @param old_position Old task position.
-  void SetTaskPosition(Task* task, double old_position) noexcept;
+  void SetTaskPosition(TaskImpl* task, double old_position) noexcept;
 
   /// Stops performer.
   void Start() noexcept;
@@ -225,21 +227,21 @@ class Performer {
 
  private:
   //  Returns an iterator to the next inactive task to process.
-  [[nodiscard]] std::set<std::pair<double, Task*>>::const_iterator GetNextInactiveTask()
+  [[nodiscard]] std::set<std::pair<double, TaskImpl*>>::const_iterator GetNextInactiveTask()
       const noexcept;
 
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
 
   /// Sets the active status of a task.
-  void SetTaskActive(const std::set<std::pair<double, Task*>>::iterator& it,
+  void SetTaskActive(const std::set<std::pair<double, TaskImpl*>>::iterator& it,
                      bool is_active) noexcept;
 
   /// Updates the key of an active task.
-  void UpdateActiveTaskKey(double old_end_position, Task* task) noexcept;
+  void UpdateActiveTaskKey(double old_end_position, TaskImpl* task) noexcept;
 
   /// Updates the key of an inactive task.
-  void UpdateInactiveTaskKey(double old_position, Task* task) noexcept;
+  void UpdateInactiveTaskKey(double old_position, TaskImpl* task) noexcept;
 
   // Beat callback.
   BeatCallback beat_callback_ = {};
@@ -260,23 +262,23 @@ class Performer {
   double position_ = 0.0;
 
   // Map of tasks with their position-pointer pairs.
-  std::unordered_map<Task*, std::unique_ptr<Task>> tasks_;
-  std::set<std::pair<double, Task*>> active_tasks_;
-  std::set<std::pair<double, Task*>> inactive_tasks_;
+  std::unordered_map<TaskImpl*, std::unique_ptr<TaskImpl>> tasks_;
+  std::set<std::pair<double, TaskImpl*>> active_tasks_;
+  std::set<std::pair<double, TaskImpl*>> inactive_tasks_;
 
   std::optional<double> last_beat_position_ = std::nullopt;
 
   // TODO(#126): Temp hack to allow destroying by handle.
  public:
-  BarelyMusicianHandle musician = nullptr;
+  BarelyEngineHandle engine = nullptr;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
-struct BarelyPerformer : public barely::internal::Performer {};
-static_assert(sizeof(BarelyPerformer) == sizeof(barely::internal::Performer));
+struct BarelyPerformer : public barely::PerformerImpl {};
+static_assert(sizeof(BarelyPerformer) == sizeof(barely::PerformerImpl));
 
-struct BarelyTask : public barely::internal::Performer::Task {};
-static_assert(sizeof(BarelyTask) == sizeof(barely::internal::Performer::Task));
+struct BarelyTask : public barely::PerformerImpl::TaskImpl {};
+static_assert(sizeof(BarelyTask) == sizeof(barely::PerformerImpl::TaskImpl));
 
-#endif  // BARELYMUSICIAN_ENGINE_PERFORMER_H_
+#endif  // BARELYMUSICIAN_PRIVATE_PERFORMER_IMPL_H_

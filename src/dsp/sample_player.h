@@ -6,7 +6,7 @@
 
 #include "barelymusician.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Sample player that generates output samples from a sample data slice.
 class SamplePlayer {
@@ -75,6 +75,6 @@ class SamplePlayer {
   float increment_ = 0.0f;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_

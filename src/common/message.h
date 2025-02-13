@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_H_
-#define BARELYMUSICIAN_ENGINE_MESSAGE_H_
+#ifndef BARELYMUSICIAN_COMMON_MESSAGE_H_
+#define BARELYMUSICIAN_COMMON_MESSAGE_H_
 
 #include <cstddef>
 #include <optional>
@@ -9,7 +9,7 @@
 #include "barelymusician.h"
 #include "dsp/sample_data.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Control message.
 struct ControlMessage {
@@ -71,6 +71,6 @@ struct MessageVisitor : MessageTypes... {
 template <typename... MessageTypes>
 MessageVisitor(MessageTypes...) -> MessageVisitor<MessageTypes...>;
 
-}  // namespace barely::internal
+}  // namespace barely
 
-#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_H_
+#endif  // BARELYMUSICIAN_COMMON_MESSAGE_H_

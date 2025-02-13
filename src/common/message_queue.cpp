@@ -1,11 +1,11 @@
-#include "engine/message_queue.h"
+#include "common/message_queue.h"
 
 #include <cstdint>
 #include <utility>
 
-#include "engine/message.h"
+#include "common/message.h"
 
-namespace barely::internal {
+namespace barely {
 
 bool MessageQueue::Add(int64_t message_sample, Message message) noexcept {
   const int index = write_index_;
@@ -27,4 +27,4 @@ std::pair<int64_t, Message>* MessageQueue::GetNext(int64_t end_sample) noexcept 
   return &messages_[index];
 }
 
-}  // namespace barely::internal
+}  // namespace barely

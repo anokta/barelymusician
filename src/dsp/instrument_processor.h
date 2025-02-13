@@ -8,7 +8,7 @@
 #include "dsp/sample_data.h"
 #include "dsp/voice.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Class that wraps the audio processing of an instrument.
 class InstrumentProcessor {
@@ -119,6 +119,6 @@ class InstrumentProcessor {
   float reference_frequency_ = 0.0f;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_

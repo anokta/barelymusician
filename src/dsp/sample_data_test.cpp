@@ -6,7 +6,7 @@
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 using ::testing::Field;
@@ -31,4 +31,4 @@ TEST(SampleDataTest, Select) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

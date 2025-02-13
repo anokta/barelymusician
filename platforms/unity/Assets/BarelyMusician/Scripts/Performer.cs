@@ -17,8 +17,8 @@ namespace Barely {
           _loop = value;
           return;
         }
-        Musician.Internal.Performer_SetLooping(_handle, value);
-        _loop = Musician.Internal.Performer_IsLooping(_handle);
+        Engine.Internal.Performer_SetLooping(_handle, value);
+        _loop = Engine.Internal.Performer_IsLooping(_handle);
       }
     }
     [SerializeField]
@@ -32,8 +32,8 @@ namespace Barely {
           _loopBeginPosition = value;
           return;
         }
-        Musician.Internal.Performer_SetLoopBeginPosition(_handle, value);
-        _loopBeginPosition = Musician.Internal.Performer_GetLoopBeginPosition(_handle);
+        Engine.Internal.Performer_SetLoopBeginPosition(_handle, value);
+        _loopBeginPosition = Engine.Internal.Performer_GetLoopBeginPosition(_handle);
       }
     }
     [SerializeField]
@@ -47,8 +47,8 @@ namespace Barely {
           _loopLength = value;
           return;
         }
-        Musician.Internal.Performer_SetLoopLength(_handle, value);
-        _loopLength = Musician.Internal.Performer_GetLoopLength(_handle);
+        Engine.Internal.Performer_SetLoopLength(_handle, value);
+        _loopLength = Engine.Internal.Performer_GetLoopLength(_handle);
       }
     }
     [SerializeField]
@@ -68,25 +68,25 @@ namespace Barely {
 
     /// True if playing, false otherwise.
     public bool IsPlaying {
-      get { return Musician.Internal.Performer_IsPlaying(_handle); }
+      get { return Engine.Internal.Performer_IsPlaying(_handle); }
     }
 
     /// Position in beats.
     public double Position {
-      get { return Musician.Internal.Performer_GetPosition(_handle); }
-      set { Musician.Internal.Performer_SetPosition(_handle, value); }
+      get { return Engine.Internal.Performer_GetPosition(_handle); }
+      set { Engine.Internal.Performer_SetPosition(_handle, value); }
     }
 
     /// Starts the performer.
     public void Play() {
       _playOnEnable = (_handle == IntPtr.Zero);
-      Musician.Internal.Performer_Start(_handle);
+      Engine.Internal.Performer_Start(_handle);
     }
 
     /// Stops the performer.
     public void Stop() {
       _playOnEnable = false;
-      Musician.Internal.Performer_Stop(_handle);
+      Engine.Internal.Performer_Stop(_handle);
     }
 
     /// Class that wraps the internal api.
@@ -107,7 +107,7 @@ namespace Barely {
     private IntPtr _handle = IntPtr.Zero;
 
     private void OnEnable() {
-      Musician.Internal.Performer_Create(this, ref _handle);
+      Engine.Internal.Performer_Create(this, ref _handle);
       Update();
       if (PlayOnAwake || _playOnEnable) {
         Play();
@@ -124,7 +124,7 @@ namespace Barely {
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(null);
       }
-      Musician.Internal.Performer_Destroy(ref _handle);
+      Engine.Internal.Performer_Destroy(ref _handle);
     }
 
     private void Update() {

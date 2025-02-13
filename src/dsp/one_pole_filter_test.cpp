@@ -6,7 +6,7 @@
 #include "barelymusician.h"
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 // Test input (single impulse).
@@ -72,4 +72,4 @@ TEST(OnePoleFilterTest, GetFilterCoefficient) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

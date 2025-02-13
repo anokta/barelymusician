@@ -1,0 +1,133 @@
+add_library(
+  barelymusician_private_arpeggiator_impl
+  arpeggiator_impl.cpp
+  arpeggiator_impl.h
+)
+target_link_libraries(
+  barelymusician_private_arpeggiator_impl
+  barelymusician_private_engine_impl
+  barelymusician_private_instrument_impl
+  barelymusician_private_performer_impl
+  barelymusician_private_random_impl
+  barelycomposer_headeronly
+  barelymusician_headeronly
+)
+
+add_library(
+  barelymusician_private_engine_impl
+  engine_impl.cpp
+  engine_impl.h
+)
+target_link_libraries(
+  barelymusician_private_engine_impl
+  barelymusician_private_instrument_impl
+  barelymusician_private_performer_impl
+  barelymusician_headeronly
+)
+
+add_library(
+  barelymusician_private_instrument_impl
+  instrument_impl.cpp
+  instrument_impl.h
+)
+target_link_libraries(
+  barelymusician_private_instrument_impl
+  barelymusician_common_callback
+  barelymusician_common_find_or_null
+  barelymusician_common_message
+  barelymusician_common_message_queue
+  barelymusician_dsp_decibels
+  barelymusician_dsp_instrument_processor
+  barelymusician_dsp_one_pole_filter
+  barelymusician_dsp_oscillator
+  barelymusician_dsp_sample_data
+  barelymusician_headeronly
+)
+
+add_library(
+  barelymusician_private_performer_impl
+  performer_impl.cpp
+  performer_impl.h
+)
+target_link_libraries(
+  barelymusician_private_performer_impl
+  barelymusician_common_callback
+  barelymusician_headeronly
+)
+
+add_library(
+  barelymusician_private_random_impl
+  random_impl.cpp
+  random_impl.h
+)
+
+add_library(
+  barelymusician_private_repeater_impl
+  repeater_impl.cpp
+  repeater_impl.h
+)
+target_link_libraries(
+  barelymusician_private_repeater_impl
+  barelymusician_private_random_impl
+  barelymusician_private_engine_impl
+  barelymusician_private_instrument_impl
+  barelymusician_private_performer_impl
+  barelycomposer_headeronly
+  barelymusician_headeronly
+)
+
+if(ENABLE_TESTS)
+  add_executable(
+    barelymusician_private_engine_impl_test
+    engine_impl_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_private_engine_impl_test
+    barelymusician_private_engine_impl
+    barelymusician_private_instrument_impl
+    barelymusician_private_performer_impl
+    barelymusician_headeronly
+    gmock
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_private_engine_impl_test)
+
+  add_executable(
+    barelymusician_private_instrument_impl_test
+    instrument_impl_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_private_instrument_impl_test
+    barelymusician_private_instrument_impl
+    barelymusician_dsp_decibels
+    barelymusician_dsp_sample_data
+    barelymusician_headeronly
+    gmock
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_private_instrument_impl_test)
+
+  add_executable(
+    barelymusician_private_performer_impl_test
+    performer_impl_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_private_performer_impl_test
+    barelymusician_private_performer_impl
+    barelymusician_headeronly
+    gmock
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_private_performer_impl_test)
+
+  add_executable(
+    barelymusician_private_random_impl_test
+    random_impl_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_private_random_impl_test
+    barelymusician_private_random_impl
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_private_random_impl_test)
+endif()

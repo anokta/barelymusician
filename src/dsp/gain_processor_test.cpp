@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 TEST(GainProcessorTest, ProcessConstantGain) {
@@ -104,4 +104,4 @@ TEST(GainProcessorTest, ProcessSetGain) {
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

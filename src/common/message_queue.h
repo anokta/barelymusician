@@ -1,14 +1,14 @@
-#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_
-#define BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_
+#ifndef BARELYMUSICIAN_COMMON_MESSAGE_QUEUE_H_
+#define BARELYMUSICIAN_COMMON_MESSAGE_QUEUE_H_
 
 #include <array>
 #include <atomic>
 #include <cstdint>
 #include <utility>
 
-#include "engine/message.h"
+#include "common/message.h"
 
-namespace barely::internal {
+namespace barely {
 
 /// Single-consumer single-producer message queue.
 class MessageQueue {
@@ -40,6 +40,6 @@ class MessageQueue {
   std::atomic<int> write_index_ = 0;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
-#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_
+#endif  // BARELYMUSICIAN_COMMON_MESSAGE_QUEUE_H_

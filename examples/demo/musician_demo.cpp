@@ -25,8 +25,8 @@
 namespace {
 
 using ::barely::ControlType;
+using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::Musician;
 using ::barely::OscillatorShape;
 using ::barely::Performer;
 using ::barely::Random;
@@ -213,8 +213,8 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
-  Musician musician(kSampleRate);
-  musician.SetTempo(kTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kTempo);
 
   // Note on callback.
   const auto set_note_callbacks_fn = [&](size_t index, Instrument& instrument) {
@@ -234,7 +234,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_instrument_fn = [&](OscillatorShape type, float gain, float attack,
                                        float release) {
-    instruments.emplace_back(musician.CreateInstrument());
+    instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
     instrument.SetControl(ControlType::kOscillatorShape, type);
@@ -253,11 +253,11 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   build_instrument_fn(OscillatorShape::kSine, -25.0f, 0.125f, 0.125f);
-  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
+  performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
   build_instrument_fn(OscillatorShape::kNoise, -40.0f, 0.5f, 0.025f);
-  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
+  performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
   const auto line_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
@@ -267,7 +267,7 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   build_instrument_fn(OscillatorShape::kSaw, -24.0f, 0.0025f, 0.125f);
-  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
+  performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           line_beat_composer_callback, instruments.size() - 1);
 
   const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
@@ -277,11 +277,11 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   build_instrument_fn(OscillatorShape::kSquare, -24.0f, 0.05f, 0.05f);
-  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
+  performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           line_2_beat_composer_callback, instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.emplace_back(musician.CreateInstrument());
+  instruments.emplace_back(engine.CreateInstrument());
   auto& percussion = instruments.back();
   percussion.SetControl(ControlType::kGain, -18.0f);
   percussion.SetControl(ControlType::kAttack, 0.0f);
@@ -313,7 +313,7 @@ int main(int /*argc*/, char* argv[]) {
         ComposeDrums(bar, beat, beat_count, random, instrument, performer, tasks);
       };
 
-  performers.emplace_back(musician.CreatePerformer(), std::vector<Task>{},
+  performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           percussion_beat_composer_callback, instruments.size() - 1);
 
   // Bar callback.
@@ -322,7 +322,7 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   // Beat callback.
-  auto metronome = musician.CreatePerformer();
+  auto metronome = engine.CreatePerformer();
   int harmonic = 0;
   metronome.SetBeatCallback([&]() {
     // Update transport.
@@ -385,15 +385,15 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        musician.SetTempo(random.DrawUniform(0.5, 0.75) * musician.GetTempo());
-        ConsoleLog() << "Tempo changed to " << musician.GetTempo();
+        engine.SetTempo(random.DrawUniform(0.5, 0.75) * engine.GetTempo());
+        ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case '2':
-        musician.SetTempo(random.DrawUniform(1.5, 2.0) * musician.GetTempo());
-        ConsoleLog() << "Tempo changed to " << musician.GetTempo();
+        engine.SetTempo(random.DrawUniform(1.5, 2.0) * engine.GetTempo());
+        ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case 'R':
-        musician.SetTempo(kTempo);
+        engine.SetTempo(kTempo);
         ConsoleLog() << "Tempo reset to " << kTempo;
         break;
       case 'D':
@@ -433,7 +433,7 @@ int main(int /*argc*/, char* argv[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
-  musician.Update(kLookahead);
+  engine.Update(kLookahead);
   for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
     performer.Start();
   }
@@ -441,7 +441,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(clock.GetTimestamp() + kLookahead);
+    engine.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

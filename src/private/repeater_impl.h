@@ -1,37 +1,37 @@
-#ifndef BARELYMUSICIAN_COMPONENTS_REPEATER_H_
-#define BARELYMUSICIAN_COMPONENTS_REPEATER_H_
+#ifndef BARELYMUSICIAN_PRIVATE_REPEATER_H_
+#define BARELYMUSICIAN_PRIVATE_REPEATER_H_
 
 #include <optional>
 #include <utility>
 #include <vector>
 
 #include "barelycomposer.h"
-#include "common/random.h"
-#include "engine/instrument.h"
-#include "engine/musician.h"
-#include "engine/performer.h"
+#include "private/engine_impl.h"
+#include "private/instrument_impl.h"
+#include "private/performer_impl.h"
+#include "private/random_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
-/// Class that wraps a repeater.
-class Repeater {
+/// Class that implements a repeater.
+class RepeaterImpl {
  public:
-  // Constructs a new `Repeater`.
+  // Constructs a new `RepeaterImpl`.
   ///
-  /// @param musician Musician.
+  /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Repeater(Musician& musician) noexcept;
+  explicit RepeaterImpl(EngineImpl& engine) noexcept;
 
-  /// Destroys `Repeater`.
-  ~Repeater() noexcept;
+  /// Destroys `RepeaterImpl`.
+  ~RepeaterImpl() noexcept;
 
   /// Non-copyable.
-  Repeater(const Repeater& other) noexcept = delete;
-  Repeater& operator=(const Repeater& other) noexcept = delete;
+  RepeaterImpl(const RepeaterImpl& other) noexcept = delete;
+  RepeaterImpl& operator=(const RepeaterImpl& other) noexcept = delete;
 
   /// Movable.
-  Repeater(Repeater&& other) noexcept = delete;
-  Repeater& operator=(Repeater&& other) noexcept = delete;
+  RepeaterImpl(RepeaterImpl&& other) noexcept = delete;
+  RepeaterImpl& operator=(RepeaterImpl&& other) noexcept = delete;
 
   /// Clears all notes.
   void Clear() noexcept;
@@ -55,7 +55,7 @@ class Repeater {
   /// Sets the instrument.
   ///
   /// @param instrument Pointer to instrument.
-  void SetInstrument(Instrument* instrument) noexcept;
+  void SetInstrument(InstrumentImpl* instrument) noexcept;
 
   /// Sets the rate.
   ///
@@ -64,7 +64,7 @@ class Repeater {
 
   /// Sets the style.
   ///
-  /// @param style Repeater style.
+  /// @param style RepeaterImpl style.
   void SetStyle(RepeaterStyle style) noexcept;
 
   /// Starts the repeater.
@@ -83,14 +83,14 @@ class Repeater {
   // Updates the repeater.
   bool Update() noexcept;
 
-  // Musician.
-  Musician* musician_ = nullptr;
+  // Engine.
+  EngineImpl* engine_ = nullptr;
 
   // Performer.
-  Performer* performer_ = nullptr;
+  PerformerImpl* performer_ = nullptr;
 
   // Instrument.
-  Instrument* instrument_ = nullptr;
+  InstrumentImpl* instrument_ = nullptr;
 
   // Array of pitches to play.
   std::vector<std::pair<std::optional<float>, int>> pitches_;
@@ -108,9 +108,9 @@ class Repeater {
   int remaining_length_ = 0;
 
   // Random number generator.
-  Random random_;
+  RandomImpl random_;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMPONENTS_REPEATER_H_
+#endif  // BARELYMUSICIAN_PRIVATE_REPEATER_H_

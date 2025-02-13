@@ -3,11 +3,11 @@
 #include <string>
 #include <vector>
 
-#include "common/random.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
+#include "private/random_impl.h"
 
-namespace barely::internal {
+namespace barely {
 namespace {
 
 using ::testing::ElementsAre;
@@ -20,7 +20,7 @@ TEST(ContextFreeGrammarTest, GenerateSequence) {
   ContextFreeGrammar<std::string> grammar;
   grammar.AddRule(kStartSymbol, {kSubstition});
 
-  Random random;
+  RandomImpl random;
   const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
   EXPECT_EQ(sequence, kSubstition);
 }
@@ -32,7 +32,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNestedRules) {
   grammar.AddRule("Body", {{"Verse", "Chorus", "Bridge"}});
   grammar.AddRule("Bridge", {{"Break", "Chorus"}});
 
-  Random random;
+  RandomImpl random;
   const auto sequence = grammar.GenerateSequence("Start", random);
   EXPECT_THAT(sequence, ElementsAre("Intro", "Verse", "Chorus", "Break", "Chorus", "Outro"));
 }
@@ -56,7 +56,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
     grammar.AddRule(i, {std::vector<int>(i, kEndSymbol)});
   }
 
-  Random random;
+  RandomImpl random;
   for (int i = 0; i < kGenerationCount; ++i) {
     const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
     EXPECT_GE(sequence.size(), kMinSize);
@@ -70,7 +70,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoRules) {
 
   const ContextFreeGrammar<int> grammar;
 
-  Random random;
+  RandomImpl random;
   const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
   EXPECT_THAT(sequence, ElementsAre(kStartSymbol));
 }
@@ -84,10 +84,10 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoStartSymbolRule) {
   grammar.AddRule(1, {{13}, {14}});
   grammar.AddRule(2, {{15}});
 
-  Random random;
+  RandomImpl random;
   const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
   EXPECT_THAT(sequence, ElementsAre(kStartSymbol));
 }
 
 }  // namespace
-}  // namespace barely::internal
+}  // namespace barely

@@ -1,4 +1,4 @@
-#include "engine/musician.h"
+#include "private/engine_impl.h"
 
 #include <algorithm>
 #include <cassert>
@@ -7,10 +7,10 @@
 #include <memory>
 #include <utility>
 
-#include "engine/instrument.h"
-#include "engine/performer.h"
+#include "private/instrument_impl.h"
+#include "private/performer_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
 namespace {
 
@@ -23,12 +23,12 @@ constexpr double kSecondsFromMinutes = 60.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Musician::Musician(int sample_rate) noexcept : sample_rate_(sample_rate) {}
+EngineImpl::EngineImpl(int sample_rate) noexcept : sample_rate_(sample_rate) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument* Musician::CreateInstrument() noexcept {
-  auto instrument = std::make_unique<Instrument>(sample_rate_, reference_frequency_,
-                                                 GetSamplesFromSeconds(timestamp_));
+InstrumentImpl* EngineImpl::CreateInstrument() noexcept {
+  auto instrument = std::make_unique<InstrumentImpl>(sample_rate_, reference_frequency_,
+                                                     GetSamplesFromSeconds(timestamp_));
   auto* instrument_ptr = instrument.get();
   [[maybe_unused]] const bool success =
       instruments_.emplace(instrument_ptr, std::move(instrument)).second;
@@ -37,8 +37,8 @@ Instrument* Musician::CreateInstrument() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Performer* Musician::CreatePerformer() noexcept {
-  auto performer = std::make_unique<Performer>();
+PerformerImpl* EngineImpl::CreatePerformer() noexcept {
+  auto performer = std::make_unique<PerformerImpl>();
   auto* performer_ptr = performer.get();
   [[maybe_unused]] const bool success =
       performers_.emplace(performer_ptr, std::move(performer)).second;
@@ -47,7 +47,7 @@ Performer* Musician::CreatePerformer() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::DestroyInstrument(Instrument* instrument) noexcept {
+void EngineImpl::DestroyInstrument(InstrumentImpl* instrument) noexcept {
   assert(instrument != nullptr);
   [[maybe_unused]] const bool success = (instruments_.erase(instrument) == 1);
   assert(success);
@@ -55,34 +55,34 @@ void Musician::DestroyInstrument(Instrument* instrument) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::DestroyPerformer(Performer* performer) noexcept {
+void EngineImpl::DestroyPerformer(PerformerImpl* performer) noexcept {
   assert(performer != nullptr);
   [[maybe_unused]] const bool success = (performers_.erase(performer) == 1);
   assert(success);
   performers_.erase(performer);
 }
 
-double Musician::GetBeatsFromSeconds(double seconds) const noexcept {
+double EngineImpl::GetBeatsFromSeconds(double seconds) const noexcept {
   return tempo_ * seconds * kMinutesFromSeconds;
 }
 
-float Musician::GetReferenceFrequency() const noexcept { return reference_frequency_; }
+float EngineImpl::GetReferenceFrequency() const noexcept { return reference_frequency_; }
 
-int64_t Musician::GetSamplesFromSeconds(double seconds) const noexcept {
+int64_t EngineImpl::GetSamplesFromSeconds(double seconds) const noexcept {
   return static_cast<int64_t>(seconds * static_cast<double>(sample_rate_));
 }
 
-double Musician::GetSecondsFromBeats(double beats) const noexcept {
+double EngineImpl::GetSecondsFromBeats(double beats) const noexcept {
   return (tempo_ > 0.0) ? beats * kSecondsFromMinutes / tempo_
                         : (beats > 0.0 ? std::numeric_limits<double>::max()
                                        : std::numeric_limits<double>::lowest());
 }
 
-double Musician::GetTempo() const noexcept { return tempo_; }
+double EngineImpl::GetTempo() const noexcept { return tempo_; }
 
-double Musician::GetTimestamp() const noexcept { return timestamp_; }
+double EngineImpl::GetTimestamp() const noexcept { return timestamp_; }
 
-void Musician::SetReferenceFrequency(float reference_frequency) noexcept {
+void EngineImpl::SetReferenceFrequency(float reference_frequency) noexcept {
   reference_frequency = std::max(reference_frequency, 0.0f);
   if (reference_frequency_ != reference_frequency) {
     reference_frequency_ = reference_frequency;
@@ -92,10 +92,10 @@ void Musician::SetReferenceFrequency(float reference_frequency) noexcept {
   }
 }
 
-void Musician::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
+void EngineImpl::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::Update(double timestamp) noexcept {
+void EngineImpl::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
       double update_duration = GetBeatsFromSeconds(timestamp - timestamp_);
@@ -136,4 +136,4 @@ void Musician::Update(double timestamp) noexcept {
   }
 }
 
-}  // namespace barely::internal
+}  // namespace barely

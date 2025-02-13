@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_MUSICIAN_H_
-#define BARELYMUSICIAN_ENGINE_MUSICIAN_H_
+#ifndef BARELYMUSICIAN_PRIVATE_ENGINE_IMPL_H_
+#define BARELYMUSICIAN_PRIVATE_ENGINE_IMPL_H_
 
 #include <cmath>
 #include <memory>
@@ -7,43 +7,43 @@
 #include <utility>
 
 #include "barelymusician.h"
-#include "engine/instrument.h"
-#include "engine/performer.h"
+#include "private/instrument_impl.h"
+#include "private/performer_impl.h"
 
-namespace barely::internal {
+namespace barely {
 
-/// Class that wraps a musician.
-class Musician {
+/// Class that implements an engine.
+class EngineImpl {
  public:
-  /// Constructs a new `Musician`.
+  /// Constructs a new `EngineImpl`.
   ///
   /// @param sample_rate Sampling rate in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Musician(int sample_rate) noexcept;
+  explicit EngineImpl(int sample_rate) noexcept;
 
   /// Creates a new instrument.
   ///
   /// @return Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument* CreateInstrument() noexcept;
+  InstrumentImpl* CreateInstrument() noexcept;
 
   /// Creates a new performer.
   ///
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Performer* CreatePerformer() noexcept;
+  PerformerImpl* CreatePerformer() noexcept;
 
   /// Destroys an instrument.
   ///
   /// @param instrument Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyInstrument(Instrument* instrument) noexcept;
+  void DestroyInstrument(InstrumentImpl* instrument) noexcept;
 
   /// Destroys a performer.
   ///
   /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyPerformer(Performer* performer) noexcept;
+  void DestroyPerformer(PerformerImpl* performer) noexcept;
 
   /// Returns the corresponding number of beats for a given number of seconds.
   ///
@@ -88,7 +88,7 @@ class Musician {
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept;
 
-  /// Updates the musician at timestamp.
+  /// Updates the engine at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -96,10 +96,10 @@ class Musician {
 
  private:
   // Map of instruments by their pointers.
-  std::unordered_map<Instrument*, std::unique_ptr<Instrument>> instruments_;
+  std::unordered_map<InstrumentImpl*, std::unique_ptr<InstrumentImpl>> instruments_;
 
   // Map of performers by their pointers.
-  std::unordered_map<Performer*, std::unique_ptr<Performer>> performers_;
+  std::unordered_map<PerformerImpl*, std::unique_ptr<PerformerImpl>> performers_;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;
@@ -114,19 +114,19 @@ class Musician {
   double timestamp_ = 0.0;
 };
 
-}  // namespace barely::internal
+}  // namespace barely
 
-struct BarelyMusician : public barely::internal::Musician {
+struct BarelyEngine : public barely::EngineImpl {
  public:
-  explicit BarelyMusician(int32_t sample_rate) noexcept : Musician(sample_rate) {}
-  ~BarelyMusician() = default;
+  explicit BarelyEngine(int32_t sample_rate) noexcept : EngineImpl(sample_rate) {}
+  ~BarelyEngine() = default;
 
   // Non-copyable and non-movable.
-  BarelyMusician(const BarelyMusician& other) noexcept = delete;
-  BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
-  BarelyMusician(BarelyMusician&& other) noexcept = delete;
-  BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
+  BarelyEngine(const BarelyEngine& other) noexcept = delete;
+  BarelyEngine& operator=(const BarelyEngine& other) noexcept = delete;
+  BarelyEngine(BarelyEngine&& other) noexcept = delete;
+  BarelyEngine& operator=(BarelyEngine&& other) noexcept = delete;
 };
-static_assert(sizeof(BarelyMusician) == sizeof(barely::internal::Musician));
+static_assert(sizeof(BarelyEngine) == sizeof(barely::EngineImpl));
 
-#endif  // BARELYMUSICIAN_ENGINE_MUSICIAN_H_
+#endif  // BARELYMUSICIAN_PRIVATE_ENGINE_IMPL_H_

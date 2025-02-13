@@ -23,8 +23,8 @@ namespace Barely {
           _position = value;
           return;
         }
-        Musician.Internal.Task_SetPosition(_handle, value);
-        _position = Musician.Internal.Task_GetPosition(_handle);
+        Engine.Internal.Task_SetPosition(_handle, value);
+        _position = Engine.Internal.Task_GetPosition(_handle);
       }
     }
     [SerializeField]
@@ -38,8 +38,8 @@ namespace Barely {
           _duration = value;
           return;
         }
-        Musician.Internal.Task_SetDuration(_handle, value);
-        _duration = Musician.Internal.Task_GetDuration(_handle);
+        Engine.Internal.Task_SetDuration(_handle, value);
+        _duration = Engine.Internal.Task_GetDuration(_handle);
       }
     }
     [SerializeField]
@@ -69,7 +69,7 @@ namespace Barely {
     }
 
     ~Task() {
-      Musician.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _handle);
+      Engine.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _handle);
     }
 
     /// Updates the task.
@@ -81,11 +81,11 @@ namespace Barely {
         Duration = _duration;
         return;
       }
-      Musician.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _handle);
+      Engine.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _handle);
       _performer = performer;
       if (_performer != null) {
-        Musician.Internal.Task_Create(this, Performer.Internal.GetHandle(_performer), _position,
-                                      _duration, ref _handle);
+        Engine.Internal.Task_Create(this, Performer.Internal.GetHandle(_performer), _position,
+                                    _duration, ref _handle);
       }
     }
 

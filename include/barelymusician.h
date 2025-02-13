@@ -437,14 +437,6 @@ BARELY_EXPORT bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp);
 
-/// Creates a performer.
-///
-/// @param engine Engine handle.
-/// @param out_performer Output performer handle.
-/// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Create(BarelyEngineHandle engine,
-                                          BarelyPerformerHandle* out_performer);
-
 /// Creates a new instrument.
 ///
 /// @param engine Engine handle.
@@ -569,6 +561,14 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle ins
 BARELY_EXPORT bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
                                                   const BarelySampleDataSlice* slices,
                                                   int32_t slice_count);
+
+/// Creates a performer.
+///
+/// @param engine Engine handle.
+/// @param out_performer Output performer handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_Create(BarelyEngineHandle engine,
+                                          BarelyPerformerHandle* out_performer);
 
 /// Destroys a performer.
 ///

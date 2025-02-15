@@ -1,13 +1,13 @@
-/// ==================
-/// barelymusician API
-/// ==================
+/// ================================================================================================
+/// barelymusician
+/// ================================================================================================
 ///
 /// barelymusician is a real-time music engine for interactive systems.
 /// It is used to generate and perform musical sounds from scratch in a sample accurate way.
 ///
-/// -----------------
+/// ------------------------------------------------------------------------------------------------
 /// Example C++ Usage
-/// -----------------
+/// ------------------------------------------------------------------------------------------------
 ///
 /// - Engine:
 ///
@@ -81,9 +81,9 @@
 ///   const bool is_playing = performer.IsPlaying();
 ///   @endcode
 ///
-/// ---------------
+/// ------------------------------------------------------------------------------------------------
 /// Example C Usage
-/// ---------------
+/// ------------------------------------------------------------------------------------------------
 ///
 /// - Engine:
 ///
@@ -177,6 +177,10 @@
 
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
 #define BARELYMUSICIAN_BARELYMUSICIAN_H_
+
+/// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/// barelymusician C API
+/// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // NOLINTBEGIN
 #include <stdbool.h>
@@ -733,6 +737,10 @@ BARELY_EXPORT bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
 }  // extern "C"
 #endif  // __cplusplus
 // NOLINTEND
+
+/// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/// barelymusician C++ API
+/// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #ifdef __cplusplus
 #include <cassert>
@@ -1577,7 +1585,6 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
 };
 
 }  // namespace barely
-
 #endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_BARELYMUSICIAN_H_

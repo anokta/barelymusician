@@ -6,7 +6,7 @@
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::OscillatorShape;
+using ::barely::OscShape;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
 using ::daisy::MidiMessageType;
@@ -20,18 +20,18 @@ constexpr size_t kFrameCount = 16;
 
 // Instrument settings.
 constexpr float kGain = -18.0f;
-constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
+constexpr OscShape kOscShape = OscShape::kSquare;
 constexpr float kAttack = 0.05f;
 constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
 
-constexpr int kOscCount = static_cast<int>(BarelyOscillatorShape_kCount);
+constexpr int kOscCount = static_cast<int>(BarelyOscShape_kCount);
 
 static DaisyPod hw;  // target the Daisy Pod hardware.
 static MidiUsbHandler midi;
 
 static Instrument* instrument_ptr = nullptr;
-static int osc_index = static_cast<int>(kOscillatorShape);
+static int osc_index = static_cast<int>(kOscShape);
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
@@ -39,8 +39,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
     osc_index = (osc_index + increment + kOscCount) % kOscCount;
-    instrument_ptr->SetControl(ControlType::kOscillatorShape,
-                               static_cast<OscillatorShape>(osc_index));
+    instrument_ptr->SetControl(ControlType::kOscShape, static_cast<OscShape>(osc_index));
   }
 
   // Process samples.
@@ -64,7 +63,7 @@ int main(void) {
 
   Instrument instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
+  instrument.SetControl(ControlType::kOscShape, kOscShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

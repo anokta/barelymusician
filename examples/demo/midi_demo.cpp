@@ -24,7 +24,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::OscillatorShape;
+using ::barely::OscShape;
 using ::barely::Performer;
 using ::barely::Task;
 using ::barely::TaskState;
@@ -42,7 +42,7 @@ constexpr int kSampleCount = 512;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr OscillatorShape kInstrumentOscillatorShape = OscillatorShape::kSquare;
+constexpr OscShape kInstrumentOscShape = OscShape::kSquare;
 constexpr float kInstrumentEnvelopeAttack = 0.0f;
 constexpr float kInstrumentEnvelopeRelease = 0.2f;
 constexpr int kInstrumentVoiceCount = 16;
@@ -126,7 +126,7 @@ int main(int /*argc*/, char* argv[]) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
     });
     instrument.SetControl(ControlType::kGain, kInstrumentGain);
-    instrument.SetControl(ControlType::kOscillatorShape, kInstrumentOscillatorShape);
+    instrument.SetControl(ControlType::kOscShape, kInstrumentOscShape);
     instrument.SetControl(ControlType::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetControl(ControlType::kRelease, kInstrumentEnvelopeRelease);
     instrument.SetControl(ControlType::kVoiceCount, kInstrumentVoiceCount);

@@ -14,13 +14,12 @@ TEST(OscillatorTest, Next) {
   constexpr float kSampleInterval = 0.0025f;
   constexpr float kPulseWidth = 0.5f;
 
-  Oscillator oscillator;
-  oscillator.SetIncrement(kPitch, kReferenceFrequency, kSampleInterval);
+  Oscillator osc;
+  osc.SetIncrement(kPitch, kReferenceFrequency, kSampleInterval);
 
   for (int cycle = 0; cycle < kCycleCount; ++cycle) {
     for (int i = -2; i < 2; ++i) {
-      EXPECT_FLOAT_EQ(oscillator.Next<OscillatorShape::kSaw>(kPulseWidth),
-                      static_cast<float>(i) * 0.5f);
+      EXPECT_FLOAT_EQ(osc.Next<OscShape::kSaw>(kPulseWidth), static_cast<float>(i) * 0.5f);
     }
   }
 }

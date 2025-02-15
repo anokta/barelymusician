@@ -12,74 +12,61 @@ namespace barely {
 
 namespace {
 
-template <OscillatorMode kOscillatorMode, OscillatorShape kOscillatorShape,
-          SamplePlaybackMode kSamplePlaybackMode>
+template <OscMode kOscMode, OscShape kOscShape, SamplePlaybackMode kSamplePlaybackMode>
 VoiceCallback GetVoiceCallback(FilterType filter_type) {
   switch (filter_type) {
     case FilterType::kNone:
-      return Voice::Next<FilterType::kNone, kOscillatorMode, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kNone, kOscMode, kOscShape, kSamplePlaybackMode>;
     case FilterType::kLowPass:
-      return Voice::Next<FilterType::kLowPass, kOscillatorMode, kOscillatorShape,
-                         kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kLowPass, kOscMode, kOscShape, kSamplePlaybackMode>;
     case FilterType::kHighPass:
-      return Voice::Next<FilterType::kHighPass, kOscillatorMode, kOscillatorShape,
-                         kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kHighPass, kOscMode, kOscShape, kSamplePlaybackMode>;
     default:
       assert(!"Invalid filter type");
-      return Voice::Next<FilterType::kNone, kOscillatorMode, kOscillatorShape, kSamplePlaybackMode>;
+      return Voice::Next<FilterType::kNone, kOscMode, kOscShape, kSamplePlaybackMode>;
   }
 }
 
-template <OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
-VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorMode oscillator_mode) {
+template <OscShape kOscShape, SamplePlaybackMode kSamplePlaybackMode>
+VoiceCallback GetVoiceCallback(FilterType filter_type, OscMode oscillator_mode) {
   switch (oscillator_mode) {
-    case OscillatorMode::kMix:
-      return GetVoiceCallback<OscillatorMode::kMix, kOscillatorShape, kSamplePlaybackMode>(
+    case OscMode::kMix:
+      return GetVoiceCallback<OscMode::kMix, kOscShape, kSamplePlaybackMode>(filter_type);
+    case OscMode::kAm:
+      return GetVoiceCallback<OscMode::kAm, kOscShape, kSamplePlaybackMode>(filter_type);
+    case OscMode::kEnvelopeFollower:
+      return GetVoiceCallback<OscMode::kEnvelopeFollower, kOscShape, kSamplePlaybackMode>(
           filter_type);
-    case OscillatorMode::kAm:
-      return GetVoiceCallback<OscillatorMode::kAm, kOscillatorShape, kSamplePlaybackMode>(
-          filter_type);
-    case OscillatorMode::kEnvelopeFollower:
-      return GetVoiceCallback<OscillatorMode::kEnvelopeFollower, kOscillatorShape,
-                              kSamplePlaybackMode>(filter_type);
-    case OscillatorMode::kRing:
-      return GetVoiceCallback<OscillatorMode::kRing, kOscillatorShape, kSamplePlaybackMode>(
-          filter_type);
+    case OscMode::kRing:
+      return GetVoiceCallback<OscMode::kRing, kOscShape, kSamplePlaybackMode>(filter_type);
     default:
       assert(!"Invalid oscillator mode");
-      return GetVoiceCallback<OscillatorMode::kMix, kOscillatorShape, kSamplePlaybackMode>(
-          filter_type);
+      return GetVoiceCallback<OscMode::kMix, kOscShape, kSamplePlaybackMode>(filter_type);
   }
 }
 
 template <SamplePlaybackMode kSamplePlaybackMode>
-VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorMode oscillator_mode,
-                               OscillatorShape oscillator_shape) {
+VoiceCallback GetVoiceCallback(FilterType filter_type, OscMode oscillator_mode,
+                               OscShape oscillator_shape) {
   switch (oscillator_shape) {
-    case OscillatorShape::kNone:
-      return GetVoiceCallback<OscillatorShape::kNone, kSamplePlaybackMode>(filter_type,
-                                                                           oscillator_mode);
-    case OscillatorShape::kSine:
-      return GetVoiceCallback<OscillatorShape::kSine, kSamplePlaybackMode>(filter_type,
-                                                                           oscillator_mode);
-    case OscillatorShape::kSaw:
-      return GetVoiceCallback<OscillatorShape::kSaw, kSamplePlaybackMode>(filter_type,
-                                                                          oscillator_mode);
-    case OscillatorShape::kSquare:
-      return GetVoiceCallback<OscillatorShape::kSquare, kSamplePlaybackMode>(filter_type,
-                                                                             oscillator_mode);
-    case OscillatorShape::kNoise:
-      return GetVoiceCallback<OscillatorShape::kNoise, kSamplePlaybackMode>(filter_type,
-                                                                            oscillator_mode);
+    case OscShape::kNone:
+      return GetVoiceCallback<OscShape::kNone, kSamplePlaybackMode>(filter_type, oscillator_mode);
+    case OscShape::kSine:
+      return GetVoiceCallback<OscShape::kSine, kSamplePlaybackMode>(filter_type, oscillator_mode);
+    case OscShape::kSaw:
+      return GetVoiceCallback<OscShape::kSaw, kSamplePlaybackMode>(filter_type, oscillator_mode);
+    case OscShape::kSquare:
+      return GetVoiceCallback<OscShape::kSquare, kSamplePlaybackMode>(filter_type, oscillator_mode);
+    case OscShape::kNoise:
+      return GetVoiceCallback<OscShape::kNoise, kSamplePlaybackMode>(filter_type, oscillator_mode);
     default:
       assert(!"Invalid oscillator shape");
-      return GetVoiceCallback<OscillatorShape::kNone, kSamplePlaybackMode>(filter_type,
-                                                                           oscillator_mode);
+      return GetVoiceCallback<OscShape::kNone, kSamplePlaybackMode>(filter_type, oscillator_mode);
   }
 }
 
-VoiceCallback GetVoiceCallback(FilterType filter_type, OscillatorMode oscillator_mode,
-                               OscillatorShape oscillator_shape, const SampleData& sample_data,
+VoiceCallback GetVoiceCallback(FilterType filter_type, OscMode oscillator_mode,
+                               OscShape oscillator_shape, const SampleData& sample_data,
                                SamplePlaybackMode sample_playback_mode) {
   if (sample_data.empty()) {
     return GetVoiceCallback<SamplePlaybackMode::kNone>(filter_type, oscillator_mode,
@@ -146,9 +133,8 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
         if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
           const float shifted_pitch =
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-          const float oscillator_shifted_pitch = shifted_pitch + oscillator_pitch_shift_;
-          voice.set_oscillator_increment(oscillator_shifted_pitch, reference_frequency_,
-                                         sample_interval_);
+          const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
+          voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
           voice.set_sample_player_increment(shifted_pitch, sample_interval_);
         }
       }
@@ -175,44 +161,43 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
     case ControlType::kRelease:
       adsr_.SetRelease(value);
       break;
-    case ControlType::kOscillatorMix:
-      voice_params_.oscillator_mix = value;
+    case ControlType::kOscMix:
+      voice_params_.osc_mix = value;
       break;
-    case ControlType::kOscillatorPitchShift:
-      oscillator_pitch_shift_ = value;
+    case ControlType::kOscPitchShift:
+      osc_pitch_shift_ = value;
       for (int i = 0; i < voice_count_; ++i) {
         if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
           const float shifted_pitch =
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-          const float oscillator_shifted_pitch = shifted_pitch + oscillator_pitch_shift_;
-          voice.set_oscillator_increment(oscillator_shifted_pitch, reference_frequency_,
-                                         sample_interval_);
+          const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
+          voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
           voice.set_sample_player_increment(shifted_pitch, sample_interval_);
         }
       }
       break;
-    case ControlType::kOscillatorMode:
-      oscillator_mode_ = static_cast<OscillatorMode>(value);
-      voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
-                                         sample_data_, sample_playback_mode_);
+    case ControlType::kOscMode:
+      osc_mode_ = static_cast<OscMode>(value);
+      voice_callback_ = GetVoiceCallback(filter_type_, osc_mode_, osc_shape_, sample_data_,
+                                         sample_playback_mode_);
       break;
-    case ControlType::kOscillatorShape:
-      oscillator_shape_ = static_cast<OscillatorShape>(value);
-      voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
-                                         sample_data_, sample_playback_mode_);
+    case ControlType::kOscShape:
+      osc_shape_ = static_cast<OscShape>(value);
+      voice_callback_ = GetVoiceCallback(filter_type_, osc_mode_, osc_shape_, sample_data_,
+                                         sample_playback_mode_);
       break;
     case ControlType::kPulseWidth:
       voice_params_.pulse_width = value;
       break;
     case ControlType::kSamplePlaybackMode:
       sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
-      voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
-                                         sample_data_, sample_playback_mode_);
+      voice_callback_ = GetVoiceCallback(filter_type_, osc_mode_, osc_shape_, sample_data_,
+                                         sample_playback_mode_);
       break;
     case ControlType::kFilterType:
       filter_type_ = static_cast<FilterType>(value);
-      voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
-                                         sample_data_, sample_playback_mode_);
+      voice_callback_ = GetVoiceCallback(filter_type_, osc_mode_, osc_shape_, sample_data_,
+                                         sample_playback_mode_);
       break;
     case ControlType::kFilterFrequency:
       voice_params_.filter_coefficient = value;
@@ -239,9 +224,8 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
           voice_states_[i].pitch_shift = value;
           const float shifted_pitch =
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-          const float oscillator_shifted_pitch = shifted_pitch + oscillator_pitch_shift_;
-          voice.set_oscillator_increment(oscillator_shifted_pitch, reference_frequency_,
-                                         sample_interval_);
+          const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
+          voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
           voice.set_sample_player_increment(shifted_pitch, sample_interval_);
           break;
         }
@@ -272,8 +256,8 @@ void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
   }
   Voice& voice = AcquireVoice(pitch);
   const float shifted_pitch = pitch + pitch_shift_;
-  const float oscillator_shifted_pitch = shifted_pitch + oscillator_pitch_shift_;
-  voice.set_oscillator_increment(oscillator_shifted_pitch, reference_frequency_, sample_interval_);
+  const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
+  voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
   if (const auto* sample = sample_data_.Select(pitch); sample != nullptr) {
     voice.set_sample_player_slice(sample);
     voice.set_sample_player_increment(shifted_pitch, sample_interval_);
@@ -286,18 +270,17 @@ void InstrumentProcessor::SetReferenceFrequency(float reference_frequency) noexc
   reference_frequency_ = reference_frequency;
   for (int i = 0; i < voice_count_; ++i) {
     if (auto& voice = voice_states_[i].voice; voice.IsActive()) {
-      const float oscillator_shifted_pitch = voice_states_[i].pitch + pitch_shift_ +
-                                             voice_states_[i].pitch_shift + oscillator_pitch_shift_;
-      voice.set_oscillator_increment(oscillator_shifted_pitch, reference_frequency_,
-                                     sample_interval_);
+      const float osc_shifted_pitch =
+          voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift + osc_pitch_shift_;
+      voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
     }
   }
 }
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   sample_data_.Swap(sample_data);
-  voice_callback_ = GetVoiceCallback(filter_type_, oscillator_mode_, oscillator_shape_,
-                                     sample_data_, sample_playback_mode_);
+  voice_callback_ =
+      GetVoiceCallback(filter_type_, osc_mode_, osc_shape_, sample_data_, sample_playback_mode_);
   for (int i = 0; i < voice_count_; ++i) {
     if (Voice& voice = voice_states_[i].voice; !voice.IsActive()) {
       voice.set_sample_player_slice(nullptr);

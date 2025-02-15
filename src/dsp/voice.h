@@ -29,26 +29,26 @@ class Voice {
     /// Filter coefficient.
     float filter_coefficient = 1.0f;
 
-    /// Oscillator mix.
-    float oscillator_mix = 0.0f;
+    /// Osc mix.
+    float osc_mix = 0.0f;
 
-    /// Oscillator pulse width.
+    /// Osc pulse width.
     float pulse_width = 0.5f;
   };
 
   /// Returns the next output sample.
   ///
   /// @tparam kFilterType Filter type.
-  /// @tparam kOscillatorMode Oscillator mode.
-  /// @tparam kOscillatorShape Oscillator shape.
+  /// @tparam kOscMode Osc mode.
+  /// @tparam kOscShape Osc shape.
   /// @tparam kSamplePlaybackMode Sample playback mode.
   /// @param voice Voice.
   /// @param params Voice process parameters.
   /// @return Next output value.
-  template <FilterType kFilterType, OscillatorMode kOscillatorMode,
-            OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
+  template <FilterType kFilterType, OscMode kOscMode, OscShape kOscShape,
+            SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] static float Next(Voice& voice, const Params& params) noexcept {
-    return voice.Next<kFilterType, kOscillatorMode, kOscillatorShape, kSamplePlaybackMode>(params);
+    return voice.Next<kFilterType, kOscMode, kOscShape, kSamplePlaybackMode>(params);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -68,7 +68,7 @@ class Voice {
       gain_ = intensity;
       bit_crusher_.Reset();
       filter_.Reset();
-      oscillator_.Reset();
+      osc_.Reset();
       sample_player_.Reset();
       envelope_.Start(adsr);
     }
@@ -84,9 +84,8 @@ class Voice {
     }
   }
 
-  void set_oscillator_increment(float pitch, float reference_frequency,
-                                float sample_interval) noexcept {
-    oscillator_.SetIncrement(pitch, reference_frequency, sample_interval);
+  void set_osc_increment(float pitch, float reference_frequency, float sample_interval) noexcept {
+    osc_.SetIncrement(pitch, reference_frequency, sample_interval);
   }
   void set_sample_player_increment(float pitch, float sample_interval) noexcept {
     sample_player_.SetIncrement(pitch, sample_interval);
@@ -96,8 +95,8 @@ class Voice {
   }
 
  private:
-  template <FilterType kFilterType, OscillatorMode kOscillatorMode,
-            OscillatorShape kOscillatorShape, SamplePlaybackMode kSamplePlaybackMode>
+  template <FilterType kFilterType, OscMode kOscMode, OscShape kOscShape,
+            SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] float Next(const Params& params) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!sample_player_.IsActive()) {
@@ -106,22 +105,20 @@ class Voice {
       }
     }
 
-    float oscillator_sample = oscillator_.Next<kOscillatorShape>(params.pulse_width);
+    float osc_sample = osc_.Next<kOscShape>(params.pulse_width);
     float sample_player_sample = sample_player_.Next<kSamplePlaybackMode>();
     const float sample_player_output =
-        (1.0f - std::max(0.0f, params.oscillator_mix)) * sample_player_sample;
+        (1.0f - std::max(0.0f, params.osc_mix)) * sample_player_sample;
     float output = gain_ * envelope_.Next();
-    if constexpr (kOscillatorMode == OscillatorMode::kMix) {
-      output *= ((1.0f - std::max(0.0f, -params.oscillator_mix)) * oscillator_sample +
-                 sample_player_output);
+    if constexpr (kOscMode == OscMode::kMix) {
+      output *= ((1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample + sample_player_output);
     } else {
-      if constexpr (kOscillatorMode == OscillatorMode::kAm) {
-        oscillator_sample = std::abs(oscillator_sample);
-      } else if constexpr (kOscillatorMode == OscillatorMode::kEnvelopeFollower) {
+      if constexpr (kOscMode == OscMode::kAm) {
+        osc_sample = std::abs(osc_sample);
+      } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
         sample_player_sample = std::abs(sample_player_sample);
       }
-      output *= ((1.0f - std::max(0.0f, -params.oscillator_mix)) * oscillator_sample *
-                     sample_player_sample +
+      output *= ((1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample * sample_player_sample +
                  sample_player_output);
     }
     return bit_crusher_.Next(filter_.Next<kFilterType>(output, params.filter_coefficient),
@@ -132,7 +129,7 @@ class Voice {
   BitCrusher bit_crusher_;
   Envelope envelope_;
   OnePoleFilter filter_;
-  Oscillator oscillator_;
+  Oscillator osc_;
   SamplePlayer sample_player_;
 };
 

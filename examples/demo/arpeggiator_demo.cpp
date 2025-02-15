@@ -20,7 +20,7 @@ using ::barely::Arpeggiator;
 using ::barely::ArpeggiatorStyle;
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscillatorShape;
+using ::barely::OscShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -34,7 +34,7 @@ constexpr double kLookahead = 0.1;
 
 // Arpeggiator settings.
 constexpr float kGain = -18.0f;
-constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
+constexpr OscShape kOscShape = OscShape::kSquare;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.05f;
 constexpr int kVoiceCount = 16;
@@ -74,7 +74,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
+  instrument.SetControl(ControlType::kOscShape, kOscShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

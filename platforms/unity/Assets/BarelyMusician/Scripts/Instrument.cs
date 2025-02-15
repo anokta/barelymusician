@@ -21,19 +21,19 @@ namespace Barely {
   }
 
   /// Oscillator mode.
-  public enum OscillatorMode {
+  public enum OscMode {
     /// Mix.
     [InspectorName("Mix")] MIX = 0,
     /// Amplitude modulation.
     [InspectorName("AM")] AM,
     /// Envelope follower.
-    [InspectorName("Envlope Follower")] ENVELOPE_FOLLOWER,
+    [InspectorName("Envelope Follower")] ENVELOPE_FOLLOWER,
     /// Ring modulation.
     [InspectorName("Ring")] RING,
   }
 
   /// Oscillator shape.
-  public enum OscillatorShape {
+  public enum OscShape {
     /// None.
     [InspectorName("None")] NONE = 0,
     /// Sine wave.
@@ -146,18 +146,18 @@ namespace Barely {
     [Header("Oscillator")]
 
     /// Oscillator mode.
-    public OscillatorMode OscillatorMode = OscillatorMode.MIX;
+    public OscMode OscMode = OscMode.MIX;
 
     /// Oscillator mix.
     [Range(-1.0f, 1.0f)]
-    public float OscillatorMix = 0.0f;
+    public float OscMix = 0.0f;
 
     /// Oscillator pitch shift.
     [Range(-1.0f, 1.0f)]
-    public float OscillatorPitchShift = 0.0f;
+    public float OscPitchShift = 0.0f;
 
     /// Oscillator shape.
-    public OscillatorShape OscillatorShape = OscillatorShape.NONE;
+    public OscShape OscShape = OscShape.NONE;
 
     /// Pulse width.
     [Range(0.0f, 1.0f)]
@@ -327,10 +327,10 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.DECAY, Decay);
       SetControl(Engine.Internal.ControlType.SUSTAIN, Sustain);
       SetControl(Engine.Internal.ControlType.RELEASE, Release);
-      SetControl(Engine.Internal.ControlType.OSCILLATOR_MIX, OscillatorMix);
-      SetControl(Engine.Internal.ControlType.OSCILLATOR_MODE, (float)OscillatorMode);
-      SetControl(Engine.Internal.ControlType.OSCILLATOR_PITCH_SHIFT, OscillatorPitchShift);
-      SetControl(Engine.Internal.ControlType.OSCILLATOR_SHAPE, (float)OscillatorShape);
+      SetControl(Engine.Internal.ControlType.OSC_MIX, OscMix);
+      SetControl(Engine.Internal.ControlType.OSC_MODE, (float)OscMode);
+      SetControl(Engine.Internal.ControlType.OSC_PITCH_SHIFT, OscPitchShift);
+      SetControl(Engine.Internal.ControlType.OSC_SHAPE, (float)OscShape);
       SetControl(Engine.Internal.ControlType.PULSE_WIDTH, PulseWidth);
       SetControl(Engine.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (float)SamplePlaybackMode);
       SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);

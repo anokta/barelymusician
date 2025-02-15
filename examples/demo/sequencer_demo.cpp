@@ -15,7 +15,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscillatorShape;
+using ::barely::OscShape;
 using ::barely::Task;
 using ::barely::TaskState;
 using ::barely::examples::AudioClock;
@@ -31,7 +31,7 @@ constexpr double kLookahead = 0.1;
 
 // Instrument settings.
 constexpr float kGain = -20.0f;
-constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
+constexpr OscShape kOscShape = OscShape::kSaw;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 
@@ -52,7 +52,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
+  instrument.SetControl(ControlType::kOscShape, kOscShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetNoteOnCallback(

@@ -212,7 +212,7 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Control type enum.
+/// Control types.
 typedef enum BarelyControlType {
   /// Gain in decibels.
   BarelyControlType_kGain = 0,
@@ -231,13 +231,13 @@ typedef enum BarelyControlType {
   /// Envelope release in seconds.
   BarelyControlType_kRelease,
   /// Oscillator mix.
-  BarelyControlType_kOscillatorMix,
+  BarelyControlType_kOscMix,
   /// Oscillator mode.
-  BarelyControlType_kOscillatorMode,
+  BarelyControlType_kOscMode,
   /// Oscillator pitch shift.
-  BarelyControlType_kOscillatorPitchShift,
+  BarelyControlType_kOscPitchShift,
   /// Oscillator shape.
-  BarelyControlType_kOscillatorShape,
+  BarelyControlType_kOscShape,
   /// Pulse width.
   BarelyControlType_kPulseWidth,
   /// Sample playback mode.
@@ -254,7 +254,7 @@ typedef enum BarelyControlType {
   BarelyControlType_kCount,
 } BarelyControlType;
 
-/// Filter type enum.
+/// Filter types.
 typedef enum BarelyFilterType {
   /// None.
   BarelyFilterType_kNone = 0,
@@ -266,7 +266,7 @@ typedef enum BarelyFilterType {
   BarelyFilterType_kCount,
 } BarelyFilterType;
 
-/// Note control type enum.
+/// Note control types.
 typedef enum BarelyNoteControlType {
   /// Pitch shift.
   BarelyNoteControlType_kPitchShift = 0,
@@ -274,40 +274,40 @@ typedef enum BarelyNoteControlType {
   BarelyNoteControlType_kCount,
 } BarelyNoteControlType;
 
-/// Oscillator mode enum.
-typedef enum BarelyOscillatorMode {
+/// Osc modes.
+typedef enum BarelyOscMode {
   /// Mix.
-  BarelyOscillatorMode_kMix = 0,
+  BarelyOscMode_kMix = 0,
   /// Amplitude modulation.
-  BarelyOscillatorMode_kAm,
+  BarelyOscMode_kAm,
   /// Envelope follower.
-  BarelyOscillatorMode_kEnvelopeFollower,
+  BarelyOscMode_kEnvelopeFollower,
   // TODO(#146): Add FM support once voice pitch calculation is cleaned up.
   // /// Frequency modulation.
-  // BarelyOscillatorMode_kFm,
+  // BarelyOscMode_kFm,
   /// Ring modulation.
-  BarelyOscillatorMode_kRing,
+  BarelyOscMode_kRing,
   /// Number of oscillator modes.
-  BarelyOscillatorMode_kCount,
-} BarelyOscillatorMode;
+  BarelyOscMode_kCount,
+} BarelyOscMode;
 
-/// Oscillator shape enum.
-typedef enum BarelyOscillatorShape {
+/// Oscillator shapes.
+typedef enum BarelyOscShape {
   /// None.
-  BarelyOscillatorShape_kNone = 0,
+  BarelyOscShape_kNone = 0,
   /// Sine wave.
-  BarelyOscillatorShape_kSine,
+  BarelyOscShape_kSine,
   /// Sawtooth wave.
-  BarelyOscillatorShape_kSaw,
+  BarelyOscShape_kSaw,
   /// Square wave.
-  BarelyOscillatorShape_kSquare,
+  BarelyOscShape_kSquare,
   /// White noise.
-  BarelyOscillatorShape_kNoise,
+  BarelyOscShape_kNoise,
   /// Number of oscillator shapes.
-  BarelyOscillatorShape_kCount,
-} BarelyOscillatorShape;
+  BarelyOscShape_kCount,
+} BarelyOscShape;
 
-/// Sample playback mode enum.
+/// Sample playback modes.
 typedef enum BarelySamplePlaybackMode {
   /// None.
   BarelySamplePlaybackMode_kNone = 0,
@@ -321,7 +321,7 @@ typedef enum BarelySamplePlaybackMode {
   BarelySamplePlaybackMode_kCount,
 } BarelySamplePlaybackMode;
 
-/// Task state enum.
+/// Task states.
 typedef enum BarelyTaskState {
   /// Begin.
   BarelyTaskState_kBegin = 0,
@@ -752,7 +752,7 @@ BARELY_EXPORT bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
 
 namespace barely {
 
-/// Control type enum.
+/// Control types.
 enum class ControlType {
   /// Gain in decibels.
   kGain = BarelyControlType_kGain,
@@ -771,13 +771,13 @@ enum class ControlType {
   /// Envelope release in seconds.
   kRelease = BarelyControlType_kRelease,
   /// Oscillator mix.
-  kOscillatorMix = BarelyControlType_kOscillatorMix,
+  kOscMix = BarelyControlType_kOscMix,
   /// Oscillator mode.
-  kOscillatorMode = BarelyControlType_kOscillatorMode,
+  kOscMode = BarelyControlType_kOscMode,
   /// Oscillator pitch shift.
-  kOscillatorPitchShift = BarelyControlType_kOscillatorPitchShift,
+  kOscPitchShift = BarelyControlType_kOscPitchShift,
   /// Oscillator shape.
-  kOscillatorShape = BarelyControlType_kOscillatorShape,
+  kOscShape = BarelyControlType_kOscShape,
   /// Pulse width.
   kPulseWidth = BarelyControlType_kPulseWidth,
   /// Sample playback mode.
@@ -792,7 +792,7 @@ enum class ControlType {
   kBitCrusherRate = BarelyControlType_kBitCrusherRate,
 };
 
-/// Filter type enum.
+/// Filter types.
 enum class FilterType {
   /// None.
   kNone = BarelyFilterType_kNone,
@@ -802,42 +802,42 @@ enum class FilterType {
   kHighPass = BarelyFilterType_kHighPass,
 };
 
-/// Note control type enum.
+/// Note control types.
 enum class NoteControlType {
   /// Pitch shift.
   kPitchShift = BarelyNoteControlType_kPitchShift,
 };
 
-/// Oscillator mode enum.
-enum class OscillatorMode {
+/// Oscillator modes.
+enum class OscMode {
   /// Mix.
-  kMix = BarelyOscillatorMode_kMix,
+  kMix = BarelyOscMode_kMix,
   /// Amplitude modulation.
-  kAm = BarelyOscillatorMode_kAm,
+  kAm = BarelyOscMode_kAm,
   /// Envelope follower.
-  kEnvelopeFollower = BarelyOscillatorMode_kEnvelopeFollower,
+  kEnvelopeFollower = BarelyOscMode_kEnvelopeFollower,
   // TODO(#146): Add FM support once voice pitch calculation is cleaned up.
   // /// Frequency modulation.
-  // kFm = BarelyOscillatorMode_kFm,
+  // kFm = BarelyOscMode_kFm,
   /// Ring modulation.
-  kRing = BarelyOscillatorMode_kRing,
+  kRing = BarelyOscMode_kRing,
 };
 
-/// Oscillator shape enum.
-enum class OscillatorShape {
+/// Oscillator shapes.
+enum class OscShape {
   /// None.
-  kNone = BarelyOscillatorShape_kNone,
+  kNone = BarelyOscShape_kNone,
   /// Sine wave.
-  kSine = BarelyOscillatorShape_kSine,
+  kSine = BarelyOscShape_kSine,
   /// Sawtooth wave.
-  kSaw = BarelyOscillatorShape_kSaw,
+  kSaw = BarelyOscShape_kSaw,
   /// Square wave.
-  kSquare = BarelyOscillatorShape_kSquare,
+  kSquare = BarelyOscShape_kSquare,
   /// White noise.
-  kNoise = BarelyOscillatorShape_kNoise,
+  kNoise = BarelyOscShape_kNoise,
 };
 
-/// Sample playback mode enum.
+/// Sample playback modes.
 enum class SamplePlaybackMode {
   /// None.
   kNone = BarelySamplePlaybackMode_kNone,
@@ -849,7 +849,7 @@ enum class SamplePlaybackMode {
   kLoop = BarelySamplePlaybackMode_kLoop,
 };
 
-/// Task state enum.
+/// Task states.
 enum class TaskState {
   /// Begin.
   kBegin = BarelyTaskState_kBegin,

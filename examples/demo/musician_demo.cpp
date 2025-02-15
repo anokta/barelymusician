@@ -27,7 +27,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::OscillatorShape;
+using ::barely::OscShape;
 using ::barely::Performer;
 using ::barely::Random;
 using ::barely::SampleDataSlice;
@@ -232,12 +232,11 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::tuple<Performer, std::vector<Task>, BeatComposerCallback, size_t>> performers;
   std::vector<Instrument> instruments;
 
-  const auto build_instrument_fn = [&](OscillatorShape type, float gain, float attack,
-                                       float release) {
+  const auto build_instrument_fn = [&](OscShape shape, float gain, float attack, float release) {
     instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
-    instrument.SetControl(ControlType::kOscillatorShape, type);
+    instrument.SetControl(ControlType::kOscShape, shape);
     instrument.SetControl(ControlType::kAttack, attack);
     instrument.SetControl(ControlType::kRelease, release);
     set_note_callbacks_fn(instruments.size(), instrument);
@@ -252,11 +251,11 @@ int main(int /*argc*/, char* argv[]) {
     ComposeChord(0.5, harmonic, scale, instrument, performer, tasks);
   };
 
-  build_instrument_fn(OscillatorShape::kSine, -25.0f, 0.125f, 0.125f);
+  build_instrument_fn(OscShape::kSine, -25.0f, 0.125f, 0.125f);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
-  build_instrument_fn(OscillatorShape::kNoise, -40.0f, 0.5f, 0.025f);
+  build_instrument_fn(OscShape::kNoise, -40.0f, 0.5f, 0.025f);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
@@ -266,7 +265,7 @@ int main(int /*argc*/, char* argv[]) {
     ComposeLine(-1, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer, tasks);
   };
 
-  build_instrument_fn(OscillatorShape::kSaw, -24.0f, 0.0025f, 0.125f);
+  build_instrument_fn(OscShape::kSaw, -24.0f, 0.0025f, 0.125f);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           line_beat_composer_callback, instruments.size() - 1);
 
@@ -276,7 +275,7 @@ int main(int /*argc*/, char* argv[]) {
     ComposeLine(0, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer, tasks);
   };
 
-  build_instrument_fn(OscillatorShape::kSquare, -24.0f, 0.05f, 0.05f);
+  build_instrument_fn(OscShape::kSquare, -24.0f, 0.05f, 0.05f);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           line_2_beat_composer_callback, instruments.size() - 1);
 

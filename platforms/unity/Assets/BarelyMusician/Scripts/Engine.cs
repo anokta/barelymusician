@@ -65,13 +65,13 @@ namespace Barely {
         /// Envelope release in seconds.
         [InspectorName("Release")] RELEASE,
         /// Oscillator mix.
-        [InspectorName("Oscillator Mix")] OSCILLATOR_MIX,
+        [InspectorName("Oscillator Mix")] OSC_MIX,
         /// Oscillator mix.
-        [InspectorName("Oscillator Mode")] OSCILLATOR_MODE,
+        [InspectorName("Oscillator Mode")] OSC_MODE,
         /// Oscillator pitch shift.
-        [InspectorName("Oscillator Pitch Shift")] OSCILLATOR_PITCH_SHIFT,
+        [InspectorName("Oscillator Pitch Shift")] OSC_PITCH_SHIFT,
         /// Oscillator shape.
-        [InspectorName("Oscillator Shape")] OSCILLATOR_SHAPE,
+        [InspectorName("Oscillator Shape")] OSC_SHAPE,
         /// Pulse width.
         [InspectorName("Pulse Width")] PULSE_WIDTH,
         /// Sample playback mode.

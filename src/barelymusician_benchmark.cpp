@@ -61,11 +61,11 @@ void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
 }
 BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithLoopingSample);
 
-void BM_BarelyInstrument_Process_SingleNoteWithSineOscillator(State& state) {
+void BM_BarelyInstrument_Process_SingleNoteWithSineOsc(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
-  instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
+  instrument.SetControl(ControlType::kOscShape, OscShape::kSine);
   instrument.SetNoteOn(0.0);
 
   std::array<float, kSampleCount> output_samples;
@@ -74,13 +74,13 @@ void BM_BarelyInstrument_Process_SingleNoteWithSineOscillator(State& state) {
     instrument.Process(output_samples, 0.0);
   }
 }
-BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithSineOscillator);
+BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithSineOsc);
 
-void BM_BarelyInstrument_Process_MultipleNotesWithSineOscillator(State& state) {
+void BM_BarelyInstrument_Process_MultipleNotesWithSineOsc(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
-  instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
+  instrument.SetControl(ControlType::kOscShape, OscShape::kSine);
 
   const int voice_count = instrument.GetControl<int>(ControlType::kVoiceCount);
   for (int i = 0; i < voice_count; ++i) {
@@ -93,13 +93,13 @@ void BM_BarelyInstrument_Process_MultipleNotesWithSineOscillator(State& state) {
     instrument.Process(output_samples, 0.0);
   }
 }
-BENCHMARK(BM_BarelyInstrument_Process_MultipleNotesWithSineOscillator);
+BENCHMARK(BM_BarelyInstrument_Process_MultipleNotesWithSineOsc);
 
 void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
-  instrument.SetControl(ControlType::kOscillatorShape, OscillatorShape::kSine);
+  instrument.SetControl(ControlType::kOscShape, OscShape::kSine);
 
   std::array<float, kSampleCount> output_samples;
   double timestamp = 0.0;

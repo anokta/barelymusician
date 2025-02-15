@@ -18,16 +18,16 @@ class Oscillator {
   /// @tparam kShape Oscillator shape.
   /// @param pulse_width Pulse width.
   /// @return Next output sample.
-  template <OscillatorShape kShape>
+  template <OscShape kShape>
   [[nodiscard]] float Next([[maybe_unused]] float pulse_width) noexcept {
     float output = 0.0f;
-    if constexpr (kShape == OscillatorShape::kSine) {
+    if constexpr (kShape == OscShape::kSine) {
       output = std::sin(phase_ * 2.0f * std::numbers::pi_v<float>);
-    } else if constexpr (kShape == OscillatorShape::kSaw) {
+    } else if constexpr (kShape == OscShape::kSaw) {
       output = 2.0f * phase_ - 1.0f;
-    } else if constexpr (kShape == OscillatorShape::kSquare) {
+    } else if constexpr (kShape == OscShape::kSquare) {
       output = (phase_ < pulse_width) ? -1.0f : 1.0f;
-    } else if constexpr (kShape == OscillatorShape::kNoise) {
+    } else if constexpr (kShape == OscShape::kNoise) {
       output = random_.DrawUniform(-1.0f, 1.0f);
     }
     phase_ += increment_;

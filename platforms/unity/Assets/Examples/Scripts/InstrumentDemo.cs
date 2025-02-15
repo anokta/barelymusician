@@ -9,7 +9,7 @@ namespace Barely.Examples {
 
     public Arpeggiator arpeggiator = null;
     public bool enableModeSwitch = false;
-    public OscillatorShape oscillatorShape = OscillatorShape.SINE;
+    public OscShape oscShape = OscShape.SINE;
     public SamplePlaybackMode samplePlaybackMode = SamplePlaybackMode.LOOP;
 
     private const int N = 4;
@@ -19,7 +19,7 @@ namespace Barely.Examples {
 
     private void Awake() {
       if (enableModeSwitch) {
-        controller.instrument.OscillatorShape = oscillatorShape;
+        controller.instrument.OscShape = oscShape;
         controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
       }
     }
@@ -58,13 +58,13 @@ namespace Barely.Examples {
         return;
       }
       if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
-        controller.instrument.OscillatorShape = oscillatorShape;
+        controller.instrument.OscShape = oscShape;
         controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
       } else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
-        controller.instrument.OscillatorShape = OscillatorShape.NONE;
+        controller.instrument.OscShape = OscShape.NONE;
         controller.instrument.SamplePlaybackMode = samplePlaybackMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
-        controller.instrument.OscillatorShape = oscillatorShape;
+        controller.instrument.OscShape = oscShape;
         controller.instrument.SamplePlaybackMode = samplePlaybackMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) {
         if (controller.arpeggiator != null) {

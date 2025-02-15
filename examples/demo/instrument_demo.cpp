@@ -16,7 +16,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscillatorShape;
+using ::barely::OscShape;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -27,7 +27,7 @@ constexpr int kSampleCount = 256;
 
 // Instrument settings.
 constexpr float kGain = -18.0f;
-constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSaw;
+constexpr OscShape kOscShape = OscShape::kSaw;
 constexpr float kAttack = 0.05f;
 constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
@@ -60,7 +60,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
+  instrument.SetControl(ControlType::kOscShape, kOscShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

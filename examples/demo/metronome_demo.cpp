@@ -14,7 +14,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscillatorShape;
+using ::barely::OscShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -27,7 +27,7 @@ constexpr int kSampleCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Metronome settings.
-constexpr OscillatorShape kOscillatorShape = OscillatorShape::kSquare;
+constexpr OscShape kOscShape = OscShape::kSquare;
 constexpr float kGain = -12.0f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.05f;
@@ -55,7 +55,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   // Create the metronome instrument.
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscillatorShape, kOscillatorShape);
+  instrument.SetControl(ControlType::kOscShape, kOscShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

@@ -3,6 +3,8 @@
 
 #include <random>
 
+#include "barelymusician.h"
+
 namespace barely {
 
 /// Class that implements a random number generator.
@@ -51,5 +53,8 @@ class RandomImpl {
 };
 
 }  // namespace barely
+
+struct BarelyRandom : public barely::RandomImpl {};
+static_assert(sizeof(BarelyRandom) == sizeof(barely::RandomImpl));
 
 #endif  // BARELYMUSICIAN_PRIVATE_RANDOM_IMPL_H_

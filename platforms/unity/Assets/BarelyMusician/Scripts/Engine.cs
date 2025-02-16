@@ -86,6 +86,111 @@ namespace Barely {
         [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
       }
 
+      /// Returns whether an arpeggiator note is on or not.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param pitch Note pitch.
+      /// @return True if on, false otherwise.
+      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorHandle, float pitch) {
+        bool isNoteOn = false;
+        if (!BarelyArpeggiator_IsNoteOn(arpeggiatorHandle, pitch, ref isNoteOn) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get if arpeggiator note " + pitch + " is on");
+        }
+        return isNoteOn;
+      }
+
+      /// Returns whether an arpeggiator is playing or not.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @return True if playing, false otherwise.
+      public static bool Arpeggiator_IsPlaying(IntPtr arpeggiatorHandle) {
+        bool isPlaying = false;
+        if (!BarelyArpeggiator_IsPlaying(arpeggiatorHandle, ref isPlaying) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get if arpeggiator is playing");
+        }
+        return isPlaying;
+      }
+
+      /// Sets all arpeggiator notes off.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      public static void Arpeggiator_SetAllNotesOff(IntPtr arpeggiatorHandle) {
+        if (!BarelyArpeggiator_SetAllNotesOff(arpeggiatorHandle) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop all arpeggiator notes");
+        }
+      }
+
+      /// Sets an arpeggiator gate ratio.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param gateRatio Gate ratio.
+      public static void Arpeggiator_SetGateRatio(IntPtr arpeggiatorHandle, float gateRatio) {
+        if (!BarelyArpeggiator_SetGateRatio(arpeggiatorHandle, gateRatio) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop arpeggiator gate ratio " + gateRatio);
+        }
+      }
+
+      /// Sets an arpeggiator instrument.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param instrument Instrument.
+      public static void Arpeggiator_SetInstrument(IntPtr arpeggiatorHandle,
+                                                   Instrument instrument) {
+        if (!BarelyArpeggiator_SetInstrument(arpeggiatorHandle,
+                                             Instrument.Internal.GetHandle(instrument)) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set arpeggiator instrument '" + instrument.name + "'");
+        }
+      }
+
+      /// Sets an arpeggiator note off.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param pitch Note pitch.
+      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorHandle, float pitch) {
+        if (!BarelyArpeggiator_SetNoteOff(arpeggiatorHandle, pitch) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop arpeggiator note " + pitch);
+        }
+      }
+
+      /// Sets an arpeggiator note on.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param pitch Note pitch.
+      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorHandle, float pitch) {
+        if (!BarelyArpeggiator_SetNoteOn(arpeggiatorHandle, pitch) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to start arpeggiator note " + pitch);
+        }
+      }
+
+      /// Sets an arpeggiator rate.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param rate Rate in notes per beat.
+      public static void Arpeggiator_SetRate(IntPtr arpeggiatorHandle, double rate) {
+        if (!BarelyArpeggiator_SetRate(arpeggiatorHandle, rate) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set arpeggiator rate " + rate);
+        }
+      }
+
+      /// Sets an arpeggiator style.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param style Style.
+      public static void Arpeggiator_SetStyle(IntPtr arpeggiatorHandle, ArpeggiatorStyle style) {
+        if (!BarelyArpeggiator_SetStyle(arpeggiatorHandle, style) &&
+            arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set arpeggiator style " + style);
+        }
+      }
+
       /// Creates a new component.
       ///
       /// @param component Component.
@@ -558,6 +663,92 @@ namespace Barely {
         }
       }
 
+      /// Returns whether an repeater is playing or not.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @return True if playing, false otherwise.
+      public static bool Repeater_IsPlaying(IntPtr repeaterHandle) {
+        bool isPlaying = false;
+        if (!BarelyRepeater_IsPlaying(repeaterHandle, ref isPlaying) &&
+            repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get if repeater is playing");
+        }
+        return isPlaying;
+      }
+
+      /// Pops the last note from the end.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      public static void Repeater_Pop(IntPtr repeaterHandle) {
+        if (!BarelyRepeater_Pop(repeaterHandle) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to pop from repeater");
+        }
+      }
+
+      /// Pushes a new note to the end.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param pitchOr Note pitch value or silence.
+      /// @param length Note length in beats.
+      public static void Repeater_Push(IntPtr repeaterHandle, float? pitchOr, int length) {
+        if ((pitchOr.HasValue && !BarelyRepeater_Push(repeaterHandle, pitchOr.Value, length)) ||
+            (!pitchOr.HasValue && !BarelyRepeater_PushSilence(repeaterHandle, length)) &&
+                repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to pop from repeater");
+        }
+      }
+
+      /// Sets an repeater instrument.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param instrument Instrument.
+      public static void Repeater_SetInstrument(IntPtr repeaterHandle, Instrument instrument) {
+        if (!BarelyRepeater_SetInstrument(repeaterHandle,
+                                          Instrument.Internal.GetHandle(instrument)) &&
+            repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set repeater instrument '" + instrument.name + "'");
+        }
+      }
+
+      /// Sets an repeater rate.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param rate Rate in notes per beat.
+      public static void Repeater_SetRate(IntPtr repeaterHandle, double rate) {
+        if (!BarelyRepeater_SetRate(repeaterHandle, rate) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set repeater rate " + rate);
+        }
+      }
+
+      /// Sets an repeater style.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param style Style.
+      public static void Repeater_SetStyle(IntPtr repeaterHandle, RepeaterStyle style) {
+        if (!BarelyRepeater_SetStyle(repeaterHandle, style) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set repeater style " + style);
+        }
+      }
+
+      /// Starts a repeater.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      /// @param pitchOffset Pitch offset.
+      public static void Repeater_Start(IntPtr repeaterHandle, float pitchOffset) {
+        if (!BarelyRepeater_Start(repeaterHandle, pitchOffset) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to start repeater with a pitch offset" + pitchOffset);
+        }
+      }
+
+      /// Stops a repeater.
+      ///
+      /// @param repeaterHandle Repeater handle.
+      public static void Repeater_Stop(IntPtr repeaterHandle) {
+        if (!BarelyRepeater_Stop(repeaterHandle) && repeaterHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop repeater");
+        }
+      }
+
       /// Gets a scale note pitch for a given degree.
       ///
       /// @param scale Pointer to scale.
@@ -669,197 +860,6 @@ namespace Barely {
         }
       }
 
-      /// Returns whether an arpeggiator note is on or not.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param pitch Note pitch.
-      /// @return True if on, false otherwise.
-      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorHandle, float pitch) {
-        bool isNoteOn = false;
-        if (!BarelyArpeggiator_IsNoteOn(arpeggiatorHandle, pitch, ref isNoteOn) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get if arpeggiator note " + pitch + " is on");
-        }
-        return isNoteOn;
-      }
-
-      /// Returns whether an arpeggiator is playing or not.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @return True if playing, false otherwise.
-      public static bool Arpeggiator_IsPlaying(IntPtr arpeggiatorHandle) {
-        bool isPlaying = false;
-        if (!BarelyArpeggiator_IsPlaying(arpeggiatorHandle, ref isPlaying) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get if arpeggiator is playing");
-        }
-        return isPlaying;
-      }
-
-      /// Sets all arpeggiator notes off.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      public static void Arpeggiator_SetAllNotesOff(IntPtr arpeggiatorHandle) {
-        if (!BarelyArpeggiator_SetAllNotesOff(arpeggiatorHandle) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop all arpeggiator notes");
-        }
-      }
-
-      /// Sets an arpeggiator gate ratio.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param gateRatio Gate ratio.
-      public static void Arpeggiator_SetGateRatio(IntPtr arpeggiatorHandle, float gateRatio) {
-        if (!BarelyArpeggiator_SetGateRatio(arpeggiatorHandle, gateRatio) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop arpeggiator gate ratio " + gateRatio);
-        }
-      }
-
-      /// Sets an arpeggiator instrument.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param instrument Instrument.
-      public static void Arpeggiator_SetInstrument(IntPtr arpeggiatorHandle,
-                                                   Instrument instrument) {
-        if (!BarelyArpeggiator_SetInstrument(arpeggiatorHandle,
-                                             Instrument.Internal.GetHandle(instrument)) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set arpeggiator instrument '" + instrument.name + "'");
-        }
-      }
-
-      /// Sets an arpeggiator note off.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorHandle, float pitch) {
-        if (!BarelyArpeggiator_SetNoteOff(arpeggiatorHandle, pitch) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop arpeggiator note " + pitch);
-        }
-      }
-
-      /// Sets an arpeggiator note on.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorHandle, float pitch) {
-        if (!BarelyArpeggiator_SetNoteOn(arpeggiatorHandle, pitch) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to start arpeggiator note " + pitch);
-        }
-      }
-
-      /// Sets an arpeggiator rate.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param rate Rate in notes per beat.
-      public static void Arpeggiator_SetRate(IntPtr arpeggiatorHandle, double rate) {
-        if (!BarelyArpeggiator_SetRate(arpeggiatorHandle, rate) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set arpeggiator rate " + rate);
-        }
-      }
-
-      /// Sets an arpeggiator style.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param style Style.
-      public static void Arpeggiator_SetStyle(IntPtr arpeggiatorHandle, ArpeggiatorStyle style) {
-        if (!BarelyArpeggiator_SetStyle(arpeggiatorHandle, style) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set arpeggiator style " + style);
-        }
-      }
-
-      /// Returns whether an repeater is playing or not.
-      ///
-      /// @param repeaterHandle Repeater handle.
-      /// @return True if playing, false otherwise.
-      public static bool Repeater_IsPlaying(IntPtr repeaterHandle) {
-        bool isPlaying = false;
-        if (!BarelyRepeater_IsPlaying(repeaterHandle, ref isPlaying) &&
-            repeaterHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get if repeater is playing");
-        }
-        return isPlaying;
-      }
-
-      /// Pops the last note from the end.
-      ///
-      /// @param repeaterHandle Repeater handle.
-      public static void Repeater_Pop(IntPtr repeaterHandle) {
-        if (!BarelyRepeater_Pop(repeaterHandle) && repeaterHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to pop from repeater");
-        }
-      }
-
-      /// Pushes a new note to the end.
-      ///
-      /// @param repeaterHandle Repeater handle.
-      /// @param pitchOr Note pitch value or silence.
-      /// @param length Note length in beats.
-      public static void Repeater_Push(IntPtr repeaterHandle, float? pitchOr, int length) {
-        if ((pitchOr.HasValue && !BarelyRepeater_Push(repeaterHandle, pitchOr.Value, length)) ||
-            (!pitchOr.HasValue && !BarelyRepeater_PushSilence(repeaterHandle, length)) &&
-                repeaterHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to pop from repeater");
-        }
-      }
-
-      /// Sets an repeater instrument.
-      ///
-      /// @param repeaterHandle Repeater handle.
-      /// @param instrument Instrument.
-      public static void Repeater_SetInstrument(IntPtr repeaterHandle, Instrument instrument) {
-        if (!BarelyRepeater_SetInstrument(repeaterHandle,
-                                          Instrument.Internal.GetHandle(instrument)) &&
-            repeaterHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set repeater instrument '" + instrument.name + "'");
-        }
-      }
-
-      /// Sets an repeater rate.
-      ///
-      /// @param repeaterHandle Repeater handle.
-      /// @param rate Rate in notes per beat.
-      public static void Repeater_SetRate(IntPtr repeaterHandle, double rate) {
-        if (!BarelyRepeater_SetRate(repeaterHandle, rate) && repeaterHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set repeater rate " + rate);
-        }
-      }
-
-      /// Sets an repeater style.
-      ///
-      /// @param repeaterHandle Repeater handle.
-      /// @param style Style.
-      public static void Repeater_SetStyle(IntPtr repeaterHandle, RepeaterStyle style) {
-        if (!BarelyRepeater_SetStyle(repeaterHandle, style) && repeaterHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set repeater style " + style);
-        }
-      }
-
-      /// Starts a repeater.
-      ///
-      /// @param repeaterHandle Repeater handle.
-      /// @param pitchOffset Pitch offset.
-      public static void Repeater_Start(IntPtr repeaterHandle, float pitchOffset) {
-        if (!BarelyRepeater_Start(repeaterHandle, pitchOffset) && repeaterHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to start repeater with a pitch offset" + pitchOffset);
-        }
-      }
-
-      /// Stops a repeater.
-      ///
-      /// @param repeaterHandle Repeater handle.
-      public static void Repeater_Stop(IntPtr repeaterHandle) {
-        if (!BarelyRepeater_Stop(repeaterHandle) && repeaterHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop repeater");
-        }
-      }
-
       // Instrument note off callback.
       private delegate void Instrument_NoteOffCallback(float pitch, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOffCallback))]
@@ -897,7 +897,7 @@ namespace Barely {
         }
       }
 
-      // Sample data.
+      // Sample data slice.
       [StructLayout(LayoutKind.Sequential)]
       private struct SampleDataSlice {
         // Root note pitch.
@@ -948,26 +948,12 @@ namespace Barely {
       }
       private static IntPtr _handle = IntPtr.Zero;
 
-      // Scale.
-      private static Scale _scale = new Scale {
-        pitches = null,
-        pitchCount = 0,
-        rootPitch = 0.0f,
-        mode = 0,
-      };
-
-      // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
-      private const double _minLookahead = 0.025;
-
       // Minimum task duration to avoid zero duration tasks.
       // TODO(#148): This can be removed once trigger tasks are supported.
       private const double _minTaskDuration = 1e-6;
 
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
-
-      // DSP latency in seconds.
-      private static double _dspLatency = 0.0;
 
       // Map of instruments by their handles.
       private static Dictionary<IntPtr, Instrument> _instruments = null;
@@ -983,6 +969,14 @@ namespace Barely {
 
       // Map of tasks by their handles.
       private static Dictionary<IntPtr, Task> _tasks = null;
+
+      // Scale.
+      private static Scale _scale = new Scale {
+        pitches = null,
+        pitchCount = 0,
+        rootPitch = 0.0f,
+        mode = 0,
+      };
 
       // Component that manages internal state.
       private class State : MonoBehaviour {
@@ -1068,6 +1062,12 @@ namespace Barely {
           return AudioSettings.dspTime +
                  Math.Max(Math.Max(_dspLatency, (double)Time.deltaTime), _minLookahead);
         }
+
+        // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
+        private const double _minLookahead = 0.025;
+
+        // DSP latency in seconds.
+        private double _dspLatency = 0.0;
       }
 
 #if !UNITY_EDITOR && UNITY_IOS
@@ -1075,6 +1075,44 @@ namespace Barely {
 #else
       private const string _pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Create")]
+      private static extern bool BarelyArpeggiator_Create(IntPtr engine, ref IntPtr outArpeggiator);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
+      private static extern bool BarelyArpeggiator_Destroy(IntPtr arpeggiator);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsNoteOn")]
+      private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, float pitch,
+                                                            ref bool outIsNoteOn);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
+      private static extern bool BarelyArpeggiator_IsPlaying(IntPtr arpeggiator,
+                                                             ref bool outIsPlaying);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetAllNotesOff")]
+      private static extern bool BarelyArpeggiator_SetAllNotesOff(IntPtr arpeggiator);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetGateRatio")]
+      private static extern bool BarelyArpeggiator_SetGateRatio(IntPtr arpeggiator,
+                                                                float gateRatio);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetInstrument")]
+      private static extern bool BarelyArpeggiator_SetInstrument(IntPtr arpeggiator,
+                                                                 IntPtr instrument);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOff")]
+      private static extern bool BarelyArpeggiator_SetNoteOff(IntPtr arpeggiator, float gateRatio);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOn")]
+      private static extern bool BarelyArpeggiator_SetNoteOn(IntPtr arpeggiator, float gateRatio);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetRate")]
+      private static extern bool BarelyArpeggiator_SetRate(IntPtr arpeggiator, double rate);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetStyle")]
+      private static extern bool BarelyArpeggiator_SetStyle(IntPtr arpeggiator,
+                                                            ArpeggiatorStyle style);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
       private static extern bool BarelyEngine_Create(Int32 sampleRate, ref IntPtr outEngine);
@@ -1206,77 +1244,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Stop")]
       private static extern bool BarelyPerformer_Stop(IntPtr performer);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
-      private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
-                                                      ref float outPitch);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_Create")]
-      private static extern bool BarelyTask_Create(IntPtr performer, double position,
-                                                   double duration, Task_ProcessCallback callback,
-                                                   IntPtr userData, ref IntPtr outTask);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
-      private static extern bool BarelyTask_Destroy(IntPtr task);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetDuration")]
-      private static extern bool BarelyTask_GetDuration(IntPtr task, ref double outDuration);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPosition")]
-      private static extern bool BarelyTask_GetPosition(IntPtr task, ref double outPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_IsActive")]
-      private static extern bool BarelyTask_IsActive(IntPtr performer, ref bool outIsActive);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetDuration")]
-      private static extern bool BarelyTask_SetDuration(IntPtr task, double duration);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPosition")]
-      private static extern bool BarelyTask_SetPosition(IntPtr task, double position);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetProcessCallback")]
-      private static extern bool BarelyTask_SetProcessCallback(IntPtr task,
-                                                               Task_ProcessCallback callback,
-                                                               IntPtr userData);
-
-      // Components.
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Create")]
-      private static extern bool BarelyArpeggiator_Create(IntPtr engine, ref IntPtr outArpeggiator);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
-      private static extern bool BarelyArpeggiator_Destroy(IntPtr arpeggiator);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsNoteOn")]
-      private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, float pitch,
-                                                            ref bool outIsNoteOn);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
-      private static extern bool BarelyArpeggiator_IsPlaying(IntPtr arpeggiator,
-                                                             ref bool outIsPlaying);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetAllNotesOff")]
-      private static extern bool BarelyArpeggiator_SetAllNotesOff(IntPtr arpeggiator);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetGateRatio")]
-      private static extern bool BarelyArpeggiator_SetGateRatio(IntPtr arpeggiator,
-                                                                float gateRatio);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetInstrument")]
-      private static extern bool BarelyArpeggiator_SetInstrument(IntPtr arpeggiator,
-                                                                 IntPtr instrument);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOff")]
-      private static extern bool BarelyArpeggiator_SetNoteOff(IntPtr arpeggiator, float gateRatio);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOn")]
-      private static extern bool BarelyArpeggiator_SetNoteOn(IntPtr arpeggiator, float gateRatio);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetRate")]
-      private static extern bool BarelyArpeggiator_SetRate(IntPtr arpeggiator, double rate);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetStyle")]
-      private static extern bool BarelyArpeggiator_SetStyle(IntPtr arpeggiator,
-                                                            ArpeggiatorStyle style);
-
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Clear")]
       private static extern bool BarelyRepeater_Clear(IntPtr repeater);
 
@@ -1315,6 +1282,38 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyRepeater_Stop")]
       private static extern bool BarelyRepeater_Stop(IntPtr repeater);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
+      private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
+                                                      ref float outPitch);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_Create")]
+      private static extern bool BarelyTask_Create(IntPtr performer, double position,
+                                                   double duration, Task_ProcessCallback callback,
+                                                   IntPtr userData, ref IntPtr outTask);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
+      private static extern bool BarelyTask_Destroy(IntPtr task);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetDuration")]
+      private static extern bool BarelyTask_GetDuration(IntPtr task, ref double outDuration);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPosition")]
+      private static extern bool BarelyTask_GetPosition(IntPtr task, ref double outPosition);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_IsActive")]
+      private static extern bool BarelyTask_IsActive(IntPtr performer, ref bool outIsActive);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetDuration")]
+      private static extern bool BarelyTask_SetDuration(IntPtr task, double duration);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPosition")]
+      private static extern bool BarelyTask_SetPosition(IntPtr task, double position);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetProcessCallback")]
+      private static extern bool BarelyTask_SetProcessCallback(IntPtr task,
+                                                               Task_ProcessCallback callback,
+                                                               IntPtr userData);
     }
   }
 }  // namespace Barely

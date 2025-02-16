@@ -9,7 +9,6 @@ target_link_libraries(
   barelymusician_private_instrument_impl
   barelymusician_private_performer_impl
   barelymusician_private_random_impl
-  barelycomposer_headeronly
   barelymusician_headeronly
 )
 
@@ -72,7 +71,6 @@ target_link_libraries(
   barelymusician_private_engine_impl
   barelymusician_private_instrument_impl
   barelymusician_private_performer_impl
-  barelycomposer_headeronly
   barelymusician_headeronly
 )
 

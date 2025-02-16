@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelycomposer.h"
+#include "barelymusician.h"
 #include "private/engine_impl.h"
 #include "private/instrument_impl.h"
 #include "private/performer_impl.h"
@@ -112,5 +112,8 @@ class RepeaterImpl {
 };
 
 }  // namespace barely
+
+struct BarelyRepeater : public barely::RepeaterImpl {};
+static_assert(sizeof(BarelyRepeater) == sizeof(barely::RepeaterImpl));
 
 #endif  // BARELYMUSICIAN_PRIVATE_REPEATER_H_

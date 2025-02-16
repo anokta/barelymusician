@@ -17,7 +17,6 @@ endfunction()
 
 add_demo(
   arpeggiator_demo
-  barelycomposer
   barelymusician
   examples_common_audio_clock
   examples_common_audio_output
@@ -55,7 +54,6 @@ add_demo(
 
 add_demo(
   musician_demo
-  barelycomposer
   barelymusician
   examples_common_audio_clock
   examples_common_audio_output
@@ -67,7 +65,6 @@ add_demo(
 
 add_demo(
   repeater_demo
-  barelycomposer
   barelymusician
   examples_common_audio_clock
   examples_common_audio_output
@@ -96,7 +93,6 @@ add_demo(
 
 add_demo(
   trigger_demo
-  barelycomposer
   barelymusician
   examples_common_audio_clock
   examples_common_audio_output

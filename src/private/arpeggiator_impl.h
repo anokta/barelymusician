@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "barelycomposer.h"
+#include "barelymusician.h"
 #include "private/engine_impl.h"
 #include "private/instrument_impl.h"
 #include "private/performer_impl.h"
@@ -122,5 +122,8 @@ class ArpeggiatorImpl {
 };
 
 }  // namespace barely
+
+struct BarelyArpeggiator : public barely::ArpeggiatorImpl {};
+static_assert(sizeof(BarelyArpeggiator) == sizeof(barely::ArpeggiatorImpl));
 
 #endif  // BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_IMPL_H_

@@ -8,7 +8,6 @@ target_compile_definitions(
 )
 target_link_libraries(
   barelymusicianunity PUBLIC
-  barelycomposer
   barelymusician
 )
 if(MSVC)

@@ -6,9 +6,9 @@
 #include <cmath>
 
 #include "barelymusician.h"
+#include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
 #include "dsp/envelope.h"
-#include "dsp/one_pole_filter.h"
 #include "dsp/oscillator.h"
 #include "dsp/sample_player.h"
 #include "dsp/voice.h"
@@ -26,8 +26,8 @@ class Voice {
     /// Bit crusher increment (for sample rate reduction).
     float bit_crusher_increment = 1.0f;
 
-    /// Filter coefficient.
-    float filter_coefficient = 1.0f;
+    /// Filter coefficients.
+    BiquadFilter::Coefficients filter_coefficients = {};
 
     /// Osc mix.
     float osc_mix = 0.0f;
@@ -38,17 +38,15 @@ class Voice {
 
   /// Returns the next output sample.
   ///
-  /// @tparam kFilterType Filter type.
   /// @tparam kOscMode Osc mode.
   /// @tparam kOscShape Osc shape.
   /// @tparam kSamplePlaybackMode Sample playback mode.
   /// @param voice Voice.
   /// @param params Voice process parameters.
   /// @return Next output value.
-  template <FilterType kFilterType, OscMode kOscMode, OscShape kOscShape,
-            SamplePlaybackMode kSamplePlaybackMode>
+  template <OscMode kOscMode, OscShape kOscShape, SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] static float Next(Voice& voice, const Params& params) noexcept {
-    return voice.Next<kFilterType, kOscMode, kOscShape, kSamplePlaybackMode>(params);
+    return voice.Next<kOscMode, kOscShape, kSamplePlaybackMode>(params);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -95,8 +93,7 @@ class Voice {
   }
 
  private:
-  template <FilterType kFilterType, OscMode kOscMode, OscShape kOscShape,
-            SamplePlaybackMode kSamplePlaybackMode>
+  template <OscMode kOscMode, OscShape kOscShape, SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] float Next(const Params& params) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!sample_player_.IsActive()) {
@@ -121,14 +118,14 @@ class Voice {
       output *= ((1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample * sample_player_sample +
                  sample_player_output);
     }
-    return bit_crusher_.Next(filter_.Next<kFilterType>(output, params.filter_coefficient),
+    return bit_crusher_.Next(filter_.Next(output, params.filter_coefficients),
                              params.bit_crusher_range, params.bit_crusher_increment);
   }
 
   float gain_ = 0.0f;
   BitCrusher bit_crusher_;
   Envelope envelope_;
-  OnePoleFilter filter_;
+  BiquadFilter filter_;
   Oscillator osc_;
   SamplePlayer sample_player_;
 };

@@ -1,4 +1,13 @@
 add_library(
+  barelymusician_dsp_biquad_filter INTERFACE
+  biquad_filter.h
+)
+target_link_libraries(
+  barelymusician_dsp_biquad_filter INTERFACE
+  barelymusician_headeronly
+)
+
+add_library(
   barelymusician_dsp_bit_crusher INTERFACE
   bit_crusher.h
 )
@@ -26,6 +35,7 @@ add_library(
 )
 target_link_libraries(
   barelymusician_dsp_instrument_processor
+  barelymusician_dsp_biquad_filter
   barelymusician_dsp_bit_crusher
   barelymusician_dsp_envelope
   barelymusician_dsp_gain_processor
@@ -79,15 +89,27 @@ add_library(
 )
 target_link_libraries(
   barelymusician_dsp_voice INTERFACE
+  barelymusician_dsp_biquad_filter
   barelymusician_dsp_bit_crusher
   barelymusician_dsp_envelope
-  barelymusician_dsp_one_pole_filter
   barelymusician_dsp_oscillator
   barelymusician_dsp_sample_player
   barelymusician_headeronly
 )
 
 if(ENABLE_TESTS)
+  add_executable(
+    barelymusician_dsp_biquad_filter_test
+    biquad_filter_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_dsp_biquad_filter_test
+    barelymusician_dsp_biquad_filter
+    barelymusician
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_dsp_biquad_filter_test)
+
   add_executable(
     barelymusician_dsp_bit_crusher_test
     bit_crusher_test.cpp

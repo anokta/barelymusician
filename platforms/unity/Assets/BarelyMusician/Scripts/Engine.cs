@@ -80,6 +80,8 @@ namespace Barely {
         [InspectorName("Filter Type")] FILTER_TYPE,
         /// Filter frequency in hertz.
         [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
+        /// Filter Q factor.
+        [InspectorName("Filter Q")] FILTER_Q,
         /// Bit crusher depth.
         [InspectorName("Bit Crusher Depth")] BIT_CRUSHER_DEPTH,
         /// Bit crusher rate.

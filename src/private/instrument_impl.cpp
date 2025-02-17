@@ -11,11 +11,27 @@
 #include "common/message.h"
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
-#include "dsp/one_pole_filter.h"
 #include "dsp/oscillator.h"
 #include "dsp/sample_data.h"
 
 namespace barely {
+
+namespace {
+
+// TODO(#146): Revamp this for all control types.
+ControlMessage BuildControlMessage(ControlType type, float value) noexcept {
+  switch (type) {
+    case ControlType::kGain:
+      return ControlMessage{type, AmplitudeFromDecibels(value)};
+    case ControlType::kPulseWidth:
+      return ControlMessage{type, NormalizePulseWidth(value)};
+    default:
+      break;
+  }
+  return ControlMessage{type, value};
+}
+
+}  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentImpl::InstrumentImpl(int sample_rate, float reference_frequency,
@@ -151,20 +167,6 @@ void InstrumentImpl::SetSampleData(SampleData sample_data) noexcept {
 void InstrumentImpl::Update(int64_t update_sample) noexcept {
   assert(update_sample >= update_sample_);
   update_sample_ = update_sample;
-}
-
-ControlMessage InstrumentImpl::BuildControlMessage(ControlType type, float value) const noexcept {
-  switch (type) {
-    case ControlType::kGain:
-      return ControlMessage{type, AmplitudeFromDecibels(value)};
-    case ControlType::kPulseWidth:
-      return ControlMessage{type, NormalizePulseWidth(value)};
-    case ControlType::kFilterFrequency:
-      return ControlMessage{type, GetFilterCoefficient(sample_rate_, value)};
-    default:
-      break;
-  }
-  return ControlMessage{type, value};
 }
 
 }  // namespace barely

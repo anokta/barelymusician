@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <limits>
 #include <span>
@@ -170,9 +171,6 @@ class InstrumentImpl {
   using ControlArray = std::array<Control, BarelyControlType_kCount>;
   using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
 
-  /// Builds a control message to be passed into the instrument processor.
-  ControlMessage BuildControlMessage(ControlType type, float value) const noexcept;
-
   // Sampling rate in hertz.
   const int sample_rate_ = 0;
 
@@ -194,6 +192,7 @@ class InstrumentImpl {
       Control(0, 0, BarelySamplePlaybackMode_kCount - 1),  // kSamplePlaybackMode
       Control(0, 0, BarelyFilterType_kCount - 1),          // kFilterType
       Control(0.0f, 0.0f),                                 // kFilterFrequency
+      Control(std::sqrt(0.5f), 0.1f),                      // kFilterQ
       Control(16.0f, 1.0f, 16.0f),                         // kBitCrusherDepth
       Control(1.0f, 0.0f, 1.0f),                           // kBitCrusherRate
   };

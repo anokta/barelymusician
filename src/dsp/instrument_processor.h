@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_
 
 #include <array>
+#include <cmath>
 
 #include "dsp/envelope.h"
 #include "dsp/gain_processor.h"
@@ -95,7 +96,7 @@ class InstrumentProcessor {
   }
 
   VoiceCallback voice_callback_ =
-      Voice::Next<FilterType::kNone, OscMode::kMix, OscShape::kNone, SamplePlaybackMode::kNone>;
+      Voice::Next<OscMode::kMix, OscShape::kNone, SamplePlaybackMode::kNone>;
   std::array<VoiceState, kMaxVoiceCount> voice_states_;
   int voice_count_ = 8;
 
@@ -105,7 +106,10 @@ class InstrumentProcessor {
   GainProcessor gain_processor_;
   SampleData sample_data_;
 
+  // TODO(#146): Filter coefficients should likely be calculated in `InstrumentImpl` instead.
   FilterType filter_type_ = FilterType::kNone;
+  float filter_frequency_ = 0.0f;
+  float filter_q_ = std::sqrt(0.5f);
   OscMode osc_mode_ = OscMode::kMix;
   OscShape osc_shape_ = OscShape::kNone;
   SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;

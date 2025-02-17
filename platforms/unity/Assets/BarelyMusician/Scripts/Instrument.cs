@@ -181,6 +181,10 @@ namespace Barely {
     [Range(0.0f, 48000.0f)]
     public float FilterFrequency = 0.0f;
 
+    /// Filter Q factor.
+    [Range(0.1f, 10.0f)]
+    public float FilterQ = 0.71f;
+
     [Header("Bit Crusher")]
 
     /// Bit crusher depth.
@@ -337,6 +341,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
       SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
       SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Engine.Internal.ControlType.FILTER_Q, FilterQ);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
     }

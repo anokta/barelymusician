@@ -332,13 +332,13 @@ typedef enum BarelyOscShape {
   /// None.
   BarelyOscShape_kNone = 0,
   /// Sine wave.
-  BarelyOscShape_kSine,
+  BarelyOscShape_kSine = 1,
   /// Sawtooth wave.
-  BarelyOscShape_kSaw,
+  BarelyOscShape_kSaw = 4,
   /// Square wave.
-  BarelyOscShape_kSquare,
+  BarelyOscShape_kSquare = 2,
   /// White noise.
-  BarelyOscShape_kNoise,
+  BarelyOscShape_kNoise = 3,
   /// Number of oscillator shapes.
   BarelyOscShape_kCount,
 } BarelyOscShape;

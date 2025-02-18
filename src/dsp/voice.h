@@ -9,9 +9,9 @@
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
 #include "dsp/envelope.h"
-#include "dsp/oscillator.h"
 #include "dsp/sample_player.h"
 #include "dsp/voice.h"
+#include "dsp/wavetable_osc.h"
 
 namespace barely {
 
@@ -31,6 +31,9 @@ class Voice {
 
     /// Osc mix.
     float osc_mix = 0.0f;
+
+    // Osc shape.
+    float osc_shape = 0.0f;
 
     /// Osc pulse width.
     float pulse_width = 0.5f;
@@ -93,6 +96,7 @@ class Voice {
   }
 
  private:
+  // TODO: Can stil template `int kOscShape`, then, give the fractional part as parameter instead.
   template <OscMode kOscMode, OscShape kOscShape, SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] float Next(const Params& params) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
@@ -102,7 +106,7 @@ class Voice {
       }
     }
 
-    float osc_sample = osc_.Next<kOscShape>(params.pulse_width);
+    float osc_sample = osc_.Next(params.osc_shape);
     float sample_player_sample = sample_player_.Next<kSamplePlaybackMode>();
     const float sample_player_output =
         (1.0f - std::max(0.0f, params.osc_mix)) * sample_player_sample;
@@ -126,7 +130,7 @@ class Voice {
   BitCrusher bit_crusher_;
   Envelope envelope_;
   BiquadFilter filter_;
-  Oscillator osc_;
+  WavetableOsc osc_;
   SamplePlayer sample_player_;
 };
 

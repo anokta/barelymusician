@@ -83,6 +83,12 @@ target_link_libraries(
   barelymusician_headeronly
 )
 
+
+add_library(
+  barelymusician_dsp_wavetable_osc INTERFACE
+  wavetable_osc.h
+)
+
 add_library(
   barelymusician_dsp_voice INTERFACE
   voice.h
@@ -92,8 +98,8 @@ target_link_libraries(
   barelymusician_dsp_biquad_filter
   barelymusician_dsp_bit_crusher
   barelymusician_dsp_envelope
-  barelymusician_dsp_oscillator
   barelymusician_dsp_sample_player
+  barelymusician_dsp_wavetable_osc
   barelymusician_headeronly
 )
 

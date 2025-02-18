@@ -32,19 +32,19 @@ namespace Barely {
     [InspectorName("Ring")] RING,
   }
 
-  /// Oscillator shape.
-  public enum OscShape {
-    /// None.
-    [InspectorName("None")] NONE = 0,
-    /// Sine wave.
-    [InspectorName("Sine")] SINE,
-    /// Sawtooth wave.
-    [InspectorName("Saw")] SAW,
-    /// Square wave.
-    [InspectorName("Square")] SQUARE,
-    /// White noise.
-    [InspectorName("Noise")] NOISE,
-  }
+  // /// Oscillator shape.
+  // public enum OscShape {
+  //   /// None.
+  //   [InspectorName("None")] NONE = 0,
+  //   /// Sine wave.
+  //   [InspectorName("Sine")] SINE,
+  //   /// Sawtooth wave.
+  //   [InspectorName("Saw")] SAW,
+  //   /// Square wave.
+  //   [InspectorName("Square")] SQUARE,
+  //   /// White noise.
+  //   [InspectorName("Noise")] NOISE,
+  // }
 
   /// Sample playback mode.
   public enum SamplePlaybackMode {
@@ -157,7 +157,8 @@ namespace Barely {
     public float OscPitchShift = 0.0f;
 
     /// Oscillator shape.
-    public OscShape OscShape = OscShape.NONE;
+    [Range(0.0f, 1.0f)]
+    public float OscShape = 0.0f;
 
     /// Pulse width.
     [Range(0.0f, 1.0f)]
@@ -334,7 +335,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.OSC_MIX, OscMix);
       SetControl(Engine.Internal.ControlType.OSC_MODE, (float)OscMode);
       SetControl(Engine.Internal.ControlType.OSC_PITCH_SHIFT, OscPitchShift);
-      SetControl(Engine.Internal.ControlType.OSC_SHAPE, (float)OscShape);
+      SetControl(Engine.Internal.ControlType.OSC_SHAPE, OscShape);
       SetControl(Engine.Internal.ControlType.PULSE_WIDTH, PulseWidth);
       SetControl(Engine.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (float)SamplePlaybackMode);
       SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);

@@ -187,7 +187,7 @@ class InstrumentImpl {
       Control(0.0f, -1.0f, 1.0f),                          // kOscMix
       Control(0, 0, BarelyOscMode_kCount - 1),             // kOscMode
       Control(0.0f),                                       // kOscPitchShift
-      Control(0, 0, BarelyOscShape_kCount - 1),            // kOscShape
+      Control(0.0f, 0.0f, 1.0f),                           // kOscShape
       Control(0.5f, 0.0f, 1.0f),                           // kPulseWidth
       Control(0, 0, BarelySamplePlaybackMode_kCount - 1),  // kSamplePlaybackMode
       Control(0, 0, BarelyFilterType_kCount - 1),          // kFilterType

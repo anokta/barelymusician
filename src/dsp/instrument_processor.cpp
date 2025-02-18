@@ -157,12 +157,12 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
     case ControlType::kOscMode:
       osc_mode_ = static_cast<OscMode>(value);
       voice_callback_ =
-          GetVoiceCallback(osc_mode_, osc_shape_, sample_data_, sample_playback_mode_);
+          GetVoiceCallback(osc_mode_, OscShape::kSine, sample_data_, sample_playback_mode_);
       break;
     case ControlType::kOscShape:
-      osc_shape_ = static_cast<OscShape>(value);
+      voice_params_.osc_shape = value;
       voice_callback_ =
-          GetVoiceCallback(osc_mode_, osc_shape_, sample_data_, sample_playback_mode_);
+          GetVoiceCallback(osc_mode_, OscShape::kSine, sample_data_, sample_playback_mode_);
       break;
     case ControlType::kPulseWidth:
       voice_params_.pulse_width = value;
@@ -170,7 +170,7 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
     case ControlType::kSamplePlaybackMode:
       sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
       voice_callback_ =
-          GetVoiceCallback(osc_mode_, osc_shape_, sample_data_, sample_playback_mode_);
+          GetVoiceCallback(osc_mode_, OscShape::kSine, sample_data_, sample_playback_mode_);
       break;
     case ControlType::kFilterType:
       filter_type_ = static_cast<FilterType>(value);
@@ -264,7 +264,8 @@ void InstrumentProcessor::SetReferenceFrequency(float reference_frequency) noexc
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   sample_data_.Swap(sample_data);
-  voice_callback_ = GetVoiceCallback(osc_mode_, osc_shape_, sample_data_, sample_playback_mode_);
+  voice_callback_ =
+      GetVoiceCallback(osc_mode_, OscShape::kSine, sample_data_, sample_playback_mode_);
   for (int i = 0; i < voice_count_; ++i) {
     if (Voice& voice = voice_states_[i].voice; !voice.IsActive()) {
       voice.set_sample_player_slice(nullptr);

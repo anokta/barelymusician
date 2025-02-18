@@ -111,7 +111,8 @@ class InstrumentProcessor {
   float filter_frequency_ = 0.0f;
   float filter_q_ = std::sqrt(0.5f);
   OscMode osc_mode_ = OscMode::kMix;
-  OscShape osc_shape_ = OscShape::kNone;
+  float osc_shape_ = 0.0f;
+  // OscShape osc_shape_ = OscShape::kNone;
   SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
 
   Voice::Params voice_params_ = {};

@@ -18,8 +18,9 @@ TEST(OscillatorTest, Next) {
   osc.SetIncrement(kPitch, kReferenceFrequency, kSampleInterval);
 
   for (int cycle = 0; cycle < kCycleCount; ++cycle) {
-    for (int i = -2; i < 2; ++i) {
-      EXPECT_FLOAT_EQ(osc.Next<OscShape::kSaw>(kPulseWidth), static_cast<float>(i) * 0.5f);
+    for (int i = 0; i < 4; ++i) {
+      EXPECT_FLOAT_EQ(osc.Next<OscShape::kSaw>(kPulseWidth),
+                      (i < 2) ? static_cast<float>(i) * 0.5f : static_cast<float>(i - 4) * 0.5f);
     }
   }
 }

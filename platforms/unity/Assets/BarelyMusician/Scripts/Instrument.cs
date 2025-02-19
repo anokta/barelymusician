@@ -38,10 +38,12 @@ namespace Barely {
     [InspectorName("None")] NONE = 0,
     /// Sine wave.
     [InspectorName("Sine")] SINE,
-    /// Sawtooth wave.
-    [InspectorName("Saw")] SAW,
+    /// Triangle wave.
+    [InspectorName("Triangle")] TRIANGLE,
     /// Square wave.
     [InspectorName("Square")] SQUARE,
+    /// Sawtooth wave.
+    [InspectorName("Saw")] SAW,
     /// White noise.
     [InspectorName("Noise")] NOISE,
   }

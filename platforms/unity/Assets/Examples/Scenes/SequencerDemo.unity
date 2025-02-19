@@ -212,16 +212,22 @@ MonoBehaviour:
   PitchShift: 0
   Retrigger: 0
   VoiceCount: 8
-  Attack: 0.05000000074505806
+  Attack: 0.05
   Decay: 0
-  Sustain: 0.800000011920929
+  Sustain: 0.8
   Release: 0.5
-  OscillatorShape: 3
+  OscMode: 0
+  OscMix: 0
+  OscPitchShift: 0
+  OscShape: 3
   PulseWidth: 0.5
   SamplePlaybackMode: 0
   Slices: []
   FilterType: 0
   FilterFrequency: 0
+  FilterQ: 0.71
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -739,7 +745,10 @@ MonoBehaviour:
   Decay: 0
   Sustain: 1
   Release: 0
-  OscillatorShape: 0
+  OscMode: 0
+  OscMix: 0
+  OscPitchShift: 0
+  OscShape: 0
   PulseWidth: 0.5
   SamplePlaybackMode: 1
   Slices:
@@ -753,6 +762,9 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
   FilterType: 0
   FilterFrequency: 0
+  FilterQ: 0.71
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1031,16 +1043,22 @@ MonoBehaviour:
   PitchShift: 0
   Retrigger: 0
   VoiceCount: 8
-  Attack: 0.10000000149011612
+  Attack: 0.1
   Decay: 0
   Sustain: 1
   Release: 0.5
-  OscillatorShape: 1
+  OscMode: 0
+  OscMix: 0
+  OscPitchShift: 0
+  OscShape: 1
   PulseWidth: 0.5
   SamplePlaybackMode: 0
   Slices: []
   FilterType: 0
   FilterFrequency: 0
+  FilterQ: 0.71
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1372,13 +1390,19 @@ MonoBehaviour:
   Attack: 0
   Decay: 0
   Sustain: 1
-  Release: 0.05000000074505806
-  OscillatorShape: 2
+  Release: 0.05
+  OscMode: 0
+  OscMix: 0
+  OscPitchShift: 0
+  OscShape: 4
   PulseWidth: 0.5
   SamplePlaybackMode: 0
   Slices: []
   FilterType: 0
   FilterFrequency: 0
+  FilterQ: 0.71
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1587,8 +1611,11 @@ MonoBehaviour:
   Attack: 0
   Decay: 0
   Sustain: 1
-  Release: 0.07500000298023224
-  OscillatorShape: 0
+  Release: 0.075
+  OscMode: 0
+  OscMix: 0
+  OscPitchShift: 0
+  OscShape: 0
   PulseWidth: 0.5
   SamplePlaybackMode: 2
   Slices:
@@ -1596,6 +1623,9 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   FilterType: 0
   FilterFrequency: 0
+  FilterQ: 0.71
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

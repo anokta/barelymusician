@@ -234,7 +234,7 @@ MonoBehaviour:
   color: {r: 1, g: 0.7019608, b: 0.7294118, a: 1}
   arpeggiator: {fileID: 1737834384}
   enableModeSwitch: 1
-  oscillatorShape: 1
+  oscShape: 1
   samplePlaybackMode: 3
 --- !u!114 &675413002
 MonoBehaviour:
@@ -476,7 +476,10 @@ MonoBehaviour:
   Decay: 0
   Sustain: 1
   Release: 0.25
-  OscillatorShape: 1
+  OscMode: 0
+  OscMix: 0
+  OscPitchShift: 0
+  OscShape: 1
   PulseWidth: 0.5
   SamplePlaybackMode: 0
   Slices:
@@ -484,6 +487,9 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   FilterType: 0
   FilterFrequency: 0
+  FilterQ: 0.71
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -625,7 +631,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3e33e299faeb1c4594f9b34c46299e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ProcessOrder: 0
   GateRatio: 0.5
   Rate: 2
   Style: 0

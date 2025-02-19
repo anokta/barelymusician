@@ -246,18 +246,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Gain: -10
+  PitchShift: 0
+  Retrigger: 0
   VoiceCount: 8
-  OscillatorShape: 1
-  SamplePlaybackMode: 0
-  Samplers: []
-  Attack: 0.004999999888241291
+  Attack: 0.005
   Decay: 0
   Sustain: 1
   Release: 0.5
-  PitchShift: 0
-  Retrigger: 0
+  OscMode: 0
+  OscMix: 0
+  OscPitchShift: 0
+  OscShape: 1
+  PulseWidth: 0.5
+  SamplePlaybackMode: 0
+  Slices: []
   FilterType: 0
   FilterFrequency: 0
+  FilterQ: 0.71
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

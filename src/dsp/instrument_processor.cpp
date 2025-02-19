@@ -37,10 +37,12 @@ VoiceCallback GetVoiceCallback(OscMode oscillator_mode, OscShape oscillator_shap
       return GetVoiceCallback<OscShape::kNone, kSamplePlaybackMode>(oscillator_mode);
     case OscShape::kSine:
       return GetVoiceCallback<OscShape::kSine, kSamplePlaybackMode>(oscillator_mode);
-    case OscShape::kSaw:
-      return GetVoiceCallback<OscShape::kSaw, kSamplePlaybackMode>(oscillator_mode);
+    case OscShape::kTriangle:
+      return GetVoiceCallback<OscShape::kTriangle, kSamplePlaybackMode>(oscillator_mode);
     case OscShape::kSquare:
       return GetVoiceCallback<OscShape::kSquare, kSamplePlaybackMode>(oscillator_mode);
+    case OscShape::kSaw:
+      return GetVoiceCallback<OscShape::kSaw, kSamplePlaybackMode>(oscillator_mode);
     case OscShape::kNoise:
       return GetVoiceCallback<OscShape::kNoise, kSamplePlaybackMode>(oscillator_mode);
     default:

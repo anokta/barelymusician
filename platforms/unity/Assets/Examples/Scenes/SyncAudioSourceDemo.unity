@@ -629,15 +629,18 @@ MonoBehaviour:
   Decay: 0.1
   Sustain: 0.9
   Release: 0.2
-  OscillatorMode: 0
-  OscillatorMix: 0
-  OscillatorPitchShift: 0
-  OscillatorShape: 1
+  OscMode: 0
+  OscMix: 0
+  OscPitchShift: 0
+  OscShape: 2
   PulseWidth: 0.5
   SamplePlaybackMode: 0
   Slices: []
   FilterType: 0
   FilterFrequency: 0
+  FilterQ: 0.71
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

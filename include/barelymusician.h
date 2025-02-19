@@ -333,10 +333,12 @@ typedef enum BarelyOscShape {
   BarelyOscShape_kNone = 0,
   /// Sine wave.
   BarelyOscShape_kSine,
-  /// Sawtooth wave.
-  BarelyOscShape_kSaw,
+  /// Triangle wave.
+  BarelyOscShape_kTriangle,
   /// Square wave.
   BarelyOscShape_kSquare,
+  /// Sawtooth wave.
+  BarelyOscShape_kSaw,
   /// White noise.
   BarelyOscShape_kNoise,
   /// Number of oscillator shapes.
@@ -1136,10 +1138,12 @@ enum class OscShape {
   kNone = BarelyOscShape_kNone,
   /// Sine wave.
   kSine = BarelyOscShape_kSine,
-  /// Sawtooth wave.
-  kSaw = BarelyOscShape_kSaw,
+  /// Triangle wave.
+  kTriangle = BarelyOscShape_kTriangle,
   /// Square wave.
   kSquare = BarelyOscShape_kSquare,
+  /// Sawtooth wave.
+  kSaw = BarelyOscShape_kSaw,
   /// White noise.
   kNoise = BarelyOscShape_kNoise,
 };

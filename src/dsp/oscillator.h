@@ -23,10 +23,12 @@ class Oscillator {
     float output = 0.0f;
     if constexpr (kShape == OscShape::kSine) {
       output = std::sin(phase_ * 2.0f * std::numbers::pi_v<float>);
-    } else if constexpr (kShape == OscShape::kSaw) {
-      output = 2.0f * phase_ - 1.0f;
+    } else if constexpr (kShape == OscShape::kTriangle) {
+      output = 4.0f * std::abs(phase_ - std::floor(phase_ + 0.75f) + 0.25f) - 1.0f;
     } else if constexpr (kShape == OscShape::kSquare) {
-      output = (phase_ < pulse_width) ? -1.0f : 1.0f;
+      output = (phase_ < pulse_width) ? 1.0f : -1.0f;
+    } else if constexpr (kShape == OscShape::kSaw) {
+      output = 2.0f * (phase_ - std::floor(phase_ + 0.5f));
     } else if constexpr (kShape == OscShape::kNoise) {
       output = random_.DrawUniform(-1.0f, 1.0f);
     }

@@ -9,7 +9,8 @@ namespace Barely.Examples {
 
     public Arpeggiator arpeggiator = null;
     public bool enableModeSwitch = false;
-    public OscShape oscShape = OscShape.SINE;
+    [Range(0.0f, 1.0f)]
+    public float oscShape = 0.0f;
     public SamplePlaybackMode samplePlaybackMode = SamplePlaybackMode.LOOP;
 
     private const int N = 4;
@@ -58,12 +59,13 @@ namespace Barely.Examples {
         return;
       }
       if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
+        controller.instrument.OscMix = 1.0f;
         controller.instrument.OscShape = oscShape;
-        controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
       } else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
-        controller.instrument.OscShape = OscShape.NONE;
+        controller.instrument.OscMix = -1.0f;
         controller.instrument.SamplePlaybackMode = samplePlaybackMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
+        controller.instrument.OscMix = 0.0f;
         controller.instrument.OscShape = oscShape;
         controller.instrument.SamplePlaybackMode = samplePlaybackMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) {

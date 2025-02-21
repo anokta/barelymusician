@@ -16,7 +16,6 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscShape;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -27,7 +26,7 @@ constexpr int kSampleCount = 256;
 
 // Instrument settings.
 constexpr float kGain = -18.0f;
-constexpr OscShape kOscShape = OscShape::kSaw;
+constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.05f;
 constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;

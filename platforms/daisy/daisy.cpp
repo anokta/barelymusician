@@ -6,7 +6,6 @@
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::OscShape;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
 using ::daisy::MidiMessageType;
@@ -20,26 +19,25 @@ constexpr size_t kFrameCount = 16;
 
 // Instrument settings.
 constexpr float kGain = -18.0f;
-constexpr OscShape kOscShape = OscShape::kSquare;
 constexpr float kAttack = 0.05f;
 constexpr float kRelease = 0.125f;
+constexpr float kOscShapeIncrement = 0.1f;
 constexpr int kVoiceCount = 16;
-
-constexpr int kOscCount = static_cast<int>(BarelyOscShape_kCount);
 
 static DaisyPod hw;  // target the Daisy Pod hardware.
 static MidiUsbHandler midi;
 
 static Instrument* instrument_ptr = nullptr;
-static int osc_index = static_cast<int>(kOscShape);
+static float osc_shape = 0.0f;
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
   hw.ProcessAllControls();
 
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
-    osc_index = (osc_index + increment + kOscCount) % kOscCount;
-    instrument_ptr->SetControl(ControlType::kOscShape, static_cast<OscShape>(osc_index));
+    osc_shape =
+        std::clamp(osc_shape + kOscShapeIncrement * static_cast<float>(increment), 0.0f, 1.0f);
+    instrument_ptr->SetControl(ControlType::kOscShape, osc_shape);
   }
 
   // Process samples.
@@ -63,7 +61,7 @@ int main(void) {
 
   Instrument instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscShape, kOscShape);
+  instrument.SetControl(ControlType::kOscShape, osc_shape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

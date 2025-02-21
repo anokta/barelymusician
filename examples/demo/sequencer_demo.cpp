@@ -15,7 +15,6 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscShape;
 using ::barely::Task;
 using ::barely::TaskState;
 using ::barely::examples::AudioClock;
@@ -31,7 +30,7 @@ constexpr double kLookahead = 0.1;
 
 // Instrument settings.
 constexpr float kGain = -20.0f;
-constexpr OscShape kOscShape = OscShape::kSaw;
+constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 

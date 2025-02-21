@@ -12,6 +12,7 @@
 #include "dsp/oscillator.h"
 #include "dsp/sample_player.h"
 #include "dsp/voice.h"
+#include "private/random_impl.h"
 
 namespace barely {
 
@@ -29,24 +30,29 @@ class Voice {
     /// Filter coefficients.
     BiquadFilter::Coefficients filter_coefficients = {};
 
-    /// Osc mix.
+    /// Oscillator mix.
     float osc_mix = 0.0f;
 
-    /// Osc pulse width.
-    float pulse_width = 0.5f;
+    /// Oscillator noise mix.
+    float osc_noise_mix = -1.0f;
+
+    /// Oscillator shape.
+    float osc_shape = 0.0f;
+
+    /// Oscillator skew.
+    float osc_skew = 0.0f;
   };
 
   /// Returns the next output sample.
   ///
-  /// @tparam kOscMode Osc mode.
-  /// @tparam kOscShape Osc shape.
+  /// @tparam kOscMode Oscillator mode.
   /// @tparam kSamplePlaybackMode Sample playback mode.
   /// @param voice Voice.
   /// @param params Voice process parameters.
   /// @return Next output value.
-  template <OscMode kOscMode, OscShape kOscShape, SamplePlaybackMode kSamplePlaybackMode>
+  template <OscMode kOscMode, SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] static float Next(Voice& voice, const Params& params) noexcept {
-    return voice.Next<kOscMode, kOscShape, kSamplePlaybackMode>(params);
+    return voice.Next<kOscMode, kSamplePlaybackMode>(params);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -93,7 +99,7 @@ class Voice {
   }
 
  private:
-  template <OscMode kOscMode, OscShape kOscShape, SamplePlaybackMode kSamplePlaybackMode>
+  template <OscMode kOscMode, SamplePlaybackMode kSamplePlaybackMode>
   [[nodiscard]] float Next(const Params& params) noexcept {
     if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
       if (!sample_player_.IsActive()) {
@@ -102,11 +108,15 @@ class Voice {
       }
     }
 
-    float osc_sample = osc_.Next<kOscShape>(params.pulse_width);
+    float osc_sample =
+        (1.0f - std::max(0.0f, params.osc_noise_mix)) *
+            osc_.Next(params.osc_shape, params.osc_skew) +
+        (1.0f - std::max(0.0f, -params.osc_noise_mix)) * random_.DrawUniform(-1.0f, 1.0f);
     float sample_player_sample = sample_player_.Next<kSamplePlaybackMode>();
     const float sample_player_output =
         (1.0f - std::max(0.0f, params.osc_mix)) * sample_player_sample;
     float output = gain_ * envelope_.Next();
+
     if constexpr (kOscMode == OscMode::kMix) {
       output *= ((1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample + sample_player_output);
     } else {
@@ -118,6 +128,7 @@ class Voice {
       output *= ((1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample * sample_player_sample +
                  sample_player_output);
     }
+
     return bit_crusher_.Next(filter_.Next(output, params.filter_coefficients),
                              params.bit_crusher_range, params.bit_crusher_increment);
   }
@@ -128,6 +139,9 @@ class Voice {
   BiquadFilter filter_;
   Oscillator osc_;
   SamplePlayer sample_player_;
+
+  // White noise random number generator.
+  inline static RandomImpl random_ = RandomImpl();
 };
 
 /// Voice callback alias.

@@ -15,7 +15,6 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscShape;
 using ::barely::Scale;
 using ::barely::Task;
 using ::barely::TaskState;
@@ -36,7 +35,7 @@ constexpr std::array<float, 7> kMajor = {
 
 // Instrument settings.
 constexpr float kGain = -20.0f;
-constexpr OscShape kOscShape = OscShape::kSaw;
+constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 

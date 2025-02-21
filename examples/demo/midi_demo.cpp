@@ -24,7 +24,6 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::OscShape;
 using ::barely::Performer;
 using ::barely::Task;
 using ::barely::TaskState;
@@ -42,7 +41,7 @@ constexpr int kSampleCount = 512;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr OscShape kInstrumentOscShape = OscShape::kSquare;
+constexpr float kInstrumentOscShape = 0.5f;
 constexpr float kInstrumentEnvelopeAttack = 0.0f;
 constexpr float kInstrumentEnvelopeRelease = 0.2f;
 constexpr int kInstrumentVoiceCount = 16;

@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -208,7 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: -21
+  Gain: -24
   PitchShift: 0
   Retrigger: 0
   VoiceCount: 8
@@ -218,9 +217,10 @@ MonoBehaviour:
   Release: 0.5
   OscMode: 0
   OscMix: 0
+  OscNoiseMix: -1
   OscPitchShift: 0
-  OscShape: 3
-  PulseWidth: 0.5
+  OscShape: 0.67
+  OscSkew: 0
   SamplePlaybackMode: 0
   Slices: []
   FilterType: 0
@@ -387,13 +387,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 332735183}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &675412997
 GameObject:
@@ -482,13 +482,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 675412997}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &675413001
 MonoBehaviour:
@@ -588,13 +588,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 685451361}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!850595691 &748775628
 LightingSettings:
@@ -746,10 +746,11 @@ MonoBehaviour:
   Sustain: 1
   Release: 0
   OscMode: 0
-  OscMix: 0
+  OscMix: -1
+  OscNoiseMix: -1
   OscPitchShift: 0
   OscShape: 0
-  PulseWidth: 0.5
+  OscSkew: 0
   SamplePlaybackMode: 1
   Slices:
   - RootPitch: 0
@@ -874,13 +875,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1737834378}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1737834384
 MeshFilter:
@@ -1049,9 +1050,10 @@ MonoBehaviour:
   Release: 0.5
   OscMode: 0
   OscMix: 0
+  OscNoiseMix: -1
   OscPitchShift: 0
-  OscShape: 1
-  PulseWidth: 0.5
+  OscShape: 0
+  OscSkew: 0
   SamplePlaybackMode: 0
   Slices: []
   FilterType: 0
@@ -1168,13 +1170,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1886020156}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -1, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1886020162
 MeshFilter:
@@ -1341,13 +1343,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2031085259}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2031085264
 MonoBehaviour:
@@ -1393,9 +1395,10 @@ MonoBehaviour:
   Release: 0.05
   OscMode: 0
   OscMix: 0
+  OscNoiseMix: -0.95
   OscPitchShift: 0
-  OscShape: 4
-  PulseWidth: 0.5
+  OscShape: 0.5
+  OscSkew: -0.1
   SamplePlaybackMode: 0
   Slices: []
   FilterType: 0
@@ -1613,10 +1616,11 @@ MonoBehaviour:
   Sustain: 1
   Release: 0.075
   OscMode: 0
-  OscMix: 0
+  OscMix: -1
+  OscNoiseMix: -1
   OscPitchShift: 0
   OscShape: 0
-  PulseWidth: 0.5
+  OscSkew: 0
   SamplePlaybackMode: 2
   Slices:
   - RootPitch: 9
@@ -1735,13 +1739,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2110623100}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &2110623107
 MeshRenderer:
@@ -1793,3 +1797,14 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2110623100}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 675413000}
+  - {fileID: 1737834382}
+  - {fileID: 1886020161}
+  - {fileID: 332735191}
+  - {fileID: 2110623106}
+  - {fileID: 2031085263}
+  - {fileID: 685451363}

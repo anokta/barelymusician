@@ -57,11 +57,6 @@ add_library(
   barelymusician_dsp_oscillator INTERFACE
   oscillator.h
 )
-target_link_libraries(
-  barelymusician_dsp_oscillator INTERFACE
-  barelymusician_headeronly
-  barelymusician_private_random_impl
-)
 
 add_library(
   barelymusician_dsp_sample_data
@@ -95,6 +90,7 @@ target_link_libraries(
   barelymusician_dsp_oscillator
   barelymusician_dsp_sample_player
   barelymusician_headeronly
+  barelymusician_private_random_impl
 )
 
 if(ENABLE_TESTS)

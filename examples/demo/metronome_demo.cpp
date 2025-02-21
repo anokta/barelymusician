@@ -14,7 +14,6 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscShape;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -27,7 +26,7 @@ constexpr int kSampleCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Metronome settings.
-constexpr OscShape kOscShape = OscShape::kSquare;
+constexpr float kOscShape = 0.75f;
 constexpr float kGain = -12.0f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.05f;

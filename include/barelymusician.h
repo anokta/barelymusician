@@ -268,12 +268,14 @@ typedef enum BarelyControlType {
   BarelyControlType_kOscMix,
   /// Oscillator mode.
   BarelyControlType_kOscMode,
+  /// Oscillator noise mix.
+  BarelyControlType_kOscNoiseMix,
   /// Oscillator pitch shift.
   BarelyControlType_kOscPitchShift,
   /// Oscillator shape.
   BarelyControlType_kOscShape,
-  /// Pulse width.
-  BarelyControlType_kPulseWidth,
+  /// Oscillator skew.
+  BarelyControlType_kOscSkew,
   /// Sample playback mode.
   BarelyControlType_kSamplePlaybackMode,
   /// Filter type.
@@ -310,7 +312,7 @@ typedef enum BarelyNoteControlType {
   BarelyNoteControlType_kCount,
 } BarelyNoteControlType;
 
-/// Osc modes.
+/// Oscillator modes.
 typedef enum BarelyOscMode {
   /// Mix.
   BarelyOscMode_kMix = 0,
@@ -326,24 +328,6 @@ typedef enum BarelyOscMode {
   /// Number of oscillator modes.
   BarelyOscMode_kCount,
 } BarelyOscMode;
-
-/// Oscillator shapes.
-typedef enum BarelyOscShape {
-  /// None.
-  BarelyOscShape_kNone = 0,
-  /// Sine wave.
-  BarelyOscShape_kSine,
-  /// Triangle wave.
-  BarelyOscShape_kTriangle,
-  /// Square wave.
-  BarelyOscShape_kSquare,
-  /// Sawtooth wave.
-  BarelyOscShape_kSaw,
-  /// White noise.
-  BarelyOscShape_kNoise,
-  /// Number of oscillator shapes.
-  BarelyOscShape_kCount,
-} BarelyOscShape;
 
 /// Repeater style enum alias.
 typedef enum BarelyRepeaterStyle {
@@ -1081,12 +1065,14 @@ enum class ControlType {
   kOscMix = BarelyControlType_kOscMix,
   /// Oscillator mode.
   kOscMode = BarelyControlType_kOscMode,
+  /// Oscillator noise mix.
+  kOscNoiseMix = BarelyControlType_kOscNoiseMix,
   /// Oscillator pitch shift.
   kOscPitchShift = BarelyControlType_kOscPitchShift,
   /// Oscillator shape.
   kOscShape = BarelyControlType_kOscShape,
-  /// Pulse width.
-  kPulseWidth = BarelyControlType_kPulseWidth,
+  /// Oscillator skew.
+  kOscSkew = BarelyControlType_kOscSkew,
   /// Sample playback mode.
   kSamplePlaybackMode = BarelyControlType_kSamplePlaybackMode,
   /// Filter type.
@@ -1130,22 +1116,6 @@ enum class OscMode {
   // kFm = BarelyOscMode_kFm,
   /// Ring modulation.
   kRing = BarelyOscMode_kRing,
-};
-
-/// Oscillator shapes.
-enum class OscShape {
-  /// None.
-  kNone = BarelyOscShape_kNone,
-  /// Sine wave.
-  kSine = BarelyOscShape_kSine,
-  /// Triangle wave.
-  kTriangle = BarelyOscShape_kTriangle,
-  /// Square wave.
-  kSquare = BarelyOscShape_kSquare,
-  /// Sawtooth wave.
-  kSaw = BarelyOscShape_kSaw,
-  /// White noise.
-  kNoise = BarelyOscShape_kNoise,
 };
 
 /// Repeater style enum.

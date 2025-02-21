@@ -32,22 +32,6 @@ namespace Barely {
     [InspectorName("Ring")] RING,
   }
 
-  /// Oscillator shape.
-  public enum OscShape {
-    /// None.
-    [InspectorName("None")] NONE = 0,
-    /// Sine wave.
-    [InspectorName("Sine")] SINE,
-    /// Triangle wave.
-    [InspectorName("Triangle")] TRIANGLE,
-    /// Square wave.
-    [InspectorName("Square")] SQUARE,
-    /// Sawtooth wave.
-    [InspectorName("Saw")] SAW,
-    /// White noise.
-    [InspectorName("Noise")] NOISE,
-  }
-
   /// Sample playback mode.
   public enum SamplePlaybackMode {
     /// None.
@@ -154,16 +138,21 @@ namespace Barely {
     [Range(-1.0f, 1.0f)]
     public float OscMix = 0.0f;
 
+    /// Oscillator noise mix.
+    [Range(-1.0f, 1.0f)]
+    public float OscNoiseMix = -1.0f;
+
     /// Oscillator pitch shift.
     [Range(-1.0f, 1.0f)]
     public float OscPitchShift = 0.0f;
 
     /// Oscillator shape.
-    public OscShape OscShape = OscShape.NONE;
-
-    /// Pulse width.
     [Range(0.0f, 1.0f)]
-    public float PulseWidth = 0.5f;
+    public float OscShape = 0.0f;
+
+    /// Oscillator skew.
+    [Range(-0.5f, 0.5f)]
+    public float OscSkew = 0.0f;
 
     [Header("Sample Player")]
 
@@ -335,9 +324,10 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.RELEASE, Release);
       SetControl(Engine.Internal.ControlType.OSC_MIX, OscMix);
       SetControl(Engine.Internal.ControlType.OSC_MODE, (float)OscMode);
+      SetControl(Engine.Internal.ControlType.OSC_NOISE_MIX, OscNoiseMix);
       SetControl(Engine.Internal.ControlType.OSC_PITCH_SHIFT, OscPitchShift);
-      SetControl(Engine.Internal.ControlType.OSC_SHAPE, (float)OscShape);
-      SetControl(Engine.Internal.ControlType.PULSE_WIDTH, PulseWidth);
+      SetControl(Engine.Internal.ControlType.OSC_SHAPE, OscShape);
+      SetControl(Engine.Internal.ControlType.OSC_SKEW, OscSkew);
       SetControl(Engine.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (float)SamplePlaybackMode);
       SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
       SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);

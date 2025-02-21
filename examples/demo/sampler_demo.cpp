@@ -82,6 +82,7 @@ int main(int /*argc*/, char* argv[]) {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
+  instrument.SetControl(ControlType::kOscMix, -1.0f);
   instrument.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kLoop);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);

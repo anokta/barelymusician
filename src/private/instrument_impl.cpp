@@ -11,7 +11,6 @@
 #include "common/message.h"
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
-#include "dsp/oscillator.h"
 #include "dsp/sample_data.h"
 
 namespace barely {
@@ -23,8 +22,6 @@ ControlMessage BuildControlMessage(ControlType type, float value) noexcept {
   switch (type) {
     case ControlType::kGain:
       return ControlMessage{type, AmplitudeFromDecibels(value)};
-    case ControlType::kPulseWidth:
-      return ControlMessage{type, NormalizePulseWidth(value)};
     default:
       break;
   }

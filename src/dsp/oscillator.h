@@ -1,12 +1,10 @@
 #ifndef BARELYMUSICIAN_DSP_OSCILLATOR_H_
 #define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <numbers>
-
-#include "barelymusician.h"
-#include "private/random_impl.h"
 
 namespace barely {
 
@@ -15,22 +13,21 @@ class Oscillator {
  public:
   /// Generates the next output sample.
   ///
-  /// @tparam kShape Oscillator shape.
-  /// @param pulse_width Pulse width.
+  /// @param shape Oscillator shape.
+  /// @param skew Oscillator skew.
   /// @return Next output sample.
-  template <OscShape kShape>
-  [[nodiscard]] float Next([[maybe_unused]] float pulse_width) noexcept {
+  [[nodiscard]] float Next(float shape, float skew) noexcept {
     float output = 0.0f;
-    if constexpr (kShape == OscShape::kSine) {
-      output = std::sin(phase_ * 2.0f * std::numbers::pi_v<float>);
-    } else if constexpr (kShape == OscShape::kTriangle) {
-      output = 4.0f * std::abs(phase_ - std::floor(phase_ + 0.75f) + 0.25f) - 1.0f;
-    } else if constexpr (kShape == OscShape::kSquare) {
-      output = (phase_ < pulse_width) ? 1.0f : -1.0f;
-    } else if constexpr (kShape == OscShape::kSaw) {
-      output = 2.0f * (phase_ - std::floor(phase_ + 0.5f));
-    } else if constexpr (kShape == OscShape::kNoise) {
-      output = random_.DrawUniform(-1.0f, 1.0f);
+    const float skewed_phase = std::min(1.0f, (1.0f + skew) * phase_);
+    const float scaled_shape = shape * kShapeScale;
+    if (shape < kShapeSineToTriangle) {
+      output = std::lerp(Sine(skewed_phase), Triangle(skewed_phase), scaled_shape);
+    } else if (shape < kShapeTriangleToSquare) {
+      output = std::lerp(Triangle(skewed_phase), Square(skewed_phase),
+                         scaled_shape - kShapeTriangleOffset);
+    } else {
+      output = std::lerp(Square(skewed_phase), Sawtooth(skewed_phase),
+                         scaled_shape - kShapeSquareOffset);
     }
     phase_ += increment_;
     if (phase_ >= 1.0f) {
@@ -54,20 +51,29 @@ class Oscillator {
   }
 
  private:
+  [[nodiscard]] float Sine(float phase) noexcept {
+    return std::sin(phase * 2.0f * std::numbers::pi_v<float>);
+  }
+  [[nodiscard]] float Triangle(float phase) noexcept {
+    return 4.0f * std::abs(phase - std::floor(phase + 0.75f) + 0.25f) - 1.0f;
+  }
+  [[nodiscard]] float Square(float phase) noexcept { return (phase < 0.5f) ? 1.0f : -1.0f; }
+  [[nodiscard]] float Sawtooth(float phase) noexcept {
+    return 2.0f * (phase - std::floor(phase + 0.5f));
+  }
+
+  static inline constexpr float kShapeScale = 3.0f;
+  static inline constexpr float kShapeTriangleOffset = 1.0f;
+  static inline constexpr float kShapeSineToTriangle = kShapeTriangleOffset / kShapeScale;
+  static inline constexpr float kShapeSquareOffset = 2.0f;
+  static inline constexpr float kShapeTriangleToSquare = kShapeSquareOffset / kShapeScale;
+
   // Increment per sample.
   float increment_ = 0.0f;
 
   // Internal clock.
   float phase_ = 0.0f;
-
-  // White noise random number generator.
-  inline static RandomImpl random_ = RandomImpl();
 };
-
-/// Normalizes the pulse width into audible range.
-///
-/// @param pulse_width Pulse width.
-inline float NormalizePulseWidth(float pulse_width) noexcept { return 0.01f + pulse_width * 0.98f; }
 
 }  // namespace barely
 

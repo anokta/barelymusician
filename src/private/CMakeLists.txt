@@ -37,7 +37,6 @@ target_link_libraries(
   barelymusician_common_message_queue
   barelymusician_dsp_decibels
   barelymusician_dsp_instrument_processor
-  barelymusician_dsp_oscillator
   barelymusician_dsp_sample_data
   barelymusician_headeronly
 )

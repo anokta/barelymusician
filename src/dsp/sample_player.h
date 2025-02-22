@@ -19,11 +19,13 @@ class SamplePlayer {
   [[nodiscard]] float GetOutput() const noexcept {
     if constexpr (kMode != SamplePlaybackMode::kNone) {
       assert(slice_ != nullptr);
-      if (static_cast<int>(cursor_) >= slice_->sample_count) {
+      const int sample_index = static_cast<int>(cursor_);
+      if (sample_index >= slice_->sample_count) {
         return 0.0f;
       }
-      // TODO(#7): Add a better interpolation method here?
-      return slice_->samples[static_cast<int>(cursor_)];
+      return std::lerp(slice_->samples[sample_index],
+                       slice_->samples[(sample_index + 1) % slice_->sample_count],
+                       cursor_ - static_cast<float>(sample_index));
     } else {
       return 0.0f;
     }

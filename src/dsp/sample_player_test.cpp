@@ -56,10 +56,13 @@ TEST(SamplePlayerTest, SetSpeed) {
     sample_player.Reset();
     sample_player.SetIncrement(pitch, kSampleInterval);
     for (int i = 0; i < kDataLength; ++i) {
-      const int expected_index =
-          static_cast<int>(static_cast<float>(i) * std::pow(2.0f, pitch - kPitch));
-      EXPECT_FLOAT_EQ(sample_player.GetOutput<SamplePlaybackMode::kLoop>(),
-                      kData[expected_index % kDataLength])
+      const float expected_offset = static_cast<float>(i) * std::pow(2.0f, pitch - kPitch);
+      const int expected_start_index = static_cast<int>(expected_offset);
+      const float expected_sample =
+          std::lerp(kData[expected_start_index % kDataLength],
+                    kData[(expected_start_index + 1) % kDataLength],
+                    expected_offset - static_cast<float>(expected_start_index));
+      EXPECT_FLOAT_EQ(sample_player.GetOutput<SamplePlaybackMode::kLoop>(), expected_sample)
           << "at index " << i << ", where pitch is: " << pitch;
       sample_player.Increment<SamplePlaybackMode::kLoop>();
     }

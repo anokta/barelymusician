@@ -235,7 +235,7 @@ int main(int /*argc*/, char* argv[]) {
     auto& instrument = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
     if (shape < 0.0f) {
-      instrument.SetControl(ControlType::kOscNoiseMix, 1.0f);
+      instrument.SetControl(ControlType::kOscNoiseRatio, 1.0f);
     } else {
       instrument.SetControl(ControlType::kOscShape, shape);
     }

@@ -22,6 +22,10 @@ VoiceCallback GetVoiceCallback(OscMode oscillator_mode) {
       return Voice::Next<OscMode::kAm, kSamplePlaybackMode>;
     case OscMode::kEnvelopeFollower:
       return Voice::Next<OscMode::kEnvelopeFollower, kSamplePlaybackMode>;
+    case OscMode::kFm:
+      return Voice::Next<OscMode::kFm, kSamplePlaybackMode>;
+    case OscMode::kMf:
+      return Voice::Next<OscMode::kMf, kSamplePlaybackMode>;
     case OscMode::kRing:
       return Voice::Next<OscMode::kRing, kSamplePlaybackMode>;
     default:
@@ -126,8 +130,8 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       osc_mode_ = static_cast<OscMode>(value);
       voice_callback_ = GetVoiceCallback(osc_mode_, sample_data_, sample_playback_mode_);
       break;
-    case ControlType::kOscNoiseMix:
-      voice_params_.osc_noise_mix = value;
+    case ControlType::kOscNoiseRatio:
+      voice_params_.osc_noise_ratio = value;
       break;
     case ControlType::kOscPitchShift:
       osc_pitch_shift_ = value;

@@ -11,6 +11,24 @@ namespace barely {
 /// Sample player that generates output samples from a sample data slice.
 class SamplePlayer {
  public:
+  /// Returns the output sample.
+  ///
+  /// @tparam kMode Sample playback mode.
+  /// @return Next output sample.
+  template <SamplePlaybackMode kMode>
+  [[nodiscard]] float GetOutput() const noexcept {
+    if constexpr (kMode != SamplePlaybackMode::kNone) {
+      assert(slice_ != nullptr);
+      if (static_cast<int>(cursor_) >= slice_->sample_count) {
+        return 0.0f;
+      }
+      // TODO(#7): Add a better interpolation method here?
+      return slice_->samples[static_cast<int>(cursor_)];
+    } else {
+      return 0.0f;
+    }
+  }
+
   /// Returns whether the sample player is currently active or not.
   ///
   /// @return True if active, false otherwise.
@@ -19,28 +37,17 @@ class SamplePlayer {
     return static_cast<int>(cursor_) < slice_->sample_count;
   }
 
-  /// Generates the next output sample.
+  // TODO(#146): Clean this up to merge the functionality with `SetIncrement`.
+  /// Increments the phase.
   ///
-  /// @tparam kMode Sample playback mode.
-  /// @return Next output sample.
+  /// @param increment_shift Phase increment shift.
   template <SamplePlaybackMode kMode>
-  [[nodiscard]] float Next() noexcept {
-    if constexpr (kMode != SamplePlaybackMode::kNone) {
-      assert(slice_ != nullptr);
+  void Increment(float increment_shift = 0.0f) noexcept {
+    cursor_ += increment_ * (1.0f + increment_shift);
+    if constexpr (kMode == SamplePlaybackMode::kLoop) {
       if (static_cast<int>(cursor_) >= slice_->sample_count) {
-        return 0.0f;
+        cursor_ = std::fmod(cursor_, static_cast<float>(slice_->sample_count));
       }
-      // TODO(#7): Add a better interpolation method here?
-      const float output = slice_->samples[static_cast<int>(cursor_)];
-      cursor_ += increment_;
-      if constexpr (kMode == SamplePlaybackMode::kLoop) {
-        if (static_cast<int>(cursor_) >= slice_->sample_count) {
-          cursor_ = std::fmod(cursor_, static_cast<float>(slice_->sample_count));
-        }
-      }
-      return output;
-    } else {
-      return 0.0f;
     }
   }
 

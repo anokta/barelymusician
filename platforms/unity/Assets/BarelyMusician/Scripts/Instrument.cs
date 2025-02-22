@@ -24,10 +24,14 @@ namespace Barely {
   public enum OscMode {
     /// Mix.
     [InspectorName("Mix")] MIX = 0,
-    /// Amplitude modulation.
+    /// Amplitude modulation by oscillator applied to sample player.
     [InspectorName("AM")] AM,
-    /// Envelope follower.
+    /// Aamplitude modulation by sample player applied to oscillator.
     [InspectorName("Envelope Follower")] ENVELOPE_FOLLOWER,
+    /// Frequency modulation by oscillator applied to sample player.
+    [InspectorName("FM")] FM,
+    /// Frequency modulation by sample player applied to oscillator.
+    [InspectorName("MF")] MF,
     /// Ring modulation.
     [InspectorName("Ring")] RING,
   }
@@ -138,12 +142,12 @@ namespace Barely {
     [Range(-1.0f, 1.0f)]
     public float OscMix = 0.0f;
 
-    /// Oscillator noise mix.
-    [Range(-1.0f, 1.0f)]
-    public float OscNoiseMix = -1.0f;
+    /// Oscillator noise ratio.
+    [Range(0.0f, 1.0f)]
+    public float OscNoiseRatio = 0.0f;
 
     /// Oscillator pitch shift.
-    [Range(-1.0f, 1.0f)]
+    [Range(-4.0f, 4.0f)]
     public float OscPitchShift = 0.0f;
 
     /// Oscillator shape.
@@ -324,7 +328,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.RELEASE, Release);
       SetControl(Engine.Internal.ControlType.OSC_MIX, OscMix);
       SetControl(Engine.Internal.ControlType.OSC_MODE, (float)OscMode);
-      SetControl(Engine.Internal.ControlType.OSC_NOISE_MIX, OscNoiseMix);
+      SetControl(Engine.Internal.ControlType.OSC_NOISE_RATIO, OscNoiseRatio);
       SetControl(Engine.Internal.ControlType.OSC_PITCH_SHIFT, OscPitchShift);
       SetControl(Engine.Internal.ControlType.OSC_SHAPE, OscShape);
       SetControl(Engine.Internal.ControlType.OSC_SKEW, OscSkew);

@@ -268,8 +268,8 @@ typedef enum BarelyControlType {
   BarelyControlType_kOscMix,
   /// Oscillator mode.
   BarelyControlType_kOscMode,
-  /// Oscillator noise mix.
-  BarelyControlType_kOscNoiseMix,
+  /// Oscillator noise ratio.
+  BarelyControlType_kOscNoiseRatio,
   /// Oscillator pitch shift.
   BarelyControlType_kOscPitchShift,
   /// Oscillator shape.
@@ -316,13 +316,14 @@ typedef enum BarelyNoteControlType {
 typedef enum BarelyOscMode {
   /// Mix.
   BarelyOscMode_kMix = 0,
-  /// Amplitude modulation.
+  /// Amplitude modulation by oscillator applied to sample player.
   BarelyOscMode_kAm,
-  /// Envelope follower.
+  /// Amplitude modulation by sample player applied to oscillator.
   BarelyOscMode_kEnvelopeFollower,
-  // TODO(#146): Add FM support once voice pitch calculation is cleaned up.
-  // /// Frequency modulation.
-  // BarelyOscMode_kFm,
+  /// Frequency modulation using oscillator applied to sample player.
+  BarelyOscMode_kFm,
+  /// Frequency modulation using sample player applied to oscillator.
+  BarelyOscMode_kMf,
   /// Ring modulation.
   BarelyOscMode_kRing,
   /// Number of oscillator modes.
@@ -1065,8 +1066,8 @@ enum class ControlType {
   kOscMix = BarelyControlType_kOscMix,
   /// Oscillator mode.
   kOscMode = BarelyControlType_kOscMode,
-  /// Oscillator noise mix.
-  kOscNoiseMix = BarelyControlType_kOscNoiseMix,
+  /// Oscillator noise ratio.
+  kOscNoiseRatio = BarelyControlType_kOscNoiseRatio,
   /// Oscillator pitch shift.
   kOscPitchShift = BarelyControlType_kOscPitchShift,
   /// Oscillator shape.
@@ -1107,13 +1108,14 @@ enum class NoteControlType {
 enum class OscMode {
   /// Mix.
   kMix = BarelyOscMode_kMix,
-  /// Amplitude modulation.
+  /// Amplitude modulation by oscillator applied to sample player.
   kAm = BarelyOscMode_kAm,
-  /// Envelope follower.
+  /// Amplitude modulation by sample player applied to oscillator.
   kEnvelopeFollower = BarelyOscMode_kEnvelopeFollower,
-  // TODO(#146): Add FM support once voice pitch calculation is cleaned up.
-  // /// Frequency modulation.
-  // kFm = BarelyOscMode_kFm,
+  /// Frequency modulation by oscillator applied to sample player.
+  kFm = BarelyOscMode_kFm,
+  /// Frequency modulation by sample player applied to oscillator.
+  kMf = BarelyOscMode_kMf,
   /// Ring modulation.
   kRing = BarelyOscMode_kRing,
 };

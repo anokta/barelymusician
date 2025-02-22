@@ -33,8 +33,8 @@ class Voice {
     /// Oscillator mix.
     float osc_mix = 0.0f;
 
-    /// Oscillator noise mix.
-    float osc_noise_mix = -1.0f;
+    /// Oscillator noise ratio.
+    float osc_noise_ratio = 0.0f;
 
     /// Oscillator shape.
     float osc_shape = 0.0f;
@@ -109,24 +109,36 @@ class Voice {
     }
 
     float osc_sample =
-        (1.0f - std::max(0.0f, params.osc_noise_mix)) *
-            osc_.Next(params.osc_shape, params.osc_skew) +
-        (1.0f - std::max(0.0f, -params.osc_noise_mix)) * random_.DrawUniform(-1.0f, 1.0f);
-    float sample_player_sample = sample_player_.Next<kSamplePlaybackMode>();
+        (1.0f - params.osc_noise_ratio) * osc_.GetOutput(params.osc_shape, params.osc_skew) +
+        params.osc_noise_ratio * random_.DrawUniform(-1.0f, 1.0f);
+    float sample_player_sample = sample_player_.GetOutput<kSamplePlaybackMode>();
     const float sample_player_output =
         (1.0f - std::max(0.0f, params.osc_mix)) * sample_player_sample;
     float output = gain_ * envelope_.Next();
 
-    if constexpr (kOscMode == OscMode::kMix) {
-      output *= ((1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample + sample_player_output);
+    if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
+      output *= (1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample + sample_player_output;
+    } else if constexpr (kOscMode == OscMode::kFm) {
+      output *= sample_player_sample;
     } else {
       if constexpr (kOscMode == OscMode::kAm) {
         osc_sample = std::abs(osc_sample);
       } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
         sample_player_sample = std::abs(sample_player_sample);
       }
-      output *= ((1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample * sample_player_sample +
-                 sample_player_output);
+      output *= (1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample * sample_player_sample +
+                sample_player_output;
+    }
+
+    if constexpr (kOscMode == OscMode::kMf) {
+      osc_.Increment(sample_player_sample);
+    } else {
+      osc_.Increment();
+    }
+    if constexpr (kOscMode == OscMode::kFm) {
+      sample_player_.Increment<kSamplePlaybackMode>(0.5f * (params.osc_mix + 1.0f) * osc_sample);
+    } else {
+      sample_player_.Increment<kSamplePlaybackMode>();
     }
 
     return bit_crusher_.Next(filter_.Next(output, params.filter_coefficients),

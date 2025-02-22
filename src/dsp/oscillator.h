@@ -11,29 +11,34 @@ namespace barely {
 /// Simple oscillator that generates output samples of basic waveforms.
 class Oscillator {
  public:
-  /// Generates the next output sample.
+  /// Returns the output sample.
   ///
   /// @param shape Oscillator shape.
   /// @param skew Oscillator skew.
   /// @return Next output sample.
-  [[nodiscard]] float Next(float shape, float skew) noexcept {
-    float output = 0.0f;
+  [[nodiscard]] float GetOutput(float shape, float skew) const noexcept {
     const float skewed_phase = std::min(1.0f, (1.0f + skew) * phase_);
     const float scaled_shape = shape * kShapeScale;
     if (shape < kShapeSineToTriangle) {
-      output = std::lerp(Sine(skewed_phase), Triangle(skewed_phase), scaled_shape);
+      return std::lerp(Sine(skewed_phase), Triangle(skewed_phase), scaled_shape);
     } else if (shape < kShapeTriangleToSquare) {
-      output = std::lerp(Triangle(skewed_phase), Square(skewed_phase),
-                         scaled_shape - kShapeTriangleOffset);
+      return std::lerp(Triangle(skewed_phase), Square(skewed_phase),
+                       scaled_shape - kShapeTriangleOffset);
     } else {
-      output = std::lerp(Square(skewed_phase), Sawtooth(skewed_phase),
-                         scaled_shape - kShapeSquareOffset);
+      return std::lerp(Square(skewed_phase), Sawtooth(skewed_phase),
+                       scaled_shape - kShapeSquareOffset);
     }
-    phase_ += increment_;
+  }
+
+  // TODO(#146): Clean this up to merge the functionality with `SetIncrement`.
+  /// Increments the phase.
+  ///
+  /// @param increment_shift Phase increment shift.
+  void Increment(float increment_shift = 0.0f) noexcept {
+    phase_ += increment_ * (1.0f + increment_shift);
     if (phase_ >= 1.0f) {
       phase_ -= 1.0f;
     }
-    return output;
   }
 
   /// Resets the phase.
@@ -51,14 +56,14 @@ class Oscillator {
   }
 
  private:
-  [[nodiscard]] float Sine(float phase) noexcept {
+  [[nodiscard]] float Sine(float phase) const noexcept {
     return std::sin(phase * 2.0f * std::numbers::pi_v<float>);
   }
-  [[nodiscard]] float Triangle(float phase) noexcept {
+  [[nodiscard]] float Triangle(float phase) const noexcept {
     return 4.0f * std::abs(phase - std::floor(phase + 0.75f) + 0.25f) - 1.0f;
   }
-  [[nodiscard]] float Square(float phase) noexcept { return (phase < 0.5f) ? 1.0f : -1.0f; }
-  [[nodiscard]] float Sawtooth(float phase) noexcept {
+  [[nodiscard]] float Square(float phase) const noexcept { return (phase < 0.5f) ? 1.0f : -1.0f; }
+  [[nodiscard]] float Sawtooth(float phase) const noexcept {
     return 2.0f * (phase - std::floor(phase + 0.5f));
   }
 

@@ -23,9 +23,11 @@ TEST(SamplePlayerTest, SimplePlayback) {
   sample_player.SetIncrement(kPitch, kSampleInterval);
 
   for (int i = 0; i < kDataLength; ++i) {
-    EXPECT_FLOAT_EQ(sample_player.Next<SamplePlaybackMode::kOnce>(), kData[i]) << "at index " << i;
+    EXPECT_FLOAT_EQ(sample_player.GetOutput<SamplePlaybackMode::kOnce>(), kData[i])
+        << "at index " << i;
+    sample_player.Increment<SamplePlaybackMode::kOnce>();
   }
-  EXPECT_FLOAT_EQ(sample_player.Next<SamplePlaybackMode::kOnce>(), 0.0f);
+  EXPECT_FLOAT_EQ(sample_player.GetOutput<SamplePlaybackMode::kOnce>(), 0.0f);
 }
 
 // Tests that the sample data is played back as expected, when set to loop.
@@ -37,8 +39,9 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
   sample_player.SetIncrement(kPitch, kSampleInterval);
 
   for (int i = 0; i < kDataLength * kLoopCount; ++i) {
-    EXPECT_FLOAT_EQ(sample_player.Next<SamplePlaybackMode::kLoop>(), kData[i % kDataLength])
+    EXPECT_FLOAT_EQ(sample_player.GetOutput<SamplePlaybackMode::kLoop>(), kData[i % kDataLength])
         << "at index " << i;
+    sample_player.Increment<SamplePlaybackMode::kLoop>();
   }
 }
 
@@ -55,9 +58,10 @@ TEST(SamplePlayerTest, SetSpeed) {
     for (int i = 0; i < kDataLength; ++i) {
       const int expected_index =
           static_cast<int>(static_cast<float>(i) * std::pow(2.0f, pitch - kPitch));
-      EXPECT_FLOAT_EQ(sample_player.Next<SamplePlaybackMode::kLoop>(),
+      EXPECT_FLOAT_EQ(sample_player.GetOutput<SamplePlaybackMode::kLoop>(),
                       kData[expected_index % kDataLength])
           << "at index " << i << ", where pitch is: " << pitch;
+      sample_player.Increment<SamplePlaybackMode::kLoop>();
     }
   }
 }
@@ -68,11 +72,12 @@ TEST(SamplePlayerTest, Reset) {
   sample_player.SetSlice(&kSlice);
   sample_player.SetIncrement(kPitch, kSampleInterval);
 
-  const float first_sample = sample_player.Next<SamplePlaybackMode::kOnce>();
-  EXPECT_NE(sample_player.Next<SamplePlaybackMode::kOnce>(), first_sample);
+  const float first_sample = sample_player.GetOutput<SamplePlaybackMode::kOnce>();
+  sample_player.Increment<SamplePlaybackMode::kOnce>();
+  EXPECT_NE(sample_player.GetOutput<SamplePlaybackMode::kOnce>(), first_sample);
 
   sample_player.Reset();
-  EXPECT_FLOAT_EQ(sample_player.Next<SamplePlaybackMode::kOnce>(), first_sample);
+  EXPECT_FLOAT_EQ(sample_player.GetOutput<SamplePlaybackMode::kOnce>(), first_sample);
 }
 
 }  // namespace

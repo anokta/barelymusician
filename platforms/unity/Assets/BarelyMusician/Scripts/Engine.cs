@@ -68,8 +68,8 @@ namespace Barely {
         [InspectorName("Oscillator Mix")] OSC_MIX,
         /// Oscillator mix.
         [InspectorName("Oscillator Mode")] OSC_MODE,
-        /// Oscillator noise mix.
-        [InspectorName("Oscillator Noise Mix")] OSC_NOISE_MIX,
+        /// Oscillator noise ratio.
+        [InspectorName("Oscillator Noise Ratio")] OSC_NOISE_RATIO,
         /// Oscillator pitch shift.
         [InspectorName("Oscillator Pitch Shift")] OSC_PITCH_SHIFT,
         /// Oscillator shape.

@@ -630,7 +630,7 @@ MonoBehaviour:
   Release: 0.2
   OscMode: 0
   OscMix: 0
-  OscNoiseMix: -1
+  OscNoiseRatio: 0
   OscPitchShift: 0
   OscShape: 0.25
   OscSkew: 0

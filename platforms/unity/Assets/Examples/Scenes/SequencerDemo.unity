@@ -217,7 +217,7 @@ MonoBehaviour:
   Release: 0.5
   OscMode: 0
   OscMix: 0
-  OscNoiseMix: -1
+  OscNoiseRatio: 0
   OscPitchShift: 0
   OscShape: 0.67
   OscSkew: 0
@@ -747,7 +747,7 @@ MonoBehaviour:
   Release: 0
   OscMode: 0
   OscMix: -1
-  OscNoiseMix: -1
+  OscNoiseRatio: 0
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
@@ -1050,7 +1050,7 @@ MonoBehaviour:
   Release: 0.5
   OscMode: 0
   OscMix: 0
-  OscNoiseMix: -1
+  OscNoiseRatio: 0
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
@@ -1395,7 +1395,7 @@ MonoBehaviour:
   Release: 0.05
   OscMode: 0
   OscMix: 0
-  OscNoiseMix: -0.95
+  OscNoiseRatio: 0.025
   OscPitchShift: 0
   OscShape: 0.5
   OscSkew: -0.1
@@ -1617,7 +1617,7 @@ MonoBehaviour:
   Release: 0.075
   OscMode: 0
   OscMix: -1
-  OscNoiseMix: -1
+  OscNoiseRatio: 0
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0

@@ -45,15 +45,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_dsp_one_pole_filter INTERFACE
-  one_pole_filter.h
-)
-target_link_libraries(
-  barelymusician_dsp_one_pole_filter INTERFACE
-  barelymusician_headeronly
-)
-
-add_library(
   barelymusician_dsp_oscillator INTERFACE
   oscillator.h
 )
@@ -162,18 +153,6 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_dsp_instrument_processor_test)
-
-  add_executable(
-    barelymusician_dsp_one_pole_filter_test
-    one_pole_filter_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_dsp_one_pole_filter_test
-    barelymusician_dsp_one_pole_filter
-    barelymusician
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_dsp_one_pole_filter_test)
 
   add_executable(
     barelymusician_dsp_oscillator_test

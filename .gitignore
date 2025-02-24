@@ -5,7 +5,8 @@ build/
 .DS_Store
 
 # VS Code.
-.vscode/
+.vscode/*
+!.vscode/cpp.code-snippets
 !.vscode/launch.json
 !.vscode/settings.json
 !.vscode/tasks.json

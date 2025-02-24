@@ -1,0 +1,42 @@
+{
+  "barely-header": {
+    "prefix": "@gen-barely-header",
+    "body": [
+      "#ifndef BARELYMUSICIAN_${TM_DIRECTORY/^.+\\\\(.*)$/${1:/upcase}/}_${TM_FILENAME_BASE/(.*)/${1:/upcase}/}_H_",
+      "#define BARELYMUSICIAN_${TM_DIRECTORY/^.+\\\\(.*)$/${1:/upcase}/}_${TM_FILENAME_BASE/(.*)/${1:/upcase}/}_H_",
+      "",
+      "namespace barely {",
+      "",
+      "}  // namespace barely",
+      "",
+      "#endif  // BARELYMUSICIAN_${TM_DIRECTORY/^.+\\\\(.*)$/${1:/upcase}/}_${TM_FILENAME_BASE/(.*)/${1:/upcase}/}_H_"
+    ],
+    "description": "barelymusician header boilerplate code"
+  },
+  "barely-cpp": {
+    "prefix": "@gen-barely-cpp",
+    "body": [
+      "#include \"${TM_DIRECTORY/^.+\\\\(.*)$/${1}/}/${TM_FILENAME_BASE/(.*)/${1}/}.h\"",
+      "",
+      "namespace barely {",
+      "",
+      "}  // namespace barely",
+    ],
+    "description": "barelymusician cpp boilerplate code"
+  },
+  "barely-test": {
+    "prefix": "@gen-barely-test",
+    "body": [
+      "#include \"${TM_DIRECTORY/^.+\\\\(.*)$/${1}/}/${TM_FILENAME_BASE/(.*)/${1}/}.h\"",
+      "",
+      "#include \"gtest/gtest.h\"",
+      "",
+      "namespace barely {",
+      "namespace {",
+      "",
+      "}  // namespace",
+      "}  // namespace barely",
+    ],
+    "description": "barelymusician test boilerplate code"
+  }
+}

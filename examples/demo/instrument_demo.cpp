@@ -16,6 +16,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
+using ::barely::OscMode;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -59,6 +60,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
+  instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(ControlType::kOscShape, kOscShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);

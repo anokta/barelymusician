@@ -26,6 +26,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::OscMode;
 using ::barely::Performer;
 using ::barely::Random;
 using ::barely::SampleDataSlice;
@@ -234,6 +235,7 @@ int main(int /*argc*/, char* argv[]) {
     instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
+    instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
     if (shape < 0.0f) {
       instrument.SetControl(ControlType::kOscNoiseRatio, 1.0f);
     } else {
@@ -285,7 +287,6 @@ int main(int /*argc*/, char* argv[]) {
   instruments.emplace_back(engine.CreateInstrument());
   auto& percussion = instruments.back();
   percussion.SetControl(ControlType::kGain, -18.0f);
-  percussion.SetControl(ControlType::kOscMix, -1.0f);
   percussion.SetControl(ControlType::kAttack, 0.0f);
   percussion.SetControl(ControlType::kRetrigger, true);
   percussion.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);

@@ -65,6 +65,7 @@ void BM_BarelyInstrument_Process_SingleNoteWithSineOsc(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
+  instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(ControlType::kOscShape, 0.0f);
   instrument.SetNoteOn(0.0);
 
@@ -80,6 +81,7 @@ void BM_BarelyInstrument_Process_MultipleNotesWithSineOsc(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
+  instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(ControlType::kOscShape, 0.0f);
 
   const int voice_count = instrument.GetControl<int>(ControlType::kVoiceCount);
@@ -99,6 +101,7 @@ void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
+  instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(ControlType::kOscShape, 0.0f);
 
   std::array<float, kSampleCount> output_samples;

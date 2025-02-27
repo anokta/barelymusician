@@ -24,7 +24,6 @@ constexpr std::array<SampleDataSlice, kVoiceCount> kSlices = {
 // Tests that playing a single voice produces the expected output.
 TEST(InstrumentProcessorTest, SingleVoice) {
   InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
-  processor.SetControl(ControlType::kOscMix, -1.0f);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSamplePlaybackMode,
                        static_cast<float>(SamplePlaybackMode::kLoop));
@@ -52,7 +51,6 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 // Tests that playing voices are capped at maximum allowed number of voices.
 TEST(InstrumentProcessorTest, MaxVoices) {
   InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
-  processor.SetControl(ControlType::kOscMix, -1.0f);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSamplePlaybackMode,
                        static_cast<float>(SamplePlaybackMode::kLoop));

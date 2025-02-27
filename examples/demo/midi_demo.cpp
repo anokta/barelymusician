@@ -24,6 +24,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::OscMode;
 using ::barely::Performer;
 using ::barely::Task;
 using ::barely::TaskState;
@@ -125,6 +126,7 @@ int main(int /*argc*/, char* argv[]) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
     });
     instrument.SetControl(ControlType::kGain, kInstrumentGain);
+    instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
     instrument.SetControl(ControlType::kOscShape, kInstrumentOscShape);
     instrument.SetControl(ControlType::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetControl(ControlType::kRelease, kInstrumentEnvelopeRelease);

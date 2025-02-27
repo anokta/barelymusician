@@ -91,6 +91,7 @@ namespace Barely.Examples {
     private void OnEnable() {
       var tempGameObject = new GameObject() { hideFlags = HideFlags.HideAndDontSave };
       var instrument = tempGameObject.AddComponent<Instrument>();
+      instrument.OscMode = OscMode.MIX;
       instrument.OscShape = 0.75f;
       instrument.Gain = -12.0f;
       instrument.Attack = 0.0f;

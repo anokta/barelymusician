@@ -54,7 +54,6 @@ TEST(InstrumentImplTest, PlaySingleNote) {
       SampleDataSlice(kPitch, kSampleRate, kSamples)};
 
   InstrumentImpl instrument(kSampleRate, kReferenceFrequency, kUpdateSample);
-  instrument.SetControl(ControlType::kOscMix, -1.0f);
   instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<float>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kSlices));
@@ -99,7 +98,6 @@ TEST(InstrumentImplTest, PlayMultipleNotes) {
   };
 
   InstrumentImpl instrument(1, kReferenceFrequency, 0);
-  instrument.SetControl(ControlType::kOscMix, -1.0f);
   instrument.SetControl(ControlType::kSamplePlaybackMode,
                         static_cast<float>(SamplePlaybackMode::kSustain));
   instrument.SetSampleData(SampleData(kSlices));

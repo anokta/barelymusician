@@ -430,7 +430,7 @@ MonoBehaviour:
   Decay: 0.05
   Sustain: 0.25
   Release: 0.025
-  OscMode: 0
+  OscMode: 1
   OscMix: 0
   OscNoiseRatio: 0
   OscPitchShift: 0

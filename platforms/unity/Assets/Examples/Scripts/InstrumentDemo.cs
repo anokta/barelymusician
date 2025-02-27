@@ -11,6 +11,7 @@ namespace Barely.Examples {
     public bool enableModeSwitch = false;
     [Range(0.0f, 1.0f)]
     public float oscShape = 0.0f;
+    public OscMode oscMode = OscMode.MIX;
     public SamplePlaybackMode samplePlaybackMode = SamplePlaybackMode.LOOP;
 
     private const int N = 4;
@@ -20,6 +21,7 @@ namespace Barely.Examples {
 
     private void Awake() {
       if (enableModeSwitch) {
+        controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
         controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
       }
@@ -59,13 +61,13 @@ namespace Barely.Examples {
         return;
       }
       if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
-        controller.instrument.OscMix = 1.0f;
+        controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
       } else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
-        controller.instrument.OscMix = -1.0f;
+        controller.instrument.OscMode = OscMode.NONE;
         controller.instrument.SamplePlaybackMode = samplePlaybackMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
-        controller.instrument.OscMix = 0.0f;
+        controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
         controller.instrument.SamplePlaybackMode = samplePlaybackMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) {

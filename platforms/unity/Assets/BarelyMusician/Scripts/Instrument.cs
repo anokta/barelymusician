@@ -22,8 +22,10 @@ namespace Barely {
 
   /// Oscillator mode.
   public enum OscMode {
+    /// None.
+    [InspectorName("None")] NONE = 0,
     /// Mix.
-    [InspectorName("Mix")] MIX = 0,
+    [InspectorName("Mix")] MIX,
     /// Amplitude modulation by oscillator applied to sample player.
     [InspectorName("AM")] AM,
     /// Aamplitude modulation by sample player applied to oscillator.
@@ -136,7 +138,7 @@ namespace Barely {
     [Header("Oscillator")]
 
     /// Oscillator mode.
-    public OscMode OscMode = OscMode.MIX;
+    public OscMode OscMode = OscMode.NONE;
 
     /// Oscillator mix.
     [Range(-1.0f, 1.0f)]

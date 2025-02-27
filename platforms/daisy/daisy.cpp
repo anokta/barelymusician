@@ -6,6 +6,7 @@
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::OscMode;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
 using ::daisy::MidiMessageType;
@@ -61,6 +62,7 @@ int main(void) {
 
   Instrument instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
+  instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(ControlType::kOscShape, osc_shape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);

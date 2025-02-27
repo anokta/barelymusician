@@ -314,8 +314,10 @@ typedef enum BarelyNoteControlType {
 
 /// Oscillator modes.
 typedef enum BarelyOscMode {
+  /// None.
+  BarelyOscMode_kNone = 0,
   /// Mix.
-  BarelyOscMode_kMix = 0,
+  BarelyOscMode_kMix,
   /// Amplitude modulation by oscillator applied to sample player.
   BarelyOscMode_kAm,
   /// Amplitude modulation by sample player applied to oscillator.
@@ -1106,6 +1108,8 @@ enum class NoteControlType {
 
 /// Oscillator modes.
 enum class OscMode {
+  /// None.
+  kNone = BarelyOscMode_kNone,
   /// Mix.
   kMix = BarelyOscMode_kMix,
   /// Amplitude modulation by oscillator applied to sample player.

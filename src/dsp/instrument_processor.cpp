@@ -16,6 +16,8 @@ namespace {
 template <SamplePlaybackMode kSamplePlaybackMode>
 VoiceCallback GetVoiceCallback(OscMode oscillator_mode) {
   switch (oscillator_mode) {
+    case OscMode::kNone:
+      return Voice::Next<OscMode::kNone, kSamplePlaybackMode>;
     case OscMode::kMix:
       return Voice::Next<OscMode::kMix, kSamplePlaybackMode>;
     case OscMode::kAm:

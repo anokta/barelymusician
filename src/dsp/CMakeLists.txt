@@ -45,6 +45,26 @@ target_link_libraries(
 )
 
 add_library(
+  barelymusician_dsp_message INTERFACE
+  message.h
+)
+target_link_libraries(
+  barelymusician_dsp_message INTERFACE
+  barelymusician_dsp_sample_data
+  barelymusician_headeronly
+)
+
+add_library(
+  barelymusician_dsp_message_queue
+  message_queue.cpp
+  message_queue.h
+)
+target_link_libraries(
+  barelymusician_dsp_message_queue
+  barelymusician_dsp_message
+)
+
+add_library(
   barelymusician_dsp_oscillator INTERFACE
   oscillator.h
 )
@@ -153,6 +173,19 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_dsp_instrument_processor_test)
+
+  add_executable(
+    barelymusician_dsp_message_queue_test
+    message_queue_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_dsp_message_queue_test
+    barelymusician_dsp_message
+    barelymusician_dsp_message_queue
+    gmock
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_dsp_message_queue_test)
 
   add_executable(
     barelymusician_dsp_oscillator_test

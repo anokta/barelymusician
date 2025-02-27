@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMMON_MESSAGE_H_
-#define BARELYMUSICIAN_COMMON_MESSAGE_H_
+#ifndef BARELYMUSICIAN_DSP_MESSAGE_H_
+#define BARELYMUSICIAN_DSP_MESSAGE_H_
 
 #include <cstddef>
 #include <optional>
@@ -73,4 +73,4 @@ MessageVisitor(MessageTypes...) -> MessageVisitor<MessageTypes...>;
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMMON_MESSAGE_H_
+#endif  // BARELYMUSICIAN_DSP_MESSAGE_H_

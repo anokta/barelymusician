@@ -11,9 +11,9 @@
 
 #include "barelymusician.h"
 #include "common/callback.h"
-#include "common/message_queue.h"
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
+#include "dsp/message_queue.h"
 #include "dsp/sample_data.h"
 
 namespace barely {

@@ -8,9 +8,9 @@
 
 #include "barelymusician.h"
 #include "common/find_or_null.h"
-#include "common/message.h"
 #include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
+#include "dsp/message.h"
 #include "dsp/sample_data.h"
 
 namespace barely {

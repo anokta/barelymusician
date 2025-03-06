@@ -65,10 +65,12 @@ class Voice {
 
   /// Starts the voice.
   ///
+  /// @param params Voice process parameters.
   /// @param adsr Adsr.
   /// @param intensity Note intensity.
-  void Start(const Envelope::Adsr& adsr, float intensity) noexcept {
+  void Start(const Params& params, const Envelope::Adsr& adsr, float intensity) noexcept {
     if (intensity > 0.0f) {
+      params_ = params;
       gain_ = intensity;
       bit_crusher_.Reset();
       filter_.Reset();
@@ -116,13 +118,13 @@ class Voice {
       sample_player_.Increment<kSamplePlaybackMode>();
     } else {
       const float sample_player_output =
-          (1.0f - std::max(0.0f, params.osc_mix)) * sample_player_sample;
+          (1.0f - std::max(0.0f, params_.osc_mix)) * sample_player_sample;
       float osc_sample =
-          (1.0f - params.osc_noise_ratio) * osc_.GetOutput(params.osc_shape, params.osc_skew) +
-          params.osc_noise_ratio * random_.DrawUniform(-1.0f, 1.0f);
+          (1.0f - params_.osc_noise_ratio) * osc_.GetOutput(params_.osc_shape, params_.osc_skew) +
+          params_.osc_noise_ratio * random_.DrawUniform(-1.0f, 1.0f);
 
       if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
-        output *= (1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample + sample_player_output;
+        output *= (1.0f - std::max(0.0f, -params_.osc_mix)) * osc_sample + sample_player_output;
       } else if constexpr (kOscMode == OscMode::kFm) {
         output *= sample_player_sample;
       } else {
@@ -131,11 +133,11 @@ class Voice {
         } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
           sample_player_sample = std::abs(sample_player_sample);
         }
-        output *= (1.0f - std::max(0.0f, -params.osc_mix)) * osc_sample * sample_player_sample +
+        output *= (1.0f - std::max(0.0f, -params_.osc_mix)) * osc_sample * sample_player_sample +
                   sample_player_output;
       }
       if constexpr (kOscMode == OscMode::kFm) {
-        sample_player_.Increment<kSamplePlaybackMode>(0.5f * (params.osc_mix + 1.0f) * osc_sample);
+        sample_player_.Increment<kSamplePlaybackMode>(0.5f * (params_.osc_mix + 1.0f) * osc_sample);
       } else {
         sample_player_.Increment<kSamplePlaybackMode>();
       }
@@ -146,8 +148,25 @@ class Voice {
       osc_.Increment();
     }
 
-    return bit_crusher_.Next(filter_.Next(output, params.filter_coefficients),
-                             params.bit_crusher_range, params.bit_crusher_increment);
+    output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
+                               params_.bit_crusher_range, params_.bit_crusher_increment);
+
+    ApproachParams(params);
+
+    return output;
+  }
+
+  void ApproachParams(const Params& params) noexcept {
+    // TODO(#146): Combine this with per-voice controls.
+    static constexpr float kCoeff = 0.002f;
+    params_.bit_crusher_increment +=
+        (params.bit_crusher_increment - params_.bit_crusher_increment) * kCoeff;
+    params_.bit_crusher_range += (params.bit_crusher_range - params_.bit_crusher_range) * kCoeff;
+    params_.osc_mix += (params.osc_mix - params_.osc_mix) * kCoeff;
+    params_.osc_noise_ratio += (params.osc_noise_ratio - params_.osc_noise_ratio) * kCoeff;
+    params_.osc_shape += (params.osc_shape - params_.osc_shape) * kCoeff;
+    params_.osc_skew += (params.osc_skew - params_.osc_skew) * kCoeff;
+    params_.filter_coefficients = params.filter_coefficients;
   }
 
   float gain_ = 0.0f;
@@ -156,6 +175,8 @@ class Voice {
   BiquadFilter filter_;
   Oscillator osc_;
   SamplePlayer sample_player_;
+
+  Params params_ = {};
 
   // White noise random number generator.
   inline static RandomImpl random_ = RandomImpl();

@@ -232,7 +232,7 @@ void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
     voice.set_sample_player_slice(sample);
     voice.set_sample_player_increment(shifted_pitch, sample_interval_);
   }
-  voice.Start(adsr_, intensity);
+  voice.Start(voice_params_, adsr_, intensity);
 }
 
 void InstrumentProcessor::SetReferenceFrequency(float reference_frequency) noexcept {

@@ -46,13 +46,13 @@ class Voice {
   /// Returns the next output sample.
   ///
   /// @tparam kOscMode Oscillator mode.
-  /// @tparam kSamplePlaybackMode Sample playback mode.
+  /// @tparam kSliceMode Slice mode.
   /// @param voice Voice.
   /// @param params Voice process parameters.
   /// @return Next output value.
-  template <OscMode kOscMode, SamplePlaybackMode kSamplePlaybackMode>
+  template <OscMode kOscMode, SliceMode kSliceMode>
   [[nodiscard]] static float Next(Voice& voice, const Params& params) noexcept {
-    return voice.Next<kOscMode, kSamplePlaybackMode>(params);
+    return voice.Next<kOscMode, kSliceMode>(params);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -101,9 +101,9 @@ class Voice {
   }
 
  private:
-  template <OscMode kOscMode, SamplePlaybackMode kSamplePlaybackMode>
+  template <OscMode kOscMode, SliceMode kSliceMode>
   [[nodiscard]] float Next(const Params& params) noexcept {
-    if constexpr (kSamplePlaybackMode == SamplePlaybackMode::kOnce) {
+    if constexpr (kSliceMode == SliceMode::kOnce) {
       if (!sample_player_.IsActive()) {
         envelope_.Reset();
         return 0.0f;
@@ -111,11 +111,11 @@ class Voice {
     }
 
     float output = gain_ * envelope_.Next();
-    float sample_player_sample = sample_player_.GetOutput<kSamplePlaybackMode>();
+    float sample_player_sample = sample_player_.GetOutput<kSliceMode>();
 
     if constexpr (kOscMode == OscMode::kNone) {
       output *= sample_player_sample;
-      sample_player_.Increment<kSamplePlaybackMode>();
+      sample_player_.Increment<kSliceMode>();
     } else {
       const float sample_player_output =
           (1.0f - std::max(0.0f, params_.osc_mix)) * sample_player_sample;
@@ -137,9 +137,9 @@ class Voice {
                   sample_player_output;
       }
       if constexpr (kOscMode == OscMode::kFm) {
-        sample_player_.Increment<kSamplePlaybackMode>(0.5f * (params_.osc_mix + 1.0f) * osc_sample);
+        sample_player_.Increment<kSliceMode>(0.5f * (params_.osc_mix + 1.0f) * osc_sample);
       } else {
-        sample_player_.Increment<kSamplePlaybackMode>();
+        sample_player_.Increment<kSliceMode>();
       }
     }
     if constexpr (kOscMode == OscMode::kMf) {

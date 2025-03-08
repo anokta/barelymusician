@@ -276,8 +276,8 @@ typedef enum BarelyControlType {
   BarelyControlType_kOscShape,
   /// Oscillator skew.
   BarelyControlType_kOscSkew,
-  /// Sample playback mode.
-  BarelyControlType_kSamplePlaybackMode,
+  /// Slice mode.
+  BarelyControlType_kSliceMode,
   /// Filter type.
   BarelyControlType_kFilterType,
   /// Filter frequency in hertz.
@@ -318,13 +318,13 @@ typedef enum BarelyOscMode {
   BarelyOscMode_kNone = 0,
   /// Mix.
   BarelyOscMode_kMix,
-  /// Amplitude modulation by oscillator applied to sample player.
+  /// Amplitude modulation by the oscillator applied to the slice.
   BarelyOscMode_kAm,
-  /// Amplitude modulation by sample player applied to oscillator.
+  /// Amplitude modulation by the slice applied to the oscillator.
   BarelyOscMode_kEnvelopeFollower,
-  /// Frequency modulation using oscillator applied to sample player.
+  /// Frequency modulation using oscillator applied to slice.
   BarelyOscMode_kFm,
-  /// Frequency modulation using sample player applied to oscillator.
+  /// Frequency modulation using slice applied to oscillator.
   BarelyOscMode_kMf,
   /// Ring modulation.
   BarelyOscMode_kRing,
@@ -344,19 +344,19 @@ typedef enum BarelyRepeaterStyle {
   BarelyRepeaterStyle_kCount,
 } BarelyRepeaterStyle;
 
-/// Sample playback modes.
-typedef enum BarelySamplePlaybackMode {
+/// Slice modes.
+typedef enum BarelySliceMode {
   /// None.
-  BarelySamplePlaybackMode_kNone = 0,
+  BarelySliceMode_kNone = 0,
   /// Once.
-  BarelySamplePlaybackMode_kOnce,
+  BarelySliceMode_kOnce,
   /// Sustain.
-  BarelySamplePlaybackMode_kSustain,
+  BarelySliceMode_kSustain,
   /// Loop.
-  BarelySamplePlaybackMode_kLoop,
-  /// Number of playback modes.
-  BarelySamplePlaybackMode_kCount,
-} BarelySamplePlaybackMode;
+  BarelySliceMode_kLoop,
+  /// Number of slice modes.
+  BarelySliceMode_kCount,
+} BarelySliceMode;
 
 /// Task states.
 typedef enum BarelyTaskState {
@@ -1076,8 +1076,8 @@ enum class ControlType {
   kOscShape = BarelyControlType_kOscShape,
   /// Oscillator skew.
   kOscSkew = BarelyControlType_kOscSkew,
-  /// Sample playback mode.
-  kSamplePlaybackMode = BarelyControlType_kSamplePlaybackMode,
+  /// Slice mode.
+  kSliceMode = BarelyControlType_kSliceMode,
   /// Filter type.
   kFilterType = BarelyControlType_kFilterType,
   /// Filter frequency in hertz.
@@ -1112,13 +1112,13 @@ enum class OscMode {
   kNone = BarelyOscMode_kNone,
   /// Mix.
   kMix = BarelyOscMode_kMix,
-  /// Amplitude modulation by oscillator applied to sample player.
+  /// Amplitude modulation by the oscillator applied to the slice.
   kAm = BarelyOscMode_kAm,
-  /// Amplitude modulation by sample player applied to oscillator.
+  /// Amplitude modulation by the slice applied to the oscillator.
   kEnvelopeFollower = BarelyOscMode_kEnvelopeFollower,
-  /// Frequency modulation by oscillator applied to sample player.
+  /// Frequency modulation by the oscillator applied to the slice.
   kFm = BarelyOscMode_kFm,
-  /// Frequency modulation by sample player applied to oscillator.
+  /// Frequency modulation by the slice applied to the oscillator.
   kMf = BarelyOscMode_kMf,
   /// Ring modulation.
   kRing = BarelyOscMode_kRing,
@@ -1134,16 +1134,16 @@ enum class RepeaterStyle {
   kRandom = BarelyRepeaterStyle_kRandom,
 };
 
-/// Sample playback modes.
-enum class SamplePlaybackMode {
+/// Slice modes.
+enum class SliceMode {
   /// None.
-  kNone = BarelySamplePlaybackMode_kNone,
+  kNone = BarelySliceMode_kNone,
   /// Once.
-  kOnce = BarelySamplePlaybackMode_kOnce,
+  kOnce = BarelySliceMode_kOnce,
   /// Sustain.
-  kSustain = BarelySamplePlaybackMode_kSustain,
+  kSustain = BarelySliceMode_kSustain,
   /// Loop.
-  kLoop = BarelySamplePlaybackMode_kLoop,
+  kLoop = BarelySliceMode_kLoop,
 };
 
 /// Task states.

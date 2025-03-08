@@ -95,7 +95,7 @@ class InstrumentProcessor {
     }
   }
 
-  VoiceCallback voice_callback_ = Voice::Next<OscMode::kNone, SamplePlaybackMode::kNone>;
+  VoiceCallback voice_callback_ = Voice::Next<OscMode::kNone, SliceMode::kNone>;
   std::array<VoiceState, kMaxVoiceCount> voice_states_;
   int voice_count_ = 8;
 
@@ -110,7 +110,7 @@ class InstrumentProcessor {
   float filter_frequency_ = 0.0f;
   float filter_q_ = std::sqrt(0.5f);
   OscMode osc_mode_ = OscMode::kNone;
-  SamplePlaybackMode sample_playback_mode_ = SamplePlaybackMode::kNone;
+  SliceMode slice_mode_ = SliceMode::kNone;
 
   Voice::Params voice_params_ = {};
 

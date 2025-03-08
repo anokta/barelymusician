@@ -26,20 +26,20 @@ namespace Barely {
     [InspectorName("None")] NONE = 0,
     /// Mix.
     [InspectorName("Mix")] MIX,
-    /// Amplitude modulation by oscillator applied to sample player.
+    /// Amplitude modulation by the oscillator applied to the slice.
     [InspectorName("AM")] AM,
-    /// Aamplitude modulation by sample player applied to oscillator.
+    /// Aamplitude modulation by the slice applied to the oscillator.
     [InspectorName("Envelope Follower")] ENVELOPE_FOLLOWER,
-    /// Frequency modulation by oscillator applied to sample player.
+    /// Frequency modulation by the oscillator applied to the slice.
     [InspectorName("FM")] FM,
-    /// Frequency modulation by sample player applied to oscillator.
+    /// Frequency modulation by the slice applied to the oscillator.
     [InspectorName("MF")] MF,
     /// Ring modulation.
     [InspectorName("Ring")] RING,
   }
 
-  /// Sample playback mode.
-  public enum SamplePlaybackMode {
+  /// Slice mode.
+  public enum SliceMode {
     /// None.
     [InspectorName("None")] NONE = 0,
     /// Once.
@@ -160,10 +160,10 @@ namespace Barely {
     [Range(-0.5f, 0.5f)]
     public float OscSkew = 0.0f;
 
-    [Header("Sample Player")]
+    [Header("Slice")]
 
-    /// Sample playback mode.
-    public SamplePlaybackMode SamplePlaybackMode = SamplePlaybackMode.NONE;
+    /// Slice mode.
+    public SliceMode SliceMode = SliceMode.NONE;
 
     /// List of sample data slices.
     public List<Slice> Slices = null;
@@ -334,7 +334,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.OSC_PITCH_SHIFT, OscPitchShift);
       SetControl(Engine.Internal.ControlType.OSC_SHAPE, OscShape);
       SetControl(Engine.Internal.ControlType.OSC_SKEW, OscSkew);
-      SetControl(Engine.Internal.ControlType.SAMPLE_PLAYBACK_MODE, (float)SamplePlaybackMode);
+      SetControl(Engine.Internal.ControlType.SLICE_MODE, (float)SliceMode);
       SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
       SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
       SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);

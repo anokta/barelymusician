@@ -49,7 +49,7 @@ void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
-  instrument.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kLoop);
+  instrument.SetControl(ControlType::kSliceMode, SliceMode::kLoop);
   instrument.SetSampleData(kSlices);
   instrument.SetNoteOn(1.0);
 

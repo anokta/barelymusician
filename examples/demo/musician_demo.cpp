@@ -30,8 +30,8 @@ using ::barely::OscMode;
 using ::barely::Performer;
 using ::barely::Random;
 using ::barely::SampleDataSlice;
-using ::barely::SamplePlaybackMode;
 using ::barely::Scale;
+using ::barely::SliceMode;
 using ::barely::Task;
 using ::barely::TaskState;
 using ::barely::examples::AudioClock;
@@ -289,7 +289,7 @@ int main(int /*argc*/, char* argv[]) {
   percussion.SetControl(ControlType::kGain, -18.0f);
   percussion.SetControl(ControlType::kAttack, 0.0f);
   percussion.SetControl(ControlType::kRetrigger, true);
-  percussion.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kOnce);
+  percussion.SetControl(ControlType::kSliceMode, SliceMode::kOnce);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<float, std::string>>& percussion_map) {

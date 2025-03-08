@@ -13,46 +13,46 @@ namespace barely {
 
 namespace {
 
-template <SamplePlaybackMode kSamplePlaybackMode>
-VoiceCallback GetVoiceCallback(OscMode oscillator_mode) {
-  switch (oscillator_mode) {
+template <SliceMode kSliceMode>
+VoiceCallback GetVoiceCallback(OscMode osc_mode) {
+  switch (osc_mode) {
     case OscMode::kNone:
-      return Voice::Next<OscMode::kNone, kSamplePlaybackMode>;
+      return Voice::Next<OscMode::kNone, kSliceMode>;
     case OscMode::kMix:
-      return Voice::Next<OscMode::kMix, kSamplePlaybackMode>;
+      return Voice::Next<OscMode::kMix, kSliceMode>;
     case OscMode::kAm:
-      return Voice::Next<OscMode::kAm, kSamplePlaybackMode>;
+      return Voice::Next<OscMode::kAm, kSliceMode>;
     case OscMode::kEnvelopeFollower:
-      return Voice::Next<OscMode::kEnvelopeFollower, kSamplePlaybackMode>;
+      return Voice::Next<OscMode::kEnvelopeFollower, kSliceMode>;
     case OscMode::kFm:
-      return Voice::Next<OscMode::kFm, kSamplePlaybackMode>;
+      return Voice::Next<OscMode::kFm, kSliceMode>;
     case OscMode::kMf:
-      return Voice::Next<OscMode::kMf, kSamplePlaybackMode>;
+      return Voice::Next<OscMode::kMf, kSliceMode>;
     case OscMode::kRing:
-      return Voice::Next<OscMode::kRing, kSamplePlaybackMode>;
+      return Voice::Next<OscMode::kRing, kSliceMode>;
     default:
       assert(!"Invalid oscillator mode");
-      return Voice::Next<OscMode::kMix, kSamplePlaybackMode>;
+      return Voice::Next<OscMode::kMix, kSliceMode>;
   }
 }
 
-VoiceCallback GetVoiceCallback(OscMode oscillator_mode, const SampleData& sample_data,
-                               SamplePlaybackMode sample_playback_mode) {
+VoiceCallback GetVoiceCallback(OscMode osc_mode, const SampleData& sample_data,
+                               SliceMode slice_mode) {
   if (sample_data.empty()) {
-    return GetVoiceCallback<SamplePlaybackMode::kNone>(oscillator_mode);
+    return GetVoiceCallback<SliceMode::kNone>(osc_mode);
   }
-  switch (sample_playback_mode) {
-    case SamplePlaybackMode::kNone:
-      return GetVoiceCallback<SamplePlaybackMode::kNone>(oscillator_mode);
-    case SamplePlaybackMode::kOnce:
-      return GetVoiceCallback<SamplePlaybackMode::kOnce>(oscillator_mode);
-    case SamplePlaybackMode::kSustain:
-      return GetVoiceCallback<SamplePlaybackMode::kSustain>(oscillator_mode);
-    case SamplePlaybackMode::kLoop:
-      return GetVoiceCallback<SamplePlaybackMode::kLoop>(oscillator_mode);
+  switch (slice_mode) {
+    case SliceMode::kNone:
+      return GetVoiceCallback<SliceMode::kNone>(osc_mode);
+    case SliceMode::kOnce:
+      return GetVoiceCallback<SliceMode::kOnce>(osc_mode);
+    case SliceMode::kSustain:
+      return GetVoiceCallback<SliceMode::kSustain>(osc_mode);
+    case SliceMode::kLoop:
+      return GetVoiceCallback<SliceMode::kLoop>(osc_mode);
     default:
-      assert(!"Invalid sample playback mode");
-      return GetVoiceCallback<SamplePlaybackMode::kNone>(oscillator_mode);
+      assert(!"Invalid slice mode");
+      return GetVoiceCallback<SliceMode::kNone>(osc_mode);
   }
 }
 
@@ -130,7 +130,7 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kOscMode:
       osc_mode_ = static_cast<OscMode>(value);
-      voice_callback_ = GetVoiceCallback(osc_mode_, sample_data_, sample_playback_mode_);
+      voice_callback_ = GetVoiceCallback(osc_mode_, sample_data_, slice_mode_);
       break;
     case ControlType::kOscNoiseRatio:
       voice_params_.osc_noise_ratio = value;
@@ -153,9 +153,9 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
     case ControlType::kOscSkew:
       voice_params_.osc_skew = value;
       break;
-    case ControlType::kSamplePlaybackMode:
-      sample_playback_mode_ = static_cast<SamplePlaybackMode>(value);
-      voice_callback_ = GetVoiceCallback(osc_mode_, sample_data_, sample_playback_mode_);
+    case ControlType::kSliceMode:
+      slice_mode_ = static_cast<SliceMode>(value);
+      voice_callback_ = GetVoiceCallback(osc_mode_, sample_data_, slice_mode_);
       break;
     case ControlType::kFilterType:
       filter_type_ = static_cast<FilterType>(value);
@@ -210,7 +210,7 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
 void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
   for (int i = 0; i < voice_count_; ++i) {
     if (voice_states_[i].pitch == pitch && voice_states_[i].voice.IsActive()) {
-      if (!sample_data_.empty() && sample_playback_mode_ == SamplePlaybackMode::kOnce) {
+      if (!sample_data_.empty() && slice_mode_ == SliceMode::kOnce) {
         voice_states_[i].voice.Stop<true>();
       } else {
         voice_states_[i].voice.Stop<false>();
@@ -249,7 +249,7 @@ void InstrumentProcessor::SetReferenceFrequency(float reference_frequency) noexc
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   sample_data_.Swap(sample_data);
-  voice_callback_ = GetVoiceCallback(osc_mode_, sample_data_, sample_playback_mode_);
+  voice_callback_ = GetVoiceCallback(osc_mode_, sample_data_, slice_mode_);
   for (int i = 0; i < voice_count_; ++i) {
     if (Voice& voice = voice_states_[i].voice; !voice.IsActive()) {
       voice.set_sample_player_slice(nullptr);

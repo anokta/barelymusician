@@ -222,7 +222,7 @@ MonoBehaviour:
   OscPitchShift: 0
   OscShape: 0.67
   OscSkew: 0
-  SamplePlaybackMode: 0
+  SliceMode: 0
   Slices: []
   FilterType: 0
   FilterFrequency: 0
@@ -752,7 +752,7 @@ MonoBehaviour:
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
-  SamplePlaybackMode: 1
+  SliceMode: 1
   Slices:
   - RootPitch: 0
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
@@ -1055,7 +1055,7 @@ MonoBehaviour:
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
-  SamplePlaybackMode: 0
+  SliceMode: 0
   Slices: []
   FilterType: 0
   FilterFrequency: 0
@@ -1400,7 +1400,7 @@ MonoBehaviour:
   OscPitchShift: 0
   OscShape: 0.5
   OscSkew: -0.1
-  SamplePlaybackMode: 0
+  SliceMode: 0
   Slices: []
   FilterType: 0
   FilterFrequency: 0
@@ -1622,7 +1622,7 @@ MonoBehaviour:
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
-  SamplePlaybackMode: 2
+  SliceMode: 2
   Slices:
   - RootPitch: 9
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}

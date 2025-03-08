@@ -25,8 +25,7 @@ constexpr std::array<SampleDataSlice, kVoiceCount> kSlices = {
 TEST(InstrumentProcessorTest, SingleVoice) {
   InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
-  processor.SetControl(ControlType::kSamplePlaybackMode,
-                       static_cast<float>(SamplePlaybackMode::kLoop));
+  processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
@@ -52,8 +51,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 TEST(InstrumentProcessorTest, MaxVoices) {
   InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
-  processor.SetControl(ControlType::kSamplePlaybackMode,
-                       static_cast<float>(SamplePlaybackMode::kLoop));
+  processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);

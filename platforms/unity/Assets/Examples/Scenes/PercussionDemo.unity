@@ -235,7 +235,8 @@ MonoBehaviour:
   arpeggiator: {fileID: 0}
   enableModeSwitch: 0
   oscShape: 0
-  samplePlaybackMode: 3
+  oscMode: 1
+  sliceMode: 3
 --- !u!114 &675413002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -475,7 +476,7 @@ MonoBehaviour:
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
-  SamplePlaybackMode: 1
+  SliceMode: 1
   Slices:
   - RootPitch: 0
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}

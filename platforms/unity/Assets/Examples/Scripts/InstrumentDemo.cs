@@ -12,7 +12,7 @@ namespace Barely.Examples {
     [Range(0.0f, 1.0f)]
     public float oscShape = 0.0f;
     public OscMode oscMode = OscMode.MIX;
-    public SamplePlaybackMode samplePlaybackMode = SamplePlaybackMode.LOOP;
+    public SliceMode sliceMode = SliceMode.LOOP;
 
     private const int N = 4;
     private Dictionary<float, Vector2> _activeNotes = null;
@@ -23,7 +23,7 @@ namespace Barely.Examples {
       if (enableModeSwitch) {
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
-        controller.instrument.SamplePlaybackMode = SamplePlaybackMode.NONE;
+        controller.instrument.SliceMode = SliceMode.NONE;
       }
     }
 
@@ -65,11 +65,11 @@ namespace Barely.Examples {
         controller.instrument.OscShape = oscShape;
       } else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
         controller.instrument.OscMode = OscMode.NONE;
-        controller.instrument.SamplePlaybackMode = samplePlaybackMode;
+        controller.instrument.SliceMode = sliceMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
-        controller.instrument.SamplePlaybackMode = samplePlaybackMode;
+        controller.instrument.SliceMode = sliceMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) {
         if (controller.arpeggiator != null) {
           controller.arpeggiator.SetAllNotesOff();

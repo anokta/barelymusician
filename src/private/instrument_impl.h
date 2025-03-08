@@ -176,26 +176,26 @@ class InstrumentImpl {
 
   // Array of controls.
   ControlArray controls_ = {
-      Control(0.0f, kMinDecibels, 0.0f),                   // kGain
-      Control(0.0f),                                       // kPitchShift
-      Control(false),                                      // kRetrigger
-      Control(8, 1, 20),                                   // kVoiceCount
-      Control(0.0f, 0.0f, 60.0f),                          // kAttack
-      Control(0.0f, 0.0f, 60.0f),                          // kDecay
-      Control(1.0f, 0.0f, 1.0f),                           // kSustain
-      Control(0.0f, 0.0f, 60.0f),                          // kRelease
-      Control(0.0f, -1.0f, 1.0f),                          // kOscMix
-      Control(0, 0, BarelyOscMode_kCount - 1),             // kOscMode
-      Control(0.0f, 0.0f, 1.0f),                           // kOscNoiseRatio
-      Control(0.0f),                                       // kOscPitchShift
-      Control(0.0f, 0.0f, 1.0f),                           // kOscShape
-      Control(0.0f, -0.5f, 0.5f),                          // kOscSkew
-      Control(0, 0, BarelySamplePlaybackMode_kCount - 1),  // kSamplePlaybackMode
-      Control(0, 0, BarelyFilterType_kCount - 1),          // kFilterType
-      Control(0.0f, 0.0f),                                 // kFilterFrequency
-      Control(std::sqrt(0.5f), 0.1f),                      // kFilterQ
-      Control(16.0f, 1.0f, 16.0f),                         // kBitCrusherDepth
-      Control(1.0f, 0.0f, 1.0f),                           // kBitCrusherRate
+      Control(0.0f, kMinDecibels, 0.0f),           // kGain
+      Control(0.0f),                               // kPitchShift
+      Control(false),                              // kRetrigger
+      Control(8, 1, 20),                           // kVoiceCount
+      Control(0.0f, 0.0f, 60.0f),                  // kAttack
+      Control(0.0f, 0.0f, 60.0f),                  // kDecay
+      Control(1.0f, 0.0f, 1.0f),                   // kSustain
+      Control(0.0f, 0.0f, 60.0f),                  // kRelease
+      Control(0.0f, -1.0f, 1.0f),                  // kOscMix
+      Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
+      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseRatio
+      Control(0.0f),                               // kOscPitchShift
+      Control(0.0f, 0.0f, 1.0f),                   // kOscShape
+      Control(0.0f, -0.5f, 0.5f),                  // kOscSkew
+      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
+      Control(0, 0, BarelyFilterType_kCount - 1),  // kFilterType
+      Control(0.0f, 0.0f),                         // kFilterFrequency
+      Control(std::sqrt(0.5f), 0.1f),              // kFilterQ
+      Control(16.0f, 1.0f, 16.0f),                 // kBitCrusherDepth
+      Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
   };
 
   // Map of note control arrays by their pitches.

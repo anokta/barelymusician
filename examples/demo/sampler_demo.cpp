@@ -22,7 +22,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::SampleDataSlice;
-using ::barely::SamplePlaybackMode;
+using ::barely::SliceMode;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -82,7 +82,7 @@ int main(int /*argc*/, char* argv[]) {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kSamplePlaybackMode, SamplePlaybackMode::kLoop);
+  instrument.SetControl(ControlType::kSliceMode, SliceMode::kLoop);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);

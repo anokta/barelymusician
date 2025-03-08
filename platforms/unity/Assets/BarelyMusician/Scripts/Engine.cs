@@ -76,8 +76,8 @@ namespace Barely {
         [InspectorName("Oscillator Shape")] OSC_SHAPE,
         /// Oscillator skew.
         [InspectorName("Oscillator Skew")] OSC_SKEW,
-        /// Sample playback mode.
-        [InspectorName("Sample Playback Mode")] SAMPLE_PLAYBACK_MODE,
+        /// Slice mode.
+        [InspectorName("Slice Mode")] SLICE_MODE,
         /// Filter type.
         [InspectorName("Filter Type")] FILTER_TYPE,
         /// Filter frequency in hertz.

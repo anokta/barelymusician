@@ -13,11 +13,11 @@ class SamplePlayer {
  public:
   /// Returns the output sample.
   ///
-  /// @tparam kMode Sample playback mode.
+  /// @tparam kMode Slice mode.
   /// @return Next output sample.
-  template <SamplePlaybackMode kMode>
+  template <SliceMode kMode>
   [[nodiscard]] float GetOutput() const noexcept {
-    if constexpr (kMode != SamplePlaybackMode::kNone) {
+    if constexpr (kMode != SliceMode::kNone) {
       assert(slice_ != nullptr);
       const int sample_index = static_cast<int>(cursor_);
       if (sample_index >= slice_->sample_count) {
@@ -43,10 +43,10 @@ class SamplePlayer {
   /// Increments the phase.
   ///
   /// @param increment_shift Phase increment shift.
-  template <SamplePlaybackMode kMode>
+  template <SliceMode kMode>
   void Increment(float increment_shift = 0.0f) noexcept {
     cursor_ += increment_ * (1.0f + increment_shift);
-    if constexpr (kMode == SamplePlaybackMode::kLoop) {
+    if constexpr (kMode == SliceMode::kLoop) {
       if (static_cast<int>(cursor_) >= slice_->sample_count) {
         cursor_ = std::fmod(cursor_, static_cast<float>(slice_->sample_count));
       }

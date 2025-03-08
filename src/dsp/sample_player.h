@@ -8,7 +8,7 @@
 
 namespace barely {
 
-/// Sample player that generates output samples from a sample data slice.
+/// Sample player that generates output samples from a slice.
 class SamplePlayer {
  public:
   /// Returns the output sample.
@@ -58,8 +58,8 @@ class SamplePlayer {
 
   /// Sets the slice.
   ///
-  /// @param slice Pointer to sample data slice.
-  void SetSlice(const SampleDataSlice* slice) noexcept { slice_ = slice; }
+  /// @param slice Pointer to slice.
+  void SetSlice(const Slice* slice) noexcept { slice_ = slice; }
 
   /// Sets the increment per sample.
   ///
@@ -74,8 +74,8 @@ class SamplePlayer {
   }
 
  private:
-  // Pointer to sample data slice.
-  const SampleDataSlice* slice_ = nullptr;
+  // Pointer to slice.
+  const Slice* slice_ = nullptr;
 
   // Playback cursor.
   float cursor_ = 0.0f;

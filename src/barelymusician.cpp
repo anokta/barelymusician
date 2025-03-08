@@ -15,7 +15,7 @@
 
 using ::barely::ControlType;
 using ::barely::NoteControlType;
-using ::barely::SampleDataSlice;
+using ::barely::Slice;
 
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!engine || !out_arpeggiator) return false;
@@ -271,14 +271,14 @@ bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
   return true;
 }
 
-bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
-                                    const BarelySampleDataSlice* slices, int32_t slice_count) {
+bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument, const BarelySlice* slices,
+                                    int32_t slice_count) {
   if (!instrument) return false;
   if (slice_count < 0 || (!slices && slice_count > 0)) return false;
 
-  instrument->SetSampleData(std::span<const SampleDataSlice>{
-      reinterpret_cast<const SampleDataSlice*>(slices),
-      reinterpret_cast<const SampleDataSlice*>(slices + slice_count)});
+  instrument->SetSampleData(
+      std::span<const Slice>{reinterpret_cast<const Slice*>(slices),
+                             reinterpret_cast<const Slice*>(slices + slice_count)});
   return true;
 }
 

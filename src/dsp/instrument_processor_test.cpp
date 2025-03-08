@@ -14,11 +14,11 @@ constexpr int kReferenceFrequency = 1;
 
 constexpr int kVoiceCount = 4;
 constexpr std::array<float, kVoiceCount> kSamples = {0.5f};
-constexpr std::array<SampleDataSlice, kVoiceCount> kSlices = {
-    SampleDataSlice(0.0, kSampleRate, kSamples),
-    SampleDataSlice(1.0, kSampleRate, kSamples),
-    SampleDataSlice(2.0, kSampleRate, kSamples),
-    SampleDataSlice(3.0, kSampleRate, kSamples),
+constexpr std::array<Slice, kVoiceCount> kSlices = {
+    Slice(0.0, kSampleRate, kSamples),
+    Slice(1.0, kSampleRate, kSamples),
+    Slice(2.0, kSampleRate, kSamples),
+    Slice(3.0, kSampleRate, kSamples),
 };
 
 // Tests that playing a single voice produces the expected output.

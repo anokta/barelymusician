@@ -44,7 +44,7 @@ BENCHMARK(BM_BarelyInstrument_Process_Empty);
 
 void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
   constexpr std::array<float, 5> kSamples = {-0.5f, -0.25f, 0.0f, 0.25f, 1.0f};
-  const std::array<SampleDataSlice, 1> kSlices = {SampleDataSlice(0.0, kSampleRate, kSamples)};
+  const std::array<Slice, 1> kSlices = {Slice(0.0, kSampleRate, kSamples)};
 
   Engine engine(kSampleRate);
 

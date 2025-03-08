@@ -96,7 +96,7 @@ class Voice {
   void set_sample_player_increment(float pitch, float sample_interval) noexcept {
     sample_player_.SetIncrement(pitch, sample_interval);
   }
-  void set_sample_player_slice(const SampleDataSlice* sample_player_slice) noexcept {
+  void set_sample_player_slice(const Slice* sample_player_slice) noexcept {
     sample_player_.SetSlice(sample_player_slice);
   }
 

@@ -29,8 +29,8 @@ using ::barely::Instrument;
 using ::barely::OscMode;
 using ::barely::Performer;
 using ::barely::Random;
-using ::barely::SampleDataSlice;
 using ::barely::Scale;
+using ::barely::Slice;
 using ::barely::SliceMode;
 using ::barely::Task;
 using ::barely::TaskState;
@@ -98,7 +98,7 @@ constexpr char kDrumsDir[] = "audio/drums/";
 
 // Inserts pad data to a given `data` from a given `file_path`.
 void InsertPadData(float pitch, const std::string& file_path, std::vector<float>& samples,
-                   std::vector<SampleDataSlice>& slices) {
+                   std::vector<Slice>& slices) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
@@ -293,7 +293,7 @@ int main(int /*argc*/, char* argv[]) {
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<float, std::string>>& percussion_map) {
-        std::vector<SampleDataSlice> slices;
+        std::vector<Slice> slices;
         std::vector<std::vector<float>> samples;
         slices.reserve(percussion_map.size());
         samples.reserve(percussion_map.size());

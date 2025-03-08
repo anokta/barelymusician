@@ -14,7 +14,7 @@ constexpr int kDataLength = 5;
 constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 constexpr float kPitch = 0.0f;
 constexpr float kSampleInterval = 1.0f;
-constexpr SampleDataSlice kSlice = SampleDataSlice(kPitch, 1, kData);
+constexpr Slice kSlice = Slice(kPitch, 1, kData);
 
 // Tests that the sample data is played back once as expected.
 TEST(SamplePlayerTest, SimplePlayback) {

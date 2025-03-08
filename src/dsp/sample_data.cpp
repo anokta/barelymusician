@@ -8,7 +8,7 @@
 namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-SampleData::SampleData(std::span<const SampleDataSlice> slices) noexcept {
+SampleData::SampleData(std::span<const Slice> slices) noexcept {
   slices_.reserve(slices.size());
   for (int i = 0; i < static_cast<int>(slices.size()); ++i) {
     slices_.emplace_back(slices[i], std::vector<float>(slices[i].samples,
@@ -17,7 +17,7 @@ SampleData::SampleData(std::span<const SampleDataSlice> slices) noexcept {
   }
 }
 
-const SampleDataSlice* SampleData::Select(float pitch) const noexcept {
+const Slice* SampleData::Select(float pitch) const noexcept {
   if (slices_.empty()) {
     return nullptr;
   }

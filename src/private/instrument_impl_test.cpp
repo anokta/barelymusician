@@ -50,8 +50,7 @@ TEST(InstrumentImplTest, PlaySingleNote) {
   constexpr float kPitch = 1.0f;
   constexpr float kIntensity = 0.5f;
   constexpr int64_t kUpdateSample = 20;
-  constexpr std::array<SampleDataSlice, 1> kSlices = {
-      SampleDataSlice(kPitch, kSampleRate, kSamples)};
+  constexpr std::array<Slice, 1> kSlices = {Slice(kPitch, kSampleRate, kSamples)};
 
   InstrumentImpl instrument(kSampleRate, kReferenceFrequency, kUpdateSample);
   instrument.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kSustain));
@@ -89,11 +88,11 @@ TEST(InstrumentImplTest, PlaySingleNote) {
 
 // Tests that the instrument plays multiple notes as expected.
 TEST(InstrumentImplTest, PlayMultipleNotes) {
-  constexpr std::array<SampleDataSlice, kSampleRate> kSlices = {
-      SampleDataSlice(0.0f, kSampleRate, {kSamples.data(), kSamples.data() + 1}),
-      SampleDataSlice(1.0f, kSampleRate, {kSamples.data() + 1, kSamples.data() + 2}),
-      SampleDataSlice(2.0f, kSampleRate, {kSamples.data() + 2, kSamples.data() + 3}),
-      SampleDataSlice(3.0f, kSampleRate, {kSamples.data() + 3, kSamples.data() + 4}),
+  constexpr std::array<Slice, kSampleRate> kSlices = {
+      Slice(0.0f, kSampleRate, {kSamples.data(), kSamples.data() + 1}),
+      Slice(1.0f, kSampleRate, {kSamples.data() + 1, kSamples.data() + 2}),
+      Slice(2.0f, kSampleRate, {kSamples.data() + 2, kSamples.data() + 3}),
+      Slice(3.0f, kSampleRate, {kSamples.data() + 3, kSamples.data() + 4}),
   };
 
   InstrumentImpl instrument(1, kReferenceFrequency, 0);

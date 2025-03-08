@@ -165,7 +165,7 @@ namespace Barely {
     /// Slice mode.
     public SliceMode SliceMode = SliceMode.NONE;
 
-    /// List of sample data slices.
+    /// List of slices.
     public List<Slice> Slices = null;
     private int _sliceCount = 0;
 

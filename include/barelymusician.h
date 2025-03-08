@@ -379,21 +379,6 @@ typedef struct BarelyQuantization {
   float amount;
 } BarelyQuantization;
 
-/// Slice of sample data.
-typedef struct BarelySampleDataSlice {
-  /// Root note pitch.
-  float root_pitch;
-
-  /// Sampling rate in hertz.
-  int32_t sample_rate;
-
-  /// Array of mono samples.
-  const float* samples;
-
-  /// Number of mono samples.
-  int32_t sample_count;
-} BarelySampleDataSlice;
-
 /// A musical scale.
 typedef struct BarelyScale {
   /// Array of note pitches relative to the root note pitch.
@@ -408,6 +393,21 @@ typedef struct BarelyScale {
   /// Mode index.
   int32_t mode;
 } BarelyScale;
+
+/// Slice of sample data.
+typedef struct BarelySlice {
+  /// Root note pitch.
+  float root_pitch;
+
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
+
+  /// Array of mono samples.
+  const float* samples;
+
+  /// Number of mono samples.
+  int32_t sample_count;
+} BarelySlice;
 
 /// Instrument note off callback.
 ///
@@ -690,12 +690,11 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle ins
 /// Sets instrument sample data.
 ///
 /// @param instrument Instrument handle.
-/// @param slices Array of sample data slices.
-/// @param sample_data_count Number of sample data slices.
+/// @param slices Array of slices.
+/// @param sample_data_count Number of slices.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
-                                                  const BarelySampleDataSlice* slices,
-                                                  int32_t slice_count);
+                                                  const BarelySlice* slices, int32_t slice_count);
 
 /// Creates a performer.
 ///
@@ -1157,25 +1156,23 @@ enum class TaskState {
 };
 
 /// Slice of sample data.
-struct SampleDataSlice : public BarelySampleDataSlice {
-  /// Constructs a new `SampleDataSlice`.
+struct Slice : public BarelySlice {
+  /// Constructs a new `Slice`.
   ///
   /// @param root_pitch Root pich.
   /// @param sample_rate Sampling rate in hertz.
   /// @param samples Span of mono samples.
-  explicit constexpr SampleDataSlice(float root_pitch, int sample_rate,
-                                     std::span<const float> samples) noexcept
-      : SampleDataSlice(
-            {root_pitch, sample_rate, samples.data(), static_cast<int>(samples.size())}) {
+  explicit constexpr Slice(float root_pitch, int sample_rate,
+                           std::span<const float> samples) noexcept
+      : Slice({root_pitch, sample_rate, samples.data(), static_cast<int>(samples.size())}) {
     assert(sample_rate >= 0);
   }
 
-  /// Constructs a new `SampleDataSlice` from a raw type.
+  /// Constructs a new `Slice` from a raw type.
   ///
-  /// @param sample_data_slice Raw sample data slice.
+  /// @param slice Raw slice.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr SampleDataSlice(BarelySampleDataSlice sample_data_slice) noexcept
-      : BarelySampleDataSlice{sample_data_slice} {}
+  constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
 };
 
 /// Handle wrapper template.
@@ -1441,11 +1438,11 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the sample data.
   ///
-  /// @param sample_data Span of sample data slices.
-  void SetSampleData(std::span<const SampleDataSlice> slices) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetSampleData(
-        *this, reinterpret_cast<const BarelySampleDataSlice*>(slices.data()),
-        static_cast<int32_t>(slices.size()));
+  /// @param sample_data Span of slices.
+  void SetSampleData(std::span<const Slice> slices) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_SetSampleData(*this, reinterpret_cast<const BarelySlice*>(slices.data()),
+                                       static_cast<int32_t>(slices.size()));
     assert(success);
   }
 

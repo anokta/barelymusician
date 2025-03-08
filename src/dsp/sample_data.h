@@ -18,16 +18,16 @@ class SampleData {
 
   /// Constructs a new `SampleData`.
   ///
-  /// @param slices Span of sample data slices.
-  SampleData(std::span<const SampleDataSlice> slices) noexcept;
+  /// @param slices Span of slices.
+  SampleData(std::span<const Slice> slices) noexcept;
 
   [[nodiscard]] bool empty() const noexcept { return slices_.empty(); }
 
-  /// Selects the sample data slice for a given pitch.
+  /// Selects the slice for a given pitch.
   ///
   /// @param pitch Note pitch.
-  /// @return Pointer to sample data slice.
-  [[nodiscard]] const SampleDataSlice* Select(float pitch) const noexcept;
+  /// @return Pointer to slice.
+  [[nodiscard]] const Slice* Select(float pitch) const noexcept;
 
   /// Swaps the sample data.
   ///
@@ -35,10 +35,10 @@ class SampleData {
   void Swap(SampleData& other) noexcept { slices_.swap(other.slices_); }
 
  private:
-  // Array of sample data slices.
-  std::vector<std::pair<SampleDataSlice, std::vector<float>>> slices_;
+  // Array of slices.
+  std::vector<std::pair<Slice, std::vector<float>>> slices_;
 
-  // Random number generator for picking sample data slices.
+  // Random number generator for picking slices.
   inline static RandomImpl random_ = RandomImpl();
 };
 

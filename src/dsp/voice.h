@@ -9,8 +9,7 @@
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
 #include "dsp/envelope.h"
-#include "dsp/oscillator.h"
-#include "dsp/sample_player.h"
+#include "dsp/sample_generators.h"
 #include "dsp/voice.h"
 #include "private/random_impl.h"
 
@@ -74,82 +73,100 @@ class Voice {
       gain_ = intensity;
       bit_crusher_.Reset();
       filter_.Reset();
-      osc_.Reset();
-      sample_player_.Reset();
+      osc_phase_ = 0.0f;
+      slice_offset_ = 0.0f;
       envelope_.Start(adsr);
     }
   }
 
   /// Stops the voice.
-  template <bool kIsSamplePlayedOnce>
+  template <bool IsSliceModeOnce>
   void Stop() noexcept {
-    if constexpr (!kIsSamplePlayedOnce) {
+    if constexpr (!IsSliceModeOnce) {
       envelope_.Stop();
-    } else if (!sample_player_.IsActive()) {
+    } else if (!IsSliceActive()) {
       envelope_.Reset();
     }
   }
 
   void set_osc_increment(float pitch, float reference_frequency, float sample_interval) noexcept {
-    osc_.SetIncrement(pitch, reference_frequency, sample_interval);
+    assert(reference_frequency >= 0.0f);
+    assert(sample_interval >= 0.0f);
+    osc_increment_ = std::pow(2.0f, pitch) * reference_frequency * sample_interval;
   }
-  void set_sample_player_increment(float pitch, float sample_interval) noexcept {
-    sample_player_.SetIncrement(pitch, sample_interval);
+  void set_slice_increment(float pitch, float sample_interval) noexcept {
+    assert(sample_interval >= 0.0f);
+    slice_increment_ =
+        (slice_ != nullptr && slice_->sample_count > 0)
+            ? std::pow(2.0f, pitch - slice_->root_pitch) * slice_->sample_rate * sample_interval
+            : 0.0f;
   }
-  void set_sample_player_slice(const Slice* sample_player_slice) noexcept {
-    sample_player_.SetSlice(sample_player_slice);
-  }
+  void set_slice(const Slice* slice) noexcept { slice_ = slice; }
 
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
   [[nodiscard]] float Next(const Params& params) noexcept {
     if constexpr (kSliceMode == SliceMode::kOnce) {
-      if (!sample_player_.IsActive()) {
+      if (!IsSliceActive()) {
         envelope_.Reset();
         return 0.0f;
       }
     }
 
+    float osc_sample = 0.0f;
+    float slice_sample = 0.0f;
     float output = gain_ * envelope_.Next();
-    float sample_player_sample = sample_player_.GetOutput<kSliceMode>();
+
+    if constexpr (kSliceMode != SliceMode::kNone) {
+      slice_sample = GenerateSliceSample(*slice_, slice_offset_);
+    }
 
     if constexpr (kOscMode == OscMode::kNone) {
-      output *= sample_player_sample;
-      sample_player_.Increment<kSliceMode>();
+      output *= slice_sample;
     } else {
-      const float sample_player_output =
-          (1.0f - std::max(0.0f, params_.osc_mix)) * sample_player_sample;
-      float osc_sample =
-          (1.0f - params_.osc_noise_ratio) * osc_.GetOutput(params_.osc_shape, params_.osc_skew) +
+      const float skewed_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
+      const float slice_output = (1.0f - std::max(0.0f, params_.osc_mix)) * slice_sample;
+      osc_sample =
+          (1.0f - params_.osc_noise_ratio) * GenerateOscSample(skewed_phase, params_.osc_shape) +
           params_.osc_noise_ratio * random_.DrawUniform(-1.0f, 1.0f);
 
       if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
-        output *= (1.0f - std::max(0.0f, -params_.osc_mix)) * osc_sample + sample_player_output;
+        output *= (1.0f - std::max(0.0f, -params_.osc_mix)) * osc_sample + slice_output;
       } else if constexpr (kOscMode == OscMode::kFm) {
-        output *= sample_player_sample;
+        output *= slice_sample;
       } else {
         if constexpr (kOscMode == OscMode::kAm) {
           osc_sample = std::abs(osc_sample);
         } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
-          sample_player_sample = std::abs(sample_player_sample);
+          slice_sample = std::abs(slice_sample);
         }
-        output *= (1.0f - std::max(0.0f, -params_.osc_mix)) * osc_sample * sample_player_sample +
-                  sample_player_output;
+        output *=
+            (1.0f - std::max(0.0f, -params_.osc_mix)) * osc_sample * slice_sample + slice_output;
       }
-      if constexpr (kOscMode == OscMode::kFm) {
-        sample_player_.Increment<kSliceMode>(0.5f * (params_.osc_mix + 1.0f) * osc_sample);
-      } else {
-        sample_player_.Increment<kSliceMode>();
-      }
-    }
-    if constexpr (kOscMode == OscMode::kMf) {
-      osc_.Increment(sample_player_sample);
-    } else {
-      osc_.Increment();
     }
 
     output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
                                params_.bit_crusher_range, params_.bit_crusher_increment);
+
+    if constexpr (kOscMode == OscMode::kMf) {
+      osc_phase_ += (1.0f + slice_sample) * osc_increment_;
+    } else {
+      osc_phase_ += osc_increment_;
+    }
+    if (osc_phase_ >= 1.0f) {
+      osc_phase_ -= 1.0f;
+    }
+
+    if constexpr (kOscMode == OscMode::kFm) {
+      slice_offset_ += 0.5f * (params_.osc_mix + 1.0f) * slice_increment_;
+    } else {
+      slice_offset_ += slice_increment_;
+    }
+    if constexpr (kSliceMode == SliceMode::kLoop) {
+      if (static_cast<int>(slice_offset_) >= slice_->sample_count) {
+        slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
+      }
+    }
 
     ApproachParams(params);
 
@@ -169,14 +186,23 @@ class Voice {
     params_.filter_coefficients = params.filter_coefficients;
   }
 
+  bool IsSliceActive() const noexcept {
+    return static_cast<int>(slice_offset_) < slice_->sample_count;
+  }
+
   float gain_ = 0.0f;
   BitCrusher bit_crusher_;
   Envelope envelope_;
   BiquadFilter filter_;
-  Oscillator osc_;
-  SamplePlayer sample_player_;
 
   Params params_ = {};
+
+  float osc_increment_ = 0.0f;
+  float osc_phase_ = 0.0f;
+
+  const Slice* slice_ = nullptr;
+  float slice_increment_ = 0.0f;
+  float slice_offset_ = 0.0f;
 
   // White noise random number generator.
   inline static RandomImpl random_ = RandomImpl();

@@ -65,11 +65,6 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_dsp_oscillator INTERFACE
-  oscillator.h
-)
-
-add_library(
   barelymusician_dsp_sample_data
   sample_data.cpp
   sample_data.h
@@ -81,11 +76,11 @@ target_link_libraries(
 )
 
 add_library(
-  barelymusician_dsp_sample_player INTERFACE
-  sample_player.h
+  barelymusician_dsp_sample_generators INTERFACE
+  sample_generators.h
 )
 target_link_libraries(
-  barelymusician_dsp_sample_player INTERFACE
+  barelymusician_dsp_sample_generators INTERFACE
   barelymusician_headeronly
 )
 
@@ -98,8 +93,7 @@ target_link_libraries(
   barelymusician_dsp_biquad_filter
   barelymusician_dsp_bit_crusher
   barelymusician_dsp_envelope
-  barelymusician_dsp_oscillator
-  barelymusician_dsp_sample_player
+  barelymusician_dsp_sample_generators
   barelymusician_headeronly
   barelymusician_private_random_impl
 )
@@ -188,17 +182,6 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_dsp_message_queue_test)
 
   add_executable(
-    barelymusician_dsp_oscillator_test
-    oscillator_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_dsp_oscillator_test
-    barelymusician_dsp_oscillator
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_dsp_oscillator_test)
-
-  add_executable(
     barelymusician_dsp_sample_data_test
     sample_data_test.cpp
   )
@@ -212,14 +195,14 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_dsp_sample_data_test)
 
   add_executable(
-    barelymusician_dsp_sample_player_test
-    sample_player_test.cpp
+    barelymusician_dsp_sample_generators_test
+    sample_generators_test.cpp
   )
   target_link_libraries(
-    barelymusician_dsp_sample_player_test
-    barelymusician_dsp_sample_player
+    barelymusician_dsp_sample_generators_test
+    barelymusician_dsp_sample_generators
     barelymusician
     gtest_main
   )
-  gtest_discover_tests(barelymusician_dsp_sample_player_test)
+  gtest_discover_tests(barelymusician_dsp_sample_generators_test)
 endif()

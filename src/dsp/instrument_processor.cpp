@@ -99,7 +99,7 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
           const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
           voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
-          voice.set_sample_player_increment(shifted_pitch, sample_interval_);
+          voice.set_slice_increment(shifted_pitch, sample_interval_);
         }
       }
       break;
@@ -143,7 +143,7 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
           const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
           voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
-          voice.set_sample_player_increment(shifted_pitch, sample_interval_);
+          voice.set_slice_increment(shifted_pitch, sample_interval_);
         }
       }
       break;
@@ -196,7 +196,7 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
               voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
           const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
           voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
-          voice.set_sample_player_increment(shifted_pitch, sample_interval_);
+          voice.set_slice_increment(shifted_pitch, sample_interval_);
           break;
         }
       }
@@ -229,8 +229,8 @@ void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
   const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
   voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
   if (const auto* sample = sample_data_.Select(pitch); sample != nullptr) {
-    voice.set_sample_player_slice(sample);
-    voice.set_sample_player_increment(shifted_pitch, sample_interval_);
+    voice.set_slice(sample);
+    voice.set_slice_increment(shifted_pitch, sample_interval_);
   }
   voice.Start(voice_params_, adsr_, intensity);
 }
@@ -252,13 +252,13 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   voice_callback_ = GetVoiceCallback(osc_mode_, sample_data_, slice_mode_);
   for (int i = 0; i < voice_count_; ++i) {
     if (Voice& voice = voice_states_[i].voice; !voice.IsActive()) {
-      voice.set_sample_player_slice(nullptr);
+      voice.set_slice(nullptr);
     } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch);
                sample != nullptr) {
       const float shifted_pitch =
           voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-      voice.set_sample_player_slice(sample);
-      voice.set_sample_player_increment(shifted_pitch, sample_interval_);
+      voice.set_slice(sample);
+      voice.set_slice_increment(shifted_pitch, sample_interval_);
     }
   }
 }

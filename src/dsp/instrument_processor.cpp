@@ -65,6 +65,8 @@ InstrumentProcessor::InstrumentProcessor(int sample_rate, float reference_freque
       gain_processor_(sample_rate),
       reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
+  voice_params_.osc_increment = reference_frequency * sample_interval_;
+  voice_params_.slice_increment = sample_interval_;
 }
 
 void InstrumentProcessor::Process(float* output_samples, int output_sample_count) noexcept {
@@ -93,15 +95,9 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kPitchShift:
       pitch_shift_ = value;
-      for (int i = 0; i < voice_count_; ++i) {
-        if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
-          const float shifted_pitch =
-              voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-          const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
-          voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
-          voice.set_slice_increment(shifted_pitch, sample_interval_);
-        }
-      }
+      voice_params_.osc_increment =
+          std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
+      voice_params_.slice_increment = std::pow(2.0f, pitch_shift_) * sample_interval_;
       break;
     case ControlType::kRetrigger:
       should_retrigger_ = static_cast<bool>(value);
@@ -137,15 +133,8 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kOscPitchShift:
       osc_pitch_shift_ = value;
-      for (int i = 0; i < voice_count_; ++i) {
-        if (Voice& voice = voice_states_[i].voice; voice.IsActive()) {
-          const float shifted_pitch =
-              voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-          const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
-          voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
-          voice.set_slice_increment(shifted_pitch, sample_interval_);
-        }
-      }
+      voice_params_.osc_increment =
+          std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
       break;
     case ControlType::kOscShape:
       voice_params_.osc_shape = value;
@@ -192,11 +181,7 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
         if (Voice& voice = voice_states_[i].voice;
             voice_states_[i].pitch == pitch && voice.IsActive()) {
           voice_states_[i].pitch_shift = value;
-          const float shifted_pitch =
-              voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
-          const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
-          voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
-          voice.set_slice_increment(shifted_pitch, sample_interval_);
+          voice.set_pitch(voice_states_[i].pitch + voice_states_[i].pitch_shift);
           break;
         }
       }
@@ -225,26 +210,18 @@ void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
     return;
   }
   Voice& voice = AcquireVoice(pitch);
-  const float shifted_pitch = pitch + pitch_shift_;
-  const float osc_shifted_pitch = shifted_pitch + osc_pitch_shift_;
-  voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
   if (const auto* sample = sample_data_.Select(pitch); sample != nullptr) {
     voice.set_slice(sample);
-    voice.set_slice_increment(shifted_pitch, sample_interval_);
   }
   voice.Start(voice_params_, adsr_, intensity);
+  voice.set_pitch(pitch);
 }
 
 void InstrumentProcessor::SetReferenceFrequency(float reference_frequency) noexcept {
   assert(reference_frequency_ != reference_frequency);
   reference_frequency_ = reference_frequency;
-  for (int i = 0; i < voice_count_; ++i) {
-    if (auto& voice = voice_states_[i].voice; voice.IsActive()) {
-      const float osc_shifted_pitch =
-          voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift + osc_pitch_shift_;
-      voice.set_osc_increment(osc_shifted_pitch, reference_frequency_, sample_interval_);
-    }
-  }
+  voice_params_.osc_increment =
+      std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
 }
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
@@ -255,10 +232,8 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
       voice.set_slice(nullptr);
     } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch);
                sample != nullptr) {
-      const float shifted_pitch =
-          voice_states_[i].pitch + pitch_shift_ + voice_states_[i].pitch_shift;
       voice.set_slice(sample);
-      voice.set_slice_increment(shifted_pitch, sample_interval_);
+      voice.set_pitch(voice_states_[i].pitch + voice_states_[i].pitch_shift);
     }
   }
 }

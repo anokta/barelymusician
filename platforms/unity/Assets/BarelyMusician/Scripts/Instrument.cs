@@ -107,7 +107,7 @@ namespace Barely {
     public float Gain = 0.0f;
 
     /// Pitch shift.
-    [Range(-1.0f, 1.0f)]
+    [Range(-2.0f, 2.0f)]
     public float PitchShift = 0.0f;
 
     /// Retrigger.

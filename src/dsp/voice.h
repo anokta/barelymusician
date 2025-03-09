@@ -19,6 +19,7 @@ namespace barely {
 class Voice {
  public:
   /// Process parameters.
+  // TODO(#146): Split voice parameters out of instrument parameters.
   struct Params {
     /// Bit crusher range (for bit depth reduction).
     float bit_crusher_range = 0.0f;
@@ -28,6 +29,9 @@ class Voice {
 
     /// Filter coefficients.
     BiquadFilter::Coefficients filter_coefficients = {};
+
+    /// Oscillator increment per sample.
+    float osc_increment = 0.0f;
 
     /// Oscillator mix.
     float osc_mix = 0.0f;
@@ -40,6 +44,9 @@ class Voice {
 
     /// Oscillator skew.
     float osc_skew = 0.0f;
+
+    /// Slice increment per sample.
+    float slice_increment = 0.0f;
   };
 
   /// Returns the next output sample.
@@ -89,17 +96,11 @@ class Voice {
     }
   }
 
-  void set_osc_increment(float pitch, float reference_frequency, float sample_interval) noexcept {
-    assert(reference_frequency >= 0.0f);
-    assert(sample_interval >= 0.0f);
-    osc_increment_ = std::pow(2.0f, pitch) * reference_frequency * sample_interval;
-  }
-  void set_slice_increment(float pitch, float sample_interval) noexcept {
-    assert(sample_interval >= 0.0f);
-    slice_increment_ =
-        (slice_ != nullptr && slice_->sample_count > 0)
-            ? std::pow(2.0f, pitch - slice_->root_pitch) * slice_->sample_rate * sample_interval
-            : 0.0f;
+  void set_pitch(float pitch) noexcept {
+    params_.osc_increment = std::pow(2.0f, pitch);
+    params_.slice_increment = (slice_ != nullptr)
+                                  ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
+                                  : 0.0f;
   }
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }
 
@@ -148,20 +149,20 @@ class Voice {
     output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
                                params_.bit_crusher_range, params_.bit_crusher_increment);
 
+    float osc_increment = params.osc_increment * params_.osc_increment;
     if constexpr (kOscMode == OscMode::kMf) {
-      osc_phase_ += (1.0f + slice_sample) * osc_increment_;
-    } else {
-      osc_phase_ += osc_increment_;
+      osc_increment += slice_sample * osc_increment;
     }
+    osc_phase_ += osc_increment;
     if (osc_phase_ >= 1.0f) {
       osc_phase_ -= 1.0f;
     }
 
+    float slice_increment = params.slice_increment * params_.slice_increment;
     if constexpr (kOscMode == OscMode::kFm) {
-      slice_offset_ += 0.5f * (params_.osc_mix + 1.0f) * slice_increment_;
-    } else {
-      slice_offset_ += slice_increment_;
+      slice_increment += 0.5f * (params_.osc_mix + 1.0f) * osc_sample * slice_increment;
     }
+    slice_offset_ += slice_increment;
     if constexpr (kSliceMode == SliceMode::kLoop) {
       if (static_cast<int>(slice_offset_) >= slice_->sample_count) {
         slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
@@ -197,11 +198,8 @@ class Voice {
 
   Params params_ = {};
 
-  float osc_increment_ = 0.0f;
   float osc_phase_ = 0.0f;
-
   const Slice* slice_ = nullptr;
-  float slice_increment_ = 0.0f;
   float slice_offset_ = 0.0f;
 
   // White noise random number generator.

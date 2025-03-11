@@ -22,10 +22,8 @@ namespace Barely {
 
   /// Oscillator mode.
   public enum OscMode {
-    /// None.
-    [InspectorName("None")] NONE = 0,
     /// Mix.
-    [InspectorName("Mix")] MIX,
+    [InspectorName("Mix")] MIX = 0,
     /// Amplitude modulation by the oscillator applied to the slice.
     [InspectorName("AM")] AM,
     /// Aamplitude modulation by the slice applied to the oscillator.
@@ -40,14 +38,12 @@ namespace Barely {
 
   /// Slice mode.
   public enum SliceMode {
-    /// None.
-    [InspectorName("None")] NONE = 0,
-    /// Once.
-    [InspectorName("Once")] ONCE,
     /// Sustain.
-    [InspectorName("Sustain")] SUSTAIN,
+    [InspectorName("Sustain")] SUSTAIN = 0,
     /// Loop.
     [InspectorName("Loop")] LOOP,
+    /// Once.
+    [InspectorName("Once")] ONCE,
   }
 
   /// A representation of a musical instrument that can be played in real-time.
@@ -138,15 +134,15 @@ namespace Barely {
     [Header("Oscillator")]
 
     /// Oscillator mode.
-    public OscMode OscMode = OscMode.NONE;
+    public OscMode OscMode = OscMode.MIX;
 
     /// Oscillator mix.
-    [Range(-1.0f, 1.0f)]
+    [Range(0.0f, 1.0f)]
     public float OscMix = 0.0f;
 
-    /// Oscillator noise ratio.
+    /// Oscillator noise mix.
     [Range(0.0f, 1.0f)]
-    public float OscNoiseRatio = 0.0f;
+    public float OscNoiseMix = 0.0f;
 
     /// Oscillator pitch shift.
     [Range(-4.0f, 4.0f)]
@@ -163,7 +159,7 @@ namespace Barely {
     [Header("Slice")]
 
     /// Slice mode.
-    public SliceMode SliceMode = SliceMode.NONE;
+    public SliceMode SliceMode = SliceMode.SUSTAIN;
 
     /// List of slices.
     public List<Slice> Slices = null;
@@ -330,7 +326,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.RELEASE, Release);
       SetControl(Engine.Internal.ControlType.OSC_MIX, OscMix);
       SetControl(Engine.Internal.ControlType.OSC_MODE, (float)OscMode);
-      SetControl(Engine.Internal.ControlType.OSC_NOISE_RATIO, OscNoiseRatio);
+      SetControl(Engine.Internal.ControlType.OSC_NOISE_MIX, OscNoiseMix);
       SetControl(Engine.Internal.ControlType.OSC_PITCH_SHIFT, OscPitchShift);
       SetControl(Engine.Internal.ControlType.OSC_SHAPE, OscShape);
       SetControl(Engine.Internal.ControlType.OSC_SKEW, OscSkew);

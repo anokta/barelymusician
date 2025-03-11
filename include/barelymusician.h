@@ -268,8 +268,8 @@ typedef enum BarelyControlType {
   BarelyControlType_kOscMix,
   /// Oscillator mode.
   BarelyControlType_kOscMode,
-  /// Oscillator noise ratio.
-  BarelyControlType_kOscNoiseRatio,
+  /// Oscillator noise mix.
+  BarelyControlType_kOscNoiseMix,
   /// Oscillator pitch shift.
   BarelyControlType_kOscPitchShift,
   /// Oscillator shape.
@@ -314,10 +314,8 @@ typedef enum BarelyNoteControlType {
 
 /// Oscillator modes.
 typedef enum BarelyOscMode {
-  /// None.
-  BarelyOscMode_kNone = 0,
   /// Mix.
-  BarelyOscMode_kMix,
+  BarelyOscMode_kMix = 0,
   /// Amplitude modulation by the oscillator applied to the slice.
   BarelyOscMode_kAm,
   /// Amplitude modulation by the slice applied to the oscillator.
@@ -346,14 +344,12 @@ typedef enum BarelyRepeaterStyle {
 
 /// Slice modes.
 typedef enum BarelySliceMode {
-  /// None.
-  BarelySliceMode_kNone = 0,
-  /// Once.
-  BarelySliceMode_kOnce,
   /// Sustain.
-  BarelySliceMode_kSustain,
+  BarelySliceMode_kSustain = 0,
   /// Loop.
   BarelySliceMode_kLoop,
+  /// Once.
+  BarelySliceMode_kOnce,
   /// Number of slice modes.
   BarelySliceMode_kCount,
 } BarelySliceMode;
@@ -1067,8 +1063,8 @@ enum class ControlType {
   kOscMix = BarelyControlType_kOscMix,
   /// Oscillator mode.
   kOscMode = BarelyControlType_kOscMode,
-  /// Oscillator noise ratio.
-  kOscNoiseRatio = BarelyControlType_kOscNoiseRatio,
+  /// Oscillator noise mix.
+  kOscNoiseMix = BarelyControlType_kOscNoiseMix,
   /// Oscillator pitch shift.
   kOscPitchShift = BarelyControlType_kOscPitchShift,
   /// Oscillator shape.
@@ -1107,8 +1103,6 @@ enum class NoteControlType {
 
 /// Oscillator modes.
 enum class OscMode {
-  /// None.
-  kNone = BarelyOscMode_kNone,
   /// Mix.
   kMix = BarelyOscMode_kMix,
   /// Amplitude modulation by the oscillator applied to the slice.
@@ -1135,14 +1129,12 @@ enum class RepeaterStyle {
 
 /// Slice modes.
 enum class SliceMode {
-  /// None.
-  kNone = BarelySliceMode_kNone,
-  /// Once.
-  kOnce = BarelySliceMode_kOnce,
   /// Sustain.
   kSustain = BarelySliceMode_kSustain,
   /// Loop.
   kLoop = BarelySliceMode_kLoop,
+  /// Once.
+  kOnce = BarelySliceMode_kOnce,
 };
 
 /// Task states.

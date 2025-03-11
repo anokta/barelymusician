@@ -53,7 +53,6 @@ TEST(InstrumentImplTest, PlaySingleNote) {
   constexpr std::array<Slice, 1> kSlices = {Slice(kPitch, kSampleRate, kSamples)};
 
   InstrumentImpl instrument(kSampleRate, kReferenceFrequency, kUpdateSample);
-  instrument.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kSustain));
   instrument.SetSampleData(SampleData(kSlices));
 
   std::vector<float> buffer(kSampleCount);
@@ -96,7 +95,6 @@ TEST(InstrumentImplTest, PlayMultipleNotes) {
   };
 
   InstrumentImpl instrument(1, kReferenceFrequency, 0);
-  instrument.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kSustain));
   instrument.SetSampleData(SampleData(kSlices));
 
   std::vector<float> buffer(kSampleRate);

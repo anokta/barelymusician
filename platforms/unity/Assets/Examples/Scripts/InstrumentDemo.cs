@@ -21,9 +21,10 @@ namespace Barely.Examples {
 
     private void Awake() {
       if (enableModeSwitch) {
+        controller.instrument.OscMix = 1.0f;
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
-        controller.instrument.SliceMode = SliceMode.NONE;
+        controller.instrument.SliceMode = sliceMode;
       }
     }
 
@@ -61,12 +62,15 @@ namespace Barely.Examples {
         return;
       }
       if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
+        controller.instrument.OscMix = 1.0f;
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
       } else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
-        controller.instrument.OscMode = OscMode.NONE;
+        controller.instrument.OscMix = 0.0f;
+        controller.instrument.OscMode = oscMode;
         controller.instrument.SliceMode = sliceMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
+        controller.instrument.OscMix = 0.5f;
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
         controller.instrument.SliceMode = sliceMode;

@@ -26,7 +26,6 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::OscMode;
 using ::barely::Performer;
 using ::barely::Random;
 using ::barely::Scale;
@@ -235,9 +234,9 @@ int main(int /*argc*/, char* argv[]) {
     instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
     instrument.SetControl(ControlType::kGain, gain);
-    instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
+    instrument.SetControl(ControlType::kOscMix, 1.0f);
     if (shape < 0.0f) {
-      instrument.SetControl(ControlType::kOscNoiseRatio, 1.0f);
+      instrument.SetControl(ControlType::kOscNoiseMix, 1.0f);
     } else {
       instrument.SetControl(ControlType::kOscShape, shape);
     }

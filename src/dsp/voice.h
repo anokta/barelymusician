@@ -36,8 +36,8 @@ class Voice {
     /// Oscillator mix.
     float osc_mix = 0.0f;
 
-    /// Oscillator noise ratio.
-    float osc_noise_ratio = 0.0f;
+    /// Oscillator noise mix.
+    float osc_noise_mix = 0.0f;
 
     /// Oscillator shape.
     float osc_shape = 0.0f;
@@ -87,14 +87,7 @@ class Voice {
   }
 
   /// Stops the voice.
-  template <bool IsSliceModeOnce>
-  void Stop() noexcept {
-    if constexpr (!IsSliceModeOnce) {
-      envelope_.Stop();
-    } else if (!IsSliceActive()) {
-      envelope_.Reset();
-    }
-  }
+  void Stop() noexcept { envelope_.Stop(); }
 
   void set_pitch(float pitch) noexcept {
     params_.osc_increment = std::pow(2.0f, pitch);
@@ -109,41 +102,30 @@ class Voice {
   [[nodiscard]] float Next(const Params& params) noexcept {
     if constexpr (kSliceMode == SliceMode::kOnce) {
       if (!IsSliceActive()) {
-        envelope_.Reset();
-        return 0.0f;
+        envelope_.Stop();
       }
     }
 
-    float osc_sample = 0.0f;
-    float slice_sample = 0.0f;
+    const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
+    const float osc_sample =
+        (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
+        params_.osc_noise_mix * random_.DrawUniform(-1.0f, 1.0f);
+    const float osc_output = params_.osc_mix * osc_sample;
+
+    const bool has_slice = (slice_ != nullptr);
+    const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
+    const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
+
     float output = gain_ * envelope_.Next();
 
-    if constexpr (kSliceMode != SliceMode::kNone) {
-      slice_sample = GenerateSliceSample(*slice_, slice_offset_);
-    }
-
-    if constexpr (kOscMode == OscMode::kNone) {
+    if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
+      output *= osc_output + slice_output;
+    } else if constexpr (kOscMode == OscMode::kFm) {
       output *= slice_sample;
-    } else {
-      const float skewed_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
-      const float slice_output = (1.0f - std::max(0.0f, params_.osc_mix)) * slice_sample;
-      osc_sample =
-          (1.0f - params_.osc_noise_ratio) * GenerateOscSample(skewed_phase, params_.osc_shape) +
-          params_.osc_noise_ratio * random_.DrawUniform(-1.0f, 1.0f);
-
-      if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
-        output *= (1.0f - std::max(0.0f, -params_.osc_mix)) * osc_sample + slice_output;
-      } else if constexpr (kOscMode == OscMode::kFm) {
-        output *= slice_sample;
-      } else {
-        if constexpr (kOscMode == OscMode::kAm) {
-          osc_sample = std::abs(osc_sample);
-        } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
-          slice_sample = std::abs(slice_sample);
-        }
-        output *=
-            (1.0f - std::max(0.0f, -params_.osc_mix)) * osc_sample * slice_sample + slice_output;
-      }
+    } else if constexpr (kOscMode == OscMode::kAm) {
+      output *= std::abs(osc_output) * slice_sample + slice_output;
+    } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
+      output *= osc_output * std::abs(slice_sample) + slice_output;
     }
 
     output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
@@ -160,11 +142,11 @@ class Voice {
 
     float slice_increment = params.slice_increment * params_.slice_increment;
     if constexpr (kOscMode == OscMode::kFm) {
-      slice_increment += 0.5f * (params_.osc_mix + 1.0f) * osc_sample * slice_increment;
+      slice_increment += osc_output * slice_increment;
     }
     slice_offset_ += slice_increment;
     if constexpr (kSliceMode == SliceMode::kLoop) {
-      if (static_cast<int>(slice_offset_) >= slice_->sample_count) {
+      if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
         slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
       }
     }
@@ -181,7 +163,7 @@ class Voice {
         (params.bit_crusher_increment - params_.bit_crusher_increment) * kCoeff;
     params_.bit_crusher_range += (params.bit_crusher_range - params_.bit_crusher_range) * kCoeff;
     params_.osc_mix += (params.osc_mix - params_.osc_mix) * kCoeff;
-    params_.osc_noise_ratio += (params.osc_noise_ratio - params_.osc_noise_ratio) * kCoeff;
+    params_.osc_noise_mix += (params.osc_noise_mix - params_.osc_noise_mix) * kCoeff;
     params_.osc_shape += (params.osc_shape - params_.osc_shape) * kCoeff;
     params_.osc_skew += (params.osc_skew - params_.osc_skew) * kCoeff;
     params_.filter_coefficients = params.filter_coefficients;

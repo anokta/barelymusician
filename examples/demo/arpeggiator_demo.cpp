@@ -19,7 +19,6 @@ using ::barely::Arpeggiator;
 using ::barely::ArpeggiatorStyle;
 using ::barely::ControlType;
 using ::barely::Engine;
-using ::barely::OscMode;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -73,7 +72,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
+  instrument.SetControl(ControlType::kOscMix, 1.0f);
   instrument.SetControl(ControlType::kOscShape, kOscShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);

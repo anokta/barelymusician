@@ -1,8 +1,5 @@
 #include "dsp/sample_generators.h"
 
-#include <cmath>
-#include <vector>
-
 #include "barelymusician.h"
 #include "gtest/gtest.h"
 

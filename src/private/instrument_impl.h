@@ -184,9 +184,9 @@ class InstrumentImpl {
       Control(0.0f, 0.0f, 60.0f),                  // kDecay
       Control(1.0f, 0.0f, 1.0f),                   // kSustain
       Control(0.0f, 0.0f, 60.0f),                  // kRelease
-      Control(0.0f, -1.0f, 1.0f),                  // kOscMix
+      Control(0.0f, 0.0f, 1.0f),                   // kOscMix
       Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
-      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseRatio
+      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
       Control(0.0f),                               // kOscPitchShift
       Control(0.0f, 0.0f, 1.0f),                   // kOscShape
       Control(0.0f, -0.5f, 0.5f),                  // kOscSkew

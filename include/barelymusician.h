@@ -189,22 +189,22 @@
 #if defined(_WIN32) || defined(__CYGWIN__)
 #ifdef BARELYMUSICIAN_EXPORTS
 #ifdef __GNUC__
-#define BARELY_EXPORT __attribute__((dllexport))
+#define BARELY_API __attribute__((dllexport))
 #else  // __GNUC__
-#define BARELY_EXPORT __declspec(dllexport)
+#define BARELY_API __declspec(dllexport)
 #endif  // __GNUC__
 #else   // BARELYMUSICIAN_EXPORTS
 #ifdef __GNUC__
-#define BARELY_EXPORT __attribute__((dllimport))
+#define BARELY_API __attribute__((dllimport))
 #else  // __GNUC__
-#define BARELY_EXPORT __declspec(dllimport)
+#define BARELY_API __declspec(dllimport)
 #endif  // __GNUC__
 #endif  // BARELYMUSICIAN_EXPORTS
 #else   // defined(_WIN32) || defined(__CYGWIN__)
 #if __GNUC__ >= 4
-#define BARELY_EXPORT __attribute__((visibility("default")))
+#define BARELY_API __attribute__((visibility("default")))
 #else  // __GNUC__ >= 4
-#define BARELY_EXPORT
+#define BARELY_API
 #endif  // __GNUC__ >= 4
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
@@ -434,14 +434,14 @@ typedef void (*BarelyTask_ProcessCallback)(BarelyTaskState state, void* user_dat
 /// @param engine Engine handle.
 /// @param out_arpeggiator Output arpeggiator handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_Create(BarelyEngineHandle engine,
-                                            BarelyArpeggiatorHandle* out_arpeggiator);
+BARELY_API bool BarelyArpeggiator_Create(BarelyEngineHandle engine,
+                                         BarelyArpeggiatorHandle* out_arpeggiator);
 
 /// Destroys an arpeggiator.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator);
+BARELY_API bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator);
 
 /// Gets whether an arpeggiator note is on or not.
 ///
@@ -449,138 +449,138 @@ BARELY_EXPORT bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch,
-                                              bool* out_is_note_on);
+BARELY_API bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch,
+                                           bool* out_is_note_on);
 
 /// Gets whether an arpeggiator is playing or not.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator,
-                                               bool* out_is_playing);
+BARELY_API bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator,
+                                            bool* out_is_playing);
 
 /// Sets all arpeggiator notes off.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator);
+BARELY_API bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator);
 
 /// Sets the gate ratio of an arpeggiator.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @param gate_ratio Gate ratio.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
-                                                  float gate_ratio);
+BARELY_API bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
+                                               float gate_ratio);
 
 /// Sets the instrument of an arpeggiator.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @param instrument Instrument handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                                   BarelyInstrumentHandle instrument);
+BARELY_API bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
+                                                BarelyInstrumentHandle instrument);
 
 /// Sets an arpeggiator note off.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, float pitch);
+BARELY_API bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, float pitch);
 
 /// Sets an arpeggiator note on.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch);
+BARELY_API bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch);
 
 /// Sets the rate of an arpeggiator.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @param rate Rate in notes per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate);
+BARELY_API bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate);
 
 /// Sets the style of an arpeggiator.
 ///
 /// @param arpeggiator Arpeggiator handle.
 /// @param style Arpeggiator style.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
-                                              BarelyArpeggiatorStyle style);
+BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
+                                           BarelyArpeggiatorStyle style);
 
 /// Creates a new engine.
 ///
 /// @param sample_rate Sampling rate in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEngine_Create(int32_t sample_rate, BarelyEngineHandle* out_engine);
+BARELY_API bool BarelyEngine_Create(int32_t sample_rate, BarelyEngineHandle* out_engine);
 
 /// Destroys an engine.
 ///
 /// @param engine Engine handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEngine_Destroy(BarelyEngineHandle engine);
+BARELY_API bool BarelyEngine_Destroy(BarelyEngineHandle engine);
 
 /// Gets the reference frequency of an engine.
 ///
 /// @param engine Engine handle.
 /// @param out_reference_frequency Output reference frequency in hertz.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEngine_GetReferenceFrequency(BarelyEngineHandle engine,
-                                                      float* out_reference_frequency);
+BARELY_API bool BarelyEngine_GetReferenceFrequency(BarelyEngineHandle engine,
+                                                   float* out_reference_frequency);
 
 /// Gets the tempo of an engine.
 ///
 /// @param engine Engine handle.
 /// @param out_tempo Output tempo in beats per minute.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo);
+BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo);
 
 /// Gets the timestamp of an engine.
 ///
 /// @param engine Engine handle.
 /// @param out_timestamp Output timestamp in seconds.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
+BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
 
 /// Sets the reference frequency of an engine.
 ///
 /// @param engine Engine handle.
 /// @param reference_frequency Reference frequency in hertz.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine,
-                                                      float reference_frequency);
+BARELY_API bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine,
+                                                   float reference_frequency);
 
 /// Sets the tempo of an engine.
 ///
 /// @param engine Engine handle.
 /// @param tempo Tempo in beats per minute.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo);
+BARELY_API bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo);
 
 /// Updates an engine at timestamp.
 ///
 /// @param engine Engine handle.
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp);
+BARELY_API bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp);
 
 /// Creates a new instrument.
 ///
 /// @param engine Engine handle.
 /// @param out_instrument Output instrument handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_Create(BarelyEngineHandle engine,
-                                           BarelyInstrumentHandle* out_instrument);
+BARELY_API bool BarelyInstrument_Create(BarelyEngineHandle engine,
+                                        BarelyInstrumentHandle* out_instrument);
 
 /// Destroys an instrument.
 ///
 /// @param instrument Instrument handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
+BARELY_API bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 
 /// Gets an instrument control value.
 ///
@@ -588,8 +588,8 @@ BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 /// @param type Control type.
 /// @param out_value Output control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument,
-                                               BarelyControlType type, float* out_value);
+BARELY_API bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument,
+                                            BarelyControlType type, float* out_value);
 
 /// Gets an instrument note control value.
 ///
@@ -598,8 +598,8 @@ BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument
 /// @param type Note control type.
 /// @param out_value Output note control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, float pitch,
-                                                   BarelyNoteControlType type, float* out_value);
+BARELY_API bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, float pitch,
+                                                BarelyNoteControlType type, float* out_value);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -607,8 +607,8 @@ BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instru
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, float pitch,
-                                             bool* out_is_note_on);
+BARELY_API bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, float pitch,
+                                          bool* out_is_note_on);
 
 /// Processes instrument output samples at timestamp.
 /// @note This is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
@@ -618,15 +618,14 @@ BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, 
 /// @param output_sample_count Number of output samples.
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
-                                            float* output_samples, int32_t output_sample_count,
-                                            double timestamp);
+BARELY_API bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, float* output_samples,
+                                         int32_t output_sample_count, double timestamp);
 
 /// Sets all instrument notes off.
 ///
 /// @param instrument Instrument handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument);
+BARELY_API bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument);
 
 /// Sets an instrument control value.
 ///
@@ -634,8 +633,8 @@ BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instru
 /// @param type Control type.
 /// @param value Control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
-                                               BarelyControlType type, float value);
+BARELY_API bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
+                                            BarelyControlType type, float value);
 
 /// Sets an instrument note control value.
 ///
@@ -644,15 +643,15 @@ BARELY_EXPORT bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument
 /// @param type Note control type.
 /// @param value Note control value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
-                                                   BarelyNoteControlType type, float value);
+BARELY_API bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
+                                                BarelyNoteControlType type, float value);
 
 /// Sets an instrument note off.
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch);
+BARELY_API bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch);
 
 /// Sets the note off callback of an instrument.
 ///
@@ -660,9 +659,9 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument
 /// @param callback Note off callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
-                                                       BarelyInstrument_NoteOffCallback callback,
-                                                       void* user_data);
+BARELY_API bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
+                                                    BarelyInstrument_NoteOffCallback callback,
+                                                    void* user_data);
 
 /// Sets an instrument note on.
 ///
@@ -670,8 +669,8 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle in
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
-                                              float intensity);
+BARELY_API bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
+                                           float intensity);
 
 /// Sets the note on callback of an instrument.
 ///
@@ -679,9 +678,9 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
 /// @param callback Note on callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
-                                                      BarelyInstrument_NoteOnCallback callback,
-                                                      void* user_data);
+BARELY_API bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
+                                                   BarelyInstrument_NoteOnCallback callback,
+                                                   void* user_data);
 
 /// Sets instrument sample data.
 ///
@@ -689,60 +688,59 @@ BARELY_EXPORT bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle ins
 /// @param slices Array of slices.
 /// @param sample_data_count Number of slices.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
-                                                  const BarelySlice* slices, int32_t slice_count);
+BARELY_API bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
+                                               const BarelySlice* slices, int32_t slice_count);
 
 /// Creates a performer.
 ///
 /// @param engine Engine handle.
 /// @param out_performer Output performer handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Create(BarelyEngineHandle engine,
-                                          BarelyPerformerHandle* out_performer);
+BARELY_API bool BarelyPerformer_Create(BarelyEngineHandle engine,
+                                       BarelyPerformerHandle* out_performer);
 
 /// Destroys a performer.
 ///
 /// @param performer Performer handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
+BARELY_API bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
 
 /// Gets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
 /// @param out_loop_begin_position Output loop begin position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
-                                                        double* out_loop_begin_position);
+BARELY_API bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
+                                                     double* out_loop_begin_position);
 
 /// Gets the loop length of a performer.
 ///
 /// @param performer Performer handle.
 /// @param out_loop_length Output loop length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer,
-                                                 double* out_loop_length);
+BARELY_API bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer,
+                                              double* out_loop_length);
 
 /// Gets the position of a performer.
 ///
 /// @param performer Performer handle.
 /// @param out_position Output position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer,
-                                               double* out_position);
+BARELY_API bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, double* out_position);
 
 /// Gets whether a performer is looping or not.
 ///
 /// @param performer Performer handle.
 /// @param out_is_looping Output true if looping, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool* out_is_looping);
+BARELY_API bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool* out_is_looping);
 
 /// Gets whether a performer is playing or not.
 ///
 /// @param performer Performer handle.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing);
+BARELY_API bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing);
 
 /// Sets the beat callback of a performer.
 ///
@@ -750,51 +748,50 @@ BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bo
 /// @param callback Beat callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
-                                                   BarelyPerformer_BeatCallback callback,
-                                                   void* user_data);
+BARELY_API bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
+                                                BarelyPerformer_BeatCallback callback,
+                                                void* user_data);
 
 /// Sets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
 /// @param loop_begin_position Loop begin position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
-                                                        double loop_begin_position);
+BARELY_API bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
+                                                     double loop_begin_position);
 
 /// Sets the loop length of a performer.
 ///
 /// @param performer Performer handle.
 /// @param loop_length Loop length in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer,
-                                                 double loop_length);
+BARELY_API bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer, double loop_length);
 
 /// Sets whether a performer is looping or not.
 ///
 /// @param performer Performer handle.
 /// @param is_looping True if looping, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping);
+BARELY_API bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping);
 
 /// Sets the position of a performer.
 ///
 /// @param performer Performer handle.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position);
+BARELY_API bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position);
 
 /// Starts a performer.
 ///
 /// @param performer Performer handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Start(BarelyPerformerHandle performer);
+BARELY_API bool BarelyPerformer_Start(BarelyPerformerHandle performer);
 
 /// Stops a performer.
 ///
 /// @param performer Performer handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
+BARELY_API bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 
 /// Gets a quantized position.
 ///
@@ -802,21 +799,21 @@ BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 /// @param position Position.
 /// @param out_position Output position.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
-                                                  double position, double* out_position);
+BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
+                                               double position, double* out_position);
 
 /// Creates a new random number generator.
 ///
 /// @param seed Seed value.
 /// @param out_random Output random handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRandom_Create(int32_t seed, BarelyRandomHandle* out_random);
+BARELY_API bool BarelyRandom_Create(int32_t seed, BarelyRandomHandle* out_random);
 
 /// Destroys a random number generator.
 ///
 /// @param random Random handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRandom_Destroy(BarelyRandomHandle random);
+BARELY_API bool BarelyRandom_Destroy(BarelyRandomHandle random);
 
 /// Draws a random number with normal distribution.
 ///
@@ -825,8 +822,8 @@ BARELY_EXPORT bool BarelyRandom_Destroy(BarelyRandomHandle random);
 /// @param variance Distrubition variance.
 /// @param out_number Output random number.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRandom_DrawNormal(BarelyRandomHandle random, float mean, float variance,
-                                           float* out_number);
+BARELY_API bool BarelyRandom_DrawNormal(BarelyRandomHandle random, float mean, float variance,
+                                        float* out_number);
 
 /// Draws a number with discrete uniform distribution in range [min, max].
 ///
@@ -835,8 +832,8 @@ BARELY_EXPORT bool BarelyRandom_DrawNormal(BarelyRandomHandle random, float mean
 /// @param max Maximum value (exclusive).
 /// @param out_number Output random number.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_t min, int32_t max,
-                                               int32_t* out_number);
+BARELY_API bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_t min, int32_t max,
+                                            int32_t* out_number);
 
 /// Draws a number with continuous uniform distribution in range [min, max).
 ///
@@ -845,48 +842,48 @@ BARELY_EXPORT bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_
 /// @param max Maximum value (exclusive).
 /// @param out_number Output random number.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, float min, float max,
-                                                float* out_number);
+BARELY_API bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, float min, float max,
+                                             float* out_number);
 
 /// Resets a random number generator with a new seed.
 ///
 /// @param random Random handle.
 /// @param seed Seed value.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRandom_Reset(BarelyRandomHandle random, int32_t seed);
+BARELY_API bool BarelyRandom_Reset(BarelyRandomHandle random, int32_t seed);
 
 /// Clears all notes.
 ///
 /// @param repeater Repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater);
+BARELY_API bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater);
 
 /// Creates a new repeater.
 ///
 /// @param engine Engine handle.
 /// @param out_repeater Output repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Create(BarelyEngineHandle engine,
-                                         BarelyRepeaterHandle* out_repeater);
+BARELY_API bool BarelyRepeater_Create(BarelyEngineHandle engine,
+                                      BarelyRepeaterHandle* out_repeater);
 
 /// Destroys an repeater.
 ///
 /// @param repeater Repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater);
+BARELY_API bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater);
 
 /// Gets whether an repeater is playing or not.
 ///
 /// @param repeater Repeater handle.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing);
+BARELY_API bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing);
 
 /// Pops the last note from the end.
 ///
 /// @param repeater Repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
+BARELY_API bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
 
 /// Pushes a new note to the end.
 ///
@@ -894,50 +891,49 @@ BARELY_EXPORT bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
 /// @param pitch Note pitch.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, float pitch, int32_t length);
+BARELY_API bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, float pitch, int32_t length);
 
 /// Pushes silence to the end.
 ///
 /// @param repeater Repeater handle.
 /// @param length Note length.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length);
+BARELY_API bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length);
 
 /// Sets the instrument of an repeater.
 ///
 /// @param repeater Repeater handle.
 /// @param instrument Instrument handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
-                                                BarelyInstrumentHandle instrument);
+BARELY_API bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
+                                             BarelyInstrumentHandle instrument);
 
 /// Sets the rate of an repeater.
 ///
 /// @param repeater Repeater handle.
 /// @param rate Rate in notes per beat.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate);
+BARELY_API bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate);
 
 /// Sets the style of an repeater.
 ///
 /// @param repeater Repeater handle.
 /// @param style Repeater style.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater,
-                                           BarelyRepeaterStyle style);
+BARELY_API bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style);
 
 /// Starts the repeater.
 ///
 /// @param repeater Repeater handle.
 /// @param pitch_offset Pitch offset.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, float pitch_offset);
+BARELY_API bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, float pitch_offset);
 
 /// Stops the repeater.
 ///
 /// @param repeater Repeater handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
+BARELY_API bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
 
 /// Gets a scale note pitch for a given degree.
 ///
@@ -945,7 +941,7 @@ BARELY_EXPORT bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
 /// @param degree Scale degree.
 /// @param out_pitch Output note pitch.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch);
+BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch);
 
 /// Creates a new task.
 ///
@@ -956,49 +952,49 @@ BARELY_EXPORT bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree
 /// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_Create(BarelyPerformerHandle performer, double position,
-                                     double duration, BarelyTask_ProcessCallback callback,
-                                     void* user_data, BarelyTaskHandle* out_task);
+BARELY_API bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double duration,
+                                  BarelyTask_ProcessCallback callback, void* user_data,
+                                  BarelyTaskHandle* out_task);
 
 /// Destroys a task.
 ///
 /// @param task Task handle.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
+BARELY_API bool BarelyTask_Destroy(BarelyTaskHandle task);
 
 /// Gets the duration of a task.
 ///
 /// @param task Task handle.
 /// @param out_duration Output duration in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_GetDuration(BarelyTaskHandle task, double* out_duration);
+BARELY_API bool BarelyTask_GetDuration(BarelyTaskHandle task, double* out_duration);
 
 /// Gets the position of a task.
 ///
 /// @param task Task handle.
 /// @param out_position Output position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position);
+BARELY_API bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position);
 
 /// Gets whether the task is active or not.
 ///
 /// @param task Task handle.
 /// @param out_is_active Output true if active, false otherwise.
-BARELY_EXPORT bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active);
+BARELY_API bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active);
 
 /// Sets the duration of a task.
 ///
 /// @param task Task handle.
 /// @param position Duration in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration);
+BARELY_API bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration);
 
 /// Sets the position of a task.
 ///
 /// @param task Task handle.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
+BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
 
 /// Sets the process callback of a task.
 ///
@@ -1006,9 +1002,8 @@ BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTaskHandle task, double position
 /// @param callback Process callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_EXPORT bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
-                                                 BarelyTask_ProcessCallback callback,
-                                                 void* user_data);
+BARELY_API bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
+                                              BarelyTask_ProcessCallback callback, void* user_data);
 
 #ifdef __cplusplus
 }  // extern "C"

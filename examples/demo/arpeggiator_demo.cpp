@@ -49,7 +49,7 @@ constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the pitch for a given `key`.
-std::optional<float> PitchFromKey(int octave_shift, const InputManager::Key& key) {
+std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
@@ -118,7 +118,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
 
     // Play note.
-    if (const auto pitch_or = PitchFromKey(octave_shift, key)) {
+    if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
       arpeggiator.SetNoteOn(*pitch_or);
     }
   };
@@ -127,7 +127,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    if (const auto pitch_or = PitchFromKey(octave_shift, key)) {
+    if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
       arpeggiator.SetNoteOff(*pitch_or);
     }
   };

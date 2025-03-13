@@ -21,7 +21,7 @@ namespace {
 ControlMessage BuildControlMessage(ControlType type, float value) noexcept {
   switch (type) {
     case ControlType::kGain:
-      return ControlMessage{type, AmplitudeFromDecibels(value)};
+      return ControlMessage{type, DecibelsToAmplitude(value)};
     default:
       break;
   }

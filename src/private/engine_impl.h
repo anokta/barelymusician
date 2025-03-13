@@ -21,6 +21,12 @@ class EngineImpl {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit EngineImpl(int sample_rate) noexcept;
 
+  /// Returns the corresponding number of seconds for a given number of beats.
+  ///
+  /// @param beats Number of beats.
+  /// @return Number of seconds.
+  [[nodiscard]] double BeatsToSeconds(double beats) const noexcept;
+
   /// Creates a new instrument.
   ///
   /// @return Pointer to instrument.
@@ -45,28 +51,10 @@ class EngineImpl {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void DestroyPerformer(PerformerImpl* performer) noexcept;
 
-  /// Returns the corresponding number of beats for a given number of seconds.
-  ///
-  /// @param seconds Number of seconds.
-  /// @return Number of beats.
-  [[nodiscard]] double GetBeatsFromSeconds(double seconds) const noexcept;
-
   /// Returns reference frequency.
   ///
   /// @return Reference frequency in hertz.
   [[nodiscard]] float GetReferenceFrequency() const noexcept;
-
-  /// Returns the corresponding number of samples for a given number of seconds.
-  ///
-  /// @param seconds Number of seconds.
-  /// @return Number of samples.
-  [[nodiscard]] int64_t GetSamplesFromSeconds(double seconds) const noexcept;
-
-  /// Returns the corresponding number of seconds for a given number of beats.
-  ///
-  /// @param beats Number of beats.
-  /// @return Number of seconds.
-  [[nodiscard]] double GetSecondsFromBeats(double beats) const noexcept;
 
   /// Returns tempo.
   ///
@@ -77,6 +65,18 @@ class EngineImpl {
   ///
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
+
+  /// Returns the corresponding number of beats for a given number of seconds.
+  ///
+  /// @param seconds Number of seconds.
+  /// @return Number of beats.
+  [[nodiscard]] double SecondsToBeats(double seconds) const noexcept;
+
+  /// Returns the corresponding number of samples for a given number of seconds.
+  ///
+  /// @param seconds Number of seconds.
+  /// @return Number of samples.
+  [[nodiscard]] int64_t SecondsToSamples(double seconds) const noexcept;
 
   /// Sets the reference frequency.
   ///

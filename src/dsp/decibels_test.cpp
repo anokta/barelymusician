@@ -16,19 +16,19 @@ TEST(DecibelsTest, AmplitudeDecibelsConversion) {
   constexpr std::array<float, kValueCount> kDecibels = {-80.0f, -20.0f, 0.0f, 6.0f};
 
   for (int i = 0; i < kValueCount; ++i) {
-    EXPECT_NEAR(AmplitudeFromDecibels(kDecibels[i]), kAmplitudes[i], kEpsilon);
-    EXPECT_NEAR(DecibelsFromAmplitude(kAmplitudes[i]), kDecibels[i], kEpsilon);
+    EXPECT_NEAR(AmplitudeToDecibels(kAmplitudes[i]), kDecibels[i], kEpsilon);
+    EXPECT_NEAR(DecibelsToAmplitude(kDecibels[i]), kAmplitudes[i], kEpsilon);
 
     // Verify that the back and forth conversions do not mutate the value.
-    EXPECT_FLOAT_EQ(AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])), kAmplitudes[i]);
-    EXPECT_FLOAT_EQ(DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])), kDecibels[i]);
+    EXPECT_FLOAT_EQ(AmplitudeToDecibels(DecibelsToAmplitude(kDecibels[i])), kDecibels[i]);
+    EXPECT_FLOAT_EQ(DecibelsToAmplitude(AmplitudeToDecibels(kAmplitudes[i])), kAmplitudes[i]);
   }
 }
 
 // Tests that amplitude/decibels conversion snaps to `kMinDecibels` threshold.
 TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
-  EXPECT_FLOAT_EQ(AmplitudeFromDecibels(kMinDecibels), 0.0f);
-  EXPECT_FLOAT_EQ(DecibelsFromAmplitude(0.0f), kMinDecibels);
+  EXPECT_FLOAT_EQ(AmplitudeToDecibels(0.0f), kMinDecibels);
+  EXPECT_FLOAT_EQ(DecibelsToAmplitude(kMinDecibels), 0.0f);
 }
 
 }  // namespace

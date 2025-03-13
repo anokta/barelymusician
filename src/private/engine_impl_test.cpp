@@ -33,13 +33,12 @@ TEST(EngineTest, BeatsSecondsConversion) {
   engine.SetTempo(kTempo);
 
   for (int i = 0; i < kValueCount; ++i) {
-    EXPECT_DOUBLE_EQ(engine.GetBeatsFromSeconds(kSeconds[i]), kBeats[i]);
-    EXPECT_DOUBLE_EQ(engine.GetSecondsFromBeats(kBeats[i]), kSeconds[i]);
+    EXPECT_DOUBLE_EQ(engine.BeatsToSeconds(kBeats[i]), kSeconds[i]);
+    EXPECT_DOUBLE_EQ(engine.SecondsToBeats(kSeconds[i]), kBeats[i]);
 
     // Verify that the back and forth conversions do not mutate the value.
-    EXPECT_DOUBLE_EQ(engine.GetBeatsFromSeconds(engine.GetSecondsFromBeats(kBeats[i])), kBeats[i]);
-    EXPECT_DOUBLE_EQ(engine.GetSecondsFromBeats(engine.GetBeatsFromSeconds(kSeconds[i])),
-                     kSeconds[i]);
+    EXPECT_DOUBLE_EQ(engine.BeatsToSeconds(engine.SecondsToBeats(kSeconds[i])), kSeconds[i]);
+    EXPECT_DOUBLE_EQ(engine.SecondsToBeats(engine.BeatsToSeconds(kBeats[i])), kBeats[i]);
   }
 }
 

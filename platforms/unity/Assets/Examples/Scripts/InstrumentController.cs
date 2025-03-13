@@ -75,36 +75,36 @@ namespace Barely.Examples {
       for (int i = 0; i < _octaveKeys.Length; ++i) {
         if (Input.GetKeyDown(_octaveKeys[i])) {
           if (arpeggiator != null) {
-            arpeggiator.SetNoteOn(GetPitchFromKeyIndex(i));
+            arpeggiator.SetNoteOn(KeyIndexToPitch(i));
           } else if (_isRepeaterActive) {
             repeater.Stop();
             repeater.Play(octaveOffset + i / 12.0f);
           } else if (instrument != null) {
-            instrument.SetNoteOn(GetPitchFromKeyIndex(i), noteIntensity);
+            instrument.SetNoteOn(KeyIndexToPitch(i), noteIntensity);
             if (repeater != null) {
-              repeater.Push(GetPitchFromKeyIndex(i), repeaterNoteLength);
+              repeater.Push(KeyIndexToPitch(i), repeaterNoteLength);
             }
           }
         } else if (Input.GetKeyUp(_octaveKeys[i])) {
           if (arpeggiator != null) {
-            arpeggiator.SetNoteOff(GetPitchFromKeyIndex(i));
+            arpeggiator.SetNoteOff(KeyIndexToPitch(i));
           } else if (instrument != null) {
-            instrument.SetNoteOff(GetPitchFromKeyIndex(i));
+            instrument.SetNoteOff(KeyIndexToPitch(i));
           }
         }
       }
       if (Application.platform == RuntimePlatform.Android ||
           Application.platform == RuntimePlatform.IPhonePlayer) {
         if (Input.GetMouseButtonDown(0)) {
-          instrument?.SetNoteOn(GetPitchFromKeyIndex(0));
+          instrument?.SetNoteOn(KeyIndexToPitch(0));
         } else if (Input.GetMouseButtonUp(0)) {
-          instrument?.SetNoteOff(GetPitchFromKeyIndex(0));
+          instrument?.SetNoteOff(KeyIndexToPitch(0));
         }
       }
     }
 
-    // Returns the corresponding pitch for the given key.
-    private float GetPitchFromKeyIndex(int keyIndex) {
+    // Returns the corresponding pitch for the given key index.
+    private float KeyIndexToPitch(int keyIndex) {
       return (float)octaveOffset + (float)keyIndex / 12.0f;
     }
   }

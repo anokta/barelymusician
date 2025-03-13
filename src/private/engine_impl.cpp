@@ -14,21 +14,27 @@ namespace barely {
 
 namespace {
 
-// Converts seconds to minutes.
-constexpr double kMinutesFromSeconds = 1.0 / 60.0;
-
 // Converts minutes to seconds.
-constexpr double kSecondsFromMinutes = 60.0;
+constexpr double kMinutesToSeconds = 60.0;
+
+// Converts seconds to minutes.
+constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
 
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 EngineImpl::EngineImpl(int sample_rate) noexcept : sample_rate_(sample_rate) {}
 
+double EngineImpl::BeatsToSeconds(double beats) const noexcept {
+  return (tempo_ > 0.0) ? beats * kMinutesToSeconds / tempo_
+                        : (beats > 0.0 ? std::numeric_limits<double>::max()
+                                       : std::numeric_limits<double>::lowest());
+}
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentImpl* EngineImpl::CreateInstrument() noexcept {
   auto instrument = std::make_unique<InstrumentImpl>(sample_rate_, reference_frequency_,
-                                                     GetSamplesFromSeconds(timestamp_));
+                                                     SecondsToSamples(timestamp_));
   auto* instrument_ptr = instrument.get();
   [[maybe_unused]] const bool success =
       instruments_.emplace(instrument_ptr, std::move(instrument)).second;
@@ -62,25 +68,19 @@ void EngineImpl::DestroyPerformer(PerformerImpl* performer) noexcept {
   performers_.erase(performer);
 }
 
-double EngineImpl::GetBeatsFromSeconds(double seconds) const noexcept {
-  return tempo_ * seconds * kMinutesFromSeconds;
-}
-
 float EngineImpl::GetReferenceFrequency() const noexcept { return reference_frequency_; }
-
-int64_t EngineImpl::GetSamplesFromSeconds(double seconds) const noexcept {
-  return static_cast<int64_t>(seconds * static_cast<double>(sample_rate_));
-}
-
-double EngineImpl::GetSecondsFromBeats(double beats) const noexcept {
-  return (tempo_ > 0.0) ? beats * kSecondsFromMinutes / tempo_
-                        : (beats > 0.0 ? std::numeric_limits<double>::max()
-                                       : std::numeric_limits<double>::lowest());
-}
 
 double EngineImpl::GetTempo() const noexcept { return tempo_; }
 
 double EngineImpl::GetTimestamp() const noexcept { return timestamp_; }
+
+double EngineImpl::SecondsToBeats(double seconds) const noexcept {
+  return tempo_ * seconds * kSecondsToMinutes;
+}
+
+int64_t EngineImpl::SecondsToSamples(double seconds) const noexcept {
+  return static_cast<int64_t>(seconds * static_cast<double>(sample_rate_));
+}
 
 void EngineImpl::SetReferenceFrequency(float reference_frequency) noexcept {
   reference_frequency = std::max(reference_frequency, 0.0f);
@@ -98,7 +98,7 @@ void EngineImpl::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0)
 void EngineImpl::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      double update_duration = GetBeatsFromSeconds(timestamp - timestamp_);
+      double update_duration = SecondsToBeats(timestamp - timestamp_);
       bool has_tasks_to_process = false;
       for (const auto& [performer, _] : performers_) {
         if (const auto maybe_duration = performer->GetNextDuration();
@@ -114,8 +114,8 @@ void EngineImpl::Update(double timestamp) noexcept {
           performer->Update(update_duration);
         }
 
-        timestamp_ += GetSecondsFromBeats(update_duration);
-        const int64_t update_sample = GetSamplesFromSeconds(timestamp_);
+        timestamp_ += BeatsToSeconds(update_duration);
+        const int64_t update_sample = SecondsToSamples(timestamp_);
         for (const auto& [instrument, _] : instruments_) {
           instrument->Update(update_sample);
         }
@@ -128,7 +128,7 @@ void EngineImpl::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      const int64_t update_sample = GetSamplesFromSeconds(timestamp_);
+      const int64_t update_sample = SecondsToSamples(timestamp_);
       for (const auto& [instrument, _] : instruments_) {
         instrument->Update(update_sample);
       }

@@ -98,9 +98,9 @@ namespace Barely {
       private AudioClip _sample = null;
     }
 
-    /// Gain in decibels.
-    [Range(-80.0f, 0.0f)]
-    public float Gain = 0.0f;
+    /// Gain in linear amplitude.
+    [Range(0.0f, 1.0f)]
+    public float Gain = 1.0f;
 
     /// Pitch shift.
     [Range(-2.0f, 2.0f)]
@@ -342,10 +342,6 @@ namespace Barely {
 
     private void OnAudioFilterRead(float[] data, int channels) {
       Engine.Internal.Instrument_Process(_handle, data, channels);
-    }
-
-    private float GetControl(Engine.Internal.ControlType type) {
-      return Engine.Internal.Instrument_GetControl(_handle, type);
     }
 
     private void SetControl(Engine.Internal.ControlType type, float value) {

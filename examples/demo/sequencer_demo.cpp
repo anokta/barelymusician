@@ -29,7 +29,7 @@ constexpr int kSampleCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr float kGain = -20.0f;
+constexpr float kGain = 0.1f;
 constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;

@@ -19,7 +19,7 @@ namespace Barely.Examples {
     public void Update() {
       instrument.PitchShift =
           2.0f * Mathf.Clamp(Input.mousePosition.x / Screen.width, 0.0f, 1.0f) - 1.0f;
-      instrument.Gain = 20.0f * Mathf.Log10(Input.mousePosition.y / Screen.height);
+      instrument.Gain = Input.mousePosition.y / Screen.height;
       if (Input.GetMouseButtonDown(0)) {
         instrument.SetNoteOn(0.0f, 1.0f);
       } else if (Input.GetMouseButtonUp(0)) {

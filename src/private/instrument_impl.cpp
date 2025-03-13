@@ -8,27 +8,11 @@
 
 #include "barelymusician.h"
 #include "common/find_or_null.h"
-#include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message.h"
 #include "dsp/sample_data.h"
 
 namespace barely {
-
-namespace {
-
-// TODO(#146): Revamp this for all control types.
-ControlMessage BuildControlMessage(ControlType type, float value) noexcept {
-  switch (type) {
-    case ControlType::kGain:
-      return ControlMessage{type, DecibelsToAmplitude(value)};
-    default:
-      break;
-  }
-  return ControlMessage{type, value};
-}
-
-}  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentImpl::InstrumentImpl(int sample_rate, float reference_frequency,
@@ -113,7 +97,7 @@ void InstrumentImpl::SetAllNotesOff() noexcept {
 
 void InstrumentImpl::SetControl(ControlType type, float value) noexcept {
   if (auto& control = controls_[static_cast<int>(type)]; control.SetValue(value)) {
-    message_queue_.Add(update_sample_, BuildControlMessage(type, control.value));
+    message_queue_.Add(update_sample_, ControlMessage{type, control.value});
   }
 }
 

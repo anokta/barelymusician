@@ -27,7 +27,7 @@ constexpr double kLookahead = 0.1;
 
 // Metronome settings.
 constexpr float kOscShape = 0.75f;
-constexpr float kGain = -12.0f;
+constexpr float kGain = 0.25f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.05f;
 constexpr int kVoiceCount = 1;

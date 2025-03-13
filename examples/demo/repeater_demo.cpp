@@ -31,7 +31,7 @@ constexpr int kSampleCount = 256;
 constexpr double kLookahead = 0.1;
 
 // Arpeggiator settings.
-constexpr float kGain = -18.0f;
+constexpr float kGain = 0.125f;
 constexpr float kOscShape = 0.75f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.05f;

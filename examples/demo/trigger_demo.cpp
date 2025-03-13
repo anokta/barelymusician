@@ -34,7 +34,7 @@ constexpr std::array<float, 7> kMajor = {
 };
 
 // Instrument settings.
-constexpr float kGain = -20.0f;
+constexpr float kGain = 0.1f;
 constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;

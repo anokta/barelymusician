@@ -68,6 +68,8 @@ VERS_1.0 {
     BarelyTask_SetDuration;
     BarelyTask_SetPosition;
     BarelyTask_SetProcessCallback;
+    Barely_AmplitudeToDecibels;
+    Barely_DecibelsToAmplitude;
   local:
     *;
 };

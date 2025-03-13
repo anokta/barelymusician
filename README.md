@@ -35,8 +35,8 @@ engine.SetTempo(/*tempo=*/124.0);
 // Create a new instrument.
 auto instrument = engine.CreateInstrument();
 
-// Set the instrument gain.
-instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0f);
+// Set the instrument to use the full oscillator mix.
+instrument.SetControl(barely::ControlType::kOscMix, /*value=*/1.0f);
 
 // Set an instrument note on.
 //

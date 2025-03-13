@@ -13,11 +13,6 @@ add_library(
 )
 
 add_library(
-  barelymusician_dsp_decibels INTERFACE
-  decibels.h
-)
-
-add_library(
   barelymusician_dsp_envelope INTERFACE
   envelope.h
 )
@@ -121,17 +116,6 @@ if(ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barelymusician_dsp_bit_crusher_test)
-
-  add_executable(
-    barelymusician_dsp_decibels_test
-    decibels_test.cpp
-  )
-  target_link_libraries(
-    barelymusician_dsp_decibels_test
-    barelymusician_dsp_decibels
-    gtest_main
-  )
-  gtest_discover_tests(barelymusician_dsp_decibels_test)
 
   add_executable(
     barelymusician_dsp_envelope_test

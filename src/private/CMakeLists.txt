@@ -33,7 +33,6 @@ target_link_libraries(
   barelymusician_private_instrument_impl
   barelymusician_common_callback
   barelymusician_common_find_or_null
-  barelymusician_dsp_decibels
   barelymusician_dsp_instrument_processor
   barelymusician_dsp_message
   barelymusician_dsp_message_queue
@@ -95,7 +94,6 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_private_instrument_impl_test
     barelymusician_private_instrument_impl
-    barelymusician_dsp_decibels
     barelymusician_dsp_sample_data
     barelymusician_headeronly
     gmock

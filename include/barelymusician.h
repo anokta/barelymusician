@@ -49,7 +49,7 @@
 ///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::ControlType::kGain, /*value=*/-6.0f);
+///   instrument.SetControl(barely::ControlType::kOscMix, /*value=*/1.0f);
 ///
 ///   // Process.
 ///   //
@@ -131,7 +131,7 @@
 ///   BarelyInstrument_IsNoteOn(instrument, c3_pitch, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, BarelyControlType_kGain, /*value=*/-6.0f);
+///   BarelyInstrument_SetControl(instrument, BarelyControlType_kOscMix, /*value=*/1.0f);
 ///
 ///   // Process.
 ///   //
@@ -208,6 +208,9 @@
 #endif  // __GNUC__ >= 4
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
+/// Minimum decibel threshold.
+#define BARELY_MIN_DECIBELS -80.0f
+
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
@@ -248,7 +251,7 @@ typedef enum BarelyArpeggiatorStyle {
 
 /// Control types.
 typedef enum BarelyControlType {
-  /// Gain in decibels.
+  /// Gain in linear amplitude.
   BarelyControlType_kGain = 0,
   /// Pitch shift.
   BarelyControlType_kPitchShift,
@@ -1005,6 +1008,20 @@ BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
 BARELY_API bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
                                               BarelyTask_ProcessCallback callback, void* user_data);
 
+/// Converts a value from linear amplitude to decibels.
+///
+/// @param amplitude Value in linear amplitude.
+/// @param out_decibels Output value in decibels.
+/// @return True if successful, false otherwise.
+BARELY_API bool Barely_AmplitudeToDecibels(float amplitude, float* out_decibels);
+
+/// Converts a value from decibels to linear amplitude.
+///
+/// @param decibels Value in decibels.
+/// @param out_amplitude Output value in linear amplitude.
+/// @return True if successful, false otherwise.
+BARELY_API bool Barely_DecibelsToAmplitude(float decibels, float* out_amplitude);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
@@ -1026,6 +1043,9 @@ BARELY_API bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
 
 namespace barely {
 
+/// Minimum decibel threshold.
+inline constexpr float kMinDecibels = BARELY_MIN_DECIBELS;
+
 /// Arpeggiator style enum.
 enum class ArpeggiatorStyle {
   /// Up.
@@ -1038,7 +1058,7 @@ enum class ArpeggiatorStyle {
 
 /// Control types.
 enum class ControlType {
-  /// Gain in decibels.
+  /// Gain in linear amplitude.
   kGain = BarelyControlType_kGain,
   /// Pitch shift.
   kPitchShift = BarelyControlType_kPitchShift,
@@ -2277,6 +2297,28 @@ struct Scale : public BarelyScale {
     return static_cast<int>(pitch_count);
   }
 };
+
+/// Converts a value from linear amplitude to decibels.
+///
+/// @param amplitude Value in linear amplitude.
+/// @return Value in decibels.
+inline float AmplitudeToDecibels(float amplitude) noexcept {
+  float decibels = 0.0f;
+  [[maybe_unused]] const bool success = Barely_AmplitudeToDecibels(amplitude, &decibels);
+  assert(success);
+  return decibels;
+}
+
+/// Converts a value from decibels to linear amplitude.
+///
+/// @param decibels Value in decibels.
+/// @return Value in linear amplitude.
+inline float DecibelsToAmplitude(float decibels) noexcept {
+  float amplitude = 0.0f;
+  [[maybe_unused]] const bool success = Barely_DecibelsToAmplitude(decibels, &amplitude);
+  assert(success);
+  return amplitude;
+}
 
 }  // namespace barely
 #endif  // __cplusplus

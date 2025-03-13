@@ -11,7 +11,6 @@
 
 #include "barelymusician.h"
 #include "common/callback.h"
-#include "dsp/decibels.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message_queue.h"
 #include "dsp/sample_data.h"
@@ -176,7 +175,7 @@ class InstrumentImpl {
 
   // Array of controls.
   ControlArray controls_ = {
-      Control(0.0f, kMinDecibels, 0.0f),           // kGain
+      Control(1.0f, 0.0f, 1.0f),                   // kGain
       Control(0.0f),                               // kPitchShift
       Control(false),                              // kRetrigger
       Control(8, 1, 20),                           // kVoiceCount

@@ -285,7 +285,7 @@ int main(int /*argc*/, char* argv[]) {
   // Add percussion instrument.
   instruments.emplace_back(engine.CreateInstrument());
   auto& percussion = instruments.back();
-  percussion.SetControl(ControlType::kGain, -18.0f);
+  percussion.SetControl(ControlType::kGain, 0.125f);
   percussion.SetControl(ControlType::kAttack, 0.0f);
   percussion.SetControl(ControlType::kRetrigger, true);
   percussion.SetControl(ControlType::kSliceMode, SliceMode::kOnce);

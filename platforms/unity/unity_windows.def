@@ -69,3 +69,5 @@ EXPORTS
   BarelyTask_SetDuration
   BarelyTask_SetPosition
   BarelyTask_SetProcessCallback
+  Barely_AmplitudeToDecibels
+  Barely_DecibelsToAmplitude

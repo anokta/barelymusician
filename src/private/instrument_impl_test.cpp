@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "barelymusician.h"
-#include "dsp/decibels.h"
 #include "dsp/sample_data.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -24,24 +23,24 @@ constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 // Tests that the instrument sets a control value as expected.
 TEST(InstrumentImplTest, SetControl) {
   InstrumentImpl instrument(kSampleRate, kReferenceFrequency, 0);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 1.0f);
 
-  instrument.SetControl(ControlType::kGain, -12.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), -12.0f);
+  instrument.SetControl(ControlType::kGain, 0.5f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.5f);
 
   // Verify that the control value is clamped at the minimum value.
-  instrument.SetControl(ControlType::kGain, -100.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), kMinDecibels);
+  instrument.SetControl(ControlType::kGain, -1.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.0f);
 
   instrument.SetControl(ControlType::kGain, 0.0f);
   EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.0f);
 
   // Verify that the control value is clamped at the maximum value.
   instrument.SetControl(ControlType::kGain, 10.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 1.0f);
 
-  instrument.SetControl(ControlType::kGain, 0.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.0f);
+  instrument.SetControl(ControlType::kGain, 1.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 1.0f);
 }
 
 // Tests that the instrument plays a single note as expected.

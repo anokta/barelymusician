@@ -36,6 +36,22 @@ namespace Barely {
       get { return Internal.Engine_GetTimestamp(); }
     }
 
+    /// Converts a value from linear amplitude to decibels.
+    ///
+    /// @param amplitude Value in linear amplitude.
+    /// @return Value in decibels.
+    public static float AmplitudeToDecibels(float amplitude) {
+      return Internal.AmplitudeToDecibels(amplitude);
+    }
+
+    /// Converts a value from decibels to linear amplitude.
+    ///
+    /// @param decibels Value in decibels.
+    /// @return Value in linear amplitude.
+    public static float DecibelsToAmplitude(float decibels) {
+      return Internal.DecibelsToAmplitude(decibels);
+    }
+
     /// Schedules a task at a specific time.
     ///
     /// @param callback Task process callback.
@@ -48,7 +64,7 @@ namespace Barely {
     public static class Internal {
       /// Control type.
       public enum ControlType {
-        /// Gain in decibels.
+        /// Gain in linear amplitude.
         [InspectorName("Gain")] GAIN = 0,
         /// Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
@@ -903,6 +919,30 @@ namespace Barely {
         }
       }
 
+      /// Converts a value from linear amplitude to decibels.
+      ///
+      /// @param amplitude Value in linear amplitude.
+      /// @return Value in decibels.
+      public static float AmplitudeToDecibels(float amplitude) {
+        float decibels = 0.0f;
+        if (!Barely_AmplitudeToDecibels(amplitude, ref decibels)) {
+          Debug.LogError("Failed to convert amplitude " + amplitude + " to decibels");
+        }
+        return decibels;
+      }
+
+      /// Converts a value from decibels to linear amplitude.
+      ///
+      /// @param decibels Value in decibels.
+      /// @return Value in linear amplitude.
+      public static float DecibelsToAmplitude(float decibels) {
+        float amplitude = 0.0f;
+        if (!Barely_DecibelsToAmplitude(decibels, ref amplitude)) {
+          Debug.LogError("Failed to convert decibels " + decibels + " to amplitude");
+        }
+        return amplitude;
+      }
+
       // Slice of sample data.
       [StructLayout(LayoutKind.Sequential)]
       private struct Slice {
@@ -1320,6 +1360,12 @@ namespace Barely {
       private static extern bool BarelyTask_SetProcessCallback(IntPtr task,
                                                                Task_ProcessCallback callback,
                                                                IntPtr userData);
+
+      [DllImport(_pluginName, EntryPoint = "Barely_AmplitudeToDecibels")]
+      private static extern bool Barely_AmplitudeToDecibels(float amplitude, ref float outDecibels);
+
+      [DllImport(_pluginName, EntryPoint = "Barely_DecibelsToAmplitude")]
+      private static extern bool Barely_DecibelsToAmplitude(float decibels, ref float outAmplitude);
     }
   }
 }  // namespace Barely

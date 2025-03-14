@@ -17,7 +17,17 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/craigsapp/midifile.git
   GIT_TAG f79e8ea395b858ceb6e0d8f353885ff80773dc76
 )
-FetchContent_MakeAvailable(midifile)
+FetchContent_GetProperties(midifile)
+if(NOT midifile_POPULATED)
+  FetchContent_Populate(midifile)
+  file(READ "${midifile_SOURCE_DIR}/CMakeLists.txt" midifile_cmake_contents)
+  string(
+    REGEX REPLACE "(add_executable|target_link_libraries)" "# \\0"
+    midifile_cmake_contents "${midifile_cmake_contents}"
+  )
+  file(WRITE "${midifile_SOURCE_DIR}/CMakeLists.txt" "${midifile_cmake_contents}")
+  add_subdirectory(${midifile_SOURCE_DIR} ${midifile_BINARY_DIR})
+endif()
 target_compile_options(
   midifile PUBLIC
   -w

@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_DATA_DATA_H_
-#define EXAMPLES_DATA_DATA_H_
+#ifndef BARELYMUSICIAN_EXAMPLES_DATA_DATA_H_
+#define BARELYMUSICIAN_EXAMPLES_DATA_DATA_H_
 
 #include <string>
 #include <string_view>
@@ -15,4 +15,4 @@ std::string GetDataFilePath(std::string_view relative_file_path, char* argv[]);
 
 }  // namespace barely::examples
 
-#endif  // EXAMPLES_DATA_DATA_H_
+#endif  // BARELYMUSICIAN_EXAMPLES_DATA_DATA_H_

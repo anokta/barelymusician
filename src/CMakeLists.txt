@@ -3,13 +3,9 @@ set(CMAKE_FOLDER src)
 include_directories(.)
 
 add_library(
-  barelymusician_headeronly INTERFACE
-  ${CMAKE_SOURCE_DIR}/include/barelymusician.h
-)
-
-add_library(
   barelymusician STATIC
   barelymusician.cpp
+  ${CMAKE_SOURCE_DIR}/include/barelymusician.h
 )
 set_target_properties(
   barelymusician PROPERTIES
@@ -18,16 +14,6 @@ set_target_properties(
 target_compile_definitions(
   barelymusician
   PUBLIC BARELYMUSICIAN_EXPORTS
-)
-target_link_libraries(
-  barelymusician
-  barelymusician_headeronly
-  barelymusician_private_arpeggiator_impl
-  barelymusician_private_engine_impl
-  barelymusician_private_instrument_impl
-  barelymusician_private_performer_impl
-  barelymusician_private_random_impl
-  barelymusician_private_repeater_impl
 )
 
 if(ENABLE_BENCHMARKS)
@@ -50,6 +36,7 @@ if(ENABLE_TESTS)
   target_link_libraries(
     barelymusician_test
     barelymusician
+    gmock
     gtest_main
   )
   gtest_discover_tests(barelymusician_test)

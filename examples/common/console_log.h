@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_COMMON_CONSOLE_LOG_H_
-#define EXAMPLES_COMMON_CONSOLE_LOG_H_
+#ifndef BARELYMUSICIAN_EXAMPLES_COMMON_CONSOLE_LOG_H_
+#define BARELYMUSICIAN_EXAMPLES_COMMON_CONSOLE_LOG_H_
 
 #include <iostream>
 #include <ostream>
@@ -39,4 +39,4 @@ class ConsoleLog {
 
 }  // namespace barely::examples
 
-#endif  // EXAMPLES_COMMON_CONSOLE_LOG_H_
+#endif  // BARELYMUSICIAN_EXAMPLES_COMMON_CONSOLE_LOG_H_

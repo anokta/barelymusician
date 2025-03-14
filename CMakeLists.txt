@@ -132,9 +132,9 @@ endif()
 if(ENABLE_BENCHMARKS)
   set(CMAKE_FOLDER external)
   FetchContent_Declare(
-      benchmark
-      GIT_REPOSITORY https://github.com/google/benchmark.git
-      GIT_TAG        v1.9.0
+    benchmark
+    GIT_REPOSITORY https://github.com/google/benchmark.git
+    GIT_TAG v1.9.0
   )
   set(BENCHMARK_ENABLE_TESTING OFF)
   FetchContent_MakeAvailable(benchmark)

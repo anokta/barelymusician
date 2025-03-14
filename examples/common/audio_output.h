@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_COMMON_AUDIO_OUTPUT_H_
-#define EXAMPLES_COMMON_AUDIO_OUTPUT_H_
+#ifndef BARELYMUSICIAN_EXAMPLES_COMMON_AUDIO_OUTPUT_H_
+#define BARELYMUSICIAN_EXAMPLES_COMMON_AUDIO_OUTPUT_H_
 
 #include <functional>
 #include <span>
@@ -52,4 +52,4 @@ class AudioOutput {
 
 }  // namespace barely::examples
 
-#endif  // EXAMPLES_COMMON_AUDIO_OUTPUT_H_
+#endif  // BARELYMUSICIAN_EXAMPLES_COMMON_AUDIO_OUTPUT_H_

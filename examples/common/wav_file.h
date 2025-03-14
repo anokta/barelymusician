@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_COMMON_WAV_FILE_H_
-#define EXAMPLES_COMMON_WAV_FILE_H_
+#ifndef BARELYMUSICIAN_EXAMPLES_COMMON_WAV_FILE_H_
+#define BARELYMUSICIAN_EXAMPLES_COMMON_WAV_FILE_H_
 
 #include <string>
 #include <vector>
@@ -43,4 +43,4 @@ class WavFile {
 
 }  // namespace barely::examples
 
-#endif  // EXAMPLES_COMMON_WAV_FILE_H_
+#endif  // BARELYMUSICIAN_EXAMPLES_COMMON_WAV_FILE_H_

@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_COMMON_INPUT_MANAGER_H_
-#define EXAMPLES_COMMON_INPUT_MANAGER_H_
+#ifndef BARELYMUSICIAN_EXAMPLES_COMMON_INPUT_MANAGER_H_
+#define BARELYMUSICIAN_EXAMPLES_COMMON_INPUT_MANAGER_H_
 
 #include <functional>
 #include <unordered_set>
@@ -87,4 +87,4 @@ class InputManager {
 
 }  // namespace barely::examples
 
-#endif  // EXAMPLES_COMMON_INPUT_MANAGER_H_
+#endif  // BARELYMUSICIAN_EXAMPLES_COMMON_INPUT_MANAGER_H_

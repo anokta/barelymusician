@@ -89,6 +89,42 @@ TEST(EngineTest, CreateDestroyPerformer) {
   [[maybe_unused]] const auto performer = engine.CreatePerformer();
 }
 
+// Tests that the engine generates uniform numbers that are always within a given range.
+TEST(EngineTest, GenerateRandomNumber) {
+  constexpr int kValueCount = 1000;
+  constexpr int kMin = -7;
+  constexpr int kMax = 35;
+
+  Engine engine(1);
+  for (int i = 0; i < kValueCount; ++i) {
+    const int value = engine.GenerateRandomNumber(kMin, kMax);
+    EXPECT_GE(value, kMin);
+    EXPECT_LT(value, kMax);
+  }
+}
+
+// Tests that the engine generates the same values the seed is reset with the same value.
+TEST(EngineTest, SetSeed) {
+  constexpr int kSeed = 1;
+  constexpr int kValueCount = 10;
+
+  Engine engine(1);
+  engine.SetSeed(kSeed);
+
+  // Generate some random values.
+  std::array<double, kValueCount> values;
+  for (int i = 0; i < kValueCount; ++i) {
+    values[i] = engine.GenerateRandomNumber();
+  }
+
+  // Reset the seed with the same value.
+  engine.SetSeed(kSeed);
+  // Validate that the same numbers are generated for the next `kValueCount`.
+  for (int i = 0; i < kValueCount; ++i) {
+    EXPECT_DOUBLE_EQ(engine.GenerateRandomNumber(), values[i]);
+  }
+}
+
 /// Common note values in relation to quarter note beat duration.
 constexpr double kQuarterNotesPerBeat = 1.0;
 constexpr double kEighthNotesPerBeat = 2.0;

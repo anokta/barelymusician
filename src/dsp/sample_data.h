@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "barelymusician.h"
-#include "private/random_impl.h"
+#include "common/rng.h"
 
 namespace barely {
 
@@ -39,7 +39,7 @@ class SampleData {
   std::vector<std::pair<Slice, std::vector<float>>> slices_;
 
   // Random number generator for picking slices.
-  inline static RandomImpl random_ = RandomImpl();
+  inline static AudioRng rng_;
 };
 
 }  // namespace barely

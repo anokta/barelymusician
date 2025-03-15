@@ -9,7 +9,6 @@
 #include "private/engine_impl.h"
 #include "private/instrument_impl.h"
 #include "private/performer_impl.h"
-#include "private/random_impl.h"
 
 namespace barely {
 
@@ -106,9 +105,6 @@ class RepeaterImpl {
 
   // Remaining length;
   int remaining_length_ = 0;
-
-  // Random number generator.
-  RandomImpl random_;
 };
 
 }  // namespace barely

@@ -6,12 +6,12 @@
 #include <cmath>
 
 #include "barelymusician.h"
+#include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_generators.h"
 #include "dsp/voice.h"
-#include "private/random_impl.h"
 
 namespace barely {
 
@@ -109,7 +109,7 @@ class Voice {
     const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
     const float osc_sample =
         (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
-        params_.osc_noise_mix * random_.DrawUniform(-1.0f, 1.0f);
+        params_.osc_noise_mix * rng_.Generate();
     const float osc_output = params_.osc_mix * osc_sample;
 
     const bool has_slice = (slice_ != nullptr);
@@ -185,7 +185,7 @@ class Voice {
   float slice_offset_ = 0.0f;
 
   // White noise random number generator.
-  inline static RandomImpl random_ = RandomImpl();
+  inline static AudioRng rng_;
 };
 
 /// Voice callback alias.

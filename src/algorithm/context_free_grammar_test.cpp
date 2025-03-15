@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
+#include "common/rng.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "private/random_impl.h"
 
 namespace barely {
 namespace {
@@ -20,8 +20,8 @@ TEST(ContextFreeGrammarTest, GenerateSequence) {
   ContextFreeGrammar<std::string> grammar;
   grammar.AddRule(kStartSymbol, {kSubstition});
 
-  RandomImpl random;
-  const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
+  MainRng rng;
+  const auto sequence = grammar.GenerateSequence(kStartSymbol, rng);
   EXPECT_EQ(sequence, kSubstition);
 }
 
@@ -32,8 +32,8 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNestedRules) {
   grammar.AddRule("Body", {{"Verse", "Chorus", "Bridge"}});
   grammar.AddRule("Bridge", {{"Break", "Chorus"}});
 
-  RandomImpl random;
-  const auto sequence = grammar.GenerateSequence("Start", random);
+  MainRng rng;
+  const auto sequence = grammar.GenerateSequence("Start", rng);
   EXPECT_THAT(sequence, ElementsAre("Intro", "Verse", "Chorus", "Break", "Chorus", "Outro"));
 }
 
@@ -56,9 +56,9 @@ TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
     grammar.AddRule(i, {std::vector<int>(i, kEndSymbol)});
   }
 
-  RandomImpl random;
+  MainRng rng;
   for (int i = 0; i < kGenerationCount; ++i) {
-    const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
+    const auto sequence = grammar.GenerateSequence(kStartSymbol, rng);
     EXPECT_GE(sequence.size(), kMinSize);
     EXPECT_LE(sequence.size(), kMaxSize);
   }
@@ -70,8 +70,8 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoRules) {
 
   const ContextFreeGrammar<int> grammar;
 
-  RandomImpl random;
-  const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
+  MainRng rng;
+  const auto sequence = grammar.GenerateSequence(kStartSymbol, rng);
   EXPECT_THAT(sequence, ElementsAre(kStartSymbol));
 }
 
@@ -84,8 +84,8 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoStartSymbolRule) {
   grammar.AddRule(1, {{13}, {14}});
   grammar.AddRule(2, {{15}});
 
-  RandomImpl random;
-  const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
+  MainRng rng;
+  const auto sequence = grammar.GenerateSequence(kStartSymbol, rng);
   EXPECT_THAT(sequence, ElementsAre(kStartSymbol));
 }
 

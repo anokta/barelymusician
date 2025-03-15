@@ -35,9 +35,8 @@ const Slice* SampleData::Select(float pitch) const noexcept {
             ++i;
           }
         }
-        return &slices_[(current_start_index + 1 == i)
-                            ? current_start_index
-                            : random_.DrawUniform(current_start_index, i)]
+        return &slices_[(current_start_index + 1 == i) ? current_start_index
+                                                       : rng_.Generate(current_start_index, i)]
                     .first;
       }
       current_pitch = current->root_pitch;
@@ -46,7 +45,7 @@ const Slice* SampleData::Select(float pitch) const noexcept {
   }
   return &slices_[(current_start_index + 1 == slice_count)
                       ? current_start_index
-                      : random_.DrawUniform(current_start_index, slice_count)]
+                      : rng_.Generate(current_start_index, slice_count)]
               .first;
 }
 

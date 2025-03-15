@@ -227,9 +227,6 @@ typedef struct BarelyInstrument* BarelyInstrumentHandle;
 /// Performer handle.
 typedef struct BarelyPerformer* BarelyPerformerHandle;
 
-/// Random handle.
-typedef struct BarelyRandom* BarelyRandomHandle;
-
 /// Repeater handle.
 typedef struct BarelyRepeater* BarelyRepeaterHandle;
 
@@ -527,6 +524,20 @@ BARELY_API bool BarelyEngine_Create(int32_t sample_rate, BarelyEngineHandle* out
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_Destroy(BarelyEngineHandle engine);
 
+/// Generates a new random number with uniform distribution in the normalized range [0, 1).
+///
+/// @param engine Engine handle.
+/// @param out_number Output random number.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_number);
+
+/// Gets the random number generator seed of an engine.
+///
+/// @param engine Engine handle.
+/// @param out_seed Output seed value.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_GetSeed(BarelyEngineHandle engine, int32_t* out_seed);
+
 /// Gets the reference frequency of an engine.
 ///
 /// @param engine Engine handle.
@@ -556,6 +567,13 @@ BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine,
                                                    float reference_frequency);
+
+/// Sets the random number generator seed of an engine.
+///
+/// @param engine Engine handle.
+/// @param seed Seed value.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_SetSeed(BarelyEngineHandle engine, int32_t seed);
 
 /// Sets the tempo of an engine.
 ///
@@ -804,56 +822,6 @@ BARELY_API bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
                                                double position, double* out_position);
-
-/// Creates a new random number generator.
-///
-/// @param seed Seed value.
-/// @param out_random Output random handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRandom_Create(int32_t seed, BarelyRandomHandle* out_random);
-
-/// Destroys a random number generator.
-///
-/// @param random Random handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRandom_Destroy(BarelyRandomHandle random);
-
-/// Draws a random number with normal distribution.
-///
-/// @param random Random handle.
-/// @param mean Distrubition mean value.
-/// @param variance Distrubition variance.
-/// @param out_number Output random number.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRandom_DrawNormal(BarelyRandomHandle random, float mean, float variance,
-                                        float* out_number);
-
-/// Draws a number with discrete uniform distribution in range [min, max].
-///
-/// @param random Random handle.
-/// @param min Minimum value (inclusive).
-/// @param max Maximum value (exclusive).
-/// @param out_number Output random number.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_t min, int32_t max,
-                                            int32_t* out_number);
-
-/// Draws a number with continuous uniform distribution in range [min, max).
-///
-/// @param random Random handle.
-/// @param min Minimum value (inclusive).
-/// @param max Maximum value (exclusive).
-/// @param out_number Output random number.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, float min, float max,
-                                             float* out_number);
-
-/// Resets a random number generator with a new seed.
-///
-/// @param random Random handle.
-/// @param seed Seed value.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRandom_Reset(BarelyRandomHandle random, int32_t seed);
 
 /// Clears all notes.
 ///
@@ -1828,6 +1796,27 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer() noexcept { return Performer(*this); }
 
+  /// Generates a random number with uniform distribution in the normalized range [0, 1).
+  ///
+  /// @return Random number.
+  [[nodiscard]] double GenerateRandomNumber() noexcept {
+    double number = 0.0;
+    [[maybe_unused]] const bool success = BarelyEngine_GenerateRandomNumber(*this, &number);
+    assert(success);
+    return number;
+  }
+
+  /// Generates a random number with uniform distribution in the range [min, max).
+  ///
+  /// @param min Minimum value (inclusive).
+  /// @param max Maximum value (exclusive).
+  /// @return Random number.
+  template <typename NumberType>
+  [[nodiscard]] NumberType GenerateRandomNumber(NumberType min, NumberType max) noexcept {
+    static_assert(std::is_arithmetic<NumberType>::value, "NumberType is not supported");
+    return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
+  }
+
   /// Returns the reference frequency.
   ///
   /// @return Reference frequency in hertz.
@@ -1837,6 +1826,16 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
         BarelyEngine_GetReferenceFrequency(*this, &reference_frequency);
     assert(success);
     return reference_frequency;
+  }
+
+  /// Returns the random number generator seed.
+  ///
+  /// @return Seed value.
+  [[nodiscard]] int GetSeed() const noexcept {
+    int32_t seed = 0;
+    [[maybe_unused]] const bool success = BarelyEngine_GetSeed(*this, &seed);
+    assert(success);
+    return static_cast<int>(seed);
   }
 
   /// Returns the tempo.
@@ -1857,6 +1856,12 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     [[maybe_unused]] const bool success = BarelyEngine_GetTimestamp(*this, &timestamp);
     assert(success);
     return timestamp;
+  }
+
+  /// Sets the random number generator seed.
+  void SetSeed(int seed) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_SetSeed(*this, static_cast<int32_t>(seed));
+    assert(success);
   }
 
   /// Sets the reference frequency.
@@ -2003,101 +2008,6 @@ class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
   void SetStyle(ArpeggiatorStyle style) noexcept {
     [[maybe_unused]] const bool success =
         BarelyArpeggiator_SetStyle(*this, static_cast<BarelyArpeggiatorStyle>(style));
-    assert(success);
-  }
-};
-
-/// A class that wraps a random handle.
-class Random : public HandleWrapper<BarelyRandomHandle> {
- public:
-  /// Creates a new `Random`.
-  ///
-  /// @param seed Seed value.
-  explicit Random(int seed = static_cast<int>(std::default_random_engine::default_seed)) noexcept
-      : HandleWrapper([&]() {
-          BarelyRandomHandle random = nullptr;
-          [[maybe_unused]] const bool success =
-              BarelyRandom_Create(static_cast<int32_t>(seed), &random);
-          assert(success);
-          return random;
-        }()) {}
-
-  /// Creates a new `Random` from a raw handle.
-  ///
-  /// @param random Raw handle to random.
-  explicit Random(BarelyRandomHandle random) noexcept : HandleWrapper(random) {}
-
-  /// Destroys `Random`.
-  ~Random() noexcept { BarelyRandom_Destroy(*this); }
-
-  /// Non-copyable.
-  Random(const Random& other) noexcept = delete;
-  Random& operator=(const Random& other) noexcept = delete;
-
-  /// Default move constructor.
-  Random(Random&& other) noexcept = default;
-
-  /// Assigns `Random` via move.
-  ///
-  /// @param other Other random.
-  /// @return Random.
-  Random& operator=(Random&& other) noexcept {
-    if (this != &other) {
-      BarelyRandom_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
-
-  /// Draws a number with normal distribution.
-  ///
-  /// @param mean Distrubition mean value.
-  /// @param variance Distrubition variance.
-  /// @return Random float number.
-  [[nodiscard]] float DrawNormal(float mean, float variance) noexcept {
-    float number = 0.0f;
-    [[maybe_unused]] const bool success = BarelyRandom_DrawNormal(*this, mean, variance, &number);
-    assert(success);
-    return number;
-  }
-
-  /// Draws a number with continuous uniform distribution in range [min, max).
-  ///
-  /// @param min Minimum value (inclusive).
-  /// @param max Maximum value (exclusive).
-  /// @return Random double number.
-  [[nodiscard]] double DrawUniform(double min, double max) noexcept {
-    return static_cast<double>(DrawUniform(static_cast<float>(min), static_cast<float>(max)));
-  }
-
-  /// Draws a number with continuous uniform distribution in range [min, max).
-  ///
-  /// @param min Minimum value (inclusive).
-  /// @param max Maximum value (exclusive).
-  /// @return Random float number.
-  [[nodiscard]] float DrawUniform(float min, float max) noexcept {
-    float number = 0.0f;
-    [[maybe_unused]] const bool success = BarelyRandom_DrawUniformReal(*this, min, max, &number);
-    assert(success);
-    return number;
-  }
-
-  /// Draws a number with discrete uniform distribution in range [min, max].
-  ///
-  /// @param min Minimum value (inclusive).
-  /// @param max Maximum value (inclusive).
-  /// @return Random integer number.
-  [[nodiscard]] int DrawUniform(int min, int max) noexcept {
-    int32_t number = 0;
-    [[maybe_unused]] const bool success = BarelyRandom_DrawUniformInt(
-        *this, static_cast<int32_t>(min), static_cast<int32_t>(max), &number);
-    assert(success);
-    return static_cast<int>(number);
-  }
-
-  /// Resets the random number generator with a new seed.
-  void Reset(int seed) noexcept {
-    [[maybe_unused]] const bool success = BarelyRandom_Reset(*this, static_cast<int32_t>(seed));
     assert(success);
   }
 };

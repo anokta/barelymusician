@@ -27,7 +27,6 @@ using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::Performer;
-using ::barely::Random;
 using ::barely::Scale;
 using ::barely::Slice;
 using ::barely::SliceMode;
@@ -157,7 +156,7 @@ void ComposeLine(int octave_offset, float intensity, int bar, int beat, int beat
   }
 }
 
-void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument& instrument,
+void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, Instrument& instrument,
                   Performer& performer, std::vector<Task>& tasks) {
   const auto get_beat = [](int step) { return static_cast<double>(step) / kSixteenthNotesPerBeat; };
   const auto add_note = [&](double begin_position, double end_position, float pitch,
@@ -185,8 +184,8 @@ void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument&
     }
   }
   // Hihat Closed.
-  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, random.DrawUniform(0.5f, 0.75f));
-  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, random.DrawUniform(0.25f, 0.75f));
+  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, engine.GenerateRandomNumber(0.5f, 0.75f));
+  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, engine.GenerateRandomNumber(0.25f, 0.75f));
   // Hihat Open.
   if (beat + 1 == beat_count) {
     if (bar % 4 == 3) {
@@ -205,8 +204,6 @@ void ComposeDrums(int bar, int beat, int beat_count, Random& random, Instrument&
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* argv[]) {
   InputManager input_manager;
-
-  Random random;
 
   AudioClock clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
@@ -230,10 +227,10 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::tuple<Performer, std::vector<Task>, BeatComposerCallback, size_t>> performers;
   std::vector<Instrument> instruments;
 
-  const auto build_instrument_fn = [&](float shape, float gain, float attack, float release) {
+  const auto build_instrument_fn = [&](float shape, float gain_db, float attack, float release) {
     instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
-    instrument.SetControl(ControlType::kGain, gain);
+    instrument.SetControl(ControlType::kGain, barely::DecibelsToAmplitude(gain_db));
     instrument.SetControl(ControlType::kOscMix, 1.0f);
     if (shape < 0.0f) {
       instrument.SetControl(ControlType::kOscNoiseMix, 1.0f);
@@ -312,7 +309,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto percussion_beat_composer_callback =
       [&](int bar, int beat, int beat_count, int /*harmonic*/, Instrument& instrument,
           Performer& performer, std::vector<Task>& tasks) {
-        ComposeDrums(bar, beat, beat_count, random, instrument, performer, tasks);
+        ComposeDrums(bar, beat, beat_count, engine, instrument, performer, tasks);
       };
 
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
@@ -387,11 +384,11 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        engine.SetTempo(random.DrawUniform(0.5, 0.75) * engine.GetTempo());
+        engine.SetTempo(engine.GenerateRandomNumber(0.5, 0.75) * engine.GetTempo());
         ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case '2':
-        engine.SetTempo(random.DrawUniform(1.5, 2.0) * engine.GetTempo());
+        engine.SetTempo(engine.GenerateRandomNumber(1.5, 2.0) * engine.GetTempo());
         ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case 'R':

@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "barelymusician.h"
+#include "common/rng.h"
 #include "private/instrument_impl.h"
 #include "private/performer_impl.h"
 
@@ -94,12 +95,17 @@ class EngineImpl {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
+  MainRng& main_rng() noexcept { return main_rng_; }
+
  private:
   // Map of instruments by their pointers.
   std::unordered_map<InstrumentImpl*, std::unique_ptr<InstrumentImpl>> instruments_;
 
   // Map of performers by their pointers.
   std::unordered_map<PerformerImpl*, std::unique_ptr<PerformerImpl>> performers_;
+
+  // Random number generator.
+  MainRng main_rng_;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;

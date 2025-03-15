@@ -8,8 +8,6 @@ target_sources(
   instrument_impl.h
   performer_impl.cpp
   performer_impl.h
-  random_impl.cpp
-  random_impl.h
   repeater_impl.cpp
   repeater_impl.h
 )
@@ -20,6 +18,5 @@ if(ENABLE_TESTS)
     engine_impl_test.cpp
     instrument_impl_test.cpp
     performer_impl_test.cpp
-    random_impl_test.cpp
   )
 endif()

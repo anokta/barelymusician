@@ -10,7 +10,6 @@
 #include "private/engine_impl.h"
 #include "private/instrument_impl.h"
 #include "private/performer_impl.h"
-#include "private/random_impl.h"
 #include "private/repeater_impl.h"
 
 using ::barely::ControlType;
@@ -111,11 +110,27 @@ bool BarelyEngine_Destroy(BarelyEngineHandle engine) {
   return true;
 }
 
+bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_number) {
+  if (!engine) return false;
+  if (!out_number) return false;
+
+  *out_number = engine->main_rng().Generate();
+  return true;
+}
+
 bool BarelyEngine_GetReferenceFrequency(BarelyEngineHandle engine, float* out_reference_frequency) {
   if (!engine) return false;
   if (!out_reference_frequency) return false;
 
   *out_reference_frequency = engine->GetReferenceFrequency();
+  return true;
+}
+
+bool BarelyEngine_GetSeed(BarelyEngineHandle engine, int32_t* out_seed) {
+  if (!engine) return false;
+  if (!out_seed) return false;
+
+  *out_seed = engine->main_rng().GetSeed();
   return true;
 }
 
@@ -139,6 +154,13 @@ bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine, float referen
   if (!engine) return false;
 
   engine->SetReferenceFrequency(reference_frequency);
+  return true;
+}
+
+bool BarelyEngine_SetSeed(BarelyEngineHandle engine, int32_t seed) {
+  if (!engine) return false;
+
+  engine->main_rng().SetSeed(seed);
   return true;
 }
 
@@ -399,54 +421,6 @@ bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization, doub
   *out_position = std::lerp(
       position, quantization->resolution * std::round(position / quantization->resolution),
       static_cast<double>(quantization->amount));
-  return true;
-}
-
-bool BarelyRandom_Create(int32_t seed, BarelyRandomHandle* out_random) {
-  if (!out_random) return false;
-
-  *out_random = static_cast<BarelyRandomHandle>(new barely::RandomImpl(static_cast<int>(seed)));
-  return true;
-}
-
-bool BarelyRandom_Destroy(BarelyRandomHandle random) {
-  if (!random) return false;
-
-  delete random;
-  return true;
-}
-
-bool BarelyRandom_DrawNormal(BarelyRandomHandle random, float mean, float variance,
-                             float* out_number) {
-  if (!random || !out_number) return false;
-
-  *out_number = random->DrawNormal(mean, variance);
-  return true;
-}
-
-bool BarelyRandom_DrawUniformInt(BarelyRandomHandle random, int32_t min, int32_t max,
-                                 int32_t* out_number) {
-  if (!random || !out_number) return false;
-  if (min > max) return false;
-
-  *out_number =
-      static_cast<int32_t>(random->DrawUniform(static_cast<int>(min), static_cast<int>(max)));
-  return true;
-}
-
-bool BarelyRandom_DrawUniformReal(BarelyRandomHandle random, float min, float max,
-                                  float* out_number) {
-  if (!random || !out_number) return false;
-  if (min > max) return false;
-
-  *out_number = random->DrawUniform(min, max);
-  return true;
-}
-
-bool BarelyRandom_Reset(BarelyRandomHandle random, int32_t seed) {
-  if (!random) return false;
-
-  random->Reset(static_cast<int>(seed));
   return true;
 }
 

@@ -7,7 +7,6 @@
 #include "private/engine_impl.h"
 #include "private/instrument_impl.h"
 #include "private/performer_impl.h"
-#include "private/random_impl.h"
 
 namespace barely {
 
@@ -116,9 +115,6 @@ class ArpeggiatorImpl {
 
   // Current pitch.
   float pitch_ = 0.0f;
-
-  // Random number generator.
-  RandomImpl random_;
 };
 
 }  // namespace barely

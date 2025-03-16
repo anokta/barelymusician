@@ -160,6 +160,7 @@ bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine, float referen
 bool BarelyEngine_SetSeed(BarelyEngineHandle engine, int32_t seed) {
   if (!engine) return false;
 
+  // TODO(#146): This should ideally set the seed of `audio_rng_` as well.
   engine->main_rng().SetSeed(seed);
   return true;
 }

@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 
+#include "common/rng.h"
 #include "dsp/envelope.h"
 #include "dsp/gain_processor.h"
 #include "dsp/sample_data.h"
@@ -16,10 +17,11 @@ class InstrumentProcessor {
  public:
   /// Constructs a new `InstrumentProcessor`.
   ///
+  /// @param rng Random number generator.
   /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentProcessor(int sample_rate, float reference_frequency) noexcept;
+  InstrumentProcessor(AudioRng& rng, int sample_rate, float reference_frequency) noexcept;
 
   /// Processes the next output samples.
   ///

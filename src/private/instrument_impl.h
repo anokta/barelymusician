@@ -11,6 +11,7 @@
 
 #include "barelymusician.h"
 #include "common/callback.h"
+#include "common/rng.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message_queue.h"
 #include "dsp/sample_data.h"
@@ -28,11 +29,13 @@ class InstrumentImpl {
 
   /// Constructs a new `InstrumentImpl`.
   ///
+  /// @param rng Random number generator.
   /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   /// @param update_sample Update sample.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentImpl(int sample_rate, float reference_frequency, int64_t update_sample) noexcept;
+  InstrumentImpl(AudioRng& rng, int sample_rate, float reference_frequency,
+                 int64_t update_sample) noexcept;
 
   /// Destroys `InstrumentImpl`.
   ~InstrumentImpl() noexcept;

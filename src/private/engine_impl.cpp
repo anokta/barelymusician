@@ -33,7 +33,7 @@ double EngineImpl::BeatsToSeconds(double beats) const noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentImpl* EngineImpl::CreateInstrument() noexcept {
-  auto instrument = std::make_unique<InstrumentImpl>(sample_rate_, reference_frequency_,
+  auto instrument = std::make_unique<InstrumentImpl>(audio_rng_, sample_rate_, reference_frequency_,
                                                      SecondsToSamples(timestamp_));
   auto* instrument_ptr = instrument.get();
   [[maybe_unused]] const bool success =

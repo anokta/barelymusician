@@ -47,6 +47,9 @@ class Voice {
 
     /// Slice increment per sample.
     float slice_increment = 0.0f;
+
+    /// Random number generator.
+    AudioRng* rng = nullptr;
   };
 
   /// Returns the next output sample.
@@ -106,10 +109,11 @@ class Voice {
       }
     }
 
+    assert(params_.rng != nullptr);
     const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
     const float osc_sample =
         (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
-        params_.osc_noise_mix * rng_.Generate();
+        params_.osc_noise_mix * params_.rng->Generate();
     const float osc_output = params_.osc_mix * osc_sample;
 
     const bool has_slice = (slice_ != nullptr);
@@ -183,9 +187,6 @@ class Voice {
   float osc_phase_ = 0.0f;
   const Slice* slice_ = nullptr;
   float slice_offset_ = 0.0f;
-
-  // White noise random number generator.
-  inline static AudioRng rng_;
 };
 
 /// Voice callback alias.

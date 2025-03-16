@@ -98,17 +98,20 @@ class EngineImpl {
   MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
+  // Sampling rate in hertz.
+  const int sample_rate_ = 0;
+
+  // Random number generator for the audio thread.
+  AudioRng audio_rng_;
+
+  // Random number generator for the main thread.
+  MainRng main_rng_;
+
   // Map of instruments by their pointers.
   std::unordered_map<InstrumentImpl*, std::unique_ptr<InstrumentImpl>> instruments_;
 
   // Map of performers by their pointers.
   std::unordered_map<PerformerImpl*, std::unique_ptr<PerformerImpl>> performers_;
-
-  // Random number generator.
-  MainRng main_rng_;
-
-  // Sampling rate in hertz.
-  const int sample_rate_ = 0;
 
   // Reference frequency at zero pitch (C4 by default).
   float reference_frequency_ = 440.0f * std::pow(2.0f, -9.0f / 12.0f);

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "barelymusician.h"
+#include "common/rng.h"
 
 namespace barely {
 
@@ -17,7 +18,7 @@ SampleData::SampleData(std::span<const Slice> slices) noexcept {
   }
 }
 
-const Slice* SampleData::Select(float pitch) const noexcept {
+const Slice* SampleData::Select(float pitch, AudioRng& rng) const noexcept {
   if (slices_.empty()) {
     return nullptr;
   }
@@ -36,7 +37,7 @@ const Slice* SampleData::Select(float pitch) const noexcept {
           }
         }
         return &slices_[(current_start_index + 1 == i) ? current_start_index
-                                                       : rng_.Generate(current_start_index, i)]
+                                                       : rng.Generate(current_start_index, i)]
                     .first;
       }
       current_pitch = current->root_pitch;
@@ -45,7 +46,7 @@ const Slice* SampleData::Select(float pitch) const noexcept {
   }
   return &slices_[(current_start_index + 1 == slice_count)
                       ? current_start_index
-                      : rng_.Generate(current_start_index, slice_count)]
+                      : rng.Generate(current_start_index, slice_count)]
               .first;
 }
 

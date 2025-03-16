@@ -26,8 +26,9 @@ class SampleData {
   /// Selects the slice for a given pitch.
   ///
   /// @param pitch Note pitch.
+  /// @param rng Random number generator.
   /// @return Pointer to slice.
-  [[nodiscard]] const Slice* Select(float pitch) const noexcept;
+  [[nodiscard]] const Slice* Select(float pitch, AudioRng& rng) const noexcept;
 
   /// Swaps the sample data.
   ///
@@ -37,9 +38,6 @@ class SampleData {
  private:
   // Array of slices.
   std::vector<std::pair<Slice, std::vector<float>>> slices_;
-
-  // Random number generator for picking slices.
-  inline static AudioRng rng_;
 };
 
 }  // namespace barely

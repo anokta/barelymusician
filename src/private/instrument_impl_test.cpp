@@ -22,7 +22,8 @@ constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that the instrument sets a control value as expected.
 TEST(InstrumentImplTest, SetControl) {
-  InstrumentImpl instrument(kSampleRate, kReferenceFrequency, 0);
+  AudioRng rng;
+  InstrumentImpl instrument(rng, kSampleRate, kReferenceFrequency, 0);
   EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 1.0f);
 
   instrument.SetControl(ControlType::kGain, 0.5f);
@@ -51,7 +52,8 @@ TEST(InstrumentImplTest, PlaySingleNote) {
   constexpr int64_t kUpdateSample = 20;
   constexpr std::array<Slice, 1> kSlices = {Slice(kPitch, kSampleRate, kSamples)};
 
-  InstrumentImpl instrument(kSampleRate, kReferenceFrequency, kUpdateSample);
+  AudioRng rng;
+  InstrumentImpl instrument(rng, kSampleRate, kReferenceFrequency, kUpdateSample);
   instrument.SetSampleData(SampleData(kSlices));
 
   std::vector<float> buffer(kSampleCount);
@@ -93,7 +95,8 @@ TEST(InstrumentImplTest, PlayMultipleNotes) {
       Slice(3.0f, kSampleRate, {kSamples.data() + 3, kSamples.data() + 4}),
   };
 
-  InstrumentImpl instrument(1, kReferenceFrequency, 0);
+  AudioRng rng;
+  InstrumentImpl instrument(rng, 1, kReferenceFrequency, 0);
   instrument.SetSampleData(SampleData(kSlices));
 
   std::vector<float> buffer(kSampleRate);
@@ -130,7 +133,8 @@ TEST(InstrumentImplTest, SetNoteCallbacks) {
   constexpr float kPitch = 3.3f;
   constexpr float kIntensity = 0.25f;
 
-  InstrumentImpl instrument(1, kReferenceFrequency, 0);
+  AudioRng rng;
+  InstrumentImpl instrument(rng, 1, kReferenceFrequency, 0);
 
   // Trigger the note on callback.
   std::pair<float, float> note_on_state = {0.0f, 0.0f};
@@ -183,7 +187,8 @@ TEST(InstrumentImplTest, SetAllNotesOff) {
   constexpr std::array<float, 3> kPitches = {1.0f, 2.0f, 3.0f};
   constexpr float kIntensity = 1.0f;
 
-  InstrumentImpl instrument(kSampleRate, kReferenceFrequency, 0);
+  AudioRng rng;
+  InstrumentImpl instrument(rng, kSampleRate, kReferenceFrequency, 0);
   for (const float pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

@@ -3,6 +3,7 @@
 #include <array>
 
 #include "barelymusician.h"
+#include "common/rng.h"
 #include "dsp/sample_data.h"
 #include "gtest/gtest.h"
 
@@ -23,7 +24,8 @@ constexpr std::array<Slice, kVoiceCount> kSlices = {
 
 // Tests that playing a single voice produces the expected output.
 TEST(InstrumentProcessorTest, SingleVoice) {
-  InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
+  AudioRng rng;
+  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
@@ -49,7 +51,8 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 
 // Tests that playing voices are capped at maximum allowed number of voices.
 TEST(InstrumentProcessorTest, MaxVoices) {
-  InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
+  AudioRng rng;
+  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
@@ -82,7 +85,8 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 
 // Tests that the processor processor produces silence when there are no available voices set.
 TEST(InstrumentProcessorTest, NoVoice) {
-  InstrumentProcessor processor(kSampleRate, kReferenceFrequency);
+  AudioRng rng;
+  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, 0);
 
   SampleData sample_data(kSlices);

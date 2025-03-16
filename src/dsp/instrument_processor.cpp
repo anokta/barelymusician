@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "barelymusician.h"
+#include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/sample_data.h"
 #include "dsp/voice.h"
@@ -51,7 +52,8 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentProcessor::InstrumentProcessor(int sample_rate, float reference_frequency) noexcept
+InstrumentProcessor::InstrumentProcessor(AudioRng& rng, int sample_rate,
+                                         float reference_frequency) noexcept
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       adsr_(sample_interval_),
       gain_processor_(sample_rate),
@@ -59,6 +61,7 @@ InstrumentProcessor::InstrumentProcessor(int sample_rate, float reference_freque
   assert(sample_rate > 0);
   voice_params_.osc_increment = reference_frequency * sample_interval_;
   voice_params_.slice_increment = sample_interval_;
+  voice_params_.rng = &rng;
 }
 
 void InstrumentProcessor::Process(float* output_samples, int output_sample_count) noexcept {
@@ -199,7 +202,7 @@ void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
     return;
   }
   Voice& voice = AcquireVoice(pitch);
-  if (const auto* sample = sample_data_.Select(pitch); sample != nullptr) {
+  if (const auto* sample = sample_data_.Select(pitch, *voice_params_.rng); sample != nullptr) {
     voice.set_slice(sample);
   }
   voice.Start(voice_params_, adsr_, intensity);
@@ -218,7 +221,7 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   for (int i = 0; i < voice_count_; ++i) {
     if (Voice& voice = voice_states_[i].voice; !voice.IsActive()) {
       voice.set_slice(nullptr);
-    } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch);
+    } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch, *voice_params_.rng);
                sample != nullptr) {
       voice.set_slice(sample);
       voice.set_pitch(voice_states_[i].pitch + voice_states_[i].pitch_shift);

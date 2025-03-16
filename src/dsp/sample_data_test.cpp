@@ -21,10 +21,11 @@ TEST(SampleDataTest, Select) {
       Slice(35.0f, kSampleRate, kSamples),
   };
 
+  AudioRng rng;
   const SampleData sample_data(kSlices);
   for (int i = 0; i <= 40; ++i) {
     EXPECT_THAT(
-        sample_data.Select(static_cast<float>(i)),
+        sample_data.Select(static_cast<float>(i), rng),
         Pointee(Field(&Slice::root_pitch, ((i <= 10) ? 5.0f : (i <= 25.0f ? 15.0f : 35.0f)))))
         << i;
   }

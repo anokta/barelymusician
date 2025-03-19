@@ -271,23 +271,26 @@ bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch)
 }
 
 bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
-                                         BarelyInstrument_NoteOffCallback callback,
-                                         void* user_data) {
+                                         BarelyInstrument_NoteCallback callback, void* user_data) {
   if (!instrument) return false;
 
   instrument->SetNoteOffCallback({callback, user_data});
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch, float intensity) {
+bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
+                                const BarelyNoteControlDef* note_control_defs,
+                                int32_t note_control_def_count) {
   if (!instrument) return false;
 
-  instrument->SetNoteOn(pitch, intensity);
+  instrument->SetNoteOn(pitch, {reinterpret_cast<const barely::NoteControlDef*>(note_control_defs),
+                                reinterpret_cast<const barely::NoteControlDef*>(note_control_defs) +
+                                    note_control_def_count});
   return true;
 }
 
 bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
-                                        BarelyInstrument_NoteOnCallback callback, void* user_data) {
+                                        BarelyInstrument_NoteCallback callback, void* user_data) {
   if (!instrument) return false;
 
   instrument->SetNoteOnCallback({callback, user_data});

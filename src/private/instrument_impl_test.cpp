@@ -48,7 +48,7 @@ TEST(InstrumentImplTest, SetControl) {
 TEST(InstrumentImplTest, PlaySingleNote) {
   constexpr int kSampleCount = 5;
   constexpr float kPitch = 1.0f;
-  constexpr float kIntensity = 0.5f;
+  constexpr float kGain = 0.5f;
   constexpr int64_t kUpdateSample = 20;
   constexpr std::array<Slice, 1> kSlices = {Slice(kPitch, kSampleRate, kSamples)};
 
@@ -66,13 +66,13 @@ TEST(InstrumentImplTest, PlaySingleNote) {
   }
 
   // Set a note on.
-  instrument.SetNoteOn(kPitch, kIntensity);
+  instrument.SetNoteOn(kPitch, {{{NoteControlType::kGain, kGain}}});
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(instrument.Process(buffer, kUpdateSample));
   for (int i = 0; i < kSampleCount; ++i) {
-    EXPECT_FLOAT_EQ(buffer[i], (i < kSampleRate) ? kSamples[i] * kIntensity : 0.0f);
+    EXPECT_FLOAT_EQ(buffer[i], (i < kSampleRate) ? kSamples[i] * kGain : 0.0f);
   }
 
   // Set the note off.
@@ -110,7 +110,7 @@ TEST(InstrumentImplTest, PlayMultipleNotes) {
 
   // Start a new note per each i in the buffer.
   for (int i = 0; i < kSampleRate; ++i) {
-    instrument.SetNoteOn(static_cast<float>(i), 1.0f);
+    instrument.SetNoteOn(static_cast<float>(i), {});
     instrument.Update(i + 1);
     instrument.SetNoteOff(static_cast<float>(i));
   }
@@ -131,35 +131,30 @@ TEST(InstrumentImplTest, PlayMultipleNotes) {
 // Tests that the instrument triggers its note callbacks as expected.
 TEST(InstrumentImplTest, SetNoteCallbacks) {
   constexpr float kPitch = 3.3f;
-  constexpr float kIntensity = 0.25f;
 
   AudioRng rng;
   InstrumentImpl instrument(rng, 1, kReferenceFrequency, 0);
 
   // Trigger the note on callback.
-  std::pair<float, float> note_on_state = {0.0f, 0.0f};
+  float note_on_pitch = 0.0f;
   instrument.SetNoteOnCallback({
-      [](float pitch, float intensity, void* user_data) {
-        auto& note_on_state = *static_cast<std::pair<float, float>*>(user_data);
-        note_on_state.first = pitch;
-        note_on_state.second = intensity;
-      },
-      static_cast<void*>(&note_on_state),
+      [](float pitch, void* user_data) { *static_cast<float*>(user_data) = pitch; },
+      static_cast<void*>(&note_on_pitch),
   });
-  EXPECT_THAT(note_on_state, Pair(0.0f, 0.0f));
+  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
 
-  instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_THAT(note_on_state, Pair(kPitch, kIntensity));
+  instrument.SetNoteOn(kPitch, {});
+  EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
 
   // This should not trigger the callback since the note is already on.
-  note_on_state = {0.0f, 0.0f};
-  instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_THAT(note_on_state, Pair(0.0f, 0.0f));
+  note_on_pitch = 0.0f;
+  instrument.SetNoteOn(kPitch, {});
+  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
 
   // Trigger the note on callback again with another note.
-  note_on_state = {0.0f, 0.0f};
-  instrument.SetNoteOn(kPitch + 2, kIntensity);
-  EXPECT_THAT(note_on_state, Pair(kPitch + 2.0f, kIntensity));
+  note_on_pitch = 0.0f;
+  instrument.SetNoteOn(kPitch + 2.0f, {});
+  EXPECT_FLOAT_EQ(note_on_pitch, kPitch + 2.0f);
 
   // Trigger the note off callback.
   float note_off_pitch = 0.0f;
@@ -185,7 +180,6 @@ TEST(InstrumentImplTest, SetNoteCallbacks) {
 // Tests that the instrument stops all notes as expected.
 TEST(InstrumentImplTest, SetAllNotesOff) {
   constexpr std::array<float, 3> kPitches = {1.0f, 2.0f, 3.0f};
-  constexpr float kIntensity = 1.0f;
 
   AudioRng rng;
   InstrumentImpl instrument(rng, kSampleRate, kReferenceFrequency, 0);
@@ -195,7 +189,7 @@ TEST(InstrumentImplTest, SetAllNotesOff) {
 
   // Start multiple notes.
   for (const float pitch : kPitches) {
-    instrument.SetNoteOn(pitch, kIntensity);
+    instrument.SetNoteOn(pitch, {});
     EXPECT_TRUE(instrument.IsNoteOn(pitch));
   }
 

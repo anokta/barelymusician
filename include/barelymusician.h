@@ -368,6 +368,24 @@ typedef enum BarelyTaskState {
   BarelyTaskState_kCount,
 } BarelyTaskState;
 
+/// Control definition.
+typedef struct BarelyControlDef {
+  /// Type.
+  BarelyControlType type;
+
+  /// Value.
+  float value;
+} BarelyControlDef;
+
+/// Note control definition.
+typedef struct BarelyNoteControlDef {
+  /// Type.
+  BarelyNoteControlType type;
+
+  /// Value.
+  float value;
+} BarelyNoteControlDef;
+
 /// A musical quantization.
 typedef struct BarelyQuantization {
   /// Resolution.
@@ -407,18 +425,11 @@ typedef struct BarelySlice {
   int32_t sample_count;
 } BarelySlice;
 
-/// Instrument note off callback.
+/// Instrument note callback.
 ///
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, void* user_data);
-
-/// Instrument note on callback.
-///
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity, void* user_data);
+typedef void (*BarelyInstrument_NoteCallback)(float pitch, void* user_data);
 
 /// Performer beat callback.
 ///
@@ -683,17 +694,19 @@ BARELY_API bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, f
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
-                                                    BarelyInstrument_NoteOffCallback callback,
+                                                    BarelyInstrument_NoteCallback callback,
                                                     void* user_data);
 
 /// Sets an instrument note on.
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
-/// @param intensity Note intensity.
+/// @param note_control_defs Array of note control definitions.
+/// @param note_control_def_count Number of note control definitions.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
-                                           float intensity);
+                                           const BarelyNoteControlDef* note_control_defs,
+                                           int32_t note_control_def_count);
 
 /// Sets the note on callback of an instrument.
 ///
@@ -702,7 +715,7 @@ BARELY_API bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, fl
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
-                                                   BarelyInstrument_NoteOnCallback callback,
+                                                   BarelyInstrument_NoteCallback callback,
                                                    void* user_data);
 
 /// Sets instrument sample data.
@@ -1134,6 +1147,34 @@ enum class TaskState {
   kUpdate = BarelyTaskState_kUpdate,
 };
 
+/// Control definition.
+struct ControlDef : public BarelyControlDef {
+  /// Constructs a new `ControlDef`.
+  ///
+  /// @param type Control type.
+  /// @param value Control value.
+  template <typename ValueType>
+  ControlDef(ControlType type, ValueType value) noexcept
+      : BarelyControlDef(static_cast<BarelyControlType>(type), static_cast<float>(value)) {
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
+  }
+};
+
+/// Note control definition.
+struct NoteControlDef : public BarelyNoteControlDef {
+  /// Constructs a new `NoteControlDef`.
+  ///
+  /// @param type Note control type.
+  /// @param value Note control value.
+  template <typename ValueType>
+  NoteControlDef(NoteControlType type, ValueType value) noexcept
+      : BarelyNoteControlDef(static_cast<BarelyNoteControlType>(type), static_cast<float>(value)) {
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
+  }
+};
+
 /// Slice of sample data.
 struct Slice : public BarelySlice {
   /// Constructs a new `Slice`.
@@ -1226,17 +1267,11 @@ class HandleWrapper {
 /// Class that wraps an instrument handle.
 class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
  public:
-  /// Note off callback function.
+  /// Note callback function.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  using NoteOffCallback = std::function<void(float pitch)>;
-
-  /// Note on callback function.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  using NoteOnCallback = std::function<void(float pitch, float intensity)>;
+  using NoteCallback = std::function<void(float pitch)>;
 
   /// Constructs a new `Instrument`.
   ///
@@ -1393,7 +1428,7 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// Sets the note off callback.
   ///
   /// @param callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback callback) noexcept {
+  void SetNoteOffCallback(NoteCallback callback) noexcept {
     note_off_callback_ = std::move(callback);
     SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
   }
@@ -1401,16 +1436,27 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  void SetNoteOn(float pitch, float intensity = 1.0f) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(*this, pitch, intensity);
+  /// @param note_control_defs Span of note control definitions.
+  void SetNoteOn(float pitch, std::span<const NoteControlDef> note_control_defs = {}) noexcept {
+    static_assert(sizeof(BarelyNoteControlDef) == sizeof(NoteControlDef));
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(
+        *this, pitch, reinterpret_cast<const BarelyNoteControlDef*>(note_control_defs.data()),
+        static_cast<int32_t>(note_control_defs.size()));
     assert(success);
+  }
+
+  /// Sets a note on.
+  ///
+  /// @param pitch Note pitch.
+  /// @param gain Note gain.
+  void SetNoteOn(float pitch, float gain) noexcept {
+    return SetNoteOn(pitch, {{{NoteControlType::kGain, gain}}});
   }
 
   /// Sets the note on callback.
   ///
   /// @param callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback callback) noexcept {
+  void SetNoteOnCallback(NoteCallback callback) noexcept {
     note_on_callback_ = std::move(callback);
     SetCallback(BarelyInstrument_SetNoteOnCallback, note_on_callback_);
   }
@@ -1427,10 +1473,10 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 
  private:
   // Note off callback.
-  NoteOffCallback note_off_callback_;
+  NoteCallback note_off_callback_;
 
   // Note on callback.
-  NoteOnCallback note_on_callback_;
+  NoteCallback note_on_callback_;
 };
 
 /// Class that wraps a task handle.

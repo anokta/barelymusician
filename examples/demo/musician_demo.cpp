@@ -216,8 +216,8 @@ int main(int /*argc*/, char* argv[]) {
     instrument.SetNoteOffCallback([index](float pitch) {
       ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
     });
-    instrument.SetNoteOnCallback([index](float pitch, float intensity) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", " << intensity << ")";
+    instrument.SetNoteOnCallback([index](float pitch) {
+      ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ")";
     });
   };
 

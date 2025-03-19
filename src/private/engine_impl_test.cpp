@@ -45,7 +45,6 @@ TEST(EngineTest, BeatsSecondsConversion) {
 // Tests that a single instrument is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySingleInstrument) {
   constexpr float kPitch = 0.5;
-  constexpr float kIntensity = 0.75;
 
   EngineImpl engine(kSampleRate);
 
@@ -53,16 +52,12 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   InstrumentImpl* instrument = engine.CreateInstrument();
 
   // Set the note callbacks.
-  std::pair<float, float> note_on_state = {0.0f, 0.0f};
+  float note_on_pitch = 0.0f;
   instrument->SetNoteOnCallback({
-      [](float pitch, float intensity, void* user_data) {
-        auto& note_on_state = *static_cast<std::pair<float, float>*>(user_data);
-        note_on_state.first = pitch;
-        note_on_state.second = intensity;
-      },
-      static_cast<void*>(&note_on_state),
+      [](float pitch, void* user_data) { *static_cast<float*>(user_data) = pitch; },
+      static_cast<void*>(&note_on_pitch),
   });
-  EXPECT_THAT(note_on_state, Pair(0.0f, 0.0f));
+  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
 
   float note_off_pitch = 0.0f;
   instrument->SetNoteOffCallback({
@@ -72,9 +67,9 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
 
   // Set a note on.
-  instrument->SetNoteOn(kPitch, kIntensity);
+  instrument->SetNoteOn(kPitch, {});
   EXPECT_TRUE(instrument->IsNoteOn(kPitch));
-  EXPECT_THAT(note_on_state, Pair(kPitch, kIntensity));
+  EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
 
   // Destroy the instrument.
   engine.DestroyInstrument(instrument);
@@ -102,8 +97,8 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
 
     // Start multiple notes, then immediately stop some of them.
     for (int i = 0; i < 3; ++i) {
-      instruments[i]->SetNoteOn(static_cast<float>(i + 1), 1.0f);
-      instruments[i]->SetNoteOn(static_cast<float>(-i - 1), 1.0f);
+      instruments[i]->SetNoteOn(static_cast<float>(i + 1), {});
+      instruments[i]->SetNoteOn(static_cast<float>(-i - 1), {});
       instruments[i]->SetNoteOff(static_cast<float>(i + 1));
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1, 2, 3));

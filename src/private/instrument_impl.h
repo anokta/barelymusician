@@ -21,11 +21,8 @@ namespace barely {
 /// Class that implements an instrument.
 class InstrumentImpl {
  public:
-  /// Note off callback alias.
-  using NoteOffCallback = Callback<BarelyInstrument_NoteOffCallback>;
-
-  /// Note on callback alias.
-  using NoteOnCallback = Callback<BarelyInstrument_NoteOnCallback>;
+  /// Note callback alias.
+  using NoteCallback = Callback<BarelyInstrument_NoteCallback>;
 
   /// Constructs a new `InstrumentImpl`.
   ///
@@ -103,19 +100,19 @@ class InstrumentImpl {
   /// Sets the note off callback.
   ///
   /// @param callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback callback) noexcept;
+  void SetNoteOffCallback(NoteCallback callback) noexcept;
 
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
+  /// @param note_control_defs Span of note control definitions.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(float pitch, float intensity) noexcept;
+  void SetNoteOn(float pitch, std::span<const NoteControlDef> note_control_defs) noexcept;
 
   /// Sets the note on callback.
   ///
   /// @param callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback callback) noexcept;
+  void SetNoteOnCallback(NoteCallback callback) noexcept;
 
   /// Sets the reference frequency.
   ///
@@ -204,10 +201,10 @@ class InstrumentImpl {
   std::unordered_map<float, NoteControlArray> note_controls_;
 
   // Note off callback.
-  NoteOffCallback note_off_callback_ = {};
+  NoteCallback note_off_callback_ = {};
 
   // Note on callback.
-  NoteOnCallback note_on_callback_ = {};
+  NoteCallback note_on_callback_ = {};
 
   // Update sample.
   int64_t update_sample_ = 0;

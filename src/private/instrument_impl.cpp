@@ -118,25 +118,29 @@ void InstrumentImpl::SetNoteOff(float pitch) noexcept {
   }
 }
 
-void InstrumentImpl::SetNoteOffCallback(NoteOffCallback callback) noexcept {
+void InstrumentImpl::SetNoteOffCallback(NoteCallback callback) noexcept {
   note_off_callback_ = callback;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void InstrumentImpl::SetNoteOn(float pitch, float intensity) noexcept {
-  if (const auto [it, success] =
-          note_controls_.try_emplace(pitch,
-                                     NoteControlArray{
-                                         Control(intensity, 0.0f, 1.0f),  // kGain
-                                         Control(0.0f),                   // kPitchShift
-                                     });
-      success) {
-    note_on_callback_(pitch, intensity);
+void InstrumentImpl::SetNoteOn(float pitch,
+                               std::span<const NoteControlDef> note_control_defs) noexcept {
+  static constexpr NoteControlArray kNoteControls = {
+      Control(1.0f, 0.0f, 1.0f),  // kGain
+      Control(0.0f),              // kPitchShift
+  };
+  auto note_controls = kNoteControls;
+  for (auto& [type, value] : note_control_defs) {
+    note_controls[static_cast<int>(type)].SetValue(value);
+  }
+  const float intensity = note_controls[static_cast<int>(NoteControlType::kGain)].value;
+  if (const auto [it, success] = note_controls_.try_emplace(pitch, kNoteControls); success) {
+    note_on_callback_(pitch);
     message_queue_.Add(update_sample_, NoteOnMessage{pitch, intensity});
   }
 }
 
-void InstrumentImpl::SetNoteOnCallback(NoteOnCallback callback) noexcept {
+void InstrumentImpl::SetNoteOnCallback(NoteCallback callback) noexcept {
   note_on_callback_ = callback;
 }
 

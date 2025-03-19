@@ -306,8 +306,10 @@ typedef enum BarelyFilterType {
 
 /// Note control types.
 typedef enum BarelyNoteControlType {
+  /// Gain in linear amplitude.
+  BarelyNoteControlType_kGain = 0,
   /// Pitch shift.
-  BarelyNoteControlType_kPitchShift = 0,
+  BarelyNoteControlType_kPitchShift,
   /// Number of note control types.
   BarelyNoteControlType_kCount,
 } BarelyNoteControlType;
@@ -1080,6 +1082,8 @@ enum class FilterType {
 
 /// Note control types.
 enum class NoteControlType {
+  /// Gain in linear amplitude.
+  kGain = BarelyNoteControlType_kGain,
   /// Pitch shift.
   kPitchShift = BarelyNoteControlType_kPitchShift,
 };

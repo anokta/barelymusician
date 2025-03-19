@@ -169,6 +169,15 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
 
 void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, float value) noexcept {
   switch (type) {
+    case NoteControlType::kGain:
+      for (int i = 0; i < voice_count_; ++i) {
+        if (Voice& voice = voice_states_[i].voice;
+            voice_states_[i].pitch == pitch && voice.IsActive()) {
+          voice.set_gain(value);
+          break;
+        }
+      }
+      break;
     case NoteControlType::kPitchShift:
       for (int i = 0; i < voice_count_; ++i) {
         if (Voice& voice = voice_states_[i].voice;

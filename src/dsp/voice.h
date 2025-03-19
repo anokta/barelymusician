@@ -96,6 +96,7 @@ class Voice {
   /// Stops the voice.
   void Stop() noexcept { envelope_.Stop(); }
 
+  void set_gain(float gain) noexcept { gain_ = gain; }
   void set_pitch(float pitch) noexcept {
     params_.osc_increment = std::pow(2.0f, pitch);
     params_.slice_increment = (slice_ != nullptr)

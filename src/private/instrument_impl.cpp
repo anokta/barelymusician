@@ -124,10 +124,12 @@ void InstrumentImpl::SetNoteOffCallback(NoteOffCallback callback) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InstrumentImpl::SetNoteOn(float pitch, float intensity) noexcept {
-  if (const auto [it, success] = note_controls_.try_emplace(pitch,
-                                                            NoteControlArray{
-                                                                Control(0.0f),  // kPitchShift
-                                                            });
+  if (const auto [it, success] =
+          note_controls_.try_emplace(pitch,
+                                     NoteControlArray{
+                                         Control(intensity, 0.0f, 1.0f),  // kGain
+                                         Control(0.0f),                   // kPitchShift
+                                     });
       success) {
     note_on_callback_(pitch, intensity);
     message_queue_.Add(update_sample_, NoteOnMessage{pitch, intensity});

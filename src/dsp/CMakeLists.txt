@@ -3,8 +3,6 @@ target_sources(
   biquad_filter.h
   bit_crusher.h
   envelope.h
-  gain_processor.cpp
-  gain_processor.h
   instrument_processor.cpp
   instrument_processor.h
   message.h
@@ -22,7 +20,6 @@ if(ENABLE_TESTS)
     biquad_filter_test.cpp
     bit_crusher_test.cpp
     envelope_test.cpp
-    gain_processor_test.cpp
     instrument_processor_test.cpp
     message_queue_test.cpp
     sample_data_test.cpp

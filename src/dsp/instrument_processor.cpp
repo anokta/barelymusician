@@ -56,7 +56,6 @@ InstrumentProcessor::InstrumentProcessor(AudioRng& rng, int sample_rate,
                                          float reference_frequency) noexcept
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       adsr_(sample_interval_),
-      gain_processor_(sample_rate),
       reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
   voice_params_.osc_increment = reference_frequency * sample_interval_;
@@ -79,14 +78,13 @@ void InstrumentProcessor::Process(float* output_samples, int output_sample_count
   if (!has_active_voice) {
     std::fill_n(output_samples, output_sample_count, 0.0f);
   }
-  gain_processor_.Process(output_samples, output_sample_count);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
   switch (type) {
     case ControlType::kGain:
-      gain_processor_.SetGain(value);
+      voice_params_.gain = value;
       break;
     case ControlType::kPitchShift:
       pitch_shift_ = value;

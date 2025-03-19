@@ -30,6 +30,9 @@ class Voice {
     /// Filter coefficients.
     BiquadFilter::Coefficients filter_coefficients = {};
 
+    /// Gain in linear amplitude.
+    float gain = 1.0f;
+
     /// Oscillator increment per sample.
     float osc_increment = 0.0f;
 
@@ -79,8 +82,9 @@ class Voice {
   /// @param intensity Note intensity.
   void Start(const Params& params, const Envelope::Adsr& adsr, float intensity) noexcept {
     if (intensity > 0.0f) {
-      params_ = params;
       gain_ = intensity;
+      params_ = params;
+      params_.gain *= gain_;
       bit_crusher_.Reset();
       filter_.Reset();
       osc_phase_ = 0.0f;
@@ -120,7 +124,7 @@ class Voice {
     const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
     const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
 
-    float output = gain_ * envelope_.Next();
+    float output = params_.gain * envelope_.Next();
 
     if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
       output *= osc_output + slice_output;
@@ -163,6 +167,7 @@ class Voice {
   void ApproachParams(const Params& params) noexcept {
     // TODO(#146): Combine this with per-voice controls.
     static constexpr float kCoeff = 0.002f;
+    params_.gain += (params.gain * gain_ - params_.gain) * kCoeff;
     params_.bit_crusher_increment +=
         (params.bit_crusher_increment - params_.bit_crusher_increment) * kCoeff;
     params_.bit_crusher_range += (params.bit_crusher_range - params_.bit_crusher_range) * kCoeff;
@@ -177,7 +182,7 @@ class Voice {
     return static_cast<int>(slice_offset_) < slice_->sample_count;
   }
 
-  float gain_ = 0.0f;
+  float gain_ = 1.0f;
   BitCrusher bit_crusher_;
   Envelope envelope_;
   BiquadFilter filter_;

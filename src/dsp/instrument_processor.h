@@ -6,7 +6,6 @@
 
 #include "common/rng.h"
 #include "dsp/envelope.h"
-#include "dsp/gain_processor.h"
 #include "dsp/sample_data.h"
 #include "dsp/voice.h"
 
@@ -104,7 +103,6 @@ class InstrumentProcessor {
   float sample_interval_ = 0.0f;
   Envelope::Adsr adsr_;
 
-  GainProcessor gain_processor_;
   SampleData sample_data_;
 
   // TODO(#146): Filter coefficients should likely be calculated in `InstrumentImpl` instead.

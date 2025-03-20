@@ -105,9 +105,9 @@ class InstrumentImpl {
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
-  /// @param note_control_defs Span of note control definitions.
+  /// @param note_control_overrides Span of note control overrides.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(float pitch, std::span<const NoteControlDef> note_control_defs) noexcept;
+  void SetNoteOn(float pitch, std::span<const NoteControlOverride> note_control_overrides) noexcept;
 
   /// Sets the note on callback.
   ///
@@ -169,6 +169,14 @@ class InstrumentImpl {
   };
   using ControlArray = std::array<Control, BarelyControlType_kCount>;
   using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
+
+  // Returns a note control array with overrides.
+  NoteControlArray BuildNoteControlArray(
+      std::span<const NoteControlOverride> note_control_overrides) const noexcept;
+
+  // Returns an array of note control values from a given note control array.
+  std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
+      const NoteControlArray& note_control_array) const noexcept;
 
   // Sampling rate in hertz.
   const int sample_rate_ = 0;

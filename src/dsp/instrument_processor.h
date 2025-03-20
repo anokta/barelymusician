@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 
+#include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"
@@ -50,8 +51,9 @@ class InstrumentProcessor {
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  void SetNoteOn(float pitch, float intensity) noexcept;
+  /// @param note_controls Array of note controls.
+  void SetNoteOn(float pitch,
+                 const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept;
 
   /// Sets the reference frequency.
   ///

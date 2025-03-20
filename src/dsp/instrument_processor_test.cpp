@@ -21,6 +21,7 @@ constexpr std::array<Slice, kVoiceCount> kSlices = {
     Slice(2.0, kSampleRate, kSamples),
     Slice(3.0, kSampleRate, kSamples),
 };
+constexpr std::array<float, BarelyNoteControlType_kCount> kNoteControls = {1.0f, 0.0f};
 
 // Tests that playing a single voice produces the expected output.
 TEST(InstrumentProcessorTest, SingleVoice) {
@@ -36,7 +37,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 
-  processor.SetNoteOn(0.0f, 1.0f);
+  processor.SetNoteOn(0.0f, kNoteControls);
 
   output = 0.0f;
   processor.Process(&output, 1);
@@ -65,7 +66,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 
   float expected_output = 0.0f;
   for (int i = 0; i < kVoiceCount; ++i) {
-    processor.SetNoteOn(static_cast<float>(i), 1.0f);
+    processor.SetNoteOn(static_cast<float>(i), kNoteControls);
 
     output = 0.0f;
     processor.Process(&output, 1);
@@ -75,7 +76,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   }
 
   for (int i = 0; i < kSampleRate; ++i) {
-    processor.SetNoteOn(static_cast<float>(kVoiceCount), 1.0f);
+    processor.SetNoteOn(static_cast<float>(kVoiceCount), kNoteControls);
 
     output = 0.0f;
     processor.Process(&output, 1);
@@ -96,7 +97,7 @@ TEST(InstrumentProcessorTest, NoVoice) {
   processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 
-  processor.SetNoteOn(0.0f, 1.0f);
+  processor.SetNoteOn(0.0f, kNoteControls);
 
   output = 0.0f;
   processor.Process(&output, 1);

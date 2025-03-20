@@ -279,13 +279,14 @@ bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
 }
 
 bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
-                                const BarelyNoteControlDef* note_control_defs,
+                                const BarelyNoteControlOverride* note_control_overrides,
                                 int32_t note_control_def_count) {
   if (!instrument) return false;
 
-  instrument->SetNoteOn(pitch, {reinterpret_cast<const barely::NoteControlDef*>(note_control_defs),
-                                reinterpret_cast<const barely::NoteControlDef*>(note_control_defs) +
-                                    note_control_def_count});
+  instrument->SetNoteOn(
+      pitch, {reinterpret_cast<const barely::NoteControlOverride*>(note_control_overrides),
+              reinterpret_cast<const barely::NoteControlOverride*>(note_control_overrides) +
+                  note_control_def_count});
   return true;
 }
 

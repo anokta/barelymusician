@@ -203,7 +203,8 @@ void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
   }
 }
 
-void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
+void InstrumentProcessor::SetNoteOn(
+    float pitch, const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
   if (voice_count_ == 0) {
     // No voices available.
     return;
@@ -212,8 +213,7 @@ void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
   if (const auto* sample = sample_data_.Select(pitch, *voice_params_.rng); sample != nullptr) {
     voice.set_slice(sample);
   }
-  voice.Start(voice_params_, adsr_, intensity);
-  voice.set_pitch(pitch);
+  voice.Start(voice_params_, adsr_, pitch, note_controls);
 }
 
 void InstrumentProcessor::SetReferenceFrequency(float reference_frequency) noexcept {

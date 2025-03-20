@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_MESSAGE_H_
 #define BARELYMUSICIAN_DSP_MESSAGE_H_
 
+#include <array>
 #include <cstddef>
 #include <optional>
 #include <variant>
@@ -43,8 +44,8 @@ struct NoteOnMessage {
   /// Pitch.
   float pitch;
 
-  /// Intensity.
-  float intensity;
+  /// Array of note controls.
+  std::array<float, BarelyNoteControlType_kCount> controls;
 };
 
 /// Reference frequency message.

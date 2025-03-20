@@ -71,7 +71,7 @@ bool InstrumentImpl::Process(std::span<float> output_samples, int64_t process_sa
               processor_.SetNoteOff(note_off_message.pitch);
             },
             [this](NoteOnMessage& note_on_message) noexcept {
-              processor_.SetNoteOn(note_on_message.pitch, note_on_message.intensity);
+              processor_.SetNoteOn(note_on_message.pitch, note_on_message.controls);
             },
             [this](ReferenceFrequencyMessage& reference_frequency_message) noexcept {
               processor_.SetReferenceFrequency(reference_frequency_message.reference_frequency);
@@ -123,20 +123,13 @@ void InstrumentImpl::SetNoteOffCallback(NoteCallback callback) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void InstrumentImpl::SetNoteOn(float pitch,
-                               std::span<const NoteControlDef> note_control_defs) noexcept {
-  static constexpr NoteControlArray kNoteControls = {
-      Control(1.0f, 0.0f, 1.0f),  // kGain
-      Control(0.0f),              // kPitchShift
-  };
-  auto note_controls = kNoteControls;
-  for (auto& [type, value] : note_control_defs) {
-    note_controls[static_cast<int>(type)].SetValue(value);
-  }
-  const float intensity = note_controls[static_cast<int>(NoteControlType::kGain)].value;
-  if (const auto [it, success] = note_controls_.try_emplace(pitch, kNoteControls); success) {
+void InstrumentImpl::SetNoteOn(
+    float pitch, std::span<const NoteControlOverride> note_control_overrides) noexcept {
+  if (const auto [it, success] =
+          note_controls_.try_emplace(pitch, BuildNoteControlArray(note_control_overrides));
+      success) {
     note_on_callback_(pitch);
-    message_queue_.Add(update_sample_, NoteOnMessage{pitch, intensity});
+    message_queue_.Add(update_sample_, NoteOnMessage{pitch, BuildNoteControls(it->second)});
   }
 }
 
@@ -155,6 +148,28 @@ void InstrumentImpl::SetSampleData(SampleData sample_data) noexcept {
 void InstrumentImpl::Update(int64_t update_sample) noexcept {
   assert(update_sample >= update_sample_);
   update_sample_ = update_sample;
+}
+
+InstrumentImpl::NoteControlArray InstrumentImpl::BuildNoteControlArray(
+    std::span<const NoteControlOverride> note_control_overrides) const noexcept {
+  static constexpr NoteControlArray kNoteControlArray = {
+      Control(1.0f, 0.0f, 1.0f),  // kGain
+      Control(0.0f),              // kPitchShift
+  };
+  NoteControlArray note_control_array = kNoteControlArray;
+  for (auto& [type, value] : note_control_overrides) {
+    note_control_array[static_cast<int>(type)].SetValue(value);
+  }
+  return note_control_array;
+}
+
+std::array<float, BarelyNoteControlType_kCount> InstrumentImpl::BuildNoteControls(
+    const NoteControlArray& note_control_array) const noexcept {
+  std::array<float, BarelyNoteControlType_kCount> note_controls;
+  for (int i = 0; i < BarelyNoteControlType_kCount; ++i) {
+    note_controls[i] = note_control_array[i].value;
+  }
+  return note_controls;
 }
 
 }  // namespace barely

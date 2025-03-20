@@ -368,23 +368,23 @@ typedef enum BarelyTaskState {
   BarelyTaskState_kCount,
 } BarelyTaskState;
 
-/// Control definition.
-typedef struct BarelyControlDef {
+/// Control override.
+typedef struct BarelyControlOverride {
   /// Type.
   BarelyControlType type;
 
   /// Value.
   float value;
-} BarelyControlDef;
+} BarelyControlOverride;
 
-/// Note control definition.
-typedef struct BarelyNoteControlDef {
+/// Note control override.
+typedef struct BarelyNoteControlOverride {
   /// Type.
   BarelyNoteControlType type;
 
   /// Value.
   float value;
-} BarelyNoteControlDef;
+} BarelyNoteControlOverride;
 
 /// A musical quantization.
 typedef struct BarelyQuantization {
@@ -701,12 +701,12 @@ BARELY_API bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instr
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
-/// @param note_control_defs Array of note control definitions.
-/// @param note_control_def_count Number of note control definitions.
+/// @param note_control_overrides Array of note control overrides.
+/// @param note_control_override_count Number of note control overrides.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
-                                           const BarelyNoteControlDef* note_control_defs,
-                                           int32_t note_control_def_count);
+                                           const BarelyNoteControlOverride* note_control_overrides,
+                                           int32_t note_control_override_count);
 
 /// Sets the note on callback of an instrument.
 ///
@@ -1147,29 +1147,30 @@ enum class TaskState {
   kUpdate = BarelyTaskState_kUpdate,
 };
 
-/// Control definition.
-struct ControlDef : public BarelyControlDef {
-  /// Constructs a new `ControlDef`.
+/// Control override.
+struct ControlOverride : public BarelyControlOverride {
+  /// Constructs a new `ControlOverride`.
   ///
   /// @param type Control type.
   /// @param value Control value.
   template <typename ValueType>
-  ControlDef(ControlType type, ValueType value) noexcept
-      : BarelyControlDef(static_cast<BarelyControlType>(type), static_cast<float>(value)) {
+  ControlOverride(ControlType type, ValueType value) noexcept
+      : BarelyControlOverride(static_cast<BarelyControlType>(type), static_cast<float>(value)) {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
   }
 };
 
-/// Note control definition.
-struct NoteControlDef : public BarelyNoteControlDef {
-  /// Constructs a new `NoteControlDef`.
+/// Note control override.
+struct NoteControlOverride : public BarelyNoteControlOverride {
+  /// Constructs a new `NoteControlOverride`.
   ///
   /// @param type Note control type.
   /// @param value Note control value.
   template <typename ValueType>
-  NoteControlDef(NoteControlType type, ValueType value) noexcept
-      : BarelyNoteControlDef(static_cast<BarelyNoteControlType>(type), static_cast<float>(value)) {
+  NoteControlOverride(NoteControlType type, ValueType value) noexcept
+      : BarelyNoteControlOverride(static_cast<BarelyNoteControlType>(type),
+                                  static_cast<float>(value)) {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
   }
@@ -1436,12 +1437,14 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
-  /// @param note_control_defs Span of note control definitions.
-  void SetNoteOn(float pitch, std::span<const NoteControlDef> note_control_defs = {}) noexcept {
-    static_assert(sizeof(BarelyNoteControlDef) == sizeof(NoteControlDef));
+  /// @param note_control_overrides Span of note control overrides.
+  void SetNoteOn(float pitch,
+                 std::span<const NoteControlOverride> note_control_overrides = {}) noexcept {
+    static_assert(sizeof(BarelyNoteControlOverride) == sizeof(NoteControlOverride));
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(
-        *this, pitch, reinterpret_cast<const BarelyNoteControlDef*>(note_control_defs.data()),
-        static_cast<int32_t>(note_control_defs.size()));
+        *this, pitch,
+        reinterpret_cast<const BarelyNoteControlOverride*>(note_control_overrides.data()),
+        static_cast<int32_t>(note_control_overrides.size()));
     assert(success);
   }
 

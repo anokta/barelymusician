@@ -1161,7 +1161,7 @@ struct ControlOverride : public BarelyControlOverride {
   /// @param value Control value.
   template <typename ValueType>
   ControlOverride(ControlType type, ValueType value) noexcept
-      : BarelyControlOverride(static_cast<BarelyControlType>(type), static_cast<float>(value)) {
+      : BarelyControlOverride{static_cast<BarelyControlType>(type), static_cast<float>(value)} {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
   }
@@ -1175,8 +1175,8 @@ struct NoteControlOverride : public BarelyNoteControlOverride {
   /// @param value Note control value.
   template <typename ValueType>
   NoteControlOverride(NoteControlType type, ValueType value) noexcept
-      : BarelyNoteControlOverride(static_cast<BarelyNoteControlType>(type),
-                                  static_cast<float>(value)) {
+      : BarelyNoteControlOverride{static_cast<BarelyNoteControlType>(type),
+                                  static_cast<float>(value)} {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
   }

@@ -1,6 +1,8 @@
 #include "private/instrument_impl.h"
 
+#include <array>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <span>
 #include <utility>
@@ -9,19 +11,77 @@
 #include "barelymusician.h"
 #include "common/find_or_null.h"
 #include "common/rng.h"
+#include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message.h"
 #include "dsp/sample_data.h"
 
 namespace barely {
 
+namespace {
+
+// Returns a control array with overrides.
+ControlArray BuildControlArray(std::span<const ControlOverride> control_overrides) noexcept {
+  ControlArray control_array = {
+      Control(1.0f, 0.0f, 1.0f),                   // kGain
+      Control(0.0f),                               // kPitchShift
+      Control(false),                              // kRetrigger
+      Control(8, 1, 20),                           // kVoiceCount
+      Control(0.0f, 0.0f, 60.0f),                  // kAttack
+      Control(0.0f, 0.0f, 60.0f),                  // kDecay
+      Control(1.0f, 0.0f, 1.0f),                   // kSustain
+      Control(0.0f, 0.0f, 60.0f),                  // kRelease
+      Control(0.0f, 0.0f, 1.0f),                   // kOscMix
+      Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
+      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
+      Control(0.0f),                               // kOscPitchShift
+      Control(0.0f, 0.0f, 1.0f),                   // kOscShape
+      Control(0.0f, -0.5f, 0.5f),                  // kOscSkew
+      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
+      Control(0, 0, BarelyFilterType_kCount - 1),  // kFilterType
+      Control(0.0f, 0.0f),                         // kFilterFrequency
+      Control(std::sqrt(0.5f), 0.1f),              // kFilterQ
+      Control(16.0f, 1.0f, 16.0f),                 // kBitCrusherDepth
+      Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
+  };
+  for (const auto& [type, value] : control_overrides) {
+    control_array[static_cast<int>(type)].SetValue(value);
+  }
+  return control_array;
+}
+
+// Returns a note control array with overrides.
+NoteControlArray BuildNoteControlArray(
+    std::span<const NoteControlOverride> note_control_overrides) noexcept {
+  NoteControlArray note_control_array = {
+      Control(1.0f, 0.0f, 1.0f),  // kGain
+      Control(0.0f),              // kPitchShift
+  };
+  for (const auto& [type, value] : note_control_overrides) {
+    note_control_array[static_cast<int>(type)].SetValue(value);
+  }
+  return note_control_array;
+}
+
+// Returns an array of note control values from a given note control array.
+std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
+    const NoteControlArray& note_control_array) noexcept {
+  std::array<float, BarelyNoteControlType_kCount> note_controls;
+  for (int i = 0; i < BarelyNoteControlType_kCount; ++i) {
+    note_controls[i] = note_control_array[i].value;
+  }
+  return note_controls;
+}
+
+}  // namespace
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentImpl::InstrumentImpl(std::span<const ControlOverride> control_overrides, AudioRng& rng,
                                int sample_rate, float reference_frequency,
                                int64_t update_sample) noexcept
     : controls_(BuildControlArray(control_overrides)),
-      update_sample_(update_sample),
       sample_rate_(sample_rate),
+      update_sample_(update_sample),
       processor_(control_overrides, rng, sample_rate, reference_frequency) {
   assert(sample_rate > 0);
 }
@@ -150,57 +210,6 @@ void InstrumentImpl::SetSampleData(SampleData sample_data) noexcept {
 void InstrumentImpl::Update(int64_t update_sample) noexcept {
   assert(update_sample >= update_sample_);
   update_sample_ = update_sample;
-}
-
-ControlArray InstrumentImpl::BuildControlArray(
-    std::span<const ControlOverride> control_overrides) const noexcept {
-  ControlArray control_array = {
-      Control(1.0f, 0.0f, 1.0f),                   // kGain
-      Control(0.0f),                               // kPitchShift
-      Control(false),                              // kRetrigger
-      Control(8, 1, 20),                           // kVoiceCount
-      Control(0.0f, 0.0f, 60.0f),                  // kAttack
-      Control(0.0f, 0.0f, 60.0f),                  // kDecay
-      Control(1.0f, 0.0f, 1.0f),                   // kSustain
-      Control(0.0f, 0.0f, 60.0f),                  // kRelease
-      Control(0.0f, 0.0f, 1.0f),                   // kOscMix
-      Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
-      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
-      Control(0.0f),                               // kOscPitchShift
-      Control(0.0f, 0.0f, 1.0f),                   // kOscShape
-      Control(0.0f, -0.5f, 0.5f),                  // kOscSkew
-      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
-      Control(0, 0, BarelyFilterType_kCount - 1),  // kFilterType
-      Control(0.0f, 0.0f),                         // kFilterFrequency
-      Control(std::sqrt(0.5f), 0.1f),              // kFilterQ
-      Control(16.0f, 1.0f, 16.0f),                 // kBitCrusherDepth
-      Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
-  };
-  for (auto& [type, value] : control_overrides) {
-    control_array[static_cast<int>(type)].SetValue(value);
-  }
-  return control_array;
-}
-
-NoteControlArray InstrumentImpl::BuildNoteControlArray(
-    std::span<const NoteControlOverride> note_control_overrides) const noexcept {
-  NoteControlArray note_control_array = {
-      Control(1.0f, 0.0f, 1.0f),  // kGain
-      Control(0.0f),              // kPitchShift
-  };
-  for (auto& [type, value] : note_control_overrides) {
-    note_control_array[static_cast<int>(type)].SetValue(value);
-  }
-  return note_control_array;
-}
-
-std::array<float, BarelyNoteControlType_kCount> InstrumentImpl::BuildNoteControls(
-    const NoteControlArray& note_control_array) const noexcept {
-  std::array<float, BarelyNoteControlType_kCount> note_controls;
-  for (int i = 0; i < BarelyNoteControlType_kCount; ++i) {
-    note_controls[i] = note_control_array[i].value;
-  }
-  return note_controls;
 }
 
 }  // namespace barely

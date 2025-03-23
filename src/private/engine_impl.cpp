@@ -8,6 +8,7 @@
 #include <span>
 #include <utility>
 
+#include "barelymusician.h"
 #include "private/instrument_impl.h"
 #include "private/performer_impl.h"
 

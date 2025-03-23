@@ -2,7 +2,6 @@
 
 #include <array>
 #include <functional>
-#include <utility>
 #include <vector>
 
 #include "barelymusician.h"
@@ -16,7 +15,6 @@ namespace {
 
 using ::testing::ElementsAre;
 using ::testing::Optional;
-using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kSampleRate = 48000;

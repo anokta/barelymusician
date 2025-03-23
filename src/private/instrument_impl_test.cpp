@@ -3,18 +3,15 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <utility>
 #include <vector>
 
 #include "barelymusician.h"
+#include "common/rng.h"
 #include "dsp/sample_data.h"
-#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
-
-using ::testing::Pair;
 
 constexpr int kSampleRate = 4;
 constexpr float kReferenceFrequency = 1.0f;

@@ -129,17 +129,6 @@ class InstrumentImpl {
   void Update(int64_t update_sample) noexcept;
 
  private:
-  // Returns a control array with overrides.
-  ControlArray BuildControlArray(std::span<const ControlOverride> control_overrides) const noexcept;
-
-  // Returns a note control array with overrides.
-  NoteControlArray BuildNoteControlArray(
-      std::span<const NoteControlOverride> note_control_overrides) const noexcept;
-
-  // Returns an array of note control values from a given note control array.
-  std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
-      const NoteControlArray& note_control_array) const noexcept;
-
   // Array of controls.
   ControlArray controls_;
 

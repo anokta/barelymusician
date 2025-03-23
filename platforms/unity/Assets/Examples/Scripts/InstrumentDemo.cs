@@ -93,7 +93,7 @@ namespace Barely.Examples {
       }
     }
 
-    private void OnNoteOn(float pitch, float intensity) {
+    private void OnNoteOn(float pitch) {
       int i = (int)(pitch * 12.0f);
       int y = i / 4;
       int x = i - 4 * y;

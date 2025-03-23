@@ -78,8 +78,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(ControlType::kRelease, kRelease);
   instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnCallback(
-      [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
+  instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   Arpeggiator arpeggiator(engine);
   arpeggiator.SetInstrument(&instrument);

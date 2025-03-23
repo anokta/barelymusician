@@ -2,7 +2,6 @@
 
 #include <array>
 #include <functional>
-#include <utility>
 #include <vector>
 
 #include "barelymusician.h"
@@ -16,7 +15,6 @@ namespace {
 
 using ::testing::ElementsAre;
 using ::testing::Optional;
-using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kSampleRate = 48000;
@@ -45,24 +43,19 @@ TEST(EngineTest, BeatsSecondsConversion) {
 // Tests that a single instrument is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySingleInstrument) {
   constexpr float kPitch = 0.5;
-  constexpr float kIntensity = 0.75;
 
   EngineImpl engine(kSampleRate);
 
   // Create an instrument.
-  InstrumentImpl* instrument = engine.CreateInstrument();
+  InstrumentImpl* instrument = engine.CreateInstrument({});
 
   // Set the note callbacks.
-  std::pair<float, float> note_on_state = {0.0f, 0.0f};
+  float note_on_pitch = 0.0f;
   instrument->SetNoteOnCallback({
-      [](float pitch, float intensity, void* user_data) {
-        auto& note_on_state = *static_cast<std::pair<float, float>*>(user_data);
-        note_on_state.first = pitch;
-        note_on_state.second = intensity;
-      },
-      static_cast<void*>(&note_on_state),
+      [](float pitch, void* user_data) { *static_cast<float*>(user_data) = pitch; },
+      static_cast<void*>(&note_on_pitch),
   });
-  EXPECT_THAT(note_on_state, Pair(0.0f, 0.0f));
+  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
 
   float note_off_pitch = 0.0f;
   instrument->SetNoteOffCallback({
@@ -72,9 +65,9 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
 
   // Set a note on.
-  instrument->SetNoteOn(kPitch, kIntensity);
+  instrument->SetNoteOn(kPitch, {});
   EXPECT_TRUE(instrument->IsNoteOn(kPitch));
-  EXPECT_THAT(note_on_state, Pair(kPitch, kIntensity));
+  EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
 
   // Destroy the instrument.
   engine.DestroyInstrument(instrument);
@@ -91,7 +84,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     // Create instruments with note off callbacks.
     std::vector<InstrumentImpl*> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(engine.CreateInstrument());
+      instruments.push_back(engine.CreateInstrument({}));
       instruments[i]->SetNoteOffCallback({
           [](float pitch, void* user_data) {
             static_cast<std::vector<float>*>(user_data)->push_back(pitch);
@@ -102,8 +95,8 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
 
     // Start multiple notes, then immediately stop some of them.
     for (int i = 0; i < 3; ++i) {
-      instruments[i]->SetNoteOn(static_cast<float>(i + 1), 1.0f);
-      instruments[i]->SetNoteOn(static_cast<float>(-i - 1), 1.0f);
+      instruments[i]->SetNoteOn(static_cast<float>(i + 1), {});
+      instruments[i]->SetNoteOn(static_cast<float>(-i - 1), {});
       instruments[i]->SetNoteOff(static_cast<float>(i + 1));
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1, 2, 3));

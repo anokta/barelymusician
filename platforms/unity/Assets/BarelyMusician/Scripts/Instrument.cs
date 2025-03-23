@@ -14,12 +14,6 @@ namespace Barely {
     [InspectorName("High-pass")] HIGH_PASS,
   }
 
-  /// Note control type.
-  public enum NoteControlType {
-    /// Pitch shift.
-    [InspectorName("Pitch Shift")] PITCH_SHIFT = 0,
-  }
-
   /// Oscillator mode.
   public enum OscMode {
     /// Mix.
@@ -201,12 +195,11 @@ namespace Barely {
     /// Note on callback.
     ///
     /// @param pitch Note pitch.
-    /// @param intensity Note intensity.
-    public delegate void NoteOnCallback(float pitch, float intensity);
+    public delegate void NoteOnCallback(float pitch);
     public event NoteOnCallback OnNoteOn;
 
     [Serializable]
-    public class NoteOnEvent : UnityEngine.Events.UnityEvent<float, float> {}
+    public class NoteOnEvent : UnityEngine.Events.UnityEvent<float> {}
     public NoteOnEvent OnNoteOnEvent;
 
     /// Instrument create callback.
@@ -218,13 +211,22 @@ namespace Barely {
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
 
-    /// Returns a note control value.
+    /// Returns the gain of a note.
     ///
     /// @param pitch Note pitch.
-    /// @param type Note control type
-    /// @return Note control value.
-    public float GetNoteControl(float pitch, NoteControlType type) {
-      return Engine.Internal.Instrument_GetNoteControl(_handle, pitch, type);
+    /// @return Note gain in linear amplitude.
+    public float GetNoteGain(float pitch) {
+      return Engine.Internal.Instrument_GetNoteControl(_handle, pitch,
+                                                       Engine.Internal.NoteControlType.GAIN);
+    }
+
+    /// Returns the pitch shift of a note.
+    ///
+    /// @param pitch Note pitch.
+    /// @return Pitch shift.
+    public float GetNotePitchShift(float pitch) {
+      return Engine.Internal.Instrument_GetNoteControl(_handle, pitch,
+                                                       Engine.Internal.NoteControlType.PITCH_SHIFT);
     }
 
     /// Returns whether a note is on or not.
@@ -240,13 +242,13 @@ namespace Barely {
       Engine.Internal.Instrument_SetAllNotesOff(_handle);
     }
 
-    /// Sets a note control value.
+    /// Sets the gain of a note.
     ///
     /// @param pitch Note pitch.
-    /// @param type Note control type.
-    /// @param value Note control value.
-    public void SetNoteControl(float pitch, NoteControlType type, float value) {
-      Engine.Internal.Instrument_SetNoteControl(_handle, pitch, type, value);
+    /// @param gain Gain in linear amplitude.
+    public void SetNoteGain(float pitch, float gain) {
+      Engine.Internal.Instrument_SetNoteControl(_handle, pitch,
+                                                Engine.Internal.NoteControlType.GAIN, gain);
     }
 
     /// Sets a note off.
@@ -256,12 +258,22 @@ namespace Barely {
       Engine.Internal.Instrument_SetNoteOff(_handle, pitch);
     }
 
+    /// Sets the pitch shift of a note.
+    ///
+    /// @param pitch Note pitch.
+    /// @param pitchShift Note pitch shift.
+    public void SetNotePitchShift(float pitch, float pitchShift) {
+      Engine.Internal.Instrument_SetNoteControl(
+          _handle, pitch, Engine.Internal.NoteControlType.PITCH_SHIFT, pitchShift);
+    }
+
     /// Sets a note on.
     ///
     /// @param pitch Note pitch.
-    /// @param intensity Note intensity.
-    public void SetNoteOn(float pitch, float intensity = 1.0f) {
-      Engine.Internal.Instrument_SetNoteOn(_handle, pitch, intensity);
+    /// @param gain Note gain.
+    /// @param pitchShift Note pitch shift.
+    public void SetNoteOn(float pitch, float gain = 1.0f, float pitchShift = 0.0f) {
+      Engine.Internal.Instrument_SetNoteOn(_handle, pitch, gain, pitchShift);
     }
 
     /// Class that wraps the internal api.
@@ -278,9 +290,9 @@ namespace Barely {
       }
 
       /// Internal note on callback.
-      public static void OnNoteOn(Instrument instrument, float pitch, float intensity) {
-        instrument.OnNoteOn?.Invoke(pitch, intensity);
-        instrument.OnNoteOnEvent?.Invoke(pitch, intensity);
+      public static void OnNoteOn(Instrument instrument, float pitch) {
+        instrument.OnNoteOn?.Invoke(pitch);
+        instrument.OnNoteOnEvent?.Invoke(pitch);
       }
     }
 

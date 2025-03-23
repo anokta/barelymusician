@@ -106,6 +106,14 @@ namespace Barely {
         [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
       }
 
+      /// Note control type.
+      public enum NoteControlType {
+        /// Gain in linear amplitude.
+        [InspectorName("Gain")] GAIN = 0,
+        /// Pitch shift.
+        [InspectorName("Pitch Shift")] PITCH_SHIFT,
+      }
+
       /// Returns whether an arpeggiator note is on or not.
       ///
       /// @param arpeggiatorHandle Arpeggiator handle.
@@ -342,7 +350,30 @@ namespace Barely {
         if (Handle == IntPtr.Zero || instrumentHandle != IntPtr.Zero) {
           return;
         }
-        bool success = BarelyInstrument_Create(Handle, ref instrumentHandle);
+        _controlOverrides[(int)ControlType.GAIN].value = instrument.Gain;
+        _controlOverrides[(int)ControlType.PITCH_SHIFT].value = instrument.PitchShift;
+        _controlOverrides[(int)ControlType.RETRIGGER].value = instrument.Retrigger ? 1.0f : 0.0f;
+        _controlOverrides[(int)ControlType.VOICE_COUNT].value = (float)instrument.VoiceCount;
+        _controlOverrides[(int)ControlType.ATTACK].value = instrument.Attack;
+        _controlOverrides[(int)ControlType.DECAY].value = instrument.Decay;
+        _controlOverrides[(int)ControlType.SUSTAIN].value = instrument.Sustain;
+        _controlOverrides[(int)ControlType.RELEASE].value = instrument.Release;
+        _controlOverrides[(int)ControlType.OSC_MIX].value = instrument.OscMix;
+        _controlOverrides[(int)ControlType.OSC_MODE].value = (float)instrument.OscMode;
+        _controlOverrides[(int)ControlType.OSC_NOISE_MIX].value = instrument.OscNoiseMix;
+        _controlOverrides[(int)ControlType.OSC_PITCH_SHIFT].value = instrument.OscPitchShift;
+        _controlOverrides[(int)ControlType.OSC_SHAPE].value = instrument.OscShape;
+        _controlOverrides[(int)ControlType.OSC_SKEW].value = instrument.OscSkew;
+        _controlOverrides[(int)ControlType.SLICE_MODE].value = (float)instrument.SliceMode;
+        _controlOverrides[(int)ControlType.FILTER_TYPE].value = (float)instrument.FilterType;
+        _controlOverrides[(int)ControlType.FILTER_FREQUENCY].value = instrument.FilterFrequency;
+        _controlOverrides[(int)ControlType.FILTER_TYPE].value = (float)instrument.FilterType;
+        _controlOverrides[(int)ControlType.FILTER_FREQUENCY].value = instrument.FilterFrequency;
+        _controlOverrides[(int)ControlType.FILTER_Q].value = instrument.FilterQ;
+        _controlOverrides[(int)ControlType.BIT_CRUSHER_DEPTH].value = instrument.BitCrusherDepth;
+        _controlOverrides[(int)ControlType.BIT_CRUSHER_RATE].value = instrument.BitCrusherRate;
+        bool success = BarelyInstrument_Create(Handle, _controlOverrides, _controlOverrides.Length,
+                                               ref instrumentHandle);
         if (!success) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
@@ -492,12 +523,16 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      public static void Instrument_SetNoteOn(IntPtr instrumentHandle, float pitch,
-                                              float intensity) {
-        if (!BarelyInstrument_SetNoteOn(instrumentHandle, pitch, intensity) &&
+      /// @param gain Note gain.
+      /// @param pitchShift Note pitch shift.
+      public static void Instrument_SetNoteOn(IntPtr instrumentHandle, float pitch, float gain,
+                                              float pitchShift) {
+        _noteControlOverrides[(int)NoteControlType.GAIN].value = gain;
+        _noteControlOverrides[(int)NoteControlType.PITCH_SHIFT].value = pitchShift;
+        if (!BarelyInstrument_SetNoteOn(instrumentHandle, pitch, _noteControlOverrides,
+                                        _noteControlOverrides.Length) &&
             instrumentHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
-                         " intensity");
+          Debug.LogError("Failed to start instrument note " + pitch + " with " + gain + " gain");
         }
       }
 
@@ -892,12 +927,11 @@ namespace Barely {
       }
 
       // Instrument note on callback.
-      private delegate void Instrument_NoteOnCallback(float pitch, float intensity,
-                                                      IntPtr userData);
+      private delegate void Instrument_NoteOnCallback(float pitch, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOnCallback))]
-      private static void Instrument_OnNoteOn(float pitch, float intensity, IntPtr userData) {
+      private static void Instrument_OnNoteOn(float pitch, IntPtr userData) {
         if (_instruments.TryGetValue(userData, out var instrument)) {
-          Instrument.Internal.OnNoteOn(instrument, pitch, intensity);
+          Instrument.Internal.OnNoteOn(instrument, pitch);
         }
       }
 
@@ -941,6 +975,26 @@ namespace Barely {
           Debug.LogError("Failed to convert decibels " + decibels + " to amplitude");
         }
         return amplitude;
+      }
+
+      // Control override.
+      [StructLayout(LayoutKind.Sequential)]
+      private struct ControlOverride {
+        // Type.
+        public ControlType type;
+
+        // Value.
+        public float value;
+      }
+
+      // Control override.
+      [StructLayout(LayoutKind.Sequential)]
+      private struct NoteControlOverride {
+        // Type.
+        public NoteControlType type;
+
+        // Value.
+        public float value;
       }
 
       // Slice of sample data.
@@ -1003,6 +1057,12 @@ namespace Barely {
 
       // Map of instruments by their handles.
       private static Dictionary<IntPtr, Instrument> _instruments = null;
+
+      // Array of control overrides.
+      private static ControlOverride[] _controlOverrides = null;
+
+      // Array of note control overrides.
+      private static NoteControlOverride[] _noteControlOverrides = null;
 
       // Array of mono output samples.
       public static float[] _outputSamples = null;
@@ -1089,6 +1149,15 @@ namespace Barely {
           _outputSamples = new float[config.dspBufferSize];
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<IntPtr, Instrument>();
+          _controlOverrides = new ControlOverride[Enum.GetNames(typeof(ControlType)).Length];
+          for (int i = 0; i < _controlOverrides.Length; ++i) {
+            _controlOverrides[i].type = (ControlType)i;
+          }
+          _noteControlOverrides =
+              new NoteControlOverride[Enum.GetNames(typeof(NoteControlType)).Length];
+          for (int i = 0; i < _noteControlOverrides.Length; ++i) {
+            _noteControlOverrides[i].type = (NoteControlType)i;
+          }
           _performers = new Dictionary<IntPtr, Performer>();
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           _tasks = new Dictionary<IntPtr, Task>();
@@ -1187,7 +1256,10 @@ namespace Barely {
       private static extern bool BarelyEngine_Update(IntPtr engine, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Create")]
-      private static extern bool BarelyInstrument_Create(IntPtr engine, ref IntPtr outInstrument);
+      private static extern bool BarelyInstrument_Create(IntPtr engine,
+                                                         [In] ControlOverride[] controlOverrides,
+                                                         Int32 controlOverrideCount,
+                                                         ref IntPtr outInstrument);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
@@ -1230,8 +1302,9 @@ namespace Barely {
           IntPtr instrument, Instrument_NoteOffCallback callback, IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
-      private static extern bool BarelyInstrument_SetNoteOn(IntPtr instrument, float pitch,
-                                                            float intensity);
+      private static extern bool BarelyInstrument_SetNoteOn(
+          IntPtr instrument, float pitch, [In] NoteControlOverride[] noteControlOverrides,
+          Int32 noteControlOverrideCount);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOnCallback")]
       private static extern bool BarelyInstrument_SetNoteOnCallback(

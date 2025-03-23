@@ -2,6 +2,7 @@ target_sources(
   barelymusician PRIVATE
   biquad_filter.h
   bit_crusher.h
+  control.h
   envelope.h
   instrument_processor.cpp
   instrument_processor.h

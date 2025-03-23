@@ -3,7 +3,9 @@
 
 #include <array>
 #include <cmath>
+#include <span>
 
+#include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"
@@ -16,11 +18,13 @@ class InstrumentProcessor {
  public:
   /// Constructs a new `InstrumentProcessor`.
   ///
+  /// @param control_overrides Span of control overrides.
   /// @param rng Random number generator.
   /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentProcessor(AudioRng& rng, int sample_rate, float reference_frequency) noexcept;
+  InstrumentProcessor(std::span<const ControlOverride> control_overrides, AudioRng& rng,
+                      int sample_rate, float reference_frequency) noexcept;
 
   /// Processes the next output samples.
   ///
@@ -50,8 +54,9 @@ class InstrumentProcessor {
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  void SetNoteOn(float pitch, float intensity) noexcept;
+  /// @param note_controls Array of note controls.
+  void SetNoteOn(float pitch,
+                 const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept;
 
   /// Sets the reference frequency.
   ///

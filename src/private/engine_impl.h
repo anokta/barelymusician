@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <memory>
+#include <span>
 #include <unordered_set>
 #include <utility>
 
@@ -30,9 +31,10 @@ class EngineImpl {
 
   /// Creates a new instrument.
   ///
+  /// @param control_overrides Span of control overrides.
   /// @return Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentImpl* CreateInstrument() noexcept;
+  InstrumentImpl* CreateInstrument(std::span<const ControlOverride> control_overrides) noexcept;
 
   /// Creates a new performer.
   ///

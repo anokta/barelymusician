@@ -91,8 +91,7 @@ void ArpeggiatorImpl::SetNextNoteOff() noexcept {
 
 void ArpeggiatorImpl::SetNextNoteOn() noexcept {
   if (instrument_ != nullptr) {
-    static constexpr float kNoteIntensity = 1.0f;
-    instrument_->SetNoteOn(pitch_, kNoteIntensity);
+    instrument_->SetNoteOn(pitch_, {});
   }
 }
 

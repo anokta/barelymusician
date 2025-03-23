@@ -89,9 +89,7 @@ int main(int /*argc*/, char* argv[]) {
 
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
-  instrument.SetNoteOnCallback([](float pitch, float intensity) {
-    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-  });
+  instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
   instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.

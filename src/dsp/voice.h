@@ -80,9 +80,12 @@ class Voice {
   /// @param params Voice process parameters.
   /// @param adsr Adsr.
   /// @param intensity Note intensity.
-  void Start(const Params& params, const Envelope::Adsr& adsr, float intensity) noexcept {
-    if (intensity > 0.0f) {
-      gain_ = intensity;
+  void Start(const Params& params, const Envelope::Adsr& adsr, float pitch,
+             const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
+    const float gain = note_controls[BarelyNoteControlType_kGain];
+    const float pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
+    if (gain > 0.0f) {
+      gain_ = gain;
       params_ = params;
       params_.gain *= gain_;
       bit_crusher_.Reset();
@@ -90,6 +93,7 @@ class Voice {
       osc_phase_ = 0.0f;
       slice_offset_ = 0.0f;
       envelope_.Start(adsr);
+      set_pitch(pitch + pitch_shift);
     }
   }
 

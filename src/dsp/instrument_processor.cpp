@@ -1,8 +1,10 @@
 #include "dsp/instrument_processor.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
+#include <span>
 
 #include "barelymusician.h"
 #include "common/rng.h"
@@ -52,12 +54,16 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentProcessor::InstrumentProcessor(AudioRng& rng, int sample_rate,
+InstrumentProcessor::InstrumentProcessor(std::span<const ControlOverride> control_overrides,
+                                         AudioRng& rng, int sample_rate,
                                          float reference_frequency) noexcept
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       adsr_(sample_interval_),
       reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
+  for (const auto& [type, value] : control_overrides) {
+    SetControl(static_cast<ControlType>(type), value);
+  }
   voice_params_.osc_increment = reference_frequency * sample_interval_;
   voice_params_.slice_increment = sample_interval_;
   voice_params_.rng = &rng;
@@ -203,7 +209,8 @@ void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
   }
 }
 
-void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
+void InstrumentProcessor::SetNoteOn(
+    float pitch, const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
   if (voice_count_ == 0) {
     // No voices available.
     return;
@@ -212,8 +219,7 @@ void InstrumentProcessor::SetNoteOn(float pitch, float intensity) noexcept {
   if (const auto* sample = sample_data_.Select(pitch, *voice_params_.rng); sample != nullptr) {
     voice.set_slice(sample);
   }
-  voice.Start(voice_params_, adsr_, intensity);
-  voice.set_pitch(pitch);
+  voice.Start(voice_params_, adsr_, pitch, note_controls);
 }
 
 void InstrumentProcessor::SetReferenceFrequency(float reference_frequency) noexcept {

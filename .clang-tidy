@@ -13,6 +13,7 @@ Checks: >
   -modernize-avoid-c-arrays,
   -modernize-use-auto,
   -modernize-use-designated-initializers,
+  -modernize-use-integer-sign-comparison,
   -modernize-use-ranges,
   -modernize-use-trailing-return-type,
 

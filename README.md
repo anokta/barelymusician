@@ -44,7 +44,7 @@ instrument.SetControl(barely::ControlType::kOscMix, /*value=*/1.0f);
 // note values adjust the frequency logarithmically to ensure equally perceived pitch intervals
 // within each octave.
 constexpr float kC4Pitch = 0.0f;
-instrument.SetNoteOn(kC4Pitch, /*intensity=*/0.25f);
+instrument.SetNoteOn(kC4Pitch);
 
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.

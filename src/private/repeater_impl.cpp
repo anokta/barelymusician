@@ -102,8 +102,7 @@ void RepeaterImpl::OnBeat() noexcept {
   if (!pitches_[index_].first.has_value()) {
     return;
   }
-  static constexpr float kNoteIntensity = 1.0f;
-  instrument_->SetNoteOn(*pitches_[index_].first + pitch_offset_, kNoteIntensity);
+  instrument_->SetNoteOn(*pitches_[index_].first + pitch_offset_, {});
 }
 
 bool RepeaterImpl::Update() noexcept {

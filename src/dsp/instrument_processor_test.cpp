@@ -21,11 +21,12 @@ constexpr std::array<Slice, kVoiceCount> kSlices = {
     Slice(2.0, kSampleRate, kSamples),
     Slice(3.0, kSampleRate, kSamples),
 };
+constexpr std::array<float, BarelyNoteControlType_kCount> kNoteControls = {1.0f, 0.0f};
 
 // Tests that playing a single voice produces the expected output.
 TEST(InstrumentProcessorTest, SingleVoice) {
   AudioRng rng;
-  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
+  InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
@@ -36,7 +37,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 
-  processor.SetNoteOn(0.0f, 1.0f);
+  processor.SetNoteOn(0.0f, kNoteControls);
 
   output = 0.0f;
   processor.Process(&output, 1);
@@ -52,7 +53,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 // Tests that playing voices are capped at maximum allowed number of voices.
 TEST(InstrumentProcessorTest, MaxVoices) {
   AudioRng rng;
-  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
+  InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
@@ -65,7 +66,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 
   float expected_output = 0.0f;
   for (int i = 0; i < kVoiceCount; ++i) {
-    processor.SetNoteOn(static_cast<float>(i), 1.0f);
+    processor.SetNoteOn(static_cast<float>(i), kNoteControls);
 
     output = 0.0f;
     processor.Process(&output, 1);
@@ -75,7 +76,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   }
 
   for (int i = 0; i < kSampleRate; ++i) {
-    processor.SetNoteOn(static_cast<float>(kVoiceCount), 1.0f);
+    processor.SetNoteOn(static_cast<float>(kVoiceCount), kNoteControls);
 
     output = 0.0f;
     processor.Process(&output, 1);
@@ -86,7 +87,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 // Tests that the processor processor produces silence when there are no available voices set.
 TEST(InstrumentProcessorTest, NoVoice) {
   AudioRng rng;
-  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
+  InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, 0);
 
   SampleData sample_data(kSlices);
@@ -96,7 +97,7 @@ TEST(InstrumentProcessorTest, NoVoice) {
   processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 
-  processor.SetNoteOn(0.0f, 1.0f);
+  processor.SetNoteOn(0.0f, kNoteControls);
 
   output = 0.0f;
   processor.Process(&output, 1);

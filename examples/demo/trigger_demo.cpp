@@ -59,8 +59,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(ControlType::kOscShape, kOscShape);
   instrument.SetControl(ControlType::kAttack, kAttack);
   instrument.SetControl(ControlType::kRelease, kRelease);
-  instrument.SetNoteOnCallback(
-      [](float pitch, float /*intensity*/) { ConsoleLog() << "Note(" << pitch << ")"; });
+  instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   std::vector<std::pair<double, double>> triggers;
   std::vector<Task> tasks;

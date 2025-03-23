@@ -43,7 +43,7 @@
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
 ///   // pitch intervals within each octave.
 ///   const float c3_pitch = -1.0f;
-///   instrument.SetNoteOn(c3_pitch, /*intensity=*/0.25f);
+///   instrument.SetNoteOn(c3_pitch);
 ///
 ///   // Check if the note is on.
 ///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
@@ -116,7 +116,8 @@
 ///   @code{.cpp}
 ///   // Create.
 ///   BarelyInstrumentHandle instrument = nullptr;
-///   BarelyInstrument_Create(engine, &instrument);
+///   BarelyInstrument_Create(engine, /*control_overrides=*/nullptr, /*control_override_count=*/0,
+///                           &instrument);
 ///
 ///   // Set a note on.
 ///   //
@@ -124,7 +125,8 @@
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
 ///   // pitch intervals within each octave.
 ///   float c3_pitch = -1.0f;
-///   BarelyInstrument_SetNoteOn(instrument, c3_pitch, /*intensity=*/0.25f);
+///   BarelyInstrument_SetNoteOn(instrument, c3_pitch, /*note_control_overrides=*/nullptr,
+///                              /*note_control_override_count=*/0);
 ///
 ///   // Check if the note is on.
 ///   bool is_note_on = false;
@@ -605,9 +607,13 @@ BARELY_API bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp)
 /// Creates a new instrument.
 ///
 /// @param engine Engine handle.
+/// @param control_overrides Array of control overrides.
+/// @param control_override_count Number of control overrides.
 /// @param out_instrument Output instrument handle.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_Create(BarelyEngineHandle engine,
+                                        const BarelyControlOverride* control_overrides,
+                                        int32_t control_override_count,
                                         BarelyInstrumentHandle* out_instrument);
 
 /// Destroys an instrument.
@@ -1271,16 +1277,18 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// Note callback function.
   ///
   /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
   using NoteCallback = std::function<void(float pitch)>;
 
   /// Constructs a new `Instrument`.
   ///
   /// @param engine Raw engine handle.
-  explicit Instrument(BarelyEngineHandle engine) noexcept
+  /// @param control_overrides Span of control overrides.
+  Instrument(BarelyEngineHandle engine, std::span<const ControlOverride> control_overrides) noexcept
       : HandleWrapper([&]() {
           BarelyInstrumentHandle instrument = nullptr;
-          [[maybe_unused]] const bool success = BarelyInstrument_Create(engine, &instrument);
+          [[maybe_unused]] const bool success = BarelyInstrument_Create(
+              engine, reinterpret_cast<const BarelyControlOverride*>(control_overrides.data()),
+              static_cast<int32_t>(control_overrides.size()), &instrument);
           assert(success);
           return instrument;
         }()) {}
@@ -1841,8 +1849,11 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
 
   /// Creates a new instrument.
   ///
+  /// @param control_overrides Span of control overrides.
   /// @return Instrument.
-  Instrument CreateInstrument() noexcept { return Instrument(*this); }
+  Instrument CreateInstrument(std::span<const ControlOverride> control_overrides = {}) noexcept {
+    return Instrument(*this, control_overrides);
+  }
 
   /// Creates a performer.
   ///

@@ -2,16 +2,14 @@
 #define BARELYMUSICIAN_PRIVATE_INSTRUMENT_IMPL_H_
 
 #include <array>
-#include <cassert>
-#include <cmath>
 #include <cstdint>
-#include <limits>
 #include <span>
 #include <unordered_map>
 
 #include "barelymusician.h"
 #include "common/callback.h"
 #include "common/rng.h"
+#include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message_queue.h"
 #include "dsp/sample_data.h"
@@ -26,13 +24,14 @@ class InstrumentImpl {
 
   /// Constructs a new `InstrumentImpl`.
   ///
+  /// @param control_overrides Span of control overrides.
   /// @param rng Random number generator.
   /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   /// @param update_sample Update sample.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentImpl(AudioRng& rng, int sample_rate, float reference_frequency,
-                 int64_t update_sample) noexcept;
+  InstrumentImpl(std::span<const ControlOverride> control_overrides, AudioRng& rng, int sample_rate,
+                 float reference_frequency, int64_t update_sample) noexcept;
 
   /// Destroys `InstrumentImpl`.
   ~InstrumentImpl() noexcept;
@@ -130,45 +129,8 @@ class InstrumentImpl {
   void Update(int64_t update_sample) noexcept;
 
  private:
-  // Control.
-  struct Control {
-    /// Constructs a new `Control`.
-    ///
-    /// @param default_value Default value.
-    /// @param min_value Minimum value.
-    /// @param max_value Maximum value.
-    template <typename ValueType>
-    constexpr Control(ValueType default_value,
-                      ValueType min_value = std::numeric_limits<ValueType>::lowest(),
-                      ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
-        : value(static_cast<float>(default_value)),
-          min_value(static_cast<float>(min_value)),
-          max_value(static_cast<float>(max_value)) {
-      static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                    "ValueType is not supported");
-      assert(default_value >= min_value && default_value <= max_value);
-    }
-
-    bool SetValue(float new_value) noexcept {
-      new_value = std::clamp(new_value, min_value, max_value);
-      if (value != new_value) {
-        value = new_value;
-        return true;
-      }
-      return false;
-    }
-
-    // Value.
-    float value = 0.0f;
-
-    // Minimum value.
-    float min_value = std::numeric_limits<float>::lowest();
-
-    // Maximum value.
-    float max_value = std::numeric_limits<float>::max();
-  };
-  using ControlArray = std::array<Control, BarelyControlType_kCount>;
-  using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
+  // Returns a control array with overrides.
+  ControlArray BuildControlArray(std::span<const ControlOverride> control_overrides) const noexcept;
 
   // Returns a note control array with overrides.
   NoteControlArray BuildNoteControlArray(
@@ -178,32 +140,8 @@ class InstrumentImpl {
   std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
       const NoteControlArray& note_control_array) const noexcept;
 
-  // Sampling rate in hertz.
-  const int sample_rate_ = 0;
-
   // Array of controls.
-  ControlArray controls_ = {
-      Control(1.0f, 0.0f, 1.0f),                   // kGain
-      Control(0.0f),                               // kPitchShift
-      Control(false),                              // kRetrigger
-      Control(8, 1, 20),                           // kVoiceCount
-      Control(0.0f, 0.0f, 60.0f),                  // kAttack
-      Control(0.0f, 0.0f, 60.0f),                  // kDecay
-      Control(1.0f, 0.0f, 1.0f),                   // kSustain
-      Control(0.0f, 0.0f, 60.0f),                  // kRelease
-      Control(0.0f, 0.0f, 1.0f),                   // kOscMix
-      Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
-      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
-      Control(0.0f),                               // kOscPitchShift
-      Control(0.0f, 0.0f, 1.0f),                   // kOscShape
-      Control(0.0f, -0.5f, 0.5f),                  // kOscSkew
-      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
-      Control(0, 0, BarelyFilterType_kCount - 1),  // kFilterType
-      Control(0.0f, 0.0f),                         // kFilterFrequency
-      Control(std::sqrt(0.5f), 0.1f),              // kFilterQ
-      Control(16.0f, 1.0f, 16.0f),                 // kBitCrusherDepth
-      Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
-  };
+  ControlArray controls_;
 
   // Map of note control arrays by their pitches.
   std::unordered_map<float, NoteControlArray> note_controls_;
@@ -213,6 +151,9 @@ class InstrumentImpl {
 
   // Note on callback.
   NoteCallback note_on_callback_ = {};
+
+  // Sampling rate in hertz.
+  int sample_rate_ = 0;
 
   // Update sample.
   int64_t update_sample_ = 0;

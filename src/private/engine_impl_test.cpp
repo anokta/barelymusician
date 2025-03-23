@@ -49,7 +49,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EngineImpl engine(kSampleRate);
 
   // Create an instrument.
-  InstrumentImpl* instrument = engine.CreateInstrument();
+  InstrumentImpl* instrument = engine.CreateInstrument({});
 
   // Set the note callbacks.
   float note_on_pitch = 0.0f;
@@ -86,7 +86,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     // Create instruments with note off callbacks.
     std::vector<InstrumentImpl*> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(engine.CreateInstrument());
+      instruments.push_back(engine.CreateInstrument({}));
       instruments[i]->SetNoteOffCallback({
           [](float pitch, void* user_data) {
             static_cast<std::vector<float>*>(user_data)->push_back(pitch);

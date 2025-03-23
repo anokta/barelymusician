@@ -7,6 +7,7 @@
 #include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
+#include "dsp/control.h"
 #include "dsp/sample_data.h"
 #include "dsp/voice.h"
 
@@ -52,12 +53,16 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentProcessor::InstrumentProcessor(AudioRng& rng, int sample_rate,
+InstrumentProcessor::InstrumentProcessor(std::span<const ControlOverride> control_overrides,
+                                         AudioRng& rng, int sample_rate,
                                          float reference_frequency) noexcept
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       adsr_(sample_interval_),
       reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
+  for (const auto& [type, value] : control_overrides) {
+    SetControl(static_cast<ControlType>(type), value);
+  }
   voice_params_.osc_increment = reference_frequency * sample_interval_;
   voice_params_.slice_increment = sample_interval_;
   voice_params_.rng = &rng;

@@ -24,12 +24,12 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
   ASSERT_TRUE(BarelyEngine_Create(1, &engine));
 
   // Failures.
-  EXPECT_FALSE(BarelyInstrument_Create(engine, nullptr));
+  EXPECT_FALSE(BarelyInstrument_Create(engine, nullptr, 0, nullptr));
   EXPECT_FALSE(BarelyInstrument_Destroy(nullptr));
 
   // Success.
   BarelyInstrumentHandle instrument = nullptr;
-  EXPECT_TRUE(BarelyInstrument_Create(engine, &instrument));
+  EXPECT_TRUE(BarelyInstrument_Create(engine, nullptr, 0, &instrument));
   EXPECT_NE(instrument, nullptr);
 
   EXPECT_TRUE(BarelyInstrument_Destroy(instrument));

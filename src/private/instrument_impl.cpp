@@ -16,11 +16,13 @@
 namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentImpl::InstrumentImpl(AudioRng& rng, int sample_rate, float reference_frequency,
+InstrumentImpl::InstrumentImpl(std::span<const ControlOverride> control_overrides, AudioRng& rng,
+                               int sample_rate, float reference_frequency,
                                int64_t update_sample) noexcept
-    : sample_rate_(sample_rate),
+    : controls_(BuildControlArray(control_overrides)),
       update_sample_(update_sample),
-      processor_(rng, sample_rate, reference_frequency) {
+      sample_rate_(sample_rate),
+      processor_(control_overrides, rng, sample_rate, reference_frequency) {
   assert(sample_rate > 0);
 }
 
@@ -150,13 +152,42 @@ void InstrumentImpl::Update(int64_t update_sample) noexcept {
   update_sample_ = update_sample;
 }
 
-InstrumentImpl::NoteControlArray InstrumentImpl::BuildNoteControlArray(
+ControlArray InstrumentImpl::BuildControlArray(
+    std::span<const ControlOverride> control_overrides) const noexcept {
+  ControlArray control_array = {
+      Control(1.0f, 0.0f, 1.0f),                   // kGain
+      Control(0.0f),                               // kPitchShift
+      Control(false),                              // kRetrigger
+      Control(8, 1, 20),                           // kVoiceCount
+      Control(0.0f, 0.0f, 60.0f),                  // kAttack
+      Control(0.0f, 0.0f, 60.0f),                  // kDecay
+      Control(1.0f, 0.0f, 1.0f),                   // kSustain
+      Control(0.0f, 0.0f, 60.0f),                  // kRelease
+      Control(0.0f, 0.0f, 1.0f),                   // kOscMix
+      Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
+      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
+      Control(0.0f),                               // kOscPitchShift
+      Control(0.0f, 0.0f, 1.0f),                   // kOscShape
+      Control(0.0f, -0.5f, 0.5f),                  // kOscSkew
+      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
+      Control(0, 0, BarelyFilterType_kCount - 1),  // kFilterType
+      Control(0.0f, 0.0f),                         // kFilterFrequency
+      Control(std::sqrt(0.5f), 0.1f),              // kFilterQ
+      Control(16.0f, 1.0f, 16.0f),                 // kBitCrusherDepth
+      Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
+  };
+  for (auto& [type, value] : control_overrides) {
+    control_array[static_cast<int>(type)].SetValue(value);
+  }
+  return control_array;
+}
+
+NoteControlArray InstrumentImpl::BuildNoteControlArray(
     std::span<const NoteControlOverride> note_control_overrides) const noexcept {
-  static constexpr NoteControlArray kNoteControlArray = {
+  NoteControlArray note_control_array = {
       Control(1.0f, 0.0f, 1.0f),  // kGain
       Control(0.0f),              // kPitchShift
   };
-  NoteControlArray note_control_array = kNoteControlArray;
   for (auto& [type, value] : note_control_overrides) {
     note_control_array[static_cast<int>(type)].SetValue(value);
   }

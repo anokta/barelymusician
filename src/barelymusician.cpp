@@ -179,11 +179,17 @@ bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp) {
   return true;
 }
 
-bool BarelyInstrument_Create(BarelyEngineHandle engine, BarelyInstrumentHandle* out_instrument) {
+bool BarelyInstrument_Create(BarelyEngineHandle engine,
+                             const BarelyControlOverride* control_overrides,
+                             int32_t control_override_count,
+                             BarelyInstrumentHandle* out_instrument) {
   if (!engine) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = static_cast<BarelyInstrument*>(engine->CreateInstrument());
+  *out_instrument = static_cast<BarelyInstrument*>(engine->CreateInstrument(
+      {reinterpret_cast<const barely::ControlOverride*>(control_overrides),
+       reinterpret_cast<const barely::ControlOverride*>(control_overrides) +
+           control_override_count}));
   // TODO(#126): Temp hack to allow destroying by handle.
   (*out_instrument)->engine = engine;
   return true;
@@ -280,13 +286,13 @@ bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
 
 bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
                                 const BarelyNoteControlOverride* note_control_overrides,
-                                int32_t note_control_def_count) {
+                                int32_t note_control_override_count) {
   if (!instrument) return false;
 
   instrument->SetNoteOn(
       pitch, {reinterpret_cast<const barely::NoteControlOverride*>(note_control_overrides),
               reinterpret_cast<const barely::NoteControlOverride*>(note_control_overrides) +
-                  note_control_def_count});
+                  note_control_override_count});
   return true;
 }
 

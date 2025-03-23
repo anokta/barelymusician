@@ -26,7 +26,7 @@ constexpr std::array<float, BarelyNoteControlType_kCount> kNoteControls = {1.0f,
 // Tests that playing a single voice produces the expected output.
 TEST(InstrumentProcessorTest, SingleVoice) {
   AudioRng rng;
-  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
+  InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
@@ -53,7 +53,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 // Tests that playing voices are capped at maximum allowed number of voices.
 TEST(InstrumentProcessorTest, MaxVoices) {
   AudioRng rng;
-  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
+  InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
@@ -87,7 +87,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 // Tests that the processor processor produces silence when there are no available voices set.
 TEST(InstrumentProcessorTest, NoVoice) {
   AudioRng rng;
-  InstrumentProcessor processor(rng, kSampleRate, kReferenceFrequency);
+  InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
   processor.SetControl(ControlType::kVoiceCount, 0);
 
   SampleData sample_data(kSlices);

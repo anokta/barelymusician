@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "private/instrument_impl.h"
@@ -32,9 +33,11 @@ double EngineImpl::BeatsToSeconds(double beats) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentImpl* EngineImpl::CreateInstrument() noexcept {
-  auto instrument = std::make_unique<InstrumentImpl>(audio_rng_, sample_rate_, reference_frequency_,
-                                                     SecondsToSamples(timestamp_));
+InstrumentImpl* EngineImpl::CreateInstrument(
+    std::span<const ControlOverride> control_overrides) noexcept {
+  auto instrument =
+      std::make_unique<InstrumentImpl>(control_overrides, audio_rng_, sample_rate_,
+                                       reference_frequency_, SecondsToSamples(timestamp_));
   auto* instrument_ptr = instrument.get();
   [[maybe_unused]] const bool success =
       instruments_.emplace(instrument_ptr, std::move(instrument)).second;

@@ -80,12 +80,13 @@ int main(int /*argc*/, char* argv[]) {
 
   Engine engine(kSampleRate);
 
-  auto instrument = engine.CreateInstrument();
-  instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kSliceMode, SliceMode::kLoop);
-  instrument.SetControl(ControlType::kAttack, kAttack);
-  instrument.SetControl(ControlType::kRelease, kRelease);
-  instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
+  auto instrument = engine.CreateInstrument({{
+      {ControlType::kGain, kGain},
+      {ControlType::kSliceMode, SliceMode::kLoop},
+      {ControlType::kAttack, kAttack},
+      {ControlType::kRelease, kRelease},
+      {ControlType::kVoiceCount, kVoiceCount},
+  }});
 
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 

@@ -53,12 +53,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
-  auto instrument = engine.CreateInstrument();
-  instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscMix, 1.0f);
-  instrument.SetControl(ControlType::kOscShape, kOscShape);
-  instrument.SetControl(ControlType::kAttack, kAttack);
-  instrument.SetControl(ControlType::kRelease, kRelease);
+  auto instrument = engine.CreateInstrument({{
+      {ControlType::kGain, kGain},
+      {ControlType::kOscMix, 1.0f},
+      {ControlType::kOscShape, kOscShape},
+      {ControlType::kAttack, kAttack},
+      {ControlType::kRelease, kRelease},
+  }});
   instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   std::vector<std::pair<double, double>> triggers;

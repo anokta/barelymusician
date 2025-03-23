@@ -57,14 +57,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Engine engine(kSampleRate);
 
-  auto instrument = engine.CreateInstrument();
-  instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscMix, 1.0f);
-  instrument.SetControl(ControlType::kOscShape, kOscShape);
-  instrument.SetControl(ControlType::kAttack, kAttack);
-  instrument.SetControl(ControlType::kRelease, kRelease);
-  instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
-
+  auto instrument = engine.CreateInstrument({{
+      {ControlType::kGain, kGain},
+      {ControlType::kOscMix, 1.0f},
+      {ControlType::kOscShape, kOscShape},
+      {ControlType::kAttack, kAttack},
+      {ControlType::kRelease, kRelease},
+      {ControlType::kVoiceCount, kVoiceCount},
+  }});
   instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
   instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 

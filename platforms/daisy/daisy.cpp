@@ -59,13 +59,14 @@ int main(void) {
   // Initialize the instrument.
   Engine engine(kSampleRate);
 
-  Instrument instrument = engine.CreateInstrument();
-  instrument.SetControl(ControlType::kGain, kGain);
-  instrument.SetControl(ControlType::kOscMix, 1.0f);
-  instrument.SetControl(ControlType::kOscShape, osc_shape);
-  instrument.SetControl(ControlType::kAttack, kAttack);
-  instrument.SetControl(ControlType::kRelease, kRelease);
-  instrument.SetControl(ControlType::kVoiceCount, kVoiceCount);
+  Instrument instrument = engine.CreateInstrument({{
+      {ControlType::kGain, kGain},
+      {ControlType::kOscMix, 1.0f},
+      {ControlType::kOscShape, osc_shape},
+      {ControlType::kAttack, kAttack},
+      {ControlType::kRelease, kRelease},
+      {ControlType::kVoiceCount, kVoiceCount},
+  }});
   instrument_ptr = &instrument;
 
   // Start processing.

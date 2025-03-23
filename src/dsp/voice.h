@@ -79,7 +79,7 @@ class Voice {
   ///
   /// @param params Voice process parameters.
   /// @param adsr Adsr.
-  /// @param intensity Note intensity.
+  /// @param note_controls Array of note controls.
   void Start(const Params& params, const Envelope::Adsr& adsr, float pitch,
              const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
     const float gain = note_controls[BarelyNoteControlType_kGain];

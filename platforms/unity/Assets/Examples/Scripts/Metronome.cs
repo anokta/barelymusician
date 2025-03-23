@@ -16,9 +16,9 @@ namespace Barely.Examples {
     [Range(-1.0f, 1.0f)]
     public float beatPitch = 0.0f;
 
-    /// Note intensity.
+    /// Note gain.
     [Range(0.0f, 1.0f)]
-    public float intensity = 1.0f;
+    public float gain = 1.0f;
 
     /// True if logging to console, false otherwise.
     public bool isLoggingToConsole = false;
@@ -105,7 +105,7 @@ namespace Barely.Examples {
         int beat = _beat % beatCount;
         float pitch = (beat == 0) ? barPitch : beatPitch;
         if (isTicking) {
-          instrument.SetNoteOn(pitch, intensity);
+          instrument.SetNoteOn(pitch, gain);
           instrument.SetNoteOff(pitch);
         }
         if (isLoggingToConsole) {

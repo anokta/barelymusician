@@ -16,9 +16,9 @@ namespace Barely.Examples {
     [Range(-3, 3)]
     public int octaveOffset = 0;
 
-    // Note intensity.
+    // Note gain.
     [Range(0.0f, 1.0f)]
-    public float noteIntensity = 1.0f;
+    public float noteGain = 1.0f;
 
     [Range(1, 4)]
     public int repeaterNoteLength = 1;
@@ -65,11 +65,11 @@ namespace Barely.Examples {
         }
         octaveOffset = Mathf.Min(octaveOffset + 1, 3);
       }
-      // Adjust note intensity.
+      // Adjust note gain.
       if (Input.GetKeyDown(KeyCode.C)) {
-        noteIntensity = Mathf.Max(noteIntensity - 0.2f, 0.0f);
+        noteGain = Mathf.Max(noteGain - 0.2f, 0.0f);
       } else if (Input.GetKeyDown(KeyCode.V)) {
-        noteIntensity = Mathf.Min(noteIntensity + 0.2f, 1.0f);
+        noteGain = Mathf.Min(noteGain + 0.2f, 1.0f);
       }
       // Play notes.
       for (int i = 0; i < _octaveKeys.Length; ++i) {
@@ -80,7 +80,7 @@ namespace Barely.Examples {
             repeater.Stop();
             repeater.Play(octaveOffset + i / 12.0f);
           } else if (instrument != null) {
-            instrument.SetNoteOn(KeyIndexToPitch(i), noteIntensity);
+            instrument.SetNoteOn(KeyIndexToPitch(i), noteGain);
             if (repeater != null) {
               repeater.Push(KeyIndexToPitch(i), repeaterNoteLength);
             }

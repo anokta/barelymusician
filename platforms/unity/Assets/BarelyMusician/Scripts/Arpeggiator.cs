@@ -59,7 +59,6 @@ namespace Barely {
     /// Sets a note on.
     ///
     /// @param pitch Note pitch.
-    /// @param intensity Note intensity.
     public void SetNoteOn(float pitch) {
       Engine.Internal.Arpeggiator_SetNoteOn(_handle, pitch);
     }

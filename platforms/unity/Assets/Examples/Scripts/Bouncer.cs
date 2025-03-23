@@ -23,8 +23,8 @@ namespace Barely.Examples {
 
     private void OnCollisionEnter(Collision collision) {
       _lastPitch = scale.GetPitch(_lastIndex);
-      float intensity = Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
-      instrument.SetNoteOn(_lastPitch, intensity);
+      float gain = Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
+      instrument.SetNoteOn(_lastPitch, gain);
     }
 
     private void OnCollisionExit(Collision collision) {

@@ -74,7 +74,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  float intensity = 1.0f;
+  float gain = 1.0f;
   int octave_shift = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -98,20 +98,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     if (upper_key == 'C' || upper_key == 'V') {
-      // Change intensity.
+      // Change gain.
       if (upper_key == 'C') {
-        intensity -= 0.25f;
+        gain -= 0.25f;
       } else {
-        intensity += 0.25f;
+        gain += 0.25f;
       }
-      intensity = std::clamp(intensity, 0.0f, 1.0f);
-      ConsoleLog() << "Note intensity set to " << intensity;
+      gain = std::clamp(gain, 0.0f, 1.0f);
+      ConsoleLog() << "Note gain set to " << gain;
       return;
     }
 
     // Play note.
     if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
-      instrument.SetNoteOn(*pitch_or, intensity);
+      instrument.SetNoteOn(*pitch_or, gain);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -133,7 +133,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   ConsoleLog() << "  * Use ASDFFGHJK keys to play the white notes in an octave";
   ConsoleLog() << "  * Use WETYU keys to play the black notes in an octave";
   ConsoleLog() << "  * Use ZX keys to set the octave up and down";
-  ConsoleLog() << "  * Use CV keys to to set the note intensity up and down";
+  ConsoleLog() << "  * Use CV keys to to set the note gain up and down";
 
   while (!quit) {
     input_manager.Update();

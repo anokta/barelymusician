@@ -106,37 +106,36 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
 }
 
 // Schedules performer to play an instrument note.
-void ScheduleNote(double position, double duration, float pitch, float intensity,
-                  Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
-  tasks.emplace_back(
-      performer.CreateTask(performer.GetPosition() + position, duration,
-                           [pitch, intensity, &instrument](TaskState state) noexcept {
-                             if (state == TaskState::kBegin) {
-                               instrument.SetNoteOn(pitch, intensity);
-                             } else if (state == TaskState::kEnd) {
-                               instrument.SetNoteOff(pitch);
-                             }
-                           }));
+void ScheduleNote(double position, double duration, float pitch, float gain, Instrument& instrument,
+                  Performer& performer, std::vector<Task>& tasks) {
+  tasks.emplace_back(performer.CreateTask(performer.GetPosition() + position, duration,
+                                          [pitch, gain, &instrument](TaskState state) noexcept {
+                                            if (state == TaskState::kBegin) {
+                                              instrument.SetNoteOn(pitch, gain);
+                                            } else if (state == TaskState::kEnd) {
+                                              instrument.SetNoteOff(pitch);
+                                            }
+                                          }));
 }
 
-void ComposeChord(float intensity, int harmonic, const Scale& scale, Instrument& instrument,
+void ComposeChord(float gain, int harmonic, const Scale& scale, Instrument& instrument,
                   Performer& performer, std::vector<Task>& tasks) {
   const auto add_chord_note = [&](int degree) {
-    ScheduleNote(0.0, 1.0, scale.GetPitch(degree), intensity, instrument, performer, tasks);
+    ScheduleNote(0.0, 1.0, scale.GetPitch(degree), gain, instrument, performer, tasks);
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
   add_chord_note(harmonic + 4);
 }
 
-void ComposeLine(int octave_offset, float intensity, int bar, int beat, int beat_count,
-                 int harmonic, const Scale& scale, Instrument& instrument, Performer& performer,
+void ComposeLine(int octave_offset, float gain, int bar, int beat, int beat_count, int harmonic,
+                 const Scale& scale, Instrument& instrument, Performer& performer,
                  std::vector<Task>& tasks) {
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position, int degree) {
     ScheduleNote(begin_position, end_position - begin_position,
-                 scale.GetPitch(octave_offset * scale.GetPitchCount() + degree), intensity,
-                 instrument, performer, tasks);
+                 scale.GetPitch(octave_offset * scale.GetPitchCount() + degree), gain, instrument,
+                 performer, tasks);
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.33, harmonic);
@@ -159,10 +158,9 @@ void ComposeLine(int octave_offset, float intensity, int bar, int beat, int beat
 void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, Instrument& instrument,
                   Performer& performer, std::vector<Task>& tasks) {
   const auto get_beat = [](int step) { return static_cast<double>(step) / kSixteenthNotesPerBeat; };
-  const auto add_note = [&](double begin_position, double end_position, float pitch,
-                            float intensity) {
-    ScheduleNote(begin_position, end_position - begin_position, pitch, intensity, instrument,
-                 performer, tasks);
+  const auto add_note = [&](double begin_position, double end_position, float pitch, float gain) {
+    ScheduleNote(begin_position, end_position - begin_position, pitch, gain, instrument, performer,
+                 tasks);
   };
 
   // Kick.

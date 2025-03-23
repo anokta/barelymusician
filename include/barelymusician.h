@@ -1464,6 +1464,18 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     return SetNoteOn(pitch, {{{NoteControlType::kGain, gain}}});
   }
 
+  /// Sets a note on.
+  ///
+  /// @param pitch Note pitch.
+  /// @param gain Note gain.
+  /// @param pitch_shift Note pitch shift.
+  void SetNoteOn(float pitch, float gain, float pitch_shift) noexcept {
+    return SetNoteOn(pitch, {{
+                                {NoteControlType::kGain, gain},
+                                {NoteControlType::kPitchShift, pitch_shift},
+                            }});
+  }
+
   /// Sets the note on callback.
   ///
   /// @param callback Note on callback.

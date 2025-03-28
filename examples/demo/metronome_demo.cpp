@@ -62,11 +62,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   }});
 
   // Create the metronome with a beat callback.
+  int beat = 0;
   auto metronome = engine.CreatePerformer();
-  metronome.SetBeatCallback([&]() {
-    const int beat = static_cast<int>(metronome.GetPosition());
+  metronome.SetLooping(true);
+  metronome.SetTrigger(0.0f, [&]() {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
+    ++beat;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const float pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
     instrument.SetNoteOn(pitch);

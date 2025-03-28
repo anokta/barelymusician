@@ -935,12 +935,12 @@ namespace Barely {
         }
       }
 
-      // Performer beat callback.
-      private delegate void Performer_BeatCallback(IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(Performer_BeatCallback))]
-      private static void Performer_OnBeat(IntPtr userData) {
+      // Performer trigger callback.
+      private delegate void Performer_TriggerCallback(IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(Performer_TriggerCallback))]
+      private static void Performer_OnTrigger(IntPtr userData) {
         if (_performers.TryGetValue(userData, out var performer)) {
-          Performer.Internal.OnBeat(performer);
+          Performer.Internal.OnTrigger(performer);
         }
       }
 
@@ -1339,11 +1339,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
       private static extern bool BarelyPerformer_IsPlaying(IntPtr performer, ref bool outIsPlaying);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetBeatCallback")]
-      private static extern bool BarelyPerformer_SetBeatCallback(IntPtr performer,
-                                                                 Performer_BeatCallback callback,
-                                                                 IntPtr userData);
-
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
       private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr performer,
                                                                       double loopBeginPosition);
@@ -1356,6 +1351,11 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetPosition")]
       private static extern bool BarelyPerformer_SetPosition(IntPtr performer, double position);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetTrigger")]
+      private static extern bool BarelyPerformer_SetTrigger(IntPtr performer, double position,
+                                                            Performer_TriggerCallback callback,
+                                                            IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Start")]
       private static extern bool BarelyPerformer_Start(IntPtr performer);

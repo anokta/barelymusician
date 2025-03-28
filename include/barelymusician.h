@@ -433,10 +433,10 @@ typedef struct BarelySlice {
 /// @param user_data Pointer to user data.
 typedef void (*BarelyInstrument_NoteCallback)(float pitch, void* user_data);
 
-/// Performer beat callback.
+/// Performer trigger callback.
 ///
 /// @param user_data Pointer to user data.
-typedef void (*BarelyPerformer_BeatCallback)(void* user_data);
+typedef void (*BarelyPerformer_TriggerCallback)(void* user_data);
 
 /// Task process callback.
 ///
@@ -784,16 +784,6 @@ BARELY_API bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool*
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing);
 
-/// Sets the beat callback of a performer.
-///
-/// @param performer Performer handle.
-/// @param callback Beat callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
-                                                BarelyPerformer_BeatCallback callback,
-                                                void* user_data);
-
 /// Sets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
@@ -822,6 +812,17 @@ BARELY_API bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position);
+
+/// Sets a performer trigger.
+///
+/// @param performer Performer handle.
+/// @param position Trigger position in beats.
+/// @param callback Trigger callback.
+/// @param user_data Pointer to user data.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyPerformer_SetTrigger(BarelyPerformerHandle performer, double position,
+                                           BarelyPerformer_TriggerCallback callback,
+                                           void* user_data);
 
 /// Starts a performer.
 ///
@@ -1028,6 +1029,7 @@ BARELY_API bool Barely_DecibelsToAmplitude(float decibels, float* out_amplitude)
 #include <random>
 #include <span>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 
 namespace barely {
@@ -1247,21 +1249,21 @@ class HandleWrapper {
 
  protected:
   // Helper functions to set a callback.
-  template <typename SetCallbackFn, typename... CallbackArgs>
-  void SetCallback(SetCallbackFn set_callback_fn, std::function<void(CallbackArgs...)>& callback) {
-    SetCallback(set_callback_fn, callback, [](CallbackArgs... args, void* user_data) noexcept {
+  template <typename SetFn, typename... CallbackArgs>
+  void SetCallback(SetFn set_fn, std::function<void(CallbackArgs...)>& callback) {
+    SetCallback(set_fn, callback, [](CallbackArgs... args, void* user_data) noexcept {
       assert(user_data != nullptr && "Invalid callback user data");
       (*static_cast<std::function<void(CallbackArgs...)>*>(user_data))(args...);
     });
   }
-  template <typename ProcessCallbackFn, typename SetCallbackFn, typename... CallbackArgs>
-  void SetCallback(SetCallbackFn set_callback_fn, std::function<void(CallbackArgs...)>& callback,
-                   ProcessCallbackFn process_callback_fn) {
+  template <typename CallbackFn, typename SetFn, typename... CallbackArgs>
+  void SetCallback(SetFn set_fn, std::function<void(CallbackArgs...)>& callback,
+                   CallbackFn callback_fn) noexcept {
     [[maybe_unused]] bool success = false;
     if (callback) {
-      success = set_callback_fn(handle_, process_callback_fn, &callback);
+      success = set_fn(handle_, callback_fn, &callback);
     } else {
-      success = set_callback_fn(handle_, nullptr, nullptr);
+      success = set_fn(handle_, nullptr, nullptr);
     }
     assert(success && "HandleWrapper::SetCallback failed");
   }
@@ -1623,6 +1625,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   ///
   /// @param callback Process callback.
   void SetProcessCallback(ProcessCallback callback) noexcept {
+    BarelyTask_SetProcessCallback(*this, nullptr, nullptr);
     process_callback_ = std::move(callback);
     SetProcessCallback();
   }
@@ -1632,8 +1635,10 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   void SetProcessCallback() noexcept {
     SetCallback(BarelyTask_SetProcessCallback, process_callback_,
                 [](BarelyTaskState state, void* user_data) noexcept {
-                  assert(user_data != nullptr && "Invalid callback user data");
-                  (*static_cast<ProcessCallback*>(user_data))(static_cast<TaskState>(state));
+                  assert(user_data != nullptr && "Invalid task process callback user data");
+                  if (const auto& callback = *static_cast<ProcessCallback*>(user_data); callback) {
+                    callback(static_cast<TaskState>(state));
+                  }
                 });
   }
 
@@ -1644,8 +1649,8 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
 /// Class that wraps a performer handle.
 class Performer : public HandleWrapper<BarelyPerformerHandle> {
  public:
-  /// Beat callback function.
-  using BeatCallback = std::function<void()>;
+  /// Trigger callback function.
+  using TriggerCallback = std::function<void()>;
 
   /// Constructs a new `Performer`.
   ///
@@ -1675,9 +1680,10 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @param other Other performer.
   /// @return Performer.
   Performer(Performer&& other) noexcept
-      : HandleWrapper(std::move(other)), beat_callback_(std::exchange(other.beat_callback_, {})) {
-    if (beat_callback_) {
-      SetCallback(BarelyPerformer_SetBeatCallback, beat_callback_);
+      : HandleWrapper(std::move(other)),
+        trigger_callbacks_(std::exchange(other.trigger_callbacks_, {})) {
+    for (auto& [position, trigger_callback] : trigger_callbacks_) {
+      SetTriggerCallback(position, trigger_callback);
     }
   }
 
@@ -1689,9 +1695,9 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
     if (this != &other) {
       BarelyPerformer_Destroy(*this);
       HandleWrapper::operator=(std::move(other));
-      beat_callback_ = std::exchange(other.beat_callback_, {});
-      if (beat_callback_) {
-        SetCallback(BarelyPerformer_SetBeatCallback, beat_callback_);
+      trigger_callbacks_ = std::exchange(other.trigger_callbacks_, {});
+      for (auto& [position, trigger_callback] : trigger_callbacks_) {
+        SetTriggerCallback(position, trigger_callback);
       }
     }
     return *this;
@@ -1759,14 +1765,6 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
     return is_playing;
   }
 
-  /// Sets the beat callback.
-  ///
-  /// @param beat_callback Beat callback.
-  void SetBeatCallback(BeatCallback beat_callback) noexcept {
-    beat_callback_ = std::move(beat_callback);
-    SetCallback(BarelyPerformer_SetBeatCallback, beat_callback_);
-  }
-
   /// Sets the loop begin position.
   ///
   /// @param loop_begin_position Loop begin position in beats.
@@ -1800,6 +1798,26 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
     assert(success);
   }
 
+  /// Sets a trigger.
+  ///
+  /// @param position Trigger position in beats.
+  /// @param callback Trigger callback.
+  void SetTrigger(double position, TriggerCallback trigger_callback) noexcept {
+    if (trigger_callback) {
+      const auto [it, success] =
+          trigger_callbacks_.try_emplace(position, std::move(trigger_callback));
+      if (!success) {
+        it->second = std::move(trigger_callback);
+      }
+      SetTriggerCallback(position, it->second);
+    } else if (const auto it = trigger_callbacks_.find(position); it != trigger_callbacks_.end()) {
+      trigger_callbacks_.erase(it);
+      [[maybe_unused]] const bool success =
+          BarelyPerformer_SetTrigger(*this, position, nullptr, nullptr);
+      assert(success);
+    }
+  }
+
   /// Starts the performer.
   void Start() noexcept {
     [[maybe_unused]] const bool success = BarelyPerformer_Start(*this);
@@ -1813,8 +1831,21 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   }
 
  private:
-  // Beat callback.
-  BeatCallback beat_callback_;
+  // Helper function to set a trigger callback.
+  void SetTriggerCallback(double position, TriggerCallback& callback) noexcept {
+    [[maybe_unused]] const bool success = BarelyPerformer_SetTrigger(
+        *this, position,
+        [](void* user_data) {
+          assert(user_data != nullptr && "Invalid trigger callback user data");
+          if ((*static_cast<TriggerCallback*>(user_data)))
+            (*static_cast<TriggerCallback*>(user_data))();
+        },
+        &callback);
+    assert(success);
+  }
+
+  // Map of trigger callbacks by their positions.
+  std::unordered_map<double, TriggerCallback> trigger_callbacks_;
 };
 
 /// A class that wraps an engine handle.

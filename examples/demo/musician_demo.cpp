@@ -60,6 +60,8 @@ constexpr double kLookahead = 0.1;
 // Performer settings.
 constexpr double kTempo = 124.0;
 constexpr int kBeatCount = 3;
+constexpr double kMaxTempo = 6000.0;
+constexpr double kDurationMultiplier = 0.999999f;  // avoid precision errors.
 
 // Number of semitones in an octave.
 constexpr int kSemitoneCount = 12;
@@ -108,7 +110,8 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, float pitch, float gain, Instrument& instrument,
                   Performer& performer, std::vector<Task>& tasks) {
-  tasks.emplace_back(performer.CreateTask(performer.GetPosition() + position, duration,
+  tasks.emplace_back(performer.CreateTask(performer.GetPosition() + position,
+                                          duration * kDurationMultiplier,
                                           [pitch, gain, &instrument](TaskState state) noexcept {
                                             if (state == TaskState::kBegin) {
                                               instrument.SetNoteOn(pitch, gain);
@@ -319,24 +322,25 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   // Beat callback.
-  auto metronome = engine.CreatePerformer();
+  int beat = 0;
   int harmonic = 0;
-  metronome.SetBeatCallback([&]() {
+  auto metronome = engine.CreatePerformer();
+  metronome.SetLooping(true);
+  metronome.SetTrigger(0.0f, [&]() {
     // Update transport.
-    int beat = static_cast<int>(metronome.GetPosition());
-    const int bar = beat / kBeatCount;
-    beat %= kBeatCount;
-
-    if (beat == 0) {
+    const int current_bar = (beat / kBeatCount);
+    const int current_beat = (beat % kBeatCount);
+    ++beat;
+    if (current_beat == 0) {
       // Compose next bar.
-      harmonic = bar_composer_callback(bar);
+      harmonic = bar_composer_callback(current_bar);
     }
     // Update members.
     for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
       // Compose next beat notes.
       if (beat_composer_callback) {
-        beat_composer_callback(bar, beat, kBeatCount, harmonic, instruments[index], performer,
-                               tasks);
+        beat_composer_callback(current_bar, current_beat, kBeatCount, harmonic, instruments[index],
+                               performer, tasks);
       }
     }
   });
@@ -386,7 +390,8 @@ int main(int /*argc*/, char* argv[]) {
         ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case '2':
-        engine.SetTempo(engine.GenerateRandomNumber(1.5, 2.0) * engine.GetTempo());
+        engine.SetTempo(
+            (std::min)(engine.GenerateRandomNumber(1.5, 2.0) * engine.GetTempo(), kMaxTempo));
         ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case 'R':

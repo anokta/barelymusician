@@ -21,7 +21,7 @@ struct Callback {
   ///
   /// @param args Callback arguments.
   template <typename... CallbackArgs>
-  constexpr void operator()(CallbackArgs... args) noexcept {
+  constexpr void operator()(CallbackArgs... args) const noexcept {
     if (callback) {
       callback(args..., user_data);
     }

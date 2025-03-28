@@ -58,14 +58,6 @@ namespace Barely {
     /// List of recurring tasks.
     public List<Task> Tasks = new List<Task>();
 
-    /// Beat callback.
-    public delegate void BeatCallback();
-    public event BeatCallback OnBeat;
-
-    [Serializable]
-    public class BeatEvent : UnityEngine.Events.UnityEvent {}
-    public BeatEvent OnBeatEvent;
-
     /// True if playing, false otherwise.
     public bool IsPlaying {
       get { return Engine.Internal.Performer_IsPlaying(_handle); }
@@ -77,10 +69,27 @@ namespace Barely {
       set { Engine.Internal.Performer_SetPosition(_handle, value); }
     }
 
+    public void AddTrigger(double position, Action callback) {
+      if (_triggers.ContainsKey(position)) {
+        _triggers[position] += callback;
+      } else {
+        _triggers[position] = callback;
+      }
+    }
+
     /// Starts the performer.
     public void Play() {
       _playOnEnable = (_handle == IntPtr.Zero);
       Engine.Internal.Performer_Start(_handle);
+    }
+
+    public void RemoveTrigger(double position, Action callback) {
+      if (_triggers.ContainsKey(position)) {
+        _triggers[position] -= callback;
+        if (_triggers[position] == null) {
+          _triggers.Remove(position);
+        }
+      }
     }
 
     /// Stops the performer.
@@ -96,10 +105,11 @@ namespace Barely {
         return performer ? performer._handle : IntPtr.Zero;
       }
 
-      /// Internal beat callback.
-      public static void OnBeat(Performer performer) {
-        performer.OnBeat?.Invoke();
-        performer.OnBeatEvent?.Invoke();
+      /// Internal trigger callback.
+      public static void OnTrigger(Performer performer, double position) {
+        if (performer._triggers.TryGetValue(position, out var trigger)) {
+          trigger?.Invoke();
+        }
       }
     }
 
@@ -135,5 +145,8 @@ namespace Barely {
         Tasks[i].Update(this);
       }
     }
+
+    // Trigger map.
+    public Dictionary<double, Action> _triggers = new Dictionary<double, Action>();
   }
 }  // namespace Barely

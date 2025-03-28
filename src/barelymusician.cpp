@@ -372,14 +372,6 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
   return true;
 }
 
-bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
-                                     BarelyPerformer_BeatCallback callback, void* user_data) {
-  if (!performer) return false;
-
-  performer->SetBeatCallback({callback, user_data});
-  return true;
-}
-
 bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
                                           double loop_begin_position) {
   if (!performer) return false;
@@ -406,6 +398,14 @@ bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double positio
   if (!performer) return false;
 
   performer->SetPosition(position);
+  return true;
+}
+
+bool BarelyPerformer_SetTrigger(BarelyPerformerHandle performer, double position,
+                                BarelyPerformer_TriggerCallback callback, void* user_data) {
+  if (!performer) return false;
+
+  performer->SetTrigger(position, {callback, user_data});
   return true;
 }
 

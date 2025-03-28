@@ -17,8 +17,8 @@ namespace barely {
 /// Class that implements a performer.
 class PerformerImpl {
  public:
-  /// Beat callback alias.
-  using BeatCallback = Callback<BarelyPerformer_BeatCallback>;
+  /// Trigger callback alias.
+  using TriggerCallback = Callback<BarelyPerformer_TriggerCallback>;
 
   /// TaskImpl.
   class TaskImpl {
@@ -175,11 +175,6 @@ class PerformerImpl {
   /// Processes all tasks at the current position.
   void ProcessAllTasksAtPosition() noexcept;
 
-  /// Sets the beat callback.
-  ///
-  /// @param callback Beat callback.
-  void SetBeatCallback(BeatCallback callback) noexcept;
-
   /// Sets loop begin position.
   ///
   /// @param loop_begin_position Loop begin position in beats.
@@ -213,6 +208,12 @@ class PerformerImpl {
   /// @param old_position Old task position.
   void SetTaskPosition(TaskImpl* task, double old_position) noexcept;
 
+  /// Sets a trigger.
+  ///
+  /// @param position Trigger position in beats.
+  /// @param callback Trigger callback.
+  void SetTrigger(double position, TriggerCallback callback) noexcept;
+
   /// Stops performer.
   void Start() noexcept;
 
@@ -226,7 +227,7 @@ class PerformerImpl {
   void Update(double duration) noexcept;
 
  private:
-  //  Returns an iterator to the next inactive task to process.
+  // Returns an iterator to the next inactive task to process.
   [[nodiscard]] std::set<std::pair<double, TaskImpl*>>::const_iterator GetNextInactiveTask()
       const noexcept;
 
@@ -242,9 +243,6 @@ class PerformerImpl {
 
   /// Updates the key of an inactive task.
   void UpdateInactiveTaskKey(double old_position, TaskImpl* task) noexcept;
-
-  // Beat callback.
-  BeatCallback beat_callback_ = {};
 
   // Denotes whether performer is looping or not.
   bool is_looping_ = false;
@@ -266,7 +264,11 @@ class PerformerImpl {
   std::set<std::pair<double, TaskImpl*>> active_tasks_;
   std::set<std::pair<double, TaskImpl*>> inactive_tasks_;
 
-  std::optional<double> last_beat_position_ = std::nullopt;
+  // Map of triggers by their positions.
+  std::map<double, TriggerCallback> triggers_;
+
+  // Last trigger position.
+  std::optional<double> last_trigger_position_ = std::nullopt;
 
   // TODO(#126): Temp hack to allow destroying by handle.
  public:

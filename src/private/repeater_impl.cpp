@@ -13,13 +13,14 @@ namespace barely {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 RepeaterImpl::RepeaterImpl(EngineImpl& engine) noexcept
     : engine_(&engine), performer_(engine_->CreatePerformer()) {
-  performer_->SetBeatCallback({
-      [](void* user_data) noexcept {
-        auto& repeater = *static_cast<RepeaterImpl*>(user_data);
-        repeater.OnBeat();
-      },
-      this,
-  });
+  performer_->SetLooping(true);
+  performer_->SetTrigger(0.0f, {
+                                   [](void* user_data) noexcept {
+                                     auto& repeater = *static_cast<RepeaterImpl*>(user_data);
+                                     repeater.OnBeat();
+                                   },
+                                   this,
+                               });
 }
 
 RepeaterImpl::~RepeaterImpl() noexcept {

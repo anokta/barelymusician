@@ -72,14 +72,23 @@ std::optional<double> PerformerImpl::GetNextDuration() const noexcept {
   std::optional<double> next_position = std::nullopt;
 
   // Check inactive tasks.
-  if (const auto next_it = GetNextInactiveTask(); next_it != inactive_tasks_.end()) {
-    if (next_it->second->IsInside(position_)) {
-      // PerformerImpl position is inside an inactive task, we can return immediately.
-      return 0.0;
+  if (!inactive_tasks_.empty()) {
+    const auto next_it = inactive_tasks_.lower_bound({position_, nullptr});
+    // If the performer position is inside an inactive task, we can return immediately.
+    // TODO(#147): This may be optimized further using an interval tree.
+    for (auto it = inactive_tasks_.begin(); it != next_it; ++it) {
+      if (it->second->GetEndPosition() > position_) {
+        return 0.0f;
+      }
     }
-    if (next_it->first < position_) {  // loop around.
-      next_position = next_it->first + loop_length_;
-    } else if (!is_looping_ || next_it->first < loop_end_position) {
+    // Loop around if needed.
+    if (is_looping_ &&
+        (next_it == inactive_tasks_.end() || next_it->first >= GetLoopEndPosition())) {
+      if (const auto loop_it = inactive_tasks_.lower_bound({loop_begin_position_, nullptr});
+          loop_it != inactive_tasks_.end() && loop_it->first < GetLoopEndPosition()) {
+        next_position = loop_it->first + loop_length_;
+      }
+    } else if (next_it != inactive_tasks_.end()) {
       next_position = next_it->first;
     }
   }
@@ -94,23 +103,27 @@ std::optional<double> PerformerImpl::GetNextDuration() const noexcept {
     }
   }
 
-  // Check beat callback.
-  if (beat_callback_) {
-    std::optional<double> next_beat_position =
-        (last_beat_position_ == position_) ? std::ceil(position_ + 1.0) : std::ceil(position_);
-    if (is_looping_ && *next_beat_position >= loop_end_position) {
-      const double first_beat_offset = std::ceil(loop_begin_position_) - loop_begin_position_;
-      next_beat_position = (loop_length_ > first_beat_offset)
-                               ? std::optional<double>{first_beat_offset + loop_end_position}
-                               : std::nullopt;
-    }
-    if (next_beat_position.has_value() &&
-        (!next_position.has_value() || *next_beat_position < *next_position)) {
-      next_position = next_beat_position;
+  // Check triggers.
+  if (!triggers_.empty()) {
+    const auto next_it = (position_ == last_trigger_position_) ? triggers_.upper_bound(position_)
+                                                               : triggers_.lower_bound(position_);
+    // Loop around if needed.
+    if (is_looping_ && (next_it == triggers_.end() || next_it->first >= GetLoopEndPosition())) {
+      if (const auto loop_it = triggers_.lower_bound(loop_begin_position_);
+          loop_it != triggers_.end() && loop_it->first < GetLoopEndPosition()) {
+        if (const double next_trigger_position = loop_it->first + loop_length_;
+            !next_position.has_value() || next_trigger_position < *next_position) {
+          next_position = next_trigger_position;
+        }
+      }
+    } else if (next_it != triggers_.end() &&
+               (!next_position.has_value() || next_it->first < *next_position)) {
+      next_position = next_it->first;
     }
   }
 
-  if (next_position) {
+  // Return the next duration.
+  if (next_position.has_value()) {
     assert(*next_position >= position_ && "Invalid next duration");
     return *next_position - position_;
   }
@@ -121,10 +134,12 @@ void PerformerImpl::ProcessAllTasksAtPosition() noexcept {
   if (!is_playing_) {
     return;
   }
-  if (last_beat_position_ != position_ && std::ceil(position_) == position_) {
-    last_beat_position_ = position_;
-    beat_callback_();
-    return;
+  if (last_trigger_position_ != position_) {
+    if (const auto it = triggers_.find(position_); it != triggers_.end()) {
+      last_trigger_position_ = position_;
+      it->second();
+      return;  // this is to ensure that all performer triggers get processed prior to their tasks.
+    }
   }
   // Active tasks get processed in `SetPosition`, so we only need to process inactive tasks here.
   for (auto it = GetNextInactiveTask();
@@ -132,8 +147,6 @@ void PerformerImpl::ProcessAllTasksAtPosition() noexcept {
     SetTaskActive(it, true);
   }
 }
-
-void PerformerImpl::SetBeatCallback(BeatCallback callback) noexcept { beat_callback_ = callback; }
 
 void PerformerImpl::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) {
@@ -168,7 +181,7 @@ void PerformerImpl::SetLooping(bool is_looping) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void PerformerImpl::SetPosition(double position) noexcept {
-  last_beat_position_ = std::nullopt;
+  last_trigger_position_ = std::nullopt;
   if (position_ == position) {
     return;
   }
@@ -216,11 +229,19 @@ void PerformerImpl::SetTaskPosition(TaskImpl* task, double old_position) noexcep
   }
 }
 
+void PerformerImpl::SetTrigger(double position, TriggerCallback callback) noexcept {
+  if (!callback) {
+    triggers_.erase(position);
+  } else if (const auto [it, success] = triggers_.emplace(position, callback); !success) {
+    it->second = callback;
+  }
+}
+
 void PerformerImpl::Start() noexcept { is_playing_ = true; }
 
 void PerformerImpl::Stop() noexcept {
   is_playing_ = false;
-  last_beat_position_ = std::nullopt;
+  last_trigger_position_ = std::nullopt;
   while (!active_tasks_.empty()) {
     SetTaskActive(active_tasks_.begin(), false);
   }
@@ -248,10 +269,6 @@ PerformerImpl::GetNextInactiveTask() const noexcept {
     if (it->second->GetEndPosition() > position_) {
       return it;
     }
-  }
-  // Loop back to the beginning if needed.
-  if (is_looping_ && (next_it == inactive_tasks_.end() || next_it->first >= GetLoopEndPosition())) {
-    next_it = inactive_tasks_.lower_bound({loop_begin_position_, nullptr});
   }
   return next_it;
 }

@@ -159,22 +159,22 @@ MonoBehaviour:
   playOnAwake: 1
   notes:
   - pitch: 9
-    intensity: 1
+    gain: 1
     position: 1.5
     duration: 0.5
     muted: 0
   - pitch: 1
-    intensity: 1
+    gain: 1
     position: 1.5
     duration: 0.5
     muted: 0
   - pitch: 9
-    intensity: 1
+    gain: 1
     position: 5.5
     duration: 0.5
     muted: 0
   - pitch: 4
-    intensity: 1
+    gain: 1
     position: 5.5
     duration: 0.5
     muted: 0
@@ -562,7 +562,7 @@ MonoBehaviour:
   beatCount: 4
   barPitch: 1
   beatPitch: 1
-  intensity: 1
+  gain: 1
   isLoggingToConsole: 0
   isTicking: 0
   playOnAwake: 1
@@ -925,22 +925,22 @@ MonoBehaviour:
   playOnAwake: 1
   notes:
   - pitch: 0
-    intensity: 1
+    gain: 1
     position: 0
     duration: 0
     muted: 0
   - pitch: 4
-    intensity: 0.5
+    gain: 0.5
     position: 0.5
     duration: 0
     muted: 0
   - pitch: 2
-    intensity: 1
+    gain: 1
     position: 1
     duration: 0
     muted: 0
   - pitch: 4
-    intensity: 0.5
+    gain: 0.5
     position: 1.5
     duration: 0
     muted: 0
@@ -962,7 +962,7 @@ MonoBehaviour:
   playOnAwake: 1
   notes:
   - pitch: 5
-    intensity: 1
+    gain: 1
     position: 7.5
     duration: 0.5
     muted: 0
@@ -1224,27 +1224,27 @@ MonoBehaviour:
   playOnAwake: 1
   notes:
   - pitch: 9
-    intensity: 1
+    gain: 1
     position: 0
     duration: 0.5
     muted: 0
   - pitch: 13
-    intensity: 1
+    gain: 1
     position: 1
     duration: 0.5
     muted: 0
   - pitch: 14
-    intensity: 1
+    gain: 1
     position: 2
     duration: 0.5
     muted: 0
   - pitch: -3
-    intensity: 0.75
+    gain: 0.75
     position: 0
     duration: 2
     muted: 0
   - pitch: -4
-    intensity: 0.75
+    gain: 0.75
     position: 2
     duration: 2
     muted: 0
@@ -1378,7 +1378,7 @@ MonoBehaviour:
   playOnAwake: 1
   notes:
   - pitch: 0
-    intensity: 1
+    gain: 1
     position: 0
     duration: 0.25
     muted: 0
@@ -1572,22 +1572,22 @@ MonoBehaviour:
   playOnAwake: 1
   notes:
   - pitch: 9
-    intensity: 1
+    gain: 1
     position: 3
     duration: 1
     muted: 0
   - pitch: 9
-    intensity: 1
+    gain: 1
     position: 6
     duration: 0.25
     muted: 0
   - pitch: 4
-    intensity: 1
+    gain: 1
     position: 6.5
     duration: 0.25
     muted: 0
   - pitch: -3
-    intensity: 1
+    gain: 1
     position: 7
     duration: 1
     muted: 0

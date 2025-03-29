@@ -106,7 +106,7 @@ void EngineImpl::Update(double timestamp) noexcept {
       bool has_tasks_to_process = false;
       for (const auto& [performer, _] : performers_) {
         if (const auto maybe_duration = performer->GetNextDuration();
-            maybe_duration && maybe_duration < update_duration) {
+            maybe_duration.has_value() && *maybe_duration < update_duration) {
           has_tasks_to_process = true;
           update_duration = *maybe_duration;
         }

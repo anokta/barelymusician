@@ -72,14 +72,23 @@ std::optional<double> PerformerImpl::GetNextDuration() const noexcept {
   std::optional<double> next_position = std::nullopt;
 
   // Check inactive tasks.
-  if (const auto next_it = GetNextInactiveTask(); next_it != inactive_tasks_.end()) {
-    if (next_it->second->IsInside(position_)) {
-      // PerformerImpl position is inside an inactive task, we can return immediately.
-      return 0.0;
+  if (!inactive_tasks_.empty()) {
+    const auto next_it = inactive_tasks_.lower_bound({position_, nullptr});
+    // If the performer position is inside an inactive task, we can return immediately.
+    // TODO(#147): This may be optimized further using an interval tree.
+    for (auto it = inactive_tasks_.begin(); it != next_it; ++it) {
+      if (it->second->GetEndPosition() > position_) {
+        return 0.0f;
+      }
     }
-    if (next_it->first < position_) {  // loop around.
-      next_position = next_it->first + loop_length_;
-    } else if (!is_looping_ || next_it->first < loop_end_position) {
+    // Loop around if needed.
+    if (is_looping_ &&
+        (next_it == inactive_tasks_.end() || next_it->first >= GetLoopEndPosition())) {
+      if (const auto loop_it = inactive_tasks_.lower_bound({loop_begin_position_, nullptr});
+          loop_it != inactive_tasks_.end() && loop_it->first < GetLoopEndPosition()) {
+        next_position = loop_it->first + loop_length_;
+      }
+    } else if (next_it != inactive_tasks_.end()) {
       next_position = next_it->first;
     }
   }
@@ -110,7 +119,7 @@ std::optional<double> PerformerImpl::GetNextDuration() const noexcept {
     }
   }
 
-  if (next_position) {
+  if (next_position.has_value()) {
     assert(*next_position >= position_ && "Invalid next duration");
     return *next_position - position_;
   }
@@ -248,10 +257,6 @@ PerformerImpl::GetNextInactiveTask() const noexcept {
     if (it->second->GetEndPosition() > position_) {
       return it;
     }
-  }
-  // Loop back to the beginning if needed.
-  if (is_looping_ && (next_it == inactive_tasks_.end() || next_it->first >= GetLoopEndPosition())) {
-    next_it = inactive_tasks_.lower_bound({loop_begin_position_, nullptr});
   }
   return next_it;
 }

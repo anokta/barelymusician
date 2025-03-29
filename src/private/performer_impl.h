@@ -28,10 +28,10 @@ class PerformerImpl {
 
     /// Constructs a new `TaskImpl`.
     ///
-    /// @param performer PerformerImpl.
-    /// @param position TaskImpl position.
-    /// @param duration TaskImpl duration.
-    /// @param callback TaskImpl process callback.
+    /// @param performer Performer.
+    /// @param position Task position.
+    /// @param duration Task duration.
+    /// @param callback Task process callback.
     TaskImpl(PerformerImpl& performer, double position, double duration,
              ProcessCallback callback) noexcept
         : performer_(performer),
@@ -71,7 +71,7 @@ class PerformerImpl {
 
     /// Processes the task.
     ///
-    /// @param state TaskImpl state.
+    /// @param state Task state.
     void Process(TaskState state) noexcept {
       process_callback_(static_cast<BarelyTaskState>(state));
     }
@@ -96,11 +96,11 @@ class PerformerImpl {
 
     /// Sets the process callback.
     ///
-    /// @param callback TaskImpl process callback.
+    /// @param callback Task process callback.
     void SetProcessCallback(ProcessCallback callback) noexcept;
 
    private:
-    // PerformerImpl.
+    // Performer.
     PerformerImpl& performer_;
 
     // Position in beats.
@@ -122,9 +122,9 @@ class PerformerImpl {
 
   /// Creates a new task.
   ///
-  /// @param position TaskImpl position in beats.
-  /// @param duration TaskImpl duration in beats.
-  /// @param callback TaskImpl process callback.
+  /// @param position Task position in beats.
+  /// @param duration Task duration in beats.
+  /// @param callback Task process callback.
   /// @return Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   TaskImpl* CreateTask(double position, double duration,

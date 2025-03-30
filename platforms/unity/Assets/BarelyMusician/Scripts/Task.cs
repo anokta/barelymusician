@@ -8,6 +8,8 @@ namespace Barely {
     [InspectorName("Begin")] BEGIN = 0,
     /// End.
     [InspectorName("End")] END,
+    /// Update.
+    [InspectorName("Update")] UPDATE,
   }
 
   /// A representation of a recurring task that can performed by a musical performer in real-time.

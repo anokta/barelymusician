@@ -83,10 +83,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto build_note_fn = [&](const SequencerNote& note) {
     return performer.CreateTask(note.position, note.duration,
                                 [&instrument, pitch = note.pitch](TaskState state) {
-                                  if (state == TaskState::kBegin) {
-                                    instrument.SetNoteOn(pitch);
-                                  } else if (state == TaskState::kEnd) {
-                                    instrument.SetNoteOff(pitch);
+                                  switch (state) {
+                                    case TaskState::kBegin:
+                                      instrument.SetNoteOn(pitch);
+                                      break;
+                                    case TaskState::kEnd:
+                                      instrument.SetNoteOff(pitch);
+                                      break;
+                                    default:
+                                      break;
                                   }
                                 });
   };

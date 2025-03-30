@@ -122,7 +122,9 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   TaskState task_state = TaskState::kEnd;
   double task_position = 0.0;
   std::function<void(TaskState)> process_callback = [&](TaskState state) {
-    EXPECT_TRUE(task_state != state);
+    // `kUpdate` can only be called after `kBegin`, and not the other way around.
+    EXPECT_TRUE(task_state != TaskState::kBegin || state == TaskState::kUpdate);
+    EXPECT_TRUE(task_state != TaskState::kUpdate || state != TaskState::kBegin);
     task_state = state;
     task_position = performer->GetPosition();
   };
@@ -160,8 +162,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_THAT(performer->GetNextDuration(), Optional(0.5));
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 2.5);
   EXPECT_TRUE(task->IsActive());
-  EXPECT_EQ(task_state, TaskState::kBegin);
-  EXPECT_DOUBLE_EQ(task_position, 1.0);
+  EXPECT_EQ(task_state, TaskState::kUpdate);
+  EXPECT_DOUBLE_EQ(task_position, 2.5);
 
   // Update the timestamp just past the task, which should not be active anymore.
   EXPECT_THAT(performer->GetNextDuration(), Optional(0.5));

@@ -70,13 +70,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const auto play_note_fn = [&](int degree) {
     return [&, pitch = Scale(kMajor).GetPitch(degree)](TaskState state) {
-      if (state == TaskState::kBegin) {
-        instrument.SetNoteOn(pitch);
-      } else if (state == TaskState::kEnd) {
-        instrument.SetNoteOff(pitch);
-        if (stop_position == performer.GetPosition()) {
-          performer.Stop();
-        }
+      switch (state) {
+        case TaskState::kBegin:
+          instrument.SetNoteOn(pitch);
+          break;
+        case TaskState::kEnd:
+          instrument.SetNoteOff(pitch);
+          if (stop_position == performer.GetPosition()) {
+            performer.Stop();
+          }
+          break;
+        default:
+          break;
       }
     };
   };

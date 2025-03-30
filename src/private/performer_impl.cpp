@@ -193,6 +193,8 @@ void PerformerImpl::SetPosition(double position) noexcept {
       auto [end_position, task] = *it;
       if (!task->IsInside(position_)) {
         SetTaskActive(it, false);
+      } else {
+        task->Process(TaskState::kUpdate);
       }
       it = active_tasks_.upper_bound({end_position, task});
     }

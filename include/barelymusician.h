@@ -364,8 +364,6 @@ typedef enum BarelyTaskState {
   BarelyTaskState_kBegin = 0,
   /// End.
   BarelyTaskState_kEnd,
-  /// Update.
-  BarelyTaskState_kUpdate,
   /// Number of task states.
   BarelyTaskState_kCount,
 } BarelyTaskState;
@@ -1149,8 +1147,6 @@ enum class TaskState {
   kBegin = BarelyTaskState_kBegin,
   /// End.
   kEnd = BarelyTaskState_kEnd,
-  /// Update.
-  kUpdate = BarelyTaskState_kUpdate,
 };
 
 /// Control override.

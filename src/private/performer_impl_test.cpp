@@ -24,7 +24,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   // Create a task.
   int task_process_begin_count = 0;
   int task_process_end_count = 0;
-  int task_process_update_count = 0;
   std::function<void(TaskState)> process_callback = [&](TaskState state) {
     switch (state) {
       case TaskState::kBegin:
@@ -32,9 +31,6 @@ TEST(PerformerTest, ProcessSingleTask) {
         break;
       case TaskState::kEnd:
         ++task_process_end_count;
-        break;
-      case TaskState::kUpdate:
-        ++task_process_update_count;
         break;
     }
   };
@@ -53,7 +49,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Start the performer.
   performer.Start();
@@ -63,7 +58,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Process the task.
   performer.Update(0.25);
@@ -73,7 +67,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
-  EXPECT_EQ(task_process_update_count, 0);
 
   performer.ProcessAllTasksAtPosition();
   EXPECT_TRUE(performer.IsPlaying());
@@ -82,7 +75,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 0);
-  EXPECT_EQ(task_process_update_count, 0);
 
   performer.Update(0.6);
   EXPECT_TRUE(performer.IsPlaying());
@@ -91,7 +83,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 1);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Set looping on.
   performer.SetLooping(true);
@@ -105,7 +96,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 1);
-  EXPECT_EQ(task_process_update_count, 0);
 
   performer.ProcessAllTasksAtPosition();
   EXPECT_TRUE(performer.IsPlaying());
@@ -114,7 +104,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 1);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Update the task position.
   task->SetPosition(0.75);
@@ -124,7 +113,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 2);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Process the task with the updated position.
   performer.Update(0.5);
@@ -134,7 +122,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 2);
-  EXPECT_EQ(task_process_update_count, 0);
 
   performer.ProcessAllTasksAtPosition();
   EXPECT_TRUE(performer.IsPlaying());
@@ -143,7 +130,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 2);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Update the position while task is still active.
   performer.Update(0.05);
@@ -153,7 +139,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 2);
-  EXPECT_EQ(task_process_update_count, 1);
 
   // Stop the performer.
   performer.Stop();
@@ -163,7 +148,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(task->IsActive());
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 3);
-  EXPECT_EQ(task_process_update_count, 1);
 }
 
 // Tests that the performer processs multiple tasks as expected.

@@ -1,11 +1,11 @@
-#include "private/arpeggiator_impl.h"
+#include "private/arpeggiator.h"
 
 #include <algorithm>
 #include <cassert>
 
 #include "barelymusician.h"
-#include "private/engine_impl.h"
-#include "private/instrument_impl.h"
+#include "private/engine.h"
+#include "private/instrument.h"
 
 namespace barely {
 

@@ -1,12 +1,12 @@
-#include "private/repeater_impl.h"
+#include "private/repeater.h"
 
 #include <cassert>
 #include <optional>
 #include <utility>
 
 #include "barelymusician.h"
-#include "private/engine_impl.h"
-#include "private/instrument_impl.h"
+#include "private/engine.h"
+#include "private/instrument.h"
 
 namespace barely {
 

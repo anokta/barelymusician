@@ -6,11 +6,11 @@
 #include <optional>
 #include <span>
 
-#include "private/arpeggiator_impl.h"
-#include "private/engine_impl.h"
-#include "private/instrument_impl.h"
-#include "private/performer_impl.h"
-#include "private/repeater_impl.h"
+#include "private/arpeggiator.h"
+#include "private/engine.h"
+#include "private/instrument.h"
+#include "private/performer.h"
+#include "private/repeater.h"
 
 using ::barely::ControlType;
 using ::barely::NoteControlType;

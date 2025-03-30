@@ -1,22 +1,22 @@
 target_sources(
   barelymusician PRIVATE
-  arpeggiator_impl.cpp
-  arpeggiator_impl.h
-  engine_impl.cpp
-  engine_impl.h
-  instrument_impl.cpp
-  instrument_impl.h
-  performer_impl.cpp
-  performer_impl.h
-  repeater_impl.cpp
-  repeater_impl.h
+  arpeggiator.cpp
+  arpeggiator.h
+  engine.cpp
+  engine.h
+  instrument.cpp
+  instrument.h
+  performer.cpp
+  performer.h
+  repeater.cpp
+  repeater.h
 )
 
 if(ENABLE_TESTS)
   target_sources(
     barelymusician_test PRIVATE
-    engine_impl_test.cpp
-    instrument_impl_test.cpp
-    performer_impl_test.cpp
+    engine_test.cpp
+    instrument_test.cpp
+    performer_test.cpp
   )
 endif()

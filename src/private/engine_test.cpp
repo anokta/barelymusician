@@ -1,4 +1,4 @@
-#include "private/engine_impl.h"
+#include "private/engine.h"
 
 #include <array>
 #include <functional>
@@ -7,8 +7,8 @@
 #include "barelymusician.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "private/instrument_impl.h"
-#include "private/performer_impl.h"
+#include "private/instrument.h"
+#include "private/performer.h"
 
 namespace barely {
 namespace {

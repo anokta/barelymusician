@@ -1,4 +1,4 @@
-#include "private/instrument_impl.h"
+#include "private/instrument.h"
 
 #include <array>
 #include <cassert>

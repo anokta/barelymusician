@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PRIVATE_ENGINE_IMPL_H_
-#define BARELYMUSICIAN_PRIVATE_ENGINE_IMPL_H_
+#ifndef BARELYMUSICIAN_PRIVATE_ENGINE_H_
+#define BARELYMUSICIAN_PRIVATE_ENGINE_H_
 
 #include <cmath>
 #include <memory>
@@ -9,8 +9,8 @@
 
 #include "barelymusician.h"
 #include "common/rng.h"
-#include "private/instrument_impl.h"
-#include "private/performer_impl.h"
+#include "private/instrument.h"
+#include "private/performer.h"
 
 namespace barely {
 
@@ -140,4 +140,4 @@ struct BarelyEngine : public barely::EngineImpl {
 };
 static_assert(sizeof(BarelyEngine) == sizeof(barely::EngineImpl));
 
-#endif  // BARELYMUSICIAN_PRIVATE_ENGINE_IMPL_H_
+#endif  // BARELYMUSICIAN_PRIVATE_ENGINE_H_

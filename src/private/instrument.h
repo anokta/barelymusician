@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PRIVATE_INSTRUMENT_IMPL_H_
-#define BARELYMUSICIAN_PRIVATE_INSTRUMENT_IMPL_H_
+#ifndef BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
+#define BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
 
 #include <array>
 #include <cstdint>
@@ -163,4 +163,4 @@ class InstrumentImpl {
 struct BarelyInstrument : public barely::InstrumentImpl {};
 static_assert(sizeof(BarelyInstrument) == sizeof(barely::InstrumentImpl));
 
-#endif  // BARELYMUSICIAN_PRIVATE_INSTRUMENT_IMPL_H_
+#endif  // BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_

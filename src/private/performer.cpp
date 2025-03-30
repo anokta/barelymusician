@@ -1,4 +1,4 @@
-#include "private/performer_impl.h"
+#include "private/performer.h"
 
 #include <algorithm>
 #include <cassert>

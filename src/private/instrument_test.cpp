@@ -2,13 +2,11 @@
 
 #include <algorithm>
 #include <array>
-#include <cstdint>
 #include <vector>
 
 #include "barelymusician.h"
-#include "common/rng.h"
-#include "dsp/sample_data.h"
 #include "gtest/gtest.h"
+#include "private/engine.h"
 
 namespace barely {
 namespace {
@@ -19,26 +17,26 @@ constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that the instrument sets a control value as expected.
 TEST(InstrumentImplTest, SetControl) {
-  AudioRng rng;
-  InstrumentImpl instrument({}, rng, kSampleRate, kReferenceFrequency, 0);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 1.0f);
+  BarelyEngine engine(kSampleRate);
+  InstrumentImpl instrument(engine, {});
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
 
-  instrument.SetControl(ControlType::kGain, 0.5f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.5f);
+  instrument.SetControl(BarelyControlType_kGain, 0.5f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 0.5f);
 
   // Verify that the control value is clamped at the minimum value.
-  instrument.SetControl(ControlType::kGain, -1.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.0f);
+  instrument.SetControl(BarelyControlType_kGain, -1.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 0.0f);
 
-  instrument.SetControl(ControlType::kGain, 0.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 0.0f);
+  instrument.SetControl(BarelyControlType_kGain, 0.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 0.0f);
 
   // Verify that the control value is clamped at the maximum value.
-  instrument.SetControl(ControlType::kGain, 10.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 1.0f);
+  instrument.SetControl(BarelyControlType_kGain, 10.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
 
-  instrument.SetControl(ControlType::kGain, 1.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(ControlType::kGain), 1.0f);
+  instrument.SetControl(BarelyControlType_kGain, 1.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
 }
 
 // Tests that the instrument plays a single note as expected.
@@ -46,28 +44,29 @@ TEST(InstrumentImplTest, PlaySingleNote) {
   constexpr int kSampleCount = 5;
   constexpr float kPitch = 1.0f;
   constexpr float kGain = 0.5f;
-  constexpr int64_t kUpdateSample = 20;
-  constexpr std::array<Slice, 1> kSlices = {Slice(kPitch, kSampleRate, kSamples)};
+  constexpr std::array<BarelySlice, 1> kSlices = {
+      BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
+  };
 
-  AudioRng rng;
-  InstrumentImpl instrument({}, rng, kSampleRate, kReferenceFrequency, kUpdateSample);
-  instrument.SetSampleData(SampleData(kSlices));
+  BarelyEngine engine(kSampleRate);
+  InstrumentImpl instrument(engine, {});
+  instrument.SetSampleData(kSlices);
 
   std::vector<float> buffer(kSampleCount);
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  EXPECT_TRUE(instrument.Process(buffer, kUpdateSample));
+  EXPECT_TRUE(instrument.Process(buffer, 0.0));
   for (int i = 0; i < kSampleCount; ++i) {
     EXPECT_FLOAT_EQ(buffer[i], 0.0f);
   }
 
   // Set a note on.
-  instrument.SetNoteOn(kPitch, {{{NoteControlType::kGain, kGain}}});
+  instrument.SetNoteOn(kPitch, {{{BarelyNoteControlType_kGain, kGain}}});
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  EXPECT_TRUE(instrument.Process(buffer, kUpdateSample));
+  EXPECT_TRUE(instrument.Process(buffer, 0.0));
   for (int i = 0; i < kSampleCount; ++i) {
     EXPECT_FLOAT_EQ(buffer[i], (i < kSampleRate) ? kSamples[i] * kGain : 0.0f);
   }
@@ -77,7 +76,7 @@ TEST(InstrumentImplTest, PlaySingleNote) {
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  EXPECT_TRUE(instrument.Process(buffer, kUpdateSample));
+  EXPECT_TRUE(instrument.Process(buffer, 0.0));
   for (int i = 0; i < kSampleCount; ++i) {
     EXPECT_FLOAT_EQ(buffer[i], 0.0f);
   }
@@ -85,16 +84,16 @@ TEST(InstrumentImplTest, PlaySingleNote) {
 
 // Tests that the instrument plays multiple notes as expected.
 TEST(InstrumentImplTest, PlayMultipleNotes) {
-  constexpr std::array<Slice, kSampleRate> kSlices = {
-      Slice(0.0f, kSampleRate, {kSamples.data(), kSamples.data() + 1}),
-      Slice(1.0f, kSampleRate, {kSamples.data() + 1, kSamples.data() + 2}),
-      Slice(2.0f, kSampleRate, {kSamples.data() + 2, kSamples.data() + 3}),
-      Slice(3.0f, kSampleRate, {kSamples.data() + 3, kSamples.data() + 4}),
+  constexpr std::array<BarelySlice, kSampleRate> kSlices = {
+      BarelySlice{0.0f, kSampleRate, kSamples.data(), 1},
+      BarelySlice{1.0f, kSampleRate, kSamples.data() + 1, 1},
+      BarelySlice{2.0f, kSampleRate, kSamples.data() + 2, 1},
+      BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
   };
 
-  AudioRng rng;
-  InstrumentImpl instrument({}, rng, 1, kReferenceFrequency, 0);
-  instrument.SetSampleData(SampleData(kSlices));
+  BarelyEngine engine(1);
+  InstrumentImpl instrument(engine, {});
+  instrument.SetSampleData(kSlices);
 
   std::vector<float> buffer(kSampleRate);
 
@@ -129,8 +128,8 @@ TEST(InstrumentImplTest, PlayMultipleNotes) {
 TEST(InstrumentImplTest, SetNoteCallbacks) {
   constexpr float kPitch = 3.3f;
 
-  AudioRng rng;
-  InstrumentImpl instrument({}, rng, 1, kReferenceFrequency, 0);
+  BarelyEngine engine(1);
+  InstrumentImpl instrument(engine, {});
 
   // Trigger the note on callback.
   float note_on_pitch = 0.0f;
@@ -178,8 +177,8 @@ TEST(InstrumentImplTest, SetNoteCallbacks) {
 TEST(InstrumentImplTest, SetAllNotesOff) {
   constexpr std::array<float, 3> kPitches = {1.0f, 2.0f, 3.0f};
 
-  AudioRng rng;
-  InstrumentImpl instrument({}, rng, kSampleRate, kReferenceFrequency, 0);
+  BarelyEngine engine(kSampleRate);
+  InstrumentImpl instrument(engine, {});
   for (const float pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

@@ -10,18 +10,17 @@
 
 #include "barelymusician.h"
 #include "common/find_or_null.h"
-#include "common/rng.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message.h"
-#include "dsp/sample_data.h"
+#include "private/engine.h"
 
 namespace barely {
 
 namespace {
 
 // Returns a control array with overrides.
-ControlArray BuildControlArray(std::span<const ControlOverride> control_overrides) noexcept {
+ControlArray BuildControlArray(std::span<const BarelyControlOverride> control_overrides) noexcept {
   ControlArray control_array = {
       Control(1.0f, 0.0f, 1.0f),                   // kGain
       Control(0.0f),                               // kPitchShift
@@ -45,14 +44,14 @@ ControlArray BuildControlArray(std::span<const ControlOverride> control_override
       Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
   };
   for (const auto& [type, value] : control_overrides) {
-    control_array[static_cast<int>(type)].SetValue(value);
+    control_array[type].SetValue(value);
   }
   return control_array;
 }
 
 // Returns a note control array with overrides.
 NoteControlArray BuildNoteControlArray(
-    std::span<const NoteControlOverride> note_control_overrides) noexcept {
+    std::span<const BarelyNoteControlOverride> note_control_overrides) noexcept {
   NoteControlArray note_control_array = {
       Control(1.0f, 0.0f, 1.0f),  // kGain
       Control(0.0f),              // kPitchShift
@@ -76,39 +75,42 @@ std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentImpl::InstrumentImpl(std::span<const ControlOverride> control_overrides, AudioRng& rng,
-                               int sample_rate, float reference_frequency,
-                               int64_t update_sample) noexcept
-    : controls_(BuildControlArray(control_overrides)),
-      sample_rate_(sample_rate),
-      update_sample_(update_sample),
-      processor_(control_overrides, rng, sample_rate, reference_frequency) {
-  assert(sample_rate > 0);
+InstrumentImpl::InstrumentImpl(BarelyEngine& engine,
+                               std::span<const BarelyControlOverride> control_overrides) noexcept
+    : engine_(&engine),
+      controls_(BuildControlArray(control_overrides)),
+      update_sample_(engine.SecondsToSamples(engine.GetTimestamp())),
+      processor_(control_overrides, engine.audio_rng(), engine.GetSampleRate(),
+                 engine.GetReferenceFrequency()) {
+  engine_->CreateInstrument(this);
 }
 
-InstrumentImpl::~InstrumentImpl() noexcept { SetAllNotesOff(); }
-
-float InstrumentImpl::GetControl(ControlType type) const noexcept {
-  return controls_[static_cast<int>(type)].value;
+InstrumentImpl::~InstrumentImpl() noexcept {
+  SetAllNotesOff();
+  engine_->DestroyInstrument(this);
 }
 
-const float* InstrumentImpl::GetNoteControl(float pitch, NoteControlType type) const noexcept {
+float InstrumentImpl::GetControl(BarelyControlType type) const noexcept {
+  return controls_[type].value;
+}
+
+const float* InstrumentImpl::GetNoteControl(float pitch,
+                                            BarelyNoteControlType type) const noexcept {
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    return &(*note_controls)[static_cast<int>(type)].value;
+    return &(*note_controls)[type].value;
   }
   return nullptr;
 }
 
-int InstrumentImpl::GetSampleRate() const noexcept { return sample_rate_; }
-
 bool InstrumentImpl::IsNoteOn(float pitch) const noexcept { return note_controls_.contains(pitch); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool InstrumentImpl::Process(std::span<float> output_samples, int64_t process_sample) noexcept {
+bool InstrumentImpl::Process(std::span<float> output_samples, double timestamp) noexcept {
   if (output_samples.empty()) {
     return false;
   }
   const int output_sample_count = static_cast<int>(output_samples.size());
+  const int64_t process_sample = engine_->SecondsToSamples(timestamp);
 
   int current_sample = 0;
   // Process *all* messages before the end sample.
@@ -158,17 +160,19 @@ void InstrumentImpl::SetAllNotesOff() noexcept {
   }
 }
 
-void InstrumentImpl::SetControl(ControlType type, float value) noexcept {
-  if (auto& control = controls_[static_cast<int>(type)]; control.SetValue(value)) {
-    message_queue_.Add(update_sample_, ControlMessage{type, control.value});
+void InstrumentImpl::SetControl(BarelyControlType type, float value) noexcept {
+  if (auto& control = controls_[type]; control.SetValue(value)) {
+    message_queue_.Add(update_sample_,
+                       ControlMessage{static_cast<ControlType>(type), control.value});
   }
 }
 
-void InstrumentImpl::SetNoteControl(float pitch, NoteControlType type, float value) noexcept {
+void InstrumentImpl::SetNoteControl(float pitch, BarelyNoteControlType type, float value) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (auto& note_control = (*note_controls)[static_cast<int>(type)];
-        note_control.SetValue(value)) {
-      message_queue_.Add(update_sample_, NoteControlMessage{pitch, type, note_control.value});
+    if (auto& note_control = (*note_controls)[type]; note_control.SetValue(value)) {
+      message_queue_.Add(
+          update_sample_,
+          NoteControlMessage{pitch, static_cast<NoteControlType>(type), note_control.value});
     }
   }
 }
@@ -186,7 +190,7 @@ void InstrumentImpl::SetNoteOffCallback(NoteCallback callback) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InstrumentImpl::SetNoteOn(
-    float pitch, std::span<const NoteControlOverride> note_control_overrides) noexcept {
+    float pitch, std::span<const BarelyNoteControlOverride> note_control_overrides) noexcept {
   if (const auto [it, success] =
           note_controls_.try_emplace(pitch, BuildNoteControlArray(note_control_overrides));
       success) {
@@ -203,8 +207,8 @@ void InstrumentImpl::SetReferenceFrequency(float reference_frequency) noexcept {
   message_queue_.Add(update_sample_, ReferenceFrequencyMessage{reference_frequency});
 }
 
-void InstrumentImpl::SetSampleData(SampleData sample_data) noexcept {
-  message_queue_.Add(update_sample_, SampleDataMessage{std::move(sample_data)});
+void InstrumentImpl::SetSampleData(std::span<const BarelySlice> slices) noexcept {
+  message_queue_.Add(update_sample_, SampleDataMessage{slices});
 }
 
 void InstrumentImpl::Update(int64_t update_sample) noexcept {

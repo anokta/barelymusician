@@ -12,10 +12,6 @@
 #include "private/performer.h"
 #include "private/repeater.h"
 
-using ::barely::ControlType;
-using ::barely::NoteControlType;
-using ::barely::Slice;
-
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!engine || !out_arpeggiator) return false;
 
@@ -186,19 +182,15 @@ bool BarelyInstrument_Create(BarelyEngineHandle engine,
   if (!engine) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = static_cast<BarelyInstrument*>(engine->CreateInstrument(
-      {reinterpret_cast<const barely::ControlOverride*>(control_overrides),
-       reinterpret_cast<const barely::ControlOverride*>(control_overrides) +
-           control_override_count}));
-  // TODO(#126): Temp hack to allow destroying by handle.
-  (*out_instrument)->engine = engine;
+  *out_instrument = static_cast<BarelyInstrument*>(new barely::InstrumentImpl(
+      *engine, {control_overrides, control_overrides + control_override_count}));
   return true;
 }
 
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  instrument->engine->DestroyInstrument(instrument);
+  delete instrument;
   return true;
 }
 
@@ -208,7 +200,7 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyContro
   if (type >= BarelyControlType_kCount) return false;
   if (!out_value) return false;
 
-  *out_value = instrument->GetControl(static_cast<ControlType>(type));
+  *out_value = instrument->GetControl(type);
   return true;
 }
 
@@ -218,8 +210,7 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, float pi
   if (type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
 
-  if (const auto* value = instrument->GetNoteControl(pitch, static_cast<NoteControlType>(type));
-      value != nullptr) {
+  if (const auto* value = instrument->GetNoteControl(pitch, type); value != nullptr) {
     *out_value = *value;
     return true;
   }
@@ -239,9 +230,7 @@ bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, float* output_s
                               int32_t output_sample_count, double timestamp) {
   if (!instrument) return false;
 
-  return instrument->Process(
-      {output_samples, output_samples + output_sample_count},
-      static_cast<int>(static_cast<double>(instrument->GetSampleRate()) * timestamp));
+  return instrument->Process({output_samples, output_samples + output_sample_count}, timestamp);
 }
 
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
@@ -256,7 +245,7 @@ bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyContro
   if (!instrument) return false;
   if (type >= BarelyControlType_kCount) return false;
 
-  instrument->SetControl(static_cast<ControlType>(type), value);
+  instrument->SetControl(type, value);
   return true;
 }
 
@@ -265,7 +254,7 @@ bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pi
   if (!instrument) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
 
-  instrument->SetNoteControl(pitch, static_cast<NoteControlType>(type), value);
+  instrument->SetNoteControl(pitch, type, value);
   return true;
 }
 
@@ -290,9 +279,7 @@ bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
   if (!instrument) return false;
 
   instrument->SetNoteOn(
-      pitch, {reinterpret_cast<const barely::NoteControlOverride*>(note_control_overrides),
-              reinterpret_cast<const barely::NoteControlOverride*>(note_control_overrides) +
-                  note_control_override_count});
+      pitch, {note_control_overrides, note_control_overrides + note_control_override_count});
   return true;
 }
 
@@ -309,9 +296,7 @@ bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument, const Bar
   if (!instrument) return false;
   if (slice_count < 0 || (!slices && slice_count > 0)) return false;
 
-  instrument->SetSampleData(
-      std::span<const Slice>{reinterpret_cast<const Slice*>(slices),
-                             reinterpret_cast<const Slice*>(slices + slice_count)});
+  instrument->SetSampleData({slices, slices + slice_count});
   return true;
 }
 

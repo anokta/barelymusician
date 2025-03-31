@@ -34,16 +34,9 @@ double EngineImpl::BeatsToSeconds(double beats) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentImpl* EngineImpl::CreateInstrument(
-    std::span<const ControlOverride> control_overrides) noexcept {
-  auto instrument =
-      std::make_unique<InstrumentImpl>(control_overrides, audio_rng_, sample_rate_,
-                                       reference_frequency_, SecondsToSamples(timestamp_));
-  auto* instrument_ptr = instrument.get();
-  [[maybe_unused]] const bool success =
-      instruments_.emplace(instrument_ptr, std::move(instrument)).second;
+void EngineImpl::CreateInstrument(InstrumentImpl* instrument) noexcept {
+  [[maybe_unused]] const bool success = instruments_.emplace(instrument).second;
   assert(success);
-  return instrument_ptr;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -58,21 +51,17 @@ PerformerImpl* EngineImpl::CreatePerformer() noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void EngineImpl::DestroyInstrument(InstrumentImpl* instrument) noexcept {
-  assert(instrument != nullptr);
-  [[maybe_unused]] const bool success = (instruments_.erase(instrument) == 1);
-  assert(success);
   instruments_.erase(instrument);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void EngineImpl::DestroyPerformer(PerformerImpl* performer) noexcept {
-  assert(performer != nullptr);
-  [[maybe_unused]] const bool success = (performers_.erase(performer) == 1);
-  assert(success);
   performers_.erase(performer);
 }
 
 float EngineImpl::GetReferenceFrequency() const noexcept { return reference_frequency_; }
+
+int EngineImpl::GetSampleRate() const noexcept { return sample_rate_; }
 
 double EngineImpl::GetTempo() const noexcept { return tempo_; }
 
@@ -90,7 +79,7 @@ void EngineImpl::SetReferenceFrequency(float reference_frequency) noexcept {
   reference_frequency = std::max(reference_frequency, 0.0f);
   if (reference_frequency_ != reference_frequency) {
     reference_frequency_ = reference_frequency;
-    for (auto& [instrument, _] : instruments_) {
+    for (auto instrument : instruments_) {
       instrument->SetReferenceFrequency(reference_frequency_);
     }
   }
@@ -120,7 +109,7 @@ void EngineImpl::Update(double timestamp) noexcept {
 
         timestamp_ += BeatsToSeconds(update_duration);
         const int64_t update_sample = SecondsToSamples(timestamp_);
-        for (const auto& [instrument, _] : instruments_) {
+        for (const auto instrument : instruments_) {
           instrument->Update(update_sample);
         }
       }
@@ -133,7 +122,7 @@ void EngineImpl::Update(double timestamp) noexcept {
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
       const int64_t update_sample = SecondsToSamples(timestamp_);
-      for (const auto& [instrument, _] : instruments_) {
+      for (const auto instrument : instruments_) {
         instrument->Update(update_sample);
       }
     }

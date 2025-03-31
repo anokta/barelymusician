@@ -1,18 +1,15 @@
 #ifndef BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
 #define BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
 
-#include <array>
 #include <cstdint>
 #include <span>
 #include <unordered_map>
 
 #include "barelymusician.h"
 #include "common/callback.h"
-#include "common/rng.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message_queue.h"
-#include "dsp/sample_data.h"
 
 namespace barely {
 
@@ -24,14 +21,11 @@ class InstrumentImpl {
 
   /// Constructs a new `InstrumentImpl`.
   ///
+  /// @param engine Engine.
   /// @param control_overrides Span of control overrides.
-  /// @param rng Random number generator.
-  /// @param sample_rate Sampling rate in hertz.
-  /// @param reference_frequency Reference frequency in hertz.
-  /// @param update_sample Update sample.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentImpl(std::span<const ControlOverride> control_overrides, AudioRng& rng, int sample_rate,
-                 float reference_frequency, int64_t update_sample) noexcept;
+  InstrumentImpl(BarelyEngine& engine,
+                 std::span<const BarelyControlOverride> control_overrides) noexcept;
 
   /// Destroys `InstrumentImpl`.
   ~InstrumentImpl() noexcept;
@@ -46,19 +40,14 @@ class InstrumentImpl {
   ///
   /// @param type Control type.
   /// @return Control value.
-  [[nodiscard]] float GetControl(ControlType type) const noexcept;
+  [[nodiscard]] float GetControl(BarelyControlType type) const noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @return Note control value.
-  [[nodiscard]] const float* GetNoteControl(float pitch, NoteControlType type) const noexcept;
-
-  /// Returns sampling rate.
-  ///
-  /// @return Sampling rate in hertz.
-  [[nodiscard]] int GetSampleRate() const noexcept;
+  [[nodiscard]] const float* GetNoteControl(float pitch, BarelyNoteControlType type) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -69,10 +58,10 @@ class InstrumentImpl {
   /// Processes output samples.
   ///
   /// @param output_samples Span of mono output samples.
-  /// @param process_sample Process sample.
+  /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool Process(std::span<float> output_samples, int64_t process_sample) noexcept;
+  bool Process(std::span<float> output_samples, double timestamp) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -82,14 +71,14 @@ class InstrumentImpl {
   ///
   /// @param type Control type.
   /// @param value Control value.
-  void SetControl(ControlType type, float value) noexcept;
+  void SetControl(BarelyControlType type, float value) noexcept;
 
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @param value Note control value.
-  void SetNoteControl(float pitch, NoteControlType type, float value) noexcept;
+  void SetNoteControl(float pitch, BarelyNoteControlType type, float value) noexcept;
 
   /// Sets a note off.
   ///
@@ -106,7 +95,8 @@ class InstrumentImpl {
   /// @param pitch Note pitch.
   /// @param note_control_overrides Span of note control overrides.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(float pitch, std::span<const NoteControlOverride> note_control_overrides) noexcept;
+  void SetNoteOn(float pitch,
+                 std::span<const BarelyNoteControlOverride> note_control_overrides) noexcept;
 
   /// Sets the note on callback.
   ///
@@ -120,8 +110,8 @@ class InstrumentImpl {
 
   /// Sets the sample data.
   ///
-  /// @param sample_data Sample data.
-  void SetSampleData(SampleData sample_data) noexcept;
+  /// @param slices Span of slices.
+  void SetSampleData(std::span<const BarelySlice> slices) noexcept;
 
   /// Updates the instrument.
   ///
@@ -129,6 +119,9 @@ class InstrumentImpl {
   void Update(int64_t update_sample) noexcept;
 
  private:
+  // Pointer to engine.
+  BarelyEngine* engine_ = nullptr;
+
   // Array of controls.
   ControlArray controls_;
 
@@ -141,21 +134,14 @@ class InstrumentImpl {
   // Note on callback.
   NoteCallback note_on_callback_ = {};
 
-  // Sampling rate in hertz.
-  int sample_rate_ = 0;
-
   // Update sample.
   int64_t update_sample_ = 0;
 
   // Message queue.
   MessageQueue message_queue_;
 
-  // Processor.
+  // Instrument processor.
   InstrumentProcessor processor_;
-
-  // TODO(#126): Temp hack to allow destroying by handle.
- public:
-  BarelyEngineHandle engine = nullptr;
 };
 
 }  // namespace barely

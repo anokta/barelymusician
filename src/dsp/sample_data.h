@@ -19,7 +19,7 @@ class SampleData {
   /// Constructs a new `SampleData`.
   ///
   /// @param slices Span of slices.
-  SampleData(std::span<const Slice> slices) noexcept;
+  SampleData(std::span<const BarelySlice> slices) noexcept;
 
   [[nodiscard]] bool empty() const noexcept { return slices_.empty(); }
 

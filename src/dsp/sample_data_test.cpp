@@ -16,10 +16,10 @@ using ::testing::Pointee;
 TEST(SampleDataTest, Select) {
   constexpr int kSampleRate = 1;
   constexpr std::array<float, 1> kSamples = {1.0f};
-  const std::array<Slice, 3> kSlices = {
-      Slice(5.0f, kSampleRate, kSamples),
-      Slice(15.0f, kSampleRate, kSamples),
-      Slice(35.0f, kSampleRate, kSamples),
+  const std::array<BarelySlice, 3> kSlices = {
+      BarelySlice{5.0f, kSampleRate, kSamples.data(), 1},
+      BarelySlice{15.0f, kSampleRate, kSamples.data(), 1},
+      BarelySlice{35.0f, kSampleRate, kSamples.data(), 1},
   };
 
   AudioRng rng;

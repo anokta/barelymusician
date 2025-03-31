@@ -31,10 +31,9 @@ class EngineImpl {
 
   /// Creates a new instrument.
   ///
-  /// @param control_overrides Span of control overrides.
-  /// @return Pointer to instrument.
+  /// @param instrument Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentImpl* CreateInstrument(std::span<const ControlOverride> control_overrides) noexcept;
+  void CreateInstrument(InstrumentImpl* instrument) noexcept;
 
   /// Creates a new performer.
   ///
@@ -58,6 +57,11 @@ class EngineImpl {
   ///
   /// @return Reference frequency in hertz.
   [[nodiscard]] float GetReferenceFrequency() const noexcept;
+
+  /// Returns sampling rate.
+  ///
+  /// @return Sampling rate in hertz.
+  [[nodiscard]] int GetSampleRate() const noexcept;
 
   /// Returns tempo.
   ///
@@ -97,6 +101,7 @@ class EngineImpl {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
+  AudioRng& audio_rng() noexcept { return audio_rng_; }
   MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
@@ -110,7 +115,7 @@ class EngineImpl {
   MainRng main_rng_;
 
   // Map of instruments by their pointers.
-  std::unordered_map<InstrumentImpl*, std::unique_ptr<InstrumentImpl>> instruments_;
+  std::unordered_set<InstrumentImpl*> instruments_;
 
   // Map of performers by their pointers.
   std::unordered_map<PerformerImpl*, std::unique_ptr<PerformerImpl>> performers_;

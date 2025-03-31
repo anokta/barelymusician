@@ -15,11 +15,11 @@ constexpr int kReferenceFrequency = 1;
 
 constexpr int kVoiceCount = 4;
 constexpr std::array<float, kVoiceCount> kSamples = {0.5f};
-constexpr std::array<Slice, kVoiceCount> kSlices = {
-    Slice(0.0, kSampleRate, kSamples),
-    Slice(1.0, kSampleRate, kSamples),
-    Slice(2.0, kSampleRate, kSamples),
-    Slice(3.0, kSampleRate, kSamples),
+constexpr std::array<BarelySlice, kVoiceCount> kSlices = {
+    BarelySlice{0.0, kSampleRate, kSamples.data(), kVoiceCount},
+    BarelySlice{1.0, kSampleRate, kSamples.data(), kVoiceCount},
+    BarelySlice{2.0, kSampleRate, kSamples.data(), kVoiceCount},
+    BarelySlice{3.0, kSampleRate, kSamples.data(), kVoiceCount},
 };
 constexpr std::array<float, BarelyNoteControlType_kCount> kNoteControls = {1.0f, 0.0f};
 

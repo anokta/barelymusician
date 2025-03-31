@@ -15,7 +15,7 @@
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!engine || !out_arpeggiator) return false;
 
-  *out_arpeggiator = static_cast<BarelyArpeggiatorHandle>(new barely::ArpeggiatorImpl(*engine));
+  *out_arpeggiator = new BarelyArpeggiator(*engine);
   return true;
 }
 
@@ -87,7 +87,7 @@ bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate)
 bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeggiatorStyle style) {
   if (!arpeggiator) return false;
 
-  arpeggiator->SetStyle(static_cast<barely::ArpeggiatorStyle>(style));
+  arpeggiator->SetStyle(style);
   return true;
 }
 
@@ -430,7 +430,7 @@ bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
 bool BarelyRepeater_Create(BarelyEngineHandle engine, BarelyRepeaterHandle* out_repeater) {
   if (!engine || !out_repeater) return false;
 
-  *out_repeater = static_cast<BarelyRepeaterHandle>(new barely::RepeaterImpl(*engine));
+  *out_repeater = new BarelyRepeater(*engine);
   return true;
 }
 
@@ -487,7 +487,7 @@ bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate) {
 bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style) {
   if (!repeater) return false;
 
-  repeater->SetStyle(static_cast<barely::RepeaterStyle>(style));
+  repeater->SetStyle(style);
   return true;
 }
 

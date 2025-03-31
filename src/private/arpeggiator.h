@@ -8,27 +8,25 @@
 #include "private/instrument.h"
 #include "private/performer.h"
 
-namespace barely {
-
 /// Class that implements an arpeggiator.
-class ArpeggiatorImpl {
+struct BarelyArpeggiator {
  public:
-  // Constructs a new `ArpeggiatorImpl`.
+  // Constructs a new `BarelyArpeggiator`.
   ///
   /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit ArpeggiatorImpl(BarelyEngine& engine) noexcept;
+  explicit BarelyArpeggiator(BarelyEngine& engine) noexcept;
 
-  /// Destroys `ArpeggiatorImpl`.
-  ~ArpeggiatorImpl() noexcept;
+  /// Destroys `BarelyArpeggiator`.
+  ~BarelyArpeggiator() noexcept;
 
   /// Non-copyable.
-  ArpeggiatorImpl(const ArpeggiatorImpl& other) noexcept = delete;
-  ArpeggiatorImpl& operator=(const ArpeggiatorImpl& other) noexcept = delete;
+  BarelyArpeggiator(const BarelyArpeggiator& other) noexcept = delete;
+  BarelyArpeggiator& operator=(const BarelyArpeggiator& other) noexcept = delete;
 
   /// Movable.
-  ArpeggiatorImpl(ArpeggiatorImpl&& other) noexcept = delete;
-  ArpeggiatorImpl& operator=(ArpeggiatorImpl&& other) noexcept = delete;
+  BarelyArpeggiator(BarelyArpeggiator&& other) noexcept = delete;
+  BarelyArpeggiator& operator=(BarelyArpeggiator&& other) noexcept = delete;
 
   /// Returns whether a note is on or not.
   ///
@@ -73,8 +71,8 @@ class ArpeggiatorImpl {
 
   /// Sets the style.
   ///
-  /// @param style ArpeggiatorImpl style.
-  void SetStyle(ArpeggiatorStyle style) noexcept;
+  /// @param style Arpeggiator style.
+  void SetStyle(BarelyArpeggiatorStyle style) noexcept;
 
  private:
   // Helper function to set the next note off.
@@ -93,10 +91,10 @@ class ArpeggiatorImpl {
   BarelyEngine* engine_ = nullptr;
 
   // Performer.
-  PerformerImpl* performer_ = nullptr;
+  barely::PerformerImpl* performer_ = nullptr;
 
   // Task.
-  PerformerImpl::TaskImpl* task_ = nullptr;
+  barely::PerformerImpl::TaskImpl* task_ = nullptr;
 
   // Pointer to instrument.
   BarelyInstrument* instrument_ = nullptr;
@@ -108,7 +106,7 @@ class ArpeggiatorImpl {
   float gate_ratio_ = 1.0f;
 
   // Style.
-  ArpeggiatorStyle style_ = ArpeggiatorStyle::kUp;
+  BarelyArpeggiatorStyle style_ = BarelyArpeggiatorStyle_kUp;
 
   // Current index.
   int index_ = -1;
@@ -116,10 +114,5 @@ class ArpeggiatorImpl {
   // Current pitch.
   float pitch_ = 0.0f;
 };
-
-}  // namespace barely
-
-struct BarelyArpeggiator : public barely::ArpeggiatorImpl {};
-static_assert(sizeof(BarelyArpeggiator) == sizeof(barely::ArpeggiatorImpl));
 
 #endif  // BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_H_

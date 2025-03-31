@@ -10,27 +10,25 @@
 #include "private/instrument.h"
 #include "private/performer.h"
 
-namespace barely {
-
 /// Class that implements a repeater.
-class RepeaterImpl {
+struct BarelyRepeater {
  public:
-  // Constructs a new `RepeaterImpl`.
+  // Constructs a new `BarelyRepeater`.
   ///
   /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit RepeaterImpl(BarelyEngine& engine) noexcept;
+  explicit BarelyRepeater(BarelyEngine& engine) noexcept;
 
-  /// Destroys `RepeaterImpl`.
-  ~RepeaterImpl() noexcept;
+  /// Destroys `BarelyRepeater`.
+  ~BarelyRepeater() noexcept;
 
   /// Non-copyable.
-  RepeaterImpl(const RepeaterImpl& other) noexcept = delete;
-  RepeaterImpl& operator=(const RepeaterImpl& other) noexcept = delete;
+  BarelyRepeater(const BarelyRepeater& other) noexcept = delete;
+  BarelyRepeater& operator=(const BarelyRepeater& other) noexcept = delete;
 
   /// Movable.
-  RepeaterImpl(RepeaterImpl&& other) noexcept = delete;
-  RepeaterImpl& operator=(RepeaterImpl&& other) noexcept = delete;
+  BarelyRepeater(BarelyRepeater&& other) noexcept = delete;
+  BarelyRepeater& operator=(BarelyRepeater&& other) noexcept = delete;
 
   /// Clears all notes.
   void Clear() noexcept;
@@ -63,8 +61,8 @@ class RepeaterImpl {
 
   /// Sets the style.
   ///
-  /// @param style RepeaterImpl style.
-  void SetStyle(RepeaterStyle style) noexcept;
+  /// @param style Repeater style.
+  void SetStyle(BarelyRepeaterStyle style) noexcept;
 
   /// Starts the repeater.
   ///
@@ -86,7 +84,7 @@ class RepeaterImpl {
   BarelyEngine* engine_ = nullptr;
 
   // Performer.
-  PerformerImpl* performer_ = nullptr;
+  barely::PerformerImpl* performer_ = nullptr;
 
   // Pointer to instrument.
   BarelyInstrument* instrument_ = nullptr;
@@ -95,7 +93,7 @@ class RepeaterImpl {
   std::vector<std::pair<std::optional<float>, int>> pitches_;
 
   // Style.
-  RepeaterStyle style_ = RepeaterStyle::kForward;
+  BarelyRepeaterStyle style_ = BarelyRepeaterStyle_kForward;
 
   // Current index.
   int index_ = -1;
@@ -106,10 +104,5 @@ class RepeaterImpl {
   // Remaining length;
   int remaining_length_ = 0;
 };
-
-}  // namespace barely
-
-struct BarelyRepeater : public barely::RepeaterImpl {};
-static_assert(sizeof(BarelyRepeater) == sizeof(barely::RepeaterImpl));
 
 #endif  // BARELYMUSICIAN_PRIVATE_REPEATER_H_

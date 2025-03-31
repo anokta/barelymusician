@@ -8,33 +8,31 @@
 #include "private/engine.h"
 #include "private/instrument.h"
 
-namespace barely {
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
-RepeaterImpl::RepeaterImpl(BarelyEngine& engine) noexcept
+BarelyRepeater::BarelyRepeater(BarelyEngine& engine) noexcept
     : engine_(&engine), performer_(engine.CreatePerformer()) {
   performer_->SetBeatCallback({
       [](void* user_data) noexcept {
-        auto& repeater = *static_cast<RepeaterImpl*>(user_data);
+        auto& repeater = *static_cast<BarelyRepeater*>(user_data);
         repeater.OnBeat();
       },
       this,
   });
 }
 
-RepeaterImpl::~RepeaterImpl() noexcept {
+BarelyRepeater::~BarelyRepeater() noexcept {
   if (IsPlaying() && instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
   engine_->DestroyPerformer(performer_);
 }
 
-void RepeaterImpl::Clear() noexcept { pitches_.clear(); }
+void BarelyRepeater::Clear() noexcept { pitches_.clear(); }
 
-bool RepeaterImpl::IsPlaying() const noexcept { return performer_->IsPlaying(); }
+bool BarelyRepeater::IsPlaying() const noexcept { return performer_->IsPlaying(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void RepeaterImpl::Pop() noexcept {
+void BarelyRepeater::Pop() noexcept {
   if (pitches_.empty()) {
     return;
   }
@@ -48,26 +46,26 @@ void RepeaterImpl::Pop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void RepeaterImpl::Push(std::optional<float> pitch_or, int length) noexcept {
+void BarelyRepeater::Push(std::optional<float> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void RepeaterImpl::SetInstrument(BarelyInstrument* instrument) noexcept {
+void BarelyRepeater::SetInstrument(BarelyInstrument* instrument) noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
   instrument_ = instrument;
 }
 
-void RepeaterImpl::SetRate(double rate) noexcept {
+void BarelyRepeater::SetRate(double rate) noexcept {
   const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
   performer_->SetLoopLength(length);
 }
 
-void RepeaterImpl::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
+void BarelyRepeater::SetStyle(BarelyRepeaterStyle style) noexcept { style_ = style; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void RepeaterImpl::Start(float pitch_offset) noexcept {
+void BarelyRepeater::Start(float pitch_offset) noexcept {
   if (IsPlaying()) {
     return;
   }
@@ -76,7 +74,7 @@ void RepeaterImpl::Start(float pitch_offset) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void RepeaterImpl::Stop() noexcept {
+void BarelyRepeater::Stop() noexcept {
   if (!IsPlaying()) {
     return;
   }
@@ -89,7 +87,7 @@ void RepeaterImpl::Stop() noexcept {
   remaining_length_ = 0;
 }
 
-void RepeaterImpl::OnBeat() noexcept {
+void BarelyRepeater::OnBeat() noexcept {
   if (pitches_.empty() || instrument_ == nullptr) {
     return;
   }
@@ -105,19 +103,19 @@ void RepeaterImpl::OnBeat() noexcept {
   instrument_->SetNoteOn(*pitches_[index_].first + pitch_offset_, {});
 }
 
-bool RepeaterImpl::Update() noexcept {
+bool BarelyRepeater::Update() noexcept {
   if (--remaining_length_ > 0 || pitches_.empty()) {
     return false;
   }
   const int size = static_cast<int>(pitches_.size());
   switch (style_) {
-    case RepeaterStyle::kForward:
+    case BarelyRepeaterStyle_kForward:
       index_ = (index_ + 1) % size;
       break;
-    case RepeaterStyle::kBackward:
+    case BarelyRepeaterStyle_kBackward:
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
-    case RepeaterStyle::kRandom:
+    case BarelyRepeaterStyle_kRandom:
       index_ = engine_->main_rng().Generate(0, size);
       break;
     default:
@@ -127,5 +125,3 @@ bool RepeaterImpl::Update() noexcept {
   remaining_length_ = pitches_[index_].second;
   return true;
 }
-
-}  // namespace barely

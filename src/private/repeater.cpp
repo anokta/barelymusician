@@ -11,8 +11,8 @@
 namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-RepeaterImpl::RepeaterImpl(EngineImpl& engine) noexcept
-    : engine_(&engine), performer_(engine_->CreatePerformer()) {
+RepeaterImpl::RepeaterImpl(BarelyEngine& engine) noexcept
+    : engine_(&engine), performer_(engine.CreatePerformer()) {
   performer_->SetBeatCallback({
       [](void* user_data) noexcept {
         auto& repeater = *static_cast<RepeaterImpl*>(user_data);

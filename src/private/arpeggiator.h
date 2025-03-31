@@ -17,7 +17,7 @@ class ArpeggiatorImpl {
   ///
   /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit ArpeggiatorImpl(EngineImpl& engine) noexcept;
+  explicit ArpeggiatorImpl(BarelyEngine& engine) noexcept;
 
   /// Destroys `ArpeggiatorImpl`.
   ~ArpeggiatorImpl() noexcept;
@@ -89,8 +89,8 @@ class ArpeggiatorImpl {
   // Updates the arpeggiator.
   void Update() noexcept;
 
-  // Engine.
-  EngineImpl* engine_ = nullptr;
+  // Pointer to engine.
+  BarelyEngine* engine_ = nullptr;
 
   // Performer.
   PerformerImpl* performer_ = nullptr;

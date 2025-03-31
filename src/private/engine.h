@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <memory>
-#include <span>
 #include <unordered_set>
 #include <utility>
 
@@ -12,16 +11,14 @@
 #include "private/instrument.h"
 #include "private/performer.h"
 
-namespace barely {
-
 /// Class that implements an engine.
-class EngineImpl {
+struct BarelyEngine {
  public:
-  /// Constructs a new `EngineImpl`.
+  /// Constructs a new `BarelyEngine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit EngineImpl(int sample_rate) noexcept;
+  explicit BarelyEngine(int sample_rate) noexcept;
 
   /// Returns the corresponding number of seconds for a given number of beats.
   ///
@@ -39,7 +36,7 @@ class EngineImpl {
   ///
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  PerformerImpl* CreatePerformer() noexcept;
+  barely::PerformerImpl* CreatePerformer() noexcept;
 
   /// Destroys an instrument.
   ///
@@ -51,7 +48,7 @@ class EngineImpl {
   ///
   /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyPerformer(PerformerImpl* performer) noexcept;
+  void DestroyPerformer(barely::PerformerImpl* performer) noexcept;
 
   /// Returns reference frequency.
   ///
@@ -101,24 +98,24 @@ class EngineImpl {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
-  AudioRng& audio_rng() noexcept { return audio_rng_; }
-  MainRng& main_rng() noexcept { return main_rng_; }
+  barely::AudioRng& audio_rng() noexcept { return audio_rng_; }
+  barely::MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
   // Sampling rate in hertz.
-  const int sample_rate_ = 0;
+  int sample_rate_ = 0;
 
   // Random number generator for the audio thread.
-  AudioRng audio_rng_;
+  barely::AudioRng audio_rng_;
 
   // Random number generator for the main thread.
-  MainRng main_rng_;
+  barely::MainRng main_rng_;
 
   // Set of pointers to instruments.
   std::unordered_set<BarelyInstrument*> instruments_;
 
   // Map of performers by their pointers.
-  std::unordered_map<PerformerImpl*, std::unique_ptr<PerformerImpl>> performers_;
+  std::unordered_map<barely::PerformerImpl*, std::unique_ptr<barely::PerformerImpl>> performers_;
 
   // Reference frequency at zero pitch (C4 by default).
   float reference_frequency_ = 440.0f * std::pow(2.0f, -9.0f / 12.0f);
@@ -129,20 +126,5 @@ class EngineImpl {
   // Timestamp in seconds.
   double timestamp_ = 0.0;
 };
-
-}  // namespace barely
-
-struct BarelyEngine : public barely::EngineImpl {
- public:
-  explicit BarelyEngine(int32_t sample_rate) noexcept : EngineImpl(sample_rate) {}
-  ~BarelyEngine() = default;
-
-  // Non-copyable and non-movable.
-  BarelyEngine(const BarelyEngine& other) noexcept = delete;
-  BarelyEngine& operator=(const BarelyEngine& other) noexcept = delete;
-  BarelyEngine(BarelyEngine&& other) noexcept = delete;
-  BarelyEngine& operator=(BarelyEngine&& other) noexcept = delete;
-};
-static_assert(sizeof(BarelyEngine) == sizeof(barely::EngineImpl));
 
 #endif  // BARELYMUSICIAN_PRIVATE_ENGINE_H_

@@ -19,7 +19,7 @@ class RepeaterImpl {
   ///
   /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit RepeaterImpl(EngineImpl& engine) noexcept;
+  explicit RepeaterImpl(BarelyEngine& engine) noexcept;
 
   /// Destroys `RepeaterImpl`.
   ~RepeaterImpl() noexcept;
@@ -82,8 +82,8 @@ class RepeaterImpl {
   // Updates the repeater.
   bool Update() noexcept;
 
-  // Engine.
-  EngineImpl* engine_ = nullptr;
+  // Pointer to engine.
+  BarelyEngine* engine_ = nullptr;
 
   // Performer.
   PerformerImpl* performer_ = nullptr;

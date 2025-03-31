@@ -8,7 +8,6 @@
 #include "gtest/gtest.h"
 #include "private/performer.h"
 
-namespace barely {
 namespace {
 
 using ::testing::Optional;
@@ -23,7 +22,7 @@ TEST(EngineTest, BeatsSecondsConversion) {
   constexpr std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0, -24.6};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0, -12.3};
 
-  EngineImpl engine(kSampleRate);
+  BarelyEngine engine(kSampleRate);
   engine.SetTempo(kTempo);
 
   for (int i = 0; i < kValueCount; ++i) {
@@ -38,26 +37,26 @@ TEST(EngineTest, BeatsSecondsConversion) {
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
-  EngineImpl engine(kSampleRate);
+  BarelyEngine engine(kSampleRate);
 
   // Create a performer.
-  PerformerImpl* performer = engine.CreatePerformer();
+  barely::PerformerImpl* performer = engine.CreatePerformer();
 
   // Create a task.
-  TaskState task_state = TaskState::kEnd;
+  barely::TaskState task_state = barely::TaskState::kEnd;
   double task_position = 0.0;
-  std::function<void(TaskState)> process_callback = [&](TaskState state) {
+  std::function<void(barely::TaskState)> process_callback = [&](barely::TaskState state) {
     // `kUpdate` can only be called after `kBegin`, and not the other way around.
-    EXPECT_TRUE(task_state != TaskState::kBegin || state == TaskState::kUpdate);
-    EXPECT_TRUE(task_state != TaskState::kUpdate || state != TaskState::kBegin);
+    EXPECT_TRUE(task_state != barely::TaskState::kBegin || state == barely::TaskState::kUpdate);
+    EXPECT_TRUE(task_state != barely::TaskState::kUpdate || state != barely::TaskState::kBegin);
     task_state = state;
     task_position = performer->GetPosition();
   };
   auto* task = performer->CreateTask(1.0, 2.0,
                                      {
                                          [](BarelyTaskState state, void* user_data) {
-                                           (*static_cast<std::function<void(TaskState)>*>(
-                                               user_data))(static_cast<TaskState>(state));
+                                           (*static_cast<std::function<void(barely::TaskState)>*>(
+                                               user_data))(static_cast<barely::TaskState>(state));
                                          },
                                          &process_callback,
                                      });
@@ -78,7 +77,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_THAT(performer->GetNextDuration(), Optional(0.0));
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
   EXPECT_FALSE(task->IsActive());
-  EXPECT_EQ(task_state, TaskState::kEnd);
+  EXPECT_EQ(task_state, barely::TaskState::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp inside the task, which should be triggered now.
@@ -87,7 +86,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_THAT(performer->GetNextDuration(), Optional(0.5));
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 2.5);
   EXPECT_TRUE(task->IsActive());
-  EXPECT_EQ(task_state, TaskState::kUpdate);
+  EXPECT_EQ(task_state, barely::TaskState::kUpdate);
   EXPECT_DOUBLE_EQ(task_position, 2.5);
 
   // Update the timestamp just past the task, which should not be active anymore.
@@ -96,7 +95,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_FALSE(performer->GetNextDuration().has_value());
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 3.0);
   EXPECT_FALSE(task->IsActive());
-  EXPECT_EQ(task_state, TaskState::kEnd);
+  EXPECT_EQ(task_state, barely::TaskState::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 3.0);
 
   // Remove the performer.
@@ -105,7 +104,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
 // Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
-  EngineImpl engine(kSampleRate);
+  BarelyEngine engine(kSampleRate);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
 
   engine.SetTempo(200.0);
@@ -119,4 +118,3 @@ TEST(EngineTest, SetTempo) {
 }
 
 }  // namespace
-}  // namespace barely

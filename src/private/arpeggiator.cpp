@@ -10,7 +10,7 @@
 namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-ArpeggiatorImpl::ArpeggiatorImpl(EngineImpl& engine) noexcept
+ArpeggiatorImpl::ArpeggiatorImpl(BarelyEngine& engine) noexcept
     : engine_(&engine), performer_(engine_->CreatePerformer()) {
   performer_->SetLooping(true);
   performer_->SetLoopLength(1.0);

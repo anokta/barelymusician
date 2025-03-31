@@ -304,15 +304,14 @@ bool BarelyPerformer_Create(BarelyEngineHandle engine, BarelyPerformerHandle* ou
   if (!engine) return false;
   if (!out_performer) return false;
 
-  *out_performer = static_cast<BarelyPerformer*>(engine->CreatePerformer());
-  (*out_performer)->engine = engine;
+  *out_performer = new BarelyPerformer(*engine);
   return true;
 }
 
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  performer->engine->DestroyPerformer(performer);
+  delete performer;
   return true;
 }
 
@@ -529,17 +528,14 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double 
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
-  *out_task =
-      static_cast<BarelyTask*>(performer->CreateTask(position, duration, {callback, user_data}));
-  // TODO(#126): Temp hack to allow destroying by handle.
-  (*out_task)->performer = performer;
+  *out_task = new BarelyTask(*performer, position, duration, {callback, user_data});
   return *out_task;
 }
 
 bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
-  task->performer->DestroyTask(task);
+  delete task;
   return true;
 }
 

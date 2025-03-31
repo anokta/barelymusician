@@ -2,16 +2,14 @@
 #define BARELYMUSICIAN_PRIVATE_ENGINE_H_
 
 #include <cmath>
-#include <memory>
 #include <unordered_set>
-#include <utility>
 
 #include "barelymusician.h"
 #include "common/rng.h"
 #include "private/instrument.h"
 #include "private/performer.h"
 
-/// Class that implements an engine.
+/// Implementation of an engine.
 struct BarelyEngine {
  public:
   /// Constructs a new `BarelyEngine`.
@@ -36,7 +34,7 @@ struct BarelyEngine {
   ///
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  barely::PerformerImpl* CreatePerformer() noexcept;
+  void CreatePerformer(BarelyPerformer* performer) noexcept;
 
   /// Destroys an instrument.
   ///
@@ -48,7 +46,7 @@ struct BarelyEngine {
   ///
   /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyPerformer(barely::PerformerImpl* performer) noexcept;
+  void DestroyPerformer(BarelyPerformer* performer) noexcept;
 
   /// Returns reference frequency.
   ///
@@ -114,8 +112,8 @@ struct BarelyEngine {
   // Set of pointers to instruments.
   std::unordered_set<BarelyInstrument*> instruments_;
 
-  // Map of performers by their pointers.
-  std::unordered_map<barely::PerformerImpl*, std::unique_ptr<barely::PerformerImpl>> performers_;
+  // Set of pointers to performers.
+  std::unordered_set<BarelyPerformer*> performers_;
 
   // Reference frequency at zero pitch (C4 by default).
   float reference_frequency_ = 440.0f * std::pow(2.0f, -9.0f / 12.0f);

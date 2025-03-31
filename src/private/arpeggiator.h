@@ -8,7 +8,7 @@
 #include "private/instrument.h"
 #include "private/performer.h"
 
-/// Class that implements an arpeggiator.
+/// Implementation of an arpeggiator.
 struct BarelyArpeggiator {
  public:
   // Constructs a new `BarelyArpeggiator`.
@@ -17,8 +17,8 @@ struct BarelyArpeggiator {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit BarelyArpeggiator(BarelyEngine& engine) noexcept;
 
-  /// Destroys `BarelyArpeggiator`.
-  ~BarelyArpeggiator() noexcept;
+  /// Default destructor.
+  ~BarelyArpeggiator() noexcept = default;
 
   /// Non-copyable.
   BarelyArpeggiator(const BarelyArpeggiator& other) noexcept = delete;
@@ -91,10 +91,10 @@ struct BarelyArpeggiator {
   BarelyEngine* engine_ = nullptr;
 
   // Performer.
-  barely::PerformerImpl* performer_ = nullptr;
+  BarelyPerformer performer_;
 
   // Task.
-  barely::PerformerImpl::TaskImpl* task_ = nullptr;
+  BarelyTask task_;
 
   // Pointer to instrument.
   BarelyInstrument* instrument_ = nullptr;

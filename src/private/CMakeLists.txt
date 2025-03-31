@@ -10,6 +10,8 @@ target_sources(
   performer.h
   repeater.cpp
   repeater.h
+  task.cpp
+  task.h
 )
 
 if(ENABLE_TESTS)

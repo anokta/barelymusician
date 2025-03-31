@@ -10,8 +10,8 @@
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyRepeater::BarelyRepeater(BarelyEngine& engine) noexcept
-    : engine_(&engine), performer_(engine.CreatePerformer()) {
-  performer_->SetBeatCallback({
+    : engine_(&engine), performer_(engine) {
+  performer_.SetBeatCallback({
       [](void* user_data) noexcept {
         auto& repeater = *static_cast<BarelyRepeater*>(user_data);
         repeater.OnBeat();
@@ -24,12 +24,11 @@ BarelyRepeater::~BarelyRepeater() noexcept {
   if (IsPlaying() && instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
-  engine_->DestroyPerformer(performer_);
 }
 
 void BarelyRepeater::Clear() noexcept { pitches_.clear(); }
 
-bool BarelyRepeater::IsPlaying() const noexcept { return performer_->IsPlaying(); }
+bool BarelyRepeater::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyRepeater::Pop() noexcept {
@@ -59,7 +58,7 @@ void BarelyRepeater::SetInstrument(BarelyInstrument* instrument) noexcept {
 
 void BarelyRepeater::SetRate(double rate) noexcept {
   const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
-  performer_->SetLoopLength(length);
+  performer_.SetLoopLength(length);
 }
 
 void BarelyRepeater::SetStyle(BarelyRepeaterStyle style) noexcept { style_ = style; }
@@ -70,7 +69,7 @@ void BarelyRepeater::Start(float pitch_offset) noexcept {
     return;
   }
   pitch_offset_ = pitch_offset;
-  performer_->Start();
+  performer_.Start();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -78,8 +77,8 @@ void BarelyRepeater::Stop() noexcept {
   if (!IsPlaying()) {
     return;
   }
-  performer_->Stop();
-  performer_->SetPosition(0.0);
+  performer_.Stop();
+  performer_.SetPosition(0.0);
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }

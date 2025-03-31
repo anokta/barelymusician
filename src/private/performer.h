@@ -7,133 +7,43 @@
 #include <memory>
 #include <optional>
 #include <set>
+#include <unordered_set>
 #include <utility>
 
 #include "barelymusician.h"
 #include "common/callback.h"
+#include "private/task.h"
 
-namespace barely {
-
-/// Class that implements a performer.
-class PerformerImpl {
+/// Implementation of a performer.
+struct BarelyPerformer {
  public:
   /// Beat callback alias.
-  using BeatCallback = Callback<BarelyPerformer_BeatCallback>;
+  using BeatCallback = barely::Callback<BarelyPerformer_BeatCallback>;
 
-  /// TaskImpl.
-  class TaskImpl {
-   public:
-    /// Process callback alias.
-    using ProcessCallback = Callback<BarelyTask_ProcessCallback>;
+  /// Constructs a new `BarelyPerformer`.
+  ///
+  /// @param engine Engine.
+  explicit BarelyPerformer(BarelyEngine& engine) noexcept;
 
-    /// Constructs a new `TaskImpl`.
-    ///
-    /// @param performer Performer.
-    /// @param position Task position.
-    /// @param duration Task duration.
-    /// @param callback Task process callback.
-    TaskImpl(PerformerImpl& performer, double position, double duration,
-             ProcessCallback callback) noexcept
-        : performer_(performer),
-          position_(position),
-          duration_(duration),
-          process_callback_(callback) {
-      assert(duration > 0.0 && "Invalid task duration");
-    }
+  /// Destroys `BarelyPerformer`.
+  ~BarelyPerformer() noexcept;
 
-    /// Returns the duration.
-    ///
-    /// @return Duration in beats.
-    double GetDuration() const noexcept { return duration_; }
-
-    /// Returns the position.
-    ///
-    /// @return Position in beats.
-    double GetPosition() const noexcept { return position_; }
-
-    /// Returns the end position.
-    ///
-    /// @return End position in beats.
-    double GetEndPosition() const noexcept { return position_ + duration_; }
-
-    /// Returns whether the task is currently active or not.
-    ///
-    /// @return True if active, false otherwise.
-    bool IsActive() const noexcept { return is_active_; }
-
-    /// Returns whether a position is inside the task boundaries.
-    ///
-    /// @param position Position in beats.
-    /// @return True if inside, false otherwise.
-    bool IsInside(double position) const noexcept {
-      return position >= position_ && position < GetEndPosition();
-    }
-
-    /// Processes the task.
-    ///
-    /// @param state Task state.
-    void Process(TaskState state) noexcept {
-      process_callback_(static_cast<BarelyTaskState>(state));
-    }
-
-    /// Sets whether the task is currently active or not.
-    ///
-    /// @param is_active True if active, false otherwise.
-    void SetActive(bool is_active) noexcept {
-      is_active_ = is_active;
-      Process(is_active_ ? TaskState::kBegin : TaskState::kEnd);
-    }
-
-    /// Sets the duration.
-    ///
-    /// @param duration Duration in beats.
-    void SetDuration(double duration) noexcept;
-
-    /// Sets the position.
-    ///
-    /// @param position Position in beats.
-    void SetPosition(double position) noexcept;
-
-    /// Sets the process callback.
-    ///
-    /// @param callback Task process callback.
-    void SetProcessCallback(ProcessCallback callback) noexcept;
-
-   private:
-    // Performer.
-    PerformerImpl& performer_;
-
-    // Position in beats.
-    double position_;
-
-    // Duration in beats.
-    double duration_;
-
-    // Process callback.
-    ProcessCallback process_callback_;
-
-    // Denotes whether the task is active or not.
-    bool is_active_ = false;
-
-    // TODO(#126): Temp hack to allow destroying by handle.
-   public:
-    BarelyPerformerHandle performer = nullptr;
-  };
+  /// Non-copyable and non-movable.
+  BarelyPerformer(const BarelyPerformer& other) noexcept = delete;
+  BarelyPerformer& operator=(const BarelyPerformer& other) noexcept = delete;
+  BarelyPerformer(BarelyPerformer&& other) noexcept = delete;
+  BarelyPerformer& operator=(BarelyPerformer&& other) noexcept = delete;
 
   /// Creates a new task.
   ///
-  /// @param position Task position in beats.
-  /// @param duration Task duration in beats.
-  /// @param callback Task process callback.
-  /// @return Pointer to task.
+  /// @param task Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  TaskImpl* CreateTask(double position, double duration,
-                       TaskImpl::ProcessCallback callback) noexcept;
+  void CreateTask(BarelyTask* task) noexcept;
 
   /// Destroys a task.
   ///
   /// @param task Pointer to task.
-  void DestroyTask(TaskImpl* task) noexcept;
+  void DestroyTask(BarelyTask* task) noexcept;
 
   /// Returns loop begin position.
   ///
@@ -205,13 +115,13 @@ class PerformerImpl {
   ///
   /// @param task Pointer to task.
   /// @param old_duration Old task duration.
-  void SetTaskDuration(TaskImpl* task, double old_duration) noexcept;
+  void SetTaskDuration(BarelyTask* task, double old_duration) noexcept;
 
   /// Sets task position.
   ///
   /// @param task Pointer to task.
   /// @param old_position Old task position.
-  void SetTaskPosition(TaskImpl* task, double old_position) noexcept;
+  void SetTaskPosition(BarelyTask* task, double old_position) noexcept;
 
   /// Stops performer.
   void Start() noexcept;
@@ -227,21 +137,24 @@ class PerformerImpl {
 
  private:
   //  Returns an iterator to the next inactive task to process.
-  [[nodiscard]] std::set<std::pair<double, TaskImpl*>>::const_iterator GetNextInactiveTask()
+  [[nodiscard]] std::set<std::pair<double, BarelyTask*>>::const_iterator GetNextInactiveTask()
       const noexcept;
 
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
 
   /// Sets the active status of a task.
-  void SetTaskActive(const std::set<std::pair<double, TaskImpl*>>::iterator& it,
+  void SetTaskActive(const std::set<std::pair<double, BarelyTask*>>::iterator& it,
                      bool is_active) noexcept;
 
   /// Updates the key of an active task.
-  void UpdateActiveTaskKey(double old_end_position, TaskImpl* task) noexcept;
+  void UpdateActiveTaskKey(double old_end_position, BarelyTask* task) noexcept;
 
   /// Updates the key of an inactive task.
-  void UpdateInactiveTaskKey(double old_position, TaskImpl* task) noexcept;
+  void UpdateInactiveTaskKey(double old_position, BarelyTask* task) noexcept;
+
+  // Pointer to engine.
+  BarelyEngine* engine_ = nullptr;
 
   // Beat callback.
   BeatCallback beat_callback_ = {};
@@ -261,24 +174,11 @@ class PerformerImpl {
   // Position in beats.
   double position_ = 0.0;
 
-  // Map of tasks with their position-pointer pairs.
-  std::unordered_map<TaskImpl*, std::unique_ptr<TaskImpl>> tasks_;
-  std::set<std::pair<double, TaskImpl*>> active_tasks_;
-  std::set<std::pair<double, TaskImpl*>> inactive_tasks_;
+  // Set of task position-pointer pairs.
+  std::set<std::pair<double, BarelyTask*>> active_tasks_;
+  std::set<std::pair<double, BarelyTask*>> inactive_tasks_;
 
   std::optional<double> last_beat_position_ = std::nullopt;
-
-  // TODO(#126): Temp hack to allow destroying by handle.
- public:
-  BarelyEngineHandle engine = nullptr;
 };
-
-}  // namespace barely
-
-struct BarelyPerformer : public barely::PerformerImpl {};
-static_assert(sizeof(BarelyPerformer) == sizeof(barely::PerformerImpl));
-
-struct BarelyTask : public barely::PerformerImpl::TaskImpl {};
-static_assert(sizeof(BarelyTask) == sizeof(barely::PerformerImpl::TaskImpl));
 
 #endif  // BARELYMUSICIAN_PRIVATE_PERFORMER_H_

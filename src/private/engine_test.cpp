@@ -40,7 +40,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   BarelyEngine engine(kSampleRate);
 
   // Create a performer.
-  barely::PerformerImpl* performer = engine.CreatePerformer();
+  BarelyPerformer performer(engine);
 
   // Create a task.
   barely::TaskState task_state = barely::TaskState::kEnd;
@@ -50,56 +50,53 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
     EXPECT_TRUE(task_state != barely::TaskState::kBegin || state == barely::TaskState::kUpdate);
     EXPECT_TRUE(task_state != barely::TaskState::kUpdate || state != barely::TaskState::kBegin);
     task_state = state;
-    task_position = performer->GetPosition();
+    task_position = performer.GetPosition();
   };
-  auto* task = performer->CreateTask(1.0, 2.0,
-                                     {
-                                         [](BarelyTaskState state, void* user_data) {
-                                           (*static_cast<std::function<void(barely::TaskState)>*>(
-                                               user_data))(static_cast<barely::TaskState>(state));
-                                         },
-                                         &process_callback,
-                                     });
+  BarelyTask task(performer, 1.0, 2.0,
+                  {
+                      [](BarelyTaskState state, void* user_data) {
+                        (*static_cast<std::function<void(barely::TaskState)>*>(user_data))(
+                            static_cast<barely::TaskState>(state));
+                      },
+                      &process_callback,
+                  });
 
   // Start the performer with a tempo of one beat per second.
   engine.SetTempo(60.0);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
 
-  EXPECT_FALSE(performer->IsPlaying());
-  EXPECT_FALSE(task->IsActive());
-  performer->Start();
-  EXPECT_TRUE(performer->IsPlaying());
-  EXPECT_FALSE(task->IsActive());
+  EXPECT_FALSE(performer.IsPlaying());
+  EXPECT_FALSE(task.IsActive());
+  performer.Start();
+  EXPECT_TRUE(performer.IsPlaying());
+  EXPECT_FALSE(task.IsActive());
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer->GetNextDuration(), Optional(1.0));
+  EXPECT_THAT(performer.GetNextDuration(), Optional(1.0));
   engine.Update(1.0);
-  EXPECT_THAT(performer->GetNextDuration(), Optional(0.0));
-  EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
-  EXPECT_FALSE(task->IsActive());
+  EXPECT_THAT(performer.GetNextDuration(), Optional(0.0));
+  EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
+  EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_state, barely::TaskState::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp inside the task, which should be triggered now.
-  EXPECT_THAT(performer->GetNextDuration(), Optional(0.0));
+  EXPECT_THAT(performer.GetNextDuration(), Optional(0.0));
   engine.Update(2.5);
-  EXPECT_THAT(performer->GetNextDuration(), Optional(0.5));
-  EXPECT_DOUBLE_EQ(performer->GetPosition(), 2.5);
-  EXPECT_TRUE(task->IsActive());
+  EXPECT_THAT(performer.GetNextDuration(), Optional(0.5));
+  EXPECT_DOUBLE_EQ(performer.GetPosition(), 2.5);
+  EXPECT_TRUE(task.IsActive());
   EXPECT_EQ(task_state, barely::TaskState::kUpdate);
   EXPECT_DOUBLE_EQ(task_position, 2.5);
 
   // Update the timestamp just past the task, which should not be active anymore.
-  EXPECT_THAT(performer->GetNextDuration(), Optional(0.5));
+  EXPECT_THAT(performer.GetNextDuration(), Optional(0.5));
   engine.Update(3.0);
-  EXPECT_FALSE(performer->GetNextDuration().has_value());
-  EXPECT_DOUBLE_EQ(performer->GetPosition(), 3.0);
-  EXPECT_FALSE(task->IsActive());
+  EXPECT_FALSE(performer.GetNextDuration().has_value());
+  EXPECT_DOUBLE_EQ(performer.GetPosition(), 3.0);
+  EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_state, barely::TaskState::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 3.0);
-
-  // Remove the performer.
-  engine.DestroyPerformer(performer);
 }
 
 // Tests that the engine sets its tempo as expected.

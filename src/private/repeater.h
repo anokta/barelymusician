@@ -10,7 +10,7 @@
 #include "private/instrument.h"
 #include "private/performer.h"
 
-/// Class that implements a repeater.
+/// Implementation of a repeater.
 struct BarelyRepeater {
  public:
   // Constructs a new `BarelyRepeater`.
@@ -84,7 +84,7 @@ struct BarelyRepeater {
   BarelyEngine* engine_ = nullptr;
 
   // Performer.
-  barely::PerformerImpl* performer_ = nullptr;
+  BarelyPerformer performer_;
 
   // Pointer to instrument.
   BarelyInstrument* instrument_ = nullptr;

@@ -13,8 +13,6 @@
 
 namespace {
 
-using ::barely::PerformerImpl;
-
 // Converts minutes to seconds.
 constexpr double kMinutesToSeconds = 60.0;
 
@@ -39,13 +37,9 @@ void BarelyEngine::CreateInstrument(BarelyInstrumentHandle instrument) noexcept 
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-PerformerImpl* BarelyEngine::CreatePerformer() noexcept {
-  auto performer = std::make_unique<PerformerImpl>();
-  auto* performer_ptr = performer.get();
-  [[maybe_unused]] const bool success =
-      performers_.emplace(performer_ptr, std::move(performer)).second;
+void BarelyEngine::CreatePerformer(BarelyPerformer* performer) noexcept {
+  [[maybe_unused]] const bool success = performers_.emplace(performer).second;
   assert(success);
-  return performer_ptr;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -54,7 +48,7 @@ void BarelyEngine::DestroyInstrument(BarelyInstrumentHandle instrument) noexcept
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::DestroyPerformer(PerformerImpl* performer) noexcept {
+void BarelyEngine::DestroyPerformer(BarelyPerformer* performer) noexcept {
   performers_.erase(performer);
 }
 
@@ -92,7 +86,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
     if (tempo_ > 0.0) {
       double update_duration = SecondsToBeats(timestamp - timestamp_);
       bool has_tasks_to_process = false;
-      for (const auto& [performer, _] : performers_) {
+      for (const auto performer : performers_) {
         if (const auto maybe_duration = performer->GetNextDuration();
             maybe_duration.has_value() && *maybe_duration < update_duration) {
           has_tasks_to_process = true;
@@ -102,7 +96,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
       assert(update_duration > 0.0 || has_tasks_to_process);
 
       if (update_duration > 0) {
-        for (const auto& [performer, _] : performers_) {
+        for (const auto performer : performers_) {
           performer->Update(update_duration);
         }
 
@@ -114,7 +108,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
       }
 
       if (has_tasks_to_process) {
-        for (const auto& [performer, _] : performers_) {
+        for (const auto performer : performers_) {
           performer->ProcessAllTasksAtPosition();
         }
       }

@@ -1,6 +1,7 @@
 #include "barelymusician.h"
 
 #include <array>
+#include <vector>
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest-param-test.h"

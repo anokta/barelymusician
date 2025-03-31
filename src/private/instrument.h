@@ -11,30 +11,28 @@
 #include "dsp/instrument_processor.h"
 #include "dsp/message_queue.h"
 
-namespace barely {
-
-/// Class that implements an instrument.
-class InstrumentImpl {
+/// Implementation an instrument.
+struct BarelyInstrument {
  public:
   /// Note callback alias.
-  using NoteCallback = Callback<BarelyInstrument_NoteCallback>;
+  using NoteCallback = barely::Callback<BarelyInstrument_NoteCallback>;
 
-  /// Constructs a new `InstrumentImpl`.
+  /// Constructs a new `BarelyInstrument`.
   ///
   /// @param engine Engine.
   /// @param control_overrides Span of control overrides.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentImpl(BarelyEngine& engine,
-                 std::span<const BarelyControlOverride> control_overrides) noexcept;
+  BarelyInstrument(BarelyEngine& engine,
+                   std::span<const BarelyControlOverride> control_overrides) noexcept;
 
-  /// Destroys `InstrumentImpl`.
-  ~InstrumentImpl() noexcept;
+  /// Destroys `BarelyInstrument`.
+  ~BarelyInstrument() noexcept;
 
   /// Non-copyable and non-movable.
-  InstrumentImpl(const InstrumentImpl& other) noexcept = delete;
-  InstrumentImpl& operator=(const InstrumentImpl& other) noexcept = delete;
-  InstrumentImpl(InstrumentImpl&& other) noexcept = delete;
-  InstrumentImpl& operator=(InstrumentImpl&& other) noexcept = delete;
+  BarelyInstrument(const BarelyInstrument& other) noexcept = delete;
+  BarelyInstrument& operator=(const BarelyInstrument& other) noexcept = delete;
+  BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
+  BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
 
   /// Returns a control value.
   ///
@@ -123,10 +121,10 @@ class InstrumentImpl {
   BarelyEngine* engine_ = nullptr;
 
   // Array of controls.
-  ControlArray controls_;
+  barely::ControlArray controls_;
 
   // Map of note control arrays by their pitches.
-  std::unordered_map<float, NoteControlArray> note_controls_;
+  std::unordered_map<float, barely::NoteControlArray> note_controls_;
 
   // Note off callback.
   NoteCallback note_off_callback_ = {};
@@ -138,15 +136,10 @@ class InstrumentImpl {
   int64_t update_sample_ = 0;
 
   // Message queue.
-  MessageQueue message_queue_;
+  barely::MessageQueue message_queue_;
 
   // Instrument processor.
-  InstrumentProcessor processor_;
+  barely::InstrumentProcessor processor_;
 };
-
-}  // namespace barely
-
-struct BarelyInstrument : public barely::InstrumentImpl {};
-static_assert(sizeof(BarelyInstrument) == sizeof(barely::InstrumentImpl));
 
 #endif  // BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_

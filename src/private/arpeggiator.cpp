@@ -47,7 +47,7 @@ void ArpeggiatorImpl::SetGateRatio(float gate_ratio) noexcept {
   task_->SetDuration(gate_ratio_ * performer_->GetLoopLength());
 }
 
-void ArpeggiatorImpl::SetInstrument(InstrumentImpl* instrument) noexcept {
+void ArpeggiatorImpl::SetInstrument(BarelyInstrument* instrument) noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }

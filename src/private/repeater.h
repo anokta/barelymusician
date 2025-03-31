@@ -54,7 +54,7 @@ class RepeaterImpl {
   /// Sets the instrument.
   ///
   /// @param instrument Pointer to instrument.
-  void SetInstrument(InstrumentImpl* instrument) noexcept;
+  void SetInstrument(BarelyInstrument* instrument) noexcept;
 
   /// Sets the rate.
   ///
@@ -88,8 +88,8 @@ class RepeaterImpl {
   // Performer.
   PerformerImpl* performer_ = nullptr;
 
-  // Instrument.
-  InstrumentImpl* instrument_ = nullptr;
+  // Pointer to instrument.
+  BarelyInstrument* instrument_ = nullptr;
 
   // Array of pitches to play.
   std::vector<std::pair<std::optional<float>, int>> pitches_;

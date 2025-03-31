@@ -52,7 +52,7 @@ class ArpeggiatorImpl {
   /// Sets the instrument.
   ///
   /// @param instrument Pointer to instrument.
-  void SetInstrument(InstrumentImpl* instrument) noexcept;
+  void SetInstrument(BarelyInstrument* instrument) noexcept;
 
   /// Sets a note off.
   ///
@@ -98,8 +98,8 @@ class ArpeggiatorImpl {
   // Task.
   PerformerImpl::TaskImpl* task_ = nullptr;
 
-  // Instrument.
-  InstrumentImpl* instrument_ = nullptr;
+  // Pointer to instrument.
+  BarelyInstrument* instrument_ = nullptr;
 
   // Array of pitches to play.
   std::vector<float> pitches_;

@@ -182,8 +182,8 @@ bool BarelyInstrument_Create(BarelyEngineHandle engine,
   if (!engine) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = static_cast<BarelyInstrument*>(new barely::InstrumentImpl(
-      *engine, {control_overrides, control_overrides + control_override_count}));
+  *out_instrument = new BarelyInstrument(
+      *engine, {control_overrides, control_overrides + control_override_count});
   return true;
 }
 

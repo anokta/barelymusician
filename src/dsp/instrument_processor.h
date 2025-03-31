@@ -110,7 +110,7 @@ class InstrumentProcessor {
 
   SampleData sample_data_;
 
-  // TODO(#146): Filter coefficients should likely be calculated in `InstrumentImpl` instead.
+  // TODO(#146): Filter coefficients should likely be calculated in `BarelyInstrument` instead.
   FilterType filter_type_ = FilterType::kNone;
   float filter_frequency_ = 0.0f;
   float filter_q_ = std::sqrt(0.5f);

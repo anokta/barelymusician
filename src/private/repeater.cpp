@@ -52,7 +52,7 @@ void RepeaterImpl::Push(std::optional<float> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void RepeaterImpl::SetInstrument(InstrumentImpl* instrument) noexcept {
+void RepeaterImpl::SetInstrument(BarelyInstrument* instrument) noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }

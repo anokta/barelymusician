@@ -34,7 +34,7 @@ double EngineImpl::BeatsToSeconds(double beats) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void EngineImpl::CreateInstrument(InstrumentImpl* instrument) noexcept {
+void EngineImpl::CreateInstrument(BarelyInstrumentHandle instrument) noexcept {
   [[maybe_unused]] const bool success = instruments_.emplace(instrument).second;
   assert(success);
 }
@@ -50,7 +50,7 @@ PerformerImpl* EngineImpl::CreatePerformer() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void EngineImpl::DestroyInstrument(InstrumentImpl* instrument) noexcept {
+void EngineImpl::DestroyInstrument(BarelyInstrumentHandle instrument) noexcept {
   instruments_.erase(instrument);
 }
 

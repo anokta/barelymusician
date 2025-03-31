@@ -2,11 +2,17 @@
 
 #include <array>
 
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
+
+using ::testing::ElementsAre;
+using ::testing::UnorderedElementsAre;
+
+constexpr int kSampleRate = 48000;
 
 TEST(BarelyEngineTest, CreateDestroyEngine) {
   // Failures.
@@ -15,13 +21,13 @@ TEST(BarelyEngineTest, CreateDestroyEngine) {
 
   // Success.
   BarelyEngineHandle engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(1, &engine));
+  EXPECT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
   BarelyEngineHandle engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(1, &engine));
+  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyInstrument_Create(engine, nullptr, 0, nullptr));
@@ -38,7 +44,7 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
   BarelyEngineHandle engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(1, &engine));
+  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyPerformer_Create(engine, nullptr));
@@ -77,16 +83,72 @@ TEST(DecibelsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_FLOAT_EQ(DecibelsToAmplitude(kMinDecibels), 0.0f);
 }
 
-TEST(EngineTest, CreateDestroyEngine) { [[maybe_unused]] const Engine engine(1); }
+TEST(EngineTest, CreateDestroyEngine) { [[maybe_unused]] const Engine engine(kSampleRate); }
 
 TEST(EngineTest, CreateDestroyInstrument) {
-  Engine engine(1);
+  Engine engine(kSampleRate);
   [[maybe_unused]] const auto instrument = engine.CreateInstrument();
 }
 
 TEST(EngineTest, CreateDestroyPerformer) {
-  Engine engine(1);
+  Engine engine(kSampleRate);
   [[maybe_unused]] const auto performer = engine.CreatePerformer();
+}
+
+// Tests that a single instrument is created and destroyed as expected.
+TEST(EngineTest, CreateDestroySingleInstrument) {
+  constexpr float kPitch = 0.5;
+
+  Engine engine(kSampleRate);
+
+  float note_off_pitch = 0.0f;
+  float note_on_pitch = 0.0f;
+  {
+    // Create an instrument.
+    Instrument instrument = engine.CreateInstrument({});
+
+    // Set the note callbacks.
+    instrument.SetNoteOnCallback([&](float pitch) { note_on_pitch = pitch; });
+    EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
+
+    instrument.SetNoteOffCallback([&](float pitch) { note_off_pitch = pitch; });
+    EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
+
+    // Set a note on.
+    instrument.SetNoteOn(kPitch);
+    EXPECT_TRUE(instrument.IsNoteOn(kPitch));
+    EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
+  }
+
+  // Note should be stopped once the instrument goes out of scope.
+  EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
+}
+
+// Tests that multiple instruments are created and destroyed as expected.
+TEST(EngineTest, CreateDestroyMultipleInstruments) {
+  std::vector<float> note_off_pitches;
+
+  {
+    Engine engine(kSampleRate);
+
+    // Create instruments with note off callbacks.
+    std::vector<Instrument> instruments;
+    for (int i = 0; i < 3; ++i) {
+      instruments.push_back(engine.CreateInstrument({}));
+      instruments[i].SetNoteOffCallback([&](float pitch) { note_off_pitches.push_back(pitch); });
+    }
+
+    // Start multiple notes, then immediately stop some of them.
+    for (int i = 0; i < 3; ++i) {
+      instruments[i].SetNoteOn(static_cast<float>(i + 1));
+      instruments[i].SetNoteOn(static_cast<float>(-i - 1));
+      instruments[i].SetNoteOff(static_cast<float>(i + 1));
+    }
+    EXPECT_THAT(note_off_pitches, ElementsAre(1, 2, 3));
+  }
+
+  // Remaining active notes should be stopped once the engine goes out of scope.
+  EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0f, -2.0f, -1.0f, 1.0f, 2.0f, 3.0f));
 }
 
 // Tests that the engine generates uniform numbers that are always within a given range.

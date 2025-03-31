@@ -33,7 +33,7 @@ class EngineImpl {
   ///
   /// @param instrument Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void CreateInstrument(InstrumentImpl* instrument) noexcept;
+  void CreateInstrument(BarelyInstrument* instrument) noexcept;
 
   /// Creates a new performer.
   ///
@@ -45,7 +45,7 @@ class EngineImpl {
   ///
   /// @param instrument Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyInstrument(InstrumentImpl* instrument) noexcept;
+  void DestroyInstrument(BarelyInstrument* instrument) noexcept;
 
   /// Destroys a performer.
   ///
@@ -114,8 +114,8 @@ class EngineImpl {
   // Random number generator for the main thread.
   MainRng main_rng_;
 
-  // Map of instruments by their pointers.
-  std::unordered_set<InstrumentImpl*> instruments_;
+  // Set of pointers to instruments.
+  std::unordered_set<BarelyInstrument*> instruments_;
 
   // Map of performers by their pointers.
   std::unordered_map<PerformerImpl*, std::unique_ptr<PerformerImpl>> performers_;

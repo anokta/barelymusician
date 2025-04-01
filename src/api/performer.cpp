@@ -12,11 +12,11 @@
 
 #include "api/engine.h"
 
-BarelyPerformer::BarelyPerformer(BarelyEngine& engine) noexcept : engine_(&engine) {
-  engine_->CreatePerformer(this);
+BarelyPerformer::BarelyPerformer(BarelyEngine& engine) noexcept : engine_(engine) {
+  engine_.CreatePerformer(this);
 }
 
-BarelyPerformer::~BarelyPerformer() noexcept { engine_->DestroyPerformer(this); }
+BarelyPerformer::~BarelyPerformer() noexcept { engine_.DestroyPerformer(this); }
 
 void BarelyPerformer::CreateTask(BarelyTask* task) noexcept {
   [[maybe_unused]] const bool success = inactive_tasks_.emplace(task->GetPosition(), task).second;

@@ -10,8 +10,8 @@
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyArpeggiator::BarelyArpeggiator(BarelyEngine& engine) noexcept
-    : engine_(&engine),
-      performer_(engine),
+    : engine_(engine),
+      performer_(engine_),
       task_(performer_, 0.0, 1.0,
             {[](BarelyTaskState state, void* user_data) {
                auto& arpeggiator = *static_cast<BarelyArpeggiator*>(user_data);
@@ -109,7 +109,7 @@ void BarelyArpeggiator::Update() noexcept {
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
     case BarelyArpeggiatorStyle_kRandom:
-      index_ = engine_->main_rng().Generate(0, size);
+      index_ = engine_.main_rng().Generate(0, size);
       break;
     default:
       assert(!"Invalid arpeggiator style");

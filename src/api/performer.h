@@ -154,8 +154,8 @@ struct BarelyPerformer {
   /// Updates the key of an inactive task.
   void UpdateInactiveTaskKey(double old_position, BarelyTask* task) noexcept;
 
-  // Pointer to engine.
-  BarelyEngine* engine_ = nullptr;
+  // Engine.
+  BarelyEngine& engine_;
 
   // Beat callback.
   BeatCallback beat_callback_ = {};

@@ -86,8 +86,8 @@ struct BarelyTask {
   void SetProcessCallback(ProcessCallback callback) noexcept;
 
  private:
-  // Pointer to instrument.
-  BarelyPerformer* performer_;
+  // Performer.
+  BarelyPerformer& performer_;
 
   // Position in beats.
   double position_;

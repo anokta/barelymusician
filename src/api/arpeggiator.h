@@ -21,11 +21,9 @@ struct BarelyArpeggiator {
   /// Default destructor.
   ~BarelyArpeggiator() noexcept = default;
 
-  /// Non-copyable.
+  /// Non-copyable and non-movable.
   BarelyArpeggiator(const BarelyArpeggiator& other) noexcept = delete;
   BarelyArpeggiator& operator=(const BarelyArpeggiator& other) noexcept = delete;
-
-  /// Movable.
   BarelyArpeggiator(BarelyArpeggiator&& other) noexcept = delete;
   BarelyArpeggiator& operator=(BarelyArpeggiator&& other) noexcept = delete;
 
@@ -88,8 +86,8 @@ struct BarelyArpeggiator {
   // Updates the arpeggiator.
   void Update() noexcept;
 
-  // Pointer to engine.
-  BarelyEngine* engine_ = nullptr;
+  // Engine.
+  BarelyEngine& engine_;
 
   // Performer.
   BarelyPerformer performer_;

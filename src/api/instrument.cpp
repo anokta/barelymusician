@@ -89,17 +89,17 @@ std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine, std::span<const BarelyControlOverride> control_overrides) noexcept
-    : engine_(&engine),
+    : engine_(engine),
       controls_(BuildControlArray(control_overrides)),
-      update_sample_(engine.SecondsToSamples(engine.GetTimestamp())),
-      processor_(control_overrides, engine.audio_rng(), engine.GetSampleRate(),
-                 engine.GetReferenceFrequency()) {
-  engine_->CreateInstrument(this);
+      update_sample_(engine_.SecondsToSamples(engine_.GetTimestamp())),
+      processor_(control_overrides, engine_.audio_rng(), engine_.GetSampleRate(),
+                 engine_.GetReferenceFrequency()) {
+  engine_.CreateInstrument(this);
 }
 
 BarelyInstrument::~BarelyInstrument() noexcept {
   SetAllNotesOff();
-  engine_->DestroyInstrument(this);
+  engine_.DestroyInstrument(this);
 }
 
 float BarelyInstrument::GetControl(BarelyControlType type) const noexcept {
@@ -124,7 +124,7 @@ bool BarelyInstrument::Process(std::span<float> output_samples, double timestamp
     return false;
   }
   const int output_sample_count = static_cast<int>(output_samples.size());
-  const int64_t process_sample = engine_->SecondsToSamples(timestamp);
+  const int64_t process_sample = engine_.SecondsToSamples(timestamp);
 
   int current_sample = 0;
   // Process *all* messages before the end sample.

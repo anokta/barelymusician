@@ -23,11 +23,9 @@ struct BarelyRepeater {
   /// Destroys `BarelyRepeater`.
   ~BarelyRepeater() noexcept;
 
-  /// Non-copyable.
+  /// Non-copyable and non-movable.
   BarelyRepeater(const BarelyRepeater& other) noexcept = delete;
   BarelyRepeater& operator=(const BarelyRepeater& other) noexcept = delete;
-
-  /// Movable.
   BarelyRepeater(BarelyRepeater&& other) noexcept = delete;
   BarelyRepeater& operator=(BarelyRepeater&& other) noexcept = delete;
 
@@ -81,8 +79,8 @@ struct BarelyRepeater {
   // Updates the repeater.
   bool Update() noexcept;
 
-  // Pointer to engine.
-  BarelyEngine* engine_ = nullptr;
+  // Engine.
+  BarelyEngine& engine_;
 
   // Performer.
   BarelyPerformer performer_;

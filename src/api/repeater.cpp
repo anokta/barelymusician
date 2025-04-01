@@ -11,7 +11,7 @@
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyRepeater::BarelyRepeater(BarelyEngine& engine) noexcept
-    : engine_(&engine), performer_(engine) {
+    : engine_(engine), performer_(engine_) {
   performer_.SetBeatCallback({
       [](void* user_data) noexcept {
         auto& repeater = *static_cast<BarelyRepeater*>(user_data);
@@ -116,7 +116,7 @@ bool BarelyRepeater::Update() noexcept {
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
     case BarelyRepeaterStyle_kRandom:
-      index_ = engine_->main_rng().Generate(0, size);
+      index_ = engine_.main_rng().Generate(0, size);
       break;
     default:
       assert(!"Invalid repeater style");

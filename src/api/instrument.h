@@ -118,8 +118,8 @@ struct BarelyInstrument {
   void Update(int64_t update_sample) noexcept;
 
  private:
-  // Pointer to engine.
-  BarelyEngine* engine_ = nullptr;
+  // Engine.
+  BarelyEngine& engine_;
 
   // Array of controls.
   barely::ControlArray controls_;

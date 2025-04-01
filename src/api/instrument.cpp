@@ -12,6 +12,7 @@
 
 #include "api/engine.h"
 #include "common/find_or_null.h"
+#include "common/time.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message.h"
@@ -91,7 +92,7 @@ BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine, std::span<const BarelyControlOverride> control_overrides) noexcept
     : engine_(engine),
       controls_(BuildControlArray(control_overrides)),
-      update_sample_(engine_.SecondsToSamples(engine_.GetTimestamp())),
+      update_sample_(barely::SecondsToSamples(engine_.GetSampleRate(), engine_.GetTimestamp())),
       processor_(control_overrides, engine_.audio_rng(), engine_.GetSampleRate(),
                  engine_.GetReferenceFrequency()) {
   engine_.AddInstrument(this);
@@ -124,7 +125,7 @@ bool BarelyInstrument::Process(std::span<float> output_samples, double timestamp
     return false;
   }
   const int output_sample_count = static_cast<int>(output_samples.size());
-  const int64_t process_sample = engine_.SecondsToSamples(timestamp);
+  const int64_t process_sample = barely::SecondsToSamples(engine_.GetSampleRate(), timestamp);
 
   int current_sample = 0;
   // Process *all* messages before the end sample.

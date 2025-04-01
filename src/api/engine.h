@@ -31,12 +31,6 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(BarelyPerformer* performer) noexcept;
 
-  /// Returns the corresponding number of seconds for a given number of beats.
-  ///
-  /// @param beats Number of beats.
-  /// @return Number of seconds.
-  [[nodiscard]] double BeatsToSeconds(double beats) const noexcept;
-
   /// Returns reference frequency.
   ///
   /// @return Reference frequency in hertz.
@@ -68,18 +62,6 @@ struct BarelyEngine {
   /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void RemovePerformer(BarelyPerformer* performer) noexcept;
-
-  /// Returns the corresponding number of beats for a given number of seconds.
-  ///
-  /// @param seconds Number of seconds.
-  /// @return Number of beats.
-  [[nodiscard]] double SecondsToBeats(double seconds) const noexcept;
-
-  /// Returns the corresponding number of samples for a given number of seconds.
-  ///
-  /// @param seconds Number of seconds.
-  /// @return Number of samples.
-  [[nodiscard]] int64_t SecondsToSamples(double seconds) const noexcept;
 
   /// Sets the reference frequency.
   ///

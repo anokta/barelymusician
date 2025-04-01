@@ -10,10 +10,10 @@ BarelyTask::BarelyTask(BarelyPerformer& performer, double position, double durat
                        ProcessCallback callback) noexcept
     : performer_(performer), position_(position), duration_(duration), process_callback_(callback) {
   assert(duration > 0.0 && "Invalid task duration");
-  performer_.CreateTask(this);
+  performer_.AddTask(this);
 }
 
-BarelyTask::~BarelyTask() noexcept { performer_.DestroyTask(this); }
+BarelyTask::~BarelyTask() noexcept { performer_.RemoveTask(this); }
 
 void BarelyTask::SetDuration(double duration) noexcept {
   assert(duration > 0.0 && "Invalid task duration");

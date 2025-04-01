@@ -25,6 +25,18 @@ constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyEngine::BarelyEngine(int sample_rate) noexcept : sample_rate_(sample_rate) {}
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void BarelyEngine::AddInstrument(BarelyInstrumentHandle instrument) noexcept {
+  [[maybe_unused]] const bool success = instruments_.emplace(instrument).second;
+  assert(success);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
+  [[maybe_unused]] const bool success = performers_.emplace(performer).second;
+  assert(success);
+}
+
 double BarelyEngine::BeatsToSeconds(double beats) const noexcept {
   return (tempo_ > 0.0) ? beats * kMinutesToSeconds / tempo_
                         : (beats > 0.0 ? std::numeric_limits<double>::max()
@@ -32,34 +44,14 @@ double BarelyEngine::BeatsToSeconds(double beats) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::CreateInstrument(BarelyInstrumentHandle instrument) noexcept {
-  [[maybe_unused]] const bool success = instruments_.emplace(instrument).second;
-  assert(success);
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::CreatePerformer(BarelyPerformer* performer) noexcept {
-  [[maybe_unused]] const bool success = performers_.emplace(performer).second;
-  assert(success);
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::DestroyInstrument(BarelyInstrumentHandle instrument) noexcept {
+void BarelyEngine::RemoveInstrument(BarelyInstrumentHandle instrument) noexcept {
   instruments_.erase(instrument);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::DestroyPerformer(BarelyPerformer* performer) noexcept {
+void BarelyEngine::RemovePerformer(BarelyPerformer* performer) noexcept {
   performers_.erase(performer);
 }
-
-float BarelyEngine::GetReferenceFrequency() const noexcept { return reference_frequency_; }
-
-int BarelyEngine::GetSampleRate() const noexcept { return sample_rate_; }
-
-double BarelyEngine::GetTempo() const noexcept { return tempo_; }
-
-double BarelyEngine::GetTimestamp() const noexcept { return timestamp_; }
 
 double BarelyEngine::SecondsToBeats(double seconds) const noexcept {
   return tempo_ * seconds * kSecondsToMinutes;

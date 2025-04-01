@@ -94,12 +94,12 @@ BarelyInstrument::BarelyInstrument(
       update_sample_(engine_.SecondsToSamples(engine_.GetTimestamp())),
       processor_(control_overrides, engine_.audio_rng(), engine_.GetSampleRate(),
                  engine_.GetReferenceFrequency()) {
-  engine_.CreateInstrument(this);
+  engine_.AddInstrument(this);
 }
 
 BarelyInstrument::~BarelyInstrument() noexcept {
   SetAllNotesOff();
-  engine_.DestroyInstrument(this);
+  engine_.RemoveInstrument(this);
 }
 
 float BarelyInstrument::GetControl(BarelyControlType type) const noexcept {

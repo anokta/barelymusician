@@ -35,16 +35,11 @@ struct BarelyPerformer {
   BarelyPerformer(BarelyPerformer&& other) noexcept = delete;
   BarelyPerformer& operator=(BarelyPerformer&& other) noexcept = delete;
 
-  /// Creates a new task.
+  /// Adds a new task.
   ///
   /// @param task Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void CreateTask(BarelyTask* task) noexcept;
-
-  /// Destroys a task.
-  ///
-  /// @param task Pointer to task.
-  void DestroyTask(BarelyTask* task) noexcept;
+  void AddTask(BarelyTask* task) noexcept;
 
   /// Returns loop begin position.
   ///
@@ -85,6 +80,11 @@ struct BarelyPerformer {
 
   /// Processes all tasks at the current position.
   void ProcessAllTasksAtPosition() noexcept;
+
+  /// Removes a task.
+  ///
+  /// @param task Pointer to task.
+  void RemoveTask(BarelyTask* task) noexcept;
 
   /// Sets the beat callback.
   ///

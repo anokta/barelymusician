@@ -13,26 +13,14 @@
 #include "api/engine.h"
 
 BarelyPerformer::BarelyPerformer(BarelyEngine& engine) noexcept : engine_(engine) {
-  engine_.CreatePerformer(this);
+  engine_.AddPerformer(this);
 }
 
-BarelyPerformer::~BarelyPerformer() noexcept { engine_.DestroyPerformer(this); }
+BarelyPerformer::~BarelyPerformer() noexcept { engine_.RemovePerformer(this); }
 
-void BarelyPerformer::CreateTask(BarelyTask* task) noexcept {
+void BarelyPerformer::AddTask(BarelyTask* task) noexcept {
   [[maybe_unused]] const bool success = inactive_tasks_.emplace(task->GetPosition(), task).second;
   assert(success && "Failed to create task");
-}
-
-void BarelyPerformer::DestroyTask(BarelyTask* task) noexcept {
-  if (task->IsActive()) {
-    [[maybe_unused]] const bool success =
-        (active_tasks_.erase({task->GetEndPosition(), task}) == 1);
-    assert(success && "Failed to destroy active task");
-    task->SetActive(false);
-  } else {
-    [[maybe_unused]] const bool success = (inactive_tasks_.erase({task->GetPosition(), task}) == 1);
-    assert(success && "Failed to destroy inactive task");
-  }
 }
 
 std::optional<double> BarelyPerformer::GetNextDuration() const noexcept {
@@ -111,6 +99,18 @@ void BarelyPerformer::ProcessAllTasksAtPosition() noexcept {
   for (auto it = GetNextInactiveTask();
        it != inactive_tasks_.end() && it->second->IsInside(position_); it = GetNextInactiveTask()) {
     SetTaskActive(it, true);
+  }
+}
+
+void BarelyPerformer::RemoveTask(BarelyTask* task) noexcept {
+  if (task->IsActive()) {
+    [[maybe_unused]] const bool success =
+        (active_tasks_.erase({task->GetEndPosition(), task}) == 1);
+    assert(success && "Failed to destroy active task");
+    task->SetActive(false);
+  } else {
+    [[maybe_unused]] const bool success = (inactive_tasks_.erase({task->GetPosition(), task}) == 1);
+    assert(success && "Failed to destroy inactive task");
   }
 }
 

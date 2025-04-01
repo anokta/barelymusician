@@ -1,13 +1,13 @@
-#ifndef BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_H_
-#define BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_H_
+#ifndef BARELYMUSICIAN_API_ARPEGGIATOR_H_
+#define BARELYMUSICIAN_API_ARPEGGIATOR_H_
 
 #include <barelymusician.h>
 
 #include <vector>
 
-#include "private/engine.h"
-#include "private/instrument.h"
-#include "private/performer.h"
+#include "api/engine.h"
+#include "api/instrument.h"
+#include "api/performer.h"
 
 /// Implementation of an arpeggiator.
 struct BarelyArpeggiator {
@@ -116,4 +116,4 @@ struct BarelyArpeggiator {
   float pitch_ = 0.0f;
 };
 
-#endif  // BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_H_
+#endif  // BARELYMUSICIAN_API_ARPEGGIATOR_H_

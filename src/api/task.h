@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PRIVATE_TASK_H_
-#define BARELYMUSICIAN_PRIVATE_TASK_H_
+#ifndef BARELYMUSICIAN_API_TASK_H_
+#define BARELYMUSICIAN_API_TASK_H_
 
 #include <barelymusician.h>
 
@@ -102,4 +102,4 @@ struct BarelyTask {
   bool is_active_ = false;
 };
 
-#endif  // BARELYMUSICIAN_PRIVATE_TASK_H_
+#endif  // BARELYMUSICIAN_API_TASK_H_

@@ -6,11 +6,11 @@
 #include <optional>
 #include <span>
 
-#include "private/arpeggiator.h"
-#include "private/engine.h"
-#include "private/instrument.h"
-#include "private/performer.h"
-#include "private/repeater.h"
+#include "api/arpeggiator.h"
+#include "api/engine.h"
+#include "api/instrument.h"
+#include "api/performer.h"
+#include "api/repeater.h"
 
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!engine || !out_arpeggiator) return false;

@@ -1,4 +1,4 @@
-#include "private/performer.h"
+#include "api/performer.h"
 
 #include <barelymusician.h>
 
@@ -7,10 +7,10 @@
 #include <functional>
 #include <utility>
 
+#include "api/engine.h"
+#include "api/task.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "private/engine.h"
-#include "private/task.h"
 
 namespace {
 

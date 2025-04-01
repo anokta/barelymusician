@@ -1,4 +1,4 @@
-#include "private/performer.h"
+#include "api/performer.h"
 
 #include <barelymusician.h>
 
@@ -10,7 +10,7 @@
 #include <set>
 #include <utility>
 
-#include "private/engine.h"
+#include "api/engine.h"
 
 BarelyPerformer::BarelyPerformer(BarelyEngine& engine) noexcept : engine_(&engine) {
   engine_->CreatePerformer(this);

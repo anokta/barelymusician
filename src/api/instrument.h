@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
-#define BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_API_INSTRUMENT_H_
+#define BARELYMUSICIAN_API_INSTRUMENT_H_
 
 #include <barelymusician.h>
 
@@ -143,4 +143,4 @@ struct BarelyInstrument {
   barely::InstrumentProcessor processor_;
 };
 
-#endif  // BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_API_INSTRUMENT_H_

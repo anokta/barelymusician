@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PRIVATE_PERFORMER_H_
-#define BARELYMUSICIAN_PRIVATE_PERFORMER_H_
+#ifndef BARELYMUSICIAN_API_PERFORMER_H_
+#define BARELYMUSICIAN_API_PERFORMER_H_
 
 #include <barelymusician.h>
 
@@ -12,8 +12,8 @@
 #include <unordered_set>
 #include <utility>
 
+#include "api/task.h"
 #include "common/callback.h"
-#include "private/task.h"
 
 /// Implementation of a performer.
 struct BarelyPerformer {
@@ -182,4 +182,4 @@ struct BarelyPerformer {
   std::optional<double> last_beat_position_ = std::nullopt;
 };
 
-#endif  // BARELYMUSICIAN_PRIVATE_PERFORMER_H_
+#endif  // BARELYMUSICIAN_API_PERFORMER_H_

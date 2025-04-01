@@ -1,10 +1,10 @@
-#include "private/task.h"
+#include "api/task.h"
 
 #include <barelymusician.h>
 
 #include <cassert>
 
-#include "private/performer.h"
+#include "api/performer.h"
 
 BarelyTask::BarelyTask(BarelyPerformer& performer, double position, double duration,
                        ProcessCallback callback) noexcept

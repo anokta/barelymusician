@@ -1,4 +1,4 @@
-#include "private/instrument.h"
+#include "api/instrument.h"
 
 #include <barelymusician.h>
 
@@ -6,8 +6,8 @@
 #include <array>
 #include <vector>
 
+#include "api/engine.h"
 #include "gtest/gtest.h"
-#include "private/engine.h"
 
 namespace {
 

@@ -1,12 +1,12 @@
-#include "private/arpeggiator.h"
+#include "api/arpeggiator.h"
 
 #include <barelymusician.h>
 
 #include <algorithm>
 #include <cassert>
 
-#include "private/engine.h"
-#include "private/instrument.h"
+#include "api/engine.h"
+#include "api/instrument.h"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyArpeggiator::BarelyArpeggiator(BarelyEngine& engine) noexcept

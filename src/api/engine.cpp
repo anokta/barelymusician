@@ -1,4 +1,4 @@
-#include "private/engine.h"
+#include "api/engine.h"
 
 #include <barelymusician.h>
 
@@ -9,8 +9,8 @@
 #include <memory>
 #include <utility>
 
-#include "private/instrument.h"
-#include "private/performer.h"
+#include "api/instrument.h"
+#include "api/performer.h"
 
 namespace {
 

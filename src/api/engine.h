@@ -1,14 +1,14 @@
-#ifndef BARELYMUSICIAN_PRIVATE_ENGINE_H_
-#define BARELYMUSICIAN_PRIVATE_ENGINE_H_
+#ifndef BARELYMUSICIAN_API_ENGINE_H_
+#define BARELYMUSICIAN_API_ENGINE_H_
 
 #include <barelymusician.h>
 
 #include <cmath>
 #include <unordered_set>
 
+#include "api/instrument.h"
+#include "api/performer.h"
 #include "common/rng.h"
-#include "private/instrument.h"
-#include "private/performer.h"
 
 /// Implementation of an engine.
 struct BarelyEngine {
@@ -126,4 +126,4 @@ struct BarelyEngine {
   double timestamp_ = 0.0;
 };
 
-#endif  // BARELYMUSICIAN_PRIVATE_ENGINE_H_
+#endif  // BARELYMUSICIAN_API_ENGINE_H_

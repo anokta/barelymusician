@@ -1,4 +1,4 @@
-#include "private/instrument.h"
+#include "api/instrument.h"
 
 #include <barelymusician.h>
 
@@ -10,11 +10,11 @@
 #include <utility>
 #include <variant>
 
+#include "api/engine.h"
 #include "common/find_or_null.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message.h"
-#include "private/engine.h"
 
 namespace {
 

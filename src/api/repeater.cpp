@@ -1,4 +1,4 @@
-#include "private/repeater.h"
+#include "api/repeater.h"
 
 #include <barelymusician.h>
 
@@ -6,8 +6,8 @@
 #include <optional>
 #include <utility>
 
-#include "private/engine.h"
-#include "private/instrument.h"
+#include "api/engine.h"
+#include "api/instrument.h"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyRepeater::BarelyRepeater(BarelyEngine& engine) noexcept

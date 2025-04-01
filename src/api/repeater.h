@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PRIVATE_REPEATER_H_
-#define BARELYMUSICIAN_PRIVATE_REPEATER_H_
+#ifndef BARELYMUSICIAN_API_REPEATER_H_
+#define BARELYMUSICIAN_API_REPEATER_H_
 
 #include <barelymusician.h>
 
@@ -7,9 +7,9 @@
 #include <utility>
 #include <vector>
 
-#include "private/engine.h"
-#include "private/instrument.h"
-#include "private/performer.h"
+#include "api/engine.h"
+#include "api/instrument.h"
+#include "api/performer.h"
 
 /// Implementation of a repeater.
 struct BarelyRepeater {
@@ -106,4 +106,4 @@ struct BarelyRepeater {
   int remaining_length_ = 0;
 };
 
-#endif  // BARELYMUSICIAN_PRIVATE_REPEATER_H_
+#endif  // BARELYMUSICIAN_API_REPEATER_H_

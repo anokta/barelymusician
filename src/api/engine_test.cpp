@@ -1,13 +1,13 @@
-#include "private/engine.h"
+#include "api/engine.h"
 
 #include <barelymusician.h>
 
 #include <array>
 #include <functional>
 
+#include "api/performer.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "private/performer.h"
 
 namespace {
 

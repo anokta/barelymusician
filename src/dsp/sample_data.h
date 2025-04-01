@@ -1,11 +1,12 @@
 #ifndef BARELYMUSICIAN_DSP_SAMPLE_DATA_H_
 #define BARELYMUSICIAN_DSP_SAMPLE_DATA_H_
 
+#include <barelymusician.h>
+
 #include <span>
 #include <utility>
 #include <vector>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 
 namespace barely {

@@ -1,6 +1,7 @@
+#include <barelymusician.h>
+
 #include <algorithm>
 
-#include "barelymusician.h"
 #include "daisy_pod.h"
 
 using ::barely::ControlType;

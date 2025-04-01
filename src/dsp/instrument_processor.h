@@ -1,11 +1,12 @@
 #ifndef BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_
 #define BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_
 
+#include <barelymusician.h>
+
 #include <array>
 #include <cmath>
 #include <span>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"

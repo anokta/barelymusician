@@ -1,12 +1,13 @@
 #include "dsp/instrument_processor.h"
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <span>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/sample_data.h"

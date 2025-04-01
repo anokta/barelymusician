@@ -1,8 +1,9 @@
 #include "dsp/sample_data.h"
 
+#include <barelymusician.h>
+
 #include <array>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"

@@ -1,11 +1,12 @@
 #ifndef BARELYMUSICIAN_PRIVATE_REPEATER_H_
 #define BARELYMUSICIAN_PRIVATE_REPEATER_H_
 
+#include <barelymusician.h>
+
 #include <optional>
 #include <utility>
 #include <vector>
 
-#include "barelymusician.h"
 #include "private/engine.h"
 #include "private/instrument.h"
 #include "private/performer.h"

@@ -1,9 +1,10 @@
 #include "private/engine.h"
 
+#include <barelymusician.h>
+
 #include <array>
 #include <functional>
 
-#include "barelymusician.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "private/performer.h"

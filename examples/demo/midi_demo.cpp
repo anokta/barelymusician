@@ -1,3 +1,5 @@
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -12,7 +14,6 @@
 
 #include "MidiEventList.h"
 #include "MidiFile.h"
-#include "barelymusician.h"
 #include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"

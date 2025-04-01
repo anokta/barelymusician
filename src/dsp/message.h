@@ -1,13 +1,14 @@
 #ifndef BARELYMUSICIAN_DSP_MESSAGE_H_
 #define BARELYMUSICIAN_DSP_MESSAGE_H_
 
+#include <barelymusician.h>
+
 #include <array>
 #include <cstddef>
 #include <optional>
 #include <variant>
 #include <vector>
 
-#include "barelymusician.h"
 #include "dsp/sample_data.h"
 
 namespace barely {

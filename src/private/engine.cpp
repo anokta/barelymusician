@@ -1,5 +1,7 @@
 #include "private/engine.h"
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -7,7 +9,6 @@
 #include <memory>
 #include <utility>
 
-#include "barelymusician.h"
 #include "private/instrument.h"
 #include "private/performer.h"
 

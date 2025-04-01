@@ -1,5 +1,7 @@
 #include "private/performer.h"
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -8,7 +10,6 @@
 #include <set>
 #include <utility>
 
-#include "barelymusician.h"
 #include "private/engine.h"
 
 BarelyPerformer::BarelyPerformer(BarelyEngine& engine) noexcept : engine_(&engine) {

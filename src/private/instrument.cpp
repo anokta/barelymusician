@@ -1,5 +1,7 @@
 #include "private/instrument.h"
 
+#include <barelymusician.h>
+
 #include <array>
 #include <cassert>
 #include <cmath>
@@ -8,7 +10,6 @@
 #include <utility>
 #include <variant>
 
-#include "barelymusician.h"
 #include "common/find_or_null.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"

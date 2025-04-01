@@ -12,7 +12,7 @@
 /// - Engine:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician.h"
+///   #include <barelymusician.h>
 ///
 ///   // Create.
 ///   barely::Engine engine(/*sample_rate=*/48000);
@@ -88,7 +88,7 @@
 /// - Engine:
 ///
 ///   @code{.cpp}
-///   #include "barelymusician.h"
+///   #include <barelymusician.h>
 ///
 ///   // Create.
 ///   BarelyEngineHandle engine = nullptr;

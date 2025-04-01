@@ -1,10 +1,11 @@
 #include "private/repeater.h"
 
+#include <barelymusician.h>
+
 #include <cassert>
 #include <optional>
 #include <utility>
 
-#include "barelymusician.h"
 #include "private/engine.h"
 #include "private/instrument.h"
 

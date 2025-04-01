@@ -1,7 +1,8 @@
 #ifndef BARELYMUSICIAN_PRIVATE_TASK_H_
 #define BARELYMUSICIAN_PRIVATE_TASK_H_
 
-#include "barelymusician.h"
+#include <barelymusician.h>
+
 #include "common/callback.h"
 
 /// Implementation of a task.

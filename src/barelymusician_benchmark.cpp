@@ -1,6 +1,7 @@
+#include <barelymusician.h>
+
 #include <array>
 
-#include "barelymusician.h"
 #include "benchmark/benchmark.h"
 
 namespace barely {

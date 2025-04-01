@@ -1,8 +1,9 @@
 #include "private/task.h"
 
+#include <barelymusician.h>
+
 #include <cassert>
 
-#include "barelymusician.h"
 #include "private/performer.h"
 
 BarelyTask::BarelyTask(BarelyPerformer& performer, double position, double duration,

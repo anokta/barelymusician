@@ -1,11 +1,12 @@
 #ifndef BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
 #define BARELYMUSICIAN_PRIVATE_INSTRUMENT_H_
 
+#include <barelymusician.h>
+
 #include <cstdint>
 #include <span>
 #include <unordered_map>
 
-#include "barelymusician.h"
 #include "common/callback.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"

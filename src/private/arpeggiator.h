@@ -1,9 +1,10 @@
 #ifndef BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_H_
 #define BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_H_
 
+#include <barelymusician.h>
+
 #include <vector>
 
-#include "barelymusician.h"
 #include "private/engine.h"
 #include "private/instrument.h"
 #include "private/performer.h"

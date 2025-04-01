@@ -1,10 +1,11 @@
 #ifndef BARELYMUSICIAN_PRIVATE_ENGINE_H_
 #define BARELYMUSICIAN_PRIVATE_ENGINE_H_
 
+#include <barelymusician.h>
+
 #include <cmath>
 #include <unordered_set>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 #include "private/instrument.h"
 #include "private/performer.h"

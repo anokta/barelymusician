@@ -1,3 +1,5 @@
+#include <barelymusician.h>
+
 #include <array>
 #include <chrono>
 #include <span>
@@ -5,7 +7,6 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician.h"
 #include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"

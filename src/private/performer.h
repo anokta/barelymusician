@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_PRIVATE_PERFORMER_H_
 #define BARELYMUSICIAN_PRIVATE_PERFORMER_H_
 
+#include <barelymusician.h>
+
 #include <cassert>
 #include <compare>
 #include <map>
@@ -10,7 +12,6 @@
 #include <unordered_set>
 #include <utility>
 
-#include "barelymusician.h"
 #include "common/callback.h"
 #include "private/task.h"
 

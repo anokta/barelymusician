@@ -1,4 +1,4 @@
-#include "barelymusician.h"
+#include <barelymusician.h>
 
 #include <array>
 #include <vector>

@@ -1,9 +1,10 @@
 #include "dsp/sample_data.h"
 
+#include <barelymusician.h>
+
 #include <span>
 #include <vector>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 
 namespace barely {

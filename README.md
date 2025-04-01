@@ -24,7 +24,7 @@ Example usage
 -------------
 
 ```cpp
-#include "barelymusician.h"
+#include <barelymusician.h>
 
 // Create the engine.
 barely::Engine engine(/*sample_rate=*/48000);

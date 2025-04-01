@@ -1,9 +1,10 @@
 #include "private/arpeggiator.h"
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <cassert>
 
-#include "barelymusician.h"
 #include "private/engine.h"
 #include "private/instrument.h"
 

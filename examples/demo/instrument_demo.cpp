@@ -1,3 +1,5 @@
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <array>
 #include <cctype>
@@ -7,7 +9,6 @@
 #include <span>
 #include <thread>
 
-#include "barelymusician.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"

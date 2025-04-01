@@ -1,10 +1,11 @@
 #include "private/instrument.h"
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <array>
 #include <vector>
 
-#include "barelymusician.h"
 #include "gtest/gtest.h"
 #include "private/engine.h"
 

@@ -1,10 +1,10 @@
 #ifndef BARELYMUSICIAN_DSP_BIT_CRUSHER_H_
 #define BARELYMUSICIAN_DSP_BIT_CRUSHER_H_
 
+#include <barelymusician.h>
+
 #include <cassert>
 #include <cmath>
-
-#include "barelymusician.h"
 
 namespace barely {
 

@@ -1,12 +1,12 @@
 #ifndef BARELYMUSICIAN_DSP_CONTROL_H_
 #define BARELYMUSICIAN_DSP_CONTROL_H_
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <limits>
-
-#include "barelymusician.h"
 
 namespace barely {
 

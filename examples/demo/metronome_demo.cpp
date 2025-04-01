@@ -1,10 +1,11 @@
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <cctype>
 #include <chrono>
 #include <span>
 #include <thread>
 
-#include "barelymusician.h"
 #include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"

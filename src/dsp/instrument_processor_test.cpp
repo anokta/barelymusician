@@ -1,8 +1,9 @@
 #include "dsp/instrument_processor.h"
 
+#include <barelymusician.h>
+
 #include <array>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/sample_data.h"
 #include "gtest/gtest.h"

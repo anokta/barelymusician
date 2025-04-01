@@ -1,11 +1,12 @@
 #ifndef BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_
 #define BARELYMUSICIAN_DSP_INSTRUMENT_PROCESSOR_H_
 
+#include <barelymusician.h>
+
 #include <array>
 #include <cmath>
 #include <span>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"
@@ -23,7 +24,7 @@ class InstrumentProcessor {
   /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentProcessor(std::span<const ControlOverride> control_overrides, AudioRng& rng,
+  InstrumentProcessor(std::span<const BarelyControlOverride> control_overrides, AudioRng& rng,
                       int sample_rate, float reference_frequency) noexcept;
 
   /// Processes the next output samples.
@@ -110,7 +111,7 @@ class InstrumentProcessor {
 
   SampleData sample_data_;
 
-  // TODO(#146): Filter coefficients should likely be calculated in `InstrumentImpl` instead.
+  // TODO(#146): Filter coefficients should likely be calculated in `BarelyInstrument` instead.
   FilterType filter_type_ = FilterType::kNone;
   float filter_frequency_ = 0.0f;
   float filter_q_ = std::sqrt(0.5f);

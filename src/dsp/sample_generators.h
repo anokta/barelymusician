@@ -1,11 +1,11 @@
 #ifndef BARELYMUSICIAN_DSP_SAMPLE_GENERATORS_H_
 #define BARELYMUSICIAN_DSP_SAMPLE_GENERATORS_H_
 
+#include <barelymusician.h>
+
 #include <cassert>
 #include <cmath>
 #include <numbers>
-
-#include "barelymusician.h"
 
 namespace barely {
 

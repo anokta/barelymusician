@@ -1,3 +1,5 @@
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -10,7 +12,6 @@
 #include <thread>
 #include <vector>
 
-#include "barelymusician.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"

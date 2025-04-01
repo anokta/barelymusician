@@ -1,12 +1,13 @@
 #include "dsp/instrument_processor.h"
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <span>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/sample_data.h"
@@ -54,7 +55,7 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentProcessor::InstrumentProcessor(std::span<const ControlOverride> control_overrides,
+InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> control_overrides,
                                          AudioRng& rng, int sample_rate,
                                          float reference_frequency) noexcept
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),

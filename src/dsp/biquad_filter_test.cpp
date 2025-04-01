@@ -1,6 +1,7 @@
 #include "dsp/biquad_filter.h"
 
-#include "barelymusician.h"
+#include <barelymusician.h>
+
 #include "gtest/gtest.h"
 
 namespace barely {

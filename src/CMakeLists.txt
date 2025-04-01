@@ -43,6 +43,6 @@ if(ENABLE_TESTS)
 endif()
 
 add_subdirectory(algorithm)
+add_subdirectory(api)
 add_subdirectory(common)
 add_subdirectory(dsp)
-add_subdirectory(private)

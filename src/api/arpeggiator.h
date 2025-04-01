@@ -1,34 +1,31 @@
-#ifndef BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_IMPL_H_
-#define BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_IMPL_H_
+#ifndef BARELYMUSICIAN_API_ARPEGGIATOR_H_
+#define BARELYMUSICIAN_API_ARPEGGIATOR_H_
+
+#include <barelymusician.h>
 
 #include <vector>
 
-#include "barelymusician.h"
-#include "private/engine_impl.h"
-#include "private/instrument_impl.h"
-#include "private/performer_impl.h"
+#include "api/engine.h"
+#include "api/instrument.h"
+#include "api/performer.h"
 
-namespace barely {
-
-/// Class that implements an arpeggiator.
-class ArpeggiatorImpl {
+/// Implementation of an arpeggiator.
+struct BarelyArpeggiator {
  public:
-  // Constructs a new `ArpeggiatorImpl`.
+  // Constructs a new `BarelyArpeggiator`.
   ///
   /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit ArpeggiatorImpl(EngineImpl& engine) noexcept;
+  explicit BarelyArpeggiator(BarelyEngine& engine) noexcept;
 
-  /// Destroys `ArpeggiatorImpl`.
-  ~ArpeggiatorImpl() noexcept;
+  /// Default destructor.
+  ~BarelyArpeggiator() noexcept = default;
 
-  /// Non-copyable.
-  ArpeggiatorImpl(const ArpeggiatorImpl& other) noexcept = delete;
-  ArpeggiatorImpl& operator=(const ArpeggiatorImpl& other) noexcept = delete;
-
-  /// Movable.
-  ArpeggiatorImpl(ArpeggiatorImpl&& other) noexcept = delete;
-  ArpeggiatorImpl& operator=(ArpeggiatorImpl&& other) noexcept = delete;
+  /// Non-copyable and non-movable.
+  BarelyArpeggiator(const BarelyArpeggiator& other) noexcept = delete;
+  BarelyArpeggiator& operator=(const BarelyArpeggiator& other) noexcept = delete;
+  BarelyArpeggiator(BarelyArpeggiator&& other) noexcept = delete;
+  BarelyArpeggiator& operator=(BarelyArpeggiator&& other) noexcept = delete;
 
   /// Returns whether a note is on or not.
   ///
@@ -52,7 +49,7 @@ class ArpeggiatorImpl {
   /// Sets the instrument.
   ///
   /// @param instrument Pointer to instrument.
-  void SetInstrument(InstrumentImpl* instrument) noexcept;
+  void SetInstrument(BarelyInstrument* instrument) noexcept;
 
   /// Sets a note off.
   ///
@@ -73,8 +70,8 @@ class ArpeggiatorImpl {
 
   /// Sets the style.
   ///
-  /// @param style ArpeggiatorImpl style.
-  void SetStyle(ArpeggiatorStyle style) noexcept;
+  /// @param style Arpeggiator style.
+  void SetStyle(BarelyArpeggiatorStyle style) noexcept;
 
  private:
   // Helper function to set the next note off.
@@ -90,16 +87,16 @@ class ArpeggiatorImpl {
   void Update() noexcept;
 
   // Engine.
-  EngineImpl* engine_ = nullptr;
+  BarelyEngine& engine_;
 
   // Performer.
-  PerformerImpl* performer_ = nullptr;
+  BarelyPerformer performer_;
 
   // Task.
-  PerformerImpl::TaskImpl* task_ = nullptr;
+  BarelyTask task_;
 
-  // Instrument.
-  InstrumentImpl* instrument_ = nullptr;
+  // Pointer to instrument.
+  BarelyInstrument* instrument_ = nullptr;
 
   // Array of pitches to play.
   std::vector<float> pitches_;
@@ -108,7 +105,7 @@ class ArpeggiatorImpl {
   float gate_ratio_ = 1.0f;
 
   // Style.
-  ArpeggiatorStyle style_ = ArpeggiatorStyle::kUp;
+  BarelyArpeggiatorStyle style_ = BarelyArpeggiatorStyle_kUp;
 
   // Current index.
   int index_ = -1;
@@ -117,9 +114,4 @@ class ArpeggiatorImpl {
   float pitch_ = 0.0f;
 };
 
-}  // namespace barely
-
-struct BarelyArpeggiator : public barely::ArpeggiatorImpl {};
-static_assert(sizeof(BarelyArpeggiator) == sizeof(barely::ArpeggiatorImpl));
-
-#endif  // BARELYMUSICIAN_PRIVATE_ARPEGGIATOR_IMPL_H_
+#endif  // BARELYMUSICIAN_API_ARPEGGIATOR_H_

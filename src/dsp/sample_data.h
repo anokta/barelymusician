@@ -1,11 +1,12 @@
 #ifndef BARELYMUSICIAN_DSP_SAMPLE_DATA_H_
 #define BARELYMUSICIAN_DSP_SAMPLE_DATA_H_
 
+#include <barelymusician.h>
+
 #include <span>
 #include <utility>
 #include <vector>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 
 namespace barely {
@@ -19,7 +20,7 @@ class SampleData {
   /// Constructs a new `SampleData`.
   ///
   /// @param slices Span of slices.
-  SampleData(std::span<const Slice> slices) noexcept;
+  SampleData(std::span<const BarelySlice> slices) noexcept;
 
   [[nodiscard]] bool empty() const noexcept { return slices_.empty(); }
 

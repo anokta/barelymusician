@@ -1,6 +1,7 @@
 #include "dsp/sample_generators.h"
 
-#include "barelymusician.h"
+#include <barelymusician.h>
+
 #include "gtest/gtest.h"
 
 namespace barely {

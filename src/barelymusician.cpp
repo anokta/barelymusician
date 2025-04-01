@@ -1,4 +1,4 @@
-#include "barelymusician.h"
+#include <barelymusician.h>
 
 #include <cassert>
 #include <cmath>
@@ -6,20 +6,16 @@
 #include <optional>
 #include <span>
 
-#include "private/arpeggiator_impl.h"
-#include "private/engine_impl.h"
-#include "private/instrument_impl.h"
-#include "private/performer_impl.h"
-#include "private/repeater_impl.h"
-
-using ::barely::ControlType;
-using ::barely::NoteControlType;
-using ::barely::Slice;
+#include "api/arpeggiator.h"
+#include "api/engine.h"
+#include "api/instrument.h"
+#include "api/performer.h"
+#include "api/repeater.h"
 
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!engine || !out_arpeggiator) return false;
 
-  *out_arpeggiator = static_cast<BarelyArpeggiatorHandle>(new barely::ArpeggiatorImpl(*engine));
+  *out_arpeggiator = new BarelyArpeggiator(*engine);
   return true;
 }
 
@@ -91,7 +87,7 @@ bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate)
 bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeggiatorStyle style) {
   if (!arpeggiator) return false;
 
-  arpeggiator->SetStyle(static_cast<barely::ArpeggiatorStyle>(style));
+  arpeggiator->SetStyle(style);
   return true;
 }
 
@@ -186,19 +182,15 @@ bool BarelyInstrument_Create(BarelyEngineHandle engine,
   if (!engine) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = static_cast<BarelyInstrument*>(engine->CreateInstrument(
-      {reinterpret_cast<const barely::ControlOverride*>(control_overrides),
-       reinterpret_cast<const barely::ControlOverride*>(control_overrides) +
-           control_override_count}));
-  // TODO(#126): Temp hack to allow destroying by handle.
-  (*out_instrument)->engine = engine;
+  *out_instrument = new BarelyInstrument(
+      *engine, {control_overrides, control_overrides + control_override_count});
   return true;
 }
 
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  instrument->engine->DestroyInstrument(instrument);
+  delete instrument;
   return true;
 }
 
@@ -208,7 +200,7 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyContro
   if (type >= BarelyControlType_kCount) return false;
   if (!out_value) return false;
 
-  *out_value = instrument->GetControl(static_cast<ControlType>(type));
+  *out_value = instrument->GetControl(type);
   return true;
 }
 
@@ -218,8 +210,7 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, float pi
   if (type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
 
-  if (const auto* value = instrument->GetNoteControl(pitch, static_cast<NoteControlType>(type));
-      value != nullptr) {
+  if (const auto* value = instrument->GetNoteControl(pitch, type); value != nullptr) {
     *out_value = *value;
     return true;
   }
@@ -239,9 +230,7 @@ bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, float* output_s
                               int32_t output_sample_count, double timestamp) {
   if (!instrument) return false;
 
-  return instrument->Process(
-      {output_samples, output_samples + output_sample_count},
-      static_cast<int>(static_cast<double>(instrument->GetSampleRate()) * timestamp));
+  return instrument->Process({output_samples, output_samples + output_sample_count}, timestamp);
 }
 
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
@@ -256,7 +245,7 @@ bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyContro
   if (!instrument) return false;
   if (type >= BarelyControlType_kCount) return false;
 
-  instrument->SetControl(static_cast<ControlType>(type), value);
+  instrument->SetControl(type, value);
   return true;
 }
 
@@ -265,7 +254,7 @@ bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pi
   if (!instrument) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
 
-  instrument->SetNoteControl(pitch, static_cast<NoteControlType>(type), value);
+  instrument->SetNoteControl(pitch, type, value);
   return true;
 }
 
@@ -290,9 +279,7 @@ bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
   if (!instrument) return false;
 
   instrument->SetNoteOn(
-      pitch, {reinterpret_cast<const barely::NoteControlOverride*>(note_control_overrides),
-              reinterpret_cast<const barely::NoteControlOverride*>(note_control_overrides) +
-                  note_control_override_count});
+      pitch, {note_control_overrides, note_control_overrides + note_control_override_count});
   return true;
 }
 
@@ -309,9 +296,7 @@ bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument, const Bar
   if (!instrument) return false;
   if (slice_count < 0 || (!slices && slice_count > 0)) return false;
 
-  instrument->SetSampleData(
-      std::span<const Slice>{reinterpret_cast<const Slice*>(slices),
-                             reinterpret_cast<const Slice*>(slices + slice_count)});
+  instrument->SetSampleData({slices, slices + slice_count});
   return true;
 }
 
@@ -319,15 +304,14 @@ bool BarelyPerformer_Create(BarelyEngineHandle engine, BarelyPerformerHandle* ou
   if (!engine) return false;
   if (!out_performer) return false;
 
-  *out_performer = static_cast<BarelyPerformer*>(engine->CreatePerformer());
-  (*out_performer)->engine = engine;
+  *out_performer = new BarelyPerformer(*engine);
   return true;
 }
 
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  performer->engine->DestroyPerformer(performer);
+  delete performer;
   return true;
 }
 
@@ -445,7 +429,7 @@ bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
 bool BarelyRepeater_Create(BarelyEngineHandle engine, BarelyRepeaterHandle* out_repeater) {
   if (!engine || !out_repeater) return false;
 
-  *out_repeater = static_cast<BarelyRepeaterHandle>(new barely::RepeaterImpl(*engine));
+  *out_repeater = new BarelyRepeater(*engine);
   return true;
 }
 
@@ -502,7 +486,7 @@ bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate) {
 bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style) {
   if (!repeater) return false;
 
-  repeater->SetStyle(static_cast<barely::RepeaterStyle>(style));
+  repeater->SetStyle(style);
   return true;
 }
 
@@ -544,17 +528,14 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double 
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
-  *out_task =
-      static_cast<BarelyTask*>(performer->CreateTask(position, duration, {callback, user_data}));
-  // TODO(#126): Temp hack to allow destroying by handle.
-  (*out_task)->performer = performer;
+  *out_task = new BarelyTask(*performer, position, duration, {callback, user_data});
   return *out_task;
 }
 
 bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
-  task->performer->DestroyTask(task);
+  delete task;
   return true;
 }
 

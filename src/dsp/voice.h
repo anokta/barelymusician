@@ -1,11 +1,12 @@
 #ifndef BARELYMUSICIAN_DSP_VOICE_H_
 #define BARELYMUSICIAN_DSP_VOICE_H_
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"

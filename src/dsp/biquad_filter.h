@@ -1,13 +1,13 @@
 #ifndef BARELYMUSICIAN_DSP_BIQUAD_FILTER_H_
 #define BARELYMUSICIAN_DSP_BIQUAD_FILTER_H_
 
+#include <barelymusician.h>
+
 #include <algorithm>
 #include <cmath>
 #include <numbers>
 #include <numeric>
 #include <utility>
-
-#include "barelymusician.h"
 
 namespace barely {
 

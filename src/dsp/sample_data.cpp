@@ -1,15 +1,16 @@
 #include "dsp/sample_data.h"
 
+#include <barelymusician.h>
+
 #include <span>
 #include <vector>
 
-#include "barelymusician.h"
 #include "common/rng.h"
 
 namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-SampleData::SampleData(std::span<const Slice> slices) noexcept {
+SampleData::SampleData(std::span<const BarelySlice> slices) noexcept {
   slices_.reserve(slices.size());
   for (int i = 0; i < static_cast<int>(slices.size()); ++i) {
     slices_.emplace_back(slices[i], std::vector<float>(slices[i].samples,

@@ -40,6 +40,8 @@ TEST(PerformerTest, ProcessSingleTask) {
       case BarelyTaskState_kUpdate:
         ++task_process_update_count;
         break;
+      default:
+        break;
     }
   };
   BarelyTask task(performer, 0.25, 0.6,

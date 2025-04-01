@@ -53,14 +53,14 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
     task_state = state;
     task_position = performer.GetPosition();
   };
-  BarelyTask task(performer, 1.0, 2.0,
-                  {
-                      [](BarelyTaskState state, void* user_data) {
-                        (*static_cast<std::function<void(barely::TaskState)>*>(user_data))(
-                            static_cast<barely::TaskState>(state));
-                      },
-                      &process_callback,
-                  });
+  const BarelyTask task(performer, 1.0, 2.0,
+                        {
+                            [](BarelyTaskState state, void* user_data) {
+                              (*static_cast<std::function<void(barely::TaskState)>*>(user_data))(
+                                  static_cast<barely::TaskState>(state));
+                            },
+                            &process_callback,
+                        });
 
   // Start the performer with a tempo of one beat per second.
   engine.SetTempo(60.0);

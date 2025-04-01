@@ -24,6 +24,7 @@ struct BarelyPerformer {
   /// Constructs a new `BarelyPerformer`.
   ///
   /// @param engine Engine.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit BarelyPerformer(BarelyEngine& engine) noexcept;
 
   /// Destroys `BarelyPerformer`.

@@ -5,19 +5,20 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <memory>
 #include <optional>
 #include <set>
 #include <utility>
 
 #include "api/engine.h"
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyPerformer::BarelyPerformer(BarelyEngine& engine) noexcept : engine_(engine) {
   engine_.AddPerformer(this);
 }
 
 BarelyPerformer::~BarelyPerformer() noexcept { engine_.RemovePerformer(this); }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyPerformer::AddTask(BarelyTask* task) noexcept {
   [[maybe_unused]] const bool success = inactive_tasks_.emplace(task->GetPosition(), task).second;
   assert(success && "Failed to create task");

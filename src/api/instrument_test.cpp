@@ -12,7 +12,6 @@
 namespace {
 
 constexpr int kSampleRate = 4;
-constexpr float kReferenceFrequency = 1.0f;
 constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that the instrument sets a control value as expected.

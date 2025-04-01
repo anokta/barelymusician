@@ -6,8 +6,6 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
-#include <memory>
-#include <utility>
 
 #include "api/instrument.h"
 #include "api/performer.h"
@@ -65,7 +63,7 @@ void BarelyEngine::SetReferenceFrequency(float reference_frequency) noexcept {
   reference_frequency = std::max(reference_frequency, 0.0f);
   if (reference_frequency_ != reference_frequency) {
     reference_frequency_ = reference_frequency;
-    for (auto instrument : instruments_) {
+    for (auto* instrument : instruments_) {
       instrument->SetReferenceFrequency(reference_frequency_);
     }
   }
@@ -79,7 +77,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
     if (tempo_ > 0.0) {
       double update_duration = SecondsToBeats(timestamp - timestamp_);
       bool has_tasks_to_process = false;
-      for (const auto performer : performers_) {
+      for (auto* performer : performers_) {
         if (const auto maybe_duration = performer->GetNextDuration();
             maybe_duration.has_value() && *maybe_duration < update_duration) {
           has_tasks_to_process = true;
@@ -89,26 +87,26 @@ void BarelyEngine::Update(double timestamp) noexcept {
       assert(update_duration > 0.0 || has_tasks_to_process);
 
       if (update_duration > 0) {
-        for (const auto performer : performers_) {
+        for (auto* performer : performers_) {
           performer->Update(update_duration);
         }
 
         timestamp_ += BeatsToSeconds(update_duration);
         const int64_t update_sample = SecondsToSamples(timestamp_);
-        for (const auto instrument : instruments_) {
+        for (auto* instrument : instruments_) {
           instrument->Update(update_sample);
         }
       }
 
       if (has_tasks_to_process) {
-        for (const auto performer : performers_) {
+        for (auto* performer : performers_) {
           performer->ProcessAllTasksAtPosition();
         }
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
       const int64_t update_sample = SecondsToSamples(timestamp_);
-      for (const auto instrument : instruments_) {
+      for (auto* instrument : instruments_) {
         instrument->Update(update_sample);
       }
     }

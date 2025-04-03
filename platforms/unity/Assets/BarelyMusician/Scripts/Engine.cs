@@ -7,18 +7,6 @@ using UnityEngine;
 namespace Barely {
   /// A representation of an engine that governs all musical components.
   public static class Engine {
-    /// Reference frequency in hertz (C4 by default).
-    public static float ReferenceFrequency {
-      get { return _referenceFrequency; }
-      set {
-        if (_referenceFrequency != value) {
-          Internal.Engine_SetReferenceFrequency(value);
-          _referenceFrequency = Internal.Engine_GetReferenceFrequency();
-        }
-      }
-    }
-    private static float _referenceFrequency = 440.0f * Mathf.Pow(2.0f, -9.0f / 12.0f);
-
     /// Tempo in beats per minute.
     public static double Tempo {
       get { return _tempo; }
@@ -271,18 +259,6 @@ namespace Barely {
         componentHandle = IntPtr.Zero;
       }
 
-      /// Returns the reference frequency of an engine.
-      ///
-      /// @return Reference frequency in hertz.
-      public static float Engine_GetReferenceFrequency() {
-        float referenceFrequency = 0.0f;
-        if (!BarelyEngine_GetReferenceFrequency(Handle, ref referenceFrequency) &&
-            _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get engine reference frequency");
-        }
-        return referenceFrequency;
-      }
-
       /// Returns the tempo of an engine.
       ///
       /// @return Tempo in beats per minute.
@@ -321,16 +297,6 @@ namespace Barely {
           _scheduledTaskCallbacks.Add(timestamp, callbacks);
         }
         callbacks?.Add(callback);
-      }
-
-      /// Sets the reference frequency of an engine.
-      ///
-      /// @param referenceFrequency Reference frequency in hertz.
-      public static void Engine_SetReferenceFrequency(float referenceFrequency) {
-        if (!BarelyEngine_SetReferenceFrequency(Handle, referenceFrequency) &&
-            _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set engine reference frequency");
-        }
       }
 
       /// Sets the tempo of an engine.
@@ -1052,6 +1018,9 @@ namespace Barely {
       // TODO(#148): This can be removed once trigger tasks are supported.
       private const double _minTaskDuration = 1e-6;
 
+      /// Reference frequency which is tuned to middle C.
+      private const float _referenceFrequency = 261.62555f;
+
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
 
@@ -1140,11 +1109,10 @@ namespace Barely {
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          if (!BarelyEngine_Create(config.sampleRate, ref _handle)) {
+          if (!BarelyEngine_Create(config.sampleRate, _referenceFrequency, ref _handle)) {
             Debug.LogError("Failed to initialize BarelyEngine");
             return;
           }
-          BarelyEngine_SetReferenceFrequency(_handle, _referenceFrequency);
           BarelyEngine_SetTempo(_handle, _tempo);
           _outputSamples = new float[config.dspBufferSize];
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
@@ -1230,24 +1198,17 @@ namespace Barely {
                                                             ArpeggiatorStyle style);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(Int32 sampleRate, ref IntPtr outEngine);
+      private static extern bool BarelyEngine_Create(Int32 sampleRate, float referenceFrequency,
+                                                     ref IntPtr outEngine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
       private static extern bool BarelyEngine_Destroy(IntPtr engine);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetReferenceFrequency")]
-      private static extern bool BarelyEngine_GetReferenceFrequency(
-          IntPtr engine, ref float outReferenceFrequency);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
       private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTimestamp")]
       private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetReferenceFrequency")]
-      private static extern bool BarelyEngine_SetReferenceFrequency(IntPtr engine,
-                                                                    float referenceFrequency);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
       private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);

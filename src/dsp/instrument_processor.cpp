@@ -223,13 +223,6 @@ void InstrumentProcessor::SetNoteOn(
   voice.Start(voice_params_, adsr_, pitch, note_controls);
 }
 
-void InstrumentProcessor::SetReferenceFrequency(float reference_frequency) noexcept {
-  assert(reference_frequency_ != reference_frequency);
-  reference_frequency_ = reference_frequency;
-  voice_params_.osc_increment =
-      std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
-}
-
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   sample_data_.Swap(sample_data);
   for (int i = 0; i < voice_count_; ++i) {

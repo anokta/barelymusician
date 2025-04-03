@@ -49,12 +49,6 @@ struct NoteOnMessage {
   std::array<float, BarelyNoteControlType_kCount> controls;
 };
 
-/// Reference frequency message.
-struct ReferenceFrequencyMessage {
-  /// Reference frequency.
-  float reference_frequency;
-};
-
 /// Sample data message.
 struct SampleDataMessage {
   /// Sample data.
@@ -63,7 +57,7 @@ struct SampleDataMessage {
 
 /// Message alias.
 using Message = std::variant<ControlMessage, NoteControlMessage, NoteOffMessage, NoteOnMessage,
-                             ReferenceFrequencyMessage, SampleDataMessage>;
+                             SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

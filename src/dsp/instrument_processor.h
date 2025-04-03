@@ -59,11 +59,6 @@ class InstrumentProcessor {
   void SetNoteOn(float pitch,
                  const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept;
 
-  /// Sets the reference frequency.
-  ///
-  /// @param reference_frequency Reference frequency in hertz.
-  void SetReferenceFrequency(float reference_frequency) noexcept;
-
   /// Sets the sample data.
   ///
   /// @param sample_data Sample data.

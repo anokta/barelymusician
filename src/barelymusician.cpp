@@ -91,11 +91,13 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeg
   return true;
 }
 
-bool BarelyEngine_Create(int32_t sample_rate, BarelyEngineHandle* out_engine) {
+bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
+                         BarelyEngineHandle* out_engine) {
   if (sample_rate <= 0) return false;
+  if (reference_frequency <= 0.0) return false;
   if (!out_engine) return false;
 
-  *out_engine = new BarelyEngine(sample_rate);
+  *out_engine = new BarelyEngine(sample_rate, reference_frequency);
   return true;
 }
 
@@ -111,14 +113,6 @@ bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_nu
   if (!out_number) return false;
 
   *out_number = engine->main_rng().Generate();
-  return true;
-}
-
-bool BarelyEngine_GetReferenceFrequency(BarelyEngineHandle engine, float* out_reference_frequency) {
-  if (!engine) return false;
-  if (!out_reference_frequency) return false;
-
-  *out_reference_frequency = engine->GetReferenceFrequency();
   return true;
 }
 
@@ -143,13 +137,6 @@ bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp)
   if (!out_timestamp) return false;
 
   *out_timestamp = engine->GetTimestamp();
-  return true;
-}
-
-bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine, float reference_frequency) {
-  if (!engine) return false;
-
-  engine->SetReferenceFrequency(reference_frequency);
   return true;
 }
 

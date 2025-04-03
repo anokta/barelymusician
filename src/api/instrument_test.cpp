@@ -12,11 +12,12 @@
 namespace {
 
 constexpr int kSampleRate = 4;
+constexpr float kReferenceFrequency = 1.0f;
 constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that the instrument sets a control value as expected.
 TEST(InstrumentTest, SetControl) {
-  BarelyEngine engine(kSampleRate);
+  BarelyEngine engine(kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
 
@@ -47,7 +48,7 @@ TEST(InstrumentTest, PlaySingleNote) {
       BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
   };
 
-  BarelyEngine engine(kSampleRate);
+  BarelyEngine engine(kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
@@ -90,7 +91,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
       BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
   };
 
-  BarelyEngine engine(1);
+  BarelyEngine engine(1, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
@@ -127,7 +128,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 TEST(InstrumentTest, SetNoteCallbacks) {
   constexpr float kPitch = 3.3f;
 
-  BarelyEngine engine(1);
+  BarelyEngine engine(1, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
 
   // Trigger the note on callback.
@@ -176,7 +177,7 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 TEST(InstrumentTest, SetAllNotesOff) {
   constexpr std::array<float, 3> kPitches = {1.0f, 2.0f, 3.0f};
 
-  BarelyEngine engine(kSampleRate);
+  BarelyEngine engine(kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   for (const float pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));

@@ -92,7 +92,7 @@
 ///
 ///   // Create.
 ///   BarelyEngineHandle engine = nullptr;
-///   BarelyEngine_Create(/*sample_rate=*/48000, &engine);
+///   BarelyEngine_Create(/*sample_rate=*/48000, BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
 ///
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
@@ -209,6 +209,9 @@
 #define BARELY_API
 #endif  // __GNUC__ >= 4
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
+
+/// Default reference frequency which is tuned to middle C.
+#define BARELY_DEFAULT_REFERENCE_FREQUENCY 261.62555f
 
 /// Minimum decibel threshold.
 #define BARELY_MIN_DECIBELS -80.0f
@@ -529,9 +532,11 @@ BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
 /// Creates a new engine.
 ///
 /// @param sample_rate Sampling rate in hertz.
+/// @param reference_frequency Reference frequency in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t sample_rate, BarelyEngineHandle* out_engine);
+BARELY_API bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
+                                    BarelyEngineHandle* out_engine);
 
 /// Destroys an engine.
 ///
@@ -553,14 +558,6 @@ BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, dou
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetSeed(BarelyEngineHandle engine, int32_t* out_seed);
 
-/// Gets the reference frequency of an engine.
-///
-/// @param engine Engine handle.
-/// @param out_reference_frequency Output reference frequency in hertz.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetReferenceFrequency(BarelyEngineHandle engine,
-                                                   float* out_reference_frequency);
-
 /// Gets the tempo of an engine.
 ///
 /// @param engine Engine handle.
@@ -574,14 +571,6 @@ BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tem
 /// @param out_timestamp Output timestamp in seconds.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
-
-/// Sets the reference frequency of an engine.
-///
-/// @param engine Engine handle.
-/// @param reference_frequency Reference frequency in hertz.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_SetReferenceFrequency(BarelyEngineHandle engine,
-                                                   float reference_frequency);
 
 /// Sets the random number generator seed of an engine.
 ///
@@ -1031,6 +1020,9 @@ BARELY_API bool Barely_DecibelsToAmplitude(float decibels, float* out_amplitude)
 #include <utility>
 
 namespace barely {
+
+/// Default reference frequency which is tuned to middle C.
+inline constexpr float kDefaultReferenceFrequency = BARELY_DEFAULT_REFERENCE_FREQUENCY;
 
 /// Minimum decibel threshold.
 inline constexpr float kMinDecibels = BARELY_MIN_DECIBELS;
@@ -1823,11 +1815,12 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  explicit Engine(int sample_rate) noexcept
+  /// @param reference_frequency Reference frequency in hertz.
+  Engine(int sample_rate, float reference_frequency = kDefaultReferenceFrequency) noexcept
       : HandleWrapper([&]() {
           BarelyEngineHandle engine = nullptr;
           [[maybe_unused]] const bool success =
-              BarelyEngine_Create(static_cast<int32_t>(sample_rate), &engine);
+              BarelyEngine_Create(static_cast<int32_t>(sample_rate), reference_frequency, &engine);
           assert(success);
           return engine;
         }()) {}
@@ -1893,17 +1886,6 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
   }
 
-  /// Returns the reference frequency.
-  ///
-  /// @return Reference frequency in hertz.
-  [[nodiscard]] float GetReferenceFrequency() const noexcept {
-    float reference_frequency = 0.0f;
-    [[maybe_unused]] const bool success =
-        BarelyEngine_GetReferenceFrequency(*this, &reference_frequency);
-    assert(success);
-    return reference_frequency;
-  }
-
   /// Returns the random number generator seed.
   ///
   /// @return Seed value.
@@ -1937,15 +1919,6 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// Sets the random number generator seed.
   void SetSeed(int seed) noexcept {
     [[maybe_unused]] const bool success = BarelyEngine_SetSeed(*this, static_cast<int32_t>(seed));
-    assert(success);
-  }
-
-  /// Sets the reference frequency.
-  ///
-  /// @param reference_frequency Reference frequency in hertz.
-  void SetReferenceFrequency(float reference_frequency) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyEngine_SetReferenceFrequency(*this, reference_frequency);
     assert(success);
   }
 

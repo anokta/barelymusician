@@ -13,10 +13,8 @@ VERS_1.0 {
     BarelyArpeggiator_SetStyle;
     BarelyEngine_Create;
     BarelyEngine_Destroy;
-    BarelyEngine_GetReferenceFrequency;
     BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
-    BarelyEngine_SetReferenceFrequency;
     BarelyEngine_SetTempo;
     BarelyEngine_Update;
     BarelyInstrument_Create;

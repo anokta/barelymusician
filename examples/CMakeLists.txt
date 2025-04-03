@@ -22,6 +22,10 @@ if(NOT midifile_POPULATED)
   FetchContent_Populate(midifile)
   file(READ "${midifile_SOURCE_DIR}/CMakeLists.txt" midifile_cmake_contents)
   string(
+    REGEX REPLACE "\\(VERSION [0-9]+\\.[0-9]+\\)" "(VERSION 3.5)"
+    midifile_cmake_contents "${midifile_cmake_contents}"
+  )
+  string(
     REGEX REPLACE "(add_executable|target_link_libraries)" "# \\0"
     midifile_cmake_contents "${midifile_cmake_contents}"
   )

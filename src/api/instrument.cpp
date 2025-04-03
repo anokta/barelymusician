@@ -29,7 +29,6 @@ using ::barely::NoteControlMessage;
 using ::barely::NoteControlType;
 using ::barely::NoteOffMessage;
 using ::barely::NoteOnMessage;
-using ::barely::ReferenceFrequencyMessage;
 using ::barely::SampleDataMessage;
 
 // Returns a control array with overrides.
@@ -137,28 +136,25 @@ bool BarelyInstrument::Process(std::span<float> output_samples, double timestamp
       processor_.Process(&output_samples[current_sample], message_sample - current_sample);
       current_sample = message_sample;
     }
-    std::visit(
-        MessageVisitor{
-            [this](ControlMessage& control_message) noexcept {
-              processor_.SetControl(control_message.type, control_message.value);
-            },
-            [this](NoteControlMessage& note_control_message) noexcept {
-              processor_.SetNoteControl(note_control_message.pitch, note_control_message.type,
-                                        note_control_message.value);
-            },
-            [this](NoteOffMessage& note_off_message) noexcept {
-              processor_.SetNoteOff(note_off_message.pitch);
-            },
-            [this](NoteOnMessage& note_on_message) noexcept {
-              processor_.SetNoteOn(note_on_message.pitch, note_on_message.controls);
-            },
-            [this](ReferenceFrequencyMessage& reference_frequency_message) noexcept {
-              processor_.SetReferenceFrequency(reference_frequency_message.reference_frequency);
-            },
-            [this](SampleDataMessage& sample_data_message) noexcept {
-              processor_.SetSampleData(sample_data_message.sample_data);
-            }},
-        message->second);
+    std::visit(MessageVisitor{[this](ControlMessage& control_message) noexcept {
+                                processor_.SetControl(control_message.type, control_message.value);
+                              },
+                              [this](NoteControlMessage& note_control_message) noexcept {
+                                processor_.SetNoteControl(note_control_message.pitch,
+                                                          note_control_message.type,
+                                                          note_control_message.value);
+                              },
+                              [this](NoteOffMessage& note_off_message) noexcept {
+                                processor_.SetNoteOff(note_off_message.pitch);
+                              },
+                              [this](NoteOnMessage& note_on_message) noexcept {
+                                processor_.SetNoteOn(note_on_message.pitch,
+                                                     note_on_message.controls);
+                              },
+                              [this](SampleDataMessage& sample_data_message) noexcept {
+                                processor_.SetSampleData(sample_data_message.sample_data);
+                              }},
+               message->second);
   }
   // Process the rest of the samples.
   if (current_sample < output_sample_count) {
@@ -217,10 +213,6 @@ void BarelyInstrument::SetNoteOn(
 
 void BarelyInstrument::SetNoteOnCallback(NoteCallback callback) noexcept {
   note_on_callback_ = callback;
-}
-
-void BarelyInstrument::SetReferenceFrequency(float reference_frequency) noexcept {
-  message_queue_.Add(update_sample_, ReferenceFrequencyMessage{reference_frequency});
 }
 
 void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexcept {

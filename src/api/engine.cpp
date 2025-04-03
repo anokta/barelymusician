@@ -11,7 +11,11 @@
 #include "common/time.h"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate) noexcept : sample_rate_(sample_rate) {}
+BarelyEngine::BarelyEngine(int sample_rate, float reference_frequency) noexcept
+    : sample_rate_(sample_rate), reference_frequency_(reference_frequency) {
+  assert(sample_rate >= 0);
+  assert(reference_frequency >= 0.0f);
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::AddInstrument(BarelyInstrumentHandle instrument) noexcept {
@@ -33,16 +37,6 @@ void BarelyEngine::RemoveInstrument(BarelyInstrumentHandle instrument) noexcept 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::RemovePerformer(BarelyPerformer* performer) noexcept {
   performers_.erase(performer);
-}
-
-void BarelyEngine::SetReferenceFrequency(float reference_frequency) noexcept {
-  reference_frequency = std::max(reference_frequency, 0.0f);
-  if (reference_frequency_ != reference_frequency) {
-    reference_frequency_ = reference_frequency;
-    for (auto* instrument : instruments_) {
-      instrument->SetReferenceFrequency(reference_frequency_);
-    }
-  }
 }
 
 void BarelyEngine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }

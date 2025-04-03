@@ -16,8 +16,9 @@ struct BarelyEngine {
   /// Constructs a new `BarelyEngine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
+  /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit BarelyEngine(int sample_rate) noexcept;
+  BarelyEngine(int sample_rate, float reference_frequency) noexcept;
 
   /// Adds a new instrument.
   ///
@@ -31,22 +32,22 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(BarelyPerformer* performer) noexcept;
 
-  /// Returns reference frequency.
+  /// Returns the reference frequency.
   ///
   /// @return Reference frequency in hertz.
   [[nodiscard]] float GetReferenceFrequency() const noexcept { return reference_frequency_; }
 
-  /// Returns sampling rate.
+  /// Returns the sampling rate.
   ///
   /// @return Sampling rate in hertz.
   [[nodiscard]] int GetSampleRate() const noexcept { return sample_rate_; }
 
-  /// Returns tempo.
+  /// Returns the tempo.
   ///
   /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept { return tempo_; }
 
-  /// Returns timestamp.
+  /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept { return timestamp_; }
@@ -62,11 +63,6 @@ struct BarelyEngine {
   /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void RemovePerformer(BarelyPerformer* performer) noexcept;
-
-  /// Sets the reference frequency.
-  ///
-  /// @param reference_frequency Reference frequency in hertz.
-  void SetReferenceFrequency(float reference_frequency) noexcept;
 
   /// Sets the tempo.
   ///
@@ -86,6 +82,9 @@ struct BarelyEngine {
   // Sampling rate in hertz.
   int sample_rate_ = 0;
 
+  // Reference frequency at zero pitch.
+  float reference_frequency_ = 0.0f;
+
   // Random number generator for the audio thread.
   barely::AudioRng audio_rng_;
 
@@ -97,9 +96,6 @@ struct BarelyEngine {
 
   // Set of pointers to performers.
   std::unordered_set<BarelyPerformer*> performers_;
-
-  // Reference frequency at zero pitch (C4 by default).
-  float reference_frequency_ = 440.0f * std::pow(2.0f, -9.0f / 12.0f);
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

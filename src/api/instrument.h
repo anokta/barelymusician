@@ -102,11 +102,6 @@ struct BarelyInstrument {
   /// @param callback Note on callback.
   void SetNoteOnCallback(NoteCallback callback) noexcept;
 
-  /// Sets the reference frequency.
-  ///
-  /// @param reference_frequency Reference frequency in hertz.
-  void SetReferenceFrequency(float reference_frequency) noexcept;
-
   /// Sets the sample data.
   ///
   /// @param slices Span of slices.

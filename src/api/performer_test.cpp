@@ -18,7 +18,7 @@ using ::testing::Optional;
 
 // Tests that the performer processs a single task as expected.
 TEST(PerformerTest, ProcessSingleTask) {
-  BarelyEngine engine(1);
+  BarelyEngine engine(1, 0.0f);
   BarelyPerformer performer(engine);
 
   EXPECT_FALSE(performer.IsPlaying());
@@ -175,7 +175,7 @@ TEST(PerformerTest, ProcessSingleTask) {
 TEST(PerformerTest, ProcessMultipleTasks) {
   constexpr int kTaskCount = 4;
 
-  BarelyEngine engine(1);
+  BarelyEngine engine(1, 0.0f);
   BarelyPerformer performer(engine);
 
   EXPECT_FALSE(performer.IsPlaying());
@@ -246,7 +246,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
 // Tests that the performer sets its current position as expected.
 TEST(PerformerTest, SetPosition) {
-  BarelyEngine engine(1);
+  BarelyEngine engine(1, 0.0f);
   BarelyPerformer performer(engine);
   EXPECT_EQ(performer.GetPosition(), 0.0);
 

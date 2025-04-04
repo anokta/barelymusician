@@ -23,6 +23,23 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
   return beats * kMinutesToSeconds / tempo;
 }
 
+/// Quantizes a position.
+///
+/// @param position Position in beats.
+/// @param subdivision Subdivision of a beat.
+/// @param amount Quantization amount.
+/// @return Position in beats.
+[[nodiscard]] constexpr double Quantize(double position, int subdivision, float amount) noexcept {
+  assert(subdivision > 0);
+  assert(amount >= 0.0f && amount <= 0.0f);
+  return std::lerp(
+      position,
+      static_cast<double>(static_cast<int64_t>(static_cast<double>(subdivision) * position +
+                                               (position >= 0.0 ? 0.5 : -0.5))) /
+          static_cast<double>(subdivision),
+      static_cast<double>(amount));
+}
+
 /// Returns the corresponding number of seconds for a given number of samples.
 ///
 /// @param sample_rate Sample rate in hertz.

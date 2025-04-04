@@ -28,6 +28,7 @@ using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::Performer;
+using ::barely::Quantization;
 using ::barely::Scale;
 using ::barely::Slice;
 using ::barely::SliceMode;
@@ -95,6 +96,9 @@ constexpr float kPitchHihatOpen = 3.0f;
 
 constexpr char kDrumsDir[] = "audio/drums/";
 
+constexpr int kQuantizationSubdivision = 960;
+constexpr Quantization quantization = Quantization(kQuantizationSubdivision);
+
 // Inserts pad data to a given `data` from a given `file_path`.
 void InsertPadData(float pitch, const std::string& file_path, std::vector<float>& samples,
                    std::vector<Slice>& slices) {
@@ -109,14 +113,15 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, float pitch, float gain, Instrument& instrument,
                   Performer& performer, std::vector<Task>& tasks) {
-  tasks.emplace_back(performer.CreateTask(performer.GetPosition() + position, duration,
-                                          [pitch, gain, &instrument](TaskState state) noexcept {
-                                            if (state == TaskState::kBegin) {
-                                              instrument.SetNoteOn(pitch, gain);
-                                            } else if (state == TaskState::kEnd) {
-                                              instrument.SetNoteOff(pitch);
-                                            }
-                                          }));
+  tasks.emplace_back(performer.CreateTask(
+      quantization.GetPosition(performer.GetPosition() + position),
+      quantization.GetPosition(duration), [pitch, gain, &instrument](TaskState state) noexcept {
+        if (state == TaskState::kBegin) {
+          instrument.SetNoteOn(pitch, gain);
+        } else if (state == TaskState::kEnd) {
+          instrument.SetNoteOff(pitch);
+        }
+      }));
 }
 
 void ComposeChord(float gain, int harmonic, const Scale& scale, Instrument& instrument,

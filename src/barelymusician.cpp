@@ -11,6 +11,7 @@
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "api/repeater.h"
+#include "common/time.h"
 
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!engine || !out_arpeggiator) return false;
@@ -397,12 +398,11 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
 bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization, double position,
                                     double* out_position) {
   if (!quantization || !out_position) return false;
-  if (quantization->resolution <= 0.0) return false;
-  if (quantization->amount < 0.0 || quantization->amount > 1.0) return false;
+  if (quantization->subdivision <= 0) return false;
+  if (quantization->amount < 0.0f || quantization->amount > 1.0f) return false;
 
-  *out_position = std::lerp(
-      position, quantization->resolution * std::round(position / quantization->resolution),
-      static_cast<double>(quantization->amount));
+  *out_position =
+      barely::Quantize(position, static_cast<int>(quantization->subdivision), quantization->amount);
   return true;
 }
 

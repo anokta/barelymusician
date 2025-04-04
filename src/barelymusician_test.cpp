@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "gmock/gmock-matchers.h"
-#include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -188,31 +187,6 @@ TEST(EngineTest, SetSeed) {
     EXPECT_DOUBLE_EQ(engine.GenerateRandomNumber(), values[i]);
   }
 }
-
-/// Common note values in relation to quarter note beat duration.
-constexpr double kQuarterNotesPerBeat = 1.0;
-constexpr double kEighthNotesPerBeat = 2.0;
-constexpr double kEighthTripletNotesPerBeat = 3.0;
-constexpr double kSixteenthNotesPerBeat = 4.0;
-constexpr double kSixteenthTripletNotesPerBeat = 6.0;
-constexpr double kThirtySecondNotesPerBeat = 8.0;
-constexpr double kThirtySecondTripletNotesPerBeat = 12.0;
-
-class QuantizationTestWithParam : public testing::TestWithParam<double> {};
-
-// Tests that the position gets quantized as expected with respect to the given resolution.
-TEST_P(QuantizationTestWithParam, GetPosition) {
-  constexpr double kPosition = 0.99;
-  const Quantization quantization(1.0 / GetParam());
-  EXPECT_DOUBLE_EQ(quantization.GetPosition(kPosition), 1.0);
-  EXPECT_DOUBLE_EQ(quantization.GetPosition(1.0 - kPosition), 0.0);
-}
-
-INSTANTIATE_TEST_SUITE_P(QuantizationTest, QuantizationTestWithParam,
-                         testing::Values(kQuarterNotesPerBeat, kEighthNotesPerBeat,
-                                         kEighthTripletNotesPerBeat, kSixteenthNotesPerBeat,
-                                         kSixteenthTripletNotesPerBeat, kThirtySecondNotesPerBeat,
-                                         kThirtySecondTripletNotesPerBeat));
 
 TEST(ScaleTest, GetPitch) {
   constexpr int kPitchCount = 5;

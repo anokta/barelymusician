@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 
+#include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -45,6 +46,31 @@ TEST(TimeTest, SamplesSecondsConversion) {
               kSamples[i]);
   }
 }
+
+// Common subdivisions of a beat in relation to quarter note beat duration.
+constexpr int kQuarterNotesPerBeat = 1;
+constexpr int kEighthNotesPerBeat = 2;
+constexpr int kEighthTripletNotesPerBeat = 3;
+constexpr int kSixteenthNotesPerBeat = 4;
+constexpr int kSixteenthTripletNotesPerBeat = 6;
+constexpr int kThirtySecondNotesPerBeat = 8;
+constexpr int kThirtySecondTripletNotesPerBeat = 12;
+
+class QuantizationTestWithParam : public testing::TestWithParam<int> {};
+
+// Tests that the position gets quantized as expected with respect to the given resolution.
+TEST_P(QuantizationTestWithParam, Quantize) {
+  constexpr double kPosition = 0.99;
+
+  EXPECT_DOUBLE_EQ(Quantize(kPosition, GetParam(), 1.0), 1.0);
+  EXPECT_DOUBLE_EQ(Quantize(1.0 - kPosition, GetParam(), 1.0), 0.0);
+}
+
+INSTANTIATE_TEST_SUITE_P(QuantizationTest, QuantizationTestWithParam,
+                         testing::Values(kQuarterNotesPerBeat, kEighthNotesPerBeat,
+                                         kEighthTripletNotesPerBeat, kSixteenthNotesPerBeat,
+                                         kSixteenthTripletNotesPerBeat, kThirtySecondNotesPerBeat,
+                                         kThirtySecondTripletNotesPerBeat));
 
 }  // namespace
 }  // namespace barely

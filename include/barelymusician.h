@@ -393,8 +393,8 @@ typedef struct BarelyNoteControlOverride {
 
 /// A musical quantization.
 typedef struct BarelyQuantization {
-  /// Resolution.
-  double resolution;
+  /// Subdivision of a beat.
+  int32_t subdivision;
 
   /// Amount.
   float amount;
@@ -2185,10 +2185,10 @@ struct Quantization : public BarelyQuantization {
 
   /// Constructs a new `Quantization`.
   ///
-  /// @param resolution Resolution.
+  /// @param subdivision Subdivision of a beat.
   /// @param amount Amount.
-  constexpr Quantization(double resolution, float amount = 1.0f) noexcept
-      : Quantization(BarelyQuantization{resolution, amount}) {}
+  constexpr Quantization(int subdivision, float amount = 1.0f) noexcept
+      : Quantization(BarelyQuantization{static_cast<int32_t>(subdivision), amount}) {}
 
   /// Constructs a new `Quantization` from a raw type.
   ///
@@ -2196,7 +2196,7 @@ struct Quantization : public BarelyQuantization {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr Quantization(BarelyQuantization quantization) noexcept
       : BarelyQuantization{quantization} {
-    assert(resolution > 0.0);
+    assert(subdivision > 0);
     assert(amount >= 0.0 && amount <= 1.0);
   }
 

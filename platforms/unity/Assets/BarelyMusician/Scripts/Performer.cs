@@ -58,13 +58,8 @@ namespace Barely {
     /// List of recurring tasks.
     public List<Task> Tasks = new List<Task>();
 
-    /// Beat callback.
-    public delegate void BeatCallback();
-    public event BeatCallback OnBeat;
-
-    [Serializable]
-    public class BeatEvent : UnityEngine.Events.UnityEvent {}
-    public BeatEvent OnBeatEvent;
+    /// List of triggers.
+    public List<Trigger> Triggers = new List<Trigger>();
 
     /// True if playing, false otherwise.
     public bool IsPlaying {
@@ -95,12 +90,6 @@ namespace Barely {
       public static IntPtr GetHandle(Performer performer) {
         return performer ? performer._handle : IntPtr.Zero;
       }
-
-      /// Internal beat callback.
-      public static void OnBeat(Performer performer) {
-        performer.OnBeat?.Invoke();
-        performer.OnBeatEvent?.Invoke();
-      }
     }
 
     // Raw handle.
@@ -124,6 +113,9 @@ namespace Barely {
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(null);
       }
+      for (int i = 0; i < Triggers.Count; ++i) {
+        Triggers[i].Update(null);
+      }
       Engine.Internal.Performer_Destroy(ref _handle);
     }
 
@@ -133,6 +125,9 @@ namespace Barely {
       LoopLength = _loopLength;
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(this);
+      }
+      for (int i = 0; i < Triggers.Count; ++i) {
+        Triggers[i].Update(this);
       }
     }
   }

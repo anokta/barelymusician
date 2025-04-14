@@ -12,6 +12,8 @@ target_sources(
   repeater.h
   task.cpp
   task.h
+  trigger.cpp
+  trigger.h
 )
 
 if(ENABLE_TESTS)

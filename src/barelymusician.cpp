@@ -11,6 +11,8 @@
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "api/repeater.h"
+#include "api/task.h"
+#include "api/trigger.h"
 #include "common/time.h"
 
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
@@ -344,14 +346,6 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
   return true;
 }
 
-bool BarelyPerformer_SetBeatCallback(BarelyPerformerHandle performer,
-                                     BarelyPerformer_BeatCallback callback, void* user_data) {
-  if (!performer) return false;
-
-  performer->SetBeatCallback({callback, user_data});
-  return true;
-}
-
 bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
                                           double loop_begin_position) {
   if (!performer) return false;
@@ -570,6 +564,46 @@ bool BarelyTask_SetProcessCallback(BarelyTaskHandle task, BarelyTask_ProcessCall
   if (!task) return false;
 
   task->SetProcessCallback({callback, user_data});
+  return true;
+}
+
+bool BarelyTrigger_Create(BarelyPerformerHandle performer, double position,
+                          BarelyTrigger_ProcessCallback callback, void* user_data,
+                          BarelyTriggerHandle* out_trigger) {
+  if (!performer) return false;
+  if (!out_trigger) return false;
+
+  *out_trigger = new BarelyTrigger(*performer, position, {callback, user_data});
+  return *out_trigger;
+}
+
+bool BarelyTrigger_Destroy(BarelyTriggerHandle trigger) {
+  if (!trigger) return false;
+
+  delete trigger;
+  return true;
+}
+
+bool BarelyTrigger_GetPosition(BarelyTriggerHandle trigger, double* out_position) {
+  if (!trigger) return false;
+  if (!out_position) return false;
+
+  *out_position = trigger->GetPosition();
+  return true;
+}
+
+bool BarelyTrigger_SetPosition(BarelyTriggerHandle trigger, double position) {
+  if (!trigger) return false;
+
+  trigger->SetPosition(position);
+  return true;
+}
+
+bool BarelyTrigger_SetProcessCallback(BarelyTriggerHandle trigger,
+                                      BarelyTrigger_ProcessCallback callback, void* user_data) {
+  if (!trigger) return false;
+
+  trigger->SetProcessCallback({callback, user_data});
   return true;
 }
 

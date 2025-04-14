@@ -100,7 +100,7 @@ namespace Barely.Examples {
       _performer.PlayOnAwake = playOnAwake;
       _performer.Loop = true;
       _performer.LoopLength = 1.0;
-      _performer.OnBeat += delegate() {
+      _performer.Triggers.Add(new Trigger(0.0, delegate() {
         int bar = _beat / beatCount;
         int beat = _beat % beatCount;
         float pitch = (beat == 0) ? barPitch : beatPitch;
@@ -113,7 +113,7 @@ namespace Barely.Examples {
         }
         _beatEventCallback(bar, beat);
         ++_beat;
-      };
+      }));
     }
 
     private void OnDisable() {

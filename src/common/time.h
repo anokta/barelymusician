@@ -31,7 +31,7 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
 /// @return Position in beats.
 [[nodiscard]] constexpr double Quantize(double position, int subdivision, float amount) noexcept {
   assert(subdivision > 0);
-  assert(amount >= 0.0f && amount <= 0.0f);
+  assert(amount >= 0.0f && amount <= 1.0f);
   return std::lerp(
       position,
       static_cast<double>(static_cast<int64_t>(static_cast<double>(subdivision) * position +

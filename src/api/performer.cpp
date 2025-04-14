@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <iterator>
 #include <optional>
 #include <set>
 #include <utility>
@@ -22,6 +23,12 @@ BarelyPerformer::~BarelyPerformer() noexcept { engine_.RemovePerformer(this); }
 void BarelyPerformer::AddTask(BarelyTask* task) noexcept {
   [[maybe_unused]] const bool success = inactive_tasks_.emplace(task->GetPosition(), task).second;
   assert(success && "Failed to create task");
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void BarelyPerformer::AddTrigger(BarelyTrigger* trigger) noexcept {
+  [[maybe_unused]] const bool success = triggers_.emplace(trigger->GetPosition(), trigger).second;
+  assert(success && "Failed to create trigger");
 }
 
 std::optional<double> BarelyPerformer::GetNextDuration() const noexcept {
@@ -64,19 +71,21 @@ std::optional<double> BarelyPerformer::GetNextDuration() const noexcept {
     }
   }
 
-  // Check beat callback.
-  if (beat_callback_) {
-    std::optional<double> next_beat_position =
-        (last_beat_position_ == position_) ? std::ceil(position_ + 1.0) : std::ceil(position_);
-    if (is_looping_ && *next_beat_position >= loop_end_position) {
-      const double first_beat_offset = std::ceil(loop_begin_position_) - loop_begin_position_;
-      next_beat_position = (loop_length_ > first_beat_offset)
-                               ? std::optional<double>{first_beat_offset + loop_end_position}
-                               : std::nullopt;
-    }
-    if (next_beat_position.has_value() &&
-        (!next_position.has_value() || *next_beat_position < *next_position)) {
-      next_position = next_beat_position;
+  // Check triggers.
+  if (!triggers_.empty()) {
+    const auto next_it = (last_trigger_it_ != triggers_.end())
+                             ? std::next(last_trigger_it_)
+                             : triggers_.lower_bound({position_, nullptr});
+    // Loop around if needed.
+    if (is_looping_ && (next_it == triggers_.end() || next_it->first >= GetLoopEndPosition())) {
+      if (const auto loop_it = triggers_.lower_bound({loop_begin_position_, nullptr});
+          loop_it != triggers_.end() && loop_it->first < GetLoopEndPosition() &&
+          (!next_position.has_value() || next_it->first < *next_position)) {
+        next_position = loop_it->first + loop_length_;
+      }
+    } else if (next_it != triggers_.end() &&
+               (!next_position.has_value() || next_it->first < *next_position)) {
+      next_position = next_it->first;
     }
   }
 
@@ -91,9 +100,15 @@ void BarelyPerformer::ProcessAllTasksAtPosition() noexcept {
   if (!is_playing_) {
     return;
   }
-  if (last_beat_position_ != position_ && std::ceil(position_) == position_) {
-    last_beat_position_ = position_;
-    beat_callback_();
+  // Process all the triggers first.
+  bool has_processed_triggers = false;
+  for (auto it = GetNextTrigger(); it != triggers_.end() && it->first < GetLoopEndPosition();
+       it = GetNextTrigger()) {
+    has_processed_triggers = true;
+    last_trigger_it_ = it;
+    it->second->Process();
+  }
+  if (has_processed_triggers) {
     return;
   }
   // Active tasks get processed in `SetPosition`, so we only need to process inactive tasks here.
@@ -115,7 +130,15 @@ void BarelyPerformer::RemoveTask(BarelyTask* task) noexcept {
   }
 }
 
-void BarelyPerformer::SetBeatCallback(BeatCallback callback) noexcept { beat_callback_ = callback; }
+void BarelyPerformer::RemoveTrigger(BarelyTrigger* trigger) noexcept {
+  if (last_trigger_it_ != triggers_.end() && last_trigger_it_->second == trigger) {
+    // Update the last processed iterator to the previous trigger.
+    last_trigger_it_ =
+        (last_trigger_it_ == triggers_.begin()) ? triggers_.end() : std::prev(last_trigger_it_);
+  }
+  [[maybe_unused]] const bool success = (triggers_.erase({trigger->GetPosition(), trigger}) == 1);
+  assert(success && "Failed to destroy trigger");
+}
 
 void BarelyPerformer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) {
@@ -150,7 +173,7 @@ void BarelyPerformer::SetLooping(bool is_looping) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyPerformer::SetPosition(double position) noexcept {
-  last_beat_position_ = std::nullopt;
+  last_trigger_it_ = triggers_.end();
   if (position_ == position) {
     return;
   }
@@ -198,11 +221,22 @@ void BarelyPerformer::SetTaskPosition(BarelyTask* task, double old_position) noe
   }
 }
 
+void BarelyPerformer::SetTriggerPosition(BarelyTrigger* trigger, double old_position) noexcept {
+  if (last_trigger_it_ != triggers_.end() && last_trigger_it_->second == trigger) {
+    // Update the last processed iterator to the previous trigger.
+    last_trigger_it_ =
+        (last_trigger_it_ == triggers_.begin()) ? triggers_.end() : std::prev(last_trigger_it_);
+  }
+  auto node = triggers_.extract({old_position, trigger});
+  node.value().first = trigger->GetPosition();
+  triggers_.insert(std::move(node));
+}
+
 void BarelyPerformer::Start() noexcept { is_playing_ = true; }
 
 void BarelyPerformer::Stop() noexcept {
   is_playing_ = false;
-  last_beat_position_ = std::nullopt;
+  last_trigger_it_ = triggers_.end();
   while (!active_tasks_.empty()) {
     SetTaskActive(active_tasks_.begin(), false);
   }
@@ -232,6 +266,15 @@ std::set<std::pair<double, BarelyTask*>>::const_iterator BarelyPerformer::GetNex
     }
   }
   return next_it;
+}
+
+std::set<std::pair<double, BarelyTrigger*>>::const_iterator BarelyPerformer::GetNextTrigger()
+    const noexcept {
+  if (!is_playing_) {
+    return triggers_.end();
+  }
+  return (last_trigger_it_ != triggers_.end()) ? std::next(last_trigger_it_)
+                                               : triggers_.lower_bound({position_, nullptr});
 }
 
 double BarelyPerformer::LoopAround(double position) const noexcept {

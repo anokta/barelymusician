@@ -38,7 +38,6 @@ VERS_1.0 {
     BarelyPerformer_GetPosition;
     BarelyPerformer_IsLooping;
     BarelyPerformer_IsPlaying;
-    BarelyPerformer_SetBeatCallback;
     BarelyPerformer_SetLoopBeginPosition;
     BarelyPerformer_SetLoopLength;
     BarelyPerformer_SetLooping;
@@ -66,6 +65,11 @@ VERS_1.0 {
     BarelyTask_SetDuration;
     BarelyTask_SetPosition;
     BarelyTask_SetProcessCallback;
+    BarelyTrigger_Create;
+    BarelyTrigger_Destroy;
+    BarelyTrigger_GetPosition;
+    BarelyTrigger_SetPosition;
+    BarelyTrigger_SetProcessCallback;
     Barely_AmplitudeToDecibels;
     Barely_DecibelsToAmplitude;
   local:

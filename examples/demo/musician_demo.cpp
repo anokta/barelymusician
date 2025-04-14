@@ -326,23 +326,24 @@ int main(int /*argc*/, char* argv[]) {
 
   // Beat callback.
   auto metronome = engine.CreatePerformer();
+  metronome.SetLooping(true);
+  int beat = 0;
   int harmonic = 0;
-  metronome.SetBeatCallback([&]() {
+  const auto metronome_trigger = metronome.CreateTrigger(0.0, [&]() {
     // Update transport.
-    int beat = static_cast<int>(metronome.GetPosition());
-    const int bar = beat / kBeatCount;
-    beat %= kBeatCount;
-
-    if (beat == 0) {
+    const int current_bar = beat / kBeatCount;
+    const int current_beat = beat % kBeatCount;
+    ++beat;
+    if (current_beat == 0) {
       // Compose next bar.
-      harmonic = bar_composer_callback(bar);
+      harmonic = bar_composer_callback(current_bar);
     }
     // Update members.
     for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
       // Compose next beat notes.
       if (beat_composer_callback) {
-        beat_composer_callback(bar, beat, kBeatCount, harmonic, instruments[index], performer,
-                               tasks);
+        beat_composer_callback(current_bar, current_beat, kBeatCount, harmonic, instruments[index],
+                               performer, tasks);
       }
     }
   });

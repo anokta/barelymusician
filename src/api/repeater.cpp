@@ -11,14 +11,18 @@
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyRepeater::BarelyRepeater(BarelyEngine& engine) noexcept
-    : engine_(engine), performer_(engine_) {
-  performer_.SetBeatCallback({
-      [](void* user_data) noexcept {
-        auto& repeater = *static_cast<BarelyRepeater*>(user_data);
-        repeater.OnBeat();
-      },
-      this,
-  });
+    : engine_(engine),
+      performer_(engine_),
+      trigger_(performer_, 0.0,
+               {
+                   [](void* user_data) noexcept {
+                     auto& repeater = *static_cast<BarelyRepeater*>(user_data);
+                     repeater.OnBeat();
+                   },
+                   this,
+               }) {
+  performer_.SetLooping(true);
+  performer_.SetLoopLength(1.0);
 }
 
 BarelyRepeater::~BarelyRepeater() noexcept {

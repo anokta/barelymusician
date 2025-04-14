@@ -5,6 +5,8 @@
   "cmake.automaticReconfigure": false,
   "cmake.enableAutomaticKitScan": false,
   "csharp.format.enable": false,
+  "dotnet.defaultSolution": "unity.sln",
+  "dotnet.preferCSharpExtension": true,
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
   "files.exclude": {
@@ -61,5 +63,4 @@
     "Temp/": true
   },
   "files.insertFinalNewline": true,
-  "dotnet.preferCSharpExtension": true,
 }

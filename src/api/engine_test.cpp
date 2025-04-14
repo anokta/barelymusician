@@ -2,7 +2,6 @@
 
 #include <barelymusician.h>
 
-#include <array>
 #include <functional>
 
 #include "api/performer.h"

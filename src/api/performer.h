@@ -13,14 +13,12 @@
 #include <utility>
 
 #include "api/task.h"
+#include "api/trigger.h"
 #include "common/callback.h"
 
 /// Implementation of a performer.
 struct BarelyPerformer {
  public:
-  /// Beat callback alias.
-  using BeatCallback = barely::Callback<BarelyPerformer_BeatCallback>;
-
   /// Constructs a new `BarelyPerformer`.
   ///
   /// @param engine Engine.
@@ -41,6 +39,12 @@ struct BarelyPerformer {
   /// @param task Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddTask(BarelyTask* task) noexcept;
+
+  /// Adds a new trigger.
+  ///
+  /// @param trigger Pointer to trigger.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void AddTrigger(BarelyTrigger* trigger) noexcept;
 
   /// Returns loop begin position.
   ///
@@ -87,10 +91,10 @@ struct BarelyPerformer {
   /// @param task Pointer to task.
   void RemoveTask(BarelyTask* task) noexcept;
 
-  /// Sets the beat callback.
+  /// Removes a trigger.
   ///
-  /// @param callback Beat callback.
-  void SetBeatCallback(BeatCallback callback) noexcept;
+  /// @param trigger Pointer to trigger.
+  void RemoveTrigger(BarelyTrigger* trigger) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -125,6 +129,12 @@ struct BarelyPerformer {
   /// @param old_position Old task position.
   void SetTaskPosition(BarelyTask* task, double old_position) noexcept;
 
+  /// Sets trigger position.
+  ///
+  /// @param trigger Pointer to trigger.
+  /// @param old_position Old task position.
+  void SetTriggerPosition(BarelyTrigger* trigger, double old_position) noexcept;
+
   /// Stops performer.
   void Start() noexcept;
 
@@ -142,6 +152,10 @@ struct BarelyPerformer {
   [[nodiscard]] std::set<std::pair<double, BarelyTask*>>::const_iterator GetNextInactiveTask()
       const noexcept;
 
+  //  Returns an iterator to the next trigger to process.
+  [[nodiscard]] std::set<std::pair<double, BarelyTrigger*>>::const_iterator GetNextTrigger()
+      const noexcept;
+
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
 
@@ -157,9 +171,6 @@ struct BarelyPerformer {
 
   // Engine.
   BarelyEngine& engine_;
-
-  // Beat callback.
-  BeatCallback beat_callback_ = {};
 
   // Denotes whether performer is looping or not.
   bool is_looping_ = false;
@@ -180,7 +191,11 @@ struct BarelyPerformer {
   std::set<std::pair<double, BarelyTask*>> active_tasks_;
   std::set<std::pair<double, BarelyTask*>> inactive_tasks_;
 
-  std::optional<double> last_beat_position_ = std::nullopt;
+  // Set of trigger position-pointer pairs.
+  std::set<std::pair<double, BarelyTrigger*>> triggers_;
+
+  // Iterator to the last processed trigger.
+  std::set<std::pair<double, BarelyTrigger*>>::const_iterator last_trigger_it_ = triggers_.end();
 };
 
 #endif  // BARELYMUSICIAN_API_PERFORMER_H_

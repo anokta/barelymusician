@@ -540,7 +540,6 @@ namespace Barely {
           Debug.LogError("Failed to create performer '" + performer.name + "'");
         }
         _performers.Add(performerHandle, performer);
-        BarelyPerformer_SetBeatCallback(performerHandle, Performer_OnBeat, performerHandle);
       }
 
       /// Destroys a performer.
@@ -883,6 +882,66 @@ namespace Barely {
         }
       }
 
+      /// Creates a new trigger.
+      ///
+      /// @param trigger Trigger.
+      /// @param performerHandle Performer handle.
+      /// @param position Trigger position.
+      /// @param callback Trigger process callback.
+      /// @param triggerHandle Trigger handle.
+      public static void Trigger_Create(Trigger trigger, IntPtr performerHandle, double position,
+                                        ref IntPtr triggerHandle) {
+        if (Handle == IntPtr.Zero || triggerHandle != IntPtr.Zero) {
+          return;
+        }
+        if (!BarelyTrigger_Create(performerHandle, position, Trigger_OnProcess, IntPtr.Zero,
+                                  ref triggerHandle)) {
+          Debug.LogError("Failed to create trigger '" + trigger + "'");
+          return;
+        }
+        _triggers.Add(triggerHandle, trigger);
+        BarelyTrigger_SetProcessCallback(triggerHandle, Trigger_OnProcess, triggerHandle);
+      }
+
+      /// Destroys a trigger.
+      ///
+      /// @param triggerHandle Trigger handle.
+      public static void Trigger_Destroy(IntPtr performerHandle, ref IntPtr triggerHandle) {
+        if (Handle == IntPtr.Zero || performerHandle == IntPtr.Zero ||
+            triggerHandle == IntPtr.Zero) {
+          triggerHandle = IntPtr.Zero;
+          return;
+        }
+        if (!BarelyTrigger_Destroy(triggerHandle)) {
+          Debug.LogError("Failed to destroy performer trigger");
+        }
+        _triggers.Remove(triggerHandle);
+        triggerHandle = IntPtr.Zero;
+      }
+
+      /// Returns the position of a trigger.
+      ///
+      /// @param triggerHandle Trigger handle.
+      /// @return Position in beats.
+      public static double Trigger_GetPosition(IntPtr triggerHandle) {
+        double position = 0.0;
+        if (!BarelyTrigger_GetPosition(triggerHandle, ref position) &&
+            triggerHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer trigger position");
+        }
+        return position;
+      }
+
+      /// Sets the position of a trigger.
+      ///
+      /// @param triggerHandle Trigger handle.
+      /// @param position Position in beats.
+      public static void Trigger_SetPosition(IntPtr triggerHandle, double position) {
+        if (!BarelyTrigger_SetPosition(triggerHandle, position) && triggerHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer trigger position");
+        }
+      }
+
       // Instrument note off callback.
       private delegate void Instrument_NoteOffCallback(float pitch, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOffCallback))]
@@ -901,21 +960,21 @@ namespace Barely {
         }
       }
 
-      // Performer beat callback.
-      private delegate void Performer_BeatCallback(IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(Performer_BeatCallback))]
-      private static void Performer_OnBeat(IntPtr userData) {
-        if (_performers.TryGetValue(userData, out var performer)) {
-          Performer.Internal.OnBeat(performer);
-        }
-      }
-
       // Task process callback.
       private delegate void Task_ProcessCallback(TaskState state, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(Task_ProcessCallback))]
       private static void Task_OnProcess(TaskState state, IntPtr userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
           Task.Internal.OnProcess(task, state);
+        }
+      }
+
+      // Trigger process callback.
+      private delegate void Trigger_ProcessCallback(IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(Trigger_ProcessCallback))]
+      private static void Trigger_OnProcess(IntPtr userData) {
+        if (_triggers.TryGetValue(userData, out var trigger)) {
+          Trigger.Internal.OnProcess(trigger);
         }
       }
 
@@ -1045,6 +1104,9 @@ namespace Barely {
       // Map of tasks by their handles.
       private static Dictionary<IntPtr, Task> _tasks = null;
 
+      // Map of triggers by their handles.
+      private static Dictionary<IntPtr, Trigger> _triggers = null;
+
       // Scale.
       private static Scale _scale = new Scale {
         pitches = null,
@@ -1129,6 +1191,7 @@ namespace Barely {
           _performers = new Dictionary<IntPtr, Performer>();
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           _tasks = new Dictionary<IntPtr, Task>();
+          _triggers = new Dictionary<IntPtr, Trigger>();
           BarelyEngine_Update(_handle, GetNextTimestamp());
         }
 
@@ -1300,11 +1363,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
       private static extern bool BarelyPerformer_IsPlaying(IntPtr performer, ref bool outIsPlaying);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetBeatCallback")]
-      private static extern bool BarelyPerformer_SetBeatCallback(IntPtr performer,
-                                                                 Performer_BeatCallback callback,
-                                                                 IntPtr userData);
-
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
       private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr performer,
                                                                       double loopBeginPosition);
@@ -1394,6 +1452,25 @@ namespace Barely {
       private static extern bool BarelyTask_SetProcessCallback(IntPtr task,
                                                                Task_ProcessCallback callback,
                                                                IntPtr userData);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_Create")]
+      private static extern bool BarelyTrigger_Create(IntPtr performer, double position,
+                                                      Trigger_ProcessCallback callback,
+                                                      IntPtr userData, ref IntPtr outTrigger);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_Destroy")]
+      private static extern bool BarelyTrigger_Destroy(IntPtr task);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_GetPosition")]
+      private static extern bool BarelyTrigger_GetPosition(IntPtr task, ref double outPosition);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_SetPosition")]
+      private static extern bool BarelyTrigger_SetPosition(IntPtr task, double position);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_SetProcessCallback")]
+      private static extern bool BarelyTrigger_SetProcessCallback(IntPtr task,
+                                                                  Trigger_ProcessCallback callback,
+                                                                  IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "Barely_AmplitudeToDecibels")]
       private static extern bool Barely_AmplitudeToDecibels(float amplitude, ref float outDecibels);

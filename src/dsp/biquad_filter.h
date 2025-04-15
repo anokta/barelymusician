@@ -29,16 +29,9 @@ class BiquadFilter {
   /// @param coeffs Filter coefficients.
   /// @return Filtered output sample.
   [[nodiscard]] float Next(float input, const Coefficients& coeffs) noexcept {
-    // Interpolate the coefficients.
-    coeffs_.a1 += (coeffs.a1 - coeffs_.a1) * kInterpolationCoefficient;
-    coeffs_.a2 += (coeffs.a2 - coeffs_.a2) * kInterpolationCoefficient;
-    coeffs_.b0 += (coeffs.b0 - coeffs_.b0) * kInterpolationCoefficient;
-    coeffs_.b1 += (coeffs.b1 - coeffs_.b1) * kInterpolationCoefficient;
-    coeffs_.b2 += (coeffs.b2 - coeffs_.b2) * kInterpolationCoefficient;
-
     // Uses Direct-Form 2.
-    const float v0 = input - coeffs_.a1 * state_.v1 - coeffs_.a2 * state_.v2;
-    const float output = coeffs_.b0 * v0 + coeffs_.b1 * state_.v1 + coeffs_.b2 * state_.v2;
+    const float v0 = input - coeffs.a1 * state_.v1 - coeffs.a2 * state_.v2;
+    const float output = coeffs.b0 * v0 + coeffs.b1 * state_.v1 + coeffs.b2 * state_.v2;
 
     state_.v2 = state_.v1;
     state_.v1 = v0;
@@ -50,21 +43,11 @@ class BiquadFilter {
   void Reset() noexcept { state_ = {}; }
 
  private:
-  // Filter coefficient interpolation coefficient.
-  // TODO(#146): Instead of keeping this value this low, it's probably better to add smoothening to
-  // the cutoff frequency and q.
-  static inline constexpr float kInterpolationCoefficient = 0.001f;
-
   // Filter state.
   struct State {
     float v1 = 0.0f;
     float v2 = 0.0f;
   };
-
-  // Current coefficients.
-  Coefficients coeffs_ = {};
-
-  // Current state.
   State state_ = {};
 };
 

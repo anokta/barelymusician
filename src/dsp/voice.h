@@ -181,7 +181,14 @@ class Voice {
     params_.osc_noise_mix += (params.osc_noise_mix - params_.osc_noise_mix) * kCoeff;
     params_.osc_shape += (params.osc_shape - params_.osc_shape) * kCoeff;
     params_.osc_skew += (params.osc_skew - params_.osc_skew) * kCoeff;
-    params_.filter_coefficients = params.filter_coefficients;
+
+    const auto& new_coeffs = params.filter_coefficients;
+    auto& coeffs = params_.filter_coefficients;
+    coeffs.a1 += (new_coeffs.a1 - coeffs.a1) * kCoeff;
+    coeffs.a2 += (new_coeffs.a2 - coeffs.a2) * kCoeff;
+    coeffs.b0 += (new_coeffs.b0 - coeffs.b0) * kCoeff;
+    coeffs.b1 += (new_coeffs.b1 - coeffs.b1) * kCoeff;
+    coeffs.b2 += (new_coeffs.b2 - coeffs.b2) * kCoeff;
   }
 
   bool IsSliceActive() const noexcept {

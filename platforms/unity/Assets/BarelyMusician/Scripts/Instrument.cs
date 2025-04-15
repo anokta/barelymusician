@@ -293,6 +293,7 @@ namespace Barely {
       public static void OnNoteOn(Instrument instrument, float pitch) {
         if (!instrument.Source.isPlaying) {
           instrument._noteOnTimestamp = Engine.Timestamp;
+          instrument.UpdateControls();
           instrument.Source.Play();
         }
         instrument.OnNoteOn?.Invoke(pitch);
@@ -330,9 +331,25 @@ namespace Barely {
     }
 
     private void Update() {
-      if (Source.isPlaying && !_hasProcessedSamples && AudioSettings.dspTime > _noteOnTimestamp) {
-        Source.Stop();
+      if (!Source.isPlaying) {
+        return;
       }
+      if (!_hasProcessedSamples && AudioSettings.dspTime > _noteOnTimestamp) {
+        Source.Stop();
+        return;
+      }
+      UpdateControls();
+    }
+
+    private void OnAudioFilterRead(float[] data, int channels) {
+      _hasProcessedSamples = Engine.Internal.Instrument_Process(_handle, data, channels);
+    }
+
+    private void SetControl(Engine.Internal.ControlType type, float value) {
+      Engine.Internal.Instrument_SetControl(_handle, type, value);
+    }
+
+    private void UpdateControls() {
       UpdateSampleData();
       SetControl(Engine.Internal.ControlType.GAIN, Gain);
       SetControl(Engine.Internal.ControlType.PITCH_SHIFT, PitchShift);
@@ -356,14 +373,6 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.FILTER_Q, FilterQ);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
-    }
-
-    private void OnAudioFilterRead(float[] data, int channels) {
-      _hasProcessedSamples = Engine.Internal.Instrument_Process(_handle, data, channels);
-    }
-
-    private void SetControl(Engine.Internal.ControlType type, float value) {
-      Engine.Internal.Instrument_SetControl(_handle, type, value);
     }
 
     private void UpdateSampleData() {

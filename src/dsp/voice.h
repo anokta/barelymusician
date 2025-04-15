@@ -104,7 +104,7 @@ class Voice {
   void set_gain(float gain) noexcept { gain_ = gain; }
   void set_pitch(float pitch) noexcept {
     params_.osc_increment = std::pow(2.0f, pitch);
-    params_.slice_increment = (slice_ != nullptr)
+    params_.slice_increment = (slice_ != nullptr && slice_->sample_count > 0)
                                   ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
                                   : 0.0f;
   }
@@ -155,13 +155,15 @@ class Voice {
     }
 
     float slice_increment = params.slice_increment * params_.slice_increment;
-    if constexpr (kOscMode == OscMode::kFm) {
-      slice_increment += osc_output * slice_increment;
-    }
-    slice_offset_ += slice_increment;
-    if constexpr (kSliceMode == SliceMode::kLoop) {
-      if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
-        slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
+    if (slice_increment > 0) {
+      if constexpr (kOscMode == OscMode::kFm) {
+        slice_increment += osc_output * slice_increment;
+      }
+      slice_offset_ += slice_increment;
+      if constexpr (kSliceMode == SliceMode::kLoop) {
+        if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
+          slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
+        }
       }
     }
 

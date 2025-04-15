@@ -1415,9 +1415,8 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// @param output_samples Span of mono output samples.
   /// @param timestamp Timestamp in seconds.
   void Process(std::span<float> output_samples, double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_Process(
-        *this, output_samples.data(), static_cast<int32_t>(output_samples.size()), timestamp);
-    assert(success);
+    BarelyInstrument_Process(*this, output_samples.data(),
+                             static_cast<int32_t>(output_samples.size()), timestamp);
   }
 
   /// Sets all notes off.

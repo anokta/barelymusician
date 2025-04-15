@@ -414,13 +414,14 @@ namespace Barely {
       /// @param instrumentHandle Instrument handle.
       /// @param outputSamples Output samples.
       /// @param outputChannelCount Number of output channels.
-      public static void Instrument_Process(IntPtr instrumentHandle, float[] outputSamples,
+      /// @return True if successful, false otherwise.
+      public static bool Instrument_Process(IntPtr instrumentHandle, float[] outputSamples,
                                             int outputChannelCount) {
         if (Handle == IntPtr.Zero) {
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;
           }
-          return;
+          return false;
         }
         int outputFrameCount = outputSamples.Length / outputChannelCount;
         if (BarelyInstrument_Process(instrumentHandle, _outputSamples, outputFrameCount,
@@ -430,10 +431,12 @@ namespace Barely {
               outputSamples[frame * outputChannelCount + channel] *= _outputSamples[frame];
             }
           }
+          return true;
         } else {
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;
           }
+          return false;
         }
       }
 

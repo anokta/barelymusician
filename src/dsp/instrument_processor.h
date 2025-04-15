@@ -31,7 +31,8 @@ class InstrumentProcessor {
   ///
   /// @param output_samples Array of mono output samples.
   /// @param output_sample_count Number of output samples.
-  void Process(float* output_samples, int output_sample_count) noexcept;
+  /// @return True if processed samples, false otherwise.
+  [[nodiscard]] bool Process(float* output_samples, int output_sample_count) noexcept;
 
   /// Sets a control value.
   ///

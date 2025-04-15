@@ -127,13 +127,15 @@ bool BarelyInstrument::Process(std::span<float> output_samples, double timestamp
   const int64_t process_sample = barely::SecondsToSamples(engine_.GetSampleRate(), timestamp);
 
   int current_sample = 0;
+  bool has_processed_samples = false;
   // Process *all* messages before the end sample.
   const int64_t end_sample = process_sample + output_sample_count;
   for (auto* message = message_queue_.GetNext(end_sample); message;
        message = message_queue_.GetNext(end_sample)) {
     if (const int message_sample = static_cast<int>(message->first - process_sample);
         current_sample < message_sample) {
-      processor_.Process(&output_samples[current_sample], message_sample - current_sample);
+      has_processed_samples |=
+          processor_.Process(&output_samples[current_sample], message_sample - current_sample);
       current_sample = message_sample;
     }
     std::visit(MessageVisitor{[this](ControlMessage& control_message) noexcept {
@@ -158,9 +160,10 @@ bool BarelyInstrument::Process(std::span<float> output_samples, double timestamp
   }
   // Process the rest of the samples.
   if (current_sample < output_sample_count) {
-    processor_.Process(&output_samples[current_sample], output_sample_count - current_sample);
+    has_processed_samples |=
+        processor_.Process(&output_samples[current_sample], output_sample_count - current_sample);
   }
-  return true;
+  return has_processed_samples;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

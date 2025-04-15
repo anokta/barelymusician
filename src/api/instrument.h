@@ -60,7 +60,7 @@ struct BarelyInstrument {
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool Process(std::span<float> output_samples, double timestamp) noexcept;
+  [[nodiscard]] bool Process(std::span<float> output_samples, double timestamp) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)

@@ -291,6 +291,10 @@ namespace Barely {
 
       /// Internal note on callback.
       public static void OnNoteOn(Instrument instrument, float pitch) {
+        if (!instrument.Source.isPlaying) {
+          instrument._noteOnTimestamp = Engine.Timestamp;
+          instrument.Source.Play();
+        }
         instrument.OnNoteOn?.Invoke(pitch);
         instrument.OnNoteOnEvent?.Invoke(pitch);
       }
@@ -314,7 +318,6 @@ namespace Barely {
         ones[i] = 1.0f;
       }
       Source.clip.SetData(ones, 0);
-      Source.Play();
       Update();
     }
 
@@ -327,6 +330,9 @@ namespace Barely {
     }
 
     private void Update() {
+      if (Source.isPlaying && !_hasProcessedSamples && AudioSettings.dspTime > _noteOnTimestamp) {
+        Source.Stop();
+      }
       UpdateSampleData();
       SetControl(Engine.Internal.ControlType.GAIN, Gain);
       SetControl(Engine.Internal.ControlType.PITCH_SHIFT, PitchShift);
@@ -353,7 +359,7 @@ namespace Barely {
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      Engine.Internal.Instrument_Process(_handle, data, channels);
+      _hasProcessedSamples = Engine.Internal.Instrument_Process(_handle, data, channels);
     }
 
     private void SetControl(Engine.Internal.ControlType type, float value) {
@@ -370,5 +376,11 @@ namespace Barely {
 
     // Raw handle.
     private IntPtr _handle = IntPtr.Zero;
+
+    // Denotes whether the instrument processed samples or not.
+    private bool _hasProcessedSamples = false;
+
+    // Most recent note on timestamp to process.
+    private double _noteOnTimestamp = 0.0;
   }
 }  // namespace Barely

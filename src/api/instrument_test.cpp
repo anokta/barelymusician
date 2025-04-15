@@ -56,7 +56,7 @@ TEST(InstrumentTest, PlaySingleNote) {
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  EXPECT_TRUE(instrument.Process(buffer, 0.0));
+  EXPECT_FALSE(instrument.Process(buffer, 0.0));
   for (int i = 0; i < kSampleCount; ++i) {
     EXPECT_FLOAT_EQ(buffer[i], 0.0f);
   }
@@ -99,7 +99,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  EXPECT_TRUE(instrument.Process(buffer, 0));
+  EXPECT_FALSE(instrument.Process(buffer, 0.0));
   for (int i = 0; i < kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(buffer[i], 0.0f);
   }
@@ -112,7 +112,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  EXPECT_TRUE(instrument.Process(buffer, 0));
+  EXPECT_TRUE(instrument.Process(buffer, 0.0));
   for (int i = 0; i < kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(buffer[i], kSamples[i]);
   }

@@ -137,14 +137,15 @@ class Envelope {
 
   /// Stops the envelope.
   void Stop() noexcept {
-    if (state_ != State::kIdle && state_ != State::kRelease) {
-      if (state_ == State::kAttack && adsr_->attack_increment_ > 0.0f) {
-        state_ = State::kIdle;
-      } else {
-        phase_ = 1.0f;
-        release_output_ = output_;
-        state_ = State::kRelease;
-      }
+    if (state_ == State::kIdle || state_ == State::kRelease) {
+      return;
+    }
+    if (state_ == State::kAttack && phase_ == 0.0f && adsr_->attack_increment_ > 0.0f) {
+      state_ = State::kIdle;
+    } else {
+      phase_ = 1.0f;
+      release_output_ = output_;
+      state_ = State::kRelease;
     }
   }
 

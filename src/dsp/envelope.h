@@ -12,16 +12,12 @@ class Envelope {
   /// ADSR (Attack-Decay-Sustain-Release).
   class Adsr {
    public:
-    /// Constructs new `Adsr`.
-    ///
-    /// @param sample_interval Sample interval in seconds.
-    explicit Adsr(float sample_interval) noexcept : sample_interval_(sample_interval) {}
-
     /// Sets the attack.
     ///
+    /// @param sample_interval Sample interval in seconds.
     /// @param attack Attack in seconds.
-    void SetAttack(float attack) noexcept {
-      attack_increment_ = (attack > 0.0f) ? sample_interval_ / attack : 0.0f;
+    void SetAttack(float sample_interval, float attack) noexcept {
+      attack_increment_ = (attack > 0.0f) ? sample_interval / attack : 0.0f;
       if (attack_increment_ > 1.0f) {
         attack_increment_ = 0.0f;
       }
@@ -29,9 +25,10 @@ class Envelope {
 
     /// Sets the decay.
     ///
-    /// @param  decay Attack in seconds.
-    void SetDecay(float decay) noexcept {
-      decay_increment_ = (decay > 0.0f) ? sample_interval_ / decay : 0.0f;
+    /// @param sample_interval Sample interval in seconds.
+    /// @param decay Attack in seconds.
+    void SetDecay(float sample_interval, float decay) noexcept {
+      decay_increment_ = (decay > 0.0f) ? sample_interval / decay : 0.0f;
       if (decay_increment_ > 1.0f) {
         decay_increment_ = 0.0f;
       }
@@ -39,9 +36,10 @@ class Envelope {
 
     /// Sets the release.
     ///
-    /// @param  release Release in seconds.
-    void SetRelease(float release) noexcept {
-      release_decrement_ = (release > 0.0f) ? -sample_interval_ / release : 0.0f;
+    /// @param sample_interval Sample interval in seconds.
+    /// @param release Release in seconds.
+    void SetRelease(float sample_interval, float release) noexcept {
+      release_decrement_ = (release > 0.0f) ? -sample_interval / release : 0.0f;
       if (release_decrement_ < -1.0f) {
         release_decrement_ = 0.0f;
       }
@@ -49,14 +47,11 @@ class Envelope {
 
     /// Sets the sustain of the envelope in amplitude.
     ///
-    /// @param  sustain Sustain in amplitude range [0, 1].
+    /// @param sustain Sustain in amplitude range [0, 1].
     void SetSustain(float sustain) noexcept { sustain_ = std::clamp(sustain, 0.0f, 1.0f); }
 
    private:
     friend class Envelope;
-
-    // Sample interval in seconds.
-    float sample_interval_ = 0.0f;
 
     // ADSR values.
     float attack_increment_ = 0.0f;

@@ -103,8 +103,6 @@ class InstrumentProcessor {
   int voice_count_ = 8;
 
   float sample_interval_ = 0.0f;
-  Envelope::Adsr adsr_;
-
   SampleData sample_data_;
 
   // TODO(#146): Filter coefficients should likely be calculated in `BarelyInstrument` instead.

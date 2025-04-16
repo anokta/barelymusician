@@ -1077,7 +1077,6 @@ namespace Barely {
       private static IntPtr _handle = IntPtr.Zero;
 
       // Minimum task duration to avoid zero duration tasks.
-      // TODO(#148): This can be removed once trigger tasks are supported.
       private const double _minTaskDuration = 1e-6;
 
       /// Reference frequency which is tuned to middle C.

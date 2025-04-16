@@ -59,7 +59,6 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
                                          AudioRng& rng, int sample_rate,
                                          float reference_frequency) noexcept
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
-      adsr_(sample_interval_),
       reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
   for (const auto& [type, value] : control_overrides) {
@@ -111,16 +110,16 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       voice_count_ = voice_count;
     } break;
     case ControlType::kAttack:
-      adsr_.SetAttack(value);
+      voice_params_.adsr.SetAttack(sample_interval_, value);
       break;
     case ControlType::kDecay:
-      adsr_.SetDecay(value);
+      voice_params_.adsr.SetDecay(sample_interval_, value);
       break;
     case ControlType::kSustain:
-      adsr_.SetSustain(value);
+      voice_params_.adsr.SetSustain(value);
       break;
     case ControlType::kRelease:
-      adsr_.SetRelease(value);
+      voice_params_.adsr.SetRelease(sample_interval_, value);
       break;
     case ControlType::kOscMix:
       voice_params_.osc_mix = value;
@@ -221,7 +220,7 @@ void InstrumentProcessor::SetNoteOn(
   if (const auto* sample = sample_data_.Select(pitch, *voice_params_.rng); sample != nullptr) {
     voice.set_slice(sample);
   }
-  voice.Start(voice_params_, adsr_, pitch, note_controls);
+  voice.Start(voice_params_, pitch, note_controls);
 }
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {

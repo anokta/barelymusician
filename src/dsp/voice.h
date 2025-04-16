@@ -22,6 +22,9 @@ class Voice {
   /// Process parameters.
   // TODO(#146): Split voice parameters out of instrument parameters.
   struct Params {
+    /// Envelope adsr.
+    Envelope::Adsr adsr = {};
+
     /// Bit crusher range (for bit depth reduction).
     float bit_crusher_range = 0.0f;
 
@@ -79,9 +82,8 @@ class Voice {
   /// Starts the voice.
   ///
   /// @param params Voice process parameters.
-  /// @param adsr Adsr.
   /// @param note_controls Array of note controls.
-  void Start(const Params& params, const Envelope::Adsr& adsr, float pitch,
+  void Start(const Params& params, float pitch,
              const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
     const float gain = note_controls[BarelyNoteControlType_kGain];
     const float pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
@@ -93,7 +95,7 @@ class Voice {
       filter_.Reset();
       osc_phase_ = 0.0f;
       slice_offset_ = 0.0f;
-      envelope_.Start(adsr);
+      envelope_.Start(params_.adsr);
       set_pitch(pitch + pitch_shift);
     }
   }

@@ -22,8 +22,7 @@ class BitCrusher {
     assert(increment >= 0.0f);
     phase_ += increment;
     if (phase_ >= 1.0f) {
-      // Zero `range` is passed to disable the bit depth reduction.
-      output_ = (range > 0.0f) ? std::round(input * range) / range : input;
+      output_ = (range > 0.0f) ? (std::round(input * range) / range) : input;
       phase_ -= 1.0f;
     }
     return output_;

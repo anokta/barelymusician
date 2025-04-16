@@ -16,58 +16,75 @@
 
 namespace barely {
 
+/// Voice parameters.
+struct VoiceParams {
+  /// Bit crusher range (for bit depth reduction).
+  float bit_crusher_range = 0.0f;
+
+  /// Bit crusher increment (for sample rate reduction).
+  float bit_crusher_increment = 1.0f;
+
+  /// Filter coefficients.
+  BiquadFilter::Coefficients filter_coefficients = {};
+
+  /// Gain in linear amplitude.
+  float gain = 1.0f;
+
+  /// Oscillator mix.
+  float osc_mix = 0.0f;
+
+  /// Oscillator noise mix.
+  float osc_noise_mix = 0.0f;
+
+  /// Oscillator shape.
+  float osc_shape = 0.0f;
+
+  /// Oscillator skew.
+  float osc_skew = 0.0f;
+};
+
+/// Instrument parameters.
+struct InstrumentParams {
+  /// Oscillator increment per sample.
+  float osc_increment = 0.0f;
+
+  /// Slice increment per sample.
+  float slice_increment = 0.0f;
+
+  /// Envelope adsr.
+  Envelope::Adsr adsr = {};
+
+  /// Random number generator.
+  AudioRng* rng = nullptr;
+
+  /// Voice parameters.
+  VoiceParams voice_params = {};
+};
+
+/// Note parameters.
+struct NoteParams {
+  /// Gain in linear amplitude.
+  float gain = 1.0f;
+
+  /// Oscillator increment per sample.
+  float osc_increment = 0.0f;
+
+  /// Slice increment per sample.
+  float slice_increment = 0.0f;
+};
+
 /// Class that wraps an instrument voice.
 class Voice {
  public:
-  /// Process parameters.
-  // TODO(#146): Split voice parameters out of instrument parameters.
-  struct Params {
-    /// Envelope adsr.
-    Envelope::Adsr adsr = {};
-
-    /// Bit crusher range (for bit depth reduction).
-    float bit_crusher_range = 0.0f;
-
-    /// Bit crusher increment (for sample rate reduction).
-    float bit_crusher_increment = 1.0f;
-
-    /// Filter coefficients.
-    BiquadFilter::Coefficients filter_coefficients = {};
-
-    /// Gain in linear amplitude.
-    float gain = 1.0f;
-
-    /// Oscillator increment per sample.
-    float osc_increment = 0.0f;
-
-    /// Oscillator mix.
-    float osc_mix = 0.0f;
-
-    /// Oscillator noise mix.
-    float osc_noise_mix = 0.0f;
-
-    /// Oscillator shape.
-    float osc_shape = 0.0f;
-
-    /// Oscillator skew.
-    float osc_skew = 0.0f;
-
-    /// Slice increment per sample.
-    float slice_increment = 0.0f;
-
-    /// Random number generator.
-    AudioRng* rng = nullptr;
-  };
-
   /// Returns the next output sample.
   ///
   /// @tparam kOscMode Oscillator mode.
   /// @tparam kSliceMode Slice mode.
   /// @param voice Voice.
-  /// @param params Voice process parameters.
+  /// @param params Instrument parameters.
   /// @return Next output value.
   template <OscMode kOscMode, SliceMode kSliceMode>
-  [[nodiscard]] static float Next(Voice& voice, const Params& params) noexcept {
+  [[nodiscard]] static float Next(Voice& voice, const InstrumentParams& params) noexcept {
     return voice.Next<kOscMode, kSliceMode>(params);
   }
 
@@ -81,51 +98,52 @@ class Voice {
 
   /// Starts the voice.
   ///
-  /// @param params Voice process parameters.
+  /// @param instrument_params Instrument parameters.
   /// @param note_controls Array of note controls.
-  void Start(const Params& params, float pitch,
+  void Start(const InstrumentParams& instrument_params, float pitch,
              const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
     const float gain = note_controls[BarelyNoteControlType_kGain];
     const float pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
     if (gain > 0.0f) {
-      gain_ = gain;
-      params_ = params;
-      params_.gain *= gain_;
+      set_gain(gain);
+      set_pitch(pitch + pitch_shift);
+      params_ = instrument_params.voice_params;
+      params_.gain *= gain;
       bit_crusher_.Reset();
       filter_.Reset();
       osc_phase_ = 0.0f;
       slice_offset_ = 0.0f;
-      envelope_.Start(params_.adsr);
-      set_pitch(pitch + pitch_shift);
+      envelope_.Start(instrument_params.adsr);
     }
   }
 
   /// Stops the voice.
   void Stop() noexcept { envelope_.Stop(); }
 
-  void set_gain(float gain) noexcept { gain_ = gain; }
+  void set_gain(float gain) noexcept { note_params_.gain = gain; }
   void set_pitch(float pitch) noexcept {
-    params_.osc_increment = std::pow(2.0f, pitch);
-    params_.slice_increment = (slice_ != nullptr && slice_->sample_count > 0)
-                                  ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
-                                  : 0.0f;
+    note_params_.osc_increment = std::pow(2.0f, pitch);
+    note_params_.slice_increment =
+        (slice_ != nullptr && slice_->sample_count > 0)
+            ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
+            : 0.0f;
   }
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }
 
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  [[nodiscard]] float Next(const Params& params) noexcept {
+  [[nodiscard]] float Next(const InstrumentParams& params) noexcept {
     if constexpr (kSliceMode == SliceMode::kOnce) {
       if (!IsSliceActive()) {
         envelope_.Stop();
       }
     }
 
-    assert(params_.rng != nullptr);
+    assert(params.rng != nullptr);
     const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
     const float osc_sample =
         (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
-        params_.osc_noise_mix * params_.rng->Generate();
+        params_.osc_noise_mix * params.rng->Generate();
     const float osc_output = params_.osc_mix * osc_sample;
 
     const bool has_slice = (slice_ != nullptr);
@@ -144,10 +162,11 @@ class Voice {
       output *= osc_output * std::abs(slice_sample) + slice_output;
     }
 
+    // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
     output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
                                params_.bit_crusher_range, params_.bit_crusher_increment);
 
-    float osc_increment = params.osc_increment * params_.osc_increment;
+    float osc_increment = params.osc_increment * note_params_.osc_increment;
     if constexpr (kOscMode == OscMode::kMf) {
       osc_increment += slice_sample * osc_increment;
     }
@@ -156,7 +175,7 @@ class Voice {
       osc_phase_ -= 1.0f;
     }
 
-    float slice_increment = params.slice_increment * params_.slice_increment;
+    float slice_increment = params.slice_increment * note_params_.slice_increment;
     if (slice_increment > 0) {
       if constexpr (kOscMode == OscMode::kFm) {
         slice_increment += osc_output * slice_increment;
@@ -169,42 +188,42 @@ class Voice {
       }
     }
 
-    ApproachParams(params);
+    Approach(params.voice_params);
 
     return output;
   }
 
-  void ApproachParams(const Params& params) noexcept {
-    // TODO(#146): Combine this with per-voice controls.
-    static constexpr float kCoeff = 0.002f;
-    params_.gain += (params.gain * gain_ - params_.gain) * kCoeff;
-    params_.bit_crusher_increment +=
-        (params.bit_crusher_increment - params_.bit_crusher_increment) * kCoeff;
-    params_.bit_crusher_range += (params.bit_crusher_range - params_.bit_crusher_range) * kCoeff;
-    params_.osc_mix += (params.osc_mix - params_.osc_mix) * kCoeff;
-    params_.osc_noise_mix += (params.osc_noise_mix - params_.osc_noise_mix) * kCoeff;
-    params_.osc_shape += (params.osc_shape - params_.osc_shape) * kCoeff;
-    params_.osc_skew += (params.osc_skew - params_.osc_skew) * kCoeff;
+  void Approach(const VoiceParams& params) noexcept {
+    ApproachParam(params_.gain, note_params_.gain * params.gain);
+    ApproachParam(params_.bit_crusher_increment, params.bit_crusher_increment);
+    ApproachParam(params_.bit_crusher_range, params.bit_crusher_range);
+    ApproachParam(params_.osc_mix, params.osc_mix);
+    ApproachParam(params_.osc_noise_mix, params.osc_noise_mix);
+    ApproachParam(params_.osc_shape, params.osc_shape);
+    ApproachParam(params_.osc_skew, params.osc_skew);
 
-    const auto& new_coeffs = params.filter_coefficients;
-    auto& coeffs = params_.filter_coefficients;
-    coeffs.a1 += (new_coeffs.a1 - coeffs.a1) * kCoeff;
-    coeffs.a2 += (new_coeffs.a2 - coeffs.a2) * kCoeff;
-    coeffs.b0 += (new_coeffs.b0 - coeffs.b0) * kCoeff;
-    coeffs.b1 += (new_coeffs.b1 - coeffs.b1) * kCoeff;
-    coeffs.b2 += (new_coeffs.b2 - coeffs.b2) * kCoeff;
+    ApproachParam(params_.filter_coefficients.a1, params.filter_coefficients.a1);
+    ApproachParam(params_.filter_coefficients.a2, params.filter_coefficients.a2);
+    ApproachParam(params_.filter_coefficients.b0, params.filter_coefficients.b0);
+    ApproachParam(params_.filter_coefficients.b1, params.filter_coefficients.b1);
+    ApproachParam(params_.filter_coefficients.b2, params.filter_coefficients.b2);
+  }
+
+  void ApproachParam(float& current_param, float target_param) noexcept {
+    static constexpr float kCoeff = 0.002f;
+    current_param += (target_param - current_param) * kCoeff;
   }
 
   bool IsSliceActive() const noexcept {
     return static_cast<int>(slice_offset_) < slice_->sample_count;
   }
 
-  float gain_ = 1.0f;
   BitCrusher bit_crusher_;
   Envelope envelope_;
   BiquadFilter filter_;
 
-  Params params_ = {};
+  NoteParams note_params_ = {};
+  VoiceParams params_ = {};
 
   float osc_phase_ = 0.0f;
   const Slice* slice_ = nullptr;
@@ -214,9 +233,9 @@ class Voice {
 /// Voice callback alias.
 ///
 /// @param voice Mutable voice.
-/// @param params Voice process parameters.
+/// @param params Instrument parameters.
 /// @return Processed output value.
-using VoiceCallback = float (*)(Voice& voice, const Voice::Params& params);
+using VoiceCallback = float (*)(Voice& voice, const InstrumentParams& params);
 
 }  // namespace barely
 

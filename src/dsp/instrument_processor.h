@@ -91,9 +91,9 @@ class InstrumentProcessor {
         return;
       }
       if constexpr (kShouldAccumulate) {
-        output_samples[i] += voice_callback_(voice, voice_params_);
+        output_samples[i] += voice_callback_(voice, params_);
       } else {
-        output_samples[i] = voice_callback_(voice, voice_params_);
+        output_samples[i] = voice_callback_(voice, params_);
       }
     }
   }
@@ -112,7 +112,7 @@ class InstrumentProcessor {
   OscMode osc_mode_ = OscMode::kMix;
   SliceMode slice_mode_ = SliceMode::kSustain;
 
-  Voice::Params voice_params_ = {};
+  InstrumentParams params_ = {};
 
   bool should_retrigger_ = false;
 

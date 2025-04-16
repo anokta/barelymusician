@@ -64,9 +64,9 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
   for (const auto& [type, value] : control_overrides) {
     SetControl(static_cast<ControlType>(type), value);
   }
-  voice_params_.osc_increment = reference_frequency * sample_interval_;
-  voice_params_.slice_increment = sample_interval_;
-  voice_params_.rng = &rng;
+  params_.osc_increment = reference_frequency * sample_interval_;
+  params_.slice_increment = sample_interval_;
+  params_.rng = &rng;
 }
 
 bool InstrumentProcessor::Process(float* output_samples, int output_sample_count) noexcept {
@@ -91,13 +91,13 @@ bool InstrumentProcessor::Process(float* output_samples, int output_sample_count
 void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
   switch (type) {
     case ControlType::kGain:
-      voice_params_.gain = value;
+      params_.voice_params.gain = value;
       break;
     case ControlType::kPitchShift:
       pitch_shift_ = value;
-      voice_params_.osc_increment =
+      params_.osc_increment =
           std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
-      voice_params_.slice_increment = std::pow(2.0f, pitch_shift_) * sample_interval_;
+      params_.slice_increment = std::pow(2.0f, pitch_shift_) * sample_interval_;
       break;
     case ControlType::kRetrigger:
       should_retrigger_ = static_cast<bool>(value);
@@ -110,37 +110,37 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       voice_count_ = voice_count;
     } break;
     case ControlType::kAttack:
-      voice_params_.adsr.SetAttack(sample_interval_, value);
+      params_.adsr.SetAttack(sample_interval_, value);
       break;
     case ControlType::kDecay:
-      voice_params_.adsr.SetDecay(sample_interval_, value);
+      params_.adsr.SetDecay(sample_interval_, value);
       break;
     case ControlType::kSustain:
-      voice_params_.adsr.SetSustain(value);
+      params_.adsr.SetSustain(value);
       break;
     case ControlType::kRelease:
-      voice_params_.adsr.SetRelease(sample_interval_, value);
+      params_.adsr.SetRelease(sample_interval_, value);
       break;
     case ControlType::kOscMix:
-      voice_params_.osc_mix = value;
+      params_.voice_params.osc_mix = value;
       break;
     case ControlType::kOscMode:
       osc_mode_ = static_cast<OscMode>(value);
       voice_callback_ = GetVoiceCallback(osc_mode_, slice_mode_);
       break;
     case ControlType::kOscNoiseMix:
-      voice_params_.osc_noise_mix = value;
+      params_.voice_params.osc_noise_mix = value;
       break;
     case ControlType::kOscPitchShift:
       osc_pitch_shift_ = value;
-      voice_params_.osc_increment =
+      params_.osc_increment =
           std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
       break;
     case ControlType::kOscShape:
-      voice_params_.osc_shape = value;
+      params_.voice_params.osc_shape = value;
       break;
     case ControlType::kOscSkew:
-      voice_params_.osc_skew = value;
+      params_.voice_params.osc_skew = value;
       break;
     case ControlType::kSliceMode:
       slice_mode_ = static_cast<SliceMode>(value);
@@ -148,25 +148,25 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kFilterType:
       filter_type_ = static_cast<FilterType>(value);
-      voice_params_.filter_coefficients =
+      params_.voice_params.filter_coefficients =
           GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
       break;
     case ControlType::kFilterFrequency:
       filter_frequency_ = value;
-      voice_params_.filter_coefficients =
+      params_.voice_params.filter_coefficients =
           GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
       break;
     case ControlType::kFilterQ:
       filter_q_ = value;
-      voice_params_.filter_coefficients =
+      params_.voice_params.filter_coefficients =
           GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
       break;
     case ControlType::kBitCrusherDepth:
       // Offset the bit depth by 1 to normalize the range.
-      voice_params_.bit_crusher_range = (value < 16.0f) ? std::pow(2.0f, value - 1.0f) : 0.0f;
+      params_.voice_params.bit_crusher_range = std::pow(2.0f, value - 1.0f);
       break;
     case ControlType::kBitCrusherRate:
-      voice_params_.bit_crusher_increment = value;
+      params_.voice_params.bit_crusher_increment = value;
       break;
     default:
       assert(!"Invalid control type");
@@ -217,10 +217,10 @@ void InstrumentProcessor::SetNoteOn(
     return;
   }
   Voice& voice = AcquireVoice(pitch);
-  if (const auto* sample = sample_data_.Select(pitch, *voice_params_.rng); sample != nullptr) {
+  if (const auto* sample = sample_data_.Select(pitch, *params_.rng); sample != nullptr) {
     voice.set_slice(sample);
   }
-  voice.Start(voice_params_, pitch, note_controls);
+  voice.Start(params_, pitch, note_controls);
 }
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
@@ -228,7 +228,7 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   for (int i = 0; i < voice_count_; ++i) {
     if (Voice& voice = voice_states_[i].voice; !voice.IsActive()) {
       voice.set_slice(nullptr);
-    } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch, *voice_params_.rng);
+    } else if (const auto* sample = sample_data_.Select(voice_states_[i].pitch, *params_.rng);
                sample != nullptr) {
       voice.set_slice(sample);
       voice.set_pitch(voice_states_[i].pitch + voice_states_[i].pitch_shift);

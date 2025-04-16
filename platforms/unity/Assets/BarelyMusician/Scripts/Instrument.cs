@@ -292,7 +292,8 @@ namespace Barely {
       /// Internal note on callback.
       public static void OnNoteOn(Instrument instrument, float pitch) {
         if (!instrument.Source.isPlaying) {
-          instrument._noteOnTimestamp = Engine.Timestamp;
+          instrument._noteOnTimestamp =
+              Engine.Timestamp + AudioSettings.GetConfiguration().dspBufferSize;
           instrument.UpdateControls();
           instrument.Source.Play();
         }

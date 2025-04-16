@@ -31,7 +31,12 @@ BarelyRepeater::~BarelyRepeater() noexcept {
   }
 }
 
-void BarelyRepeater::Clear() noexcept { pitches_.clear(); }
+void BarelyRepeater::Clear() noexcept {
+  if (IsPlaying() && instrument_ != nullptr) {
+    instrument_->SetAllNotesOff();
+  }
+  pitches_.clear();
+}
 
 bool BarelyRepeater::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 

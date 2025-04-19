@@ -519,10 +519,10 @@ namespace Barely {
             slices[i] = new Slice() {
               rootPitch = instrumentSlices[i].RootPitch / 12.0f,
               sampleRate =
-                  (instrumentSlices[i].Sample != null) ? instrumentSlices[i].Sample.frequency : 0,
+                  (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.frequency : 0,
               samples = instrumentSlices[i].Data,
               sampleCount =
-                  (instrumentSlices[i].Sample != null) ? instrumentSlices[i].Sample.samples : 0,
+                  (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.samples : 0,
             };
           }
         }

@@ -57,6 +57,9 @@ namespace Barely {
         get {
           if (_data == null || HasChanged) {
             _rootPitch = RootPitch;
+            if (Sample != null && Sample.loadState != AudioDataLoadState.Loaded) {
+              return null;  // not ready yet.
+            }
             _sample = Sample;
             if (_sample == null || _sample.samples == 0) {
               _data = null;

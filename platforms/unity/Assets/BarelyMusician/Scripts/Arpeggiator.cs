@@ -73,10 +73,10 @@ namespace Barely {
     }
 
     private void OnDisable() {
-      Engine.Internal.Component_Destroy(this, ref _handle);
       _instrument.OnInstrumentCreate -= OnInstrumentCreate;
       _instrument.OnInstrumentDestroy -= OnInstrumentDestroy;
       _instrument = null;
+      Engine.Internal.Component_Destroy(this, ref _handle);
     }
 
     private void Update() {

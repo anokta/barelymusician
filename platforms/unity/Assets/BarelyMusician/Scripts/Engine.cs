@@ -239,6 +239,7 @@ namespace Barely {
       /// @param componentHandle Component handle.
       public static void Component_Destroy(Component component, ref IntPtr componentHandle) {
         if (Handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
+          componentHandle = IntPtr.Zero;
           return;
         }
         bool success = true;
@@ -1143,12 +1144,26 @@ namespace Barely {
           for (int i = 0; i < instruments.Count; ++i) {
             instruments[i].enabled = false;
           }
+          var arpeggiators = GameObject.FindObjectsByType<Arpeggiator>(FindObjectsSortMode.None);
+          for (int i = 0; i < arpeggiators.Length; ++i) {
+            arpeggiators[i].enabled = false;
+          }
+          var repeaters = GameObject.FindObjectsByType<Repeater>(FindObjectsSortMode.None);
+          for (int i = 0; i < repeaters.Length; ++i) {
+            repeaters[i].enabled = false;
+          }
           Initialize();
           for (int i = 0; i < instruments.Count; ++i) {
             instruments[i].enabled = true;
           }
           for (int i = 0; i < performers.Count; ++i) {
             performers[i].enabled = true;
+          }
+          for (int i = 0; i < arpeggiators.Length; ++i) {
+            arpeggiators[i].enabled = true;
+          }
+          for (int i = 0; i < repeaters.Length; ++i) {
+            repeaters[i].enabled = true;
           }
         }
 

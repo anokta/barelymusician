@@ -55,11 +55,11 @@ namespace Barely {
     [Min(0.0f)]
     private double _loopLength = 1.0;
 
+    /// List of recurring triggers.
+    public List<Trigger> Triggers = new List<Trigger>();
+
     /// List of recurring tasks.
     public List<Task> Tasks = new List<Task>();
-
-    /// List of triggers.
-    public List<Trigger> Triggers = new List<Trigger>();
 
     /// True if playing, false otherwise.
     public bool IsPlaying {

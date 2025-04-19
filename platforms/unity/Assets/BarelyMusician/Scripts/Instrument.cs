@@ -132,7 +132,7 @@ namespace Barely {
 
     /// Oscillator mix.
     [Range(0.0f, 1.0f)]
-    public float OscMix = 0.0f;
+    public float OscMix = 0.5f;
 
     /// Oscillator noise mix.
     [Range(0.0f, 1.0f)]

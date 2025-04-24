@@ -179,7 +179,7 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
     case NoteControlType::kGain:
       for (int i = 0; i < voice_count_; ++i) {
         if (Voice& voice = voice_states_[i].voice;
-            voice_states_[i].pitch == pitch && voice.IsActive()) {
+            voice_states_[i].pitch == pitch && voice.IsOn()) {
           voice.set_gain(value);
           break;
         }
@@ -188,7 +188,7 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
     case NoteControlType::kPitchShift:
       for (int i = 0; i < voice_count_; ++i) {
         if (Voice& voice = voice_states_[i].voice;
-            voice_states_[i].pitch == pitch && voice.IsActive()) {
+            voice_states_[i].pitch == pitch && voice.IsOn()) {
           voice_states_[i].pitch_shift = value;
           voice.set_pitch(voice_states_[i].pitch + voice_states_[i].pitch_shift);
           break;
@@ -203,9 +203,10 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
 
 void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
   for (int i = 0; i < voice_count_; ++i) {
-    if (voice_states_[i].pitch == pitch && voice_states_[i].voice.IsActive() &&
+    if (voice_states_[i].pitch == pitch && voice_states_[i].voice.IsOn() &&
         (sample_data_.empty() || slice_mode_ != SliceMode::kOnce)) {
       voice_states_[i].voice.Stop();
+      break;
     }
   }
 }

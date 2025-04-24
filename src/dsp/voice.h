@@ -93,6 +93,11 @@ class Voice {
   /// @return True if active.
   [[nodiscard]] bool IsActive() const noexcept { return envelope_.IsActive(); }
 
+  /// Returns whether the voice is currently on.
+  ///
+  /// @return True if on.
+  [[nodiscard]] bool IsOn() const noexcept { return envelope_.IsOn(); }
+
   /// Resets the voice.
   void Reset() noexcept { return envelope_.Reset(); }
 

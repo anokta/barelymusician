@@ -41,6 +41,7 @@ namespace Barely {
   }
 
   /// A representation of a musical instrument that can be played in real-time.
+  [ExecuteInEditMode]
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
     /// Slice.

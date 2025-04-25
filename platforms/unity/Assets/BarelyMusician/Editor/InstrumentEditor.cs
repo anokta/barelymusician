@@ -7,17 +7,14 @@ namespace Barely {
     public override void OnInspectorGUI() {
       base.OnInspectorGUI();
 
-      // TODO(#161): Support preview in Edit mode as well.
-      if (Application.isPlaying) {
-        EditorGUILayout.Separator();
+      EditorGUILayout.Separator();
 
-        _showPreview = EditorGUILayout.Foldout(_showPreview, "Preview");
-        if (_showPreview) {
-          DrawPreviewGui();
-        } else if (_noteKey != _invalidKey) {
-          (target as Instrument).SetNoteOff(NoteKeyToPitch(_noteKey));
-          _noteKey = _invalidKey;
-        }
+      _showPreview = EditorGUILayout.Foldout(_showPreview, "Preview");
+      if (_showPreview) {
+        DrawPreviewGui();
+      } else if (_noteKey != _invalidKey) {
+        (target as Instrument).SetNoteOff(NoteKeyToPitch(_noteKey));
+        _noteKey = _invalidKey;
       }
     }
 

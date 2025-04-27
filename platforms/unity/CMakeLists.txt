@@ -3,8 +3,8 @@ add_library(
   empty.cpp
 )
 target_compile_definitions(
-  barelymusicianunity
-  PUBLIC BARELYMUSICIAN_EXPORTS
+  barelymusicianunity PUBLIC
+  BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
   barelymusicianunity PUBLIC

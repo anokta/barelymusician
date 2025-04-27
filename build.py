@@ -76,6 +76,11 @@ def parse_args():
         help="build the unity native plugins for the selected platforms",
     )
     parser.add_argument(
+        "--vst",
+        action="store_true",
+        help="build the vst plugins for the selected platforms",
+    )
+    parser.add_argument(
         "--examples",
         action="store_true",
         help="build the examples for the selected platforms",
@@ -183,6 +188,15 @@ def build(args, source_dir, build_dir):
     common_cmake_options = []
     if args.unity:
         common_cmake_options.append("-DENABLE_UNITY=ON")
+    if args.vst:
+        common_cmake_options += [
+            "-DENABLE_VST=ON",
+            "-DSMTG_CREATE_PLUGIN_LINK=OFF",
+            "-DSMTG_ENABLE_VST3_HOSTING_EXAMPLES=OFF",
+            "-DSMTG_ENABLE_VST3_PLUGIN_EXAMPLES=OFF",
+            "-DSMTG_ENABLE_VSTGUI_SUPPORT=OFF",
+            "-DSMTG_RUN_VST_VALIDATOR=OFF",
+        ]
 
     if args.android:
         print("Building the Android targets...")

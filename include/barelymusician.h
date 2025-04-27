@@ -1182,6 +1182,9 @@ enum class TaskState {
 
 /// Control override.
 struct ControlOverride : public BarelyControlOverride {
+  /// Default constructor.
+  ControlOverride() noexcept = default;
+
   /// Constructs a new `ControlOverride`.
   ///
   /// @param type Control type.
@@ -1196,6 +1199,9 @@ struct ControlOverride : public BarelyControlOverride {
 
 /// Note control override.
 struct NoteControlOverride : public BarelyNoteControlOverride {
+  /// Default constructor.
+  NoteControlOverride() noexcept = default;
+
   /// Constructs a new `NoteControlOverride`.
   ///
   /// @param type Note control type.

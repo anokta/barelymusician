@@ -15,6 +15,11 @@ if(NOT DEFINED ENABLE_UNITY)
 endif()
 option(ENABLE_UNITY "Build Unity platform" ${ENABLE_UNITY})
 
+if(NOT DEFINED ENABLE_VST)
+  set(ENABLE_VST OFF CACHE BOOL "Build VST platform" FORCE)
+endif()
+option(ENABLE_VST "Build VST platform" ${ENABLE_VST})
+
 if(NOT DEFINED ENABLE_BENCHMARKS)
   set(ENABLE_BENCHMARKS OFF CACHE BOOL "Build benchmarks" FORCE)
 endif()
@@ -168,4 +173,3 @@ add_subdirectory(platforms)
 if(ENABLE_EXAMPLES)
   add_subdirectory(examples)
 endif()
-

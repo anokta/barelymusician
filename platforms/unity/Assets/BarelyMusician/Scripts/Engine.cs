@@ -521,6 +521,7 @@ namespace Barely {
         if (instrumentSlices.Count > 0) {
           slices = new Slice[instrumentSlices.Count];
           for (int i = 0; i < slices.Length; ++i) {
+            instrumentSlices[i].Sample.LoadAudioData();
             slices[i] = new Slice() {
               rootPitch = instrumentSlices[i].RootPitch / 12.0f,
               sampleRate =

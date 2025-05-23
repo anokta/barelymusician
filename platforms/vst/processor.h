@@ -1,9 +1,10 @@
 #ifndef BARELYMUSICIAN_VST_PROCESSOR_H_
 #define BARELYMUSICIAN_VST_PROCESSOR_H_
 
+#include <barelymusician.h>
+
 #include <optional>
 
-#include "barelymusician.h"
 #include "public.sdk/source/vst/vstaudioeffect.h"
 
 namespace barely::vst {

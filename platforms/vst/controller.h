@@ -1,9 +1,10 @@
 #ifndef BARELYMUSICIAN_VST_CONTROLLER_H_
 #define BARELYMUSICIAN_VST_CONTROLLER_H_
 
+#include <barelymusician.h>
+
 #include <span>
 
-#include "barelymusician.h"
 #include "public.sdk/source/vst/vsteditcontroller.h"
 
 namespace barely::vst {

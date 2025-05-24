@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>BarelyMusician</title>
+</head>
+
+<body>
+  <h1>BarelyMusician</h1>
+
+  <input type="range" id="tempoSlider" min="30" max="480" value="120" step="1">
+  <label for="tempoSlider">Tempo: <span id="tempoValue">120</span></label>
+
+  <script src="../../build/WebAssembly/bin/barelymusician.js"></script>
+  <script>
+    let engine = null;
+    let instrument = null;
+
+    const tempoSlider = document.getElementById('tempoSlider');
+    const tempoValue = document.getElementById('tempoValue');
+
+    barelymusician().then(Module => {
+      engine = new Module.Engine(48000, 440.0);
+      tempoSlider.value = engine.tempo;
+      tempoValue.textContent = tempoSlider.value;
+    });
+
+    tempoSlider.addEventListener('input', function () {
+      if (engine) {
+        engine.tempo = Number(this.value);
+        tempoValue.textContent = engine.tempo;
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -81,6 +81,11 @@ def parse_args():
         help="build the vst plugins for the selected platforms",
     )
     parser.add_argument(
+        "--wasm",
+        action="store_true",
+        help="build the webassembly platform",
+    )
+    parser.add_argument(
         "--examples",
         action="store_true",
         help="build the examples for the selected platforms",
@@ -150,6 +155,8 @@ def build_platform(args, config, source_dir, build_dir, cmake_options):
 
     if not args.skip_generate:
         generate_command = f'cmake -S "{source_dir}" -B "{build_dir}" {" ".join(cmake_options)}'
+        if args.wasm:
+            generate_command = f"emcmake {generate_command}"
         run_command(generate_command, build_dir)
 
     if not args.skip_build:
@@ -174,6 +181,12 @@ def build(args, source_dir, build_dir):
         return
 
     config = get_build_config(args)
+
+    if args.wasm:
+        wasm_build_dir = os.path.join(build_dir, "WebAssembly")
+        wasm_cmake_options = ["-DENABLE_WASM=ON"]
+        build_platform(args, config, source_dir, wasm_build_dir, wasm_cmake_options)
+        args.wasm = False
 
     if args.daisy:
         daisy_build_dir = os.path.join(build_dir, "Daisy")

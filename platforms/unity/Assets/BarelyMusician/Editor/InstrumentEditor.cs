@@ -5,7 +5,11 @@ namespace Barely {
   [CustomEditor(typeof(Instrument))]
   public class InstrumentEditor : Editor {
     public override void OnInspectorGUI() {
-      base.OnInspectorGUI();
+      try {
+        base.OnInspectorGUI();
+      } catch (System.NullReferenceException) {
+        // This is a harmless error caused by a Unity bug.
+      }
 
       EditorGUILayout.Separator();
 

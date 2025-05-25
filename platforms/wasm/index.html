@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 
+<link rel="shortcut icon" href="#">
+
 <head>
   <meta charset="utf-8">
   <title>BarelyMusician</title>
@@ -16,6 +18,7 @@
   <script>
     let engine = null;
     let instrument = null;
+    let performer = null;
 
     const tempoSlider = document.getElementById('tempoSlider');
     const tempoValue = document.getElementById('tempoValue');
@@ -24,6 +27,26 @@
       engine = new Module.Engine(48000, 440.0);
       tempoSlider.value = engine.tempo;
       tempoValue.textContent = tempoSlider.value;
+
+      performer = engine.createPerformer();
+      console.log(performer.isPlaying);
+      performer.start();
+      console.log(performer.isPlaying);
+      performer.stop();
+      console.log(performer.isPlaying);
+
+      task = performer.createTrigger(0.5, () => { console.log("CALLBACK: " + performer.position); });
+
+      performer.start();
+      engine.update(1.0);
+
+      instrument = engine.createInstrument();
+
+      instrument.setNoteOnCallback((pitch) => { console.log("ON: " + pitch); });
+      instrument.setNoteOffCallback((pitch) => { console.log("OFF: " + pitch); });
+      instrument.setNoteOn(5.0, 1.0, 0.0);
+      instrument.setNoteOn(2.5);
+      instrument.setAllNotesOff();
     });
 
     tempoSlider.addEventListener('input', function () {

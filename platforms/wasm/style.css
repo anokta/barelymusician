@@ -1,0 +1,45 @@
+#engine-ui input[type="range"] {
+  vertical-align: middle;
+}
+
+#engine-ui button {
+  margin-right: 0.5em;
+}
+
+#engine-ui {
+  font-family: sans-serif;
+}
+
+#piano {
+  position: relative;
+}
+
+.white.key {
+  position: absolute;
+  width: 44px;
+  height: 120px;
+  background: #fff;
+  border: 1px solid #888;
+  z-index: 1;
+  border-radius: 0 0 6px 6px;
+}
+
+.white.key.active {
+  background: #eef;
+}
+
+.black.key {
+  position: absolute;
+  width: 28px;
+  height: 72px;
+  background: #222;
+  border: 1px solid #444;
+  z-index: 2;
+  left: 0;
+  top: 0;
+  border-radius: 0 0 4px 4px;
+}
+
+.black.key.active {
+  background: #66f;
+}

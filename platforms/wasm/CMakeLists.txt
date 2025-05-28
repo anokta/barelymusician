@@ -6,7 +6,18 @@ add_executable(
 )
 set_target_properties(
   barelymusicianwasm PROPERTIES
-  LINK_FLAGS "--bind -s MODULARIZE=1 -s EXPORT_NAME=barelymusician"
+  LINK_FLAGS "--bind \
+    -s SINGLE_FILE=1 \
+    -s ENVIRONMENT=web \
+    -s WASM=1 \
+    -s NO_FILESYSTEM=1 \
+    -s BINARYEN_ASYNC_COMPILATION=0 \
+    -s ASSERTIONS=0 \
+    -s EXPORT_ES6=1 \
+    -s MODULARIZE=1 \
+    -s EXPORTED_FUNCTIONS=['_malloc','_free'] \
+    -s EXPORT_ALL=1 \
+    -s EXPORT_NAME=barelymusician"
   OUTPUT_NAME "barelymusician"
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )

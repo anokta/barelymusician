@@ -5,57 +5,20 @@
 
 <head>
   <meta charset="utf-8">
-  <title>BarelyMusician</title>
+  <meta name="description" content="a real-time music engine">
+  <title>barelymusician</title>
+
+  <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
-  <h1>BarelyMusician</h1>
+  <h1>barelymusician: a real time music engine</h1>
 
-  <input type="range" id="tempoSlider" min="30" max="480" value="120" step="1">
-  <label for="tempoSlider">Tempo: <span id="tempoValue">120</span></label>
+  <div id="engine-ui"></div>
+  <p></p>
+  <div id="instrument-ui"></div>
 
-  <script src="../../build/WebAssembly/bin/barelymusician.js"></script>
-  <script>
-    let engine = null;
-    let instrument = null;
-    let performer = null;
-
-    const tempoSlider = document.getElementById('tempoSlider');
-    const tempoValue = document.getElementById('tempoValue');
-
-    barelymusician().then(Module => {
-      engine = new Module.Engine(48000, 440.0);
-      tempoSlider.value = engine.tempo;
-      tempoValue.textContent = tempoSlider.value;
-
-      performer = engine.createPerformer();
-      console.log(performer.isPlaying);
-      performer.start();
-      console.log(performer.isPlaying);
-      performer.stop();
-      console.log(performer.isPlaying);
-
-      task = performer.createTrigger(0.5, () => { console.log("CALLBACK: " + performer.position); });
-
-      performer.start();
-      engine.update(1.0);
-
-      instrument = engine.createInstrument();
-
-      instrument.setNoteOnCallback((pitch) => { console.log("ON: " + pitch); });
-      instrument.setNoteOffCallback((pitch) => { console.log("OFF: " + pitch); });
-      instrument.setNoteOn(5.0, 1.0, 0.0);
-      instrument.setNoteOn(2.5);
-      instrument.setAllNotesOff();
-    });
-
-    tempoSlider.addEventListener('input', function () {
-      if (engine) {
-        engine.tempo = Number(this.value);
-        tempoValue.textContent = engine.tempo;
-      }
-    });
-  </script>
+  <script src="main.js" type="module"></script>
 </body>
 
 </html>

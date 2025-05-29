@@ -1,5 +1,7 @@
 #include <barelymusician.h>
 
+#include <span>
+
 #include "emscripten/bind.h"
 
 using ::barely::ControlType;
@@ -11,7 +13,7 @@ using ::barely::TaskState;
 using ::barely::Trigger;
 using ::emscripten::allow_raw_pointers;
 using ::emscripten::class_;
-using ::emscripten::function;
+using ::emscripten::enum_;
 using ::emscripten::optional_override;
 using ::emscripten::val;
 using ::emscripten::return_value_policy::take_ownership;
@@ -26,18 +28,43 @@ static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {
   return reinterpret_cast<uintptr_t>(static_cast<BarelyInstrumentHandle>(instrument));
 }
 
+static void Instrument_SetControl(Instrument& instrument, int type, float value) noexcept {
+  instrument.SetControl(static_cast<ControlType>(type), value);
+}
+
 static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
   instrument.SetNoteOn(pitch);
 }
 
-static void ProcessBarelyInstrument(uintptr_t instrument_handle, uintptr_t samples,
-                                    int sample_count, double timestamp) noexcept {
-  BarelyInstrument_Process(reinterpret_cast<BarelyInstrumentHandle>(instrument_handle),
-                           reinterpret_cast<float*>(samples), sample_count, timestamp);
+static void Instrument_Process(Instrument& instrument, uintptr_t samples, int sample_count,
+                               double timestamp) noexcept {
+  instrument.Process(std::span<float>(reinterpret_cast<float*>(samples), sample_count), timestamp);
 }
 
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
-  class_<Engine>("BarelyEngine")
+  enum_<ControlType>("ControlType")
+      .value("GAIN", ControlType::kGain)
+      .value("PITCH_SHIFT", ControlType::kPitchShift)
+      .value("RETRIGGER", ControlType::kRetrigger)
+      .value("VOICE_COUNT", ControlType::kVoiceCount)
+      .value("ATTACK", ControlType::kAttack)
+      .value("DECAY", ControlType::kDecay)
+      .value("SUSTAIN", ControlType::kSustain)
+      .value("RELEASE", ControlType::kRelease)
+      .value("OSC_MIX", ControlType::kOscMix)
+      .value("OSC_MODE", ControlType::kOscMode)
+      .value("OSC_NOISE_MIX", ControlType::kOscNoiseMix)
+      .value("OSC_PITCH_SHIFT", ControlType::kOscPitchShift)
+      .value("OSC_SHAPE", ControlType::kOscShape)
+      .value("OSC_SKEW", ControlType::kOscSkew)
+      .value("SLICE_MODE", ControlType::kSliceMode)
+      .value("FILTER_TYPE", ControlType::kFilterType)
+      .value("FILTER_FREQUENCY", ControlType::kFilterFrequency)
+      .value("FILTER_Q", ControlType::kFilterQ)
+      .value("BIT_CRUSHER_DEPTH", ControlType::kBitCrusherDepth)
+      .value("BIT_CRUSHER_RATE", ControlType::kBitCrusherRate);
+
+  class_<Engine>("Engine")
       .constructor<int, float>()
       .function("createInstrument", &Engine_CreateInstrument, take_ownership())
       .function("createPerformer", &Engine::CreatePerformer, take_ownership())
@@ -50,13 +77,14 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .property("tempo", &Engine::GetTempo, &Engine::SetTempo)
       .property("timestamp", &Engine::GetTimestamp);
 
-  class_<Instrument>("BarelyInstrument")
+  class_<Instrument>("Instrument")
       .function("getControl", &Instrument::GetControl<float>)
       .function("getHandle", &Instrument_GetHandle, allow_raw_pointers())
       .function("getNoteControl", &Instrument::GetNoteControl<float>)
       .function("isNoteOn", &Instrument::IsNoteOn)
+      .function("process", &Instrument_Process, allow_raw_pointers())
       .function("setAllNotesOff", &Instrument::SetAllNotesOff)
-      .function("setControl", &Instrument::SetControl<float>)
+      .function("setControl", &Instrument_SetControl)
       .function("setNoteControl", &Instrument::SetNoteControl<float>)
       .function("setNoteOff", &Instrument::SetNoteOff)
       .function("setNoteOffCallback",
@@ -73,10 +101,9 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
           "setNoteOnCallback", optional_override([](Instrument& instrument, val js_callback) {
             return instrument.SetNoteOnCallback([js_callback](float pitch) { js_callback(pitch); });
           }));
-  function("processBarelyInstrument", &ProcessBarelyInstrument, allow_raw_pointers());
   // TODO(#164): Add sample data support.
 
-  class_<Performer>("BarelyPerformer")
+  class_<Performer>("Performer")
       .function("createTask", &Performer::CreateTask, take_ownership())
       .function("createTrigger",
                 optional_override([](Performer& performer, double position, val js_callback) {
@@ -92,7 +119,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .property("looping", &Performer::IsLooping, &Performer::SetLooping)
       .property("isPlaying", &Performer::IsPlaying);
 
-  class_<Task>("BarelyTask")
+  class_<Task>("Task")
       .function(
           "setProcessCallback", optional_override([](Task& task, val js_callback) {
             return task.SetProcessCallback([js_callback](TaskState state) { js_callback(state); });
@@ -101,7 +128,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .property("duration", &Task::GetDuration, &Task::SetDuration)
       .property("position", &Task::GetPosition, &Task::SetPosition);
 
-  class_<Trigger>("BarelyTrigger")
+  class_<Trigger>("Trigger")
       .function("setProcessCallback", optional_override([](Trigger& trigger, val js_callback) {
                   return trigger.SetProcessCallback([js_callback]() { js_callback(); });
                 }))

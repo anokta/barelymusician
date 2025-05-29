@@ -1,4 +1,4 @@
-class BarelyEngineUI {
+class Engine {
   /**
    * @param {Object} options
    * @param {HTMLElement} options.container - Where to render the UI
@@ -130,4 +130,4 @@ class BarelyEngineUI {
   }
 }
 
-export default BarelyEngineUI;
+export default Engine;

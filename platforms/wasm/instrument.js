@@ -1,7 +1,16 @@
-class BarelyInstrumentUI {
-  constructor({container, instrument}) {
+class Instrument {
+  constructor({
+    container,
+    audioNode,
+    instrumentHandle,
+    noteOnCallback,
+    noteOffCallback
+  }) {
     this.container = container;
-    this.instrument = instrument;
+    this.audioNode = audioNode;
+    this.instrumentHandle = instrumentHandle;
+    this.noteOnCallback = noteOnCallback;
+    this.noteOffCallback = noteOffCallback;
     this.activeNotes = new Set();
     this.baseMidi = 60;  // C4
 
@@ -16,8 +25,8 @@ class BarelyInstrumentUI {
   _render() {
     this.container.innerHTML = `
       <div>
-        <label>Osc Mix: <input type="range" min="0" max="1" step="0.01" value="0.5" id="oscMix"></label>
-        <span id="oscMixValue">0.5</span>
+        <label>Osc Shape: <input type="range" min="0" max="1" step="0.01" value="0.5" id="oscShape"></label>
+        <span id="oscShapeValue">0.5</span>
       </div>
       <div>
         <label>Osc Freq: <input type="range" min="20" max="2000" step="1" value="440" id="oscFreq"></label>
@@ -44,21 +53,25 @@ class BarelyInstrumentUI {
 
   _attachEvents() {
     // Oscillator sliders
-    // const oscMix = this.container.querySelector('#oscMix');
-    // const oscMixValue = this.container.querySelector('#oscMixValue');
-    // oscMix.addEventListener('input', () => {
-    //   oscMixValue.textContent = oscMix.value;
-    //   this.instrument.setControl(
-    //       0, parseFloat(oscMix.value));  // 0 = OscMix, adjust as needed
-    // });
+    const oscShape = this.container.querySelector('#oscShape');
+    const oscShapeValue = this.container.querySelector('#oscShapeValue');
+    oscShape.addEventListener('input', () => {
+      oscShapeValue.textContent = oscShape.value;
+      this.audioNode.port.postMessage({
+        type: 'instrument-set-control',
+        instrumentHandle: this.instrumentHandle,
+        typeIndex: 12,
+        value: parseFloat(oscShape.value)
+      });
+    });
 
-    // const oscFreq = this.container.querySelector('#oscFreq');
-    // const oscFreqValue = this.container.querySelector('#oscFreqValue');
-    // oscFreq.addEventListener('input', () => {
-    //   oscFreqValue.textContent = oscFreq.value;
-    //   this.instrument.setControl(
-    //       1, parseFloat(oscFreq.value));  // 1 = OscFreq, adjust as needed
-    // });
+    const oscFreq = this.container.querySelector('#oscFreq');
+    const oscFreqValue = this.container.querySelector('#oscFreqValue');
+    oscFreq.addEventListener('input', () => {
+      oscFreqValue.textContent = oscFreq.value;
+      this.instrument.setControl(
+          1, parseFloat(oscFreq.value));  // 1 = OscFreq, adjust as needed
+    });
 
     // Piano keys
     const piano = this.container.querySelector('#piano');
@@ -112,7 +125,13 @@ class BarelyInstrumentUI {
     if (!this.activeNotes.has(note)) {
       this.activeNotes.add(note);
       const pitch = this.noteToPitch(this.baseMidi + note);
-      this.instrument.setNoteOn(pitch);
+      // this.instrument.setNoteOn(pitch);
+      this.audioNode.port.postMessage({
+        type: 'instrument-set-note-on',
+        instrumentHandle: this.instrumentHandle,
+        pitch: pitch,
+        gain: 1.0
+      });
       const el = this.container.querySelector(`[data-note="${note}"]`);
       if (el) el.classList.add('active');
     }
@@ -122,11 +141,16 @@ class BarelyInstrumentUI {
     if (this.activeNotes.has(note)) {
       this.activeNotes.delete(note);
       const pitch = this.noteToPitch(this.baseMidi + note);
-      this.instrument.setNoteOff(pitch);
+      // this.instrument.setNoteOff(pitch);
+      this.audioNode.port.postMessage({
+        type: 'instrument-set-note-off',
+        instrumentHandle: this.instrumentHandle,
+        pitch: pitch
+      });
       const el = this.container.querySelector(`[data-note="${note}"]`);
       if (el) el.classList.remove('active');
     }
   }
 }
 
-export default BarelyInstrumentUI;
+export default Instrument;

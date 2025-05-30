@@ -1,5 +1,7 @@
 import Module from '../../build/WebAssembly/bin/barelymusician.js';
 
+import {ControlType} from './instrument.js'
+
 const REFERENCE_FREQUENCY = 261.62555;
 
 class Processor extends AudioWorkletProcessor {
@@ -44,9 +46,9 @@ class Processor extends AudioWorkletProcessor {
           let instrumentHandle = instrument.getHandle();
           this.instruments[instrumentHandle] = instrument;
 
-          instrument.setControl(/*this.module.ControlType.ATTACK*/ 4, 0.05);
-          instrument.setControl(/*this.module.ControlType.GAIN*/ 0, 0.5);
-          instrument.setControl(/*this.module.ControlType.RELEASE*/ 7, 0.1);
+          instrument.setControl(ControlType.ATTACK, 0.05);
+          instrument.setControl(ControlType.GAIN, 0.5);
+          instrument.setControl(ControlType.RELEASE, 0.1);
           instrument.setNoteOnCallback((pitch) => {
             this.port.postMessage({
               type: 'instrument-on-note-on',

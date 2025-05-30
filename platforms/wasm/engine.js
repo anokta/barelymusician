@@ -1,4 +1,4 @@
-class Engine {
+export class Engine {
   /**
    * @param {Object} options
    * @param {HTMLElement} options.container - Where to render the UI
@@ -129,5 +129,3 @@ class Engine {
     this.container.querySelector('#engineStatus').textContent = status;
   }
 }
-
-export default Engine;

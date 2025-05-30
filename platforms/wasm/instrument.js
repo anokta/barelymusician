@@ -1,4 +1,27 @@
-class Instrument {
+export const ControlType = {
+  GAIN: 0,
+  PITCH_SHIFT: 1,
+  RETRIGGER: 2,
+  VOICE_COUNT: 3,
+  ATTACK: 4,
+  DECAY: 5,
+  SUSTAIN: 6,
+  RELEASE: 7,
+  OSC_MIX: 8,
+  OSC_MODE: 9,
+  OSC_NOISE_MIX: 10,
+  OSC_PITCH_SHIFT: 11,
+  OSC_SHAPE: 12,
+  OSC_SKEW: 13,
+  SLICE_MODE: 14,
+  FILTER_TYPE: 15,
+  FILTER_FREQUENCY: 16,
+  FILTER_Q: 17,
+  BIT_CRUSHER_DEPTH: 18,
+  BIT_CRUSHER_RATE: 19,
+};
+
+export class Instrument {
   constructor({
     container,
     audioNode,
@@ -152,5 +175,3 @@ class Instrument {
     }
   }
 }
-
-export default Instrument;

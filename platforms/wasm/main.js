@@ -1,7 +1,8 @@
-import Engine from './engine.js';
-import Instrument from './instrument.js';
+import {Engine} from './engine.js';
+import {Instrument} from './instrument.js';
 
 const onLoad = async () => {
+  // Initialize audio processor.
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   await audioContext.audioWorklet.addModule('processor.js');
   document.body.addEventListener('click', () => audioContext.resume());

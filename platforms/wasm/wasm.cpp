@@ -13,7 +13,6 @@ using ::barely::TaskState;
 using ::barely::Trigger;
 using ::emscripten::allow_raw_pointers;
 using ::emscripten::class_;
-using ::emscripten::enum_;
 using ::emscripten::optional_override;
 using ::emscripten::val;
 using ::emscripten::return_value_policy::take_ownership;
@@ -42,28 +41,6 @@ static void Instrument_Process(Instrument& instrument, uintptr_t samples, int sa
 }
 
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
-  enum_<ControlType>("ControlType")
-      .value("GAIN", ControlType::kGain)
-      .value("PITCH_SHIFT", ControlType::kPitchShift)
-      .value("RETRIGGER", ControlType::kRetrigger)
-      .value("VOICE_COUNT", ControlType::kVoiceCount)
-      .value("ATTACK", ControlType::kAttack)
-      .value("DECAY", ControlType::kDecay)
-      .value("SUSTAIN", ControlType::kSustain)
-      .value("RELEASE", ControlType::kRelease)
-      .value("OSC_MIX", ControlType::kOscMix)
-      .value("OSC_MODE", ControlType::kOscMode)
-      .value("OSC_NOISE_MIX", ControlType::kOscNoiseMix)
-      .value("OSC_PITCH_SHIFT", ControlType::kOscPitchShift)
-      .value("OSC_SHAPE", ControlType::kOscShape)
-      .value("OSC_SKEW", ControlType::kOscSkew)
-      .value("SLICE_MODE", ControlType::kSliceMode)
-      .value("FILTER_TYPE", ControlType::kFilterType)
-      .value("FILTER_FREQUENCY", ControlType::kFilterFrequency)
-      .value("FILTER_Q", ControlType::kFilterQ)
-      .value("BIT_CRUSHER_DEPTH", ControlType::kBitCrusherDepth)
-      .value("BIT_CRUSHER_RATE", ControlType::kBitCrusherRate);
-
   class_<Engine>("Engine")
       .constructor<int, float>()
       .function("createInstrument", &Engine_CreateInstrument, take_ownership())

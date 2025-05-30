@@ -18,30 +18,16 @@ class Processor extends AudioWorkletProcessor {
         return;
       }
 
-      switch (event.data.type) {
-        case 'init': {
-          if (!this.module) {
-            this.module = await Module();
-          }
-          this.engine = new this.module.Engine(sampleRate, REFERENCE_FREQUENCY);
-          this.instruments = {};
-          this.performers = {};
-        } break;
-        case 'shutdown': {
-          this.engine = null;
-          this.instruments = {};
-          this.performers = {};
-        } break;
-        case 'instrument-create': {
-          if (!this.engine) {
-            // console.log('ERROR: Engine not initialized!');
-            if (!this.module) {
-              this.module = await Module();
-            }
-            this.engine =
-                new this.module.Engine(sampleRate, REFERENCE_FREQUENCY);
-          }
+      if (!this.module) {
+        this.module = await Module();
+        this.engine = new this.module.Engine(sampleRate, REFERENCE_FREQUENCY);
+        this.instruments = {};
+        this.performers = {};
+        console.log('barelymusician initialized');
+      }
 
+      switch (event.data.type) {
+        case 'instrument-create': {
           let instrument = this.engine.createInstrument();
           let instrumentHandle = instrument.getHandle();
           this.instruments[instrumentHandle] = instrument;
@@ -68,35 +54,18 @@ class Processor extends AudioWorkletProcessor {
               {type: 'instrument-create-success', handle: instrumentHandle})
         } break;
         case 'instrument-destroy': {
-          // if (!this.engine) {
-          //   console.log('ERROR: Engine not initialized!');
-          //   return;
-          // }
-          delete this.instruments[event.data.instrumentHandle];
+          delete this.instruments[event.data.handle];
         } break;
         case 'instrument-set-control': {
-          if (!this.instruments[event.data.instrumentHandle]) {
-            console.log('ERROR: Instrument does not exist!');
-            return;
-          }
-          this.instruments[event.data.instrumentHandle].setControl(
+          this.instruments[event.data.handle].setControl(
               event.data.typeIndex, event.data.value);
         } break;
         case 'instrument-set-note-on': {
-          if (!this.instruments[event.data.instrumentHandle]) {
-            console.log('ERROR: Instrument does not exist!');
-            return;
-          }
-          this.instruments[event.data.instrumentHandle].setNoteOn(
+          this.instruments[event.data.handle].setNoteOn(
               event.data.pitch, event.data.gain);
         } break;
         case 'instrument-set-note-off': {
-          if (!this.instruments[event.data.instrumentHandle]) {
-            console.log('ERROR: Instrument does not exist!');
-            return;
-          }
-          this.instruments[event.data.instrumentHandle].setNoteOff(
-              event.data.pitch);
+          this.instruments[event.data.handle].setNoteOff(event.data.pitch);
         } break;
         default:
           console.log('ERROR: Unknown message!');

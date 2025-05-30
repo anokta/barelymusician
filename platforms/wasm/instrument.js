@@ -22,38 +22,44 @@ export const ControlType = {
 };
 
 export class Instrument {
-  constructor({
-    container,
-    audioNode,
-    instrumentHandle,
-    noteOnCallback,
-    noteOffCallback
-  }) {
+  constructor({container, audioNode, handle, noteOnCallback, noteOffCallback}) {
     this.container = container;
     this.audioNode = audioNode;
-    this.instrumentHandle = instrumentHandle;
+    this.handle = handle;
     this.noteOnCallback = noteOnCallback;
     this.noteOffCallback = noteOffCallback;
     this.activeNotes = new Set();
-    this.baseMidi = 60;  // C4
 
+    this._init();
     this._render();
     this._attachEvents();
   }
 
-  noteToPitch(midi) {
-    return (midi - 60) / 12;
+  _init() {
+    this.audioNode.port.onmessage = async (event) => {
+      if (!event.data) {
+        return;
+      }
+      switch (event.data.type) {
+        case 'instrument-on-note-on': {
+          if (event.data.handle == this.handle) {
+            this.noteOnCallback(event.data.pitch);
+          }
+        } break;
+        case 'instrument-on-note-off': {
+          if (event.data.handle == this.handle) {
+            this.noteOffCallback(event.data.pitch);
+          }
+        } break;
+      }
+    };
   }
 
   _render() {
     this.container.innerHTML = `
       <div>
-        <label>Osc Shape: <input type="range" min="0" max="1" step="0.01" value="0.5" id="oscShape"></label>
-        <span id="oscShapeValue">0.5</span>
-      </div>
-      <div>
-        <label>Osc Freq: <input type="range" min="20" max="2000" step="1" value="440" id="oscFreq"></label>
-        <span id="oscFreqValue">440</span>
+        <label>Osc Shape <input type="range" min="0" max="1" step="0.01" value="0.0" id="oscShape"></label>
+        <span id="oscShapeValue">0.0</span>
       </div>
       <div id="piano" style="margin:2em 0;user-select:none;">
         <div style="position:relative;width:336px;height:120px;">
@@ -75,28 +81,20 @@ export class Instrument {
   }
 
   _attachEvents() {
-    // Oscillator sliders
+    // Oscillator sliders.
     const oscShape = this.container.querySelector('#oscShape');
     const oscShapeValue = this.container.querySelector('#oscShapeValue');
     oscShape.addEventListener('input', () => {
       oscShapeValue.textContent = oscShape.value;
       this.audioNode.port.postMessage({
         type: 'instrument-set-control',
-        instrumentHandle: this.instrumentHandle,
+        handle: this.handle,
         typeIndex: 12,
         value: parseFloat(oscShape.value)
       });
     });
 
-    const oscFreq = this.container.querySelector('#oscFreq');
-    const oscFreqValue = this.container.querySelector('#oscFreqValue');
-    oscFreq.addEventListener('input', () => {
-      oscFreqValue.textContent = oscFreq.value;
-      this.instrument.setControl(
-          1, parseFloat(oscFreq.value));  // 1 = OscFreq, adjust as needed
-    });
-
-    // Piano keys
+    // Piano keys.
     const piano = this.container.querySelector('#piano');
     let pressedNote = null;
     piano.addEventListener('mousedown', e => {
@@ -112,66 +110,60 @@ export class Instrument {
         pressedNote = null;
       }
     });
+    piano.addEventListener('mouseover', e => {
+      if (pressedNote !== null && e.target.classList.contains('key')) {
+        const note = Number(e.target.dataset.note);
+        this.stopNote(pressedNote);
+        this.playNote(note);
+        pressedNote = note;
+      }
+    });
     piano.addEventListener('mouseleave', e => {
       if (pressedNote !== null) {
         this.stopNote(pressedNote);
         pressedNote = null;
       }
     });
+  }
 
-    // Touch support
-    let activeTouchNotes = new Map();
-    piano.addEventListener('touchstart', e => {
-      for (const t of e.changedTouches) {
-        const el = document.elementFromPoint(t.clientX, t.clientY);
-        if (el && el.classList.contains('key')) {
-          const note = Number(el.dataset.note);
-          this.playNote(note);
-          activeTouchNotes.set(t.identifier, note);
-        }
-      }
-      e.preventDefault();
-    }, {passive: false});
-    piano.addEventListener('touchend', e => {
-      for (const t of e.changedTouches) {
-        const note = activeTouchNotes.get(t.identifier);
-        if (note !== undefined) {
-          this.stopNote(note);
-          activeTouchNotes.delete(t.identifier);
-        }
-      }
-      e.preventDefault();
-    }, {passive: false});
+  _noteToPitch(note) {
+    return note / 12;
   }
 
   playNote(note) {
+    if (!this.handle) {
+      return;
+    }
     if (!this.activeNotes.has(note)) {
       this.activeNotes.add(note);
-      const pitch = this.noteToPitch(this.baseMidi + note);
-      // this.instrument.setNoteOn(pitch);
+      const pitch = this._noteToPitch(note);
       this.audioNode.port.postMessage({
         type: 'instrument-set-note-on',
-        instrumentHandle: this.instrumentHandle,
+        handle: this.handle,
         pitch: pitch,
         gain: 1.0
       });
       const el = this.container.querySelector(`[data-note="${note}"]`);
-      if (el) el.classList.add('active');
+      if (el) {
+        el.classList.add('active');
+      }
     }
   }
 
   stopNote(note) {
+    if (!this.handle) {
+      return;
+    }
     if (this.activeNotes.has(note)) {
       this.activeNotes.delete(note);
-      const pitch = this.noteToPitch(this.baseMidi + note);
+      const pitch = this._noteToPitch(note);
       // this.instrument.setNoteOff(pitch);
-      this.audioNode.port.postMessage({
-        type: 'instrument-set-note-off',
-        instrumentHandle: this.instrumentHandle,
-        pitch: pitch
-      });
+      this.audioNode.port.postMessage(
+          {type: 'instrument-set-note-off', handle: this.handle, pitch: pitch});
       const el = this.container.querySelector(`[data-note="${note}"]`);
-      if (el) el.classList.remove('active');
+      if (el) {
+        el.classList.remove('active');
+      }
     }
   }
 }

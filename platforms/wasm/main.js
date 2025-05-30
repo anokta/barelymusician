@@ -9,41 +9,33 @@ const onLoad = async () => {
 
   const audioNode =
       new AudioWorkletNode(audioContext, 'barelymusician-processor');
-  // audioNode.port.postMessage({type: 'init'});
   audioNode.connect(audioContext.destination);
 
-  // let instruments = []
-  let instrument = null;
+  let instruments = []
   audioNode.port.onmessage = async (event) => {
     if (!event.data) {
       return;
     }
-
     switch (event.data.type) {
       case 'instrument-create-success': {
-        instrument = new Instrument({
-          container: document.getElementById('instrument-ui'),
+        instruments.push(new Instrument({
+          container:
+              document.getElementById('instrument-ui-' + instruments.length),
           audioNode,
-          instrumentHandle: event.data.handle,
+          handle: event.data.handle,
           noteOnCallback: (pitch) => {
             console.log('NoteOn: ' + pitch);
           },
           noteOffCallback: (pitch) => {
             console.log('NoteOff: ' + pitch);
-          }
-        });
-      } break;
-      case 'instrument-on-note-on': {
-        instrument.noteOnCallback(event.data.pitch);
-      } break;
-      case 'instrument-on-note-off': {
-        instrument.noteOffCallback(event.data.pitch);
+          },
+        }));
       } break;
     }
   };
 
-  // TODO: need to be synced with init success.
   audioNode.port.postMessage({type: 'instrument-create'});
+  // audioNode.port.postMessage({type: 'instrument-create'});
   // let engine = new barelymusician.BarelyEngine(48000, 440.0);
 
   // const engineUI =

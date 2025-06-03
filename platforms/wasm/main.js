@@ -1,4 +1,3 @@
-import {Engine} from './engine.js';
 import {Instrument} from './instrument.js';
 
 const onLoad = async () => {
@@ -7,20 +6,25 @@ const onLoad = async () => {
   await audioContext.audioWorklet.addModule('processor.js');
   document.body.addEventListener('click', () => audioContext.resume());
 
-  const audioNode =
-      new AudioWorkletNode(audioContext, 'barelymusician-processor');
+  const audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor');
   audioNode.connect(audioContext.destination);
 
-  let instruments = []
-  audioNode.port.onmessage = async (event) => {
+  // Initialize the engine.
+  let instruments = {};
+
+  audioNode.port.onmessage = (event) => {
     if (!event.data) {
       return;
     }
+
     switch (event.data.type) {
+      case 'init-success': {
+        audioNode.port.postMessage({type: 'instrument-create'});
+        audioNode.port.postMessage({type: 'instrument-create'});
+      } break;
       case 'instrument-create-success': {
-        instruments.push(new Instrument({
-          container:
-              document.getElementById('instrument-ui-' + instruments.length),
+        instruments[event.data.handle] = new Instrument({
+          container: document.getElementById('instrument-ui-' + Object.keys(instruments).length),
           audioNode,
           handle: event.data.handle,
           noteOnCallback: (pitch) => {
@@ -29,12 +33,21 @@ const onLoad = async () => {
           noteOffCallback: (pitch) => {
             console.log('NoteOff: ' + pitch);
           },
-        }));
+        });
+      } break;
+      case 'instrument-on-note-on': {
+        if (event.data.handle in instruments) {
+          instruments[event.data.handle].noteOnCallback(event.data.pitch);
+        }
+      } break;
+      case 'instrument-on-note-off': {
+        if (event.data.handle in instruments) {
+          instruments[event.data.handle].noteOffCallback(event.data.pitch);
+        }
       } break;
     }
   };
 
-  audioNode.port.postMessage({type: 'instrument-create'});
   // audioNode.port.postMessage({type: 'instrument-create'});
   // let engine = new barelymusician.BarelyEngine(48000, 440.0);
 

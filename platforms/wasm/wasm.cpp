@@ -19,6 +19,9 @@ using ::emscripten::return_value_policy::take_ownership;
 
 static Instrument Engine_CreateInstrument(Engine& engine) noexcept {
   return engine.CreateInstrument({{
+      {ControlType::kGain, 0.25f},
+      {ControlType::kAttack, 0.05f},
+      {ControlType::kRelease, 0.1f},
       {ControlType::kOscMix, 1.0f},
   }});
 }

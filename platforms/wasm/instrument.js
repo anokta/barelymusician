@@ -30,29 +30,8 @@ export class Instrument {
     this.noteOffCallback = noteOffCallback;
     this.activeNotes = new Set();
 
-    this._init();
     this._render();
     this._attachEvents();
-  }
-
-  _init() {
-    this.audioNode.port.onmessage = async (event) => {
-      if (!event.data) {
-        return;
-      }
-      switch (event.data.type) {
-        case 'instrument-on-note-on': {
-          if (event.data.handle == this.handle) {
-            this.noteOnCallback(event.data.pitch);
-          }
-        } break;
-        case 'instrument-on-note-off': {
-          if (event.data.handle == this.handle) {
-            this.noteOffCallback(event.data.pitch);
-          }
-        } break;
-      }
-    };
   }
 
   _render() {
@@ -137,12 +116,8 @@ export class Instrument {
     if (!this.activeNotes.has(note)) {
       this.activeNotes.add(note);
       const pitch = this._noteToPitch(note);
-      this.audioNode.port.postMessage({
-        type: 'instrument-set-note-on',
-        handle: this.handle,
-        pitch: pitch,
-        gain: 1.0
-      });
+      this.audioNode.port.postMessage(
+          {type: 'instrument-set-note-on', handle: this.handle, pitch: pitch, gain: 1.0});
       const el = this.container.querySelector(`[data-note="${note}"]`);
       if (el) {
         el.classList.add('active');

@@ -16,7 +16,7 @@
   ],
   "clang-format.language.c.enable": false,
   "clang-format.language.cpp.enable": false,
-  "clang-format.style": "Google",
+  "clang-format.style": "file",
   "cmake.configureOnEdit": false,
   "cmake.configureOnOpen": false,
   "cmake.automaticReconfigure": false,

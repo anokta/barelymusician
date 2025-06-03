@@ -41,54 +41,49 @@ export class Engine {
 
   _attachEvents() {
     // Instruments.
-    this.container.querySelector('#createInstrumentBtn')
-        .addEventListener('click', () => {
-          const instrument = this.engine.createInstrument();
-          this.instruments.push(instrument);
-          this._updateStatus();
-        });
+    this.container.querySelector('#createInstrumentBtn').addEventListener('click', () => {
+      const instrument = this.engine.createInstrument();
+      this.instruments.push(instrument);
+      this._updateStatus();
+    });
 
-    this.container.querySelector('#deleteInstrumentBtn')
-        .addEventListener('click', () => {
-          if (this.instruments.length > 0) {
-            const instrument = this.instruments.pop();
-            // TODO: Need to destroy explicitly?
-            this._updateStatus();
-          }
-        });
+    this.container.querySelector('#deleteInstrumentBtn').addEventListener('click', () => {
+      if (this.instruments.length > 0) {
+        const instrument = this.instruments.pop();
+        // TODO: Need to destroy explicitly?
+        this._updateStatus();
+      }
+    });
 
     // Performers.
-    this.container.querySelector('#createPerformerBtn')
-        .addEventListener('click', () => {
-          const performer = this.engine.createPerformer();
-          this.performers.push(performer);
-          this._updateStatus();
-        });
+    this.container.querySelector('#createPerformerBtn').addEventListener('click', () => {
+      const performer = this.engine.createPerformer();
+      this.performers.push(performer);
+      this._updateStatus();
+    });
 
-    this.container.querySelector('#deletePerformerBtn')
-        .addEventListener('click', () => {
-          if (this.performers.length > 0) {
-            const performer = this.performers.pop();
-            // TODO: Need to destroy explicitly?
-            this._updateStatus();
-          }
-        });
+    this.container.querySelector('#deletePerformerBtn').addEventListener('click', () => {
+      if (this.performers.length > 0) {
+        const performer = this.performers.pop();
+        // TODO: Need to destroy explicitly?
+        this._updateStatus();
+      }
+    });
 
     // Transport controls.
     this.metronome = this.engine.createPerformer();
 
-    this.container.querySelector('#playPauseBtn')
-        .addEventListener('click', () => {
-          if (this.metronome.isPlaying) {
-            this.metronome.stop();
-            this.performers.forEach(performer => performer.stop());
-            this.container.querySelector('#playPauseBtn').textContent = 'Play';
-          } else {
-            this.metronome.start();
-            this.performers.forEach(performer => performer.start());
-            this.container.querySelector('#playPauseBtn').textContent = 'Pause';
-          }
-        });
+    this.container.querySelector('#playPauseBtn').addEventListener('click', () => {
+      if (this.metronome.isPlaying) {
+        this.metronome.stop();
+        this.performers.forEach(performer => performer.stop());
+        this.container.querySelector('#playPauseBtn').textContent = 'Play';
+      } else {
+        this.metronome.start();
+        this.performers.forEach(performer => performer.start());
+        this.container.querySelector('#playPauseBtn').textContent = 'Pause';
+      }
+    });
 
     this.container.querySelector('#stopBtn').addEventListener('click', () => {
       this.metronome.stop();

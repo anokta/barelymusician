@@ -55,6 +55,22 @@ class Processor extends AudioWorkletProcessor {
           this.port.postMessage(
               {type: 'engine-get-timestamp-response', timestamp: this.engine.timestamp});
         } break;
+        case 'engine-set-seed': {
+          this.engine.seed = event.data.seed;
+        } break;
+        case 'engine-set-tempo': {
+          this.engine.tempo = event.data.tempo;
+        } break;
+        case 'engine-start': {
+          for (const [handle, performer] of this.performers) {
+            performer.start();
+          }
+        } break;
+        case 'engine-stop': {
+          for (const [handle, performer] of this.performers) {
+            performer.stop();
+          }
+        } break;
         case 'instrument-create': {
           let instrument = this.engine.createInstrument();
           instrument.setNoteOnCallback(

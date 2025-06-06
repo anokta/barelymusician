@@ -43,3 +43,43 @@
 .black.key.active {
   background: #66f;
 }
+
+.control-container {
+  display: grid;
+  grid-template-columns: 8rem 1fr auto;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  min-width: 160px;
+  max-width: 240px;
+  flex: 1 1 auto;
+}
+
+.control-container label {
+  grid-column: 1 / 2;
+  white-space: nowrap;
+  padding-right: 0.25rem;
+}
+
+.control-container input[type='range'] {
+  grid-column: 2 / 3;
+  min-width: 160px;
+  max-width: 100%;
+  width: 100%;
+}
+
+.control-container input[type='checkbox'] {
+  grid-column: 2 / 3;
+  justify-self: start;
+}
+
+.control-container span {
+  grid-column: 3 / 4;
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #888;
+  text-align: left;
+  width: 3em;
+  display: inline-block;
+  white-space: nowrap;
+}

@@ -1,25 +1,4 @@
-export const ControlType = {
-  GAIN: 0,
-  PITCH_SHIFT: 1,
-  RETRIGGER: 2,
-  VOICE_COUNT: 3,
-  ATTACK: 4,
-  DECAY: 5,
-  SUSTAIN: 6,
-  RELEASE: 7,
-  OSC_MIX: 8,
-  OSC_MODE: 9,
-  OSC_NOISE_MIX: 10,
-  OSC_PITCH_SHIFT: 11,
-  OSC_SHAPE: 12,
-  OSC_SKEW: 13,
-  SLICE_MODE: 14,
-  FILTER_TYPE: 15,
-  FILTER_FREQUENCY: 16,
-  FILTER_Q: 17,
-  BIT_CRUSHER_DEPTH: 18,
-  BIT_CRUSHER_RATE: 19,
-};
+import {CONTROLS} from './control.js'
 
 export class Instrument {
   constructor({container, audioNode, handle, noteOnCallback, noteOffCallback}) {
@@ -34,12 +13,72 @@ export class Instrument {
     this._attachEvents();
   }
 
+  _createControlContainer(controlTypeIndex, parentContainer) {
+    if (!(controlTypeIndex in CONTROLS)) return;
+    const control = CONTROLS[controlTypeIndex];
+
+    // container
+    const controlContainer = document.createElement('div');
+    controlContainer.id = `control-${controlTypeIndex}`;
+    controlContainer.classList.add('control-container');
+    parentContainer.appendChild(controlContainer);
+
+    // label
+    const controlLabel = document.createElement('label');
+    controlLabel.textContent = control.name;
+    controlLabel.htmlFor = `input-${controlTypeIndex}`;
+    controlContainer.appendChild(controlLabel);
+
+    // input
+    const controlInput = document.createElement('input');
+    controlInput.id = `input-${controlTypeIndex}`;
+    switch (control.valueType) {
+      case 'bool': {
+        controlInput.type = 'checkbox';
+        controlInput.checked = control.defaultValue;
+      } break;
+      case 'int': {
+        controlInput.type = 'range';
+        controlInput.min = control.minValue;
+        controlInput.max = control.maxValue;
+        controlInput.step = 1;
+        controlInput.value = control.defaultValue;
+      } break;
+      case 'float': {
+        controlInput.type = 'range';
+        controlInput.min = control.minValue;
+        controlInput.max = control.maxValue;
+        controlInput.step = 0.01 * (control.maxValue - control.minValue);
+        controlInput.value = control.defaultValue;
+      } break;
+      default:
+        console.error('Invalid control value type: ' + control.valueType);
+        controlContainer.remove();
+        return;
+    }
+    controlContainer.appendChild(controlInput);
+
+    if (control.valueType == 'bool') {
+      controlInput.addEventListener(
+          'change', (e) => this.setControl(controlTypeIndex, e.target.checked ? 1.0 : 0.0));
+    } else {
+      const controlSpan = document.createElement('span');
+      controlSpan.id = `span-${controlTypeIndex}`;
+      controlSpan.textContent = control.defaultValue.toPrecision(2);
+      controlContainer.appendChild(controlSpan);
+
+      controlInput.addEventListener('input', (e) => {
+        controlSpan.textContent = controlInput.value;
+        this.setControl(
+            controlTypeIndex,
+            (control.valueType == 'int') ? parseInt(e.target.value) : parseFloat(e.target.value));
+      });
+    }
+  }
+
   _render() {
     this.container.innerHTML = `
-      <div>
-        <label>Osc Shape <input type="range" min="0" max="1" step="0.01" value="0.0" id="oscShape"></label>
-        <span id="oscShapeValue">0.0</span>
-      </div>
+      <div id="controls"></div>
       <div id="piano" style="margin:2em 0;user-select:none;">
         <div style="position:relative;width:336px;height:120px;">
           <div class="white key" data-note="0" style="left:0px;"></div>
@@ -60,20 +99,13 @@ export class Instrument {
   }
 
   _attachEvents() {
-    // Oscillator sliders.
-    const oscShape = this.container.querySelector('#oscShape');
-    const oscShapeValue = this.container.querySelector('#oscShapeValue');
-    oscShape.addEventListener('input', () => {
-      oscShapeValue.textContent = oscShape.value;
-      this.audioNode.port.postMessage({
-        type: 'instrument-set-control',
-        handle: this.handle,
-        typeIndex: 12,
-        value: parseFloat(oscShape.value)
-      });
-    });
+    // controls
+    const controlsContainer = this.container.querySelector('#controls');
+    for (const controlTypeIndex in CONTROLS) {
+      this._createControlContainer(controlTypeIndex, controlsContainer);
+    }
 
-    // Piano keys.
+    // piano keys
     const piano = this.container.querySelector('#piano');
     let pressedNote = null;
     piano.addEventListener('mousedown', e => {
@@ -132,7 +164,6 @@ export class Instrument {
     if (this.activeNotes.has(note)) {
       this.activeNotes.delete(note);
       const pitch = this._noteToPitch(note);
-      // this.instrument.setNoteOff(pitch);
       this.audioNode.port.postMessage(
           {type: 'instrument-set-note-off', handle: this.handle, pitch: pitch});
       const el = this.container.querySelector(`[data-note="${note}"]`);
@@ -140,5 +171,14 @@ export class Instrument {
         el.classList.remove('active');
       }
     }
+  }
+
+  setControl(typeIndex, value) {
+    this.audioNode.port.postMessage({
+      type: 'instrument-set-control',
+      handle: this.handle,
+      typeIndex: typeIndex,
+      value: value,
+    });
   }
 }

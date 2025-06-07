@@ -43,6 +43,18 @@ static void Instrument_Process(Instrument& instrument, uintptr_t samples, int sa
   instrument.Process(std::span<float>(reinterpret_cast<float*>(samples), sample_count), timestamp);
 }
 
+static uintptr_t Performer_GetHandle(Performer& performer) noexcept {
+  return reinterpret_cast<uintptr_t>(static_cast<BarelyPerformerHandle>(performer));
+}
+
+static uintptr_t Task_GetHandle(Task& task) noexcept {
+  return reinterpret_cast<uintptr_t>(static_cast<BarelyTaskHandle>(task));
+}
+
+static uintptr_t Trigger_GetHandle(Trigger& trigger) noexcept {
+  return reinterpret_cast<uintptr_t>(static_cast<BarelyTriggerHandle>(trigger));
+}
+
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
   class_<Engine>("Engine")
       .constructor<int, float>()
@@ -84,12 +96,19 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
   // TODO(#164): Add sample data support.
 
   class_<Performer>("Performer")
-      .function("createTask", &Performer::CreateTask, take_ownership())
+      .function("createTask",
+                optional_override([](Performer& performer, double position, double duration,
+                                     val js_callback) {
+                  return performer.CreateTask(
+                      position, duration, [js_callback](TaskState state) { js_callback(state); });
+                }),
+                take_ownership())
       .function("createTrigger",
                 optional_override([](Performer& performer, double position, val js_callback) {
                   return performer.CreateTrigger(position, [js_callback]() { js_callback(); });
                 }),
                 take_ownership())
+      .function("getHandle", &Performer_GetHandle, allow_raw_pointers())
       .function("start", &Performer::Start)
       .function("stop", &Performer::Stop)
       .property("loopBeginPosition", &Performer::GetLoopBeginPosition,
@@ -100,17 +119,21 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .property("isPlaying", &Performer::IsPlaying);
 
   class_<Task>("Task")
-      .function(
-          "setProcessCallback", optional_override([](Task& task, val js_callback) {
-            return task.SetProcessCallback([js_callback](TaskState state) { js_callback(state); });
-          }))
+      .function("getHandle", &Task_GetHandle, allow_raw_pointers())
+      // TODO(#164): Remove these and store task callbacks by ids in js.
+      // .function(
+      //     "setProcessCallback", optional_override([](Task& task, val js_callback) {
+      //       return task.SetProcessCallback([js_callback](TaskState state) { js_callback(state);
+      //       });
+      //     }))
       .property("isActive", &Task::IsActive)
       .property("duration", &Task::GetDuration, &Task::SetDuration)
       .property("position", &Task::GetPosition, &Task::SetPosition);
 
   class_<Trigger>("Trigger")
-      .function("setProcessCallback", optional_override([](Trigger& trigger, val js_callback) {
-                  return trigger.SetProcessCallback([js_callback]() { js_callback(); });
-                }))
+      .function("getHandle", &Trigger_GetHandle, allow_raw_pointers())
+      // .function("setProcessCallback", optional_override([](Trigger& trigger, val js_callback) {
+      //             return trigger.SetProcessCallback([js_callback]() { js_callback(); });
+      //           }))
       .property("position", &Trigger::GetPosition, &Trigger::SetPosition);
 }

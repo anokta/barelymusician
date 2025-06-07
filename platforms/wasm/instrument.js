@@ -7,10 +7,33 @@ export class Instrument {
     this.handle = handle;
     this.noteOnCallback = noteOnCallback;
     this.noteOffCallback = noteOffCallback;
-    this.activeNotes = new Set();
 
-    this._render();
-    this._attachEvents();
+    if (this.container) {
+      this._render();
+      this._attachEvents();
+    }
+  }
+
+  _render() {
+    this.container.innerHTML = `
+      <div id="controls"></div>
+      <div id="piano" style="margin:2em 0;user-select:none;">
+        <div style="position:relative;width:336px;height:120px;">
+          <div class="white key" data-note="0" style="left:0px;"></div>
+          <div class="white key" data-note="2" style="left:48px;"></div>
+          <div class="white key" data-note="4" style="left:96px;"></div>
+          <div class="white key" data-note="5" style="left:144px;"></div>
+          <div class="white key" data-note="7" style="left:192px;"></div>
+          <div class="white key" data-note="9" style="left:240px;"></div>
+          <div class="white key" data-note="11" style="left:288px;"></div>
+          <div class="black key" data-note="1" style="left:36px;"></div>
+          <div class="black key" data-note="3" style="left:84px;"></div>
+          <div class="black key" data-note="6" style="left:180px;"></div>
+          <div class="black key" data-note="8" style="left:228px;"></div>
+          <div class="black key" data-note="10" style="left:276px;"></div>
+        </div>
+      </div>
+    `;
   }
 
   _createControlContainer(controlTypeIndex, parentContainer) {
@@ -76,28 +99,6 @@ export class Instrument {
     }
   }
 
-  _render() {
-    this.container.innerHTML = `
-      <div id="controls"></div>
-      <div id="piano" style="margin:2em 0;user-select:none;">
-        <div style="position:relative;width:336px;height:120px;">
-          <div class="white key" data-note="0" style="left:0px;"></div>
-          <div class="white key" data-note="2" style="left:48px;"></div>
-          <div class="white key" data-note="4" style="left:96px;"></div>
-          <div class="white key" data-note="5" style="left:144px;"></div>
-          <div class="white key" data-note="7" style="left:192px;"></div>
-          <div class="white key" data-note="9" style="left:240px;"></div>
-          <div class="white key" data-note="11" style="left:288px;"></div>
-          <div class="black key" data-note="1" style="left:36px;"></div>
-          <div class="black key" data-note="3" style="left:84px;"></div>
-          <div class="black key" data-note="6" style="left:180px;"></div>
-          <div class="black key" data-note="8" style="left:228px;"></div>
-          <div class="black key" data-note="10" style="left:276px;"></div>
-        </div>
-      </div>
-    `;
-  }
-
   _attachEvents() {
     // controls
     const controlsContainer = this.container.querySelector('#controls');
@@ -111,74 +112,74 @@ export class Instrument {
     piano.addEventListener('mousedown', e => {
       if (e.target.classList.contains('key')) {
         const note = Number(e.target.dataset.note);
-        this.playNote(note);
+        this.setNoteOn(note);
         pressedNote = note;
       }
     });
     document.addEventListener('mouseup', e => {
       if (pressedNote !== null) {
-        this.stopNote(pressedNote);
+        this.setNoteOff(pressedNote);
         pressedNote = null;
       }
     });
     piano.addEventListener('mouseover', e => {
       if (pressedNote !== null && e.target.classList.contains('key')) {
         const note = Number(e.target.dataset.note);
-        this.stopNote(pressedNote);
-        this.playNote(note);
+        this.setNoteOff(pressedNote);
+        this.setNoteOn(note);
         pressedNote = note;
       }
     });
     piano.addEventListener('mouseleave', e => {
       if (pressedNote !== null) {
-        this.stopNote(pressedNote);
+        this.setNoteOff(pressedNote);
         pressedNote = null;
       }
     });
   }
 
   _noteToPitch(note) {
-    return note / 12;
-  }
-
-  playNote(note) {
-    if (!this.handle) {
-      return;
-    }
-    if (!this.activeNotes.has(note)) {
-      this.activeNotes.add(note);
-      const pitch = this._noteToPitch(note);
-      this.audioNode.port.postMessage(
-          {type: 'instrument-set-note-on', handle: this.handle, pitch: pitch, gain: 1.0});
-      const el = this.container.querySelector(`[data-note="${note}"]`);
-      if (el) {
-        el.classList.add('active');
-      }
-    }
-  }
-
-  stopNote(note) {
-    if (!this.handle) {
-      return;
-    }
-    if (this.activeNotes.has(note)) {
-      this.activeNotes.delete(note);
-      const pitch = this._noteToPitch(note);
-      this.audioNode.port.postMessage(
-          {type: 'instrument-set-note-off', handle: this.handle, pitch: pitch});
-      const el = this.container.querySelector(`[data-note="${note}"]`);
-      if (el) {
-        el.classList.remove('active');
-      }
-    }
+    return note / 12.0;
   }
 
   setControl(typeIndex, value) {
+    if (!this.handle) return;
+
     this.audioNode.port.postMessage({
       type: 'instrument-set-control',
       handle: this.handle,
       typeIndex: typeIndex,
       value: value,
     });
+  }
+
+  setNoteOff(note) {
+    if (!this.handle) return;
+
+    this.audioNode.port.postMessage({
+      type: 'instrument-set-note-off',
+      handle: this.handle,
+      pitch: this._noteToPitch(note),
+    });
+
+    if (this.container) {
+      this.container.querySelector(`[data-note="${note}"]`)?.classList.remove('active');
+    }
+  }
+
+  setNoteOn(note, gain = 1.0, pitchShift = 0.0) {
+    if (!this.handle) return;
+
+    this.audioNode.port.postMessage({
+      type: 'instrument-set-note-on',
+      handle: this.handle,
+      pitch: this._noteToPitch(note),
+      gain: gain,
+      pitchShift: pitchShift,
+    });
+
+    if (this.container) {
+      this.container.querySelector(`[data-note="${note}"]`)?.classList.add('active');
+    }
   }
 }

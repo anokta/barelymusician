@@ -83,3 +83,26 @@
   display: inline-block;
   white-space: nowrap;
 }
+
+.engine-controls {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1em;
+}
+
+.engine-tempo {
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+}
+
+#playPauseBtn {
+  width: 55px;
+}
+
+#engineStatus {
+  margin-top: 1em;
+  font-family: monospace;
+  font-size: 0.9em;
+  color: #666;
+}

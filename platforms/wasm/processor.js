@@ -72,24 +72,13 @@ class Processor extends AudioWorkletProcessor {
           }
         } break;
         case 'instrument-create': {
-          let instrument = this.engine.createInstrument();
+          const instrument = this.engine.createInstrument();
           instrument.setNoteOnCallback(
               (pitch) => this.port.postMessage({type: 'instrument-on-note-on', handle, pitch}));
           instrument.setNoteOffCallback(
               (pitch) => this.port.postMessage({type: 'instrument-on-note-off', handle, pitch}));
 
-          let handle = instrument.getHandle();
-          this.instruments[handle] = instrument;
-          this.port.postMessage({type: 'instrument-create-success', handle})
-        } break;
-        case 'instrument-create': {
-          let instrument = this.engine.createInstrument();
-          instrument.setNoteOnCallback(
-              (pitch) => this.port.postMessage({type: 'instrument-on-note-on', handle, pitch}));
-          instrument.setNoteOffCallback(
-              (pitch) => this.port.postMessage({type: 'instrument-on-note-off', handle, pitch}));
-
-          let handle = instrument.getHandle();
+          const handle = instrument.getHandle();
           this.instruments[handle] = instrument;
           this.port.postMessage({type: 'instrument-create-success', handle})
         } break;
@@ -135,24 +124,44 @@ class Processor extends AudioWorkletProcessor {
           this.instruments[event.data.handle]?.setAllNotesOff();
         } break;
         case 'instrument-set-note-on': {
-          this.instruments[event.data.handle]?.setNoteOn(event.data.pitch, event.data.gain);
+          this.instruments[event.data.handle]?.setNoteOn(
+              event.data.pitch, event.data.gain, event.data.pitchShift);
         } break;
         case 'instrument-set-note-off': {
           this.instruments[event.data.handle]?.setNoteOff(event.data.pitch);
         } break;
         case 'performer-create': {
-          let performer = this.engine.createPerformer();
-          let handle = performer.getHandle();
+          const performer = this.engine.createPerformer();
+          const handle = performer.getHandle();
           this.performers[handle] = performer;
           this.port.postMessage({type: 'performer-create-success', handle})
         } break;
         case 'performer-destroy': {
           delete this.performers[event.data.handle];
         } break;
-        case 'performer-set-position': {
-          if (event.data.handle in this.performers) {
-            this.performers[event.data.handle].position = event.data.position;
-          }
+        case 'performer-get-loop-begin-position': {
+          this.port.postMessage({
+            type: 'performer-get-loop-begin-position-response',
+            loopBeginPosition: this.performers[event.data.handle].loopBeginPosition,
+          });
+        } break;
+        case 'performer-get-loop-length': {
+          this.port.postMessage({
+            type: 'performer-get-loop-length',
+            loopLength: this.performers[event.data.handle].loopLength,
+          });
+        } break;
+        case 'performer-get-position': {
+          this.port.postMessage({
+            type: 'performer-get-position-response',
+            position: this.performers[event.data.handle].position,
+          });
+        } break;
+        case 'performer-is-looping': {
+          this.port.postMessage({
+            type: 'performer-is-looping-response',
+            isLooping: this.performers[event.data.handle].isLooping,
+          });
         } break;
         case 'performer-set-loop-begin-position': {
           if (event.data.handle in this.performers) {
@@ -166,7 +175,12 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'performer-set-looping': {
           if (event.data.handle in this.performers) {
-            this.performers[event.data.handle].looping = event.data.looping;
+            this.performers[event.data.handle].looping = event.data.isLooping;
+          }
+        } break;
+        case 'performer-set-position': {
+          if (event.data.handle in this.performers) {
+            this.performers[event.data.handle].position = event.data.position;
           }
         } break;
         case 'performer-start': {
@@ -174,6 +188,34 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'performer-stop': {
           this.performers[event.data.handle]?.stop();
+        } break;
+        case 'task-create': {
+          if (event.data.performerHandle in this.performers) {
+            const task = this.performers[event.data.performerHandle].createTask(
+                event.data.position, event.data.duration, event.data.callback);
+            const handle = task.getHandle();
+            this.tasks[handle] = task;
+            this.port.postMessage({type: 'task-create-success', handle});
+          }
+        } break;
+        case 'task-set-position': {
+          if (event.data.handle in this.tasks) {
+            this.tasks[event.data.handle].position = event.data.position;
+          }
+        } break;
+        case 'trigger-create': {
+          if (event.data.performerHandle in this.performers) {
+            const trigger = this.performers[event.data.performerHandle].createTrigger(
+                event.data.position, event.data.callback);
+            const handle = trigger.getHandle();
+            this.triggers[handle] = trigger;
+            this.port.postMessage({type: 'trigger-create-success', handle});
+          }
+        } break;
+        case 'trigger-set-position': {
+          if (event.data.handle in this.triggers) {
+            this.triggers[event.data.handle].position = event.data.position;
+          }
         } break;
         default:
           console.error('Unknown message!');

@@ -1,4 +1,5 @@
 import {Instrument} from './instrument.js';
+import {Performer} from './performer.js';
 
 export class Engine {
   constructor({container, audioContext}) {
@@ -15,27 +16,33 @@ export class Engine {
 
     this.instruments = {};
     this.performers = {};
-    // this.metronome = null;
+
+    // TODO(#164): Testonly fields for now, to be cleaned up later.
+    this.metronome = null;
+    this.position = 0.0;
 
     this._initAudioNode(audioContext);
   }
 
   _render() {
     this.container.innerHTML = `
-      <div>
-        <button id="playPauseBtn">Play</button>
-        <button id="stopBtn">Stop</button>
-        <label>Tempo: <input type="range" min="30" max="480" value="${
-        this.tempo}" step="1" id="tempoSlider"></label>
+    <div class="engine-controls">
+      <button id="playPauseBtn">Play</button>
+      <button id="stopBtn">Stop</button>
+      <div class="engine-tempo">
+        <label for="tempoSlider">Tempo</label>
+        <input type="range" min="30" max="480" value="${this.tempo}" step="1" id="tempoSlider">
         <span id="tempoValue">${this.tempo}</span>
       </div>
-      <div style="margin-top:1em;">
-        <button id="createInstrumentBtn">Create Instrument</button>
-        <button id="createPerformerBtn">Create Performer</button>
-        <button id="resetBtn">Reset</button>
-      </div>
-      <div id="engineStatus" style="margin-top:1em;font-size:0.9em;color:#666;"></div>
-      <p></p>
+    </div>
+    <div class="engine-actions">
+      <button id="createInstrumentBtn">Create Instrument</button>
+      <button id="createPerformerBtn">Create Performer</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+    <div id="engineStatus"></div>
+     <p></p>
+    <div class="instruments"></div>
     `;
   }
 
@@ -49,19 +56,35 @@ export class Engine {
       audioNode: this.audioNode,
       handle: handle,
       noteOnCallback: (pitch) => {
-        console.log('NoteOn: ' + pitch);
+        console.log(`[Instrument#${handle}] NoteOn(${pitch.toFixed(1)})`);
       },
       noteOffCallback: (pitch) => {
-        console.log('NoteOff: ' + pitch);
+        console.log(`[Instrument#${handle}] NoteOff(${pitch.toFixed(1)})`);
       },
     });
+  }
+
+  _createPerformer(handle) {
+    if (!this.metronome) {
+      this.metronome = new Performer({audioNode: this.audioNode, handle: handle});
+      // TODO(#164): Make this work.
+      // this.metronomeTask = this.metronome.createTrigger(0.0, () => {
+      //   console.log('TICK');
+      // });
+      return;
+    }
+    this.performers[handle] = new Performer({audioNode: this.audioNode, handle: handle});
   }
 
   _destroyInstrument(handle) {
     document.getElementById('instrument-' + handle).remove();
     this.audioNode.port.postMessage({type: 'instrument-destroy', handle: handle});
-
     delete this.instruments[handle];
+  }
+
+  _destroyPerformer(handle) {
+    this.audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
+    delete this.performers[handle];
   }
 
   _initAudioNode(audioContext) {
@@ -77,6 +100,9 @@ export class Engine {
           this._attachEvents();
           this._startUpdateLoop();
         } break;
+        case 'engine-get-timestamp-response': {
+          this.timestamp = event.data.timestamp;
+        } break;
         case 'instrument-create-success': {
           this._createInstrument(event.data.handle);
         } break;
@@ -90,6 +116,12 @@ export class Engine {
             this.instruments[event.data.handle].noteOffCallback(event.data.pitch);
           }
         } break;
+        case 'performer-create-success': {
+          this._createPerformer(event.data.handle);
+        } break;
+        case 'performer-get-position-response': {
+          this.position = event.data.position;
+        } break;
       }
     };
   }
@@ -100,18 +132,9 @@ export class Engine {
       this.audioNode.port.postMessage({type: 'instrument-create'});
     });
 
-    // this.container.querySelector('#deleteInstrumentBtn').addEventListener('click', () => {
-    //   const lastInstrumentIndex = Object.keys(this.instruments).length - 1;
-    //   this.audioNode.port.postMessage(
-    //       {type: 'instrument-destroy', handle: this.instruments[lastInstrumentIndex].handle});
-    //   this._destroyInstrumentContainer(lastInstrumentIndex);
-    // });
-
     // // Performers.
     // this.container.querySelector('#createPerformerBtn').addEventListener('click', () => {
-    //   const performer = this.engine.createPerformer();
-    //   this.performers.push(performer);
-    //   this._updateStatus();
+    //   this.audioNode.port.postMessage({type: 'performer-create'});
     // });
 
     // this.container.querySelector('#deletePerformerBtn').addEventListener('click', () => {
@@ -122,30 +145,31 @@ export class Engine {
     //   }
     // });
 
-    // // Transport controls.
-    // this.metronome = this.engine.createPerformer();
+    // Transport controls.
+    this.audioNode.port.postMessage({type: 'performer-create'});
 
-    // this.container.querySelector('#playPauseBtn').addEventListener('click', () => {
-    //   if (this.metronome.isPlaying) {
-    //     this.metronome.stop();
-    //     this.performers.forEach(performer => performer.stop());
-    //     this.container.querySelector('#playPauseBtn').textContent = 'Play';
-    //   } else {
-    //     this.metronome.start();
-    //     this.performers.forEach(performer => performer.start());
-    //     this.container.querySelector('#playPauseBtn').textContent = 'Pause';
-    //   }
-    // });
+    const playPauseButton = this.container.querySelector('#playPauseBtn');
+    playPauseButton.addEventListener('click', () => {
+      if (this.metronome.isPlaying) {
+        this.metronome.stop();
+        Object.values(this.performers).forEach(performer => performer.stop());
+        playPauseButton.textContent = ' Play ';
+      } else {
+        this.metronome.start();
+        Object.values(this.performers).forEach(performer => performer.start());
+        playPauseButton.textContent = 'Pause';
+      }
+    });
 
-    // this.container.querySelector('#stopBtn').addEventListener('click', () => {
-    //   this.metronome.stop();
-    //   this.metronome.position = 0.0;
-    //   this.performers.forEach(performer => {
-    //     performer.stop();
-    //     performer.position = 0.0;
-    //   });
-    //   this.container.querySelector('#playPauseBtn').textContent = 'Play';
-    // });
+    this.container.querySelector('#stopBtn').addEventListener('click', () => {
+      this.metronome.stop();
+      this.metronome.position = 0.0;
+      Object.values(this.performers).forEach(performer => {
+        performer.stop();
+        performer.position = 0.0;
+      });
+      this.container.querySelector('#playPauseBtn').textContent = 'Play';
+    });
 
     this.tempoSlider = this.container.querySelector('#tempoSlider');
     this.tempoValue = this.container.querySelector('#tempoValue');
@@ -156,7 +180,7 @@ export class Engine {
     });
 
     this.container.querySelector('#resetBtn').addEventListener('click', () => {
-      for (let handle in this.instruments) {
+      for (const handle in this.instruments) {
         this._destroyInstrument(handle);
       }
       this.instruments = {};
@@ -173,10 +197,15 @@ export class Engine {
   }
 
   _updateStatus() {
+    this.audioNode.port.postMessage({type: 'engine-get-timestamp'});
+    if (this.metronome) {
+      this.audioNode.port.postMessage(
+          {type: 'performer-get-position', handle: this.metronome.handle});
+    }
     const status = `
       Instruments: ${Object.keys(this.instruments).length} |
       Performers: ${Object.keys(this.performers).length} |
-      Timestamp: ${this.timestamp.toFixed(1)}
+      Position: ${this.position.toFixed(1)}
     `;
     this.container.querySelector('#engineStatus').textContent = status;
   }

@@ -107,20 +107,24 @@ export class Engine {
           this._createInstrument(event.data.handle);
         } break;
         case 'instrument-on-note-on': {
-          if (event.data.handle in this.instruments) {
-            this.instruments[event.data.handle].noteOnCallback(event.data.pitch);
-          }
+          this.instruments[event.data.handle]?.noteOnCallback(event.data.pitch);
         } break;
         case 'instrument-on-note-off': {
-          if (event.data.handle in this.instruments) {
-            this.instruments[event.data.handle].noteOffCallback(event.data.pitch);
-          }
+          this.instruments[event.data.handle]?.noteOffCallback(event.data.pitch);
         } break;
         case 'performer-create-success': {
           this._createPerformer(event.data.handle);
         } break;
         case 'performer-get-position-response': {
-          this.position = event.data.position;
+          if (this.performers[event.data.handle]) {
+            this.performers[event.data.handle].position = event.data.position;
+          }
+        } break;
+        case 'task-on-process': {
+          this.tasks[event.data.handle]?.processCallback(event.data.state);
+        } break;
+        case 'trigger-on-process': {
+          this.triggers[event.data.handle]?.processCallback();
         } break;
       }
     };

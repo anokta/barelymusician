@@ -37,7 +37,7 @@ export class Instrument {
   }
 
   _createControlContainer(controlTypeIndex, parentContainer) {
-    if (!(controlTypeIndex in CONTROLS)) return;
+    if (!CONTROLS[controlTypeIndex]) return;
     const control = CONTROLS[controlTypeIndex];
 
     // container

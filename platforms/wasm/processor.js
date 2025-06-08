@@ -73,20 +73,20 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'instrument-create': {
           const instrument = this.engine.createInstrument();
+          const handle = instrument.getHandle();
           instrument.setNoteOnCallback(
               (pitch) => this.port.postMessage({type: 'instrument-on-note-on', handle, pitch}));
           instrument.setNoteOffCallback(
               (pitch) => this.port.postMessage({type: 'instrument-on-note-off', handle, pitch}));
-
-          const handle = instrument.getHandle();
           this.instruments[handle] = instrument;
+
           this.port.postMessage({type: 'instrument-create-success', handle})
         } break;
         case 'instrument-destroy': {
           delete this.instruments[event.data.handle];
         } break;
         case 'instrument-get-control': {
-          if (event.data.handle in instruments) {
+          if (this.instruments[event.data.handle]) {
             this.port.postMessage({
               type: 'instrument-get-control-response',
               handle: event.data.handle,
@@ -95,7 +95,7 @@ class Processor extends AudioWorkletProcessor {
           }
         } break;
         case 'instrument-get-note-control': {
-          if (event.data.handle in instruments) {
+          if (this.instruments[event.data.handle]) {
             this.port.postMessage({
               type: 'instrument-get-note-control-response',
               handle: event.data.handle,
@@ -105,7 +105,7 @@ class Processor extends AudioWorkletProcessor {
           }
         } break;
         case 'instrument-is-note-on': {
-          if (event.data.handle in instruments) {
+          if (this.instruments[event.data.handle]) {
             this.port.postMessage({
               type: 'instrument-is-note-on-response',
               handle: event.data.handle,
@@ -164,22 +164,22 @@ class Processor extends AudioWorkletProcessor {
           });
         } break;
         case 'performer-set-loop-begin-position': {
-          if (event.data.handle in this.performers) {
+          if (this.performers[event.data.handle]) {
             this.performers[event.data.handle].loopBeginPosition = event.data.loopBeginPosition;
           }
         } break;
         case 'performer-set-loop-length': {
-          if (event.data.handle in this.performers) {
+          if (this.performers[event.data.handle]) {
             this.performers[event.data.handle].loopLength = event.data.loopLength;
           }
         } break;
         case 'performer-set-looping': {
-          if (event.data.handle in this.performers) {
+          if (this.performers[event.data.handle]) {
             this.performers[event.data.handle].looping = event.data.isLooping;
           }
         } break;
         case 'performer-set-position': {
-          if (event.data.handle in this.performers) {
+          if (this.performers[event.data.handle]) {
             this.performers[event.data.handle].position = event.data.position;
           }
         } break;
@@ -190,30 +190,36 @@ class Processor extends AudioWorkletProcessor {
           this.performers[event.data.handle]?.stop();
         } break;
         case 'task-create': {
-          if (event.data.performerHandle in this.performers) {
+          if (this.performers[event.data.performerHandle]) {
             const task = this.performers[event.data.performerHandle].createTask(
                 event.data.position, event.data.duration, event.data.callback);
             const handle = task.getHandle();
+            task.setProcessCallback(
+                (state) => this.port.postMessage({type: 'task-on-process', handle, state}));
             this.tasks[handle] = task;
+
             this.port.postMessage({type: 'task-create-success', handle});
           }
         } break;
         case 'task-set-position': {
-          if (event.data.handle in this.tasks) {
+          if (this.tasks[event.data.handle]) {
             this.tasks[event.data.handle].position = event.data.position;
           }
         } break;
         case 'trigger-create': {
-          if (event.data.performerHandle in this.performers) {
-            const trigger = this.performers[event.data.performerHandle].createTrigger(
-                event.data.position, event.data.callback);
+          if (this.performers[event.data.performerHandle]) {
+            const trigger =
+                this.performers[event.data.performerHandle].createTrigger(event.data.position);
             const handle = trigger.getHandle();
+            trigger.setProcessCallback(
+                () => this.port.postMessage({type: 'trigger-on-process', handle}));
             this.triggers[handle] = trigger;
+
             this.port.postMessage({type: 'trigger-create-success', handle});
           }
         } break;
         case 'trigger-set-position': {
-          if (event.data.handle in this.triggers) {
+          if (this.triggers[event.data.handle]) {
             this.triggers[event.data.handle].position = event.data.position;
           }
         } break;

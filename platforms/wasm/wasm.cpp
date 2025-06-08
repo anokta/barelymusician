@@ -17,7 +17,7 @@ using ::emscripten::optional_override;
 using ::emscripten::val;
 using ::emscripten::return_value_policy::take_ownership;
 
-static Instrument Engine_CreateInstrument(Engine& engine) noexcept {
+[[nodiscard]] static Instrument Engine_CreateInstrument(Engine& engine) noexcept {
   return engine.CreateInstrument({{
       {ControlType::kGain, 0.25f},
       {ControlType::kAttack, 0.05f},
@@ -26,8 +26,13 @@ static Instrument Engine_CreateInstrument(Engine& engine) noexcept {
   }});
 }
 
-static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {
+[[nodiscard]] static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {
   return reinterpret_cast<uintptr_t>(static_cast<BarelyInstrumentHandle>(instrument));
+}
+
+static void Instrument_Process(Instrument& instrument, uintptr_t samples, int sample_count,
+                               double timestamp) noexcept {
+  instrument.Process(std::span<float>(reinterpret_cast<float*>(samples), sample_count), timestamp);
 }
 
 static void Instrument_SetControl(Instrument& instrument, int type, float value) noexcept {
@@ -38,20 +43,25 @@ static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
   instrument.SetNoteOn(pitch);
 }
 
-static void Instrument_Process(Instrument& instrument, uintptr_t samples, int sample_count,
-                               double timestamp) noexcept {
-  instrument.Process(std::span<float>(reinterpret_cast<float*>(samples), sample_count), timestamp);
+[[nodiscard]] static Task Performer_CreateTask(Performer& performer, double position,
+                                               double duration) noexcept {
+  return performer.CreateTask(position, duration, /*callback=*/nullptr);
 }
 
-static uintptr_t Performer_GetHandle(Performer& performer) noexcept {
+[[nodiscard]] static Trigger Performer_CreateTrigger(Performer& performer,
+                                                     double position) noexcept {
+  return performer.CreateTrigger(position, /*callback=*/nullptr);
+}
+
+[[nodiscard]] static uintptr_t Performer_GetHandle(Performer& performer) noexcept {
   return reinterpret_cast<uintptr_t>(static_cast<BarelyPerformerHandle>(performer));
 }
 
-static uintptr_t Task_GetHandle(Task& task) noexcept {
+[[nodiscard]] static uintptr_t Task_GetHandle(Task& task) noexcept {
   return reinterpret_cast<uintptr_t>(static_cast<BarelyTaskHandle>(task));
 }
 
-static uintptr_t Trigger_GetHandle(Trigger& trigger) noexcept {
+[[nodiscard]] static uintptr_t Trigger_GetHandle(Trigger& trigger) noexcept {
   return reinterpret_cast<uintptr_t>(static_cast<BarelyTriggerHandle>(trigger));
 }
 
@@ -96,18 +106,8 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
   // TODO(#164): Add sample data support.
 
   class_<Performer>("Performer")
-      .function("createTask",
-                optional_override([](Performer& performer, double position, double duration,
-                                     val js_callback) {
-                  return performer.CreateTask(
-                      position, duration, [js_callback](TaskState state) { js_callback(state); });
-                }),
-                take_ownership())
-      .function("createTrigger",
-                optional_override([](Performer& performer, double position, val js_callback) {
-                  return performer.CreateTrigger(position, [js_callback]() { js_callback(); });
-                }),
-                take_ownership())
+      .function("createTask", &Performer_CreateTask, take_ownership())
+      .function("createTrigger", &Performer_CreateTrigger, take_ownership())
       .function("getHandle", &Performer_GetHandle, allow_raw_pointers())
       .function("start", &Performer::Start)
       .function("stop", &Performer::Stop)
@@ -120,20 +120,18 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
 
   class_<Task>("Task")
       .function("getHandle", &Task_GetHandle, allow_raw_pointers())
-      // TODO(#164): Remove these and store task callbacks by ids in js.
-      // .function(
-      //     "setProcessCallback", optional_override([](Task& task, val js_callback) {
-      //       return task.SetProcessCallback([js_callback](TaskState state) { js_callback(state);
-      //       });
-      //     }))
+      .function(
+          "setProcessCallback", optional_override([](Task& task, val js_callback) {
+            return task.SetProcessCallback([js_callback](TaskState state) { js_callback(state); });
+          }))
       .property("isActive", &Task::IsActive)
       .property("duration", &Task::GetDuration, &Task::SetDuration)
       .property("position", &Task::GetPosition, &Task::SetPosition);
 
   class_<Trigger>("Trigger")
       .function("getHandle", &Trigger_GetHandle, allow_raw_pointers())
-      // .function("setProcessCallback", optional_override([](Trigger& trigger, val js_callback) {
-      //             return trigger.SetProcessCallback([js_callback]() { js_callback(); });
-      //           }))
+      .function("setProcessCallback", optional_override([](Trigger& trigger, val js_callback) {
+                  return trigger.SetProcessCallback([js_callback]() { js_callback(); });
+                }))
       .property("position", &Trigger::GetPosition, &Trigger::SetPosition);
 }

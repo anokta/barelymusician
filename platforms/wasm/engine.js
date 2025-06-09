@@ -14,12 +14,12 @@ export class Engine {
     this.instrumentsContainer.className = 'instruments';
     this.container.appendChild(this.instrumentsContainer);
 
-    this.instruments = {};
-    this.performers = {};
+    this._instruments = {};
+    this._performers = {};
 
-    // TODO(#164): Testonly fields for now, to be cleaned up later.
-    this.metronome = null;
-    this.position = 0.0;
+    this._pendingPerformers = [];
+
+    this._metronome = null;
 
     this._initAudioNode(audioContext);
   }
@@ -51,9 +51,9 @@ export class Engine {
     instrumentContainer.id = 'instrument-' + handle;
     this.instrumentsContainer.appendChild(instrumentContainer);
 
-    this.instruments[handle] = new Instrument({
+    this._instruments[handle] = new Instrument({
       container: instrumentContainer,
-      audioNode: this.audioNode,
+      audioNode: this._audioNode,
       handle: handle,
       noteOnCallback: (pitch) => {
         console.log(`[Instrument#${handle}] NoteOn(${pitch.toFixed(1)})`);
@@ -64,33 +64,34 @@ export class Engine {
     });
   }
 
-  _createPerformer(handle) {
-    if (!this.metronome) {
-      this.metronome = new Performer({audioNode: this.audioNode, handle: handle});
-      // TODO(#164): Make this work.
-      // this.metronomeTask = this.metronome.createTrigger(0.0, () => {
-      //   console.log('TICK');
-      // });
-      return;
-    }
-    this.performers[handle] = new Performer({audioNode: this.audioNode, handle: handle});
+  createPerformer() {
+    let resolveHandle;
+    const handlePromise = new Promise(resolve => {
+      resolveHandle = resolve;
+    });
+    const performer = new Performer({audioNode: this._audioNode, handlePromise: handlePromise});
+
+    this._audioNode.port.postMessage({type: 'performer-create'});
+    this._pendingPerformers.push({performer, resolveHandle});
+
+    return performer;
   }
 
   _destroyInstrument(handle) {
     document.getElementById('instrument-' + handle).remove();
-    this.audioNode.port.postMessage({type: 'instrument-destroy', handle: handle});
-    delete this.instruments[handle];
+    this._audioNode.port.postMessage({type: 'instrument-destroy', handle: handle});
+    delete this._instruments[handle];
   }
 
   _destroyPerformer(handle) {
-    this.audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
-    delete this.performers[handle];
+    this._audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
+    delete this._performers[handle];
   }
 
   _initAudioNode(audioContext) {
-    this.audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor');
-    this.audioNode.connect(audioContext.destination);
-    this.audioNode.port.onmessage = (event) => {
+    this._audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor');
+    this._audioNode.connect(audioContext.destination);
+    this._audioNode.port.onmessage = (event) => {
       if (!event.data) {
         return;
       }
@@ -107,17 +108,23 @@ export class Engine {
           this._createInstrument(event.data.handle);
         } break;
         case 'instrument-on-note-on': {
-          this.instruments[event.data.handle]?.noteOnCallback(event.data.pitch);
+          this._instruments[event.data.handle]?.noteOnCallback(event.data.pitch);
         } break;
         case 'instrument-on-note-off': {
-          this.instruments[event.data.handle]?.noteOffCallback(event.data.pitch);
+          this._instruments[event.data.handle]?.noteOffCallback(event.data.pitch);
         } break;
         case 'performer-create-success': {
-          this._createPerformer(event.data.handle);
+          const {performer, resolveHandle} = this._pendingPerformers.shift();
+          resolveHandle(event.data.handle);
+          this._performers[event.data.handle] = performer;
         } break;
-        case 'performer-get-position-response': {
-          if (this.performers[event.data.handle]) {
-            this.performers[event.data.handle].position = event.data.position;
+        case 'performer-get-properties-response': {
+          const performer = this._performers[event.data.handle];
+          if (performer) {
+            performer.isLooping = event.data.isLooping;
+            performer.loopBeginPosition = event.data.loopBeginPosition;
+            performer.loopLength = event.data.loopLength;
+            performer.position = event.data.position;
           }
         } break;
         case 'task-on-process': {
@@ -133,42 +140,42 @@ export class Engine {
   _attachEvents() {
     // Instruments.
     this.container.querySelector('#createInstrumentBtn').addEventListener('click', () => {
-      this.audioNode.port.postMessage({type: 'instrument-create'});
+      this._audioNode.port.postMessage({type: 'instrument-create'});
     });
 
     // // Performers.
     // this.container.querySelector('#createPerformerBtn').addEventListener('click', () => {
-    //   this.audioNode.port.postMessage({type: 'performer-create'});
+    //   this._audioNode.port.postMessage({type: 'performer-create'});
     // });
 
     // this.container.querySelector('#deletePerformerBtn').addEventListener('click', () => {
-    //   if (this.performers.length > 0) {
-    //     const performer = this.performers.pop();
+    //   if (this._performers.length > 0) {
+    //     const performer = this._performers.pop();
     //     // TODO: Need to destroy explicitly?
     //     this._updateStatus();
     //   }
     // });
 
     // Transport controls.
-    this.audioNode.port.postMessage({type: 'performer-create'});
+    this._metronome = this.createPerformer();
 
     const playPauseButton = this.container.querySelector('#playPauseBtn');
     playPauseButton.addEventListener('click', () => {
-      if (this.metronome.isPlaying) {
-        this.metronome.stop();
-        Object.values(this.performers).forEach(performer => performer.stop());
+      if (this._metronome.isPlaying) {
+        this._metronome.stop();
+        Object.values(this._performers).forEach(performer => performer.stop());
         playPauseButton.textContent = ' Play ';
       } else {
-        this.metronome.start();
-        Object.values(this.performers).forEach(performer => performer.start());
+        this._metronome.start();
+        Object.values(this._performers).forEach(performer => performer.start());
         playPauseButton.textContent = 'Pause';
       }
     });
 
     this.container.querySelector('#stopBtn').addEventListener('click', () => {
-      this.metronome.stop();
-      this.metronome.position = 0.0;
-      Object.values(this.performers).forEach(performer => {
+      this._metronome.stop();
+      this._metronome.position = 0.0;
+      Object.values(this._performers).forEach(performer => {
         performer.stop();
         performer.position = 0.0;
       });
@@ -180,15 +187,15 @@ export class Engine {
     this.tempoSlider.addEventListener('input', () => {
       this.tempo = Number(this.tempoSlider.value);
       this.tempoValue.textContent = this.tempo;
-      this.audioNode.port.postMessage({type: 'engine-set-tempo', tempo: this.tempo});
+      this._audioNode.port.postMessage({type: 'engine-set-tempo', tempo: this.tempo});
     });
 
     this.container.querySelector('#resetBtn').addEventListener('click', () => {
-      for (const handle in this.instruments) {
+      for (const handle in this._instruments) {
         this._destroyInstrument(handle);
       }
-      this.instruments = {};
-      this.performers = {};
+      this._instruments = {};
+      this._performers = {};
     });
   }
 
@@ -201,15 +208,14 @@ export class Engine {
   }
 
   _updateStatus() {
-    this.audioNode.port.postMessage({type: 'engine-get-timestamp'});
-    if (this.metronome) {
-      this.audioNode.port.postMessage(
-          {type: 'performer-get-position', handle: this.metronome.handle});
+    this._audioNode.port.postMessage({type: 'engine-get-timestamp'});
+    for (const performerHandle in this._performers) {
+      this._audioNode.port.postMessage({type: 'performer-get-properties', handle: performerHandle});
     }
     const status = `
-      Instruments: ${Object.keys(this.instruments).length} |
-      Performers: ${Object.keys(this.performers).length} |
-      Position: ${this.position.toFixed(1)}
+      Instruments: ${Object.keys(this._instruments).length} |
+      Performers: ${Object.keys(this._performers).length} |
+      Position: ${this._metronome.position.toFixed(1)}
     `;
     this.container.querySelector('#engineStatus').textContent = status;
   }

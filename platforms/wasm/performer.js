@@ -1,3 +1,6 @@
+import {Task} from './task.js'
+import {Trigger} from './trigger.js'
+
 export class Performer {
   constructor({audioNode, handlePromise}) {
     this._audioNode = audioNode;
@@ -8,6 +11,11 @@ export class Performer {
     this._loopBeginPosition = 0.0;
     this._loopLength = 1.0;
     this._position = 0.0;
+
+    this._pendingTasks = [];
+    this._pendingTriggers = [];
+
+    this._audioNode.port.postMessage({type: 'performer-create'});
   }
 
   async _withHandle(fn) {
@@ -41,6 +49,7 @@ export class Performer {
   set isLooping(newIsLooping) {
     if (this._isLooping == newIsLooping) return;
 
+    // TODO(#164): Revisit how the properties are set when they are set (immediate vs deferred).
     this._isLooping = newIsLooping;
     this._withHandle((handle) => {
       this._audioNode.port.postMessage({
@@ -99,30 +108,54 @@ export class Performer {
     });
   }
 
-  // createTask(position, duration, callback) {
-  //   if (!this.handle) return;
+  createTask(position, duration, callback) {
+    this._withHandle((handle) => {
+      let resolveHandle;
+      const handlePromise = new Promise(resolve => {
+        resolveHandle = resolve;
+      });
+      const task = new Task({
+        audioNode: this._audioNode,
+        handlePromise: handlePromise,
+        performerHandle: handle,
+        position,
+        duration,
+        callback,
+      });
 
-  //   // TODO(#164): need to respond to in `task-create-success`.
-  //   this._audioNode.port.postMessage({
-  //     type: 'task-create',
-  //     performerHandle: this.handle,
-  //     position: position,
-  //     duration: duration,
-  //     callback: callback,
-  //   });
-  // }
+      this._pendingTasks.push({task, resolveHandle});
+    });
+  }
 
-  // createTrigger(position, callback) {
-  //   if (!this.handle) return;
+  createTrigger(position, callback) {
+    this._withHandle((handle) => {
+      let resolveHandle;
+      const handlePromise = new Promise(resolve => {
+        resolveHandle = resolve;
+      });
+      const trigger = new Trigger({
+        audioNode: this._audioNode,
+        handlePromise: handlePromise,
+        performerHandle: handle,
+        position,
+        callback,
+      });
 
-  //   // TODO(#164): need to respond to in `trigger-create-success`.
-  //   this._audioNode.port.postMessage({
-  //     type: 'trigger-create',
-  //     performerHandle: this.handle,
-  //     position: position,
-  //     callback: callback,
-  //   });
-  // }
+      this._pendingTriggers.push({trigger, resolveHandle});
+    });
+  }
+
+  onTaskCreateSuccess(handle) {
+    const {task, resolveHandle} = this._pendingTasks.shift();
+    resolveHandle(handle);
+    return task;
+  }
+
+  onTriggerCreateSuccess(handle) {
+    const {trigger, resolveHandle} = this._pendingTriggers.shift();
+    resolveHandle(handle);
+    return trigger;
+  }
 
   start() {
     if (this._isPlaying) return;

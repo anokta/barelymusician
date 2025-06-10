@@ -164,7 +164,7 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'performer-set-looping': {
           if (this._performers[event.data.handle]) {
-            this._performers[event.data.handle].looping = event.data.isLooping;
+            this._performers[event.data.handle].isLooping = event.data.isLooping;
           }
         } break;
         case 'performer-set-position': {
@@ -181,13 +181,35 @@ class Processor extends AudioWorkletProcessor {
         case 'task-create': {
           if (this._performers[event.data.performerHandle]) {
             const task = this._performers[event.data.performerHandle].createTask(
-                event.data.position, event.data.duration, event.data.callback);
+                event.data.position, event.data.duration);
             const handle = task.getHandle();
             task.setProcessCallback(
-                (state) => this.port.postMessage({type: 'task-on-process', handle, state}));
+                (state) => this.port.postMessage(
+                    {type: 'task-on-process', handle, position: task.position, state}));
             this._tasks[handle] = task;
 
-            this.port.postMessage({type: 'task-create-success', handle});
+            this.port.postMessage({
+              type: 'task-create-success',
+              performerHandle: event.data.performerHandle,
+              handle,
+            });
+          }
+        } break;
+        case 'task-get-properties': {
+          const task = this._tasks[event.data.handle];
+          if (task) {
+            this.port.postMessage({
+              type: 'task-get-properties-response',
+              handle: event.data.handle,
+              duration: task.duration,
+              isActive: task.isActive,
+              position: task.position,
+            });
+          }
+        } break;
+        case 'task-set-duration': {
+          if (this._tasks[event.data.handle]) {
+            this._tasks[event.data.handle].duration = event.data.duration;
           }
         } break;
         case 'task-set-position': {
@@ -201,10 +223,24 @@ class Processor extends AudioWorkletProcessor {
                 this._performers[event.data.performerHandle].createTrigger(event.data.position);
             const handle = trigger.getHandle();
             trigger.setProcessCallback(
-                () => this.port.postMessage({type: 'trigger-on-process', handle}));
+                () => this.port.postMessage(
+                    {type: 'trigger-on-process', handle, position: trigger.position}));
             this._triggers[handle] = trigger;
 
-            this.port.postMessage({type: 'trigger-create-success', handle});
+            this.port.postMessage({
+              type: 'trigger-create-success',
+              performerHandle: event.data.performerHandle,
+              handle,
+            });
+          }
+        } break;
+        case 'trigger-get-properties': {
+          if (this._triggers[event.data.handle]) {
+            this.port.postMessage({
+              type: 'trigger-get-properties-response',
+              handle: event.data.handle,
+              position: this._triggers[event.data.handle].position,
+            });
           }
         } break;
         case 'trigger-set-position': {

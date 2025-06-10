@@ -111,12 +111,12 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("getHandle", &Performer_GetHandle, allow_raw_pointers())
       .function("start", &Performer::Start)
       .function("stop", &Performer::Stop)
+      .property("isLooping", &Performer::IsLooping, &Performer::SetLooping)
+      .property("isPlaying", &Performer::IsPlaying)
       .property("loopBeginPosition", &Performer::GetLoopBeginPosition,
                 &Performer::SetLoopBeginPosition)
       .property("loopLength", &Performer::GetLoopLength, &Performer::SetLoopLength)
-      .property("position", &Performer::GetPosition, &Performer::SetPosition)
-      .property("looping", &Performer::IsLooping, &Performer::SetLooping)
-      .property("isPlaying", &Performer::IsPlaying);
+      .property("position", &Performer::GetPosition, &Performer::SetPosition);
 
   class_<Task>("Task")
       .function("getHandle", &Task_GetHandle, allow_raw_pointers())

@@ -16,10 +16,13 @@ export class Engine {
 
     this._instruments = {};
     this._performers = {};
+    this._tasks = {};
+    this._triggers = {};
 
     this._pendingPerformers = [];
 
     this._metronome = null;
+    this._beat = 0;
 
     this._initAudioNode(audioContext);
   }
@@ -71,7 +74,6 @@ export class Engine {
     });
     const performer = new Performer({audioNode: this._audioNode, handlePromise: handlePromise});
 
-    this._audioNode.port.postMessage({type: 'performer-create'});
     this._pendingPerformers.push({performer, resolveHandle});
 
     return performer;
@@ -92,9 +94,7 @@ export class Engine {
     this._audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor');
     this._audioNode.connect(audioContext.destination);
     this._audioNode.port.onmessage = (event) => {
-      if (!event.data) {
-        return;
-      }
+      if (!event.data) return;
 
       switch (event.data.type) {
         case 'init-success': {
@@ -127,11 +127,36 @@ export class Engine {
             performer.position = event.data.position;
           }
         } break;
+        case 'task-create-success': {
+          const performer = this._performers[event.data.performerHandle];
+          if (performer) {
+            this._tasks[event.data.handle] = performer.onTaskCreateSuccess(event.data.handle);
+          }
+        } break;
+        case 'task-get-properties-response': {
+          const task = this._tasks[event.data.handle];
+          if (task) {
+            task.duration = event.data.duration;
+            task.position = event.data.position;
+          }
+        } break;
         case 'task-on-process': {
-          this.tasks[event.data.handle]?.processCallback(event.data.state);
+          this._tasks[event.data.handle]?.onProcess(event.data.position, event.data.state);
+        } break;
+        case 'trigger-create-success': {
+          const performer = this._performers[event.data.performerHandle];
+          if (performer) {
+            this._triggers[event.data.handle] = performer.onTriggerCreateSuccess(event.data.handle);
+          }
+        } break;
+        case 'trigger-get-properties-response': {
+          const trigger = this._triggers[event.data.handle];
+          if (trigger) {
+            trigger.position = event.data.position;
+          }
         } break;
         case 'trigger-on-process': {
-          this.triggers[event.data.handle]?.processCallback();
+          this._triggers[event.data.handle]?.onProcess(event.data.position);
         } break;
       }
     };
@@ -158,6 +183,11 @@ export class Engine {
 
     // Transport controls.
     this._metronome = this.createPerformer();
+    this._metronome.isLooping = true;
+    this._metronome.createTrigger(0.0, () => {
+      console.log('Tick: ' + this._beat);
+      ++this._beat;
+    });
 
     const playPauseButton = this.container.querySelector('#playPauseBtn');
     playPauseButton.addEventListener('click', () => {
@@ -175,6 +205,7 @@ export class Engine {
     this.container.querySelector('#stopBtn').addEventListener('click', () => {
       this._metronome.stop();
       this._metronome.position = 0.0;
+      this._beat = 0;
       Object.values(this._performers).forEach(performer => {
         performer.stop();
         performer.position = 0.0;
@@ -195,7 +226,9 @@ export class Engine {
         this._destroyInstrument(handle);
       }
       this._instruments = {};
-      this._performers = {};
+      // this._performers = {};
+      // this._tasks = {};
+      // this._triggers = {};
     });
   }
 
@@ -212,10 +245,16 @@ export class Engine {
     for (const performerHandle in this._performers) {
       this._audioNode.port.postMessage({type: 'performer-get-properties', handle: performerHandle});
     }
+    for (const taskHandle in this._tasks) {
+      this._audioNode.port.postMessage({type: 'task-get-properties', handle: taskHandle});
+    }
+    for (const triggerHandle in this._triggers) {
+      this._audioNode.port.postMessage({type: 'trigger-get-properties', handle: triggerHandle});
+    }
     const status = `
       Instruments: ${Object.keys(this._instruments).length} |
       Performers: ${Object.keys(this._performers).length} |
-      Position: ${this._metronome.position.toFixed(1)}
+      Position: ${(this._beat + this._metronome.position).toFixed(1)}
     `;
     this.container.querySelector('#engineStatus').textContent = status;
   }

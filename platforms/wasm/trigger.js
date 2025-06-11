@@ -1,13 +1,13 @@
 
 export class Trigger {
-  constructor({audioNode, handlePromise, performerHandle, position, callback}) {
+  constructor({audioNode, handlePromise, performerHandle, position, processCallback}) {
     this._audioNode = audioNode;
     this._handlePromise = handlePromise;
 
     this._isActive = false;
     this._position = position;
 
-    this.callback = callback;
+    this.processCallback = processCallback;
 
     this._audioNode.port.postMessage({type: 'trigger-create', performerHandle, position});
   }
@@ -35,10 +35,5 @@ export class Trigger {
         position: newPosition,
       });
     });
-  }
-
-  onProcess(position) {
-    this._position = position;
-    this.callback();
   }
 }

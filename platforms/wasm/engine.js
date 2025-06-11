@@ -19,6 +19,7 @@ export class Engine {
     this._tasks = {};
     this._triggers = {};
 
+    this._pendingInstruments = [];
     this._pendingPerformers = [];
 
     this._metronome = null;
@@ -45,26 +46,32 @@ export class Engine {
     </div>
     <div id="engineStatus"></div>
      <p></p>
-    <div class="instruments"></div>
     `;
   }
 
-  _createInstrument(handle) {
+  createInstrument() {
     const instrumentContainer = document.createElement('div');
-    instrumentContainer.id = 'instrument-' + handle;
+    instrumentContainer.className = 'instrument';
     this.instrumentsContainer.appendChild(instrumentContainer);
 
-    this._instruments[handle] = new Instrument({
+    let resolveHandle;
+    const handlePromise = new Promise(resolve => {
+      resolveHandle = resolve;
+    });
+
+    const instrument = new Instrument({
       container: instrumentContainer,
       audioNode: this._audioNode,
-      handle: handle,
+      handlePromise: handlePromise,
       noteOnCallback: (pitch) => {
-        console.log(`[Instrument#${handle}] NoteOn(${pitch.toFixed(1)})`);
+        console.log(`[${instrumentContainer.id}] NoteOn(${pitch.toFixed(1)})`);
       },
       noteOffCallback: (pitch) => {
-        console.log(`[Instrument#${handle}] NoteOff(${pitch.toFixed(1)})`);
+        console.log(`[${instrumentContainer.id}] NoteOff(${pitch.toFixed(1)})`);
       },
     });
+
+    this._pendingInstruments.push({instrument, resolveHandle});
   }
 
   createPerformer() {
@@ -77,12 +84,6 @@ export class Engine {
     this._pendingPerformers.push({performer, resolveHandle});
 
     return performer;
-  }
-
-  _destroyInstrument(handle) {
-    document.getElementById('instrument-' + handle).remove();
-    this._audioNode.port.postMessage({type: 'instrument-destroy', handle: handle});
-    delete this._instruments[handle];
   }
 
   _destroyPerformer(handle) {
@@ -105,7 +106,12 @@ export class Engine {
           this.timestamp = event.data.timestamp;
         } break;
         case 'instrument-create-success': {
-          this._createInstrument(event.data.handle);
+          const {instrument, resolveHandle} = this._pendingInstruments.shift();
+          resolveHandle(event.data.handle);
+          this._instruments[event.data.handle] = instrument;
+        } break;
+        case 'instrument-destroy-success': {
+          delete this._instruments[event.data.handle];
         } break;
         case 'instrument-on-note-on': {
           this._instruments[event.data.handle]?.noteOnCallback(event.data.pitch);
@@ -141,7 +147,7 @@ export class Engine {
           }
         } break;
         case 'task-on-process': {
-          this._tasks[event.data.handle]?.onProcess(event.data.position, event.data.state);
+          this._tasks[event.data.handle]?.processCallback(event.data.state);
         } break;
         case 'trigger-create-success': {
           const performer = this._performers[event.data.performerHandle];
@@ -156,7 +162,7 @@ export class Engine {
           }
         } break;
         case 'trigger-on-process': {
-          this._triggers[event.data.handle]?.onProcess(event.data.position);
+          this._triggers[event.data.handle]?.processCallback();
         } break;
       }
     };
@@ -165,7 +171,7 @@ export class Engine {
   _attachEvents() {
     // Instruments.
     this.container.querySelector('#createInstrumentBtn').addEventListener('click', () => {
-      this._audioNode.port.postMessage({type: 'instrument-create'});
+      this.createInstrument();
     });
 
     // // Performers.
@@ -223,7 +229,7 @@ export class Engine {
 
     this.container.querySelector('#resetBtn').addEventListener('click', () => {
       for (const handle in this._instruments) {
-        this._destroyInstrument(handle);
+        this._instruments[handle].destroy();
       }
       this._instruments = {};
       // this._performers = {};

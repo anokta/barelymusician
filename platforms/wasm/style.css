@@ -1,3 +1,7 @@
+body {
+  font-family: monospace;
+}
+
 #engine-ui input[type="range"] {
   vertical-align: middle;
 }
@@ -6,12 +10,34 @@
   margin-right: 0.5em;
 }
 
-#engine-ui {
-  font-family: sans-serif;
+.instrument {
+  width: 336px;
+  border: 0.5em solid #dadadb;
+  padding: 1em;
+  margin-bottom: 0.25em;
+  border-radius: 10px 10px 10px 10px;
+}
+
+.instrument #name {
+  display: block;
+  font-size: 1.0rem;
+  text-align: center;
+  font-weight: bold;
+  color: #323232;
+  margin: 0.5em 0;
+  margin-top: -0.5em;
 }
 
 #piano {
   position: relative;
+  margin: 1em 0;
+  user-select: none;
+}
+
+#keys {
+  position: relative;
+  display: block;
+  height: 120px;
 }
 
 .white.key {
@@ -75,13 +101,34 @@
 
 .control-container span {
   grid-column: 3 / 4;
-  font-family: monospace;
   font-size: 0.75rem;
   color: #888;
   text-align: left;
   width: 3em;
   display: inline-block;
   white-space: nowrap;
+}
+
+#deleteBtn {
+  margin-top: 1em;
+  margin-left: auto;
+  align-items: center;
+  position: relative;
+  width: 336px;
+}
+
+#deleteBtn:hover {
+  background: #ff5555;
+}
+
+#deleteBtn i {
+  color: #c00;
+  font-size: 24px;
+  pointer-events: none;
+}
+
+#deleteBtn:hover i {
+  color: #fff;
 }
 
 .engine-controls {
@@ -102,7 +149,6 @@
 
 #engineStatus {
   margin-top: 1em;
-  font-family: monospace;
   font-size: 0.9em;
   color: #666;
 }

@@ -108,7 +108,7 @@ export class Performer {
     });
   }
 
-  createTask(position, duration, callback) {
+  createTask(position, duration, processCallback) {
     this._withHandle((handle) => {
       let resolveHandle;
       const handlePromise = new Promise(resolve => {
@@ -120,14 +120,14 @@ export class Performer {
         performerHandle: handle,
         position,
         duration,
-        callback,
+        processCallback,
       });
 
       this._pendingTasks.push({task, resolveHandle});
     });
   }
 
-  createTrigger(position, callback) {
+  createTrigger(position, processCallback) {
     this._withHandle((handle) => {
       let resolveHandle;
       const handlePromise = new Promise(resolve => {
@@ -138,7 +138,7 @@ export class Performer {
         handlePromise: handlePromise,
         performerHandle: handle,
         position,
-        callback,
+        processCallback,
       });
 
       this._pendingTriggers.push({trigger, resolveHandle});

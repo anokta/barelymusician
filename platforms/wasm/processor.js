@@ -83,7 +83,10 @@ class Processor extends AudioWorkletProcessor {
           this.port.postMessage({type: 'instrument-create-success', handle})
         } break;
         case 'instrument-destroy': {
-          delete this._instruments[event.data.handle];
+          if (this._instruments[event.data.handle]) {
+            delete this._instruments[event.data.handle];
+            this.port.postMessage({type: 'instrument-destroy-success', handle: event.data.handle});
+          }
         } break;
         case 'instrument-get-control': {
           if (this._instruments[event.data.handle]) {

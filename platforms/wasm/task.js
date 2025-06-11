@@ -6,7 +6,7 @@ export const TaskState = {
 };
 
 export class Task {
-  constructor({audioNode, handlePromise, performerHandle, position, duration, callback}) {
+  constructor({audioNode, handlePromise, performerHandle, position, duration, processCallback}) {
     this._audioNode = audioNode;
     this._handlePromise = handlePromise;
 
@@ -14,7 +14,7 @@ export class Task {
     this._duration = duration;
     this._isActive = false;
 
-    this.callback = callback;
+    this.processCallback = processCallback;
 
     this._audioNode.port.postMessage({type: 'task-create', performerHandle, position, duration});
   }
@@ -66,10 +66,5 @@ export class Task {
         position: newPosition,
       });
     });
-  }
-
-  onProcess(position, state) {
-    this._position = position;
-    this.callback(state);
   }
 }

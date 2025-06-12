@@ -167,7 +167,9 @@ export class Instrument {
     this._withHandle((handle) => {
       this._audioNode.port.postMessage({type: 'instrument-destroy', handle: handle});
     });
-    this._container.remove();
+    if (this._container) {
+      this._container.remove();
+    }
   }
 
   setControl(typeIndex, value) {

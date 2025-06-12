@@ -5,7 +5,10 @@ const onLoad = async () => {
   await audioContext.audioWorklet.addModule('processor.js');
   document.body.addEventListener('click', () => audioContext.resume());
 
-  new Engine({container: document.getElementById('engine-ui'), audioContext: audioContext});
+  new Engine({
+    container: document.querySelector('.engine'),
+    audioContext: audioContext,
+  });
 };
 
 window.addEventListener('load', onLoad);

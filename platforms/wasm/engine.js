@@ -10,9 +10,6 @@ export class Engine {
     this.timestamp = 0.0;
 
     this._render();
-    this.instrumentsContainer = document.createElement('div');
-    this.instrumentsContainer.className = 'instruments';
-    this.container.appendChild(this.instrumentsContainer);
 
     this._instruments = {};
     this._performers = {};
@@ -45,15 +42,15 @@ export class Engine {
       <button id="resetBtn">Reset</button>
     </div>
     <div id="engineStatus"></div>
+    <div class="engine-components">
+      <div class="instruments"></div>
+      <div class="performers"></div>
+    </div>
      <p></p>
     `;
   }
 
-  createInstrument() {
-    const instrumentContainer = document.createElement('div');
-    instrumentContainer.className = 'instrument';
-    this.instrumentsContainer.appendChild(instrumentContainer);
-
+  createInstrument(instrumentContainer) {
     let resolveHandle;
     const handlePromise = new Promise(resolve => {
       resolveHandle = resolve;
@@ -74,21 +71,20 @@ export class Engine {
     this._pendingInstruments.push({instrument, resolveHandle});
   }
 
-  createPerformer() {
+  createPerformer(performerContainer) {
     let resolveHandle;
     const handlePromise = new Promise(resolve => {
       resolveHandle = resolve;
     });
-    const performer = new Performer({audioNode: this._audioNode, handlePromise: handlePromise});
+    const performer = new Performer({
+      container: performerContainer,
+      audioNode: this._audioNode,
+      handlePromise: handlePromise,
+    });
 
     this._pendingPerformers.push({performer, resolveHandle});
 
     return performer;
-  }
-
-  _destroyPerformer(handle) {
-    this._audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
-    delete this._performers[handle];
   }
 
   _initAudioNode(audioContext) {
@@ -168,32 +164,36 @@ export class Engine {
     };
   }
 
-  _attachEvents() {
-    // Instruments.
-    this.container.querySelector('#createInstrumentBtn').addEventListener('click', () => {
-      this.createInstrument();
-    });
-
-    // // Performers.
-    // this.container.querySelector('#createPerformerBtn').addEventListener('click', () => {
-    //   this._audioNode.port.postMessage({type: 'performer-create'});
-    // });
-
-    // this.container.querySelector('#deletePerformerBtn').addEventListener('click', () => {
-    //   if (this._performers.length > 0) {
-    //     const performer = this._performers.pop();
-    //     // TODO: Need to destroy explicitly?
-    //     this._updateStatus();
-    //   }
-    // });
-
-    // Transport controls.
+  _createMetronome() {
     this._metronome = this.createPerformer();
     this._metronome.isLooping = true;
     this._metronome.createTrigger(0.0, () => {
       console.log('Tick: ' + this._beat);
       ++this._beat;
     });
+  }
+
+  _attachEvents() {
+    // Instruments.
+    const instrumentsContainer = this.container.querySelector('.instruments');
+    this.container.querySelector('#createInstrumentBtn').addEventListener('click', () => {
+      const instrumentContainer = document.createElement('div');
+      instrumentContainer.className = 'instrument';
+      instrumentsContainer.appendChild(instrumentContainer);
+      this.createInstrument(instrumentContainer);
+    });
+
+    // Performers.
+    const performersContainer = this.container.querySelector('.performers');
+    this.container.querySelector('#createPerformerBtn').addEventListener('click', () => {
+      const performerContainer = document.createElement('div');
+      performerContainer.className = 'performer';
+      performersContainer.appendChild(performerContainer);
+      this.createPerformer(performerContainer);
+    });
+
+    // Transport controls.
+    this._createMetronome();
 
     const playPauseButton = this.container.querySelector('#playPauseBtn');
     playPauseButton.addEventListener('click', () => {
@@ -208,7 +208,8 @@ export class Engine {
       }
     });
 
-    this.container.querySelector('#stopBtn').addEventListener('click', () => {
+    const stopButton = this.container.querySelector('#stopBtn');
+    stopButton.addEventListener('click', () => {
       this._metronome.stop();
       this._metronome.position = 0.0;
       this._beat = 0;
@@ -216,7 +217,7 @@ export class Engine {
         performer.stop();
         performer.position = 0.0;
       });
-      this.container.querySelector('#playPauseBtn').textContent = 'Play';
+      playPauseButton.textContent = 'Play';
     });
 
     this.tempoSlider = this.container.querySelector('#tempoSlider');
@@ -227,14 +228,20 @@ export class Engine {
       this._audioNode.port.postMessage({type: 'engine-set-tempo', tempo: this.tempo});
     });
 
+    // reset
     this.container.querySelector('#resetBtn').addEventListener('click', () => {
+      stopButton.click();
       for (const handle in this._instruments) {
         this._instruments[handle].destroy();
       }
+      for (const handle in this._performers) {
+        this._performers[handle].destroy();
+      }
       this._instruments = {};
-      // this._performers = {};
-      // this._tasks = {};
-      // this._triggers = {};
+      this._performers = {};
+      this._tasks = {};
+      this._triggers = {};
+      this._createMetronome();
     });
   }
 
@@ -259,7 +266,7 @@ export class Engine {
     }
     const status = `
       Instruments: ${Object.keys(this._instruments).length} |
-      Performers: ${Object.keys(this._performers).length} |
+      Performers: ${Math.max(Object.keys(this._performers).length - 1, 0)} |
       Position: ${(this._beat + this._metronome.position).toFixed(1)}
     `;
     this.container.querySelector('#engineStatus').textContent = status;

@@ -2,7 +2,8 @@ import {Task} from './task.js'
 import {Trigger} from './trigger.js'
 
 export class Performer {
-  constructor({audioNode, handlePromise}) {
+  constructor({container, audioNode, handlePromise}) {
+    this._container = container;
     this._audioNode = audioNode;
     this._handlePromise = handlePromise;
 
@@ -15,12 +16,37 @@ export class Performer {
     this._pendingTasks = [];
     this._pendingTriggers = [];
 
+    if (this._container) {
+      this._initContainer();
+    }
+
     this._audioNode.port.postMessage({type: 'performer-create'});
   }
 
   async _withHandle(fn) {
     const handle = await this._handlePromise;
     return fn(handle);
+  }
+
+  _initContainer() {
+    this._container.innerHTML = `
+      <label id="name"></label>
+      <button id="deleteBtn" title="Delete Instrument">
+        <i class="material-icons">delete</i>
+      </button>
+    `;
+
+    // delete
+    this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
+
+    // id
+    this._withHandle((handle) => {
+      this._container.id = `performer#${handle}`;
+
+      // label
+      const label = this._container.querySelector('label');
+      label.textContent = this._container.id;
+    });
   }
 
   get isLooping() {
@@ -143,6 +169,15 @@ export class Performer {
 
       this._pendingTriggers.push({trigger, resolveHandle});
     });
+  }
+
+  destroy() {
+    this._withHandle((handle) => {
+      this._audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
+    });
+    if (this._container) {
+      this._container.remove();
+    }
   }
 
   onTaskCreateSuccess(handle) {

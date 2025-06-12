@@ -2,12 +2,19 @@ body {
   font-family: monospace;
 }
 
-#engine-ui input[type="range"] {
+.engine input[type="range"] {
   vertical-align: middle;
 }
 
-#engine-ui button {
+.engine button {
   margin-right: 0.5em;
+}
+
+.engine-components {
+  display: flex;
+  padding: 1em;
+  gap: 2em;
+  align-items: flex-start;
 }
 
 .instrument {
@@ -18,7 +25,7 @@ body {
   border-radius: 10px 10px 10px 10px;
 }
 
-.instrument #name {
+#name {
   display: block;
   font-size: 1.0rem;
   text-align: center;
@@ -26,6 +33,14 @@ body {
   color: #323232;
   margin: 0.5em 0;
   margin-top: -0.5em;
+}
+
+.performer {
+  width: 480px;
+  border: 0.5em solid #dadadb;
+  padding: 1em;
+  margin-bottom: 0.25em;
+  border-radius: 10px 10px 10px 10px;
 }
 
 #piano {
@@ -111,10 +126,8 @@ body {
 
 #deleteBtn {
   margin-top: 1em;
-  margin-left: auto;
   align-items: center;
-  position: relative;
-  width: 336px;
+  width: 100%;
 }
 
 #deleteBtn:hover {

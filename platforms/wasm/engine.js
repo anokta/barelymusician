@@ -27,6 +27,12 @@ export class Engine {
 
   _render() {
     this.container.innerHTML = `
+    </div>
+    <div class="engine-actions">
+      <button id="createInstrumentBtn">Create Instrument</button>
+      <button id="createPerformerBtn">Create Performer</button>
+      <button id="resetBtn">Reset</button>
+    </div>
     <div class="engine-controls">
       <button id="playPauseBtn">Play</button>
       <button id="stopBtn">Stop</button>
@@ -35,13 +41,7 @@ export class Engine {
         <input type="range" min="30" max="480" value="${this.tempo}" step="1" id="tempoSlider">
         <span id="tempoValue">${this.tempo}</span>
       </div>
-    </div>
-    <div class="engine-actions">
-      <button id="createInstrumentBtn">Create Instrument</button>
-      <button id="createPerformerBtn">Create Performer</button>
-      <button id="resetBtn">Reset</button>
-    </div>
-    <div id="engineStatus"></div>
+    <div class="engine-status"></div>
     <div class="engine-components">
       <div class="instruments"></div>
       <div class="performers"></div>
@@ -80,6 +80,7 @@ export class Engine {
       container: performerContainer,
       audioNode: this._audioNode,
       handlePromise: handlePromise,
+      instruments: this._instruments,
     });
 
     this._pendingPerformers.push({performer, resolveHandle});
@@ -105,9 +106,15 @@ export class Engine {
           const {instrument, resolveHandle} = this._pendingInstruments.shift();
           resolveHandle(event.data.handle);
           this._instruments[event.data.handle] = instrument;
+          for (const handle in this._performers) {
+            this._performers[handle].updateInstrumentSelect(this._instruments);
+          }
         } break;
         case 'instrument-destroy-success': {
           delete this._instruments[event.data.handle];
+          for (const handle in this._performers) {
+            this._performers[handle].updateInstrumentSelect(this._instruments);
+          }
         } break;
         case 'instrument-on-note-on': {
           this._instruments[event.data.handle]?.noteOnCallback(event.data.pitch);
@@ -269,6 +276,6 @@ export class Engine {
       Performers: ${Math.max(Object.keys(this._performers).length - 1, 0)} |
       Position: ${(this._beat + this._metronome.position).toFixed(1)}
     `;
-    this.container.querySelector('#engineStatus').textContent = status;
+    this.container.querySelector('.engine-status').textContent = status;
   }
 }

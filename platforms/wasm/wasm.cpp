@@ -120,10 +120,10 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
 
   class_<Task>("Task")
       .function("getHandle", &Task_GetHandle, allow_raw_pointers())
-      .function(
-          "setProcessCallback", optional_override([](Task& task, val js_callback) {
-            return task.SetProcessCallback([js_callback](TaskState state) { js_callback(state); });
-          }))
+      .function("setProcessCallback", optional_override([](Task& task, val js_callback) {
+                  return task.SetProcessCallback(
+                      [js_callback](TaskState state) { js_callback(static_cast<int>(state)); });
+                }))
       .property("isActive", &Task::IsActive)
       .property("duration", &Task::GetDuration, &Task::SetDuration)
       .property("position", &Task::GetPosition, &Task::SetPosition);

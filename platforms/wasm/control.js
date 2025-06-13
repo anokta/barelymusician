@@ -64,8 +64,8 @@ export const CONTROLS = {
     name: 'Pitch Shift',
     valueType: 'float',
     defaultValue: 0.0,
-    minValue: -4.0,
-    maxValue: 4.0,
+    minValue: -2.0,
+    maxValue: 2.0,
   },
   // [ControlType.RETRIGGER]: {
   //   name: 'Retrigger',
@@ -86,14 +86,14 @@ export const CONTROLS = {
     valueType: 'float',
     defaultValue: 0.05,
     minValue: 0.0,
-    maxValue: 5.0,
+    maxValue: 10.0,
   },
   [ControlType.DECAY]: {
     name: 'Decay (sec)',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 5.0,
+    maxValue: 10.0,
   },
   [ControlType.SUSTAIN]: {
     name: 'Sustain',
@@ -107,7 +107,7 @@ export const CONTROLS = {
     valueType: 'float',
     defaultValue: 0.1,
     minValue: 0.0,
-    maxValue: 5.0,
+    maxValue: 10.0,
   },
   // [ControlType.OSC_MIX]: {
   //   name: 'Osc Mix',

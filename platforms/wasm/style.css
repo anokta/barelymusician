@@ -1,5 +1,12 @@
 body {
   font-family: monospace;
+  font-size: 1.0rem;
+  text-align: center;
+}
+
+button {
+  text-align: center;
+  font-size: 1.0rem;
 }
 
 .engine input[type="range"] {
@@ -11,28 +18,36 @@ body {
 }
 
 .engine-components {
+  align-items: flex-start;
   display: flex;
   padding: 1em;
   gap: 2em;
-  align-items: flex-start;
+}
+
+.engine-controls {
+  align-items: center;
+  padding: 1.5em;
+}
+
+.engine-tempo {
+  padding: 1em;
+  margin-top: 0.5em;
+}
+
+.engine-status {
+  align-items: center;
+  padding: 1em;
+  margin-bottom: 1em;
+  font-size: 0.9em;
+  color: #666;
 }
 
 .instrument {
-  width: 336px;
+  width: 360px;
   border: 0.5em solid #dadadb;
   padding: 1em;
   margin-bottom: 0.25em;
   border-radius: 10px 10px 10px 10px;
-}
-
-#name {
-  display: block;
-  font-size: 1.0rem;
-  text-align: center;
-  font-weight: bold;
-  color: #323232;
-  margin: 0.5em 0;
-  margin-top: -0.5em;
 }
 
 .performer {
@@ -41,18 +56,6 @@ body {
   padding: 1em;
   margin-bottom: 0.25em;
   border-radius: 10px 10px 10px 10px;
-}
-
-#piano {
-  position: relative;
-  margin: 1em 0;
-  user-select: none;
-}
-
-#keys {
-  position: relative;
-  display: block;
-  height: 120px;
 }
 
 .white.key {
@@ -100,6 +103,7 @@ body {
   grid-column: 1 / 2;
   white-space: nowrap;
   padding-right: 0.25rem;
+  text-align: left;
 }
 
 .control-container input[type='range'] {
@@ -114,14 +118,36 @@ body {
   justify-self: start;
 }
 
-.control-container span {
+.control-container .value-input {
   grid-column: 3 / 4;
   font-size: 0.75rem;
   color: #888;
   text-align: left;
-  width: 3em;
-  display: inline-block;
-  white-space: nowrap;
+  width: 4em;
+  margin: 0.1em;
+}
+
+#name {
+  display: block;
+  font-size: 1.0rem;
+  text-align: center;
+  font-weight: bold;
+  color: #323232;
+  margin: 0.5em 0;
+  margin-top: -0.5em;
+}
+
+#piano {
+  position: relative;
+  padding-left: 0.65em;
+  margin: 1em 0;
+  user-select: none;
+}
+
+#keys {
+  position: relative;
+  display: block;
+  height: 120px;
 }
 
 #deleteBtn {
@@ -130,38 +156,30 @@ body {
   width: 100%;
 }
 
-#deleteBtn:hover {
-  background: #ff5555;
-}
-
 #deleteBtn i {
   color: #c00;
-  font-size: 24px;
+  font-size: 1.125em;
   pointer-events: none;
+}
+
+#deleteBtn:hover {
+  background: #ff5555;
 }
 
 #deleteBtn:hover i {
   color: #fff;
 }
 
-.engine-controls {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1em;
-}
-
-.engine-tempo {
-  display: flex;
-  align-items: center;
-  gap: 0.25em;
-}
-
 #playPauseBtn {
-  width: 55px;
+  width: 65px;
 }
 
-#engineStatus {
-  margin-top: 1em;
-  font-size: 0.9em;
-  color: #666;
+#stopBtn {
+  width: 65px;
+}
+
+#instrumentSelect {
+  font-family: monospace;
+  min-width: 100px;
+  padding-inline: 0.5em;
 }

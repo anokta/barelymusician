@@ -70,13 +70,25 @@ export class Instrument {
       controlInput.addEventListener(
           'change', (e) => this.setControl(controlTypeIndex, e.target.checked ? 1.0 : 0.0));
     } else {
-      const controlSpan = document.createElement('span');
-      controlSpan.id = `span-${controlTypeIndex}`;
-      controlSpan.textContent = control.defaultValue.toPrecision(2);
-      controlContainer.appendChild(controlSpan);
+      // value input
+      const controlValueInput = document.createElement('input');
+      controlValueInput.type = 'number';
+      controlValueInput.id = `input-number-${controlTypeIndex}`;
+      controlValueInput.value = controlInput.value;
+      controlValueInput.min = controlInput.min;
+      controlValueInput.max = controlInput.max;
+      controlValueInput.step = controlInput.step;
+      controlValueInput.classList.add('value-input');
+      controlContainer.appendChild(controlValueInput);
 
       controlInput.addEventListener('input', (e) => {
-        controlSpan.textContent = controlInput.value;
+        controlValueInput.value = controlInput.value;
+        this.setControl(
+            controlTypeIndex,
+            (control.valueType == 'int') ? parseInt(e.target.value) : parseFloat(e.target.value));
+      });
+      controlValueInput.addEventListener('input', (e) => {
+        controlInput.value = controlValueInput.value;
         this.setControl(
             controlTypeIndex,
             (control.valueType == 'int') ? parseInt(e.target.value) : parseFloat(e.target.value));
@@ -170,6 +182,15 @@ export class Instrument {
     if (this._container) {
       this._container.remove();
     }
+  }
+
+  setAllNotesOff() {
+    this._withHandle((handle) => {
+      this._audioNode.port.postMessage({
+        type: 'instrument-set-all-notes-off',
+        handle: handle,
+      });
+    });
   }
 
   setControl(typeIndex, value) {

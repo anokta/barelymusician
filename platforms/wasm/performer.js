@@ -1,8 +1,8 @@
-import {Task} from './task.js'
+import {Task, TaskState} from './task.js'
 import {Trigger} from './trigger.js'
 
 export class Performer {
-  constructor({container, audioNode, handlePromise}) {
+  constructor({container, audioNode, handlePromise, instruments}) {
     this._container = container;
     this._audioNode = audioNode;
     this._handlePromise = handlePromise;
@@ -16,8 +16,10 @@ export class Performer {
     this._pendingTasks = [];
     this._pendingTriggers = [];
 
+    this._selectedInstrument = null;
+
     if (this._container) {
-      this._initContainer();
+      this._initContainer(instruments);
     }
 
     this._audioNode.port.postMessage({type: 'performer-create'});
@@ -28,13 +30,25 @@ export class Performer {
     return fn(handle);
   }
 
-  _initContainer() {
+  _initContainer(instruments) {
     this._container.innerHTML = `
       <label id="name"></label>
+      <select id="instrumentSelect"></select>
       <button id="deleteBtn" title="Delete Instrument">
         <i class="material-icons">delete</i>
       </button>
     `;
+
+    // instrument select
+    const instrumentSelect = this._container.querySelector('#instrumentSelect');
+    instrumentSelect.addEventListener('change', () => {
+      if (this._selectedInstrument) {
+        this._selectedInstrument.setAllNotesOff();
+      }
+      this._selectedInstrument = instruments[instrumentSelect.value];
+    });
+
+    this.updateInstrumentSelect(instruments);
 
     // delete
     this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
@@ -46,6 +60,17 @@ export class Performer {
       // label
       const label = this._container.querySelector('label');
       label.textContent = this._container.id;
+
+      // TODO(#164): testonly
+      this.isLooping = true;
+      this.createTask(0.0, 0.5, (state) => {
+        if (!this._selectedInstrument) return;
+        if (state == TaskState.BEGIN) {
+          this._selectedInstrument.setNoteOn(0.0);
+        } else if (state == TaskState.END) {
+          this._selectedInstrument.setNoteOff(0.0);
+        }
+      })
     });
   }
 
@@ -208,5 +233,30 @@ export class Performer {
     this._withHandle((handle) => {
       this._audioNode.port.postMessage({type: 'performer-stop', handle: handle});
     });
+  }
+
+  updateInstrumentSelect(instruments) {
+    if (!this._container) return;
+
+    const instrumentSelect = this._container.querySelector('#instrumentSelect');
+    const currentInstrumentHandle = instrumentSelect.value;
+    instrumentSelect.innerHTML = '';
+
+    const noneOption = document.createElement('option');
+    noneOption.value = 0;
+    noneOption.textContent = 'none';
+    instrumentSelect.appendChild(noneOption);
+
+    Object.keys(instruments).forEach((handle) => {
+      const option = document.createElement('option');
+      option.value = handle;
+      option.textContent = `instrument#${handle}`;
+      instrumentSelect.appendChild(option);
+    });
+
+    if (instruments[currentInstrumentHandle]) {
+      instrumentSelect.value = currentInstrumentHandle;
+    }
+    this._selectedInstrument = instruments[currentInstrumentHandle];
   }
 }

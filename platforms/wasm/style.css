@@ -145,13 +145,13 @@ button {
 }
 
 #deleteBtn i {
-  color: #c00;
+  color: #c65;
   font-size: 1.125em;
   pointer-events: none;
 }
 
 #deleteBtn:hover {
-  background: #ff5555;
+  background: #e65;
 }
 
 #deleteBtn:hover i {

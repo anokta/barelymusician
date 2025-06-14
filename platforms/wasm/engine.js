@@ -127,15 +127,16 @@ export class Engine {
           resolveHandle(event.data.handle);
           this._performers[event.data.handle] = performer;
         } break;
-        case 'performer-get-properties-response': {
-          const performer = this._performers[event.data.handle];
-          if (performer) {
-            performer.isLooping = event.data.isLooping;
-            performer.loopBeginPosition = event.data.loopBeginPosition;
-            performer.loopLength = event.data.loopLength;
-            performer.position = event.data.position;
-          }
-        } break;
+        // TODO(#164): Is this needed?
+        // case 'performer-get-properties-response': {
+        //   const performer = this._performers[event.data.handle];
+        //   if (performer) {
+        //     performer.isLooping = event.data.isLooping;
+        //     performer.loopBeginPosition = event.data.loopBeginPosition;
+        //     performer.loopLength = event.data.loopLength;
+        //     performer.position = event.data.position;
+        //   }
+        // } break;
         case 'task-create-success': {
           const performer = this._performers[event.data.performerHandle];
           if (performer) {
@@ -198,6 +199,12 @@ export class Engine {
       performersContainer.appendChild(performerContainer);
       this.createPerformer(performerContainer);
     });
+
+    // TODO: testonly
+    const performerContainer = document.createElement('div');
+    performerContainer.className = 'performer';
+    performersContainer.appendChild(performerContainer);
+    this.createPerformer(performerContainer);
 
     // Transport controls.
     this._createMetronome();
@@ -262,9 +269,11 @@ export class Engine {
 
   _updateStatus() {
     this._audioNode.port.postMessage({type: 'engine-get-timestamp'});
-    for (const performerHandle in this._performers) {
-      this._audioNode.port.postMessage({type: 'performer-get-properties', handle: performerHandle});
-    }
+    // TODO(#164): Is this needed?
+    // for (const performerHandle in this._performers) {
+    //   this._audioNode.port.postMessage({type: 'performer-get-properties', handle:
+    //   performerHandle});
+    // }
     for (const taskHandle in this._tasks) {
       this._audioNode.port.postMessage({type: 'task-get-properties', handle: taskHandle});
     }

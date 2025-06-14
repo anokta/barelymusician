@@ -13,10 +13,6 @@ button {
   vertical-align: middle;
 }
 
-.engine button {
-  margin-right: 0.5em;
-}
-
 .engine-components {
   align-items: flex-start;
   display: flex;
@@ -47,15 +43,7 @@ button {
   border: 0.5em solid #dadadb;
   padding: 1em;
   margin-bottom: 0.25em;
-  border-radius: 10px 10px 10px 10px;
-}
-
-.performer {
-  width: 480px;
-  border: 0.5em solid #dadadb;
-  padding: 1em;
-  margin-bottom: 0.25em;
-  border-radius: 10px 10px 10px 10px;
+  border-radius: 10px;
 }
 
 .white.key {
@@ -182,4 +170,92 @@ button {
   font-family: monospace;
   min-width: 100px;
   padding-inline: 0.5em;
+}
+
+.performer {
+  width: 480px;
+  border: 0.5em solid #dadadb;
+  padding: 1em;
+  margin-bottom: 0.25em;
+  border-radius: 10px;
+  background: #f8f8fa;
+}
+
+.performer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.clip {
+  position: relative;
+  width: 480px;
+  height: 240px;
+  background: #222;
+  border: 1px solid #444;
+  user-select: none;
+  margin-top: 0.5em;
+  overflow: hidden;
+}
+
+.clip-row {
+  position: absolute;
+  left: 40px; /* leave space for note names */
+  width: 400px;
+  height: 12px;
+  border-bottom: 1px solid #333;
+  box-sizing: border-box;
+  z-index: 0;
+}
+
+.clip-gridline {
+  position: absolute;
+  top: 0;
+  left: 40px;
+  width: 1px;
+  height: 100%;
+  background: #444;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.clip-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #aaa;
+  font-size: 0.7em;
+  z-index: 3;
+  pointer-events: none;
+  background: rgba(34,34,34,0.8);
+  padding: 0 2px;
+  border-radius: 2px;
+  transform: translate(-50%, 0);
+}
+
+.clip-note-name {
+  position: absolute;
+  left: 0;
+  width: 38px;
+  height: 12px;
+  color: #aaa;
+  font-size: 0.7em;
+  text-align: right;
+  padding-right: 2px;
+  top: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.clip-note {
+  position: absolute;
+  height: 12px;
+  background: #4af;
+  border: 1px solid #08f;
+  border-radius: 3px;
+  opacity: 0.85;
+  cursor: pointer;
+  box-sizing: border-box;
+  z-index: 2;
 }

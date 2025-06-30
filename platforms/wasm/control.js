@@ -91,7 +91,7 @@ export const CONTROLS = {
   [ControlType.DECAY]: {
     name: 'Decay (sec)',
     valueType: 'float',
-    defaultValue: 0.0,
+    defaultValue: 0.05,
     minValue: 0.0,
     maxValue: 10.0,
   },
@@ -169,7 +169,7 @@ export const CONTROLS = {
     name: 'Filter Frequency',
     valueType: 'float',
     defaultValue: 0.0,
-    minValue: 0.0,
+    minValue: 48000.0,
     maxValue: 48000.0,
   },
   [ControlType.FILTER_Q]: {

@@ -69,6 +69,8 @@ export class Engine {
     });
 
     this._pendingInstruments.push({instrument, resolveHandle});
+
+    return instrument;
   }
 
   createPerformer(performerContainer) {
@@ -143,11 +145,15 @@ export class Engine {
             this._tasks[event.data.handle] = performer.onTaskCreateSuccess(event.data.handle);
           }
         } break;
+        case 'task-destroy-success': {
+          delete this._tasks[event.data.handle];
+        } break;
         case 'task-get-properties-response': {
           const task = this._tasks[event.data.handle];
           if (task) {
-            task.duration = event.data.duration;
-            task.position = event.data.position;
+            task._duration = event.data.duration;
+            task._isActive = event.data.isActive;
+            task._position = event.data.position;
           }
         } break;
         case 'task-on-process': {
@@ -159,12 +165,16 @@ export class Engine {
             this._triggers[event.data.handle] = performer.onTriggerCreateSuccess(event.data.handle);
           }
         } break;
-        case 'trigger-get-properties-response': {
-          const trigger = this._triggers[event.data.handle];
-          if (trigger) {
-            trigger.position = event.data.position;
-          }
+        case 'trigger-destroy-success': {
+          delete this._triggers[event.data.handle];
         } break;
+        // TODO(#164): Is this needed?
+        // case 'trigger-get-properties-response': {
+        //   const trigger = this._triggers[event.data.handle];
+        //   if (trigger) {
+        //     trigger.position = event.data.position;
+        //   }
+        // } break;
         case 'trigger-on-process': {
           this._triggers[event.data.handle]?.processCallback();
         } break;
@@ -197,14 +207,14 @@ export class Engine {
       const performerContainer = document.createElement('div');
       performerContainer.className = 'performer';
       performersContainer.appendChild(performerContainer);
-      this.createPerformer(performerContainer);
-    });
 
-    // TODO: testonly
-    const performerContainer = document.createElement('div');
-    performerContainer.className = 'performer';
-    performersContainer.appendChild(performerContainer);
-    this.createPerformer(performerContainer);
+      const performer = this.createPerformer(performerContainer);
+      performer.isLooping = true;
+      performer.position = this._metronome.position;
+      if (this._metronome.isPlaying) {
+        performer.start();
+      }
+    });
 
     // Transport controls.
     this._createMetronome();
@@ -277,9 +287,9 @@ export class Engine {
     for (const taskHandle in this._tasks) {
       this._audioNode.port.postMessage({type: 'task-get-properties', handle: taskHandle});
     }
-    for (const triggerHandle in this._triggers) {
-      this._audioNode.port.postMessage({type: 'trigger-get-properties', handle: triggerHandle});
-    }
+    // for (const triggerHandle in this._triggers) {
+    //   this._audioNode.port.postMessage({type: 'trigger-get-properties', handle: triggerHandle});
+    // }
     const status = `
       Instruments: ${Object.keys(this._instruments).length} |
       Performers: ${Math.max(Object.keys(this._performers).length - 1, 0)} |

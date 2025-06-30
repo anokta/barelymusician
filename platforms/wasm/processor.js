@@ -198,6 +198,12 @@ class Processor extends AudioWorkletProcessor {
             });
           }
         } break;
+        case 'task-destroy': {
+          if (this._tasks[event.data.handle]) {
+            delete this._tasks[event.data.handle];
+            this.port.postMessage({type: 'task-destroy-success', handle: event.data.handle});
+          }
+        } break;
         case 'task-get-properties': {
           const task = this._tasks[event.data.handle];
           if (task) {
@@ -235,6 +241,12 @@ class Processor extends AudioWorkletProcessor {
               performerHandle: event.data.performerHandle,
               handle,
             });
+          }
+        } break;
+        case 'trigger-destroy': {
+          if (this._triggers[event.data.handle]) {
+            delete this._triggers[event.data.handle];
+            this.port.postMessage({type: 'trigger-destroy-success', handle: event.data.handle});
           }
         } break;
         case 'trigger-get-properties': {

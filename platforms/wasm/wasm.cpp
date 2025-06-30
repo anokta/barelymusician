@@ -8,6 +8,7 @@ using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::Performer;
+using ::barely::Quantization;
 using ::barely::Task;
 using ::barely::TaskState;
 using ::barely::Trigger;
@@ -117,6 +118,10 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
                 &Performer::SetLoopBeginPosition)
       .property("loopLength", &Performer::GetLoopLength, &Performer::SetLoopLength)
       .property("position", &Performer::GetPosition, &Performer::SetPosition);
+
+  class_<Quantization>("Quantization")
+      .constructor<int, float>()
+      .function("getPosition", &Quantization::GetPosition);
 
   class_<Task>("Task")
       .function("getHandle", &Task_GetHandle, allow_raw_pointers())

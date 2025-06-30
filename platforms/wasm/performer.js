@@ -2,11 +2,12 @@ import {Note} from './note.js'
 import {Task, TaskState} from './task.js'
 import {Trigger} from './trigger.js'
 
-const PITCHES = 13;  // e.g. 16 semitones (C4–C5)
+const PITCHES = 14;  // e.g. 16 semitones (C4–C5)
 const CLIP_HEIGHT = 240;
 const CLIP_WIDTH = 440;
 const ROW_HEIGHT = CLIP_HEIGHT / PITCHES;
 const GRID_DIVISIONS = 16;  // e.g. 16 for 1/16th notes
+const GRID_SIZE = CLIP_WIDTH / GRID_DIVISIONS;
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const BASE_OCTAVE = 4;  // e.g. C4 is the bottom
@@ -36,24 +37,118 @@ export class Performer {
     this._audioNode.port.postMessage({type: 'performer-create'});
   }
 
-  async _withHandle(fn) {
-    const handle = await this._handlePromise;
-    return fn(handle);
+  createTask(position, duration, processCallback) {
+    let resolveHandle;
+    const handlePromise = new Promise(resolve => {
+      resolveHandle = resolve;
+    });
+    const task = new Task({
+      audioNode: this._audioNode,
+      handlePromise,
+      position,
+      duration,
+      processCallback,
+    });
+
+    this._pendingTasks.push({task, resolveHandle});
+
+    this._withHandle((handle) => {
+      this._audioNode.port.postMessage(
+          {type: 'task-create', performerHandle: handle, position, duration});
+    });
+
+    return task;
+  }
+
+  createTrigger(position, processCallback) {
+    let resolveHandle;
+    const handlePromise = new Promise(resolve => {
+      resolveHandle = resolve;
+    });
+    const trigger = new Trigger({
+      audioNode: this._audioNode,
+      handlePromise,
+      position,
+      processCallback,
+    });
+
+    this._pendingTriggers.push({trigger, resolveHandle});
+
+    this._withHandle((handle) => {
+      this._audioNode.port.postMessage({type: 'trigger-create', performerHandle: handle, position});
+    });
+
+    return trigger;
+  }
+
+  destroy() {
+    this._destroyAllNotes();
+    this._withHandle((handle) => {
+      this._audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
+    });
+    if (this._container) {
+      this._container.remove();
+    }
+  }
+
+  onTaskCreateSuccess(handle) {
+    const {task, resolveHandle} = this._pendingTasks.shift();
+    resolveHandle(handle);
+    return task;
+  }
+
+  onTriggerCreateSuccess(handle) {
+    const {trigger, resolveHandle} = this._pendingTriggers.shift();
+    resolveHandle(handle);
+    return trigger;
+  }
+
+  start() {
+    if (this._isPlaying) return;
+
+    this._isPlaying = true;
+    this._withHandle((handle) => {
+      this._audioNode.port.postMessage({type: 'performer-start', handle: handle});
+    });
+  }
+
+  stop() {
+    if (!this._isPlaying) return;
+
+    this._isPlaying = false;
+    this._withHandle((handle) => {
+      this._audioNode.port.postMessage({type: 'performer-stop', handle: handle});
+    });
+  }
+
+  updateInstrumentSelect(instruments) {
+    if (!this._container) return;
+
+    const instrumentSelect = this._container.querySelector('#instrumentSelect');
+    const currentInstrumentHandle = instrumentSelect.value;
+    instrumentSelect.innerHTML = '';
+
+    const noneOption = document.createElement('option');
+    noneOption.value = 0;
+    noneOption.textContent = 'none';
+    instrumentSelect.appendChild(noneOption);
+
+    Object.keys(instruments).forEach((handle) => {
+      const option = document.createElement('option');
+      option.value = handle;
+      option.textContent = `instrument#${handle}`;
+      instrumentSelect.appendChild(option);
+    });
+
+    if (instruments[currentInstrumentHandle]) {
+      instrumentSelect.value = currentInstrumentHandle;
+    }
+    this._selectedInstrument = instruments[currentInstrumentHandle];
   }
 
   _renderClip() {
     const clip = this._container.querySelector('.clip');
     clip.innerHTML = '';
-
-    // // Draw rows
-    // for (let i = 0; i < PITCHES; ++i) {
-    //   const row = document.createElement('div');
-    //   row.className = 'clip-row';
-    //   row.style.top = `${i * ROW_HEIGHT}px`;
-    //   row.style.height = `${ROW_HEIGHT}px`;
-    //   clip.appendChild(row);
-    // }
-
 
     const getNoteName = (pitch) => {
       const note = NOTE_NAMES[pitch % 12];
@@ -63,71 +158,65 @@ export class Performer {
 
     // Draw horizontal rows (pitches)
     for (let i = 0; i < PITCHES; ++i) {
+      const y = i * ROW_HEIGHT;
+
       const row = document.createElement('div');
       row.className = 'clip-row';
-      row.style.top = `${i * ROW_HEIGHT}px`;
+      row.style.top = `${y}px`;
+      row.style.left = `${GRID_SIZE}px`;
+      row.style.width = `${CLIP_WIDTH}px`;
       row.style.height = `${ROW_HEIGHT}px`;
       clip.appendChild(row);
 
+      if (i == 0) continue;
+
       const noteNameDiv = document.createElement('div');
       noteNameDiv.className = 'clip-note-name';
-      noteNameDiv.style.top = `${i * ROW_HEIGHT}px`;
+      noteNameDiv.style.top = `${y}px`;
       noteNameDiv.textContent = getNoteName(PITCHES - 1 - i);
       clip.appendChild(noteNameDiv);
     }
 
-    // // Draw vertical grid lines (beats or subdivisions)
-    // const gridDivisions = 16;  // e.g., 16 for 1/16th notes in a 1-bar loop
-    // for (let i = 0; i <= gridDivisions; ++i) {
-    //   const gridLine = document.createElement('div');
-    //   gridLine.className = 'clip-gridline';
-    //   gridLine.style.left = `${(i / gridDivisions) * 100}%`;
-    //   gridLine.style.top = '0';
-    //   gridLine.style.height = '100%';
-    //   clip.appendChild(gridLine);
-    // }
-
     // Draw vertical grid lines and position markers
     for (let i = 0; i <= GRID_DIVISIONS; ++i) {
-      const x = (i / GRID_DIVISIONS) * CLIP_WIDTH;
+      const x = (i + 1) * GRID_SIZE;
 
       // Grid line
       const gridLine = document.createElement('div');
       gridLine.className = 'clip-gridline';
+      gridLine.style.top = `${ROW_HEIGHT}px`;
       gridLine.style.left = `${x}px`;
+      gridLine.style.height = `${CLIP_HEIGHT - ROW_HEIGHT}px`;
       clip.appendChild(gridLine);
 
       // Position marker (every 4th grid, e.g. quarter note)
-      if (i % 4 === 0) {
+      if (i % 2 === 0) {
         const marker = document.createElement('div');
         marker.className = 'clip-marker';
         marker.style.left = `${x}px`;
-        marker.textContent = (this.loopLength * i / GRID_DIVISIONS).toFixed(2);
+        marker.textContent = (this._loopLength * i / GRID_DIVISIONS).toFixed(3);
         clip.appendChild(marker);
       }
     }
 
     // Draw notes
     for (const note of this._notes) {
-      if (note._position >= this._loopLength) continue;
+      if (note.position >= this._loopLength) continue;
 
       const clampedDuration =
-          Math.min(note._position + note._duration, this._loopLength) - note._position;
+          Math.min(note.position + note.duration, this._loopLength) - note.position;
 
-      const noteDiv = document.createElement('div');
-      noteDiv.className = 'clip-note';
-      noteDiv.style.left = `${note._position * CLIP_WIDTH / this._loopLength}px`;
-      noteDiv.style.width = `${clampedDuration * CLIP_WIDTH / this._loopLength}px`;
-      noteDiv.style.top = `${(PITCHES - 1 - note.pitch) * ROW_HEIGHT}px`;
-      noteDiv.style.height = `${ROW_HEIGHT - 2}px`;
+      note.noteDiv = document.createElement('div');
+      note.noteDiv.className = 'clip-note';
+      note.noteDiv.style.left = `${
+          (note.position + this._loopLength / GRID_DIVISIONS) * CLIP_WIDTH / this._loopLength}px`;
+      note.noteDiv.style.width = `${clampedDuration * CLIP_WIDTH / this._loopLength}px`;
+      note.noteDiv.style.top = `${(PITCHES - 1 - note.pitch) * ROW_HEIGHT}px`;
+      note.noteDiv.style.height = `${ROW_HEIGHT - 2}px`;
 
-      // Drag/move/remove logic
-      noteDiv.onmousedown = (e) => this._startNoteDrag(e, note);
-      noteDiv.onclick = (e) => {
-        if (e.detail === 2) this._removeNote(note);
-      };  // double-click to remove
+      note.noteDiv.onmousedown = (e) => this._startNoteDrag(e, note, note.noteDiv);
 
-      clip.appendChild(noteDiv);
+      clip.appendChild(note.noteDiv);
     }
 
     // Add note creation logic
@@ -135,20 +224,17 @@ export class Performer {
   }
 
   _startNoteCreate(e) {
-    const snapToGrid = (x) => {
-      const gridSize = CLIP_WIDTH / GRID_DIVISIONS;
-      return Math.round(x / gridSize) * gridSize;
-    };
-
     const clip = e.currentTarget;
     const rect = clip.getBoundingClientRect();
-    let x = e.clientX - rect.left;
+    const x = this._snapToGrid(e.clientX - rect.left);
     const y = e.clientY - rect.top;
 
-    x = snapToGrid(x);
+    if (x < GRID_SIZE || x > CLIP_WIDTH || y < ROW_HEIGHT || y > CLIP_HEIGHT) {
+      return;
+    }
 
     const pitch = PITCHES - 1 - Math.floor(y / ROW_HEIGHT);
-    const start = x / CLIP_WIDTH * this._loopLength;
+    const start = (this._loopLength * x) / CLIP_WIDTH;
 
     let noteDiv = document.createElement('div');
     noteDiv.className = 'clip-note';
@@ -160,18 +246,20 @@ export class Performer {
     const onMouseMove = (moveEvent) => {
       let moveX = moveEvent.clientX - rect.left;
 
-      moveX = snapToGrid(moveX);
+      moveX = this._snapToGrid(moveX);
 
-      const width = Math.max(8, moveX - x);
+      const width = Math.max(moveX - x, 0.0);
       noteDiv.style.width = `${width}px`;
     };
 
     const onMouseUp = (upEvent) => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-      const endX = upEvent.clientX - rect.left;
-      const duration = Math.max(0.05, (endX - x) / CLIP_WIDTH * this._loopLength);
-      this._addNote(start, duration, pitch, 1.0);
+      const endX = Math.min(upEvent.clientX - rect.left, CLIP_WIDTH + GRID_SIZE);
+      const duration = this._snapToGrid(endX - x) / CLIP_WIDTH * this._loopLength;
+      if (duration > 0) {
+        this._addNote(start - this._loopLength / GRID_DIVISIONS, duration, pitch, 1.0);
+      }
       clip.removeChild(noteDiv);
       this._renderClip();
     };
@@ -186,23 +274,117 @@ export class Performer {
   }
 
   _removeNote(note) {
-    this._notes = this._notes.filter(n => n !== note);
+    this._notes = this._notes.filter(n => {
+      if (n === note) {
+        n.destroy();
+        return false;
+      }
+      return true;
+    });
     this._renderClip();
   }
 
-  _startNoteDrag(e, note) {
-    // Implement drag logic to move or resize note
-    // (left as an exercise, but similar to _startNoteCreate)
+  _startNoteDrag(e, note, noteDiv) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.detail == 2) {  // double click to remove
+      this._removeNote(note);
+      return;
+    }
+
+    const clipRect = noteDiv.parentElement.getBoundingClientRect();
+    const startX = e.clientX - clipRect.left;
+    const noteLeft = parseFloat(noteDiv.style.left);
+    const noteWidth = parseFloat(noteDiv.style.width);
+
+    const edgeThreshold = 6;  // px
+    let dragMode = 'move';
+    if (Math.abs(startX - noteLeft) < edgeThreshold) {
+      dragMode = 'resize-left';
+      noteDiv.style.cursor = 'ew-resize';
+    } else if (Math.abs(startX - (noteLeft + noteWidth)) < edgeThreshold) {
+      dragMode = 'resize-right';
+      noteDiv.style.cursor = 'ew-resize';
+    } else {
+      noteDiv.style.cursor = 'move';
+    }
+
+    const origPosition = note.position;
+    const origDuration = note.duration;
+
+    const onMouseMove = (moveEvent) => {
+      let moveX = moveEvent.clientX - clipRect.left;
+      let moveY = moveEvent.clientY - clipRect.top;
+
+      if (dragMode === 'move') {
+        // Snap left edge to grid, keep duration
+        let newLeft = this._snapToGrid(moveX - (startX - noteLeft));
+        const newPitch =
+            Math.min(Math.max(PITCHES - 1 - Math.floor(moveY / ROW_HEIGHT), 0), PITCHES - 2);
+        note.pitch = newPitch;
+        // Clamp so note stays in bounds
+        newLeft = Math.min(Math.max(newLeft, GRID_SIZE), CLIP_WIDTH - noteWidth + GRID_SIZE);
+        noteDiv.style.left = `${newLeft}px`;
+        noteDiv.style.top = `${(PITCHES - 1 - newPitch) * ROW_HEIGHT}px`;
+      } else if (dragMode === 'resize-left') {
+        let newLeft = Math.max(GRID_SIZE, this._snapToGrid(moveX));
+        let newWidth = noteWidth + (noteLeft - newLeft);
+        if (newWidth < GRID_SIZE) {
+          newWidth = GRID_SIZE;
+          newLeft = noteLeft + noteWidth - GRID_SIZE;
+        }
+        noteDiv.style.left = `${newLeft}px`;
+        noteDiv.style.width = `${newWidth}px`;
+      } else if (dragMode === 'resize-right') {
+        let newRight = Math.min(this._snapToGrid(moveX), CLIP_WIDTH + GRID_SIZE);
+        let newWidth = Math.max(GRID_SIZE, newRight - noteLeft);
+        noteDiv.style.width = `${newWidth}px`;
+      }
+    };
+
+    const onMouseUp = (upEvent) => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      noteDiv.style.cursor = '';
+
+      let finalLeft = parseFloat(noteDiv.style.left);
+      let finalWidth = parseFloat(noteDiv.style.width);
+      let finalTop = parseFloat(noteDiv.style.top);
+
+      if (dragMode === 'move') {
+        note.position =
+            (finalLeft * this._loopLength) / CLIP_WIDTH - this._loopLength / GRID_DIVISIONS;
+        note.pitch = PITCHES - 1 - Math.round(finalTop / ROW_HEIGHT);
+      } else if (dragMode === 'resize-left') {
+        const newStart =
+            (finalLeft * this._loopLength) / CLIP_WIDTH - this._loopLength / GRID_DIVISIONS;
+        const newDuration = origPosition + origDuration - newStart;
+        if (newDuration > 0) {
+          note.position = newStart;
+          note.duration = newDuration;
+        }
+      } else if (dragMode === 'resize-right') {
+        const newDuration = (finalWidth * this._loopLength) / CLIP_WIDTH;
+        if (newDuration > 0) {
+          note.duration = newDuration;
+        }
+      }
+      this._renderClip();
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
 
   _initContainer(instruments) {
     this._container.innerHTML = `
       <label id="name"></label>
-      <button id="clearNotesBtn">Clear</button>
       <button id="loopDecBtn">-</button>
-      <span id="loopLengthLabel">1</span>
+      <span id="loopLengthLabel">${this._loopLength}</span>
       <button id="loopIncBtn">+</button>
       <select id="instrumentSelect"></select>
+      <button id="clearNotesBtn">Clear</button>
       <div class="clip"></div>
       <button id="deleteBtn" title="Delete Instrument">
         <i class="material-icons">delete</i>
@@ -222,19 +404,19 @@ export class Performer {
 
     // controls
     this._container.querySelector('#clearNotesBtn').onclick = () => {
-      this._notes = [];
+      this._destroyAllNotes();
       this._renderClip();
     };
 
     const loopLengthLabel = this._container.querySelector('#loopLengthLabel');
     this._container.querySelector('#loopDecBtn').onclick = () => {
-      this.loopLength = Math.max(this.loopLength - 1, 1);
-      loopLengthLabel.textContent = this.loopLength;
+      this._loopLength = Math.max(this._loopLength - 1, 1);
+      loopLengthLabel.textContent = this._loopLength;
       this._renderClip();
     };
     this._container.querySelector('#loopIncBtn').onclick = () => {
-      this.loopLength = Math.min(this.loopLength + 1, 4);
-      loopLengthLabel.textContent = this.loopLength;
+      this._loopLength = Math.min(this._loopLength + 1, 4);
+      loopLengthLabel.textContent = this._loopLength;
       this._renderClip();
     };
 
@@ -249,10 +431,10 @@ export class Performer {
       const label = this._container.querySelector('label');
       label.textContent = this._container.id;
 
-      // TODO(#164): testonly
-      this.isLooping = true;
       this._renderClip();
     });
+
+    this._startRenderLoop();
   }
 
   get selectedInstrument() {
@@ -321,11 +503,12 @@ export class Performer {
     this._loopLength = Math.max(newLoopLength, 0.0);
     this._withHandle((handle) => {
       this._audioNode.port.postMessage({
-        type: 'performer-set-loop-begin-position',
+        type: 'performer-set-loop-length',
         handle: handle,
         loopLength: newLoopLength,
       });
     });
+    this._container.querySelector('#loopLengthLabel').textContent = this._loopLength;
   }
 
   /**
@@ -344,104 +527,31 @@ export class Performer {
     });
   }
 
-  createTask(position, duration, processCallback) {
-    this._withHandle((handle) => {
-      let resolveHandle;
-      const handlePromise = new Promise(resolve => {
-        resolveHandle = resolve;
-      });
-      const task = new Task({
-        audioNode: this._audioNode,
-        handlePromise: handlePromise,
-        performerHandle: handle,
-        position,
-        duration,
-        processCallback,
-      });
-
-      this._pendingTasks.push({task, resolveHandle});
-    });
-  }
-
-  createTrigger(position, processCallback) {
-    this._withHandle((handle) => {
-      let resolveHandle;
-      const handlePromise = new Promise(resolve => {
-        resolveHandle = resolve;
-      });
-      const trigger = new Trigger({
-        audioNode: this._audioNode,
-        handlePromise: handlePromise,
-        performerHandle: handle,
-        position,
-        processCallback,
-      });
-
-      this._pendingTriggers.push({trigger, resolveHandle});
-    });
-  }
-
-  destroy() {
-    this._withHandle((handle) => {
-      this._audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
-    });
-    if (this._container) {
-      this._container.remove();
+  _destroyAllNotes() {
+    for (const note of this._notes) {
+      note.destroy();
     }
+    this._notes = [];
   }
 
-  onTaskCreateSuccess(handle) {
-    const {task, resolveHandle} = this._pendingTasks.shift();
-    resolveHandle(handle);
-    return task;
+  _snapToGrid(x) {
+    return Math.min(Math.round(x / GRID_SIZE) * GRID_SIZE, CLIP_WIDTH + GRID_SIZE);
   }
 
-  onTriggerCreateSuccess(handle) {
-    const {trigger, resolveHandle} = this._pendingTriggers.shift();
-    resolveHandle(handle);
-    return trigger;
+  _startRenderLoop() {
+    const render = () => {
+      for (const note of this._notes) {
+        if (note.noteDiv) {
+          note.noteDiv.style.background = (note.isActive ? '#8ff' : '#4af');
+        }
+      }
+      requestAnimationFrame(render);
+    };
+    render();
   }
 
-  start() {
-    if (this._isPlaying) return;
-
-    this._isPlaying = true;
-    this._withHandle((handle) => {
-      this._audioNode.port.postMessage({type: 'performer-start', handle: handle});
-    });
-  }
-
-  stop() {
-    if (!this._isPlaying) return;
-
-    this._isPlaying = false;
-    this._withHandle((handle) => {
-      this._audioNode.port.postMessage({type: 'performer-stop', handle: handle});
-    });
-  }
-
-  updateInstrumentSelect(instruments) {
-    if (!this._container) return;
-
-    const instrumentSelect = this._container.querySelector('#instrumentSelect');
-    const currentInstrumentHandle = instrumentSelect.value;
-    instrumentSelect.innerHTML = '';
-
-    const noneOption = document.createElement('option');
-    noneOption.value = 0;
-    noneOption.textContent = 'none';
-    instrumentSelect.appendChild(noneOption);
-
-    Object.keys(instruments).forEach((handle) => {
-      const option = document.createElement('option');
-      option.value = handle;
-      option.textContent = `instrument#${handle}`;
-      instrumentSelect.appendChild(option);
-    });
-
-    if (instruments[currentInstrumentHandle]) {
-      instrumentSelect.value = currentInstrumentHandle;
-    }
-    this._selectedInstrument = instruments[currentInstrumentHandle];
+  async _withHandle(fn) {
+    const handle = await this._handlePromise;
+    return fn(handle);
   }
 }

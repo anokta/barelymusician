@@ -1,6 +1,6 @@
 
 export class Trigger {
-  constructor({audioNode, handlePromise, performerHandle, position, processCallback}) {
+  constructor({audioNode, handlePromise, position, processCallback}) {
     this._audioNode = audioNode;
     this._handlePromise = handlePromise;
 
@@ -8,13 +8,15 @@ export class Trigger {
     this._position = position;
 
     this.processCallback = processCallback;
-
-    this._audioNode.port.postMessage({type: 'trigger-create', performerHandle, position});
   }
 
-  async _withHandle(fn) {
-    const handle = await this._handlePromise;
-    return fn(handle);
+  /**
+   * Destroys the task.
+   */
+  destroy() {
+    this._withHandle((handle) => {
+      this._audioNode.port.postMessage({type: 'trigger-destroy', handle});
+    });
   }
 
   get position() {
@@ -35,5 +37,16 @@ export class Trigger {
         position: newPosition,
       });
     });
+  }
+
+  /**
+   * Helper to run a function with the resolved handle.
+   * @param {function(number):void} fn
+   * @return {!Promise}
+   * @private
+   */
+  async _withHandle(fn) {
+    const handle = await this._handlePromise;
+    return fn(handle);
   }
 }

@@ -1,25 +1,41 @@
-import {Task, TaskState} from './task.js'
+import {TaskState} from './task.js'
 
 export class Note {
   constructor(performer, position, duration, pitch, gain) {
     this._performer = performer;
-    this._position = position;
-    this._duration = duration;
+    this._pitch = pitch;
 
-    this.pitch = pitch;
     this.gain = gain;
 
-    this._task = this._performer.createTask(position, duration, (state) => {
+    this._task = performer.createTask(position, duration, (state) => {
       if (state == TaskState.BEGIN) {
-        this._performer.selectedInstrument?.setNoteOn(this.pitch, this.gain);
+        this._performer.selectedInstrument?.setNoteOn(this._pitch, this.gain);
       } else if (state == TaskState.END) {
-        this._performer.selectedInstrument?.setNoteOff(this.pitch);
+        this._performer.selectedInstrument?.setNoteOff(this._pitch);
       }
     });
+
+    this.noteDiv = null;
+  }
+
+  /**
+   * Destroys the note.
+   */
+  destroy() {
+    this._performer.selectedInstrument?.setNoteOff(this._pitch);
+    this._task.destroy();
   }
 
   get duration() {
     return this._task.duration;
+  }
+
+  get isActive() {
+    return this._task.isActive;
+  }
+
+  get pitch() {
+    return this._pitch;
   }
 
   get position() {
@@ -28,6 +44,18 @@ export class Note {
 
   set duration(newDuration) {
     this._task.duration = newDuration;
+  }
+
+  set pitch(newPitch) {
+    if (this._pitch == newPitch) return;
+
+    if (this.isActive) {
+      this._performer.selectedInstrument?.setNoteOff(this._pitch);
+    }
+    this._pitch = newPitch;
+    if (this.isActive) {
+      this._performer.selectedInstrument?.setNoteOn(this._pitch, this.gain);
+    }
   }
 
   set position(newPosition) {

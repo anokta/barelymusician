@@ -1,12 +1,12 @@
 body {
   font-family: monospace;
-  font-size: 1.0rem;
+  font-size: 1.0em;
   text-align: center;
 }
 
 button {
   text-align: center;
-  font-size: 1.0rem;
+  font-size: 1.0em;
 }
 
 .engine input[type="range"] {
@@ -42,7 +42,7 @@ button {
   width: 360px;
   border: 0.5em solid #dadadb;
   padding: 1em;
-  margin-bottom: 0.25em;
+  margin-bottom: 0.5em;
   border-radius: 10px;
 }
 
@@ -78,10 +78,10 @@ button {
 
 .control-container {
   display: grid;
-  grid-template-columns: 8rem 1fr auto;
+  grid-template-columns: 8em 1fr auto;
   align-items: center;
-  gap: 0.25rem 0.5rem;
-  font-size: 0.85rem;
+  gap: 0.5em 1.0em;
+  font-size: 1.0em;
   min-width: 160px;
   max-width: 240px;
   flex: 1 1 auto;
@@ -90,7 +90,7 @@ button {
 .control-container label {
   grid-column: 1 / 2;
   white-space: nowrap;
-  padding-right: 0.25rem;
+  padding-right: 0.5em;
   text-align: left;
 }
 
@@ -108,7 +108,7 @@ button {
 
 .control-container .value-input {
   grid-column: 3 / 4;
-  font-size: 0.75rem;
+  font-size: 0.85em;
   color: #888;
   text-align: left;
   width: 4em;
@@ -117,7 +117,7 @@ button {
 
 #name {
   display: block;
-  font-size: 1.0rem;
+  font-size: 1.25em;
   text-align: center;
   font-weight: bold;
   color: #323232;
@@ -127,7 +127,7 @@ button {
 
 #piano {
   position: relative;
-  padding-left: 0.65em;
+  padding-left: 1.0em;
   margin: 1em 0;
   user-select: none;
 }
@@ -146,7 +146,7 @@ button {
 
 #deleteBtn i {
   color: #c65;
-  font-size: 1.125em;
+  font-size: 1.0em;
   pointer-events: none;
 }
 
@@ -176,7 +176,7 @@ button {
   width: 480px;
   border: 0.5em solid #dadadb;
   padding: 1em;
-  margin-bottom: 0.25em;
+  margin-bottom: 0.5em;
   border-radius: 10px;
   background: #f8f8fa;
 }
@@ -196,66 +196,56 @@ button {
   border: 1px solid #444;
   user-select: none;
   margin-top: 0.5em;
+  padding-bottom: 0.5em;
   overflow: hidden;
 }
 
 .clip-row {
   position: absolute;
-  left: 40px; /* leave space for note names */
   width: 400px;
   height: 12px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #444;
   box-sizing: border-box;
   z-index: 0;
 }
 
 .clip-gridline {
   position: absolute;
-  top: 0;
-  left: 40px;
   width: 1px;
-  height: 100%;
-  background: #444;
-  z-index: 2;
+  background: #333;
+  z-index: 0;
   pointer-events: none;
 }
 
 .clip-marker {
   position: absolute;
-  top: 0;
-  left: 0;
   color: #aaa;
-  font-size: 0.7em;
-  z-index: 3;
+  font-size: 0.675em;
+  z-index: 1;
   pointer-events: none;
-  background: rgba(34,34,34,0.8);
-  padding: 0 2px;
+  background: rgba(34, 34, 34, 0.8);
+  padding: 1px;
   border-radius: 2px;
   transform: translate(-50%, 0);
 }
 
 .clip-note-name {
   position: absolute;
-  left: 0;
-  width: 38px;
-  height: 12px;
   color: #aaa;
-  font-size: 0.7em;
-  text-align: right;
-  padding-right: 2px;
-  top: 0;
-  z-index: 4;
+  font-size: 0.75em;
+  text-align: left;
+  padding: 2px;
+  z-index: 1;
   pointer-events: none;
 }
 
 .clip-note {
   position: absolute;
-  height: 12px;
   background: #4af;
   border: 1px solid #08f;
   border-radius: 3px;
   opacity: 0.85;
   cursor: pointer;
   box-sizing: border-box;
-  z-index: 2;
+  z-index: 1;
 }

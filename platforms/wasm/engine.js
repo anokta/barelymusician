@@ -188,6 +188,13 @@ export class Engine {
     this._metronome.createTrigger(0.0, () => {
       console.log('Tick: ' + this._beat);
       ++this._beat;
+
+      Object.values(this._performers).forEach((performer) => {
+        if (!performer.isPlaying) {
+          performer.position = this._metronome.position;
+          performer.start();
+        }
+      });
     });
   }
 
@@ -210,10 +217,6 @@ export class Engine {
 
       const performer = this.createPerformer(performerContainer);
       performer.isLooping = true;
-      performer.position = this._metronome.position;
-      if (this._metronome.isPlaying) {
-        performer.start();
-      }
     });
 
     // Transport controls.

@@ -49,9 +49,7 @@ export class Note {
   set pitch(newPitch) {
     if (this._pitch == newPitch) return;
 
-    if (this.isActive) {
-      this._performer.selectedInstrument?.setNoteOff(this._pitch);
-    }
+    this._performer.selectedInstrument?.setNoteOff(this._pitch);
     this._pitch = newPitch;
     if (this.isActive) {
       this._performer.selectedInstrument?.setNoteOn(this._pitch, this.gain);

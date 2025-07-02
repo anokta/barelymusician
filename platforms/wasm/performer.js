@@ -410,13 +410,13 @@ export class Performer {
 
     const loopLengthLabel = this._container.querySelector('#loopLengthLabel');
     this._container.querySelector('#loopDecBtn').onclick = () => {
-      this._loopLength = Math.max(this._loopLength - 1, 1);
-      loopLengthLabel.textContent = this._loopLength;
+      this.loopLength = Math.max(this.loopLength - 1, 1);
+      loopLengthLabel.textContent = this.loopLength;
       this._renderClip();
     };
     this._container.querySelector('#loopIncBtn').onclick = () => {
-      this._loopLength = Math.min(this._loopLength + 1, 4);
-      loopLengthLabel.textContent = this._loopLength;
+      this.loopLength = Math.min(this.loopLength + 1, 4);
+      loopLengthLabel.textContent = this.loopLength;
       this._renderClip();
     };
 
@@ -508,7 +508,6 @@ export class Performer {
         loopLength: newLoopLength,
       });
     });
-    this._container.querySelector('#loopLengthLabel').textContent = this._loopLength;
   }
 
   /**

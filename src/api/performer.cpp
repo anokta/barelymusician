@@ -286,8 +286,9 @@ double BarelyPerformer::LoopAround(double position) const noexcept {
 void BarelyPerformer::SetTaskActive(const std::set<std::pair<double, BarelyTask*>>::iterator& it,
                                     bool is_active) noexcept {
   BarelyTask* task = it->second;
-  assert(!is_playing_ ||
-         ((is_active && task->IsInside(position_)) || (!is_active && !task->IsInside(position_))));
+  assert(!is_playing_ || ((is_active && task->IsInside(position_)) ||
+                          (!is_active && (!task->IsInside(position_) ||
+                                          task->GetEndPosition() >= GetLoopEndPosition()))));
   auto node = (is_active ? inactive_tasks_ : active_tasks_).extract(it);
   node.value().first = is_active ? task->GetEndPosition() : task->GetPosition();
   (is_active ? active_tasks_ : inactive_tasks_).insert(std::move(node));

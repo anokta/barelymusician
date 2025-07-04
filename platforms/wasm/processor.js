@@ -21,6 +21,9 @@ class Processor extends AudioWorkletProcessor {
       this._tasks = {};
       this._triggers = {};
 
+      // TODO(#164): Temp workaround to sync performers.
+      this._metronome = null;
+
       this.port.postMessage({type: 'init-success'});
     });
 
@@ -60,16 +63,6 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'engine-set-tempo': {
           this._engine.tempo = event.data.tempo;
-        } break;
-        case 'engine-start': {
-          for (const [handle, performer] of this._performers) {
-            performer.start();
-          }
-        } break;
-        case 'engine-stop': {
-          for (const [handle, performer] of this._performers) {
-            performer.stop();
-          }
         } break;
         case 'instrument-create': {
           const instrument = this._engine.createInstrument();
@@ -138,9 +131,22 @@ class Processor extends AudioWorkletProcessor {
           const handle = performer.getHandle();
           this._performers[handle] = performer;
           this.port.postMessage({type: 'performer-create-success', handle})
+
+          // TOD(#164): Temp workaround to sync performers.
+          if (Object.keys(this._performers).length == 1) {
+            this._metronome = performer;
+          } else if(this._metronome.isPlaying) {
+            performer.position = this._metronome.position;
+            performer.start();
+          }
         } break;
         case 'performer-destroy': {
           delete this._performers[event.data.handle];
+
+          // TOD(#164): Temp workaround to sync performers.
+          if (Object.keys(this._performers).length == 0) {
+            this._metronome = null;
+          }
         } break;
         case 'performer-get-properties': {
           const performer = this._performers[event.data.handle];
@@ -149,6 +155,7 @@ class Processor extends AudioWorkletProcessor {
               type: 'performer-get-properties-response',
               handle: event.data.handle,
               isLooping: performer.isLooping,
+              isPlaying: performer.isPlaying,
               loopBeginPosition: performer.loopBeginPosition,
               loopLength: performer.loopLength,
               position: performer.position,
@@ -159,10 +166,20 @@ class Processor extends AudioWorkletProcessor {
           if (this._performers[event.data.handle]) {
             this._performers[event.data.handle].loopBeginPosition = event.data.loopBeginPosition;
           }
+
+          // TOD(#164): Temp workaround to sync performers.
+          if (this._performers[event.data.handle] && this._metronome) {
+            this._performers[event.data.handle].position = this._metronome.position;
+          }
         } break;
         case 'performer-set-loop-length': {
           if (this._performers[event.data.handle]) {
             this._performers[event.data.handle].loopLength = event.data.loopLength;
+          }
+
+          // TOD(#164): Temp workaround to sync performers.
+          if (this._performers[event.data.handle] && this._metronome) {
+            this._performers[event.data.handle].position = this._metronome.position;
           }
         } break;
         case 'performer-set-looping': {
@@ -174,12 +191,27 @@ class Processor extends AudioWorkletProcessor {
           if (this._performers[event.data.handle]) {
             this._performers[event.data.handle].position = event.data.position;
           }
+
+          // TOD(#164): Temp workaround to sync performers.
+          if (this._performers[event.data.handle] && this._metronome) {
+            this._performers[event.data.handle].position = this._metronome.position;
+          }
         } break;
         case 'performer-start': {
           this._performers[event.data.handle]?.start();
+
+          // TOD(#164): Temp workaround to sync performers.
+          if (this._performers[event.data.handle] && this._metronome) {
+            this._performers[event.data.handle].position = this._metronome.position;
+          }
         } break;
         case 'performer-stop': {
           this._performers[event.data.handle]?.stop();
+
+          // TOD(#164): Temp workaround to sync performers.
+          if (this._performers[event.data.handle] && this._metronome) {
+            this._performers[event.data.handle].position = this._metronome.position;
+          }
         } break;
         case 'task-create': {
           if (this._performers[event.data.performerHandle]) {

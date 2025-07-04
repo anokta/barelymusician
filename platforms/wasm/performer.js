@@ -8,6 +8,7 @@ const CLIP_WIDTH = 440;
 const ROW_HEIGHT = CLIP_HEIGHT / PITCHES;
 const GRID_DIVISIONS = 16;  // e.g. 16 for 1/16th notes
 const GRID_SIZE = CLIP_WIDTH / GRID_DIVISIONS;
+const MAX_LOOP_LENGTH = 8;
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const BASE_OCTAVE = 4;  // e.g. C4 is the bottom
@@ -81,9 +82,9 @@ export class Performer {
     return trigger;
   }
 
-  destroy() {
+  async destroy() {
     this._destroyAllNotes();
-    this._withHandle((handle) => {
+    await this._withHandle((handle) => {
       this._audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
     });
     if (this._container) {
@@ -104,7 +105,7 @@ export class Performer {
   }
 
   start() {
-    if (this._isPlaying) return;
+    // if (this._isPlaying) return;
 
     this._isPlaying = true;
     this._withHandle((handle) => {
@@ -113,7 +114,7 @@ export class Performer {
   }
 
   stop() {
-    if (!this._isPlaying) return;
+    // if (!this._isPlaying) return;
 
     this._isPlaying = false;
     this._withHandle((handle) => {
@@ -415,7 +416,7 @@ export class Performer {
       this._renderClip();
     };
     this._container.querySelector('#loopIncBtn').onclick = () => {
-      this.loopLength = Math.min(this.loopLength + 1, 4);
+      this.loopLength = Math.min(this.loopLength + 1, MAX_LOOP_LENGTH);
       loopLengthLabel.textContent = this.loopLength;
       this._renderClip();
     };

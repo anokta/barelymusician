@@ -20,8 +20,8 @@ export class Task {
   /**
    * Destroys the task.
    */
-  destroy() {
-    this._withHandle((handle) => {
+  async destroy() {
+    await this._withHandle((handle) => {
       this._audioNode.port.postMessage({type: 'task-destroy', handle});
     });
   }

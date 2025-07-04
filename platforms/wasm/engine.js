@@ -20,7 +20,6 @@ export class Engine {
     this._pendingPerformers = [];
 
     this._metronome = null;
-    this._beat = 0;
 
     this._initAudioNode(audioContext);
   }
@@ -130,15 +129,13 @@ export class Engine {
           this._performers[event.data.handle] = performer;
         } break;
         // TODO(#164): Is this needed?
-        // case 'performer-get-properties-response': {
-        //   const performer = this._performers[event.data.handle];
-        //   if (performer) {
-        //     performer.isLooping = event.data.isLooping;
-        //     performer.loopBeginPosition = event.data.loopBeginPosition;
-        //     performer.loopLength = event.data.loopLength;
-        //     performer.position = event.data.position;
-        //   }
-        // } break;
+        case 'performer-get-properties-response': {
+          const performer = this._performers[event.data.handle];
+          if (performer && performer == this._metronome) {
+            performer._isPlaying = event.data.isPlaying;
+            performer._position = event.data.position;
+          }
+        } break;
         case 'task-create-success': {
           const performer = this._performers[event.data.performerHandle];
           if (performer) {
@@ -182,22 +179,6 @@ export class Engine {
     };
   }
 
-  _createMetronome() {
-    this._metronome = this.createPerformer();
-    this._metronome.isLooping = true;
-    this._metronome.createTrigger(0.0, () => {
-      console.log('Tick: ' + this._beat);
-      ++this._beat;
-
-      Object.values(this._performers).forEach((performer) => {
-        if (!performer.isPlaying) {
-          performer.position = this._metronome.position;
-          performer.start();
-        }
-      });
-    });
-  }
-
   _attachEvents() {
     // Instruments.
     const instrumentsContainer = this.container.querySelector('.instruments');
@@ -220,7 +201,7 @@ export class Engine {
     });
 
     // Transport controls.
-    this._createMetronome();
+    this._metronome = this.createPerformer();
 
     const playPauseButton = this.container.querySelector('#playPauseBtn');
     playPauseButton.addEventListener('click', () => {
@@ -268,7 +249,8 @@ export class Engine {
       this._performers = {};
       this._tasks = {};
       this._triggers = {};
-      this._createMetronome();
+
+      this._metronome = this.createPerformer();
     });
   }
 
@@ -283,10 +265,9 @@ export class Engine {
   _updateStatus() {
     this._audioNode.port.postMessage({type: 'engine-get-timestamp'});
     // TODO(#164): Is this needed?
-    // for (const performerHandle in this._performers) {
-    //   this._audioNode.port.postMessage({type: 'performer-get-properties', handle:
-    //   performerHandle});
-    // }
+    for (const performerHandle in this._performers) {
+      this._audioNode.port.postMessage({type: 'performer-get-properties', handle: performerHandle});
+    }
     for (const taskHandle in this._tasks) {
       this._audioNode.port.postMessage({type: 'task-get-properties', handle: taskHandle});
     }
@@ -296,7 +277,7 @@ export class Engine {
     const status = `
       Instruments: ${Object.keys(this._instruments).length} |
       Performers: ${Math.max(Object.keys(this._performers).length - 1, 0)} |
-      Position: ${(this._beat + this._metronome.position).toFixed(1)}
+      Position: ${(this._metronome.position).toFixed(1)}
     `;
     this.container.querySelector('.engine-status').textContent = status;
   }

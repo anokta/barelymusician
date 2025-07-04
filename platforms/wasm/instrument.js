@@ -35,8 +35,8 @@ export class Instrument {
   /**
    * Destroys the instrument and removes its UI.
    */
-  destroy() {
-    this._withHandle((handle) => {
+  async destroy() {
+    await this._withHandle((handle) => {
       this._audioNode.port.postMessage({type: 'instrument-destroy', handle: handle});
     });
     if (this._container) {

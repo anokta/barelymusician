@@ -168,8 +168,8 @@ export const CONTROLS = {
   [ControlType.FILTER_FREQUENCY]: {
     name: 'Filter Frequency',
     valueType: 'float',
-    defaultValue: 0.0,
-    minValue: 48000.0,
+    defaultValue: 48000.0,
+    minValue: 0.0,
     maxValue: 48000.0,
   },
   [ControlType.FILTER_Q]: {

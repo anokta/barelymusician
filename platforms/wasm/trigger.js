@@ -13,8 +13,8 @@ export class Trigger {
   /**
    * Destroys the task.
    */
-  destroy() {
-    this._withHandle((handle) => {
+  async destroy() {
+    await this._withHandle((handle) => {
       this._audioNode.port.postMessage({type: 'trigger-destroy', handle});
     });
   }

@@ -70,6 +70,13 @@ export class Instrument {
         value: value,
       });
     });
+
+    if (this._container) {
+      const controlContainer =
+          this._container.querySelector('#controls').querySelector(`#control-${typeIndex}`);
+      controlContainer.querySelector('input').value = value;
+      controlContainer.querySelector(`#input-number-${typeIndex}`).value = value;
+    }
   }
 
   /**

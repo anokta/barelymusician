@@ -8,7 +8,7 @@ const CLIP_WIDTH = 440;
 const ROW_HEIGHT = CLIP_HEIGHT / PITCHES;
 const GRID_DIVISIONS = 16;  // e.g. 16 for 1/16th notes
 const GRID_SIZE = CLIP_WIDTH / GRID_DIVISIONS;
-const MAX_LOOP_LENGTH = 8;
+const MAX_LOOP_LENGTH = 16;
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const BASE_OCTAVE = 4;  // e.g. C4 is the bottom
@@ -90,6 +90,11 @@ export class Performer {
     if (this._container) {
       this._container.remove();
     }
+  }
+
+  getSelectedInstrumentHandle() {
+    if (!this._container) return 0;
+    return this._container.querySelector('#instrumentSelect').value;
   }
 
   onTaskCreateSuccess(handle) {
@@ -509,6 +514,10 @@ export class Performer {
         loopLength: newLoopLength,
       });
     });
+
+    if (this._container) {
+      this._container.querySelector('#loopLengthLabel').textContent = this._loopLength;
+    }
   }
 
   /**

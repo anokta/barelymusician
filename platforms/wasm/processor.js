@@ -135,7 +135,8 @@ class Processor extends AudioWorkletProcessor {
           // TOD(#164): Temp workaround to sync performers.
           if (Object.keys(this._performers).length == 1) {
             this._metronome = performer;
-          } else if(this._metronome.isPlaying) {
+          }
+          else if (this._metronome.isPlaying) {
             performer.position = this._metronome.position;
             performer.start();
           }

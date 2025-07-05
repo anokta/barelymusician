@@ -8,6 +8,7 @@ const onLoad = async () => {
   new Engine({
     container: document.querySelector('.engine'),
     audioContext: audioContext,
+    state: location.hash.slice(1),
   });
 };
 

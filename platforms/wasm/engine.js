@@ -1,12 +1,13 @@
+import {CONTROLS} from './control.js';
 import {Instrument} from './instrument.js';
 import {Performer} from './performer.js';
 
 export class Engine {
-  constructor({container, audioContext}) {
+  constructor({container, audioContext, state}) {
     this.container = container;
 
     this.seed = 0.0;
-    this.tempo = 120.0;
+    this._tempo = 120.0;
     this.timestamp = 0.0;
 
     this._render();
@@ -21,7 +22,78 @@ export class Engine {
 
     this._metronome = null;
 
-    this._initAudioNode(audioContext);
+    this._initAudioNode(audioContext, state);
+  }
+
+  loadState(stateStr) {
+    const {tempoJson, instrumentsJson, performersJson} =
+        JSON.parse(decodeURIComponent(atob(stateStr)));
+
+    this.tempo = tempoJson;
+
+    const tempInstruments = {};
+
+    const instrumentsContainer = this.container.querySelector('.instruments');
+    instrumentsJson.forEach(instrumentJson => {
+      const instrumentContainer = document.createElement('div');
+      instrumentContainer.className = 'instrument';
+      instrumentsContainer.appendChild(instrumentContainer);
+
+      const instrument = this.createInstrument(instrumentContainer);
+      for (const controlTypeIndex in instrumentJson.controlValues) {
+        instrument.setControl(controlTypeIndex, instrumentJson.controlValues[controlTypeIndex]);
+      }
+
+      tempInstruments[instrumentJson.handle] = instrument;
+    });
+
+    const performersContainer = this.container.querySelector('.performers');
+    performersJson.forEach(performerJson => {
+      const performerContainer = document.createElement('div');
+      performerContainer.className = 'performer';
+      performersContainer.appendChild(performerContainer);
+
+      const performer = this.createPerformer(performerContainer);
+      performer.isLooping = true;
+      performer.loopLength = performerJson.loopLength;
+      performerJson.notes.forEach(
+          note => performer._addNote(note.position, note.duration, note.pitch, note.gain));
+
+      if (tempInstruments[performerJson.instrumentHandle]) {
+        tempInstruments[performerJson.instrumentHandle]._withHandle(handle => {
+          performer.updateInstrumentSelect(this._instruments);
+          performer._container.querySelector('#instrumentSelect').value = handle;
+        });
+      }
+    });
+  }
+
+  saveState() {
+    const tempoJson = this._tempo;
+    const instrumentsJson = Object.keys(this._instruments).map(handle => {
+      const instrument = this._instruments[handle];
+      const controlValues = {};
+      const controlsContainer = instrument._container.querySelector('#controls');
+      for (const controlTypeIndex in CONTROLS) {
+        const controlInput =
+            controlsContainer.querySelector(`#control-${controlTypeIndex}`).querySelector('input');
+        controlValues[controlTypeIndex] = controlInput.value;
+      }
+      return {handle, controlValues};
+    });
+    const performersJson = Object.values(this._performers)
+                               .filter(performer => performer !== this._metronome)
+                               .map(performer => ({
+                                      instrumentHandle: performer.getSelectedInstrumentHandle(),
+                                      loopLength: performer.loopLength,
+                                      notes: performer._notes.map(note => ({
+                                                                    position: note.position,
+                                                                    duration: note.duration,
+                                                                    pitch: note.pitch,
+                                                                    gain: note.gain,
+                                                                  })),
+                                    }));
+    return btoa(encodeURIComponent(JSON.stringify({tempoJson, instrumentsJson, performersJson})));
   }
 
   _render() {
@@ -31,14 +103,15 @@ export class Engine {
       <button id="createInstrumentBtn">Create Instrument</button>
       <button id="createPerformerBtn">Create Performer</button>
       <button id="resetBtn">Reset</button>
+      <button id="saveBtn">Save</button>
     </div>
     <div class="engine-controls">
       <button id="playPauseBtn">Play</button>
       <button id="stopBtn">Stop</button>
       <div class="engine-tempo">
         <label for="tempoSlider">Tempo</label>
-        <input type="range" min="30" max="480" value="${this.tempo}" step="1" id="tempoSlider">
-        <span id="tempoValue">${this.tempo}</span>
+        <input type="range" min="30" max="480" value="${this._tempo}" step="1" id="tempoSlider">
+        <span id="tempoValue">${this._tempo}</span>
       </div>
     <div class="engine-status"></div>
     <div class="engine-components">
@@ -89,7 +162,20 @@ export class Engine {
     return performer;
   }
 
-  _initAudioNode(audioContext) {
+  get tempo() {
+    return this._tempo;
+  }
+
+  set tempo(newTempo) {
+    if (this._tempo == newTempo) return;
+
+    this._tempo = newTempo;
+    this.tempoSlider.value = this._tempo;
+    this.tempoValue.textContent = this._tempo;
+    this._audioNode.port.postMessage({type: 'engine-set-tempo', tempo: this._tempo});
+  }
+
+  _initAudioNode(audioContext, state) {
     this._audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor');
     this._audioNode.connect(audioContext.destination);
     this._audioNode.port.onmessage = (event) => {
@@ -97,7 +183,11 @@ export class Engine {
 
       switch (event.data.type) {
         case 'init-success': {
+          this._reset();
           this._attachEvents();
+          if (state) {
+            this.loadState(state);
+          }
           this._startUpdateLoop();
         } break;
         case 'engine-get-timestamp-response': {
@@ -127,6 +217,7 @@ export class Engine {
           const {performer, resolveHandle} = this._pendingPerformers.shift();
           resolveHandle(event.data.handle);
           this._performers[event.data.handle] = performer;
+          this._performers[event.data.handle].updateInstrumentSelect(this._instruments);
         } break;
         // TODO(#164): Is this needed?
         case 'performer-get-properties-response': {
@@ -201,8 +292,6 @@ export class Engine {
     });
 
     // Transport controls.
-    this._metronome = this.createPerformer();
-
     const playPauseButton = this.container.querySelector('#playPauseBtn');
     playPauseButton.addEventListener('click', () => {
       if (this._metronome.isPlaying) {
@@ -232,26 +321,36 @@ export class Engine {
     this.tempoValue = this.container.querySelector('#tempoValue');
     this.tempoSlider.addEventListener('input', () => {
       this.tempo = Number(this.tempoSlider.value);
-      this.tempoValue.textContent = this.tempo;
-      this._audioNode.port.postMessage({type: 'engine-set-tempo', tempo: this.tempo});
     });
 
     // reset
     this.container.querySelector('#resetBtn').addEventListener('click', () => {
       stopButton.click();
-      for (const handle in this._instruments) {
-        this._instruments[handle].destroy();
-      }
-      for (const handle in this._performers) {
-        this._performers[handle].destroy();
-      }
-      this._instruments = {};
-      this._performers = {};
-      this._tasks = {};
-      this._triggers = {};
-
-      this._metronome = this.createPerformer();
+      this._reset()
     });
+
+    // save
+    this.container.querySelector('#saveBtn').addEventListener('click', () => {
+      const stateStr = this.saveState();
+      const url = `${location.origin}${location.pathname}#${stateStr}`;
+      navigator.clipboard.writeText(url);
+      alert(`Link copied to clipboard!`);
+    });
+  }
+
+  _reset() {
+    for (const handle in this._instruments) {
+      this._instruments[handle].destroy();
+    }
+    for (const handle in this._performers) {
+      this._performers[handle].destroy();
+    }
+    this._instruments = {};
+    this._performers = {};
+    this._tasks = {};
+    this._triggers = {};
+
+    this._metronome = this.createPerformer();
   }
 
   _startUpdateLoop() {

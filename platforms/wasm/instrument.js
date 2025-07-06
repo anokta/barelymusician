@@ -34,10 +34,11 @@ export class Instrument {
 
   /**
    * Destroys the instrument and removes its UI.
+   * @return {!Promise<void>}
    */
   async destroy() {
-    await this._withHandle((handle) => {
-      this._audioNode.port.postMessage({type: 'instrument-destroy', handle: handle});
+    await this._withHandle(handle => {
+      this._audioNode.port.postMessage({type: 'instrument-destroy', handle});
     });
     if (this._container) {
       this._container.remove();
@@ -48,10 +49,10 @@ export class Instrument {
    * Sets all notes off.
    */
   setAllNotesOff() {
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-all-notes-off',
-        handle: handle,
+        handle,
       });
     });
   }
@@ -62,12 +63,12 @@ export class Instrument {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-control',
-        handle: handle,
-        typeIndex: typeIndex,
-        value: value,
+        handle,
+        typeIndex,
+        value,
       });
     });
 
@@ -84,10 +85,10 @@ export class Instrument {
    * @param {number} note
    */
   setNoteOff(note) {
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-note-off',
-        handle: handle,
+        handle,
         pitch: this._noteToPitch(note),
       });
 
@@ -104,13 +105,13 @@ export class Instrument {
    * @param {number=} pitchShift
    */
   setNoteOn(note, gain = 1.0, pitchShift = 0.0) {
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-note-on',
-        handle: handle,
+        handle,
         pitch: this._noteToPitch(note),
-        gain: gain,
-        pitchShift: pitchShift,
+        gain,
+        pitchShift,
       });
 
       if (this._container) {
@@ -172,7 +173,7 @@ export class Instrument {
 
     if (control.valueType === 'bool') {
       controlInput.addEventListener(
-          'change', (e) => this.setControl(controlTypeIndex, e.target.checked ? 1.0 : 0.0));
+          'change', e => this.setControl(controlTypeIndex, e.target.checked ? 1.0 : 0.0));
     } else {
       // Value input (number box)
       const controlValueInput = document.createElement('input');
@@ -186,14 +187,14 @@ export class Instrument {
       controlContainer.appendChild(controlValueInput);
 
       // Sync slider and number input
-      controlInput.addEventListener('input', (e) => {
+      controlInput.addEventListener('input', e => {
         controlValueInput.value = controlInput.value;
         this.setControl(
             controlTypeIndex,
             control.valueType === 'int' ? parseInt(e.target.value, 10) :
                                           parseFloat(e.target.value));
       });
-      controlValueInput.addEventListener('input', (e) => {
+      controlValueInput.addEventListener('input', e => {
         controlInput.value = controlValueInput.value;
         this.setControl(
             controlTypeIndex,
@@ -241,7 +242,7 @@ export class Instrument {
     // Piano keys
     const piano = this._container.querySelector('#piano');
     let pressedNote = null;
-    piano.addEventListener('mousedown', (e) => {
+    piano.addEventListener('mousedown', e => {
       if (e.target.classList.contains('key')) {
         const note = Number(e.target.dataset.note);
         this.setNoteOn(note);
@@ -254,7 +255,7 @@ export class Instrument {
         pressedNote = null;
       }
     });
-    piano.addEventListener('mouseover', (e) => {
+    piano.addEventListener('mouseover', e => {
       if (pressedNote !== null && e.target.classList.contains('key')) {
         const note = Number(e.target.dataset.note);
         this.setNoteOff(pressedNote);
@@ -273,7 +274,7 @@ export class Instrument {
     this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
 
     // Set id and label
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._container.id = `instrument#${handle}`;
       const label = this._container.querySelector('label');
       label.textContent = this._container.id;

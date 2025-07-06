@@ -1,19 +1,22 @@
-import {Note} from './note.js'
-import {Task, TaskState} from './task.js'
-import {Trigger} from './trigger.js'
+import {Note} from './note.js';
+import {Task, TaskState} from './task.js';
+import {Trigger} from './trigger.js';
 
-const PITCHES = 14;  // e.g. 16 semitones (C4–C5)
+const PITCHES = 14;
 const CLIP_HEIGHT = 240;
 const CLIP_WIDTH = 440;
 const ROW_HEIGHT = CLIP_HEIGHT / PITCHES;
-const GRID_DIVISIONS = 16;  // e.g. 16 for 1/16th notes
+const GRID_DIVISIONS = 16;
 const GRID_SIZE = CLIP_WIDTH / GRID_DIVISIONS;
 const MAX_LOOP_LENGTH = 16;
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-const BASE_OCTAVE = 4;  // e.g. C4 is the bottom
+const BASE_OCTAVE = 4;
 
 export class Performer {
+  /**
+   * @param {!Object} options
+   */
   constructor({container, audioNode, handlePromise, instruments}) {
     this._container = container;
     this._audioNode = audioNode;
@@ -38,6 +41,12 @@ export class Performer {
     this._audioNode.port.postMessage({type: 'performer-create'});
   }
 
+  /**
+   * @param {number} position
+   * @param {number} duration
+   * @param {function} processCallback
+   * @return {!Task}
+   */
   createTask(position, duration, processCallback) {
     let resolveHandle;
     const handlePromise = new Promise(resolve => {
@@ -53,14 +62,23 @@ export class Performer {
 
     this._pendingTasks.push({task, resolveHandle});
 
-    this._withHandle((handle) => {
-      this._audioNode.port.postMessage(
-          {type: 'task-create', performerHandle: handle, position, duration});
+    this._withHandle(handle => {
+      this._audioNode.port.postMessage({
+        type: 'task-create',
+        performerHandle: handle,
+        position,
+        duration,
+      });
     });
 
     return task;
   }
 
+  /**
+   * @param {number} position
+   * @param {function} processCallback
+   * @return {!Trigger}
+   */
   createTrigger(position, processCallback) {
     let resolveHandle;
     const handlePromise = new Promise(resolve => {
@@ -75,58 +93,83 @@ export class Performer {
 
     this._pendingTriggers.push({trigger, resolveHandle});
 
-    this._withHandle((handle) => {
-      this._audioNode.port.postMessage({type: 'trigger-create', performerHandle: handle, position});
+    this._withHandle(handle => {
+      this._audioNode.port.postMessage({
+        type: 'trigger-create',
+        performerHandle: handle,
+        position,
+      });
     });
 
     return trigger;
   }
 
+  /**
+   * Destroys the performer and cleans up resources.
+   * @return {!Promise<void>}
+   */
   async destroy() {
     this._destroyAllNotes();
-    await this._withHandle((handle) => {
-      this._audioNode.port.postMessage({type: 'performer-destroy', handle: handle});
+    await this._withHandle(handle => {
+      this._audioNode.port.postMessage({type: 'performer-destroy', handle});
     });
     if (this._container) {
       this._container.remove();
     }
   }
 
+  /**
+   * @return {number}
+   */
   getSelectedInstrumentHandle() {
     if (!this._container) return 0;
     return this._container.querySelector('#instrumentSelect').value;
   }
 
+  /**
+   * @param {number} handle
+   * @return {!Task}
+   */
   onTaskCreateSuccess(handle) {
     const {task, resolveHandle} = this._pendingTasks.shift();
     resolveHandle(handle);
     return task;
   }
 
+  /**
+   * @param {number} handle
+   * @return {!Trigger}
+   */
   onTriggerCreateSuccess(handle) {
     const {trigger, resolveHandle} = this._pendingTriggers.shift();
     resolveHandle(handle);
     return trigger;
   }
 
+  /**
+   * Starts playback.
+   */
   start() {
-    // if (this._isPlaying) return;
-
     this._isPlaying = true;
-    this._withHandle((handle) => {
-      this._audioNode.port.postMessage({type: 'performer-start', handle: handle});
+    this._withHandle(handle => {
+      this._audioNode.port.postMessage({type: 'performer-start', handle});
     });
   }
 
+  /**
+   * Stops playback.
+   */
   stop() {
-    // if (!this._isPlaying) return;
-
     this._isPlaying = false;
-    this._withHandle((handle) => {
-      this._audioNode.port.postMessage({type: 'performer-stop', handle: handle});
+    this._withHandle(handle => {
+      this._audioNode.port.postMessage({type: 'performer-stop', handle});
     });
   }
 
+  /**
+   * Updates the instrument select dropdown.
+   * @param {!Object} instruments
+   */
   updateInstrumentSelect(instruments) {
     if (!this._container) return;
 
@@ -139,7 +182,7 @@ export class Performer {
     noneOption.textContent = 'none';
     instrumentSelect.appendChild(noneOption);
 
-    Object.keys(instruments).forEach((handle) => {
+    Object.keys(instruments).forEach(handle => {
       const option = document.createElement('option');
       option.value = handle;
       option.textContent = `instrument#${handle}`;
@@ -156,10 +199,10 @@ export class Performer {
     const clip = this._container.querySelector('.clip');
     clip.innerHTML = '';
 
-    const getNoteName = (pitch) => {
+    const getNoteName = pitch => {
       const note = NOTE_NAMES[pitch % 12];
       const octave = BASE_OCTAVE + Math.floor(pitch / 12);
-      return note + octave;
+      return `${note}${octave}`;
     };
 
     // Draw horizontal rows (pitches)
@@ -174,7 +217,7 @@ export class Performer {
       row.style.height = `${ROW_HEIGHT}px`;
       clip.appendChild(row);
 
-      if (i == 0) continue;
+      if (i === 0) continue;
 
       const noteNameDiv = document.createElement('div');
       noteNameDiv.className = 'clip-note-name';
@@ -220,13 +263,13 @@ export class Performer {
       note.noteDiv.style.top = `${(PITCHES - 1 - note.pitch) * ROW_HEIGHT}px`;
       note.noteDiv.style.height = `${ROW_HEIGHT - 2}px`;
 
-      note.noteDiv.onmousedown = (e) => this._startNoteDrag(e, note, note.noteDiv);
+      note.noteDiv.onmousedown = e => this._startNoteDrag(e, note, note.noteDiv);
 
       clip.appendChild(note.noteDiv);
     }
 
     // Add note creation logic
-    clip.onmousedown = (e) => this._startNoteCreate(e);
+    clip.onmousedown = e => this._startNoteCreate(e);
   }
 
   _startNoteCreate(e) {
@@ -242,23 +285,21 @@ export class Performer {
     const pitch = PITCHES - 1 - Math.floor(y / ROW_HEIGHT);
     const start = (this._loopLength * x) / CLIP_WIDTH;
 
-    let noteDiv = document.createElement('div');
+    const noteDiv = document.createElement('div');
     noteDiv.className = 'clip-note';
     noteDiv.style.top = `${(PITCHES - 1 - pitch) * ROW_HEIGHT}px`;
     noteDiv.style.left = `${x}px`;
     noteDiv.style.height = `${ROW_HEIGHT - 2}px`;
     clip.appendChild(noteDiv);
 
-    const onMouseMove = (moveEvent) => {
+    const onMouseMove = moveEvent => {
       let moveX = moveEvent.clientX - rect.left;
-
       moveX = this._snapToGrid(moveX);
-
       const width = Math.max(moveX - x, 0.0);
       noteDiv.style.width = `${width}px`;
     };
 
-    const onMouseUp = (upEvent) => {
+    const onMouseUp = upEvent => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       const endX = Math.min(upEvent.clientX - rect.left, CLIP_WIDTH + GRID_SIZE);
@@ -294,7 +335,7 @@ export class Performer {
     e.preventDefault();
     e.stopPropagation();
 
-    if (e.detail == 2) {  // double click to remove
+    if (e.detail === 2) {
       this._removeNote(note);
       return;
     }
@@ -319,17 +360,15 @@ export class Performer {
     const origPosition = note.position;
     const origDuration = note.duration;
 
-    const onMouseMove = (moveEvent) => {
+    const onMouseMove = moveEvent => {
       let moveX = moveEvent.clientX - clipRect.left;
       let moveY = moveEvent.clientY - clipRect.top;
 
       if (dragMode === 'move') {
-        // Snap left edge to grid, keep duration
         let newLeft = this._snapToGrid(moveX - (startX - noteLeft));
         const newPitch =
             Math.min(Math.max(PITCHES - 1 - Math.floor(moveY / ROW_HEIGHT), 0), PITCHES - 2);
         note.pitch = newPitch;
-        // Clamp so note stays in bounds
         newLeft = Math.min(Math.max(newLeft, GRID_SIZE), CLIP_WIDTH - noteWidth + GRID_SIZE);
         noteDiv.style.left = `${newLeft}px`;
         noteDiv.style.top = `${(PITCHES - 1 - newPitch) * ROW_HEIGHT}px`;
@@ -349,14 +388,14 @@ export class Performer {
       }
     };
 
-    const onMouseUp = (upEvent) => {
+    const onMouseUp = upEvent => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       noteDiv.style.cursor = '';
 
-      let finalLeft = parseFloat(noteDiv.style.left);
-      let finalWidth = parseFloat(noteDiv.style.width);
-      let finalTop = parseFloat(noteDiv.style.top);
+      const finalLeft = parseFloat(noteDiv.style.left);
+      const finalWidth = parseFloat(noteDiv.style.width);
+      const finalTop = parseFloat(noteDiv.style.top);
 
       if (dragMode === 'move') {
         note.position =
@@ -430,7 +469,7 @@ export class Performer {
     this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
 
     // id
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._container.id = `performer#${handle}`;
 
       // label
@@ -468,49 +507,48 @@ export class Performer {
   }
 
   /**
-   * @param {bool} newIsLooping
+   * @param {boolean} newIsLooping
    */
   set isLooping(newIsLooping) {
-    if (this._isLooping == newIsLooping) return;
+    if (this._isLooping === newIsLooping) return;
 
-    // TODO(#164): Revisit how the properties are set when they are set (immediate vs deferred).
     this._isLooping = newIsLooping;
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'performer-set-looping',
-        handle: handle,
+        handle,
         isLooping: newIsLooping,
       });
     });
   }
 
   /**
-   * @param {float} newLoopBeginPosition
+   * @param {number} newLoopBeginPosition
    */
   set loopBeginPosition(newLoopBeginPosition) {
-    if (this._loopBeginPosition == newLoopBeginPosition) return;
+    if (this._loopBeginPosition === newLoopBeginPosition) return;
 
     this._loopBeginPosition = newLoopBeginPosition;
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'performer-set-loop-begin-position',
-        handle: handle,
+        handle,
         loopBeginPosition: newLoopBeginPosition,
       });
     });
   }
 
   /**
-   * @param {float} newLoopLength
+   * @param {number} newLoopLength
    */
   set loopLength(newLoopLength) {
-    if (this._loopLength == newLoopLength) return;
+    if (this._loopLength === newLoopLength) return;
 
     this._loopLength = Math.max(newLoopLength, 0.0);
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'performer-set-loop-length',
-        handle: handle,
+        handle,
         loopLength: newLoopLength,
       });
     });
@@ -521,16 +559,16 @@ export class Performer {
   }
 
   /**
-   * @param {float} newPosition
+   * @param {number} newPosition
    */
   set position(newPosition) {
-    if (this._position == newPosition) return;
+    if (this._position === newPosition) return;
 
     this._position = newPosition;
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'performer-set-position',
-        handle: handle,
+        handle,
         position: newPosition,
       });
     });

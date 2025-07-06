@@ -3,6 +3,9 @@ import {Instrument} from './instrument.js';
 import {Performer} from './performer.js';
 
 export class Engine {
+  /**
+   * @param {!Object} options
+   */
   constructor({container, audioContext, state}) {
     this.container = container;
 
@@ -25,6 +28,10 @@ export class Engine {
     this._initAudioNode(audioContext, state);
   }
 
+  /**
+   * Loads engine state from a string.
+   * @param {string} stateStr
+   */
   loadState(stateStr) {
     const {tempoJson, instrumentsJson, performersJson} =
         JSON.parse(decodeURIComponent(atob(stateStr)));
@@ -68,6 +75,10 @@ export class Engine {
     });
   }
 
+  /**
+   * Saves engine state to a string.
+   * @return {string}
+   */
   saveState() {
     const tempoJson = this._tempo;
     const instrumentsJson = Object.keys(this._instruments).map(handle => {
@@ -122,6 +133,10 @@ export class Engine {
     `;
   }
 
+  /**
+   * @param {!Element} instrumentContainer
+   * @return {!Instrument}
+   */
   createInstrument(instrumentContainer) {
     let resolveHandle;
     const handlePromise = new Promise(resolve => {
@@ -132,10 +147,10 @@ export class Engine {
       container: instrumentContainer,
       audioNode: this._audioNode,
       handlePromise: handlePromise,
-      noteOnCallback: (pitch) => {
+      noteOnCallback: pitch => {
         console.log(`[${instrumentContainer.id}] NoteOn(${pitch.toFixed(1)})`);
       },
-      noteOffCallback: (pitch) => {
+      noteOffCallback: pitch => {
         console.log(`[${instrumentContainer.id}] NoteOff(${pitch.toFixed(1)})`);
       },
     });
@@ -145,6 +160,10 @@ export class Engine {
     return instrument;
   }
 
+  /**
+   * @param {!Element} performerContainer
+   * @return {!Performer}
+   */
   createPerformer(performerContainer) {
     let resolveHandle;
     const handlePromise = new Promise(resolve => {
@@ -167,7 +186,7 @@ export class Engine {
   }
 
   set tempo(newTempo) {
-    if (this._tempo == newTempo) return;
+    if (this._tempo === newTempo) return;
 
     this._tempo = newTempo;
     this.tempoSlider.value = this._tempo;
@@ -178,7 +197,7 @@ export class Engine {
   _initAudioNode(audioContext, state) {
     this._audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor');
     this._audioNode.connect(audioContext.destination);
-    this._audioNode.port.onmessage = (event) => {
+    this._audioNode.port.onmessage = event => {
       if (!event.data) return;
 
       switch (event.data.type) {
@@ -222,7 +241,7 @@ export class Engine {
         // TODO(#164): Is this needed?
         case 'performer-get-properties-response': {
           const performer = this._performers[event.data.handle];
-          if (performer && performer == this._metronome) {
+          if (performer && performer === this._metronome) {
             performer._isPlaying = event.data.isPlaying;
             performer._position = event.data.position;
           }
@@ -323,18 +342,18 @@ export class Engine {
       this.tempo = Number(this.tempoSlider.value);
     });
 
-    // reset
+    // Reset
     this.container.querySelector('#resetBtn').addEventListener('click', () => {
       stopButton.click();
-      this._reset()
+      this._reset();
     });
 
-    // save
+    // Save
     this.container.querySelector('#saveBtn').addEventListener('click', () => {
       const stateStr = this.saveState();
       const url = `${location.origin}${location.pathname}#${stateStr}`;
       navigator.clipboard.writeText(url);
-      alert(`Link copied to clipboard!`);
+      alert('Link copied to clipboard!');
     });
   }
 
@@ -376,7 +395,7 @@ export class Engine {
     const status = `
       Instruments: ${Object.keys(this._instruments).length} |
       Performers: ${Math.max(Object.keys(this._performers).length - 1, 0)} |
-      Position: ${(this._metronome.position).toFixed(1)}
+      Position: ${this._metronome.position.toFixed(1)}
     `;
     this.container.querySelector('.engine-status').textContent = status;
   }

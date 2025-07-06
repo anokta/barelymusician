@@ -19,9 +19,10 @@ export class Task {
 
   /**
    * Destroys the task.
+   * @return {!Promise<void>}
    */
   async destroy() {
-    await this._withHandle((handle) => {
+    await this._withHandle(handle => {
       this._audioNode.port.postMessage({type: 'task-destroy', handle});
     });
   }
@@ -39,32 +40,32 @@ export class Task {
   }
 
   /**
-   * @param {float} newDuration
+   * @param {number} newDuration
    */
   set duration(newDuration) {
-    if (this._duration == newDuration) return;
+    if (this._duration === newDuration) return;
 
     this._duration = newDuration;
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'task-set-duration',
-        handle: handle,
+        handle,
         duration: newDuration,
       });
     });
   }
 
   /**
-   * @param {float} newPosition
+   * @param {number} newPosition
    */
   set position(newPosition) {
-    if (this._position == newPosition) return;
+    if (this._position === newPosition) return;
 
     this._position = newPosition;
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'task-set-position',
-        handle: handle,
+        handle,
         position: newPosition,
       });
     });

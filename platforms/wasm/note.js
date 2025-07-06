@@ -1,16 +1,15 @@
-import {TaskState} from './task.js'
+import {TaskState} from './task.js';
 
 export class Note {
   constructor(performer, position, duration, pitch, gain) {
     this._performer = performer;
     this._pitch = pitch;
-
     this.gain = gain;
 
-    this._task = performer.createTask(position, duration, (state) => {
-      if (state == TaskState.BEGIN) {
+    this._task = performer.createTask(position, duration, state => {
+      if (state === TaskState.BEGIN) {
         this._performer.selectedInstrument?.setNoteOn(this._pitch, this.gain);
-      } else if (state == TaskState.END) {
+      } else if (state === TaskState.END) {
         this._performer.selectedInstrument?.setNoteOff(this._pitch);
       }
     });
@@ -47,7 +46,7 @@ export class Note {
   }
 
   set pitch(newPitch) {
-    if (this._pitch == newPitch) return;
+    if (this._pitch === newPitch) return;
 
     this._performer.selectedInstrument?.setNoteOff(this._pitch);
     this._pitch = newPitch;

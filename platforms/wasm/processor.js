@@ -13,7 +13,7 @@ class Processor extends AudioWorkletProcessor {
     this._tasks = null;
     this._triggers = null;
 
-    Module().then((module) => {
+    Module().then(module => {
       this._module = module;
       this._engine = new this._module.Engine(sampleRate, REFERENCE_FREQUENCY);
       this._instruments = {};
@@ -27,7 +27,7 @@ class Processor extends AudioWorkletProcessor {
       this.port.postMessage({type: 'init-success'});
     });
 
-    this.port.onmessage = (event) => {
+    this.port.onmessage = event => {
       if (!event.data) return;
 
       if (!this._module) {
@@ -130,13 +130,12 @@ class Processor extends AudioWorkletProcessor {
           const performer = this._engine.createPerformer();
           const handle = performer.getHandle();
           this._performers[handle] = performer;
-          this.port.postMessage({type: 'performer-create-success', handle})
+          this.port.postMessage({type: 'performer-create-success', handle});
 
-          // TOD(#164): Temp workaround to sync performers.
-          if (Object.keys(this._performers).length == 1) {
+          // TODO(#164): Temp workaround to sync performers.
+          if (Object.keys(this._performers).length === 1) {
             this._metronome = performer;
-          }
-          else if (this._metronome.isPlaying) {
+          } else if (this._metronome && this._metronome.isPlaying) {
             performer.position = this._metronome.position;
             performer.start();
           }
@@ -144,8 +143,8 @@ class Processor extends AudioWorkletProcessor {
         case 'performer-destroy': {
           delete this._performers[event.data.handle];
 
-          // TOD(#164): Temp workaround to sync performers.
-          if (Object.keys(this._performers).length == 0) {
+          // TODO(#164): Temp workaround to sync performers.
+          if (Object.keys(this._performers).length === 0) {
             this._metronome = null;
           }
         } break;
@@ -168,7 +167,7 @@ class Processor extends AudioWorkletProcessor {
             this._performers[event.data.handle].loopBeginPosition = event.data.loopBeginPosition;
           }
 
-          // TOD(#164): Temp workaround to sync performers.
+          // TODO(#164): Temp workaround to sync performers.
           if (this._performers[event.data.handle] && this._metronome) {
             this._performers[event.data.handle].position = this._metronome.position;
           }
@@ -178,7 +177,7 @@ class Processor extends AudioWorkletProcessor {
             this._performers[event.data.handle].loopLength = event.data.loopLength;
           }
 
-          // TOD(#164): Temp workaround to sync performers.
+          // TODO(#164): Temp workaround to sync performers.
           if (this._performers[event.data.handle] && this._metronome) {
             this._performers[event.data.handle].position = this._metronome.position;
           }
@@ -193,7 +192,7 @@ class Processor extends AudioWorkletProcessor {
             this._performers[event.data.handle].position = event.data.position;
           }
 
-          // TOD(#164): Temp workaround to sync performers.
+          // TODO(#164): Temp workaround to sync performers.
           if (this._performers[event.data.handle] && this._metronome) {
             this._performers[event.data.handle].position = this._metronome.position;
           }
@@ -201,7 +200,7 @@ class Processor extends AudioWorkletProcessor {
         case 'performer-start': {
           this._performers[event.data.handle]?.start();
 
-          // TOD(#164): Temp workaround to sync performers.
+          // TODO(#164): Temp workaround to sync performers.
           if (this._performers[event.data.handle] && this._metronome) {
             this._performers[event.data.handle].position = this._metronome.position;
           }
@@ -209,7 +208,7 @@ class Processor extends AudioWorkletProcessor {
         case 'performer-stop': {
           this._performers[event.data.handle]?.stop();
 
-          // TOD(#164): Temp workaround to sync performers.
+          // TODO(#164): Temp workaround to sync performers.
           if (this._performers[event.data.handle] && this._metronome) {
             this._performers[event.data.handle].position = this._metronome.position;
           }
@@ -302,6 +301,9 @@ class Processor extends AudioWorkletProcessor {
     };
   }
 
+  /**
+   * Audio processing callback.
+   */
   process(inputs, outputs, parameters) {
     if (!this._engine || !this._module || !this._module.HEAPF32) return true;
 

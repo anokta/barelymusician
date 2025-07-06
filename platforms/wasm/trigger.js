@@ -1,4 +1,3 @@
-
 export class Trigger {
   constructor({audioNode, handlePromise, position, processCallback}) {
     this._audioNode = audioNode;
@@ -11,10 +10,11 @@ export class Trigger {
   }
 
   /**
-   * Destroys the task.
+   * Destroys the trigger.
+   * @return {!Promise<void>}
    */
   async destroy() {
-    await this._withHandle((handle) => {
+    await this._withHandle(handle => {
       this._audioNode.port.postMessage({type: 'trigger-destroy', handle});
     });
   }
@@ -24,16 +24,16 @@ export class Trigger {
   }
 
   /**
-   * @param {float} newPosition
+   * @param {number} newPosition
    */
   set position(newPosition) {
-    if (this._position == newPosition) return;
+    if (this._position === newPosition) return;
 
     this._position = newPosition;
-    this._withHandle((handle) => {
+    this._withHandle(handle => {
       this._audioNode.port.postMessage({
         type: 'trigger-set-position',
-        handle: handle,
+        handle,
         position: newPosition,
       });
     });

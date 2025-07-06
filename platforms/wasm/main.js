@@ -1,5 +1,8 @@
 import {Engine} from './engine.js';
 
+/**
+ * Initializes the barelymusician engine on page load.
+ */
 const onLoad = async () => {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   await audioContext.audioWorklet.addModule('processor.js');

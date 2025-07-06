@@ -409,22 +409,22 @@ export class Performer {
     this.updateInstrumentSelect(instruments);
 
     // controls
-    this._container.querySelector('#clearNotesBtn').onclick = () => {
+    this._container.querySelector('#clearNotesBtn').addEventListener('click', () => {
       this._destroyAllNotes();
       this._renderClip();
-    };
+    });
 
     const loopLengthLabel = this._container.querySelector('#loopLengthLabel');
-    this._container.querySelector('#loopDecBtn').onclick = () => {
+    this._container.querySelector('#loopDecBtn').addEventListener('click', () => {
       this.loopLength = Math.max(this.loopLength - 1, 1);
       loopLengthLabel.textContent = this.loopLength;
       this._renderClip();
-    };
-    this._container.querySelector('#loopIncBtn').onclick = () => {
+    });
+    this._container.querySelector('#loopIncBtn').addEventListener('click', () => {
       this.loopLength = Math.min(this.loopLength + 1, MAX_LOOP_LENGTH);
       loopLengthLabel.textContent = this.loopLength;
       this._renderClip();
-    };
+    });
 
     // delete
     this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());

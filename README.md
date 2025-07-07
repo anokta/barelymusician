@@ -8,6 +8,8 @@ barelymusician is a real-time music engine for interactive systems.
 It provides a modern C/C++ API to generate and perform musical sounds from scratch in a sample
 accurate way.
 
+[Try out the web demo](http://barelymusician.com) to get started!
+
 This repository includes build targets for Windows, macOS, Linux, Android, WebAssembly, and Daisy
 platforms, as well as a native Unity game engine plugin and a VST instrument plugin.
 

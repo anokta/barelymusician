@@ -1,4 +1,4 @@
-import Module from '../../build/WebAssembly/bin/barelymusician.js';
+import Module from './barelymusician.js';
 
 const REFERENCE_FREQUENCY = 261.62555;
 

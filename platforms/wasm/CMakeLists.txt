@@ -30,3 +30,11 @@ target_link_libraries(
   barelymusicianwasm PRIVATE
   barelymusician
 )
+
+function(package_barelymusicianwasm)
+  add_custom_command(
+    TARGET barelymusicianwasm POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusicianwasm> ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+endfunction()
+package_barelymusicianwasm()

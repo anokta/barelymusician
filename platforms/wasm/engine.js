@@ -238,6 +238,9 @@ export class Engine {
           this._performers[event.data.handle] = performer;
           this._performers[event.data.handle].updateInstrumentSelect(this._instruments);
         } break;
+        case 'performer-destroy-success': {
+          delete this._performers[event.data.handle];
+        } break;
         // TODO(#164): Is this needed?
         case 'performer-get-properties-response': {
           const performer = this._performers[event.data.handle];

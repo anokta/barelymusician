@@ -270,6 +270,39 @@ export class Instrument {
       }
     });
 
+    piano.addEventListener('touchstart', e => {
+      const touch = e.touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (target && target.classList.contains('key')) {
+        const note = Number(target.dataset.note);
+        this.setNoteOn(note);
+        pressedNote = note;
+        e.preventDefault();
+      }
+    }, {passive: false});
+    piano.addEventListener('touchend', e => {
+      if (pressedNote !== null) {
+        this.setNoteOff(pressedNote);
+        pressedNote = null;
+        e.preventDefault();
+      }
+    }, {passive: false});
+    piano.addEventListener('touchmove', e => {
+      if (pressedNote !== null) {
+        const touch = e.touches[0];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (target && target.classList.contains('key')) {
+          const note = Number(target.dataset.note);
+          if (note !== pressedNote) {
+            this.setNoteOff(pressedNote);
+            this.setNoteOn(note);
+            pressedNote = note;
+          }
+        }
+        e.preventDefault();
+      }
+    }, {passive: false});
+
     // Delete button
     this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
 

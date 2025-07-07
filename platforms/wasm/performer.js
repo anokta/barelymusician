@@ -264,12 +264,44 @@ export class Performer {
       note.noteDiv.style.height = `${ROW_HEIGHT - 2}px`;
 
       note.noteDiv.onmousedown = e => this._startNoteDrag(e, note, note.noteDiv);
+      note.noteDiv.ontouchstart = e => {
+        if (e.touches.length > 1) return;
+        const touch = e.touches[0];
+        // Synthesize a mouse-like event object.
+        const fakeEvent = {
+          ...e,
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          currentTarget: clip,
+          preventDefault: () => e.preventDefault(),
+          stopPropagation: () => e.stopPropagation(),
+          detail: e.detail || 1,
+        };
+        this._startNoteDrag(fakeEvent, note, note.noteDiv);
+        e.preventDefault();
+      };
 
       clip.appendChild(note.noteDiv);
     }
 
     // Add note creation logic
     clip.onmousedown = e => this._startNoteCreate(e);
+    clip.ontouchstart = e => {
+      if (e.touches.length > 1) return;
+      const touch = e.touches[0];
+      // Synthesize a mouse-like event object.
+      const fakeEvent = {
+        ...e,
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        currentTarget: clip,
+        preventDefault: () => e.preventDefault(),
+        stopPropagation: () => e.stopPropagation(),
+        detail: 1,
+      };
+      this._startNoteCreate(fakeEvent);
+      e.preventDefault();
+    };
   }
 
   _startNoteCreate(e) {
@@ -299,9 +331,24 @@ export class Performer {
       noteDiv.style.width = `${width}px`;
     };
 
+    const onTouchMove = touchEvent => {
+      if (touchEvent.touches.length > 1) return;
+      const touch = touchEvent.touches[0];
+      onMouseMove({clientX: touch.clientX, clientY: touch.clientY});
+      touchEvent.preventDefault();
+    };
+
+    const onTouchEnd = touchEvent => {
+      const touch = (touchEvent.changedTouches && touchEvent.changedTouches[0]) || {};
+      onMouseUp({clientX: touch.clientX || 0, clientY: touch.clientY || 0});
+      touchEvent.preventDefault();
+    };
+
     const onMouseUp = upEvent => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
       const endX = Math.min(upEvent.clientX - rect.left, CLIP_WIDTH + GRID_SIZE);
       const duration = this._snapToGrid(endX - x) / CLIP_WIDTH * this._loopLength;
       if (duration > 0) {
@@ -313,6 +360,8 @@ export class Performer {
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('touchmove', onTouchMove, {passive: false});
+    document.addEventListener('touchend', onTouchEnd, {passive: false});
   }
 
   _addNote(start, duration, pitch, gain) {
@@ -360,6 +409,19 @@ export class Performer {
     const origPosition = note.position;
     const origDuration = note.duration;
 
+    const onTouchMove = touchEvent => {
+      if (touchEvent.touches.length > 1) return;
+      const touch = touchEvent.touches[0];
+      onMouseMove({clientX: touch.clientX, clientY: touch.clientY});
+      touchEvent.preventDefault();
+    };
+
+    const onTouchEnd = touchEvent => {
+      const touch = (touchEvent.changedTouches && touchEvent.changedTouches[0]) || {};
+      onMouseUp({clientX: touch.clientX || 0, clientY: touch.clientY || 0});
+      touchEvent.preventDefault();
+    };
+
     const onMouseMove = moveEvent => {
       let moveX = moveEvent.clientX - clipRect.left;
       let moveY = moveEvent.clientY - clipRect.top;
@@ -391,6 +453,8 @@ export class Performer {
     const onMouseUp = upEvent => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
       noteDiv.style.cursor = '';
 
       const finalLeft = parseFloat(noteDiv.style.left);
@@ -420,6 +484,8 @@ export class Performer {
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('touchmove', onTouchMove, {passive: false});
+    document.addEventListener('touchend', onTouchEnd, {passive: false});
   }
 
   _initContainer(instruments) {

@@ -141,7 +141,10 @@ class Processor extends AudioWorkletProcessor {
           }
         } break;
         case 'performer-destroy': {
-          delete this._performers[event.data.handle];
+          if (this._performers[event.data.handle]) {
+            delete this._performers[event.data.handle];
+            this.port.postMessage({type: 'performer-destroy-success', handle: event.data.handle});
+          }
 
           // TODO(#164): Temp workaround to sync performers.
           if (Object.keys(this._performers).length === 0) {

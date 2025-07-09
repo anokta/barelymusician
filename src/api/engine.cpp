@@ -29,6 +29,16 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
   assert(success);
 }
 
+void BarelyEngine::Process(std::span<float> output_samples) noexcept {
+  std::fill_n(output_samples.data(), output_samples.size(), 0.0f);
+  const int64_t process_sample = timestamp_samples_;
+  // TODO(#166): This is not thread-safe for when instruments get destroyed.
+  for (auto* instrument : instruments_) {
+    instrument->Process(output_samples, process_sample);
+  }
+  timestamp_samples_ = process_sample + output_samples.size();
+}
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::RemoveInstrument(BarelyInstrumentHandle instrument) noexcept {
   instruments_.erase(instrument);
@@ -42,7 +52,8 @@ void BarelyEngine::RemovePerformer(BarelyPerformer* performer) noexcept {
 void BarelyEngine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::Update(double timestamp) noexcept {
+void BarelyEngine::Update(double lookahead) noexcept {
+  const double timestamp = barely::SamplesToSeconds(sample_rate_, timestamp_samples_) + lookahead;
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
       double update_duration = barely::SecondsToBeats(tempo_, timestamp - timestamp_);

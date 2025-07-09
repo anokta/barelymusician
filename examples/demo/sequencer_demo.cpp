@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
@@ -18,7 +17,6 @@ using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Task;
 using ::barely::TaskState;
-using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -44,7 +42,6 @@ constexpr double kTempoIncrement = 10.0;
 int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
-  AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
   Engine engine(kSampleRate);
@@ -101,11 +98,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<float> output_samples) {
-    instrument.Process(output_samples, audio_clock.GetTimestamp());
-    audio_clock.Update(static_cast<int>(output_samples.size()));
-  };
-  audio_output.SetProcessCallback(process_callback);
+  audio_output.SetProcessCallback(
+      [&engine](std::span<float> output_samples) { engine.Process(output_samples); });
 
   // Key down callback.
   bool quit = false;
@@ -176,7 +170,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(audio_clock.GetTimestamp() + kLookahead);
+    engine.Update(kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

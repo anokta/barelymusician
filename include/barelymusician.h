@@ -575,6 +575,16 @@ BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tem
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
 
+/// Processes the next output samples of an engine.
+/// @note This is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
+///
+/// @param engine Engine handle.
+/// @param output_samples Array of mono output samples.
+/// @param output_sample_count Number of output samples.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
+                                     int32_t output_sample_count);
+
 /// Sets the random number generator seed of an engine.
 ///
 /// @param engine Engine handle.
@@ -592,9 +602,9 @@ BARELY_API bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo);
 /// Updates an engine at timestamp.
 ///
 /// @param engine Engine handle.
-/// @param timestamp Timestamp in seconds.
+/// @param lookahead Lookahead in seconds.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp);
+BARELY_API bool BarelyEngine_Update(BarelyEngineHandle engine, double lookahead);
 
 /// Creates a new instrument.
 ///
@@ -641,17 +651,6 @@ BARELY_API bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrumen
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, float pitch,
                                           bool* out_is_note_on);
-
-/// Processes instrument output samples at timestamp.
-/// @note This is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
-///
-/// @param instrument Instrument handle.
-/// @param output_samples Array of mono output samples.
-/// @param output_sample_count Number of output samples.
-/// @param timestamp Timestamp in seconds.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, float* output_samples,
-                                         int32_t output_sample_count, double timestamp);
 
 /// Sets all instrument notes off.
 ///
@@ -1416,15 +1415,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     return is_note_on;
   }
 
-  /// Processes output samples at timestamp.
-  ///
-  /// @param output_samples Span of mono output samples.
-  /// @param timestamp Timestamp in seconds.
-  void Process(std::span<float> output_samples, double timestamp) noexcept {
-    BarelyInstrument_Process(*this, output_samples.data(),
-                             static_cast<int32_t>(output_samples.size()), timestamp);
-  }
-
   /// Sets all notes off.
   void SetAllNotesOff() noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetAllNotesOff(*this);
@@ -2039,6 +2029,13 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     return timestamp;
   }
 
+  /// Processes the next output samples.
+  ///
+  /// @param output_samples Span of mono output samples.
+  void Process(std::span<float> output_samples) noexcept {
+    BarelyEngine_Process(*this, output_samples.data(), static_cast<int32_t>(output_samples.size()));
+  }
+
   /// Sets the random number generator seed.
   void SetSeed(int seed) noexcept {
     [[maybe_unused]] const bool success = BarelyEngine_SetSeed(*this, static_cast<int32_t>(seed));
@@ -2053,11 +2050,11 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     assert(success);
   }
 
-  /// Updates the engine at timestamp.
+  /// Updates the engine.
   ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_Update(*this, timestamp);
+  /// @param lookahead Lookahead in seconds.
+  void Update(double lookahead) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_Update(*this, lookahead);
     assert(success);
   }
 };

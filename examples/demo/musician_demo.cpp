@@ -15,7 +15,6 @@
 #include <utility>
 #include <vector>
 
-#include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
@@ -34,7 +33,6 @@ using ::barely::Slice;
 using ::barely::SliceMode;
 using ::barely::Task;
 using ::barely::TaskState;
-using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -209,7 +207,6 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, Instrument&
 int main(int /*argc*/, char* argv[]) {
   InputManager input_manager;
 
-  AudioClock clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
   Engine engine(kSampleRate);
@@ -349,17 +346,8 @@ int main(int /*argc*/, char* argv[]) {
   });
 
   // Audio process callback.
-  std::vector<float> temp_buffer(kSampleCount);
-  const auto process_callback = [&](std::span<float> output_samples) {
-    std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
-    for (auto& instrument : instruments) {
-      instrument.Process(temp_buffer, clock.GetTimestamp());
-      std::transform(temp_buffer.begin(), temp_buffer.end(), output_samples.begin(),
-                     output_samples.begin(), std::plus());
-    }
-    clock.Update(static_cast<int>(output_samples.size()));
-  };
-  audio_output.SetProcessCallback(process_callback);
+  audio_output.SetProcessCallback(
+      [&engine](std::span<float> output_samples) { engine.Process(output_samples); });
 
   // Key down callback.
   bool quit = false;
@@ -445,7 +433,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(clock.GetTimestamp() + kLookahead);
+    engine.Update(kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

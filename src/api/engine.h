@@ -4,6 +4,7 @@
 #include <barelymusician.h>
 
 #include <cmath>
+#include <cstdint>
 #include <unordered_set>
 
 #include "api/instrument.h"
@@ -52,6 +53,12 @@ struct BarelyEngine {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept { return timestamp_; }
 
+  /// Processes the next output samples.
+  ///
+  /// @param output_samples Span of mono output samples.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  [[nodiscard]] void Process(std::span<float> output_samples) noexcept;
+
   /// Removes an instrument.
   ///
   /// @param instrument Pointer to instrument.
@@ -69,11 +76,11 @@ struct BarelyEngine {
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept;
 
-  /// Updates the engine at timestamp.
+  /// Updates the engine.
   ///
-  /// @param timestamp Timestamp in seconds.
+  /// @param lookahead Lookahead in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(double timestamp) noexcept;
+  void Update(double lookahead) noexcept;
 
   barely::AudioRng& audio_rng() noexcept { return audio_rng_; }
   barely::MainRng& main_rng() noexcept { return main_rng_; }
@@ -100,8 +107,11 @@ struct BarelyEngine {
   // Tempo in beats per minute.
   double tempo_ = 120.0;
 
-  // Timestamp in seconds.
+  // Last timestamp in seconds.
   double timestamp_ = 0.0;
+
+  // Monotonic timestamp in samples.
+  std::atomic<int64_t> timestamp_samples_ = 0;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

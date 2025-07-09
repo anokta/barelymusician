@@ -58,9 +58,8 @@ struct BarelyInstrument {
   ///
   /// @param output_samples Span of mono output samples.
   /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  [[nodiscard]] bool Process(std::span<float> output_samples, double timestamp) noexcept;
+  [[nodiscard]] void Process(std::span<float> output_samples, int64_t process_sample) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)

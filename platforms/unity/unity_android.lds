@@ -15,6 +15,7 @@ VERS_1.0 {
     BarelyEngine_Destroy;
     BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
+    BarelyEngine_Process;
     BarelyEngine_SetTempo;
     BarelyEngine_Update;
     BarelyInstrument_Create;
@@ -22,7 +23,6 @@ VERS_1.0 {
     BarelyInstrument_GetControl;
     BarelyInstrument_GetNoteControl;
     BarelyInstrument_IsNoteOn;
-    BarelyInstrument_Process;
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
     BarelyInstrument_SetNoteControl;

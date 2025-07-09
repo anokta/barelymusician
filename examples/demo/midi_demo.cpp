@@ -14,7 +14,6 @@
 
 #include "MidiEventList.h"
 #include "MidiFile.h"
-#include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
@@ -28,7 +27,6 @@ using ::barely::Instrument;
 using ::barely::Performer;
 using ::barely::Task;
 using ::barely::TaskState;
-using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -99,7 +97,6 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Initializing " << kMidiFileName << " for MIDI playback (" << track_count
                << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  AudioClock clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kSampleCount);
 
   Engine engine(kSampleRate);
@@ -134,17 +131,8 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<float> mix_buffer(kSampleCount);
-  const auto process_callback = [&](std::span<float> output_samples) {
-    std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
-    for (auto& [instrument, performer, tasks, _] : tracks) {
-      instrument.Process(mix_buffer, clock.GetTimestamp());
-      std::transform(mix_buffer.begin(), mix_buffer.end(), output_samples.begin(),
-                     output_samples.begin(), std::plus<>());
-    }
-    clock.Update(static_cast<int>(output_samples.size()));
-  };
-  audio_output.SetProcessCallback(process_callback);
+  audio_output.SetProcessCallback(
+      [&engine](std::span<float> output_samples) { engine.Process(output_samples); });
 
   // Key down callback.
   bool quit = false;
@@ -167,7 +155,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(clock.GetTimestamp() + kLookahead);
+    engine.Update(kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

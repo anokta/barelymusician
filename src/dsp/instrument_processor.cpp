@@ -69,22 +69,15 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
   params_.rng = &rng;
 }
 
-bool InstrumentProcessor::Process(float* output_samples, int output_sample_count) noexcept {
-  bool has_active_voice = false;
-  for (int i = 0; i < voice_count_; ++i) {
-    if (voice_states_[i].voice.IsActive()) {
-      if (has_active_voice) {
-        ProcessVoice<true>(voice_states_[i].voice, output_samples, output_sample_count);
-      } else {
-        ProcessVoice<false>(voice_states_[i].voice, output_samples, output_sample_count);
-        has_active_voice = true;
+void InstrumentProcessor::Process(float* output_samples, int output_sample_count) noexcept {
+  for (VoiceState& voice_state : voice_states_) {
+    for (int i = 0; i < output_sample_count; ++i) {
+      if (!voice_state.voice.IsActive()) {
+        break;
       }
+      output_samples[i] += voice_callback_(voice_state.voice, params_);
     }
   }
-  if (!has_active_voice) {
-    std::fill_n(output_samples, output_sample_count, 0.0f);
-  }
-  return has_active_voice;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

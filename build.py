@@ -232,9 +232,9 @@ def build(args, source_dir, build_dir):
     elif args.config == "tsan":
         common_cmake_options.append("-DENABLE_TSAN=ON")
 
+    if args.benchmark:
+        common_cmake_options.append("-DENABLE_BENCHMARKS=ON")
     # TODO(#166): Reenable after refactor
-    # if args.benchmark:
-    #     common_cmake_options.append("-DENABLE_BENCHMARKS=ON")
     # if args.test:
     #     common_cmake_options.append("-DENABLE_TESTS=ON -DGTEST_COLOR=1")
     if args.examples or args.run_demo:
@@ -341,8 +341,8 @@ def main():
     # if args.test:
     #     run_tests(build_dir)
 
-    # if args.benchmark:
-    #     run_benchmarks(args, build_dir)
+    if args.benchmark:
+        run_benchmarks(args, build_dir)
 
     if args.daisy:
         run_daisy_program(build_dir)

@@ -20,15 +20,17 @@
 ///   // Set the tempo.
 ///   engine.SetTempo(/*tempo=*/124.0);
 ///
-///   // Update the timestamp.
+///   // Update the internal state.
 ///   //
-///   // Timestamp updates must occur before processing instruments with their respective
-///   // timestamps. Otherwise, `Process` calls may be *late* in receiving the relevant changes to
-///   // the instruments. To address this, `Update` should typically be called from the main thread
-///   // update callback using a lookahead to prevent potential thread synchronization issues in
-///   // real-time audio applications.
-///   double timestamp = 1.0;
-///   engine.Update(timestamp);
+///   // The lookahead specifies how far ahead in seconds to apply updates relative to the current
+///   // engine time. This ensures the engine processes any scheduled changes before generating
+///   // the corresponding output samples, preventing synchronization issues between threads.
+///   constexpr double kLookahead = 0.2;
+///   engine.Update(kLookahead);
+///
+///   // Process the next output samples.
+///   float output_samples[1024];
+///   instrument.Process(output_samples);
 ///   @endcode
 ///
 /// - Instrument:
@@ -50,15 +52,6 @@
 ///
 ///   // Set a control value.
 ///   instrument.SetControl(barely::ControlType::kOscMix, /*value=*/1.0f);
-///
-///   // Process.
-///   //
-///   // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process`
-///   // should typically be called from an audio thread process callback in real-time audio
-///   // applications.
-///   float output_samples[1024];
-///   double timestamp = 0.0;
-///   instrument.Process(output_samples, timestamp);
 ///   @endcode
 ///
 /// - Performer:
@@ -97,15 +90,17 @@
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
 ///
-///   // Update the timestamp.
+///   // Update the internal state.
 ///   //
-///   // Timestamp updates must occur before processing instruments with their respective
-///   // timestamps. Otherwise, `Process` calls may be *late* in receiving the relevant changes to
-///   // the instruments. To address this, `Update` should typically be called from the main thread
-///   // update callback using a lookahead to prevent potential thread synchronization issues in
-///   // real-time audio applications.
-///   double timestamp = 1.0;
-///   BarelyEngine_Update(engine, timestamp);
+///   // The lookahead specifies how far ahead in seconds to apply updates relative to the current
+///   // engine time. This ensures the engine processes any scheduled changes before generating
+///   // the corresponding output samples, preventing synchronization issues between threads.
+///   const double kLookahead = 0.2;
+///   BarelyEngine_Update(engine, kLookahead);
+///
+///   // Process the next output samples.
+///   float output_samples[1024];
+///   BarelyEngine_Process(engine, output_samples, /*output_sample_count=*/1024);
 ///
 ///   // Destroy.
 ///   BarelyEngine_Destroy(engine);
@@ -122,8 +117,8 @@
 ///   // Set a note on.
 ///   //
 ///   // The note pitch is centered around the reference frequency and measured in octaves.
-///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
-///   // pitch intervals within each octave.
+///   // Fractional values adjust the frequency logarithmically to ensure equally perceived pitch
+///   // intervals within each octave.
 ///   float c3_pitch = -1.0f;
 ///   BarelyInstrument_SetNoteOn(instrument, c3_pitch, /*note_control_overrides=*/nullptr,
 ///                              /*note_control_override_count=*/0);
@@ -134,15 +129,6 @@
 ///
 ///   // Set a control value.
 ///   BarelyInstrument_SetControl(instrument, BarelyControlType_kOscMix, /*value=*/1.0f);
-///
-///   // Process.
-///   //
-///   // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process`
-///   // should typically be called from an audio thread process callback in real-time audio
-///   // applications.
-///   float output_samples[1024];
-///   double timestamp = 0.0;
-///   BarelyInstrument_Process(instrument, output_samples, /*output_sample_count=*/1024, timestamp);
 ///
 ///   // Destroy.
 ///   BarelyInstrument_Destroy(instrument);
@@ -576,7 +562,7 @@ BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tem
 BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
 
 /// Processes the next output samples of an engine.
-/// @note This is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
+/// @note This is *not* thread-safe during a corresponding `BarelyEngine_Destroy` call.
 ///
 /// @param engine Engine handle.
 /// @param output_samples Array of mono output samples.

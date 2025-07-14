@@ -30,18 +30,16 @@ void BM_BarelyEngine_AddRemovePerformer(State& state) {
 }
 BENCHMARK(BM_BarelyEngine_AddRemovePerformer);
 
-void BM_BarelyInstrument_Process_Empty(State& state) {
+void BM_BarelyEngine_Process_Empty(State& state) {
   Engine engine(kSampleRate);
-
-  auto instrument = engine.CreateInstrument();
 
   std::array<float, kSampleCount> output_samples;
 
   for (auto _ : state) {
-    instrument.Process(output_samples, 0.0);
+    engine.Process(output_samples);
   }
 }
-BENCHMARK(BM_BarelyInstrument_Process_Empty);
+BENCHMARK(BM_BarelyEngine_Process_Empty);
 
 void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
   constexpr std::array<float, 5> kSamples = {-0.5f, -0.25f, 0.0f, 0.25f, 1.0f};
@@ -57,7 +55,7 @@ void BM_BarelyInstrument_Process_SingleNoteWithLoopingSample(State& state) {
   std::array<float, kSampleCount> output_samples;
 
   for (auto _ : state) {
-    instrument.Process(output_samples, 0.0);
+    engine.Process(output_samples);
   }
 }
 BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithLoopingSample);
@@ -73,7 +71,7 @@ void BM_BarelyInstrument_Process_SingleNoteWithSineOsc(State& state) {
   std::array<float, kSampleCount> output_samples;
 
   for (auto _ : state) {
-    instrument.Process(output_samples, 0.0);
+    engine.Process(output_samples);
   }
 }
 BENCHMARK(BM_BarelyInstrument_Process_SingleNoteWithSineOsc);
@@ -93,7 +91,7 @@ void BM_BarelyInstrument_Process_MultipleNotesWithSineOsc(State& state) {
   std::array<float, kSampleCount> output_samples;
 
   for (auto _ : state) {
-    instrument.Process(output_samples, 0.0);
+    engine.Process(output_samples);
   }
 }
 BENCHMARK(BM_BarelyInstrument_Process_MultipleNotesWithSineOsc);
@@ -115,19 +113,19 @@ void BM_BarelyInstrument_Process_FrequentUpdates(State& state) {
   for (auto _ : state) {
     state.PauseTiming();
     for (int i = 0; i < kUpdateCount; ++i) {
-      engine.Update(timestamp);
+      engine.Update(kTimestampIncrement * static_cast<double>(i) /
+                    static_cast<double>(kUpdateCount));
       instrument.SetControl(ControlType::kAttack, 0.001f * static_cast<float>(i));
       const float pitch = static_cast<float>(i) / static_cast<float>(kUpdateCount);
       instrument.SetNoteOn(pitch);
       instrument.SetNoteControl(pitch, NoteControlType::kPitchShift, static_cast<float>(i));
-      engine.Update(timestamp + kTimestampIncrement * static_cast<double>(i) /
-                                    static_cast<double>(kUpdateCount));
+      engine.Update(kTimestampIncrement * static_cast<double>(i + 1) /
+                    static_cast<double>(kUpdateCount));
       instrument.SetNoteOff(pitch);
       instrument.SetControl(ControlType::kAttack, 0.01f * static_cast<float>(i));
     }
     state.ResumeTiming();
-    instrument.Process(output_samples, timestamp);
-    timestamp += kTimestampIncrement;
+    engine.Process(output_samples);
   }
 }
 BENCHMARK(BM_BarelyInstrument_Process_FrequentUpdates);

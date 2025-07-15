@@ -57,7 +57,7 @@ struct BarelyEngine {
   ///
   /// @param output_samples Span of mono output samples.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  [[nodiscard]] void Process(std::span<float> output_samples) noexcept;
+  void Process(std::span<float> output_samples) noexcept;
 
   /// Removes an instrument.
   ///

@@ -315,24 +315,14 @@ class Processor extends AudioWorkletProcessor {
     const outputSize = outputLength * Float32Array.BYTES_PER_ELEMENT;
 
     const latency = Math.max(1.0 / 60.0, outputLength / sampleRate);
-    this._engine.update(currentTime + latency);
+    this._engine.update(latency);
 
     const outputPtr = this._module._malloc(outputSize);
+    this._engine.process(outputPtr, outputLength);
+
     const outputSamples = new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputLength);
-    outputSamples.fill(0);
-
-    const tempPtr = this._module._malloc(outputSize);
-    const tempSamples = new Float32Array(this._module.HEAPF32.buffer, tempPtr, outputLength);
-
-    Object.values(this._instruments).forEach(instrument => {
-      instrument.process(tempPtr, outputLength, currentTime);
-      for (let i = 0; i < outputLength; ++i) {
-        outputSamples[i] += tempSamples[i];
-      }
-    });
     output.set(outputSamples);
 
-    this._module._free(tempPtr);
     this._module._free(outputPtr);
 
     return true;

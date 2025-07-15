@@ -30,7 +30,7 @@
 ///
 ///   // Process the next output samples.
 ///   float output_samples[1024];
-///   instrument.Process(output_samples);
+///   engine.Process(output_samples);
 ///   @endcode
 ///
 /// - Instrument:

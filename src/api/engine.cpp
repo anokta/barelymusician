@@ -2,9 +2,11 @@
 
 #include <barelymusician.h>
 
+#include <Vector>
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <utility>
 
 #include "api/instrument.h"
 #include "api/performer.h"
@@ -17,10 +19,13 @@ BarelyEngine::BarelyEngine(int sample_rate, float reference_frequency) noexcept
   assert(reference_frequency >= 0.0f);
 }
 
+BarelyEngine::~BarelyEngine() noexcept { mutable_instruments_.Update({}); }
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::AddInstrument(BarelyInstrumentHandle instrument) noexcept {
   [[maybe_unused]] const bool success = instruments_.emplace(instrument).second;
   assert(success);
+  UpdateMutableInstruments();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -32,8 +37,8 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
 void BarelyEngine::Process(std::span<float> output_samples) noexcept {
   std::fill_n(output_samples.data(), output_samples.size(), 0.0f);
   const int64_t process_sample = timestamp_samples_;
-  // TODO(#166): This is not thread-safe for when instruments get destroyed.
-  for (auto* instrument : instruments_) {
+  auto instruments = mutable_instruments_.GetScopedView();
+  for (auto* instrument : *instruments) {
     instrument->Process(output_samples, process_sample);
   }
   timestamp_samples_ = process_sample + output_samples.size();
@@ -42,6 +47,7 @@ void BarelyEngine::Process(std::span<float> output_samples) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::RemoveInstrument(BarelyInstrumentHandle instrument) noexcept {
   instruments_.erase(instrument);
+  UpdateMutableInstruments();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -92,4 +98,13 @@ void BarelyEngine::Update(double lookahead) noexcept {
       }
     }
   }
+}
+
+void BarelyEngine::UpdateMutableInstruments() noexcept {
+  std::vector<BarelyInstrument*> new_mutable_instruments;
+  new_mutable_instruments.reserve(instruments_.size());
+  for (auto* instrument : instruments_) {
+    new_mutable_instruments.emplace_back(instrument);
+  }
+  mutable_instruments_.Update(std::move(new_mutable_instruments));
 }

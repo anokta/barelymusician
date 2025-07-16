@@ -6,9 +6,11 @@
 #include <cmath>
 #include <cstdint>
 #include <unordered_set>
+#include <Vector>
 
 #include "api/instrument.h"
 #include "api/performer.h"
+#include "common/mutable.h"
 #include "common/rng.h"
 
 /// Implementation of an engine.
@@ -20,6 +22,9 @@ struct BarelyEngine {
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   BarelyEngine(int sample_rate, float reference_frequency) noexcept;
+
+  /// Destroys the engine.
+  ~BarelyEngine() noexcept;
 
   /// Adds a new instrument.
   ///
@@ -86,6 +91,10 @@ struct BarelyEngine {
   barely::MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
+  // Updates mutable instruments.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void UpdateMutableInstruments() noexcept;
+
   // Sampling rate in hertz.
   int sample_rate_ = 0;
 
@@ -100,6 +109,7 @@ struct BarelyEngine {
 
   // Set of pointers to instruments.
   std::unordered_set<BarelyInstrument*> instruments_;
+  barely::Mutable<std::vector<BarelyInstrument*>> mutable_instruments_;
 
   // Set of pointers to performers.
   std::unordered_set<BarelyPerformer*> performers_;

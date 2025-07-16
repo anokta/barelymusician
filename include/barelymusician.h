@@ -562,7 +562,6 @@ BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tem
 BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
 
 /// Processes the next output samples of an engine.
-/// @note This is *not* thread-safe during a corresponding `BarelyEngine_Destroy` call.
 ///
 /// @param engine Engine handle.
 /// @param output_samples Array of mono output samples.

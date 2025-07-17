@@ -11,7 +11,6 @@ export class Engine {
 
     this.seed = 0.0;
     this._tempo = 120.0;
-    this.timestamp = 0.0;
 
     this._render();
 
@@ -209,9 +208,6 @@ export class Engine {
           }
           this._startUpdateLoop();
         } break;
-        case 'engine-get-timestamp-response': {
-          this.timestamp = event.data.timestamp;
-        } break;
         case 'instrument-create-success': {
           const {instrument, resolveHandle} = this._pendingInstruments.shift();
           resolveHandle(event.data.handle);
@@ -384,7 +380,6 @@ export class Engine {
   }
 
   _updateStatus() {
-    this._audioNode.port.postMessage({type: 'engine-get-timestamp'});
     // TODO(#164): Is this needed?
     for (const performerHandle in this._performers) {
       this._audioNode.port.postMessage({type: 'performer-get-properties', handle: performerHandle});

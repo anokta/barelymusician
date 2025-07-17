@@ -42,7 +42,6 @@ namespace Barely {
 
   /// A representation of a musical instrument that can be played in real-time.
   [ExecuteInEditMode]
-  [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
     /// Slice.
     [Serializable]
@@ -212,9 +211,6 @@ namespace Barely {
     /// Instrument destroy callback.
     public event Action OnInstrumentDestroy;
 
-    /// Audio source.
-    public AudioSource Source { get; private set; } = null;
-
     /// Returns the gain of a note.
     ///
     /// @param pitch Note pitch.
@@ -295,66 +291,24 @@ namespace Barely {
 
       /// Internal note on callback.
       public static void OnNoteOn(Instrument instrument, float pitch) {
-        if (!instrument.Source.isPlaying) {
-          instrument._noteOnTimestamp =
-              Engine.Timestamp + AudioSettings.GetConfiguration().dspBufferSize;
-          instrument.UpdateControls();
-          instrument.Source.Play();
-        }
         instrument.OnNoteOn?.Invoke(pitch);
         instrument.OnNoteOnEvent?.Invoke(pitch);
       }
     }
 
-    private void Awake() {
-      Source = GetComponent<AudioSource>();
-      Source.loop = true;
-    }
-
-    private void OnDestroy() {
-      Source = null;
-    }
-
     private void OnEnable() {
       Engine.Internal.Instrument_Create(this, ref _handle);
       OnInstrumentCreate?.Invoke();
-      Source.clip = AudioClip.Create("[DO NOT EDIT]", 64, 1, AudioSettings.outputSampleRate, false);
-      float[] ones = new float[64];
-      for (int i = 0; i < ones.Length; ++i) {
-        ones[i] = 1.0f;
-      }
-      Source.clip.SetData(ones, 0);
       Update();
     }
 
     private void OnDisable() {
-      Source.Stop();
-      Source.clip = null;
       OnInstrumentDestroy?.Invoke();
       Engine.Internal.Instrument_Destroy(ref _handle);
       _sliceCount = 0;
     }
 
     private void Update() {
-      if (!Source.isPlaying) {
-        return;
-      }
-      if (!_hasProcessedSamples && AudioSettings.dspTime > _noteOnTimestamp) {
-        Source.Stop();
-        return;
-      }
-      UpdateControls();
-    }
-
-    private void OnAudioFilterRead(float[] data, int channels) {
-      _hasProcessedSamples = Engine.Internal.Instrument_Process(_handle, data, channels);
-    }
-
-    private void SetControl(Engine.Internal.ControlType type, float value) {
-      Engine.Internal.Instrument_SetControl(_handle, type, value);
-    }
-
-    private void UpdateControls() {
       UpdateSampleData();
       SetControl(Engine.Internal.ControlType.GAIN, Gain);
       SetControl(Engine.Internal.ControlType.PITCH_SHIFT, PitchShift);
@@ -380,6 +334,10 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
     }
 
+    private void SetControl(Engine.Internal.ControlType type, float value) {
+      Engine.Internal.Instrument_SetControl(_handle, type, value);
+    }
+
     private void UpdateSampleData() {
       if (Slices != null &&
           (Slices.Count != _sliceCount || Slices.Any(slice => slice.HasChanged))) {
@@ -390,11 +348,5 @@ namespace Barely {
 
     // Raw handle.
     private IntPtr _handle = IntPtr.Zero;
-
-    // Denotes whether the instrument processed samples or not.
-    private bool _hasProcessedSamples = false;
-
-    // Most recent note on timestamp to process.
-    private double _noteOnTimestamp = 0.0;
   }
 }  // namespace Barely

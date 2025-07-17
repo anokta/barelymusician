@@ -554,13 +554,6 @@ BARELY_API bool BarelyEngine_GetSeed(BarelyEngineHandle engine, int32_t* out_see
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo);
 
-/// Gets the timestamp of an engine.
-///
-/// @param engine Engine handle.
-/// @param out_timestamp Output timestamp in seconds.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
-
 /// Processes the next output samples of an engine.
 ///
 /// @param engine Engine handle.
@@ -2002,16 +1995,6 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     [[maybe_unused]] const bool success = BarelyEngine_GetTempo(*this, &tempo);
     assert(success);
     return tempo;
-  }
-
-  /// Returns the timestamp.
-  ///
-  /// @return Timestamp in seconds.
-  [[nodiscard]] double GetTimestamp() const noexcept {
-    double timestamp = 0.0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetTimestamp(*this, &timestamp);
-    assert(success);
-    return timestamp;
   }
 
   /// Processes the next output samples.

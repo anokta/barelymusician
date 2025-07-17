@@ -135,14 +135,6 @@ bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo) {
   return true;
 }
 
-bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp) {
-  if (!engine) return false;
-  if (!out_timestamp) return false;
-
-  *out_timestamp = engine->GetTimestamp();
-  return true;
-}
-
 bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
                           int32_t output_sample_count) {
   if (!engine) return false;

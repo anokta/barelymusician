@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -38,14 +37,6 @@ namespace Barely {
     /// @return Value in linear amplitude.
     public static float DecibelsToAmplitude(float decibels) {
       return Internal.DecibelsToAmplitude(decibels);
-    }
-
-    /// Schedules a task at a specific time.
-    ///
-    /// @param callback Task process callback.
-    /// @param dspTime Time in seconds.
-    public static void ScheduleTask(Action callback, double dspTime) {
-      Internal.Engine_ScheduleTask(callback, dspTime);
     }
 
     /// Class that wraps the internal api.
@@ -275,29 +266,7 @@ namespace Barely {
       ///
       /// @return Timestamp in seconds.
       public static double Engine_GetTimestamp() {
-        double timestamp = 0.0;
-        if (!BarelyEngine_GetTimestamp(Handle, ref timestamp) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get engine timestamp");
-        }
-        return timestamp;
-      }
-
-      /// Schedules a new engine task.
-      ///
-      /// @param callback Task process callback.
-      /// @param timestamp Task timestamp in seconds.
-      public static void Engine_ScheduleTask(Action callback, double timestamp) {
-        if (timestamp < Timestamp) {
-          Debug.LogError("Failed to create engine task at " + timestamp);
-          return;
-        }
-        List<Action> callbacks = null;
-        if (_scheduledTaskCallbacks != null &&
-            !_scheduledTaskCallbacks.TryGetValue(timestamp, out callbacks)) {
-          callbacks = new List<Action>();
-          _scheduledTaskCallbacks.Add(timestamp, callbacks);
-        }
-        callbacks?.Add(callback);
+        return AudioSettings.dspTime + _lookahead;
       }
 
       /// Sets the tempo of an engine.
@@ -413,37 +382,6 @@ namespace Barely {
           Debug.LogError("Failed to get if instrument note " + pitch + " is on");
         }
         return isNoteOn;
-      }
-
-      /// Processes instrument output samples.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      /// @param outputSamples Output samples.
-      /// @param outputChannelCount Number of output channels.
-      /// @return True if successful, false otherwise.
-      public static bool Instrument_Process(IntPtr instrumentHandle, float[] outputSamples,
-                                            int outputChannelCount) {
-        if (Handle == IntPtr.Zero) {
-          for (int i = 0; i < outputSamples.Length; ++i) {
-            outputSamples[i] = 0.0f;
-          }
-          return false;
-        }
-        int outputFrameCount = outputSamples.Length / outputChannelCount;
-        if (BarelyInstrument_Process(instrumentHandle, _outputSamples, outputFrameCount,
-                                     AudioSettings.dspTime)) {
-          for (int frame = 0; frame < outputFrameCount; ++frame) {
-            for (int channel = 0; channel < outputChannelCount; ++channel) {
-              outputSamples[frame * outputChannelCount + channel] *= _outputSamples[frame];
-            }
-          }
-          return true;
-        } else {
-          for (int i = 0; i < outputSamples.Length; ++i) {
-            outputSamples[i] = 0.0f;
-          }
-          return false;
-        }
       }
 
       /// Sets all instrument notes off.
@@ -1085,14 +1023,20 @@ namespace Barely {
       }
       private static IntPtr _handle = IntPtr.Zero;
 
+      // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
+      private const double _minLookahead = 0.025;
+
       // Minimum task duration to avoid zero duration tasks.
       private const double _minTaskDuration = 1e-6;
 
-      /// Reference frequency which is tuned to middle C.
+      // Reference frequency which is tuned to middle C.
       private const float _referenceFrequency = 261.62555f;
 
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
+
+      // Lookahead in seconds.
+      private static double _lookahead = _minLookahead;
 
       // Map of instruments by their handles.
       private static Dictionary<IntPtr, Instrument> _instruments = null;
@@ -1103,14 +1047,8 @@ namespace Barely {
       // Array of note control overrides.
       private static NoteControlOverride[] _noteControlOverrides = null;
 
-      // Array of mono output samples.
-      public static float[] _outputSamples = null;
-
       // Map of performers by their handles.
       private static Dictionary<IntPtr, Performer> _performers = null;
-
-      // Map of scheduled list of task callbacks by their timestamps.
-      private static SortedDictionary<double, List<Action>> _scheduledTaskCallbacks = null;
 
       // Map of tasks by their handles.
       private static Dictionary<IntPtr, Task> _tasks = null;
@@ -1128,16 +1066,47 @@ namespace Barely {
 
       // Component that manages internal state.
       [ExecuteInEditMode]
+      [RequireComponent(typeof(AudioSource))]
       private class State : MonoBehaviour {
         private void Awake() {
+#if UNITY_EDITOR
+          UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnAssemblyReload;
+          UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+#endif  // UNITY_EDITOR
           AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
           Initialize();
+          var source = GetComponent<AudioSource>();
+          source.loop = true;
+          source.clip = AudioClip.Create("zeros", 64, 1, AudioSettings.outputSampleRate, false);
+          source.Play();
         }
 
         private void OnDestroy() {
+#if UNITY_EDITOR
+          UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= OnAssemblyReload;
+          UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+#endif  // UNITY_EDITOR
           AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
           Shutdown();
         }
+
+#if UNITY_EDITOR
+        private void OnAssemblyReload() {
+          if (!Application.isPlaying) {
+            GameObject.Destroy(gameObject);
+          } else {
+            _isShuttingDown = true;
+            GameObject.DestroyImmediate(gameObject);
+          }
+        }
+
+        private void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange state) {
+          if (state == UnityEditor.PlayModeStateChange.ExitingEditMode) {
+            _isShuttingDown = true;
+            GameObject.DestroyImmediate(gameObject);
+          }
+        }
+#endif  // UNITY_EDITOR
 
         private void OnApplicationQuit() {
           GameObject.Destroy(gameObject);
@@ -1176,34 +1145,35 @@ namespace Barely {
           }
         }
 
-        private void LateUpdate() {
-          double nextTimestamp = GetNextTimestamp();
-          while (_scheduledTaskCallbacks.Count > 0) {
-            double taskTimestamp = _scheduledTaskCallbacks.ElementAt(0).Key;
-            if (taskTimestamp > nextTimestamp) {
-              break;
+        private void OnAudioFilterRead(float[] data, int channels) {
+          int outputFrameCount = data.Length / channels;
+          if (BarelyEngine_Process(_handle, _outputSamples, outputFrameCount)) {
+            for (int frame = 0; frame < outputFrameCount; ++frame) {
+              for (int channel = 0; channel < channels; ++channel) {
+                data[frame * channels + channel] = _outputSamples[frame];
+              }
             }
-            BarelyEngine_Update(_handle, taskTimestamp);
-            var callbacks = _scheduledTaskCallbacks.ElementAt(0).Value;
-            for (int i = 0; i < callbacks.Count; ++i) {
-              callbacks[i]?.Invoke();
-            }
-            _scheduledTaskCallbacks.Remove(taskTimestamp);
           }
-          BarelyEngine_Update(_handle, nextTimestamp);
+        }
+
+        private void LateUpdate() {
+          BarelyEngine_Update(_handle, _lookahead);
         }
 
         // Initializes the internal state.
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
+          _lookahead = Math.Max(Math.Max((double)(config.dspBufferSize + 1) / config.sampleRate,
+                                         (double)Time.deltaTime),
+                                _minLookahead);
           if (!BarelyEngine_Create(config.sampleRate, _referenceFrequency, ref _handle)) {
             Debug.LogError("Failed to initialize BarelyEngine");
             return;
           }
           BarelyEngine_SetTempo(_handle, _tempo);
+          BarelyEngine_Update(_handle, _lookahead);
           _outputSamples = new float[config.dspBufferSize];
-          _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<IntPtr, Instrument>();
           _controlOverrides = new ControlOverride[Enum.GetNames(typeof(ControlType)).Length];
           for (int i = 0; i < _controlOverrides.Length; ++i) {
@@ -1215,10 +1185,8 @@ namespace Barely {
             _noteControlOverrides[i].type = (NoteControlType)i;
           }
           _performers = new Dictionary<IntPtr, Performer>();
-          _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           _tasks = new Dictionary<IntPtr, Task>();
           _triggers = new Dictionary<IntPtr, Trigger>();
-          BarelyEngine_Update(_handle, GetNextTimestamp());
         }
 
         // Shuts down the internal state.
@@ -1226,20 +1194,10 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyEngine_Destroy(_handle);
           _handle = IntPtr.Zero;
-          _scheduledTaskCallbacks = null;
         }
 
-        // Returns the next timestamp to update.
-        private double GetNextTimestamp() {
-          return AudioSettings.dspTime +
-                 Math.Max(Math.Max(_dspLatency, (double)Time.deltaTime), _minLookahead);
-        }
-
-        // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
-        private const double _minLookahead = 0.025;
-
-        // DSP latency in seconds.
-        private double _dspLatency = 0.0;
+        // Array of mono output samples.
+        private float[] _outputSamples = null;
       }
 
 #if !UNITY_EDITOR && UNITY_IOS
@@ -1296,14 +1254,15 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
       private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTimestamp")]
-      private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
+      private static extern bool BarelyEngine_Process(IntPtr engine, [In, Out] float[] data,
+                                                      Int32 outputSampleCount);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
       private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Update")]
-      private static extern bool BarelyEngine_Update(IntPtr engine, double timestamp);
+      private static extern bool BarelyEngine_Update(IntPtr engine, double lookahead);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Create")]
       private static extern bool BarelyInstrument_Create(IntPtr engine,
@@ -1326,12 +1285,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, float pitch,
                                                            ref bool outIsNoteOn);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Process")]
-      private static extern bool BarelyInstrument_Process(IntPtr instrument,
-                                                          [In, Out] float[] outputSamples,
-                                                          Int32 outputSampleCount,
-                                                          double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
       private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr instrument);

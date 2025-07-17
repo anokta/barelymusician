@@ -1,4 +1,7 @@
 {
+  "[csharp]": {
+    "editor.formatOnType": false,
+  },
   "clang-format.style": "Google",
   "cmake.configureOnEdit": false,
   "cmake.configureOnOpen": false,

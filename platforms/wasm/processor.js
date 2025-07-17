@@ -54,10 +54,6 @@ class Processor extends AudioWorkletProcessor {
         case 'engine-get-tempo': {
           this.port.postMessage({type: 'engine-get-tempo-response', tempo: this._engine.tempo});
         } break;
-        case 'engine-get-timestamp': {
-          this.port.postMessage(
-              {type: 'engine-get-timestamp-response', timestamp: this._engine.timestamp});
-        } break;
         case 'engine-set-seed': {
           this._engine.seed = event.data.seed;
         } break;

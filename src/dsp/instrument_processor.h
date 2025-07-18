@@ -78,7 +78,7 @@ class InstrumentProcessor {
     int timestamp = 0;
   };
 
-  /// Acquires a new voice.
+  // Acquires a new voice.
   Voice& AcquireVoice(float pitch) noexcept;
 
   template <bool kShouldAccumulate>

@@ -151,10 +151,5 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
-  // Stop the demo.
-  ConsoleLog() << "Stopping audio stream";
-  metronome.Stop();
-  audio_output.Stop();
-
   return 0;
 }

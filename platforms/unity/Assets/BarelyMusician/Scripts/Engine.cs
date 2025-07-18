@@ -1088,7 +1088,7 @@ namespace Barely {
       // Minimum task duration to avoid zero duration tasks.
       private const double _minTaskDuration = 1e-6;
 
-      /// Reference frequency which is tuned to middle C.
+      // Reference frequency which is tuned to middle C.
       private const float _referenceFrequency = 261.62555f;
 
       // Denotes if the system is shutting down to avoid re-initialization.

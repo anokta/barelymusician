@@ -220,27 +220,6 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Arpeggiator handle.
-typedef struct BarelyArpeggiator* BarelyArpeggiatorHandle;
-
-/// Engine handle.
-typedef struct BarelyEngine* BarelyEngineHandle;
-
-/// Instrument handle.
-typedef struct BarelyInstrument* BarelyInstrumentHandle;
-
-/// Performer handle.
-typedef struct BarelyPerformer* BarelyPerformerHandle;
-
-/// Repeater handle.
-typedef struct BarelyRepeater* BarelyRepeaterHandle;
-
-/// Task handle.
-typedef struct BarelyTask* BarelyTaskHandle;
-
-/// Trigger handle.
-typedef struct BarelyTrigger* BarelyTriggerHandle;
-
 /// Arpeggiator style enum alias.
 // TODO(#142): Add more arpeggiator styles.
 typedef enum BarelyArpeggiatorStyle {
@@ -432,6 +411,27 @@ typedef struct BarelySlice {
   /// Number of mono samples.
   int32_t sample_count;
 } BarelySlice;
+
+/// Arpeggiator handle.
+typedef struct BarelyArpeggiator* BarelyArpeggiatorHandle;
+
+/// Engine handle.
+typedef struct BarelyEngine* BarelyEngineHandle;
+
+/// Instrument handle.
+typedef struct BarelyInstrument* BarelyInstrumentHandle;
+
+/// Performer handle.
+typedef struct BarelyPerformer* BarelyPerformerHandle;
+
+/// Repeater handle.
+typedef struct BarelyRepeater* BarelyRepeaterHandle;
+
+/// Task handle.
+typedef struct BarelyTask* BarelyTaskHandle;
+
+/// Trigger handle.
+typedef struct BarelyTrigger* BarelyTriggerHandle;
 
 /// Instrument note callback.
 ///

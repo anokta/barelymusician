@@ -70,22 +70,22 @@ auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, [&](barely:
 // Start the performer.
 performer.Start();
 
-// Update the engine timestamp in seconds.
+// Update the engine timestamp.
 //
-// Timestamp updates must occur before processing instruments with their respective timestamps.
-// Otherwise, `Process` calls may be *late* in receiving the relevant changes to the instruments. To
-// address this, `Update` should typically be called from the main thread update callback using a
-// lookahead to prevent potential thread synchronization issues in real-time audio applications.
+// Timestamp updates must occur before processing the engine with the respective timestamps.
+// Otherwise, `Process` calls may be *late* in receiving relevant changes to the engine. To address
+// this, `Update` should typically be called from the main thread update callback using a lookahead
+// to prevent potential thread synchronization issues in real-time audio applications.
 constexpr double kLookahead = 0.1;
 double timestamp = 0.0;
 engine.Update(timestamp + kLookahead);
 
-// Process the next output samples of the instrument.
+// Process the next output samples of the engine.
 //
-// Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process` should
-// typically be called from an audio thread process callback in real-time audio applications.
-float output_samples[1024];
-instrument.Process(output_samples, timestamp);
+// The engine processes raw PCM audio samples synchronously. Therefore, `Process` should typically
+// be called from an audio thread process callback in real-time audio applications.
+float output_samples[512];
+engine.Process(output_samples, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

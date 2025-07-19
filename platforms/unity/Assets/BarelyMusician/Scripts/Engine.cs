@@ -415,37 +415,6 @@ namespace Barely {
         return isNoteOn;
       }
 
-      /// Processes instrument output samples.
-      ///
-      /// @param instrumentHandle Instrument handle.
-      /// @param outputSamples Output samples.
-      /// @param outputChannelCount Number of output channels.
-      /// @return True if successful, false otherwise.
-      public static bool Instrument_Process(IntPtr instrumentHandle, float[] outputSamples,
-                                            int outputChannelCount) {
-        if (Handle == IntPtr.Zero) {
-          for (int i = 0; i < outputSamples.Length; ++i) {
-            outputSamples[i] = 0.0f;
-          }
-          return false;
-        }
-        int outputFrameCount = outputSamples.Length / outputChannelCount;
-        if (BarelyInstrument_Process(instrumentHandle, _outputSamples, outputFrameCount,
-                                     AudioSettings.dspTime)) {
-          for (int frame = 0; frame < outputFrameCount; ++frame) {
-            for (int channel = 0; channel < outputChannelCount; ++channel) {
-              outputSamples[frame * outputChannelCount + channel] *= _outputSamples[frame];
-            }
-          }
-          return true;
-        } else {
-          for (int i = 0; i < outputSamples.Length; ++i) {
-            outputSamples[i] = 0.0f;
-          }
-          return false;
-        }
-      }
-
       /// Sets all instrument notes off.
       ///
       /// @param instrumentHandle Instrument handle.
@@ -1103,9 +1072,6 @@ namespace Barely {
       // Array of note control overrides.
       private static NoteControlOverride[] _noteControlOverrides = null;
 
-      // Array of mono output samples.
-      public static float[] _outputSamples = null;
-
       // Map of performers by their handles.
       private static Dictionary<IntPtr, Performer> _performers = null;
 
@@ -1128,16 +1094,47 @@ namespace Barely {
 
       // Component that manages internal state.
       [ExecuteInEditMode]
+      [RequireComponent(typeof(AudioSource))]
       private class State : MonoBehaviour {
         private void Awake() {
+#if UNITY_EDITOR
+          UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnAssemblyReload;
+          UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+#endif  // UNITY_EDITOR
           AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
           Initialize();
+          var source = GetComponent<AudioSource>();
+          source.loop = true;
+          source.clip = AudioClip.Create("zeros", 64, 1, AudioSettings.outputSampleRate, false);
+          source.Play();
         }
 
         private void OnDestroy() {
+#if UNITY_EDITOR
+          UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= OnAssemblyReload;
+          UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+#endif  // UNITY_EDITOR
           AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
           Shutdown();
         }
+
+#if UNITY_EDITOR
+        private void OnAssemblyReload() {
+          if (!Application.isPlaying) {
+            GameObject.Destroy(gameObject);
+          } else {
+            _isShuttingDown = true;
+            GameObject.DestroyImmediate(gameObject);
+          }
+        }
+
+        private void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange state) {
+          if (state == UnityEditor.PlayModeStateChange.ExitingEditMode) {
+            _isShuttingDown = true;
+            GameObject.DestroyImmediate(gameObject);
+          }
+        }
+#endif  // UNITY_EDITOR
 
         private void OnApplicationQuit() {
           GameObject.Destroy(gameObject);
@@ -1173,6 +1170,18 @@ namespace Barely {
           }
           for (int i = 0; i < repeaters.Length; ++i) {
             repeaters[i].enabled = true;
+          }
+        }
+
+        private void OnAudioFilterRead(float[] data, int channels) {
+          int outputFrameCount = data.Length / channels;
+          if (BarelyEngine_Process(_handle, _outputSamples, outputFrameCount,
+                                   AudioSettings.dspTime)) {
+            for (int frame = 0; frame < outputFrameCount; ++frame) {
+              for (int channel = 0; channel < channels; ++channel) {
+                data[frame * channels + channel] = _outputSamples[frame];
+              }
+            }
           }
         }
 
@@ -1240,6 +1249,9 @@ namespace Barely {
 
         // DSP latency in seconds.
         private double _dspLatency = 0.0;
+
+        // Array of mono output samples.
+        private float[] _outputSamples = null;
       }
 
 #if !UNITY_EDITOR && UNITY_IOS
@@ -1299,6 +1311,11 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTimestamp")]
       private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
+      private static extern bool BarelyEngine_Process(IntPtr engine,
+                                                      [In, Out] float[] outputSamples,
+                                                      Int32 outputSampleCount, double timestamp);
+
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
       private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);
 
@@ -1326,12 +1343,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern bool BarelyInstrument_IsNoteOn(IntPtr instrument, float pitch,
                                                            ref bool outIsNoteOn);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Process")]
-      private static extern bool BarelyInstrument_Process(IntPtr instrument,
-                                                          [In, Out] float[] outputSamples,
-                                                          Int32 outputSampleCount,
-                                                          double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
       private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr instrument);

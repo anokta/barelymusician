@@ -99,13 +99,23 @@
 ///
 ///   // Update the timestamp.
 ///   //
-///   // Timestamp updates must occur before processing instruments with their respective
-///   // timestamps. Otherwise, `Process` calls may be *late* in receiving the relevant changes to
-///   // the instruments. To address this, `Update` should typically be called from the main thread
-///   // update callback using a lookahead to prevent potential thread synchronization issues in
-///   // real-time audio applications.
-///   double timestamp = 1.0;
-///   BarelyEngine_Update(engine, timestamp);
+///   // Timestamp updates must occur before processing the engine with the respective timestamps.
+///   // Otherwise, `Process` calls may be *late* in receiving relevant changes to the engine. To
+///   // address this, `Update` should typically be called from the main thread update callback
+///   // using a lookahead to prevent potential thread synchronization issues in real-time audio
+///   // applications.
+///   double lookahead = 0.1;
+///   double timestamp = 0.0;
+///   BarelyEngine_Update(engine, timestamp + lookahead);
+///
+///   // Process.
+///   //
+///   // Process the next output samples of the engine.
+//
+///   // The engine processes raw PCM audio samples synchronously. Therefore, `Process` should
+///   // typically be called from an audio thread process callback in real-time audio applications.
+///   float output_samples[512];
+///   BarelyEngine_Process(engine, output_samples, /*output_sample_count=*/512, timestamp);
 ///
 ///   // Destroy.
 ///   BarelyEngine_Destroy(engine);
@@ -134,15 +144,6 @@
 ///
 ///   // Set a control value.
 ///   BarelyInstrument_SetControl(instrument, BarelyControlType_kOscMix, /*value=*/1.0f);
-///
-///   // Process.
-///   //
-///   // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process`
-///   // should typically be called from an audio thread process callback in real-time audio
-///   // applications.
-///   float output_samples[1024];
-///   double timestamp = 0.0;
-///   BarelyInstrument_Process(instrument, output_samples, /*output_sample_count=*/1024, timestamp);
 ///
 ///   // Destroy.
 ///   BarelyInstrument_Destroy(instrument);
@@ -575,6 +576,16 @@ BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tem
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
 
+/// Processes output samples of an engine at timestamp.
+///
+/// @param engine Engine handle.
+/// @param output_samples Array of mono output samples.
+/// @param output_sample_count Number of output samples.
+/// @param timestamp Timestamp in seconds.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
+                                     int32_t output_sample_count, double timestamp);
+
 /// Sets the random number generator seed of an engine.
 ///
 /// @param engine Engine handle.
@@ -641,17 +652,6 @@ BARELY_API bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrumen
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, float pitch,
                                           bool* out_is_note_on);
-
-/// Processes instrument output samples at timestamp.
-/// @note This is *not* thread-safe during a corresponding `BarelyInstrument_Destroy` call.
-///
-/// @param instrument Instrument handle.
-/// @param output_samples Array of mono output samples.
-/// @param output_sample_count Number of output samples.
-/// @param timestamp Timestamp in seconds.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, float* output_samples,
-                                         int32_t output_sample_count, double timestamp);
 
 /// Sets all instrument notes off.
 ///
@@ -1416,15 +1416,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     return is_note_on;
   }
 
-  /// Processes output samples at timestamp.
-  ///
-  /// @param output_samples Span of mono output samples.
-  /// @param timestamp Timestamp in seconds.
-  void Process(std::span<float> output_samples, double timestamp) noexcept {
-    BarelyInstrument_Process(*this, output_samples.data(),
-                             static_cast<int32_t>(output_samples.size()), timestamp);
-  }
-
   /// Sets all notes off.
   void SetAllNotesOff() noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetAllNotesOff(*this);
@@ -2037,6 +2028,16 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     [[maybe_unused]] const bool success = BarelyEngine_GetTimestamp(*this, &timestamp);
     assert(success);
     return timestamp;
+  }
+
+  /// Processes output samples at timestamp.
+  ///
+  /// @param output_samples Span of mono output samples.
+  /// @param timestamp Timestamp in seconds.
+  void Process(std::span<float> output_samples, double timestamp) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_Process(
+        *this, output_samples.data(), static_cast<int32_t>(output_samples.size()), timestamp);
+    assert(success);
   }
 
   /// Sets the random number generator seed.

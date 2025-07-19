@@ -319,20 +319,10 @@ class Processor extends AudioWorkletProcessor {
 
     const outputPtr = this._module._malloc(outputSize);
     const outputSamples = new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputLength);
-    outputSamples.fill(0);
 
-    const tempPtr = this._module._malloc(outputSize);
-    const tempSamples = new Float32Array(this._module.HEAPF32.buffer, tempPtr, outputLength);
-
-    Object.values(this._instruments).forEach(instrument => {
-      instrument.process(tempPtr, outputLength, currentTime);
-      for (let i = 0; i < outputLength; ++i) {
-        outputSamples[i] += tempSamples[i];
-      }
-    });
+    engine.process(outputPtr, outputLength, currentTime);
     output.set(outputSamples);
 
-    this._module._free(tempPtr);
     this._module._free(outputPtr);
 
     return true;

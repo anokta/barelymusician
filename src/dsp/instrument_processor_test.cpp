@@ -35,19 +35,19 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.SetSampleData(sample_data);
 
   float output = 0.0f;
-  EXPECT_FALSE(processor.Process(&output, 1));
+  processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 
   processor.SetNoteOn(0.0f, kNoteControls);
 
   output = 0.0f;
-  EXPECT_TRUE(processor.Process(&output, 1));
+  processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, kSamples[0]);
 
   processor.SetNoteOff(0.0f);
 
   output = 0.0f;
-  EXPECT_TRUE(processor.Process(&output, 1));
+  processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 }
 
@@ -62,7 +62,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   processor.SetSampleData(sample_data);
 
   float output = 0.0f;
-  EXPECT_FALSE(processor.Process(&output, 1));
+  processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 
   float expected_output = 0.0f;
@@ -70,7 +70,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
     processor.SetNoteOn(static_cast<float>(i), kNoteControls);
 
     output = 0.0f;
-    EXPECT_TRUE(processor.Process(&output, 1));
+    processor.Process(&output, 1);
 
     expected_output += kSamples[i];
     EXPECT_FLOAT_EQ(output, expected_output) << i;
@@ -80,7 +80,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
     processor.SetNoteOn(static_cast<float>(kVoiceCount), kNoteControls);
 
     output = 0.0f;
-    EXPECT_TRUE(processor.Process(&output, 1));
+    processor.Process(&output, 1);
     EXPECT_FLOAT_EQ(output, expected_output);
   }
 }
@@ -95,13 +95,13 @@ TEST(InstrumentProcessorTest, NoVoice) {
   processor.SetSampleData(sample_data);
 
   float output = 0.0f;
-  EXPECT_FALSE(processor.Process(&output, 1));
+  processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 
   processor.SetNoteOn(0.0f, kNoteControls);
 
   output = 0.0f;
-  EXPECT_FALSE(processor.Process(&output, 1));
+  processor.Process(&output, 1);
   EXPECT_FLOAT_EQ(output, 0.0f);
 }
 

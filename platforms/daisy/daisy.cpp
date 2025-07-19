@@ -28,6 +28,7 @@ constexpr int kVoiceCount = 16;
 static DaisyPod hw;  // target the Daisy Pod hardware.
 static MidiUsbHandler midi;
 
+static Engine* engine_ptr = nullptr;
 static Instrument* instrument_ptr = nullptr;
 static float osc_shape = 0.0f;
 
@@ -42,7 +43,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   }
 
   // Process samples.
-  instrument_ptr->Process({out[0], out[0] + size}, /*timestamp=*/0.0);
+  engine_ptr->Process({out[0], out[0] + size}, /*timestamp=*/0.0);
   std::copy_n(out[0], size, out[1]);  // copy onto stereo buffer.
 }
 
@@ -59,6 +60,7 @@ int main(void) {
 
   // Initialize the instrument.
   Engine engine(kSampleRate);
+  engine_ptr = &engine;
 
   Instrument instrument = engine.CreateInstrument({{
       {ControlType::kGain, kGain},

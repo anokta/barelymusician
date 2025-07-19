@@ -143,6 +143,14 @@ bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp)
   return true;
 }
 
+bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
+                          int32_t output_sample_count, double timestamp) {
+  if (!engine) return false;
+
+  engine->Process({output_samples, output_samples + output_sample_count}, timestamp);
+  return true;
+}
+
 bool BarelyEngine_SetSeed(BarelyEngineHandle engine, int32_t seed) {
   if (!engine) return false;
 
@@ -214,13 +222,6 @@ bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, float pitch,
 
   *out_is_note_on = instrument->IsNoteOn(pitch);
   return true;
-}
-
-bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, float* output_samples,
-                              int32_t output_sample_count, double timestamp) {
-  if (!instrument) return false;
-
-  return instrument->Process({output_samples, output_samples + output_sample_count}, timestamp);
 }
 
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {

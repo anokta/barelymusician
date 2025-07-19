@@ -27,13 +27,13 @@ using ::emscripten::return_value_policy::take_ownership;
   }});
 }
 
-[[nodiscard]] static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {
-  return reinterpret_cast<uintptr_t>(static_cast<BarelyInstrumentHandle>(instrument));
+static void Engine_Process(Engine& engine, uintptr_t samples, int sample_count,
+                           double timestamp) noexcept {
+  engine.Process(std::span<float>(reinterpret_cast<float*>(samples), sample_count), timestamp);
 }
 
-static void Instrument_Process(Instrument& instrument, uintptr_t samples, int sample_count,
-                               double timestamp) noexcept {
-  instrument.Process(std::span<float>(reinterpret_cast<float*>(samples), sample_count), timestamp);
+[[nodiscard]] static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {
+  return reinterpret_cast<uintptr_t>(static_cast<BarelyInstrumentHandle>(instrument));
 }
 
 static void Instrument_SetControl(Instrument& instrument, int type, float value) noexcept {
@@ -75,6 +75,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
                 static_cast<double (Engine::*)()>(&Engine::GenerateRandomNumber))
       .function("generateRandomNumber", &Engine::GenerateRandomNumber<double>)
       .function("generateRandomInteger", &Engine::GenerateRandomNumber<int>)
+      .function("process", &Engine_Process, allow_raw_pointers())
       .function("update", &Engine::Update)
       .property("seed", &Engine::GetSeed, &Engine::SetSeed)
       .property("tempo", &Engine::GetTempo, &Engine::SetTempo)
@@ -85,7 +86,6 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("getHandle", &Instrument_GetHandle, allow_raw_pointers())
       .function("getNoteControl", &Instrument::GetNoteControl<float>)
       .function("isNoteOn", &Instrument::IsNoteOn)
-      .function("process", &Instrument_Process, allow_raw_pointers())
       .function("setAllNotesOff", &Instrument::SetAllNotesOff)
       .function("setControl", &Instrument_SetControl)
       .function("setNoteControl", &Instrument::SetNoteControl<float>)

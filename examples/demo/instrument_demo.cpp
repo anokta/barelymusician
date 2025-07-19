@@ -70,9 +70,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](std::span<float> output_samples) {
-    instrument.Process(output_samples, /*timestamp=*/0.0);
-  });
+  audio_output.SetProcessCallback(
+      [&](std::span<float> output_samples) { engine.Process(output_samples, /*timestamp=*/0.0); });
 
   // Key down callback.
   float gain = 1.0f;

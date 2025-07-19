@@ -4,10 +4,13 @@
 #include <barelymusician.h>
 
 #include <cmath>
+#include <span>
 #include <unordered_set>
+#include <vector>
 
 #include "api/instrument.h"
 #include "api/performer.h"
+#include "common/mutable.h"
 #include "common/rng.h"
 
 /// Implementation of an engine.
@@ -19,6 +22,9 @@ struct BarelyEngine {
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   BarelyEngine(int sample_rate, float reference_frequency) noexcept;
+
+  /// Destroys `BarelyEngine`.
+  ~BarelyEngine() noexcept;
 
   /// Adds a new instrument.
   ///
@@ -52,6 +58,13 @@ struct BarelyEngine {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept { return timestamp_; }
 
+  /// Processes output samples.
+  ///
+  /// @param output_samples Span of mono output samples.
+  /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void Process(std::span<float> output_samples, double timestamp) noexcept;
+
   /// Removes an instrument.
   ///
   /// @param instrument Pointer to instrument.
@@ -79,6 +92,10 @@ struct BarelyEngine {
   barely::MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
+  // Updates mutable instruments.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void UpdateMutableInstruments() noexcept;
+
   // Sampling rate in hertz.
   int sample_rate_ = 0;
 
@@ -93,6 +110,7 @@ struct BarelyEngine {
 
   // Set of pointers to instruments.
   std::unordered_set<BarelyInstrument*> instruments_;
+  barely::Mutable<std::vector<BarelyInstrument*>> mutable_instruments_;
 
   // Set of pointers to performers.
   std::unordered_set<BarelyPerformer*> performers_;

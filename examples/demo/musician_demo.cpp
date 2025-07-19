@@ -1,6 +1,5 @@
 #include <barelymusician.h>
 
-#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cctype>
@@ -349,14 +348,8 @@ int main(int /*argc*/, char* argv[]) {
   });
 
   // Audio process callback.
-  std::vector<float> temp_buffer(kSampleCount);
   const auto process_callback = [&](std::span<float> output_samples) {
-    std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
-    for (auto& instrument : instruments) {
-      instrument.Process(temp_buffer, clock.GetTimestamp());
-      std::transform(temp_buffer.begin(), temp_buffer.end(), output_samples.begin(),
-                     output_samples.begin(), std::plus());
-    }
+    engine.Process(output_samples, clock.GetTimestamp());
     clock.Update(static_cast<int>(output_samples.size()));
   };
   audio_output.SetProcessCallback(process_callback);

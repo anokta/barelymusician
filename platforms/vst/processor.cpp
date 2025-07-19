@@ -93,7 +93,7 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
 
   // Process instrument.
   auto& output = data.outputs[0];
-  instrument_->Process({output.channelBuffers32[0], static_cast<size_t>(data.numSamples)}, 0.0);
+  engine_->Process({output.channelBuffers32[0], static_cast<size_t>(data.numSamples)}, 0.0);
   std::copy_n(output.channelBuffers32[0], data.numSamples, output.channelBuffers32[1]);
 
   return Steinberg::kResultTrue;

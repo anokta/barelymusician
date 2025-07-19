@@ -1,10 +1,8 @@
 #include <barelymusician.h>
 
-#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
-#include <functional>
 #include <span>
 #include <string>
 #include <thread>
@@ -134,14 +132,8 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<float> mix_buffer(kSampleCount);
   const auto process_callback = [&](std::span<float> output_samples) {
-    std::fill_n(output_samples.begin(), kSampleCount, 0.0f);
-    for (auto& [instrument, performer, tasks, _] : tracks) {
-      instrument.Process(mix_buffer, clock.GetTimestamp());
-      std::transform(mix_buffer.begin(), mix_buffer.end(), output_samples.begin(),
-                     output_samples.begin(), std::plus<>());
-    }
+    engine.Process(output_samples, clock.GetTimestamp());
     clock.Update(static_cast<int>(output_samples.size()));
   };
   audio_output.SetProcessCallback(process_callback);

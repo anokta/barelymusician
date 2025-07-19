@@ -78,7 +78,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Audio process callback.
   const auto process_callback = [&](std::span<float> output_samples) {
-    instrument.Process(output_samples, audio_clock.GetTimestamp());
+    engine.Process(output_samples, audio_clock.GetTimestamp());
     audio_clock.Update(static_cast<int>(output_samples.size()));
   };
   audio_output.SetProcessCallback(process_callback);

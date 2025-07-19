@@ -31,8 +31,7 @@ class InstrumentProcessor {
   ///
   /// @param output_samples Array of mono output samples.
   /// @param output_sample_count Number of output samples.
-  /// @return True if processed samples, false otherwise.
-  [[nodiscard]] bool Process(float* output_samples, int output_sample_count) noexcept;
+  void Process(float* output_samples, int output_sample_count) noexcept;
 
   /// Sets a control value.
   ///
@@ -80,23 +79,6 @@ class InstrumentProcessor {
 
   // Acquires a new voice.
   Voice& AcquireVoice(float pitch) noexcept;
-
-  template <bool kShouldAccumulate>
-  void ProcessVoice(Voice& voice, float* output_samples, int output_sample_count) noexcept {
-    for (int i = 0; i < output_sample_count; ++i) {
-      if (!voice.IsActive()) {
-        if constexpr (!kShouldAccumulate) {
-          std::fill(output_samples + i, output_samples + output_sample_count, 0.0f);
-        }
-        return;
-      }
-      if constexpr (kShouldAccumulate) {
-        output_samples[i] += voice_callback_(voice, params_);
-      } else {
-        output_samples[i] = voice_callback_(voice, params_);
-      }
-    }
-  }
 
   VoiceCallback voice_callback_ = Voice::Next<OscMode::kMix, SliceMode::kSustain>;
   std::array<VoiceState, kMaxVoiceCount> voice_states_;

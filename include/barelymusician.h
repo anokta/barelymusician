@@ -3,7 +3,7 @@
 /// ================================================================================================
 ///
 /// barelymusician is a real-time music engine for interactive systems.
-/// It is used to generate and perform musical sounds from scratch in a sample accurate way.
+/// It is used to generate and perform musical sounds from scratch with sample accurate timing.
 ///
 /// ------------------------------------------------------------------------------------------------
 /// Example C++ Usage

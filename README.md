@@ -5,13 +5,13 @@ barelymusician
 
 barelymusician is a real-time music engine for interactive systems.
 
-It provides a modern C/C++ API to generate and perform musical sounds from scratch in a sample
-accurate way.
+It provides a modern C/C++ API to generate and perform musical sounds from scratch with sample
+accurate timing.
 
 [Try out the web demo](http://barelymusician.com) to get started!
 
 This repository includes build targets for Windows, macOS, Linux, Android, WebAssembly, and Daisy
-platforms, as well as a native Unity game engine plugin and a VST instrument plugin.
+platforms, along with a native Unity game engine plugin and a VST instrument plugin.
 
 To use in a project, simply include [barelymusician.h](include/barelymusician.h).
 
@@ -37,7 +37,7 @@ engine.SetTempo(/*tempo=*/124.0);
 // Create a new instrument.
 auto instrument = engine.CreateInstrument();
 
-// Set the instrument to use the full oscillator mix.
+// Set the instrument to use full oscillator mix.
 instrument.SetControl(barely::ControlType::kOscMix, /*value=*/1.0f);
 
 // Set an instrument note on.
@@ -67,7 +67,7 @@ auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, [&](barely:
   }
 });
 
-// Start the performer.
+// Start the performer playback.
 performer.Start();
 
 // Update the engine timestamp.

@@ -12,7 +12,7 @@
 BarelyArpeggiator::BarelyArpeggiator(BarelyEngine& engine) noexcept
     : engine_(engine),
       performer_(engine_),
-      task_(performer_, 0.0, 1.0,
+      task_(performer_, 0.0, 1.0, 0,
             {[](BarelyTaskState state, void* user_data) {
                auto& arpeggiator = *static_cast<BarelyArpeggiator*>(user_data);
                if (state == BarelyTaskState_kBegin) {

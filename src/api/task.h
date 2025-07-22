@@ -16,8 +16,9 @@ struct BarelyTask {
   /// @param performer Performer.
   /// @param position Task position.
   /// @param duration Task duration.
+  /// @param priority Task priority.
   /// @param callback Task process callback.
-  BarelyTask(BarelyPerformer& performer, double position, double duration,
+  BarelyTask(BarelyPerformer& performer, double position, double duration, int priority,
              ProcessCallback callback) noexcept;
 
   /// Destroys `BarelyTask`.
@@ -43,6 +44,11 @@ struct BarelyTask {
   ///
   /// @return End position in beats.
   double GetEndPosition() const noexcept { return position_ + duration_; }
+
+  /// Returns the priority.
+  ///
+  /// @return Priority.
+  int GetPriority() const noexcept { return priority_; }
 
   /// Returns whether the task is currently active or not.
   ///
@@ -80,6 +86,11 @@ struct BarelyTask {
   /// @param position Position in beats.
   void SetPosition(double position) noexcept;
 
+  /// Sets the priority.
+  ///
+  /// @param priority Priority.
+  void SetPriority(int priority) noexcept;
+
   /// Sets the process callback.
   ///
   /// @param callback Task process callback.
@@ -94,6 +105,9 @@ struct BarelyTask {
 
   // Duration in beats.
   double duration_;
+
+  // Priority.
+  int priority_;
 
   // Process callback.
   ProcessCallback process_callback_;

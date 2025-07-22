@@ -11,7 +11,6 @@ class Processor extends AudioWorkletProcessor {
     this._instruments = null;
     this._performers = null;
     this._tasks = null;
-    this._triggers = null;
 
     Module().then(module => {
       this._module = module;
@@ -19,7 +18,6 @@ class Processor extends AudioWorkletProcessor {
       this._instruments = {};
       this._performers = {};
       this._tasks = {};
-      this._triggers = {};
 
       // TODO(#164): Temp workaround to sync performers.
       this._metronome = null;
@@ -261,43 +259,6 @@ class Processor extends AudioWorkletProcessor {
             this._tasks[event.data.handle].position = event.data.position;
           }
         } break;
-        case 'trigger-create': {
-          if (this._performers[event.data.performerHandle]) {
-            const trigger =
-                this._performers[event.data.performerHandle].createTrigger(event.data.position);
-            const handle = trigger.getHandle();
-            trigger.setProcessCallback(
-                () => this.port.postMessage(
-                    {type: 'trigger-on-process', handle, position: trigger.position}));
-            this._triggers[handle] = trigger;
-
-            this.port.postMessage({
-              type: 'trigger-create-success',
-              performerHandle: event.data.performerHandle,
-              handle,
-            });
-          }
-        } break;
-        case 'trigger-destroy': {
-          if (this._triggers[event.data.handle]) {
-            delete this._triggers[event.data.handle];
-            this.port.postMessage({type: 'trigger-destroy-success', handle: event.data.handle});
-          }
-        } break;
-        case 'trigger-get-properties': {
-          if (this._triggers[event.data.handle]) {
-            this.port.postMessage({
-              type: 'trigger-get-properties-response',
-              handle: event.data.handle,
-              position: this._triggers[event.data.handle].position,
-            });
-          }
-        } break;
-        case 'trigger-set-position': {
-          if (this._triggers[event.data.handle]) {
-            this._triggers[event.data.handle].position = event.data.position;
-          }
-        } break;
         default:
           console.error('Unknown message!');
       }
@@ -320,7 +281,7 @@ class Processor extends AudioWorkletProcessor {
     const outputPtr = this._module._malloc(outputSize);
     const outputSamples = new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputLength);
 
-    engine.process(outputPtr, outputLength, currentTime);
+    this._engine.process(outputPtr, outputLength, currentTime);
     output.set(outputSamples);
 
     this._module._free(outputPtr);

@@ -114,7 +114,7 @@ void ScheduleNote(double position, double duration, float pitch, float gain, Ins
                   Performer& performer, std::vector<Task>& tasks) {
   tasks.emplace_back(performer.CreateTask(
       quantization.GetPosition(performer.GetPosition() + position),
-      quantization.GetPosition(duration), [pitch, gain, &instrument](TaskState state) noexcept {
+      quantization.GetPosition(duration), 0, [pitch, gain, &instrument](TaskState state) noexcept {
         if (state == TaskState::kBegin) {
           instrument.SetNoteOn(pitch, gain);
         } else if (state == TaskState::kEnd) {
@@ -328,7 +328,10 @@ int main(int /*argc*/, char* argv[]) {
   metronome.SetLooping(true);
   int beat = 0;
   int harmonic = 0;
-  const auto metronome_trigger = metronome.CreateTrigger(0.0, [&]() {
+  const auto metronome_trigger = metronome.CreateTask(0.0, 1e-6, -1, [&](TaskState state) {
+    if (state != TaskState::kBegin) {
+      return;
+    }
     // Update transport.
     const int current_bar = beat / kBeatCount;
     const int current_beat = beat % kBeatCount;

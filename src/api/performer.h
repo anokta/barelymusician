@@ -13,12 +13,14 @@
 #include <utility>
 
 #include "api/task.h"
-#include "api/trigger.h"
 #include "common/callback.h"
 
 /// Implementation of a performer.
 struct BarelyPerformer {
  public:
+  /// Task key consists of a position and its priority.
+  using TaskKey = std::pair<double, int>;
+
   /// Constructs a new `BarelyPerformer`.
   ///
   /// @param engine Engine.
@@ -39,12 +41,6 @@ struct BarelyPerformer {
   /// @param task Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddTask(BarelyTask* task) noexcept;
-
-  /// Adds a new trigger.
-  ///
-  /// @param trigger Pointer to trigger.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddTrigger(BarelyTrigger* trigger) noexcept;
 
   /// Returns loop begin position.
   ///
@@ -78,23 +74,20 @@ struct BarelyPerformer {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept { return is_playing_; }
 
-  /// Returns the duration to next callback.
+  /// Returns the next task key.
   ///
-  /// @return Optional duration in beats.
-  [[nodiscard]] std::optional<double> GetNextDuration() const noexcept;
+  /// @return Optional task key.
+  [[nodiscard]] std::optional<TaskKey> GetNextTaskKey() const noexcept;
 
   /// Processes all tasks at the current position.
-  void ProcessAllTasksAtPosition() noexcept;
+  ///
+  /// @param max_priority Maximum task priority to process.
+  void ProcessAllTasksAtPosition(int max_priority) noexcept;
 
   /// Removes a task.
   ///
   /// @param task Pointer to task.
   void RemoveTask(BarelyTask* task) noexcept;
-
-  /// Removes a trigger.
-  ///
-  /// @param trigger Pointer to trigger.
-  void RemoveTrigger(BarelyTrigger* trigger) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -129,11 +122,11 @@ struct BarelyPerformer {
   /// @param old_position Old task position.
   void SetTaskPosition(BarelyTask* task, double old_position) noexcept;
 
-  /// Sets trigger position.
+  /// Sets task priority.
   ///
-  /// @param trigger Pointer to trigger.
-  /// @param old_position Old task position.
-  void SetTriggerPosition(BarelyTrigger* trigger, double old_position) noexcept;
+  /// @param task Pointer to task.
+  /// @param old_priority Old priority.
+  void SetTaskPriority(BarelyTask* task, int old_priority) noexcept;
 
   /// Stops performer.
   void Start() noexcept;
@@ -149,25 +142,21 @@ struct BarelyPerformer {
 
  private:
   //  Returns an iterator to the next inactive task to process.
-  [[nodiscard]] std::set<std::pair<double, BarelyTask*>>::const_iterator GetNextInactiveTask()
-      const noexcept;
-
-  //  Returns an iterator to the next trigger to process.
-  [[nodiscard]] std::set<std::pair<double, BarelyTrigger*>>::const_iterator GetNextTrigger()
+  [[nodiscard]] std::set<std::pair<TaskKey, BarelyTask*>>::const_iterator GetNextInactiveTask()
       const noexcept;
 
   // Loops around a given `position`.
   [[nodiscard]] double LoopAround(double position) const noexcept;
 
   /// Sets the active status of a task.
-  void SetTaskActive(const std::set<std::pair<double, BarelyTask*>>::iterator& it,
+  void SetTaskActive(const std::set<std::pair<TaskKey, BarelyTask*>>::iterator& it,
                      bool is_active) noexcept;
 
   /// Updates the key of an active task.
-  void UpdateActiveTaskKey(double old_end_position, BarelyTask* task) noexcept;
+  void UpdateActiveTaskKey(TaskKey old_task_key, BarelyTask* task) noexcept;
 
   /// Updates the key of an inactive task.
-  void UpdateInactiveTaskKey(double old_position, BarelyTask* task) noexcept;
+  void UpdateInactiveTaskKey(TaskKey old_task_key, BarelyTask* task) noexcept;
 
   // Engine.
   BarelyEngine& engine_;
@@ -188,14 +177,8 @@ struct BarelyPerformer {
   double position_ = 0.0;
 
   // Set of task position-pointer pairs.
-  std::set<std::pair<double, BarelyTask*>> active_tasks_;
-  std::set<std::pair<double, BarelyTask*>> inactive_tasks_;
-
-  // Set of trigger position-pointer pairs.
-  std::set<std::pair<double, BarelyTrigger*>> triggers_;
-
-  // Iterator to the last processed trigger.
-  std::set<std::pair<double, BarelyTrigger*>>::const_iterator last_trigger_it_ = triggers_.end();
+  std::set<std::pair<TaskKey, BarelyTask*>> active_tasks_;
+  std::set<std::pair<TaskKey, BarelyTask*>> inactive_tasks_;
 };
 
 #endif  // BARELYMUSICIAN_API_PERFORMER_H_

@@ -61,15 +61,12 @@ VERS_1.0 {
     BarelyTask_Destroy;
     BarelyTask_GetDuration;
     BarelyTask_GetPosition;
+    BarelyTask_GetPriority;
     BarelyTask_IsActive;
     BarelyTask_SetDuration;
     BarelyTask_SetPosition;
+    BarelyTask_SetPriority;
     BarelyTask_SetProcessCallback;
-    BarelyTrigger_Create;
-    BarelyTrigger_Destroy;
-    BarelyTrigger_GetPosition;
-    BarelyTrigger_SetPosition;
-    BarelyTrigger_SetProcessCallback;
     Barely_AmplitudeToDecibels;
     Barely_DecibelsToAmplitude;
   local:

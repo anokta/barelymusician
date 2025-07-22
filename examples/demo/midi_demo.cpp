@@ -67,7 +67,7 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float gain = static_cast<float>(midi_event.getVelocity()) / 127.0f;
       tasks.emplace_back(
-          performer.CreateTask(position, duration, [&, pitch, gain](TaskState state) noexcept {
+          performer.CreateTask(position, duration, 0, [&, pitch, gain](TaskState state) noexcept {
             if (state == TaskState::kBegin) {
               instrument.SetNoteOn(pitch, gain);
             } else if (state == TaskState::kEnd) {

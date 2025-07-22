@@ -18,7 +18,6 @@ export class Engine {
     this._instruments = {};
     this._performers = {};
     this._tasks = {};
-    this._triggers = {};
 
     this._pendingInstruments = [];
     this._pendingPerformers = [];
@@ -269,25 +268,6 @@ export class Engine {
         case 'task-on-process': {
           this._tasks[event.data.handle]?.processCallback(event.data.state);
         } break;
-        case 'trigger-create-success': {
-          const performer = this._performers[event.data.performerHandle];
-          if (performer) {
-            this._triggers[event.data.handle] = performer.onTriggerCreateSuccess(event.data.handle);
-          }
-        } break;
-        case 'trigger-destroy-success': {
-          delete this._triggers[event.data.handle];
-        } break;
-        // TODO(#164): Is this needed?
-        // case 'trigger-get-properties-response': {
-        //   const trigger = this._triggers[event.data.handle];
-        //   if (trigger) {
-        //     trigger.position = event.data.position;
-        //   }
-        // } break;
-        case 'trigger-on-process': {
-          this._triggers[event.data.handle]?.processCallback();
-        } break;
       }
     };
   }
@@ -370,7 +350,6 @@ export class Engine {
     this._instruments = {};
     this._performers = {};
     this._tasks = {};
-    this._triggers = {};
 
     this._metronome = this.createPerformer();
   }
@@ -392,9 +371,6 @@ export class Engine {
     for (const taskHandle in this._tasks) {
       this._audioNode.port.postMessage({type: 'task-get-properties', handle: taskHandle});
     }
-    // for (const triggerHandle in this._triggers) {
-    //   this._audioNode.port.postMessage({type: 'trigger-get-properties', handle: triggerHandle});
-    // }
     const status = `
       Instruments: ${Object.keys(this._instruments).length} |
       Performers: ${Math.max(Object.keys(this._performers).length - 1, 0)} |

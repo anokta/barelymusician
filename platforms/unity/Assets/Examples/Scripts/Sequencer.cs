@@ -14,6 +14,8 @@ namespace Barely.Examples {
 
     public bool playOnAwake = true;
 
+    public int priority = 0;
+
     [System.Serializable]
     public class Note {
       [Range(-64, 64)]
@@ -81,14 +83,15 @@ namespace Barely.Examples {
         if (note.muted) {
           continue;
         }
-        _performer.Tasks.Add(new Task(note.position, note.duration, delegate(TaskState state) {
-          float pitch = note.pitch / 12.0f;
-          if (state == TaskState.BEGIN) {
-            instrument?.SetNoteOn(pitch, note.gain);
-          } else if (state == TaskState.END) {
-            instrument?.SetNoteOff(pitch);
-          }
-        }));
+        _performer.Tasks.Add(
+            new Task(note.position, note.duration, priority, delegate(TaskState state) {
+              float pitch = note.pitch / 12.0f;
+              if (state == TaskState.BEGIN) {
+                instrument?.SetNoteOn(pitch, note.gain);
+              } else if (state == TaskState.END) {
+                instrument?.SetNoteOff(pitch);
+              }
+            }));
       }
     }
   }

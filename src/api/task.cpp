@@ -6,9 +6,13 @@
 
 #include "api/performer.h"
 
-BarelyTask::BarelyTask(BarelyPerformer& performer, double position, double duration,
+BarelyTask::BarelyTask(BarelyPerformer& performer, double position, double duration, int priority,
                        ProcessCallback callback) noexcept
-    : performer_(performer), position_(position), duration_(duration), process_callback_(callback) {
+    : performer_(performer),
+      position_(position),
+      duration_(duration),
+      priority_(priority),
+      process_callback_(callback) {
   assert(duration > 0.0 && "Invalid task duration");
   performer_.AddTask(this);
 }
@@ -29,6 +33,14 @@ void BarelyTask::SetPosition(double position) noexcept {
     const double old_position = position_;
     position_ = position;
     performer_.SetTaskPosition(this, old_position);
+  }
+}
+
+void BarelyTask::SetPriority(int priority) noexcept {
+  if (priority != priority_) {
+    const int old_priority = priority_;
+    priority_ = priority;
+    performer_.SetTaskPriority(this, old_priority);
   }
 }
 

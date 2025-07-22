@@ -74,6 +74,9 @@ namespace Barely.Examples {
       }
     }
 
+    // Priority.
+    private const int _priority = -100;
+
     // Performer.
     private Performer _performer = null;
 
@@ -100,7 +103,10 @@ namespace Barely.Examples {
       _performer.PlayOnAwake = playOnAwake;
       _performer.Loop = true;
       _performer.LoopLength = 1.0;
-      _performer.Triggers.Add(new Trigger(0.0, delegate() {
+      _performer.Tasks.Add(new Task(0.0, 0.0, _priority, delegate(TaskState state) {
+        if (state != TaskState.BEGIN) {
+          return;
+        }
         int bar = _beat / beatCount;
         int beat = _beat % beatCount;
         float pitch = (beat == 0) ? barPitch : beatPitch;

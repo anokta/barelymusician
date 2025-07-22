@@ -1,6 +1,5 @@
 import {Note} from './note.js';
 import {Task, TaskState} from './task.js';
-import {Trigger} from './trigger.js';
 
 const PITCHES = 14;
 const CLIP_HEIGHT = 240;
@@ -29,7 +28,6 @@ export class Performer {
     this._position = 0.0;
 
     this._pendingTasks = [];
-    this._pendingTriggers = [];
 
     this._notes = [];
     this._selectedInstrument = null;
@@ -75,36 +73,6 @@ export class Performer {
   }
 
   /**
-   * @param {number} position
-   * @param {function} processCallback
-   * @return {!Trigger}
-   */
-  createTrigger(position, processCallback) {
-    let resolveHandle;
-    const handlePromise = new Promise(resolve => {
-      resolveHandle = resolve;
-    });
-    const trigger = new Trigger({
-      audioNode: this._audioNode,
-      handlePromise,
-      position,
-      processCallback,
-    });
-
-    this._pendingTriggers.push({trigger, resolveHandle});
-
-    this._withHandle(handle => {
-      this._audioNode.port.postMessage({
-        type: 'trigger-create',
-        performerHandle: handle,
-        position,
-      });
-    });
-
-    return trigger;
-  }
-
-  /**
    * Destroys the performer and cleans up resources.
    * @return {!Promise<void>}
    */
@@ -134,16 +102,6 @@ export class Performer {
     const {task, resolveHandle} = this._pendingTasks.shift();
     resolveHandle(handle);
     return task;
-  }
-
-  /**
-   * @param {number} handle
-   * @return {!Trigger}
-   */
-  onTriggerCreateSuccess(handle) {
-    const {trigger, resolveHandle} = this._pendingTriggers.shift();
-    resolveHandle(handle);
-    return trigger;
   }
 
   /**

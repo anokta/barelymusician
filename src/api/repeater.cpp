@@ -13,14 +13,16 @@
 BarelyRepeater::BarelyRepeater(BarelyEngine& engine) noexcept
     : engine_(engine),
       performer_(engine_),
-      trigger_(performer_, 0.0,
-               {
-                   [](void* user_data) noexcept {
-                     auto& repeater = *static_cast<BarelyRepeater*>(user_data);
-                     repeater.OnBeat();
-                   },
-                   this,
-               }) {
+      task_(performer_, 0.0, 1.0, 0,
+            {
+                [](BarelyTaskState state, void* user_data) noexcept {
+                  if (state == BarelyTaskState_kBegin) {
+                    auto& repeater = *static_cast<BarelyRepeater*>(user_data);
+                    repeater.OnBeat();
+                  }
+                },
+                this,
+            }) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
 }
@@ -69,6 +71,7 @@ void BarelyRepeater::SetInstrument(BarelyInstrument* instrument) noexcept {
 void BarelyRepeater::SetRate(double rate) noexcept {
   const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
   performer_.SetLoopLength(length);
+  task_.SetDuration(length);
 }
 
 void BarelyRepeater::SetStyle(BarelyRepeaterStyle style) noexcept { style_ = style; }

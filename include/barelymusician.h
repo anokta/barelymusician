@@ -159,7 +159,8 @@
 ///   // Create a task.
 ///   BarelyTaskHandle task = nullptr;
 ///   BarelyTask_ProcessCallback process_callback{ /*populate this*/ };
-///   BarelyTask_Create(performer, /*position=*/0.0, /*duration=*/1.0, process_callback, &task);
+///   BarelyTask_Create(performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
+///                     process_callback, &task);
 ///
 ///   // Set to looping.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
@@ -350,8 +351,6 @@ typedef enum BarelyTaskState {
   BarelyTaskState_kBegin = 0,
   /// End.
   BarelyTaskState_kEnd,
-  /// Update.
-  BarelyTaskState_kUpdate,
   /// Number of task states.
   BarelyTaskState_kCount,
 } BarelyTaskState;
@@ -431,9 +430,6 @@ typedef struct BarelyRepeater* BarelyRepeaterHandle;
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
 
-/// Trigger handle.
-typedef struct BarelyTrigger* BarelyTriggerHandle;
-
 /// Instrument note callback.
 ///
 /// @param pitch Note pitch.
@@ -445,11 +441,6 @@ typedef void (*BarelyInstrument_NoteCallback)(float pitch, void* user_data);
 /// @param state Task state.
 /// @param user_data Pointer to user data.
 typedef void (*BarelyTask_ProcessCallback)(BarelyTaskState state, void* user_data);
-
-/// Trigger process callback.
-///
-/// @param user_data Pointer to user data.
-typedef void (*BarelyTrigger_ProcessCallback)(void* user_data);
 
 /// Creates a new arpeggiator.
 ///
@@ -922,13 +913,14 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 /// @param performer Performer handle.
 /// @param position Task position in beats.
 /// @param duration Task duration in beats.
+/// @param priority Task priority.
 /// @param callback Task process callback.
 /// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double duration,
-                                  BarelyTask_ProcessCallback callback, void* user_data,
-                                  BarelyTaskHandle* out_task);
+                                  int32_t priority, BarelyTask_ProcessCallback callback,
+                                  void* user_data, BarelyTaskHandle* out_task);
 
 /// Destroys a task.
 ///
@@ -950,6 +942,13 @@ BARELY_API bool BarelyTask_GetDuration(BarelyTaskHandle task, double* out_durati
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position);
 
+/// Gets the position of a task.
+///
+/// @param task Task handle.
+/// @param out_priority Output priority.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyTask_GetPriority(BarelyTaskHandle task, int32_t* out_priority);
+
 /// Gets whether the task is active or not.
 ///
 /// @param task Task handle.
@@ -970,6 +969,13 @@ BARELY_API bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
 
+/// Sets the position of a task.
+///
+/// @param task Task handle.
+/// @param priority Priority.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority);
+
 /// Sets the process callback of a task.
 ///
 /// @param task Task handle.
@@ -978,48 +984,6 @@ BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
                                               BarelyTask_ProcessCallback callback, void* user_data);
-
-/// Creates a new trigger.
-///
-/// @param performer Performer handle.
-/// @param position Trigger position in beats.
-/// @param callback Trigger process callback.
-/// @param user_data Pointer to user data.
-/// @param out_trigger Output trigger handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTrigger_Create(BarelyPerformerHandle performer, double position,
-                                     BarelyTrigger_ProcessCallback callback, void* user_data,
-                                     BarelyTriggerHandle* out_trigger);
-
-/// Destroys a trigger.
-///
-/// @param trigger Trigger handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTrigger_Destroy(BarelyTriggerHandle trigger);
-
-/// Gets the position of a trigger.
-///
-/// @param trigger Trigger handle.
-/// @param out_position Output position in beats.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTrigger_GetPosition(BarelyTriggerHandle trigger, double* out_position);
-
-/// Sets the position of a trigger.
-///
-/// @param trigger Trigger handle.
-/// @param position Position in beats.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTrigger_SetPosition(BarelyTriggerHandle trigger, double position);
-
-/// Sets the process callback of a trigger.
-///
-/// @param trigger Trigger handle.
-/// @param callback Process callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTrigger_SetProcessCallback(BarelyTriggerHandle trigger,
-                                                 BarelyTrigger_ProcessCallback callback,
-                                                 void* user_data);
 
 /// Converts a value from linear amplitude to decibels.
 ///
@@ -1176,8 +1140,6 @@ enum class TaskState {
   kBegin = BarelyTaskState_kBegin,
   /// End.
   kEnd = BarelyTaskState_kEnd,
-  /// Update.
-  kUpdate = BarelyTaskState_kUpdate,
 };
 
 /// Control override.
@@ -1538,13 +1500,14 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   /// @param performer Raw performer handle.
   /// @param position Task position in beats.
   /// @param duration Task duration in beats.
+  /// @param priority Task priority.
   /// @param callback Task process callback.
-  Task(BarelyPerformerHandle performer, double position, double duration,
+  Task(BarelyPerformerHandle performer, double position, double duration, int priority,
        ProcessCallback callback) noexcept
       : HandleWrapper([&]() {
           BarelyTaskHandle task = nullptr;
           [[maybe_unused]] const bool success = BarelyTask_Create(
-              performer, position, duration,
+              performer, position, duration, priority,
               [](BarelyTaskState state, void* user_data) noexcept {
                 if (user_data != nullptr) {
                   (*static_cast<ProcessCallback*>(user_data))(static_cast<TaskState>(state));
@@ -1667,104 +1630,6 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   ProcessCallback process_callback_;
 };
 
-/// Class that wraps a trigger handle.
-class Trigger : public HandleWrapper<BarelyTriggerHandle> {
- public:
-  /// Process callback function.
-  using ProcessCallback = std::function<void()>;
-
-  /// Constructs a new `Trigger`.
-  ///
-  /// @param performer Raw performer handle.
-  /// @param position Trigger position in beats.
-  /// @param callback Trigger process callback.
-  Trigger(BarelyPerformerHandle performer, double position, ProcessCallback callback) noexcept
-      : HandleWrapper([&]() {
-          BarelyTriggerHandle trigger = nullptr;
-          [[maybe_unused]] const bool success = BarelyTrigger_Create(
-              performer, position,
-              [](void* user_data) noexcept {
-                if (user_data != nullptr) {
-                  (*static_cast<ProcessCallback*>(user_data))();
-                }
-              },
-              &process_callback_, &trigger);
-          assert(success);
-          return trigger;
-        }()),
-        process_callback_(std::move(callback)) {}
-
-  /// Constructs a new `Trigger` from a raw handle.
-  ///
-  /// @param trigger Raw handle to trigger.
-  explicit Trigger(BarelyTriggerHandle trigger) noexcept : HandleWrapper(trigger) {}
-
-  /// Destroys `Trigger`.
-  ~Trigger() noexcept { BarelyTrigger_Destroy(*this); }
-
-  /// Non-copyable.
-  Trigger(const Trigger& other) noexcept = delete;
-  Trigger& operator=(const Trigger& other) noexcept = delete;
-
-  /// Constructs a new `Trigger` via move.
-  ///
-  /// @param other Other trigger.
-  /// @return Trigger.
-  Trigger(Trigger&& other) noexcept
-      : HandleWrapper(std::move(other)),
-        process_callback_(std::exchange(other.process_callback_, {})) {
-    if (process_callback_) {
-      SetCallback(BarelyTrigger_SetProcessCallback, process_callback_);
-    }
-  }
-
-  /// Assigns `Trigger` via move.
-  ///
-  /// @param other Other trigger.
-  /// @return Trigger.
-  Trigger& operator=(Trigger&& other) noexcept {
-    if (this != &other) {
-      BarelyTrigger_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
-      process_callback_ = std::exchange(other.process_callback_, {});
-      if (process_callback_) {
-        SetCallback(BarelyTrigger_SetProcessCallback, process_callback_);
-      }
-    }
-    return *this;
-  }
-
-  /// Returns the position.
-  ///
-  /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept {
-    double position = 0.0;
-    [[maybe_unused]] const bool success = BarelyTrigger_GetPosition(*this, &position);
-    assert(success);
-    return position;
-  }
-
-  /// Sets the position.
-  ///
-  /// @param position Position in beats.
-  void SetPosition(double position) noexcept {
-    [[maybe_unused]] const bool success = BarelyTrigger_SetPosition(*this, position);
-    assert(success);
-  }
-
-  /// Sets the process callback.
-  ///
-  /// @param callback Process callback.
-  void SetProcessCallback(ProcessCallback callback) noexcept {
-    process_callback_ = std::move(callback);
-    SetCallback(BarelyTrigger_SetProcessCallback, process_callback_);
-  }
-
- private:
-  // Process callback.
-  ProcessCallback process_callback_;
-};
-
 /// Class that wraps a performer handle.
 class Performer : public HandleWrapper<BarelyPerformerHandle> {
  public:
@@ -1809,21 +1674,13 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// Creates a new task.
   ///
   /// @param position Task position in beats.
-  /// @param position Task duration in beats.
+  /// @param duration Task duration in beats.
+  /// @param priority Task priority.
   /// @param callback Task process callback.
   /// @return Task.
-  [[nodiscard]] Task CreateTask(double position, double duration,
+  [[nodiscard]] Task CreateTask(double position, double duration, int priority,
                                 Task::ProcessCallback callback) noexcept {
-    return Task(*this, position, duration, std::move(callback));
-  }
-
-  /// Creates a new trigger.
-  ///
-  /// @param position Trigger position in beats.
-  /// @param callback Trigger process callback.
-  /// @return Trigger.
-  [[nodiscard]] Trigger CreateTrigger(double position, Trigger::ProcessCallback callback) noexcept {
-    return Trigger(*this, position, std::move(callback));
+    return Task(*this, position, duration, priority, std::move(callback));
   }
 
   /// Returns the loop begin position.

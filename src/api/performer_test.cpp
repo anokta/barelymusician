@@ -15,6 +15,7 @@
 namespace {
 
 using ::testing::Optional;
+using ::testing::Pair;
 
 // Tests that the performer processs a single task as expected.
 TEST(PerformerTest, ProcessSingleTask) {
@@ -23,12 +24,11 @@ TEST(PerformerTest, ProcessSingleTask) {
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_FALSE(performer.GetNextDuration().has_value());
+  EXPECT_FALSE(performer.GetNextTaskKey().has_value());
 
   // Create a task.
   int task_process_begin_count = 0;
   int task_process_end_count = 0;
-  int task_process_update_count = 0;
   std::function<void(BarelyTaskState)> process_callback = [&](BarelyTaskState state) {
     switch (state) {
       case BarelyTaskState_kBegin:
@@ -37,14 +37,11 @@ TEST(PerformerTest, ProcessSingleTask) {
       case BarelyTaskState_kEnd:
         ++task_process_end_count;
         break;
-      case BarelyTaskState_kUpdate:
-        ++task_process_update_count;
-        break;
       default:
         break;
     }
   };
-  BarelyTask task(performer, 0.25, 0.6,
+  BarelyTask task(performer, 0.25, 0.6, 0,
                   {
                       [](BarelyTaskState state, void* user_data) {
                         (*static_cast<std::function<void(BarelyTaskState)>*>(user_data))(state);
@@ -54,121 +51,110 @@ TEST(PerformerTest, ProcessSingleTask) {
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_FALSE(performer.GetNextDuration().has_value());
+  EXPECT_FALSE(performer.GetNextTaskKey().has_value());
   EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Start the performer.
   performer.Start();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.25));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.25, 0)));
   EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Process the task.
   performer.Update(0.25);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.0));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
   EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
-  EXPECT_EQ(task_process_update_count, 0);
 
-  performer.ProcessAllTasksAtPosition();
+  performer.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.6));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.6, 0)));
   EXPECT_TRUE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 0);
-  EXPECT_EQ(task_process_update_count, 0);
 
   performer.Update(0.6);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.85);
-  EXPECT_FALSE(performer.GetNextDuration().has_value());
+  EXPECT_FALSE(performer.GetNextTaskKey().has_value());
   EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 1);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Set looping on.
   performer.SetLooping(true);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.4));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.4, 0)));
 
   // Process the next task with a loop back.
   performer.Update(0.4);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.0));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
   EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 1);
-  EXPECT_EQ(task_process_update_count, 0);
 
-  performer.ProcessAllTasksAtPosition();
+  performer.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.6));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.6, 0)));
   EXPECT_TRUE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 1);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Update the task position.
   task.SetPosition(0.75);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.5));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
   EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 2);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Process the task with the updated position.
   performer.Update(0.5);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.0));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
   EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 2);
-  EXPECT_EQ(task_process_update_count, 0);
 
-  performer.ProcessAllTasksAtPosition();
+  performer.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(0.25));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.25, 0)));
   EXPECT_TRUE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 2);
-  EXPECT_EQ(task_process_update_count, 0);
 
   // Update the position while task is still active.
   performer.Update(0.05);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.8);
-  EXPECT_DOUBLE_EQ(*performer.GetNextDuration(), 0.2);
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+  EXPECT_DOUBLE_EQ(performer.GetNextTaskKey()->first, 0.2);
   EXPECT_TRUE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 2);
-  EXPECT_EQ(task_process_update_count, 1);
 
   // Stop the performer.
   performer.Stop();
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.8);
-  EXPECT_FALSE(performer.GetNextDuration().has_value());
+  EXPECT_FALSE(performer.GetNextTaskKey().has_value());
   EXPECT_FALSE(task.IsActive());
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 3);
-  EXPECT_EQ(task_process_update_count, 1);
 }
 
 // Tests that the performer processs multiple tasks as expected.
@@ -180,7 +166,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_FALSE(performer.GetNextDuration().has_value());
+  EXPECT_FALSE(performer.GetNextTaskKey().has_value());
 
   // Create tasks.
   std::array<std::pair<std::function<void(BarelyTaskState)>, bool>, kTaskCount> task_callbacks;
@@ -197,7 +183,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
         false,
     };
     tasks.emplace_back(
-        performer, static_cast<double>(i + 1), 1.0,
+        performer, static_cast<double>(i + 1), 1.0, 0,
         BarelyTask::ProcessCallback{
             [](BarelyTaskState state, void* user_data) {
               (*static_cast<std::function<void(BarelyTaskState)>*>(user_data))(state);
@@ -207,7 +193,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_FALSE(performer.GetNextDuration().has_value());
+  EXPECT_FALSE(performer.GetNextTaskKey().has_value());
   for (auto& [_, is_active] : task_callbacks) {
     EXPECT_FALSE(is_active);
   }
@@ -216,21 +202,21 @@ TEST(PerformerTest, ProcessMultipleTasks) {
   performer.Start();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_THAT(performer.GetNextDuration(), Optional(1.0));
+  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(1.0, 0)));
   for (auto& [_, is_active] : task_callbacks) {
     EXPECT_FALSE(is_active);
   }
 
   // Process tasks.
   for (int i = 1; i <= kTaskCount + 1; ++i) {
-    ASSERT_THAT(performer.GetNextDuration(), Optional(1.0));
+    ASSERT_THAT(performer.GetNextTaskKey(), Optional(Pair(1.0, 0)));
 
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-    performer.Update(*performer.GetNextDuration());
+    performer.Update(performer.GetNextTaskKey()->first);
     EXPECT_DOUBLE_EQ(performer.GetPosition(), static_cast<double>(i));
 
-    performer.ProcessAllTasksAtPosition();  // beat callback
-    performer.ProcessAllTasksAtPosition();
+    performer.ProcessAllTasksAtPosition(0);  // beat callback
+    performer.ProcessAllTasksAtPosition(0);
     for (int j = 1; j <= kTaskCount; ++j) {
       EXPECT_EQ(task_callbacks[j - 1].second, i == j);
     }
@@ -238,7 +224,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), kTaskCount + 1);
-  EXPECT_FALSE(performer.GetNextDuration().has_value());
+  EXPECT_FALSE(performer.GetNextTaskKey().has_value());
   for (int i = 1; i <= kTaskCount; ++i) {
     EXPECT_EQ(task_callbacks[i - 1].second, false);
   }

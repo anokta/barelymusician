@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <span>
 #include <utility>
 #include <vector>
@@ -61,15 +62,18 @@ void BarelyEngine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.
 void BarelyEngine::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      double update_duration = barely::SecondsToBeats(tempo_, timestamp - timestamp_);
+      BarelyPerformer::TaskKey next_key = {barely::SecondsToBeats(tempo_, timestamp - timestamp_),
+                                           std::numeric_limits<int>::min()};
       bool has_tasks_to_process = false;
       for (auto* performer : performers_) {
-        if (const auto maybe_duration = performer->GetNextDuration();
-            maybe_duration.has_value() && *maybe_duration < update_duration) {
+        if (const auto maybe_next_key = performer->GetNextTaskKey();
+            maybe_next_key.has_value() && *maybe_next_key < next_key) {
           has_tasks_to_process = true;
-          update_duration = *maybe_duration;
+          next_key = *maybe_next_key;
         }
       }
+
+      const auto& [update_duration, max_priority] = next_key;
       assert(update_duration > 0.0 || has_tasks_to_process);
 
       if (update_duration > 0) {
@@ -86,7 +90,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
 
       if (has_tasks_to_process) {
         for (auto* performer : performers_) {
-          performer->ProcessAllTasksAtPosition();
+          performer->ProcessAllTasksAtPosition(max_priority);
         }
       }
     } else if (timestamp_ < timestamp) {

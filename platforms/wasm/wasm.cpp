@@ -11,7 +11,6 @@ using ::barely::Performer;
 using ::barely::Quantization;
 using ::barely::Task;
 using ::barely::TaskState;
-using ::barely::Trigger;
 using ::emscripten::allow_raw_pointers;
 using ::emscripten::class_;
 using ::emscripten::optional_override;
@@ -46,12 +45,7 @@ static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
 
 [[nodiscard]] static Task Performer_CreateTask(Performer& performer, double position,
                                                double duration) noexcept {
-  return performer.CreateTask(position, duration, /*callback=*/nullptr);
-}
-
-[[nodiscard]] static Trigger Performer_CreateTrigger(Performer& performer,
-                                                     double position) noexcept {
-  return performer.CreateTrigger(position, /*callback=*/nullptr);
+  return performer.CreateTask(position, duration, /*priority=*/0, /*callback=*/nullptr);
 }
 
 [[nodiscard]] static uintptr_t Performer_GetHandle(Performer& performer) noexcept {
@@ -60,10 +54,6 @@ static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
 
 [[nodiscard]] static uintptr_t Task_GetHandle(Task& task) noexcept {
   return reinterpret_cast<uintptr_t>(static_cast<BarelyTaskHandle>(task));
-}
-
-[[nodiscard]] static uintptr_t Trigger_GetHandle(Trigger& trigger) noexcept {
-  return reinterpret_cast<uintptr_t>(static_cast<BarelyTriggerHandle>(trigger));
 }
 
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
@@ -108,7 +98,6 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
 
   class_<Performer>("Performer")
       .function("createTask", &Performer_CreateTask, take_ownership())
-      .function("createTrigger", &Performer_CreateTrigger, take_ownership())
       .function("getHandle", &Performer_GetHandle, allow_raw_pointers())
       .function("start", &Performer::Start)
       .function("stop", &Performer::Stop)
@@ -132,11 +121,4 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .property("isActive", &Task::IsActive)
       .property("duration", &Task::GetDuration, &Task::SetDuration)
       .property("position", &Task::GetPosition, &Task::SetPosition);
-
-  class_<Trigger>("Trigger")
-      .function("getHandle", &Trigger_GetHandle, allow_raw_pointers())
-      .function("setProcessCallback", optional_override([](Trigger& trigger, val js_callback) {
-                  return trigger.SetProcessCallback([js_callback]() { js_callback(); });
-                }))
-      .property("position", &Trigger::GetPosition, &Trigger::SetPosition);
 }

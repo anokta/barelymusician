@@ -55,9 +55,6 @@ namespace Barely {
     [Min(0.0f)]
     private double _loopLength = 1.0;
 
-    /// List of recurring triggers.
-    public List<Trigger> Triggers = new List<Trigger>();
-
     /// List of recurring tasks.
     public List<Task> Tasks = new List<Task>();
 
@@ -113,9 +110,6 @@ namespace Barely {
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(null);
       }
-      for (int i = 0; i < Triggers.Count; ++i) {
-        Triggers[i].Update(null);
-      }
       Engine.Internal.Performer_Destroy(ref _handle);
     }
 
@@ -125,9 +119,6 @@ namespace Barely {
       LoopLength = _loopLength;
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(this);
-      }
-      for (int i = 0; i < Triggers.Count; ++i) {
-        Triggers[i].Update(this);
       }
     }
   }

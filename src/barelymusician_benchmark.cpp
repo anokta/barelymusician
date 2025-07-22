@@ -15,7 +15,7 @@ constexpr int kSampleCount = 1024;
 void BM_BarelyEngine_AddRemoveInstrument(State& state) {
   Engine engine(kSampleRate);
 
-  for (auto _ : state) {
+  for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     [[maybe_unused]] const auto instrument = engine.CreateInstrument();
   }
 }
@@ -24,7 +24,7 @@ BENCHMARK(BM_BarelyEngine_AddRemoveInstrument);
 void BM_BarelyEngine_AddRemovePerformer(State& state) {
   Engine engine(kSampleRate);
 
-  for (auto _ : state) {
+  for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     [[maybe_unused]] const auto performer = engine.CreatePerformer();
   }
 }
@@ -35,7 +35,7 @@ void BM_BarelyEngine_ProcessEmpty(State& state) {
 
   std::array<float, kSampleCount> output_samples;
 
-  for (auto _ : state) {
+  for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     engine.Process(output_samples, 0.0);
   }
 }
@@ -55,7 +55,7 @@ void BM_BarelyEngine_ProcessFrequentUpdates(State& state) {
   constexpr double kTimestampIncrement =
       static_cast<double>(kSampleCount) / static_cast<double>(kSampleRate);
 
-  for (auto _ : state) {
+  for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     state.PauseTiming();
     for (int i = 0; i < kUpdateCount; ++i) {
       engine.Update(timestamp);
@@ -88,7 +88,7 @@ void BM_BarelyInstrument_PlaySingleNoteWithLoopingSample(State& state) {
 
   std::array<float, kSampleCount> output_samples;
 
-  for (auto _ : state) {
+  for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     engine.Process(output_samples, 0.0);
   }
 }
@@ -104,7 +104,7 @@ void BM_BarelyInstrument_PlaySingleoteWithSineOsc(State& state) {
 
   std::array<float, kSampleCount> output_samples;
 
-  for (auto _ : state) {
+  for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     engine.Process(output_samples, 0.0);
   }
 }
@@ -124,7 +124,7 @@ void BM_BarelyInstrument_PlayMultipleNotesWithSineOsc(State& state) {
 
   std::array<float, kSampleCount> output_samples;
 
-  for (auto _ : state) {
+  for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     engine.Process(output_samples, 0.0);
   }
 }
@@ -136,7 +136,7 @@ void BM_BarelyInstrument_SetMultipleControls(State& state) {
   auto instrument = engine.CreateInstrument();
   int i = 0;
 
-  for (auto _ : state) {
+  for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     state.PauseTiming();
     const ControlType type = static_cast<ControlType>(i % BarelyControlType_kCount);
     const float value = static_cast<float>(i++);

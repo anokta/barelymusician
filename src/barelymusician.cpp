@@ -12,7 +12,6 @@
 #include "api/performer.h"
 #include "api/repeater.h"
 #include "api/task.h"
-#include "api/trigger.h"
 #include "common/time.h"
 
 bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
@@ -504,13 +503,14 @@ bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_p
 }
 
 bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double duration,
-                       BarelyTask_ProcessCallback callback, void* user_data,
+                       int32_t priority, BarelyTask_ProcessCallback callback, void* user_data,
                        BarelyTaskHandle* out_task) {
   if (!performer) return false;
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
-  *out_task = new BarelyTask(*performer, position, duration, {callback, user_data});
+  *out_task = new BarelyTask(*performer, position, duration, static_cast<int>(priority),
+                             {callback, user_data});
   return *out_task;
 }
 
@@ -537,6 +537,14 @@ bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
   return true;
 }
 
+bool BarelyTask_GetPriority(BarelyTaskHandle task, int32_t* out_priority) {
+  if (!task) return false;
+  if (!out_priority) return false;
+
+  *out_priority = static_cast<int32_t>(task->GetPriority());
+  return true;
+}
+
 bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active) {
   if (!task) return false;
   if (!out_is_active) return false;
@@ -560,51 +568,18 @@ bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
   return true;
 }
 
+bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority) {
+  if (!task) return false;
+
+  task->SetPriority(static_cast<int>(priority));
+  return true;
+}
+
 bool BarelyTask_SetProcessCallback(BarelyTaskHandle task, BarelyTask_ProcessCallback callback,
                                    void* user_data) {
   if (!task) return false;
 
   task->SetProcessCallback({callback, user_data});
-  return true;
-}
-
-bool BarelyTrigger_Create(BarelyPerformerHandle performer, double position,
-                          BarelyTrigger_ProcessCallback callback, void* user_data,
-                          BarelyTriggerHandle* out_trigger) {
-  if (!performer) return false;
-  if (!out_trigger) return false;
-
-  *out_trigger = new BarelyTrigger(*performer, position, {callback, user_data});
-  return *out_trigger;
-}
-
-bool BarelyTrigger_Destroy(BarelyTriggerHandle trigger) {
-  if (!trigger) return false;
-
-  delete trigger;
-  return true;
-}
-
-bool BarelyTrigger_GetPosition(BarelyTriggerHandle trigger, double* out_position) {
-  if (!trigger) return false;
-  if (!out_position) return false;
-
-  *out_position = trigger->GetPosition();
-  return true;
-}
-
-bool BarelyTrigger_SetPosition(BarelyTriggerHandle trigger, double position) {
-  if (!trigger) return false;
-
-  trigger->SetPosition(position);
-  return true;
-}
-
-bool BarelyTrigger_SetProcessCallback(BarelyTriggerHandle trigger,
-                                      BarelyTrigger_ProcessCallback callback, void* user_data) {
-  if (!trigger) return false;
-
-  trigger->SetProcessCallback({callback, user_data});
   return true;
 }
 

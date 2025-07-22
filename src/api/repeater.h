@@ -85,8 +85,8 @@ struct BarelyRepeater {
   // Performer.
   BarelyPerformer performer_;
 
-  // Trigger.
-  BarelyTrigger trigger_;
+  // Task.
+  BarelyTask task_;
 
   // Pointer to instrument.
   BarelyInstrument* instrument_ = nullptr;

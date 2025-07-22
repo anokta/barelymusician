@@ -15,6 +15,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
+using ::barely::TaskState;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -66,7 +67,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   auto metronome = engine.CreatePerformer();
   metronome.SetLooping(true);
   int beat = 0;
-  const auto metronome_trigger = metronome.CreateTrigger(0.0, [&]() {
+  const auto metronome_trigger = metronome.CreateTask(0.0, 1e-6, 0, [&](TaskState state) {
+    if (state != TaskState::kBegin) {
+      return;
+    }
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ++beat;

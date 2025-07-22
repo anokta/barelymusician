@@ -82,7 +82,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   std::unordered_map<int, Task> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {
-    return performer.CreateTask(note.position, note.duration,
+    return performer.CreateTask(note.position, note.duration, 0,
                                 [&instrument, pitch = note.pitch](TaskState state) {
                                   switch (state) {
                                     case TaskState::kBegin:

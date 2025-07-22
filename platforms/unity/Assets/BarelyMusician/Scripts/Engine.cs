@@ -40,14 +40,6 @@ namespace Barely {
       return Internal.DecibelsToAmplitude(decibels);
     }
 
-    /// Schedules a task at a specific time.
-    ///
-    /// @param callback Task process callback.
-    /// @param dspTime Time in seconds.
-    public static void ScheduleTask(Action callback, double dspTime) {
-      Internal.Engine_ScheduleTask(callback, dspTime);
-    }
-
     /// Class that wraps the internal api.
     public static class Internal {
       /// Control type.
@@ -280,24 +272,6 @@ namespace Barely {
           Debug.LogError("Failed to get engine timestamp");
         }
         return timestamp;
-      }
-
-      /// Schedules a new engine task.
-      ///
-      /// @param callback Task process callback.
-      /// @param timestamp Task timestamp in seconds.
-      public static void Engine_ScheduleTask(Action callback, double timestamp) {
-        if (timestamp < Timestamp) {
-          Debug.LogError("Failed to create engine task at " + timestamp);
-          return;
-        }
-        List<Action> callbacks = null;
-        if (_scheduledTaskCallbacks != null &&
-            !_scheduledTaskCallbacks.TryGetValue(timestamp, out callbacks)) {
-          callbacks = new List<Action>();
-          _scheduledTaskCallbacks.Add(timestamp, callbacks);
-        }
-        callbacks?.Add(callback);
       }
 
       /// Sets the tempo of an engine.
@@ -776,12 +750,12 @@ namespace Barely {
       /// @param callback Task process callback.
       /// @param taskHandle Task handle.
       public static void Task_Create(Task task, IntPtr performerHandle, double position,
-                                     double duration, ref IntPtr taskHandle) {
+                                     double duration, int priority, ref IntPtr taskHandle) {
         if (Handle == IntPtr.Zero || taskHandle != IntPtr.Zero) {
           return;
         }
         if (!BarelyTask_Create(performerHandle, position, Math.Max(duration, _minTaskDuration),
-                               Task_OnProcess, IntPtr.Zero, ref taskHandle)) {
+                               priority, Task_OnProcess, IntPtr.Zero, ref taskHandle)) {
           Debug.LogError("Failed to create task '" + task + "'");
           return;
         }
@@ -828,6 +802,18 @@ namespace Barely {
         return position;
       }
 
+      /// Returns the priority of a task.
+      ///
+      /// @param taskHandle Task handle.
+      /// @return Priority.
+      public static int Task_GetPriority(IntPtr taskHandle) {
+        int priority = 0;
+        if (!BarelyTask_GetPriority(taskHandle, ref priority) && taskHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer task priority");
+        }
+        return priority;
+      }
+
       /// Returns whether a task is active or not.
       ///
       /// @param taskHandle Task handle.
@@ -843,7 +829,7 @@ namespace Barely {
       /// Sets the duration of a task.
       ///
       /// @param taskHandle Task handle.
-      /// @param duration Duration in beats.
+      /// @param duration Task duration in beats.
       public static void Task_SetDuration(IntPtr taskHandle, double duration) {
         if (!BarelyTask_SetDuration(taskHandle, Math.Max(duration, _minTaskDuration)) &&
             taskHandle != IntPtr.Zero) {
@@ -854,70 +840,20 @@ namespace Barely {
       /// Sets the position of a task.
       ///
       /// @param taskHandle Task handle.
-      /// @param position Position in beats.
+      /// @param position Task position in beats.
       public static void Task_SetPosition(IntPtr taskHandle, double position) {
         if (!BarelyTask_SetPosition(taskHandle, position) && taskHandle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer task position");
         }
       }
 
-      /// Creates a new trigger.
+      /// Sets the priority of a task.
       ///
-      /// @param trigger Trigger.
-      /// @param performerHandle Performer handle.
-      /// @param position Trigger position.
-      /// @param callback Trigger process callback.
-      /// @param triggerHandle Trigger handle.
-      public static void Trigger_Create(Trigger trigger, IntPtr performerHandle, double position,
-                                        ref IntPtr triggerHandle) {
-        if (Handle == IntPtr.Zero || triggerHandle != IntPtr.Zero) {
-          return;
-        }
-        if (!BarelyTrigger_Create(performerHandle, position, Trigger_OnProcess, IntPtr.Zero,
-                                  ref triggerHandle)) {
-          Debug.LogError("Failed to create trigger '" + trigger + "'");
-          return;
-        }
-        _triggers.Add(triggerHandle, trigger);
-        BarelyTrigger_SetProcessCallback(triggerHandle, Trigger_OnProcess, triggerHandle);
-      }
-
-      /// Destroys a trigger.
-      ///
-      /// @param triggerHandle Trigger handle.
-      public static void Trigger_Destroy(IntPtr performerHandle, ref IntPtr triggerHandle) {
-        if (Handle == IntPtr.Zero || performerHandle == IntPtr.Zero ||
-            triggerHandle == IntPtr.Zero) {
-          triggerHandle = IntPtr.Zero;
-          return;
-        }
-        if (!BarelyTrigger_Destroy(triggerHandle)) {
-          Debug.LogError("Failed to destroy performer trigger");
-        }
-        _triggers.Remove(triggerHandle);
-        triggerHandle = IntPtr.Zero;
-      }
-
-      /// Returns the position of a trigger.
-      ///
-      /// @param triggerHandle Trigger handle.
-      /// @return Position in beats.
-      public static double Trigger_GetPosition(IntPtr triggerHandle) {
-        double position = 0.0;
-        if (!BarelyTrigger_GetPosition(triggerHandle, ref position) &&
-            triggerHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get performer trigger position");
-        }
-        return position;
-      }
-
-      /// Sets the position of a trigger.
-      ///
-      /// @param triggerHandle Trigger handle.
-      /// @param position Position in beats.
-      public static void Trigger_SetPosition(IntPtr triggerHandle, double position) {
-        if (!BarelyTrigger_SetPosition(triggerHandle, position) && triggerHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set performer trigger position");
+      /// @param taskHandle Task handle.
+      /// @param priority Task priority.
+      public static void Task_SetPriority(IntPtr taskHandle, int priority) {
+        if (!BarelyTask_SetPriority(taskHandle, priority) && taskHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer task priority");
         }
       }
 
@@ -945,15 +881,6 @@ namespace Barely {
       private static void Task_OnProcess(TaskState state, IntPtr userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
           Task.Internal.OnProcess(task, state);
-        }
-      }
-
-      // Trigger process callback.
-      private delegate void Trigger_ProcessCallback(IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(Trigger_ProcessCallback))]
-      private static void Trigger_OnProcess(IntPtr userData) {
-        if (_triggers.TryGetValue(userData, out var trigger)) {
-          Trigger.Internal.OnProcess(trigger);
         }
       }
 
@@ -1075,14 +1002,8 @@ namespace Barely {
       // Map of performers by their handles.
       private static Dictionary<IntPtr, Performer> _performers = null;
 
-      // Map of scheduled list of task callbacks by their timestamps.
-      private static SortedDictionary<double, List<Action>> _scheduledTaskCallbacks = null;
-
       // Map of tasks by their handles.
       private static Dictionary<IntPtr, Task> _tasks = null;
-
-      // Map of triggers by their handles.
-      private static Dictionary<IntPtr, Trigger> _triggers = null;
 
       // Scale.
       private static Scale _scale = new Scale {
@@ -1186,20 +1107,7 @@ namespace Barely {
         }
 
         private void LateUpdate() {
-          double nextTimestamp = GetNextTimestamp();
-          while (_scheduledTaskCallbacks.Count > 0) {
-            double taskTimestamp = _scheduledTaskCallbacks.ElementAt(0).Key;
-            if (taskTimestamp > nextTimestamp) {
-              break;
-            }
-            BarelyEngine_Update(_handle, taskTimestamp);
-            var callbacks = _scheduledTaskCallbacks.ElementAt(0).Value;
-            for (int i = 0; i < callbacks.Count; ++i) {
-              callbacks[i]?.Invoke();
-            }
-            _scheduledTaskCallbacks.Remove(taskTimestamp);
-          }
-          BarelyEngine_Update(_handle, nextTimestamp);
+          BarelyEngine_Update(_handle, GetNextTimestamp());
         }
 
         // Initializes the internal state.
@@ -1224,9 +1132,7 @@ namespace Barely {
             _noteControlOverrides[i].type = (NoteControlType)i;
           }
           _performers = new Dictionary<IntPtr, Performer>();
-          _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           _tasks = new Dictionary<IntPtr, Task>();
-          _triggers = new Dictionary<IntPtr, Trigger>();
           BarelyEngine_Update(_handle, GetNextTimestamp());
         }
 
@@ -1235,7 +1141,6 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyEngine_Destroy(_handle);
           _handle = IntPtr.Zero;
-          _scheduledTaskCallbacks = null;
         }
 
         // Returns the next timestamp to update.
@@ -1464,8 +1369,9 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Create")]
       private static extern bool BarelyTask_Create(IntPtr performer, double position,
-                                                   double duration, Task_ProcessCallback callback,
-                                                   IntPtr userData, ref IntPtr outTask);
+                                                   double duration, Int32 priority,
+                                                   Task_ProcessCallback callback, IntPtr userData,
+                                                   ref IntPtr outTask);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
       private static extern bool BarelyTask_Destroy(IntPtr task);
@@ -1476,6 +1382,9 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPosition")]
       private static extern bool BarelyTask_GetPosition(IntPtr task, ref double outPosition);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPriority")]
+      private static extern bool BarelyTask_GetPriority(IntPtr task, ref Int32 outPriority);
+
       [DllImport(_pluginName, EntryPoint = "BarelyTask_IsActive")]
       private static extern bool BarelyTask_IsActive(IntPtr performer, ref bool outIsActive);
 
@@ -1485,29 +1394,13 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPosition")]
       private static extern bool BarelyTask_SetPosition(IntPtr task, double position);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPriority")]
+      private static extern bool BarelyTask_SetPriority(IntPtr task, Int32 priority);
+
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetProcessCallback")]
       private static extern bool BarelyTask_SetProcessCallback(IntPtr task,
                                                                Task_ProcessCallback callback,
                                                                IntPtr userData);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_Create")]
-      private static extern bool BarelyTrigger_Create(IntPtr performer, double position,
-                                                      Trigger_ProcessCallback callback,
-                                                      IntPtr userData, ref IntPtr outTrigger);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_Destroy")]
-      private static extern bool BarelyTrigger_Destroy(IntPtr task);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_GetPosition")]
-      private static extern bool BarelyTrigger_GetPosition(IntPtr task, ref double outPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_SetPosition")]
-      private static extern bool BarelyTrigger_SetPosition(IntPtr task, double position);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTrigger_SetProcessCallback")]
-      private static extern bool BarelyTrigger_SetProcessCallback(IntPtr task,
-                                                                  Trigger_ProcessCallback callback,
-                                                                  IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "Barely_AmplitudeToDecibels")]
       private static extern bool Barely_AmplitudeToDecibels(float amplitude, ref float outDecibels);

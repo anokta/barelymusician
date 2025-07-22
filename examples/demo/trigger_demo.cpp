@@ -89,25 +89,25 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(0.0, 1.0, play_note_fn(0)));
+  tasks.emplace_back(performer.CreateTask(0.0, 1.0, 0, play_note_fn(0)));
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(1.0, 1.0, play_note_fn(1)));
+  tasks.emplace_back(performer.CreateTask(1.0, 1.0, 0, play_note_fn(1)));
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(2.0, 1.0, play_note_fn(2)));
+  tasks.emplace_back(performer.CreateTask(2.0, 1.0, 0, play_note_fn(2)));
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(3.0, 0.66, play_note_fn(3)));
-  tasks.emplace_back(performer.CreateTask(3.66, 0.34, play_note_fn(4)));
+  tasks.emplace_back(performer.CreateTask(3.0, 0.66, 0, play_note_fn(3)));
+  tasks.emplace_back(performer.CreateTask(3.66, 0.34, 0, play_note_fn(4)));
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(4.0, 0.33, play_note_fn(5)));
-  tasks.emplace_back(performer.CreateTask(4.33, 0.33, play_note_fn(6)));
-  tasks.emplace_back(performer.CreateTask(4.66, 0.34, play_note_fn(7)));
+  tasks.emplace_back(performer.CreateTask(4.0, 0.33, 0, play_note_fn(5)));
+  tasks.emplace_back(performer.CreateTask(4.33, 0.33, 0, play_note_fn(6)));
+  tasks.emplace_back(performer.CreateTask(4.66, 0.34, 0, play_note_fn(7)));
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  tasks.emplace_back(performer.CreateTask(5.0, 2.0, play_note_fn(8)));
+  tasks.emplace_back(performer.CreateTask(5.0, 2.0, 0, play_note_fn(8)));
 
   // Audio process callback.
   const auto process_callback = [&](std::span<float> output_samples) {

@@ -46,6 +46,21 @@ namespace Barely {
     [Min(0.0f)]
     private double _duration = 0.0;
 
+    /// Priority.
+    public int Priority {
+      get { return _priority; }
+      set {
+        if (_performer == null) {
+          _priority = value;
+          return;
+        }
+        Engine.Internal.Task_SetPriority(_handle, value);
+        _priority = Engine.Internal.Task_GetPriority(_handle);
+      }
+    }
+    [SerializeField]
+    private int _priority = 0;
+
     /// Process callback.
     public delegate void ProcessCallback(TaskState state);
     public event ProcessCallback OnProcess;
@@ -58,12 +73,14 @@ namespace Barely {
     ///
     /// @param position Task position in beats.
     /// @param duration Task duration in beats.
+    /// @param priority Task priority.
     /// @param callback Task process callback.
     /// @param onProcessEvent Task process event.
-    public Task(double position, double duration, ProcessCallback callback,
+    public Task(double position, double duration, int priority, ProcessCallback callback,
                 ProcessEvent onProcessEvent = null) {
       _position = position;
       _duration = duration;
+      _priority = priority;
       OnProcess = callback;
       OnProcessEvent = onProcessEvent;
     }
@@ -79,13 +96,14 @@ namespace Barely {
       if (_performer == performer && _handle != IntPtr.Zero) {
         Position = _position;
         Duration = _duration;
+        Priority = _priority;
         return;
       }
       Engine.Internal.Task_Destroy(Performer.Internal.GetHandle(_performer), ref _handle);
       _performer = performer;
       if (_performer != null) {
         Engine.Internal.Task_Create(this, Performer.Internal.GetHandle(_performer), _position,
-                                    _duration, ref _handle);
+                                    _duration, _priority, ref _handle);
       }
     }
 

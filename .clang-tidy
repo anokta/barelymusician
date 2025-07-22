@@ -6,6 +6,8 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   -bugprone-implicit-widening-of-multiplication-result,
 
+  clang-analyzer-*,
+  concurrency-*,
   google-*,
   misc-*,
 

@@ -65,10 +65,19 @@ class Processor extends AudioWorkletProcessor {
         case 'instrument-create': {
           const instrument = this._engine.createInstrument();
           const handle = instrument.getHandle();
-          instrument.setNoteOnCallback(
-              (pitch) => this.port.postMessage({type: 'instrument-on-note-on', handle, pitch}));
-          instrument.setNoteOffCallback(
-              (pitch) => this.port.postMessage({type: 'instrument-on-note-off', handle, pitch}));
+          instrument.setNoteEventCallback((eventType, pitch) => {
+            const NoteEventType = {
+              OFF: 0,
+              ON: 1,
+            };
+            if (eventType == NoteEventType.ON) {
+              this.port.postMessage({type: 'instrument-on-note-on', handle, pitch});
+            } else if (eventType == NoteEventType.OFF) {
+              this.port.postMessage({type: 'instrument-on-note-off', handle, pitch});
+            } else {
+              console.error('Invalid note event type!');
+            }
+          });
           this._instruments[handle] = instrument;
 
           this.port.postMessage({type: 'instrument-create-success', handle})
@@ -260,7 +269,7 @@ class Processor extends AudioWorkletProcessor {
           }
         } break;
         default:
-          console.error('Unknown message!');
+          console.error('Invalid message!');
       }
     };
   }

@@ -325,9 +325,8 @@ namespace Barely {
           return;
         }
         _instruments.Add(instrumentHandle, instrument);
-        BarelyInstrument_SetNoteOffCallback(instrumentHandle, Instrument_OnNoteOff,
-                                            instrumentHandle);
-        BarelyInstrument_SetNoteOnCallback(instrumentHandle, Instrument_OnNoteOn, instrumentHandle);
+        BarelyInstrument_SetNoteEventCallback(instrumentHandle, Instrument_OnNoteEvent,
+                                              instrumentHandle);
       }
 
       /// Destroys an instrument.
@@ -857,21 +856,19 @@ namespace Barely {
         }
       }
 
-      // Instrument note off callback.
-      private delegate void Instrument_NoteOffCallback(float pitch, IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOffCallback))]
-      private static void Instrument_OnNoteOff(float pitch, IntPtr userData) {
+      // Instrument note event callback.
+      private delegate void Instrument_NoteEventCallback(NoteEventType type, float pitch,
+                                                         IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteEventCallback))]
+      private static void Instrument_OnNoteEvent(NoteEventType type, float pitch, IntPtr userData) {
         if (_instruments.TryGetValue(userData, out var instrument)) {
-          Instrument.Internal.OnNoteOff(instrument, pitch);
-        }
-      }
-
-      // Instrument note on callback.
-      private delegate void Instrument_NoteOnCallback(float pitch, IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOnCallback))]
-      private static void Instrument_OnNoteOn(float pitch, IntPtr userData) {
-        if (_instruments.TryGetValue(userData, out var instrument)) {
-          Instrument.Internal.OnNoteOn(instrument, pitch);
+          if (type == NoteEventType.ON) {
+            Instrument.Internal.OnNoteOn(instrument, pitch);
+          } else if (type == NoteEventType.OFF) {
+            Instrument.Internal.OnNoteOff(instrument, pitch);
+          } else {
+            Debug.LogError("Invalid note event type");
+          }
         }
       }
 
@@ -926,6 +923,14 @@ namespace Barely {
 
         // Value.
         public float value;
+      }
+
+      // Note event type.
+      private enum NoteEventType {
+        // Off.
+        [InspectorName("Off")] OFF = 0,
+        // On.
+        [InspectorName("On")] ON,
       }
 
       // Slice of sample data.
@@ -1260,21 +1265,17 @@ namespace Barely {
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr instrument, float pitch,
                                                                  NoteControlType type, float value);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteEventCallback")]
+      private static extern bool BarelyInstrument_SetNoteEventCallback(
+          IntPtr instrument, Instrument_NoteEventCallback callback, IntPtr userData);
+
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, float pitch);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOffCallback")]
-      private static extern bool BarelyInstrument_SetNoteOffCallback(
-          IntPtr instrument, Instrument_NoteOffCallback callback, IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
       private static extern bool BarelyInstrument_SetNoteOn(
           IntPtr instrument, float pitch, [In] NoteControlOverride[] noteControlOverrides,
           Int32 noteControlOverrideCount);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOnCallback")]
-      private static extern bool BarelyInstrument_SetNoteOnCallback(
-          IntPtr instrument, Instrument_NoteOnCallback callback, IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
       private static extern bool BarelyInstrument_SetSampleData(IntPtr instrument,

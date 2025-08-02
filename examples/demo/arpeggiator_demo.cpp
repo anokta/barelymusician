@@ -20,6 +20,7 @@ using ::barely::Arpeggiator;
 using ::barely::ArpeggiatorStyle;
 using ::barely::ControlType;
 using ::barely::Engine;
+using ::barely::NoteEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -79,7 +80,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {ControlType::kRelease, kRelease},
       {ControlType::kVoiceCount, kVoiceCount},
   }});
-  instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
+  instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
+    if (type == NoteEventType::kOn) {
+      ConsoleLog() << "Note(" << pitch << ")";
+    }
+  });
 
   Arpeggiator arpeggiator(engine);
   arpeggiator.SetInstrument(&instrument);

@@ -303,6 +303,16 @@ typedef enum BarelyNoteControlType {
   BarelyNoteControlType_kCount,
 } BarelyNoteControlType;
 
+/// Note event types.
+typedef enum BarelyNoteEventType {
+  /// Off.
+  BarelyNoteEventType_kOff = 0,
+  /// On.
+  BarelyNoteEventType_kOn,
+  /// Number of note event types.
+  BarelyNoteEventType_kCount,
+} BarelyNoteEventType;
+
 /// Oscillator modes.
 typedef enum BarelyOscMode {
   /// Mix.
@@ -432,9 +442,11 @@ typedef struct BarelyTask* BarelyTaskHandle;
 
 /// Instrument note callback.
 ///
+/// @param type Note event type.
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteCallback)(float pitch, void* user_data);
+typedef void (*BarelyInstrument_NoteEventCallback)(BarelyNoteEventType type, float pitch,
+                                                   void* user_data);
 
 /// Task process callback.
 ///
@@ -669,22 +681,22 @@ BARELY_API bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
 BARELY_API bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
                                                 BarelyNoteControlType type, float value);
 
+/// Sets the note event callback of an instrument.
+///
+/// @param instrument Instrument handle.
+/// @param callback Note event callback.
+/// @param user_data Pointer to user data.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyInstrument_SetNoteEventCallback(BarelyInstrumentHandle instrument,
+                                                      BarelyInstrument_NoteEventCallback callback,
+                                                      void* user_data);
+
 /// Sets an instrument note off.
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch);
-
-/// Sets the note off callback of an instrument.
-///
-/// @param instrument Instrument handle.
-/// @param callback Note off callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
-                                                    BarelyInstrument_NoteCallback callback,
-                                                    void* user_data);
 
 /// Sets an instrument note on.
 ///
@@ -696,16 +708,6 @@ BARELY_API bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instr
 BARELY_API bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
                                            const BarelyNoteControlOverride* note_control_overrides,
                                            int32_t note_control_override_count);
-
-/// Sets the note on callback of an instrument.
-///
-/// @param instrument Instrument handle.
-/// @param callback Note on callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
-                                                   BarelyInstrument_NoteCallback callback,
-                                                   void* user_data);
 
 /// Sets instrument sample data.
 ///
@@ -1098,6 +1100,14 @@ enum class NoteControlType {
   kPitchShift = BarelyNoteControlType_kPitchShift,
 };
 
+/// Note event types.
+enum class NoteEventType {
+  /// Off.
+  kOff = BarelyNoteEventType_kOff,
+  /// On.
+  kOn = BarelyNoteEventType_kOn,
+};
+
 /// Oscillator modes.
 enum class OscMode {
   /// Mix.
@@ -1242,13 +1252,6 @@ class HandleWrapper {
 
  protected:
   // Helper functions to set a callback.
-  template <typename SetCallbackFn, typename... CallbackArgs>
-  void SetCallback(SetCallbackFn set_callback_fn, std::function<void(CallbackArgs...)>& callback) {
-    SetCallback(set_callback_fn, callback, [](CallbackArgs... args, void* user_data) noexcept {
-      assert(user_data != nullptr && "Invalid callback user data");
-      (*static_cast<std::function<void(CallbackArgs...)>*>(user_data))(args...);
-    });
-  }
   template <typename ProcessCallbackFn, typename SetCallbackFn, typename... CallbackArgs>
   void SetCallback(SetCallbackFn set_callback_fn, std::function<void(CallbackArgs...)>& callback,
                    ProcessCallbackFn process_callback_fn) {
@@ -1269,10 +1272,11 @@ class HandleWrapper {
 /// Class that wraps an instrument handle.
 class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
  public:
-  /// Note callback function.
+  /// Note event callback function.
   ///
+  /// @param type Note event type.
   /// @param pitch Note pitch.
-  using NoteCallback = std::function<void(float pitch)>;
+  using NoteEventCallback = std::function<void(NoteEventType type, float pitch)>;
 
   /// Constructs a new `Instrument`.
   ///
@@ -1306,13 +1310,9 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// @return Instrument.
   Instrument(Instrument&& other) noexcept
       : HandleWrapper(std::move(other)),
-        note_off_callback_(std::exchange(other.note_off_callback_, {})),
-        note_on_callback_(std::exchange(other.note_on_callback_, {})) {
-    if (note_off_callback_) {
-      SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
-    }
-    if (note_on_callback_) {
-      SetCallback(BarelyInstrument_SetNoteOnCallback, note_on_callback_);
+        note_event_callback_(std::exchange(other.note_event_callback_, {})) {
+    if (note_event_callback_) {
+      SetNoteEventCallback();
     }
   }
 
@@ -1324,13 +1324,9 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     if (this != &other) {
       BarelyInstrument_Destroy(*this);
       HandleWrapper::operator=(std::move(other));
-      note_off_callback_ = std::exchange(other.note_off_callback_, {});
-      note_on_callback_ = std::exchange(other.note_on_callback_, {});
-      if (note_off_callback_) {
-        SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
-      }
-      if (note_on_callback_) {
-        SetCallback(BarelyInstrument_SetNoteOnCallback, note_on_callback_);
+      note_event_callback_ = std::exchange(other.note_event_callback_, {});
+      if (note_event_callback_) {
+        SetNoteEventCallback();
       }
     }
     return *this;
@@ -1411,20 +1407,20 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
+  /// Sets the note event callback.
+  ///
+  /// @param callback Note event callback.
+  void SetNoteEventCallback(NoteEventCallback callback) noexcept {
+    note_event_callback_ = std::move(callback);
+    SetNoteEventCallback();
+  }
+
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
   void SetNoteOff(float pitch) noexcept {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOff(*this, pitch);
     assert(success);
-  }
-
-  /// Sets the note off callback.
-  ///
-  /// @param callback Note off callback.
-  void SetNoteOffCallback(NoteCallback callback) noexcept {
-    note_off_callback_ = std::move(callback);
-    SetCallback(BarelyInstrument_SetNoteOffCallback, note_off_callback_);
   }
 
   /// Sets a note on.
@@ -1461,14 +1457,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
                             }});
   }
 
-  /// Sets the note on callback.
-  ///
-  /// @param callback Note on callback.
-  void SetNoteOnCallback(NoteCallback callback) noexcept {
-    note_on_callback_ = std::move(callback);
-    SetCallback(BarelyInstrument_SetNoteOnCallback, note_on_callback_);
-  }
-
   /// Sets the sample data.
   ///
   /// @param sample_data Span of slices.
@@ -1480,11 +1468,20 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   }
 
  private:
-  // Note off callback.
-  NoteCallback note_off_callback_;
+  // Helper function to set the note event callback.
+  void SetNoteEventCallback() noexcept {
+    SetCallback(BarelyInstrument_SetNoteEventCallback, note_event_callback_,
+                [](BarelyNoteEventType type, float pitch, void* user_data) noexcept {
+                  assert(user_data != nullptr && "Invalid note event callback user data");
+                  if (const auto& callback = *static_cast<NoteEventCallback*>(user_data);
+                      callback) {
+                    callback(static_cast<NoteEventType>(type), pitch);
+                  }
+                });
+  }
 
-  // Note on callback.
-  NoteCallback note_on_callback_;
+  // Note event callback.
+  NoteEventCallback note_event_callback_;
 };
 
 /// Class that wraps a task handle.

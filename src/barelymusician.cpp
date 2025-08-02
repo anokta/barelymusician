@@ -248,18 +248,19 @@ bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pi
   return true;
 }
 
+bool BarelyInstrument_SetNoteEventCallback(BarelyInstrumentHandle instrument,
+                                           BarelyInstrument_NoteEventCallback callback,
+                                           void* user_data) {
+  if (!instrument) return false;
+
+  instrument->SetNoteEventCallback({callback, user_data});
+  return true;
+}
+
 bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, float pitch) {
   if (!instrument) return false;
 
   instrument->SetNoteOff(pitch);
-  return true;
-}
-
-bool BarelyInstrument_SetNoteOffCallback(BarelyInstrumentHandle instrument,
-                                         BarelyInstrument_NoteCallback callback, void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetNoteOffCallback({callback, user_data});
   return true;
 }
 
@@ -270,14 +271,6 @@ bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, float pitch,
 
   instrument->SetNoteOn(
       pitch, {note_control_overrides, note_control_overrides + note_control_override_count});
-  return true;
-}
-
-bool BarelyInstrument_SetNoteOnCallback(BarelyInstrumentHandle instrument,
-                                        BarelyInstrument_NoteCallback callback, void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetNoteOnCallback({callback, user_data});
   return true;
 }
 

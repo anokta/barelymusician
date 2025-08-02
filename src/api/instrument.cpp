@@ -162,7 +162,7 @@ void BarelyInstrument::Process(std::span<float> output_samples, int64_t process_
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyInstrument::SetAllNotesOff() noexcept {
   for (const auto& [pitch, _] : std::exchange(note_controls_, {})) {
-    note_off_callback_(pitch);
+    note_event_callback_(BarelyNoteEventType_kOff, pitch);
     message_queue_.Add(update_sample_, NoteOffMessage{pitch});
   }
 }
@@ -185,15 +185,15 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
   }
 }
 
-void BarelyInstrument::SetNoteOff(float pitch) noexcept {
-  if (note_controls_.erase(pitch) > 0) {
-    note_off_callback_(pitch);
-    message_queue_.Add(update_sample_, NoteOffMessage{pitch});
-  }
+void BarelyInstrument::SetNoteEventCallback(NoteEventCallback callback) noexcept {
+  note_event_callback_ = callback;
 }
 
-void BarelyInstrument::SetNoteOffCallback(NoteCallback callback) noexcept {
-  note_off_callback_ = callback;
+void BarelyInstrument::SetNoteOff(float pitch) noexcept {
+  if (note_controls_.erase(pitch) > 0) {
+    note_event_callback_(BarelyNoteEventType_kOff, pitch);
+    message_queue_.Add(update_sample_, NoteOffMessage{pitch});
+  }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -202,13 +202,9 @@ void BarelyInstrument::SetNoteOn(
   if (const auto [it, success] =
           note_controls_.try_emplace(pitch, BuildNoteControlArray(note_control_overrides));
       success) {
-    note_on_callback_(pitch);
+    note_event_callback_(BarelyNoteEventType_kOn, pitch);
     message_queue_.Add(update_sample_, NoteOnMessage{pitch, BuildNoteControls(it->second)});
   }
-}
-
-void BarelyInstrument::SetNoteOnCallback(NoteCallback callback) noexcept {
-  note_on_callback_ = callback;
 }
 
 void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexcept {

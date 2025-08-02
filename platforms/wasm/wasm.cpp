@@ -7,6 +7,7 @@
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Quantization;
 using ::barely::Task;
@@ -79,21 +80,18 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("setAllNotesOff", &Instrument::SetAllNotesOff)
       .function("setControl", &Instrument_SetControl)
       .function("setNoteControl", &Instrument::SetNoteControl<float>)
+      .function(
+          "setNoteEventCallback", optional_override([](Instrument& instrument, val js_callback) {
+            return instrument.SetNoteEventCallback([js_callback](NoteEventType type, float pitch) {
+              js_callback(static_cast<int>(type), pitch);
+            });
+          }))
       .function("setNoteOff", &Instrument::SetNoteOff)
-      .function("setNoteOffCallback",
-                optional_override([](Instrument& instrument, val js_callback) {
-                  return instrument.SetNoteOffCallback(
-                      [js_callback](float pitch) { js_callback(pitch); });
-                }))
       .function("setNoteOn", &Instrument_SetNoteOn)
       .function("setNoteOn",
                 static_cast<void (Instrument::*)(float, float)>(&Instrument::SetNoteOn))
       .function("setNoteOn",
-                static_cast<void (Instrument::*)(float, float, float)>(&Instrument::SetNoteOn))
-      .function(
-          "setNoteOnCallback", optional_override([](Instrument& instrument, val js_callback) {
-            return instrument.SetNoteOnCallback([js_callback](float pitch) { js_callback(pitch); });
-          }));
+                static_cast<void (Instrument::*)(float, float, float)>(&Instrument::SetNoteOn));
   // TODO(#164): Add sample data support.
 
   class_<Performer>("Performer")

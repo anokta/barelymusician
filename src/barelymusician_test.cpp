@@ -109,10 +109,10 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
     Instrument instrument = engine.CreateInstrument({});
 
     // Set the note callbacks.
-    instrument.SetNoteOnCallback([&](float pitch) { note_on_pitch = pitch; });
+    instrument.SetNoteEventCallback([&](NoteEventType type, float pitch) {
+      (type == NoteEventType::kOn ? note_on_pitch : note_off_pitch) = pitch;
+    });
     EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
-
-    instrument.SetNoteOffCallback([&](float pitch) { note_off_pitch = pitch; });
     EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
 
     // Set a note on.
@@ -136,7 +136,11 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     std::vector<Instrument> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(engine.CreateInstrument({}));
-      instruments[i].SetNoteOffCallback([&](float pitch) { note_off_pitches.push_back(pitch); });
+      instruments[i].SetNoteEventCallback([&](NoteEventType type, float pitch) {
+        if (type == NoteEventType::kOff) {
+          note_off_pitches.push_back(pitch);
+        }
+      });
     }
 
     // Start multiple notes, then immediately stop some of them.

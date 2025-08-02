@@ -22,6 +22,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
+using ::barely::NoteEventType;
 using ::barely::Slice;
 using ::barely::SliceMode;
 using ::barely::examples::AudioOutput;
@@ -90,9 +91,9 @@ int main(int /*argc*/, char* argv[]) {
   }});
 
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
-
-  instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
-  instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
+  instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
+    ConsoleLog() << "Note" << (type == NoteEventType::kOn ? "On" : "Off") << "(" << pitch << ")";
+  });
 
   // Audio process callback.
   audio_output.SetProcessCallback(

@@ -26,6 +26,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Quantization;
 using ::barely::Scale;
@@ -214,13 +215,11 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate);
   engine.SetTempo(kTempo);
 
-  // Note on callback.
-  const auto set_note_callbacks_fn = [&](size_t index, Instrument& instrument) {
-    instrument.SetNoteOffCallback([index](float pitch) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
-    });
-    instrument.SetNoteOnCallback([index](float pitch) {
-      ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ")";
+  // Note event callback.
+  const auto set_note_Event_callback_fn = [&](size_t index, Instrument& instrument) {
+    instrument.SetNoteEventCallback([index](NoteEventType type, float pitch) {
+      ConsoleLog() << "Instrument #" << index << ": Note"
+                   << (type == NoteEventType::kOn ? "On" : "Off") << "(" << pitch << ")";
     });
   };
 
@@ -242,7 +241,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     instrument.SetControl(ControlType::kAttack, attack);
     instrument.SetControl(ControlType::kRelease, release);
-    set_note_callbacks_fn(instruments.size(), instrument);
+    set_note_Event_callback_fn(instruments.size(), instrument);
   };
 
   Scale scale = {kDiatonicPitches, kRootPitch};
@@ -289,7 +288,7 @@ int main(int /*argc*/, char* argv[]) {
   percussion.SetControl(ControlType::kAttack, 0.0f);
   percussion.SetControl(ControlType::kRetrigger, true);
   percussion.SetControl(ControlType::kSliceMode, SliceMode::kOnce);
-  set_note_callbacks_fn(instruments.size(), percussion);
+  set_note_Event_callback_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<float, std::string>>& percussion_map) {
         std::vector<Slice> slices;

@@ -23,6 +23,7 @@ namespace {
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Task;
 using ::barely::TaskState;
@@ -116,11 +117,9 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Set the instrument settings.
-    instrument.SetNoteOnCallback([track_index](float pitch) {
-      ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(" << pitch << ")";
-    });
-    instrument.SetNoteOffCallback([track_index](float pitch) {
-      ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
+    instrument.SetNoteEventCallback([track_index](NoteEventType type, float pitch) {
+      ConsoleLog() << "MIDI track #" << track_index << ": Note"
+                   << (type == NoteEventType::kOn ? "On" : "Off") << "(" << pitch << ")";
     });
     instrument.SetControl(ControlType::kGain, kInstrumentGain);
     instrument.SetControl(ControlType::kOscMix, 1.0f);

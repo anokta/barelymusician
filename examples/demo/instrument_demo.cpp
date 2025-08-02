@@ -17,6 +17,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
+using ::barely::NoteEventType;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -66,8 +67,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {ControlType::kRelease, kRelease},
       {ControlType::kVoiceCount, kVoiceCount},
   }});
-  instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
-  instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
+  instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
+    ConsoleLog() << "Note" << (type == NoteEventType::kOn ? "On" : "Off") << "(" << pitch << ")";
+  });
 
   // Audio process callback.
   audio_output.SetProcessCallback(

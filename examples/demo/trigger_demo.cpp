@@ -16,6 +16,7 @@ namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
+using ::barely::NoteEventType;
 using ::barely::Scale;
 using ::barely::Task;
 using ::barely::TaskState;
@@ -61,7 +62,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {ControlType::kAttack, kAttack},
       {ControlType::kRelease, kRelease},
   }});
-  instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
+  instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
+    if (type == NoteEventType::kOn) {
+      ConsoleLog() << "Note(" << pitch << ")";
+    }
+  });
 
   std::vector<std::pair<double, double>> triggers;
   std::vector<Task> tasks;

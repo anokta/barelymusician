@@ -132,45 +132,42 @@ TEST(InstrumentTest, SetNoteCallbacks) {
   BarelyInstrument instrument(engine, {});
 
   // Trigger the note on callback.
-  float note_on_pitch = 0.0f;
-  instrument.SetNoteOnCallback({
-      [](float pitch, void* user_data) { *static_cast<float*>(user_data) = pitch; },
-      static_cast<void*>(&note_on_pitch),
+  std::pair<float, float> note_pitch = {0.0f, 0.0f};
+  instrument.SetNoteEventCallback({
+      [](BarelyNoteEventType type, float pitch, void* user_data) {
+        (type == BarelyNoteEventType_kOn
+             ? static_cast<std::pair<float, float>*>(user_data)->first
+             : static_cast<std::pair<float, float>*>(user_data)->second) = pitch;
+      },
+      static_cast<void*>(&note_pitch),
   });
-  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
+  EXPECT_FLOAT_EQ(note_pitch.first, 0.0f);
 
   instrument.SetNoteOn(kPitch, {});
-  EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
+  EXPECT_FLOAT_EQ(note_pitch.first, kPitch);
 
   // This should not trigger the callback since the note is already on.
-  note_on_pitch = 0.0f;
+  note_pitch.first = 0.0f;
   instrument.SetNoteOn(kPitch, {});
-  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
+  EXPECT_FLOAT_EQ(note_pitch.first, 0.0f);
 
   // Trigger the note on callback again with another note.
-  note_on_pitch = 0.0f;
+  note_pitch.first = 0.0f;
   instrument.SetNoteOn(kPitch + 2.0f, {});
-  EXPECT_FLOAT_EQ(note_on_pitch, kPitch + 2.0f);
+  EXPECT_FLOAT_EQ(note_pitch.first, kPitch + 2.0f);
 
   // Trigger the note off callback.
-  float note_off_pitch = 0.0f;
-  instrument.SetNoteOffCallback({
-      [](float pitch, void* user_data) { *static_cast<float*>(user_data) = pitch; },
-      static_cast<void*>(&note_off_pitch),
-  });
-  EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
-
   instrument.SetNoteOff(kPitch);
-  EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
+  EXPECT_FLOAT_EQ(note_pitch.second, kPitch);
 
   // This should not trigger the callback since the note is already off.
-  note_off_pitch = 0.0;
+  note_pitch.second = 0.0;
   instrument.SetNoteOff(kPitch);
-  EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
+  EXPECT_FLOAT_EQ(note_pitch.second, 0.0f);
 
   // Finally, trigger the note off callback with the remaining note.
   instrument.SetAllNotesOff();
-  EXPECT_FLOAT_EQ(note_off_pitch, kPitch + 2.0f);
+  EXPECT_FLOAT_EQ(note_pitch.second, kPitch + 2.0f);
 }
 
 // Tests that the instrument stops all notes as expected.

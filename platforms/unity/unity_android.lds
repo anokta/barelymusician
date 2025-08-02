@@ -26,10 +26,9 @@ VERS_1.0 {
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
     BarelyInstrument_SetNoteControl;
+    BarelyInstrument_SetNoteEventCallback;
     BarelyInstrument_SetNoteOff;
-    BarelyInstrument_SetNoteOffCallback;
     BarelyInstrument_SetNoteOn;
-    BarelyInstrument_SetNoteOnCallback;
     BarelyInstrument_SetSampleData;
     BarelyPerformer_Create;
     BarelyPerformer_Destroy;

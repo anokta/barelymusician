@@ -2,8 +2,8 @@ using System;
 using UnityEngine;
 
 namespace Barely {
-  /// Task state.
-  public enum TaskState {
+  /// Task event types.
+  public enum TaskEventType {
     /// Begin.
     [InspectorName("Begin")] BEGIN = 0,
     /// End.
@@ -62,11 +62,11 @@ namespace Barely {
     private int _priority = 0;
 
     /// Process callback.
-    public delegate void ProcessCallback(TaskState state);
+    public delegate void ProcessCallback(TaskEventType type);
     public event ProcessCallback OnProcess;
 
     [Serializable]
-    public class ProcessEvent : UnityEngine.Events.UnityEvent<TaskState> {}
+    public class ProcessEvent : UnityEngine.Events.UnityEvent<TaskEventType> {}
     public ProcessEvent OnProcessEvent;
 
     /// Constructs a new `Task`.
@@ -110,9 +110,9 @@ namespace Barely {
     /// Class that wraps the internal api.
     public static class Internal {
       /// Internal process callback.
-      public static void OnProcess(Task task, TaskState state) {
-        task.OnProcess?.Invoke(state);
-        task.OnProcessEvent?.Invoke(state);
+      public static void OnProcess(Task task, TaskEventType type) {
+        task.OnProcess?.Invoke(type);
+        task.OnProcessEvent?.Invoke(type);
       }
     }
 

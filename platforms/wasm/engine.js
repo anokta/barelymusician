@@ -266,7 +266,7 @@ export class Engine {
           }
         } break;
         case 'task-on-process': {
-          this._tasks[event.data.handle]?.processCallback(event.data.state);
+          this._tasks[event.data.handle]?.processCallback(event.data.eventType);
         } break;
       }
     };

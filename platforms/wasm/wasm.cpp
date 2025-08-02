@@ -11,7 +11,7 @@ using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Quantization;
 using ::barely::Task;
-using ::barely::TaskState;
+using ::barely::TaskEventType;
 using ::emscripten::allow_raw_pointers;
 using ::emscripten::class_;
 using ::emscripten::optional_override;
@@ -114,7 +114,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("getHandle", &Task_GetHandle, allow_raw_pointers())
       .function("setProcessCallback", optional_override([](Task& task, val js_callback) {
                   return task.SetProcessCallback(
-                      [js_callback](TaskState state) { js_callback(static_cast<int>(state)); });
+                      [js_callback](TaskEventType type) { js_callback(static_cast<int>(type)); });
                 }))
       .property("isActive", &Task::IsActive)
       .property("duration", &Task::GetDuration, &Task::SetDuration)

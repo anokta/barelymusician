@@ -84,11 +84,11 @@ namespace Barely.Examples {
           continue;
         }
         _performer.Tasks.Add(
-            new Task(note.position, note.duration, priority, delegate(TaskState state) {
+            new Task(note.position, note.duration, priority, delegate(TaskEventType type) {
               float pitch = note.pitch / 12.0f;
-              if (state == TaskState.BEGIN) {
+              if (type == TaskEventType.BEGIN) {
                 instrument?.SetNoteOn(pitch, note.gain);
-              } else if (state == TaskState.END) {
+              } else if (type == TaskEventType.END) {
                 instrument?.SetNoteOff(pitch);
               }
             }));

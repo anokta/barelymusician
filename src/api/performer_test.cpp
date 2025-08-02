@@ -29,22 +29,17 @@ TEST(PerformerTest, ProcessSingleTask) {
   // Create a task.
   int task_process_begin_count = 0;
   int task_process_end_count = 0;
-  std::function<void(BarelyTaskState)> process_callback = [&](BarelyTaskState state) {
-    switch (state) {
-      case BarelyTaskState_kBegin:
-        ++task_process_begin_count;
-        break;
-      case BarelyTaskState_kEnd:
-        ++task_process_end_count;
-        break;
-      default:
-        break;
+  std::function<void(BarelyTaskEventType)> process_callback = [&](BarelyTaskEventType type) {
+    if (type == BarelyTaskEventType_kBegin) {
+      ++task_process_begin_count;
+    } else if (type == BarelyTaskEventType_kEnd) {
+      ++task_process_end_count;
     }
   };
   BarelyTask task(performer, 0.25, 0.6, 0,
                   {
-                      [](BarelyTaskState state, void* user_data) {
-                        (*static_cast<std::function<void(BarelyTaskState)>*>(user_data))(state);
+                      [](BarelyTaskEventType type, void* user_data) {
+                        (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
                       },
                       &process_callback,
                   });
@@ -169,14 +164,14 @@ TEST(PerformerTest, ProcessMultipleTasks) {
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
 
   // Create tasks.
-  std::array<std::pair<std::function<void(BarelyTaskState)>, bool>, kTaskCount> task_callbacks;
+  std::array<std::pair<std::function<void(BarelyTaskEventType)>, bool>, kTaskCount> task_callbacks;
   std::deque<BarelyTask> tasks;
   for (int i = 0; i < kTaskCount; ++i) {
     task_callbacks[i] = {
-        [&, i](BarelyTaskState state) {
-          if (state == BarelyTaskState_kBegin) {
+        [&, i](BarelyTaskEventType type) {
+          if (type == BarelyTaskEventType_kBegin) {
             task_callbacks[i].second = true;
-          } else if (state == BarelyTaskState_kEnd) {
+          } else if (type == BarelyTaskEventType_kEnd) {
             task_callbacks[i].second = false;
           }
         },
@@ -185,8 +180,8 @@ TEST(PerformerTest, ProcessMultipleTasks) {
     tasks.emplace_back(
         performer, static_cast<double>(i + 1), 1.0, 0,
         BarelyTask::ProcessCallback{
-            [](BarelyTaskState state, void* user_data) {
-              (*static_cast<std::function<void(BarelyTaskState)>*>(user_data))(state);
+            [](BarelyTaskEventType type, void* user_data) {
+              (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
             },
             &task_callbacks[i].first});
   }

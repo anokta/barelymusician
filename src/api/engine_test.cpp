@@ -24,17 +24,17 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   BarelyPerformer performer(engine);
 
   // Create a task.
-  barely::TaskState task_state = barely::TaskState::kEnd;
+  barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;
   double task_position = 0.0;
-  std::function<void(barely::TaskState)> process_callback = [&](barely::TaskState state) {
-    task_state = state;
+  std::function<void(barely::TaskEventType)> process_callback = [&](barely::TaskEventType type) {
+    task_event_type = type;
     task_position = performer.GetPosition();
   };
   const BarelyTask task(performer, 1.0, 2.0, 0,
                         {
-                            [](BarelyTaskState state, void* user_data) {
-                              (*static_cast<std::function<void(barely::TaskState)>*>(user_data))(
-                                  static_cast<barely::TaskState>(state));
+                            [](BarelyTaskEventType type, void* user_data) {
+                              (*static_cast<std::function<void(barely::TaskEventType)>*>(
+                                  user_data))(static_cast<barely::TaskEventType>(type));
                             },
                             &process_callback,
                         });
@@ -55,7 +55,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
   EXPECT_FALSE(task.IsActive());
-  EXPECT_EQ(task_state, barely::TaskState::kEnd);
+  EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp inside the task, which should be triggered now.
@@ -64,7 +64,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 2.5);
   EXPECT_TRUE(task.IsActive());
-  EXPECT_EQ(task_state, barely::TaskState::kBegin);
+  EXPECT_EQ(task_event_type, barely::TaskEventType::kBegin);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Update the timestamp just past the task, which should not be active anymore.
@@ -73,7 +73,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 3.0);
   EXPECT_FALSE(task.IsActive());
-  EXPECT_EQ(task_state, barely::TaskState::kEnd);
+  EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 3.0);
 }
 

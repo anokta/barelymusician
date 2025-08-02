@@ -873,11 +873,11 @@ namespace Barely {
       }
 
       // Task process callback.
-      private delegate void Task_ProcessCallback(TaskState state, IntPtr userData);
+      private delegate void Task_ProcessCallback(TaskEventType type, IntPtr userData);
       [AOT.MonoPInvokeCallback(typeof(Task_ProcessCallback))]
-      private static void Task_OnProcess(TaskState state, IntPtr userData) {
+      private static void Task_OnProcess(TaskEventType type, IntPtr userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
-          Task.Internal.OnProcess(task, state);
+          Task.Internal.OnProcess(task, type);
         }
       }
 

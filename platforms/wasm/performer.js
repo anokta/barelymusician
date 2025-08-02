@@ -1,5 +1,5 @@
 import {Note} from './note.js';
-import {Task, TaskState} from './task.js';
+import {Task} from './task.js';
 
 const PITCHES = 14;
 const CLIP_HEIGHT = 240;

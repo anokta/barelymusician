@@ -19,7 +19,7 @@ using ::barely::Engine;
 using ::barely::NoteEventType;
 using ::barely::Scale;
 using ::barely::Task;
-using ::barely::TaskState;
+using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -75,19 +75,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   double stop_position = 0.0;
 
   const auto play_note_fn = [&](int degree) {
-    return [&, pitch = Scale(kMajor).GetPitch(degree)](TaskState state) {
-      switch (state) {
-        case TaskState::kBegin:
-          instrument.SetNoteOn(pitch);
-          break;
-        case TaskState::kEnd:
-          instrument.SetNoteOff(pitch);
-          if (stop_position == performer.GetPosition()) {
-            performer.Stop();
-          }
-          break;
-        default:
-          break;
+    return [&, pitch = Scale(kMajor).GetPitch(degree)](TaskEventType type) {
+      if (type == TaskEventType::kBegin) {
+        instrument.SetNoteOn(pitch);
+      } else if (type == TaskEventType::kEnd) {
+        instrument.SetNoteOff(pitch);
+        if (stop_position == performer.GetPosition()) {
+          performer.Stop();
+        }
       }
     };
   };

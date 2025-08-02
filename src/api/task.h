@@ -65,15 +65,15 @@ struct BarelyTask {
 
   /// Processes the task.
   ///
-  /// @param state Task state.
-  void Process(BarelyTaskState state) noexcept { process_callback_(state); }
+  /// @param type Task event type.
+  void Process(BarelyTaskEventType type) noexcept { process_callback_(type); }
 
   /// Sets whether the task is currently active or not.
   ///
   /// @param is_active True if active, false otherwise.
   void SetActive(bool is_active) noexcept {
     is_active_ = is_active;
-    Process(is_active_ ? BarelyTaskState_kBegin : BarelyTaskState_kEnd);
+    Process(is_active_ ? BarelyTaskEventType_kBegin : BarelyTaskEventType_kEnd);
   }
 
   /// Sets the duration.

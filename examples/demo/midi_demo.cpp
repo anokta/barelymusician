@@ -26,7 +26,7 @@ using ::barely::Instrument;
 using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Task;
-using ::barely::TaskState;
+using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -67,14 +67,14 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
       const double duration = get_position_fn(midi_event.getTickDuration());
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float gain = static_cast<float>(midi_event.getVelocity()) / 127.0f;
-      tasks.emplace_back(
-          performer.CreateTask(position, duration, 0, [&, pitch, gain](TaskState state) noexcept {
-            if (state == TaskState::kBegin) {
-              instrument.SetNoteOn(pitch, gain);
-            } else if (state == TaskState::kEnd) {
-              instrument.SetNoteOff(pitch);
-            }
-          }));
+      tasks.emplace_back(performer.CreateTask(position, duration, 0,
+                                              [&, pitch, gain](TaskEventType type) noexcept {
+                                                if (type == TaskEventType::kBegin) {
+                                                  instrument.SetNoteOn(pitch, gain);
+                                                } else if (type == TaskEventType::kEnd) {
+                                                  instrument.SetNoteOff(pitch);
+                                                }
+                                              }));
       has_notes = true;
     }
   }

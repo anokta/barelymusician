@@ -15,8 +15,8 @@ BarelyRepeater::BarelyRepeater(BarelyEngine& engine) noexcept
       performer_(engine_),
       task_(performer_, 0.0, 1.0, 0,
             {
-                [](BarelyTaskState state, void* user_data) noexcept {
-                  if (state == BarelyTaskState_kBegin) {
+                [](BarelyTaskEventType type, void* user_data) noexcept {
+                  if (type == BarelyTaskEventType_kBegin) {
                     auto& repeater = *static_cast<BarelyRepeater*>(user_data);
                     repeater.OnBeat();
                   }

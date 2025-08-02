@@ -1,4 +1,4 @@
-import {TaskState} from './task.js';
+import {TaskEventType} from './task.js';
 
 export class Note {
   constructor(performer, position, duration, pitch, gain) {
@@ -6,10 +6,10 @@ export class Note {
     this._pitch = pitch;
     this.gain = gain;
 
-    this._task = performer.createTask(position, duration, state => {
-      if (state === TaskState.BEGIN) {
+    this._task = performer.createTask(position, duration, type => {
+      if (type === TaskEventType.BEGIN) {
         this._performer.selectedInstrument?.setNoteOn(this._pitch, this.gain);
-      } else if (state === TaskState.END) {
+      } else if (type === TaskEventType.END) {
         this._performer.selectedInstrument?.setNoteOff(this._pitch);
       }
     });

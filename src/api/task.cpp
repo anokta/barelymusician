@@ -46,10 +46,10 @@ void BarelyTask::SetPriority(int priority) noexcept {
 
 void BarelyTask::SetProcessCallback(ProcessCallback callback) noexcept {
   if (is_active_) {
-    Process(BarelyTaskState_kEnd);
+    Process(BarelyTaskEventType_kEnd);
   }
   process_callback_ = callback;
   if (is_active_) {
-    Process(BarelyTaskState_kBegin);
+    Process(BarelyTaskEventType_kBegin);
   }
 }

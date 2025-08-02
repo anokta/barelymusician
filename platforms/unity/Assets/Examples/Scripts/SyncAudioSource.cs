@@ -28,8 +28,8 @@ namespace Barely.Examples {
       _pitch = Mathf.PingPong(0.5f * Time.time, 2.0f);
     }
 
-    public void PlayNote(TaskState state) {
-      if (state == TaskState.BEGIN) {
+    public void PlayNote(TaskEventType type) {
+      if (type == TaskEventType.BEGIN) {
         instrument.SetNoteOn(_pitch);
         instrument.SetNoteOff(_pitch);
       }

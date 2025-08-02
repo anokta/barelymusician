@@ -69,7 +69,7 @@
 ///
 ///   // Create a task.
 ///   auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0,
-///                                    [](barely::TaskState state) { /*populate this*/ });
+///                                    [](barely::TaskEventType type) { /*populate this*/ });
 ///
 ///   // Set to looping.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -355,15 +355,15 @@ typedef enum BarelySliceMode {
   BarelySliceMode_kCount,
 } BarelySliceMode;
 
-/// Task states.
-typedef enum BarelyTaskState {
+/// Task event types.
+typedef enum BarelyTaskEventType {
   /// Begin.
-  BarelyTaskState_kBegin = 0,
+  BarelyTaskEventType_kBegin = 0,
   /// End.
-  BarelyTaskState_kEnd,
-  /// Number of task states.
-  BarelyTaskState_kCount,
-} BarelyTaskState;
+  BarelyTaskEventType_kEnd,
+  /// Number of task event types.
+  BarelyTaskEventType_kCount,
+} BarelyTaskEventType;
 
 /// Control override.
 typedef struct BarelyControlOverride {
@@ -450,9 +450,9 @@ typedef void (*BarelyInstrument_NoteEventCallback)(BarelyNoteEventType type, flo
 
 /// Task process callback.
 ///
-/// @param state Task state.
+/// @param type Task event type.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyTask_ProcessCallback)(BarelyTaskState state, void* user_data);
+typedef void (*BarelyTask_ProcessCallback)(BarelyTaskEventType type, void* user_data);
 
 /// Creates a new arpeggiator.
 ///
@@ -1144,12 +1144,12 @@ enum class SliceMode {
   kOnce = BarelySliceMode_kOnce,
 };
 
-/// Task states.
-enum class TaskState {
+/// Task event types.
+enum class TaskEventType {
   /// Begin.
-  kBegin = BarelyTaskState_kBegin,
+  kBegin = BarelyTaskEventType_kBegin,
   /// End.
-  kEnd = BarelyTaskState_kEnd,
+  kEnd = BarelyTaskEventType_kEnd,
 };
 
 /// Control override.
@@ -1489,8 +1489,8 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
  public:
   /// Process callback function.
   ///
-  /// @param state Task state.
-  using ProcessCallback = std::function<void(TaskState state)>;
+  /// @param type Task event type.
+  using ProcessCallback = std::function<void(TaskEventType type)>;
 
   /// Constructs a new `Task`.
   ///
@@ -1505,9 +1505,9 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
           BarelyTaskHandle task = nullptr;
           [[maybe_unused]] const bool success = BarelyTask_Create(
               performer, position, duration, priority,
-              [](BarelyTaskState state, void* user_data) noexcept {
+              [](BarelyTaskEventType type, void* user_data) noexcept {
                 if (user_data != nullptr) {
-                  (*static_cast<ProcessCallback*>(user_data))(static_cast<TaskState>(state));
+                  (*static_cast<ProcessCallback*>(user_data))(static_cast<TaskEventType>(type));
                 }
               },
               &process_callback_, &task);
@@ -1615,10 +1615,10 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   // Helper function to set the process callback.
   void SetProcessCallback() noexcept {
     SetCallback(BarelyTask_SetProcessCallback, process_callback_,
-                [](BarelyTaskState state, void* user_data) noexcept {
+                [](BarelyTaskEventType type, void* user_data) noexcept {
                   assert(user_data != nullptr && "Invalid task process callback user data");
                   if (const auto& callback = *static_cast<ProcessCallback*>(user_data); callback) {
-                    callback(static_cast<TaskState>(state));
+                    callback(static_cast<TaskEventType>(type));
                   }
                 });
   }

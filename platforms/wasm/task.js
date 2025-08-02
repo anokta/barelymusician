@@ -1,8 +1,7 @@
-export const TaskState = {
+export const TaskEventType = {
   BEGIN: 0,
   END: 1,
-  UPDATE: 2,
-  COUNT: 3,
+  COUNT: 2,
 };
 
 export class Task {

@@ -14,8 +14,8 @@ namespace Barely.Examples {
 
     private float _pitch = 0.0f;
 
-    public void OnProcess(TaskState state) {
-      if (state == TaskState.BEGIN) {
+    public void OnProcess(TaskEventType type) {
+      if (type == TaskEventType.BEGIN) {
         if (_beat % 4 == 0) {
           instrument.FilterType = (_beat % 8 == 0) ? FilterType.LOW_PASS : FilterType.HIGH_PASS;
         }
@@ -28,7 +28,7 @@ namespace Barely.Examples {
         text.text = ((int)(12.0f * _pitch)).ToString();
         _h = Random.Range(0.0f, 1.0f);
         _v = 0.2f * (_pitch + 1.0f);
-      } else if (state == TaskState.END) {
+      } else if (type == TaskEventType.END) {
         instrument.SetNoteOff(_pitch);
       }
     }

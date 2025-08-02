@@ -18,7 +18,7 @@ using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::NoteEventType;
 using ::barely::Task;
-using ::barely::TaskState;
+using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -88,16 +88,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Task> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {
     return performer.CreateTask(note.position, note.duration, 0,
-                                [&instrument, pitch = note.pitch](TaskState state) {
-                                  switch (state) {
-                                    case TaskState::kBegin:
-                                      instrument.SetNoteOn(pitch);
-                                      break;
-                                    case TaskState::kEnd:
-                                      instrument.SetNoteOff(pitch);
-                                      break;
-                                    default:
-                                      break;
+                                [&instrument, pitch = note.pitch](TaskEventType type) {
+                                  if (type == TaskEventType::kBegin) {
+                                    instrument.SetNoteOn(pitch);
+                                  } else if (type == TaskEventType::kEnd) {
+                                    instrument.SetNoteOff(pitch);
                                   }
                                 });
   };

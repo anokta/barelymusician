@@ -69,6 +69,7 @@ class Processor extends AudioWorkletProcessor {
             const NoteEventType = {
               OFF: 0,
               ON: 1,
+              COUNT: 2,
             };
             if (eventType == NoteEventType.ON) {
               this.port.postMessage({type: 'instrument-on-note-on', handle, pitch});
@@ -229,8 +230,8 @@ class Processor extends AudioWorkletProcessor {
                 event.data.position, event.data.duration);
             const handle = task.getHandle();
             task.setProcessCallback(
-                (state) => this.port.postMessage(
-                    {type: 'task-on-process', handle, position: task.position, state}));
+                (eventType) => this.port.postMessage(
+                    {type: 'task-on-process', handle, position: task.position, eventType}));
             this._tasks[handle] = task;
 
             this.port.postMessage({

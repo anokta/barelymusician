@@ -13,12 +13,12 @@ BarelyArpeggiator::BarelyArpeggiator(BarelyEngine& engine) noexcept
     : engine_(engine),
       performer_(engine_),
       task_(performer_, 0.0, 1.0, 0,
-            {[](BarelyTaskState state, void* user_data) {
+            {[](BarelyTaskEventType type, void* user_data) {
                auto& arpeggiator = *static_cast<BarelyArpeggiator*>(user_data);
-               if (state == BarelyTaskState_kBegin) {
+               if (type == BarelyTaskEventType_kBegin) {
                  arpeggiator.Update();
                  arpeggiator.SetNextNoteOn();
-               } else if (state == BarelyTaskState_kEnd) {
+               } else if (type == BarelyTaskEventType_kEnd) {
                  arpeggiator.SetNextNoteOff();
                }
              },

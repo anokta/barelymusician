@@ -365,6 +365,19 @@ typedef enum BarelyTaskEventType {
   BarelyTaskEventType_kCount,
 } BarelyTaskEventType;
 
+/// Note event callback.
+///
+/// @param type Note event type.
+/// @param pitch Note pitch.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyNoteEventCallback)(BarelyNoteEventType type, float pitch, void* user_data);
+
+/// Task process callback.
+///
+/// @param type Task event type.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyTask_ProcessCallback)(BarelyTaskEventType type, void* user_data);
+
 /// Control override.
 typedef struct BarelyControlOverride {
   /// Type.
@@ -439,20 +452,6 @@ typedef struct BarelyRepeater* BarelyRepeaterHandle;
 
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
-
-/// Instrument note callback.
-///
-/// @param type Note event type.
-/// @param pitch Note pitch.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteEventCallback)(BarelyNoteEventType type, float pitch,
-                                                   void* user_data);
-
-/// Task process callback.
-///
-/// @param type Task event type.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyTask_ProcessCallback)(BarelyTaskEventType type, void* user_data);
 
 /// Creates a new arpeggiator.
 ///
@@ -688,7 +687,7 @@ BARELY_API bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrumen
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteEventCallback(BarelyInstrumentHandle instrument,
-                                                      BarelyInstrument_NoteEventCallback callback,
+                                                      BarelyNoteEventCallback callback,
                                                       void* user_data);
 
 /// Sets an instrument note off.
@@ -1152,6 +1151,12 @@ enum class TaskEventType {
   kEnd = BarelyTaskEventType_kEnd,
 };
 
+/// Note event callback function.
+///
+/// @param type Note event type.
+/// @param pitch Note pitch.
+using NoteEventCallback = std::function<void(NoteEventType type, float pitch)>;
+
 /// Control override.
 struct ControlOverride : public BarelyControlOverride {
   /// Default constructor.
@@ -1272,12 +1277,6 @@ class HandleWrapper {
 /// Class that wraps an instrument handle.
 class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
  public:
-  /// Note event callback function.
-  ///
-  /// @param type Note event type.
-  /// @param pitch Note pitch.
-  using NoteEventCallback = std::function<void(NoteEventType type, float pitch)>;
-
   /// Constructs a new `Instrument`.
   ///
   /// @param engine Raw engine handle.

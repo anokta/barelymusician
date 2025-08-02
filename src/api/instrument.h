@@ -16,7 +16,7 @@
 struct BarelyInstrument {
  public:
   /// Note event callback alias.
-  using NoteEventCallback = barely::Callback<BarelyInstrument_NoteEventCallback>;
+  using NoteEventCallback = barely::Callback<BarelyNoteEventCallback>;
 
   /// Constructs a new `BarelyInstrument`.
   ///

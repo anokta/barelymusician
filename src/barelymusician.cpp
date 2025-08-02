@@ -249,8 +249,7 @@ bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pi
 }
 
 bool BarelyInstrument_SetNoteEventCallback(BarelyInstrumentHandle instrument,
-                                           BarelyInstrument_NoteEventCallback callback,
-                                           void* user_data) {
+                                           BarelyNoteEventCallback callback, void* user_data) {
   if (!instrument) return false;
 
   instrument->SetNoteEventCallback({callback, user_data});

@@ -856,10 +856,9 @@ namespace Barely {
         }
       }
 
-      // Instrument note event callback.
-      private delegate void Instrument_NoteEventCallback(NoteEventType type, float pitch,
-                                                         IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteEventCallback))]
+      // Note event callback.
+      private delegate void NoteEventCallback(NoteEventType type, float pitch, IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(NoteEventCallback))]
       private static void Instrument_OnNoteEvent(NoteEventType type, float pitch, IntPtr userData) {
         if (_instruments.TryGetValue(userData, out var instrument)) {
           if (type == NoteEventType.ON) {
@@ -1266,8 +1265,9 @@ namespace Barely {
                                                                  NoteControlType type, float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteEventCallback")]
-      private static extern bool BarelyInstrument_SetNoteEventCallback(
-          IntPtr instrument, Instrument_NoteEventCallback callback, IntPtr userData);
+      private static extern bool BarelyInstrument_SetNoteEventCallback(IntPtr instrument,
+                                                                       NoteEventCallback callback,
+                                                                       IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr instrument, float pitch);

@@ -7,7 +7,7 @@ function(add_demo demo_name)
   set_target_properties(
     ${DEMO_TARGET_NAME} PROPERTIES
     OUTPUT_NAME ${demo_name}
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/examples
   )
   target_link_libraries(
     ${DEMO_TARGET_NAME} PRIVATE

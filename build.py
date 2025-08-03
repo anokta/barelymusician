@@ -278,7 +278,7 @@ def run_demo(args, build_dir):
             or (platform == "Mac" and sys.platform.startswith("darwin"))
             or (platform == "Windows" and sys.platform.startswith("win"))
         ):
-            demo_dir = f"{build_dir}/{platform}/bin"
+            demo_dir = f"{build_dir}/{platform}/bin/examples"
             if platform != "Linux":
                 demo_dir = os.path.join(demo_dir, f"{get_build_config(args)}")
             demo_path = os.path.join(demo_dir, args.run_demo)

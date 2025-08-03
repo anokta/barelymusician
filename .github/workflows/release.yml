@@ -23,7 +23,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: examples-${{ matrix.os }}
-          path: build/**/bin/**/*_demo*
+          path: build/**/bin/examples/**/*_demo*
 
   unity:
     name: unity on ${{ matrix.os }}
@@ -62,9 +62,14 @@ jobs:
       - name: examples
         shell: bash
         run: |
-          mkdir -p artifacts/examples/demo
+          mkdir -p artifacts/examples
           for dir in temp/examples-*/; do
-            cp -rf "${dir}"* artifacts/examples/demo/
+            for platform_dir in "${dir}"*/; do
+              platform=$(basename "${platform_dir}")
+              mkdir -p artifacts/examples/${platform}
+              find "${platform_dir}"* -type f -name '*_demo*' \
+                -exec cp {} "artifacts/examples/${platform}/" \;
+            done
           done
       - name: unity
         shell: bash

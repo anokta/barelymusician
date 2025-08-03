@@ -291,7 +291,8 @@ class Processor extends AudioWorkletProcessor {
     const outputPtr = this._module._malloc(outputSize);
     const outputSamples = new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputLength);
 
-    this._engine.process(outputPtr, outputLength, currentTime);
+    // TODO(#145): Add multi-channel output support.
+    this._engine.process(outputPtr, 1, outputLength, currentTime);
     output.set(outputSamples);
 
     this._module._free(outputPtr);

@@ -4,7 +4,6 @@
 #include <barelymusician.h>
 
 #include <cmath>
-#include <span>
 #include <unordered_set>
 #include <vector>
 
@@ -18,10 +17,10 @@ struct BarelyEngine {
  public:
   /// Constructs a new `BarelyEngine`.
   ///
-  /// @param sample_rate Sampling rate in hertz.
+  /// @param frame_rate Frame rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  BarelyEngine(int sample_rate, float reference_frequency) noexcept;
+  BarelyEngine(int frame_rate, float reference_frequency) noexcept;
 
   /// Destroys `BarelyEngine`.
   ~BarelyEngine() noexcept;
@@ -43,10 +42,10 @@ struct BarelyEngine {
   /// @return Reference frequency in hertz.
   [[nodiscard]] float GetReferenceFrequency() const noexcept { return reference_frequency_; }
 
-  /// Returns the sampling rate.
+  /// Returns the frame rate.
   ///
-  /// @return Sampling rate in hertz.
-  [[nodiscard]] int GetSampleRate() const noexcept { return sample_rate_; }
+  /// @return Frame rate in hertz.
+  [[nodiscard]] int GetFrameRate() const noexcept { return frame_rate_; }
 
   /// Returns the tempo.
   ///
@@ -60,10 +59,13 @@ struct BarelyEngine {
 
   /// Processes output samples.
   ///
-  /// @param output_samples Span of mono output samples.
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(std::span<float> output_samples, double timestamp) noexcept;
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
+               double timestamp) noexcept;
 
   /// Removes an instrument.
   ///
@@ -96,8 +98,8 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void UpdateMutableInstruments() noexcept;
 
-  // Sampling rate in hertz.
-  int sample_rate_ = 0;
+  // Frame rate in hertz.
+  int frame_rate_ = 0;
 
   // Reference frequency at zero pitch.
   float reference_frequency_ = 0.0f;

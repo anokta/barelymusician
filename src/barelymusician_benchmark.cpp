@@ -9,11 +9,12 @@ namespace {
 
 using ::benchmark::State;
 
-constexpr int kSampleRate = 48000;
-constexpr int kSampleCount = 1024;
+constexpr int kFrameRate = 48000;
+constexpr int kChannelCount = 1;
+constexpr int kFrameCount = 1024;
 
 void BM_BarelyEngine_AddRemoveInstrument(State& state) {
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     [[maybe_unused]] const auto instrument = engine.CreateInstrument();
@@ -22,7 +23,7 @@ void BM_BarelyEngine_AddRemoveInstrument(State& state) {
 BENCHMARK(BM_BarelyEngine_AddRemoveInstrument);
 
 void BM_BarelyEngine_AddRemovePerformer(State& state) {
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     [[maybe_unused]] const auto performer = engine.CreatePerformer();
@@ -31,29 +32,29 @@ void BM_BarelyEngine_AddRemovePerformer(State& state) {
 BENCHMARK(BM_BarelyEngine_AddRemovePerformer);
 
 void BM_BarelyEngine_ProcessEmpty(State& state) {
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
-  std::array<float, kSampleCount> output_samples;
+  std::array<float, kChannelCount * kFrameCount> output_samples;
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    engine.Process(output_samples, 0.0);
+    engine.Process(output_samples.data(), kChannelCount, kFrameCount, 0.0);
   }
 }
 BENCHMARK(BM_BarelyEngine_ProcessEmpty);
 
 void BM_BarelyEngine_ProcessFrequentUpdates(State& state) {
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(ControlType::kOscShape, 0.0f);
 
-  std::array<float, kSampleCount> output_samples;
+  std::array<float, kChannelCount * kFrameCount> output_samples;
   double timestamp = 0.0;
 
   constexpr int kUpdateCount = 20;
   constexpr double kTimestampIncrement =
-      static_cast<double>(kSampleCount) / static_cast<double>(kSampleRate);
+      static_cast<double>(kFrameCount) / static_cast<double>(kFrameRate);
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     state.PauseTiming();
@@ -69,7 +70,7 @@ void BM_BarelyEngine_ProcessFrequentUpdates(State& state) {
       instrument.SetControl(ControlType::kAttack, 0.01f * static_cast<float>(i));
     }
     state.ResumeTiming();
-    engine.Process(output_samples, timestamp);
+    engine.Process(output_samples.data(), kChannelCount, kFrameCount, timestamp);
     timestamp += kTimestampIncrement;
   }
 }
@@ -77,41 +78,41 @@ BENCHMARK(BM_BarelyEngine_ProcessFrequentUpdates);
 
 void BM_BarelyInstrument_PlaySingleNoteWithLoopingSample(State& state) {
   constexpr std::array<float, 5> kSamples = {-0.5f, -0.25f, 0.0f, 0.25f, 1.0f};
-  const std::array<Slice, 1> kSlices = {Slice(0.0, kSampleRate, kSamples)};
+  const std::array<Slice, 1> kSlices = {Slice(0.0, kFrameRate, kSamples)};
 
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kSliceMode, SliceMode::kLoop);
   instrument.SetSampleData(kSlices);
   instrument.SetNoteOn(1.0);
 
-  std::array<float, kSampleCount> output_samples;
+  std::array<float, kChannelCount * kFrameCount> output_samples;
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    engine.Process(output_samples, 0.0);
+    engine.Process(output_samples.data(), kChannelCount, kFrameCount, 0.0);
   }
 }
 BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithLoopingSample);
 
 void BM_BarelyInstrument_PlaySingleoteWithSineOsc(State& state) {
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(ControlType::kOscShape, 0.0f);
   instrument.SetNoteOn(0.0);
 
-  std::array<float, kSampleCount> output_samples;
+  std::array<float, kChannelCount * kFrameCount> output_samples;
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    engine.Process(output_samples, 0.0);
+    engine.Process(output_samples.data(), kChannelCount, kFrameCount, 0.0);
   }
 }
 BENCHMARK(BM_BarelyInstrument_PlaySingleoteWithSineOsc);
 
 void BM_BarelyInstrument_PlayMultipleNotesWithSineOsc(State& state) {
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(ControlType::kOscMode, OscMode::kMix);
@@ -122,16 +123,16 @@ void BM_BarelyInstrument_PlayMultipleNotesWithSineOsc(State& state) {
     instrument.SetNoteOn(static_cast<float>(i));
   }
 
-  std::array<float, kSampleCount> output_samples;
+  std::array<float, kChannelCount * kFrameCount> output_samples;
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    engine.Process(output_samples, 0.0);
+    engine.Process(output_samples.data(), kChannelCount, kFrameCount, 0.0);
   }
 }
 BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithSineOsc);
 
 void BM_BarelyInstrument_SetMultipleControls(State& state) {
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
   auto instrument = engine.CreateInstrument();
   int i = 0;

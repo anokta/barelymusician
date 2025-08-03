@@ -7,7 +7,6 @@
 #include <chrono>
 #include <iterator>
 #include <optional>
-#include <span>
 #include <string>
 #include <thread>
 #include <vector>
@@ -32,8 +31,9 @@ using ::barely::examples::InputManager;
 using ::barely::examples::WavFile;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
-constexpr int kSampleCount = 256;
+constexpr int kFrameRate = 48000;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 256;
 
 // Instrument settings.
 constexpr float kGain = 0.25f;
@@ -59,7 +59,7 @@ std::vector<Slice> GetSampleData(const std::string& file_path) {
   assert(success);
 
   const static std::vector<float> samples = sample_file.GetData();
-  return {Slice(kRootPitch, sample_file.GetSampleRate(), samples)};
+  return {Slice(kRootPitch, sample_file.GetFrameRate(), samples)};
 }
 
 // Returns the pitch for a given `key`.
@@ -78,9 +78,9 @@ std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) 
 int main(int /*argc*/, char* argv[]) {
   InputManager input_manager;
 
-  AudioOutput audio_output(kSampleRate, kSampleCount);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
 
   auto instrument = engine.CreateInstrument({{
       {ControlType::kGain, kGain},
@@ -96,8 +96,9 @@ int main(int /*argc*/, char* argv[]) {
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback(
-      [&](std::span<float> output_samples) { engine.Process(output_samples, /*timestamp=*/0.0); });
+  audio_output.SetProcessCallback([&](float* samples, int channel_count, int frame_count) {
+    engine.Process(samples, channel_count, frame_count, /*timestamp=*/0.0);
+  });
 
   // Key down callback.
   float gain = 1.0f;

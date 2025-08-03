@@ -5,8 +5,8 @@
 namespace barely {
 namespace {
 
-constexpr int kSampleRate = 1000;
-constexpr float kSampleInterval = 1.0f / kSampleRate;
+constexpr int kFrameRate = 1000;
+constexpr float kSampleInterval = 1.0f / kFrameRate;
 
 // Envelope ADSR.
 constexpr float kAttack = 0.02f;
@@ -34,10 +34,10 @@ TEST(EnvelopeTest, ProcessDefault) {
 
 // Tests that the envelope generates the expected output samples consistently over multiple samples.
 TEST(EnvelopeTest, ProcessMultiSamples) {
-  constexpr int kAttackSampleCount = static_cast<int>(kSampleRate * kAttack);
-  constexpr int kDecaySampleCount = static_cast<int>(kSampleRate * kDecay);
+  constexpr int kAttackSampleCount = static_cast<int>(kFrameRate * kAttack);
+  constexpr int kDecaySampleCount = static_cast<int>(kFrameRate * kDecay);
   constexpr int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
-  constexpr int kReleaseSampleCount = static_cast<int>(kSampleRate * kRelease);
+  constexpr int kReleaseSampleCount = static_cast<int>(kFrameRate * kRelease);
 
   Envelope::Adsr adsr;
   adsr.SetAttack(kSampleInterval, kAttack);
@@ -52,7 +52,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   float expected_sample = 0.0f;
 
   envelope.Start(adsr);
-  for (int i = 0; i < kSustainSampleCount + kSampleRate; ++i) {
+  for (int i = 0; i < kSustainSampleCount + kFrameRate; ++i) {
     if (i < kAttackSampleCount) {
       // Attack.
       expected_sample = static_cast<float>(i) / static_cast<float>(kAttackSampleCount);
@@ -68,7 +68,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   }
 
   envelope.Stop();
-  for (int i = 0; i < kReleaseSampleCount + kSampleRate; ++i) {
+  for (int i = 0; i < kReleaseSampleCount + kFrameRate; ++i) {
     if (i < kReleaseSampleCount) {
       // Release.
       expected_sample =

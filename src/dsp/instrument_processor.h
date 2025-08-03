@@ -21,17 +21,18 @@ class InstrumentProcessor {
   ///
   /// @param control_overrides Span of control overrides.
   /// @param rng Random number generator.
-  /// @param sample_rate Sampling rate in hertz.
+  /// @param frame_rate Frame rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   InstrumentProcessor(std::span<const BarelyControlOverride> control_overrides, AudioRng& rng,
-                      int sample_rate, float reference_frequency) noexcept;
+                      int frame_rate, float reference_frequency) noexcept;
 
   /// Processes the next output samples.
   ///
-  /// @param output_samples Array of mono output samples.
-  /// @param output_sample_count Number of output samples.
-  void Process(float* output_samples, int output_sample_count) noexcept;
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
+  void Process(float* output_samples, int output_channel_count, int output_frame_count) noexcept;
 
   /// Sets a control value.
   ///

@@ -1,7 +1,5 @@
 #include <barelymusician.h>
 
-#include <span>
-
 #include "emscripten/bind.h"
 
 using ::barely::ControlType;
@@ -27,9 +25,10 @@ using ::emscripten::return_value_policy::take_ownership;
   }});
 }
 
-static void Engine_Process(Engine& engine, uintptr_t samples, int sample_count,
-                           double timestamp) noexcept {
-  engine.Process(std::span<float>(reinterpret_cast<float*>(samples), sample_count), timestamp);
+static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_channel_count,
+                           int output_frame_count, double timestamp) noexcept {
+  engine.Process(reinterpret_cast<float*>(output_samples), output_channel_count, output_frame_count,
+                 timestamp);
 }
 
 [[nodiscard]] static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {

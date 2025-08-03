@@ -13,12 +13,12 @@ namespace {
 using ::testing::Optional;
 using ::testing::Pair;
 
-constexpr int kSampleRate = 48000;
+constexpr int kFrameRate = 48000;
 constexpr float kReferenceFrequency = 440.0f;
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
-  BarelyEngine engine(kSampleRate, kReferenceFrequency);
+  BarelyEngine engine(kFrameRate, kReferenceFrequency);
 
   // Create a performer.
   BarelyPerformer performer(engine);
@@ -79,7 +79,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
 // Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
-  BarelyEngine engine(kSampleRate, kReferenceFrequency);
+  BarelyEngine engine(kFrameRate, kReferenceFrequency);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
 
   engine.SetTempo(200.0);

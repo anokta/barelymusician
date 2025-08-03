@@ -55,11 +55,11 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> control_overrides,
-                                         AudioRng& rng, int sample_rate,
+                                         AudioRng& rng, int frame_rate,
                                          float reference_frequency) noexcept
-    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
+    : sample_interval_(1.0f / static_cast<float>(frame_rate)),
       reference_frequency_(reference_frequency) {
-  assert(sample_rate > 0);
+  assert(frame_rate > 0);
   for (const auto& [type, value] : control_overrides) {
     SetControl(static_cast<ControlType>(type), value);
   }
@@ -68,15 +68,22 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
   params_.rng = &rng;
 }
 
-void InstrumentProcessor::Process(float* output_samples, int output_sample_count) noexcept {
+void InstrumentProcessor::Process(float* output_samples, int output_channel_count,
+                                  int output_frame_count) noexcept {
+  assert(output_samples != nullptr);
+  assert(output_channel_count > 0);
+  assert(output_frame_count > 0);
   for (VoiceState& voice_state : voice_states_) {
     Voice& voice = voice_state.voice;
     if (voice.IsActive()) {
-      for (int i = 0; i < output_sample_count; ++i) {
+      for (int frame = 0; frame < output_frame_count; ++frame) {
         if (!voice.IsActive()) {
           break;
         }
-        output_samples[i] += voice_callback_(voice, params_);
+        const float sample = voice_callback_(voice, params_);
+        for (int channel = 0; channel < output_channel_count; ++channel) {
+          output_samples[frame * output_channel_count + channel] += sample;
+        }
       }
     }
   }

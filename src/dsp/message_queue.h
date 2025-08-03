@@ -13,24 +13,24 @@ namespace barely {
 /// Single-consumer single-producer message queue.
 class MessageQueue {
  public:
-  /// Adds a message at a sample.
+  /// Adds a message at a frame.
   ///
-  /// @param message_sample Message sample.
+  /// @param message_frame Message frame.
   /// @param message Message.
   /// @return True if successful, false otherwise.
-  bool Add(int64_t message_sample, Message message) noexcept;
+  bool Add(int64_t message_frame, Message message) noexcept;
 
-  /// Returns the next message before an end sample.
+  /// Returns the next message before an end frame.
   ///
-  /// @param end_sample End sample.
+  /// @param end_frame End frame.
   /// @return Pointer to message if successful, `nullptr` otherwise.
-  std::pair<int64_t, Message>* GetNext(int64_t end_sample) noexcept;
+  std::pair<int64_t, Message>* GetNext(int64_t end_frame) noexcept;
 
  private:
   // Maximum number of messages.
   static constexpr int kMaxMessageCount = 4096;
 
-  // List of messages with their timestamps in samples.
+  // List of messages with their timestamps in frames.
   std::array<std::pair<int64_t, Message>, kMaxMessageCount> messages_;
 
   // Read index.

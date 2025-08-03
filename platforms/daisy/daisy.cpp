@@ -15,7 +15,7 @@ using ::daisy::MidiUsbTransport;
 using ::daisy::SaiHandle;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
+constexpr int kFrameRate = 48000;
 constexpr size_t kFrameCount = 16;
 
 // Instrument settings.
@@ -42,8 +42,9 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
     instrument_ptr->SetControl(ControlType::kOscShape, osc_shape);
   }
 
-  // Process samples.
-  engine_ptr->Process({out[0], out[0] + size}, /*timestamp=*/0.0);
+  // Process the output samples.
+  // TODO(#145): Add multi-channel output support.
+  engine_ptr->Process(out[0], /*output_channel_count=*/1, size, /*timestamp=*/0.0);
   std::copy_n(out[0], size, out[1]);  // copy onto stereo buffer.
 }
 
@@ -59,7 +60,7 @@ int main(void) {
   midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
   engine_ptr = &engine;
 
   Instrument instrument = engine.CreateInstrument({{

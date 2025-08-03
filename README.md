@@ -29,7 +29,7 @@ Example usage
 #include <barelymusician.h>
 
 // Create the engine.
-barely::Engine engine(/*sample_rate=*/48000);
+barely::Engine engine(/*frame_rate=*/48000);
 
 // Set the global tempo.
 engine.SetTempo(/*tempo=*/124.0);
@@ -85,8 +85,10 @@ engine.Update(timestamp + kLookahead);
 //
 // The engine processes raw PCM audio samples synchronously. Therefore, `Process` should typically
 // be called from an audio thread process callback in real-time audio applications.
-float output_samples[512];
-engine.Process(output_samples, timestamp);
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 512;
+float output_samples[kChannelCount * kFrameCount];
+engine.Process(output_samples, kChannelCount, kFrameCount, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

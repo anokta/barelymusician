@@ -466,7 +466,7 @@ namespace Barely {
             instrumentSlices[i].Sample.LoadAudioData();
             slices[i] = new Slice() {
               rootPitch = instrumentSlices[i].RootPitch / 12.0f,
-              sampleRate =
+              frameRate =
                   (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.frequency : 0,
               samples = instrumentSlices[i].Data,
               sampleCount =
@@ -938,8 +938,8 @@ namespace Barely {
         // Root note pitch.
         public float rootPitch;
 
-        // Sampling rate in hertz.
-        public Int32 sampleRate;
+        // Frame rate in hertz.
+        public Int32 frameRate;
 
         // Array of mono samples.
         public float[] samples;
@@ -1099,15 +1099,8 @@ namespace Barely {
         }
 
         private void OnAudioFilterRead(float[] data, int channels) {
-          int outputFrameCount = data.Length / channels;
-          if (BarelyEngine_Process(_handle, _outputSamples, outputFrameCount,
-                                   AudioSettings.dspTime)) {
-            for (int frame = 0; frame < outputFrameCount; ++frame) {
-              for (int channel = 0; channel < channels; ++channel) {
-                data[frame * channels + channel] = _outputSamples[frame];
-              }
-            }
-          }
+          BarelyEngine_Process(_handle, data, channels, data.Length / channels,
+                               AudioSettings.dspTime);
         }
 
         private void LateUpdate() {
@@ -1123,7 +1116,6 @@ namespace Barely {
             return;
           }
           BarelyEngine_SetTempo(_handle, _tempo);
-          _outputSamples = new float[config.dspBufferSize];
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<IntPtr, Instrument>();
           _controlOverrides = new ControlOverride[Enum.GetNames(typeof(ControlType)).Length];
@@ -1158,9 +1150,6 @@ namespace Barely {
 
         // DSP latency in seconds.
         private double _dspLatency = 0.0;
-
-        // Array of mono output samples.
-        private float[] _outputSamples = null;
       }
 
 #if !UNITY_EDITOR && UNITY_IOS
@@ -1208,7 +1197,7 @@ namespace Barely {
                                                             ArpeggiatorStyle style);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(Int32 sampleRate, float referenceFrequency,
+      private static extern bool BarelyEngine_Create(Int32 frameRate, float referenceFrequency,
                                                      ref IntPtr outEngine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
@@ -1221,9 +1210,9 @@ namespace Barely {
       private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
-      private static extern bool BarelyEngine_Process(IntPtr engine,
-                                                      [In, Out] float[] outputSamples,
-                                                      Int32 outputSampleCount, double timestamp);
+      private static extern bool BarelyEngine_Process(IntPtr engine, [In, Out] float[] outputBuffer,
+                                                      Int32 outputChannelCount,
+                                                      Int32 outputFrameCount, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
       private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);

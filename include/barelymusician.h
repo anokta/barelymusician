@@ -15,20 +15,31 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create.
-///   barely::Engine engine(/*sample_rate=*/48000);
+///   barely::Engine engine(/*frame_rate=*/48000);
 ///
 ///   // Set the tempo.
 ///   engine.SetTempo(/*tempo=*/124.0);
 ///
 ///   // Update the timestamp.
 ///   //
-///   // Timestamp updates must occur before processing instruments with their respective
-///   // timestamps. Otherwise, `Process` calls may be *late* in receiving the relevant changes to
-///   // the instruments. To address this, `Update` should typically be called from the main thread
-///   // update callback using a lookahead to prevent potential thread synchronization issues in
-///   // real-time audio applications.
+///   // Timestamp updates must occur before processing the engine with the respective timestamps.
+///   // Otherwise, `Process` calls may be *late* in receiving relevant changes to the engine. To
+///   // address this, `Update` should typically be called from the main thread update callback
+///   // using a lookahead to prevent potential thread synchronization issues in real-time audio
+///   // applications.
+///   constexpr double kLookahead = 0.1;
 ///   double timestamp = 1.0;
-///   engine.Update(timestamp);
+///   engine.Update(timestamp + kLookahead);
+///
+///   // Process.
+///   //
+///   // The engine processes raw PCM audio samples synchronously. Therefore, `Process` should
+///   // typically be called from an audio thread process callback in real-time audio applications.
+///   constexpr int kChannelCount = 2;
+///   constexpr int kFrameCount = 512;
+///   float output_samples[kChannelCount * kFrameCount];
+///   double timestamp = 0.0;
+///   engine.Process(output_samples, kChannelCount, kFrameCount, timestamp);
 ///   @endcode
 ///
 /// - Instrument:
@@ -42,23 +53,14 @@
 ///   // The note pitch is centered around the reference frequency and measured in octaves.
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
 ///   // pitch intervals within each octave.
-///   const float c3_pitch = -1.0f;
-///   instrument.SetNoteOn(c3_pitch);
+///   constexpr float kC3Pitch = -1.0f;
+///   instrument.SetNoteOn(kC3Pitch);
 ///
 ///   // Check if the note is on.
-///   const bool is_note_on = instrument.IsNoteOn(c3_pitch);
+///   const bool is_note_on = instrument.IsNoteOn(kC3Pitch);
 ///
 ///   // Set a control value.
 ///   instrument.SetControl(barely::ControlType::kOscMix, /*value=*/1.0f);
-///
-///   // Process.
-///   //
-///   // Instruments process raw PCM audio samples in a synchronous call. Therefore, `Process`
-///   // should typically be called from an audio thread process callback in real-time audio
-///   // applications.
-///   float output_samples[1024];
-///   double timestamp = 0.0;
-///   instrument.Process(output_samples, timestamp);
 ///   @endcode
 ///
 /// - Performer:
@@ -92,7 +94,7 @@
 ///
 ///   // Create.
 ///   BarelyEngineHandle engine = nullptr;
-///   BarelyEngine_Create(/*sample_rate=*/48000, BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
+///   BarelyEngine_Create(/*frame_rate=*/48000, BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
 ///
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
@@ -111,11 +113,12 @@
 ///   // Process.
 ///   //
 ///   // Process the next output samples of the engine.
-//
+///   //
 ///   // The engine processes raw PCM audio samples synchronously. Therefore, `Process` should
 ///   // typically be called from an audio thread process callback in real-time audio applications.
-///   float output_samples[512];
-///   BarelyEngine_Process(engine, output_samples, /*output_sample_count=*/512, timestamp);
+///   float output_samples[2*512];
+///   BarelyEngine_Process(engine, output_samples, /*output_channel_count=*/2,
+///                        /*output_frame_count=*/512, timestamp);
 ///
 ///   // Destroy.
 ///   BarelyEngine_Destroy(engine);
@@ -412,8 +415,8 @@ typedef struct BarelySlice {
   /// Root note pitch.
   float root_pitch;
 
-  /// Sampling rate in hertz.
-  int32_t sample_rate;
+  /// Frame rate in hertz.
+  int32_t frame_rate;
 
   /// Array of mono samples.
   const float* samples;
@@ -537,11 +540,11 @@ BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
 
 /// Creates a new engine.
 ///
-/// @param sample_rate Sampling rate in hertz.
+/// @param frame_rate Frame rate in hertz.
 /// @param reference_frequency Reference frequency in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
+BARELY_API bool BarelyEngine_Create(int32_t frame_rate, float reference_frequency,
                                     BarelyEngineHandle* out_engine);
 
 /// Destroys an engine.
@@ -578,15 +581,17 @@ BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tem
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp);
 
-/// Processes output samples of an engine at timestamp.
+/// Processes the next output samples of an engine at timestamp.
 ///
 /// @param engine Engine handle.
-/// @param output_samples Array of mono output samples.
-/// @param output_sample_count Number of output samples.
+/// @param output_samples Array of interleaved output samples.
+/// @param output_channel_count Number of output channels.
+/// @param output_frame_count Number of output frames.
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
-                                     int32_t output_sample_count, double timestamp);
+                                     int32_t output_channel_count, int32_t output_frame_count,
+                                     double timestamp);
 
 /// Sets the random number generator seed of an engine.
 ///
@@ -712,7 +717,7 @@ BARELY_API bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, fl
 ///
 /// @param instrument Instrument handle.
 /// @param slices Array of slices.
-/// @param sample_data_count Number of slices.
+/// @param slice_count Number of slices.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
                                                const BarelySlice* slices, int32_t slice_count);
@@ -1191,12 +1196,12 @@ struct Slice : public BarelySlice {
   /// Constructs a new `Slice`.
   ///
   /// @param root_pitch Root pich.
-  /// @param sample_rate Sampling rate in hertz.
+  /// @param frame_rate Frame rate in hertz.
   /// @param samples Span of mono samples.
-  explicit constexpr Slice(float root_pitch, int sample_rate,
+  explicit constexpr Slice(float root_pitch, int frame_rate,
                            std::span<const float> samples) noexcept
-      : Slice({root_pitch, sample_rate, samples.data(), static_cast<int>(samples.size())}) {
-    assert(sample_rate >= 0);
+      : Slice({root_pitch, frame_rate, samples.data(), static_cast<int32_t>(samples.size())}) {
+    assert(frame_rate >= 0);
   }
 
   /// Constructs a new `Slice` from a raw type.
@@ -1460,7 +1465,7 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets the sample data.
   ///
-  /// @param sample_data Span of slices.
+  /// @param slices Span of slices.
   void SetSampleData(std::span<const Slice> slices) noexcept {
     [[maybe_unused]] const bool success =
         BarelyInstrument_SetSampleData(*this, reinterpret_cast<const BarelySlice*>(slices.data()),
@@ -1778,13 +1783,13 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
  public:
   /// Constructs a new `Engine`.
   ///
-  /// @param sample_rate Sampling rate in hertz.
+  /// @param frame_rate Frame rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
-  Engine(int sample_rate, float reference_frequency = kDefaultReferenceFrequency) noexcept
+  Engine(int frame_rate, float reference_frequency = kDefaultReferenceFrequency) noexcept
       : HandleWrapper([&]() {
           BarelyEngineHandle engine = nullptr;
           [[maybe_unused]] const bool success =
-              BarelyEngine_Create(static_cast<int32_t>(sample_rate), reference_frequency, &engine);
+              BarelyEngine_Create(static_cast<int32_t>(frame_rate), reference_frequency, &engine);
           assert(success);
           return engine;
         }()) {}
@@ -1880,13 +1885,17 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     return timestamp;
   }
 
-  /// Processes output samples at timestamp.
+  /// Processes the next output samples at timestamp.
   ///
-  /// @param output_samples Span of mono output samples.
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  void Process(std::span<float> output_samples, double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_Process(
-        *this, output_samples.data(), static_cast<int32_t>(output_samples.size()), timestamp);
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
+               double timestamp) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyEngine_Process(*this, output_samples, static_cast<int32_t>(output_channel_count),
+                             static_cast<int32_t>(output_frame_count), timestamp);
     assert(success);
   }
 

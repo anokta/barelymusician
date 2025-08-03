@@ -12,17 +12,17 @@ class WavFile {
   /// Returns the audio data.
   ///
   /// @return Audio data.
-  [[nodiscard]] const std::vector<float>& GetData() const noexcept;
+  [[nodiscard]] const std::vector<float>& GetData() const noexcept { return data_; }
 
   /// Returns the number of audio channels.
   ///
   /// @return Number of audio channels.
-  [[nodiscard]] int GetChannelCount() const noexcept;
+  [[nodiscard]] int GetChannelCount() const noexcept { return channel_count_; }
 
-  /// Returns the audio sampling rate.
+  /// Returns the audio frame rate.
   ///
-  /// @return Audio sampling rate in hertz.
-  [[nodiscard]] int GetSampleRate() const noexcept;
+  /// @return Audio frame rate in hertz.
+  [[nodiscard]] int GetFrameRate() const noexcept { return frame_rate_; }
 
   /// Loads Wave file with the given `file_path`.
   ///
@@ -34,8 +34,8 @@ class WavFile {
   // Number of audio channels.
   int channel_count_ = 0;
 
-  // Audio sampling rate in hertz.
-  int sample_rate_ = 0;
+  // Audio frame rate in hertz.
+  int frame_rate_ = 0;
 
   // Audio data.
   std::vector<float> data_;

@@ -10,21 +10,26 @@
 namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-AudioOutput::AudioOutput(int sample_rate, int sample_count) noexcept {
-  assert(sample_rate > 0);
-  assert(sample_count > 0);
+AudioOutput::AudioOutput(int frame_rate, int channel_count, int frame_count) noexcept
+    : channel_count_(channel_count) {
+  assert(frame_rate > 0);
+  assert(channel_count > 0);
+  assert(frame_count > 0);
   // Configure the playback device.
   ma_device_config device_config = ma_device_config_init(ma_device_type_playback);
   device_config.playback.format = ma_format_f32;
-  device_config.playback.channels = 1;
-  device_config.periodSizeInFrames = sample_count;
-  device_config.sampleRate = sample_rate;
-  device_config.pUserData = static_cast<void*>(&process_callback_);
+  device_config.playback.channels = channel_count;
+  device_config.periodSizeInFrames = frame_count;
+  device_config.sampleRate = frame_rate;
+  device_config.pUserData = static_cast<void*>(this);
   device_config.dataCallback = [](ma_device* device, void* output, const void* /*input*/,
                                   ma_uint32 frame_count) noexcept {
-    if (auto& callback = *static_cast<ProcessCallback*>(device->pUserData); callback) {
-      float* output_buffer = static_cast<float*>(output);
-      callback({output_buffer, output_buffer + frame_count});
+    assert(device->pUserData != nullptr);
+    if (auto& audio_output = *static_cast<AudioOutput*>(device->pUserData);
+        audio_output.process_callback_) {
+      float* output_samples = static_cast<float*>(output);
+      audio_output.process_callback_(output_samples, audio_output.channel_count_,
+                                     static_cast<int>(frame_count));
     }
   };
   // Initialize the device.

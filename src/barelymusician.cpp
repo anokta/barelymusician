@@ -93,13 +93,13 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeg
   return true;
 }
 
-bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
+bool BarelyEngine_Create(int32_t frame_rate, float reference_frequency,
                          BarelyEngineHandle* out_engine) {
-  if (sample_rate <= 0) return false;
+  if (frame_rate <= 0) return false;
   if (reference_frequency <= 0.0) return false;
   if (!out_engine) return false;
 
-  *out_engine = new BarelyEngine(sample_rate, reference_frequency);
+  *out_engine = new BarelyEngine(frame_rate, reference_frequency);
   return true;
 }
 
@@ -143,10 +143,14 @@ bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp)
 }
 
 bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
-                          int32_t output_sample_count, double timestamp) {
+                          int32_t output_channel_count, int32_t output_frame_count,
+                          double timestamp) {
   if (!engine) return false;
+  if (!output_samples) return false;
+  if (output_channel_count <= 0 || output_frame_count <= 0) return false;
 
-  engine->Process({output_samples, output_samples + output_sample_count}, timestamp);
+  engine->Process(output_samples, static_cast<int>(output_channel_count),
+                  static_cast<int>(output_frame_count), timestamp);
   return true;
 }
 

@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <cstring>
 #include <functional>
-#include <span>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -54,8 +53,9 @@ using BeatComposerCallback =
                        Performer& performer, std::vector<Task>& tasks)>;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
-constexpr int kSampleCount = 1024;
+constexpr int kFrameRate = 48000;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 1024;
 
 constexpr double kLookahead = 0.1;
 
@@ -107,7 +107,7 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
   assert(success);
 
   samples = sample_file.GetData();
-  slices.emplace_back(pitch, sample_file.GetSampleRate(), samples);
+  slices.emplace_back(pitch, sample_file.GetFrameRate(), samples);
 }
 
 // Schedules performer to play an instrument note.
@@ -210,10 +210,10 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, Instrument&
 int main(int /*argc*/, char* argv[]) {
   InputManager input_manager;
 
-  AudioClock clock(kSampleRate);
-  AudioOutput audio_output(kSampleRate, kSampleCount);
+  AudioClock clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
   engine.SetTempo(kTempo);
 
   // Note event callback.
@@ -351,9 +351,9 @@ int main(int /*argc*/, char* argv[]) {
   });
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<float> output_samples) {
-    engine.Process(output_samples, clock.GetTimestamp());
-    clock.Update(static_cast<int>(output_samples.size()));
+  const auto process_callback = [&](float* samples, int channel_count, int frame_count) {
+    engine.Process(samples, channel_count, frame_count, clock.GetTimestamp());
+    clock.Update(frame_count);
   };
   audio_output.SetProcessCallback(process_callback);
 

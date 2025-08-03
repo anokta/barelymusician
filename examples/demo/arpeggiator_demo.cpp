@@ -6,7 +6,6 @@
 #include <chrono>
 #include <iterator>
 #include <optional>
-#include <span>
 #include <thread>
 
 #include "common/audio_clock.h"
@@ -27,8 +26,9 @@ using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
-constexpr int kSampleCount = 256;
+constexpr int kFrameRate = 48000;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 256;
 
 constexpr double kLookahead = 0.1;
 
@@ -66,10 +66,10 @@ std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) 
 int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
-  AudioClock audio_clock(kSampleRate);
-  AudioOutput audio_output(kSampleRate, kSampleCount);
+  AudioClock audio_clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
   engine.SetTempo(kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{
@@ -93,9 +93,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   arpeggiator.SetStyle(kInitialStyle);
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](std::span<float> output_samples) {
-    engine.Process(output_samples, audio_clock.GetTimestamp());
-    audio_clock.Update(static_cast<int>(output_samples.size()));
+  audio_output.SetProcessCallback([&](float* samples, int channel_count, int frame_count) {
+    engine.Process(samples, channel_count, frame_count, audio_clock.GetTimestamp());
+    audio_clock.Update(frame_count);
   });
 
   // Key down callback.

@@ -3,7 +3,6 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
-#include <span>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -35,8 +34,9 @@ using ::barely::examples::InputManager;
 using ::smf::MidiFile;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
-constexpr int kSampleCount = 512;
+constexpr int kFrameRate = 48000;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 512;
 
 constexpr double kLookahead = 0.1;
 
@@ -98,10 +98,10 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Initializing " << kMidiFileName << " for MIDI playback (" << track_count
                << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  AudioClock clock(kSampleRate);
-  AudioOutput audio_output(kSampleRate, kSampleCount);
+  AudioClock clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
   engine.SetTempo(kTempo);
 
   std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;
@@ -131,9 +131,9 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<float> output_samples) {
-    engine.Process(output_samples, clock.GetTimestamp());
-    clock.Update(static_cast<int>(output_samples.size()));
+  const auto process_callback = [&](float* samples, int channel_count, int frame_count) {
+    engine.Process(samples, channel_count, frame_count, clock.GetTimestamp());
+    clock.Update(frame_count);
   };
   audio_output.SetProcessCallback(process_callback);
 

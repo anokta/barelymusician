@@ -2,7 +2,6 @@
 
 #include <array>
 #include <chrono>
-#include <span>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -26,8 +25,9 @@ using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
-constexpr int kSampleCount = 512;
+constexpr int kFrameRate = 48000;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 512;
 
 constexpr double kLookahead = 0.05;
 
@@ -49,10 +49,10 @@ constexpr double kInitialTempo = 120.0;
 int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
-  AudioClock audio_clock(kSampleRate);
-  AudioOutput audio_output(kSampleRate, kSampleCount);
+  AudioClock audio_clock(kFrameRate);
+  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kFrameRate);
   engine.SetTempo(kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{
@@ -110,9 +110,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   tasks.emplace_back(performer.CreateTask(5.0, 2.0, 0, play_note_fn(8)));
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<float> output_samples) {
-    engine.Process(output_samples, audio_clock.GetTimestamp());
-    audio_clock.Update(static_cast<int>(output_samples.size()));
+  const auto process_callback = [&](float* samples, int channel_count, int frame_count) {
+    engine.Process(samples, channel_count, frame_count, audio_clock.GetTimestamp());
+    audio_clock.Update(frame_count);
   };
   audio_output.SetProcessCallback(process_callback);
 

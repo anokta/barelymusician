@@ -27,23 +27,22 @@ TEST(TimeTest, BeatsSecondsConversion) {
   }
 }
 
-// Tests that samples and seconds are converted to each other as expected.
-TEST(TimeTest, SamplesSecondsConversion) {
-  constexpr int kSampleRate = 8000;
+// Tests that frames and seconds are converted to each other as expected.
+TEST(TimeTest, FramesSecondsConversion) {
+  constexpr int kFrameRate = 8000;
 
   constexpr int kValueCount = 4;
-  constexpr std::array<int64_t, kValueCount> kSamples = {0, 800, 4000, 32000};
+  constexpr std::array<int64_t, kValueCount> kFrames = {0, 800, 4000, 32000};
   constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.1, 0.5, 4.0};
 
   for (int i = 0; i < kValueCount; ++i) {
-    EXPECT_DOUBLE_EQ(SamplesToSeconds(kSampleRate, kSamples[i]), kSeconds[i]);
-    EXPECT_EQ(SecondsToSamples(kSampleRate, kSeconds[i]), kSamples[i]);
+    EXPECT_DOUBLE_EQ(FramesToSeconds(kFrameRate, kFrames[i]), kSeconds[i]);
+    EXPECT_EQ(SecondsToFrames(kFrameRate, kSeconds[i]), kFrames[i]);
 
     // Verify that the back and forth conversions do not mutate the value.
-    EXPECT_DOUBLE_EQ(SamplesToSeconds(kSampleRate, SecondsToSamples(kSampleRate, kSeconds[i])),
+    EXPECT_DOUBLE_EQ(FramesToSeconds(kFrameRate, SecondsToFrames(kFrameRate, kSeconds[i])),
                      kSeconds[i]);
-    EXPECT_EQ(SecondsToSamples(kSampleRate, SamplesToSeconds(kSampleRate, kSamples[i])),
-              kSamples[i]);
+    EXPECT_EQ(SecondsToFrames(kFrameRate, FramesToSeconds(kFrameRate, kFrames[i])), kFrames[i]);
   }
 }
 

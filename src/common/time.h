@@ -23,6 +23,16 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
   return beats * kMinutesToSeconds / tempo;
 }
 
+/// Returns the corresponding number of seconds for a given number of frames.
+///
+/// @param frame_rate Frame rate in hertz.
+/// @param frames Number of frames.
+/// @return Number of seconds.
+constexpr double FramesToSeconds(int frame_rate, int64_t frames) noexcept {
+  assert(frame_rate > 0);
+  return static_cast<double>(frames) / static_cast<double>(frame_rate);
+}
+
 /// Quantizes a position.
 ///
 /// @param position Position in beats.
@@ -40,16 +50,6 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
       static_cast<double>(amount));
 }
 
-/// Returns the corresponding number of seconds for a given number of samples.
-///
-/// @param sample_rate Sample rate in hertz.
-/// @param samples Number of samples.
-/// @return Number of seconds.
-constexpr double SamplesToSeconds(int sample_rate, int64_t samples) noexcept {
-  assert(sample_rate > 0);
-  return static_cast<double>(samples) / static_cast<double>(sample_rate);
-}
-
 /// Returns the corresponding number of beats for a given number of seconds.
 ///
 /// @param tempo Tempo in beats per minute.
@@ -59,13 +59,13 @@ constexpr double SamplesToSeconds(int sample_rate, int64_t samples) noexcept {
   return seconds * kSecondsToMinutes * tempo;
 }
 
-/// Returns the corresponding number of samples for a given number of seconds.
+/// Returns the corresponding number of frames for a given number of seconds.
 ///
-/// @param sample_rate Sample rate in hertz.
+/// @param frame_rate Frame rate in hertz.
 /// @param seconds Number of seconds.
-/// @return Number of samples.
-[[nodiscard]] constexpr int64_t SecondsToSamples(int sample_rate, double seconds) noexcept {
-  return static_cast<int64_t>(seconds * static_cast<double>(sample_rate));
+/// @return Number of frames.
+[[nodiscard]] constexpr int64_t SecondsToFrames(int frame_rate, double seconds) noexcept {
+  return static_cast<int64_t>(seconds * static_cast<double>(frame_rate));
 }
 
 }  // namespace barely

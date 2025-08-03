@@ -6,7 +6,6 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
-#include <span>
 #include <utility>
 #include <vector>
 
@@ -15,9 +14,9 @@
 #include "common/time.h"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate, float reference_frequency) noexcept
-    : sample_rate_(sample_rate), reference_frequency_(reference_frequency) {
-  assert(sample_rate >= 0);
+BarelyEngine::BarelyEngine(int frame_rate, float reference_frequency) noexcept
+    : frame_rate_(frame_rate), reference_frequency_(reference_frequency) {
+  assert(frame_rate >= 0);
   assert(reference_frequency >= 0.0f);
 }
 
@@ -36,12 +35,16 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
   assert(success);
 }
 
-void BarelyEngine::Process(std::span<float> output_samples, double timestamp) noexcept {
-  std::fill_n(output_samples.data(), output_samples.size(), 0.0f);
-  const int64_t process_sample = barely::SecondsToSamples(sample_rate_, timestamp);
+void BarelyEngine::Process(float* output_samples, int output_channel_count, int output_frame_count,
+                           double timestamp) noexcept {
+  assert(output_samples != nullptr);
+  assert(output_channel_count > 0);
+  assert(output_frame_count > 0);
+  std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
+  const int64_t process_frame = barely::SecondsToFrames(frame_rate_, timestamp);
   auto instruments = mutable_instruments_.GetScopedView();
   for (auto* instrument : *instruments) {
-    instrument->Process(output_samples, process_sample);
+    instrument->Process(output_samples, output_channel_count, output_frame_count, process_frame);
   }
 }
 
@@ -82,9 +85,9 @@ void BarelyEngine::Update(double timestamp) noexcept {
         }
 
         timestamp_ += barely::BeatsToSeconds(tempo_, update_duration);
-        const int64_t update_sample = barely::SecondsToSamples(sample_rate_, timestamp_);
+        const int64_t update_frame = barely::SecondsToFrames(frame_rate_, timestamp_);
         for (auto* instrument : instruments_) {
-          instrument->Update(update_sample);
+          instrument->Update(update_frame);
         }
       }
 
@@ -95,9 +98,9 @@ void BarelyEngine::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      const int64_t update_sample = barely::SecondsToSamples(sample_rate_, timestamp_);
+      const int64_t update_frame = barely::SecondsToFrames(frame_rate_, timestamp_);
       for (auto* instrument : instruments_) {
-        instrument->Update(update_sample);
+        instrument->Update(update_frame);
       }
     }
   }

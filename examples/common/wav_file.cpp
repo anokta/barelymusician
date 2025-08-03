@@ -9,12 +9,6 @@
 
 namespace barely::examples {
 
-const std::vector<float>& WavFile::GetData() const noexcept { return data_; }
-
-int WavFile::GetChannelCount() const noexcept { return channel_count_; }
-
-int WavFile::GetSampleRate() const noexcept { return sample_rate_; }
-
 bool WavFile::Load(const std::string& file_path) {
   // Read the file.
   unsigned int wav_channel_count;
@@ -28,7 +22,7 @@ bool WavFile::Load(const std::string& file_path) {
 
   // Copy the contents.
   channel_count_ = static_cast<int>(wav_channel_count);
-  sample_rate_ = static_cast<int>(wav_sample_rate);
+  frame_rate_ = static_cast<int>(wav_sample_rate);
   data_.resize(wav_channel_count * wav_frame_count);
   std::copy_n(wav_data, data_.size(), data_.begin());
 

@@ -130,7 +130,7 @@ class Voice {
     note_params_.osc_increment = std::pow(2.0f, pitch);
     note_params_.slice_increment =
         (slice_ != nullptr && slice_->sample_count > 0)
-            ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
+            ? slice_->frame_rate * std::pow(2.0f, pitch - slice_->root_pitch)
             : 0.0f;
   }
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }

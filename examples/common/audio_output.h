@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_EXAMPLES_COMMON_AUDIO_OUTPUT_H_
 
 #include <functional>
-#include <span>
 
 #include "miniaudio.h"
 
@@ -13,14 +12,17 @@ class AudioOutput {
  public:
   /// Audio process callback signature.
   ///
-  /// @param output_samples Span of mono output samples.
-  using ProcessCallback = std::function<void(std::span<float> output_samples)>;
+  /// @param samples Array of interleaved samples.
+  /// @param channel_count Number of channels.
+  /// @param frame_count Number of  frames.
+  using ProcessCallback = std::function<void(float* samples, int channel_count, int frame_count)>;
 
   /// Constructs new `AudioOutput`.
   ///
-  /// @param sample_rate Sampling rate in hertz.
-  /// @param sample_count Number of samples per buffer.
-  AudioOutput(int sample_rate, int sample_count) noexcept;
+  /// @param frame_rate Frame rate in hertz.
+  /// @param channel_count Number of channels.
+  /// @param frame_count Number of frames.
+  AudioOutput(int frame_rate, int channel_count, int frame_count) noexcept;
 
   /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;
@@ -45,6 +47,9 @@ class AudioOutput {
  private:
   // Audio device.
   ma_device device_;
+
+  // Number of channels.
+  int channel_count_ = 0;
 
   // Process callback.
   ProcessCallback process_callback_ = nullptr;

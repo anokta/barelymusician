@@ -56,10 +56,13 @@ struct BarelyInstrument {
 
   /// Processes output samples.
   ///
-  /// @param output_samples Span of mono output samples.
-  /// @param process_sample Process sample.
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
+  /// @param process_frame Process sample.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(std::span<float> output_samples, int64_t process_sample) noexcept;
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
+               int64_t process_frame) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -103,8 +106,8 @@ struct BarelyInstrument {
 
   /// Updates the instrument.
   ///
-  /// @param update_sample Update sample.
-  void Update(int64_t update_sample) noexcept;
+  /// @param update_frame Update frame.
+  void Update(int64_t update_frame) noexcept;
 
  private:
   // Engine.
@@ -119,8 +122,8 @@ struct BarelyInstrument {
   // Note event callback.
   NoteEventCallback note_event_callback_ = {};
 
-  // Update sample.
-  int64_t update_sample_ = 0;
+  // Update frame.
+  int64_t update_frame_ = 0;
 
   // Message queue.
   barely::MessageQueue message_queue_;

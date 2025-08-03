@@ -265,8 +265,8 @@ export class Engine {
             task._position = event.data.position;
           }
         } break;
-        case 'task-on-process': {
-          this._tasks[event.data.handle]?.processCallback(event.data.eventType);
+        case 'task-on-event': {
+          this._tasks[event.data.handle]?.eventCallback(event.data.eventType);
         } break;
       }
     };

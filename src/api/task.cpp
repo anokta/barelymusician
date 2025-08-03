@@ -7,12 +7,12 @@
 #include "api/performer.h"
 
 BarelyTask::BarelyTask(BarelyPerformer& performer, double position, double duration, int priority,
-                       ProcessCallback callback) noexcept
+                       EventCallback callback) noexcept
     : performer_(performer),
       position_(position),
       duration_(duration),
       priority_(priority),
-      process_callback_(callback) {
+      event_callback_(callback) {
   assert(duration > 0.0 && "Invalid task duration");
   performer_.AddTask(this);
 }
@@ -25,6 +25,16 @@ void BarelyTask::SetDuration(double duration) noexcept {
     const double old_duration = duration_;
     duration_ = duration;
     performer_.SetTaskDuration(this, old_duration);
+  }
+}
+
+void BarelyTask::SetEventCallback(EventCallback callback) noexcept {
+  if (is_active_) {
+    Process(BarelyTaskEventType_kEnd);
+  }
+  event_callback_ = callback;
+  if (is_active_) {
+    Process(BarelyTaskEventType_kBegin);
   }
 }
 
@@ -41,15 +51,5 @@ void BarelyTask::SetPriority(int priority) noexcept {
     const int old_priority = priority_;
     priority_ = priority;
     performer_.SetTaskPriority(this, old_priority);
-  }
-}
-
-void BarelyTask::SetProcessCallback(ProcessCallback callback) noexcept {
-  if (is_active_) {
-    Process(BarelyTaskEventType_kEnd);
-  }
-  process_callback_ = callback;
-  if (is_active_) {
-    Process(BarelyTaskEventType_kBegin);
   }
 }

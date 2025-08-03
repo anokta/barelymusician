@@ -495,7 +495,7 @@ bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_p
 }
 
 bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double duration,
-                       int32_t priority, BarelyTask_ProcessCallback callback, void* user_data,
+                       int32_t priority, BarelyTaskEventCallback callback, void* user_data,
                        BarelyTaskHandle* out_task) {
   if (!performer) return false;
   if (duration <= 0.0) return false;
@@ -553,6 +553,14 @@ bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration) {
   return true;
 }
 
+bool BarelyTask_SetEventCallback(BarelyTaskHandle task, BarelyTaskEventCallback callback,
+                                 void* user_data) {
+  if (!task) return false;
+
+  task->SetEventCallback({callback, user_data});
+  return true;
+}
+
 bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
   if (!task) return false;
 
@@ -564,14 +572,6 @@ bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority) {
   if (!task) return false;
 
   task->SetPriority(static_cast<int>(priority));
-  return true;
-}
-
-bool BarelyTask_SetProcessCallback(BarelyTaskHandle task, BarelyTask_ProcessCallback callback,
-                                   void* user_data) {
-  if (!task) return false;
-
-  task->SetProcessCallback({callback, user_data});
   return true;
 }
 

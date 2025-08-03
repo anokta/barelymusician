@@ -63,9 +63,9 @@ VERS_1.0 {
     BarelyTask_GetPriority;
     BarelyTask_IsActive;
     BarelyTask_SetDuration;
+    BarelyTask_SetEventCallback;
     BarelyTask_SetPosition;
     BarelyTask_SetPriority;
-    BarelyTask_SetProcessCallback;
     Barely_AmplitudeToDecibels;
     Barely_DecibelsToAmplitude;
   local:

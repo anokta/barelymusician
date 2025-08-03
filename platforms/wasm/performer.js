@@ -42,10 +42,10 @@ export class Performer {
   /**
    * @param {number} position
    * @param {number} duration
-   * @param {function} processCallback
+   * @param {function} eventCallback
    * @return {!Task}
    */
-  createTask(position, duration, processCallback) {
+  createTask(position, duration, eventCallback) {
     let resolveHandle;
     const handlePromise = new Promise(resolve => {
       resolveHandle = resolve;
@@ -55,7 +55,7 @@ export class Performer {
       handlePromise,
       position,
       duration,
-      processCallback,
+      eventCallback,
     });
 
     this._pendingTasks.push({task, resolveHandle});

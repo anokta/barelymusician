@@ -158,7 +158,7 @@
 ///
 ///   // Create a task.
 ///   BarelyTaskHandle task = nullptr;
-///   BarelyTask_ProcessCallback process_callback{ /*populate this*/ };
+///   BarelyTaskEventCallback process_callback{ /*populate this*/ };
 ///   BarelyTask_Create(performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
 ///                     process_callback, &task);
 ///
@@ -365,19 +365,6 @@ typedef enum BarelyTaskEventType {
   BarelyTaskEventType_kCount,
 } BarelyTaskEventType;
 
-/// Note event callback.
-///
-/// @param type Note event type.
-/// @param pitch Note pitch.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyNoteEventCallback)(BarelyNoteEventType type, float pitch, void* user_data);
-
-/// Task process callback.
-///
-/// @param type Task event type.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyTask_ProcessCallback)(BarelyTaskEventType type, void* user_data);
-
 /// Control override.
 typedef struct BarelyControlOverride {
   /// Type.
@@ -452,6 +439,19 @@ typedef struct BarelyRepeater* BarelyRepeaterHandle;
 
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
+
+/// Note event callback.
+///
+/// @param type Note event type.
+/// @param pitch Note pitch.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyNoteEventCallback)(BarelyNoteEventType type, float pitch, void* user_data);
+
+/// Task event callback.
+///
+/// @param type Task event type.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_data);
 
 /// Creates a new arpeggiator.
 ///
@@ -915,12 +915,12 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 /// @param position Task position in beats.
 /// @param duration Task duration in beats.
 /// @param priority Task priority.
-/// @param callback Task process callback.
+/// @param callback Task event callback.
 /// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double duration,
-                                  int32_t priority, BarelyTask_ProcessCallback callback,
+                                  int32_t priority, BarelyTaskEventCallback callback,
                                   void* user_data, BarelyTaskHandle* out_task);
 
 /// Destroys a task.
@@ -963,6 +963,15 @@ BARELY_API bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration);
 
+/// Sets the event callback of a task.
+///
+/// @param task Task handle.
+/// @param callback Event callback.
+/// @param user_data Pointer to user data.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyTask_SetEventCallback(BarelyTaskHandle task, BarelyTaskEventCallback callback,
+                                            void* user_data);
+
 /// Sets the position of a task.
 ///
 /// @param task Task handle.
@@ -976,15 +985,6 @@ BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
 /// @param priority Priority.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority);
-
-/// Sets the process callback of a task.
-///
-/// @param task Task handle.
-/// @param callback Process callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetProcessCallback(BarelyTaskHandle task,
-                                              BarelyTask_ProcessCallback callback, void* user_data);
 
 /// Converts a value from linear amplitude to decibels.
 ///
@@ -1151,12 +1151,6 @@ enum class TaskEventType {
   kEnd = BarelyTaskEventType_kEnd,
 };
 
-/// Note event callback function.
-///
-/// @param type Note event type.
-/// @param pitch Note pitch.
-using NoteEventCallback = std::function<void(NoteEventType type, float pitch)>;
-
 /// Control override.
 struct ControlOverride : public BarelyControlOverride {
   /// Default constructor.
@@ -1212,6 +1206,17 @@ struct Slice : public BarelySlice {
   constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
 };
 
+/// Note event callback function.
+///
+/// @param type Note event type.
+/// @param pitch Note pitch.
+using NoteEventCallback = std::function<void(NoteEventType type, float pitch)>;
+
+/// Task event callback function.
+///
+/// @param type Task event type.
+using TaskEventCallback = std::function<void(TaskEventType type)>;
+
 /// Handle wrapper template.
 template <typename HandleType>
 class HandleWrapper {
@@ -1257,15 +1262,12 @@ class HandleWrapper {
 
  protected:
   // Helper functions to set a callback.
-  template <typename ProcessCallbackFn, typename SetCallbackFn, typename... CallbackArgs>
+  template <typename CallbackFn, typename SetCallbackFn, typename... CallbackArgs>
   void SetCallback(SetCallbackFn set_callback_fn, std::function<void(CallbackArgs...)>& callback,
-                   ProcessCallbackFn process_callback_fn) {
-    [[maybe_unused]] bool success = false;
-    if (callback) {
-      success = set_callback_fn(handle_, process_callback_fn, &callback);
-    } else {
-      success = set_callback_fn(handle_, nullptr, nullptr);
-    }
+                   CallbackFn callback_fn) {
+    [[maybe_unused]] const bool success = callback
+                                              ? set_callback_fn(handle_, callback_fn, &callback)
+                                              : set_callback_fn(handle_, nullptr, nullptr);
     assert(success && "HandleWrapper::SetCallback failed");
   }
 
@@ -1486,34 +1488,29 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 /// Class that wraps a task handle.
 class Task : public HandleWrapper<BarelyTaskHandle> {
  public:
-  /// Process callback function.
-  ///
-  /// @param type Task event type.
-  using ProcessCallback = std::function<void(TaskEventType type)>;
-
   /// Constructs a new `Task`.
   ///
   /// @param performer Raw performer handle.
   /// @param position Task position in beats.
   /// @param duration Task duration in beats.
   /// @param priority Task priority.
-  /// @param callback Task process callback.
+  /// @param callback Task event callback.
   Task(BarelyPerformerHandle performer, double position, double duration, int priority,
-       ProcessCallback callback) noexcept
+       TaskEventCallback callback) noexcept
       : HandleWrapper([&]() {
           BarelyTaskHandle task = nullptr;
           [[maybe_unused]] const bool success = BarelyTask_Create(
               performer, position, duration, priority,
               [](BarelyTaskEventType type, void* user_data) noexcept {
                 if (user_data != nullptr) {
-                  (*static_cast<ProcessCallback*>(user_data))(static_cast<TaskEventType>(type));
+                  (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
                 }
               },
-              &process_callback_, &task);
+              &event_callback_, &task);
           assert(success);
           return task;
         }()),
-        process_callback_(std::move(callback)) {}
+        event_callback_(std::move(callback)) {}
 
   /// Constructs a new `Task` from a raw handle.
   ///
@@ -1532,10 +1529,9 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   /// @param other Other task.
   /// @return Task.
   Task(Task&& other) noexcept
-      : HandleWrapper(std::move(other)),
-        process_callback_(std::exchange(other.process_callback_, {})) {
-    if (process_callback_) {
-      SetProcessCallback();
+      : HandleWrapper(std::move(other)), event_callback_(std::exchange(other.event_callback_, {})) {
+    if (event_callback_) {
+      SetEventCallback();
     }
   }
 
@@ -1547,9 +1543,9 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
     if (this != &other) {
       BarelyTask_Destroy(*this);
       HandleWrapper::operator=(std::move(other));
-      process_callback_ = std::exchange(other.process_callback_, {});
-      if (process_callback_) {
-        SetProcessCallback();
+      event_callback_ = std::exchange(other.event_callback_, {});
+      if (event_callback_) {
+        SetEventCallback();
       }
     }
     return *this;
@@ -1601,29 +1597,30 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
     assert(success);
   }
 
-  /// Sets the process callback.
+  /// Sets the event callback.
   ///
-  /// @param callback Process callback.
-  void SetProcessCallback(ProcessCallback callback) noexcept {
-    BarelyTask_SetProcessCallback(*this, nullptr, nullptr);
-    process_callback_ = std::move(callback);
-    SetProcessCallback();
+  /// @param callback Event callback.
+  void SetEventCallback(TaskEventCallback callback) noexcept {
+    BarelyTask_SetEventCallback(*this, nullptr, nullptr);
+    event_callback_ = std::move(callback);
+    SetEventCallback();
   }
 
  private:
-  // Helper function to set the process callback.
-  void SetProcessCallback() noexcept {
-    SetCallback(BarelyTask_SetProcessCallback, process_callback_,
+  // Helper function to set the event callback.
+  void SetEventCallback() noexcept {
+    SetCallback(BarelyTask_SetEventCallback, event_callback_,
                 [](BarelyTaskEventType type, void* user_data) noexcept {
-                  assert(user_data != nullptr && "Invalid task process callback user data");
-                  if (const auto& callback = *static_cast<ProcessCallback*>(user_data); callback) {
+                  assert(user_data != nullptr && "Invalid task event callback user data");
+                  if (const auto& callback = *static_cast<TaskEventCallback*>(user_data);
+                      callback) {
                     callback(static_cast<TaskEventType>(type));
                   }
                 });
   }
 
-  // Process callback.
-  ProcessCallback process_callback_;
+  // Event callback.
+  TaskEventCallback event_callback_;
 };
 
 /// Class that wraps a performer handle.
@@ -1672,10 +1669,10 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @param position Task position in beats.
   /// @param duration Task duration in beats.
   /// @param priority Task priority.
-  /// @param callback Task process callback.
+  /// @param callback Task event callback.
   /// @return Task.
   [[nodiscard]] Task CreateTask(double position, double duration, int priority,
-                                Task::ProcessCallback callback) noexcept {
+                                TaskEventCallback callback) noexcept {
     return Task(*this, position, duration, priority, std::move(callback));
   }
 

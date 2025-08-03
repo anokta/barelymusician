@@ -229,9 +229,9 @@ class Processor extends AudioWorkletProcessor {
             const task = this._performers[event.data.performerHandle].createTask(
                 event.data.position, event.data.duration);
             const handle = task.getHandle();
-            task.setProcessCallback(
+            task.setEventCallback(
                 (eventType) => this.port.postMessage(
-                    {type: 'task-on-process', handle, position: task.position, eventType}));
+                    {type: 'task-on-event', handle, position: task.position, eventType}));
             this._tasks[handle] = task;
 
             this.port.postMessage({

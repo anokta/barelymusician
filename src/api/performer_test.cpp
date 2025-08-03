@@ -179,7 +179,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
     };
     tasks.emplace_back(
         performer, static_cast<double>(i + 1), 1.0, 0,
-        BarelyTask::ProcessCallback{
+        BarelyTask::EventCallback{
             [](BarelyTaskEventType type, void* user_data) {
               (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
             },

@@ -112,8 +112,8 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
 
   class_<Task>("Task")
       .function("getHandle", &Task_GetHandle, allow_raw_pointers())
-      .function("setProcessCallback", optional_override([](Task& task, val js_callback) {
-                  return task.SetProcessCallback(
+      .function("setEventCallback", optional_override([](Task& task, val js_callback) {
+                  return task.SetEventCallback(
                       [js_callback](TaskEventType type) { js_callback(static_cast<int>(type)); });
                 }))
       .property("isActive", &Task::IsActive)

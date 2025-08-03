@@ -8,8 +8,8 @@
 /// Implementation of a task.
 struct BarelyTask {
  public:
-  /// Process callback alias.
-  using ProcessCallback = barely::Callback<BarelyTask_ProcessCallback>;
+  /// Event callback alias.
+  using EventCallback = barely::Callback<BarelyTaskEventCallback>;
 
   /// Constructs a new `BarelyTask`.
   ///
@@ -17,9 +17,9 @@ struct BarelyTask {
   /// @param position Task position.
   /// @param duration Task duration.
   /// @param priority Task priority.
-  /// @param callback Task process callback.
+  /// @param callback Task event callback.
   BarelyTask(BarelyPerformer& performer, double position, double duration, int priority,
-             ProcessCallback callback) noexcept;
+             EventCallback callback) noexcept;
 
   /// Destroys `BarelyTask`.
   ~BarelyTask() noexcept;
@@ -66,7 +66,7 @@ struct BarelyTask {
   /// Processes the task.
   ///
   /// @param type Task event type.
-  void Process(BarelyTaskEventType type) noexcept { process_callback_(type); }
+  void Process(BarelyTaskEventType type) noexcept { event_callback_(type); }
 
   /// Sets whether the task is currently active or not.
   ///
@@ -81,6 +81,11 @@ struct BarelyTask {
   /// @param duration Duration in beats.
   void SetDuration(double duration) noexcept;
 
+  /// Sets the event callback.
+  ///
+  /// @param callback Event callback.
+  void SetEventCallback(EventCallback callback) noexcept;
+
   /// Sets the position.
   ///
   /// @param position Position in beats.
@@ -90,11 +95,6 @@ struct BarelyTask {
   ///
   /// @param priority Priority.
   void SetPriority(int priority) noexcept;
-
-  /// Sets the process callback.
-  ///
-  /// @param callback Task process callback.
-  void SetProcessCallback(ProcessCallback callback) noexcept;
 
  private:
   // Performer.
@@ -109,8 +109,8 @@ struct BarelyTask {
   // Priority.
   int priority_;
 
-  // Process callback.
-  ProcessCallback process_callback_;
+  // Event callback.
+  EventCallback event_callback_;
 
   // Denotes whether the task is active or not.
   bool is_active_ = false;

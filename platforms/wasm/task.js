@@ -5,7 +5,7 @@ export const TaskEventType = {
 };
 
 export class Task {
-  constructor({audioNode, handlePromise, position, duration, processCallback}) {
+  constructor({audioNode, handlePromise, position, duration, eventCallback}) {
     this._audioNode = audioNode;
     this._handlePromise = handlePromise;
 
@@ -13,7 +13,7 @@ export class Task {
     this._duration = duration;
     this._isActive = false;
 
-    this.processCallback = processCallback;
+    this.eventCallback = eventCallback;
   }
 
   /**

@@ -744,9 +744,9 @@ namespace Barely {
       ///
       /// @param task Task.
       /// @param performerHandle Performer handle.
-      /// @param position Task position.
-      /// @param duration Task duration.
-      /// @param callback Task process callback.
+      /// @param position Task position in beats.
+      /// @param duration Task duration in beats.
+      /// @param priority Task priority.
       /// @param taskHandle Task handle.
       public static void Task_Create(Task task, IntPtr performerHandle, double position,
                                      double duration, int priority, ref IntPtr taskHandle) {
@@ -754,12 +754,12 @@ namespace Barely {
           return;
         }
         if (!BarelyTask_Create(performerHandle, position, Math.Max(duration, _minTaskDuration),
-                               priority, Task_OnProcess, IntPtr.Zero, ref taskHandle)) {
+                               priority, Task_OnEvent, IntPtr.Zero, ref taskHandle)) {
           Debug.LogError("Failed to create task '" + task + "'");
           return;
         }
         _tasks.Add(taskHandle, task);
-        BarelyTask_SetProcessCallback(taskHandle, Task_OnProcess, taskHandle);
+        BarelyTask_SetEventCallback(taskHandle, Task_OnEvent, taskHandle);
       }
 
       /// Destroys a task.
@@ -871,10 +871,10 @@ namespace Barely {
         }
       }
 
-      // Task process callback.
-      private delegate void Task_ProcessCallback(TaskEventType type, IntPtr userData);
-      [AOT.MonoPInvokeCallback(typeof(Task_ProcessCallback))]
-      private static void Task_OnProcess(TaskEventType type, IntPtr userData) {
+      // Task event callback.
+      private delegate void TaskEventCallback(TaskEventType type, IntPtr userData);
+      [AOT.MonoPInvokeCallback(typeof(TaskEventCallback))]
+      private static void Task_OnEvent(TaskEventType type, IntPtr userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
           Task.Internal.OnProcess(task, type);
         }
@@ -1371,7 +1371,7 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Create")]
       private static extern bool BarelyTask_Create(IntPtr performer, double position,
                                                    double duration, Int32 priority,
-                                                   Task_ProcessCallback callback, IntPtr userData,
+                                                   TaskEventCallback callback, IntPtr userData,
                                                    ref IntPtr outTask);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
@@ -1398,10 +1398,10 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPriority")]
       private static extern bool BarelyTask_SetPriority(IntPtr task, Int32 priority);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetProcessCallback")]
-      private static extern bool BarelyTask_SetProcessCallback(IntPtr task,
-                                                               Task_ProcessCallback callback,
-                                                               IntPtr userData);
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetEventCallback")]
+      private static extern bool BarelyTask_SetEventCallback(IntPtr task,
+                                                             TaskEventCallback callback,
+                                                             IntPtr userData);
 
       [DllImport(_pluginName, EntryPoint = "Barely_AmplitudeToDecibels")]
       private static extern bool Barely_AmplitudeToDecibels(float amplitude, ref float outDecibels);

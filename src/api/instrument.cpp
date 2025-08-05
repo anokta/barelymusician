@@ -173,6 +173,7 @@ void BarelyInstrument::SetAllNotesOff() noexcept {
 
 void BarelyInstrument::SetControl(BarelyControlType type, float value) noexcept {
   if (auto& control = controls_[type]; control.SetValue(value)) {
+    control_event_callback_(type, control.value);
     message_queue_.Add(update_frame_,
                        ControlMessage{static_cast<ControlType>(type), control.value});
   }
@@ -182,15 +183,12 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
                                       float value) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[type]; note_control.SetValue(value)) {
+      note_control_event_callback_(pitch, type, note_control.value);
       message_queue_.Add(
           update_frame_,
           NoteControlMessage{pitch, static_cast<NoteControlType>(type), note_control.value});
     }
   }
-}
-
-void BarelyInstrument::SetNoteEventCallback(NoteEventCallback callback) noexcept {
-  note_event_callback_ = callback;
 }
 
 void BarelyInstrument::SetNoteOff(float pitch) noexcept {

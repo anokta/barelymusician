@@ -41,6 +41,9 @@ struct VoiceParams {
 
   /// Oscillator skew.
   float osc_skew = 0.0f;
+
+  /// Stereo pan.
+  float stereo_pan = 0.0f;
 };
 
 /// Instrument parameters.
@@ -125,6 +128,7 @@ class Voice {
   /// Stops the voice.
   void Stop() noexcept { envelope_.Stop(); }
 
+  [[nodiscard]] float stereo_pan() const noexcept { return params_.stereo_pan; }
   void set_gain(float gain) noexcept { note_params_.gain = gain; }
   void set_pitch(float pitch) noexcept {
     note_params_.osc_increment = std::pow(2.0f, pitch);
@@ -206,6 +210,7 @@ class Voice {
     ApproachParam(params_.osc_noise_mix, params.osc_noise_mix);
     ApproachParam(params_.osc_shape, params.osc_shape);
     ApproachParam(params_.osc_skew, params.osc_skew);
+    ApproachParam(params_.stereo_pan, params.stereo_pan);
 
     ApproachParam(params_.filter_coefficients.a1, params.filter_coefficients.a1);
     ApproachParam(params_.filter_coefficients.a2, params.filter_coefficients.a2);

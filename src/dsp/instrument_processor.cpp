@@ -80,9 +80,16 @@ void InstrumentProcessor::Process(float* output_samples, int output_channel_coun
         if (!voice.IsActive()) {
           break;
         }
+        // TODO(#145): Implement multichannel panner here instead.
         const float sample = voice_callback_(voice, params_);
-        for (int channel = 0; channel < output_channel_count; ++channel) {
-          output_samples[frame * output_channel_count + channel] += sample;
+        if (output_channel_count == 1) {
+          output_samples[frame] += sample;
+        } else {
+          assert(output_channel_count == 2);
+          const float left_gain = 0.5f * (1.0f - voice.stereo_pan());
+          const float right_gain = 1.0f - left_gain;
+          output_samples[frame * output_channel_count] += left_gain * sample;
+          output_samples[frame * output_channel_count + 1] += right_gain * sample;
         }
       }
     }
@@ -103,6 +110,9 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kRetrigger:
       should_retrigger_ = static_cast<bool>(value);
+      break;
+    case ControlType::kStereoPan:
+      params_.voice_params.stereo_pan = value;
       break;
     case ControlType::kVoiceCount: {
       const int voice_count = static_cast<int>(value);

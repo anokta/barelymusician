@@ -246,6 +246,8 @@ typedef enum BarelyControlType {
   BarelyControlType_kPitchShift,
   /// Retrigger.
   BarelyControlType_kRetrigger,
+  /// Stereo pan.
+  BarelyControlType_kStereoPan,
   /// Number of voices.
   BarelyControlType_kVoiceCount,
   /// Envelope attack in seconds.
@@ -1085,6 +1087,8 @@ enum class ControlType {
   kPitchShift = BarelyControlType_kPitchShift,
   /// Retrigger.
   kRetrigger = BarelyControlType_kRetrigger,
+  /// Stereo pan.
+  kStereoPan = BarelyControlType_kStereoPan,
   /// Number of voices.
   kVoiceCount = BarelyControlType_kVoiceCount,
   /// Envelope attack in seconds.

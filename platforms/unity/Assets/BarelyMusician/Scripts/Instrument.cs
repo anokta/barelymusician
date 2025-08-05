@@ -106,6 +106,9 @@ namespace Barely {
     /// Retrigger.
     public bool Retrigger = false;
 
+    [Range(-1.0f, 1.0f)]
+    public float StereoPan = 0.0f;
+
     /// Number of voices.
     [Range(1, 20)]
     public int VoiceCount = 8;
@@ -313,6 +316,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.GAIN, Gain);
       SetControl(Engine.Internal.ControlType.PITCH_SHIFT, PitchShift);
       SetControl(Engine.Internal.ControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
+      SetControl(Engine.Internal.ControlType.STEREO_PAN, StereoPan);
       SetControl(Engine.Internal.ControlType.VOICE_COUNT, (float)VoiceCount);
       SetControl(Engine.Internal.ControlType.ATTACK, Attack);
       SetControl(Engine.Internal.ControlType.DECAY, Decay);

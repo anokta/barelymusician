@@ -50,6 +50,8 @@ namespace Barely {
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
         /// Retrigger.
         [InspectorName("Retrigger")] RETRIGGER,
+        /// Stereo pan.
+        [InspectorName("Stereo Pan")] STEREO_PAN,
         /// Number of voices.
         [InspectorName("Voice Count")] VOICE_COUNT,
         /// Envelope attack in seconds.
@@ -1045,7 +1047,7 @@ namespace Barely {
 
 #if UNITY_EDITOR
         private void OnAssemblyReload() {
-          if (!Application.isPlaying) {
+          if (Application.isPlaying) {
             GameObject.Destroy(gameObject);
           } else {
             _isShuttingDown = true;

@@ -15,6 +15,7 @@ const std::array<RangeParameter, BarelyControlType_kCount> kParams = {
     RangeParameter(STR16("Gain"), BarelyControlType_kGain, STR16(""), 0.0, 1.0, 0.125),
     RangeParameter(STR16("Pitch Shift"), BarelyControlType_kPitchShift, STR16(""), -4.0, 4.0, 0.0),
     RangeParameter(STR16("Retrigger"), BarelyControlType_kRetrigger, STR16(""), 0, 1, 0, 1),
+    RangeParameter(STR16("Stereo Pan"), BarelyControlType_kRetrigger, STR16(""), -1.0, 1.0, 0.0),
     RangeParameter(STR16("Voice Count"), BarelyControlType_kVoiceCount, STR16(""), 1, 20, 8, 19),
     RangeParameter(STR16("Attack"), BarelyControlType_kAttack, STR16("sec"), 0.0, 60.0, 0.01),
     RangeParameter(STR16("Decay"), BarelyControlType_kDecay, STR16("sec"), 0.0, 60.0, 0.0),

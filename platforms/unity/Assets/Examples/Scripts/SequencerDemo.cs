@@ -11,6 +11,9 @@ namespace Barely.Examples {
       randomSequencer.notes[0].gain = 0.5f * Random.Range(0, 3);
       randomSequencer.notes[0].position = 0.0;
       randomSequencer.notes[0].duration = 0.125 * Random.Range(2, 4);
+      if (randomSequencer.notes[0].gain > 0.0f) {
+        randomSequencer.instrument.StereoPan = Random.Range(-0.5f, 0.5f);
+      }
     }
 
     private void Update() {

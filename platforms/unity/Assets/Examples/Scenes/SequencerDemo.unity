@@ -156,6 +156,7 @@ MonoBehaviour:
   loop: 1
   loopLength: 8
   playOnAwake: 1
+  priority: 0
   notes:
   - pitch: 9
     gain: 1
@@ -206,6 +207,7 @@ MonoBehaviour:
   Gain: 0.075
   PitchShift: 0
   Retrigger: 0
+  StereoPan: 0.25
   VoiceCount: 8
   Attack: 0.05
   Decay: 0
@@ -642,6 +644,7 @@ MonoBehaviour:
   Gain: 0.25
   PitchShift: 0
   Retrigger: 1
+  StereoPan: 0
   VoiceCount: 4
   Attack: 0
   Decay: 0
@@ -727,6 +730,7 @@ MonoBehaviour:
   loop: 1
   loopLength: 2
   playOnAwake: 1
+  priority: 0
   notes:
   - pitch: 0
     gain: 1
@@ -764,6 +768,7 @@ MonoBehaviour:
   loop: 1
   loopLength: 8
   playOnAwake: 1
+  priority: 0
   notes:
   - pitch: 5
     gain: 1
@@ -851,6 +856,7 @@ MonoBehaviour:
   Gain: 0.1
   PitchShift: 0
   Retrigger: 0
+  StereoPan: -0.25
   VoiceCount: 8
   Attack: 0.1
   Decay: 0
@@ -928,6 +934,7 @@ MonoBehaviour:
   loop: 1
   loopLength: 4
   playOnAwake: 1
+  priority: 0
   notes:
   - pitch: 9
     gain: 1
@@ -1081,6 +1088,7 @@ MonoBehaviour:
   loop: 1
   loopLength: 1
   playOnAwake: 1
+  priority: 0
   notes:
   - pitch: 0
     gain: 1
@@ -1102,6 +1110,7 @@ MonoBehaviour:
   Gain: 0.1
   PitchShift: 0
   Retrigger: 0
+  StereoPan: 0
   VoiceCount: 8
   Attack: 0
   Decay: 0
@@ -1177,6 +1186,7 @@ MonoBehaviour:
   loop: 1
   loopLength: 8
   playOnAwake: 1
+  priority: 0
   notes:
   - pitch: 9
     gain: 1
@@ -1227,6 +1237,7 @@ MonoBehaviour:
   Gain: 0.4
   PitchShift: 0
   Retrigger: 0
+  StereoPan: 0
   VoiceCount: 8
   Attack: 0
   Decay: 0

@@ -25,12 +25,12 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
 
 /// Returns the corresponding number of seconds for a given number of frames.
 ///
-/// @param frame_rate Frame rate in hertz.
+/// @param sample_rate Sampling rate in hertz.
 /// @param frames Number of frames.
 /// @return Number of seconds.
-constexpr double FramesToSeconds(int frame_rate, int64_t frames) noexcept {
-  assert(frame_rate > 0);
-  return static_cast<double>(frames) / static_cast<double>(frame_rate);
+constexpr double FramesToSeconds(int sample_rate, int64_t frames) noexcept {
+  assert(sample_rate > 0);
+  return static_cast<double>(frames) / static_cast<double>(sample_rate);
 }
 
 /// Quantizes a position.
@@ -61,11 +61,11 @@ constexpr double FramesToSeconds(int frame_rate, int64_t frames) noexcept {
 
 /// Returns the corresponding number of frames for a given number of seconds.
 ///
-/// @param frame_rate Frame rate in hertz.
+/// @param sample_rate Sampling rate in hertz.
 /// @param seconds Number of seconds.
 /// @return Number of frames.
-[[nodiscard]] constexpr int64_t SecondsToFrames(int frame_rate, double seconds) noexcept {
-  return static_cast<int64_t>(seconds * static_cast<double>(frame_rate));
+[[nodiscard]] constexpr int64_t SecondsToFrames(int sample_rate, double seconds) noexcept {
+  return static_cast<int64_t>(seconds * static_cast<double>(sample_rate));
 }
 
 }  // namespace barely

@@ -29,7 +29,7 @@ Example usage
 #include <barelymusician.h>
 
 // Create the engine.
-barely::Engine engine(/*frame_rate=*/48000);
+barely::Engine engine(/*sample_rate=*/48000);
 
 // Set the global tempo.
 engine.SetTempo(/*tempo=*/124.0);

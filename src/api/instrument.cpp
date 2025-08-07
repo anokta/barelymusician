@@ -92,8 +92,8 @@ BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine, std::span<const BarelyControlOverride> control_overrides) noexcept
     : engine_(engine),
       controls_(BuildControlArray(control_overrides)),
-      update_frame_(barely::SecondsToFrames(engine_.GetFrameRate(), engine_.GetTimestamp())),
-      processor_(control_overrides, engine_.audio_rng(), engine_.GetFrameRate(),
+      update_frame_(barely::SecondsToFrames(engine_.GetSampleRate(), engine_.GetTimestamp())),
+      processor_(control_overrides, engine_.audio_rng(), engine_.GetSampleRate(),
                  engine_.GetReferenceFrequency()) {
   engine_.AddInstrument(this);
 }

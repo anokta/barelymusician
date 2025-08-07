@@ -55,11 +55,11 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> control_overrides,
-                                         AudioRng& rng, int frame_rate,
+                                         AudioRng& rng, int sample_rate,
                                          float reference_frequency) noexcept
-    : sample_interval_(1.0f / static_cast<float>(frame_rate)),
+    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       reference_frequency_(reference_frequency) {
-  assert(frame_rate > 0);
+  assert(sample_rate > 0);
   for (const auto& [type, value] : control_overrides) {
     SetControl(static_cast<ControlType>(type), value);
   }

@@ -12,7 +12,7 @@ namespace {
 using ::testing::ElementsAre;
 using ::testing::UnorderedElementsAre;
 
-constexpr int kFrameRate = 48000;
+constexpr int kSampleRate = 48000;
 constexpr float kReferenceFrequency = kDefaultReferenceFrequency;
 
 TEST(BarelyEngineTest, CreateDestroyEngine) {
@@ -22,13 +22,13 @@ TEST(BarelyEngineTest, CreateDestroyEngine) {
 
   // Success.
   BarelyEngineHandle engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(kFrameRate, kReferenceFrequency, &engine));
+  EXPECT_TRUE(BarelyEngine_Create(kSampleRate, kReferenceFrequency, &engine));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
   BarelyEngineHandle engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(kFrameRate, kReferenceFrequency, &engine));
+  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kReferenceFrequency, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyInstrument_Create(engine, nullptr, 0, nullptr));
@@ -45,7 +45,7 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
   BarelyEngineHandle engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(kFrameRate, kReferenceFrequency, &engine));
+  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kReferenceFrequency, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyPerformer_Create(engine, nullptr));
@@ -84,15 +84,15 @@ TEST(DecibelsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_FLOAT_EQ(DecibelsToAmplitude(kMinDecibels), 0.0f);
 }
 
-TEST(EngineTest, CreateDestroyEngine) { [[maybe_unused]] const Engine engine(kFrameRate); }
+TEST(EngineTest, CreateDestroyEngine) { [[maybe_unused]] const Engine engine(kSampleRate); }
 
 TEST(EngineTest, CreateDestroyInstrument) {
-  Engine engine(kFrameRate, kReferenceFrequency);
+  Engine engine(kSampleRate, kReferenceFrequency);
   [[maybe_unused]] const auto instrument = engine.CreateInstrument();
 }
 
 TEST(EngineTest, CreateDestroyPerformer) {
-  Engine engine(kFrameRate, kReferenceFrequency);
+  Engine engine(kSampleRate, kReferenceFrequency);
   [[maybe_unused]] const auto performer = engine.CreatePerformer();
 }
 
@@ -100,7 +100,7 @@ TEST(EngineTest, CreateDestroyPerformer) {
 TEST(EngineTest, CreateDestroySingleInstrument) {
   constexpr float kPitch = 0.5;
 
-  Engine engine(kFrameRate, kReferenceFrequency);
+  Engine engine(kSampleRate, kReferenceFrequency);
 
   float note_off_pitch = 0.0f;
   float note_on_pitch = 0.0f;
@@ -130,7 +130,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
   std::vector<float> note_off_pitches;
 
   {
-    Engine engine(kFrameRate, kReferenceFrequency);
+    Engine engine(kSampleRate, kReferenceFrequency);
 
     // Create instruments with note off callbacks.
     std::vector<Instrument> instruments;

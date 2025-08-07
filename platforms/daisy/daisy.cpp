@@ -15,7 +15,7 @@ using ::daisy::MidiUsbTransport;
 using ::daisy::SaiHandle;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
+constexpr int kSampleRate = 48000;
 constexpr size_t kFrameCount = 16;
 
 // Instrument settings.
@@ -60,7 +60,7 @@ int main(void) {
   midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  Engine engine(kFrameRate);
+  Engine engine(kSampleRate);
   engine_ptr = &engine;
 
   Instrument instrument = engine.CreateInstrument({{

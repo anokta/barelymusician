@@ -34,7 +34,7 @@ using ::barely::examples::InputManager;
 using ::smf::MidiFile;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
+constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
@@ -98,10 +98,10 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Initializing " << kMidiFileName << " for MIDI playback (" << track_count
                << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  AudioClock clock(kFrameRate);
-  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
+  AudioClock clock(kSampleRate);
+  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kFrameRate);
+  Engine engine(kSampleRate);
   engine.SetTempo(kTempo);
 
   std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;

@@ -93,13 +93,13 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeg
   return true;
 }
 
-bool BarelyEngine_Create(int32_t frame_rate, float reference_frequency,
+bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
                          BarelyEngineHandle* out_engine) {
-  if (frame_rate <= 0) return false;
+  if (sample_rate <= 0) return false;
   if (reference_frequency <= 0.0) return false;
   if (!out_engine) return false;
 
-  *out_engine = new BarelyEngine(frame_rate, reference_frequency);
+  *out_engine = new BarelyEngine(sample_rate, reference_frequency);
   return true;
 }
 

@@ -22,7 +22,7 @@ bool WavFile::Load(const std::string& file_path) {
 
   // Copy the contents.
   channel_count_ = static_cast<int>(wav_channel_count);
-  frame_rate_ = static_cast<int>(wav_sample_rate);
+  sample_rate_ = static_cast<int>(wav_sample_rate);
   data_.resize(wav_channel_count * wav_frame_count);
   std::copy_n(wav_data, data_.size(), data_.begin());
 

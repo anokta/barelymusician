@@ -11,8 +11,8 @@ namespace {
 constexpr int kInputLength = 4;
 constexpr float kInput[kInputLength] = {1.0f, -1.0f, 1.0f, 0.5f};
 
-constexpr float kFrameRate = 8000.0f;
-constexpr float kSampleInterval = 1.0f / kFrameRate;
+constexpr float kSampleRate = 8000.0f;
+constexpr float kSampleInterval = 1.0f / kSampleRate;
 
 constexpr float kFilterQ = 1.0f;
 constexpr float kEpsilon = 1e-5f;
@@ -20,7 +20,7 @@ constexpr float kEpsilon = 1e-5f;
 // Tests that a low-pass filter does not alter the input when the coefficient is set to all-pass.
 TEST(BiquadFilterTest, LowPassAllPass) {
   const auto coeffs =
-      GetFilterCoefficients(kSampleInterval, FilterType::kLowPass, kFrameRate, kFilterQ);
+      GetFilterCoefficients(kSampleInterval, FilterType::kLowPass, kSampleRate, kFilterQ);
 
   BiquadFilter filter;
   for (const float input : kInput) {

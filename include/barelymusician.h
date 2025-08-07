@@ -15,7 +15,7 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create.
-///   barely::Engine engine(/*frame_rate=*/48000);
+///   barely::Engine engine(/*sample_rate=*/48000);
 ///
 ///   // Set the tempo.
 ///   engine.SetTempo(/*tempo=*/124.0);
@@ -94,7 +94,7 @@
 ///
 ///   // Create.
 ///   BarelyEngineHandle engine = nullptr;
-///   BarelyEngine_Create(/*frame_rate=*/48000, BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
+///   BarelyEngine_Create(/*sample_rate=*/48000, BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
 ///
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
@@ -417,8 +417,8 @@ typedef struct BarelySlice {
   /// Root note pitch.
   float root_pitch;
 
-  /// Frame rate in hertz.
-  int32_t frame_rate;
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
 
   /// Array of mono samples.
   const float* samples;
@@ -558,11 +558,11 @@ BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
 
 /// Creates a new engine.
 ///
-/// @param frame_rate Frame rate in hertz.
+/// @param sample_rate Sampling rate in hertz.
 /// @param reference_frequency Reference frequency in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t frame_rate, float reference_frequency,
+BARELY_API bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
                                     BarelyEngineHandle* out_engine);
 
 /// Destroys an engine.
@@ -1235,12 +1235,12 @@ struct Slice : public BarelySlice {
   /// Constructs a new `Slice`.
   ///
   /// @param root_pitch Root pich.
-  /// @param frame_rate Frame rate in hertz.
+  /// @param sample_rate Sampling rate in hertz.
   /// @param samples Span of mono samples.
-  explicit constexpr Slice(float root_pitch, int frame_rate,
+  explicit constexpr Slice(float root_pitch, int sample_rate,
                            std::span<const float> samples) noexcept
-      : Slice({root_pitch, frame_rate, samples.data(), static_cast<int32_t>(samples.size())}) {
-    assert(frame_rate >= 0);
+      : Slice({root_pitch, sample_rate, samples.data(), static_cast<int32_t>(samples.size())}) {
+    assert(sample_rate >= 0);
   }
 
   /// Constructs a new `Slice` from a raw type.
@@ -1898,13 +1898,13 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
  public:
   /// Constructs a new `Engine`.
   ///
-  /// @param frame_rate Frame rate in hertz.
+  /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
-  Engine(int frame_rate, float reference_frequency = kDefaultReferenceFrequency) noexcept
+  Engine(int sample_rate, float reference_frequency = kDefaultReferenceFrequency) noexcept
       : HandleWrapper([&]() {
           BarelyEngineHandle engine = nullptr;
           [[maybe_unused]] const bool success =
-              BarelyEngine_Create(static_cast<int32_t>(frame_rate), reference_frequency, &engine);
+              BarelyEngine_Create(static_cast<int32_t>(sample_rate), reference_frequency, &engine);
           assert(success);
           return engine;
         }()) {}

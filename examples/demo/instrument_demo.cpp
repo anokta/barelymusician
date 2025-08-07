@@ -22,7 +22,7 @@ using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
+constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
@@ -55,9 +55,9 @@ std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) 
 int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
-  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
+  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kFrameRate);
+  Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument({{
       {ControlType::kGain, kGain},

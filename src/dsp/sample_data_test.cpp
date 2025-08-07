@@ -15,12 +15,12 @@ using ::testing::Field;
 using ::testing::Pointee;
 
 TEST(SampleDataTest, Select) {
-  constexpr int kFrameRate = 1;
+  constexpr int kSampleRate = 1;
   constexpr std::array<float, 1> kSamples = {1.0f};
   const std::array<BarelySlice, 3> kSlices = {
-      BarelySlice{5.0f, kFrameRate, kSamples.data(), 1},
-      BarelySlice{15.0f, kFrameRate, kSamples.data(), 1},
-      BarelySlice{35.0f, kFrameRate, kSamples.data(), 1},
+      BarelySlice{5.0f, kSampleRate, kSamples.data(), 1},
+      BarelySlice{15.0f, kSampleRate, kSamples.data(), 1},
+      BarelySlice{35.0f, kSampleRate, kSamples.data(), 1},
   };
 
   AudioRng rng;

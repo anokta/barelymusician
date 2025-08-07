@@ -10,9 +10,9 @@
 namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-AudioOutput::AudioOutput(int frame_rate, int channel_count, int frame_count) noexcept
+AudioOutput::AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept
     : channel_count_(channel_count) {
-  assert(frame_rate > 0);
+  assert(sample_rate > 0);
   assert(channel_count > 0);
   assert(frame_count > 0);
   // Configure the playback device.
@@ -20,7 +20,7 @@ AudioOutput::AudioOutput(int frame_rate, int channel_count, int frame_count) noe
   device_config.playback.format = ma_format_f32;
   device_config.playback.channels = channel_count;
   device_config.periodSizeInFrames = frame_count;
-  device_config.sampleRate = frame_rate;
+  device_config.sampleRate = sample_rate;
   device_config.pUserData = static_cast<void*>(this);
   device_config.dataCallback = [](ma_device* device, void* output, const void* /*input*/,
                                   ma_uint32 frame_count) noexcept {

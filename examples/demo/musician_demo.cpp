@@ -53,7 +53,7 @@ using BeatComposerCallback =
                        Performer& performer, std::vector<Task>& tasks)>;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
+constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
@@ -107,7 +107,7 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
   assert(success);
 
   samples = sample_file.GetData();
-  slices.emplace_back(pitch, sample_file.GetFrameRate(), samples);
+  slices.emplace_back(pitch, sample_file.GetSampleRate(), samples);
 }
 
 // Schedules performer to play an instrument note.
@@ -210,10 +210,10 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, Instrument&
 int main(int /*argc*/, char* argv[]) {
   InputManager input_manager;
 
-  AudioClock clock(kFrameRate);
-  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
+  AudioClock clock(kSampleRate);
+  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kFrameRate);
+  Engine engine(kSampleRate);
   engine.SetTempo(kTempo);
 
   // Note event callback.

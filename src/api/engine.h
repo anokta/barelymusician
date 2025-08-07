@@ -17,10 +17,10 @@ struct BarelyEngine {
  public:
   /// Constructs a new `BarelyEngine`.
   ///
-  /// @param frame_rate Frame rate in hertz.
+  /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  BarelyEngine(int frame_rate, float reference_frequency) noexcept;
+  BarelyEngine(int sample_rate, float reference_frequency) noexcept;
 
   /// Destroys `BarelyEngine`.
   ~BarelyEngine() noexcept;
@@ -42,10 +42,10 @@ struct BarelyEngine {
   /// @return Reference frequency in hertz.
   [[nodiscard]] float GetReferenceFrequency() const noexcept { return reference_frequency_; }
 
-  /// Returns the frame rate.
+  /// Returns the sampling rate.
   ///
-  /// @return Frame rate in hertz.
-  [[nodiscard]] int GetFrameRate() const noexcept { return frame_rate_; }
+  /// @return Sampling rate in hertz.
+  [[nodiscard]] int GetSampleRate() const noexcept { return sample_rate_; }
 
   /// Returns the tempo.
   ///
@@ -98,8 +98,8 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void UpdateMutableInstruments() noexcept;
 
-  // Frame rate in hertz.
-  int frame_rate_ = 0;
+  // Sampling rate in hertz.
+  int sample_rate_ = 0;
 
   // Reference frequency at zero pitch.
   float reference_frequency_ = 0.0f;

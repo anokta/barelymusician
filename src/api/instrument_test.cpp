@@ -12,13 +12,13 @@
 
 namespace {
 
-constexpr int kFrameRate = 4;
+constexpr int kSampleRate = 4;
 constexpr float kReferenceFrequency = 1.0f;
-constexpr std::array<float, kFrameRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
+constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that the instrument sets a control value as expected.
 TEST(InstrumentTest, SetControl) {
-  BarelyEngine engine(kFrameRate, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
 
@@ -46,10 +46,10 @@ TEST(InstrumentTest, PlaySingleNote) {
   constexpr float kPitch = 1.0f;
   constexpr float kGain = 0.5f;
   constexpr std::array<BarelySlice, 1> kSlices = {
-      BarelySlice{kPitch, kFrameRate, kSamples.data(), kFrameRate},
+      BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
   };
 
-  BarelyEngine engine(kFrameRate, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
@@ -69,7 +69,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   std::fill(samples.begin(), samples.end(), 0.0f);
   instrument.Process(samples.data(), 1, kFrameCount, 0);
   for (int i = 0; i < kFrameCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], (i < kFrameRate) ? kSamples[i] * kGain : 0.0f);
+    EXPECT_FLOAT_EQ(samples[i], (i < kSampleRate) ? kSamples[i] * kGain : 0.0f);
   }
 
   // Set the note off.
@@ -85,42 +85,42 @@ TEST(InstrumentTest, PlaySingleNote) {
 
 // Tests that the instrument plays multiple notes as expected.
 TEST(InstrumentTest, PlayMultipleNotes) {
-  constexpr std::array<BarelySlice, kFrameRate> kSlices = {
-      BarelySlice{0.0f, kFrameRate, kSamples.data(), 1},
-      BarelySlice{1.0f, kFrameRate, kSamples.data() + 1, 1},
-      BarelySlice{2.0f, kFrameRate, kSamples.data() + 2, 1},
-      BarelySlice{3.0f, kFrameRate, kSamples.data() + 3, 1},
+  constexpr std::array<BarelySlice, kSampleRate> kSlices = {
+      BarelySlice{0.0f, kSampleRate, kSamples.data(), 1},
+      BarelySlice{1.0f, kSampleRate, kSamples.data() + 1, 1},
+      BarelySlice{2.0f, kSampleRate, kSamples.data() + 2, 1},
+      BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
   };
 
   BarelyEngine engine(1, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
-  std::vector<float> samples(kFrameRate);
+  std::vector<float> samples(kSampleRate);
 
   // Control is set to its default value.
   std::fill(samples.begin(), samples.end(), 0.0f);
-  instrument.Process(samples.data(), 1, kFrameRate, 0);
-  for (int i = 0; i < kFrameRate; ++i) {
+  instrument.Process(samples.data(), 1, kSampleRate, 0);
+  for (int i = 0; i < kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
 
   // Start a new note per each i in the samples.
-  for (int i = 0; i < kFrameRate; ++i) {
+  for (int i = 0; i < kSampleRate; ++i) {
     instrument.SetNoteOn(static_cast<float>(i), {});
     instrument.Update(i + 1);
     instrument.SetNoteOff(static_cast<float>(i));
   }
 
   std::fill(samples.begin(), samples.end(), 0.0f);
-  instrument.Process(samples.data(), 1, kFrameRate, 0);
-  for (int i = 0; i < kFrameRate; ++i) {
+  instrument.Process(samples.data(), 1, kSampleRate, 0);
+  for (int i = 0; i < kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], kSamples[i]);
   }
 
   std::fill(samples.begin(), samples.end(), 0.0f);
-  instrument.Process(samples.data(), 1, kFrameRate, kFrameRate);
-  for (int i = 0; i < kFrameRate; ++i) {
+  instrument.Process(samples.data(), 1, kSampleRate, kSampleRate);
+  for (int i = 0; i < kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
 }
@@ -175,7 +175,7 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 TEST(InstrumentTest, SetAllNotesOff) {
   constexpr std::array<float, 3> kPitches = {1.0f, 2.0f, 3.0f};
 
-  BarelyEngine engine(kFrameRate, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   for (const float pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));

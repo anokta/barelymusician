@@ -21,7 +21,7 @@ using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 
 // System audio settings.
-constexpr int kFrameRate = 48000;
+constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
@@ -47,10 +47,10 @@ constexpr double kTempoIncrement = 10.0;
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   InputManager input_manager;
 
-  AudioClock audio_clock(kFrameRate);
-  AudioOutput audio_output(kFrameRate, kChannelCount, kFrameCount);
+  AudioClock audio_clock(kSampleRate);
+  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kFrameRate);
+  Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
@@ -130,7 +130,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       default:
         return;
     }
-    tempo = std::clamp(tempo, 0.0, static_cast<double>(kFrameRate));
+    tempo = std::clamp(tempo, 0.0, static_cast<double>(kSampleRate));
     engine.SetTempo(tempo);
     ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
   };

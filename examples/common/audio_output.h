@@ -19,10 +19,10 @@ class AudioOutput {
 
   /// Constructs new `AudioOutput`.
   ///
-  /// @param frame_rate Frame rate in hertz.
+  /// @param sample_rate Sampling rate in hertz.
   /// @param channel_count Number of channels.
   /// @param frame_count Number of frames.
-  AudioOutput(int frame_rate, int channel_count, int frame_count) noexcept;
+  AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept;
 
   /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;

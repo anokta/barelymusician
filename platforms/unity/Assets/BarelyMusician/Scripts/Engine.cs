@@ -468,7 +468,7 @@ namespace Barely {
             instrumentSlices[i].Sample.LoadAudioData();
             slices[i] = new Slice() {
               rootPitch = instrumentSlices[i].RootPitch / 12.0f,
-              frameRate =
+              sampleRate =
                   (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.frequency : 0,
               samples = instrumentSlices[i].Data,
               sampleCount =
@@ -940,8 +940,8 @@ namespace Barely {
         // Root note pitch.
         public float rootPitch;
 
-        // Frame rate in hertz.
-        public Int32 frameRate;
+        // Sampling rate in hertz.
+        public Int32 sampleRate;
 
         // Array of mono samples.
         public float[] samples;
@@ -1199,7 +1199,7 @@ namespace Barely {
                                                             ArpeggiatorStyle style);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(Int32 frameRate, float referenceFrequency,
+      private static extern bool BarelyEngine_Create(Int32 sampleRate, float referenceFrequency,
                                                      ref IntPtr outEngine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]

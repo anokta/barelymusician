@@ -75,13 +75,13 @@ export const CONTROLS = {
   //   minValue: 0,
   //   maxValue: 1,
   // },
-  // [ControlType.STEREO_PAN]: {
-  //   name: 'Stereo Pan',
-  //   valueType: 'float',
-  //   defaultValue: 0.0,
-  //   minValue: -1.0,
-  //   maxValue: 1.0,
-  // },
+  [ControlType.STEREO_PAN]: {
+    name: 'Stereo Pan',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: -1.0,
+    maxValue: 1.0,
+  },
   // [ControlType.VOICE_COUNT]: {
   //   name: 'Voice Count',
   //   valueType: 'int',

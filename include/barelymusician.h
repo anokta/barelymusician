@@ -221,6 +221,9 @@
 /// Minimum decibel threshold.
 #define BARELY_MIN_DECIBELS -80.0f
 
+/// Number of stereo channels.
+#define BARELY_STEREO_CHANNEL_COUNT 2
+
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
@@ -1068,6 +1071,9 @@ inline constexpr float kDefaultReferenceFrequency = BARELY_DEFAULT_REFERENCE_FRE
 
 /// Minimum decibel threshold.
 inline constexpr float kMinDecibels = BARELY_MIN_DECIBELS;
+
+/// Number of stereo channels.
+inline constexpr int kStereoChannelCount = BARELY_STEREO_CHANNEL_COUNT;
 
 /// Arpeggiator style enum.
 enum class ArpeggiatorStyle {

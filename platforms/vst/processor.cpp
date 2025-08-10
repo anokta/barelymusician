@@ -92,10 +92,12 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
   }
 
   // Process instrument.
-  // TODO(#145): Add multi-channel output support.
-  auto& output = data.outputs[0];
-  engine_->Process(output.channelBuffers32[0], 1, static_cast<int>(data.numSamples), 0.0);
-  std::copy_n(output.channelBuffers32[0], data.numSamples, output.channelBuffers32[1]);
+  const int output_frame_count = static_cast<int>(data.numSamples);
+  engine_->Process(output_samples_.data(), kStereoChannelCount, output_frame_count, 0.0);
+  for (int frame = 0; frame < output_frame_count; ++frame) {
+    data.outputs[0].channelBuffers32[0][frame] = output_samples_[frame * kStereoChannelCount];
+    data.outputs[0].channelBuffers32[1][frame] = output_samples_[frame * kStereoChannelCount + 1];
+  }
 
   return Steinberg::kResultTrue;
 }
@@ -120,6 +122,7 @@ Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::Process
   instrument_ = std::nullopt;
   engine_ = Engine(static_cast<int>(setup.sampleRate));
   instrument_ = engine_->CreateInstrument(Controller::GetDefaultControls());
+  output_samples_.resize(setup.maxSamplesPerBlock * kStereoChannelCount);
   return Steinberg::kResultTrue;
 }
 

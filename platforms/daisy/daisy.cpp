@@ -1,12 +1,14 @@
 #include <barelymusician.h>
 
 #include <algorithm>
+#include <array>
 
 #include "daisy_pod.h"
 
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::kStereoChannelCount;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
 using ::daisy::MidiMessageType;
@@ -31,6 +33,7 @@ static MidiUsbHandler midi;
 static Engine* engine_ptr = nullptr;
 static Instrument* instrument_ptr = nullptr;
 static float osc_shape = 0.0f;
+static std::array<float, kFrameCount> output_samples;
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
@@ -43,9 +46,12 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   }
 
   // Process the output samples.
-  // TODO(#145): Add multi-channel output support.
-  engine_ptr->Process(out[0], /*output_channel_count=*/1, size, /*timestamp=*/0.0);
-  std::copy_n(out[0], size, out[1]);  // copy onto stereo buffer.
+  const int output_frame_count = static_cast<int>(size);
+  engine_ptr->Process(output_samples.data(), kStereoChannelCount, output_frame_count, 0.0);
+  for (int frame = 0; frame < output_frame_count; ++frame) {
+    out[0][frame] = output_samples[frame * kStereoChannelCount];
+    out[1][frame] = output_samples[frame * kStereoChannelCount + 1];
+  }
 }
 
 int main(void) {

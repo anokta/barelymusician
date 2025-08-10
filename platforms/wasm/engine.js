@@ -194,7 +194,14 @@ export class Engine {
   }
 
   _initAudioNode(audioContext, state) {
-    this._audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor');
+    const STEREO_CHANNEL_COUNT = 2;
+    this._audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor', {
+      numberOfInputs: 0,
+      numberOfOutputs: 1,
+      outputChannelCount: [STEREO_CHANNEL_COUNT],
+      channelCount: STEREO_CHANNEL_COUNT,
+      channelCountMode: 'explicit',
+    });
     this._audioNode.connect(audioContext.destination);
     this._audioNode.port.onmessage = event => {
       if (!event.data) return;

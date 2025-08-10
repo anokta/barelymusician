@@ -4,6 +4,7 @@
 #include <barelymusician.h>
 
 #include <optional>
+#include <vector>
 
 #include "public.sdk/source/vst/vstaudioeffect.h"
 
@@ -36,6 +37,7 @@ class Processor : public Steinberg::Vst::AudioEffect {
  private:
   std::optional<Engine> engine_;
   std::optional<Instrument> instrument_;
+  std::vector<float> output_samples_;
 };
 
 }  // namespace barely::vst

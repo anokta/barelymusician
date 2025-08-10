@@ -281,19 +281,26 @@ class Processor extends AudioWorkletProcessor {
   process(inputs, outputs, parameters) {
     if (!this._engine || !this._module || !this._module.HEAPF32) return true;
 
-    const output = outputs[0][0];
-    const outputLength = output.length;
-    const outputSize = outputLength * Float32Array.BYTES_PER_ELEMENT;
+    const STEREO_CHANNEL_COUNT = 2;
 
-    const latency = Math.max(1.0 / 60.0, outputLength / sampleRate);
+    const outputChannels = outputs[0];
+    const outputFrameCount = outputChannels[0].length;
+    const outputSampleCount = outputFrameCount * STEREO_CHANNEL_COUNT;
+    const outputSize = outputSampleCount * Float32Array.BYTES_PER_ELEMENT;
+
+    const latency = Math.max(1.0 / 60.0, outputFrameCount / sampleRate);
     this._engine.update(currentTime + latency);
 
     const outputPtr = this._module._malloc(outputSize);
-    const outputSamples = new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputLength);
+    const outputSamples =
+        new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputSampleCount);
 
-    // TODO(#145): Add multi-channel output support.
-    this._engine.process(outputPtr, 1, outputLength, currentTime);
-    output.set(outputSamples);
+    this._engine.process(outputPtr, STEREO_CHANNEL_COUNT, outputFrameCount, currentTime);
+
+    for (let i = 0; i < outputSampleCount; ++i) {
+      outputChannels[0][i] = outputSamples[i * STEREO_CHANNEL_COUNT];
+      outputChannels[1][i] = outputSamples[i * STEREO_CHANNEL_COUNT + 1];
+    }
 
     this._module._free(outputPtr);
 

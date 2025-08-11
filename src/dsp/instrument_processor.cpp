@@ -20,20 +20,20 @@ template <SliceMode kSliceMode>
 VoiceCallback GetVoiceCallback(OscMode osc_mode) {
   switch (osc_mode) {
     case OscMode::kMix:
-      return Voice::Next<OscMode::kMix, kSliceMode>;
+      return Voice::Process<OscMode::kMix, kSliceMode>;
     case OscMode::kAm:
-      return Voice::Next<OscMode::kAm, kSliceMode>;
+      return Voice::Process<OscMode::kAm, kSliceMode>;
     case OscMode::kEnvelopeFollower:
-      return Voice::Next<OscMode::kEnvelopeFollower, kSliceMode>;
+      return Voice::Process<OscMode::kEnvelopeFollower, kSliceMode>;
     case OscMode::kFm:
-      return Voice::Next<OscMode::kFm, kSliceMode>;
+      return Voice::Process<OscMode::kFm, kSliceMode>;
     case OscMode::kMf:
-      return Voice::Next<OscMode::kMf, kSliceMode>;
+      return Voice::Process<OscMode::kMf, kSliceMode>;
     case OscMode::kRing:
-      return Voice::Next<OscMode::kRing, kSliceMode>;
+      return Voice::Process<OscMode::kRing, kSliceMode>;
     default:
       assert(!"Invalid oscillator mode");
-      return Voice::Next<OscMode::kMix, kSliceMode>;
+      return Voice::Process<OscMode::kMix, kSliceMode>;
   }
 }
 
@@ -68,10 +68,8 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
   params_.rng = &rng;
 }
 
-void InstrumentProcessor::Process(float* output_samples, int output_channel_count,
-                                  int output_frame_count) noexcept {
+void InstrumentProcessor::Process(float* output_samples, int output_frame_count) noexcept {
   assert(output_samples != nullptr);
-  assert(output_channel_count > 0);
   assert(output_frame_count > 0);
   for (VoiceState& voice_state : voice_states_) {
     Voice& voice = voice_state.voice;
@@ -80,17 +78,7 @@ void InstrumentProcessor::Process(float* output_samples, int output_channel_coun
         if (!voice.IsActive()) {
           break;
         }
-        // TODO(#145): Implement multichannel panner here instead.
-        const float sample = voice_callback_(voice, params_);
-        if (output_channel_count == 1) {
-          output_samples[frame] += sample;
-        } else {
-          assert(output_channel_count == 2);
-          const float left_gain = 0.5f * (1.0f - voice.stereo_pan());
-          const float right_gain = 1.0f - left_gain;
-          output_samples[frame * output_channel_count] += left_gain * sample;
-          output_samples[frame * output_channel_count + 1] += right_gain * sample;
-        }
+        voice_callback_(voice, params_, &output_samples[frame * kStereoChannelCount]);
       }
     }
   }

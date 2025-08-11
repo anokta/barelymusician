@@ -120,10 +120,9 @@ bool BarelyInstrument::IsNoteOn(float pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyInstrument::Process(float* output_samples, int output_channel_count,
-                               int output_frame_count, int64_t process_frame) noexcept {
+void BarelyInstrument::Process(float* output_samples, int output_frame_count,
+                               int64_t process_frame) noexcept {
   assert(output_samples != nullptr);
-  assert(output_channel_count > 0);
   assert(output_frame_count > 0);
 
   int current_frame = 0;
@@ -133,8 +132,8 @@ void BarelyInstrument::Process(float* output_samples, int output_channel_count,
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      processor_.Process(&output_samples[current_frame * output_channel_count],
-                         output_channel_count, message_frame - current_frame);
+      processor_.Process(&output_samples[current_frame * barely::kStereoChannelCount],
+                         message_frame - current_frame);
       current_frame = message_frame;
     }
     std::visit(MessageVisitor{[this](ControlMessage& control_message) noexcept {
@@ -159,7 +158,7 @@ void BarelyInstrument::Process(float* output_samples, int output_channel_count,
   }
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    processor_.Process(&output_samples[current_frame * output_channel_count], output_channel_count,
+    processor_.Process(&output_samples[current_frame * barely::kStereoChannelCount],
                        output_frame_count - current_frame);
   }
 }

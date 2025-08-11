@@ -35,7 +35,6 @@ using ::smf::MidiFile;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
-constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
 constexpr double kLookahead = 0.1;
@@ -99,7 +98,7 @@ int main(int /*argc*/, char* argv[]) {
                << " tracks, " << ticks_per_quarter << " TPQ)";
 
   AudioClock clock(kSampleRate);
-  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
+  AudioOutput audio_output(kSampleRate, kFrameCount);
 
   Engine engine(kSampleRate);
   engine.SetTempo(kTempo);
@@ -131,8 +130,8 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  const auto process_callback = [&](float* samples, int channel_count, int frame_count) {
-    engine.Process(samples, channel_count, frame_count, clock.GetTimestamp());
+  const auto process_callback = [&](float* samples, int frame_count) {
+    engine.Process(samples, frame_count, clock.GetTimestamp());
     clock.Update(frame_count);
   };
   audio_output.SetProcessCallback(process_callback);

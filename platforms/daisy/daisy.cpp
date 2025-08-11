@@ -47,7 +47,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 
   // Process the output samples.
   const int output_frame_count = static_cast<int>(size);
-  engine_ptr->Process(output_samples.data(), kStereoChannelCount, output_frame_count, 0.0);
+  engine_ptr->Process(output_samples.data(), output_frame_count, 0.0);
   for (int frame = 0; frame < output_frame_count; ++frame) {
     out[0][frame] = output_samples[frame * kStereoChannelCount];
     out[1][frame] = output_samples[frame * kStereoChannelCount + 1];

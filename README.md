@@ -85,10 +85,9 @@ engine.Update(timestamp + kLookahead);
 //
 // The engine processes raw PCM audio samples synchronously. Therefore, `Process` should typically
 // be called from an audio thread process callback in real-time audio applications.
-constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
-float output_samples[kChannelCount * kFrameCount];
-engine.Process(output_samples, kChannelCount, kFrameCount, timestamp);
+float output_samples[kFrameCount * barely::kStereoChannelCount];
+engine.Process(output_samples, kFrameCount, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

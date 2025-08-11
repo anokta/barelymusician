@@ -1,6 +1,8 @@
 
 #include "common/audio_output.h"
 
+#include <barelymusician.h>
+
 #include <cassert>
 #include <utility>
 
@@ -10,15 +12,13 @@
 namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-AudioOutput::AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept
-    : channel_count_(channel_count) {
+AudioOutput::AudioOutput(int sample_rate, int frame_count) noexcept {
   assert(sample_rate > 0);
-  assert(channel_count > 0);
   assert(frame_count > 0);
   // Configure the playback device.
   ma_device_config device_config = ma_device_config_init(ma_device_type_playback);
   device_config.playback.format = ma_format_f32;
-  device_config.playback.channels = channel_count;
+  device_config.playback.channels = kStereoChannelCount;
   device_config.periodSizeInFrames = frame_count;
   device_config.sampleRate = sample_rate;
   device_config.pUserData = static_cast<void*>(this);
@@ -28,8 +28,7 @@ AudioOutput::AudioOutput(int sample_rate, int channel_count, int frame_count) no
     if (auto& audio_output = *static_cast<AudioOutput*>(device->pUserData);
         audio_output.process_callback_) {
       float* output_samples = static_cast<float*>(output);
-      audio_output.process_callback_(output_samples, audio_output.channel_count_,
-                                     static_cast<int>(frame_count));
+      audio_output.process_callback_(output_samples, static_cast<int>(frame_count));
     }
   };
   // Initialize the device.

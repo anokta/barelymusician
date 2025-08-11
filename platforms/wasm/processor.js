@@ -295,7 +295,7 @@ class Processor extends AudioWorkletProcessor {
     const outputSamples =
         new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputSampleCount);
 
-    this._engine.process(outputPtr, STEREO_CHANNEL_COUNT, outputFrameCount, currentTime);
+    this._engine.process(outputPtr, outputFrameCount, currentTime);
 
     for (let i = 0; i < outputSampleCount; ++i) {
       outputChannels[0][i] = outputSamples[i * STEREO_CHANNEL_COUNT];

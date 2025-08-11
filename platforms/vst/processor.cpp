@@ -93,7 +93,7 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
 
   // Process instrument.
   const int output_frame_count = static_cast<int>(data.numSamples);
-  engine_->Process(output_samples_.data(), kStereoChannelCount, output_frame_count, 0.0);
+  engine_->Process(output_samples_.data(), output_frame_count, 0.0);
   for (int frame = 0; frame < output_frame_count; ++frame) {
     data.outputs[0].channelBuffers32[0][frame] = output_samples_[frame * kStereoChannelCount];
     data.outputs[0].channelBuffers32[1][frame] = output_samples_[frame * kStereoChannelCount + 1];

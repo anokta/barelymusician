@@ -13,16 +13,14 @@ class AudioOutput {
   /// Audio process callback signature.
   ///
   /// @param samples Array of interleaved samples.
-  /// @param channel_count Number of channels.
   /// @param frame_count Number of  frames.
-  using ProcessCallback = std::function<void(float* samples, int channel_count, int frame_count)>;
+  using ProcessCallback = std::function<void(float* samples, int frame_count)>;
 
   /// Constructs new `AudioOutput`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param channel_count Number of channels.
   /// @param frame_count Number of frames.
-  AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept;
+  AudioOutput(int sample_rate, int frame_count) noexcept;
 
   /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;
@@ -47,9 +45,6 @@ class AudioOutput {
  private:
   // Audio device.
   ma_device device_;
-
-  // Number of channels.
-  int channel_count_ = 0;
 
   // Process callback.
   ProcessCallback process_callback_ = nullptr;

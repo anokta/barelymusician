@@ -32,7 +32,6 @@ using ::barely::examples::WavFile;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
-constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
 // Instrument settings.
@@ -78,7 +77,7 @@ std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) 
 int main(int /*argc*/, char* argv[]) {
   InputManager input_manager;
 
-  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
+  AudioOutput audio_output(kSampleRate, kFrameCount);
 
   Engine engine(kSampleRate);
 
@@ -96,8 +95,8 @@ int main(int /*argc*/, char* argv[]) {
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](float* samples, int channel_count, int frame_count) {
-    engine.Process(samples, channel_count, frame_count, /*timestamp=*/0.0);
+  audio_output.SetProcessCallback([&](float* samples, int frame_count) {
+    engine.Process(samples, frame_count, /*timestamp=*/0.0);
   });
 
   // Key down callback.

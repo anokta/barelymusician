@@ -79,16 +79,17 @@ struct NoteParams {
 /// Class that wraps an instrument voice.
 class Voice {
  public:
-  /// Returns the next output sample.
+  /// Processes the next output samples.
   ///
   /// @tparam kOscMode Oscillator mode.
   /// @tparam kSliceMode Slice mode.
   /// @param voice Voice.
   /// @param params Instrument parameters.
-  /// @return Next output value.
+  /// @param output_samples Output samples to process.
   template <OscMode kOscMode, SliceMode kSliceMode>
-  [[nodiscard]] static float Next(Voice& voice, const InstrumentParams& params) noexcept {
-    return voice.Next<kOscMode, kSliceMode>(params);
+  static void Process(Voice& voice, const InstrumentParams& params,
+                      float output_samples[kStereoChannelCount]) noexcept {
+    return voice.Process<kOscMode, kSliceMode>(params, output_samples);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -128,7 +129,6 @@ class Voice {
   /// Stops the voice.
   void Stop() noexcept { envelope_.Stop(); }
 
-  [[nodiscard]] float stereo_pan() const noexcept { return params_.stereo_pan; }
   void set_gain(float gain) noexcept { note_params_.gain = gain; }
   void set_pitch(float pitch) noexcept {
     note_params_.osc_increment = std::pow(2.0f, pitch);
@@ -141,7 +141,7 @@ class Voice {
 
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  [[nodiscard]] float Next(const InstrumentParams& params) noexcept {
+  void Process(const InstrumentParams& params, float output_samples[kStereoChannelCount]) noexcept {
     if constexpr (kSliceMode == SliceMode::kOnce) {
       if (!IsSliceActive()) {
         envelope_.Stop();
@@ -197,9 +197,12 @@ class Voice {
       }
     }
 
-    Approach(params.voice_params);
+    const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
+    const float right_gain = 1.0f - left_gain;
+    output_samples[0] += left_gain * output;
+    output_samples[1] += right_gain * output;
 
-    return output;
+    Approach(params.voice_params);
   }
 
   void Approach(const VoiceParams& params) noexcept {
@@ -244,8 +247,9 @@ class Voice {
 ///
 /// @param voice Mutable voice.
 /// @param params Instrument parameters.
-/// @return Processed output value.
-using VoiceCallback = float (*)(Voice& voice, const InstrumentParams& params);
+/// @param output_samples Output samples to process.
+using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
+                               float output_samples[kStereoChannelCount]);
 
 }  // namespace barely
 

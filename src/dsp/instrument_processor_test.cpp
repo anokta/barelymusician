@@ -34,21 +34,29 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  float output = 0.0f;
-  processor.Process(&output, 1, 1);
-  EXPECT_FLOAT_EQ(output, 0.0f);
+  std::array<float, kStereoChannelCount> output;
+
+  output.fill(0.0f);
+  processor.Process(output.data(), 1);
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+    EXPECT_FLOAT_EQ(output[channel], 0.0f);
+  }
 
   processor.SetNoteOn(0.0f, kNoteControls);
 
-  output = 0.0f;
-  processor.Process(&output, 1, 1);
-  EXPECT_FLOAT_EQ(output, kSamples[0]);
+  output.fill(0.0f);
+  processor.Process(output.data(), 1);
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+    EXPECT_FLOAT_EQ(output[channel], 0.5f * kSamples[0]);
+  }
 
   processor.SetNoteOff(0.0f);
 
-  output = 0.0f;
-  processor.Process(&output, 1, 1);
-  EXPECT_FLOAT_EQ(output, 0.0f);
+  output.fill(0.0f);
+  processor.Process(output.data(), 1);
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+    EXPECT_FLOAT_EQ(output[channel], 0.0f);
+  }
 }
 
 // Tests that playing voices are capped at maximum allowed number of voices.
@@ -61,27 +69,35 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  float output = 0.0f;
-  processor.Process(&output, 1, 1);
-  EXPECT_FLOAT_EQ(output, 0.0f);
+  std::array<float, kStereoChannelCount> output;
+
+  output.fill(0.0f);
+  processor.Process(output.data(), 1);
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+    EXPECT_FLOAT_EQ(output[channel], 0.0f);
+  }
 
   float expected_output = 0.0f;
   for (int i = 0; i < kVoiceCount; ++i) {
     processor.SetNoteOn(static_cast<float>(i), kNoteControls);
 
-    output = 0.0f;
-    processor.Process(&output, 1, 1);
-
     expected_output += kSamples[i];
-    EXPECT_FLOAT_EQ(output, expected_output) << i;
+
+    output.fill(0.0f);
+    processor.Process(output.data(), 1);
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+      EXPECT_FLOAT_EQ(output[channel], 0.5f * expected_output) << i;
+    }
   }
 
   for (int i = 0; i < kSampleRate; ++i) {
     processor.SetNoteOn(static_cast<float>(kVoiceCount), kNoteControls);
 
-    output = 0.0f;
-    processor.Process(&output, 1, 1);
-    EXPECT_FLOAT_EQ(output, expected_output);
+    output.fill(0.0f);
+    processor.Process(output.data(), 1);
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+      EXPECT_FLOAT_EQ(output[channel], 0.5f * expected_output) << i;
+    }
   }
 }
 
@@ -94,15 +110,21 @@ TEST(InstrumentProcessorTest, NoVoice) {
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  float output = 0.0f;
-  processor.Process(&output, 1, 1);
-  EXPECT_FLOAT_EQ(output, 0.0f);
+  std::array<float, kStereoChannelCount> output;
+
+  output.fill(0.0f);
+  processor.Process(output.data(), 1);
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+    EXPECT_FLOAT_EQ(output[channel], 0.0f);
+  }
 
   processor.SetNoteOn(0.0f, kNoteControls);
 
-  output = 0.0f;
-  processor.Process(&output, 1, 1);
-  EXPECT_FLOAT_EQ(output, 0.0f);
+  output.fill(0.0f);
+  processor.Process(output.data(), 1);
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+    EXPECT_FLOAT_EQ(output[channel], 0.0f);
+  }
 }
 
 }  // namespace

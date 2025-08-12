@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_EXAMPLES_COMMON_AUDIO_OUTPUT_H_
 
 #include <functional>
+#include <span>
 
 #include "miniaudio.h"
 
@@ -12,9 +13,8 @@ class AudioOutput {
  public:
   /// Audio process callback signature.
   ///
-  /// @param samples Array of interleaved samples.
-  /// @param frame_count Number of  frames.
-  using ProcessCallback = std::function<void(float* samples, int frame_count)>;
+  /// @param samples Span of interleaved stereo samples.
+  using ProcessCallback = std::function<void(std::span<float> samples)>;
 
   /// Constructs new `AudioOutput`.
   ///

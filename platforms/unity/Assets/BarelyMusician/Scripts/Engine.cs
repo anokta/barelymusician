@@ -1101,7 +1101,7 @@ namespace Barely {
         }
 
         private void OnAudioFilterRead(float[] data, int channels) {
-          BarelyEngine_Process(_handle, data, data.Length / channels, AudioSettings.dspTime);
+          BarelyEngine_Process(_handle, data, data.Length, AudioSettings.dspTime);
         }
 
         private void LateUpdate() {
@@ -1212,7 +1212,7 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
       private static extern bool BarelyEngine_Process(IntPtr engine, [In, Out] float[] outputBuffer,
-                                                      Int32 outputFrameCount, double timestamp);
+                                                      Int32 outputSampleCount, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
       private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);

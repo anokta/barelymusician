@@ -4,6 +4,7 @@
 #include <barelymusician.h>
 
 #include <cmath>
+#include <span>
 #include <unordered_set>
 #include <vector>
 
@@ -60,10 +61,9 @@ struct BarelyEngine {
   /// Processes output samples.
   ///
   /// @param output_samples Array of interleaved output samples.
-  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(float* output_samples, int output_frame_count, double timestamp) noexcept;
+  void Process(std::span<float> output_samples, double timestamp) noexcept;
 
   /// Removes an instrument.
   ///

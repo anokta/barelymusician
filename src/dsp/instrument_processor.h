@@ -29,9 +29,8 @@ class InstrumentProcessor {
 
   /// Processes the next output samples.
   ///
-  /// @param output_samples Array of interleaved output samples.
-  /// @param output_frame_count Number of output frames.
-  void Process(float* output_samples, int output_frame_count) noexcept;
+  /// @param output_samples Array of interleaved stereo output samples.
+  void Process(std::span<float> output_samples) noexcept;
 
   /// Sets a control value.
   ///

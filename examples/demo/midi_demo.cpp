@@ -3,6 +3,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
+#include <span>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -130,9 +131,9 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  const auto process_callback = [&](float* samples, int frame_count) {
-    engine.Process(samples, frame_count, clock.GetTimestamp());
-    clock.Update(frame_count);
+  const auto process_callback = [&](std::span<float> samples) {
+    engine.Process(samples, clock.GetTimestamp());
+    clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);
 

@@ -62,11 +62,10 @@ struct BarelyInstrument {
 
   /// Processes output samples.
   ///
-  /// @param output_samples Array of interleaved output samples.
-  /// @param output_frame_count Number of output frames.
-  /// @param process_frame Process sample.
+  /// @param output_samples Span of interleaved stereo output samples.
+  /// @param process_frame Process frame.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(float* output_samples, int output_frame_count, int64_t process_frame) noexcept;
+  void Process(std::span<float> output_samples, int64_t process_frame) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)

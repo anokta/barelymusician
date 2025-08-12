@@ -33,7 +33,7 @@ static MidiUsbHandler midi;
 static Engine* engine_ptr = nullptr;
 static Instrument* instrument_ptr = nullptr;
 static float osc_shape = 0.0f;
-static std::array<float, kFrameCount> output_samples;
+static std::array<float, kFrameCount * kStereoChannelCount> output_samples;
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
@@ -46,9 +46,8 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   }
 
   // Process the output samples.
-  const int output_frame_count = static_cast<int>(size);
-  engine_ptr->Process(output_samples.data(), output_frame_count, 0.0);
-  for (int frame = 0; frame < output_frame_count; ++frame) {
+  engine_ptr->Process(output_samples, /*timestamp=*/0.0);
+  for (int frame = 0; frame < static_cast<int>(size); ++frame) {
     out[0][frame] = output_samples[frame * kStereoChannelCount];
     out[1][frame] = output_samples[frame * kStereoChannelCount + 1];
   }

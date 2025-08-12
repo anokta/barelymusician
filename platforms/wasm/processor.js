@@ -284,18 +284,17 @@ class Processor extends AudioWorkletProcessor {
     const STEREO_CHANNEL_COUNT = 2;
 
     const outputChannels = outputs[0];
-    const outputFrameCount = outputChannels[0].length;
-    const outputSampleCount = outputFrameCount * STEREO_CHANNEL_COUNT;
+    const outputSampleCount = outputChannels[0].length * STEREO_CHANNEL_COUNT;
     const outputSize = outputSampleCount * Float32Array.BYTES_PER_ELEMENT;
 
-    const latency = Math.max(1.0 / 60.0, outputFrameCount / sampleRate);
+    const latency = Math.max(1.0 / 60.0, outputChannels[0].length / sampleRate);
     this._engine.update(currentTime + latency);
 
     const outputPtr = this._module._malloc(outputSize);
     const outputSamples =
         new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputSampleCount);
 
-    this._engine.process(outputPtr, outputFrameCount, currentTime);
+    this._engine.process(outputPtr, outputSampleCount, currentTime);
 
     for (let i = 0; i < outputSampleCount; ++i) {
       outputChannels[0][i] = outputSamples[i * STEREO_CHANNEL_COUNT];

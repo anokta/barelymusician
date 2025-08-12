@@ -25,9 +25,11 @@ using ::emscripten::return_value_policy::take_ownership;
   }});
 }
 
-static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_frame_count,
+static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_sample_count,
                            double timestamp) noexcept {
-  engine.Process(reinterpret_cast<float*>(output_samples), output_frame_count, timestamp);
+  engine.Process({reinterpret_cast<float*>(output_samples),
+                  reinterpret_cast<float*>(output_samples) + output_sample_count},
+                 timestamp);
 }
 
 [[nodiscard]] static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {

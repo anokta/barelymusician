@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -35,15 +36,14 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
   assert(success);
 }
 
-void BarelyEngine::Process(float* output_samples, int output_frame_count,
-                           double timestamp) noexcept {
-  assert(output_samples != nullptr);
-  assert(output_frame_count > 0);
-  std::fill_n(output_samples, output_frame_count * barely::kStereoChannelCount, 0.0f);
+void BarelyEngine::Process(std::span<float> output_samples, double timestamp) noexcept {
+  assert(!output_samples.empty());
+  assert(output_samples.size() % 2 == 0);
+  std::fill(output_samples.begin(), output_samples.end(), 0.0f);
   const int64_t process_frame = barely::SecondsToFrames(sample_rate_, timestamp);
   auto instruments = mutable_instruments_.GetScopedView();
   for (auto* instrument : *instruments) {
-    instrument->Process(output_samples, output_frame_count, process_frame);
+    instrument->Process(output_samples, process_frame);
   }
 }
 

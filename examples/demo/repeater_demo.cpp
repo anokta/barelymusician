@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iterator>
 #include <optional>
+#include <span>
 #include <thread>
 
 #include "common/audio_clock.h"
@@ -91,9 +92,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](float* samples, int frame_count) {
-    engine.Process(samples, frame_count, audio_clock.GetTimestamp());
-    audio_clock.Update(frame_count);
+  audio_output.SetProcessCallback([&](std::span<float> samples) {
+    engine.Process(samples, audio_clock.GetTimestamp());
+    audio_clock.Update(kFrameCount);
   });
 
   // Key down callback.

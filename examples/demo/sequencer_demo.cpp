@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <chrono>
+#include <span>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -100,9 +101,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Audio process callback.
-  const auto process_callback = [&](float* samples, int frame_count) {
-    engine.Process(samples, frame_count, audio_clock.GetTimestamp());
-    audio_clock.Update(frame_count);
+  const auto process_callback = [&](std::span<float> samples) {
+    engine.Process(samples, audio_clock.GetTimestamp());
+    audio_clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);
 

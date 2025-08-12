@@ -27,8 +27,9 @@ AudioOutput::AudioOutput(int sample_rate, int frame_count) noexcept {
     assert(device->pUserData != nullptr);
     if (auto& audio_output = *static_cast<AudioOutput*>(device->pUserData);
         audio_output.process_callback_) {
-      float* output_samples = static_cast<float*>(output);
-      audio_output.process_callback_(output_samples, static_cast<int>(frame_count));
+      audio_output.process_callback_(
+          {static_cast<float*>(output),
+           static_cast<float*>(output) + frame_count * kStereoChannelCount});
     }
   };
   // Initialize the device.

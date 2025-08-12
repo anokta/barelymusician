@@ -120,20 +120,20 @@ bool BarelyInstrument::IsNoteOn(float pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyInstrument::Process(float* output_samples, int output_frame_count,
-                               int64_t process_frame) noexcept {
-  assert(output_samples != nullptr);
-  assert(output_frame_count > 0);
+void BarelyInstrument::Process(std::span<float> output_samples, int64_t process_frame) noexcept {
+  assert(!output_samples.empty());
+  assert(output_samples.size() % 2 == 0);
 
-  int current_frame = 0;
+  int64_t current_frame = 0;
+
   // Process *all* messages before the end sample.
-  const int64_t end_frame = process_frame + output_frame_count;
+  const int64_t end_frame = process_frame + static_cast<int64_t>(output_samples.size() / 2);
   for (auto* message = message_queue_.GetNext(end_frame); message;
        message = message_queue_.GetNext(end_frame)) {
-    if (const int message_frame = static_cast<int>(message->first - process_frame);
+    if (const int64_t message_frame = message->first - process_frame;
         current_frame < message_frame) {
-      processor_.Process(&output_samples[current_frame * barely::kStereoChannelCount],
-                         message_frame - current_frame);
+      processor_.Process({output_samples.begin() + current_frame * barely::kStereoChannelCount,
+                          output_samples.begin() + message_frame * barely::kStereoChannelCount});
       current_frame = message_frame;
     }
     std::visit(MessageVisitor{[this](ControlMessage& control_message) noexcept {
@@ -156,10 +156,11 @@ void BarelyInstrument::Process(float* output_samples, int output_frame_count,
                               }},
                message->second);
   }
+
   // Process the rest of the samples.
-  if (current_frame < output_frame_count) {
-    processor_.Process(&output_samples[current_frame * barely::kStereoChannelCount],
-                       output_frame_count - current_frame);
+  if (process_frame + current_frame < end_frame) {
+    processor_.Process({output_samples.begin() + current_frame * barely::kStereoChannelCount,
+                        output_samples.end()});
   }
 }
 

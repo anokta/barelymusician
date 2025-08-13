@@ -4,5 +4,3 @@
 *.h text diff=cpp
 
 *.cs text diff=csharp
-
-platforms/unity/Docs/** linguist-documentation

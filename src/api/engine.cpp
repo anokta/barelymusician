@@ -13,6 +13,14 @@
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "common/time.h"
+#include "dsp/message.h"
+
+using ::barely::ControlMessage;
+using ::barely::MessageVisitor;
+using ::barely::NoteControlMessage;
+using ::barely::NoteOffMessage;
+using ::barely::NoteOnMessage;
+using ::barely::SampleDataMessage;
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyEngine::BarelyEngine(int sample_rate, float reference_frequency) noexcept
@@ -27,7 +35,7 @@ BarelyEngine::~BarelyEngine() noexcept { mutable_instruments_.Update({}); }
 void BarelyEngine::AddInstrument(BarelyInstrumentHandle instrument) noexcept {
   [[maybe_unused]] const bool success = instruments_.emplace(instrument).second;
   assert(success);
-  UpdateMutableInstruments();
+  mutable_instruments_.Update(instruments_);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -39,18 +47,70 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
 void BarelyEngine::Process(std::span<float> output_samples, double timestamp) noexcept {
   assert(!output_samples.empty());
   assert(output_samples.size() % 2 == 0);
+
   std::fill(output_samples.begin(), output_samples.end(), 0.0f);
+
   const int64_t process_frame = barely::SecondsToFrames(sample_rate_, timestamp);
+  const int64_t end_frame = process_frame + static_cast<int64_t>(output_samples.size() / 2);
+  int64_t current_frame = 0;
+
   auto instruments = mutable_instruments_.GetScopedView();
-  for (auto* instrument : *instruments) {
-    instrument->Process(output_samples, process_frame);
+
+  // Process *all* messages before the end sample.
+  for (auto* message = message_queue_.GetNext(end_frame); message;
+       message = message_queue_.GetNext(end_frame)) {
+    if (const int64_t message_frame = message->first - process_frame;
+        current_frame < message_frame) {
+      for (auto* instrument : *instruments) {
+        instrument->processor().Process(
+            {output_samples.begin() + current_frame * barely::kStereoChannelCount,
+             output_samples.begin() + message_frame * barely::kStereoChannelCount});
+      }
+      current_frame = message_frame;
+    }
+    std::visit(MessageVisitor{[&instruments](ControlMessage& control_message) noexcept {
+                                if (!instruments->contains(control_message.instrument)) return;
+                                control_message.instrument->processor().SetControl(
+                                    control_message.type, control_message.value);
+                              },
+                              [&instruments](NoteControlMessage& note_control_message) noexcept {
+                                if (!instruments->contains(note_control_message.instrument)) return;
+                                note_control_message.instrument->processor().SetNoteControl(
+                                    note_control_message.pitch, note_control_message.type,
+                                    note_control_message.value);
+                              },
+                              [&instruments](NoteOffMessage& note_off_message) noexcept {
+                                if (!instruments->contains(note_off_message.instrument)) return;
+                                note_off_message.instrument->processor().SetNoteOff(
+                                    note_off_message.pitch);
+                              },
+                              [&instruments](NoteOnMessage& note_on_message) noexcept {
+                                if (!instruments->contains(note_on_message.instrument)) return;
+                                note_on_message.instrument->processor().SetNoteOn(
+                                    note_on_message.pitch, note_on_message.controls);
+                              },
+                              [&instruments](SampleDataMessage& sample_data_message) noexcept {
+                                if (!instruments->contains(sample_data_message.instrument)) return;
+                                sample_data_message.instrument->processor().SetSampleData(
+                                    sample_data_message.sample_data);
+                              }},
+               message->second);
+  }
+
+  // Process the rest of the samples.
+  if (process_frame + current_frame < end_frame) {
+    for (auto* instrument : *instruments) {
+      instrument->processor().Process(
+          {output_samples.begin() + current_frame * barely::kStereoChannelCount,
+           output_samples.end()});
+    }
   }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::RemoveInstrument(BarelyInstrumentHandle instrument) noexcept {
   instruments_.erase(instrument);
-  UpdateMutableInstruments();
+  mutable_instruments_.Update(instruments_);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -103,14 +163,4 @@ void BarelyEngine::Update(double timestamp) noexcept {
       }
     }
   }
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::UpdateMutableInstruments() noexcept {
-  std::vector<BarelyInstrument*> new_mutable_instruments;
-  new_mutable_instruments.reserve(instruments_.size());
-  for (auto* instrument : instruments_) {
-    new_mutable_instruments.emplace_back(instrument);
-  }
-  mutable_instruments_.Update(std::move(new_mutable_instruments));
 }

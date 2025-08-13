@@ -6,12 +6,12 @@
 #include <cmath>
 #include <span>
 #include <unordered_set>
-#include <vector>
 
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "common/mutable.h"
 #include "common/rng.h"
+#include "dsp/message_queue.h"
 
 /// Implementation of an engine.
 struct BarelyEngine {
@@ -90,12 +90,9 @@ struct BarelyEngine {
 
   barely::AudioRng& audio_rng() noexcept { return audio_rng_; }
   barely::MainRng& main_rng() noexcept { return main_rng_; }
+  barely::MessageQueue& message_queue() noexcept { return message_queue_; }
 
  private:
-  // Updates mutable instruments.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void UpdateMutableInstruments() noexcept;
-
   // Sampling rate in hertz.
   int sample_rate_ = 0;
 
@@ -108,9 +105,12 @@ struct BarelyEngine {
   // Random number generator for the main thread.
   barely::MainRng main_rng_;
 
+  // Message queue.
+  barely::MessageQueue message_queue_;
+
   // Set of pointers to instruments.
   std::unordered_set<BarelyInstrument*> instruments_;
-  barely::Mutable<std::vector<BarelyInstrument*>> mutable_instruments_;
+  barely::Mutable<std::unordered_set<BarelyInstrument*>> mutable_instruments_;
 
   // Set of pointers to performers.
   std::unordered_set<BarelyPerformer*> performers_;

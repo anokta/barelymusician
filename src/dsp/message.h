@@ -15,6 +15,9 @@ namespace barely {
 
 /// Control message.
 struct ControlMessage {
+  /// Instrument handle.
+  BarelyInstrumentHandle instrument;
+
   /// Type.
   ControlType type;
 
@@ -24,6 +27,9 @@ struct ControlMessage {
 
 /// Note control message.
 struct NoteControlMessage {
+  /// Instrument handle.
+  BarelyInstrumentHandle instrument;
+
   /// Pitch.
   float pitch;
 
@@ -36,12 +42,18 @@ struct NoteControlMessage {
 
 /// Note off message.
 struct NoteOffMessage {
+  /// Instrument handle.
+  BarelyInstrumentHandle instrument;
+
   /// Pitch.
   float pitch;
 };
 
 /// Note on message.
 struct NoteOnMessage {
+  /// Instrument handle.
+  BarelyInstrumentHandle instrument;
+
   /// Pitch.
   float pitch;
 
@@ -51,6 +63,9 @@ struct NoteOnMessage {
 
 /// Sample data message.
 struct SampleDataMessage {
+  /// Instrument handle.
+  BarelyInstrumentHandle instrument;
+
   /// Sample data.
   SampleData sample_data;
 };

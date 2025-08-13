@@ -23,7 +23,6 @@ using ::barely::Control;
 using ::barely::ControlArray;
 using ::barely::ControlMessage;
 using ::barely::ControlType;
-using ::barely::MessageVisitor;
 using ::barely::NoteControlArray;
 using ::barely::NoteControlMessage;
 using ::barely::NoteControlType;
@@ -120,63 +119,18 @@ bool BarelyInstrument::IsNoteOn(float pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyInstrument::Process(std::span<float> output_samples, int64_t process_frame) noexcept {
-  assert(!output_samples.empty());
-  assert(output_samples.size() % 2 == 0);
-
-  int64_t current_frame = 0;
-
-  // Process *all* messages before the end sample.
-  const int64_t end_frame = process_frame + static_cast<int64_t>(output_samples.size() / 2);
-  for (auto* message = message_queue_.GetNext(end_frame); message;
-       message = message_queue_.GetNext(end_frame)) {
-    if (const int64_t message_frame = message->first - process_frame;
-        current_frame < message_frame) {
-      processor_.Process({output_samples.begin() + current_frame * barely::kStereoChannelCount,
-                          output_samples.begin() + message_frame * barely::kStereoChannelCount});
-      current_frame = message_frame;
-    }
-    std::visit(MessageVisitor{[this](ControlMessage& control_message) noexcept {
-                                processor_.SetControl(control_message.type, control_message.value);
-                              },
-                              [this](NoteControlMessage& note_control_message) noexcept {
-                                processor_.SetNoteControl(note_control_message.pitch,
-                                                          note_control_message.type,
-                                                          note_control_message.value);
-                              },
-                              [this](NoteOffMessage& note_off_message) noexcept {
-                                processor_.SetNoteOff(note_off_message.pitch);
-                              },
-                              [this](NoteOnMessage& note_on_message) noexcept {
-                                processor_.SetNoteOn(note_on_message.pitch,
-                                                     note_on_message.controls);
-                              },
-                              [this](SampleDataMessage& sample_data_message) noexcept {
-                                processor_.SetSampleData(sample_data_message.sample_data);
-                              }},
-               message->second);
-  }
-
-  // Process the rest of the samples.
-  if (process_frame + current_frame < end_frame) {
-    processor_.Process({output_samples.begin() + current_frame * barely::kStereoChannelCount,
-                        output_samples.end()});
-  }
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyInstrument::SetAllNotesOff() noexcept {
   for (const auto& [pitch, _] : std::exchange(note_controls_, {})) {
     note_event_callback_(BarelyNoteEventType_kOff, pitch);
-    message_queue_.Add(update_frame_, NoteOffMessage{pitch});
+    engine_.message_queue().Add(update_frame_, NoteOffMessage{this, pitch});
   }
 }
 
 void BarelyInstrument::SetControl(BarelyControlType type, float value) noexcept {
   if (auto& control = controls_[type]; control.SetValue(value)) {
     control_event_callback_(type, control.value);
-    message_queue_.Add(update_frame_,
-                       ControlMessage{static_cast<ControlType>(type), control.value});
+    engine_.message_queue().Add(
+        update_frame_, ControlMessage{this, static_cast<ControlType>(type), control.value});
   }
 }
 
@@ -185,9 +139,9 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[type]; note_control.SetValue(value)) {
       note_control_event_callback_(pitch, type, note_control.value);
-      message_queue_.Add(
+      engine_.message_queue().Add(
           update_frame_,
-          NoteControlMessage{pitch, static_cast<NoteControlType>(type), note_control.value});
+          NoteControlMessage{this, pitch, static_cast<NoteControlType>(type), note_control.value});
     }
   }
 }
@@ -195,7 +149,7 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
 void BarelyInstrument::SetNoteOff(float pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
     note_event_callback_(BarelyNoteEventType_kOff, pitch);
-    message_queue_.Add(update_frame_, NoteOffMessage{pitch});
+    engine_.message_queue().Add(update_frame_, NoteOffMessage{this, pitch});
   }
 }
 
@@ -206,12 +160,13 @@ void BarelyInstrument::SetNoteOn(
           note_controls_.try_emplace(pitch, BuildNoteControlArray(note_control_overrides));
       success) {
     note_event_callback_(BarelyNoteEventType_kOn, pitch);
-    message_queue_.Add(update_frame_, NoteOnMessage{pitch, BuildNoteControls(it->second)});
+    engine_.message_queue().Add(update_frame_,
+                                NoteOnMessage{this, pitch, BuildNoteControls(it->second)});
   }
 }
 
 void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexcept {
-  message_queue_.Add(update_frame_, SampleDataMessage{slices});
+  engine_.message_queue().Add(update_frame_, SampleDataMessage{this, slices});
 }
 
 void BarelyInstrument::Update(int64_t update_frame) noexcept {

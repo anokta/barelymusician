@@ -318,7 +318,6 @@ export class Engine {
     stopButton.addEventListener('click', () => {
       this._metronome.stop();
       this._metronome.position = 0.0;
-      this._beat = 0;
       Object.values(this._performers).forEach(performer => {
         performer.stop();
         performer.position = 0.0;
@@ -348,6 +347,8 @@ export class Engine {
   }
 
   _reset() {
+    this._metronome = null;
+
     for (const handle in this._instruments) {
       this._instruments[handle].destroy();
     }

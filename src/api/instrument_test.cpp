@@ -12,7 +12,6 @@ namespace {
 
 constexpr int kSampleRate = 4;
 constexpr float kReferenceFrequency = 1.0f;
-constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that the instrument sets a control value as expected.
 TEST(InstrumentTest, SetControl) {
@@ -36,91 +35,6 @@ TEST(InstrumentTest, SetControl) {
 
   instrument.SetControl(BarelyControlType_kGain, 1.0f);
   EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
-}
-
-// Tests that the instrument plays a single note as expected.
-TEST(InstrumentTest, PlaySingleNote) {
-  constexpr int kSampleCount = 5 * barely::kStereoChannelCount;
-  constexpr float kPitch = 1.0f;
-  constexpr float kGain = 0.5f;
-  constexpr std::array<BarelySlice, 1> kSlices = {
-      BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
-  };
-
-  BarelyEngine engine(kSampleRate, kReferenceFrequency);
-  BarelyInstrument instrument(engine, {});
-  instrument.SetSampleData(kSlices);
-
-  std::array<float, kSampleCount> samples;
-
-  // Control is set to its default value.
-  samples.fill(0.0f);
-  instrument.Process(samples, 0);
-  for (int i = 0; i < kSampleCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.0f);
-  }
-
-  // Set a note on.
-  instrument.SetNoteOn(kPitch, {{{BarelyNoteControlType_kGain, kGain}}});
-  EXPECT_TRUE(instrument.IsNoteOn(kPitch));
-
-  samples.fill(0.0f);
-  instrument.Process(samples, 0);
-  for (int i = 0; i < kSampleCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], (i / 2 < kSampleRate) ? 0.5f * kSamples[i / 2] * kGain : 0.0f);
-  }
-
-  // Set the note off.
-  instrument.SetNoteOff(kPitch);
-  EXPECT_FALSE(instrument.IsNoteOn(kPitch));
-
-  samples.fill(0.0f);
-  instrument.Process(samples, 0);
-  for (int i = 0; i < kSampleCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.0f);
-  }
-}
-
-// Tests that the instrument plays multiple notes as expected.
-TEST(InstrumentTest, PlayMultipleNotes) {
-  constexpr std::array<BarelySlice, kSampleRate> kSlices = {
-      BarelySlice{0.0f, kSampleRate, kSamples.data(), 1},
-      BarelySlice{1.0f, kSampleRate, kSamples.data() + 1, 1},
-      BarelySlice{2.0f, kSampleRate, kSamples.data() + 2, 1},
-      BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
-  };
-
-  BarelyEngine engine(1, kReferenceFrequency);
-  BarelyInstrument instrument(engine, {});
-  instrument.SetSampleData(kSlices);
-
-  std::array<float, kSampleRate * barely::kStereoChannelCount> samples;
-
-  // Control is set to its default value.
-  samples.fill(0.0f);
-  instrument.Process(samples, 0);
-  for (int i = 0; i < kSampleRate * barely::kStereoChannelCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.0f);
-  }
-
-  // Start a new note per each i in the samples.
-  for (int i = 0; i < kSampleRate; ++i) {
-    instrument.SetNoteOn(static_cast<float>(i), {});
-    instrument.Update(i + 1);
-    instrument.SetNoteOff(static_cast<float>(i));
-  }
-
-  samples.fill(0.0f);
-  instrument.Process(samples, 0);
-  for (int i = 0; i < kSampleRate * barely::kStereoChannelCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i / 2]);
-  }
-
-  samples.fill(0.0f);
-  instrument.Process(samples, kSampleRate);
-  for (int i = 0; i < kSampleRate * barely::kStereoChannelCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.0f);
-  }
 }
 
 // Tests that the instrument triggers its note callbacks as expected.

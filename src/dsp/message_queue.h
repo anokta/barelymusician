@@ -28,7 +28,7 @@ class MessageQueue {
 
  private:
   // Maximum number of messages.
-  static constexpr int kMaxMessageCount = 4096;
+  static constexpr int kMaxMessageCount = 8192;
 
   // List of messages with their timestamps in frames.
   std::array<std::pair<int64_t, Message>, kMaxMessageCount> messages_;

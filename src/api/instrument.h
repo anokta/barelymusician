@@ -10,7 +10,6 @@
 #include "common/callback.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
-#include "dsp/message_queue.h"
 
 /// Implementation an instrument.
 struct BarelyInstrument {
@@ -59,13 +58,6 @@ struct BarelyInstrument {
   /// @param pitch Note pitch.
   /// @return True if on, false otherwise.
   [[nodiscard]] bool IsNoteOn(float pitch) const noexcept;
-
-  /// Processes output samples.
-  ///
-  /// @param output_samples Span of interleaved stereo output samples.
-  /// @param process_frame Process frame.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(std::span<float> output_samples, int64_t process_frame) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -128,6 +120,8 @@ struct BarelyInstrument {
   /// @param update_frame Update frame.
   void Update(int64_t update_frame) noexcept;
 
+  barely::InstrumentProcessor& processor() noexcept { return processor_; }
+
  private:
   // Engine.
   BarelyEngine& engine_;
@@ -149,9 +143,6 @@ struct BarelyInstrument {
 
   // Update frame.
   int64_t update_frame_ = 0;
-
-  // Message queue.
-  barely::MessageQueue message_queue_;
 
   // Instrument processor.
   barely::InstrumentProcessor processor_;

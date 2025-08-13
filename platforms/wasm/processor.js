@@ -85,6 +85,7 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'instrument-destroy': {
           if (this._instruments[event.data.handle]) {
+            this._instruments[event.data.handle].delete();
             delete this._instruments[event.data.handle];
             this.port.postMessage({type: 'instrument-destroy-success', handle: event.data.handle});
           }
@@ -150,6 +151,10 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'performer-destroy': {
           if (this._performers[event.data.handle]) {
+            if (this._performers[event.data.handle] == this._metronome) {
+              this._metronome = null;
+            }
+            this._performers[event.data.handle].delete();
             delete this._performers[event.data.handle];
             this.port.postMessage({type: 'performer-destroy-success', handle: event.data.handle});
           }
@@ -243,6 +248,7 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'task-destroy': {
           if (this._tasks[event.data.handle]) {
+            this._tasks[event.data.handle].delete();
             delete this._tasks[event.data.handle];
             this.port.postMessage({type: 'task-destroy-success', handle: event.data.handle});
           }

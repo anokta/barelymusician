@@ -4,6 +4,7 @@
 #include <barelymusician.h>
 
 #include <cmath>
+#include <cstdint>
 #include <span>
 #include <unordered_set>
 
@@ -77,6 +78,11 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void RemovePerformer(BarelyPerformer* performer) noexcept;
 
+  /// Schedules a new message in the queue.
+  ///
+  /// @param message Message
+  void ScheduleMessage(barely::Message message) noexcept;
+
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
@@ -90,7 +96,6 @@ struct BarelyEngine {
 
   barely::AudioRng& audio_rng() noexcept { return audio_rng_; }
   barely::MainRng& main_rng() noexcept { return main_rng_; }
-  barely::MessageQueue& message_queue() noexcept { return message_queue_; }
 
  private:
   // Sampling rate in hertz.
@@ -120,6 +125,9 @@ struct BarelyEngine {
 
   // Timestamp in seconds.
   double timestamp_ = 0.0;
+
+  // Update frame.
+  int64_t update_frame_ = 0;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

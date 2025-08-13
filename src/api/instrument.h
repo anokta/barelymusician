@@ -115,11 +115,6 @@ struct BarelyInstrument {
   /// @param slices Span of slices.
   void SetSampleData(std::span<const BarelySlice> slices) noexcept;
 
-  /// Updates the instrument.
-  ///
-  /// @param update_frame Update frame.
-  void Update(int64_t update_frame) noexcept;
-
   barely::InstrumentProcessor& processor() noexcept { return processor_; }
 
  private:
@@ -140,9 +135,6 @@ struct BarelyInstrument {
 
   // Note event callback.
   NoteEventCallback note_event_callback_ = {};
-
-  // Update frame.
-  int64_t update_frame_ = 0;
 
   // Instrument processor.
   barely::InstrumentProcessor processor_;

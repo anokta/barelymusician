@@ -5,14 +5,11 @@
 #include <array>
 #include <cassert>
 #include <cmath>
-#include <cstdint>
 #include <span>
 #include <utility>
-#include <variant>
 
 #include "api/engine.h"
 #include "common/find_or_null.h"
-#include "common/time.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message.h"
@@ -91,7 +88,6 @@ BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine, std::span<const BarelyControlOverride> control_overrides) noexcept
     : engine_(engine),
       controls_(BuildControlArray(control_overrides)),
-      update_frame_(barely::SecondsToFrames(engine_.GetSampleRate(), engine_.GetTimestamp())),
       processor_(control_overrides, engine_.audio_rng(), engine_.GetSampleRate(),
                  engine_.GetReferenceFrequency()) {
   engine_.AddInstrument(this);
@@ -122,15 +118,14 @@ bool BarelyInstrument::IsNoteOn(float pitch) const noexcept {
 void BarelyInstrument::SetAllNotesOff() noexcept {
   for (const auto& [pitch, _] : std::exchange(note_controls_, {})) {
     note_event_callback_(BarelyNoteEventType_kOff, pitch);
-    engine_.message_queue().Add(update_frame_, NoteOffMessage{this, pitch});
+    engine_.ScheduleMessage(NoteOffMessage{this, pitch});
   }
 }
 
 void BarelyInstrument::SetControl(BarelyControlType type, float value) noexcept {
   if (auto& control = controls_[type]; control.SetValue(value)) {
     control_event_callback_(type, control.value);
-    engine_.message_queue().Add(
-        update_frame_, ControlMessage{this, static_cast<ControlType>(type), control.value});
+    engine_.ScheduleMessage(ControlMessage{this, static_cast<ControlType>(type), control.value});
   }
 }
 
@@ -139,8 +134,7 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[type]; note_control.SetValue(value)) {
       note_control_event_callback_(pitch, type, note_control.value);
-      engine_.message_queue().Add(
-          update_frame_,
+      engine_.ScheduleMessage(
           NoteControlMessage{this, pitch, static_cast<NoteControlType>(type), note_control.value});
     }
   }
@@ -149,7 +143,7 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
 void BarelyInstrument::SetNoteOff(float pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
     note_event_callback_(BarelyNoteEventType_kOff, pitch);
-    engine_.message_queue().Add(update_frame_, NoteOffMessage{this, pitch});
+    engine_.ScheduleMessage(NoteOffMessage{this, pitch});
   }
 }
 
@@ -160,16 +154,10 @@ void BarelyInstrument::SetNoteOn(
           note_controls_.try_emplace(pitch, BuildNoteControlArray(note_control_overrides));
       success) {
     note_event_callback_(BarelyNoteEventType_kOn, pitch);
-    engine_.message_queue().Add(update_frame_,
-                                NoteOnMessage{this, pitch, BuildNoteControls(it->second)});
+    engine_.ScheduleMessage(NoteOnMessage{this, pitch, BuildNoteControls(it->second)});
   }
 }
 
 void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexcept {
-  engine_.message_queue().Add(update_frame_, SampleDataMessage{this, slices});
-}
-
-void BarelyInstrument::Update(int64_t update_frame) noexcept {
-  assert(update_frame >= update_frame_);
-  update_frame_ = update_frame;
+  engine_.ScheduleMessage(SampleDataMessage{this, slices});
 }

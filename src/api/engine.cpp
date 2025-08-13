@@ -8,6 +8,7 @@
 #include <limits>
 #include <span>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "api/instrument.h"
@@ -118,6 +119,10 @@ void BarelyEngine::RemovePerformer(BarelyPerformer* performer) noexcept {
   performers_.erase(performer);
 }
 
+void BarelyEngine::ScheduleMessage(barely::Message message) noexcept {
+  message_queue_.Add(update_frame_, std::move(message));
+}
+
 void BarelyEngine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -144,10 +149,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
         }
 
         timestamp_ += barely::BeatsToSeconds(tempo_, update_duration);
-        const int64_t update_frame = barely::SecondsToFrames(sample_rate_, timestamp_);
-        for (auto* instrument : instruments_) {
-          instrument->Update(update_frame);
-        }
+        update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);
       }
 
       if (has_tasks_to_process) {
@@ -157,10 +159,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      const int64_t update_frame = barely::SecondsToFrames(sample_rate_, timestamp_);
-      for (auto* instrument : instruments_) {
-        instrument->Update(update_frame);
-      }
+      update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);
     }
   }
 }

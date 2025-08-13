@@ -2,6 +2,7 @@
 
 #include <barelymusician.h>
 
+#include <array>
 #include <functional>
 
 #include "api/performer.h"
@@ -146,7 +147,7 @@ TEST(EngineTest, PlayMultipleNotes) {
   // Start a new note per each i in the samples.
   for (int i = 0; i < kSampleRate; ++i) {
     instrument.SetNoteOn(static_cast<float>(i), {});
-    instrument.Update(i + 1);
+    engine.Update(i + 1);
     instrument.SetNoteOff(static_cast<float>(i));
   }
 

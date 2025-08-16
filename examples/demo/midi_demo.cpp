@@ -37,6 +37,7 @@ using ::smf::MidiFile;
 // System audio settings.
 constexpr int kSampleRate = 48000;
 constexpr int kFrameCount = 512;
+constexpr int kSampleCount = kFrameCount * barely::kStereoChannelCount;
 
 constexpr double kLookahead = 0.1;
 
@@ -101,7 +102,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kSampleRate, kSampleCount);
   engine.SetTempo(kTempo);
 
   std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;

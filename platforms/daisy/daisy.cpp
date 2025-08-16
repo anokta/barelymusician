@@ -19,6 +19,7 @@ using ::daisy::SaiHandle;
 // System audio settings.
 constexpr int kSampleRate = 48000;
 constexpr size_t kFrameCount = 16;
+constexpr size_t kSampleCount = kFrameCount * kStereoChannelCount;
 
 // Instrument settings.
 constexpr float kGain = 0.125f;
@@ -33,7 +34,7 @@ static MidiUsbHandler midi;
 static Engine* engine_ptr = nullptr;
 static Instrument* instrument_ptr = nullptr;
 static float osc_shape = 0.0f;
-static std::array<float, kFrameCount * kStereoChannelCount> output_samples;
+static std::array<float, kSampleCount> output_samples;
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
@@ -65,7 +66,7 @@ int main(void) {
   midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  Engine engine(kSampleRate);
+  Engine engine(kSampleRate, kSampleCount);
   engine_ptr = &engine;
 
   Instrument instrument = engine.CreateInstrument({{

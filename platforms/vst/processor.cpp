@@ -118,10 +118,10 @@ Steinberg::tresult PLUGIN_API Processor::setProcessing(Steinberg::TBool /*state*
 }
 
 Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::ProcessSetup& setup) {
-  instrument_ = std::nullopt;
-  engine_ = Engine(static_cast<int>(setup.sampleRate));
-  instrument_ = engine_->CreateInstrument(Controller::GetDefaultControls());
   output_samples_.resize(setup.maxSamplesPerBlock * kStereoChannelCount);
+  instrument_ = std::nullopt;  // destroy existing instrument first
+  engine_ = Engine(static_cast<int>(setup.sampleRate), static_cast<int>(output_samples_.size()));
+  instrument_ = engine_->CreateInstrument(Controller::GetDefaultControls());
   return Steinberg::kResultTrue;
 }
 

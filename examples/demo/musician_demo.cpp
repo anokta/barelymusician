@@ -56,6 +56,7 @@ using BeatComposerCallback =
 // System audio settings.
 constexpr int kSampleRate = 48000;
 constexpr int kFrameCount = 1024;
+constexpr int kSampleCount = kFrameCount * barely::kStereoChannelCount;
 
 constexpr double kLookahead = 0.1;
 
@@ -213,7 +214,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kSampleRate, kSampleCount);
   engine.SetTempo(kTempo);
 
   // Note event callback.

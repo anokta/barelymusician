@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <span>
 #include <unordered_set>
+#include <vector>
 
 #include "api/instrument.h"
 #include "api/performer.h"
@@ -20,9 +21,10 @@ struct BarelyEngine {
   /// Constructs a new `BarelyEngine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
+  /// @param max_sample_count Maximum number of samples per process buffer.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  BarelyEngine(int sample_rate, float reference_frequency) noexcept;
+  BarelyEngine(int sample_rate, int max_sample_count, float reference_frequency) noexcept;
 
   /// Destroys `BarelyEngine`.
   ~BarelyEngine() noexcept;
@@ -128,6 +130,9 @@ struct BarelyEngine {
 
   // Update frame.
   int64_t update_frame_ = 0;
+
+  // Temporary array to store fade samples.
+  std::vector<float> fade_samples_;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

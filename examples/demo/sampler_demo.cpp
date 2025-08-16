@@ -34,6 +34,7 @@ using ::barely::examples::WavFile;
 // System audio settings.
 constexpr int kSampleRate = 48000;
 constexpr int kFrameCount = 256;
+constexpr int kSampleCount = kFrameCount * barely::kStereoChannelCount;
 
 // Instrument settings.
 constexpr float kGain = 0.25f;
@@ -80,7 +81,7 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioOutput audio_output(kSampleRate, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kSampleRate, kSampleCount);
 
   auto instrument = engine.CreateInstrument({{
       {ControlType::kGain, kGain},

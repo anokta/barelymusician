@@ -559,11 +559,12 @@ BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
 /// Creates a new engine.
 ///
 /// @param sample_rate Sampling rate in hertz.
+/// @param max_sample_count Maximum number of samples per process buffer.
 /// @param reference_frequency Reference frequency in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
-                                    BarelyEngineHandle* out_engine);
+BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_sample_count,
+                                    float reference_frequency, BarelyEngineHandle* out_engine);
 
 /// Destroys an engine.
 ///
@@ -1900,12 +1901,15 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
+  /// @param max_sample_count Maximum number of samples per process buffer.
   /// @param reference_frequency Reference frequency in hertz.
-  Engine(int sample_rate, float reference_frequency = kDefaultReferenceFrequency) noexcept
+  Engine(int sample_rate, int max_sample_count,
+         float reference_frequency = kDefaultReferenceFrequency) noexcept
       : HandleWrapper([&]() {
           BarelyEngineHandle engine = nullptr;
           [[maybe_unused]] const bool success =
-              BarelyEngine_Create(static_cast<int32_t>(sample_rate), reference_frequency, &engine);
+              BarelyEngine_Create(static_cast<int32_t>(sample_rate),
+                                  static_cast<int>(max_sample_count), reference_frequency, &engine);
           assert(success);
           return engine;
         }()) {}

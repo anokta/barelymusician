@@ -23,11 +23,27 @@ using ::barely::NoteOffMessage;
 using ::barely::NoteOnMessage;
 using ::barely::SampleDataMessage;
 
+namespace {
+
+void ProcessInstruments(const std::unordered_set<BarelyInstrument*>& instruments,
+                        std::span<float> /*fade_samples*/,
+                        std::span<float> output_samples) noexcept {
+  for (BarelyInstrument* instrument : instruments) {
+    instrument->processor().Process(output_samples);
+  }
+}
+
+}  // namespace
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate, float reference_frequency) noexcept
-    : sample_rate_(sample_rate), reference_frequency_(reference_frequency) {
-  assert(sample_rate >= 0);
-  assert(reference_frequency >= 0.0f);
+BarelyEngine::BarelyEngine(int sample_rate, int max_sample_count,
+                           float reference_frequency) noexcept
+    : sample_rate_(sample_rate),
+      reference_frequency_(reference_frequency),
+      fade_samples_(max_sample_count, 0.0f) {
+  assert(sample_rate > 0);
+  assert(max_sample_count > 0);
+  assert(reference_frequency > 0.0f);
 }
 
 BarelyEngine::~BarelyEngine() noexcept { mutable_instruments_.Update({}); }
@@ -62,11 +78,9 @@ void BarelyEngine::Process(std::span<float> output_samples, double timestamp) no
        message = message_queue_.GetNext(end_frame)) {
     if (const int64_t message_frame = message->first - process_frame;
         current_frame < message_frame) {
-      for (auto* instrument : *instruments) {
-        instrument->processor().Process(
-            {output_samples.begin() + current_frame * barely::kStereoChannelCount,
-             output_samples.begin() + message_frame * barely::kStereoChannelCount});
-      }
+      ProcessInstruments(*instruments, fade_samples_,
+                         {output_samples.begin() + current_frame * barely::kStereoChannelCount,
+                          output_samples.begin() + message_frame * barely::kStereoChannelCount});
       current_frame = message_frame;
     }
     std::visit(MessageVisitor{[&instruments](ControlMessage& control_message) noexcept {
@@ -100,11 +114,9 @@ void BarelyEngine::Process(std::span<float> output_samples, double timestamp) no
 
   // Process the rest of the samples.
   if (process_frame + current_frame < end_frame) {
-    for (auto* instrument : *instruments) {
-      instrument->processor().Process(
-          {output_samples.begin() + current_frame * barely::kStereoChannelCount,
-           output_samples.end()});
-    }
+    ProcessInstruments(*instruments, fade_samples_,
+                       {output_samples.begin() + current_frame * barely::kStereoChannelCount,
+                        output_samples.end()});
   }
 }
 

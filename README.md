@@ -83,10 +83,13 @@ engine.Update(timestamp + kLookahead);
 
 // Process the next output samples of the engine.
 //
-// The engine processes stereo audio samples synchronously. Therefore, `Process` should typically
-// be called from an audio thread process callback in real-time audio applications.
-float output_samples[512 * barely::kStereoChannelCount];
-engine.Process(output_samples, timestamp);
+// The engine processes output samples synchronously. Therefore, `Process` should typically be
+// called from an audio thread process callback in real-time audio applications.
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 512;
+float output_samples[kChannelCount * kFrameCount];
+float *output_channels[kChannelCount] = {output_samples, output_samples + kFrameCount};
+engine.Process(output_channels, kFrameCount, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

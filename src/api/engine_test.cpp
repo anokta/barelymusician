@@ -15,6 +15,7 @@ using ::testing::Optional;
 using ::testing::Pair;
 
 constexpr int kSampleRate = 4;
+constexpr int kChannelCount = 2;
 constexpr float kReferenceFrequency = 1.0f;
 constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
@@ -81,7 +82,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
 // Tests that an instrument plays a single note as expected.
 TEST(EngineTest, PlaySingleNote) {
-  constexpr int kSampleCount = 5 * barely::kStereoChannelCount;
+  constexpr int kFrameCount = 5;
   constexpr float kPitch = 1.0f;
   constexpr float kGain = 0.5f;
   constexpr std::array<BarelySlice, 1> kSlices = {
@@ -92,12 +93,13 @@ TEST(EngineTest, PlaySingleNote) {
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
-  std::array<float, kSampleCount> samples;
+  std::array<float, kChannelCount * kFrameCount> samples;
+  std::array<float*, kChannelCount> channels = {samples.data(), samples.data() + kFrameCount};
 
   // Control is set to its default value.
   samples.fill(0.0f);
-  engine.Process(samples, 0);
-  for (int i = 0; i < kSampleCount; ++i) {
+  engine.Process(channels, kFrameCount, 0);
+  for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
 
@@ -106,9 +108,11 @@ TEST(EngineTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   samples.fill(0.0f);
-  engine.Process(samples, 0);
-  for (int i = 0; i < kSampleCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], (i / 2 < kSampleRate) ? 0.5f * kSamples[i / 2] * kGain : 0.0f);
+  engine.Process(channels, kFrameCount, 0);
+  for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
+    EXPECT_FLOAT_EQ(samples[i], (i % kFrameCount < kSampleRate)
+                                    ? 0.5f * kSamples[i % kFrameCount] * kGain
+                                    : 0.0f);
   }
 
   // Set the note off.
@@ -116,8 +120,8 @@ TEST(EngineTest, PlaySingleNote) {
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   samples.fill(0.0f);
-  engine.Process(samples, 0);
-  for (int i = 0; i < kSampleCount; ++i) {
+  engine.Process(channels, kFrameCount, 0);
+  for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
 }
@@ -135,12 +139,13 @@ TEST(EngineTest, PlayMultipleNotes) {
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
-  std::array<float, kSampleRate * barely::kStereoChannelCount> samples;
+  std::array<float, kChannelCount * kSampleRate> samples;
+  std::array<float*, kChannelCount> channels = {samples.data(), samples.data() + kSampleRate};
 
   // Control is set to its default value.
   samples.fill(0.0f);
-  engine.Process(samples, 0);
-  for (int i = 0; i < kSampleRate * barely::kStereoChannelCount; ++i) {
+  engine.Process(channels, kSampleRate, 0);
+  for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
 
@@ -152,14 +157,14 @@ TEST(EngineTest, PlayMultipleNotes) {
   }
 
   samples.fill(0.0f);
-  engine.Process(samples, 0);
-  for (int i = 0; i < kSampleRate * barely::kStereoChannelCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i / 2]);
+  engine.Process(channels, kSampleRate, 0);
+  for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
+    EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i % kSampleRate]);
   }
 
   samples.fill(0.0f);
-  engine.Process(samples, kSampleRate);
-  for (int i = 0; i < kSampleRate * barely::kStereoChannelCount; ++i) {
+  engine.Process(channels, kSampleRate, 0);
+  for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
 }

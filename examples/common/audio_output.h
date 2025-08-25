@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <span>
+#include <vector>
 
 #include "miniaudio.h"
 
@@ -13,14 +14,17 @@ class AudioOutput {
  public:
   /// Audio process callback signature.
   ///
-  /// @param samples Span of interleaved stereo samples.
-  using ProcessCallback = std::function<void(std::span<float> samples)>;
+  /// @param output_channels Span of output channels each containing non-interleaved samples.
+  /// @param output_frame_count Number of output frames.
+  using ProcessCallback =
+      std::function<void(std::span<float*> output_channels, int output_frame_count)>;
 
   /// Constructs new `AudioOutput`.
   ///
   /// @param sample_rate Sampling rate in hertz.
+  /// @param channel_count Number of channels.
   /// @param frame_count Number of frames.
-  AudioOutput(int sample_rate, int frame_count) noexcept;
+  AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept;
 
   /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;
@@ -48,6 +52,12 @@ class AudioOutput {
 
   // Process callback.
   ProcessCallback process_callback_ = nullptr;
+
+  // Output channels.
+  std::vector<float*> output_channels_;
+
+  // Output samples.
+  std::vector<float> output_samples_;
 };
 
 }  // namespace barely::examples

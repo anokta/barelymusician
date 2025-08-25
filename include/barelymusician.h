@@ -33,11 +33,13 @@
 ///
 ///   // Process.
 ///   //
-///   // The engine processes stereo audio samples synchronously. Therefore, `Process` should
-///   // typically be called from an audio thread process callback in real-time audio applications.
-///   float output_samples[512 * barely::kStereoChannelCount];
-///   double timestamp = 0.0;
-///   engine.Process(output_samples, timestamp);
+///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
+///   // called from an audio thread process callback in real-time audio applications.
+///   constexpr int kChannelCount = 2;
+///   constexpr int kFrameCount = 512;
+///   float output_samples[kChannelCount * kFrameCount];
+///   float *output_channels[kChannelCount] = {output_samples, output_samples + kFrameCount};
+///   engine.Process(output_channels, kFrameCount, timestamp);
 ///   @endcode
 ///
 /// - Instrument:
@@ -112,10 +114,11 @@
 ///   //
 ///   // Process the next output samples of the engine.
 ///   //
-///   // The engine processes stereo audio samples synchronously. Therefore, `Process` should
-///   // typically be called from an audio thread process callback in real-time audio applications.
-///   float output_samples[512 * BARELY_STEREO_CHANNEL_COUNT];
-///   BarelyEngine_Process(engine, output_samples, 512 * BARELY_STEREO_CHANNEL_COUNT, timestamp);
+///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
+///   // called from an audio thread process callback in real-time audio applications.
+///   float output_samples[2 * 512];
+///   float *output_channels[kChannelCount] = {output_samples, output_samples + 512};
+///   BarelyEngine_Process(engine, output_channels, 2, 512, timestamp);
 ///
 ///   // Destroy.
 ///   BarelyEngine_Destroy(engine);
@@ -158,9 +161,9 @@
 ///
 ///   // Create a task.
 ///   BarelyTaskHandle task = nullptr;
-///   BarelyTaskEventCallback process_callback{ /*populate this*/ };
-///   BarelyTask_Create(performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
-///                     process_callback, &task);
+///   BarelyTaskEventCallback callback{ /*populate this*/ };
+///   BarelyTask_Create(performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0, callback,
+///                     &task);
 ///
 ///   // Set to looping.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
@@ -217,9 +220,6 @@
 
 /// Minimum decibel threshold.
 #define BARELY_MIN_DECIBELS -80.0f
-
-/// Number of stereo channels.
-#define BARELY_STEREO_CHANNEL_COUNT 2
 
 #ifdef __cplusplus
 extern "C" {
@@ -602,12 +602,14 @@ BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out
 /// Processes the next output samples of an engine at timestamp.
 ///
 /// @param engine Engine handle.
-/// @param output_samples Array of interleaved stereo output samples.
-/// @param output_sample_count number of output samples.
+/// @param output_channels Array of output channels each containing non-interleaved samples.
+/// @param output_channel_count Number of output channels.
+/// @param output_frame_count Number of output frames.
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
-                                     int32_t output_sample_count, double timestamp);
+BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float** output_channels,
+                                     int32_t output_channel_count, int32_t output_frame_count,
+                                     double timestamp);
 
 /// Sets the random number generator seed of an engine.
 ///
@@ -1066,9 +1068,6 @@ inline constexpr float kDefaultReferenceFrequency = BARELY_DEFAULT_REFERENCE_FRE
 
 /// Minimum decibel threshold.
 inline constexpr float kMinDecibels = BARELY_MIN_DECIBELS;
-
-/// Number of stereo channels.
-inline constexpr int kStereoChannelCount = BARELY_STEREO_CHANNEL_COUNT;
 
 /// Arpeggiator style enum.
 enum class ArpeggiatorStyle {
@@ -2003,11 +2002,14 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
 
   /// Processes the next output samples at timestamp.
   ///
-  /// @param output_samples Span of interleaved stereo output samples.
+  /// @param output_channels Span of output channels each containing non-interleaved samples.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  void Process(std::span<float> output_samples, double timestamp) noexcept {
+  void Process(std::span<float*> output_channels, int output_frame_count,
+               double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyEngine_Process(
-        *this, output_samples.data(), static_cast<int32_t>(output_samples.size()), timestamp);
+        *this, output_channels.data(), static_cast<int32_t>(output_channels.size()),
+        static_cast<int32_t>(output_frame_count), timestamp);
     assert(success);
   }
 

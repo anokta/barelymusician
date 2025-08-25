@@ -85,11 +85,10 @@ class Voice {
   /// @tparam kSliceMode Slice mode.
   /// @param voice Voice.
   /// @param params Instrument parameters.
-  /// @param output_samples Output samples to process.
+  /// @return Processed output sample.
   template <OscMode kOscMode, SliceMode kSliceMode>
-  static void Process(Voice& voice, const InstrumentParams& params,
-                      float output_samples[kStereoChannelCount]) noexcept {
-    return voice.Process<kOscMode, kSliceMode>(params, output_samples);
+  static float Process(Voice& voice, const InstrumentParams& params) noexcept {
+    return voice.Process<kOscMode, kSliceMode>(params);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -139,9 +138,11 @@ class Voice {
   }
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }
 
+  [[nodiscard]] float stereo_pan() const noexcept { return params_.stereo_pan; }
+
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  void Process(const InstrumentParams& params, float output_samples[kStereoChannelCount]) noexcept {
+  [[nodiscard]] float Process(const InstrumentParams& params) noexcept {
     if constexpr (kSliceMode == SliceMode::kOnce) {
       if (!IsSliceActive()) {
         envelope_.Stop();
@@ -197,12 +198,9 @@ class Voice {
       }
     }
 
-    const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
-    const float right_gain = 1.0f - left_gain;
-    output_samples[0] += left_gain * output;
-    output_samples[1] += right_gain * output;
-
     Approach(params.voice_params);
+
+    return output;
   }
 
   void Approach(const VoiceParams& params) noexcept {
@@ -247,9 +245,8 @@ class Voice {
 ///
 /// @param voice Mutable voice.
 /// @param params Instrument parameters.
-/// @param output_samples Output samples to process.
-using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
-                               float output_samples[kStereoChannelCount]);
+/// @return Processed output sample.
+using VoiceCallback = float (*)(Voice& voice, const InstrumentParams& params);
 
 }  // namespace barely
 

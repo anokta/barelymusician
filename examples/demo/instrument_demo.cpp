@@ -24,6 +24,7 @@ using ::barely::examples::InputManager;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
+constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
 // Instrument settings.
@@ -55,7 +56,7 @@ std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) 
 int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
-  AudioOutput audio_output(kSampleRate, kFrameCount);
+  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
 
@@ -72,8 +73,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback(
-      [&](std::span<float> samples) { engine.Process(samples, /*timestamp=*/0.0); });
+  audio_output.SetProcessCallback([&](std::span<float*> output_channels, int output_frame_count) {
+    engine.Process(output_channels, output_frame_count, /*timestamp=*/0.0);
+  });
 
   // Key down callback.
   float gain = 1.0f;

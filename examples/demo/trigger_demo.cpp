@@ -27,6 +27,7 @@ using ::barely::examples::InputManager;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
+constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
 constexpr double kLookahead = 0.05;
@@ -50,7 +51,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);
-  AudioOutput audio_output(kSampleRate, kFrameCount);
+  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
@@ -110,11 +111,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   tasks.emplace_back(performer.CreateTask(5.0, 2.0, 0, play_note_fn(8)));
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<float> samples) {
-    engine.Process(samples, audio_clock.GetTimestamp());
-    audio_clock.Update(kFrameCount);
-  };
-  audio_output.SetProcessCallback(process_callback);
+  audio_output.SetProcessCallback([&](std::span<float*> output_channels, int output_frame_count) {
+    engine.Process(output_channels, output_frame_count, audio_clock.GetTimestamp());
+    audio_clock.Update(output_frame_count);
+  });
 
   // Key down callback.
   bool quit = false;

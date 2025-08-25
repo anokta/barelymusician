@@ -287,27 +287,31 @@ class Processor extends AudioWorkletProcessor {
   process(inputs, outputs, parameters) {
     if (!this._engine || !this._module || !this._module.HEAPF32) return true;
 
-    const STEREO_CHANNEL_COUNT = 2;
+    const output = outputs[0];
+    const outputChannelCount = output.length;
+    const outputFrameCount = output[0].length;
+    if (outputChannelCount == 0 || outputFrameCount == 0) return;
 
-    const outputChannels = outputs[0];
-    const outputSampleCount = outputChannels[0].length * STEREO_CHANNEL_COUNT;
-    const outputSize = outputSampleCount * Float32Array.BYTES_PER_ELEMENT;
-
-    const latency = Math.max(1.0 / 60.0, outputChannels[0].length / sampleRate);
+    const latency = Math.max(1.0 / 60.0, outputFrameCount / sampleRate);
     this._engine.update(currentTime + latency);
 
-    const outputPtr = this._module._malloc(outputSize);
-    const outputSamples =
-        new Float32Array(this._module.HEAPF32.buffer, outputPtr, outputSampleCount);
-
-    this._engine.process(outputPtr, outputSampleCount, currentTime);
-
-    for (let i = 0; i < outputSampleCount; ++i) {
-      outputChannels[0][i] = outputSamples[i * STEREO_CHANNEL_COUNT];
-      outputChannels[1][i] = outputSamples[i * STEREO_CHANNEL_COUNT + 1];
+    const outputChannels = new Int32Array(outputChannelCount);
+    const outputChannelSize = outputFrameCount * Float32Array.BYTES_PER_ELEMENT;
+    for (let i = 0; i < outputChannelCount; ++i) {
+      outputChannels[i] = this._module._malloc(outputChannelSize);
     }
+    const outputChannelPtrSize = Int32Array.BYTES_PER_ELEMENT;
+    const outputChannelPtrs = this._module._malloc(outputChannelCount * outputChannelPtrSize);
+    this._module.HEAP32.set(outputChannels, outputChannelPtrs / outputChannelPtrSize);
 
-    this._module._free(outputPtr);
+    this._engine.process(outputChannelPtrs, outputChannelCount, outputFrameCount, currentTime);
+
+    for (let i = 0; i < outputChannelCount; ++i) {
+      output[i].set(
+          new Float32Array(this._module.HEAP32.buffer, outputChannels[i], outputFrameCount));
+      this._module._free(outputChannels[i]);
+    }
+    this._module._free(outputChannelPtrs);
 
     return true;
   }

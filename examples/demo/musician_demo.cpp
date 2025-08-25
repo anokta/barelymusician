@@ -55,6 +55,7 @@ using BeatComposerCallback =
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
+constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
 constexpr double kLookahead = 0.1;
@@ -210,8 +211,8 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, Instrument&
 int main(int /*argc*/, char* argv[]) {
   InputManager input_manager;
 
-  AudioClock clock(kSampleRate);
-  AudioOutput audio_output(kSampleRate, kFrameCount);
+  AudioClock audio_clock(kSampleRate);
+  AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
   engine.SetTempo(kTempo);
@@ -351,11 +352,10 @@ int main(int /*argc*/, char* argv[]) {
   });
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<float> samples) {
-    engine.Process(samples, clock.GetTimestamp());
-    clock.Update(kFrameCount);
-  };
-  audio_output.SetProcessCallback(process_callback);
+  audio_output.SetProcessCallback([&](std::span<float*> output_channels, int output_frame_count) {
+    engine.Process(output_channels, output_frame_count, audio_clock.GetTimestamp());
+    audio_clock.Update(output_frame_count);
+  });
 
   // Key down callback.
   bool quit = false;
@@ -441,7 +441,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(clock.GetTimestamp() + kLookahead);
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

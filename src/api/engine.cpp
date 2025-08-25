@@ -45,27 +45,28 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
   assert(success);
 }
 
-void BarelyEngine::Process(std::span<float> output_samples, double timestamp) noexcept {
-  assert(!output_samples.empty());
-  assert(output_samples.size() % 2 == 0);
+void BarelyEngine::Process(std::span<float*> output_channels, int output_frame_count,
+                           double timestamp) noexcept {
+  assert(!output_channels.empty());
 
-  std::fill(output_samples.begin(), output_samples.end(), 0.0f);
+  for (float* channel : output_channels) {
+    assert(channel);
+    std::fill_n(channel, output_frame_count, 0.0f);
+  }
 
   const int64_t process_frame = barely::SecondsToFrames(sample_rate_, timestamp);
-  const int64_t end_frame = process_frame + static_cast<int64_t>(output_samples.size() / 2);
-  int64_t current_frame = 0;
+  const int64_t end_frame = process_frame + output_frame_count;
+  int current_frame = 0;
 
   auto instruments = mutable_instruments_.GetScopedView();
 
   // Process *all* messages before the end sample.
   for (auto* message = message_queue_.GetNext(end_frame); message;
        message = message_queue_.GetNext(end_frame)) {
-    if (const int64_t message_frame = message->first - process_frame;
+    if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
       for (auto* instrument : *instruments) {
-        instrument->processor().Process(
-            {output_samples.begin() + current_frame * barely::kStereoChannelCount,
-             output_samples.begin() + message_frame * barely::kStereoChannelCount});
+        instrument->processor().Process(output_channels, message_frame, current_frame);
       }
       current_frame = message_frame;
     }
@@ -99,11 +100,9 @@ void BarelyEngine::Process(std::span<float> output_samples, double timestamp) no
   }
 
   // Process the rest of the samples.
-  if (process_frame + current_frame < end_frame) {
+  if (process_frame + static_cast<int64_t>(current_frame) < end_frame) {
     for (auto* instrument : *instruments) {
-      instrument->processor().Process(
-          {output_samples.begin() + current_frame * barely::kStereoChannelCount,
-           output_samples.end()});
+      instrument->processor().Process(output_channels, output_frame_count, current_frame);
     }
   }
 }

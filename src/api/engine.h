@@ -61,10 +61,12 @@ struct BarelyEngine {
 
   /// Processes output samples.
   ///
-  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channels Span of output channels each containing non-interleaved samples.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(std::span<float> output_samples, double timestamp) noexcept;
+  void Process(std::span<float*> output_channels, int output_frame_count,
+               double timestamp) noexcept;
 
   /// Removes an instrument.
   ///

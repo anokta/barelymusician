@@ -142,13 +142,15 @@ bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp)
   return true;
 }
 
-bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
-                          int32_t output_sample_count, double timestamp) {
+bool BarelyEngine_Process(BarelyEngineHandle engine, float** output_channels,
+                          int32_t output_channel_count, int32_t output_frame_count,
+                          double timestamp) {
   if (!engine) return false;
-  if (!output_samples) return false;
-  if (output_sample_count <= 0 || output_sample_count % 2 == 1) return false;
+  if (!output_channels) return false;
+  if (output_channel_count <= 0 || output_frame_count <= 0) return false;
 
-  engine->Process({output_samples, output_samples + output_sample_count}, timestamp);
+  engine->Process({output_channels, output_channels + output_channel_count}, output_frame_count,
+                  timestamp);
   return true;
 }
 

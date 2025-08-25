@@ -154,6 +154,7 @@ MonoBehaviour:
   Gain: 0.1
   PitchShift: 0
   Retrigger: 0
+  StereoPan: 0
   VoiceCount: 8
   Attack: 0.005
   Decay: 0

@@ -102,7 +102,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kSampleRate, kFrameCount);
   engine.SetTempo(kTempo);
 
   std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;

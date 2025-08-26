@@ -51,7 +51,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate);
+  Engine engine(kSampleRate, kFrameCount);
   engine.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.

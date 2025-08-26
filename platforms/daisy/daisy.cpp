@@ -33,7 +33,7 @@ static Engine* engine_ptr = nullptr;
 static Instrument* instrument_ptr = nullptr;
 static float osc_shape = 0.0f;
 
-void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
+static void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
   hw.ProcessAllControls();
   if (const auto increment = hw.encoder.Increment(); increment != 0) {
@@ -57,7 +57,7 @@ int main(void) {
   midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  Engine engine(kSampleRate);
+  Engine engine(kSampleRate, kFrameCount);
   engine_ptr = &engine;
 
   Instrument instrument = engine.CreateInstrument({{

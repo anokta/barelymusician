@@ -117,7 +117,7 @@ Steinberg::tresult PLUGIN_API Processor::setProcessing(Steinberg::TBool /*state*
 
 Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::ProcessSetup& setup) {
   instrument_ = std::nullopt;
-  engine_ = Engine(static_cast<int>(setup.sampleRate));
+  engine_ = Engine(static_cast<int>(setup.sampleRate), static_cast<int>(setup.maxSamplesPerBlock));
   instrument_ = engine_->CreateInstrument(Controller::GetDefaultControls());
   return Steinberg::kResultTrue;
 }

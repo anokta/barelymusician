@@ -15,7 +15,8 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create.
-///   barely::Engine engine(/*sample_rate=*/48000);
+///   constexpr int kMaxFrameCount = 512;
+///   barely::Engine engine(/*sample_rate=*/48000, kMaxFrameCount);
 ///
 ///   // Set the tempo.
 ///   engine.SetTempo(/*tempo=*/124.0);
@@ -36,10 +37,9 @@
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
 ///   constexpr int kChannelCount = 2;
-///   constexpr int kFrameCount = 512;
-///   float output_samples[kChannelCount * kFrameCount];
-///   float *output_channels[kChannelCount] = {output_samples, output_samples + kFrameCount};
-///   engine.Process(output_channels, kFrameCount, timestamp);
+///   float output_samples[kChannelCount * kMaxFrameCount];
+///   float *output_channels[kChannelCount] = {output_samples, output_samples + kMaxFrameCount};
+///   engine.Process(output_channels, kMaxFrameCount, timestamp);
 ///   @endcode
 ///
 /// - Instrument:
@@ -94,7 +94,8 @@
 ///
 ///   // Create.
 ///   BarelyEngineHandle engine = nullptr;
-///   BarelyEngine_Create(/*sample_rate=*/48000, BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
+///   BarelyEngine_Create(/*sample_rate=*/48000, /*max_frame_count=*/512,
+///                       BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
 ///
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
@@ -559,11 +560,12 @@ BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
 /// Creates a new engine.
 ///
 /// @param sample_rate Sampling rate in hertz.
+/// @param max_frame_count Maximum number of frames.
 /// @param reference_frequency Reference frequency in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
-                                    BarelyEngineHandle* out_engine);
+BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
+                                    float reference_frequency, BarelyEngineHandle* out_engine);
 
 /// Destroys an engine.
 ///
@@ -1899,12 +1901,15 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
+  /// @param max_frame_count Maximum number of frames.
   /// @param reference_frequency Reference frequency in hertz.
-  Engine(int sample_rate, float reference_frequency = kDefaultReferenceFrequency) noexcept
+  Engine(int sample_rate, int max_frame_count,
+         float reference_frequency = kDefaultReferenceFrequency) noexcept
       : HandleWrapper([&]() {
           BarelyEngineHandle engine = nullptr;
-          [[maybe_unused]] const bool success =
-              BarelyEngine_Create(static_cast<int32_t>(sample_rate), reference_frequency, &engine);
+          [[maybe_unused]] const bool success = BarelyEngine_Create(
+              static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_frame_count),
+              reference_frequency, &engine);
           assert(success);
           return engine;
         }()) {}

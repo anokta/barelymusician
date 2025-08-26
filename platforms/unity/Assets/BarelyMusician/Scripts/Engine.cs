@@ -1122,7 +1122,8 @@ namespace Barely {
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          if (!BarelyEngine_Create(config.sampleRate, _referenceFrequency, ref _handle)) {
+          if (!BarelyEngine_Create(config.sampleRate, config.dspBufferSize, _referenceFrequency,
+                                   ref _handle)) {
             Debug.LogError("Failed to initialize BarelyEngine");
             return;
           }
@@ -1257,7 +1258,8 @@ namespace Barely {
                                                             ArpeggiatorStyle style);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(Int32 sampleRate, float referenceFrequency,
+      private static extern bool BarelyEngine_Create(Int32 sampleRate, Int32 maxFrameCount,
+                                                     float referenceFrequency,
                                                      ref IntPtr outEngine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]

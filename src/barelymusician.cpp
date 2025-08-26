@@ -93,9 +93,10 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeg
   return true;
 }
 
-bool BarelyEngine_Create(int32_t sample_rate, float reference_frequency,
+bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count, float reference_frequency,
                          BarelyEngineHandle* out_engine) {
   if (sample_rate <= 0) return false;
+  if (max_frame_count <= 0) return false;
   if (reference_frequency <= 0.0) return false;
   if (!out_engine) return false;
 

@@ -85,10 +85,14 @@ class Voice {
   /// @tparam kSliceMode Slice mode.
   /// @param voice Voice.
   /// @param params Instrument parameters.
-  /// @return Processed output sample.
+  /// @param output_channels Span of output channels each containing non-interleaved samples.
+  /// @param output_frame_count Number of output frames.
+  /// @param start_frame Start frame.
   template <OscMode kOscMode, SliceMode kSliceMode>
-  static float Process(Voice& voice, const InstrumentParams& params) noexcept {
-    return voice.Process<kOscMode, kSliceMode>(params);
+  static void Process(Voice& voice, const InstrumentParams& params,
+                      std::span<float*> output_channels, int output_frame_count,
+                      int start_frame) noexcept {
+    voice.Process<kOscMode, kSliceMode>(params, output_channels, output_frame_count, start_frame);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -138,69 +142,85 @@ class Voice {
   }
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }
 
-  [[nodiscard]] float stereo_pan() const noexcept { return params_.stereo_pan; }
-
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  [[nodiscard]] float Process(const InstrumentParams& params) noexcept {
-    if constexpr (kSliceMode == SliceMode::kOnce) {
-      if (!IsSliceActive()) {
-        envelope_.Stop();
-      }
+  void Process(const InstrumentParams& params, std::span<float*> output_channels,
+               int output_frame_count, int start_frame) noexcept {
+    assert(!output_channels.empty());
+    assert(output_frame_count > 0);
+    assert(output_channels.size() == 2);
+
+    if (!IsActive()) {
+      return;
     }
 
-    assert(params.rng != nullptr);
-    const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
-    const float osc_sample =
-        (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
-        params_.osc_noise_mix * params.rng->Generate();
-    const float osc_output = params_.osc_mix * osc_sample;
-
-    const bool has_slice = (slice_ != nullptr);
-    const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
-    const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
-
-    float output = params_.gain * envelope_.Next();
-
-    if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
-      output *= osc_output + slice_output;
-    } else if constexpr (kOscMode == OscMode::kFm) {
-      output *= slice_sample;
-    } else if constexpr (kOscMode == OscMode::kAm) {
-      output *= std::abs(osc_output) * slice_sample + slice_output;
-    } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
-      output *= osc_output * std::abs(slice_sample) + slice_output;
-    }
-
-    // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
-    output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
-                               params_.bit_crusher_range, params_.bit_crusher_increment);
-
-    float osc_increment = params.osc_increment * note_params_.osc_increment;
-    if constexpr (kOscMode == OscMode::kMf) {
-      osc_increment += slice_sample * osc_increment;
-    }
-    osc_phase_ += osc_increment;
-    if (osc_phase_ >= 1.0f) {
-      osc_phase_ -= 1.0f;
-    }
-
-    float slice_increment = params.slice_increment * note_params_.slice_increment;
-    if (slice_increment > 0) {
-      if constexpr (kOscMode == OscMode::kFm) {
-        slice_increment += osc_output * slice_increment;
-      }
-      slice_offset_ += slice_increment;
-      if constexpr (kSliceMode == SliceMode::kLoop) {
-        if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
-          slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
+    for (int frame = start_frame; frame < output_frame_count; ++frame) {
+      if constexpr (kSliceMode == SliceMode::kOnce) {
+        if (!IsSliceActive()) {
+          envelope_.Stop();
         }
       }
+
+      assert(params.rng != nullptr);
+      const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
+      const float osc_sample =
+          (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
+          params_.osc_noise_mix * params.rng->Generate();
+      const float osc_output = params_.osc_mix * osc_sample;
+
+      const bool has_slice = (slice_ != nullptr);
+      const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
+      const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
+
+      float output = params_.gain * envelope_.Next();
+
+      if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
+        output *= osc_output + slice_output;
+      } else if constexpr (kOscMode == OscMode::kFm) {
+        output *= slice_sample;
+      } else if constexpr (kOscMode == OscMode::kAm) {
+        output *= std::abs(osc_output) * slice_sample + slice_output;
+      } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
+        output *= osc_output * std::abs(slice_sample) + slice_output;
+      }
+
+      // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
+      output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
+                                 params_.bit_crusher_range, params_.bit_crusher_increment);
+
+      float osc_increment = params.osc_increment * note_params_.osc_increment;
+      if constexpr (kOscMode == OscMode::kMf) {
+        osc_increment += slice_sample * osc_increment;
+      }
+      osc_phase_ += osc_increment;
+      if (osc_phase_ >= 1.0f) {
+        osc_phase_ -= 1.0f;
+      }
+
+      float slice_increment = params.slice_increment * note_params_.slice_increment;
+      if (slice_increment > 0) {
+        if constexpr (kOscMode == OscMode::kFm) {
+          slice_increment += osc_output * slice_increment;
+        }
+        slice_offset_ += slice_increment;
+        if constexpr (kSliceMode == SliceMode::kLoop) {
+          if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
+            slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
+          }
+        }
+      }
+
+      const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
+      const float right_gain = 1.0f - left_gain;
+      output_channels[0][frame] += left_gain * output;
+      output_channels[1][frame] += right_gain * output;
+
+      Approach(params.voice_params);
+
+      if (!IsActive()) {
+        return;
+      }
     }
-
-    Approach(params.voice_params);
-
-    return output;
   }
 
   void Approach(const VoiceParams& params) noexcept {
@@ -245,8 +265,12 @@ class Voice {
 ///
 /// @param voice Mutable voice.
 /// @param params Instrument parameters.
-/// @return Processed output sample.
-using VoiceCallback = float (*)(Voice& voice, const InstrumentParams& params);
+/// @param output_channels Span of output channels each containing non-interleaved samples.
+/// @param output_frame_count Number of output frames.
+/// @param start_frame Start frame.
+using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
+                               std::span<float*> output_channels, int output_frame_count,
+                               int start_frame);
 
 }  // namespace barely
 

@@ -70,27 +70,8 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
 
 void InstrumentProcessor::Process(std::span<float*> output_channels, int output_frame_count,
                                   int start_frame) noexcept {
-  assert(!output_channels.empty());
-  assert(output_frame_count > 0);
-  assert(start_frame >= 0);
-
-  assert(output_channels.size() == 2);
-
   for (VoiceState& voice_state : voice_states_) {
-    Voice& voice = voice_state.voice;
-    if (voice.IsActive()) {
-      for (int frame = start_frame; frame < output_frame_count; ++frame) {
-        if (!voice.IsActive()) {
-          break;
-        }
-        const float stereo_pan = voice.stereo_pan();
-        const float output = voice_callback_(voice, params_);
-        const float left_gain = 0.5f * (1.0f - stereo_pan);
-        const float right_gain = 1.0f - left_gain;
-        output_channels[0][frame] += left_gain * output;
-        output_channels[1][frame] += right_gain * output;
-      }
-    }
+    voice_callback_(voice_state.voice, params_, output_channels, output_frame_count, start_frame);
   }
 }
 

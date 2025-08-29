@@ -1,8 +1,12 @@
 #include <barelymusician.h>
 
 #include <algorithm>
+#include <array>
+#include <optional>
 
 #include "daisy_pod.h"
+
+namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
@@ -26,68 +30,74 @@ constexpr float kRelease = 0.125f;
 constexpr float kOscShapeIncrement = 0.1f;
 constexpr int kVoiceCount = 16;
 
-static DaisyPod hw;  // target the Daisy Pod hardware.
-static MidiUsbHandler midi;
+DaisyPod g_hw;  // target the Daisy Pod hardware.
+MidiUsbHandler g_midi;
 
-static Engine* engine_ptr = nullptr;
-static Instrument* instrument_ptr = nullptr;
-static float osc_shape = 0.0f;
+std::optional<Engine> g_engine = std::nullopt;
+std::optional<Instrument> g_instrument = std::nullopt;
+float g_osc_shape = 0.0f;
+std::array<float, kChannelCount * kFrameCount> g_output_samples;
 
-static void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
+void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
-  hw.ProcessAllControls();
-  if (const auto increment = hw.encoder.Increment(); increment != 0) {
-    osc_shape =
-        std::clamp(osc_shape + kOscShapeIncrement * static_cast<float>(increment), 0.0f, 1.0f);
-    instrument_ptr->SetControl(ControlType::kOscShape, osc_shape);
+  g_hw.ProcessAllControls();
+  if (const auto increment = g_hw.encoder.Increment(); increment != 0) {
+    g_osc_shape =
+        std::clamp(g_osc_shape + kOscShapeIncrement * static_cast<float>(increment), 0.0f, 1.0f);
+    g_instrument->SetControl(ControlType::kOscShape, g_osc_shape);
   }
   // Process the output samples.
-  engine_ptr->Process({out, out + kChannelCount}, kFrameCount, /*timestamp=*/0.0);
+  const int frame_count = static_cast<int>(size);
+  g_engine->Process(g_output_samples.data(), kChannelCount, frame_count, /*timestamp=*/0.0);
+  for (int frame = 0; frame < frame_count; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      out[channel][frame] = g_output_samples[frame * kChannelCount + channel];
+    }
+  }
 }
+
+}  // namespace
 
 int main(void) {
   // Initialize the Daisy hardware.
-  hw.Init();
-  hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
-  hw.SetAudioBlockSize(kFrameCount);
+  g_hw.Init();
+  g_hw.SetAudioSampleRate(SaiHandle::Config::SampleRate::SAI_48KHZ);
+  g_hw.SetAudioBlockSize(kFrameCount);
 
   // Initialize USB MIDI.
   MidiUsbHandler::Config midi_cfg;
   midi_cfg.transport_config.periph = MidiUsbTransport::Config::INTERNAL;
-  midi.Init(midi_cfg);
+  g_midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  Engine engine(kSampleRate, kFrameCount);
-  engine_ptr = &engine;
-
-  Instrument instrument = engine.CreateInstrument({{
+  g_engine.emplace(kSampleRate, kFrameCount);
+  g_instrument = g_engine->CreateInstrument({{
       {ControlType::kGain, kGain},
       {ControlType::kOscMix, 1.0f},
-      {ControlType::kOscShape, osc_shape},
+      {ControlType::kOscShape, g_osc_shape},
       {ControlType::kAttack, kAttack},
       {ControlType::kRelease, kRelease},
       {ControlType::kVoiceCount, kVoiceCount},
   }});
-  instrument_ptr = &instrument;
 
   // Start processing.
-  hw.StartAdc();
-  hw.StartAudio(AudioCallback);
+  g_hw.StartAdc();
+  g_hw.StartAudio(AudioCallback);
 
   while (true) {
     // Listen to MIDI events.
-    midi.Listen();
+    g_midi.Listen();
 
-    while (midi.HasEvents()) {
-      auto midi_event = midi.PopEvent();
+    while (g_midi.HasEvents()) {
+      auto midi_event = g_midi.PopEvent();
       switch (midi_event.type) {
         case MidiMessageType::NoteOn:
           if (const auto note_on_event = midi_event.AsNoteOn(); note_on_event.velocity != 0) {
-            instrument.SetNoteOn(note_on_event.note);
+            g_instrument->SetNoteOn(note_on_event.note);
           }
           break;
         case MidiMessageType::NoteOff:
-          instrument.SetNoteOff(midi_event.AsNoteOff().note);
+          g_instrument->SetNoteOff(midi_event.AsNoteOff().note);
           break;
         default:
           break;

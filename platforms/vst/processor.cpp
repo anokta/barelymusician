@@ -14,6 +14,8 @@ namespace barely::vst {
 
 namespace {
 
+constexpr int kStereoChannelCount = 2;
+
 float MidiNoteToPitch(Steinberg::int16 midi_note) noexcept {
   return (static_cast<float>(midi_note) - 60.0f) / 12.0f;
 }
@@ -92,9 +94,12 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
   }
 
   // Process instrument.
-  engine_->Process({data.outputs[0].channelBuffers32,
-                    data.outputs[0].channelBuffers32 + data.outputs[0].numChannels},
-                   data.numSamples, /*timestamp=*/0.0);
+  const int frame_count = static_cast<int>(data.numSamples);
+  engine_->Process(output_samples_.data(), kStereoChannelCount, frame_count, /*timestamp=*/0.0);
+  for (int frame = 0; frame < frame_count; ++frame) {
+    data.outputs[0].channelBuffers32[0][frame] = output_samples_[frame * kStereoChannelCount];
+    data.outputs[0].channelBuffers32[1][frame] = output_samples_[frame * kStereoChannelCount + 1];
+  }
 
   return Steinberg::kResultTrue;
 }
@@ -119,6 +124,7 @@ Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::Process
   instrument_ = std::nullopt;
   engine_ = Engine(static_cast<int>(setup.sampleRate), static_cast<int>(setup.maxSamplesPerBlock));
   instrument_ = engine_->CreateInstrument(Controller::GetDefaultControls());
+  output_samples_.resize(kStereoChannelCount * setup.maxSamplesPerBlock);
   return Steinberg::kResultTrue;
 }
 

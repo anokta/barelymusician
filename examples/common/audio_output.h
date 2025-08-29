@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_EXAMPLES_COMMON_AUDIO_OUTPUT_H_
 
 #include <functional>
-#include <span>
 #include <vector>
 
 #include "miniaudio.h"
@@ -14,10 +13,11 @@ class AudioOutput {
  public:
   /// Audio process callback signature.
   ///
-  /// @param output_channels Span of output channels each containing non-interleaved samples.
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   using ProcessCallback =
-      std::function<void(std::span<float*> output_channels, int output_frame_count)>;
+      std::function<void(float* output_samples, int output_channel_count, int output_frame_count)>;
 
   /// Constructs new `AudioOutput`.
   ///
@@ -52,12 +52,6 @@ class AudioOutput {
 
   // Process callback.
   ProcessCallback process_callback_ = nullptr;
-
-  // Output channels.
-  std::vector<float*> output_channels_;
-
-  // Output samples.
-  std::vector<float> output_samples_;
 };
 
 }  // namespace barely::examples

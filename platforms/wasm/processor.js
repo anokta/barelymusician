@@ -291,30 +291,28 @@ class Processor extends AudioWorkletProcessor {
     const output = outputs[0];
     const outputChannelCount = output.length;
     const outputFrameCount = output[0].length;
+    const outputSampleCount = outputChannelCount * outputFrameCount;
 
-    if (outputChannelCount == 0 || outputFrameCount == 0) return;
-    if (outputFrameCount > RENDER_QUANTUM_SIZE) return;
+    if (outputSampleCount == 0) return true;
+    if (outputFrameCount > RENDER_QUANTUM_SIZE) return true;
 
     const latency = Math.max(1.0 / 60.0, outputFrameCount / sampleRate);
     this._engine.update(currentTime + latency);
 
-    const outputChannels = new Int32Array(outputChannelCount);
-    const outputChannelSize = outputFrameCount * Float32Array.BYTES_PER_ELEMENT;
-    for (let i = 0; i < outputChannelCount; ++i) {
-      outputChannels[i] = this._module._malloc(outputChannelSize);
-    }
-    const outputChannelPtrSize = Int32Array.BYTES_PER_ELEMENT;
-    const outputChannelPtrs = this._module._malloc(outputChannelCount * outputChannelPtrSize);
-    this._module.HEAP32.set(outputChannels, outputChannelPtrs / outputChannelPtrSize);
+    const outputSamplesPtr =
+        this._module._malloc(outputSampleCount * Float32Array.BYTES_PER_ELEMENT);
+    const outputSamples =
+        new Float32Array(this._module.HEAPF32.buffer, outputSamplesPtr, outputSampleCount);
 
-    this._engine.process(outputChannelPtrs, outputChannelCount, outputFrameCount, currentTime);
+    this._engine.process(outputSamplesPtr, outputChannelCount, outputFrameCount, currentTime);
 
-    for (let i = 0; i < outputChannelCount; ++i) {
-      output[i].set(
-          new Float32Array(this._module.HEAP32.buffer, outputChannels[i], outputFrameCount));
-      this._module._free(outputChannels[i]);
+    for (let frame = 0; frame < outputFrameCount; ++frame) {
+      for (let channel = 0; channel < outputChannelCount; ++channel) {
+        output[channel][frame] = outputSamples[frame * outputChannelCount + channel];
+      }
     }
-    this._module._free(outputChannelPtrs);
+
+    this._module._free(outputSamplesPtr);
 
     return true;
   }

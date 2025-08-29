@@ -15,6 +15,7 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create.
+///   constexpr int kChannelCount = 2;
 ///   constexpr int kMaxFrameCount = 512;
 ///   barely::Engine engine(/*sample_rate=*/48000, kMaxFrameCount);
 ///
@@ -36,10 +37,8 @@
 ///   //
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
-///   constexpr int kChannelCount = 2;
 ///   float output_samples[kChannelCount * kMaxFrameCount];
-///   float *output_channels[kChannelCount] = {output_samples, output_samples + kMaxFrameCount};
-///   engine.Process(output_channels, kMaxFrameCount, timestamp);
+///   engine.Process(output_samples, kChannelCount, kMaxFrameCount, timestamp);
 ///   @endcode
 ///
 /// - Instrument:
@@ -118,8 +117,7 @@
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
 ///   float output_samples[2 * 512];
-///   float *output_channels[kChannelCount] = {output_samples, output_samples + 512};
-///   BarelyEngine_Process(engine, output_channels, 2, 512, timestamp);
+///   BarelyEngine_Process(engine, output_samples, 2, 512, timestamp);
 ///
 ///   // Destroy.
 ///   BarelyEngine_Destroy(engine);
@@ -604,12 +602,12 @@ BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out
 /// Processes the next output samples of an engine at timestamp.
 ///
 /// @param engine Engine handle.
-/// @param output_channels Array of output channels each containing non-interleaved samples.
+/// @param output_samples Array of interleaved output samples.
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float** output_channels,
+BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
                                      int32_t output_channel_count, int32_t output_frame_count,
                                      double timestamp);
 
@@ -2007,14 +2005,15 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
 
   /// Processes the next output samples at timestamp.
   ///
-  /// @param output_channels Span of output channels each containing non-interleaved samples.
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  void Process(std::span<float*> output_channels, int output_frame_count,
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_Process(
-        *this, output_channels.data(), static_cast<int32_t>(output_channels.size()),
-        static_cast<int32_t>(output_frame_count), timestamp);
+    [[maybe_unused]] const bool success =
+        BarelyEngine_Process(*this, output_samples, static_cast<int32_t>(output_channel_count),
+                             static_cast<int32_t>(output_frame_count), timestamp);
     assert(success);
   }
 

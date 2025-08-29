@@ -10,15 +10,10 @@
 namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-AudioOutput::AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept
-    : output_channels_(channel_count), output_samples_(channel_count * frame_count) {
+AudioOutput::AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept {
   assert(sample_rate > 0);
   assert(channel_count > 0);
   assert(frame_count > 0);
-  // Initialize output channels.
-  for (int i = 0; i < channel_count; ++i) {
-    output_channels_[i] = &output_samples_[i * frame_count];
-  }
   // Configure the playback device.
   ma_device_config device_config = ma_device_config_init(ma_device_type_playback);
   device_config.playback.format = ma_format_f32;
@@ -32,15 +27,9 @@ AudioOutput::AudioOutput(int sample_rate, int channel_count, int frame_count) no
     assert(device->pUserData != nullptr);
     if (auto& audio_output = *static_cast<AudioOutput*>(device->pUserData);
         audio_output.process_callback_) {
-      assert(device->playback.channels <= audio_output.output_channels_.size());
-      assert(device->playback.channels * frame_count <= audio_output.output_samples_.size());
-      audio_output.process_callback_(audio_output.output_channels_, static_cast<int>(frame_count));
-      for (int frame = 0; frame < static_cast<int>(frame_count); ++frame) {
-        for (int i = 0; i < static_cast<int>(device->playback.channels); ++i) {
-          static_cast<float*>(output)[frame * device->playback.channels + i] =
-              audio_output.output_channels_[i][frame];
-        }
-      }
+      audio_output.process_callback_(static_cast<float*>(output),
+                                     static_cast<int>(device->playback.channels),
+                                     static_cast<int>(frame_count));
     }
   };
   // Initialize the device.

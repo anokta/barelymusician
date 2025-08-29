@@ -85,14 +85,14 @@ class Voice {
   /// @tparam kSliceMode Slice mode.
   /// @param voice Voice.
   /// @param params Instrument parameters.
-  /// @param output_channels Span of output channels each containing non-interleaved samples.
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  /// @param start_frame Start frame.
   template <OscMode kOscMode, SliceMode kSliceMode>
-  static void Process(Voice& voice, const InstrumentParams& params,
-                      std::span<float*> output_channels, int output_frame_count,
-                      int start_frame) noexcept {
-    voice.Process<kOscMode, kSliceMode>(params, output_channels, output_frame_count, start_frame);
+  static void Process(Voice& voice, const InstrumentParams& params, float* output_samples,
+                      int output_channel_count, int output_frame_count) noexcept {
+    voice.Process<kOscMode, kSliceMode>(params, output_samples, output_channel_count,
+                                        output_frame_count);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -144,17 +144,17 @@ class Voice {
 
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  void Process(const InstrumentParams& params, std::span<float*> output_channels,
-               int output_frame_count, int start_frame) noexcept {
-    assert(!output_channels.empty());
+  void Process(const InstrumentParams& params, float* output_samples, int output_channel_count,
+               int output_frame_count) noexcept {
+    assert(output_samples != nullptr);
+    assert(output_channel_count == 2);
     assert(output_frame_count > 0);
-    assert(output_channels.size() == 2);
 
     if (!IsActive()) {
       return;
     }
 
-    for (int frame = start_frame; frame < output_frame_count; ++frame) {
+    for (int frame = 0; frame < output_frame_count; ++frame) {
       if constexpr (kSliceMode == SliceMode::kOnce) {
         if (!IsSliceActive()) {
           envelope_.Stop();
@@ -212,8 +212,8 @@ class Voice {
 
       const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
       const float right_gain = 1.0f - left_gain;
-      output_channels[0][frame] += left_gain * output;
-      output_channels[1][frame] += right_gain * output;
+      output_samples[frame * output_channel_count] += left_gain * output;
+      output_samples[frame * output_channel_count + 1] += right_gain * output;
 
       Approach(params.voice_params);
 
@@ -265,12 +265,11 @@ class Voice {
 ///
 /// @param voice Mutable voice.
 /// @param params Instrument parameters.
-/// @param output_channels Span of output channels each containing non-interleaved samples.
+/// @param output_samples Array of interleaved output samples.
+/// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
-/// @param start_frame Start frame.
-using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
-                               std::span<float*> output_channels, int output_frame_count,
-                               int start_frame);
+using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params, float* output_samples,
+                               int output_channel_count, int output_frame_count);
 
 }  // namespace barely
 

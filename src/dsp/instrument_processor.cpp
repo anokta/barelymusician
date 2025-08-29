@@ -68,10 +68,11 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
   params_.rng = &rng;
 }
 
-void InstrumentProcessor::Process(std::span<float*> output_channels, int output_frame_count,
-                                  int start_frame) noexcept {
+void InstrumentProcessor::Process(float* output_samples, int output_channel_count,
+                                  int output_frame_count) noexcept {
   for (VoiceState& voice_state : voice_states_) {
-    voice_callback_(voice_state.voice, params_, output_channels, output_frame_count, start_frame);
+    voice_callback_(voice_state.voice, params_, output_samples, output_channel_count,
+                    output_frame_count);
   }
 }
 

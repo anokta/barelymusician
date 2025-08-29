@@ -2,7 +2,6 @@
 
 #include <array>
 #include <chrono>
-#include <span>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -111,10 +110,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   tasks.emplace_back(performer.CreateTask(5.0, 2.0, 0, play_note_fn(8)));
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](std::span<float*> output_channels, int output_frame_count) {
-    engine.Process(output_channels, output_frame_count, audio_clock.GetTimestamp());
-    audio_clock.Update(output_frame_count);
-  });
+  audio_output.SetProcessCallback(
+      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+        engine.Process(output_samples, output_channel_count, output_frame_count,
+                       audio_clock.GetTimestamp());
+        audio_clock.Update(output_frame_count);
+      });
 
   // Key down callback.
   bool quit = false;

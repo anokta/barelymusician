@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstdint>
 #include <optional>
-#include <span>
 
 #include "api/arpeggiator.h"
 #include "api/engine.h"
@@ -143,15 +142,14 @@ bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp)
   return true;
 }
 
-bool BarelyEngine_Process(BarelyEngineHandle engine, float** output_channels,
+bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
                           int32_t output_channel_count, int32_t output_frame_count,
                           double timestamp) {
   if (!engine) return false;
-  if (!output_channels) return false;
+  if (!output_samples) return false;
   if (output_channel_count <= 0 || output_frame_count <= 0) return false;
 
-  engine->Process({output_channels, output_channels + output_channel_count}, output_frame_count,
-                  timestamp);
+  engine->Process(output_samples, output_channel_count, output_frame_count, timestamp);
   return true;
 }
 

@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <span>
 #include <unordered_set>
 
 #include "api/instrument.h"
@@ -61,11 +60,12 @@ struct BarelyEngine {
 
   /// Processes output samples.
   ///
-  /// @param output_channels Span of output channels each containing non-interleaved samples.
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(std::span<float*> output_channels, int output_frame_count,
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
 
   /// Removes an instrument.

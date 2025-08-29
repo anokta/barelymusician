@@ -6,7 +6,6 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
-#include <span>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -45,14 +44,13 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
   assert(success);
 }
 
-void BarelyEngine::Process(std::span<float*> output_channels, int output_frame_count,
+void BarelyEngine::Process(float* output_samples, int output_channel_count, int output_frame_count,
                            double timestamp) noexcept {
-  assert(!output_channels.empty());
+  assert(output_samples != nullptr);
+  assert(output_channel_count > 0);
+  assert(output_frame_count > 0);
 
-  for (float* channel : output_channels) {
-    assert(channel);
-    std::fill_n(channel, output_frame_count, 0.0f);
-  }
+  std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
 
   const int64_t process_frame = barely::SecondsToFrames(sample_rate_, timestamp);
   const int64_t end_frame = process_frame + output_frame_count;
@@ -66,7 +64,8 @@ void BarelyEngine::Process(std::span<float*> output_channels, int output_frame_c
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
       for (auto* instrument : *instruments) {
-        instrument->processor().Process(output_channels, message_frame, current_frame);
+        instrument->processor().Process(&output_samples[current_frame * output_channel_count],
+                                        output_channel_count, message_frame - current_frame);
       }
       current_frame = message_frame;
     }
@@ -102,7 +101,8 @@ void BarelyEngine::Process(std::span<float*> output_channels, int output_frame_c
   // Process the rest of the samples.
   if (process_frame + static_cast<int64_t>(current_frame) < end_frame) {
     for (auto* instrument : *instruments) {
-      instrument->processor().Process(output_channels, output_frame_count, current_frame);
+      instrument->processor().Process(&output_samples[current_frame * output_channel_count],
+                                      output_channel_count, output_frame_count - current_frame);
     }
   }
 }

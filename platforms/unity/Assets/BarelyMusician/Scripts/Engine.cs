@@ -1101,17 +1101,8 @@ namespace Barely {
         }
 
         private void OnAudioFilterRead(float[] data, int channels) {
-          int outputFrameCount = data.Length / channels;
-          if (BarelyEngine_Process(_handle, _outputChannelsPtr, channels, outputFrameCount,
-                                   AudioSettings.dspTime)) {
-            for (int frame = 0; frame < outputFrameCount; ++frame) {
-              for (int i = 0; i < channels; ++i) {
-                data[frame * channels + i] = _outputChannels[i][frame];
-              }
-            }
-          } else {
-            Array.Clear(data, 0, data.Length);
-          }
+          BarelyEngine_Process(_handle, data, channels, data.Length / channels,
+                               AudioSettings.dspTime);
         }
 
         private void LateUpdate() {
@@ -1128,7 +1119,6 @@ namespace Barely {
             return;
           }
           BarelyEngine_SetTempo(_handle, _tempo);
-          InitializeOutputChannels(config);
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<IntPtr, Instrument>();
           _controlOverrides = new ControlOverride[Enum.GetNames(typeof(ControlType)).Length];
@@ -1150,46 +1140,6 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyEngine_Destroy(_handle);
           _handle = IntPtr.Zero;
-          ShutdownOutputChannels();
-        }
-
-        // Initializes the internal output channels.
-        private void InitializeOutputChannels(AudioConfiguration config) {
-          int channelCount = config.speakerMode switch { AudioSpeakerMode.Mono => 1,
-                                                         AudioSpeakerMode.Stereo => 2,
-                                                         AudioSpeakerMode.Quad => 4,
-                                                         AudioSpeakerMode.Surround => 5,
-                                                         AudioSpeakerMode.Mode5point1 => 6,
-                                                         AudioSpeakerMode.Mode7point1 => 8,
-                                                         AudioSpeakerMode.Prologic => 2,
-                                                         _ => 2 };
-          _outputChannels = new float [channelCount][];
-          _outputChannelHandles = new GCHandle[channelCount];
-          IntPtr[] outputChannelPtrs = new IntPtr[channelCount];
-          for (int i = 0; i < channelCount; ++i) {
-            _outputChannels[i] = new float[config.dspBufferSize];
-            _outputChannelHandles[i] = GCHandle.Alloc(_outputChannels[i], GCHandleType.Pinned);
-            outputChannelPtrs[i] = _outputChannelHandles[i].AddrOfPinnedObject();
-          }
-          _outputChannelsPtrHandle = GCHandle.Alloc(outputChannelPtrs, GCHandleType.Pinned);
-          _outputChannelsPtr = _outputChannelsPtrHandle.AddrOfPinnedObject();
-        }
-
-        // Shuts down the internal output channels.
-        private void ShutdownOutputChannels() {
-          if (_outputChannelHandles != null) {
-            for (int i = 0; i < _outputChannelHandles.Length; ++i) {
-              if (_outputChannelHandles[i].IsAllocated) {
-                _outputChannelHandles[i].Free();
-              }
-            }
-            _outputChannelHandles = null;
-          }
-          if (_outputChannelsPtrHandle.IsAllocated) {
-            _outputChannelsPtrHandle.Free();
-          }
-          _outputChannelsPtr = IntPtr.Zero;
-          _outputChannels = null;
         }
 
         // Returns the next timestamp to update.
@@ -1203,14 +1153,6 @@ namespace Barely {
 
         // DSP latency in seconds.
         private double _dspLatency = 0.0;
-
-        // Array of output channels each containing non-interleaved samples.
-        private float[][] _outputChannels = null;
-        private GCHandle[] _outputChannelHandles;
-
-        // Native pointer to array of output channels.
-        private IntPtr _outputChannelsPtr = IntPtr.Zero;
-        private GCHandle _outputChannelsPtrHandle;
       }
 
 #if !UNITY_EDITOR && UNITY_IOS
@@ -1272,7 +1214,8 @@ namespace Barely {
       private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
-      private static extern bool BarelyEngine_Process(IntPtr engine, IntPtr outputChannels,
+      private static extern bool BarelyEngine_Process(IntPtr engine,
+                                                      [In, Out] float[] outputSamples,
                                                       Int32 outputChannelCount,
                                                       Int32 outputFrameCount, double timestamp);
 

@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
-#include <span>
 #include <thread>
 
 #include "common/audio_clock.h"
@@ -82,8 +81,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   });
 
   // Audio process callback.
-  const auto process_callback = [&](std::span<float*> output_channels, int output_frame_count) {
-    engine.Process(output_channels, output_frame_count, audio_clock.GetTimestamp());
+  const auto process_callback = [&](float* output_samples, int output_channel_count,
+                                    int output_frame_count) {
+    engine.Process(output_samples, output_channel_count, output_frame_count,
+                   audio_clock.GetTimestamp());
     audio_clock.Update(output_frame_count);
   };
   audio_output.SetProcessCallback(process_callback);

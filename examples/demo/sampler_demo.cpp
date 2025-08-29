@@ -7,7 +7,6 @@
 #include <chrono>
 #include <iterator>
 #include <optional>
-#include <span>
 #include <string>
 #include <thread>
 #include <vector>
@@ -97,9 +96,10 @@ int main(int /*argc*/, char* argv[]) {
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](std::span<float*> output_channels, int output_frame_count) {
-    engine.Process(output_channels, output_frame_count, /*timestamp=*/0.0);
-  });
+  audio_output.SetProcessCallback(
+      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+        engine.Process(output_samples, output_channel_count, output_frame_count, /*timestamp=*/0.0);
+      });
 
   // Key down callback.
   float gain = 1.0f;

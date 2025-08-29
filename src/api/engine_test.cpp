@@ -94,11 +94,10 @@ TEST(EngineTest, PlaySingleNote) {
   instrument.SetSampleData(kSlices);
 
   std::array<float, kChannelCount * kFrameCount> samples;
-  std::array<float*, kChannelCount> channels = {samples.data(), samples.data() + kFrameCount};
 
   // Control is set to its default value.
   samples.fill(0.0f);
-  engine.Process(channels, kFrameCount, 0);
+  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -108,10 +107,10 @@ TEST(EngineTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   samples.fill(0.0f);
-  engine.Process(channels, kFrameCount, 0);
+  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], (i % kFrameCount < kSampleRate)
-                                    ? 0.5f * kSamples[i % kFrameCount] * kGain
+    EXPECT_FLOAT_EQ(samples[i], (i / kChannelCount < kSampleRate)
+                                    ? 0.5f * kSamples[i / kChannelCount] * kGain
                                     : 0.0f);
   }
 
@@ -120,7 +119,7 @@ TEST(EngineTest, PlaySingleNote) {
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   samples.fill(0.0f);
-  engine.Process(channels, kFrameCount, 0);
+  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -140,11 +139,10 @@ TEST(EngineTest, PlayMultipleNotes) {
   instrument.SetSampleData(kSlices);
 
   std::array<float, kChannelCount * kSampleRate> samples;
-  std::array<float*, kChannelCount> channels = {samples.data(), samples.data() + kSampleRate};
 
   // Control is set to its default value.
   samples.fill(0.0f);
-  engine.Process(channels, kSampleRate, 0);
+  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -157,13 +155,13 @@ TEST(EngineTest, PlayMultipleNotes) {
   }
 
   samples.fill(0.0f);
-  engine.Process(channels, kSampleRate, 0);
+  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i % kSampleRate]);
+    EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i / kChannelCount]);
   }
 
   samples.fill(0.0f);
-  engine.Process(channels, kSampleRate, 0);
+  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }

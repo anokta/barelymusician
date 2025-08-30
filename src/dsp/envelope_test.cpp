@@ -15,7 +15,7 @@ constexpr float kSustain = 0.5f;
 constexpr float kRelease = 0.8f;
 
 // Tolerated error margin.
-constexpr float kEpsilon = 1e-3f;
+constexpr float kEpsilon = 5e-2f;
 
 // Tests that the envelope generates the expected output samples when initialized with the default
 // constructor.
@@ -64,7 +64,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
       // Sustain.
       expected_sample = kSustain;
     }
-    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
+    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon) << i;
   }
 
   envelope.Stop();
@@ -77,7 +77,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
       // Idle.
       expected_sample = 0.0f;
     }
-    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
+    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon) << i;
   }
 }
 

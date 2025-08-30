@@ -199,6 +199,8 @@ TEST(EngineTest, SetSeed) {
 }
 
 TEST(ScaleTest, GetPitch) {
+  constexpr float kEpsilon = 1e-5f;
+
   constexpr int kPitchCount = 5;
   const std::array<float, kPitchCount> kPitches = {0.0f, 0.2f, 0.35f, 0.5f, 0.95f};
   constexpr float kRootPitch = 1.75f;
@@ -214,7 +216,7 @@ TEST(ScaleTest, GetPitch) {
                                    // NOLINTNEXTLINE(bugprone-integer-division)
                                    static_cast<float>(octave + (i + kMode) / kPitchCount) +
                                    kPitches[(i + kMode) % kPitchCount] - kPitches[kMode];
-      EXPECT_FLOAT_EQ(scale.GetPitch(degree), expected_pitch) << degree;
+      EXPECT_NEAR(scale.GetPitch(degree), expected_pitch, kEpsilon) << degree;
     }
   }
 }

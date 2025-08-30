@@ -81,19 +81,12 @@ if(MSVC)
     /W4
     /WX
   )
-elseif(APPLE)
-  add_compile_options(
-    -Wall
-    -Wextra
-    -Wno-missing-field-initializers
-    -Wno-unused-lambda-capture
-    -Werror
-  )
 else()
   add_compile_options(
     -Wall
     -Wextra
     -Wno-missing-field-initializers
+    -Wno-unused-lambda-capture
     -Werror
   )
 endif()

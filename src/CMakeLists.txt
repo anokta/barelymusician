@@ -15,6 +15,24 @@ target_compile_definitions(
   barelymusician
   PUBLIC BARELYMUSICIAN_EXPORTS
 )
+if(MSVC)
+  target_compile_options(
+    barelymusician PUBLIC
+    /O2
+    /Ob2
+    /Oi
+    /Ot
+    /fp:fast
+  )
+else()
+  target_compile_options(
+    barelymusician PUBLIC
+    -O3
+    -finline-functions
+    -ffast-math
+    -fno-math-errno
+  )
+endif()
 
 if(ENABLE_BENCHMARKS)
   add_executable(

@@ -13,19 +13,44 @@
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "common/time.h"
+#include "dsp/control.h"
 #include "dsp/message.h"
 
+namespace {
+
+using ::barely::Control;
 using ::barely::ControlMessage;
+using ::barely::EffectControlArray;
+using ::barely::EffectControlMessage;
+using ::barely::EffectControlType;
 using ::barely::MessageVisitor;
 using ::barely::NoteControlMessage;
 using ::barely::NoteOffMessage;
 using ::barely::NoteOnMessage;
 using ::barely::SampleDataMessage;
 
+// Returns an effect control array.
+EffectControlArray BuildEffectControlArray() noexcept {
+  return {
+      Control(0.0f, 0.0f, 1.0f),   // kDelayMix
+      Control(0.0f, 0.0f, 10.0f),  // kDelayTime
+      Control(0.0f, 0.0f, 1.0f),   // kDelayFeedback
+  };
+}
+
+}  // namespace
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate, float reference_frequency) noexcept
-    : sample_rate_(sample_rate), reference_frequency_(reference_frequency) {
+BarelyEngine::BarelyEngine(int sample_rate, int max_channel_count, int max_frame_count,
+                           float reference_frequency) noexcept
+    : sample_rate_(sample_rate),
+      reference_frequency_(reference_frequency),
+      effect_controls_(BuildEffectControlArray()),
+      effect_processor_(sample_rate_, max_channel_count),
+      effect_samples_(max_channel_count * max_frame_count) {
   assert(sample_rate >= 0);
+  assert(max_channel_count > 0);
+  assert(max_frame_count > 0);
   assert(reference_frequency >= 0.0f);
 }
 
@@ -44,6 +69,10 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
   assert(success);
 }
 
+float BarelyEngine::GetEffectControl(BarelyEffectControlType type) const noexcept {
+  return effect_controls_[type].value;
+}
+
 void BarelyEngine::Process(float* output_samples, int output_channel_count, int output_frame_count,
                            double timestamp) noexcept {
   assert(output_samples != nullptr);
@@ -51,6 +80,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
   assert(output_frame_count > 0);
 
   std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
+  std::fill_n(effect_samples_.begin(), output_channel_count * output_frame_count, 0.0f);
 
   const int64_t process_frame = barely::SecondsToFrames(sample_rate_, timestamp);
   const int64_t end_frame = process_frame + output_frame_count;
@@ -64,15 +94,24 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
       for (auto* instrument : *instruments) {
-        instrument->processor().Process(&output_samples[current_frame * output_channel_count],
+        instrument->processor().Process(&effect_samples_[current_frame * output_channel_count],
+                                        &output_samples[current_frame * output_channel_count],
                                         output_channel_count, message_frame - current_frame);
       }
+      effect_processor_.Process(&effect_samples_[current_frame * output_channel_count],
+                                &output_samples[current_frame * output_channel_count],
+                                message_frame - current_frame);
+
       current_frame = message_frame;
     }
     std::visit(MessageVisitor{[&instruments](ControlMessage& control_message) noexcept {
                                 if (!instruments->contains(control_message.instrument)) return;
                                 control_message.instrument->processor().SetControl(
                                     control_message.type, control_message.value);
+                              },
+                              [this](EffectControlMessage& effect_control_message) noexcept {
+                                effect_processor_.SetControl(effect_control_message.type,
+                                                             effect_control_message.value);
                               },
                               [&instruments](NoteControlMessage& note_control_message) noexcept {
                                 if (!instruments->contains(note_control_message.instrument)) return;
@@ -101,9 +140,13 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
   // Process the rest of the samples.
   if (process_frame + static_cast<int64_t>(current_frame) < end_frame) {
     for (auto* instrument : *instruments) {
-      instrument->processor().Process(&output_samples[current_frame * output_channel_count],
+      instrument->processor().Process(&effect_samples_[current_frame * output_channel_count],
+                                      &output_samples[current_frame * output_channel_count],
                                       output_channel_count, output_frame_count - current_frame);
     }
+    effect_processor_.Process(&effect_samples_[current_frame * output_channel_count],
+                              &output_samples[current_frame * output_channel_count],
+                              output_frame_count - current_frame);
   }
 }
 
@@ -120,6 +163,13 @@ void BarelyEngine::RemovePerformer(BarelyPerformer* performer) noexcept {
 
 void BarelyEngine::ScheduleMessage(barely::Message message) noexcept {
   message_queue_.Add(update_frame_, std::move(message));
+}
+
+void BarelyEngine::SetEffectControl(BarelyEffectControlType type, float value) noexcept {
+  if (auto& effect_control = effect_controls_[type]; effect_control.SetValue(value)) {
+    ScheduleMessage(
+        EffectControlMessage{static_cast<EffectControlType>(type), effect_control.value});
+  }
 }
 
 void BarelyEngine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }

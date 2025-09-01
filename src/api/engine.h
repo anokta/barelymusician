@@ -6,11 +6,14 @@
 #include <cmath>
 #include <cstdint>
 #include <unordered_set>
+#include <vector>
 
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "common/mutable.h"
 #include "common/rng.h"
+#include "dsp/control.h"
+#include "dsp/effect_processor.h"
 #include "dsp/message_queue.h"
 
 /// Implementation of an engine.
@@ -19,9 +22,12 @@ struct BarelyEngine {
   /// Constructs a new `BarelyEngine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
+  /// @param max_channel_count Maximum number of channels.
+  /// @param max_frame_count Maximum number of frames.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  BarelyEngine(int sample_rate, float reference_frequency) noexcept;
+  BarelyEngine(int sample_rate, int max_channel_count, int max_frame_count,
+               float reference_frequency) noexcept;
 
   /// Destroys `BarelyEngine`.
   ~BarelyEngine() noexcept;
@@ -37,6 +43,12 @@ struct BarelyEngine {
   /// @return Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(BarelyPerformer* performer) noexcept;
+
+  /// Returns an effect control value.
+  ///
+  /// @param type Effect control type.
+  /// @return Effect control value.
+  [[nodiscard]] float GetEffectControl(BarelyEffectControlType type) const noexcept;
 
   /// Returns the reference frequency.
   ///
@@ -85,6 +97,12 @@ struct BarelyEngine {
   /// @param message Message
   void ScheduleMessage(barely::Message message) noexcept;
 
+  /// Sets an effect control value.
+  ///
+  /// @param type Effect control type.
+  /// @param value Effect control value.
+  void SetEffectControl(BarelyEffectControlType type, float value) noexcept;
+
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
@@ -105,6 +123,15 @@ struct BarelyEngine {
 
   // Reference frequency at zero pitch.
   float reference_frequency_ = 0.0f;
+
+  // Array of effect controls.
+  barely::EffectControlArray effect_controls_;
+
+  // Effect processor.
+  barely::EffectProcessor effect_processor_;
+
+  // Effect samples.
+  std::vector<float> effect_samples_;
 
   // Random number generator for the audio thread.
   barely::AudioRng audio_rng_;

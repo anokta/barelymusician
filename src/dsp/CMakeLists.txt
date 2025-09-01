@@ -3,6 +3,8 @@ target_sources(
   biquad_filter.h
   bit_crusher.h
   control.h
+  delay.h
+  effect_processor.cpp
   envelope.h
   instrument_processor.cpp
   instrument_processor.h

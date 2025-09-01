@@ -21,7 +21,7 @@ constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
-  BarelyEngine engine(kSampleRate, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kChannelCount, kSampleRate, kReferenceFrequency);
 
   // Create a performer.
   BarelyPerformer performer(engine);
@@ -89,7 +89,7 @@ TEST(EngineTest, PlaySingleNote) {
       BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
   };
 
-  BarelyEngine engine(kSampleRate, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kChannelCount, kFrameCount, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
@@ -134,7 +134,7 @@ TEST(EngineTest, PlayMultipleNotes) {
       BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
   };
 
-  BarelyEngine engine(1, kReferenceFrequency);
+  BarelyEngine engine(1, kChannelCount, kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
@@ -169,7 +169,7 @@ TEST(EngineTest, PlayMultipleNotes) {
 
 // Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
-  BarelyEngine engine(kSampleRate, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kChannelCount, kSampleRate, kReferenceFrequency);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
 
   engine.SetTempo(200.0);

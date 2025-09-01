@@ -15,9 +15,9 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create.
-///   constexpr int kChannelCount = 2;
+///   constexpr int kMaxChannelCount = 2;
 ///   constexpr int kMaxFrameCount = 512;
-///   barely::Engine engine(/*sample_rate=*/48000, kMaxFrameCount);
+///   barely::Engine engine(/*sample_rate=*/48000, kMaxChannelCount, kMaxFrameCount);
 ///
 ///   // Set the tempo.
 ///   engine.SetTempo(/*tempo=*/124.0);
@@ -37,8 +37,8 @@
 ///   //
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
-///   float output_samples[kChannelCount * kMaxFrameCount];
-///   engine.Process(output_samples, kChannelCount, kMaxFrameCount, timestamp);
+///   float output_samples[kMaxChannelCount * kMaxFrameCount];
+///   engine.Process(output_samples, kMaxChannelCount, kMaxFrameCount, timestamp);
 ///   @endcode
 ///
 /// - Instrument:
@@ -93,7 +93,7 @@
 ///
 ///   // Create.
 ///   BarelyEngineHandle engine = nullptr;
-///   BarelyEngine_Create(/*sample_rate=*/48000, /*max_frame_count=*/512,
+///   BarelyEngine_Create(/*sample_rate=*/48000, /*max_channel_count=*/2, /*max_frame_count=*/512,
 ///                       BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
 ///
 ///   // Set the tempo.
@@ -281,9 +281,23 @@ typedef enum BarelyControlType {
   BarelyControlType_kBitCrusherDepth,
   /// Normalized bit crusher rate.
   BarelyControlType_kBitCrusherRate,
+  /// Delay send.
+  BarelyControlType_kDelaySend,
   /// Number of control types.
   BarelyControlType_kCount,
 } BarelyControlType;
+
+/// Effect control types.
+typedef enum BarelyEffectControlType {
+  /// Delay mix.
+  BarelyEffectControlType_kDelayMix = 0,
+  /// Delay time in seconds.
+  BarelyEffectControlType_kDelayTime,
+  /// Delay feedback.
+  BarelyEffectControlType_kDelayFeedback,
+  // Number of effect control types.
+  BarelyEffectControlType_kCount,
+} BarelyEffectControlType;
 
 /// Filter types.
 typedef enum BarelyFilterType {
@@ -558,12 +572,14 @@ BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
 /// Creates a new engine.
 ///
 /// @param sample_rate Sampling rate in hertz.
+/// @param max_channel_count Maximum number of channels.
 /// @param max_frame_count Maximum number of frames.
 /// @param reference_frequency Reference frequency in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
-                                    float reference_frequency, BarelyEngineHandle* out_engine);
+BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_channel_count,
+                                    int32_t max_frame_count, float reference_frequency,
+                                    BarelyEngineHandle* out_engine);
 
 /// Destroys an engine.
 ///
@@ -577,6 +593,15 @@ BARELY_API bool BarelyEngine_Destroy(BarelyEngineHandle engine);
 /// @param out_number Output random number.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_number);
+
+/// Gets an effect control value of an engine.
+///
+/// @param engine Engine handle.
+/// @param type Effect control type.
+/// @param out_value Output effect control value.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_GetEffectControl(BarelyEngineHandle engine,
+                                              BarelyEffectControlType type, float* out_value);
 
 /// Gets the random number generator seed of an engine.
 ///
@@ -610,6 +635,15 @@ BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out
 BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
                                      int32_t output_channel_count, int32_t output_frame_count,
                                      double timestamp);
+
+/// Sets an effect control value of an engine.
+///
+/// @param engine Engine handle.
+/// @param type Effect control type.
+/// @param value Effect control value.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_SetEffectControl(BarelyEngineHandle engine,
+                                              BarelyEffectControlType type, float value);
 
 /// Sets the random number generator seed of an engine.
 ///
@@ -1123,6 +1157,18 @@ enum class ControlType {
   kBitCrusherDepth = BarelyControlType_kBitCrusherDepth,
   /// Normalized bit crusher rate.
   kBitCrusherRate = BarelyControlType_kBitCrusherRate,
+  /// Delay send.
+  kDelaySend = BarelyControlType_kDelaySend,
+};
+
+/// Effect control types.
+enum class EffectControlType {
+  /// Delay mix.
+  kDelayMix = BarelyEffectControlType_kDelayMix,
+  /// Delay time in seconds.
+  kDelayTime = BarelyEffectControlType_kDelayTime,
+  /// Delay feedback.
+  kDelayFeedback = BarelyEffectControlType_kDelayFeedback,
 };
 
 /// Filter types.
@@ -1899,15 +1945,16 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
+  /// @param max_channel_count Maximum number of channels.
   /// @param max_frame_count Maximum number of frames.
   /// @param reference_frequency Reference frequency in hertz.
-  Engine(int sample_rate, int max_frame_count,
+  Engine(int sample_rate, int max_channel_count, int max_frame_count,
          float reference_frequency = kDefaultReferenceFrequency) noexcept
       : HandleWrapper([&]() {
           BarelyEngineHandle engine = nullptr;
           [[maybe_unused]] const bool success = BarelyEngine_Create(
-              static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_frame_count),
-              reference_frequency, &engine);
+              static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_channel_count),
+              static_cast<int32_t>(max_frame_count), reference_frequency, &engine);
           assert(success);
           return engine;
         }()) {}
@@ -1973,6 +2020,21 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
   }
 
+  /// Returns an effect control value.
+  ///
+  /// @param type Effect control type.
+  /// @return Effect control value.
+  template <typename ValueType>
+  [[nodiscard]] ValueType GetEffectControl(EffectControlType type) const noexcept {
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
+    float value = 0.0f;
+    [[maybe_unused]] const bool success =
+        BarelyEngine_GetEffectControl(*this, static_cast<BarelyEffectControlType>(type), &value);
+    assert(success);
+    return static_cast<ValueType>(value);
+  }
+
   /// Returns the random number generator seed.
   ///
   /// @return Seed value.
@@ -2014,6 +2076,19 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     [[maybe_unused]] const bool success =
         BarelyEngine_Process(*this, output_samples, static_cast<int32_t>(output_channel_count),
                              static_cast<int32_t>(output_frame_count), timestamp);
+    assert(success);
+  }
+
+  /// Sets an effect control value.
+  ///
+  /// @param type Effect control type.
+  /// @param value Effect control value.
+  template <typename ValueType>
+  void SetEffectControl(EffectControlType type, ValueType value) noexcept {
+    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+                  "ValueType is not supported");
+    [[maybe_unused]] const bool success = BarelyEngine_SetEffectControl(
+        *this, static_cast<BarelyEffectControlType>(type), static_cast<float>(value));
     assert(success);
   }
 

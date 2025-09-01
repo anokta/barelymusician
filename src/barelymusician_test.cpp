@@ -13,26 +13,31 @@ using ::testing::ElementsAre;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kSampleRate = 48000;
+constexpr int kMaxChannelCount = 2;
 constexpr int kMaxFrameCount = 512;
 constexpr float kReferenceFrequency = kDefaultReferenceFrequency;
 
 TEST(BarelyEngineTest, CreateDestroyEngine) {
   // Failures.
-  EXPECT_FALSE(BarelyEngine_Create(0, 0, 0.0f, nullptr));
-  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, 0, 0.0f, nullptr));
-  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, 0.0f, nullptr));
-  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, kReferenceFrequency, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(0, 0, 0, 0.0f, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, 0, 0, 0.0f, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, kMaxChannelCount, 0, 0.0f, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, kMaxChannelCount, kMaxFrameCount, 0.0f, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, kMaxChannelCount, kMaxFrameCount,
+                                   kReferenceFrequency, nullptr));
   EXPECT_FALSE(BarelyEngine_Destroy(nullptr));
 
   // Success.
   BarelyEngineHandle engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, kReferenceFrequency, &engine));
+  EXPECT_TRUE(BarelyEngine_Create(kSampleRate, kMaxChannelCount, kMaxFrameCount,
+                                  kReferenceFrequency, &engine));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
   BarelyEngineHandle engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, kReferenceFrequency, &engine));
+  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxChannelCount, kMaxFrameCount,
+                                  kReferenceFrequency, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyInstrument_Create(engine, nullptr, 0, nullptr));
@@ -49,7 +54,8 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
   BarelyEngineHandle engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, kReferenceFrequency, &engine));
+  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxChannelCount, kMaxFrameCount,
+                                  kReferenceFrequency, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyPerformer_Create(engine, nullptr));
@@ -89,16 +95,16 @@ TEST(DecibelsTest, AmplitudeDecibelsMinThreshold) {
 }
 
 TEST(EngineTest, CreateDestroyEngine) {
-  [[maybe_unused]] const Engine engine(kSampleRate, kMaxFrameCount);
+  [[maybe_unused]] const Engine engine(kSampleRate, kMaxChannelCount, kMaxFrameCount);
 }
 
 TEST(EngineTest, CreateDestroyInstrument) {
-  Engine engine(kSampleRate, kMaxFrameCount, kReferenceFrequency);
+  Engine engine(kSampleRate, kMaxChannelCount, kMaxFrameCount, kReferenceFrequency);
   [[maybe_unused]] const auto instrument = engine.CreateInstrument();
 }
 
 TEST(EngineTest, CreateDestroyPerformer) {
-  Engine engine(kSampleRate, kMaxFrameCount, kReferenceFrequency);
+  Engine engine(kSampleRate, kMaxChannelCount, kMaxFrameCount, kReferenceFrequency);
   [[maybe_unused]] const auto performer = engine.CreatePerformer();
 }
 
@@ -106,7 +112,7 @@ TEST(EngineTest, CreateDestroyPerformer) {
 TEST(EngineTest, CreateDestroySingleInstrument) {
   constexpr float kPitch = 0.5;
 
-  Engine engine(kSampleRate, kMaxFrameCount, kReferenceFrequency);
+  Engine engine(kSampleRate, kMaxChannelCount, kMaxFrameCount, kReferenceFrequency);
 
   float note_off_pitch = 0.0f;
   float note_on_pitch = 0.0f;
@@ -136,7 +142,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
   std::vector<float> note_off_pitches;
 
   {
-    Engine engine(kSampleRate, kMaxFrameCount, kReferenceFrequency);
+    Engine engine(kSampleRate, kMaxChannelCount, kMaxFrameCount, kReferenceFrequency);
 
     // Create instruments with note off callbacks.
     std::vector<Instrument> instruments;
@@ -168,7 +174,7 @@ TEST(EngineTest, GenerateRandomNumber) {
   constexpr int kMin = -7;
   constexpr int kMax = 35;
 
-  Engine engine(1, 1);
+  Engine engine(1, kMaxChannelCount, 1);
   for (int i = 0; i < kValueCount; ++i) {
     const int value = engine.GenerateRandomNumber(kMin, kMax);
     EXPECT_GE(value, kMin);
@@ -181,7 +187,7 @@ TEST(EngineTest, SetSeed) {
   constexpr int kSeed = 1;
   constexpr int kValueCount = 10;
 
-  Engine engine(1, 1);
+  Engine engine(1, kMaxChannelCount, 1);
   engine.SetSeed(kSeed);
 
   // Generate some random values.

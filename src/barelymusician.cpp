@@ -92,14 +92,16 @@ bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeg
   return true;
 }
 
-bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count, float reference_frequency,
-                         BarelyEngineHandle* out_engine) {
+bool BarelyEngine_Create(int32_t sample_rate, int32_t max_channel_count, int32_t max_frame_count,
+                         float reference_frequency, BarelyEngineHandle* out_engine) {
   if (sample_rate <= 0) return false;
+  if (max_channel_count <= 0) return false;
   if (max_frame_count <= 0) return false;
   if (reference_frequency <= 0.0) return false;
   if (!out_engine) return false;
 
-  *out_engine = new BarelyEngine(sample_rate, reference_frequency);
+  *out_engine =
+      new BarelyEngine(sample_rate, max_channel_count, max_frame_count, reference_frequency);
   return true;
 }
 
@@ -115,6 +117,16 @@ bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_nu
   if (!out_number) return false;
 
   *out_number = engine->main_rng().Generate();
+  return true;
+}
+
+bool BarelyEngine_GetEffectControl(BarelyEngineHandle engine, BarelyEffectControlType type,
+                                   float* out_value) {
+  if (!engine) return false;
+  if (type >= BarelyEffectControlType_kCount) return false;
+  if (!out_value) return false;
+
+  *out_value = engine->GetEffectControl(type);
   return true;
 }
 
@@ -150,6 +162,15 @@ bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
   if (output_channel_count <= 0 || output_frame_count <= 0) return false;
 
   engine->Process(output_samples, output_channel_count, output_frame_count, timestamp);
+  return true;
+}
+
+bool BarelyEngine_SetEffectControl(BarelyEngineHandle engine, BarelyEffectControlType type,
+                                   float value) {
+  if (!engine) return false;
+  if (type >= BarelyEffectControlType_kCount) return false;
+
+  engine->SetEffectControl(type, value);
   return true;
 }
 

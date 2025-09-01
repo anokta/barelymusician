@@ -10,6 +10,7 @@
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
+#include "dsp/control.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_generators.h"
 #include "dsp/voice.h"
@@ -23,6 +24,9 @@ struct VoiceParams {
 
   /// Bit crusher increment (for sample rate reduction).
   float bit_crusher_increment = 1.0f;
+
+  /// Delay send.
+  float delay_send = 0.0f;
 
   /// Filter coefficients.
   BiquadFilter::Coefficients filter_coefficients = {};
@@ -85,13 +89,15 @@ class Voice {
   /// @tparam kSliceMode Slice mode.
   /// @param voice Voice.
   /// @param params Instrument parameters.
+  /// @param delay_samples Array of interleaved delay send samples.
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   template <OscMode kOscMode, SliceMode kSliceMode>
-  static void Process(Voice& voice, const InstrumentParams& params, float* output_samples,
-                      int output_channel_count, int output_frame_count) noexcept {
-    voice.Process<kOscMode, kSliceMode>(params, output_samples, output_channel_count,
+  static void Process(Voice& voice, const InstrumentParams& params, float* delay_samples,
+                      float* output_samples, int output_channel_count,
+                      int output_frame_count) noexcept {
+    voice.Process<kOscMode, kSliceMode>(params, delay_samples, output_samples, output_channel_count,
                                         output_frame_count);
   }
 
@@ -144,8 +150,8 @@ class Voice {
 
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  void Process(const InstrumentParams& params, float* output_samples, int output_channel_count,
-               int output_frame_count) noexcept {
+  void Process(const InstrumentParams& params, float* delay_samples, float* output_samples,
+               int output_channel_count, int output_frame_count) noexcept {
     assert(output_samples != nullptr);
     assert(output_channel_count == 2);
     assert(output_frame_count > 0);
@@ -215,6 +221,11 @@ class Voice {
       output_samples[frame * output_channel_count] += left_gain * output;
       output_samples[frame * output_channel_count + 1] += right_gain * output;
 
+      delay_samples[frame * output_channel_count] +=
+          params_.delay_send * output_samples[frame * output_channel_count];
+      delay_samples[frame * output_channel_count + 1] +=
+          params_.delay_send * output_samples[frame * output_channel_count + 1];
+
       Approach(params.voice_params);
 
       if (!IsActive()) {
@@ -224,25 +235,22 @@ class Voice {
   }
 
   void Approach(const VoiceParams& params) noexcept {
-    ApproachParam(params_.gain, note_params_.gain * params.gain);
-    ApproachParam(params_.bit_crusher_increment, params.bit_crusher_increment);
-    ApproachParam(params_.bit_crusher_range, params.bit_crusher_range);
-    ApproachParam(params_.osc_mix, params.osc_mix);
-    ApproachParam(params_.osc_noise_mix, params.osc_noise_mix);
-    ApproachParam(params_.osc_shape, params.osc_shape);
-    ApproachParam(params_.osc_skew, params.osc_skew);
-    ApproachParam(params_.stereo_pan, params.stereo_pan);
+    ApproachValue(params_.gain, note_params_.gain * params.gain);
+    ApproachValue(params_.bit_crusher_increment, params.bit_crusher_increment);
+    ApproachValue(params_.bit_crusher_range, params.bit_crusher_range);
+    ApproachValue(params_.osc_mix, params.osc_mix);
+    ApproachValue(params_.osc_noise_mix, params.osc_noise_mix);
+    ApproachValue(params_.osc_shape, params.osc_shape);
+    ApproachValue(params_.osc_skew, params.osc_skew);
+    ApproachValue(params_.stereo_pan, params.stereo_pan);
 
-    ApproachParam(params_.filter_coefficients.a1, params.filter_coefficients.a1);
-    ApproachParam(params_.filter_coefficients.a2, params.filter_coefficients.a2);
-    ApproachParam(params_.filter_coefficients.b0, params.filter_coefficients.b0);
-    ApproachParam(params_.filter_coefficients.b1, params.filter_coefficients.b1);
-    ApproachParam(params_.filter_coefficients.b2, params.filter_coefficients.b2);
-  }
+    ApproachValue(params_.filter_coefficients.a1, params.filter_coefficients.a1);
+    ApproachValue(params_.filter_coefficients.a2, params.filter_coefficients.a2);
+    ApproachValue(params_.filter_coefficients.b0, params.filter_coefficients.b0);
+    ApproachValue(params_.filter_coefficients.b1, params.filter_coefficients.b1);
+    ApproachValue(params_.filter_coefficients.b2, params.filter_coefficients.b2);
 
-  void ApproachParam(float& current_param, float target_param) noexcept {
-    static constexpr float kCoeff = 0.002f;
-    current_param += (target_param - current_param) * kCoeff;
+    ApproachValue(params_.delay_send, params.delay_send);
   }
 
   bool IsSliceActive() const noexcept {
@@ -265,11 +273,13 @@ class Voice {
 ///
 /// @param voice Mutable voice.
 /// @param params Instrument parameters.
+/// @param delay_samples Array of interleaved delay send samples.
 /// @param output_samples Array of interleaved output samples.
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
-using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params, float* output_samples,
-                               int output_channel_count, int output_frame_count);
+using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params, float* delay_samples,
+                               float* output_samples, int output_channel_count,
+                               int output_frame_count);
 
 }  // namespace barely
 

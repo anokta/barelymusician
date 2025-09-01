@@ -17,7 +17,7 @@ namespace barely {
 namespace {
 
 template <SliceMode kSliceMode>
-VoiceCallback GetVoiceCallback(OscMode osc_mode) {
+VoiceCallback GetVoiceCallback(OscMode osc_mode) noexcept {
   switch (osc_mode) {
     case OscMode::kMix:
       return Voice::Process<OscMode::kMix, kSliceMode>;
@@ -37,7 +37,7 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode) {
   }
 }
 
-VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) {
+VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) noexcept {
   switch (slice_mode) {
     case SliceMode::kSustain:
       return GetVoiceCallback<SliceMode::kSustain>(osc_mode);
@@ -68,10 +68,10 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
   params_.rng = &rng;
 }
 
-void InstrumentProcessor::Process(float* output_samples, int output_channel_count,
-                                  int output_frame_count) noexcept {
+void InstrumentProcessor::Process(float* delay_samples, float* output_samples,
+                                  int output_channel_count, int output_frame_count) noexcept {
   for (VoiceState& voice_state : voice_states_) {
-    voice_callback_(voice_state.voice, params_, output_samples, output_channel_count,
+    voice_callback_(voice_state.voice, params_, delay_samples, output_samples, output_channel_count,
                     output_frame_count);
   }
 }
@@ -159,6 +159,9 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kBitCrusherRate:
       params_.voice_params.bit_crusher_increment = value;
+      break;
+    case ControlType::kDelaySend:
+      params_.voice_params.delay_send = value;
       break;
     default:
       assert(!"Invalid control type");

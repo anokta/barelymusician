@@ -7,15 +7,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(vst3sdk)
 target_compile_options(
-  base PUBLIC
+  base PRIVATE
   -w
 )
 target_compile_options(
-  pluginterfaces PUBLIC
+  pluginterfaces PRIVATE
   -w
 )
 target_compile_options(
-  sdk PUBLIC
+  sdk PRIVATE
   -w
 )
 

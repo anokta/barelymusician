@@ -33,7 +33,7 @@ if(NOT midifile_POPULATED)
   add_subdirectory(${midifile_SOURCE_DIR} ${midifile_BINARY_DIR})
 endif()
 target_compile_options(
-  midifile PUBLIC
+  midifile PRIVATE
   -w
 )
 include_directories(${midifile_SOURCE_DIR}/include)

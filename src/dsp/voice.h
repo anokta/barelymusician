@@ -7,6 +7,7 @@
 #include <array>
 #include <cmath>
 
+#include "common/restrict.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
@@ -94,9 +95,9 @@ class Voice {
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   template <OscMode kOscMode, SliceMode kSliceMode>
-  static void Process(Voice& voice, const InstrumentParams& params, float* delay_samples,
-                      float* output_samples, int output_channel_count,
-                      int output_frame_count) noexcept {
+  static void Process(Voice& voice, const InstrumentParams& params,
+                      float* BARELY_RESTRICT delay_samples, float* BARELY_RESTRICT output_samples,
+                      int output_channel_count, int output_frame_count) noexcept {
     voice.Process<kOscMode, kSliceMode>(params, delay_samples, output_samples, output_channel_count,
                                         output_frame_count);
   }
@@ -150,8 +151,9 @@ class Voice {
 
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  void Process(const InstrumentParams& params, float* delay_samples, float* output_samples,
-               int output_channel_count, int output_frame_count) noexcept {
+  void Process(const InstrumentParams& params, float* BARELY_RESTRICT delay_samples,
+               float* BARELY_RESTRICT output_samples, int output_channel_count,
+               int output_frame_count) noexcept {
     assert(output_samples != nullptr);
     assert(output_channel_count == 2);
     assert(output_frame_count > 0);
@@ -218,13 +220,17 @@ class Voice {
 
       const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
       const float right_gain = 1.0f - left_gain;
-      output_samples[frame * output_channel_count] += left_gain * output;
-      output_samples[frame * output_channel_count + 1] += right_gain * output;
 
-      delay_samples[frame * output_channel_count] +=
-          params_.delay_send * output_samples[frame * output_channel_count];
-      delay_samples[frame * output_channel_count + 1] +=
-          params_.delay_send * output_samples[frame * output_channel_count + 1];
+      const float left_output = left_gain * output;
+      const float right_output = right_gain * output;
+
+      const int frame_offset = output_channel_count * frame;
+
+      output_samples[frame_offset] += left_output;
+      output_samples[frame_offset + 1] += right_output;
+
+      delay_samples[frame_offset] += params_.delay_send * left_output;
+      delay_samples[frame_offset + 1] += params_.delay_send * right_output;
 
       Approach(params.voice_params);
 
@@ -277,8 +283,9 @@ class Voice {
 /// @param output_samples Array of interleaved output samples.
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
-using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params, float* delay_samples,
-                               float* output_samples, int output_channel_count,
+using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
+                               float* BARELY_RESTRICT delay_samples,
+                               float* BARELY_RESTRICT output_samples, int output_channel_count,
                                int output_frame_count);
 
 }  // namespace barely

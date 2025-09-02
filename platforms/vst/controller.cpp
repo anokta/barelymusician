@@ -41,6 +41,7 @@ const std::array<RangeParameter, BarelyControlType_kCount> kParams = {
                    16.0, 16.0),
     RangeParameter(STR16("Bitcrusher Rate"), BarelyControlType_kBitCrusherRate, STR16(""), 0.0, 1.0,
                    1.0),
+    RangeParameter(STR16("Delay Send"), BarelyControlType_kDelaySend, STR16(""), 0.0, 1.0, 0.0),
 };
 
 }
@@ -76,7 +77,8 @@ tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {
   // Initialize plugin parameters.
   for (int i = 0; i < BarelyControlType_kCount; ++i) {
     if (i == BarelyControlType_kOscMix || i == BarelyControlType_kOscMode ||
-        i == BarelyControlType_kOscPitchShift || i == BarelyControlType_kSliceMode) {
+        i == BarelyControlType_kOscPitchShift || i == BarelyControlType_kSliceMode ||
+        i == BarelyControlType_kDelaySend) {
       // TODO(#162): Support sampling features.
       continue;
     }

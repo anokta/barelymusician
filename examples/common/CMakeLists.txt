@@ -18,11 +18,11 @@ target_link_libraries(
 if(MSVC)
   target_link_options(
     barelymusician_examples_common
-    PRIVATE -l user32.lib
+    PUBLIC -l user32.lib
   )
 elseif(APPLE)
   target_link_options(
     barelymusician_examples_common
-    PRIVATE -framework ApplicationServices
+    PUBLIC -framework ApplicationServices
   )
 endif()

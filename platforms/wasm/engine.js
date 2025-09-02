@@ -13,6 +13,9 @@ export class Engine {
     this._tempo = 120.0;
     this.timestamp = 0.0;
 
+    this._delayTime = 0.0;
+    this._delayFeedback = 0.0;
+
     this._render();
 
     this._instruments = {};
@@ -123,6 +126,16 @@ export class Engine {
         <input type="range" min="30" max="480" value="${this._tempo}" step="1" id="tempoSlider">
         <span id="tempoValue">${this._tempo}</span>
       </div>
+      <div class="engine-delay">
+        <label for="delayTimeSlider">Delay Time</label>
+        <input type="range" min="0.0" max="10.0" value="${
+        this._delayTime}" step="0.1" id="delayTimeSlider">
+        <span id="delayTimeValue">${this._delayTime.toFixed(1)}</span>
+        <label for="delayFeedbackSlider">Feedback</label>
+        <input type="range" min="0.0" max="1.0" value="${
+        this._delayFeedback}" step="0.05" id="delayFeedbackSlider">
+        <span id="delayFeedbackValue">${this._delayFeedback.toFixed(2)}</span>
+      </div>
     <div class="engine-status"></div>
     <div class="engine-components">
       <div class="instruments"></div>
@@ -191,6 +204,25 @@ export class Engine {
     this.tempoSlider.value = this._tempo;
     this.tempoValue.textContent = this._tempo;
     this._audioNode.port.postMessage({type: 'engine-set-tempo', tempo: this._tempo});
+  }
+
+  set delayTime(newDelayTime) {
+    if (this._delayTime === newDelayTime) return;
+
+    this._delayTime = newDelayTime;
+    this.delayTimeSlider.value = this._delayTime;
+    this.delayTimeValue.textContent = this._delayTime.toFixed(1);
+    this._audioNode.port.postMessage({type: 'engine-set-delay-time', delayTime: this._delayTime});
+  }
+
+  set delayFeedback(newDelayFeedback) {
+    if (this._delayFeedback === newDelayFeedback) return;
+
+    this._delayFeedback = newDelayFeedback;
+    this.delayFeedbackSlider.value = this._delayFeedback;
+    this.delayFeedbackValue.textContent = this._delayFeedback.toFixed(2);
+    this._audioNode.port.postMessage(
+        {type: 'engine-set-delay-feedback', delayFeedback: this._delayFeedback});
   }
 
   _initAudioNode(audioContext, state) {
@@ -329,6 +361,17 @@ export class Engine {
     this.tempoValue = this.container.querySelector('#tempoValue');
     this.tempoSlider.addEventListener('input', () => {
       this.tempo = Number(this.tempoSlider.value);
+    });
+
+    this.delayTimeSlider = this.container.querySelector('#delayTimeSlider');
+    this.delayTimeValue = this.container.querySelector('#delayTimeValue');
+    this.delayTimeSlider.addEventListener('input', () => {
+      this.delayTime = Number(this.delayTimeSlider.value);
+    });
+    this.delayFeedbackSlider = this.container.querySelector('#delayFeedbackSlider');
+    this.delayFeedbackValue = this.container.querySelector('#delayFeedbackValue');
+    this.delayFeedbackSlider.addEventListener('input', () => {
+      this.delayFeedback = Number(this.delayFeedbackSlider.value);
     });
 
     // Reset

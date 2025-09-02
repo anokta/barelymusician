@@ -1,7 +1,10 @@
 #include "dsp/effect_processor.h"
 
+#include <barelymusician.h>
+
 #include <cassert>
 
+#include "common/restrict.h"
 #include "dsp/control.h"
 
 namespace barely {
@@ -13,20 +16,21 @@ constexpr int kMaxDelayFrameSeconds = 10;
 
 }  // namespace
 
-EffectProcessor::EffectProcessor(int sample_rate, int channel_count) noexcept
+EffectProcessor::EffectProcessor(int sample_rate, int max_channel_count) noexcept
     : sample_rate_(sample_rate),
-      channel_count_(channel_count),
-      delay_(channel_count, sample_rate * kMaxDelayFrameSeconds) {
+      delay_filter_(max_channel_count, sample_rate * kMaxDelayFrameSeconds) {
   assert(sample_rate > 0);
-  assert(channel_count > 0);
+  assert(max_channel_count > 0);
 }
 
-void EffectProcessor::Process(const float* input_samples, float* output_samples,
+void EffectProcessor::Process(const float* BARELY_RESTRICT delay_samples,
+                              float* BARELY_RESTRICT output_samples, int channel_count,
                               int frame_count) noexcept {
   for (int frame = 0; frame < frame_count; ++frame) {
-    delay_.Process(&input_samples[frame * channel_count_], &output_samples[frame * channel_count_],
-                   current_params_.delay_mix, current_params_.delay_frame_count,
-                   current_params_.delay_feedback);
+    const int frame_offset = channel_count * frame;
+    delay_filter_.Process(&delay_samples[frame_offset], &output_samples[frame_offset],
+                          channel_count, current_params_.delay_mix,
+                          current_params_.delay_frame_count, current_params_.delay_feedback);
     Approach();
   }
 }

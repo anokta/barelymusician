@@ -20,7 +20,8 @@ export const ControlType = {
   FILTER_Q: 18,
   BIT_CRUSHER_DEPTH: 19,
   BIT_CRUSHER_RATE: 20,
-  COUNT: 21,
+  DELAY_SEND: 21,
+  COUNT: 22,
 };
 
 export const FilterType = {
@@ -198,6 +199,13 @@ export const CONTROLS = {
     name: 'Bitcrusher Rate',
     valueType: 'float',
     defaultValue: 1.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [ControlType.DELAY_SEND]: {
+    name: 'Delay Send',
+    valueType: 'float',
+    defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 1.0,
   },

@@ -28,9 +28,8 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
 // Effect settings.
-constexpr float kDelayMix = 1.0f;
 constexpr float kDelayTime = 0.5f;
-constexpr float kDelayFeedback = 0.2f;
+constexpr float kDelayFeedback = 0.2;
 
 // Instrument settings.
 constexpr float kGain = 0.125f;
@@ -38,7 +37,7 @@ constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.05f;
 constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
-constexpr float kDelaySend = 0.25f;
+constexpr float kDelaySend = 0.1f;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
@@ -65,7 +64,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kChannelCount, kFrameCount);
-  engine.SetEffectControl(EffectControlType::kDelayMix, kDelayMix);
   engine.SetEffectControl(EffectControlType::kDelayTime, kDelayTime);
   engine.SetEffectControl(EffectControlType::kDelayFeedback, kDelayFeedback);
 

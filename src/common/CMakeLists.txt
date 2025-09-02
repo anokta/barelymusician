@@ -3,6 +3,7 @@ target_sources(
   callback.h
   find_or_null.h
   mutable.h
+  restrict.h
   rng.h
   time.h
 )

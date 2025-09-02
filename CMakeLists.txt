@@ -63,7 +63,7 @@ if(ENABLE_DAISY)
     BOOT_APP # Use the Daisy bootloader.
   )
   target_compile_options(
-    daisy PRIVATE
+    daisy PUBLIC
     -w
   )
   include_directories(${libdaisy_SOURCE_DIR}/src)
@@ -142,7 +142,7 @@ if(ENABLE_BENCHMARKS)
   set(BENCHMARK_ENABLE_TESTING OFF)
   FetchContent_MakeAvailable(benchmark)
   target_compile_options(
-    benchmark PRIVATE
+    benchmark PUBLIC
     -w
   )
   include_directories(${benchmark_SOURCE_DIR}/include)

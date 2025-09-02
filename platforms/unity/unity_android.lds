@@ -13,9 +13,11 @@ VERS_1.0 {
     BarelyArpeggiator_SetStyle;
     BarelyEngine_Create;
     BarelyEngine_Destroy;
+    BarelyEngine_GetEffectControl;
     BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
     BarelyEngine_Process;
+    BarelyEngine_SetEffectControl;
     BarelyEngine_SetTempo;
     BarelyEngine_Update;
     BarelyInstrument_Create;

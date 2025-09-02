@@ -7,6 +7,7 @@
 #include <cmath>
 #include <span>
 
+#include "common/restrict.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/sample_data.h"
@@ -68,8 +69,9 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
   params_.rng = &rng;
 }
 
-void InstrumentProcessor::Process(float* delay_samples, float* output_samples,
-                                  int output_channel_count, int output_frame_count) noexcept {
+void InstrumentProcessor::Process(float* BARELY_RESTRICT delay_samples,
+                                  float* BARELY_RESTRICT output_samples, int output_channel_count,
+                                  int output_frame_count) noexcept {
   for (VoiceState& voice_state : voice_states_) {
     voice_callback_(voice_state.voice, params_, delay_samples, output_samples, output_channel_count,
                     output_frame_count);

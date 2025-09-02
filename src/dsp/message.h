@@ -25,6 +25,15 @@ struct ControlMessage {
   float value;
 };
 
+/// Effect control message.
+struct EffectControlMessage {
+  /// Type.
+  EffectControlType type;
+
+  /// Value.
+  float value;
+};
+
 /// Note control message.
 struct NoteControlMessage {
   /// Instrument handle.
@@ -71,8 +80,8 @@ struct SampleDataMessage {
 };
 
 /// Message alias.
-using Message = std::variant<ControlMessage, NoteControlMessage, NoteOffMessage, NoteOnMessage,
-                             SampleDataMessage>;
+using Message = std::variant<ControlMessage, EffectControlMessage, NoteControlMessage,
+                             NoteOffMessage, NoteOnMessage, SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

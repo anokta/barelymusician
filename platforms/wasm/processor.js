@@ -1,7 +1,15 @@
 import Module from './barelymusician.js';
 
 const REFERENCE_FREQUENCY = 261.62555;
+const STEREO_CHANNEL_COUNT = 2;
 const RENDER_QUANTUM_SIZE = 128
+
+export const EffectControlType = {
+  DELAY_MIX: 0,
+  DELAY_TIME: 1,
+  DELAY_FEEDBACK: 2,
+  COUNT: 3,
+};
 
 class Processor extends AudioWorkletProcessor {
   constructor() {
@@ -15,7 +23,8 @@ class Processor extends AudioWorkletProcessor {
 
     Module().then(module => {
       this._module = module;
-      this._engine = new this._module.Engine(sampleRate, RENDER_QUANTUM_SIZE, REFERENCE_FREQUENCY);
+      this._engine = new this._module.Engine(
+          sampleRate, STEREO_CHANNEL_COUNT, RENDER_QUANTUM_SIZE, REFERENCE_FREQUENCY);
       this._instruments = {};
       this._performers = {};
       this._tasks = {};
@@ -56,6 +65,12 @@ class Processor extends AudioWorkletProcessor {
         case 'engine-get-timestamp': {
           this.port.postMessage(
               {type: 'engine-get-timestamp-response', timestamp: this._engine.timestamp});
+        } break;
+        case 'engine-set-delay-time': {
+          this._engine.setEffectControl(EffectControlType.DELAY_TIME, event.data.delayTime);
+        } break;
+        case 'engine-set-delay-feedback': {
+          this._engine.setEffectControl(EffectControlType.DELAY_FEEDBACK, event.data.delayFeedback);
         } break;
         case 'engine-set-seed': {
           this._engine.seed = event.data.seed;
@@ -294,6 +309,7 @@ class Processor extends AudioWorkletProcessor {
     const outputSampleCount = outputChannelCount * outputFrameCount;
 
     if (outputSampleCount == 0) return true;
+    if (outputChannelCount > STEREO_CHANNEL_COUNT) return true;
     if (outputFrameCount > RENDER_QUANTUM_SIZE) return true;
 
     const latency = Math.max(1.0 / 60.0, outputFrameCount / sampleRate);

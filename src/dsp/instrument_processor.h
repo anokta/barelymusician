@@ -7,6 +7,7 @@
 #include <cmath>
 #include <span>
 
+#include "common/restrict.h"
 #include "common/rng.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"
@@ -29,10 +30,12 @@ class InstrumentProcessor {
 
   /// Processes the next output samples.
   ///
+  /// @param delay_samples Array of interleaved delay send samples.
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  void Process(float* output_samples, int output_channel_count, int output_frame_count) noexcept;
+  void Process(float* BARELY_RESTRICT delay_samples, float* BARELY_RESTRICT output_samples,
+               int output_channel_count, int output_frame_count) noexcept;
 
   /// Sets a control value.
   ///

@@ -427,6 +427,7 @@ GameObject:
   - component: {fileID: 1737834379}
   - component: {fileID: 1737834383}
   - component: {fileID: 1737834384}
+  - component: {fileID: 1737834385}
   m_Layer: 0
   m_Name: InstrumentController
   m_TagString: Untagged
@@ -467,6 +468,7 @@ MonoBehaviour:
   Gain: 0.125
   PitchShift: 0
   Retrigger: 0
+  StereoPan: 0
   VoiceCount: 8
   Attack: 0.05
   Decay: 0
@@ -478,7 +480,7 @@ MonoBehaviour:
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
-  SliceMode: 0
+  SliceMode: 1
   Slices:
   - RootPitch: 0
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
@@ -487,6 +489,7 @@ MonoBehaviour:
   FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DelaySend: 0.1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -535,6 +538,22 @@ MonoBehaviour:
   GateRatio: 0.5
   Rate: 2
   Style: 0
+--- !u!114 &1737834385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737834378}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Bpm: 120
+  DelayMix: 1
+  DelayTime: 0.5
+  DelayFeedback: 0.2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -70,7 +70,7 @@ int main(void) {
   g_midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  g_engine.emplace(kSampleRate, kFrameCount);
+  g_engine.emplace(kSampleRate, kChannelCount, kFrameCount);
   g_instrument = g_engine->CreateInstrument({{
       {ControlType::kGain, kGain},
       {ControlType::kOscMix, 1.0f},

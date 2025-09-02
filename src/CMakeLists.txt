@@ -18,19 +18,14 @@ target_compile_definitions(
 if(MSVC)
   target_compile_options(
     barelymusician PUBLIC
-    /O2
-    /Ob2
-    /Oi
-    /Ot
     /fp:fast
+    $<$<CONFIG:RELEASE>: /O2 /Ob2 /Oi /Ot /Oy>
   )
 else()
   target_compile_options(
     barelymusician PUBLIC
-    -O3
-    -finline-functions
-    -ffast-math
-    -fno-math-errno
+    -ffast-math -fno-math-errno
+    $<$<CONFIG:RELEASE>: -O3 -finline-functions -fomit-frame-pointer>
   )
 endif()
 

@@ -55,8 +55,20 @@ struct Control {
 /// Control array.
 using ControlArray = std::array<Control, BarelyControlType_kCount>;
 
+/// Effect control array.
+using EffectControlArray = std::array<Control, BarelyEffectControlType_kCount>;
+
 /// Note control array.
 using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
+
+/// Approaches a value to a target value with smoothing.
+///
+/// @param current_value Current value.
+/// @param target_value Target value.
+inline constexpr void ApproachValue(float& current_value, float target_value) noexcept {
+  constexpr float kSmoothingCoeff = 0.002f;
+  current_value += (target_value - current_value) * kSmoothingCoeff;
+}
 
 }  // namespace barely
 

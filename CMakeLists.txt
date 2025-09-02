@@ -59,7 +59,7 @@ if(ENABLE_DAISY)
     FOLDER external
   )
   target_compile_definitions(
-    daisy PUBLIC
+    daisy PRIVATE
     BOOT_APP # Use the Daisy bootloader.
   )
   target_compile_options(

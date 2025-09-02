@@ -188,6 +188,12 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float BitCrusherRate = 1.0f;
 
+    [Header("Send Effects")]
+
+    /// Delay send.
+    [Range(0.0f, 1.0f)]
+    public float DelaySend = 0.0f;
+
     /// Note off callback.
     ///
     /// @param pitch Note pitch.
@@ -336,6 +342,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.FILTER_Q, FilterQ);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
+      SetControl(Engine.Internal.ControlType.DELAY_SEND, DelaySend);
     }
 
     private void SetControl(Engine.Internal.ControlType type, float value) {

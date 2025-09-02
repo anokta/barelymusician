@@ -2,11 +2,49 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Xml.Serialization;
 using UnityEngine;
 
 namespace Barely {
   /// A representation of an engine that governs all musical components.
   public static class Engine {
+    /// Delay mix.
+    public static float DelayMix {
+      get { return _delayMix; }
+      set {
+        if (_delayMix != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_MIX, value);
+          _delayMix = Internal.Engine_GetEffectControl(Internal.EffectControlType.DELAY_MIX);
+        }
+      }
+    }
+    private static float _delayMix = 1.0f;
+
+    /// Delay time in seconds.
+    public static float DelayTime {
+      get { return _delayTime; }
+      set {
+        if (_delayTime != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_TIME, value);
+          _delayTime = Internal.Engine_GetEffectControl(Internal.EffectControlType.DELAY_TIME);
+        }
+      }
+    }
+    private static float _delayTime = 0.0f;
+
+    /// Delay feedback.
+    public static float DelayFeedback {
+      get { return _delayFeedback; }
+      set {
+        if (_delayFeedback != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_FEEDBACK, value);
+          _delayFeedback =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.DELAY_FEEDBACK);
+        }
+      }
+    }
+    private static float _delayFeedback = 0.0f;
+
     /// Tempo in beats per minute.
     public static double Tempo {
       get { return _tempo; }
@@ -86,6 +124,18 @@ namespace Barely {
         [InspectorName("Bit Crusher Depth")] BIT_CRUSHER_DEPTH,
         /// Bit crusher rate.
         [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
+        /// Delay send.
+        [InspectorName("Delay Send")] DELAY_SEND,
+      }
+
+      /// Effect control type.
+      public enum EffectControlType {
+        /// Delay mix.
+        [InspectorName("Delay Mix")] DELAY_MIX = 0,
+        /// Delay time in seconds.
+        [InspectorName("Delay Time")] DELAY_TIME,
+        /// Delay feedback.
+        [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
       }
 
       /// Note control type.
@@ -254,6 +304,18 @@ namespace Barely {
         componentHandle = IntPtr.Zero;
       }
 
+      /// Returns an effect control of an engine.
+      ///
+      /// @param type Effect control type.
+      /// @return Effect control value.
+      public static float Engine_GetEffectControl(EffectControlType type) {
+        float value = 0.0f;
+        if (!BarelyEngine_GetEffectControl(Handle, type, ref value) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get engine effect control");
+        }
+        return value;
+      }
+
       /// Returns the tempo of an engine.
       ///
       /// @return Tempo in beats per minute.
@@ -274,6 +336,16 @@ namespace Barely {
           Debug.LogError("Failed to get engine timestamp");
         }
         return timestamp;
+      }
+
+      /// Sets an effect control of an engine.
+      ///
+      /// @param type Effect control type.
+      /// @param value Effect control value.
+      public static void Engine_SetEffectControl(EffectControlType type, float value) {
+        if (!BarelyEngine_SetEffectControl(Handle, type, value) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set engine effect control");
+        }
       }
 
       /// Sets the tempo of an engine.
@@ -1113,8 +1185,16 @@ namespace Barely {
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          if (!BarelyEngine_Create(config.sampleRate, config.dspBufferSize, _referenceFrequency,
-                                   ref _handle)) {
+          int channelCount = config.speakerMode switch { AudioSpeakerMode.Mono => 1,
+                                                         AudioSpeakerMode.Stereo => 2,
+                                                         AudioSpeakerMode.Quad => 4,
+                                                         AudioSpeakerMode.Surround => 5,
+                                                         AudioSpeakerMode.Mode5point1 => 6,
+                                                         AudioSpeakerMode.Mode7point1 => 8,
+                                                         AudioSpeakerMode.Prologic => 2,
+                                                         _ => 2 };
+          if (!BarelyEngine_Create(config.sampleRate, channelCount, config.dspBufferSize,
+                                   _referenceFrequency, ref _handle)) {
             Debug.LogError("Failed to initialize BarelyEngine");
             return;
           }
@@ -1200,12 +1280,17 @@ namespace Barely {
                                                             ArpeggiatorStyle style);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(Int32 sampleRate, Int32 maxFrameCount,
-                                                     float referenceFrequency,
+      private static extern bool BarelyEngine_Create(Int32 sampleRate, Int32 maxChannelCount,
+                                                     Int32 maxFrameCount, float referenceFrequency,
                                                      ref IntPtr outEngine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
       private static extern bool BarelyEngine_Destroy(IntPtr engine);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetEffectControl")]
+      private static extern bool BarelyEngine_GetEffectControl(IntPtr engine,
+                                                               EffectControlType type,
+                                                               ref float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
       private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
@@ -1218,6 +1303,10 @@ namespace Barely {
                                                       [In, Out] float[] outputSamples,
                                                       Int32 outputChannelCount,
                                                       Int32 outputFrameCount, double timestamp);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetEffectControl")]
+      private static extern bool BarelyEngine_SetEffectControl(IntPtr engine,
+                                                               EffectControlType type, float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
       private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);

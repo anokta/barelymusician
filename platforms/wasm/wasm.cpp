@@ -3,6 +3,7 @@
 #include "emscripten/bind.h"
 
 using ::barely::ControlType;
+using ::barely::EffectControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::NoteEventType;
@@ -23,6 +24,10 @@ using ::emscripten::return_value_policy::take_ownership;
       {ControlType::kRelease, 0.1f},
       {ControlType::kOscMix, 1.0f},
   }});
+}
+
+static void Engine_SetEffectControl(Engine& engine, int type, float value) noexcept {
+  engine.SetEffectControl(static_cast<EffectControlType>(type), value);
 }
 
 static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_channel_count,
@@ -58,14 +63,16 @@ static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
 
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
   class_<Engine>("Engine")
-      .constructor<int, int, float>()
+      .constructor<int, int, int, float>()
       .function("createInstrument", &Engine_CreateInstrument, take_ownership())
       .function("createPerformer", &Engine::CreatePerformer, take_ownership())
       .function("generateRandomNumber",
                 static_cast<double (Engine::*)()>(&Engine::GenerateRandomNumber))
       .function("generateRandomNumber", &Engine::GenerateRandomNumber<double>)
       .function("generateRandomInteger", &Engine::GenerateRandomNumber<int>)
+      .function("getEffectControl", &Engine::GetEffectControl<float>)
       .function("process", &Engine_Process, allow_raw_pointers())
+      .function("setEffectControl", &Engine_SetEffectControl)
       .function("update", &Engine::Update)
       .property("seed", &Engine::GetSeed, &Engine::SetSeed)
       .property("tempo", &Engine::GetTempo, &Engine::SetTempo)

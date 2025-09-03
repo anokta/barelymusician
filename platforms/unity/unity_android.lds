@@ -70,8 +70,6 @@ VERS_1.0 {
     BarelyTask_SetEventCallback;
     BarelyTask_SetPosition;
     BarelyTask_SetPriority;
-    Barely_AmplitudeToDecibels;
-    Barely_DecibelsToAmplitude;
   local:
     *;
 };

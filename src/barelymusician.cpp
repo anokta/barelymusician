@@ -616,17 +616,3 @@ bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority) {
   task->SetPriority(static_cast<int>(priority));
   return true;
 }
-
-bool Barely_AmplitudeToDecibels(float amplitude, float* out_decibels) {
-  if (!out_decibels) return false;
-
-  *out_decibels = (amplitude > 0.0) ? 20.0f * std::log10(amplitude) : barely::kMinDecibels;
-  return true;
-}
-
-bool Barely_DecibelsToAmplitude(float decibels, float* out_amplitude) {
-  if (!out_amplitude) return false;
-
-  *out_amplitude = (decibels > barely::kMinDecibels) ? std::pow(10.0f, 0.05f * decibels) : 0.0f;
-  return true;
-}

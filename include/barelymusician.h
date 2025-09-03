@@ -217,9 +217,6 @@
 /// Default reference frequency which is tuned to middle C.
 #define BARELY_DEFAULT_REFERENCE_FREQUENCY 261.62555f
 
-/// Minimum decibel threshold.
-#define BARELY_MIN_DECIBELS -80.0f
-
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
@@ -1062,20 +1059,6 @@ BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority);
 
-/// Converts a value from linear amplitude to decibels.
-///
-/// @param amplitude Value in linear amplitude.
-/// @param out_decibels Output value in decibels.
-/// @return True if successful, false otherwise.
-BARELY_API bool Barely_AmplitudeToDecibels(float amplitude, float* out_decibels);
-
-/// Converts a value from decibels to linear amplitude.
-///
-/// @param decibels Value in decibels.
-/// @param out_amplitude Output value in linear amplitude.
-/// @return True if successful, false otherwise.
-BARELY_API bool Barely_DecibelsToAmplitude(float decibels, float* out_amplitude);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
@@ -1099,9 +1082,6 @@ namespace barely {
 
 /// Default reference frequency which is tuned to middle C.
 inline constexpr float kDefaultReferenceFrequency = BARELY_DEFAULT_REFERENCE_FREQUENCY;
-
-/// Minimum decibel threshold.
-inline constexpr float kMinDecibels = BARELY_MIN_DECIBELS;
 
 /// Arpeggiator style enum.
 enum class ArpeggiatorStyle {
@@ -2432,28 +2412,6 @@ struct Scale : public BarelyScale {
     return static_cast<int>(pitch_count);
   }
 };
-
-/// Converts a value from linear amplitude to decibels.
-///
-/// @param amplitude Value in linear amplitude.
-/// @return Value in decibels.
-inline float AmplitudeToDecibels(float amplitude) noexcept {
-  float decibels = 0.0f;
-  [[maybe_unused]] const bool success = Barely_AmplitudeToDecibels(amplitude, &decibels);
-  assert(success);
-  return decibels;
-}
-
-/// Converts a value from decibels to linear amplitude.
-///
-/// @param decibels Value in decibels.
-/// @return Value in linear amplitude.
-inline float DecibelsToAmplitude(float decibels) noexcept {
-  float amplitude = 0.0f;
-  [[maybe_unused]] const bool success = Barely_DecibelsToAmplitude(decibels, &amplitude);
-  assert(success);
-  return amplitude;
-}
 
 }  // namespace barely
 #endif  // __cplusplus

@@ -5,6 +5,7 @@ add_library(
   audio_output.cpp
   audio_output.h
   console_log.h
+  decibels.h
   input_manager.cpp
   input_manager.h
   wav_file.cpp

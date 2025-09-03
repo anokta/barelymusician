@@ -16,6 +16,7 @@
 #include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
+#include "common/decibels.h"
 #include "common/input_manager.h"
 #include "common/wav_file.h"
 #include "data/data.h"
@@ -233,7 +234,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto build_instrument_fn = [&](float shape, float gain_db, float attack, float release) {
     instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
-    instrument.SetControl(ControlType::kGain, barely::DecibelsToAmplitude(gain_db));
+    instrument.SetControl(ControlType::kGain, barely::examples::DecibelsToAmplitude(gain_db));
     instrument.SetControl(ControlType::kOscMix, 1.0f);
     if (shape < 0.0f) {
       instrument.SetControl(ControlType::kOscNoiseMix, 1.0f);

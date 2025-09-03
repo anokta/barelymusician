@@ -62,22 +62,6 @@ namespace Barely {
       get { return Internal.Engine_GetTimestamp(); }
     }
 
-    /// Converts a value from linear amplitude to decibels.
-    ///
-    /// @param amplitude Value in linear amplitude.
-    /// @return Value in decibels.
-    public static float AmplitudeToDecibels(float amplitude) {
-      return Internal.AmplitudeToDecibels(amplitude);
-    }
-
-    /// Converts a value from decibels to linear amplitude.
-    ///
-    /// @param decibels Value in decibels.
-    /// @return Value in linear amplitude.
-    public static float DecibelsToAmplitude(float decibels) {
-      return Internal.DecibelsToAmplitude(decibels);
-    }
-
     /// Class that wraps the internal api.
     public static class Internal {
       /// Control type.
@@ -954,30 +938,6 @@ namespace Barely {
         }
       }
 
-      /// Converts a value from linear amplitude to decibels.
-      ///
-      /// @param amplitude Value in linear amplitude.
-      /// @return Value in decibels.
-      public static float AmplitudeToDecibels(float amplitude) {
-        float decibels = 0.0f;
-        if (!Barely_AmplitudeToDecibels(amplitude, ref decibels)) {
-          Debug.LogError("Failed to convert amplitude " + amplitude + " to decibels");
-        }
-        return decibels;
-      }
-
-      /// Converts a value from decibels to linear amplitude.
-      ///
-      /// @param decibels Value in decibels.
-      /// @return Value in linear amplitude.
-      public static float DecibelsToAmplitude(float decibels) {
-        float amplitude = 0.0f;
-        if (!Barely_DecibelsToAmplitude(decibels, ref amplitude)) {
-          Debug.LogError("Failed to convert decibels " + decibels + " to amplitude");
-        }
-        return amplitude;
-      }
-
       // Control override.
       [StructLayout(LayoutKind.Sequential)]
       private struct ControlOverride {
@@ -1485,12 +1445,6 @@ namespace Barely {
       private static extern bool BarelyTask_SetEventCallback(IntPtr task,
                                                              TaskEventCallback callback,
                                                              IntPtr userData);
-
-      [DllImport(_pluginName, EntryPoint = "Barely_AmplitudeToDecibels")]
-      private static extern bool Barely_AmplitudeToDecibels(float amplitude, ref float outDecibels);
-
-      [DllImport(_pluginName, EntryPoint = "Barely_DecibelsToAmplitude")]
-      private static extern bool Barely_DecibelsToAmplitude(float decibels, ref float outAmplitude);
     }
   }
 }  // namespace Barely

@@ -5,27 +5,20 @@
 
 #include <vector>
 
-#include "api/engine.h"
-#include "api/instrument.h"
 #include "api/performer.h"
+#include "api/task.h"
+
+namespace barely {
 
 /// Implementation of an arpeggiator.
-struct BarelyArpeggiator {
+struct Arpeggiator {
  public:
-  // Constructs a new `BarelyArpeggiator`.
+  // Constructs a new `Arpeggiator`.
   ///
   /// @param engine Engine.
+  /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit BarelyArpeggiator(BarelyEngine& engine) noexcept;
-
-  /// Default destructor.
-  ~BarelyArpeggiator() noexcept = default;
-
-  /// Non-copyable and non-movable.
-  BarelyArpeggiator(const BarelyArpeggiator& other) noexcept = delete;
-  BarelyArpeggiator& operator=(const BarelyArpeggiator& other) noexcept = delete;
-  BarelyArpeggiator(BarelyArpeggiator&& other) noexcept = delete;
-  BarelyArpeggiator& operator=(BarelyArpeggiator&& other) noexcept = delete;
+  Arpeggiator(BarelyEngine& engine, BarelyInstrument& instrumnet) noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -43,13 +36,13 @@ struct BarelyArpeggiator {
 
   /// Sets the gate ratio.
   ///
-  /// @param gate Gate ratio.
+  /// @param gate_ratio Gate ratio.
   void SetGateRatio(float gate_ratio) noexcept;
 
-  /// Sets the instrument.
+  /// Sets the mode.
   ///
-  /// @param instrument Pointer to instrument.
-  void SetInstrument(BarelyInstrument* instrument) noexcept;
+  /// @param mode Arpeggiator mode.
+  void SetMode(BarelyArpeggiatorMode mode) noexcept;
 
   /// Sets a note off.
   ///
@@ -65,13 +58,9 @@ struct BarelyArpeggiator {
 
   /// Sets the rate.
   ///
+  /// @param gate_ratio Gate ratio.
   /// @param rate Rate in notes per beat.
-  void SetRate(double rate) noexcept;
-
-  /// Sets the style.
-  ///
-  /// @param style Arpeggiator style.
-  void SetStyle(BarelyArpeggiatorStyle style) noexcept;
+  void SetRate(float gate_ratio, float rate) noexcept;
 
  private:
   // Helper function to set the next note off.
@@ -89,23 +78,20 @@ struct BarelyArpeggiator {
   // Engine.
   BarelyEngine& engine_;
 
+  // Instrument.
+  BarelyInstrument& instrument_;
+
   // Performer.
   BarelyPerformer performer_;
 
   // Task.
   BarelyTask task_;
 
-  // Pointer to instrument.
-  BarelyInstrument* instrument_ = nullptr;
-
   // Array of pitches to play.
   std::vector<float> pitches_;
 
-  // Gate ratio.
-  float gate_ratio_ = 1.0f;
-
   // Style.
-  BarelyArpeggiatorStyle style_ = BarelyArpeggiatorStyle_kUp;
+  BarelyArpeggiatorMode mode_ = BarelyArpeggiatorMode_kNone;
 
   // Current index.
   int index_ = -1;
@@ -113,5 +99,7 @@ struct BarelyArpeggiator {
   // Current pitch.
   float pitch_ = 0.0f;
 };
+
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_API_ARPEGGIATOR_H_

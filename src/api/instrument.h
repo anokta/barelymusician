@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 #include "common/callback.h"
+#include "composition/arpeggiator.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 
@@ -115,11 +116,22 @@ struct BarelyInstrument {
   /// @param slices Span of slices.
   void SetSampleData(std::span<const BarelySlice> slices) noexcept;
 
+  void StartNote(float pitch,
+                 std::span<const BarelyNoteControlOverride> note_control_overrides) noexcept;
+  void StopAllNotes() noexcept;
+  void StopNote(float pitch) noexcept;
+
   barely::InstrumentProcessor& processor() noexcept { return processor_; }
 
  private:
+  // Processes a control value.
+  void ProcessControl(barely::ControlType type, float value) noexcept;
+
   // Engine.
   BarelyEngine& engine_;
+
+  // Arpeggiator.
+  barely::Arpeggiator arpeggiator_;
 
   // Array of controls.
   barely::ControlArray controls_;

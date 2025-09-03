@@ -1,7 +1,5 @@
 target_sources(
   barelymusician PRIVATE
-  arpeggiator.cpp
-  arpeggiator.h
   engine.cpp
   engine.h
   instrument.cpp

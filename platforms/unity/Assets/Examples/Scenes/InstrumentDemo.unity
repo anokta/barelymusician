@@ -228,11 +228,11 @@ MonoBehaviour:
   controller: {fileID: 1737834379}
   pixel: {fileID: 2800000, guid: 831f86318f630fc4db677a7235341f4d, type: 3}
   color: {r: 1, g: 0.7019608, b: 0.7294118, a: 1}
-  arpeggiator: {fileID: 1737834384}
   enableModeSwitch: 1
   oscShape: 0
   oscMode: 0
   sliceMode: 1
+  arpeggiatorMode: 1
 --- !u!114 &675413002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -426,7 +426,6 @@ GameObject:
   - component: {fileID: 1737834380}
   - component: {fileID: 1737834379}
   - component: {fileID: 1737834383}
-  - component: {fileID: 1737834384}
   - component: {fileID: 1737834385}
   m_Layer: 0
   m_Name: InstrumentController
@@ -448,11 +447,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 1737834380}
-  arpeggiator: {fileID: 0}
-  repeater: {fileID: 0}
   octaveOffset: 0
   noteGain: 1
-  repeaterNoteLength: 1
 --- !u!114 &1737834380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,6 +486,9 @@ MonoBehaviour:
   BitCrusherDepth: 16
   BitCrusherRate: 1
   DelaySend: 0.1
+  ArpeggiatorMode: 0
+  ArpeggiatorGateRatio: 0.5
+  ArpeggiatorRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -523,21 +522,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e240a29169207374c878c245e1f1693d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1737834384
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1737834378}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3e33e299faeb1c4594f9b34c46299e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GateRatio: 0.5
-  Rate: 2
-  Style: 0
 --- !u!114 &1737834385
 MonoBehaviour:
   m_ObjectHideFlags: 0

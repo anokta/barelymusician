@@ -5,91 +5,11 @@
 #include <cstdint>
 #include <optional>
 
-#include "api/arpeggiator.h"
 #include "api/engine.h"
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "api/task.h"
 #include "common/time.h"
-
-bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
-  if (!engine || !out_arpeggiator) return false;
-
-  *out_arpeggiator = new BarelyArpeggiator(*engine);
-  return true;
-}
-
-bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator) {
-  if (!arpeggiator) return false;
-
-  delete arpeggiator;
-  return true;
-}
-
-bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch,
-                                bool* out_is_note_on) {
-  if (!arpeggiator || !out_is_note_on) return false;
-
-  *out_is_note_on = arpeggiator->IsNoteOn(pitch);
-  return true;
-}
-
-bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator, bool* out_is_playing) {
-  if (!arpeggiator || !out_is_playing) return false;
-
-  *out_is_playing = arpeggiator->IsPlaying();
-  return true;
-}
-
-bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetAllNotesOff();
-  return true;
-}
-
-bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator, float gate_ratio) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetGateRatio(gate_ratio);
-  return true;
-}
-
-bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                     BarelyInstrumentHandle instrument) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetInstrument(instrument);
-  return true;
-}
-
-bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, float pitch) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetNoteOff(pitch);
-  return true;
-}
-
-bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetNoteOn(pitch);
-  return true;
-}
-
-bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetRate(rate);
-  return true;
-}
-
-bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeggiatorStyle style) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetStyle(style);
-  return true;
-}
 
 bool BarelyEngine_Create(int32_t sample_rate, int32_t max_channel_count, int32_t max_frame_count,
                          float reference_frequency, BarelyEngineHandle* out_engine) {

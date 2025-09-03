@@ -110,6 +110,12 @@ namespace Barely {
         [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
         /// Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
+        /// Arpeggiator mode.
+        [InspectorName("Arpeggiator Mode")] ARPEGGIATOR_MODE,
+        /// Arpeggiator gate ratio.
+        [InspectorName("Arpeggiator Gate Ratio")] ARPEGGIATOR_GATE_RATIO,
+        /// Arpeggiator rate.
+        [InspectorName("Arpeggiator Rate")] ARPEGGIATOR_RATE,
       }
 
       /// Effect control type.
@@ -128,156 +134,6 @@ namespace Barely {
         [InspectorName("Gain")] GAIN = 0,
         /// Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
-      }
-
-      /// Returns whether an arpeggiator note is on or not.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param pitch Note pitch.
-      /// @return True if on, false otherwise.
-      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorHandle, float pitch) {
-        bool isNoteOn = false;
-        if (!BarelyArpeggiator_IsNoteOn(arpeggiatorHandle, pitch, ref isNoteOn) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get if arpeggiator note " + pitch + " is on");
-        }
-        return isNoteOn;
-      }
-
-      /// Returns whether an arpeggiator is playing or not.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @return True if playing, false otherwise.
-      public static bool Arpeggiator_IsPlaying(IntPtr arpeggiatorHandle) {
-        bool isPlaying = false;
-        if (!BarelyArpeggiator_IsPlaying(arpeggiatorHandle, ref isPlaying) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to get if arpeggiator is playing");
-        }
-        return isPlaying;
-      }
-
-      /// Sets all arpeggiator notes off.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      public static void Arpeggiator_SetAllNotesOff(IntPtr arpeggiatorHandle) {
-        if (!BarelyArpeggiator_SetAllNotesOff(arpeggiatorHandle) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop all arpeggiator notes");
-        }
-      }
-
-      /// Sets an arpeggiator gate ratio.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param gateRatio Gate ratio.
-      public static void Arpeggiator_SetGateRatio(IntPtr arpeggiatorHandle, float gateRatio) {
-        if (!BarelyArpeggiator_SetGateRatio(arpeggiatorHandle, gateRatio) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop arpeggiator gate ratio " + gateRatio);
-        }
-      }
-
-      /// Sets an arpeggiator instrument.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param instrument Instrument.
-      public static void Arpeggiator_SetInstrument(IntPtr arpeggiatorHandle,
-                                                   Instrument instrument) {
-        if (!BarelyArpeggiator_SetInstrument(arpeggiatorHandle,
-                                             Instrument.Internal.GetHandle(instrument)) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set arpeggiator instrument '" + instrument.name + "'");
-        }
-      }
-
-      /// Sets an arpeggiator note off.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorHandle, float pitch) {
-        if (!BarelyArpeggiator_SetNoteOff(arpeggiatorHandle, pitch) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop arpeggiator note " + pitch);
-        }
-      }
-
-      /// Sets an arpeggiator note on.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param pitch Note pitch.
-      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorHandle, float pitch) {
-        if (!BarelyArpeggiator_SetNoteOn(arpeggiatorHandle, pitch) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to start arpeggiator note " + pitch);
-        }
-      }
-
-      /// Sets an arpeggiator rate.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param rate Rate in notes per beat.
-      public static void Arpeggiator_SetRate(IntPtr arpeggiatorHandle, double rate) {
-        if (!BarelyArpeggiator_SetRate(arpeggiatorHandle, rate) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set arpeggiator rate " + rate);
-        }
-      }
-
-      /// Sets an arpeggiator style.
-      ///
-      /// @param arpeggiatorHandle Arpeggiator handle.
-      /// @param style Style.
-      public static void Arpeggiator_SetStyle(IntPtr arpeggiatorHandle, ArpeggiatorStyle style) {
-        if (!BarelyArpeggiator_SetStyle(arpeggiatorHandle, style) &&
-            arpeggiatorHandle != IntPtr.Zero) {
-          Debug.LogError("Failed to set arpeggiator style " + style);
-        }
-      }
-
-      /// Creates a new component.
-      ///
-      /// @param component Component.
-      /// @param componentHandle Component handle.
-      public static void Component_Create(Component component, ref IntPtr componentHandle) {
-        if (Handle == IntPtr.Zero || componentHandle != IntPtr.Zero) {
-          return;
-        }
-        switch (component) {
-          case Arpeggiator arpeggiator:
-            if (BarelyArpeggiator_Create(_handle, ref componentHandle)) {
-              return;
-            }
-            break;
-          default:
-            Debug.LogError("Unsupported component type: " + component.GetType());
-            return;
-        }
-        Debug.LogError("Failed to create component '" + component.name + "'");
-      }
-
-      /// Destroys a component.
-      ///
-      /// @param component Component.
-      /// @param componentHandle Component handle.
-      public static void Component_Destroy(Component component, ref IntPtr componentHandle) {
-        if (Handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
-          componentHandle = IntPtr.Zero;
-          return;
-        }
-        bool success = true;
-        switch (component) {
-          case Arpeggiator arpeggiator:
-            success = BarelyArpeggiator_Destroy(componentHandle);
-            break;
-          default:
-            Debug.LogError("Unsupported component type: " + component.GetType());
-            return;
-        }
-        if (!success) {
-          Debug.LogError("Failed to destroy component '" + component.name + "'");
-        }
-        componentHandle = IntPtr.Zero;
       }
 
       /// Returns an effect control of an engine.
@@ -1015,19 +871,12 @@ namespace Barely {
           for (int i = 0; i < performers.Count; ++i) {
             performers[i].enabled = false;
           }
-          var arpeggiators = GameObject.FindObjectsByType<Arpeggiator>(FindObjectsSortMode.None);
-          for (int i = 0; i < arpeggiators.Length; ++i) {
-            arpeggiators[i].enabled = false;
-          }
           Initialize();
           for (int i = 0; i < instruments.Count; ++i) {
             instruments[i].enabled = true;
           }
           for (int i = 0; i < performers.Count; ++i) {
             performers[i].enabled = true;
-          }
-          for (int i = 0; i < arpeggiators.Length; ++i) {
-            arpeggiators[i].enabled = true;
           }
         }
 
@@ -1099,44 +948,6 @@ namespace Barely {
 #else
       private const string _pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Create")]
-      private static extern bool BarelyArpeggiator_Create(IntPtr engine, ref IntPtr outArpeggiator);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
-      private static extern bool BarelyArpeggiator_Destroy(IntPtr arpeggiator);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsNoteOn")]
-      private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, float pitch,
-                                                            ref bool outIsNoteOn);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
-      private static extern bool BarelyArpeggiator_IsPlaying(IntPtr arpeggiator,
-                                                             ref bool outIsPlaying);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetAllNotesOff")]
-      private static extern bool BarelyArpeggiator_SetAllNotesOff(IntPtr arpeggiator);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetGateRatio")]
-      private static extern bool BarelyArpeggiator_SetGateRatio(IntPtr arpeggiator,
-                                                                float gateRatio);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetInstrument")]
-      private static extern bool BarelyArpeggiator_SetInstrument(IntPtr arpeggiator,
-                                                                 IntPtr instrument);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOff")]
-      private static extern bool BarelyArpeggiator_SetNoteOff(IntPtr arpeggiator, float gateRatio);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOn")]
-      private static extern bool BarelyArpeggiator_SetNoteOn(IntPtr arpeggiator, float gateRatio);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetRate")]
-      private static extern bool BarelyArpeggiator_SetRate(IntPtr arpeggiator, double rate);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyArpeggiator_SetStyle")]
-      private static extern bool BarelyArpeggiator_SetStyle(IntPtr arpeggiator,
-                                                            ArpeggiatorStyle style);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
       private static extern bool BarelyEngine_Create(Int32 sampleRate, Int32 maxChannelCount,

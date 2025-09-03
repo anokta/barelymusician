@@ -7,12 +7,12 @@ namespace Barely.Examples {
     public Texture2D pixel = null;
     public Color color = Color.white;
 
-    public Arpeggiator arpeggiator = null;
     public bool enableModeSwitch = false;
     [Range(0.0f, 1.0f)]
     public float oscShape = 0.0f;
     public OscMode oscMode = OscMode.MIX;
     public SliceMode sliceMode = SliceMode.LOOP;
+    public ArpeggiatorMode arpeggiatorMode = ArpeggiatorMode.UP;
 
     private const int N = 4;
     private Dictionary<float, Vector2> _activeNotes = null;
@@ -75,13 +75,9 @@ namespace Barely.Examples {
         controller.instrument.OscShape = oscShape;
         controller.instrument.SliceMode = sliceMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) {
-        if (controller.arpeggiator != null) {
-          controller.arpeggiator.SetAllNotesOff();
-          controller.arpeggiator = null;
-        } else {
-          controller.instrument.SetAllNotesOff();
-          controller.arpeggiator = arpeggiator;
-        }
+        controller.instrument.ArpeggiatorMode =
+            (controller.instrument.ArpeggiatorMode == arpeggiatorMode) ? ArpeggiatorMode.NONE
+                                                                       : arpeggiatorMode;
       }
     }
 

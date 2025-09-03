@@ -1,16 +1,5 @@
 VERS_1.0 {
   global:
-    BarelyArpeggiator_Create;
-    BarelyArpeggiator_Destroy;
-    BarelyArpeggiator_IsNoteOn;
-    BarelyArpeggiator_IsPlaying;
-    BarelyArpeggiator_SetAllNotesOff;
-    BarelyArpeggiator_SetGateRatio;
-    BarelyArpeggiator_SetInstrument;
-    BarelyArpeggiator_SetNoteOff;
-    BarelyArpeggiator_SetNoteOn;
-    BarelyArpeggiator_SetRate;
-    BarelyArpeggiator_SetStyle;
     BarelyEngine_Create;
     BarelyEngine_Destroy;
     BarelyEngine_GetEffectControl;

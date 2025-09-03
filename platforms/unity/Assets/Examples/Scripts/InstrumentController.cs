@@ -6,9 +6,6 @@ namespace Barely.Examples {
     // Instrument to control.
     public Instrument instrument = null;
 
-    // Arpeggiator to control.
-    public Arpeggiator arpeggiator = null;
-
     // Octave offset.
     [Range(-3, 3)]
     public int octaveOffset = 0;
@@ -26,14 +23,10 @@ namespace Barely.Examples {
     void Update() {
       // Shift octaves.
       if (Input.GetKeyDown(KeyCode.Z)) {
-        if (arpeggiator != null) {
-          arpeggiator.SetAllNotesOff();
-        }
+        instrument.SetAllNotesOff();
         octaveOffset = Mathf.Max(octaveOffset - 1, -3);
       } else if (Input.GetKeyDown(KeyCode.X)) {
-        if (arpeggiator != null) {
-          arpeggiator.SetAllNotesOff();
-        }
+        instrument.SetAllNotesOff();
         octaveOffset = Mathf.Min(octaveOffset + 1, 3);
       }
       // Adjust note gain.
@@ -45,17 +38,9 @@ namespace Barely.Examples {
       // Play notes.
       for (int i = 0; i < _octaveKeys.Length; ++i) {
         if (Input.GetKeyDown(_octaveKeys[i])) {
-          if (arpeggiator != null) {
-            arpeggiator.SetNoteOn(KeyIndexToPitch(i));
-          } else if (instrument != null) {
-            instrument.SetNoteOn(KeyIndexToPitch(i), noteGain);
-          }
+          instrument.SetNoteOn(KeyIndexToPitch(i), noteGain);
         } else if (Input.GetKeyUp(_octaveKeys[i])) {
-          if (arpeggiator != null) {
-            arpeggiator.SetNoteOff(KeyIndexToPitch(i));
-          } else if (instrument != null) {
-            instrument.SetNoteOff(KeyIndexToPitch(i));
-          }
+          instrument.SetNoteOff(KeyIndexToPitch(i));
         }
       }
       if (Application.platform == RuntimePlatform.Android ||

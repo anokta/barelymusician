@@ -42,6 +42,12 @@ const std::array<RangeParameter, BarelyControlType_kCount> kParams = {
     RangeParameter(STR16("Bitcrusher Rate"), BarelyControlType_kBitCrusherRate, STR16(""), 0.0, 1.0,
                    1.0),
     RangeParameter(STR16("Delay Send"), BarelyControlType_kDelaySend, STR16(""), 0.0, 1.0, 0.0),
+    RangeParameter(STR16("Arpeggiator Mode"), BarelyControlType_kArpeggiatorMode, STR16(""), 0,
+                   BarelyArpeggiatorMode_kCount - 1, 0, BarelyArpeggiatorMode_kCount - 1),
+    RangeParameter(STR16("Arpeggiator Gate Ratio"), BarelyControlType_kArpeggiatorGateRatio,
+                   STR16(""), 0.0, 1.0, 0.5),
+    RangeParameter(STR16("Arpeggiator Rate"), BarelyControlType_kArpeggiatorRate, STR16(""), 0.0,
+                   8.0, 1.0),
 };
 
 }

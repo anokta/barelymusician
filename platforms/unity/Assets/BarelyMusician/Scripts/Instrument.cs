@@ -4,7 +4,19 @@ using System.Linq;
 using UnityEngine;
 
 namespace Barely {
-  /// Filter type.
+  /// Arpeggiator modes.
+  public enum ArpeggiatorMode {
+    /// None.
+    [InspectorName("None")] NONE = 0,
+    /// None.
+    [InspectorName("Up")] UP,
+    /// None.
+    [InspectorName("Down")] DOWN,
+    /// None.
+    [InspectorName("Random")] RANDOM,
+  }
+
+  /// Filter types.
   public enum FilterType {
     /// None.
     [InspectorName("None")] NONE = 0,
@@ -14,7 +26,7 @@ namespace Barely {
     [InspectorName("High-pass")] HIGH_PASS,
   }
 
-  /// Oscillator mode.
+  /// Oscillator modes.
   public enum OscMode {
     /// Mix.
     [InspectorName("Mix")] MIX = 0,
@@ -30,7 +42,7 @@ namespace Barely {
     [InspectorName("Ring")] RING,
   }
 
-  /// Slice mode.
+  /// Slice modes.
   public enum SliceMode {
     /// Sustain.
     [InspectorName("Sustain")] SUSTAIN = 0,
@@ -194,6 +206,19 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float DelaySend = 0.0f;
 
+    [Header("Arpeggiator")]
+
+    /// Arpeggiator mode.
+    public ArpeggiatorMode ArpeggiatorMode = ArpeggiatorMode.NONE;
+
+    /// Arpeggiator gate ratio.
+    [Range(0.0f, 1.0f)]
+    public float ArpeggiatorGateRatio = 0.5f;
+
+    /// Arpeggiator rate.
+    [Range(0.0f, 8.0f)]
+    public float ArpeggiatorRate = 1.0f;
+
     /// Note off callback.
     ///
     /// @param pitch Note pitch.
@@ -213,12 +238,6 @@ namespace Barely {
     [Serializable]
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<float> {}
     public NoteOnEvent OnNoteOnEvent;
-
-    /// Instrument create callback.
-    public event Action OnInstrumentCreate;
-
-    /// Instrument destroy callback.
-    public event Action OnInstrumentDestroy;
 
     /// Returns the gain of a note.
     ///
@@ -307,12 +326,10 @@ namespace Barely {
 
     private void OnEnable() {
       Engine.Internal.Instrument_Create(this, ref _handle);
-      OnInstrumentCreate?.Invoke();
       Update();
     }
 
     private void OnDisable() {
-      OnInstrumentDestroy?.Invoke();
       Engine.Internal.Instrument_Destroy(ref _handle);
       _sliceCount = 0;
     }
@@ -343,6 +360,9 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
       SetControl(Engine.Internal.ControlType.DELAY_SEND, DelaySend);
+      SetControl(Engine.Internal.ControlType.ARPEGGIATOR_MODE, (float)ArpeggiatorMode);
+      SetControl(Engine.Internal.ControlType.ARPEGGIATOR_GATE_RATIO, ArpeggiatorGateRatio);
+      SetControl(Engine.Internal.ControlType.ARPEGGIATOR_RATE, ArpeggiatorRate);
     }
 
     private void SetControl(Engine.Internal.ControlType type, float value) {

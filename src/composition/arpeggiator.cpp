@@ -1,4 +1,4 @@
-#include "api/arpeggiator.h"
+#include "composition/arpeggiator.h"
 
 #include <barelymusician.h>
 
@@ -8,13 +8,16 @@
 #include "api/engine.h"
 #include "api/instrument.h"
 
+namespace barely {
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyArpeggiator::BarelyArpeggiator(BarelyEngine& engine) noexcept
+Arpeggiator::Arpeggiator(BarelyEngine& engine, BarelyInstrument& instrument) noexcept
     : engine_(engine),
+      instrument_(instrument),
       performer_(engine_),
       task_(performer_, 0.0, 1.0, 0,
             {[](BarelyTaskEventType type, void* user_data) {
-               auto& arpeggiator = *static_cast<BarelyArpeggiator*>(user_data);
+               auto& arpeggiator = *static_cast<Arpeggiator*>(user_data);
                if (type == BarelyTaskEventType_kBegin) {
                  arpeggiator.Update();
                  arpeggiator.SetNextNoteOn();
@@ -27,33 +30,32 @@ BarelyArpeggiator::BarelyArpeggiator(BarelyEngine& engine) noexcept
   performer_.SetLoopLength(1.0);
 }
 
-bool BarelyArpeggiator::IsNoteOn(float pitch) const noexcept {
+bool Arpeggiator::IsNoteOn(float pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();
 }
 
-bool BarelyArpeggiator::IsPlaying() const noexcept { return performer_.IsPlaying(); }
+bool Arpeggiator::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
-void BarelyArpeggiator::SetAllNotesOff() noexcept {
+void Arpeggiator::SetAllNotesOff() noexcept {
   if (!pitches_.empty()) {
     pitches_.clear();
     Stop();
   }
 }
 
-void BarelyArpeggiator::SetGateRatio(float gate_ratio) noexcept {
-  gate_ratio_ = std::clamp(gate_ratio, 0.0f, 1.0f);
-  task_.SetDuration(gate_ratio_ * performer_.GetLoopLength());
+void Arpeggiator::SetGateRatio(float gate_ratio) noexcept {
+  task_.SetDuration(static_cast<double>(gate_ratio) * performer_.GetLoopLength());
 }
 
-void BarelyArpeggiator::SetInstrument(BarelyInstrument* instrument) noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetAllNotesOff();
+void Arpeggiator::SetMode(BarelyArpeggiatorMode mode) noexcept {
+  if (mode == BarelyArpeggiatorMode_kNone && mode_ != BarelyArpeggiatorMode_kNone) {
+    instrument_.StopAllNotes();
   }
-  instrument_ = instrument;
+  mode_ = mode;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyArpeggiator::SetNoteOff(float pitch) noexcept {
+void Arpeggiator::SetNoteOff(float pitch) noexcept {
   if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch); it != pitches_.end()) {
     pitches_.erase(it);
     if (pitches_.empty() && IsPlaying()) {
@@ -63,7 +65,7 @@ void BarelyArpeggiator::SetNoteOff(float pitch) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyArpeggiator::SetNoteOn(float pitch) noexcept {
+void Arpeggiator::SetNoteOn(float pitch) noexcept {
   if (const auto it = std::lower_bound(pitches_.begin(), pitches_.end(), pitch);
       it == pitches_.end() || *it != pitch) {
     pitches_.insert(it, pitch);
@@ -73,42 +75,31 @@ void BarelyArpeggiator::SetNoteOn(float pitch) noexcept {
   }
 }
 
-void BarelyArpeggiator::SetRate(double rate) noexcept {
-  const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
-  performer_.SetLoopLength(length);
-  task_.SetDuration(gate_ratio_ * performer_.GetLoopLength());
+void Arpeggiator::SetRate(float gate_ratio, float rate) noexcept {
+  performer_.SetLoopLength((rate > 0.0f) ? 1.0 / static_cast<double>(rate) : 0.0);
+  task_.SetDuration(static_cast<double>(gate_ratio) * performer_.GetLoopLength());
 }
 
-void BarelyArpeggiator::SetStyle(BarelyArpeggiatorStyle style) noexcept { style_ = style; }
+void Arpeggiator::SetNextNoteOff() noexcept { instrument_.StopNote(pitch_); }
 
-void BarelyArpeggiator::SetNextNoteOff() noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetNoteOff(pitch_);
-  }
-}
+void Arpeggiator::SetNextNoteOn() noexcept { instrument_.StartNote(pitch_, {}); }
 
-void BarelyArpeggiator::SetNextNoteOn() noexcept {
-  if (instrument_ != nullptr) {
-    instrument_->SetNoteOn(pitch_, {});
-  }
-}
-
-void BarelyArpeggiator::Stop() noexcept {
+void Arpeggiator::Stop() noexcept {
   performer_.Stop();
   performer_.SetPosition(0.0);
   index_ = -1;
 }
 
-void BarelyArpeggiator::Update() noexcept {
+void Arpeggiator::Update() noexcept {
   const int size = static_cast<int>(pitches_.size());
-  switch (style_) {
-    case BarelyArpeggiatorStyle_kUp:
+  switch (mode_) {
+    case BarelyArpeggiatorMode_kUp:
       index_ = (index_ + 1) % size;
       break;
-    case BarelyArpeggiatorStyle_kDown:
+    case BarelyArpeggiatorMode_kDown:
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
-    case BarelyArpeggiatorStyle_kRandom:
+    case BarelyArpeggiatorMode_kRandom:
       index_ = engine_.main_rng().Generate(0, size);
       break;
     default:
@@ -118,3 +109,5 @@ void BarelyArpeggiator::Update() noexcept {
   assert(index_ >= 0 && index_ < static_cast<int>(pitches_.size()));
   pitch_ = pitches_[index_];
 }
+
+}  // namespace barely

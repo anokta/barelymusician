@@ -221,18 +221,20 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Arpeggiator style enum alias.
-// TODO(#142): Add more arpeggiator styles.
-typedef enum BarelyArpeggiatorStyle {
+/// Arpeggiator modes.
+// TODO(#142): Add more arpeggiator modes.
+typedef enum BarelyArpeggiatorMode {
+  /// None.
+  BarelyArpeggiatorMode_kNone = 0,
   /// Up.
-  BarelyArpeggiatorStyle_kUp = 0,
+  BarelyArpeggiatorMode_kUp,
   /// Down.
-  BarelyArpeggiatorStyle_kDown,
+  BarelyArpeggiatorMode_kDown,
   /// Random.
-  BarelyArpeggiatorStyle_kRandom,
-  /// Number of arpeggiator styles.
-  BarelyArpeggiatorStyle_kCount,
-} BarelyArpeggiatorStyle;
+  BarelyArpeggiatorMode_kRandom,
+  /// Number of arpeggiator modes.
+  BarelyArpeggiatorMode_kCount,
+} BarelyArpeggiatorMode;
 
 /// Control types.
 typedef enum BarelyControlType {
@@ -280,6 +282,12 @@ typedef enum BarelyControlType {
   BarelyControlType_kBitCrusherRate,
   /// Delay send.
   BarelyControlType_kDelaySend,
+  /// Arpeggiator mode.
+  BarelyControlType_kArpeggiatorMode,
+  /// Arpeggiator gate ratio.
+  BarelyControlType_kArpeggiatorGateRatio,
+  /// Arpeggiator rate.
+  BarelyControlType_kArpeggiatorRate,
   /// Number of control types.
   BarelyControlType_kCount,
 } BarelyControlType;
@@ -425,9 +433,6 @@ typedef struct BarelySlice {
   int32_t sample_count;
 } BarelySlice;
 
-/// Arpeggiator handle.
-typedef struct BarelyArpeggiator* BarelyArpeggiatorHandle;
-
 /// Engine handle.
 typedef struct BarelyEngine* BarelyEngineHandle;
 
@@ -468,88 +473,6 @@ typedef void (*BarelyNoteEventCallback)(BarelyNoteEventType type, float pitch, v
 /// @param type Task event type.
 /// @param user_data Pointer to user data.
 typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_data);
-
-/// Creates a new arpeggiator.
-///
-/// @param engine Engine handle.
-/// @param out_arpeggiator Output arpeggiator handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_Create(BarelyEngineHandle engine,
-                                         BarelyArpeggiatorHandle* out_arpeggiator);
-
-/// Destroys an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator);
-
-/// Gets whether an arpeggiator note is on or not.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param pitch Note pitch.
-/// @param out_is_note_on Output true if on, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch,
-                                           bool* out_is_note_on);
-
-/// Gets whether an arpeggiator is playing or not.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator,
-                                            bool* out_is_playing);
-
-/// Sets all arpeggiator notes off.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator);
-
-/// Sets the gate ratio of an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param gate_ratio Gate ratio.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
-                                               float gate_ratio);
-
-/// Sets the instrument of an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                                BarelyInstrumentHandle instrument);
-
-/// Sets an arpeggiator note off.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param pitch Note pitch.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, float pitch);
-
-/// Sets an arpeggiator note on.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param pitch Note pitch.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch);
-
-/// Sets the rate of an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param rate Rate in notes per beat.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate);
-
-/// Sets the style of an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param style Arpeggiator style.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
-                                           BarelyArpeggiatorStyle style);
 
 /// Creates a new engine.
 ///
@@ -985,14 +908,16 @@ namespace barely {
 /// Default reference frequency which is tuned to middle C.
 inline constexpr float kDefaultReferenceFrequency = BARELY_DEFAULT_REFERENCE_FREQUENCY;
 
-/// Arpeggiator style enum.
-enum class ArpeggiatorStyle {
+/// Arpeggiator modes.
+enum class ArpeggiatorMode {
+  /// None.
+  kNone = BarelyArpeggiatorMode_kNone,
   /// Up.
-  kUp = BarelyArpeggiatorStyle_kUp,
+  kUp = BarelyArpeggiatorMode_kUp,
   /// Down.
-  kDown = BarelyArpeggiatorStyle_kDown,
+  kDown = BarelyArpeggiatorMode_kDown,
   /// Random.
-  kRandom = BarelyArpeggiatorStyle_kRandom,
+  kRandom = BarelyArpeggiatorMode_kRandom,
 };
 
 /// Control types.
@@ -1041,6 +966,12 @@ enum class ControlType {
   kBitCrusherRate = BarelyControlType_kBitCrusherRate,
   /// Delay send.
   kDelaySend = BarelyControlType_kDelaySend,
+  /// Arpeggiator mode.
+  kArpeggiatorMode = BarelyControlType_kArpeggiatorMode,
+  /// Arpeggiator gate ratio.
+  kArpeggiatorGateRatio = BarelyControlType_kArpeggiatorGateRatio,
+  /// Arpeggiator rate.
+  kArpeggiatorRate = BarelyControlType_kArpeggiatorRate,
 };
 
 /// Effect control types.
@@ -1983,128 +1914,6 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept {
     [[maybe_unused]] const bool success = BarelyEngine_Update(*this, timestamp);
-    assert(success);
-  }
-};
-
-/// A class that wraps an arpeggiator handle.
-class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
- public:
-  /// Creates a new `Arpeggiator`.
-  ///
-  /// @param engine Engine.
-  explicit Arpeggiator(Engine& engine) noexcept
-      : HandleWrapper([&]() {
-          BarelyArpeggiatorHandle arpeggiator = nullptr;
-          [[maybe_unused]] const bool success = BarelyArpeggiator_Create(engine, &arpeggiator);
-          assert(success);
-          return arpeggiator;
-        }()) {}
-
-  /// Creates a new `Arpeggiator` from a raw handle.
-  ///
-  /// @param arpeggiator Raw handle to arpeggiator.
-  explicit Arpeggiator(BarelyArpeggiatorHandle arpeggiator) noexcept : HandleWrapper(arpeggiator) {}
-
-  /// Destroys `Arpeggiator`.
-  ~Arpeggiator() noexcept { BarelyArpeggiator_Destroy(*this); }
-
-  /// Non-copyable.
-  Arpeggiator(const Arpeggiator& other) noexcept = delete;
-  Arpeggiator& operator=(const Arpeggiator& other) noexcept = delete;
-
-  /// Default move constructor.
-  Arpeggiator(Arpeggiator&& other) noexcept = default;
-
-  /// Assigns `Arpeggiator` via move.
-  ///
-  /// @param other Other arpeggiator.
-  /// @return Arpeggiator.
-  Arpeggiator& operator=(Arpeggiator&& other) noexcept {
-    if (this != &other) {
-      BarelyArpeggiator_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
-
-  /// Returns whether a note is on or not.
-  ///
-  /// @param pitch Note pitch.
-  /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept {
-    bool is_note_on = false;
-    [[maybe_unused]] const bool success = BarelyArpeggiator_IsNoteOn(*this, pitch, &is_note_on);
-    assert(success);
-    return is_note_on;
-  }
-
-  /// Returns whether the arpeggiator is playing or not.
-  ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept {
-    bool is_playing = false;
-    [[maybe_unused]] const bool success = BarelyArpeggiator_IsPlaying(*this, &is_playing);
-    assert(success);
-    return is_playing;
-  }
-
-  /// Sets all notes off.
-  void SetAllNotesOff() noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetAllNotesOff(*this);
-    assert(success);
-  }
-
-  /// Sets the gate ratio.
-  ///
-  /// @param gate Gate ratio.
-  void SetGateRatio(float gate_ratio) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetGateRatio(*this, gate_ratio);
-    assert(success);
-  }
-
-  /// Sets the instrument.
-  ///
-  /// @param instrument Pointer to instrument.
-  void SetInstrument(Instrument* instrument) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetInstrument(
-        *this,
-        (instrument != nullptr) ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
-    assert(success);
-  }
-
-  /// Sets a note off.
-  ///
-  /// @param pitch Note pitch.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOff(float pitch) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetNoteOff(*this, pitch);
-    assert(success);
-  }
-
-  /// Sets a note on.
-  ///
-  /// @param pitch Note pitch.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(float pitch) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetNoteOn(*this, pitch);
-    assert(success);
-  }
-
-  /// Sets the rate.
-  ///
-  /// @param rate Rate in notes per beat.
-  void SetRate(double rate) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetRate(*this, rate);
-    assert(success);
-  }
-
-  /// Sets the style.
-  ///
-  /// @param style Arpeggiator style.
-  void SetStyle(ArpeggiatorStyle style) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyArpeggiator_SetStyle(*this, static_cast<BarelyArpeggiatorStyle>(style));
     assert(success);
   }
 };

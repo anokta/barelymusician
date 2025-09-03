@@ -346,18 +346,6 @@ typedef enum BarelyOscMode {
   BarelyOscMode_kCount,
 } BarelyOscMode;
 
-/// Repeater style enum alias.
-typedef enum BarelyRepeaterStyle {
-  /// Forward.
-  BarelyRepeaterStyle_kForward = 0,
-  /// Backward.
-  BarelyRepeaterStyle_kBackward,
-  /// Random.
-  BarelyRepeaterStyle_kRandom,
-  /// Number of repeater styles.
-  BarelyRepeaterStyle_kCount,
-} BarelyRepeaterStyle;
-
 /// Slice modes.
 typedef enum BarelySliceMode {
   /// Sustain.
@@ -448,9 +436,6 @@ typedef struct BarelyInstrument* BarelyInstrumentHandle;
 
 /// Performer handle.
 typedef struct BarelyPerformer* BarelyPerformerHandle;
-
-/// Repeater handle.
-typedef struct BarelyRepeater* BarelyRepeaterHandle;
 
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
@@ -891,89 +876,6 @@ BARELY_API bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
                                                double position, double* out_position);
 
-/// Clears all notes.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater);
-
-/// Creates a new repeater.
-///
-/// @param engine Engine handle.
-/// @param out_repeater Output repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Create(BarelyEngineHandle engine,
-                                      BarelyRepeaterHandle* out_repeater);
-
-/// Destroys an repeater.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater);
-
-/// Gets whether an repeater is playing or not.
-///
-/// @param repeater Repeater handle.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing);
-
-/// Pops the last note from the end.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
-
-/// Pushes a new note to the end.
-///
-/// @param repeater Repeater handle.
-/// @param pitch Note pitch.
-/// @param length Note length.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, float pitch, int32_t length);
-
-/// Pushes silence to the end.
-///
-/// @param repeater Repeater handle.
-/// @param length Note length.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length);
-
-/// Sets the instrument of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
-                                             BarelyInstrumentHandle instrument);
-
-/// Sets the rate of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param rate Rate in notes per beat.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate);
-
-/// Sets the style of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param style Repeater style.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style);
-
-/// Starts the repeater.
-///
-/// @param repeater Repeater handle.
-/// @param pitch_offset Pitch offset.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, float pitch_offset);
-
-/// Stops the repeater.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
-
 /// Gets a scale note pitch for a given degree.
 ///
 /// @param scale Pointer to scale.
@@ -1191,16 +1093,6 @@ enum class OscMode {
   kMf = BarelyOscMode_kMf,
   /// Ring modulation.
   kRing = BarelyOscMode_kRing,
-};
-
-/// Repeater style enum.
-enum class RepeaterStyle {
-  /// Forward.
-  kForward = BarelyRepeaterStyle_kForward,
-  /// Backward.
-  kBackward = BarelyRepeaterStyle_kBackward,
-  /// Random.
-  kRandom = BarelyRepeaterStyle_kRandom,
 };
 
 /// Slice modes.
@@ -2213,122 +2105,6 @@ class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
   void SetStyle(ArpeggiatorStyle style) noexcept {
     [[maybe_unused]] const bool success =
         BarelyArpeggiator_SetStyle(*this, static_cast<BarelyArpeggiatorStyle>(style));
-    assert(success);
-  }
-};
-
-/// A class that wraps a repeater handle.
-class Repeater : public HandleWrapper<BarelyRepeaterHandle> {
- public:
-  /// Creates a new `Repeater`.
-  ///
-  /// @param engine Engine.
-  explicit Repeater(Engine& engine) noexcept
-      : HandleWrapper([&]() {
-          BarelyRepeaterHandle repeater = nullptr;
-          [[maybe_unused]] const bool success = BarelyRepeater_Create(engine, &repeater);
-          assert(success);
-          return repeater;
-        }()) {}
-
-  /// Creates a new `Repeater` from a raw handle.
-  ///
-  /// @param repeater Raw handle to repeater.
-  explicit Repeater(BarelyRepeaterHandle repeater) noexcept : HandleWrapper(repeater) {}
-
-  /// Destroys `Repeater`.
-  ~Repeater() noexcept { BarelyRepeater_Destroy(*this); }
-
-  /// Non-copyable.
-  Repeater(const Repeater& other) noexcept = delete;
-  Repeater& operator=(const Repeater& other) noexcept = delete;
-
-  /// Default move constructor.
-  Repeater(Repeater&& other) noexcept = default;
-
-  /// Assigns `Repeater` via move.
-  ///
-  /// @param other Other repeater.
-  /// @return Repeater.
-  Repeater& operator=(Repeater&& other) noexcept {
-    if (this != &other) {
-      BarelyRepeater_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
-
-  /// Clears all notes.
-  void Clear() noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_Clear(*this);
-    assert(success);
-  }
-
-  /// Returns whether the repeater is playing or not.
-  ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept {
-    bool is_playing = false;
-    [[maybe_unused]] const bool success = BarelyRepeater_IsPlaying(*this, &is_playing);
-    assert(success);
-    return is_playing;
-  }
-
-  /// Pops the last note from the end.
-  void Pop() noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_Pop(*this);
-    assert(success);
-  }
-
-  /// Pushes a new note to the end.
-  ///
-  /// @param pitch_or Note pitch or silence.
-  /// @param length Note length.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Push(std::optional<float> pitch_or, int length = 1) noexcept {
-    [[maybe_unused]] const bool success = pitch_or ? BarelyRepeater_Push(*this, *pitch_or, length)
-                                                   : BarelyRepeater_PushSilence(*this, length);
-    assert(success);
-  }
-
-  /// Sets the instrument.
-  ///
-  /// @param instrument Pointer to instrument.
-  void SetInstrument(Instrument* instrument) noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_SetInstrument(
-        *this,
-        (instrument != nullptr) ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
-    assert(success);
-  }
-
-  /// Sets the rate.
-  ///
-  /// @param rate Rate in notes per beat.
-  void SetRate(double rate) noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_SetRate(*this, rate);
-    assert(success);
-  }
-
-  /// Sets the style.
-  ///
-  /// @param style Repeater style.
-  void SetStyle(RepeaterStyle style) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyRepeater_SetStyle(*this, static_cast<BarelyRepeaterStyle>(style));
-    assert(success);
-  }
-
-  /// Starts the repeater.
-  ///
-  /// @param pitch_offset Pitch offset.
-  void Start(float pitch_offset = 0.0f) noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_Start(*this, pitch_offset);
-    assert(success);
-  }
-
-  /// Stop the repeater.
-  void Stop() noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_Stop(*this);
     assert(success);
   }
 };

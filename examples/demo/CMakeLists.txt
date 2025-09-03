@@ -13,6 +13,7 @@ function(add_demo demo_name)
     ${DEMO_TARGET_NAME} PRIVATE
     barelymusician
     barelymusician_examples_common
+    barelymusician_examples_composition
     barelymusician_examples_data
     ${ARGN}
   )

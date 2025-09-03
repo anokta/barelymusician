@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_API_REPEATER_H_
-#define BARELYMUSICIAN_API_REPEATER_H_
+#ifndef BARELYMUSICIAN_EXAMPLES_COMPOSITION_REPEATER_H_
+#define BARELYMUSICIAN_EXAMPLES_COMPOSITION_REPEATER_H_
 
 #include <barelymusician.h>
 
@@ -7,27 +7,27 @@
 #include <utility>
 #include <vector>
 
-#include "api/engine.h"
-#include "api/instrument.h"
-#include "api/performer.h"
+namespace barely::examples {
 
-/// Implementation of a repeater.
-struct BarelyRepeater {
+/// Repeater modes.
+enum class RepeaterMode {
+  /// Forward.
+  kForward = 0,
+  /// Backward.
+  kBackward,
+  /// Random.
+  kRandom,
+};
+
+/// Class that plays a repeating sequence of instrument notes.
+struct Repeater {
  public:
-  // Constructs a new `BarelyRepeater`.
+  // Constructs a new `Repeater`.
   ///
   /// @param engine Engine.
+  /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit BarelyRepeater(BarelyEngine& engine) noexcept;
-
-  /// Destroys `BarelyRepeater`.
-  ~BarelyRepeater() noexcept;
-
-  /// Non-copyable and non-movable.
-  BarelyRepeater(const BarelyRepeater& other) noexcept = delete;
-  BarelyRepeater& operator=(const BarelyRepeater& other) noexcept = delete;
-  BarelyRepeater(BarelyRepeater&& other) noexcept = delete;
-  BarelyRepeater& operator=(BarelyRepeater&& other) noexcept = delete;
+  Repeater(Engine& engine, Instrument& instrument) noexcept;
 
   /// Clears all notes.
   void Clear() noexcept;
@@ -48,11 +48,6 @@ struct BarelyRepeater {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Push(std::optional<float> pitch_or, int length = 1) noexcept;
 
-  /// Sets the instrument.
-  ///
-  /// @param instrument Pointer to instrument.
-  void SetInstrument(BarelyInstrument* instrument) noexcept;
-
   /// Sets the rate.
   ///
   /// @param rate Rate in notes per beat.
@@ -61,7 +56,7 @@ struct BarelyRepeater {
   /// Sets the style.
   ///
   /// @param style Repeater style.
-  void SetStyle(BarelyRepeaterStyle style) noexcept;
+  void SetStyle(RepeaterMode style) noexcept;
 
   /// Starts the repeater.
   ///
@@ -80,22 +75,22 @@ struct BarelyRepeater {
   bool Update() noexcept;
 
   // Engine.
-  BarelyEngine& engine_;
+  Engine& engine_;
+
+  // Instrument.
+  Instrument& instrument_;
 
   // Performer.
-  BarelyPerformer performer_;
+  Performer performer_;
 
   // Task.
-  BarelyTask task_;
-
-  // Pointer to instrument.
-  BarelyInstrument* instrument_ = nullptr;
+  Task task_;
 
   // Array of pitches to play.
   std::vector<std::pair<std::optional<float>, int>> pitches_;
 
-  // Style.
-  BarelyRepeaterStyle style_ = BarelyRepeaterStyle_kForward;
+  // Mode.
+  RepeaterMode mode_ = RepeaterMode::kForward;
 
   // Current index.
   int index_ = -1;
@@ -107,4 +102,6 @@ struct BarelyRepeater {
   int remaining_length_ = 0;
 };
 
-#endif  // BARELYMUSICIAN_API_REPEATER_H_
+}  // namespace barely::examples
+
+#endif  // BARELYMUSICIAN_EXAMPLES_COMPOSITION_REPEATER_H_

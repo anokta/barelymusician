@@ -9,7 +9,6 @@
 #include "api/engine.h"
 #include "api/instrument.h"
 #include "api/performer.h"
-#include "api/repeater.h"
 #include "api/task.h"
 #include "common/time.h"
 
@@ -431,91 +430,6 @@ bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization, doub
 
   *out_position =
       barely::Quantize(position, static_cast<int>(quantization->subdivision), quantization->amount);
-  return true;
-}
-
-bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
-  if (!repeater) return false;
-
-  repeater->Clear();
-  return true;
-}
-
-bool BarelyRepeater_Create(BarelyEngineHandle engine, BarelyRepeaterHandle* out_repeater) {
-  if (!engine || !out_repeater) return false;
-
-  *out_repeater = new BarelyRepeater(*engine);
-  return true;
-}
-
-bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater) {
-  if (!repeater) return false;
-
-  delete repeater;
-  return true;
-}
-
-bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing) {
-  if (!repeater || !out_is_playing) return false;
-
-  *out_is_playing = repeater->IsPlaying();
-  return true;
-}
-
-bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater) {
-  if (!repeater) return false;
-
-  repeater->Pop();
-  return true;
-}
-
-bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, float pitch, int32_t length) {
-  if (!repeater) return false;
-
-  repeater->Push(pitch, static_cast<int>(length));
-  return true;
-}
-
-bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length) {
-  if (!repeater) return false;
-
-  repeater->Push(std::nullopt, static_cast<int>(length));
-  return true;
-}
-
-bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
-                                  BarelyInstrumentHandle instrument) {
-  if (!repeater) return false;
-
-  repeater->SetInstrument(instrument);
-  return true;
-}
-
-bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate) {
-  if (!repeater) return false;
-
-  repeater->SetRate(rate);
-  return true;
-}
-
-bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style) {
-  if (!repeater) return false;
-
-  repeater->SetStyle(style);
-  return true;
-}
-
-bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, float pitch_offset) {
-  if (!repeater) return false;
-
-  repeater->Start(pitch_offset);
-  return true;
-}
-
-bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater) {
-  if (!repeater) return false;
-
-  repeater->Stop();
   return true;
 }
 

@@ -8,8 +8,6 @@ target_sources(
   instrument.h
   performer.cpp
   performer.h
-  repeater.cpp
-  repeater.h
   task.cpp
   task.h
 )

@@ -320,10 +320,10 @@ typedef enum BarelyNoteControlType {
 
 /// Note event types.
 typedef enum BarelyNoteEventType {
-  /// Off.
-  BarelyNoteEventType_kOff = 0,
-  /// On.
-  BarelyNoteEventType_kOn,
+  /// Begin.
+  BarelyNoteEventType_kBegin = 0,
+  /// End.
+  BarelyNoteEventType_kEnd,
   /// Number of note event types.
   BarelyNoteEventType_kCount,
 } BarelyNoteEventType;
@@ -1171,10 +1171,10 @@ enum class NoteControlType {
 
 /// Note event types.
 enum class NoteEventType {
-  /// Off.
-  kOff = BarelyNoteEventType_kOff,
-  /// On.
-  kOn = BarelyNoteEventType_kOn,
+  /// Begin.
+  kBegin = BarelyNoteEventType_kBegin,
+  /// End.
+  kEnd = BarelyNoteEventType_kEnd,
 };
 
 /// Oscillator modes.

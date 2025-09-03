@@ -98,7 +98,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
 
     // Set the note callbacks.
     instrument.SetNoteEventCallback([&](NoteEventType type, float pitch) {
-      (type == NoteEventType::kOn ? note_on_pitch : note_off_pitch) = pitch;
+      (type == NoteEventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
     });
     EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
     EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
@@ -125,7 +125,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(engine.CreateInstrument({}));
       instruments[i].SetNoteEventCallback([&](NoteEventType type, float pitch) {
-        if (type == NoteEventType::kOff) {
+        if (type == NoteEventType::kEnd) {
           note_off_pitches.push_back(pitch);
         }
       });

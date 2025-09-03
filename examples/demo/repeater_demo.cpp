@@ -86,7 +86,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   repeater.SetStyle(kInitialStyle);
 
   instrument.SetNoteEventCallback([&repeater](NoteEventType type, float pitch) {
-    if (type == NoteEventType::kOn && repeater.IsPlaying()) {
+    if (type == NoteEventType::kBegin && repeater.IsPlaying()) {
       ConsoleLog() << "Note(" << pitch << ")";
     }
   });

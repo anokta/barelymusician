@@ -83,13 +83,13 @@ class Processor extends AudioWorkletProcessor {
           const handle = instrument.getHandle();
           instrument.setNoteEventCallback((eventType, pitch) => {
             const NoteEventType = {
-              OFF: 0,
-              ON: 1,
+              BEGIN: 0,
+              END: 1,
               COUNT: 2,
             };
-            if (eventType == NoteEventType.ON) {
+            if (eventType == NoteEventType.BEGIN) {
               this.port.postMessage({type: 'instrument-on-note-on', handle, pitch});
-            } else if (eventType == NoteEventType.OFF) {
+            } else if (eventType == NoteEventType.END) {
               this.port.postMessage({type: 'instrument-on-note-off', handle, pitch});
             } else {
               console.error('Invalid note event type!');

@@ -118,7 +118,7 @@ bool BarelyInstrument::IsNoteOn(float pitch) const noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyInstrument::SetAllNotesOff() noexcept {
   for (const auto& [pitch, _] : std::exchange(note_controls_, {})) {
-    note_event_callback_(BarelyNoteEventType_kOff, pitch);
+    note_event_callback_(BarelyNoteEventType_kEnd, pitch);
     engine_.ScheduleMessage(NoteOffMessage{this, pitch});
   }
 }
@@ -143,7 +143,7 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
 
 void BarelyInstrument::SetNoteOff(float pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
-    note_event_callback_(BarelyNoteEventType_kOff, pitch);
+    note_event_callback_(BarelyNoteEventType_kEnd, pitch);
     engine_.ScheduleMessage(NoteOffMessage{this, pitch});
   }
 }
@@ -154,7 +154,7 @@ void BarelyInstrument::SetNoteOn(
   if (const auto [it, success] =
           note_controls_.try_emplace(pitch, BuildNoteControlArray(note_control_overrides));
       success) {
-    note_event_callback_(BarelyNoteEventType_kOn, pitch);
+    note_event_callback_(BarelyNoteEventType_kBegin, pitch);
     engine_.ScheduleMessage(NoteOnMessage{this, pitch, BuildNoteControls(it->second)});
   }
 }

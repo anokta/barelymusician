@@ -221,7 +221,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto set_note_Event_callback_fn = [&](size_t index, Instrument& instrument) {
     instrument.SetNoteEventCallback([index](NoteEventType type, float pitch) {
       ConsoleLog() << "Instrument #" << index << ": Note"
-                   << (type == NoteEventType::kOn ? "On" : "Off") << "(" << pitch << ")";
+                   << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
     });
   };
 

@@ -119,7 +119,7 @@ int main(int /*argc*/, char* argv[]) {
     // Set the instrument settings.
     instrument.SetNoteEventCallback([track_index](NoteEventType type, float pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": Note"
-                   << (type == NoteEventType::kOn ? "On" : "Off") << "(" << pitch << ")";
+                   << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
     });
     instrument.SetControl(ControlType::kGain, kInstrumentGain);
     instrument.SetControl(ControlType::kOscMix, 1.0f);

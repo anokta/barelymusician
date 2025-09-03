@@ -919,9 +919,9 @@ namespace Barely {
       [AOT.MonoPInvokeCallback(typeof(NoteEventCallback))]
       private static void Instrument_OnNoteEvent(NoteEventType type, float pitch, IntPtr userData) {
         if (_instruments.TryGetValue(userData, out var instrument)) {
-          if (type == NoteEventType.ON) {
+          if (type == NoteEventType.BEGIN) {
             Instrument.Internal.OnNoteOn(instrument, pitch);
-          } else if (type == NoteEventType.OFF) {
+          } else if (type == NoteEventType.END) {
             Instrument.Internal.OnNoteOff(instrument, pitch);
           } else {
             Debug.LogError("Invalid note event type");
@@ -958,12 +958,12 @@ namespace Barely {
         public float value;
       }
 
-      // Note event type.
+      // Note event types.
       private enum NoteEventType {
-        // Off.
-        [InspectorName("Off")] OFF = 0,
-        // On.
-        [InspectorName("On")] ON,
+        // Begin.
+        [InspectorName("BEGIN")] BEGIN = 0,
+        // End.
+        [InspectorName("END")] END,
       }
 
       // Slice of sample data.

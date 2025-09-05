@@ -222,7 +222,6 @@ extern "C" {
 #endif  // __cplusplus
 
 /// Arpeggiator modes.
-// TODO(#142): Add more arpeggiator modes.
 typedef enum BarelyArpeggiatorMode {
   /// None.
   BarelyArpeggiatorMode_kNone = 0,
@@ -445,22 +444,6 @@ typedef struct BarelyPerformer* BarelyPerformerHandle;
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
 
-/// Control event callback.
-///
-/// @param type Control type.
-/// @param value Control value.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyControlEventCallback)(BarelyControlType type, float value, void* user_data);
-
-/// Note control event callback.
-///
-/// @param pitch Note pitch.
-/// @param type Note control type.
-/// @param value Note control value.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyNoteControlEventCallback)(float pitch, BarelyNoteControlType type, float value,
-                                               void* user_data);
-
 /// Note event callback.
 ///
 /// @param type Note event type.
@@ -632,16 +615,6 @@ BARELY_API bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrumen
 BARELY_API bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
                                             BarelyControlType type, float value);
 
-/// Sets the control event callback of an instrument.
-///
-/// @param instrument Instrument handle.
-/// @param callback Control event callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetControlEventCallback(BarelyInstrumentHandle instrument,
-                                                         BarelyControlEventCallback callback,
-                                                         void* user_data);
-
 /// Sets an instrument note control value.
 ///
 /// @param instrument Instrument handle.
@@ -651,15 +624,6 @@ BARELY_API bool BarelyInstrument_SetControlEventCallback(BarelyInstrumentHandle 
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
                                                 BarelyNoteControlType type, float value);
-
-/// Sets the note control event callback of an instrument.
-///
-/// @param instrument Instrument handle.
-/// @param callback Note control event callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteControlEventCallback(
-    BarelyInstrumentHandle instrument, BarelyNoteControlEventCallback callback, void* user_data);
 
 /// Sets the note event callback of an instrument.
 ///
@@ -1099,20 +1063,6 @@ struct Slice : public BarelySlice {
   constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
 };
 
-/// Control event callback function.
-///
-/// @param type Control type.
-/// @param value Control value.
-using ControlEventCallback = std::function<void(ControlType type, float value)>;
-
-/// Note control event callback function.
-///
-/// @param pitch Note pitch.
-/// @param type Note control type.
-/// @param value Note control value.
-using NoteControlEventCallback =
-    std::function<void(float pitch, NoteControlType type, float value)>;
-
 /// Note event callback function.
 ///
 /// @param type Note event type.
@@ -1218,15 +1168,7 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// @return Instrument.
   Instrument(Instrument&& other) noexcept
       : HandleWrapper(std::move(other)),
-        control_event_callback_(std::exchange(other.control_event_callback_, {})),
-        note_control_event_callback_(std::exchange(other.note_control_event_callback_, {})),
         note_event_callback_(std::exchange(other.note_event_callback_, {})) {
-    if (control_event_callback_) {
-      SetControlEventCallback();
-    }
-    if (note_control_event_callback_) {
-      SetNoteControlEventCallback();
-    }
     if (note_event_callback_) {
       SetNoteEventCallback();
     }
@@ -1240,15 +1182,7 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     if (this != &other) {
       BarelyInstrument_Destroy(*this);
       HandleWrapper::operator=(std::move(other));
-      control_event_callback_ = std::exchange(other.control_event_callback_, {});
-      note_control_event_callback_ = std::exchange(other.note_control_event_callback_, {});
       note_event_callback_ = std::exchange(other.note_event_callback_, {});
-      if (control_event_callback_) {
-        SetControlEventCallback();
-      }
-      if (note_control_event_callback_) {
-        SetNoteControlEventCallback();
-      }
       if (note_event_callback_) {
         SetNoteEventCallback();
       }
@@ -1317,14 +1251,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
-  /// Sets the control event callback.
-  ///
-  /// @param callback Control event callback.
-  void SetControlEventCallback(ControlEventCallback callback) noexcept {
-    control_event_callback_ = std::move(callback);
-    SetControlEventCallback();
-  }
-
   /// Sets a control value.
   ///
   /// @param pitch Note pitch.
@@ -1337,14 +1263,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
         *this, pitch, static_cast<BarelyNoteControlType>(type), static_cast<float>(value));
     assert(success);
-  }
-
-  /// Sets the note control event callback.
-  ///
-  /// @param callback Note control event callback.
-  void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept {
-    note_control_event_callback_ = std::move(callback);
-    SetNoteControlEventCallback();
   }
 
   /// Sets the note event callback.
@@ -1408,30 +1326,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   }
 
  private:
-  // Helper function to set the control event callback.
-  void SetControlEventCallback() noexcept {
-    SetCallback(BarelyInstrument_SetControlEventCallback, control_event_callback_,
-                [](BarelyControlType type, float value, void* user_data) noexcept {
-                  assert(user_data != nullptr && "Invalid control event callback user data");
-                  if (const auto& callback = *static_cast<ControlEventCallback*>(user_data);
-                      callback) {
-                    callback(static_cast<ControlType>(type), value);
-                  }
-                });
-  }
-
-  // Helper function to set the note control event callback.
-  void SetNoteControlEventCallback() noexcept {
-    SetCallback(BarelyInstrument_SetNoteControlEventCallback, note_control_event_callback_,
-                [](float pitch, BarelyNoteControlType type, float value, void* user_data) noexcept {
-                  assert(user_data != nullptr && "Invalid note control event callback user data");
-                  if (const auto& callback = *static_cast<NoteControlEventCallback*>(user_data);
-                      callback) {
-                    callback(pitch, static_cast<NoteControlType>(type), value);
-                  }
-                });
-  }
-
   // Helper function to set the note event callback.
   void SetNoteEventCallback() noexcept {
     SetCallback(BarelyInstrument_SetNoteEventCallback, note_event_callback_,
@@ -1443,12 +1337,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
                   }
                 });
   }
-
-  // Control event callback.
-  ControlEventCallback control_event_callback_;
-
-  // Note control event callback.
-  NoteControlEventCallback note_control_event_callback_;
 
   // Note event callback.
   NoteEventCallback note_event_callback_;

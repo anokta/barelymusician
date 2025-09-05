@@ -182,30 +182,12 @@ bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyContro
   return true;
 }
 
-bool BarelyInstrument_SetControlEventCallback(BarelyInstrumentHandle instrument,
-                                              BarelyControlEventCallback callback,
-                                              void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetControlEventCallback({callback, user_data});
-  return true;
-}
-
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
                                      BarelyNoteControlType type, float value) {
   if (!instrument) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
 
   instrument->SetNoteControl(pitch, type, value);
-  return true;
-}
-
-bool BarelyInstrument_SetNoteControlEventCallback(BarelyInstrumentHandle instrument,
-                                                  BarelyNoteControlEventCallback callback,
-                                                  void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetNoteControlEventCallback({callback, user_data});
   return true;
 }
 

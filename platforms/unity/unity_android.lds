@@ -16,9 +16,7 @@ VERS_1.0 {
     BarelyInstrument_IsNoteOn;
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
-    BarelyInstrument_SetControlEventCallback;
     BarelyInstrument_SetNoteControl;
-    BarelyInstrument_SetNoteControlEventCallback;
     BarelyInstrument_SetNoteEventCallback;
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOn;

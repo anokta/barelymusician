@@ -15,12 +15,6 @@
 /// Implementation an instrument.
 struct BarelyInstrument {
  public:
-  /// Control event callback alias.
-  using ControlEventCallback = barely::Callback<BarelyControlEventCallback>;
-
-  /// Note control event callback alias.
-  using NoteControlEventCallback = barely::Callback<BarelyNoteControlEventCallback>;
-
   /// Note event callback alias.
   using NoteEventCallback = barely::Callback<BarelyNoteEventCallback>;
 
@@ -70,26 +64,12 @@ struct BarelyInstrument {
   /// @param value Control value.
   void SetControl(BarelyControlType type, float value) noexcept;
 
-  /// Sets the control event callback.
-  ///
-  /// @param callback Control event callback.
-  void SetControlEventCallback(ControlEventCallback callback) noexcept {
-    control_event_callback_ = callback;
-  }
-
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @param value Note control value.
   void SetNoteControl(float pitch, BarelyNoteControlType type, float value) noexcept;
-
-  /// Sets the note control event callback.
-  ///
-  /// @param callback Note control event callback.
-  void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept {
-    note_control_event_callback_ = callback;
-  }
 
   /// Sets the note event callback.
   ///
@@ -136,14 +116,8 @@ struct BarelyInstrument {
   // Array of controls.
   barely::ControlArray controls_;
 
-  // Control event callback.
-  ControlEventCallback control_event_callback_ = {};
-
   // Map of note control arrays by their pitches.
   std::unordered_map<float, barely::NoteControlArray> note_controls_;
-
-  // Note control event callback.
-  NoteControlEventCallback note_control_event_callback_ = {};
 
   // Note event callback.
   NoteEventCallback note_event_callback_ = {};

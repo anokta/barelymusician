@@ -29,9 +29,9 @@ export const ControlType = {
   BIT_CRUSHER_DEPTH: 19,
   BIT_CRUSHER_RATE: 20,
   DELAY_SEND: 21,
-  ARPEGGIATOR_MODE: 22,
-  ARPEGGIATOR_GATE_RATIO: 23,
-  ARPEGGIATOR_RATE: 24,
+  ARP_MODE: 22,
+  ARP_GATE_RATIO: 23,
+  ARP_RATE: 24,
   COUNT: 25,
 };
 
@@ -220,25 +220,25 @@ export const CONTROLS = {
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.ARPEGGIATOR_MODE]: {
+  [ControlType.ARP_MODE]: {
     name: 'Arpeggiator Mode',
     valueType: 'int',
     defaultValue: ArpMode.NONE,
     minValue: 0,
     maxValue: ArpMode.COUNT - 1,
   },
-  [ControlType.ARPEGGIATOR_GATE_RATIO]: {
+  [ControlType.ARP_GATE_RATIO]: {
     name: 'Arpeggiator Gate Ratio',
     valueType: 'float',
     defaultValue: 0.5,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.ARPEGGIATOR_RATE]: {
+  [ControlType.ARP_RATE]: {
     name: 'Arpeggiator Rate',
     valueType: 'float',
     defaultValue: 1.0,
     minValue: 0.0,
-    maxValue: 8.0,
+    maxValue: 16.0,
   },
 };

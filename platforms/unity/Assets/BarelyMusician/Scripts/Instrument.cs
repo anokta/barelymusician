@@ -213,11 +213,11 @@ namespace Barely {
 
     /// Arpeggiator gate ratio.
     [Range(0.0f, 1.0f)]
-    public float ArpeggiatorGateRatio = 0.5f;
+    public float ArpGateRatio = 0.5f;
 
     /// Arpeggiator rate.
-    [Range(0.0f, 8.0f)]
-    public float ArpeggiatorRate = 1.0f;
+    [Range(0.0f, 16.0f)]
+    public float ArpRate = 1.0f;
 
     /// Note off callback.
     ///
@@ -360,9 +360,9 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
       SetControl(Engine.Internal.ControlType.DELAY_SEND, DelaySend);
-      SetControl(Engine.Internal.ControlType.ARPEGGIATOR_MODE, (float)ArpMode);
-      SetControl(Engine.Internal.ControlType.ARPEGGIATOR_GATE_RATIO, ArpeggiatorGateRatio);
-      SetControl(Engine.Internal.ControlType.ARPEGGIATOR_RATE, ArpeggiatorRate);
+      SetControl(Engine.Internal.ControlType.ARP_MODE, (float)ArpMode);
+      SetControl(Engine.Internal.ControlType.ARP_GATE_RATIO, ArpGateRatio);
+      SetControl(Engine.Internal.ControlType.ARP_RATE, ArpRate);
     }
 
     private void SetControl(Engine.Internal.ControlType type, float value) {

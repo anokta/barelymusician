@@ -111,11 +111,11 @@ namespace Barely {
         /// Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
         /// Arpeggiator mode.
-        [InspectorName("Arpeggiator Mode")] ARPEGGIATOR_MODE,
+        [InspectorName("Arpeggiator Mode")] ARP_MODE,
         /// Arpeggiator gate ratio.
-        [InspectorName("Arpeggiator Gate Ratio")] ARPEGGIATOR_GATE_RATIO,
+        [InspectorName("Arpeggiator Gate Ratio")] ARP_GATE_RATIO,
         /// Arpeggiator rate.
-        [InspectorName("Arpeggiator Rate")] ARPEGGIATOR_RATE,
+        [InspectorName("Arpeggiator Rate")] ARP_RATE,
       }
 
       /// Effect control type.
@@ -224,6 +224,10 @@ namespace Barely {
         _controlOverrides[(int)ControlType.FILTER_Q].value = instrument.FilterQ;
         _controlOverrides[(int)ControlType.BIT_CRUSHER_DEPTH].value = instrument.BitCrusherDepth;
         _controlOverrides[(int)ControlType.BIT_CRUSHER_RATE].value = instrument.BitCrusherRate;
+        _controlOverrides[(int)ControlType.DELAY_SEND].value = instrument.DelaySend;
+        _controlOverrides[(int)ControlType.ARP_MODE].value = (float)instrument.ArpMode;
+        _controlOverrides[(int)ControlType.ARP_GATE_RATIO].value = instrument.ArpGateRatio;
+        _controlOverrides[(int)ControlType.ARP_RATE].value = instrument.ArpRate;
         bool success = BarelyInstrument_Create(Handle, _controlOverrides, _controlOverrides.Length,
                                                ref instrumentHandle);
         if (!success) {

@@ -3,7 +3,6 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <optional>
 
 #include "api/engine.h"
 #include "api/instrument.h"

@@ -4,11 +4,14 @@
 #include <barelymusician.h>
 
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <unordered_map>
+#include <vector>
 
+#include "api/performer.h"
+#include "api/task.h"
 #include "common/callback.h"
-#include "composition/arpeggiator.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
 
@@ -96,34 +99,36 @@ struct BarelyInstrument {
   /// @param slices Span of slices.
   void SetSampleData(std::span<const BarelySlice> slices) noexcept;
 
-  void StartNote(float pitch,
-                 std::span<const BarelyNoteControlOverride> note_control_overrides) noexcept;
-  void StopAllNotes() noexcept;
-  void StopNote(float pitch) noexcept;
-
   barely::InstrumentProcessor& processor() noexcept { return processor_; }
 
  private:
   // Processes a control value.
   void ProcessControl(barely::ControlType type, float value) noexcept;
 
+  // Updates the arpeggiator.
+  void UpdateArp() noexcept;
+
   // Engine.
   BarelyEngine& engine_;
-
-  // Arpeggiator.
-  barely::Arpeggiator arpeggiator_;
 
   // Array of controls.
   barely::ControlArray controls_;
 
   // Map of note control arrays by their pitches.
   std::unordered_map<float, barely::NoteControlArray> note_controls_;
+  std::vector<float> pitches_;  // sorted
 
   // Note event callback.
   NoteEventCallback note_event_callback_ = {};
 
   // Instrument processor.
   barely::InstrumentProcessor processor_;
+
+  // Arpeggiator.
+  BarelyPerformer arp_;
+  BarelyTask arp_task_;
+  int arp_pitch_index_ = -1;
+  std::optional<float> arp_pitch_ = std::nullopt;
 };
 
 #endif  // BARELYMUSICIAN_API_INSTRUMENT_H_

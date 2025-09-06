@@ -47,8 +47,8 @@ void Arpeggiator::SetGateRatio(float gate_ratio) noexcept {
   task_.SetDuration(static_cast<double>(gate_ratio) * performer_.GetLoopLength());
 }
 
-void Arpeggiator::SetMode(BarelyArpeggiatorMode mode) noexcept {
-  if (mode == BarelyArpeggiatorMode_kNone && mode_ != BarelyArpeggiatorMode_kNone) {
+void Arpeggiator::SetMode(BarelyArpMode mode) noexcept {
+  if (mode == BarelyArpMode_kNone && mode_ != BarelyArpMode_kNone) {
     instrument_.StopAllNotes();
   }
   mode_ = mode;
@@ -93,13 +93,13 @@ void Arpeggiator::Stop() noexcept {
 void Arpeggiator::Update() noexcept {
   const int size = static_cast<int>(pitches_.size());
   switch (mode_) {
-    case BarelyArpeggiatorMode_kUp:
+    case BarelyArpMode_kUp:
       index_ = (index_ + 1) % size;
       break;
-    case BarelyArpeggiatorMode_kDown:
+    case BarelyArpMode_kDown:
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
-    case BarelyArpeggiatorMode_kRandom:
+    case BarelyArpMode_kRandom:
       index_ = engine_.main_rng().Generate(0, size);
       break;
     default:

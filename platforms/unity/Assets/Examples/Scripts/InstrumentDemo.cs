@@ -12,7 +12,7 @@ namespace Barely.Examples {
     public float oscShape = 0.0f;
     public OscMode oscMode = OscMode.MIX;
     public SliceMode sliceMode = SliceMode.LOOP;
-    public ArpeggiatorMode arpeggiatorMode = ArpeggiatorMode.UP;
+    public ArpMode arpeggiatorMode = ArpMode.UP;
 
     private const int N = 4;
     private Dictionary<float, Vector2> _activeNotes = null;
@@ -75,8 +75,8 @@ namespace Barely.Examples {
         controller.instrument.OscShape = oscShape;
         controller.instrument.SliceMode = sliceMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) {
-        controller.instrument.ArpeggiatorMode =
-            (controller.instrument.ArpeggiatorMode == arpeggiatorMode) ? ArpeggiatorMode.NONE
+        controller.instrument.ArpMode =
+            (controller.instrument.ArpMode == arpeggiatorMode) ? ArpMode.NONE
                                                                        : arpeggiatorMode;
       }
     }

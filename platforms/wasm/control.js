@@ -1,4 +1,4 @@
-export const ArpeggiatorMode = {
+export const ArpMode = {
   NONE: 0,
   UP: 1,
   DOWN: 2,
@@ -223,9 +223,9 @@ export const CONTROLS = {
   [ControlType.ARPEGGIATOR_MODE]: {
     name: 'Arpeggiator Mode',
     valueType: 'int',
-    defaultValue: ArpeggiatorMode.NONE,
+    defaultValue: ArpMode.NONE,
     minValue: 0,
-    maxValue: ArpeggiatorMode.COUNT - 1,
+    maxValue: ArpMode.COUNT - 1,
   },
   [ControlType.ARPEGGIATOR_GATE_RATIO]: {
     name: 'Arpeggiator Gate Ratio',

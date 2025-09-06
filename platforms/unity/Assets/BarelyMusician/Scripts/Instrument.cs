@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Barely {
   /// Arpeggiator modes.
-  public enum ArpeggiatorMode {
+  public enum ArpMode {
     /// None.
     [InspectorName("None")] NONE = 0,
     /// None.
@@ -209,7 +209,7 @@ namespace Barely {
     [Header("Arpeggiator")]
 
     /// Arpeggiator mode.
-    public ArpeggiatorMode ArpeggiatorMode = ArpeggiatorMode.NONE;
+    public ArpMode ArpMode = ArpMode.NONE;
 
     /// Arpeggiator gate ratio.
     [Range(0.0f, 1.0f)]
@@ -360,7 +360,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
       SetControl(Engine.Internal.ControlType.DELAY_SEND, DelaySend);
-      SetControl(Engine.Internal.ControlType.ARPEGGIATOR_MODE, (float)ArpeggiatorMode);
+      SetControl(Engine.Internal.ControlType.ARPEGGIATOR_MODE, (float)ArpMode);
       SetControl(Engine.Internal.ControlType.ARPEGGIATOR_GATE_RATIO, ArpeggiatorGateRatio);
       SetControl(Engine.Internal.ControlType.ARPEGGIATOR_RATE, ArpeggiatorRate);
     }

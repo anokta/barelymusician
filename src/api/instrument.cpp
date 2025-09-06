@@ -30,31 +30,31 @@ using ::barely::SampleDataMessage;
 // Returns a control array with overrides.
 ControlArray BuildControlArray(std::span<const BarelyControlOverride> control_overrides) noexcept {
   ControlArray control_array = {
-      Control(1.0f, 0.0f, 1.0f),                        // kGain
-      Control(0.0f),                                    // kPitchShift
-      Control(false),                                   // kRetrigger
-      Control(0.0f, -1.0f, 1.0f),                       // kStereoPan
-      Control(8, 1, 20),                                // kVoiceCount
-      Control(0.0f, 0.0f, 60.0f),                       // kAttack
-      Control(0.0f, 0.0f, 60.0f),                       // kDecay
-      Control(1.0f, 0.0f, 1.0f),                        // kSustain
-      Control(0.0f, 0.0f, 60.0f),                       // kRelease
-      Control(0.0f, 0.0f, 1.0f),                        // kOscMix
-      Control(0, 0, BarelyOscMode_kCount - 1),          // kOscMode
-      Control(0.0f, 0.0f, 1.0f),                        // kOscNoiseMix
-      Control(0.0f),                                    // kOscPitchShift
-      Control(0.0f, 0.0f, 1.0f),                        // kOscShape
-      Control(0.0f, -0.5f, 0.5f),                       // kOscSkew
-      Control(0, 0, BarelySliceMode_kCount - 1),        // kSliceMode
-      Control(0, 0, BarelyFilterType_kCount - 1),       // kFilterType
-      Control(0.0f, 0.0f),                              // kFilterFrequency
-      Control(std::sqrt(0.5f), 0.1f),                   // kFilterQ
-      Control(16.0f, 1.0f, 16.0f),                      // kBitCrusherDepth
-      Control(1.0f, 0.0f, 1.0f),                        // kBitCrusherRate
-      Control(0.0f, 0.0f, 1.0f),                        // kDelaySend
-      Control(0, 0, BarelyArpeggiatorMode_kCount - 1),  // kArpeggiatorMode
-      Control(0.5f, 0.0f, 1.0f),                        // kArpeggiatorGateRatio
-      Control(1.0f, 0.0f, 8.0f),                        // kArpeggiatorRate
+      Control(1.0f, 0.0f, 1.0f),                   // kGain
+      Control(0.0f),                               // kPitchShift
+      Control(false),                              // kRetrigger
+      Control(0.0f, -1.0f, 1.0f),                  // kStereoPan
+      Control(8, 1, 20),                           // kVoiceCount
+      Control(0.0f, 0.0f, 60.0f),                  // kAttack
+      Control(0.0f, 0.0f, 60.0f),                  // kDecay
+      Control(1.0f, 0.0f, 1.0f),                   // kSustain
+      Control(0.0f, 0.0f, 60.0f),                  // kRelease
+      Control(0.0f, 0.0f, 1.0f),                   // kOscMix
+      Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
+      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
+      Control(0.0f),                               // kOscPitchShift
+      Control(0.0f, 0.0f, 1.0f),                   // kOscShape
+      Control(0.0f, -0.5f, 0.5f),                  // kOscSkew
+      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
+      Control(0, 0, BarelyFilterType_kCount - 1),  // kFilterType
+      Control(0.0f, 0.0f),                         // kFilterFrequency
+      Control(std::sqrt(0.5f), 0.1f),              // kFilterQ
+      Control(16.0f, 1.0f, 16.0f),                 // kBitCrusherDepth
+      Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
+      Control(0.0f, 0.0f, 1.0f),                   // kDelaySend
+      Control(0, 0, BarelyArpMode_kCount - 1),     // kArpMode
+      Control(0.5f, 0.0f, 1.0f),                   // kArpGateRatio
+      Control(1.0f, 0.0f, 8.0f),                   // kArpRate
 
   };
   for (const auto& [type, value] : control_overrides) {
@@ -97,11 +97,10 @@ BarelyInstrument::BarelyInstrument(
       processor_(control_overrides, engine_.audio_rng(), engine_.GetSampleRate(),
                  engine_.GetReferenceFrequency()) {
   engine_.AddInstrument(this);
-  arpeggiator_.SetMode(
-      static_cast<BarelyArpeggiatorMode>(controls_[BarelyControlType_kArpeggiatorMode].value));
-  arpeggiator_.SetGateRatio(controls_[BarelyControlType_kArpeggiatorGateRatio].value);
-  arpeggiator_.SetRate(controls_[BarelyControlType_kArpeggiatorGateRatio].value,
-                       controls_[BarelyControlType_kArpeggiatorRate].value);
+  arpeggiator_.SetMode(static_cast<BarelyArpMode>(controls_[BarelyControlType_kArpMode].value));
+  arpeggiator_.SetGateRatio(controls_[BarelyControlType_kArpGateRatio].value);
+  arpeggiator_.SetRate(controls_[BarelyControlType_kArpGateRatio].value,
+                       controls_[BarelyControlType_kArpRate].value);
 }
 
 BarelyInstrument::~BarelyInstrument() noexcept {
@@ -127,8 +126,8 @@ bool BarelyInstrument::IsNoteOn(float pitch) const noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyInstrument::SetAllNotesOff() noexcept {
-  if (static_cast<BarelyArpeggiatorMode>(controls_[BarelyControlType_kArpeggiatorMode].value) !=
-      BarelyArpeggiatorMode_kNone) {
+  if (static_cast<BarelyArpMode>(controls_[BarelyControlType_kArpMode].value) !=
+      BarelyArpMode_kNone) {
     arpeggiator_.SetAllNotesOff();
   } else {
     StopAllNotes();
@@ -152,8 +151,8 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
 }
 
 void BarelyInstrument::SetNoteOff(float pitch) noexcept {
-  if (static_cast<BarelyArpeggiatorMode>(controls_[BarelyControlType_kArpeggiatorMode].value) !=
-      BarelyArpeggiatorMode_kNone) {
+  if (static_cast<BarelyArpMode>(controls_[BarelyControlType_kArpMode].value) !=
+      BarelyArpMode_kNone) {
     arpeggiator_.SetNoteOff(pitch);
   } else {
     StopNote(pitch);
@@ -163,8 +162,8 @@ void BarelyInstrument::SetNoteOff(float pitch) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyInstrument::SetNoteOn(
     float pitch, std::span<const BarelyNoteControlOverride> note_control_overrides) noexcept {
-  if (static_cast<BarelyArpeggiatorMode>(controls_[BarelyControlType_kArpeggiatorMode].value) !=
-      BarelyArpeggiatorMode_kNone) {
+  if (static_cast<BarelyArpMode>(controls_[BarelyControlType_kArpMode].value) !=
+      BarelyArpMode_kNone) {
     arpeggiator_.SetNoteOn(pitch);
   } else {
     StartNote(pitch, note_control_overrides);
@@ -201,14 +200,14 @@ void BarelyInstrument::StopNote(float pitch) noexcept {
 
 void BarelyInstrument::ProcessControl(ControlType type, float value) noexcept {
   switch (type) {
-    case ControlType::kArpeggiatorMode:
-      arpeggiator_.SetMode(static_cast<BarelyArpeggiatorMode>(value));
+    case ControlType::kArpMode:
+      arpeggiator_.SetMode(static_cast<BarelyArpMode>(value));
       break;
-    case ControlType::kArpeggiatorGateRatio:
+    case ControlType::kArpGateRatio:
       arpeggiator_.SetGateRatio(value);
       break;
-    case ControlType::kArpeggiatorRate:
-      arpeggiator_.SetRate(controls_[BarelyControlType_kArpeggiatorGateRatio].value, value);
+    case ControlType::kArpRate:
+      arpeggiator_.SetRate(controls_[BarelyControlType_kArpGateRatio].value, value);
       break;
     default:
       engine_.ScheduleMessage(ControlMessage{this, type, value});

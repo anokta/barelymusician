@@ -15,7 +15,7 @@
 
 namespace {
 
-using ::barely::ArpeggiatorMode;
+using ::barely::ArpMode;
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::NoteEventType;
@@ -41,7 +41,7 @@ constexpr int kVoiceCount = 16;
 constexpr float kInitialGateRatio = 0.5f;
 constexpr float kInitialRate = 4.0f;
 constexpr double kInitialTempo = 100.0;
-constexpr ArpeggiatorMode kInitialMode = ArpeggiatorMode::kUp;
+constexpr ArpMode kInitialMode = ArpMode::kUp;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
@@ -78,9 +78,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {ControlType::kAttack, kAttack},
       {ControlType::kRelease, kRelease},
       {ControlType::kVoiceCount, kVoiceCount},
-      {ControlType::kArpeggiatorMode, kInitialMode},
-      {ControlType::kArpeggiatorGateRatio, kInitialGateRatio},
-      {ControlType::kArpeggiatorRate, kInitialRate},
+      {ControlType::kArpMode, kInitialMode},
+      {ControlType::kArpGateRatio, kInitialGateRatio},
+      {ControlType::kArpRate, kInitialRate},
   }});
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
     if (type == NoteEventType::kBegin) {

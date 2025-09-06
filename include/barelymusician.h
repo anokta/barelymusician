@@ -222,18 +222,18 @@ extern "C" {
 #endif  // __cplusplus
 
 /// Arpeggiator modes.
-typedef enum BarelyArpeggiatorMode {
+typedef enum BarelyArpMode {
   /// None.
-  BarelyArpeggiatorMode_kNone = 0,
+  BarelyArpMode_kNone = 0,
   /// Up.
-  BarelyArpeggiatorMode_kUp,
+  BarelyArpMode_kUp,
   /// Down.
-  BarelyArpeggiatorMode_kDown,
+  BarelyArpMode_kDown,
   /// Random.
-  BarelyArpeggiatorMode_kRandom,
+  BarelyArpMode_kRandom,
   /// Number of arpeggiator modes.
-  BarelyArpeggiatorMode_kCount,
-} BarelyArpeggiatorMode;
+  BarelyArpMode_kCount,
+} BarelyArpMode;
 
 /// Control types.
 typedef enum BarelyControlType {
@@ -282,11 +282,11 @@ typedef enum BarelyControlType {
   /// Delay send.
   BarelyControlType_kDelaySend,
   /// Arpeggiator mode.
-  BarelyControlType_kArpeggiatorMode,
+  BarelyControlType_kArpMode,
   /// Arpeggiator gate ratio.
-  BarelyControlType_kArpeggiatorGateRatio,
+  BarelyControlType_kArpGateRatio,
   /// Arpeggiator rate.
-  BarelyControlType_kArpeggiatorRate,
+  BarelyControlType_kArpRate,
   /// Number of control types.
   BarelyControlType_kCount,
 } BarelyControlType;
@@ -873,15 +873,15 @@ namespace barely {
 inline constexpr float kDefaultReferenceFrequency = BARELY_DEFAULT_REFERENCE_FREQUENCY;
 
 /// Arpeggiator modes.
-enum class ArpeggiatorMode {
+enum class ArpMode {
   /// None.
-  kNone = BarelyArpeggiatorMode_kNone,
+  kNone = BarelyArpMode_kNone,
   /// Up.
-  kUp = BarelyArpeggiatorMode_kUp,
+  kUp = BarelyArpMode_kUp,
   /// Down.
-  kDown = BarelyArpeggiatorMode_kDown,
+  kDown = BarelyArpMode_kDown,
   /// Random.
-  kRandom = BarelyArpeggiatorMode_kRandom,
+  kRandom = BarelyArpMode_kRandom,
 };
 
 /// Control types.
@@ -931,11 +931,11 @@ enum class ControlType {
   /// Delay send.
   kDelaySend = BarelyControlType_kDelaySend,
   /// Arpeggiator mode.
-  kArpeggiatorMode = BarelyControlType_kArpeggiatorMode,
+  kArpMode = BarelyControlType_kArpMode,
   /// Arpeggiator gate ratio.
-  kArpeggiatorGateRatio = BarelyControlType_kArpeggiatorGateRatio,
+  kArpGateRatio = BarelyControlType_kArpGateRatio,
   /// Arpeggiator rate.
-  kArpeggiatorRate = BarelyControlType_kArpeggiatorRate,
+  kArpRate = BarelyControlType_kArpRate,
 };
 
 /// Effect control types.

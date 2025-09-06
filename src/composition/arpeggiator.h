@@ -42,7 +42,7 @@ struct Arpeggiator {
   /// Sets the mode.
   ///
   /// @param mode Arpeggiator mode.
-  void SetMode(BarelyArpeggiatorMode mode) noexcept;
+  void SetMode(BarelyArpMode mode) noexcept;
 
   /// Sets a note off.
   ///
@@ -90,8 +90,8 @@ struct Arpeggiator {
   // Array of pitches to play.
   std::vector<float> pitches_;
 
-  // Style.
-  BarelyArpeggiatorMode mode_ = BarelyArpeggiatorMode_kNone;
+  // Mode.
+  BarelyArpMode mode_ = BarelyArpMode_kNone;
 
   // Current index.
   int index_ = -1;

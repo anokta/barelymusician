@@ -805,7 +805,7 @@ BARELY_API bool BarelyTask_GetDuration(BarelyTaskHandle task, double* out_durati
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position);
 
-/// Gets the position of a task.
+/// Gets the priority of a task.
 ///
 /// @param task Task handle.
 /// @param out_priority Output priority.
@@ -821,7 +821,7 @@ BARELY_API bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active);
 /// Sets the duration of a task.
 ///
 /// @param task Task handle.
-/// @param position Duration in beats.
+/// @param duration Duration in beats.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration);
 
@@ -841,7 +841,7 @@ BARELY_API bool BarelyTask_SetEventCallback(BarelyTaskHandle task, BarelyTaskEve
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
 
-/// Sets the position of a task.
+/// Sets the priority of a task.
 ///
 /// @param task Task handle.
 /// @param priority Priority.
@@ -1047,7 +1047,7 @@ struct NoteControlOverride : public BarelyNoteControlOverride {
 struct Slice : public BarelySlice {
   /// Constructs a new `Slice`.
   ///
-  /// @param root_pitch Root pich.
+  /// @param root_pitch Root pitch.
   /// @param sample_rate Sampling rate in hertz.
   /// @param samples Span of mono samples.
   explicit constexpr Slice(float root_pitch, int sample_rate,
@@ -1428,6 +1428,16 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
     return position;
   }
 
+  /// Returns the priority.
+  ///
+  /// @return Priority.
+  [[nodiscard]] int GetPriority() const noexcept {
+    int32_t priority = 0;
+    [[maybe_unused]] const bool success = BarelyTask_GetPriority(*this, &priority);
+    assert(success);
+    return static_cast<int>(priority);
+  }
+
   /// Returns whether the task is active or not.
   ///
   /// @return True if active, false otherwise.
@@ -1446,6 +1456,15 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
     assert(success);
   }
 
+  /// Sets the event callback.
+  ///
+  /// @param callback Event callback.
+  void SetEventCallback(TaskEventCallback callback) noexcept {
+    BarelyTask_SetEventCallback(*this, nullptr, nullptr);
+    event_callback_ = std::move(callback);
+    SetEventCallback();
+  }
+
   /// Sets the position.
   ///
   /// @param position Position in beats.
@@ -1454,13 +1473,13 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
     assert(success);
   }
 
-  /// Sets the event callback.
+  /// Sets the priority.
   ///
-  /// @param callback Event callback.
-  void SetEventCallback(TaskEventCallback callback) noexcept {
-    BarelyTask_SetEventCallback(*this, nullptr, nullptr);
-    event_callback_ = std::move(callback);
-    SetEventCallback();
+  /// @param priority Priority.
+  void SetPriority(int priority) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyTask_SetPriority(*this, static_cast<int32_t>(priority));
+    assert(success);
   }
 
  private:

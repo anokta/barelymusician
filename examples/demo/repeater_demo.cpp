@@ -12,18 +12,19 @@
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
+#include "composition/repeater.h"
 
 namespace {
 
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::NoteEventType;
-using ::barely::Repeater;
-using ::barely::RepeaterStyle;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
+using ::barely::examples::Repeater;
+using ::barely::examples::RepeaterMode;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -41,7 +42,7 @@ constexpr int kVoiceCount = 16;
 
 constexpr double kInitialRate = 2.0;
 constexpr double kInitialTempo = 135.0;
-constexpr RepeaterStyle kInitialStyle = RepeaterStyle::kForward;
+constexpr RepeaterMode kInitialStyle = RepeaterMode::kForward;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
@@ -80,13 +81,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {ControlType::kVoiceCount, kVoiceCount},
   }});
 
-  Repeater repeater(engine);
-  repeater.SetInstrument(&instrument);
+  Repeater repeater(engine, instrument);
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
   instrument.SetNoteEventCallback([&repeater](NoteEventType type, float pitch) {
-    if (type == NoteEventType::kOn && repeater.IsPlaying()) {
+    if (type == NoteEventType::kBegin && repeater.IsPlaying()) {
       ConsoleLog() << "Note(" << pitch << ")";
     }
   });
@@ -129,11 +129,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Play note.
     if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
       const float pitch = *pitch_or;
-      if (!repeater.IsPlaying()) {
+      if (repeater.IsPlaying()) {
+        repeater.Stop();
+        repeater.Start(pitch);
+      } else {
         instrument.SetNoteOn(pitch);
+        repeater.Push(pitch, length);
+        ConsoleLog() << "Note(" << pitch << ") added";
       }
-      repeater.Push(pitch, length);
-      ConsoleLog() << "Note(" << pitch << ") added";
       return;
     }
 

@@ -3,94 +3,12 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <optional>
 
-#include "api/arpeggiator.h"
 #include "api/engine.h"
 #include "api/instrument.h"
 #include "api/performer.h"
-#include "api/repeater.h"
 #include "api/task.h"
 #include "common/time.h"
-
-bool BarelyArpeggiator_Create(BarelyEngineHandle engine, BarelyArpeggiatorHandle* out_arpeggiator) {
-  if (!engine || !out_arpeggiator) return false;
-
-  *out_arpeggiator = new BarelyArpeggiator(*engine);
-  return true;
-}
-
-bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator) {
-  if (!arpeggiator) return false;
-
-  delete arpeggiator;
-  return true;
-}
-
-bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch,
-                                bool* out_is_note_on) {
-  if (!arpeggiator || !out_is_note_on) return false;
-
-  *out_is_note_on = arpeggiator->IsNoteOn(pitch);
-  return true;
-}
-
-bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator, bool* out_is_playing) {
-  if (!arpeggiator || !out_is_playing) return false;
-
-  *out_is_playing = arpeggiator->IsPlaying();
-  return true;
-}
-
-bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetAllNotesOff();
-  return true;
-}
-
-bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator, float gate_ratio) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetGateRatio(gate_ratio);
-  return true;
-}
-
-bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                     BarelyInstrumentHandle instrument) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetInstrument(instrument);
-  return true;
-}
-
-bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, float pitch) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetNoteOff(pitch);
-  return true;
-}
-
-bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetNoteOn(pitch);
-  return true;
-}
-
-bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetRate(rate);
-  return true;
-}
-
-bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator, BarelyArpeggiatorStyle style) {
-  if (!arpeggiator) return false;
-
-  arpeggiator->SetStyle(style);
-  return true;
-}
 
 bool BarelyEngine_Create(int32_t sample_rate, int32_t max_channel_count, int32_t max_frame_count,
                          float reference_frequency, BarelyEngineHandle* out_engine) {
@@ -263,30 +181,12 @@ bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyContro
   return true;
 }
 
-bool BarelyInstrument_SetControlEventCallback(BarelyInstrumentHandle instrument,
-                                              BarelyControlEventCallback callback,
-                                              void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetControlEventCallback({callback, user_data});
-  return true;
-}
-
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
                                      BarelyNoteControlType type, float value) {
   if (!instrument) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
 
   instrument->SetNoteControl(pitch, type, value);
-  return true;
-}
-
-bool BarelyInstrument_SetNoteControlEventCallback(BarelyInstrumentHandle instrument,
-                                                  BarelyNoteControlEventCallback callback,
-                                                  void* user_data) {
-  if (!instrument) return false;
-
-  instrument->SetNoteControlEventCallback({callback, user_data});
   return true;
 }
 
@@ -434,91 +334,6 @@ bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization, doub
   return true;
 }
 
-bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater) {
-  if (!repeater) return false;
-
-  repeater->Clear();
-  return true;
-}
-
-bool BarelyRepeater_Create(BarelyEngineHandle engine, BarelyRepeaterHandle* out_repeater) {
-  if (!engine || !out_repeater) return false;
-
-  *out_repeater = new BarelyRepeater(*engine);
-  return true;
-}
-
-bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater) {
-  if (!repeater) return false;
-
-  delete repeater;
-  return true;
-}
-
-bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing) {
-  if (!repeater || !out_is_playing) return false;
-
-  *out_is_playing = repeater->IsPlaying();
-  return true;
-}
-
-bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater) {
-  if (!repeater) return false;
-
-  repeater->Pop();
-  return true;
-}
-
-bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, float pitch, int32_t length) {
-  if (!repeater) return false;
-
-  repeater->Push(pitch, static_cast<int>(length));
-  return true;
-}
-
-bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length) {
-  if (!repeater) return false;
-
-  repeater->Push(std::nullopt, static_cast<int>(length));
-  return true;
-}
-
-bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
-                                  BarelyInstrumentHandle instrument) {
-  if (!repeater) return false;
-
-  repeater->SetInstrument(instrument);
-  return true;
-}
-
-bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate) {
-  if (!repeater) return false;
-
-  repeater->SetRate(rate);
-  return true;
-}
-
-bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style) {
-  if (!repeater) return false;
-
-  repeater->SetStyle(style);
-  return true;
-}
-
-bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, float pitch_offset) {
-  if (!repeater) return false;
-
-  repeater->Start(pitch_offset);
-  return true;
-}
-
-bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater) {
-  if (!repeater) return false;
-
-  repeater->Stop();
-  return true;
-}
-
 bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch) {
   if (scale == nullptr) return false;
   if (scale->pitches == nullptr || scale->pitch_count == 0) return false;
@@ -614,19 +429,5 @@ bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority) {
   if (!task) return false;
 
   task->SetPriority(static_cast<int>(priority));
-  return true;
-}
-
-bool Barely_AmplitudeToDecibels(float amplitude, float* out_decibels) {
-  if (!out_decibels) return false;
-
-  *out_decibels = (amplitude > 0.0) ? 20.0f * std::log10(amplitude) : barely::kMinDecibels;
-  return true;
-}
-
-bool Barely_DecibelsToAmplitude(float decibels, float* out_amplitude) {
-  if (!out_amplitude) return false;
-
-  *out_amplitude = (decibels > barely::kMinDecibels) ? std::pow(10.0f, 0.05f * decibels) : 0.0f;
   return true;
 }

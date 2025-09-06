@@ -59,5 +59,6 @@ set(CMAKE_FOLDER examples)
 include_directories(.)
 
 add_subdirectory(common)
+add_subdirectory(composition)
 add_subdirectory(data)
 add_subdirectory(demo)

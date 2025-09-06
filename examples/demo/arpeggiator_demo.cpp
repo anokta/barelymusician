@@ -15,8 +15,7 @@
 
 namespace {
 
-using ::barely::Arpeggiator;
-using ::barely::ArpeggiatorStyle;
+using ::barely::ArpMode;
 using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::NoteEventType;
@@ -40,9 +39,9 @@ constexpr float kRelease = 0.05f;
 constexpr int kVoiceCount = 16;
 
 constexpr float kInitialGateRatio = 0.5f;
-constexpr double kInitialRate = 4.0;
+constexpr float kInitialRate = 4.0f;
 constexpr double kInitialTempo = 100.0;
-constexpr ArpeggiatorStyle kInitialStyle = ArpeggiatorStyle::kUp;
+constexpr ArpMode kInitialMode = ArpMode::kUp;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
@@ -79,18 +78,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {ControlType::kAttack, kAttack},
       {ControlType::kRelease, kRelease},
       {ControlType::kVoiceCount, kVoiceCount},
+      {ControlType::kArpMode, kInitialMode},
+      {ControlType::kArpGateRatio, kInitialGateRatio},
+      {ControlType::kArpRate, kInitialRate},
   }});
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
-    if (type == NoteEventType::kOn) {
+    if (type == NoteEventType::kBegin) {
       ConsoleLog() << "Note(" << pitch << ")";
     }
   });
-
-  Arpeggiator arpeggiator(engine);
-  arpeggiator.SetInstrument(&instrument);
-  arpeggiator.SetGateRatio(kInitialGateRatio);
-  arpeggiator.SetRate(kInitialRate);
-  arpeggiator.SetStyle(kInitialStyle);
 
   // Audio process callback.
   audio_output.SetProcessCallback(
@@ -113,7 +109,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Shift octaves.
-      arpeggiator.SetAllNotesOff();
+      instrument.SetAllNotesOff();
       if (upper_key == 'Z') {
         --octave_shift;
       } else {
@@ -126,7 +122,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
-      arpeggiator.SetNoteOn(*pitch_or);
+      instrument.SetNoteOn(*pitch_or);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -135,7 +131,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
-      arpeggiator.SetNoteOff(*pitch_or);
+      instrument.SetNoteOff(*pitch_or);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

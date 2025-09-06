@@ -165,6 +165,10 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
     case ControlType::kDelaySend:
       params_.voice_params.delay_send = value;
       break;
+    case ControlType::kArpMode:
+    case ControlType::kArpGateRatio:
+    case ControlType::kArpRate:
+      break;
     default:
       assert(!"Invalid control type");
       return;

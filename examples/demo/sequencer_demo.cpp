@@ -59,7 +59,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {ControlType::kRelease, kRelease},
   }});
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
-    if (type == NoteEventType::kOn) {
+    if (type == NoteEventType::kBegin) {
       ConsoleLog() << "Note(" << pitch << ")";
     }
   });

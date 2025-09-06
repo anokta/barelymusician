@@ -49,7 +49,7 @@ TEST(InstrumentTest, SetNoteCallbacks) {
   std::pair<float, float> note_pitch = {0.0f, 0.0f};
   instrument.SetNoteEventCallback({
       [](BarelyNoteEventType type, float pitch, void* user_data) {
-        (type == BarelyNoteEventType_kOn
+        (type == BarelyNoteEventType_kBegin
              ? static_cast<std::pair<float, float>*>(user_data)->first
              : static_cast<std::pair<float, float>*>(user_data)->second) = pitch;
       },

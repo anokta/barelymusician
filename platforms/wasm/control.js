@@ -1,3 +1,11 @@
+export const ArpMode = {
+  NONE: 0,
+  UP: 1,
+  DOWN: 2,
+  RANDOM: 3,
+  COUNT: 4,
+};
+
 export const ControlType = {
   GAIN: 0,
   PITCH_SHIFT: 1,
@@ -21,7 +29,10 @@ export const ControlType = {
   BIT_CRUSHER_DEPTH: 19,
   BIT_CRUSHER_RATE: 20,
   DELAY_SEND: 21,
-  COUNT: 22,
+  ARP_MODE: 22,
+  ARP_GATE_RATIO: 23,
+  ARP_RATE: 24,
+  COUNT: 25,
 };
 
 export const FilterType = {
@@ -208,5 +219,26 @@ export const CONTROLS = {
     defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 1.0,
+  },
+  [ControlType.ARP_MODE]: {
+    name: 'Arpeggiator Mode',
+    valueType: 'int',
+    defaultValue: ArpMode.NONE,
+    minValue: 0,
+    maxValue: ArpMode.COUNT - 1,
+  },
+  [ControlType.ARP_GATE_RATIO]: {
+    name: 'Arpeggiator Gate Ratio',
+    valueType: 'float',
+    defaultValue: 0.5,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [ControlType.ARP_RATE]: {
+    name: 'Arpeggiator Rate',
+    valueType: 'float',
+    defaultValue: 1.0,
+    minValue: 0.0,
+    maxValue: 16.0,
   },
 };

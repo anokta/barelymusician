@@ -1,16 +1,5 @@
 VERS_1.0 {
   global:
-    BarelyArpeggiator_Create;
-    BarelyArpeggiator_Destroy;
-    BarelyArpeggiator_IsNoteOn;
-    BarelyArpeggiator_IsPlaying;
-    BarelyArpeggiator_SetAllNotesOff;
-    BarelyArpeggiator_SetGateRatio;
-    BarelyArpeggiator_SetInstrument;
-    BarelyArpeggiator_SetNoteOff;
-    BarelyArpeggiator_SetNoteOn;
-    BarelyArpeggiator_SetRate;
-    BarelyArpeggiator_SetStyle;
     BarelyEngine_Create;
     BarelyEngine_Destroy;
     BarelyEngine_GetEffectControl;
@@ -27,9 +16,7 @@ VERS_1.0 {
     BarelyInstrument_IsNoteOn;
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
-    BarelyInstrument_SetControlEventCallback;
     BarelyInstrument_SetNoteControl;
-    BarelyInstrument_SetNoteControlEventCallback;
     BarelyInstrument_SetNoteEventCallback;
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOn;
@@ -47,18 +34,6 @@ VERS_1.0 {
     BarelyPerformer_SetPosition;
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
-    BarelyRepeater_Clear;
-    BarelyRepeater_Create;
-    BarelyRepeater_Destroy;
-    BarelyRepeater_IsPlaying;
-    BarelyRepeater_Pop;
-    BarelyRepeater_Push;
-    BarelyRepeater_PushSilence;
-    BarelyRepeater_SetInstrument;
-    BarelyRepeater_SetRate;
-    BarelyRepeater_SetStyle;
-    BarelyRepeater_Start;
-    BarelyRepeater_Stop;
     BarelyScale_GetPitch;
     BarelyTask_Create;
     BarelyTask_Destroy;
@@ -70,8 +45,6 @@ VERS_1.0 {
     BarelyTask_SetEventCallback;
     BarelyTask_SetPosition;
     BarelyTask_SetPriority;
-    Barely_AmplitudeToDecibels;
-    Barely_DecibelsToAmplitude;
   local:
     *;
 };

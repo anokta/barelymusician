@@ -4,9 +4,13 @@
 #include <barelymusician.h>
 
 #include <cstdint>
+#include <optional>
 #include <span>
 #include <unordered_map>
+#include <vector>
 
+#include "api/performer.h"
+#include "api/task.h"
 #include "common/callback.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
@@ -14,12 +18,6 @@
 /// Implementation an instrument.
 struct BarelyInstrument {
  public:
-  /// Control event callback alias.
-  using ControlEventCallback = barely::Callback<BarelyControlEventCallback>;
-
-  /// Note control event callback alias.
-  using NoteControlEventCallback = barely::Callback<BarelyNoteControlEventCallback>;
-
   /// Note event callback alias.
   using NoteEventCallback = barely::Callback<BarelyNoteEventCallback>;
 
@@ -69,26 +67,12 @@ struct BarelyInstrument {
   /// @param value Control value.
   void SetControl(BarelyControlType type, float value) noexcept;
 
-  /// Sets the control event callback.
-  ///
-  /// @param callback Control event callback.
-  void SetControlEventCallback(ControlEventCallback callback) noexcept {
-    control_event_callback_ = callback;
-  }
-
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param type Note control type.
   /// @param value Note control value.
   void SetNoteControl(float pitch, BarelyNoteControlType type, float value) noexcept;
-
-  /// Sets the note control event callback.
-  ///
-  /// @param callback Note control event callback.
-  void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept {
-    note_control_event_callback_ = callback;
-  }
 
   /// Sets the note event callback.
   ///
@@ -118,26 +102,33 @@ struct BarelyInstrument {
   barely::InstrumentProcessor& processor() noexcept { return processor_; }
 
  private:
+  // Processes a control value.
+  void ProcessControl(barely::ControlType type, float value) noexcept;
+
+  // Updates the arpeggiator.
+  void UpdateArp() noexcept;
+
   // Engine.
   BarelyEngine& engine_;
 
   // Array of controls.
   barely::ControlArray controls_;
 
-  // Control event callback.
-  ControlEventCallback control_event_callback_ = {};
-
   // Map of note control arrays by their pitches.
   std::unordered_map<float, barely::NoteControlArray> note_controls_;
-
-  // Note control event callback.
-  NoteControlEventCallback note_control_event_callback_ = {};
+  std::vector<float> pitches_;  // sorted
 
   // Note event callback.
   NoteEventCallback note_event_callback_ = {};
 
   // Instrument processor.
   barely::InstrumentProcessor processor_;
+
+  // Arpeggiator.
+  BarelyPerformer arp_;
+  BarelyTask arp_task_;
+  int arp_pitch_index_ = -1;
+  std::optional<float> arp_pitch_ = std::nullopt;
 };
 
 #endif  // BARELYMUSICIAN_API_INSTRUMENT_H_

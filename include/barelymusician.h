@@ -217,25 +217,23 @@
 /// Default reference frequency which is tuned to middle C.
 #define BARELY_DEFAULT_REFERENCE_FREQUENCY 261.62555f
 
-/// Minimum decibel threshold.
-#define BARELY_MIN_DECIBELS -80.0f
-
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
 
-/// Arpeggiator style enum alias.
-// TODO(#142): Add more arpeggiator styles.
-typedef enum BarelyArpeggiatorStyle {
+/// Arpeggiator modes.
+typedef enum BarelyArpMode {
+  /// None.
+  BarelyArpMode_kNone = 0,
   /// Up.
-  BarelyArpeggiatorStyle_kUp = 0,
+  BarelyArpMode_kUp,
   /// Down.
-  BarelyArpeggiatorStyle_kDown,
+  BarelyArpMode_kDown,
   /// Random.
-  BarelyArpeggiatorStyle_kRandom,
-  /// Number of arpeggiator styles.
-  BarelyArpeggiatorStyle_kCount,
-} BarelyArpeggiatorStyle;
+  BarelyArpMode_kRandom,
+  /// Number of arpeggiator modes.
+  BarelyArpMode_kCount,
+} BarelyArpMode;
 
 /// Control types.
 typedef enum BarelyControlType {
@@ -283,6 +281,12 @@ typedef enum BarelyControlType {
   BarelyControlType_kBitCrusherRate,
   /// Delay send.
   BarelyControlType_kDelaySend,
+  /// Arpeggiator mode.
+  BarelyControlType_kArpMode,
+  /// Arpeggiator gate ratio.
+  BarelyControlType_kArpGateRatio,
+  /// Arpeggiator rate.
+  BarelyControlType_kArpRate,
   /// Number of control types.
   BarelyControlType_kCount,
 } BarelyControlType;
@@ -323,10 +327,10 @@ typedef enum BarelyNoteControlType {
 
 /// Note event types.
 typedef enum BarelyNoteEventType {
-  /// Off.
-  BarelyNoteEventType_kOff = 0,
-  /// On.
-  BarelyNoteEventType_kOn,
+  /// Begin.
+  BarelyNoteEventType_kBegin = 0,
+  /// End.
+  BarelyNoteEventType_kEnd,
   /// Number of note event types.
   BarelyNoteEventType_kCount,
 } BarelyNoteEventType;
@@ -348,18 +352,6 @@ typedef enum BarelyOscMode {
   /// Number of oscillator modes.
   BarelyOscMode_kCount,
 } BarelyOscMode;
-
-/// Repeater style enum alias.
-typedef enum BarelyRepeaterStyle {
-  /// Forward.
-  BarelyRepeaterStyle_kForward = 0,
-  /// Backward.
-  BarelyRepeaterStyle_kBackward,
-  /// Random.
-  BarelyRepeaterStyle_kRandom,
-  /// Number of repeater styles.
-  BarelyRepeaterStyle_kCount,
-} BarelyRepeaterStyle;
 
 /// Slice modes.
 typedef enum BarelySliceMode {
@@ -440,9 +432,6 @@ typedef struct BarelySlice {
   int32_t sample_count;
 } BarelySlice;
 
-/// Arpeggiator handle.
-typedef struct BarelyArpeggiator* BarelyArpeggiatorHandle;
-
 /// Engine handle.
 typedef struct BarelyEngine* BarelyEngineHandle;
 
@@ -452,27 +441,8 @@ typedef struct BarelyInstrument* BarelyInstrumentHandle;
 /// Performer handle.
 typedef struct BarelyPerformer* BarelyPerformerHandle;
 
-/// Repeater handle.
-typedef struct BarelyRepeater* BarelyRepeaterHandle;
-
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
-
-/// Control event callback.
-///
-/// @param type Control type.
-/// @param value Control value.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyControlEventCallback)(BarelyControlType type, float value, void* user_data);
-
-/// Note control event callback.
-///
-/// @param pitch Note pitch.
-/// @param type Note control type.
-/// @param value Note control value.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyNoteControlEventCallback)(float pitch, BarelyNoteControlType type, float value,
-                                               void* user_data);
 
 /// Note event callback.
 ///
@@ -486,88 +456,6 @@ typedef void (*BarelyNoteEventCallback)(BarelyNoteEventType type, float pitch, v
 /// @param type Task event type.
 /// @param user_data Pointer to user data.
 typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_data);
-
-/// Creates a new arpeggiator.
-///
-/// @param engine Engine handle.
-/// @param out_arpeggiator Output arpeggiator handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_Create(BarelyEngineHandle engine,
-                                         BarelyArpeggiatorHandle* out_arpeggiator);
-
-/// Destroys an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator);
-
-/// Gets whether an arpeggiator note is on or not.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param pitch Note pitch.
-/// @param out_is_note_on Output true if on, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch,
-                                           bool* out_is_note_on);
-
-/// Gets whether an arpeggiator is playing or not.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator,
-                                            bool* out_is_playing);
-
-/// Sets all arpeggiator notes off.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator);
-
-/// Sets the gate ratio of an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param gate_ratio Gate ratio.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
-                                               float gate_ratio);
-
-/// Sets the instrument of an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
-                                                BarelyInstrumentHandle instrument);
-
-/// Sets an arpeggiator note off.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param pitch Note pitch.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, float pitch);
-
-/// Sets an arpeggiator note on.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param pitch Note pitch.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, float pitch);
-
-/// Sets the rate of an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param rate Rate in notes per beat.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate);
-
-/// Sets the style of an arpeggiator.
-///
-/// @param arpeggiator Arpeggiator handle.
-/// @param style Arpeggiator style.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
-                                           BarelyArpeggiatorStyle style);
 
 /// Creates a new engine.
 ///
@@ -727,16 +615,6 @@ BARELY_API bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrumen
 BARELY_API bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
                                             BarelyControlType type, float value);
 
-/// Sets the control event callback of an instrument.
-///
-/// @param instrument Instrument handle.
-/// @param callback Control event callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetControlEventCallback(BarelyInstrumentHandle instrument,
-                                                         BarelyControlEventCallback callback,
-                                                         void* user_data);
-
 /// Sets an instrument note control value.
 ///
 /// @param instrument Instrument handle.
@@ -746,15 +624,6 @@ BARELY_API bool BarelyInstrument_SetControlEventCallback(BarelyInstrumentHandle 
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, float pitch,
                                                 BarelyNoteControlType type, float value);
-
-/// Sets the note control event callback of an instrument.
-///
-/// @param instrument Instrument handle.
-/// @param callback Note control event callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteControlEventCallback(
-    BarelyInstrumentHandle instrument, BarelyNoteControlEventCallback callback, void* user_data);
 
 /// Sets the note event callback of an instrument.
 ///
@@ -894,89 +763,6 @@ BARELY_API bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
                                                double position, double* out_position);
 
-/// Clears all notes.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Clear(BarelyRepeaterHandle repeater);
-
-/// Creates a new repeater.
-///
-/// @param engine Engine handle.
-/// @param out_repeater Output repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Create(BarelyEngineHandle engine,
-                                      BarelyRepeaterHandle* out_repeater);
-
-/// Destroys an repeater.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Destroy(BarelyRepeaterHandle repeater);
-
-/// Gets whether an repeater is playing or not.
-///
-/// @param repeater Repeater handle.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_IsPlaying(BarelyRepeaterHandle repeater, bool* out_is_playing);
-
-/// Pops the last note from the end.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Pop(BarelyRepeaterHandle repeater);
-
-/// Pushes a new note to the end.
-///
-/// @param repeater Repeater handle.
-/// @param pitch Note pitch.
-/// @param length Note length.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Push(BarelyRepeaterHandle repeater, float pitch, int32_t length);
-
-/// Pushes silence to the end.
-///
-/// @param repeater Repeater handle.
-/// @param length Note length.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_PushSilence(BarelyRepeaterHandle repeater, int32_t length);
-
-/// Sets the instrument of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param instrument Instrument handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_SetInstrument(BarelyRepeaterHandle repeater,
-                                             BarelyInstrumentHandle instrument);
-
-/// Sets the rate of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param rate Rate in notes per beat.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_SetRate(BarelyRepeaterHandle repeater, double rate);
-
-/// Sets the style of an repeater.
-///
-/// @param repeater Repeater handle.
-/// @param style Repeater style.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_SetStyle(BarelyRepeaterHandle repeater, BarelyRepeaterStyle style);
-
-/// Starts the repeater.
-///
-/// @param repeater Repeater handle.
-/// @param pitch_offset Pitch offset.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Start(BarelyRepeaterHandle repeater, float pitch_offset);
-
-/// Stops the repeater.
-///
-/// @param repeater Repeater handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyRepeater_Stop(BarelyRepeaterHandle repeater);
-
 /// Gets a scale note pitch for a given degree.
 ///
 /// @param scale Pointer to scale.
@@ -1062,20 +848,6 @@ BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority);
 
-/// Converts a value from linear amplitude to decibels.
-///
-/// @param amplitude Value in linear amplitude.
-/// @param out_decibels Output value in decibels.
-/// @return True if successful, false otherwise.
-BARELY_API bool Barely_AmplitudeToDecibels(float amplitude, float* out_decibels);
-
-/// Converts a value from decibels to linear amplitude.
-///
-/// @param decibels Value in decibels.
-/// @param out_amplitude Output value in linear amplitude.
-/// @return True if successful, false otherwise.
-BARELY_API bool Barely_DecibelsToAmplitude(float decibels, float* out_amplitude);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
@@ -1100,17 +872,16 @@ namespace barely {
 /// Default reference frequency which is tuned to middle C.
 inline constexpr float kDefaultReferenceFrequency = BARELY_DEFAULT_REFERENCE_FREQUENCY;
 
-/// Minimum decibel threshold.
-inline constexpr float kMinDecibels = BARELY_MIN_DECIBELS;
-
-/// Arpeggiator style enum.
-enum class ArpeggiatorStyle {
+/// Arpeggiator modes.
+enum class ArpMode {
+  /// None.
+  kNone = BarelyArpMode_kNone,
   /// Up.
-  kUp = BarelyArpeggiatorStyle_kUp,
+  kUp = BarelyArpMode_kUp,
   /// Down.
-  kDown = BarelyArpeggiatorStyle_kDown,
+  kDown = BarelyArpMode_kDown,
   /// Random.
-  kRandom = BarelyArpeggiatorStyle_kRandom,
+  kRandom = BarelyArpMode_kRandom,
 };
 
 /// Control types.
@@ -1159,6 +930,12 @@ enum class ControlType {
   kBitCrusherRate = BarelyControlType_kBitCrusherRate,
   /// Delay send.
   kDelaySend = BarelyControlType_kDelaySend,
+  /// Arpeggiator mode.
+  kArpMode = BarelyControlType_kArpMode,
+  /// Arpeggiator gate ratio.
+  kArpGateRatio = BarelyControlType_kArpGateRatio,
+  /// Arpeggiator rate.
+  kArpRate = BarelyControlType_kArpRate,
 };
 
 /// Effect control types.
@@ -1191,10 +968,10 @@ enum class NoteControlType {
 
 /// Note event types.
 enum class NoteEventType {
-  /// Off.
-  kOff = BarelyNoteEventType_kOff,
-  /// On.
-  kOn = BarelyNoteEventType_kOn,
+  /// Begin.
+  kBegin = BarelyNoteEventType_kBegin,
+  /// End.
+  kEnd = BarelyNoteEventType_kEnd,
 };
 
 /// Oscillator modes.
@@ -1211,16 +988,6 @@ enum class OscMode {
   kMf = BarelyOscMode_kMf,
   /// Ring modulation.
   kRing = BarelyOscMode_kRing,
-};
-
-/// Repeater style enum.
-enum class RepeaterStyle {
-  /// Forward.
-  kForward = BarelyRepeaterStyle_kForward,
-  /// Backward.
-  kBackward = BarelyRepeaterStyle_kBackward,
-  /// Random.
-  kRandom = BarelyRepeaterStyle_kRandom,
 };
 
 /// Slice modes.
@@ -1295,20 +1062,6 @@ struct Slice : public BarelySlice {
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
 };
-
-/// Control event callback function.
-///
-/// @param type Control type.
-/// @param value Control value.
-using ControlEventCallback = std::function<void(ControlType type, float value)>;
-
-/// Note control event callback function.
-///
-/// @param pitch Note pitch.
-/// @param type Note control type.
-/// @param value Note control value.
-using NoteControlEventCallback =
-    std::function<void(float pitch, NoteControlType type, float value)>;
 
 /// Note event callback function.
 ///
@@ -1415,15 +1168,7 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// @return Instrument.
   Instrument(Instrument&& other) noexcept
       : HandleWrapper(std::move(other)),
-        control_event_callback_(std::exchange(other.control_event_callback_, {})),
-        note_control_event_callback_(std::exchange(other.note_control_event_callback_, {})),
         note_event_callback_(std::exchange(other.note_event_callback_, {})) {
-    if (control_event_callback_) {
-      SetControlEventCallback();
-    }
-    if (note_control_event_callback_) {
-      SetNoteControlEventCallback();
-    }
     if (note_event_callback_) {
       SetNoteEventCallback();
     }
@@ -1437,15 +1182,7 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     if (this != &other) {
       BarelyInstrument_Destroy(*this);
       HandleWrapper::operator=(std::move(other));
-      control_event_callback_ = std::exchange(other.control_event_callback_, {});
-      note_control_event_callback_ = std::exchange(other.note_control_event_callback_, {});
       note_event_callback_ = std::exchange(other.note_event_callback_, {});
-      if (control_event_callback_) {
-        SetControlEventCallback();
-      }
-      if (note_control_event_callback_) {
-        SetNoteControlEventCallback();
-      }
       if (note_event_callback_) {
         SetNoteEventCallback();
       }
@@ -1514,14 +1251,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     assert(success);
   }
 
-  /// Sets the control event callback.
-  ///
-  /// @param callback Control event callback.
-  void SetControlEventCallback(ControlEventCallback callback) noexcept {
-    control_event_callback_ = std::move(callback);
-    SetControlEventCallback();
-  }
-
   /// Sets a control value.
   ///
   /// @param pitch Note pitch.
@@ -1534,14 +1263,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
         *this, pitch, static_cast<BarelyNoteControlType>(type), static_cast<float>(value));
     assert(success);
-  }
-
-  /// Sets the note control event callback.
-  ///
-  /// @param callback Note control event callback.
-  void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept {
-    note_control_event_callback_ = std::move(callback);
-    SetNoteControlEventCallback();
   }
 
   /// Sets the note event callback.
@@ -1605,30 +1326,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   }
 
  private:
-  // Helper function to set the control event callback.
-  void SetControlEventCallback() noexcept {
-    SetCallback(BarelyInstrument_SetControlEventCallback, control_event_callback_,
-                [](BarelyControlType type, float value, void* user_data) noexcept {
-                  assert(user_data != nullptr && "Invalid control event callback user data");
-                  if (const auto& callback = *static_cast<ControlEventCallback*>(user_data);
-                      callback) {
-                    callback(static_cast<ControlType>(type), value);
-                  }
-                });
-  }
-
-  // Helper function to set the note control event callback.
-  void SetNoteControlEventCallback() noexcept {
-    SetCallback(BarelyInstrument_SetNoteControlEventCallback, note_control_event_callback_,
-                [](float pitch, BarelyNoteControlType type, float value, void* user_data) noexcept {
-                  assert(user_data != nullptr && "Invalid note control event callback user data");
-                  if (const auto& callback = *static_cast<NoteControlEventCallback*>(user_data);
-                      callback) {
-                    callback(pitch, static_cast<NoteControlType>(type), value);
-                  }
-                });
-  }
-
   // Helper function to set the note event callback.
   void SetNoteEventCallback() noexcept {
     SetCallback(BarelyInstrument_SetNoteEventCallback, note_event_callback_,
@@ -1640,12 +1337,6 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
                   }
                 });
   }
-
-  // Control event callback.
-  ControlEventCallback control_event_callback_;
-
-  // Note control event callback.
-  NoteControlEventCallback note_control_event_callback_;
 
   // Note event callback.
   NoteEventCallback note_event_callback_;
@@ -2115,244 +1806,6 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   }
 };
 
-/// A class that wraps an arpeggiator handle.
-class Arpeggiator : public HandleWrapper<BarelyArpeggiatorHandle> {
- public:
-  /// Creates a new `Arpeggiator`.
-  ///
-  /// @param engine Engine.
-  explicit Arpeggiator(Engine& engine) noexcept
-      : HandleWrapper([&]() {
-          BarelyArpeggiatorHandle arpeggiator = nullptr;
-          [[maybe_unused]] const bool success = BarelyArpeggiator_Create(engine, &arpeggiator);
-          assert(success);
-          return arpeggiator;
-        }()) {}
-
-  /// Creates a new `Arpeggiator` from a raw handle.
-  ///
-  /// @param arpeggiator Raw handle to arpeggiator.
-  explicit Arpeggiator(BarelyArpeggiatorHandle arpeggiator) noexcept : HandleWrapper(arpeggiator) {}
-
-  /// Destroys `Arpeggiator`.
-  ~Arpeggiator() noexcept { BarelyArpeggiator_Destroy(*this); }
-
-  /// Non-copyable.
-  Arpeggiator(const Arpeggiator& other) noexcept = delete;
-  Arpeggiator& operator=(const Arpeggiator& other) noexcept = delete;
-
-  /// Default move constructor.
-  Arpeggiator(Arpeggiator&& other) noexcept = default;
-
-  /// Assigns `Arpeggiator` via move.
-  ///
-  /// @param other Other arpeggiator.
-  /// @return Arpeggiator.
-  Arpeggiator& operator=(Arpeggiator&& other) noexcept {
-    if (this != &other) {
-      BarelyArpeggiator_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
-
-  /// Returns whether a note is on or not.
-  ///
-  /// @param pitch Note pitch.
-  /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept {
-    bool is_note_on = false;
-    [[maybe_unused]] const bool success = BarelyArpeggiator_IsNoteOn(*this, pitch, &is_note_on);
-    assert(success);
-    return is_note_on;
-  }
-
-  /// Returns whether the arpeggiator is playing or not.
-  ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept {
-    bool is_playing = false;
-    [[maybe_unused]] const bool success = BarelyArpeggiator_IsPlaying(*this, &is_playing);
-    assert(success);
-    return is_playing;
-  }
-
-  /// Sets all notes off.
-  void SetAllNotesOff() noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetAllNotesOff(*this);
-    assert(success);
-  }
-
-  /// Sets the gate ratio.
-  ///
-  /// @param gate Gate ratio.
-  void SetGateRatio(float gate_ratio) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetGateRatio(*this, gate_ratio);
-    assert(success);
-  }
-
-  /// Sets the instrument.
-  ///
-  /// @param instrument Pointer to instrument.
-  void SetInstrument(Instrument* instrument) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetInstrument(
-        *this,
-        (instrument != nullptr) ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
-    assert(success);
-  }
-
-  /// Sets a note off.
-  ///
-  /// @param pitch Note pitch.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOff(float pitch) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetNoteOff(*this, pitch);
-    assert(success);
-  }
-
-  /// Sets a note on.
-  ///
-  /// @param pitch Note pitch.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(float pitch) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetNoteOn(*this, pitch);
-    assert(success);
-  }
-
-  /// Sets the rate.
-  ///
-  /// @param rate Rate in notes per beat.
-  void SetRate(double rate) noexcept {
-    [[maybe_unused]] const bool success = BarelyArpeggiator_SetRate(*this, rate);
-    assert(success);
-  }
-
-  /// Sets the style.
-  ///
-  /// @param style Arpeggiator style.
-  void SetStyle(ArpeggiatorStyle style) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyArpeggiator_SetStyle(*this, static_cast<BarelyArpeggiatorStyle>(style));
-    assert(success);
-  }
-};
-
-/// A class that wraps a repeater handle.
-class Repeater : public HandleWrapper<BarelyRepeaterHandle> {
- public:
-  /// Creates a new `Repeater`.
-  ///
-  /// @param engine Engine.
-  explicit Repeater(Engine& engine) noexcept
-      : HandleWrapper([&]() {
-          BarelyRepeaterHandle repeater = nullptr;
-          [[maybe_unused]] const bool success = BarelyRepeater_Create(engine, &repeater);
-          assert(success);
-          return repeater;
-        }()) {}
-
-  /// Creates a new `Repeater` from a raw handle.
-  ///
-  /// @param repeater Raw handle to repeater.
-  explicit Repeater(BarelyRepeaterHandle repeater) noexcept : HandleWrapper(repeater) {}
-
-  /// Destroys `Repeater`.
-  ~Repeater() noexcept { BarelyRepeater_Destroy(*this); }
-
-  /// Non-copyable.
-  Repeater(const Repeater& other) noexcept = delete;
-  Repeater& operator=(const Repeater& other) noexcept = delete;
-
-  /// Default move constructor.
-  Repeater(Repeater&& other) noexcept = default;
-
-  /// Assigns `Repeater` via move.
-  ///
-  /// @param other Other repeater.
-  /// @return Repeater.
-  Repeater& operator=(Repeater&& other) noexcept {
-    if (this != &other) {
-      BarelyRepeater_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
-
-  /// Clears all notes.
-  void Clear() noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_Clear(*this);
-    assert(success);
-  }
-
-  /// Returns whether the repeater is playing or not.
-  ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept {
-    bool is_playing = false;
-    [[maybe_unused]] const bool success = BarelyRepeater_IsPlaying(*this, &is_playing);
-    assert(success);
-    return is_playing;
-  }
-
-  /// Pops the last note from the end.
-  void Pop() noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_Pop(*this);
-    assert(success);
-  }
-
-  /// Pushes a new note to the end.
-  ///
-  /// @param pitch_or Note pitch or silence.
-  /// @param length Note length.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Push(std::optional<float> pitch_or, int length = 1) noexcept {
-    [[maybe_unused]] const bool success = pitch_or ? BarelyRepeater_Push(*this, *pitch_or, length)
-                                                   : BarelyRepeater_PushSilence(*this, length);
-    assert(success);
-  }
-
-  /// Sets the instrument.
-  ///
-  /// @param instrument Pointer to instrument.
-  void SetInstrument(Instrument* instrument) noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_SetInstrument(
-        *this,
-        (instrument != nullptr) ? static_cast<BarelyInstrumentHandle>(*instrument) : nullptr);
-    assert(success);
-  }
-
-  /// Sets the rate.
-  ///
-  /// @param rate Rate in notes per beat.
-  void SetRate(double rate) noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_SetRate(*this, rate);
-    assert(success);
-  }
-
-  /// Sets the style.
-  ///
-  /// @param style Repeater style.
-  void SetStyle(RepeaterStyle style) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyRepeater_SetStyle(*this, static_cast<BarelyRepeaterStyle>(style));
-    assert(success);
-  }
-
-  /// Starts the repeater.
-  ///
-  /// @param pitch_offset Pitch offset.
-  void Start(float pitch_offset = 0.0f) noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_Start(*this, pitch_offset);
-    assert(success);
-  }
-
-  /// Stop the repeater.
-  void Stop() noexcept {
-    [[maybe_unused]] const bool success = BarelyRepeater_Stop(*this);
-    assert(success);
-  }
-};
-
 /// A musical quantization.
 struct Quantization : public BarelyQuantization {
  public:
@@ -2432,28 +1885,6 @@ struct Scale : public BarelyScale {
     return static_cast<int>(pitch_count);
   }
 };
-
-/// Converts a value from linear amplitude to decibels.
-///
-/// @param amplitude Value in linear amplitude.
-/// @return Value in decibels.
-inline float AmplitudeToDecibels(float amplitude) noexcept {
-  float decibels = 0.0f;
-  [[maybe_unused]] const bool success = Barely_AmplitudeToDecibels(amplitude, &decibels);
-  assert(success);
-  return decibels;
-}
-
-/// Converts a value from decibels to linear amplitude.
-///
-/// @param decibels Value in decibels.
-/// @return Value in linear amplitude.
-inline float DecibelsToAmplitude(float decibels) noexcept {
-  float amplitude = 0.0f;
-  [[maybe_unused]] const bool success = Barely_DecibelsToAmplitude(decibels, &amplitude);
-  assert(success);
-  return amplitude;
-}
 
 }  // namespace barely
 #endif  // __cplusplus

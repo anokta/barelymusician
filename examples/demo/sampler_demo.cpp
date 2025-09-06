@@ -92,7 +92,7 @@ int main(int /*argc*/, char* argv[]) {
 
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
-    ConsoleLog() << "Note" << (type == NoteEventType::kOn ? "On" : "Off") << "(" << pitch << ")";
+    ConsoleLog() << "Note" << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
   });
 
   // Audio process callback.

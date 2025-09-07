@@ -35,10 +35,12 @@ export class Engine {
    * @param {string} stateStr
    */
   loadState(stateStr) {
-    const {tempoJson, instrumentsJson, performersJson} =
+    const {tempoJson, delayTimeJson, delayFeedbackJson, instrumentsJson, performersJson} =
         JSON.parse(decodeURIComponent(atob(stateStr)));
 
     this.tempo = tempoJson;
+    this.delayTime = delayTimeJson;
+    this.delayFeedback = delayFeedbackJson;
 
     const tempInstruments = {};
 
@@ -83,6 +85,8 @@ export class Engine {
    */
   saveState() {
     const tempoJson = this._tempo;
+    const delayTimeJson = this._delayTime;
+    const delayFeedbackJson = this._delayFeedback;
     const instrumentsJson = Object.keys(this._instruments).map(handle => {
       const instrument = this._instruments[handle];
       const controlValues = {};
@@ -106,7 +110,13 @@ export class Engine {
                                                                     gain: note.gain,
                                                                   })),
                                     }));
-    return btoa(encodeURIComponent(JSON.stringify({tempoJson, instrumentsJson, performersJson})));
+    return btoa(encodeURIComponent(JSON.stringify({
+      tempoJson,
+      delayTimeJson,
+      delayFeedbackJson,
+      instrumentsJson,
+      performersJson,
+    })));
   }
 
   _render() {
@@ -195,6 +205,14 @@ export class Engine {
 
   get tempo() {
     return this._tempo;
+  }
+
+  get delayTime() {
+    return this._delayTime;
+  }
+
+  get delayFeedback() {
+    return this._delayFeedback;
   }
 
   set tempo(newTempo) {

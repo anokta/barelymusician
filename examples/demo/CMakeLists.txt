@@ -18,7 +18,6 @@ function(add_demo demo_name)
     ${ARGN}
   )
 endfunction()
-add_demo(arpeggiator_demo)
 add_demo(instrument_demo)
 add_demo(metronome_demo)
 add_demo(midi_demo midifile)

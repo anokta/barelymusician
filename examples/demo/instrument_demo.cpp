@@ -8,16 +8,19 @@
 #include <optional>
 #include <thread>
 
+#include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
 
 namespace {
 
+using ::barely::ArpMode;
 using ::barely::ControlType;
 using ::barely::EffectControlType;
 using ::barely::Engine;
 using ::barely::NoteEventType;
+using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -27,17 +30,23 @@ constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
-// Effect settings.
+constexpr double kLookahead = 0.05;
+
+// Engine settings.
 constexpr float kDelayTime = 0.5f;
 constexpr float kDelayFeedback = 0.2;
+constexpr double kTempo = 128.0;
 
 // Instrument settings.
 constexpr float kGain = 0.125f;
-constexpr float kOscShape = 1.0f;
-constexpr float kAttack = 0.05f;
+constexpr float kOscShape = 0.75f;
+constexpr float kAttack = 0.005f;
 constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
 constexpr float kDelaySend = 0.1f;
+constexpr ArpMode kArpMode = ArpMode::kUp;
+constexpr float kArpGateRatio = 0.5f;
+constexpr float kArpRate = 2.0f;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
@@ -61,11 +70,13 @@ std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) 
 int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
+  AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kChannelCount, kFrameCount);
   engine.SetEffectControl(EffectControlType::kDelayTime, kDelayTime);
   engine.SetEffectControl(EffectControlType::kDelayFeedback, kDelayFeedback);
+  engine.SetTempo(kTempo);
 
   auto instrument = engine.CreateInstrument({{
       {ControlType::kGain, kGain},
@@ -75,6 +86,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {ControlType::kRelease, kRelease},
       {ControlType::kVoiceCount, kVoiceCount},
       {ControlType::kDelaySend, kDelaySend},
+      {ControlType::kArpGateRatio, kArpGateRatio},
+      {ControlType::kArpRate, kArpRate},
   }});
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
     ConsoleLog() << "Note" << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
@@ -83,7 +96,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Audio process callback.
   audio_output.SetProcessCallback(
       [&](float* output_samples, int output_channel_count, int output_frame_count) {
-        engine.Process(output_samples, output_channel_count, output_frame_count, /*timestamp=*/0.0);
+        engine.Process(output_samples, output_channel_count, output_frame_count,
+                       audio_clock.GetTimestamp());
+        audio_clock.Update(output_frame_count);
       });
 
   // Key down callback.
@@ -121,6 +136,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
       ConsoleLog() << "Note gain set to " << gain;
       return;
     }
+    if (upper_key == '0') {
+      instrument.SetControl<ArpMode>(
+          ControlType::kArpMode,
+          (instrument.GetControl<ArpMode>(ControlType::kArpMode) == ArpMode::kNone)
+              ? kArpMode
+              : ArpMode::kNone);
+    }
 
     // Play note.
     if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
@@ -141,16 +163,19 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
+  engine.Update(kLookahead);
 
   ConsoleLog() << "Play the instrument using the keyboard keys:";
   ConsoleLog() << "  * Use ASDFFGHJK keys to play the white notes in an octave";
   ConsoleLog() << "  * Use WETYU keys to play the black notes in an octave";
   ConsoleLog() << "  * Use ZX keys to set the octave up and down";
-  ConsoleLog() << "  * Use CV keys to to set the note gain up and down";
+  ConsoleLog() << "  * Use CV keys to set the note gain up and down";
+  ConsoleLog() << "  * Use 0 key to toggle the arpeggiator on and off";
 
   while (!quit) {
     input_manager.Update();
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }
 
   return 0;

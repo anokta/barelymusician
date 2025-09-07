@@ -30,12 +30,13 @@ class InstrumentProcessor {
 
   /// Processes the next output samples.
   ///
-  /// @param delay_samples Array of interleaved delay send samples.
-  /// @param output_samples Array of interleaved output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
-  void Process(float* BARELY_RESTRICT delay_samples, float* BARELY_RESTRICT output_samples,
-               int output_channel_count, int output_frame_count) noexcept;
+  /// @param delay_frame Delay send frame.
+  /// @param output_frame Output frame.
+  void Process(float* BARELY_RESTRICT delay_frame, float* BARELY_RESTRICT output_frame) noexcept {
+    for (VoiceState& voice_state : voice_states_) {
+      voice_callback_(voice_state.voice, params_, delay_frame, output_frame);
+    }
+  }
 
   /// Sets a control value.
   ///

@@ -84,22 +84,19 @@ struct NoteParams {
 /// Class that wraps an instrument voice.
 class Voice {
  public:
-  /// Processes the next output samples.
+  /// Processes the next output frame.
   ///
   /// @tparam kOscMode Oscillator mode.
   /// @tparam kSliceMode Slice mode.
   /// @param voice Voice.
   /// @param params Instrument parameters.
-  /// @param delay_samples Array of interleaved delay send samples.
-  /// @param output_samples Array of interleaved output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
+  /// @param delay_frame Delay send frame.
+  /// @param output_frame Output frame.
   template <OscMode kOscMode, SliceMode kSliceMode>
   static void Process(Voice& voice, const InstrumentParams& params,
-                      float* BARELY_RESTRICT delay_samples, float* BARELY_RESTRICT output_samples,
-                      int output_channel_count, int output_frame_count) noexcept {
-    voice.Process<kOscMode, kSliceMode>(params, delay_samples, output_samples, output_channel_count,
-                                        output_frame_count);
+                      float* BARELY_RESTRICT delay_frame,
+                      float* BARELY_RESTRICT output_frame) noexcept {
+    voice.Process<kOscMode, kSliceMode>(params, delay_frame, output_frame);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -151,93 +148,80 @@ class Voice {
 
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  void Process(const InstrumentParams& params, float* BARELY_RESTRICT delay_samples,
-               float* BARELY_RESTRICT output_samples, int output_channel_count,
-               int output_frame_count) noexcept {
-    assert(output_samples != nullptr);
-    assert(output_channel_count == 2);
-    assert(output_frame_count > 0);
-
+  void Process(const InstrumentParams& params, float* BARELY_RESTRICT delay_frame,
+               float* BARELY_RESTRICT output_frame) noexcept {
     if (!IsActive()) {
       return;
     }
 
-    for (int frame = 0; frame < output_frame_count; ++frame) {
-      if constexpr (kSliceMode == SliceMode::kOnce) {
-        if (!IsSliceActive()) {
-          envelope_.Stop();
-        }
-      }
-
-      assert(params.rng != nullptr);
-      const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
-      const float osc_sample =
-          (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
-          params_.osc_noise_mix * params.rng->Generate();
-      const float osc_output = params_.osc_mix * osc_sample;
-
-      const bool has_slice = (slice_ != nullptr);
-      const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
-      const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
-
-      float output = params_.gain * envelope_.Next();
-
-      if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
-        output *= osc_output + slice_output;
-      } else if constexpr (kOscMode == OscMode::kFm) {
-        output *= slice_sample;
-      } else if constexpr (kOscMode == OscMode::kAm) {
-        output *= std::abs(osc_output) * slice_sample + slice_output;
-      } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
-        output *= osc_output * std::abs(slice_sample) + slice_output;
-      }
-
-      // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
-      output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
-                                 params_.bit_crusher_range, params_.bit_crusher_increment);
-
-      float osc_increment = params.osc_increment * note_params_.osc_increment;
-      if constexpr (kOscMode == OscMode::kMf) {
-        osc_increment += slice_sample * osc_increment;
-      }
-      osc_phase_ += osc_increment;
-      if (osc_phase_ >= 1.0f) {
-        osc_phase_ -= 1.0f;
-      }
-
-      float slice_increment = params.slice_increment * note_params_.slice_increment;
-      if (slice_increment > 0) {
-        if constexpr (kOscMode == OscMode::kFm) {
-          slice_increment += osc_output * slice_increment;
-        }
-        slice_offset_ += slice_increment;
-        if constexpr (kSliceMode == SliceMode::kLoop) {
-          if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
-            slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
-          }
-        }
-      }
-
-      const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
-      const float right_gain = 1.0f - left_gain;
-
-      const float left_output = left_gain * output;
-      const float right_output = right_gain * output;
-
-      const int frame_offset = output_channel_count * frame;
-
-      output_samples[frame_offset] += left_output;
-      output_samples[frame_offset + 1] += right_output;
-
-      delay_samples[frame_offset] += params_.delay_send * left_output;
-      delay_samples[frame_offset + 1] += params_.delay_send * right_output;
-
-      Approach(params.voice_params);
-
-      if (!IsActive()) {
-        return;
+    if constexpr (kSliceMode == SliceMode::kOnce) {
+      if (!IsSliceActive()) {
+        envelope_.Stop();
       }
     }
+
+    assert(params.rng != nullptr);
+    const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
+    const float osc_sample =
+        (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
+        params_.osc_noise_mix * params.rng->Generate();
+    const float osc_output = params_.osc_mix * osc_sample;
+
+    const bool has_slice = (slice_ != nullptr);
+    const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
+    const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
+
+    float output = params_.gain * envelope_.Next();
+
+    if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
+      output *= osc_output + slice_output;
+    } else if constexpr (kOscMode == OscMode::kFm) {
+      output *= slice_sample;
+    } else if constexpr (kOscMode == OscMode::kAm) {
+      output *= std::abs(osc_output) * slice_sample + slice_output;
+    } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
+      output *= osc_output * std::abs(slice_sample) + slice_output;
+    }
+
+    // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
+    output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
+                               params_.bit_crusher_range, params_.bit_crusher_increment);
+
+    float osc_increment = params.osc_increment * note_params_.osc_increment;
+    if constexpr (kOscMode == OscMode::kMf) {
+      osc_increment += slice_sample * osc_increment;
+    }
+    osc_phase_ += osc_increment;
+    if (osc_phase_ >= 1.0f) {
+      osc_phase_ -= 1.0f;
+    }
+
+    float slice_increment = params.slice_increment * note_params_.slice_increment;
+    if (slice_increment > 0) {
+      if constexpr (kOscMode == OscMode::kFm) {
+        slice_increment += osc_output * slice_increment;
+      }
+      slice_offset_ += slice_increment;
+      if constexpr (kSliceMode == SliceMode::kLoop) {
+        if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
+          slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
+        }
+      }
+    }
+
+    const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
+    const float right_gain = 1.0f - left_gain;
+
+    const float left_output = left_gain * output;
+    const float right_output = right_gain * output;
+
+    output_frame[0] += left_output;
+    output_frame[1] += right_output;
+
+    delay_frame[0] += params_.delay_send * left_output;
+    delay_frame[1] += params_.delay_send * right_output;
+
+    Approach(params.voice_params);
   }
 
   void Approach(const VoiceParams& params) noexcept {
@@ -279,14 +263,11 @@ class Voice {
 ///
 /// @param voice Mutable voice.
 /// @param params Instrument parameters.
-/// @param delay_samples Array of interleaved delay send samples.
-/// @param output_samples Array of interleaved output samples.
-/// @param output_channel_count Number of output channels.
-/// @param output_frame_count Number of output frames.
+/// @param delay_frame Delay send frame.
+/// @param output_frame Output frame.
 using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
                                float* BARELY_RESTRICT delay_samples,
-                               float* BARELY_RESTRICT output_samples, int output_channel_count,
-                               int output_frame_count);
+                               float* BARELY_RESTRICT output_samples);
 
 }  // namespace barely
 

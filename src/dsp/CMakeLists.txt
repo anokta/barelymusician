@@ -4,8 +4,8 @@ target_sources(
   bit_crusher.h
   control.h
   delay_filter.h
-  effect_processor.cpp
-  effect_processor.h
+  engine_processor.cpp
+  engine_processor.h
   envelope.h
   instrument_processor.cpp
   instrument_processor.h

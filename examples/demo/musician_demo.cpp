@@ -16,7 +16,6 @@
 #include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
-#include "common/decibels.h"
 #include "common/input_manager.h"
 #include "common/wav_file.h"
 #include "data/data.h"
@@ -99,6 +98,12 @@ constexpr char kDrumsDir[] = "audio/drums/";
 
 constexpr int kQuantizationSubdivision = 960;
 constexpr Quantization quantization = Quantization(kQuantizationSubdivision);
+
+// Converts a value from decibels to linear amplitude.
+float DecibelsToAmplitude(float decibels) {
+  constexpr float kMinDecibels = -80.0f;
+  return (decibels > kMinDecibels) ? std::pow(10.0f, 0.05f * decibels) : 0.0f;
+}
 
 // Inserts pad data to a given `data` from a given `file_path`.
 void InsertPadData(float pitch, const std::string& file_path, std::vector<float>& samples,
@@ -234,7 +239,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto build_instrument_fn = [&](float shape, float gain_db, float attack, float release) {
     instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
-    instrument.SetControl(ControlType::kGain, barely::examples::DecibelsToAmplitude(gain_db));
+    instrument.SetControl(ControlType::kGain, DecibelsToAmplitude(gain_db));
     instrument.SetControl(ControlType::kOscMix, 1.0f);
     if (shape < 0.0f) {
       instrument.SetControl(ControlType::kOscNoiseMix, 1.0f);

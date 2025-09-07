@@ -3,6 +3,7 @@ target_sources(
   biquad_filter.h
   bit_crusher.h
   control.h
+  decibels.h
   delay_filter.h
   engine_processor.cpp
   engine_processor.h
@@ -23,6 +24,7 @@ if(ENABLE_TESTS)
     barelymusician_test PRIVATE
     biquad_filter_test.cpp
     bit_crusher_test.cpp
+    decibels_test.cpp
     envelope_test.cpp
     instrument_processor_test.cpp
     message_queue_test.cpp

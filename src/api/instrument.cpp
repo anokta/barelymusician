@@ -56,6 +56,7 @@ ControlArray BuildControlArray(std::span<const BarelyControlOverride> control_ov
       Control(16.0f, 1.0f, 16.0f),                 // kBitCrusherDepth
       Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
       Control(0.0f, 0.0f, 1.0f),                   // kDelaySend
+      Control(0.0f, -1.0f, 1.0f),                  // kSidechainSend
       Control(0, 0, BarelyArpMode_kCount - 1),     // kArpMode
       Control(0.5f, 0.001f, 1.0f),                 // kArpGateRatio
       Control(1.0f, 0.0f, 16.0f),                  // kArpRate

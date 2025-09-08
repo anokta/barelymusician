@@ -281,6 +281,8 @@ typedef enum BarelyControlType {
   BarelyControlType_kBitCrusherRate,
   /// Delay send.
   BarelyControlType_kDelaySend,
+  /// Sidechain send.
+  BarelyControlType_kSidechainSend,
   /// Arpeggiator mode.
   BarelyControlType_kArpMode,
   /// Arpeggiator gate ratio.
@@ -299,6 +301,16 @@ typedef enum BarelyEffectControlType {
   BarelyEffectControlType_kDelayTime,
   /// Delay feedback.
   BarelyEffectControlType_kDelayFeedback,
+  /// Sidechain mix.
+  BarelyEffectControlType_kSidechainMix,
+  /// Sidechain attack in seconds.
+  BarelyEffectControlType_kSidechainAttack,
+  /// Sidechain release in seconds.
+  BarelyEffectControlType_kSidechainRelease,
+  /// Sidechain threshold.
+  BarelyEffectControlType_kSidechainThreshold,
+  /// Sidechain ratio.
+  BarelyEffectControlType_kSidechainRatio,
   // Number of effect control types.
   BarelyEffectControlType_kCount,
 } BarelyEffectControlType;
@@ -930,6 +942,8 @@ enum class ControlType {
   kBitCrusherRate = BarelyControlType_kBitCrusherRate,
   /// Delay send.
   kDelaySend = BarelyControlType_kDelaySend,
+  /// Sidechain send.
+  kSidechainSend = BarelyControlType_kSidechainSend,
   /// Arpeggiator mode.
   kArpMode = BarelyControlType_kArpMode,
   /// Arpeggiator gate ratio.
@@ -946,6 +960,16 @@ enum class EffectControlType {
   kDelayTime = BarelyEffectControlType_kDelayTime,
   /// Delay feedback.
   kDelayFeedback = BarelyEffectControlType_kDelayFeedback,
+  /// Sidechain mix.
+  kSidechainMix = BarelyEffectControlType_kSidechainMix,
+  /// Sidechain attack in seconds.
+  kSidechainAttack = BarelyEffectControlType_kSidechainAttack,
+  /// Sidechain release in seconds.
+  kSidechainRelease = BarelyEffectControlType_kSidechainRelease,
+  /// Sidechain threshold.
+  kSidechainThreshold = BarelyEffectControlType_kSidechainThreshold,
+  /// Sidechain ratio.
+  kSidechainRatio = BarelyEffectControlType_kSidechainRatio,
 };
 
 /// Filter types.

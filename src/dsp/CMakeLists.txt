@@ -16,6 +16,7 @@ target_sources(
   sample_data.cpp
   sample_data.h
   sample_generators.h
+  sidechain.h
   voice.h
 )
 

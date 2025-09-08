@@ -45,6 +45,71 @@ namespace Barely {
     }
     private static float _delayFeedback = 0.0f;
 
+    /// Sidechain mix.
+    public static float SidechainMix {
+      get { return _sidechainMix; }
+      set {
+        if (_sidechainMix != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_MIX, value);
+          _sidechainMix =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_MIX);
+        }
+      }
+    }
+    private static float _sidechainMix = 1.0f;
+
+    /// Sidechain attack.
+    public static float SidechainAttack {
+      get { return _sidechainAttack; }
+      set {
+        if (_sidechainAttack != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_ATTACK, value);
+          _sidechainAttack =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_ATTACK);
+        }
+      }
+    }
+    private static float _sidechainAttack = 0.0f;
+
+    /// Sidechain release.
+    public static float SidechainRelease {
+      get { return _sidechainRelease; }
+      set {
+        if (_sidechainRelease != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_RELEASE, value);
+          _sidechainRelease =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_RELEASE);
+        }
+      }
+    }
+    private static float _sidechainRelease = 0.0f;
+
+    /// Sidechain threshold.
+    public static float SidechainThreshold {
+      get { return _sidechainThreshold; }
+      set {
+        if (_sidechainThreshold != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_THRESHOLD, value);
+          _sidechainThreshold =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_THRESHOLD);
+        }
+      }
+    }
+    private static float _sidechainThreshold = 1.0f;
+
+    /// Sidechain ratio.
+    public static float SidechainRatio {
+      get { return _sidechainRatio; }
+      set {
+        if (_sidechainRatio != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_RATIO, value);
+          _sidechainRatio =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_RATIO);
+        }
+      }
+    }
+    private static float _sidechainRatio = 1.0f;
+
     /// Tempo in beats per minute.
     public static double Tempo {
       get { return _tempo; }
@@ -110,6 +175,8 @@ namespace Barely {
         [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
         /// Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
+        /// Sidechain send.
+        [InspectorName("Sidechain Send")] SIDECHAIN_SEND,
         /// Arpeggiator mode.
         [InspectorName("Arpeggiator Mode")] ARP_MODE,
         /// Arpeggiator gate ratio.
@@ -126,6 +193,16 @@ namespace Barely {
         [InspectorName("Delay Time")] DELAY_TIME,
         /// Delay feedback.
         [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
+        /// Sidechain mix.
+        [InspectorName("Sidechain Mix")] SIDECHAIN_MIX,
+        /// Sidechain attack in seconds.
+        [InspectorName("Sidechain Attack")] SIDECHAIN_ATTACK,
+        /// Sidechain release in seconds.
+        [InspectorName("Sidechain Release")] SIDECHAIN_RELEASE,
+        /// Sidechain threshold.
+        [InspectorName("Sidechain Threshold")] SIDECHAIN_THRESHOLD,
+        /// Sidechain ratio.
+        [InspectorName("Sidechain Ratio")] SIDECHAIN_RATIO,
       }
 
       /// Note control type.
@@ -225,6 +302,7 @@ namespace Barely {
         _controlOverrides[(int)ControlType.BIT_CRUSHER_DEPTH].value = instrument.BitCrusherDepth;
         _controlOverrides[(int)ControlType.BIT_CRUSHER_RATE].value = instrument.BitCrusherRate;
         _controlOverrides[(int)ControlType.DELAY_SEND].value = instrument.DelaySend;
+        _controlOverrides[(int)ControlType.SIDECHAIN_SEND].value = instrument.SidechainSend;
         _controlOverrides[(int)ControlType.ARP_MODE].value = (float)instrument.ArpMode;
         _controlOverrides[(int)ControlType.ARP_GATE_RATIO].value = instrument.ArpGateRatio;
         _controlOverrides[(int)ControlType.ARP_RATE].value = instrument.ArpRate;

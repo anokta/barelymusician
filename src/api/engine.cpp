@@ -36,18 +36,24 @@ EffectControlArray BuildEffectControlArray() noexcept {
       Control(1.0f, 0.0f, 1.0f),   // kDelayMix
       Control(0.0f, 0.0f, 10.0f),  // kDelayTime
       Control(0.0f, 0.0f, 1.0f),   // kDelayFeedback
+      Control(1.0f, 0.0f, 1.0f),   // kSidechainMix
+      Control(0.0f, 0.0f, 10.0f),  // kSidechainAttack
+      Control(0.0f, 0.0f, 10.0f),  // kSidechainRelease
+      Control(1.0f, 0.0f, 1.0f),   // kSidechainThreshold
+      Control(1.0f, 1.0f, 64.0f),  // kSidechainRatio
   };
 }
 
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate, int max_channel_count, int max_frame_count,
-                           float reference_frequency) noexcept
+// TODO(#146): `max_frame_count` is currently not used, but likely needed for reverb implementation.
+BarelyEngine::BarelyEngine(int sample_rate, int max_channel_count,
+                           [[maybe_unused]] int max_frame_count, float reference_frequency) noexcept
     : sample_rate_(sample_rate),
       reference_frequency_(reference_frequency),
       effect_controls_(BuildEffectControlArray()),
-      engine_processor_(sample_rate_, max_channel_count, max_frame_count) {
+      engine_processor_(sample_rate_, max_channel_count) {
   assert(sample_rate >= 0);
   assert(max_channel_count > 0);
   assert(max_frame_count > 0);

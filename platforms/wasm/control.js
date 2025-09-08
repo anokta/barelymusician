@@ -29,10 +29,11 @@ export const ControlType = {
   BIT_CRUSHER_DEPTH: 19,
   BIT_CRUSHER_RATE: 20,
   DELAY_SEND: 21,
-  ARP_MODE: 22,
-  ARP_GATE_RATIO: 23,
-  ARP_RATE: 24,
-  COUNT: 25,
+  SIDECHAIN_SEND: 22,
+  ARP_MODE: 23,
+  ARP_GATE_RATIO: 24,
+  ARP_RATE: 25,
+  COUNT: 26,
 };
 
 export const FilterType = {
@@ -218,6 +219,13 @@ export const CONTROLS = {
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [ControlType.SIDECHAIN_SEND]: {
+    name: 'Sidechain Send',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: -1.0,
     maxValue: 1.0,
   },
   [ControlType.ARP_MODE]: {

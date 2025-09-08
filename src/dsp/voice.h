@@ -26,9 +26,6 @@ struct VoiceParams {
   /// Bit crusher increment (for sample rate reduction).
   float bit_crusher_increment = 1.0f;
 
-  /// Delay send.
-  float delay_send = 0.0f;
-
   /// Filter coefficients.
   BiquadFilter::Coefficients filter_coefficients = {};
 
@@ -49,6 +46,12 @@ struct VoiceParams {
 
   /// Stereo pan.
   float stereo_pan = 0.0f;
+
+  /// Delay send.
+  float delay_send = 0.0f;
+
+  /// Sidechain send.
+  float sidechain_send = 0.0f;
 };
 
 /// Instrument parameters.
@@ -91,12 +94,15 @@ class Voice {
   /// @param voice Voice.
   /// @param params Instrument parameters.
   /// @param delay_frame Delay send frame.
+  /// @param sidechain_frame Sidechain send frame.
+  /// @param is_sidechain_send Denotes whether the sidechain frame is for send or receive.
   /// @param output_frame Output frame.
   template <OscMode kOscMode, SliceMode kSliceMode>
   static void Process(Voice& voice, const InstrumentParams& params,
-                      float* BARELY_RESTRICT delay_frame,
-                      float* BARELY_RESTRICT output_frame) noexcept {
-    voice.Process<kOscMode, kSliceMode>(params, delay_frame, output_frame);
+                      float* BARELY_RESTRICT delay_frame, float* BARELY_RESTRICT sidechain_frame,
+                      bool is_sidechain_send, float* BARELY_RESTRICT output_frame) noexcept {
+    voice.Process<kOscMode, kSliceMode>(params, delay_frame, sidechain_frame, is_sidechain_send,
+                                        output_frame);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -149,8 +155,10 @@ class Voice {
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
   void Process(const InstrumentParams& params, float* BARELY_RESTRICT delay_frame,
+               float* BARELY_RESTRICT sidechain_frame, bool is_sidechain_send,
                float* BARELY_RESTRICT output_frame) noexcept {
-    if (!IsActive()) {
+    if (!IsActive() || ((is_sidechain_send && params_.sidechain_send <= 0.0f) ||
+                        (!is_sidechain_send && params_.sidechain_send > 0.0f))) {
       return;
     }
 
@@ -212,14 +220,23 @@ class Voice {
     const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
     const float right_gain = 1.0f - left_gain;
 
-    const float left_output = left_gain * output;
-    const float right_output = right_gain * output;
+    float left_output = left_gain * output;
+    float right_output = right_gain * output;
 
-    output_frame[0] += left_output;
-    output_frame[1] += right_output;
+    if (is_sidechain_send) {
+      sidechain_frame[0] += params_.sidechain_send * left_output;
+      sidechain_frame[1] += params_.sidechain_send * right_output;
+    } else if (params_.sidechain_send < 0.0f) {
+      const float sidechain_send = -params_.sidechain_send;
+      left_output = std::lerp(left_output, sidechain_frame[0] * left_output, sidechain_send);
+      right_output = std::lerp(right_output, sidechain_frame[1] * right_output, sidechain_send);
+    }
 
     delay_frame[0] += params_.delay_send * left_output;
     delay_frame[1] += params_.delay_send * right_output;
+
+    output_frame[0] += left_output;
+    output_frame[1] += right_output;
 
     Approach(params.voice_params);
   }
@@ -241,6 +258,7 @@ class Voice {
     ApproachValue(params_.filter_coefficients.b2, params.filter_coefficients.b2);
 
     ApproachValue(params_.delay_send, params.delay_send);
+    ApproachValue(params_.sidechain_send, params.sidechain_send);
   }
 
   bool IsSliceActive() const noexcept {
@@ -264,10 +282,13 @@ class Voice {
 /// @param voice Mutable voice.
 /// @param params Instrument parameters.
 /// @param delay_frame Delay send frame.
+/// @param sidechain_frame Sidechain send frame.
+/// @param is_sidechain_send Denotes whether the sidechain frame is for send or receive.
 /// @param output_frame Output frame.
 using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
-                               float* BARELY_RESTRICT delay_samples,
-                               float* BARELY_RESTRICT output_samples);
+                               float* BARELY_RESTRICT delay_frame,
+                               float* BARELY_RESTRICT sidechain_frame, bool is_sidechain_send,
+                               float* BARELY_RESTRICT output_frame);
 
 }  // namespace barely
 

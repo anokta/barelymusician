@@ -69,7 +69,7 @@ class Envelope {
   ///
   /// @return True if on.
   [[nodiscard]] bool IsOn() const noexcept {
-    return state_ != State::kIdle && state_ != State::kRelease;
+    return static_cast<int>(state_) < static_cast<int>(State::kRelease);
   }
 
   /// Generates the next output sample.
@@ -153,7 +153,7 @@ class Envelope {
 
  private:
   // Envelope state.
-  enum class State { kAttack, kDecay, kSustain, kRelease, kIdle };
+  enum class State { kAttack = 0, kDecay, kSustain, kRelease, kIdle };
 
   // Pointer to adsr.
   const Adsr* adsr_ = nullptr;

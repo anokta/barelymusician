@@ -9,6 +9,7 @@
 #include "common/restrict.h"
 #include "dsp/control.h"
 #include "dsp/delay_filter.h"
+#include "dsp/sidechain.h"
 
 namespace barely {
 
@@ -22,6 +23,15 @@ struct EffectParams {
 
   // Delay feedback.
   float delay_feedback = 0.0f;
+
+  // Sidechain mix.
+  float sidechain_mix = 1.0f;
+
+  // Sidechain threshold in decibels.
+  float sidechain_threshold_db = 0.0f;
+
+  // Sidechain ratio.
+  float sidechain_ratio = 1.0f;
 };
 
 /// Class that wraps the audio processing of an effect.
@@ -31,11 +41,9 @@ class EngineProcessor {
   ///
   /// @param sample_rate Sampling rate in hertz.
   /// @param max_channel_count Maximum number of channels.
-  /// @param max_frame_count Maximum number of frames.
-  EngineProcessor(int sample_rate, int max_channel_count, int max_frame_count) noexcept;
+  EngineProcessor(int sample_rate, int max_channel_count) noexcept;
 
   /// Processes the next output samples.
-  ///
   ///
   /// @param instruments Set of instruments.
   /// @param output_samples Array of interleaved output samples.
@@ -43,17 +51,27 @@ class EngineProcessor {
   /// @param output_frame_count Number of output frames.
   void Process(const std::unordered_set<BarelyInstrument*>& instruments, float* output_samples,
                int output_channel_count, int output_frame_count) noexcept {
-    std::fill_n(delay_samples_.begin(), output_channel_count * output_frame_count, 0.0f);
     for (int frame = 0; frame < output_frame_count; ++frame) {
-      const int frame_offset = output_channel_count * frame;
-      float* delay_frame = &delay_samples_[frame_offset];
-      float* output_frame = &output_samples[frame_offset];
+      float* delay_frame = delay_frame_.data();
+      float* sidechain_frame = sidechain_frame_.data();
+      float* output_frame = &output_samples[output_channel_count * frame];
+
+      std::fill_n(delay_frame, output_channel_count, 0.0f);
+      std::fill_n(sidechain_frame, output_channel_count, 0.0f);
+
       for (BarelyInstrument* instrument : instruments) {
-        instrument->processor().Process(delay_frame, output_frame);
+        instrument->processor().Process(delay_frame, sidechain_frame, true, output_frame);
       }
+      sidechain_.Process(sidechain_frame, output_channel_count, current_params_.sidechain_mix,
+                         current_params_.sidechain_threshold_db, current_params_.sidechain_ratio);
+      for (BarelyInstrument* instrument : instruments) {
+        instrument->processor().Process(delay_frame, sidechain_frame, false, output_frame);
+      }
+
       delay_filter_.Process(delay_frame, output_frame, output_channel_count,
                             current_params_.delay_mix, current_params_.delay_frame_count,
                             current_params_.delay_feedback);
+
       Approach();
     }
   }
@@ -71,6 +89,9 @@ class EngineProcessor {
     ApproachValue(current_params_.delay_mix, target_params_.delay_mix);
     ApproachValue(current_params_.delay_frame_count, target_params_.delay_frame_count);
     ApproachValue(current_params_.delay_feedback, target_params_.delay_feedback);
+    ApproachValue(current_params_.sidechain_mix, target_params_.sidechain_mix);
+    ApproachValue(current_params_.sidechain_threshold_db, target_params_.sidechain_threshold_db);
+    ApproachValue(current_params_.sidechain_ratio, target_params_.sidechain_ratio);
   }
 
   // Sampling rate in hertz.
@@ -79,14 +100,20 @@ class EngineProcessor {
   // Delay filter.
   DelayFilter delay_filter_;
 
+  // Sidechain.
+  Sidechain sidechain_;
+
+  // Delay send frame.
+  std::vector<float> delay_frame_;
+
+  // Sidechain send frame.
+  std::vector<float> sidechain_frame_;
+
   // Current parameters.
   EffectParams current_params_ = {};
 
   // Target parameters.
   EffectParams target_params_ = {};
-
-  // Delay samples.
-  std::vector<float> delay_samples_;
 };
 
 }  // namespace barely

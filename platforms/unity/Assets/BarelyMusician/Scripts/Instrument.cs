@@ -206,6 +206,10 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float DelaySend = 0.0f;
 
+    /// Sidechain send.
+    [Range(-1.0f, 1.0f)]
+    public float SidechainSend = 0.0f;
+
     [Header("Arpeggiator")]
 
     /// Arpeggiator mode.
@@ -360,6 +364,7 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
       SetControl(Engine.Internal.ControlType.DELAY_SEND, DelaySend);
+      SetControl(Engine.Internal.ControlType.SIDECHAIN_SEND, SidechainSend);
       SetControl(Engine.Internal.ControlType.ARP_MODE, (float)ArpMode);
       SetControl(Engine.Internal.ControlType.ARP_GATE_RATIO, ArpGateRatio);
       SetControl(Engine.Internal.ControlType.ARP_RATE, ArpRate);

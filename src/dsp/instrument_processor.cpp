@@ -156,6 +156,9 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
     case ControlType::kDelaySend:
       params_.voice_params.delay_send = value;
       break;
+    case ControlType::kSidechainSend:
+      params_.voice_params.sidechain_send = value;
+      break;
     case ControlType::kArpMode:
     case ControlType::kArpGateRatio:
     case ControlType::kArpRate:
@@ -252,6 +255,7 @@ Voice& InstrumentProcessor::AcquireVoice(float pitch) noexcept {
   if (voice_index == -1) {
     // If no voices are available to acquire, steal the oldest active voice.
     voice_index = oldest_voice_index;
+    voice_states_[voice_index].voice.Reset();
   }
   VoiceState& voice_state = voice_states_[voice_index];
   voice_state.pitch = pitch;

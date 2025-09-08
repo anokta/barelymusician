@@ -16,11 +16,31 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float DelayFeedback = 0.0f;
 
+    [Range(0.0f, 1.0f)]
+    public float SidechainMix = 1.0f;
+
+    [Range(0.001f, 1.0f)]
+    public float SidechainAttack = 0.001f;
+
+    [Range(0.01f, 3.0f)]
+    public float SidechainRelease = 0.01f;
+
+    [Range(0.0f, 1.0f)]
+    public float SidechainThreshold = 1.0f;
+
+    [Range(1.0f, 64.0f)]
+    public float SidechainRatio = 1.0f;
+
     private void Update() {
       Engine.Tempo = (double)Bpm;
       Engine.DelayMix = DelayMix;
       Engine.DelayTime = DelayTime;
       Engine.DelayFeedback = DelayFeedback;
+      Engine.SidechainMix = SidechainMix;
+      Engine.SidechainAttack = SidechainAttack;
+      Engine.SidechainRelease = SidechainRelease;
+      Engine.SidechainThreshold = SidechainThreshold;
+      Engine.SidechainRatio = SidechainRatio;
     }
   }
 }  // namespace Barely

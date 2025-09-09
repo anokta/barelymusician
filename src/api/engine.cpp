@@ -36,19 +36,24 @@ EffectControlArray BuildEffectControlArray() noexcept {
       Control(1.0f, 0.0f, 1.0f),   // kDelayMix
       Control(0.0f, 0.0f, 10.0f),  // kDelayTime
       Control(0.0f, 0.0f, 1.0f),   // kDelayFeedback
+      Control(1.0f, 0.0f, 1.0f),   // kSidechainMix
+      Control(0.0f, 0.0f, 10.0f),  // kSidechainAttack
+      Control(0.0f, 0.0f, 10.0f),  // kSidechainRelease
+      Control(1.0f, 0.0f, 1.0f),   // kSidechainThreshold
+      Control(1.0f, 1.0f, 64.0f),  // kSidechainRatio
   };
 }
 
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate, int max_channel_count, int max_frame_count,
-                           float reference_frequency) noexcept
+// TODO(#146): `max_frame_count` is currently not used, but likely needed for reverb implementation.
+BarelyEngine::BarelyEngine(int sample_rate, int max_channel_count,
+                           [[maybe_unused]] int max_frame_count, float reference_frequency) noexcept
     : sample_rate_(sample_rate),
       reference_frequency_(reference_frequency),
       effect_controls_(BuildEffectControlArray()),
-      effect_processor_(sample_rate_, max_channel_count),
-      delay_samples_(max_channel_count * max_frame_count) {
+      engine_processor_(sample_rate_, max_channel_count) {
   assert(sample_rate >= 0);
   assert(max_channel_count > 0);
   assert(max_frame_count > 0);
@@ -78,11 +83,10 @@ float BarelyEngine::GetEffectControl(BarelyEffectControlType type) const noexcep
 void BarelyEngine::Process(float* output_samples, int output_channel_count, int output_frame_count,
                            double timestamp) noexcept {
   assert(output_samples != nullptr);
-  assert(output_channel_count > 0);
+  assert(output_channel_count == 2);
   assert(output_frame_count > 0);
 
   std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
-  std::fill_n(delay_samples_.begin(), output_channel_count * output_frame_count, 0.0f);
 
   const int64_t process_frame = barely::SecondsToFrames(sample_rate_, timestamp);
   const int64_t end_frame = process_frame + output_frame_count;
@@ -95,9 +99,8 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      Process(*instruments, &delay_samples_[output_channel_count * current_frame],
-              &output_samples[output_channel_count * current_frame], output_channel_count,
-              message_frame - current_frame);
+      engine_processor_.Process(*instruments, &output_samples[output_channel_count * current_frame],
+                                output_channel_count, message_frame - current_frame);
       current_frame = message_frame;
     }
     std::visit(MessageVisitor{[&instruments](ControlMessage& control_message) noexcept {
@@ -106,7 +109,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                                     control_message.type, control_message.value);
                               },
                               [this](EffectControlMessage& effect_control_message) noexcept {
-                                effect_processor_.SetControl(effect_control_message.type,
+                                engine_processor_.SetControl(effect_control_message.type,
                                                              effect_control_message.value);
                               },
                               [&instruments](NoteControlMessage& note_control_message) noexcept {
@@ -135,9 +138,8 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
   // Process the rest of the samples.
   if (process_frame + static_cast<int64_t>(current_frame) < end_frame) {
-    Process(*instruments, &delay_samples_[output_channel_count * current_frame],
-            &output_samples[output_channel_count * current_frame], output_channel_count,
-            output_frame_count - current_frame);
+    engine_processor_.Process(*instruments, &output_samples[output_channel_count * current_frame],
+                              output_channel_count, output_frame_count - current_frame);
   }
 }
 
@@ -202,13 +204,4 @@ void BarelyEngine::Update(double timestamp) noexcept {
       update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);
     }
   }
-}
-
-void BarelyEngine::Process(const InstrumentSet& instruments, float* BARELY_RESTRICT delay_samples,
-                           float* BARELY_RESTRICT output_samples, int channel_count,
-                           int frame_count) noexcept {
-  for (BarelyInstrument* instrument : instruments) {
-    instrument->processor().Process(delay_samples, output_samples, channel_count, frame_count);
-  }
-  effect_processor_.Process(delay_samples, output_samples, channel_count, frame_count);
 }

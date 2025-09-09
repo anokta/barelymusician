@@ -8,13 +8,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "api/instrument.h"
-#include "api/performer.h"
 #include "common/mutable.h"
-#include "common/restrict.h"
 #include "common/rng.h"
 #include "dsp/control.h"
-#include "dsp/effect_processor.h"
+#include "dsp/engine_processor.h"
 #include "dsp/message_queue.h"
 
 /// Implementation of an engine.
@@ -71,7 +68,7 @@ struct BarelyEngine {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept { return timestamp_; }
 
-  /// Processes output samples.
+  /// Processes output samples at timestamp.
   ///
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
@@ -119,13 +116,6 @@ struct BarelyEngine {
   barely::MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
-  // Instrument set alias.
-  using InstrumentSet = std::unordered_set<BarelyInstrument*>;
-
-  // Processes the next output samples between the messages.
-  void Process(const InstrumentSet& instruments, float* BARELY_RESTRICT delay_samples,
-               float* BARELY_RESTRICT output_samples, int channel_count, int frame_count) noexcept;
-
   // Sampling rate in hertz.
   int sample_rate_ = 0;
 
@@ -134,12 +124,6 @@ struct BarelyEngine {
 
   // Array of effect controls.
   barely::EffectControlArray effect_controls_;
-
-  // Effect processor.
-  barely::EffectProcessor effect_processor_;
-
-  // Delay samples.
-  std::vector<float> delay_samples_;
 
   // Random number generator for the audio thread.
   barely::AudioRng audio_rng_;
@@ -151,8 +135,8 @@ struct BarelyEngine {
   barely::MessageQueue message_queue_;
 
   // Set of pointers to instruments.
-  InstrumentSet instruments_;
-  barely::Mutable<InstrumentSet> mutable_instruments_;
+  std::unordered_set<BarelyInstrument*> instruments_;
+  barely::Mutable<std::unordered_set<BarelyInstrument*>> mutable_instruments_;
 
   // Set of pointers to performers.
   std::unordered_set<BarelyPerformer*> performers_;
@@ -165,6 +149,9 @@ struct BarelyEngine {
 
   // Update frame.
   int64_t update_frame_ = 0;
+
+  // Engine processor.
+  barely::EngineProcessor engine_processor_;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

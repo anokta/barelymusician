@@ -1,9 +1,9 @@
-#ifndef BARELYMUSICIAN_EXAMPLES_COMMON_DECIBELS_H_
-#define BARELYMUSICIAN_EXAMPLES_COMMON_DECIBELS_H_
+#ifndef BARELYMUSICIAN_DSP_DECIBELS_H_
+#define BARELYMUSICIAN_DSP_DECIBELS_H_
 
 #include <cmath>
 
-namespace barely::examples {
+namespace barely {
 
 /// Minimum decibel threshold.
 inline constexpr float kMinDecibels = -80.0f;
@@ -13,6 +13,7 @@ inline constexpr float kMinDecibels = -80.0f;
 /// @param amplitude Value in linear amplitude.
 /// @return Value in decibels.
 inline constexpr float AmplitudeToDecibels(float amplitude) noexcept {
+  // decibels = 20 * log(amplitude).
   return (amplitude > 0.0) ? 20.0f * std::log10(amplitude) : kMinDecibels;
 }
 
@@ -21,9 +22,10 @@ inline constexpr float AmplitudeToDecibels(float amplitude) noexcept {
 /// @param decibels Value in decibels.
 /// @return Value in linear amplitude.
 inline constexpr float DecibelsToAmplitude(float decibels) noexcept {
+  // amplitude = 10 ^ (decibels / 20).
   return (decibels > kMinDecibels) ? std::pow(10.0f, 0.05f * decibels) : 0.0f;
 }
 
-}  // namespace barely::examples
+}  // namespace barely
 
-#endif  // BARELYMUSICIAN_EXAMPLES_COMMON_DECIBELS_H_
+#endif  // BARELYMUSICIAN_DSP_DECIBELS_H_

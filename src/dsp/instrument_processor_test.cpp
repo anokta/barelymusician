@@ -36,10 +36,11 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.SetSampleData(sample_data);
 
   std::array<float, kChannelCount> delay;
+  std::array<float, kChannelCount> sidechain;
   std::array<float, kChannelCount> output;
 
   output.fill(0.0f);
-  processor.Process(delay.data(), output.data(), kChannelCount, 1);
+  processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
   for (int channel = 0; channel < kChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
@@ -47,7 +48,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.SetNoteOn(0.0f, kNoteControls);
 
   output.fill(0.0f);
-  processor.Process(delay.data(), output.data(), kChannelCount, 1);
+  processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
   for (int channel = 0; channel < kChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.5f * kSamples[0]);
   }
@@ -55,7 +56,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.SetNoteOff(0.0f);
 
   output.fill(0.0f);
-  processor.Process(delay.data(), output.data(), kChannelCount, 1);
+  processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
   for (int channel = 0; channel < kChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
@@ -72,10 +73,11 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   processor.SetSampleData(sample_data);
 
   std::array<float, kChannelCount> delay;
+  std::array<float, kChannelCount> sidechain;
   std::array<float, kChannelCount> output;
 
   output.fill(0.0f);
-  processor.Process(delay.data(), output.data(), kChannelCount, 1);
+  processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
   for (int channel = 0; channel < kChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
@@ -87,7 +89,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
     expected_output += kSamples[i];
 
     output.fill(0.0f);
-    processor.Process(delay.data(), output.data(), kChannelCount, 1);
+    processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(output[channel], 0.5f * expected_output) << i;
     }
@@ -97,7 +99,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
     processor.SetNoteOn(static_cast<float>(kVoiceCount), kNoteControls);
 
     output.fill(0.0f);
-    processor.Process(delay.data(), output.data(), kChannelCount, 1);
+    processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(output[channel], 0.5f * expected_output) << i;
     }
@@ -114,10 +116,11 @@ TEST(InstrumentProcessorTest, NoVoice) {
   processor.SetSampleData(sample_data);
 
   std::array<float, kChannelCount> delay;
+  std::array<float, kChannelCount> sidechain;
   std::array<float, kChannelCount> output;
 
   output.fill(0.0f);
-  processor.Process(delay.data(), output.data(), kChannelCount, 1);
+  processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
   for (int channel = 0; channel < kChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
@@ -125,7 +128,7 @@ TEST(InstrumentProcessorTest, NoVoice) {
   processor.SetNoteOn(0.0f, kNoteControls);
 
   output.fill(0.0f);
-  processor.Process(delay.data(), output.data(), kChannelCount, 1);
+  processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
   for (int channel = 0; channel < kChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }

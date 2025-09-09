@@ -69,15 +69,6 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
   params_.rng = &rng;
 }
 
-void InstrumentProcessor::Process(float* BARELY_RESTRICT delay_samples,
-                                  float* BARELY_RESTRICT output_samples, int output_channel_count,
-                                  int output_frame_count) noexcept {
-  for (VoiceState& voice_state : voice_states_) {
-    voice_callback_(voice_state.voice, params_, delay_samples, output_samples, output_channel_count,
-                    output_frame_count);
-  }
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
   switch (type) {
@@ -164,6 +155,9 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kDelaySend:
       params_.voice_params.delay_send = value;
+      break;
+    case ControlType::kSidechainSend:
+      params_.voice_params.sidechain_send = value;
       break;
     case ControlType::kArpMode:
     case ControlType::kArpGateRatio:
@@ -261,6 +255,7 @@ Voice& InstrumentProcessor::AcquireVoice(float pitch) noexcept {
   if (voice_index == -1) {
     // If no voices are available to acquire, steal the oldest active voice.
     voice_index = oldest_voice_index;
+    voice_states_[voice_index].voice.Reset();
   }
   VoiceState& voice_state = voice_states_[voice_index];
   voice_state.pitch = pitch;

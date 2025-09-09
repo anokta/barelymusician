@@ -42,6 +42,8 @@ const std::array<RangeParameter, BarelyControlType_kCount> kParams = {
     RangeParameter(STR16("Bitcrusher Rate"), BarelyControlType_kBitCrusherRate, STR16(""), 0.0, 1.0,
                    1.0),
     RangeParameter(STR16("Delay Send"), BarelyControlType_kDelaySend, STR16(""), 0.0, 1.0, 0.0),
+    RangeParameter(STR16("Sidechain Send"), BarelyControlType_kSidechainSend, STR16(""), -1.0, 1.0,
+                   0.0),
     RangeParameter(STR16("Arpeggiator Mode"), BarelyControlType_kArpMode, STR16(""), 0,
                    BarelyArpMode_kCount - 1, 0, BarelyArpMode_kCount - 1),
     RangeParameter(STR16("Arpeggiator Gate Ratio"), BarelyControlType_kArpGateRatio, STR16(""), 0.0,
@@ -84,8 +86,9 @@ tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {
   for (int i = 0; i < BarelyControlType_kCount; ++i) {
     if (i == BarelyControlType_kOscMix || i == BarelyControlType_kOscMode ||
         i == BarelyControlType_kOscPitchShift || i == BarelyControlType_kSliceMode ||
-        i == BarelyControlType_kDelaySend || i == BarelyControlType_kArpMode ||
-        i == BarelyControlType_kArpGateRatio || i == BarelyControlType_kArpRate) {
+        i == BarelyControlType_kDelaySend || i == BarelyControlType_kSidechainSend ||
+        i == BarelyControlType_kArpMode || i == BarelyControlType_kArpGateRatio ||
+        i == BarelyControlType_kArpRate) {
       // TODO(#162): Support sampling features.
       continue;
     }

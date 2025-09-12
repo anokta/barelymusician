@@ -37,7 +37,7 @@ ControlArray BuildControlArray(std::span<const BarelyControlOverride> control_ov
       Control(0.0f),                               // kPitchShift
       Control(false),                              // kRetrigger
       Control(0.0f, -1.0f, 1.0f),                  // kStereoPan
-      Control(8, 1, 20),                           // kVoiceCount
+      Control(8, 1, 16),                           // kVoiceCount
       Control(0.0f, 0.0f, 60.0f),                  // kAttack
       Control(0.0f, 0.0f, 60.0f),                  // kDecay
       Control(1.0f, 0.0f, 1.0f),                   // kSustain

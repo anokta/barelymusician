@@ -122,7 +122,7 @@ namespace Barely {
     public float StereoPan = 0.0f;
 
     /// Number of voices.
-    [Range(1, 20)]
+    [Range(1, 16)]
     public int VoiceCount = 8;
 
     [Header("Envelope")]

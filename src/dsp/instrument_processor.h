@@ -75,7 +75,7 @@ class InstrumentProcessor {
   void SetSampleData(SampleData& sample_data) noexcept;
 
  private:
-  static constexpr int kMaxVoiceCount = 20;
+  static constexpr int kMaxVoiceCount = 16;
 
   // List of voices with their pitch and timestamp. Voice timestamp is used to determine which voice
   // to steal when there are no free voices available.

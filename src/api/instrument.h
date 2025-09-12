@@ -99,8 +99,6 @@ struct BarelyInstrument {
   /// @param slices Span of slices.
   void SetSampleData(std::span<const BarelySlice> slices) noexcept;
 
-  barely::InstrumentProcessor& processor() noexcept { return processor_; }
-
  private:
   // Processes a control value.
   void ProcessControl(barely::ControlType type, float value) noexcept;
@@ -120,9 +118,6 @@ struct BarelyInstrument {
 
   // Note event callback.
   NoteEventCallback note_event_callback_ = {};
-
-  // Instrument processor.
-  barely::InstrumentProcessor processor_;
 
   // Arpeggiator.
   BarelyPerformer arp_;

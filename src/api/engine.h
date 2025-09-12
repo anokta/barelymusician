@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -12,6 +13,7 @@
 #include "common/rng.h"
 #include "dsp/control.h"
 #include "dsp/engine_processor.h"
+#include "dsp/instrument_processor.h"
 #include "dsp/message_queue.h"
 
 /// Implementation of an engine.
@@ -33,8 +35,10 @@ struct BarelyEngine {
   /// Adds a new instrument.
   ///
   /// @param instrument Pointer to instrument.
+  /// @param control_overrides Span of control overrides.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddInstrument(BarelyInstrument* instrument) noexcept;
+  void AddInstrument(BarelyInstrument* instrument,
+                     std::span<const BarelyControlOverride> control_overrides) noexcept;
 
   /// Adds a new performer.
   ///
@@ -47,16 +51,6 @@ struct BarelyEngine {
   /// @param type Effect control type.
   /// @return Effect control value.
   [[nodiscard]] float GetEffectControl(BarelyEffectControlType type) const noexcept;
-
-  /// Returns the reference frequency.
-  ///
-  /// @return Reference frequency in hertz.
-  [[nodiscard]] float GetReferenceFrequency() const noexcept { return reference_frequency_; }
-
-  /// Returns the sampling rate.
-  ///
-  /// @return Sampling rate in hertz.
-  [[nodiscard]] int GetSampleRate() const noexcept { return sample_rate_; }
 
   /// Returns the tempo.
   ///
@@ -112,7 +106,6 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
-  barely::AudioRng& audio_rng() noexcept { return audio_rng_; }
   barely::MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
@@ -134,9 +127,10 @@ struct BarelyEngine {
   // Message queue.
   barely::MessageQueue message_queue_;
 
-  // Set of pointers to instruments.
-  std::unordered_set<BarelyInstrument*> instruments_;
-  barely::Mutable<std::unordered_set<BarelyInstrument*>> mutable_instruments_;
+  // Map of instrument pointers to processors.
+  std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor> instruments_;
+  barely::Mutable<std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*>>
+      mutable_instruments_;
 
   // Set of pointers to performers.
   std::unordered_set<BarelyPerformer*> performers_;

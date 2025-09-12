@@ -15,6 +15,7 @@
 #include "common/restrict.h"
 #include "common/time.h"
 #include "dsp/control.h"
+#include "dsp/instrument_processor.h"
 #include "dsp/message.h"
 
 namespace {
@@ -44,6 +45,20 @@ EffectControlArray BuildEffectControlArray() noexcept {
   };
 }
 
+// Builds a new mutable instrument map.
+std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutableInstrumentMap(
+    const std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor>& instruments,
+    BarelyInstrument* excluded_instrument = nullptr) noexcept {
+  std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> new_instruments;
+  new_instruments.reserve(instruments.size());
+  for (auto& [instrument, processor] : instruments) {
+    if (instrument != excluded_instrument) {
+      new_instruments.emplace(instrument, const_cast<barely::InstrumentProcessor*>(&processor));
+    }
+  }
+  return new_instruments;
+}
+
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -63,10 +78,16 @@ BarelyEngine::BarelyEngine(int sample_rate, int max_channel_count,
 BarelyEngine::~BarelyEngine() noexcept { mutable_instruments_.Update({}); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::AddInstrument(BarelyInstrumentHandle instrument) noexcept {
-  [[maybe_unused]] const bool success = instruments_.emplace(instrument).second;
+void BarelyEngine::AddInstrument(
+    BarelyInstrumentHandle instrument,
+    std::span<const BarelyControlOverride> control_overrides) noexcept {
+  [[maybe_unused]] const bool success =
+      instruments_
+          .emplace(instrument, barely::InstrumentProcessor(control_overrides, audio_rng_,
+                                                           sample_rate_, reference_frequency_))
+          .second;
   assert(success);
-  mutable_instruments_.Update(instruments_);
+  mutable_instruments_.Update(BuildMutableInstrumentMap(instruments_));
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -103,37 +124,46 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                                 output_channel_count, message_frame - current_frame);
       current_frame = message_frame;
     }
-    std::visit(MessageVisitor{[&instruments](ControlMessage& control_message) noexcept {
-                                if (!instruments->contains(control_message.instrument)) return;
-                                control_message.instrument->processor().SetControl(
-                                    control_message.type, control_message.value);
-                              },
-                              [this](EffectControlMessage& effect_control_message) noexcept {
-                                engine_processor_.SetControl(effect_control_message.type,
-                                                             effect_control_message.value);
-                              },
-                              [&instruments](NoteControlMessage& note_control_message) noexcept {
-                                if (!instruments->contains(note_control_message.instrument)) return;
-                                note_control_message.instrument->processor().SetNoteControl(
-                                    note_control_message.pitch, note_control_message.type,
-                                    note_control_message.value);
-                              },
-                              [&instruments](NoteOffMessage& note_off_message) noexcept {
-                                if (!instruments->contains(note_off_message.instrument)) return;
-                                note_off_message.instrument->processor().SetNoteOff(
-                                    note_off_message.pitch);
-                              },
-                              [&instruments](NoteOnMessage& note_on_message) noexcept {
-                                if (!instruments->contains(note_on_message.instrument)) return;
-                                note_on_message.instrument->processor().SetNoteOn(
-                                    note_on_message.pitch, note_on_message.controls);
-                              },
-                              [&instruments](SampleDataMessage& sample_data_message) noexcept {
-                                if (!instruments->contains(sample_data_message.instrument)) return;
-                                sample_data_message.instrument->processor().SetSampleData(
-                                    sample_data_message.sample_data);
-                              }},
-               message->second);
+    std::visit(
+        MessageVisitor{[&instruments](ControlMessage& control_message) noexcept {
+                         // TODO(#126): This shouldn't need an instrument look up and can directly
+                         // pass the processor pointer here and below once memory is fixed.
+                         if (const auto it = instruments->find(control_message.instrument);
+                             it != instruments->end()) {
+                           it->second->SetControl(control_message.type, control_message.value);
+                         }
+                       },
+                       [this](EffectControlMessage& effect_control_message) noexcept {
+                         engine_processor_.SetControl(effect_control_message.type,
+                                                      effect_control_message.value);
+                       },
+                       [&instruments](NoteControlMessage& note_control_message) noexcept {
+                         if (const auto it = instruments->find(note_control_message.instrument);
+                             it != instruments->end()) {
+                           it->second->SetNoteControl(note_control_message.pitch,
+                                                      note_control_message.type,
+                                                      note_control_message.value);
+                         }
+                       },
+                       [&instruments](NoteOffMessage& note_off_message) noexcept {
+                         if (const auto it = instruments->find(note_off_message.instrument);
+                             it != instruments->end()) {
+                           it->second->SetNoteOff(note_off_message.pitch);
+                         }
+                       },
+                       [&instruments](NoteOnMessage& note_on_message) noexcept {
+                         if (const auto it = instruments->find(note_on_message.instrument);
+                             it != instruments->end()) {
+                           it->second->SetNoteOn(note_on_message.pitch, note_on_message.controls);
+                         }
+                       },
+                       [&instruments](SampleDataMessage& sample_data_message) noexcept {
+                         if (const auto it = instruments->find(sample_data_message.instrument);
+                             it != instruments->end()) {
+                           it->second->SetSampleData(sample_data_message.sample_data);
+                         }
+                       }},
+        message->second);
   }
 
   // Process the rest of the samples.
@@ -145,8 +175,8 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::RemoveInstrument(BarelyInstrumentHandle instrument) noexcept {
+  mutable_instruments_.Update(BuildMutableInstrumentMap(instruments_, instrument));
   instruments_.erase(instrument);
-  mutable_instruments_.Update(instruments_);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

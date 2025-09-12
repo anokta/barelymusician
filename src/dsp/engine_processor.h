@@ -9,6 +9,7 @@
 #include "common/restrict.h"
 #include "dsp/control.h"
 #include "dsp/delay_filter.h"
+#include "dsp/instrument_processor.h"
 #include "dsp/sidechain.h"
 
 namespace barely {
@@ -49,8 +50,9 @@ class EngineProcessor {
   /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  void Process(const std::unordered_set<BarelyInstrument*>& instruments, float* output_samples,
-               int output_channel_count, int output_frame_count) noexcept {
+  void Process(
+      const std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*>& instruments,
+      float* output_samples, int output_channel_count, int output_frame_count) noexcept {
     for (int frame = 0; frame < output_frame_count; ++frame) {
       float* delay_frame = delay_frame_.data();
       float* sidechain_frame = sidechain_frame_.data();
@@ -59,13 +61,13 @@ class EngineProcessor {
       std::fill_n(delay_frame, output_channel_count, 0.0f);
       std::fill_n(sidechain_frame, output_channel_count, 0.0f);
 
-      for (BarelyInstrument* instrument : instruments) {
-        instrument->processor().Process(delay_frame, sidechain_frame, true, output_frame);
+      for (const auto& [_, processor] : instruments) {
+        processor->Process(delay_frame, sidechain_frame, true, output_frame);
       }
       sidechain_.Process(sidechain_frame, output_channel_count, current_params_.sidechain_mix,
                          current_params_.sidechain_threshold_db, current_params_.sidechain_ratio);
-      for (BarelyInstrument* instrument : instruments) {
-        instrument->processor().Process(delay_frame, sidechain_frame, false, output_frame);
+      for (const auto& [_, processor] : instruments) {
+        processor->Process(delay_frame, sidechain_frame, false, output_frame);
       }
 
       delay_filter_.Process(delay_frame, output_frame, output_channel_count,

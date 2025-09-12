@@ -15,7 +15,6 @@
 #include "api/engine.h"
 #include "common/find_or_null.h"
 #include "dsp/control.h"
-#include "dsp/instrument_processor.h"
 #include "dsp/message.h"
 
 namespace {
@@ -97,8 +96,6 @@ BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine, std::span<const BarelyControlOverride> control_overrides) noexcept
     : engine_(engine),
       controls_(BuildControlArray(control_overrides)),
-      processor_(control_overrides, engine_.audio_rng(), engine_.GetSampleRate(),
-                 engine_.GetReferenceFrequency()),
       arp_(engine),
       arp_task_(
           arp_, 0.0, 1.0, std::numeric_limits<int32_t>::max(),
@@ -128,7 +125,7 @@ BarelyInstrument::BarelyInstrument(
   arp_task_.SetDuration(static_cast<double>(controls_[BarelyControlType_kArpGateRatio].value) *
                         arp_.GetLoopLength());
 
-  engine_.AddInstrument(this);
+  engine_.AddInstrument(this, control_overrides);
 }
 
 BarelyInstrument::~BarelyInstrument() noexcept {

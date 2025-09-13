@@ -5,6 +5,7 @@ target_sources(
   control.h
   decibels.h
   delay_filter.h
+  distortion.h
   engine_processor.cpp
   engine_processor.h
   envelope.h
@@ -26,6 +27,7 @@ if(ENABLE_TESTS)
     biquad_filter_test.cpp
     bit_crusher_test.cpp
     decibels_test.cpp
+    distortion_test.cpp
     envelope_test.cpp
     instrument_processor_test.cpp
     message_queue_test.cpp

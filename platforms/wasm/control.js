@@ -28,12 +28,14 @@ export const ControlType = {
   FILTER_Q: 18,
   BIT_CRUSHER_DEPTH: 19,
   BIT_CRUSHER_RATE: 20,
-  DELAY_SEND: 21,
-  SIDECHAIN_SEND: 22,
-  ARP_MODE: 23,
-  ARP_GATE_RATIO: 24,
-  ARP_RATE: 25,
-  COUNT: 26,
+  DISTORTION_AMOUNT: 20,
+  DISTORTION_DRIVE: 21,
+  DELAY_SEND: 22,
+  SIDECHAIN_SEND: 23,
+  ARP_MODE: 24,
+  ARP_GATE_RATIO: 25,
+  ARP_RATE: 26,
+  COUNT: 27,
 };
 
 export const FilterType = {
@@ -213,6 +215,20 @@ export const CONTROLS = {
     defaultValue: 1.0,
     minValue: 0.0,
     maxValue: 1.0,
+  },
+  [ControlType.DISTORTION_AMOUNT]: {
+    name: 'Distortion Amount',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [ControlType.DISTORTION_DRIVE]: {
+    name: 'Distortion Drive',
+    valueType: 'float',
+    defaultValue: 1.0,
+    minValue: 0.0,
+    maxValue: 20.0,
   },
   [ControlType.DELAY_SEND]: {
     name: 'Delay Send',

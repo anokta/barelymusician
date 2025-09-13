@@ -279,6 +279,10 @@ typedef enum BarelyControlType {
   BarelyControlType_kBitCrusherDepth,
   /// Normalized bit crusher rate.
   BarelyControlType_kBitCrusherRate,
+  /// Distortion amount.
+  BarelyControlType_kDistortionAmount,
+  /// Distortion drive.
+  BarelyControlType_kDistortionDrive,
   /// Delay send.
   BarelyControlType_kDelaySend,
   /// Sidechain send.
@@ -940,6 +944,10 @@ enum class ControlType {
   kBitCrusherDepth = BarelyControlType_kBitCrusherDepth,
   /// Normalized bit crusher rate.
   kBitCrusherRate = BarelyControlType_kBitCrusherRate,
+  /// Distortion amount.
+  kDistortionAmount = BarelyControlType_kDistortionAmount,
+  /// Distortion drive.
+  kDistortionDrive = BarelyControlType_kDistortionDrive,
   /// Delay send.
   kDelaySend = BarelyControlType_kDelaySend,
   /// Sidechain send.

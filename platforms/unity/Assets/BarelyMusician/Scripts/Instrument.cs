@@ -200,6 +200,16 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float BitCrusherRate = 1.0f;
 
+    [Header("Distortion")]
+
+    /// Distortion amount.
+    [Range(0.0f, 1.0f)]
+    public float DistortionAmount = 0.0f;
+
+    /// Distortion drive.
+    [Range(0.0f, 20.0f)]
+    public float DistortionDrive = 1.0f;
+
     [Header("Send Effects")]
 
     /// Delay send.
@@ -363,6 +373,8 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.FILTER_Q, FilterQ);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
+      SetControl(Engine.Internal.ControlType.DISTORTION_AMOUNT, DistortionAmount);
+      SetControl(Engine.Internal.ControlType.DISTORTION_DRIVE, DistortionDrive);
       SetControl(Engine.Internal.ControlType.DELAY_SEND, DelaySend);
       SetControl(Engine.Internal.ControlType.SIDECHAIN_SEND, SidechainSend);
       SetControl(Engine.Internal.ControlType.ARP_MODE, (float)ArpMode);

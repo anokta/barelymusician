@@ -16,7 +16,7 @@ class BitCrusher {
   /// @param input Input sample.
   /// @param range Sample value range (for bit depth reduction).
   /// @param increment Sample step increment (for sample rate reduction).
-  /// @return Filtered output sample.
+  /// @return Output sample.
   [[nodiscard]] float Next(float input, float range, float increment) noexcept {
     assert(range >= 0.0f);
     assert(increment >= 0.0f);

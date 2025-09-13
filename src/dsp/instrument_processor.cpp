@@ -153,6 +153,12 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
     case ControlType::kBitCrusherRate:
       params_.voice_params.bit_crusher_increment = value;
       break;
+    case ControlType::kDistortionAmount:
+      params_.voice_params.distortion_amount = value;
+      break;
+    case ControlType::kDistortionDrive:
+      params_.voice_params.distortion_drive = value;
+      break;
     case ControlType::kDelaySend:
       params_.voice_params.delay_send = value;
       break;

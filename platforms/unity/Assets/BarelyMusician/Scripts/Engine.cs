@@ -173,6 +173,10 @@ namespace Barely {
         [InspectorName("Bit Crusher Depth")] BIT_CRUSHER_DEPTH,
         /// Bit crusher rate.
         [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
+        /// Distortion amount.
+        [InspectorName("Distortion Amount")] DISTORTION_AMOUNT,
+        /// Distortion drive.
+        [InspectorName("Distortion Drive")] DISTORTION_DRIVE,
         /// Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
         /// Sidechain send.
@@ -301,6 +305,8 @@ namespace Barely {
         _controlOverrides[(int)ControlType.FILTER_Q].value = instrument.FilterQ;
         _controlOverrides[(int)ControlType.BIT_CRUSHER_DEPTH].value = instrument.BitCrusherDepth;
         _controlOverrides[(int)ControlType.BIT_CRUSHER_RATE].value = instrument.BitCrusherRate;
+        _controlOverrides[(int)ControlType.DISTORTION_AMOUNT].value = instrument.DistortionAmount;
+        _controlOverrides[(int)ControlType.DISTORTION_DRIVE].value = instrument.DistortionDrive;
         _controlOverrides[(int)ControlType.DELAY_SEND].value = instrument.DelaySend;
         _controlOverrides[(int)ControlType.SIDECHAIN_SEND].value = instrument.SidechainSend;
         _controlOverrides[(int)ControlType.ARP_MODE].value = (float)instrument.ArpMode;

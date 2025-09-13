@@ -12,6 +12,7 @@
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
 #include "dsp/control.h"
+#include "dsp/distortion.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_generators.h"
 #include "dsp/voice.h"
@@ -25,6 +26,12 @@ struct VoiceParams {
 
   /// Bit crusher increment (for sample rate reduction).
   float bit_crusher_increment = 1.0f;
+
+  /// Distortion amount.
+  float distortion_amount = 0.0f;
+
+  /// Distortion drive.
+  float distortion_drive = 1.0f;
 
   /// Filter coefficients.
   BiquadFilter::Coefficients filter_coefficients = {};
@@ -179,7 +186,7 @@ class Voice {
     const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
     const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
 
-    float output = params_.gain * envelope_.Next();
+    float output = envelope_.Next();
 
     if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
       output *= osc_output + slice_output;
@@ -192,8 +199,11 @@ class Voice {
     }
 
     // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
-    output = bit_crusher_.Next(filter_.Next(output, params_.filter_coefficients),
-                               params_.bit_crusher_range, params_.bit_crusher_increment);
+    output = bit_crusher_.Next(output, params_.bit_crusher_range, params_.bit_crusher_increment);
+    output = Distortion(output, params_.distortion_amount, params_.distortion_drive);
+    output = filter_.Next(output, params_.filter_coefficients);
+
+    output *= params_.gain;
 
     float osc_increment = params.osc_increment * note_params_.osc_increment;
     if constexpr (kOscMode == OscMode::kMf) {
@@ -245,6 +255,8 @@ class Voice {
     ApproachValue(params_.gain, note_params_.gain * params.gain);
     ApproachValue(params_.bit_crusher_increment, params.bit_crusher_increment);
     ApproachValue(params_.bit_crusher_range, params.bit_crusher_range);
+    ApproachValue(params_.distortion_amount, params.distortion_amount);
+    ApproachValue(params_.distortion_drive, params.distortion_drive);
     ApproachValue(params_.osc_mix, params.osc_mix);
     ApproachValue(params_.osc_noise_mix, params.osc_noise_mix);
     ApproachValue(params_.osc_shape, params.osc_shape);

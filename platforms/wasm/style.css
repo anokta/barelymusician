@@ -80,7 +80,7 @@ button {
   display: grid;
   grid-template-columns: 8em 1fr auto;
   align-items: center;
-  gap: 0.5em 1.0em;
+  gap: 0em 1.25em;
   font-size: 1.0em;
   min-width: 160px;
   max-width: 240px;

@@ -177,19 +177,6 @@ namespace Barely {
     public List<Slice> Slices = null;
     private int _sliceCount = 0;
 
-    [Header("Filter")]
-
-    /// Filter type.
-    public FilterType FilterType = FilterType.NONE;
-
-    /// Filter frequency in hertz.
-    [Range(0.0f, 48000.0f)]
-    public float FilterFrequency = 0.0f;
-
-    /// Filter Q factor.
-    [Range(0.1f, 10.0f)]
-    public float FilterQ = 0.71f;
-
     [Header("Bit Crusher")]
 
     /// Bit crusher depth.
@@ -209,6 +196,19 @@ namespace Barely {
     /// Distortion drive.
     [Range(0.0f, 20.0f)]
     public float DistortionDrive = 1.0f;
+
+    [Header("Filter")]
+
+    /// Filter type.
+    public FilterType FilterType = FilterType.NONE;
+
+    /// Filter frequency in hertz.
+    [Range(0.0f, 48000.0f)]
+    public float FilterFrequency = 0.0f;
+
+    /// Filter Q factor.
+    [Range(0.1f, 10.0f)]
+    public float FilterQ = 0.71f;
 
     [Header("Send Effects")]
 
@@ -366,15 +366,13 @@ namespace Barely {
       SetControl(Engine.Internal.ControlType.OSC_SHAPE, OscShape);
       SetControl(Engine.Internal.ControlType.OSC_SKEW, OscSkew);
       SetControl(Engine.Internal.ControlType.SLICE_MODE, (float)SliceMode);
-      SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
-      SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
-      SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
-      SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
-      SetControl(Engine.Internal.ControlType.FILTER_Q, FilterQ);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
       SetControl(Engine.Internal.ControlType.DISTORTION_AMOUNT, DistortionAmount);
       SetControl(Engine.Internal.ControlType.DISTORTION_DRIVE, DistortionDrive);
+      SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
+      SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Engine.Internal.ControlType.FILTER_Q, FilterQ);
       SetControl(Engine.Internal.ControlType.DELAY_SEND, DelaySend);
       SetControl(Engine.Internal.ControlType.SIDECHAIN_SEND, SidechainSend);
       SetControl(Engine.Internal.ControlType.ARP_MODE, (float)ArpMode);

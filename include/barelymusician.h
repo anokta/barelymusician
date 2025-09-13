@@ -269,12 +269,6 @@ typedef enum BarelyControlType {
   BarelyControlType_kOscSkew,
   /// Slice mode.
   BarelyControlType_kSliceMode,
-  /// Filter type.
-  BarelyControlType_kFilterType,
-  /// Filter frequency in hertz.
-  BarelyControlType_kFilterFrequency,
-  /// Filter Q factor.
-  BarelyControlType_kFilterQ,
   /// Bit crusher depth.
   BarelyControlType_kBitCrusherDepth,
   /// Normalized bit crusher rate.
@@ -283,6 +277,12 @@ typedef enum BarelyControlType {
   BarelyControlType_kDistortionAmount,
   /// Distortion drive.
   BarelyControlType_kDistortionDrive,
+  /// Filter type.
+  BarelyControlType_kFilterType,
+  /// Filter frequency in hertz.
+  BarelyControlType_kFilterFrequency,
+  /// Filter Q factor.
+  BarelyControlType_kFilterQ,
   /// Delay send.
   BarelyControlType_kDelaySend,
   /// Sidechain send.
@@ -934,12 +934,6 @@ enum class ControlType {
   kOscSkew = BarelyControlType_kOscSkew,
   /// Slice mode.
   kSliceMode = BarelyControlType_kSliceMode,
-  /// Filter type.
-  kFilterType = BarelyControlType_kFilterType,
-  /// Filter frequency in hertz.
-  kFilterFrequency = BarelyControlType_kFilterFrequency,
-  /// Filter Q factor.
-  kFilterQ = BarelyControlType_kFilterQ,
   /// Bit crusher depth.
   kBitCrusherDepth = BarelyControlType_kBitCrusherDepth,
   /// Normalized bit crusher rate.
@@ -948,6 +942,12 @@ enum class ControlType {
   kDistortionAmount = BarelyControlType_kDistortionAmount,
   /// Distortion drive.
   kDistortionDrive = BarelyControlType_kDistortionDrive,
+  /// Filter type.
+  kFilterType = BarelyControlType_kFilterType,
+  /// Filter frequency in hertz.
+  kFilterFrequency = BarelyControlType_kFilterFrequency,
+  /// Filter Q factor.
+  kFilterQ = BarelyControlType_kFilterQ,
   /// Delay send.
   kDelaySend = BarelyControlType_kDelaySend,
   /// Sidechain send.

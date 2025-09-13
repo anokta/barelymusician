@@ -163,12 +163,6 @@ namespace Barely {
         [InspectorName("Oscillator Skew")] OSC_SKEW,
         /// Slice mode.
         [InspectorName("Slice Mode")] SLICE_MODE,
-        /// Filter type.
-        [InspectorName("Filter Type")] FILTER_TYPE,
-        /// Filter frequency in hertz.
-        [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
-        /// Filter Q factor.
-        [InspectorName("Filter Q")] FILTER_Q,
         /// Bit crusher depth.
         [InspectorName("Bit Crusher Depth")] BIT_CRUSHER_DEPTH,
         /// Bit crusher rate.
@@ -177,6 +171,12 @@ namespace Barely {
         [InspectorName("Distortion Amount")] DISTORTION_AMOUNT,
         /// Distortion drive.
         [InspectorName("Distortion Drive")] DISTORTION_DRIVE,
+        /// Filter type.
+        [InspectorName("Filter Type")] FILTER_TYPE,
+        /// Filter frequency in hertz.
+        [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
+        /// Filter Q factor.
+        [InspectorName("Filter Q")] FILTER_Q,
         /// Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
         /// Sidechain send.
@@ -286,6 +286,7 @@ namespace Barely {
         _controlOverrides[(int)ControlType.GAIN].value = instrument.Gain;
         _controlOverrides[(int)ControlType.PITCH_SHIFT].value = instrument.PitchShift;
         _controlOverrides[(int)ControlType.RETRIGGER].value = instrument.Retrigger ? 1.0f : 0.0f;
+        _controlOverrides[(int)ControlType.STEREO_PAN].value = (float)instrument.StereoPan;
         _controlOverrides[(int)ControlType.VOICE_COUNT].value = (float)instrument.VoiceCount;
         _controlOverrides[(int)ControlType.ATTACK].value = instrument.Attack;
         _controlOverrides[(int)ControlType.DECAY].value = instrument.Decay;
@@ -298,15 +299,13 @@ namespace Barely {
         _controlOverrides[(int)ControlType.OSC_SHAPE].value = instrument.OscShape;
         _controlOverrides[(int)ControlType.OSC_SKEW].value = instrument.OscSkew;
         _controlOverrides[(int)ControlType.SLICE_MODE].value = (float)instrument.SliceMode;
-        _controlOverrides[(int)ControlType.FILTER_TYPE].value = (float)instrument.FilterType;
-        _controlOverrides[(int)ControlType.FILTER_FREQUENCY].value = instrument.FilterFrequency;
-        _controlOverrides[(int)ControlType.FILTER_TYPE].value = (float)instrument.FilterType;
-        _controlOverrides[(int)ControlType.FILTER_FREQUENCY].value = instrument.FilterFrequency;
-        _controlOverrides[(int)ControlType.FILTER_Q].value = instrument.FilterQ;
         _controlOverrides[(int)ControlType.BIT_CRUSHER_DEPTH].value = instrument.BitCrusherDepth;
         _controlOverrides[(int)ControlType.BIT_CRUSHER_RATE].value = instrument.BitCrusherRate;
         _controlOverrides[(int)ControlType.DISTORTION_AMOUNT].value = instrument.DistortionAmount;
         _controlOverrides[(int)ControlType.DISTORTION_DRIVE].value = instrument.DistortionDrive;
+        _controlOverrides[(int)ControlType.FILTER_TYPE].value = (float)instrument.FilterType;
+        _controlOverrides[(int)ControlType.FILTER_FREQUENCY].value = instrument.FilterFrequency;
+        _controlOverrides[(int)ControlType.FILTER_Q].value = instrument.FilterQ;
         _controlOverrides[(int)ControlType.DELAY_SEND].value = instrument.DelaySend;
         _controlOverrides[(int)ControlType.SIDECHAIN_SEND].value = instrument.SidechainSend;
         _controlOverrides[(int)ControlType.ARP_MODE].value = (float)instrument.ArpMode;

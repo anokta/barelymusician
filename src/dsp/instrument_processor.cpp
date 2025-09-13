@@ -131,6 +131,19 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       slice_mode_ = static_cast<SliceMode>(value);
       voice_callback_ = GetVoiceCallback(osc_mode_, slice_mode_);
       break;
+    case ControlType::kBitCrusherDepth:
+      // Offset the bit depth by 1 to normalize the range.
+      params_.voice_params.bit_crusher_range = std::pow(2.0f, value - 1.0f);
+      break;
+    case ControlType::kBitCrusherRate:
+      params_.voice_params.bit_crusher_increment = value;
+      break;
+    case ControlType::kDistortionAmount:
+      params_.voice_params.distortion_amount = value;
+      break;
+    case ControlType::kDistortionDrive:
+      params_.voice_params.distortion_drive = value;
+      break;
     case ControlType::kFilterType:
       filter_type_ = static_cast<FilterType>(value);
       params_.voice_params.filter_coefficients =
@@ -145,19 +158,6 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       filter_q_ = value;
       params_.voice_params.filter_coefficients =
           GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
-      break;
-    case ControlType::kBitCrusherDepth:
-      // Offset the bit depth by 1 to normalize the range.
-      params_.voice_params.bit_crusher_range = std::pow(2.0f, value - 1.0f);
-      break;
-    case ControlType::kBitCrusherRate:
-      params_.voice_params.bit_crusher_increment = value;
-      break;
-    case ControlType::kDistortionAmount:
-      params_.voice_params.distortion_amount = value;
-      break;
-    case ControlType::kDistortionDrive:
-      params_.voice_params.distortion_drive = value;
       break;
     case ControlType::kDelaySend:
       params_.voice_params.delay_send = value;

@@ -968,8 +968,7 @@ namespace Barely {
         }
 
         private void OnAudioFilterRead(float[] data, int channels) {
-          BarelyEngine_Process(_handle, data, channels, data.Length / channels,
-                               AudioSettings.dspTime);
+          BarelyEngine_Process(_handle, data, data.Length / channels, AudioSettings.dspTime);
         }
 
         private void LateUpdate() {
@@ -1037,7 +1036,7 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(Int32 sampleRate, Int32 maxChannelCount,
+      private static extern bool BarelyEngine_Create(Int32 sampleRate, Int32 channelCount,
                                                      Int32 maxFrameCount, float referenceFrequency,
                                                      ref IntPtr outEngine);
 
@@ -1058,7 +1057,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
       private static extern bool BarelyEngine_Process(IntPtr engine,
                                                       [In, Out] float[] outputSamples,
-                                                      Int32 outputChannelCount,
                                                       Int32 outputFrameCount, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetEffectControl")]

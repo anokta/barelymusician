@@ -15,9 +15,9 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create.
-///   constexpr int kMaxChannelCount = 2;
+///   constexpr int kChannelCount = 2;
 ///   constexpr int kMaxFrameCount = 512;
-///   barely::Engine engine(/*sample_rate=*/48000, kMaxChannelCount, kMaxFrameCount);
+///   barely::Engine engine(/*sample_rate=*/48000, kChannelCount, kMaxFrameCount);
 ///
 ///   // Set the tempo.
 ///   engine.SetTempo(/*tempo=*/124.0);
@@ -37,8 +37,8 @@
 ///   //
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
-///   float output_samples[kMaxChannelCount * kMaxFrameCount];
-///   engine.Process(output_samples, kMaxChannelCount, kMaxFrameCount, timestamp);
+///   float output_samples[kChannelCount * kMaxFrameCount];
+///   engine.Process(output_samples, kMaxFrameCount, timestamp);
 ///   @endcode
 ///
 /// - Instrument:
@@ -93,7 +93,7 @@
 ///
 ///   // Create.
 ///   BarelyEngineHandle engine = nullptr;
-///   BarelyEngine_Create(/*sample_rate=*/48000, /*max_channel_count=*/2, /*max_frame_count=*/512,
+///   BarelyEngine_Create(/*sample_rate=*/48000, /*channel_count=*/2, /*max_frame_count=*/512,
 ///                       BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
 ///
 ///   // Set the tempo.
@@ -476,12 +476,12 @@ typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_dat
 /// Creates a new engine.
 ///
 /// @param sample_rate Sampling rate in hertz.
-/// @param max_channel_count Maximum number of channels.
+/// @param channel_count Number of channels.
 /// @param max_frame_count Maximum number of frames.
 /// @param reference_frequency Reference frequency in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_channel_count,
+BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t channel_count,
                                     int32_t max_frame_count, float reference_frequency,
                                     BarelyEngineHandle* out_engine);
 
@@ -532,13 +532,11 @@ BARELY_API bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out
 ///
 /// @param engine Engine handle.
 /// @param output_samples Array of interleaved output samples.
-/// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
-                                     int32_t output_channel_count, int32_t output_frame_count,
-                                     double timestamp);
+                                     int32_t output_frame_count, double timestamp);
 
 /// Sets an effect control value of an engine.
 ///
@@ -1687,15 +1685,15 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param max_channel_count Maximum number of channels.
+  /// @param channel_count Number of channels.
   /// @param max_frame_count Maximum number of frames.
   /// @param reference_frequency Reference frequency in hertz.
-  Engine(int sample_rate, int max_channel_count, int max_frame_count,
+  Engine(int sample_rate, int channel_count, int max_frame_count,
          float reference_frequency = kDefaultReferenceFrequency) noexcept
       : HandleWrapper([&]() {
           BarelyEngineHandle engine = nullptr;
           [[maybe_unused]] const bool success = BarelyEngine_Create(
-              static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_channel_count),
+              static_cast<int32_t>(sample_rate), static_cast<int32_t>(channel_count),
               static_cast<int32_t>(max_frame_count), reference_frequency, &engine);
           assert(success);
           return engine;
@@ -1810,14 +1808,11 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// Processes the next output samples at timestamp.
   ///
   /// @param output_samples Array of interleaved output samples.
-  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  void Process(float* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyEngine_Process(*this, output_samples, static_cast<int32_t>(output_channel_count),
-                             static_cast<int32_t>(output_frame_count), timestamp);
+  void Process(float* output_samples, int output_frame_count, double timestamp) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_Process(
+        *this, output_samples, static_cast<int32_t>(output_frame_count), timestamp);
     assert(success);
   }
 

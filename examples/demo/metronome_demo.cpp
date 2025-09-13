@@ -81,13 +81,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   });
 
   // Audio process callback.
-  const auto process_callback = [&](float* output_samples, int output_channel_count,
-                                    int output_frame_count) {
-    engine.Process(output_samples, output_channel_count, output_frame_count,
-                   audio_clock.GetTimestamp());
+  audio_output.SetProcessCallback([&](float* output_samples, int output_frame_count) {
+    engine.Process(output_samples, output_frame_count, audio_clock.GetTimestamp());
     audio_clock.Update(output_frame_count);
-  };
-  audio_output.SetProcessCallback(process_callback);
+  });
 
   // Key down callback.
   bool quit = false;

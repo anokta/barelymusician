@@ -22,11 +22,11 @@ struct BarelyEngine {
   /// Constructs a new `BarelyEngine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param max_channel_count Maximum number of channels.
+  /// @param channel_count Number of channels.
   /// @param max_frame_count Maximum number of frames.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  BarelyEngine(int sample_rate, int max_channel_count, int max_frame_count,
+  BarelyEngine(int sample_rate, int channel_count, int max_frame_count,
                float reference_frequency) noexcept;
 
   /// Destroys `BarelyEngine`.
@@ -65,12 +65,10 @@ struct BarelyEngine {
   /// Processes output samples at timestamp.
   ///
   /// @param output_samples Array of interleaved output samples.
-  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(float* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept;
+  void Process(float* output_samples, int output_frame_count, double timestamp) noexcept;
 
   /// Removes an instrument.
   ///
@@ -111,6 +109,9 @@ struct BarelyEngine {
  private:
   // Sampling rate in hertz.
   int sample_rate_ = 0;
+
+  // Number of channels.
+  int channel_count_ = 0;
 
   // Reference frequency at zero pitch.
   float reference_frequency_ = 0.0f;

@@ -3,16 +3,23 @@
 
 #include <barelymusician.h>
 
-#include <unordered_set>
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <unordered_map>
 
 #include "api/instrument.h"
 #include "common/restrict.h"
 #include "dsp/control.h"
+#include "dsp/decibels.h"
 #include "dsp/delay_filter.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/sidechain.h"
 
 namespace barely {
+
+// Maximum number of delay seconds.
+inline constexpr int kMaxDelayFrameSeconds = 10;
 
 /// Effect parameters.
 struct EffectParams {
@@ -36,43 +43,48 @@ struct EffectParams {
 };
 
 /// Class that wraps the audio processing of an effect.
+///
+/// @tparam kChannelCount Number of channels.
+template <int kChannelCount>
 class EngineProcessor {
  public:
   /// Constructs a new `EngineProcessor`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param max_channel_count Maximum number of channels.
-  EngineProcessor(int sample_rate, int max_channel_count) noexcept;
+  explicit EngineProcessor(int sample_rate) noexcept
+      : sample_rate_(sample_rate),
+        delay_filter_(sample_rate * kMaxDelayFrameSeconds),
+        sidechain_(sample_rate) {
+    assert(sample_rate > 0);
+  }
 
   /// Processes the next output samples.
   ///
   /// @param instruments Set of instruments.
   /// @param output_samples Array of interleaved output samples.
-  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   void Process(
       const std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*>& instruments,
-      float* output_samples, int output_channel_count, int output_frame_count) noexcept {
+      float* output_samples, int output_frame_count) noexcept {
     for (int frame = 0; frame < output_frame_count; ++frame) {
+      delay_frame_.fill(0.0f);
+      sidechain_frame_.fill(0.0f);
+
       float* delay_frame = delay_frame_.data();
       float* sidechain_frame = sidechain_frame_.data();
-      float* output_frame = &output_samples[output_channel_count * frame];
-
-      std::fill_n(delay_frame, output_channel_count, 0.0f);
-      std::fill_n(sidechain_frame, output_channel_count, 0.0f);
+      float* output_frame = &output_samples[kChannelCount * frame];
 
       for (const auto& [_, processor] : instruments) {
         processor->Process(delay_frame, sidechain_frame, true, output_frame);
       }
-      sidechain_.Process(sidechain_frame, output_channel_count, current_params_.sidechain_mix,
+      sidechain_.Process(sidechain_frame, current_params_.sidechain_mix,
                          current_params_.sidechain_threshold_db, current_params_.sidechain_ratio);
       for (const auto& [_, processor] : instruments) {
         processor->Process(delay_frame, sidechain_frame, false, output_frame);
       }
 
-      delay_filter_.Process(delay_frame, output_frame, output_channel_count,
-                            current_params_.delay_mix, current_params_.delay_frame_count,
-                            current_params_.delay_feedback);
+      delay_filter_.Process(delay_frame, output_frame, current_params_.delay_mix,
+                            current_params_.delay_frame_count, current_params_.delay_feedback);
 
       Approach();
     }
@@ -83,7 +95,37 @@ class EngineProcessor {
   /// @param type Control type.
   /// @param value Control value.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(EffectControlType type, float value) noexcept;
+  void SetControl(EffectControlType type, float value) noexcept {
+    switch (type) {
+      case EffectControlType::kDelayMix:
+        target_params_.delay_mix = value;
+        break;
+      case EffectControlType::kDelayTime:
+        target_params_.delay_frame_count = value * static_cast<float>(sample_rate_);
+        break;
+      case EffectControlType::kDelayFeedback:
+        target_params_.delay_feedback = value;
+        break;
+      case EffectControlType::kSidechainMix:
+        target_params_.sidechain_mix = value;
+        break;
+      case EffectControlType::kSidechainAttack:
+        sidechain_.SetAttack(value);
+        break;
+      case EffectControlType::kSidechainRelease:
+        sidechain_.SetRelease(value);
+        break;
+      case EffectControlType::kSidechainThreshold:
+        target_params_.sidechain_threshold_db = AmplitudeToDecibels(value);
+        break;
+      case EffectControlType::kSidechainRatio:
+        target_params_.sidechain_ratio = value;
+        break;
+      default:
+        assert(!"Invalid effect control type");
+        return;
+    }
+  }
 
  private:
   // Approaches parameters.
@@ -100,16 +142,16 @@ class EngineProcessor {
   int sample_rate_ = 0;
 
   // Delay filter.
-  DelayFilter delay_filter_;
+  DelayFilter<kChannelCount> delay_filter_;
 
   // Sidechain.
-  Sidechain sidechain_;
+  Sidechain<kChannelCount> sidechain_;
 
   // Delay send frame.
-  std::vector<float> delay_frame_;
+  std::array<float, kChannelCount> delay_frame_;
 
   // Sidechain send frame.
-  std::vector<float> sidechain_frame_;
+  std::array<float, kChannelCount> sidechain_frame_;
 
   // Current parameters.
   EffectParams current_params_ = {};

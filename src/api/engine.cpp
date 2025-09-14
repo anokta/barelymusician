@@ -6,13 +6,13 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <span>
+#include <unordered_map>
 #include <utility>
 #include <variant>
-#include <vector>
 
 #include "api/instrument.h"
 #include "api/performer.h"
-#include "common/restrict.h"
 #include "common/time.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
@@ -46,12 +46,13 @@ EffectControlArray BuildEffectControlArray() noexcept {
 }
 
 // Builds a new mutable instrument map.
+// NOLINTNEXTLINE(bugprone-exception-escape)
 std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutableInstrumentMap(
     const std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor>& instruments,
     BarelyInstrument* excluded_instrument = nullptr) noexcept {
   std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> new_instruments;
   new_instruments.reserve(instruments.size());
-  for (auto& [instrument, processor] : instruments) {
+  for (const auto& [instrument, processor] : instruments) {
     if (instrument != excluded_instrument) {
       new_instruments.emplace(instrument, const_cast<barely::InstrumentProcessor*>(&processor));
     }
@@ -61,17 +62,17 @@ std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutable
 
 }  // namespace
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 // TODO(#146): `max_frame_count` is currently not used, but likely needed for reverb implementation.
+// NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyEngine::BarelyEngine(int sample_rate, int channel_count, [[maybe_unused]] int max_frame_count,
                            float reference_frequency) noexcept
     : sample_rate_(sample_rate),
       channel_count_(channel_count),
       reference_frequency_(reference_frequency),
       effect_controls_(BuildEffectControlArray()),
-      engine_processor_(sample_rate_, channel_count) {
+      engine_processor_(sample_rate_) {
   assert(sample_rate >= 0);
-  assert(channel_count == 2);
+  assert(channel_count == kChannelCount);
   assert(max_frame_count > 0);
   assert(reference_frequency >= 0.0f);
 }
@@ -121,7 +122,7 @@ void BarelyEngine::Process(float* output_samples, int output_frame_count,
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
       engine_processor_.Process(*instruments, &output_samples[channel_count_ * current_frame],
-                                channel_count_, message_frame - current_frame);
+                                message_frame - current_frame);
       current_frame = message_frame;
     }
     std::visit(
@@ -167,9 +168,9 @@ void BarelyEngine::Process(float* output_samples, int output_frame_count,
   }
 
   // Process the rest of the samples.
-  if (process_frame + static_cast<int64_t>(current_frame) < end_frame) {
+  if (current_frame < output_frame_count) {
     engine_processor_.Process(*instruments, &output_samples[channel_count_ * current_frame],
-                              channel_count_, output_frame_count - current_frame);
+                              output_frame_count - current_frame);
   }
 }
 

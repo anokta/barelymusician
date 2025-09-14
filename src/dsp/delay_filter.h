@@ -10,16 +10,18 @@
 namespace barely {
 
 /// Delay filter with smooth interpolation.
+///
+/// @tparam kChannelCount Number of channels.
+template <int kChannelCount>
 class DelayFilter {
  public:
   /// Constructs a new `DelayFilter`.
   ///
-  /// @param max_channel_count Maximum number of channels.
   /// @param max_delay_frame_count Maximum number of delay frames.
-  DelayFilter(int max_channel_count, int max_delay_frame_count) noexcept
+  explicit DelayFilter(int max_delay_frame_count) noexcept
       : max_delay_frame_count_(max_delay_frame_count),
-        delay_samples_(max_channel_count * max_delay_frame_count, 0.0f) {
-    assert(max_channel_count > 0);
+        delay_samples_(kChannelCount * max_delay_frame_count, 0.0f) {
+    static_assert(kChannelCount > 0, "Invalid channel count");
     assert(max_delay_frame_count >= 0);
   }
 
@@ -27,16 +29,13 @@ class DelayFilter {
   ///
   /// @param input_frame Input frame.
   /// @param output_frame Output frame.
-  /// @param channel_count Number of channels.
   /// @param delay_mix Delay mix.
   /// @param delay_frame_count Number of delay frames.
   /// @param delay_feedback Delay feedback.
   void Process(const float* BARELY_RESTRICT input_frame, float* BARELY_RESTRICT output_frame,
-               int channel_count, float delay_mix, float delay_frame_count,
-               float delay_feedback) noexcept {
+               float delay_mix, float delay_frame_count, float delay_feedback) noexcept {
     assert(delay_frame_count >= 0);
     assert(static_cast<int>(delay_frame_count) <= max_delay_frame_count_);
-    assert(channel_count * max_delay_frame_count_ <= static_cast<int>(delay_samples_.size()));
 
     const int delay_frame_count_floor = static_cast<int>(delay_frame_count);
     const int read_frame_begin =
@@ -44,13 +43,13 @@ class DelayFilter {
     const int read_frame_end =
         (read_frame_begin - 1 + max_delay_frame_count_) % max_delay_frame_count_;
 
-    for (int channel = 0; channel < channel_count; ++channel) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
       const float output_sample =
-          std::lerp(delay_samples_[channel_count * read_frame_begin + channel],
-                    delay_samples_[channel_count * read_frame_end + channel],
+          std::lerp(delay_samples_[kChannelCount * read_frame_begin + channel],
+                    delay_samples_[kChannelCount * read_frame_end + channel],
                     delay_frame_count - static_cast<float>(delay_frame_count_floor));
       output_frame[channel] += delay_mix * output_sample;
-      delay_samples_[channel_count * write_frame_ + channel] =
+      delay_samples_[kChannelCount * write_frame_ + channel] =
           input_frame[channel] + output_sample * delay_feedback;
     }
 

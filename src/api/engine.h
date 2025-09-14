@@ -146,7 +146,9 @@ struct BarelyEngine {
   int64_t update_frame_ = 0;
 
   // Engine processor.
-  barely::EngineProcessor engine_processor_;
+  // TODO(#145): Make this a variant with respect to channel count.
+  static constexpr int kChannelCount = 2;
+  barely::EngineProcessor<kChannelCount> engine_processor_;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

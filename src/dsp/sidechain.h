@@ -9,26 +9,23 @@
 namespace barely {
 
 /// Sidechain compressor.
+///
+/// @tparam kChannelCount Number of channels.
+template <int kChannelCount>
 class Sidechain {
  public:
   /// Constructs a new `Sidechain`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param max_channel_count Maximum number of channels.
-  Sidechain(int sample_rate, int max_channel_count) noexcept
-      : sample_interval_(1.0f / static_cast<float>(sample_rate)),
-        sidechain_db_frame_(max_channel_count, 0.0f) {}
+  explicit Sidechain(int sample_rate) noexcept
+      : sample_interval_(1.0f / static_cast<float>(sample_rate)) {}
 
   /// Processes the next sidechain frame.
   ///
   /// @param input_frame Input frame.
   /// @param sidechain_frame Sidechain frame.
-  /// @param channel_count Number of channels.
-  void Process(float* sidechain_frame, int channel_count, float mix, float threshold_db,
-               float ratio) noexcept {
-    assert(channel_count <= static_cast<int>(sidechain_db_frame_.size()));
-
-    for (int channel = 0; channel < channel_count; ++channel) {
+  void Process(float* sidechain_frame, float mix, float threshold_db, float ratio) noexcept {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
       const float input_gain_db = AmplitudeToDecibels(std::abs(sidechain_frame[channel]));
 
       float sidechain_db = 0.0f;
@@ -72,7 +69,7 @@ class Sidechain {
   float release_coeff_ = 0.0f;
 
   // Sidechain frame in decibels.
-  std::vector<float> sidechain_db_frame_;
+  std::array<float, kChannelCount> sidechain_db_frame_;
 };
 
 }  // namespace barely

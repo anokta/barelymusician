@@ -6,7 +6,6 @@ target_sources(
   decibels.h
   delay_filter.h
   distortion.h
-  engine_processor.cpp
   engine_processor.h
   envelope.h
   instrument_processor.cpp

@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include "api/instrument.h"
-#include "common/restrict.h"
+#include "common/constants.h"
 #include "dsp/control.h"
 #include "dsp/decibels.h"
 #include "dsp/delay_filter.h"
@@ -43,9 +43,6 @@ struct EffectParams {
 };
 
 /// Class that wraps the audio processing of an effect.
-///
-/// @tparam kChannelCount Number of channels.
-template <int kChannelCount>
 class EngineProcessor {
  public:
   /// Constructs a new `EngineProcessor`.
@@ -72,7 +69,7 @@ class EngineProcessor {
 
       float* delay_frame = delay_frame_.data();
       float* sidechain_frame = sidechain_frame_.data();
-      float* output_frame = &output_samples[kChannelCount * frame];
+      float* output_frame = &output_samples[kStereoChannelCount * frame];
 
       for (const auto& [_, processor] : instruments) {
         processor->Process(delay_frame, sidechain_frame, true, output_frame);
@@ -142,16 +139,16 @@ class EngineProcessor {
   int sample_rate_ = 0;
 
   // Delay filter.
-  DelayFilter<kChannelCount> delay_filter_;
+  DelayFilter delay_filter_;
 
   // Sidechain.
-  Sidechain<kChannelCount> sidechain_;
+  Sidechain sidechain_;
 
   // Delay send frame.
-  std::array<float, kChannelCount> delay_frame_;
+  std::array<float, kStereoChannelCount> delay_frame_;
 
   // Sidechain send frame.
-  std::array<float, kChannelCount> sidechain_frame_;
+  std::array<float, kStereoChannelCount> sidechain_frame_;
 
   // Current parameters.
   EffectParams current_params_ = {};

@@ -30,9 +30,10 @@ static void Engine_SetEffectControl(Engine& engine, int type, float value) noexc
   engine.SetEffectControl(static_cast<EffectControlType>(type), value);
 }
 
-static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_frame_count,
-                           double timestamp) noexcept {
-  engine.Process(reinterpret_cast<float*>(output_samples), output_frame_count, timestamp);
+static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_channel_count,
+                           int output_frame_count, double timestamp) noexcept {
+  engine.Process(reinterpret_cast<float*>(output_samples), output_channel_count, output_frame_count,
+                 timestamp);
 }
 
 [[nodiscard]] static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {
@@ -62,7 +63,7 @@ static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
 
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
   class_<Engine>("Engine")
-      .constructor<int, int, int, float>()
+      .constructor<int, int, float>()
       .function("createInstrument", &Engine_CreateInstrument, take_ownership())
       .function("createPerformer", &Engine::CreatePerformer, take_ownership())
       .function("generateRandomNumber",

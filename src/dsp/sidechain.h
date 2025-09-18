@@ -4,14 +4,12 @@
 #include <cmath>
 #include <vector>
 
+#include "common/constants.h"
 #include "dsp/decibels.h"
 
 namespace barely {
 
 /// Sidechain compressor.
-///
-/// @tparam kChannelCount Number of channels.
-template <int kChannelCount>
 class Sidechain {
  public:
   /// Constructs a new `Sidechain`.
@@ -22,10 +20,10 @@ class Sidechain {
 
   /// Processes the next sidechain frame.
   ///
-  /// @param input_frame Input frame.
-  /// @param sidechain_frame Sidechain frame.
-  void Process(float* sidechain_frame, float mix, float threshold_db, float ratio) noexcept {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  /// @param sidechain_frame Input/output sidechain frame.
+  void Process(float sidechain_frame[kStereoChannelCount], float mix, float threshold_db,
+               float ratio) noexcept {
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       const float input_gain_db = AmplitudeToDecibels(std::abs(sidechain_frame[channel]));
 
       float sidechain_db = 0.0f;
@@ -69,7 +67,7 @@ class Sidechain {
   float release_coeff_ = 0.0f;
 
   // Sidechain frame in decibels.
-  std::array<float, kChannelCount> sidechain_db_frame_;
+  std::array<float, kStereoChannelCount> sidechain_db_frame_;
 };
 
 }  // namespace barely

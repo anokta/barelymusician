@@ -22,12 +22,10 @@ struct BarelyEngine {
   /// Constructs a new `BarelyEngine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param channel_count Number of channels.
   /// @param max_frame_count Maximum number of frames.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  BarelyEngine(int sample_rate, int channel_count, int max_frame_count,
-               float reference_frequency) noexcept;
+  BarelyEngine(int sample_rate, int max_frame_count, float reference_frequency) noexcept;
 
   /// Destroys `BarelyEngine`.
   ~BarelyEngine() noexcept;
@@ -65,10 +63,12 @@ struct BarelyEngine {
   /// Processes output samples at timestamp.
   ///
   /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(float* output_samples, int output_frame_count, double timestamp) noexcept;
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
+               double timestamp) noexcept;
 
   /// Removes an instrument.
   ///
@@ -110,9 +110,6 @@ struct BarelyEngine {
   // Sampling rate in hertz.
   int sample_rate_ = 0;
 
-  // Number of channels.
-  int channel_count_ = 0;
-
   // Reference frequency at zero pitch.
   float reference_frequency_ = 0.0f;
 
@@ -146,9 +143,10 @@ struct BarelyEngine {
   int64_t update_frame_ = 0;
 
   // Engine processor.
-  // TODO(#145): Make this a variant with respect to channel count.
-  static constexpr int kChannelCount = 2;
-  barely::EngineProcessor<kChannelCount> engine_processor_;
+  barely::EngineProcessor engine_processor_;
+
+  // Output samples.
+  std::vector<float> output_samples_;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

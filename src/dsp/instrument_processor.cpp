@@ -7,7 +7,6 @@
 #include <cmath>
 #include <span>
 
-#include "common/restrict.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/sample_data.h"

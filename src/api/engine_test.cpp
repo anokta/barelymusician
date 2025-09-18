@@ -6,6 +6,7 @@
 #include <functional>
 
 #include "api/performer.h"
+#include "common/constants.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -21,7 +22,7 @@ constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
-  BarelyEngine engine(kSampleRate, kChannelCount, kSampleRate, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kSampleRate, kReferenceFrequency);
 
   // Create a performer.
   BarelyPerformer performer(engine);
@@ -89,7 +90,7 @@ TEST(EngineTest, PlaySingleNote) {
       BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
   };
 
-  BarelyEngine engine(kSampleRate, kChannelCount, kFrameCount, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kFrameCount, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
@@ -97,7 +98,7 @@ TEST(EngineTest, PlaySingleNote) {
 
   // Control is set to its default value.
   samples.fill(0.0f);
-  engine.Process(samples.data(), kFrameCount, 0);
+  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -107,7 +108,7 @@ TEST(EngineTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   samples.fill(0.0f);
-  engine.Process(samples.data(), kFrameCount, 0);
+  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], (i / kChannelCount < kSampleRate)
                                     ? 0.5f * kSamples[i / kChannelCount] * kGain
@@ -119,7 +120,7 @@ TEST(EngineTest, PlaySingleNote) {
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   samples.fill(0.0f);
-  engine.Process(samples.data(), kFrameCount, 0);
+  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -134,7 +135,7 @@ TEST(EngineTest, PlayMultipleNotes) {
       BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
   };
 
-  BarelyEngine engine(1, kChannelCount, kSampleRate, kReferenceFrequency);
+  BarelyEngine engine(1, kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
   instrument.SetSampleData(kSlices);
 
@@ -142,7 +143,7 @@ TEST(EngineTest, PlayMultipleNotes) {
 
   // Control is set to its default value.
   samples.fill(0.0f);
-  engine.Process(samples.data(), kSampleRate, 0);
+  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -155,13 +156,13 @@ TEST(EngineTest, PlayMultipleNotes) {
   }
 
   samples.fill(0.0f);
-  engine.Process(samples.data(), kSampleRate, 0);
+  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i / kChannelCount]);
   }
 
   samples.fill(0.0f);
-  engine.Process(samples.data(), kSampleRate, 0);
+  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -169,7 +170,7 @@ TEST(EngineTest, PlayMultipleNotes) {
 
 // Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
-  BarelyEngine engine(kSampleRate, kChannelCount, kSampleRate, kReferenceFrequency);
+  BarelyEngine engine(kSampleRate, kSampleRate, kReferenceFrequency);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
 
   engine.SetTempo(200.0);

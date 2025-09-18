@@ -7,7 +7,7 @@
 #include <array>
 #include <cmath>
 
-#include "common/restrict.h"
+#include "common/constants.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
@@ -106,8 +106,9 @@ class Voice {
   /// @param output_frame Output frame.
   template <OscMode kOscMode, SliceMode kSliceMode>
   static void Process(Voice& voice, const InstrumentParams& params,
-                      float* BARELY_RESTRICT delay_frame, float* BARELY_RESTRICT sidechain_frame,
-                      bool is_sidechain_send, float* BARELY_RESTRICT output_frame) noexcept {
+                      float delay_frame[kStereoChannelCount],
+                      float sidechain_frame[kStereoChannelCount], bool is_sidechain_send,
+                      float output_frame[kStereoChannelCount]) noexcept {
     voice.Process<kOscMode, kSliceMode>(params, delay_frame, sidechain_frame, is_sidechain_send,
                                         output_frame);
   }
@@ -161,9 +162,9 @@ class Voice {
 
  private:
   template <OscMode kOscMode, SliceMode kSliceMode>
-  void Process(const InstrumentParams& params, float* BARELY_RESTRICT delay_frame,
-               float* BARELY_RESTRICT sidechain_frame, bool is_sidechain_send,
-               float* BARELY_RESTRICT output_frame) noexcept {
+  void Process(const InstrumentParams& params, float delay_frame[kStereoChannelCount],
+               float sidechain_frame[kStereoChannelCount], bool is_sidechain_send,
+               float output_frame[kStereoChannelCount]) noexcept {
     if (!IsActive() || ((is_sidechain_send && params_.sidechain_send <= 0.0f) ||
                         (!is_sidechain_send && params_.sidechain_send > 0.0f))) {
       return;
@@ -298,9 +299,9 @@ class Voice {
 /// @param is_sidechain_send Denotes whether the sidechain frame is for send or receive.
 /// @param output_frame Output frame.
 using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
-                               float* BARELY_RESTRICT delay_frame,
-                               float* BARELY_RESTRICT sidechain_frame, bool is_sidechain_send,
-                               float* BARELY_RESTRICT output_frame);
+                               float delay_frame[kStereoChannelCount],
+                               float sidechain_frame[kStereoChannelCount], bool is_sidechain_send,
+                               float output_frame[kStereoChannelCount]);
 
 }  // namespace barely
 

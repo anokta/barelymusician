@@ -13,6 +13,7 @@
 
 #include "api/instrument.h"
 #include "api/performer.h"
+#include "common/constants.h"
 #include "common/time.h"
 #include "dsp/control.h"
 #include "dsp/instrument_processor.h"
@@ -25,6 +26,7 @@ using ::barely::ControlMessage;
 using ::barely::EffectControlArray;
 using ::barely::EffectControlMessage;
 using ::barely::EffectControlType;
+using ::barely::kStereoChannelCount;
 using ::barely::MessageVisitor;
 using ::barely::NoteControlMessage;
 using ::barely::NoteOffMessage;
@@ -62,17 +64,14 @@ std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutable
 
 }  // namespace
 
-// TODO(#146): `max_frame_count` is currently not used, but likely needed for reverb implementation.
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate, int channel_count, [[maybe_unused]] int max_frame_count,
-                           float reference_frequency) noexcept
+BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count, float reference_frequency) noexcept
     : sample_rate_(sample_rate),
-      channel_count_(channel_count),
       reference_frequency_(reference_frequency),
       effect_controls_(BuildEffectControlArray()),
-      engine_processor_(sample_rate_) {
+      engine_processor_(sample_rate_),
+      output_samples_(kStereoChannelCount * max_frame_count) {
   assert(sample_rate >= 0);
-  assert(channel_count == kChannelCount);
   assert(max_frame_count > 0);
   assert(reference_frequency >= 0.0f);
 }
@@ -103,12 +102,13 @@ float BarelyEngine::GetEffectControl(BarelyEffectControlType type) const noexcep
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::Process(float* output_samples, int output_frame_count,
+void BarelyEngine::Process(float* output_samples, int output_channel_count, int output_frame_count,
                            double timestamp) noexcept {
   assert(output_samples != nullptr);
+  assert(output_channel_count > 0);
   assert(output_frame_count > 0);
 
-  std::fill_n(output_samples, channel_count_ * output_frame_count, 0.0f);
+  std::fill_n(output_samples_.begin(), kStereoChannelCount * output_frame_count, 0.0f);
 
   const int64_t process_frame = barely::SecondsToFrames(sample_rate_, timestamp);
   const int64_t end_frame = process_frame + output_frame_count;
@@ -121,7 +121,7 @@ void BarelyEngine::Process(float* output_samples, int output_frame_count,
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      engine_processor_.Process(*instruments, &output_samples[channel_count_ * current_frame],
+      engine_processor_.Process(*instruments, &output_samples_[kStereoChannelCount * current_frame],
                                 message_frame - current_frame);
       current_frame = message_frame;
     }
@@ -169,8 +169,23 @@ void BarelyEngine::Process(float* output_samples, int output_frame_count,
 
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    engine_processor_.Process(*instruments, &output_samples[channel_count_ * current_frame],
+    engine_processor_.Process(*instruments, &output_samples_[kStereoChannelCount * current_frame],
                               output_frame_count - current_frame);
+  }
+
+  // Fill the output samples.
+  if (output_channel_count > 1) {
+    std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
+    for (int frame = 0; frame < output_frame_count; ++frame) {
+      output_samples[output_channel_count * frame] = output_samples_[kStereoChannelCount * frame];
+      output_samples[output_channel_count * frame + 1] =
+          output_samples_[kStereoChannelCount * frame + 1];
+    }
+  } else {  // downmix to mono.
+    for (int frame = 0; frame < output_frame_count; ++frame) {
+      output_samples[frame] = output_samples_[kStereoChannelCount * frame] +
+                              output_samples_[kStereoChannelCount * frame + 1];
+    }
   }
 }
 

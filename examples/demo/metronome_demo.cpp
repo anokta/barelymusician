@@ -50,7 +50,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate, kChannelCount, kFrameCount);
+  Engine engine(kSampleRate, kFrameCount);
   engine.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
@@ -81,10 +81,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](float* output_samples, int output_frame_count) {
-    engine.Process(output_samples, output_frame_count, audio_clock.GetTimestamp());
-    audio_clock.Update(output_frame_count);
-  });
+  audio_output.SetProcessCallback(
+      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+        engine.Process(output_samples, output_channel_count, output_frame_count,
+                       audio_clock.GetTimestamp());
+        audio_clock.Update(output_frame_count);
+      });
 
   // Key down callback.
   bool quit = false;

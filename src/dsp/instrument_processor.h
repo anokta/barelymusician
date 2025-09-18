@@ -7,7 +7,7 @@
 #include <cmath>
 #include <span>
 
-#include "common/restrict.h"
+#include "common/constants.h"
 #include "common/rng.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"
@@ -35,8 +35,8 @@ class InstrumentProcessor {
   /// @param is_sidechain_send Denotes whether the sidechain frame is for send or receive.
   /// @param output_frame Output frame.
   // TODO(#174): Template `is_sidechain_send`.
-  void Process(float* BARELY_RESTRICT delay_frame, float* BARELY_RESTRICT sidechain_frame,
-               bool is_sidechain_send, float* BARELY_RESTRICT output_frame) noexcept {
+  void Process(float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
+               bool is_sidechain_send, float output_frame[kStereoChannelCount]) noexcept {
     for (VoiceState& voice_state : voice_states_) {
       voice_callback_(voice_state.voice, params_, delay_frame, sidechain_frame, is_sidechain_send,
                       output_frame);

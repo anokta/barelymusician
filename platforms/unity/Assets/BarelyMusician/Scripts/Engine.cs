@@ -968,7 +968,8 @@ namespace Barely {
         }
 
         private void OnAudioFilterRead(float[] data, int channels) {
-          BarelyEngine_Process(_handle, data, data.Length / channels, AudioSettings.dspTime);
+          BarelyEngine_Process(_handle, data, channels, data.Length / channels,
+                               AudioSettings.dspTime);
         }
 
         private void LateUpdate() {
@@ -979,16 +980,8 @@ namespace Barely {
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          int channelCount = config.speakerMode switch { AudioSpeakerMode.Mono => 1,
-                                                         AudioSpeakerMode.Stereo => 2,
-                                                         AudioSpeakerMode.Quad => 4,
-                                                         AudioSpeakerMode.Surround => 5,
-                                                         AudioSpeakerMode.Mode5point1 => 6,
-                                                         AudioSpeakerMode.Mode7point1 => 8,
-                                                         AudioSpeakerMode.Prologic => 2,
-                                                         _ => 2 };
-          if (!BarelyEngine_Create(config.sampleRate, channelCount, config.dspBufferSize,
-                                   _referenceFrequency, ref _handle)) {
+          if (!BarelyEngine_Create(config.sampleRate, config.dspBufferSize, _referenceFrequency,
+                                   ref _handle)) {
             Debug.LogError("Failed to initialize BarelyEngine");
             return;
           }
@@ -1036,8 +1029,8 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(Int32 sampleRate, Int32 channelCount,
-                                                     Int32 maxFrameCount, float referenceFrequency,
+      private static extern bool BarelyEngine_Create(Int32 sampleRate, Int32 maxFrameCount,
+                                                     float referenceFrequency,
                                                      ref IntPtr outEngine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
@@ -1057,6 +1050,7 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
       private static extern bool BarelyEngine_Process(IntPtr engine,
                                                       [In, Out] float[] outputSamples,
+                                                      Int32 outputChannelCount,
                                                       Int32 outputFrameCount, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetEffectControl")]

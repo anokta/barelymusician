@@ -27,7 +27,9 @@ AudioOutput::AudioOutput(int sample_rate, int channel_count, int frame_count) no
     assert(device->pUserData != nullptr);
     if (auto& audio_output = *static_cast<AudioOutput*>(device->pUserData);
         audio_output.process_callback_) {
-      audio_output.process_callback_(static_cast<float*>(output), static_cast<int>(frame_count));
+      audio_output.process_callback_(static_cast<float*>(output),
+                                     static_cast<int>(device->playback.channels),
+                                     static_cast<int>(frame_count));
     }
   };
   // Initialize the device.

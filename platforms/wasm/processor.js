@@ -1,7 +1,6 @@
 import Module from './barelymusician.js';
 
 const REFERENCE_FREQUENCY = 261.62555;
-const STEREO_CHANNEL_COUNT = 2;
 const RENDER_QUANTUM_SIZE = 128
 
 export const EffectControlType = {
@@ -23,8 +22,7 @@ class Processor extends AudioWorkletProcessor {
 
     Module().then(module => {
       this._module = module;
-      this._engine = new this._module.Engine(
-          sampleRate, STEREO_CHANNEL_COUNT, RENDER_QUANTUM_SIZE, REFERENCE_FREQUENCY);
+      this._engine = new this._module.Engine(sampleRate, RENDER_QUANTUM_SIZE, REFERENCE_FREQUENCY);
       this._instruments = {};
       this._performers = {};
       this._tasks = {};
@@ -309,7 +307,6 @@ class Processor extends AudioWorkletProcessor {
     const outputSampleCount = outputChannelCount * outputFrameCount;
 
     if (outputSampleCount == 0) return true;
-    if (outputChannelCount > STEREO_CHANNEL_COUNT) return true;
     if (outputFrameCount > RENDER_QUANTUM_SIZE) return true;
 
     const latency = Math.max(1.0 / 60.0, outputFrameCount / sampleRate);
@@ -320,7 +317,7 @@ class Processor extends AudioWorkletProcessor {
     const outputSamples =
         new Float32Array(this._module.HEAPF32.buffer, outputSamplesPtr, outputSampleCount);
 
-    this._engine.process(outputSamplesPtr, outputFrameCount, currentTime);
+    this._engine.process(outputSamplesPtr, outputChannelCount, outputFrameCount, currentTime);
 
     for (let frame = 0; frame < outputFrameCount; ++frame) {
       for (let channel = 0; channel < outputChannelCount; ++channel) {

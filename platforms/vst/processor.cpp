@@ -95,7 +95,7 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
 
   // Process instrument.
   const int frame_count = static_cast<int>(data.numSamples);
-  engine_->Process(output_samples_.data(), frame_count, /*timestamp=*/0.0);
+  engine_->Process(output_samples_.data(), kStereoChannelCount, frame_count, /*timestamp=*/0.0);
   for (int frame = 0; frame < frame_count; ++frame) {
     data.outputs[0].channelBuffers32[0][frame] = output_samples_[frame * kStereoChannelCount];
     data.outputs[0].channelBuffers32[1][frame] = output_samples_[frame * kStereoChannelCount + 1];
@@ -122,8 +122,7 @@ Steinberg::tresult PLUGIN_API Processor::setProcessing(Steinberg::TBool /*state*
 
 Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::ProcessSetup& setup) {
   instrument_ = std::nullopt;
-  engine_ = Engine(static_cast<int>(setup.sampleRate), kStereoChannelCount,
-                   static_cast<int>(setup.maxSamplesPerBlock));
+  engine_ = Engine(static_cast<int>(setup.sampleRate), static_cast<int>(setup.maxSamplesPerBlock));
   instrument_ = engine_->CreateInstrument(Controller::GetDefaultControls());
   output_samples_.resize(kStereoChannelCount * setup.maxSamplesPerBlock);
   return Steinberg::kResultTrue;

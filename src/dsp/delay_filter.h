@@ -5,14 +5,11 @@
 #include <cmath>
 #include <vector>
 
-#include "common/restrict.h"
+#include "common/constants.h"
 
 namespace barely {
 
 /// Delay filter with smooth interpolation.
-///
-/// @tparam kChannelCount Number of channels.
-template <int kChannelCount>
 class DelayFilter {
  public:
   /// Constructs a new `DelayFilter`.
@@ -20,8 +17,7 @@ class DelayFilter {
   /// @param max_delay_frame_count Maximum number of delay frames.
   explicit DelayFilter(int max_delay_frame_count) noexcept
       : max_delay_frame_count_(max_delay_frame_count),
-        delay_samples_(kChannelCount * max_delay_frame_count, 0.0f) {
-    static_assert(kChannelCount > 0, "Invalid channel count");
+        delay_samples_(kStereoChannelCount * max_delay_frame_count, 0.0f) {
     assert(max_delay_frame_count >= 0);
   }
 
@@ -32,7 +28,7 @@ class DelayFilter {
   /// @param delay_mix Delay mix.
   /// @param delay_frame_count Number of delay frames.
   /// @param delay_feedback Delay feedback.
-  void Process(const float* BARELY_RESTRICT input_frame, float* BARELY_RESTRICT output_frame,
+  void Process(float input_frame[kStereoChannelCount], float output_frame[kStereoChannelCount],
                float delay_mix, float delay_frame_count, float delay_feedback) noexcept {
     assert(delay_frame_count >= 0);
     assert(static_cast<int>(delay_frame_count) <= max_delay_frame_count_);
@@ -43,13 +39,13 @@ class DelayFilter {
     const int read_frame_end =
         (read_frame_begin - 1 + max_delay_frame_count_) % max_delay_frame_count_;
 
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       const float output_sample =
-          std::lerp(delay_samples_[kChannelCount * read_frame_begin + channel],
-                    delay_samples_[kChannelCount * read_frame_end + channel],
+          std::lerp(delay_samples_[kStereoChannelCount * read_frame_begin + channel],
+                    delay_samples_[kStereoChannelCount * read_frame_end + channel],
                     delay_frame_count - static_cast<float>(delay_frame_count_floor));
       output_frame[channel] += delay_mix * output_sample;
-      delay_samples_[kChannelCount * write_frame_ + channel] =
+      delay_samples_[kStereoChannelCount * write_frame_ + channel] =
           input_frame[channel] + output_sample * delay_feedback;
     }
 

@@ -10,15 +10,14 @@
 #include "api/task.h"
 #include "common/time.h"
 
-bool BarelyEngine_Create(int32_t sample_rate, int32_t channel_count, int32_t max_frame_count,
-                         float reference_frequency, BarelyEngineHandle* out_engine) {
+bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count, float reference_frequency,
+                         BarelyEngineHandle* out_engine) {
   if (sample_rate <= 0) return false;
-  if (channel_count <= 0) return false;
   if (max_frame_count <= 0) return false;
   if (reference_frequency <= 0.0) return false;
   if (!out_engine) return false;
 
-  *out_engine = new BarelyEngine(sample_rate, channel_count, max_frame_count, reference_frequency);
+  *out_engine = new BarelyEngine(sample_rate, max_frame_count, reference_frequency);
   return true;
 }
 
@@ -72,12 +71,13 @@ bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp)
 }
 
 bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
-                          int32_t output_frame_count, double timestamp) {
+                          int32_t output_channel_count, int32_t output_frame_count,
+                          double timestamp) {
   if (!engine) return false;
   if (!output_samples) return false;
-  if (output_frame_count <= 0) return false;
+  if (output_channel_count <= 0 || output_frame_count <= 0) return false;
 
-  engine->Process(output_samples, output_frame_count, timestamp);
+  engine->Process(output_samples, output_channel_count, output_frame_count, timestamp);
   return true;
 }
 

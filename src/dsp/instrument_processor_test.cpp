@@ -4,6 +4,7 @@
 
 #include <array>
 
+#include "common/constants.h"
 #include "common/rng.h"
 #include "dsp/sample_data.h"
 #include "gtest/gtest.h"
@@ -12,7 +13,6 @@ namespace barely {
 namespace {
 
 constexpr int kSampleRate = 1;
-constexpr int kChannelCount = 2;
 constexpr int kReferenceFrequency = 1;
 
 constexpr int kVoiceCount = 4;
@@ -35,13 +35,13 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  std::array<float, kChannelCount> delay;
-  std::array<float, kChannelCount> sidechain;
-  std::array<float, kChannelCount> output;
+  std::array<float, kStereoChannelCount> delay;
+  std::array<float, kStereoChannelCount> sidechain;
+  std::array<float, kStereoChannelCount> output;
 
   output.fill(0.0f);
   processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
-  for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
 
@@ -49,7 +49,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 
   output.fill(0.0f);
   processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
-  for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.5f * kSamples[0]);
   }
 
@@ -57,7 +57,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 
   output.fill(0.0f);
   processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
-  for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
 }
@@ -72,13 +72,13 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  std::array<float, kChannelCount> delay;
-  std::array<float, kChannelCount> sidechain;
-  std::array<float, kChannelCount> output;
+  std::array<float, kStereoChannelCount> delay;
+  std::array<float, kStereoChannelCount> sidechain;
+  std::array<float, kStereoChannelCount> output;
 
   output.fill(0.0f);
   processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
-  for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
 
@@ -90,7 +90,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 
     output.fill(0.0f);
     processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(output[channel], 0.5f * expected_output) << i;
     }
   }
@@ -100,7 +100,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 
     output.fill(0.0f);
     processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(output[channel], 0.5f * expected_output) << i;
     }
   }
@@ -115,13 +115,13 @@ TEST(InstrumentProcessorTest, NoVoice) {
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
 
-  std::array<float, kChannelCount> delay;
-  std::array<float, kChannelCount> sidechain;
-  std::array<float, kChannelCount> output;
+  std::array<float, kStereoChannelCount> delay;
+  std::array<float, kStereoChannelCount> sidechain;
+  std::array<float, kStereoChannelCount> output;
 
   output.fill(0.0f);
   processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
-  for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
 
@@ -129,7 +129,7 @@ TEST(InstrumentProcessorTest, NoVoice) {
 
   output.fill(0.0f);
   processor.Process(delay.data(), sidechain.data(), /*is_sidechain_send=*/false, output.data());
-  for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
 }

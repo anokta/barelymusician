@@ -101,7 +101,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate, kChannelCount, kFrameCount);
+  Engine engine(kSampleRate, kFrameCount);
   engine.SetTempo(kTempo);
 
   std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;
@@ -131,10 +131,12 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](float* output_samples, int output_frame_count) {
-    engine.Process(output_samples, output_frame_count, audio_clock.GetTimestamp());
-    audio_clock.Update(output_frame_count);
-  });
+  audio_output.SetProcessCallback(
+      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+        engine.Process(output_samples, output_channel_count, output_frame_count,
+                       audio_clock.GetTimestamp());
+        audio_clock.Update(output_frame_count);
+      });
 
   // Key down callback.
   bool quit = false;

@@ -48,7 +48,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   }
   // Process the output samples.
   const int frame_count = static_cast<int>(size);
-  g_engine->Process(g_output_samples.data(), frame_count, /*timestamp=*/0.0);
+  g_engine->Process(g_output_samples.data(), kChannelCount, frame_count, /*timestamp=*/0.0);
   for (int frame = 0; frame < frame_count; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       out[channel][frame] = g_output_samples[frame * kChannelCount + channel];
@@ -70,7 +70,7 @@ int main(void) {
   g_midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  g_engine.emplace(kSampleRate, kChannelCount, kFrameCount);
+  g_engine.emplace(kSampleRate, kFrameCount);
   g_instrument = g_engine->CreateInstrument({{
       {ControlType::kGain, kGain},
       {ControlType::kOscMix, 1.0f},

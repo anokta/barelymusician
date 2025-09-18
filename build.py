@@ -184,7 +184,10 @@ def build(args, source_dir, build_dir):
 
     if args.wasm:
         wasm_build_dir = os.path.join(build_dir, "WebAssembly")
-        wasm_cmake_options = ["-DENABLE_WASM=ON"]
+        wasm_cmake_options = [
+            "-DENABLE_WASM=ON",
+            f'-DCMAKE_BUILD_TYPE="{config}"',
+        ]
         build_platform(args, config, source_dir, wasm_build_dir, wasm_cmake_options)
         args.wasm = False
 

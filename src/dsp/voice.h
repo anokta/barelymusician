@@ -98,19 +98,19 @@ class Voice {
   ///
   /// @tparam kOscMode Oscillator mode.
   /// @tparam kSliceMode Slice mode.
+  /// @param kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
   /// @param voice Voice.
   /// @param params Instrument parameters.
   /// @param delay_frame Delay send frame.
   /// @param sidechain_frame Sidechain send frame.
-  /// @param is_sidechain_send Denotes whether the sidechain frame is for send or receive.
   /// @param output_frame Output frame.
-  template <OscMode kOscMode, SliceMode kSliceMode>
+  template <OscMode kOscMode, SliceMode kSliceMode, bool kIsSidechainSend>
   static void Process(Voice& voice, const InstrumentParams& params,
                       float delay_frame[kStereoChannelCount],
-                      float sidechain_frame[kStereoChannelCount], bool is_sidechain_send,
+                      float sidechain_frame[kStereoChannelCount],
                       float output_frame[kStereoChannelCount]) noexcept {
-    voice.Process<kOscMode, kSliceMode>(params, delay_frame, sidechain_frame, is_sidechain_send,
-                                        output_frame);
+    voice.Process<kOscMode, kSliceMode, kIsSidechainSend>(params, delay_frame, sidechain_frame,
+                                                          output_frame);
   }
 
   /// Returns whether the voice is currently active (i.e., playing).
@@ -161,13 +161,22 @@ class Voice {
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }
 
  private:
-  template <OscMode kOscMode, SliceMode kSliceMode>
+  template <OscMode kOscMode, SliceMode kSliceMode, bool kIsSidechainSend>
   void Process(const InstrumentParams& params, float delay_frame[kStereoChannelCount],
-               float sidechain_frame[kStereoChannelCount], bool is_sidechain_send,
+               float sidechain_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount]) noexcept {
-    if (!IsActive() || ((is_sidechain_send && params_.sidechain_send <= 0.0f) ||
-                        (!is_sidechain_send && params_.sidechain_send > 0.0f))) {
+    if (!IsActive()) {
       return;
+    }
+
+    if constexpr (kIsSidechainSend) {
+      if (params_.sidechain_send <= 0.0f) {
+        return;
+      }
+    } else {
+      if (params_.sidechain_send > 0.0f) {
+        return;
+      }
     }
 
     if constexpr (kSliceMode == SliceMode::kOnce) {
@@ -234,13 +243,15 @@ class Voice {
     float left_output = left_gain * output;
     float right_output = right_gain * output;
 
-    if (is_sidechain_send) {
+    if constexpr (kIsSidechainSend) {
       sidechain_frame[0] += params_.sidechain_send * left_output;
       sidechain_frame[1] += params_.sidechain_send * right_output;
-    } else if (params_.sidechain_send < 0.0f) {
-      const float sidechain_send = -params_.sidechain_send;
-      left_output = std::lerp(left_output, sidechain_frame[0] * left_output, sidechain_send);
-      right_output = std::lerp(right_output, sidechain_frame[1] * right_output, sidechain_send);
+    } else {
+      if (params_.sidechain_send < 0.0f) {
+        const float sidechain_send = -params_.sidechain_send;
+        left_output = std::lerp(left_output, sidechain_frame[0] * left_output, sidechain_send);
+        right_output = std::lerp(right_output, sidechain_frame[1] * right_output, sidechain_send);
+      }
     }
 
     delay_frame[0] += params_.delay_send * left_output;
@@ -296,11 +307,10 @@ class Voice {
 /// @param params Instrument parameters.
 /// @param delay_frame Delay send frame.
 /// @param sidechain_frame Sidechain send frame.
-/// @param is_sidechain_send Denotes whether the sidechain frame is for send or receive.
 /// @param output_frame Output frame.
 using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
                                float delay_frame[kStereoChannelCount],
-                               float sidechain_frame[kStereoChannelCount], bool is_sidechain_send,
+                               float sidechain_frame[kStereoChannelCount],
                                float output_frame[kStereoChannelCount]);
 
 }  // namespace barely

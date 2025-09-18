@@ -72,12 +72,12 @@ class EngineProcessor {
       float* output_frame = &output_samples[kStereoChannelCount * frame];
 
       for (const auto& [_, processor] : instruments) {
-        processor->Process(delay_frame, sidechain_frame, true, output_frame);
+        processor->Process<true>(delay_frame, sidechain_frame, output_frame);
       }
       sidechain_.Process(sidechain_frame, current_params_.sidechain_mix,
                          current_params_.sidechain_threshold_db, current_params_.sidechain_ratio);
       for (const auto& [_, processor] : instruments) {
-        processor->Process(delay_frame, sidechain_frame, false, output_frame);
+        processor->Process<false>(delay_frame, sidechain_frame, output_frame);
       }
 
       delay_filter_.Process(delay_frame, output_frame, current_params_.delay_mix,

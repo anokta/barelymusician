@@ -16,38 +16,39 @@ namespace barely {
 
 namespace {
 
-template <SliceMode kSliceMode>
+template <SliceMode kSliceMode, bool kIsSidechainSend>
 VoiceCallback GetVoiceCallback(OscMode osc_mode) noexcept {
   switch (osc_mode) {
     case OscMode::kMix:
-      return Voice::Process<OscMode::kMix, kSliceMode>;
+      return Voice::Process<OscMode::kMix, kSliceMode, kIsSidechainSend>;
     case OscMode::kAm:
-      return Voice::Process<OscMode::kAm, kSliceMode>;
+      return Voice::Process<OscMode::kAm, kSliceMode, kIsSidechainSend>;
     case OscMode::kEnvelopeFollower:
-      return Voice::Process<OscMode::kEnvelopeFollower, kSliceMode>;
+      return Voice::Process<OscMode::kEnvelopeFollower, kSliceMode, kIsSidechainSend>;
     case OscMode::kFm:
-      return Voice::Process<OscMode::kFm, kSliceMode>;
+      return Voice::Process<OscMode::kFm, kSliceMode, kIsSidechainSend>;
     case OscMode::kMf:
-      return Voice::Process<OscMode::kMf, kSliceMode>;
+      return Voice::Process<OscMode::kMf, kSliceMode, kIsSidechainSend>;
     case OscMode::kRing:
-      return Voice::Process<OscMode::kRing, kSliceMode>;
+      return Voice::Process<OscMode::kRing, kSliceMode, kIsSidechainSend>;
     default:
       assert(!"Invalid oscillator mode");
-      return Voice::Process<OscMode::kMix, kSliceMode>;
+      return Voice::Process<OscMode::kMix, kSliceMode, kIsSidechainSend>;
   }
 }
 
+template <bool kIsSidechainSend>
 VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) noexcept {
   switch (slice_mode) {
     case SliceMode::kSustain:
-      return GetVoiceCallback<SliceMode::kSustain>(osc_mode);
+      return GetVoiceCallback<SliceMode::kSustain, kIsSidechainSend>(osc_mode);
     case SliceMode::kLoop:
-      return GetVoiceCallback<SliceMode::kLoop>(osc_mode);
+      return GetVoiceCallback<SliceMode::kLoop, kIsSidechainSend>(osc_mode);
     case SliceMode::kOnce:
-      return GetVoiceCallback<SliceMode::kOnce>(osc_mode);
+      return GetVoiceCallback<SliceMode::kOnce, kIsSidechainSend>(osc_mode);
     default:
       assert(!"Invalid slice mode");
-      return GetVoiceCallback<SliceMode::kSustain>(osc_mode);
+      return GetVoiceCallback<SliceMode::kSustain, kIsSidechainSend>(osc_mode);
   }
 }
 
@@ -110,7 +111,8 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kOscMode:
       osc_mode_ = static_cast<OscMode>(value);
-      voice_callback_ = GetVoiceCallback(osc_mode_, slice_mode_);
+      voice_callback_send_ = GetVoiceCallback<true>(osc_mode_, slice_mode_);
+      voice_callback_receive_ = GetVoiceCallback<false>(osc_mode_, slice_mode_);
       break;
     case ControlType::kOscNoiseMix:
       params_.voice_params.osc_noise_mix = value;
@@ -128,7 +130,8 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       break;
     case ControlType::kSliceMode:
       slice_mode_ = static_cast<SliceMode>(value);
-      voice_callback_ = GetVoiceCallback(osc_mode_, slice_mode_);
+      voice_callback_send_ = GetVoiceCallback<true>(osc_mode_, slice_mode_);
+      voice_callback_receive_ = GetVoiceCallback<false>(osc_mode_, slice_mode_);
       break;
     case ControlType::kBitCrusherDepth:
       // Offset the bit depth by 1 to normalize the range.

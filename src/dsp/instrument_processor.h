@@ -30,16 +30,21 @@ class InstrumentProcessor {
 
   /// Processes the next output samples.
   ///
+  /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
   /// @param delay_frame Delay send frame.
   /// @param sidechain_frame Sidechain send frame.
-  /// @param is_sidechain_send Denotes whether the sidechain frame is for send or receive.
   /// @param output_frame Output frame.
-  // TODO(#174): Template `is_sidechain_send`.
+  template <bool kIsSidechainSend = false>
   void Process(float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
-               bool is_sidechain_send, float output_frame[kStereoChannelCount]) noexcept {
+               float output_frame[kStereoChannelCount]) noexcept {
     for (VoiceState& voice_state : voice_states_) {
-      voice_callback_(voice_state.voice, params_, delay_frame, sidechain_frame, is_sidechain_send,
-                      output_frame);
+      if constexpr (kIsSidechainSend) {
+        voice_callback_send_(voice_state.voice, params_, delay_frame, sidechain_frame,
+                             output_frame);
+      } else {
+        voice_callback_receive_(voice_state.voice, params_, delay_frame, sidechain_frame,
+                                output_frame);
+      }
     }
   }
 
@@ -90,7 +95,8 @@ class InstrumentProcessor {
   // Acquires a new voice.
   Voice& AcquireVoice(float pitch) noexcept;
 
-  VoiceCallback voice_callback_ = Voice::Process<OscMode::kMix, SliceMode::kSustain>;
+  VoiceCallback voice_callback_send_ = Voice::Process<OscMode::kMix, SliceMode::kSustain, true>;
+  VoiceCallback voice_callback_receive_ = Voice::Process<OscMode::kMix, SliceMode::kSustain, false>;
   std::array<VoiceState, kMaxVoiceCount> voice_states_;
   int voice_count_ = 8;
 

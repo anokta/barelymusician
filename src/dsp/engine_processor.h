@@ -10,6 +10,7 @@
 
 #include "api/instrument.h"
 #include "common/constants.h"
+#include "dsp/compressor.h"
 #include "dsp/control.h"
 #include "dsp/decibels.h"
 #include "dsp/delay_filter.h"
@@ -24,6 +25,9 @@ inline constexpr int kMaxDelayFrameSeconds = 10;
 
 /// Effect parameters.
 struct EffectParams {
+  /// Compressor parameters.
+  CompressorParams compressor_params = {};
+
   /// Delay parameters.
   DelayParams delay_params = {};
 
@@ -45,6 +49,7 @@ class EngineProcessor {
   /// @param sample_rate Sampling rate in hertz.
   explicit EngineProcessor(int sample_rate) noexcept
       : sample_rate_(sample_rate),
+        compressor_(sample_rate),
         delay_filter_(sample_rate * kMaxDelayFrameSeconds),
         sidechain_(sample_rate) {
     assert(sample_rate > 0);
@@ -77,6 +82,8 @@ class EngineProcessor {
 
       delay_filter_.Process(delay_frame, output_frame, current_params_.delay_params);
 
+      compressor_.Process(output_frame, current_params_.compressor_params);
+
       Approach();
     }
   }
@@ -88,6 +95,21 @@ class EngineProcessor {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(EffectControlType type, float value) noexcept {
     switch (type) {
+      case EffectControlType::kCompressorMix:
+        target_params_.compressor_params.mix = value;
+        break;
+      case EffectControlType::kCompressorAttack:
+        compressor_.SetAttack(value);
+        break;
+      case EffectControlType::kCompressorRelease:
+        compressor_.SetRelease(value);
+        break;
+      case EffectControlType::kCompressorThreshold:
+        target_params_.compressor_params.threshold_db = AmplitudeToDecibels(value);
+        break;
+      case EffectControlType::kCompressorRatio:
+        target_params_.compressor_params.ratio = value;
+        break;
       case EffectControlType::kDelayMix:
         target_params_.delay_params.mix = value;
         break;
@@ -127,6 +149,7 @@ class EngineProcessor {
  private:
   // Approaches parameters.
   void Approach() noexcept {
+    current_params_.compressor_params.Approach(target_params_.compressor_params);
     current_params_.delay_params.Approach(target_params_.delay_params);
     ApproachValue(current_params_.sidechain_mix, target_params_.sidechain_mix);
     ApproachValue(current_params_.sidechain_threshold_db, target_params_.sidechain_threshold_db);
@@ -135,6 +158,9 @@ class EngineProcessor {
 
   // Sampling rate in hertz.
   int sample_rate_ = 0;
+
+  // Compressor.
+  Compressor compressor_;
 
   // Delay filter.
   DelayFilter delay_filter_;

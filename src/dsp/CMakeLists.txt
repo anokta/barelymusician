@@ -2,6 +2,7 @@ target_sources(
   barelymusician PRIVATE
   biquad_filter.h
   bit_crusher.h
+  compressor.h
   control.h
   decibels.h
   delay_filter.h

@@ -299,8 +299,18 @@ typedef enum BarelyControlType {
 
 /// Effect control types.
 typedef enum BarelyEffectControlType {
+  /// Compressor mix.
+  BarelyEffectControlType_kCompressorMix = 0,
+  /// Compressor attack in seconds.
+  BarelyEffectControlType_kCompressorAttack,
+  /// Compressor release in seconds.
+  BarelyEffectControlType_kCompressorRelease,
+  /// Compressor threshold.
+  BarelyEffectControlType_kCompressorThreshold,
+  /// Compressor ratio.
+  BarelyEffectControlType_kCompressorRatio,
   /// Delay mix.
-  BarelyEffectControlType_kDelayMix = 0,
+  BarelyEffectControlType_kDelayMix,
   /// Delay time in seconds.
   BarelyEffectControlType_kDelayTime,
   /// Delay feedback.
@@ -964,6 +974,16 @@ enum class ControlType {
 
 /// Effect control types.
 enum class EffectControlType {
+  /// Compressor mix.
+  kCompressorMix = BarelyEffectControlType_kCompressorMix,
+  /// Compressor attack in seconds.
+  kCompressorAttack = BarelyEffectControlType_kCompressorAttack,
+  /// Compressor release in seconds.
+  kCompressorRelease = BarelyEffectControlType_kCompressorRelease,
+  /// Compressor threshold.
+  kCompressorThreshold = BarelyEffectControlType_kCompressorThreshold,
+  /// Compressor ratio.
+  kCompressorRatio = BarelyEffectControlType_kCompressorRatio,
   /// Delay mix.
   kDelayMix = BarelyEffectControlType_kDelayMix,
   /// Delay time in seconds.

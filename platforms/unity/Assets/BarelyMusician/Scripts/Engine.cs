@@ -8,6 +8,71 @@ using UnityEngine;
 namespace Barely {
   /// A representation of an engine that governs all musical components.
   public static class Engine {
+    /// Compressor mix.
+    public static float CompressorMix {
+      get { return _compressorMix; }
+      set {
+        if (_compressorMix != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_MIX, value);
+          _compressorMix =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_MIX);
+        }
+      }
+    }
+    private static float _compressorMix = 1.0f;
+
+    /// Compressor attack.
+    public static float CompressorAttack {
+      get { return _compressorAttack; }
+      set {
+        if (_compressorAttack != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_ATTACK, value);
+          _compressorAttack =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_ATTACK);
+        }
+      }
+    }
+    private static float _compressorAttack = 0.0f;
+
+    /// Compressor release.
+    public static float CompressorRelease {
+      get { return _compressorRelease; }
+      set {
+        if (_compressorRelease != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_RELEASE, value);
+          _compressorRelease =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_RELEASE);
+        }
+      }
+    }
+    private static float _compressorRelease = 0.0f;
+
+    /// Compressor threshold.
+    public static float CompressorThreshold {
+      get { return _compressorThreshold; }
+      set {
+        if (_compressorThreshold != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_THRESHOLD, value);
+          _compressorThreshold =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_THRESHOLD);
+        }
+      }
+    }
+    private static float _compressorThreshold = 1.0f;
+
+    /// Compressor ratio.
+    public static float CompressorRatio {
+      get { return _compressorRatio; }
+      set {
+        if (_compressorRatio != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_RATIO, value);
+          _compressorRatio =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_RATIO);
+        }
+      }
+    }
+    private static float _compressorRatio = 1.0f;
+
     /// Delay mix.
     public static float DelayMix {
       get { return _delayMix; }
@@ -219,8 +284,18 @@ namespace Barely {
 
       /// Effect control type.
       public enum EffectControlType {
+        /// Compressor mix.
+        [InspectorName("Compressor Mix")] COMPRESSOR_MIX = 0,
+        /// Compressor attack in seconds.
+        [InspectorName("Compressor Attack")] COMPRESSOR_ATTACK,
+        /// Compressor release in seconds.
+        [InspectorName("Compressor Release")] COMPRESSOR_RELEASE,
+        /// Compressor threshold.
+        [InspectorName("Compressor Threshold")] COMPRESSOR_THRESHOLD,
+        /// Compressor ratio.
+        [InspectorName("Compressor Ratio")] COMPRESSOR_RATIO,
         /// Delay mix.
-        [InspectorName("Delay Mix")] DELAY_MIX = 0,
+        [InspectorName("Delay Mix")] DELAY_MIX,
         /// Delay time in seconds.
         [InspectorName("Delay Time")] DELAY_TIME,
         /// Delay feedback.

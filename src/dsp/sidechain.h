@@ -1,8 +1,8 @@
 #ifndef BARELYMUSICIAN_DSP_SIDECHAIN_H_
 #define BARELYMUSICIAN_DSP_SIDECHAIN_H_
 
+#include <array>
 #include <cmath>
-#include <vector>
 
 #include "common/constants.h"
 #include "dsp/decibels.h"
@@ -21,15 +21,18 @@ class Sidechain {
   /// Processes the next sidechain frame.
   ///
   /// @param sidechain_frame Input/output sidechain frame.
+  /// @param mix Sidechain mix.
+  /// @param threshold_db Sidechain threshold in decibels.
+  /// @param ratio Sidechain ratio.
   void Process(float sidechain_frame[kStereoChannelCount], float mix, float threshold_db,
                float ratio) noexcept {
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-      const float input_gain_db = AmplitudeToDecibels(std::abs(sidechain_frame[channel]));
-
-      float sidechain_db = 0.0f;
-      if (input_gain_db > threshold_db) {
-        const float overshoot_db = input_gain_db - threshold_db;
+      float sidechain_db = AmplitudeToDecibels(std::abs(sidechain_frame[channel]));
+      if (sidechain_db > threshold_db) {
+        const float overshoot_db = sidechain_db - threshold_db;
         sidechain_db = overshoot_db / ratio - overshoot_db;
+      } else {
+        sidechain_db = 0.0f;  // no gain reduction
       }
 
       // TODO(#174): Merge this with the envelope implementation.

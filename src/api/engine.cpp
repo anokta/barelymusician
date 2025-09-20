@@ -36,6 +36,11 @@ using ::barely::SampleDataMessage;
 // Returns an effect control array.
 EffectControlArray BuildEffectControlArray(float sample_rate) noexcept {
   return {
+      Control(0.0f, 0.0f, 1.0f),                // kCompressorMix
+      Control(0.0f, 0.0f, 10.0f),               // kCompressorAttack
+      Control(0.0f, 0.0f, 10.0f),               // kCompressorRelease
+      Control(1.0f, 0.0f, 1.0f),                // kCompressorThreshold
+      Control(1.0f, 1.0f, 64.0f),               // kCompressorRatio
       Control(1.0f, 0.0f, 1.0f),                // kDelayMix
       Control(0.0f, 0.0f, 10.0f),               // kDelayTime
       Control(0.0f, 0.0f, 1.0f),                // kDelayFeedback

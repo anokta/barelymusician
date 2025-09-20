@@ -45,6 +45,34 @@ namespace Barely {
     }
     private static float _delayFeedback = 0.0f;
 
+    /// Delay low-pass frequency.
+    public static float DelayLowPassFrequency {
+      get { return _delayLowPassFrequency; }
+      set {
+        if (_delayLowPassFrequency != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_LOW_PASS_FREQUENCY,
+                                           value);
+          _delayLowPassFrequency =
+              Internal.Engine_GetEffectControl(Internal.EffectControlType.DELAY_LOW_PASS_FREQUENCY);
+        }
+      }
+    }
+    private static float _delayLowPassFrequency = 48000.0f;
+
+    /// Delay high-pass frequency.
+    public static float DelayHighPassFrequency {
+      get { return _delayHighPassFrequency; }
+      set {
+        if (_delayHighPassFrequency != value) {
+          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_HIGH_PASS_FREQUENCY,
+                                           value);
+          _delayHighPassFrequency = Internal.Engine_GetEffectControl(
+              Internal.EffectControlType.DELAY_HIGH_PASS_FREQUENCY);
+        }
+      }
+    }
+    private static float _delayHighPassFrequency = 0.0f;
+
     /// Sidechain mix.
     public static float SidechainMix {
       get { return _sidechainMix; }
@@ -197,6 +225,10 @@ namespace Barely {
         [InspectorName("Delay Time")] DELAY_TIME,
         /// Delay feedback.
         [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
+        /// Delay low-pass frequency.
+        [InspectorName("Delay Low-Pass Frequency")] DELAY_LOW_PASS_FREQUENCY,
+        /// Delay high-pass frequency.
+        [InspectorName("Delay High-Pass Frequency")] DELAY_HIGH_PASS_FREQUENCY,
         /// Sidechain mix.
         [InspectorName("Sidechain Mix")] SIDECHAIN_MIX,
         /// Sidechain attack in seconds.

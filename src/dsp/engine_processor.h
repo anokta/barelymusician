@@ -14,6 +14,7 @@
 #include "dsp/decibels.h"
 #include "dsp/delay_filter.h"
 #include "dsp/instrument_processor.h"
+#include "dsp/one_pole_filter.h"
 #include "dsp/sidechain.h"
 
 namespace barely {
@@ -23,22 +24,16 @@ inline constexpr int kMaxDelayFrameSeconds = 10;
 
 /// Effect parameters.
 struct EffectParams {
-  // Delay mix.
-  float delay_mix = 1.0f;
+  /// Delay parameters.
+  DelayParams delay_params = {};
 
-  // Number of delay frames.
-  float delay_frame_count = 0.0f;
-
-  // Delay feedback.
-  float delay_feedback = 0.0f;
-
-  // Sidechain mix.
+  /// Sidechain mix.
   float sidechain_mix = 1.0f;
 
-  // Sidechain threshold in decibels.
+  /// Sidechain threshold in decibels.
   float sidechain_threshold_db = 0.0f;
 
-  // Sidechain ratio.
+  /// Sidechain ratio.
   float sidechain_ratio = 1.0f;
 };
 
@@ -80,8 +75,7 @@ class EngineProcessor {
         processor->Process<false>(delay_frame, sidechain_frame, output_frame);
       }
 
-      delay_filter_.Process(delay_frame, output_frame, current_params_.delay_mix,
-                            current_params_.delay_frame_count, current_params_.delay_feedback);
+      delay_filter_.Process(delay_frame, output_frame, current_params_.delay_params);
 
       Approach();
     }
@@ -95,13 +89,19 @@ class EngineProcessor {
   void SetControl(EffectControlType type, float value) noexcept {
     switch (type) {
       case EffectControlType::kDelayMix:
-        target_params_.delay_mix = value;
+        target_params_.delay_params.mix = value;
         break;
       case EffectControlType::kDelayTime:
-        target_params_.delay_frame_count = value * static_cast<float>(sample_rate_);
+        target_params_.delay_params.frame_count = value * static_cast<float>(sample_rate_);
         break;
       case EffectControlType::kDelayFeedback:
-        target_params_.delay_feedback = value;
+        target_params_.delay_params.feedback = value;
+        break;
+      case EffectControlType::kDelayLowPassFrequency:
+        target_params_.delay_params.low_pass_coeff = GetFilterCoefficient(sample_rate_, value);
+        break;
+      case EffectControlType::kDelayHighPassFrequency:
+        target_params_.delay_params.high_pass_coeff = GetFilterCoefficient(sample_rate_, value);
         break;
       case EffectControlType::kSidechainMix:
         target_params_.sidechain_mix = value;
@@ -127,9 +127,7 @@ class EngineProcessor {
  private:
   // Approaches parameters.
   void Approach() noexcept {
-    ApproachValue(current_params_.delay_mix, target_params_.delay_mix);
-    ApproachValue(current_params_.delay_frame_count, target_params_.delay_frame_count);
-    ApproachValue(current_params_.delay_feedback, target_params_.delay_feedback);
+    current_params_.delay_params.Approach(target_params_.delay_params);
     ApproachValue(current_params_.sidechain_mix, target_params_.sidechain_mix);
     ApproachValue(current_params_.sidechain_threshold_db, target_params_.sidechain_threshold_db);
     ApproachValue(current_params_.sidechain_ratio, target_params_.sidechain_ratio);
@@ -145,10 +143,10 @@ class EngineProcessor {
   Sidechain sidechain_;
 
   // Delay send frame.
-  std::array<float, kStereoChannelCount> delay_frame_;
+  std::array<float, kStereoChannelCount> delay_frame_ = {};
 
   // Sidechain send frame.
-  std::array<float, kStereoChannelCount> sidechain_frame_;
+  std::array<float, kStereoChannelCount> sidechain_frame_ = {};
 
   // Current parameters.
   EffectParams current_params_ = {};

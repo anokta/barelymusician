@@ -305,6 +305,10 @@ typedef enum BarelyEffectControlType {
   BarelyEffectControlType_kDelayTime,
   /// Delay feedback.
   BarelyEffectControlType_kDelayFeedback,
+  /// Delay low-pass frequency.
+  BarelyEffectControlType_kDelayLowPassFrequency,
+  /// Delay high-pass frequency.
+  BarelyEffectControlType_kDelayHighPassFrequency,
   /// Sidechain mix.
   BarelyEffectControlType_kSidechainMix,
   /// Sidechain attack in seconds.
@@ -966,6 +970,10 @@ enum class EffectControlType {
   kDelayTime = BarelyEffectControlType_kDelayTime,
   /// Delay feedback.
   kDelayFeedback = BarelyEffectControlType_kDelayFeedback,
+  /// Delay low-pass frequency.
+  kDelayLowPassFrequency = BarelyEffectControlType_kDelayLowPassFrequency,
+  /// Delay high-pass frequency.
+  kDelayHighPassFrequency = BarelyEffectControlType_kDelayHighPassFrequency,
   /// Sidechain mix.
   kSidechainMix = BarelyEffectControlType_kSidechainMix,
   /// Sidechain attack in seconds.

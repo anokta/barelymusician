@@ -67,7 +67,7 @@ class Sidechain {
   float release_coeff_ = 0.0f;
 
   // Sidechain frame in decibels.
-  std::array<float, kStereoChannelCount> sidechain_db_frame_;
+  std::array<float, kStereoChannelCount> sidechain_db_frame_ = {};
 };
 
 }  // namespace barely

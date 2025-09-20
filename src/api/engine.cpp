@@ -34,16 +34,18 @@ using ::barely::NoteOnMessage;
 using ::barely::SampleDataMessage;
 
 // Returns an effect control array.
-EffectControlArray BuildEffectControlArray() noexcept {
+EffectControlArray BuildEffectControlArray(float sample_rate) noexcept {
   return {
-      Control(1.0f, 0.0f, 1.0f),   // kDelayMix
-      Control(0.0f, 0.0f, 10.0f),  // kDelayTime
-      Control(0.0f, 0.0f, 1.0f),   // kDelayFeedback
-      Control(1.0f, 0.0f, 1.0f),   // kSidechainMix
-      Control(0.0f, 0.0f, 10.0f),  // kSidechainAttack
-      Control(0.0f, 0.0f, 10.0f),  // kSidechainRelease
-      Control(1.0f, 0.0f, 1.0f),   // kSidechainThreshold
-      Control(1.0f, 1.0f, 64.0f),  // kSidechainRatio
+      Control(1.0f, 0.0f, 1.0f),                // kDelayMix
+      Control(0.0f, 0.0f, 10.0f),               // kDelayTime
+      Control(0.0f, 0.0f, 1.0f),                // kDelayFeedback
+      Control(sample_rate, 0.0f, sample_rate),  // kDelayLowPassFrequency
+      Control(0.0f, 0.0f, sample_rate),         // kDelayHighPassFrequency
+      Control(1.0f, 0.0f, 1.0f),                // kSidechainMix
+      Control(0.0f, 0.0f, 10.0f),               // kSidechainAttack
+      Control(0.0f, 0.0f, 10.0f),               // kSidechainRelease
+      Control(1.0f, 0.0f, 1.0f),                // kSidechainThreshold
+      Control(1.0f, 1.0f, 64.0f),               // kSidechainRatio
   };
 }
 
@@ -68,7 +70,7 @@ std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutable
 BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count, float reference_frequency) noexcept
     : sample_rate_(sample_rate),
       reference_frequency_(reference_frequency),
-      effect_controls_(BuildEffectControlArray()),
+      effect_controls_(BuildEffectControlArray(static_cast<float>(sample_rate))),
       engine_processor_(sample_rate_),
       output_samples_(kStereoChannelCount * max_frame_count) {
   assert(sample_rate >= 0);

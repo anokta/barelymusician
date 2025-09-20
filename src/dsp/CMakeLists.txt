@@ -13,6 +13,7 @@ target_sources(
   message.h
   message_queue.cpp
   message_queue.h
+  one_pole_filter.h
   sample_data.cpp
   sample_data.h
   sample_generators.h
@@ -30,6 +31,7 @@ if(ENABLE_TESTS)
     envelope_test.cpp
     instrument_processor_test.cpp
     message_queue_test.cpp
+    one_pole_filter_test.cpp
     sample_data_test.cpp
     sample_generators_test.cpp
   )

@@ -16,6 +16,12 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float DelayFeedback = 0.0f;
 
+    [Range(0.0f, 48000.0f)]
+    public float DelayLowPassFrequency = 48000.0f;
+
+    [Range(0.0f, 48000.0f)]
+    public float DelayHighPassFrequency = 0.0f;
+
     [Range(0.0f, 1.0f)]
     public float SidechainMix = 1.0f;
 
@@ -36,6 +42,8 @@ namespace Barely {
       Engine.DelayMix = DelayMix;
       Engine.DelayTime = DelayTime;
       Engine.DelayFeedback = DelayFeedback;
+      Engine.DelayLowPassFrequency = DelayLowPassFrequency;
+      Engine.DelayHighPassFrequency = DelayHighPassFrequency;
       Engine.SidechainMix = SidechainMix;
       Engine.SidechainAttack = SidechainAttack;
       Engine.SidechainRelease = SidechainRelease;

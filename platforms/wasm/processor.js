@@ -7,7 +7,14 @@ export const EffectControlType = {
   DELAY_MIX: 0,
   DELAY_TIME: 1,
   DELAY_FEEDBACK: 2,
-  COUNT: 3,
+  DELAY_LOW_PASS_FREQUENCY: 3,
+  DELAY_HIGH_PASS_FREQUENCY: 4,
+  SIDECHAIN_MIX: 5,
+  SIDECHAIN_ATTACK: 6,
+  SIDECHAIN_RELEASE: 7,
+  SIDECHAIN_THRESHOLD: 8,
+  SIDECHAIN_RATIO: 9,
+  COUNT: 10,
 };
 
 class Processor extends AudioWorkletProcessor {

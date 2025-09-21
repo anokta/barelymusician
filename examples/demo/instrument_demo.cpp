@@ -17,8 +17,8 @@ namespace {
 
 using ::barely::ArpMode;
 using ::barely::ControlType;
-using ::barely::EffectControlType;
 using ::barely::Engine;
+using ::barely::EngineControlType;
 using ::barely::NoteEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -75,9 +75,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kFrameCount);
-  engine.SetEffectControl(EffectControlType::kDelayTime, kDelayTime);
-  engine.SetEffectControl(EffectControlType::kDelayFeedback, kDelayFeedback);
-  engine.SetEffectControl(EffectControlType::kDelayLowPassFrequency, kDelayLowPassFrequency);
+  engine.SetControl(EngineControlType::kDelayTime, kDelayTime);
+  engine.SetControl(EngineControlType::kDelayFeedback, kDelayFeedback);
+  engine.SetControl(EngineControlType::kDelayLowPassFrequency, kDelayLowPassFrequency);
   engine.SetTempo(kTempo);
 
   auto instrument = engine.CreateInstrument({{

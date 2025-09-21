@@ -44,11 +44,11 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddPerformer(BarelyPerformer* performer) noexcept;
 
-  /// Returns an effect control value.
+  /// Returns a control value.
   ///
-  /// @param type Effect control type.
-  /// @return Effect control value.
-  [[nodiscard]] float GetEffectControl(BarelyEffectControlType type) const noexcept;
+  /// @param type Engine control type.
+  /// @return Engine control value.
+  [[nodiscard]] float GetControl(BarelyEngineControlType type) const noexcept;
 
   /// Returns the tempo.
   ///
@@ -87,11 +87,11 @@ struct BarelyEngine {
   /// @param message Message
   void ScheduleMessage(barely::Message message) noexcept;
 
-  /// Sets an effect control value.
+  /// Sets a control value.
   ///
-  /// @param type Effect control type.
-  /// @param value Effect control value.
-  void SetEffectControl(BarelyEffectControlType type, float value) noexcept;
+  /// @param type Engine control type.
+  /// @param value Engine control value.
+  void SetControl(BarelyEngineControlType type, float value) noexcept;
 
   /// Sets the tempo.
   ///
@@ -113,8 +113,8 @@ struct BarelyEngine {
   // Reference frequency at zero pitch.
   float reference_frequency_ = 0.0f;
 
-  // Array of effect controls.
-  barely::EffectControlArray effect_controls_;
+  // Array of engine controls.
+  barely::EngineControlArray controls_;
 
   // Random number generator for the audio thread.
   barely::AudioRng audio_rng_;

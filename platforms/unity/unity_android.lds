@@ -2,11 +2,11 @@ VERS_1.0 {
   global:
     BarelyEngine_Create;
     BarelyEngine_Destroy;
-    BarelyEngine_GetEffectControl;
+    BarelyEngine_GetControl;
     BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
     BarelyEngine_Process;
-    BarelyEngine_SetEffectControl;
+    BarelyEngine_SetControl;
     BarelyEngine_SetTempo;
     BarelyEngine_Update;
     BarelyInstrument_Create;

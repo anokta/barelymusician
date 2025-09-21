@@ -13,9 +13,8 @@ namespace Barely {
       get { return _compressorMix; }
       set {
         if (_compressorMix != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_MIX, value);
-          _compressorMix =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_MIX);
+          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_MIX, value);
+          _compressorMix = Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_MIX);
         }
       }
     }
@@ -26,9 +25,9 @@ namespace Barely {
       get { return _compressorAttack; }
       set {
         if (_compressorAttack != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_ATTACK, value);
+          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_ATTACK, value);
           _compressorAttack =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_ATTACK);
+              Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_ATTACK);
         }
       }
     }
@@ -39,9 +38,9 @@ namespace Barely {
       get { return _compressorRelease; }
       set {
         if (_compressorRelease != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_RELEASE, value);
+          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_RELEASE, value);
           _compressorRelease =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_RELEASE);
+              Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_RELEASE);
         }
       }
     }
@@ -52,9 +51,9 @@ namespace Barely {
       get { return _compressorThreshold; }
       set {
         if (_compressorThreshold != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_THRESHOLD, value);
+          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_THRESHOLD, value);
           _compressorThreshold =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_THRESHOLD);
+              Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_THRESHOLD);
         }
       }
     }
@@ -65,9 +64,9 @@ namespace Barely {
       get { return _compressorRatio; }
       set {
         if (_compressorRatio != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.COMPRESSOR_RATIO, value);
+          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_RATIO, value);
           _compressorRatio =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.COMPRESSOR_RATIO);
+              Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_RATIO);
         }
       }
     }
@@ -78,8 +77,8 @@ namespace Barely {
       get { return _delayMix; }
       set {
         if (_delayMix != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_MIX, value);
-          _delayMix = Internal.Engine_GetEffectControl(Internal.EffectControlType.DELAY_MIX);
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_MIX, value);
+          _delayMix = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_MIX);
         }
       }
     }
@@ -90,8 +89,8 @@ namespace Barely {
       get { return _delayTime; }
       set {
         if (_delayTime != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_TIME, value);
-          _delayTime = Internal.Engine_GetEffectControl(Internal.EffectControlType.DELAY_TIME);
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_TIME, value);
+          _delayTime = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_TIME);
         }
       }
     }
@@ -102,9 +101,8 @@ namespace Barely {
       get { return _delayFeedback; }
       set {
         if (_delayFeedback != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_FEEDBACK, value);
-          _delayFeedback =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.DELAY_FEEDBACK);
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_FEEDBACK, value);
+          _delayFeedback = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_FEEDBACK);
         }
       }
     }
@@ -115,10 +113,9 @@ namespace Barely {
       get { return _delayLowPassFrequency; }
       set {
         if (_delayLowPassFrequency != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_LOW_PASS_FREQUENCY,
-                                           value);
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_LOW_PASS_FREQUENCY, value);
           _delayLowPassFrequency =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.DELAY_LOW_PASS_FREQUENCY);
+              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_LOW_PASS_FREQUENCY);
         }
       }
     }
@@ -129,10 +126,9 @@ namespace Barely {
       get { return _delayHighPassFrequency; }
       set {
         if (_delayHighPassFrequency != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.DELAY_HIGH_PASS_FREQUENCY,
-                                           value);
-          _delayHighPassFrequency = Internal.Engine_GetEffectControl(
-              Internal.EffectControlType.DELAY_HIGH_PASS_FREQUENCY);
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_HIGH_PASS_FREQUENCY, value);
+          _delayHighPassFrequency =
+              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_HIGH_PASS_FREQUENCY);
         }
       }
     }
@@ -143,9 +139,8 @@ namespace Barely {
       get { return _sidechainMix; }
       set {
         if (_sidechainMix != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_MIX, value);
-          _sidechainMix =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_MIX);
+          Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_MIX, value);
+          _sidechainMix = Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_MIX);
         }
       }
     }
@@ -156,9 +151,9 @@ namespace Barely {
       get { return _sidechainAttack; }
       set {
         if (_sidechainAttack != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_ATTACK, value);
+          Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_ATTACK, value);
           _sidechainAttack =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_ATTACK);
+              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_ATTACK);
         }
       }
     }
@@ -169,9 +164,9 @@ namespace Barely {
       get { return _sidechainRelease; }
       set {
         if (_sidechainRelease != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_RELEASE, value);
+          Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_RELEASE, value);
           _sidechainRelease =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_RELEASE);
+              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_RELEASE);
         }
       }
     }
@@ -182,9 +177,9 @@ namespace Barely {
       get { return _sidechainThreshold; }
       set {
         if (_sidechainThreshold != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_THRESHOLD, value);
+          Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_THRESHOLD, value);
           _sidechainThreshold =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_THRESHOLD);
+              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_THRESHOLD);
         }
       }
     }
@@ -195,9 +190,8 @@ namespace Barely {
       get { return _sidechainRatio; }
       set {
         if (_sidechainRatio != value) {
-          Internal.Engine_SetEffectControl(Internal.EffectControlType.SIDECHAIN_RATIO, value);
-          _sidechainRatio =
-              Internal.Engine_GetEffectControl(Internal.EffectControlType.SIDECHAIN_RATIO);
+          Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_RATIO, value);
+          _sidechainRatio = Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_RATIO);
         }
       }
     }
@@ -282,8 +276,8 @@ namespace Barely {
         [InspectorName("Arpeggiator Rate")] ARP_RATE,
       }
 
-      /// Effect control type.
-      public enum EffectControlType {
+      /// Engine control type.
+      public enum EngineControlType {
         /// Compressor mix.
         [InspectorName("Compressor Mix")] COMPRESSOR_MIX = 0,
         /// Compressor attack in seconds.
@@ -324,14 +318,14 @@ namespace Barely {
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
       }
 
-      /// Returns an effect control of an engine.
+      /// Returns a control of an engine.
       ///
-      /// @param type Effect control type.
-      /// @return Effect control value.
-      public static float Engine_GetEffectControl(EffectControlType type) {
+      /// @param type Engine control type.
+      /// @return Engine control value.
+      public static float Engine_GetControl(EngineControlType type) {
         float value = 0.0f;
-        if (!BarelyEngine_GetEffectControl(Handle, type, ref value) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get engine effect control");
+        if (!BarelyEngine_GetControl(Handle, type, ref value) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get engine engine control");
         }
         return value;
       }
@@ -358,13 +352,13 @@ namespace Barely {
         return timestamp;
       }
 
-      /// Sets an effect control of an engine.
+      /// Sets a control of an engine.
       ///
-      /// @param type Effect control type.
-      /// @param value Effect control value.
-      public static void Engine_SetEffectControl(EffectControlType type, float value) {
-        if (!BarelyEngine_SetEffectControl(Handle, type, value) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set engine effect control");
+      /// @param type Engine control type.
+      /// @param value Engine control value.
+      public static void Engine_SetControl(EngineControlType type, float value) {
+        if (!BarelyEngine_SetControl(Handle, type, value) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set engine engine control");
         }
       }
 
@@ -1143,10 +1137,9 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
       private static extern bool BarelyEngine_Destroy(IntPtr engine);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetEffectControl")]
-      private static extern bool BarelyEngine_GetEffectControl(IntPtr engine,
-                                                               EffectControlType type,
-                                                               ref float value);
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetControl")]
+      private static extern bool BarelyEngine_GetControl(IntPtr engine, EngineControlType type,
+                                                         ref float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
       private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
@@ -1160,9 +1153,9 @@ namespace Barely {
                                                       Int32 outputChannelCount,
                                                       Int32 outputFrameCount, double timestamp);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetEffectControl")]
-      private static extern bool BarelyEngine_SetEffectControl(IntPtr engine,
-                                                               EffectControlType type, float value);
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetControl")]
+      private static extern bool BarelyEngine_SetControl(IntPtr engine, EngineControlType type,
+                                                         float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
       private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);

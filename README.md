@@ -29,9 +29,7 @@ Example usage
 #include <barelymusician.h>
 
 // Create the engine.
-constexpr int kMaxChannelCount = 2;
-constexpr int kMaxFrameCount = 512;
-barely::Engine engine(/*sample_rate=*/48000, kMaxChannelCount, kMaxFrameCount);
+barely::Engine engine(/*sample_rate=*/48000, /*max_frame_count=*/512);
 
 // Set the global tempo.
 engine.SetTempo(/*tempo=*/124.0);
@@ -87,8 +85,10 @@ engine.Update(timestamp + kLookahead);
 //
 // The engine processes output samples synchronously. Therefore, `Process` should typically be
 // called from an audio thread process callback in real-time audio applications.
-float output_samples[kMaxChannelCount * kMaxFrameCount];
-engine.Process(output_samples, kMaxChannelCount, kMaxFrameCount, timestamp);
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 512;
+float output_samples[kChannelCount * kFrameCount];
+engine.Process(output_samples, kChannelCount, kFrameCount, timestamp);
 ```
 
 Further examples can be found in [examples/demo](examples/demo), e.g. to run the

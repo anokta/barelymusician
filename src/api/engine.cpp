@@ -23,9 +23,9 @@ namespace {
 
 using ::barely::Control;
 using ::barely::ControlMessage;
-using ::barely::EffectControlArray;
-using ::barely::EffectControlMessage;
-using ::barely::EffectControlType;
+using ::barely::EngineControlArray;
+using ::barely::EngineControlMessage;
+using ::barely::EngineControlType;
 using ::barely::kStereoChannelCount;
 using ::barely::MessageVisitor;
 using ::barely::NoteControlMessage;
@@ -33,8 +33,8 @@ using ::barely::NoteOffMessage;
 using ::barely::NoteOnMessage;
 using ::barely::SampleDataMessage;
 
-// Returns an effect control array.
-EffectControlArray BuildEffectControlArray(float sample_rate) noexcept {
+// Returns an engine control array.
+EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
   return {
       Control(0.0f, 0.0f, 1.0f),                // kCompressorMix
       Control(0.0f, 0.0f, 10.0f),               // kCompressorAttack
@@ -75,7 +75,7 @@ std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutable
 BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count, float reference_frequency) noexcept
     : sample_rate_(sample_rate),
       reference_frequency_(reference_frequency),
-      effect_controls_(BuildEffectControlArray(static_cast<float>(sample_rate))),
+      controls_(BuildEngineControlArray(static_cast<float>(sample_rate))),
       engine_processor_(sample_rate_),
       output_samples_(kStereoChannelCount * max_frame_count) {
   assert(sample_rate >= 0);
@@ -104,8 +104,8 @@ void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
   assert(success);
 }
 
-float BarelyEngine::GetEffectControl(BarelyEffectControlType type) const noexcept {
-  return effect_controls_[type].value;
+float BarelyEngine::GetControl(BarelyEngineControlType type) const noexcept {
+  return controls_[type].value;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -141,9 +141,9 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                            it->second->SetControl(control_message.type, control_message.value);
                          }
                        },
-                       [this](EffectControlMessage& effect_control_message) noexcept {
-                         engine_processor_.SetControl(effect_control_message.type,
-                                                      effect_control_message.value);
+                       [this](EngineControlMessage& engine_control_message) noexcept {
+                         engine_processor_.SetControl(engine_control_message.type,
+                                                      engine_control_message.value);
                        },
                        [&instruments](NoteControlMessage& note_control_message) noexcept {
                          if (const auto it = instruments->find(note_control_message.instrument);
@@ -211,10 +211,9 @@ void BarelyEngine::ScheduleMessage(barely::Message message) noexcept {
   message_queue_.Add(update_frame_, std::move(message));
 }
 
-void BarelyEngine::SetEffectControl(BarelyEffectControlType type, float value) noexcept {
-  if (auto& effect_control = effect_controls_[type]; effect_control.SetValue(value)) {
-    ScheduleMessage(
-        EffectControlMessage{static_cast<EffectControlType>(type), effect_control.value});
+void BarelyEngine::SetControl(BarelyEngineControlType type, float value) noexcept {
+  if (auto& control = controls_[type]; control.SetValue(value)) {
+    ScheduleMessage(EngineControlMessage{static_cast<EngineControlType>(type), control.value});
   }
 }
 

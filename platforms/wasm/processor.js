@@ -3,7 +3,7 @@ import Module from './barelymusician.js';
 const REFERENCE_FREQUENCY = 261.62555;
 const RENDER_QUANTUM_SIZE = 128
 
-export const EffectControlType = {
+export const EngineControlType = {
   COMPRESSOR_MIX: 0,
   COMPRESSOR_ATTACK: 1,
   COMPRESSOR_RELEASE: 2,
@@ -77,10 +77,10 @@ class Processor extends AudioWorkletProcessor {
               {type: 'engine-get-timestamp-response', timestamp: this._engine.timestamp});
         } break;
         case 'engine-set-delay-time': {
-          this._engine.setEffectControl(EffectControlType.DELAY_TIME, event.data.delayTime);
+          this._engine.setControl(EngineControlType.DELAY_TIME, event.data.delayTime);
         } break;
         case 'engine-set-delay-feedback': {
-          this._engine.setEffectControl(EffectControlType.DELAY_FEEDBACK, event.data.delayFeedback);
+          this._engine.setControl(EngineControlType.DELAY_FEEDBACK, event.data.delayFeedback);
         } break;
         case 'engine-set-seed': {
           this._engine.seed = event.data.seed;

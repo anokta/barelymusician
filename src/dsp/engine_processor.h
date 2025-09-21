@@ -93,55 +93,55 @@ class EngineProcessor {
   /// @param type Control type.
   /// @param value Control value.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(EffectControlType type, float value) noexcept {
+  void SetControl(EngineControlType type, float value) noexcept {
     switch (type) {
-      case EffectControlType::kCompressorMix:
+      case EngineControlType::kCompressorMix:
         target_params_.compressor_params.mix = value;
         break;
-      case EffectControlType::kCompressorAttack:
+      case EngineControlType::kCompressorAttack:
         compressor_.SetAttack(value);
         break;
-      case EffectControlType::kCompressorRelease:
+      case EngineControlType::kCompressorRelease:
         compressor_.SetRelease(value);
         break;
-      case EffectControlType::kCompressorThreshold:
+      case EngineControlType::kCompressorThreshold:
         target_params_.compressor_params.threshold_db = AmplitudeToDecibels(value);
         break;
-      case EffectControlType::kCompressorRatio:
+      case EngineControlType::kCompressorRatio:
         target_params_.compressor_params.ratio = value;
         break;
-      case EffectControlType::kDelayMix:
+      case EngineControlType::kDelayMix:
         target_params_.delay_params.mix = value;
         break;
-      case EffectControlType::kDelayTime:
+      case EngineControlType::kDelayTime:
         target_params_.delay_params.frame_count = value * static_cast<float>(sample_rate_);
         break;
-      case EffectControlType::kDelayFeedback:
+      case EngineControlType::kDelayFeedback:
         target_params_.delay_params.feedback = value;
         break;
-      case EffectControlType::kDelayLowPassFrequency:
+      case EngineControlType::kDelayLowPassFrequency:
         target_params_.delay_params.low_pass_coeff = GetFilterCoefficient(sample_rate_, value);
         break;
-      case EffectControlType::kDelayHighPassFrequency:
+      case EngineControlType::kDelayHighPassFrequency:
         target_params_.delay_params.high_pass_coeff = GetFilterCoefficient(sample_rate_, value);
         break;
-      case EffectControlType::kSidechainMix:
+      case EngineControlType::kSidechainMix:
         target_params_.sidechain_mix = value;
         break;
-      case EffectControlType::kSidechainAttack:
+      case EngineControlType::kSidechainAttack:
         sidechain_.SetAttack(value);
         break;
-      case EffectControlType::kSidechainRelease:
+      case EngineControlType::kSidechainRelease:
         sidechain_.SetRelease(value);
         break;
-      case EffectControlType::kSidechainThreshold:
+      case EngineControlType::kSidechainThreshold:
         target_params_.sidechain_threshold_db = AmplitudeToDecibels(value);
         break;
-      case EffectControlType::kSidechainRatio:
+      case EngineControlType::kSidechainRatio:
         target_params_.sidechain_ratio = value;
         break;
       default:
-        assert(!"Invalid effect control type");
+        assert(!"Invalid engine control type");
         return;
     }
   }

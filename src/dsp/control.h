@@ -55,8 +55,8 @@ struct Control {
 /// Control array.
 using ControlArray = std::array<Control, BarelyControlType_kCount>;
 
-/// Effect control array.
-using EffectControlArray = std::array<Control, BarelyEffectControlType_kCount>;
+/// Engine control array.
+using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
 
 /// Note control array.
 using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;

@@ -25,10 +25,10 @@ struct ControlMessage {
   float value;
 };
 
-/// Effect control message.
-struct EffectControlMessage {
+/// Engine control message.
+struct EngineControlMessage {
   /// Type.
-  EffectControlType type;
+  EngineControlType type;
 
   /// Value.
   float value;
@@ -80,7 +80,7 @@ struct SampleDataMessage {
 };
 
 /// Message alias.
-using Message = std::variant<ControlMessage, EffectControlMessage, NoteControlMessage,
+using Message = std::variant<ControlMessage, EngineControlMessage, NoteControlMessage,
                              NoteOffMessage, NoteOnMessage, SampleDataMessage>;
 
 // Message visitor.

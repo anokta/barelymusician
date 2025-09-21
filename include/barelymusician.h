@@ -15,8 +15,7 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create.
-///   constexpr int kMaxFrameCount = 512;
-///   barely::Engine engine(/*sample_rate=*/48000, kMaxFrameCount);
+///   barely::Engine engine(/*sample_rate=*/48000, /*max_frame_count=*/512);
 ///
 ///   // Set the tempo.
 ///   engine.SetTempo(/*tempo=*/124.0);
@@ -37,8 +36,9 @@
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
 ///   constexpr int kChannelCount = 2;
-///   float output_samples[kChannelCount * kMaxFrameCount];
-///   engine.Process(output_samples, kChannelCount, kMaxFrameCount, timestamp);
+///   constexpr int kFrameCount = 512;
+///   float output_samples[kChannelCount * kFrameCount];
+///   engine.Process(output_samples, kChannelCount, kFrameCount, timestamp);
 ///   @endcode
 ///
 /// - Instrument:
@@ -297,41 +297,41 @@ typedef enum BarelyControlType {
   BarelyControlType_kCount,
 } BarelyControlType;
 
-/// Effect control types.
-typedef enum BarelyEffectControlType {
+/// Engine control types.
+typedef enum BarelyEngineControlType {
   /// Compressor mix.
-  BarelyEffectControlType_kCompressorMix = 0,
+  BarelyEngineControlType_kCompressorMix = 0,
   /// Compressor attack in seconds.
-  BarelyEffectControlType_kCompressorAttack,
+  BarelyEngineControlType_kCompressorAttack,
   /// Compressor release in seconds.
-  BarelyEffectControlType_kCompressorRelease,
+  BarelyEngineControlType_kCompressorRelease,
   /// Compressor threshold.
-  BarelyEffectControlType_kCompressorThreshold,
+  BarelyEngineControlType_kCompressorThreshold,
   /// Compressor ratio.
-  BarelyEffectControlType_kCompressorRatio,
+  BarelyEngineControlType_kCompressorRatio,
   /// Delay mix.
-  BarelyEffectControlType_kDelayMix,
+  BarelyEngineControlType_kDelayMix,
   /// Delay time in seconds.
-  BarelyEffectControlType_kDelayTime,
+  BarelyEngineControlType_kDelayTime,
   /// Delay feedback.
-  BarelyEffectControlType_kDelayFeedback,
+  BarelyEngineControlType_kDelayFeedback,
   /// Delay low-pass frequency.
-  BarelyEffectControlType_kDelayLowPassFrequency,
+  BarelyEngineControlType_kDelayLowPassFrequency,
   /// Delay high-pass frequency.
-  BarelyEffectControlType_kDelayHighPassFrequency,
+  BarelyEngineControlType_kDelayHighPassFrequency,
   /// Sidechain mix.
-  BarelyEffectControlType_kSidechainMix,
+  BarelyEngineControlType_kSidechainMix,
   /// Sidechain attack in seconds.
-  BarelyEffectControlType_kSidechainAttack,
+  BarelyEngineControlType_kSidechainAttack,
   /// Sidechain release in seconds.
-  BarelyEffectControlType_kSidechainRelease,
+  BarelyEngineControlType_kSidechainRelease,
   /// Sidechain threshold.
-  BarelyEffectControlType_kSidechainThreshold,
+  BarelyEngineControlType_kSidechainThreshold,
   /// Sidechain ratio.
-  BarelyEffectControlType_kSidechainRatio,
-  // Number of effect control types.
-  BarelyEffectControlType_kCount,
-} BarelyEffectControlType;
+  BarelyEngineControlType_kSidechainRatio,
+  // Number of engine control types.
+  BarelyEngineControlType_kCount,
+} BarelyEngineControlType;
 
 /// Filter types.
 typedef enum BarelyFilterType {
@@ -510,14 +510,14 @@ BARELY_API bool BarelyEngine_Destroy(BarelyEngineHandle engine);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_number);
 
-/// Gets an effect control value of an engine.
+/// Gets a control value of an engine.
 ///
 /// @param engine Engine handle.
-/// @param type Effect control type.
-/// @param out_value Output effect control value.
+/// @param type Engine control type.
+/// @param out_value Output engine control value.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetEffectControl(BarelyEngineHandle engine,
-                                              BarelyEffectControlType type, float* out_value);
+BARELY_API bool BarelyEngine_GetControl(BarelyEngineHandle engine, BarelyEngineControlType type,
+                                        float* out_value);
 
 /// Gets the random number generator seed of an engine.
 ///
@@ -552,14 +552,14 @@ BARELY_API bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_sa
                                      int32_t output_channel_count, int32_t output_frame_count,
                                      double timestamp);
 
-/// Sets an effect control value of an engine.
+/// Sets a control value of an engine.
 ///
 /// @param engine Engine handle.
-/// @param type Effect control type.
-/// @param value Effect control value.
+/// @param type Engine control type.
+/// @param value Engine control value.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_SetEffectControl(BarelyEngineHandle engine,
-                                              BarelyEffectControlType type, float value);
+BARELY_API bool BarelyEngine_SetControl(BarelyEngineHandle engine, BarelyEngineControlType type,
+                                        float value);
 
 /// Sets the random number generator seed of an engine.
 ///
@@ -972,38 +972,38 @@ enum class ControlType {
   kArpRate = BarelyControlType_kArpRate,
 };
 
-/// Effect control types.
-enum class EffectControlType {
+/// Engine control types.
+enum class EngineControlType {
   /// Compressor mix.
-  kCompressorMix = BarelyEffectControlType_kCompressorMix,
+  kCompressorMix = BarelyEngineControlType_kCompressorMix,
   /// Compressor attack in seconds.
-  kCompressorAttack = BarelyEffectControlType_kCompressorAttack,
+  kCompressorAttack = BarelyEngineControlType_kCompressorAttack,
   /// Compressor release in seconds.
-  kCompressorRelease = BarelyEffectControlType_kCompressorRelease,
+  kCompressorRelease = BarelyEngineControlType_kCompressorRelease,
   /// Compressor threshold.
-  kCompressorThreshold = BarelyEffectControlType_kCompressorThreshold,
+  kCompressorThreshold = BarelyEngineControlType_kCompressorThreshold,
   /// Compressor ratio.
-  kCompressorRatio = BarelyEffectControlType_kCompressorRatio,
+  kCompressorRatio = BarelyEngineControlType_kCompressorRatio,
   /// Delay mix.
-  kDelayMix = BarelyEffectControlType_kDelayMix,
+  kDelayMix = BarelyEngineControlType_kDelayMix,
   /// Delay time in seconds.
-  kDelayTime = BarelyEffectControlType_kDelayTime,
+  kDelayTime = BarelyEngineControlType_kDelayTime,
   /// Delay feedback.
-  kDelayFeedback = BarelyEffectControlType_kDelayFeedback,
+  kDelayFeedback = BarelyEngineControlType_kDelayFeedback,
   /// Delay low-pass frequency.
-  kDelayLowPassFrequency = BarelyEffectControlType_kDelayLowPassFrequency,
+  kDelayLowPassFrequency = BarelyEngineControlType_kDelayLowPassFrequency,
   /// Delay high-pass frequency.
-  kDelayHighPassFrequency = BarelyEffectControlType_kDelayHighPassFrequency,
+  kDelayHighPassFrequency = BarelyEngineControlType_kDelayHighPassFrequency,
   /// Sidechain mix.
-  kSidechainMix = BarelyEffectControlType_kSidechainMix,
+  kSidechainMix = BarelyEngineControlType_kSidechainMix,
   /// Sidechain attack in seconds.
-  kSidechainAttack = BarelyEffectControlType_kSidechainAttack,
+  kSidechainAttack = BarelyEngineControlType_kSidechainAttack,
   /// Sidechain release in seconds.
-  kSidechainRelease = BarelyEffectControlType_kSidechainRelease,
+  kSidechainRelease = BarelyEngineControlType_kSidechainRelease,
   /// Sidechain threshold.
-  kSidechainThreshold = BarelyEffectControlType_kSidechainThreshold,
+  kSidechainThreshold = BarelyEngineControlType_kSidechainThreshold,
   /// Sidechain ratio.
-  kSidechainRatio = BarelyEffectControlType_kSidechainRatio,
+  kSidechainRatio = BarelyEngineControlType_kSidechainRatio,
 };
 
 /// Filter types.
@@ -1787,17 +1787,17 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
   }
 
-  /// Returns an effect control value.
+  /// Returns a control value.
   ///
-  /// @param type Effect control type.
-  /// @return Effect control value.
+  /// @param type Engine control type.
+  /// @return Engine control value.
   template <typename ValueType>
-  [[nodiscard]] ValueType GetEffectControl(EffectControlType type) const noexcept {
+  [[nodiscard]] ValueType GetControl(EngineControlType type) const noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     float value = 0.0f;
     [[maybe_unused]] const bool success =
-        BarelyEngine_GetEffectControl(*this, static_cast<BarelyEffectControlType>(type), &value);
+        BarelyEngine_GetControl(*this, static_cast<BarelyEngineControlType>(type), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1846,16 +1846,16 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     assert(success);
   }
 
-  /// Sets an effect control value.
+  /// Sets a control value.
   ///
-  /// @param type Effect control type.
-  /// @param value Effect control value.
+  /// @param type Engine control type.
+  /// @param value Engine control value.
   template <typename ValueType>
-  void SetEffectControl(EffectControlType type, ValueType value) noexcept {
+  void SetControl(EngineControlType type, ValueType value) noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyEngine_SetEffectControl(
-        *this, static_cast<BarelyEffectControlType>(type), static_cast<float>(value));
+    [[maybe_unused]] const bool success = BarelyEngine_SetControl(
+        *this, static_cast<BarelyEngineControlType>(type), static_cast<float>(value));
     assert(success);
   }
 

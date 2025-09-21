@@ -36,13 +36,13 @@ bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_nu
   return true;
 }
 
-bool BarelyEngine_GetEffectControl(BarelyEngineHandle engine, BarelyEffectControlType type,
-                                   float* out_value) {
+bool BarelyEngine_GetControl(BarelyEngineHandle engine, BarelyEngineControlType type,
+                             float* out_value) {
   if (!engine) return false;
-  if (type >= BarelyEffectControlType_kCount) return false;
+  if (type >= BarelyEngineControlType_kCount) return false;
   if (!out_value) return false;
 
-  *out_value = engine->GetEffectControl(type);
+  *out_value = engine->GetControl(type);
   return true;
 }
 
@@ -81,12 +81,11 @@ bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
   return true;
 }
 
-bool BarelyEngine_SetEffectControl(BarelyEngineHandle engine, BarelyEffectControlType type,
-                                   float value) {
+bool BarelyEngine_SetControl(BarelyEngineHandle engine, BarelyEngineControlType type, float value) {
   if (!engine) return false;
-  if (type >= BarelyEffectControlType_kCount) return false;
+  if (type >= BarelyEngineControlType_kCount) return false;
 
-  engine->SetEffectControl(type, value);
+  engine->SetControl(type, value);
   return true;
 }
 

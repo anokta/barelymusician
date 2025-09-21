@@ -36,7 +36,7 @@ constexpr double kLookahead = 0.05;
 constexpr float kDelayTime = 0.5f;
 constexpr float kDelayFeedback = 0.2;
 constexpr float kDelayLowPassFrequency = 1000.0f;
-constexpr double kTempo = 128.0;
+constexpr float kTempo = 128.0f;
 
 // Instrument settings.
 constexpr float kGain = 0.125f;
@@ -78,7 +78,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetControl(EngineControlType::kDelayTime, kDelayTime);
   engine.SetControl(EngineControlType::kDelayFeedback, kDelayFeedback);
   engine.SetControl(EngineControlType::kDelayLowPassFrequency, kDelayLowPassFrequency);
-  engine.SetTempo(kTempo);
+  engine.SetControl(barely::EngineControlType::kTempo, kTempo);
 
   auto instrument = engine.CreateInstrument({{
       {ControlType::kGain, kGain},

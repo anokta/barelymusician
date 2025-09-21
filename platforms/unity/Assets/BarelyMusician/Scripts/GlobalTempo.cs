@@ -53,7 +53,7 @@ namespace Barely {
     public float SidechainRatio = 1.0f;
 
     private void Update() {
-      Engine.Tempo = (double)Bpm;
+      Engine.Tempo = Bpm;
       Engine.CompressorMix = CompressorMix;
       Engine.CompressorAttack = CompressorAttack;
       Engine.CompressorRelease = CompressorRelease;

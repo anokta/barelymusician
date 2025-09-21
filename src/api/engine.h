@@ -50,11 +50,6 @@ struct BarelyEngine {
   /// @return Engine control value.
   [[nodiscard]] float GetControl(BarelyEngineControlType type) const noexcept;
 
-  /// Returns the tempo.
-  ///
-  /// @return Tempo in beats per minute.
-  [[nodiscard]] double GetTempo() const noexcept { return tempo_; }
-
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
@@ -92,11 +87,6 @@ struct BarelyEngine {
   /// @param type Engine control type.
   /// @param value Engine control value.
   void SetControl(BarelyEngineControlType type, float value) noexcept;
-
-  /// Sets the tempo.
-  ///
-  /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept;
 
   /// Updates the engine at timestamp.
   ///

@@ -44,8 +44,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
                         });
 
   // Start the performer with a tempo of one beat per second.
-  engine.SetTempo(60.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
+  engine.SetControl(BarelyEngineControlType_kTempo, 60.0f);
+  EXPECT_FLOAT_EQ(engine.GetControl(BarelyEngineControlType_kTempo), 60.0f);
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_FALSE(task.IsActive());
@@ -171,16 +171,16 @@ TEST(EngineTest, PlayMultipleNotes) {
 // Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
   BarelyEngine engine(kSampleRate, kSampleRate, kReferenceFrequency);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
+  EXPECT_FLOAT_EQ(engine.GetControl(BarelyEngineControlType_kTempo), 120.0f);
 
-  engine.SetTempo(200.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 200.0);
+  engine.SetControl(BarelyEngineControlType_kTempo, 200.0f);
+  EXPECT_FLOAT_EQ(engine.GetControl(BarelyEngineControlType_kTempo), 200.0f);
 
-  engine.SetTempo(0.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 0.0);
+  engine.SetControl(BarelyEngineControlType_kTempo, 0.0f);
+  EXPECT_FLOAT_EQ(engine.GetControl(BarelyEngineControlType_kTempo), 0.0f);
 
-  engine.SetTempo(-100.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 0.0);
+  engine.SetControl(BarelyEngineControlType_kTempo, -100.0f);
+  EXPECT_FLOAT_EQ(engine.GetControl(BarelyEngineControlType_kTempo), 0.0f);
 }
 
 }  // namespace

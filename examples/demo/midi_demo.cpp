@@ -50,7 +50,7 @@ constexpr float kInstrumentGain = 0.1f;
 // Midi file name.
 constexpr char kMidiFileName[] = "midi/sample.mid";
 
-constexpr double kTempo = 132.0;
+constexpr float kTempo = 132.0f;
 
 // Builds the score for the given `midi_events`.
 bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instrument& instrument,
@@ -102,7 +102,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kFrameCount);
-  engine.SetTempo(kTempo);
+  engine.SetControl(barely::EngineControlType::kTempo, kTempo);
 
   std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;
   tracks.reserve(track_count);

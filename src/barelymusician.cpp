@@ -54,14 +54,6 @@ bool BarelyEngine_GetSeed(BarelyEngineHandle engine, int32_t* out_seed) {
   return true;
 }
 
-bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo) {
-  if (!engine) return false;
-  if (!out_tempo) return false;
-
-  *out_tempo = engine->GetTempo();
-  return true;
-}
-
 bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp) {
   if (!engine) return false;
   if (!out_timestamp) return false;
@@ -94,13 +86,6 @@ bool BarelyEngine_SetSeed(BarelyEngineHandle engine, int32_t seed) {
 
   // TODO(#146): This should ideally set the seed of `audio_rng_` as well.
   engine->main_rng().SetSeed(seed);
-  return true;
-}
-
-bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo) {
-  if (!engine) return false;
-
-  engine->SetTempo(tempo);
   return true;
 }
 

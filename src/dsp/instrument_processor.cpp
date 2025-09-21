@@ -168,9 +168,11 @@ void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
       params_.voice_params.sidechain_send = value;
       break;
     case ControlType::kArpMode:
+      [[fallthrough]];
     case ControlType::kArpGateRatio:
+      [[fallthrough]];
     case ControlType::kArpRate:
-      break;
+      [[fallthrough]];
     default:
       assert(!"Invalid control type");
       return;

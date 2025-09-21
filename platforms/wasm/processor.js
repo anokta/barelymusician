@@ -4,22 +4,27 @@ const REFERENCE_FREQUENCY = 261.62555;
 const RENDER_QUANTUM_SIZE = 128
 
 export const EngineControlType = {
-  COMPRESSOR_MIX: 0,
-  COMPRESSOR_ATTACK: 1,
-  COMPRESSOR_RELEASE: 2,
-  COMPRESSOR_THRESHOLD: 3,
-  COMPRESSOR_RATIO: 4,
-  DELAY_MIX: 5,
-  DELAY_TIME: 6,
-  DELAY_FEEDBACK: 7,
-  DELAY_LOW_PASS_FREQUENCY: 8,
-  DELAY_HIGH_PASS_FREQUENCY: 9,
-  SIDECHAIN_MIX: 10,
-  SIDECHAIN_ATTACK: 11,
-  SIDECHAIN_RELEASE: 12,
-  SIDECHAIN_THRESHOLD: 13,
-  SIDECHAIN_RATIO: 14,
-  COUNT: 15,
+  TEMPO: 0,
+
+  COMPRESSOR_MIX: 1,
+  COMPRESSOR_ATTACK: 2,
+  COMPRESSOR_RELEASE: 3,
+  COMPRESSOR_THRESHOLD: 4,
+  COMPRESSOR_RATIO: 5,
+
+  DELAY_MIX: 6,
+  DELAY_TIME: 7,
+  DELAY_FEEDBACK: 8,
+  DELAY_LOW_PASS_FREQUENCY: 9,
+  DELAY_HIGH_PASS_FREQUENCY: 10,
+
+  SIDECHAIN_MIX: 11,
+  SIDECHAIN_ATTACK: 12,
+  SIDECHAIN_RELEASE: 13,
+  SIDECHAIN_THRESHOLD: 14,
+  SIDECHAIN_RATIO: 15,
+
+  COUNT: 16,
 };
 
 class Processor extends AudioWorkletProcessor {
@@ -70,7 +75,10 @@ class Processor extends AudioWorkletProcessor {
           this.port.postMessage({type: 'engine-get-seed-response', seed: this._engine.seed});
         } break;
         case 'engine-get-tempo': {
-          this.port.postMessage({type: 'engine-get-tempo-response', tempo: this._engine.tempo});
+          this.port.postMessage({
+            type: 'engine-get-tempo-response',
+            tempo: this._engine.getControl(EngineControlType.TEMPO),
+          });
         } break;
         case 'engine-get-timestamp': {
           this.port.postMessage(
@@ -86,7 +94,7 @@ class Processor extends AudioWorkletProcessor {
           this._engine.seed = event.data.seed;
         } break;
         case 'engine-set-tempo': {
-          this._engine.tempo = event.data.tempo;
+          this._engine.setControl(EngineControlType.TEMPO, event.data.tempo);
         } break;
         case 'instrument-create': {
           const instrument = this._engine.createInstrument();

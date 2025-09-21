@@ -41,7 +41,7 @@ constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 
-constexpr double kInitialTempo = 120.0;
+constexpr float kInitialTempo = 120.0f;
 
 }  // namespace
 
@@ -53,7 +53,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kFrameCount);
-  engine.SetTempo(kInitialTempo);
+  engine.SetControl(barely::EngineControlType::kTempo, kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{
       {ControlType::kGain, kGain},

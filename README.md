@@ -32,7 +32,7 @@ Example usage
 barely::Engine engine(/*sample_rate=*/48000, /*max_frame_count=*/512);
 
 // Set the global tempo.
-engine.SetTempo(/*tempo=*/124.0);
+engine.SetControl(barely::EngineControlType::kTempo, 124.0f);
 
 // Create a new instrument.
 auto instrument = engine.CreateInstrument();

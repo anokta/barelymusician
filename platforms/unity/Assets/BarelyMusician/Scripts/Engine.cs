@@ -216,8 +216,8 @@ namespace Barely {
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Control type.
-      public enum ControlType {
+      /// Instrument control type.
+      public enum InstrumentControlType {
         /// Gain in linear amplitude.
         [InspectorName("Gain")] GAIN = 0,
         /// Pitch shift.
@@ -366,36 +366,56 @@ namespace Barely {
         if (Handle == IntPtr.Zero || instrumentHandle != IntPtr.Zero) {
           return;
         }
-        _controlOverrides[(int)ControlType.GAIN].value = instrument.Gain;
-        _controlOverrides[(int)ControlType.PITCH_SHIFT].value = instrument.PitchShift;
-        _controlOverrides[(int)ControlType.RETRIGGER].value = instrument.Retrigger ? 1.0f : 0.0f;
-        _controlOverrides[(int)ControlType.STEREO_PAN].value = (float)instrument.StereoPan;
-        _controlOverrides[(int)ControlType.VOICE_COUNT].value = (float)instrument.VoiceCount;
-        _controlOverrides[(int)ControlType.ATTACK].value = instrument.Attack;
-        _controlOverrides[(int)ControlType.DECAY].value = instrument.Decay;
-        _controlOverrides[(int)ControlType.SUSTAIN].value = instrument.Sustain;
-        _controlOverrides[(int)ControlType.RELEASE].value = instrument.Release;
-        _controlOverrides[(int)ControlType.OSC_MIX].value = instrument.OscMix;
-        _controlOverrides[(int)ControlType.OSC_MODE].value = (float)instrument.OscMode;
-        _controlOverrides[(int)ControlType.OSC_NOISE_MIX].value = instrument.OscNoiseMix;
-        _controlOverrides[(int)ControlType.OSC_PITCH_SHIFT].value = instrument.OscPitchShift;
-        _controlOverrides[(int)ControlType.OSC_SHAPE].value = instrument.OscShape;
-        _controlOverrides[(int)ControlType.OSC_SKEW].value = instrument.OscSkew;
-        _controlOverrides[(int)ControlType.SLICE_MODE].value = (float)instrument.SliceMode;
-        _controlOverrides[(int)ControlType.BIT_CRUSHER_DEPTH].value = instrument.BitCrusherDepth;
-        _controlOverrides[(int)ControlType.BIT_CRUSHER_RATE].value = instrument.BitCrusherRate;
-        _controlOverrides[(int)ControlType.DISTORTION_AMOUNT].value = instrument.DistortionAmount;
-        _controlOverrides[(int)ControlType.DISTORTION_DRIVE].value = instrument.DistortionDrive;
-        _controlOverrides[(int)ControlType.FILTER_TYPE].value = (float)instrument.FilterType;
-        _controlOverrides[(int)ControlType.FILTER_FREQUENCY].value = instrument.FilterFrequency;
-        _controlOverrides[(int)ControlType.FILTER_Q].value = instrument.FilterQ;
-        _controlOverrides[(int)ControlType.DELAY_SEND].value = instrument.DelaySend;
-        _controlOverrides[(int)ControlType.SIDECHAIN_SEND].value = instrument.SidechainSend;
-        _controlOverrides[(int)ControlType.ARP_MODE].value = (float)instrument.ArpMode;
-        _controlOverrides[(int)ControlType.ARP_GATE_RATIO].value = instrument.ArpGateRatio;
-        _controlOverrides[(int)ControlType.ARP_RATE].value = instrument.ArpRate;
-        bool success = BarelyInstrument_Create(Handle, _controlOverrides, _controlOverrides.Length,
-                                               ref instrumentHandle);
+        _instrumentControlOverrides[(int)InstrumentControlType.GAIN].value = instrument.Gain;
+        _instrumentControlOverrides[(int)InstrumentControlType.PITCH_SHIFT].value =
+            instrument.PitchShift;
+        _instrumentControlOverrides[(int)InstrumentControlType.RETRIGGER].value =
+            instrument.Retrigger ? 1.0f : 0.0f;
+        _instrumentControlOverrides[(int)InstrumentControlType.STEREO_PAN].value =
+            (float)instrument.StereoPan;
+        _instrumentControlOverrides[(int)InstrumentControlType.VOICE_COUNT].value =
+            (float)instrument.VoiceCount;
+        _instrumentControlOverrides[(int)InstrumentControlType.ATTACK].value = instrument.Attack;
+        _instrumentControlOverrides[(int)InstrumentControlType.DECAY].value = instrument.Decay;
+        _instrumentControlOverrides[(int)InstrumentControlType.SUSTAIN].value = instrument.Sustain;
+        _instrumentControlOverrides[(int)InstrumentControlType.RELEASE].value = instrument.Release;
+        _instrumentControlOverrides[(int)InstrumentControlType.OSC_MIX].value = instrument.OscMix;
+        _instrumentControlOverrides[(int)InstrumentControlType.OSC_MODE].value =
+            (float)instrument.OscMode;
+        _instrumentControlOverrides[(int)InstrumentControlType.OSC_NOISE_MIX].value =
+            instrument.OscNoiseMix;
+        _instrumentControlOverrides[(int)InstrumentControlType.OSC_PITCH_SHIFT].value =
+            instrument.OscPitchShift;
+        _instrumentControlOverrides[(int)InstrumentControlType.OSC_SHAPE].value =
+            instrument.OscShape;
+        _instrumentControlOverrides[(int)InstrumentControlType.OSC_SKEW].value = instrument.OscSkew;
+        _instrumentControlOverrides[(int)InstrumentControlType.SLICE_MODE].value =
+            (float)instrument.SliceMode;
+        _instrumentControlOverrides[(int)InstrumentControlType.BIT_CRUSHER_DEPTH].value =
+            instrument.BitCrusherDepth;
+        _instrumentControlOverrides[(int)InstrumentControlType.BIT_CRUSHER_RATE].value =
+            instrument.BitCrusherRate;
+        _instrumentControlOverrides[(int)InstrumentControlType.DISTORTION_AMOUNT].value =
+            instrument.DistortionAmount;
+        _instrumentControlOverrides[(int)InstrumentControlType.DISTORTION_DRIVE].value =
+            instrument.DistortionDrive;
+        _instrumentControlOverrides[(int)InstrumentControlType.FILTER_TYPE].value =
+            (float)instrument.FilterType;
+        _instrumentControlOverrides[(int)InstrumentControlType.FILTER_FREQUENCY].value =
+            instrument.FilterFrequency;
+        _instrumentControlOverrides[(int)InstrumentControlType.FILTER_Q].value = instrument.FilterQ;
+        _instrumentControlOverrides[(int)InstrumentControlType.DELAY_SEND].value =
+            instrument.DelaySend;
+        _instrumentControlOverrides[(int)InstrumentControlType.SIDECHAIN_SEND].value =
+            instrument.SidechainSend;
+        _instrumentControlOverrides[(int)InstrumentControlType.ARP_MODE].value =
+            (float)instrument.ArpMode;
+        _instrumentControlOverrides[(int)InstrumentControlType.ARP_GATE_RATIO].value =
+            instrument.ArpGateRatio;
+        _instrumentControlOverrides[(int)InstrumentControlType.ARP_RATE].value = instrument.ArpRate;
+        bool success =
+            BarelyInstrument_Create(Handle, _instrumentControlOverrides,
+                                    _instrumentControlOverrides.Length, ref instrumentHandle);
         if (!success) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
@@ -423,9 +443,10 @@ namespace Barely {
       /// Returns the value of an instrument control.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @param type Control type.
-      /// @return Control value.
-      public static float Instrument_GetControl(IntPtr instrumentHandle, ControlType type) {
+      /// @param type Instrument control type.
+      /// @return Instrument control value.
+      public static float Instrument_GetControl(IntPtr instrumentHandle,
+                                                InstrumentControlType type) {
         float value = 0.0f;
         if (!BarelyInstrument_GetControl(instrumentHandle, type, ref value) &&
             instrumentHandle != IntPtr.Zero) {
@@ -476,9 +497,9 @@ namespace Barely {
       /// Sets an instrument control value.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @param type Control type.
-      /// @param value Control value.
-      public static void Instrument_SetControl(IntPtr instrumentHandle, ControlType type,
+      /// @param type Instrument control type.
+      /// @param value Instrument control value.
+      public static void Instrument_SetControl(IntPtr instrumentHandle, InstrumentControlType type,
                                                float value) {
         if (!BarelyInstrument_SetControl(instrumentHandle, type, value) &&
             instrumentHandle != IntPtr.Zero) {
@@ -870,17 +891,17 @@ namespace Barely {
         }
       }
 
-      // Control override.
+      // Instrument control override.
       [StructLayout(LayoutKind.Sequential)]
-      private struct ControlOverride {
+      private struct InstrumentControlOverride {
         // Type.
-        public ControlType type;
+        public InstrumentControlType type;
 
         // Value.
         public float value;
       }
 
-      // Control override.
+      // Instrument control override.
       [StructLayout(LayoutKind.Sequential)]
       private struct NoteControlOverride {
         // Type.
@@ -963,8 +984,8 @@ namespace Barely {
       // Map of instruments by their handles.
       private static Dictionary<IntPtr, Instrument> _instruments = null;
 
-      // Array of control overrides.
-      private static ControlOverride[] _controlOverrides = null;
+      // Array of instrument control overrides.
+      private static InstrumentControlOverride[] _instrumentControlOverrides = null;
 
       // Array of note control overrides.
       private static NoteControlOverride[] _noteControlOverrides = null;
@@ -1091,9 +1112,10 @@ namespace Barely {
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_RATIO, _sidechainRatio);
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<IntPtr, Instrument>();
-          _controlOverrides = new ControlOverride[Enum.GetNames(typeof(ControlType)).Length];
-          for (int i = 0; i < _controlOverrides.Length; ++i) {
-            _controlOverrides[i].type = (ControlType)i;
+          _instrumentControlOverrides =
+              new InstrumentControlOverride[Enum.GetNames(typeof(InstrumentControlType)).Length];
+          for (int i = 0; i < _instrumentControlOverrides.Length; ++i) {
+            _instrumentControlOverrides[i].type = (InstrumentControlType)i;
           }
           _noteControlOverrides =
               new NoteControlOverride[Enum.GetNames(typeof(NoteControlType)).Length];
@@ -1160,16 +1182,16 @@ namespace Barely {
       private static extern bool BarelyEngine_Update(IntPtr engine, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Create")]
-      private static extern bool BarelyInstrument_Create(IntPtr engine,
-                                                         [In] ControlOverride[] controlOverrides,
-                                                         Int32 controlOverrideCount,
-                                                         ref IntPtr outInstrument);
+      private static extern bool BarelyInstrument_Create(
+          IntPtr engine, [In] InstrumentControlOverride[] controlOverrides,
+          Int32 controlOverrideCount, ref IntPtr outInstrument);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr instrument);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetControl")]
-      private static extern bool BarelyInstrument_GetControl(IntPtr instrument, ControlType type,
+      private static extern bool BarelyInstrument_GetControl(IntPtr instrument,
+                                                             InstrumentControlType type,
                                                              ref float outValue);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
@@ -1185,7 +1207,8 @@ namespace Barely {
       private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr instrument);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetControl")]
-      private static extern bool BarelyInstrument_SetControl(IntPtr instrument, ControlType type,
+      private static extern bool BarelyInstrument_SetControl(IntPtr instrument,
+                                                             InstrumentControlType type,
                                                              float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]

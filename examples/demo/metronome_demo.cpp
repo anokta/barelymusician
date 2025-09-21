@@ -12,9 +12,9 @@
 
 namespace {
 
-using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::EngineControlType;
+using ::barely::InstrumentControlType;
 using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -56,12 +56,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Create the metronome instrument.
   auto instrument = engine.CreateInstrument({{
-      {ControlType::kGain, kGain},
-      {ControlType::kOscMix, 1.0f},
-      {ControlType::kOscShape, kOscShape},
-      {ControlType::kAttack, kAttack},
-      {ControlType::kRelease, kRelease},
-      {ControlType::kVoiceCount, kVoiceCount},
+      {InstrumentControlType::kGain, kGain},
+      {InstrumentControlType::kOscMix, 1.0f},
+      {InstrumentControlType::kOscShape, kOscShape},
+      {InstrumentControlType::kAttack, kAttack},
+      {InstrumentControlType::kRelease, kRelease},
+      {InstrumentControlType::kVoiceCount, kVoiceCount},
   }});
 
   // Create the metronome with a beat callback.

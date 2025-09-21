@@ -59,7 +59,7 @@
 ///   const bool is_note_on = instrument.IsNoteOn(kC3Pitch);
 ///
 ///   // Set the instrument to use full oscillator mix.
-///   instrument.SetControl(barely::ControlType::kOscMix, /*value=*/1.0f);
+///   instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 ///   @endcode
 ///
 /// - Performer:
@@ -145,7 +145,7 @@
 ///   BarelyInstrument_IsNoteOn(instrument, c3_pitch, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, BarelyControlType_kOscMix, /*value=*/1.0f);
+///   BarelyInstrument_SetControl(instrument, BarelyInstrumentControlType_kOscMix, /*value=*/1.0f);
 ///
 ///   // Destroy.
 ///   BarelyInstrument_Destroy(instrument);
@@ -235,68 +235,6 @@ typedef enum BarelyArpMode {
   BarelyArpMode_kCount,
 } BarelyArpMode;
 
-/// Control types.
-typedef enum BarelyControlType {
-  /// Gain in linear amplitude.
-  BarelyControlType_kGain = 0,
-  /// Pitch shift.
-  BarelyControlType_kPitchShift,
-  /// Retrigger.
-  BarelyControlType_kRetrigger,
-  /// Stereo pan.
-  BarelyControlType_kStereoPan,
-  /// Number of voices.
-  BarelyControlType_kVoiceCount,
-  /// Envelope attack in seconds.
-  BarelyControlType_kAttack,
-  /// Envelope decay in seconds.
-  BarelyControlType_kDecay,
-  /// Envelope sustain.
-  BarelyControlType_kSustain,
-  /// Envelope release in seconds.
-  BarelyControlType_kRelease,
-  /// Oscillator mix.
-  BarelyControlType_kOscMix,
-  /// Oscillator mode.
-  BarelyControlType_kOscMode,
-  /// Oscillator noise mix.
-  BarelyControlType_kOscNoiseMix,
-  /// Oscillator pitch shift.
-  BarelyControlType_kOscPitchShift,
-  /// Oscillator shape.
-  BarelyControlType_kOscShape,
-  /// Oscillator skew.
-  BarelyControlType_kOscSkew,
-  /// Slice mode.
-  BarelyControlType_kSliceMode,
-  /// Bit crusher depth.
-  BarelyControlType_kBitCrusherDepth,
-  /// Normalized bit crusher rate.
-  BarelyControlType_kBitCrusherRate,
-  /// Distortion amount.
-  BarelyControlType_kDistortionAmount,
-  /// Distortion drive.
-  BarelyControlType_kDistortionDrive,
-  /// Filter type.
-  BarelyControlType_kFilterType,
-  /// Filter frequency in hertz.
-  BarelyControlType_kFilterFrequency,
-  /// Filter Q factor.
-  BarelyControlType_kFilterQ,
-  /// Delay send.
-  BarelyControlType_kDelaySend,
-  /// Sidechain send.
-  BarelyControlType_kSidechainSend,
-  /// Arpeggiator mode.
-  BarelyControlType_kArpMode,
-  /// Arpeggiator gate ratio.
-  BarelyControlType_kArpGateRatio,
-  /// Arpeggiator rate.
-  BarelyControlType_kArpRate,
-  /// Number of control types.
-  BarelyControlType_kCount,
-} BarelyControlType;
-
 /// Engine control types.
 typedef enum BarelyEngineControlType {
   /// Tempo in beats per minute.
@@ -346,6 +284,68 @@ typedef enum BarelyFilterType {
   /// Number of filters.
   BarelyFilterType_kCount,
 } BarelyFilterType;
+
+/// Instrument control types.
+typedef enum BarelyInstrumentControlType {
+  /// Gain in linear amplitude.
+  BarelyInstrumentControlType_kGain = 0,
+  /// Pitch shift.
+  BarelyInstrumentControlType_kPitchShift,
+  /// Retrigger.
+  BarelyInstrumentControlType_kRetrigger,
+  /// Stereo pan.
+  BarelyInstrumentControlType_kStereoPan,
+  /// Number of voices.
+  BarelyInstrumentControlType_kVoiceCount,
+  /// Envelope attack in seconds.
+  BarelyInstrumentControlType_kAttack,
+  /// Envelope decay in seconds.
+  BarelyInstrumentControlType_kDecay,
+  /// Envelope sustain.
+  BarelyInstrumentControlType_kSustain,
+  /// Envelope release in seconds.
+  BarelyInstrumentControlType_kRelease,
+  /// Oscillator mix.
+  BarelyInstrumentControlType_kOscMix,
+  /// Oscillator mode.
+  BarelyInstrumentControlType_kOscMode,
+  /// Oscillator noise mix.
+  BarelyInstrumentControlType_kOscNoiseMix,
+  /// Oscillator pitch shift.
+  BarelyInstrumentControlType_kOscPitchShift,
+  /// Oscillator shape.
+  BarelyInstrumentControlType_kOscShape,
+  /// Oscillator skew.
+  BarelyInstrumentControlType_kOscSkew,
+  /// Slice mode.
+  BarelyInstrumentControlType_kSliceMode,
+  /// Bit crusher depth.
+  BarelyInstrumentControlType_kBitCrusherDepth,
+  /// Normalized bit crusher rate.
+  BarelyInstrumentControlType_kBitCrusherRate,
+  /// Distortion amount.
+  BarelyInstrumentControlType_kDistortionAmount,
+  /// Distortion drive.
+  BarelyInstrumentControlType_kDistortionDrive,
+  /// Filter type.
+  BarelyInstrumentControlType_kFilterType,
+  /// Filter frequency in hertz.
+  BarelyInstrumentControlType_kFilterFrequency,
+  /// Filter Q factor.
+  BarelyInstrumentControlType_kFilterQ,
+  /// Delay send.
+  BarelyInstrumentControlType_kDelaySend,
+  /// Sidechain send.
+  BarelyInstrumentControlType_kSidechainSend,
+  /// Arpeggiator mode.
+  BarelyInstrumentControlType_kArpMode,
+  /// Arpeggiator gate ratio.
+  BarelyInstrumentControlType_kArpGateRatio,
+  /// Arpeggiator rate.
+  BarelyInstrumentControlType_kArpRate,
+  /// Number of instrument control types.
+  BarelyInstrumentControlType_kCount,
+} BarelyInstrumentControlType;
 
 /// Note control types.
 typedef enum BarelyNoteControlType {
@@ -407,14 +407,14 @@ typedef enum BarelyTaskEventType {
   BarelyTaskEventType_kCount,
 } BarelyTaskEventType;
 
-/// Control override.
-typedef struct BarelyControlOverride {
+/// Instrument control override.
+typedef struct BarelyInstrumentControlOverride {
   /// Type.
-  BarelyControlType type;
+  BarelyInstrumentControlType type;
 
   /// Value.
   float value;
-} BarelyControlOverride;
+} BarelyInstrumentControlOverride;
 
 /// Note control override.
 typedef struct BarelyNoteControlOverride {
@@ -573,12 +573,12 @@ BARELY_API bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp)
 /// Creates a new instrument.
 ///
 /// @param engine Engine handle.
-/// @param control_overrides Array of control overrides.
-/// @param control_override_count Number of control overrides.
+/// @param control_overrides Array of instrument control overrides.
+/// @param control_override_count Number of instrument control overrides.
 /// @param out_instrument Output instrument handle.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_Create(BarelyEngineHandle engine,
-                                        const BarelyControlOverride* control_overrides,
+                                        const BarelyInstrumentControlOverride* control_overrides,
                                         int32_t control_override_count,
                                         BarelyInstrumentHandle* out_instrument);
 
@@ -591,11 +591,11 @@ BARELY_API bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 /// Gets an instrument control value.
 ///
 /// @param instrument Instrument handle.
-/// @param type Control type.
-/// @param out_value Output control value.
+/// @param type Instrument control type.
+/// @param out_value Output instrument control value.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument,
-                                            BarelyControlType type, float* out_value);
+                                            BarelyInstrumentControlType type, float* out_value);
 
 /// Gets an instrument note control value.
 ///
@@ -625,11 +625,11 @@ BARELY_API bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrumen
 /// Sets an instrument control value.
 ///
 /// @param instrument Instrument handle.
-/// @param type Control type.
-/// @param value Control value.
+/// @param type Instrument control type.
+/// @param value Instrument control value.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
-                                            BarelyControlType type, float value);
+                                            BarelyInstrumentControlType type, float value);
 
 /// Sets an instrument note control value.
 ///
@@ -900,64 +900,64 @@ enum class ArpMode {
   kRandom = BarelyArpMode_kRandom,
 };
 
-/// Control types.
-enum class ControlType {
+/// Instrument control types.
+enum class InstrumentControlType {
   /// Gain in linear amplitude.
-  kGain = BarelyControlType_kGain,
+  kGain = BarelyInstrumentControlType_kGain,
   /// Pitch shift.
-  kPitchShift = BarelyControlType_kPitchShift,
+  kPitchShift = BarelyInstrumentControlType_kPitchShift,
   /// Retrigger.
-  kRetrigger = BarelyControlType_kRetrigger,
+  kRetrigger = BarelyInstrumentControlType_kRetrigger,
   /// Stereo pan.
-  kStereoPan = BarelyControlType_kStereoPan,
+  kStereoPan = BarelyInstrumentControlType_kStereoPan,
   /// Number of voices.
-  kVoiceCount = BarelyControlType_kVoiceCount,
+  kVoiceCount = BarelyInstrumentControlType_kVoiceCount,
   /// Envelope attack in seconds.
-  kAttack = BarelyControlType_kAttack,
+  kAttack = BarelyInstrumentControlType_kAttack,
   /// Envelope decay in seconds.
-  kDecay = BarelyControlType_kDecay,
+  kDecay = BarelyInstrumentControlType_kDecay,
   /// Envelope sustain.
-  kSustain = BarelyControlType_kSustain,
+  kSustain = BarelyInstrumentControlType_kSustain,
   /// Envelope release in seconds.
-  kRelease = BarelyControlType_kRelease,
+  kRelease = BarelyInstrumentControlType_kRelease,
   /// Oscillator mix.
-  kOscMix = BarelyControlType_kOscMix,
+  kOscMix = BarelyInstrumentControlType_kOscMix,
   /// Oscillator mode.
-  kOscMode = BarelyControlType_kOscMode,
+  kOscMode = BarelyInstrumentControlType_kOscMode,
   /// Oscillator noise mix.
-  kOscNoiseMix = BarelyControlType_kOscNoiseMix,
+  kOscNoiseMix = BarelyInstrumentControlType_kOscNoiseMix,
   /// Oscillator pitch shift.
-  kOscPitchShift = BarelyControlType_kOscPitchShift,
+  kOscPitchShift = BarelyInstrumentControlType_kOscPitchShift,
   /// Oscillator shape.
-  kOscShape = BarelyControlType_kOscShape,
+  kOscShape = BarelyInstrumentControlType_kOscShape,
   /// Oscillator skew.
-  kOscSkew = BarelyControlType_kOscSkew,
+  kOscSkew = BarelyInstrumentControlType_kOscSkew,
   /// Slice mode.
-  kSliceMode = BarelyControlType_kSliceMode,
+  kSliceMode = BarelyInstrumentControlType_kSliceMode,
   /// Bit crusher depth.
-  kBitCrusherDepth = BarelyControlType_kBitCrusherDepth,
+  kBitCrusherDepth = BarelyInstrumentControlType_kBitCrusherDepth,
   /// Normalized bit crusher rate.
-  kBitCrusherRate = BarelyControlType_kBitCrusherRate,
+  kBitCrusherRate = BarelyInstrumentControlType_kBitCrusherRate,
   /// Distortion amount.
-  kDistortionAmount = BarelyControlType_kDistortionAmount,
+  kDistortionAmount = BarelyInstrumentControlType_kDistortionAmount,
   /// Distortion drive.
-  kDistortionDrive = BarelyControlType_kDistortionDrive,
+  kDistortionDrive = BarelyInstrumentControlType_kDistortionDrive,
   /// Filter type.
-  kFilterType = BarelyControlType_kFilterType,
+  kFilterType = BarelyInstrumentControlType_kFilterType,
   /// Filter frequency in hertz.
-  kFilterFrequency = BarelyControlType_kFilterFrequency,
+  kFilterFrequency = BarelyInstrumentControlType_kFilterFrequency,
   /// Filter Q factor.
-  kFilterQ = BarelyControlType_kFilterQ,
+  kFilterQ = BarelyInstrumentControlType_kFilterQ,
   /// Delay send.
-  kDelaySend = BarelyControlType_kDelaySend,
+  kDelaySend = BarelyInstrumentControlType_kDelaySend,
   /// Sidechain send.
-  kSidechainSend = BarelyControlType_kSidechainSend,
+  kSidechainSend = BarelyInstrumentControlType_kSidechainSend,
   /// Arpeggiator mode.
-  kArpMode = BarelyControlType_kArpMode,
+  kArpMode = BarelyInstrumentControlType_kArpMode,
   /// Arpeggiator gate ratio.
-  kArpGateRatio = BarelyControlType_kArpGateRatio,
+  kArpGateRatio = BarelyInstrumentControlType_kArpGateRatio,
   /// Arpeggiator rate.
-  kArpRate = BarelyControlType_kArpRate,
+  kArpRate = BarelyInstrumentControlType_kArpRate,
 };
 
 /// Engine control types.
@@ -1056,18 +1056,19 @@ enum class TaskEventType {
   kEnd = BarelyTaskEventType_kEnd,
 };
 
-/// Control override.
-struct ControlOverride : public BarelyControlOverride {
+/// Instrument control override.
+struct InstrumentControlOverride : public BarelyInstrumentControlOverride {
   /// Default constructor.
-  ControlOverride() noexcept = default;
+  InstrumentControlOverride() noexcept = default;
 
-  /// Constructs a new `ControlOverride`.
+  /// Constructs a new `InstrumentControlOverride`.
   ///
-  /// @param type Control type.
-  /// @param value Control value.
+  /// @param type Instrument control type.
+  /// @param value Instrument control value.
   template <typename ValueType>
-  ControlOverride(ControlType type, ValueType value) noexcept
-      : BarelyControlOverride{static_cast<BarelyControlType>(type), static_cast<float>(value)} {
+  InstrumentControlOverride(InstrumentControlType type, ValueType value) noexcept
+      : BarelyInstrumentControlOverride{static_cast<BarelyInstrumentControlType>(type),
+                                        static_cast<float>(value)} {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
   }
@@ -1187,12 +1188,14 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   /// Constructs a new `Instrument`.
   ///
   /// @param engine Raw engine handle.
-  /// @param control_overrides Span of control overrides.
-  Instrument(BarelyEngineHandle engine, std::span<const ControlOverride> control_overrides) noexcept
+  /// @param control_overrides Span of instrument control overrides.
+  Instrument(BarelyEngineHandle engine,
+             std::span<const InstrumentControlOverride> control_overrides) noexcept
       : HandleWrapper([&]() {
           BarelyInstrumentHandle instrument = nullptr;
           [[maybe_unused]] const bool success = BarelyInstrument_Create(
-              engine, reinterpret_cast<const BarelyControlOverride*>(control_overrides.data()),
+              engine,
+              reinterpret_cast<const BarelyInstrumentControlOverride*>(control_overrides.data()),
               static_cast<int32_t>(control_overrides.size()), &instrument);
           assert(success);
           return instrument;
@@ -1240,15 +1243,15 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Returns a control value.
   ///
-  /// @param type Control type.
-  /// @return Control value.
+  /// @param type Instrument control type.
+  /// @return Instrument control value.
   template <typename ValueType>
-  [[nodiscard]] ValueType GetControl(ControlType type) const noexcept {
+  [[nodiscard]] ValueType GetControl(InstrumentControlType type) const noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     float value = 0.0f;
     [[maybe_unused]] const bool success =
-        BarelyInstrument_GetControl(*this, static_cast<BarelyControlType>(type), &value);
+        BarelyInstrument_GetControl(*this, static_cast<BarelyInstrumentControlType>(type), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1288,14 +1291,14 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
 
   /// Sets a control value.
   ///
-  /// @param type Control type.
-  /// @param value Control value.
+  /// @param type Instrument control type.
+  /// @param value Instrument control value.
   template <typename ValueType>
-  void SetControl(ControlType type, ValueType value) noexcept {
+  void SetControl(InstrumentControlType type, ValueType value) noexcept {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
-        *this, static_cast<BarelyControlType>(type), static_cast<float>(value));
+        *this, static_cast<BarelyInstrumentControlType>(type), static_cast<float>(value));
     assert(success);
   }
 
@@ -1745,9 +1748,10 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
 
   /// Creates a new instrument.
   ///
-  /// @param control_overrides Span of control overrides.
+  /// @param control_overrides Span of instrument control overrides.
   /// @return Instrument.
-  Instrument CreateInstrument(std::span<const ControlOverride> control_overrides = {}) noexcept {
+  Instrument CreateInstrument(
+      std::span<const InstrumentControlOverride> control_overrides = {}) noexcept {
     return Instrument(*this, control_overrides);
   }
 

@@ -8,9 +8,9 @@
 
 namespace {
 
-using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::InstrumentControlType;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
 using ::daisy::MidiMessageType;
@@ -44,7 +44,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   if (const auto increment = g_hw.encoder.Increment(); increment != 0) {
     g_osc_shape =
         std::clamp(g_osc_shape + kOscShapeIncrement * static_cast<float>(increment), 0.0f, 1.0f);
-    g_instrument->SetControl(ControlType::kOscShape, g_osc_shape);
+    g_instrument->SetControl(InstrumentControlType::kOscShape, g_osc_shape);
   }
   // Process the output samples.
   const int frame_count = static_cast<int>(size);
@@ -72,12 +72,12 @@ int main(void) {
   // Initialize the instrument.
   g_engine.emplace(kSampleRate, kFrameCount);
   g_instrument = g_engine->CreateInstrument({{
-      {ControlType::kGain, kGain},
-      {ControlType::kOscMix, 1.0f},
-      {ControlType::kOscShape, g_osc_shape},
-      {ControlType::kAttack, kAttack},
-      {ControlType::kRelease, kRelease},
-      {ControlType::kVoiceCount, kVoiceCount},
+      {InstrumentControlType::kGain, kGain},
+      {InstrumentControlType::kOscMix, 1.0f},
+      {InstrumentControlType::kOscShape, g_osc_shape},
+      {InstrumentControlType::kAttack, kAttack},
+      {InstrumentControlType::kRelease, kRelease},
+      {InstrumentControlType::kVoiceCount, kVoiceCount},
   }});
 
   // Start processing.

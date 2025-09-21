@@ -20,9 +20,9 @@
 namespace {
 
 using ::barely::Control;
-using ::barely::ControlArray;
-using ::barely::ControlMessage;
-using ::barely::ControlType;
+using ::barely::InstrumentControlArray;
+using ::barely::InstrumentControlMessage;
+using ::barely::InstrumentControlType;
 using ::barely::NoteControlArray;
 using ::barely::NoteControlMessage;
 using ::barely::NoteControlType;
@@ -31,8 +31,9 @@ using ::barely::NoteOnMessage;
 using ::barely::SampleDataMessage;
 
 // Returns a control array with overrides.
-ControlArray BuildControlArray(std::span<const BarelyControlOverride> control_overrides) noexcept {
-  ControlArray control_array = {
+InstrumentControlArray BuildControlArray(
+    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
+  InstrumentControlArray control_array = {
       Control(1.0f, 0.0f, 1.0f),                   // kGain
       Control(0.0f),                               // kPitchShift
       Control(false),                              // kRetrigger
@@ -95,7 +96,8 @@ std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyInstrument::BarelyInstrument(
-    BarelyEngine& engine, std::span<const BarelyControlOverride> control_overrides) noexcept
+    BarelyEngine& engine,
+    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept
     : engine_(engine),
       controls_(BuildControlArray(control_overrides)),
       arp_(engine),
@@ -121,11 +123,12 @@ BarelyInstrument::BarelyInstrument(
              }
            },
            this}) {
-  const float arp_rate = controls_[BarelyControlType_kArpRate].value;
+  const float arp_rate = controls_[BarelyInstrumentControlType_kArpRate].value;
   arp_.SetLooping(true);
   arp_.SetLoopLength((arp_rate > 0.0f) ? 1.0 / static_cast<double>(arp_rate) : 0.0);
-  arp_task_.SetDuration(static_cast<double>(controls_[BarelyControlType_kArpGateRatio].value) *
-                        arp_.GetLoopLength());
+  arp_task_.SetDuration(
+      static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
+      arp_.GetLoopLength());
 
   engine_.AddInstrument(this, control_overrides);
 }
@@ -135,7 +138,7 @@ BarelyInstrument::~BarelyInstrument() noexcept {
   engine_.RemoveInstrument(this);
 }
 
-float BarelyInstrument::GetControl(BarelyControlType type) const noexcept {
+float BarelyInstrument::GetControl(BarelyInstrumentControlType type) const noexcept {
   return controls_[type].value;
 }
 
@@ -167,9 +170,9 @@ void BarelyInstrument::SetAllNotesOff() noexcept {
   }
 }
 
-void BarelyInstrument::SetControl(BarelyControlType type, float value) noexcept {
+void BarelyInstrument::SetControl(BarelyInstrumentControlType type, float value) noexcept {
   if (auto& control = controls_[type]; control.SetValue(value)) {
-    ProcessControl(static_cast<ControlType>(type), control.value);
+    ProcessControl(static_cast<InstrumentControlType>(type), control.value);
   }
 }
 
@@ -205,7 +208,7 @@ void BarelyInstrument::SetNoteOn(
       success) {
     pitches_.insert(std::lower_bound(pitches_.begin(), pitches_.end(), pitch), pitch);
     if (pitches_.size() == 1 &&
-        static_cast<BarelyArpMode>(controls_[BarelyControlType_kArpMode].value) !=
+        static_cast<BarelyArpMode>(controls_[BarelyInstrumentControlType_kArpMode].value) !=
             BarelyArpMode_kNone) {
       arp_.Start();
     } else if (!arp_.IsPlaying()) {
@@ -219,9 +222,9 @@ void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexce
   engine_.ScheduleMessage(SampleDataMessage{this, slices});
 }
 
-void BarelyInstrument::ProcessControl(ControlType type, float value) noexcept {
+void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) noexcept {
   switch (type) {
-    case ControlType::kArpMode:
+    case InstrumentControlType::kArpMode:
       if (static_cast<BarelyArpMode>(value) == BarelyArpMode_kNone) {
         if (arp_.IsPlaying()) {
           arp_.Stop();
@@ -239,23 +242,24 @@ void BarelyInstrument::ProcessControl(ControlType type, float value) noexcept {
         }
       }
       break;
-    case ControlType::kArpGateRatio:
+    case InstrumentControlType::kArpGateRatio:
       arp_task_.SetDuration(static_cast<double>(value) * arp_.GetLoopLength());
       break;
-    case ControlType::kArpRate:
+    case InstrumentControlType::kArpRate:
       arp_.SetLoopLength((value > 0.0f) ? 1.0 / static_cast<double>(value) : 0.0);
-      arp_task_.SetDuration(static_cast<double>(controls_[BarelyControlType_kArpGateRatio].value) *
-                            arp_.GetLoopLength());
+      arp_task_.SetDuration(
+          static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
+          arp_.GetLoopLength());
       break;
     default:
-      engine_.ScheduleMessage(ControlMessage{this, type, value});
+      engine_.ScheduleMessage(InstrumentControlMessage{this, type, value});
       break;
   }
 }
 
 void BarelyInstrument::UpdateArp() noexcept {
   const int size = static_cast<int>(pitches_.size());
-  switch (static_cast<BarelyArpMode>(controls_[BarelyControlType_kArpMode].value)) {
+  switch (static_cast<BarelyArpMode>(controls_[BarelyInstrumentControlType_kArpMode].value)) {
     case BarelyArpMode_kUp:
       arp_pitch_index_ = (arp_pitch_index_ + 1) % size;
       break;

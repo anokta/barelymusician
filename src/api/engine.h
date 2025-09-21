@@ -33,10 +33,10 @@ struct BarelyEngine {
   /// Adds a new instrument.
   ///
   /// @param instrument Pointer to instrument.
-  /// @param control_overrides Span of control overrides.
+  /// @param control_overrides Span of instrument control overrides.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddInstrument(BarelyInstrument* instrument,
-                     std::span<const BarelyControlOverride> control_overrides) noexcept;
+                     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept;
 
   /// Adds a new performer.
   ///

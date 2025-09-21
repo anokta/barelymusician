@@ -55,14 +55,14 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) noexcept 
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> control_overrides,
-                                         AudioRng& rng, int sample_rate,
-                                         float reference_frequency) noexcept
+InstrumentProcessor::InstrumentProcessor(
+    std::span<const BarelyInstrumentControlOverride> control_overrides, AudioRng& rng,
+    int sample_rate, float reference_frequency) noexcept
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       reference_frequency_(reference_frequency) {
   assert(sample_rate > 0);
   for (const auto& [type, value] : control_overrides) {
-    SetControl(static_cast<ControlType>(type), value);
+    SetControl(static_cast<InstrumentControlType>(type), value);
   }
   params_.osc_increment = reference_frequency * sample_interval_;
   params_.slice_increment = sample_interval_;
@@ -70,108 +70,108 @@ InstrumentProcessor::InstrumentProcessor(std::span<const BarelyControlOverride> 
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void InstrumentProcessor::SetControl(ControlType type, float value) noexcept {
+void InstrumentProcessor::SetControl(InstrumentControlType type, float value) noexcept {
   switch (type) {
-    case ControlType::kGain:
+    case InstrumentControlType::kGain:
       params_.voice_params.gain = value;
       break;
-    case ControlType::kPitchShift:
+    case InstrumentControlType::kPitchShift:
       pitch_shift_ = value;
       params_.osc_increment =
           std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
       params_.slice_increment = std::pow(2.0f, pitch_shift_) * sample_interval_;
       break;
-    case ControlType::kRetrigger:
+    case InstrumentControlType::kRetrigger:
       should_retrigger_ = static_cast<bool>(value);
       break;
-    case ControlType::kStereoPan:
+    case InstrumentControlType::kStereoPan:
       params_.voice_params.stereo_pan = value;
       break;
-    case ControlType::kVoiceCount: {
+    case InstrumentControlType::kVoiceCount: {
       const int voice_count = static_cast<int>(value);
       for (int i = voice_count_; i < voice_count; ++i) {
         voice_states_[i].voice.Reset();
       }
       voice_count_ = voice_count;
     } break;
-    case ControlType::kAttack:
+    case InstrumentControlType::kAttack:
       params_.adsr.SetAttack(sample_interval_, value);
       break;
-    case ControlType::kDecay:
+    case InstrumentControlType::kDecay:
       params_.adsr.SetDecay(sample_interval_, value);
       break;
-    case ControlType::kSustain:
+    case InstrumentControlType::kSustain:
       params_.adsr.SetSustain(value);
       break;
-    case ControlType::kRelease:
+    case InstrumentControlType::kRelease:
       params_.adsr.SetRelease(sample_interval_, value);
       break;
-    case ControlType::kOscMix:
+    case InstrumentControlType::kOscMix:
       params_.voice_params.osc_mix = value;
       break;
-    case ControlType::kOscMode:
+    case InstrumentControlType::kOscMode:
       osc_mode_ = static_cast<OscMode>(value);
       voice_callback_send_ = GetVoiceCallback<true>(osc_mode_, slice_mode_);
       voice_callback_receive_ = GetVoiceCallback<false>(osc_mode_, slice_mode_);
       break;
-    case ControlType::kOscNoiseMix:
+    case InstrumentControlType::kOscNoiseMix:
       params_.voice_params.osc_noise_mix = value;
       break;
-    case ControlType::kOscPitchShift:
+    case InstrumentControlType::kOscPitchShift:
       osc_pitch_shift_ = value;
       params_.osc_increment =
           std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
       break;
-    case ControlType::kOscShape:
+    case InstrumentControlType::kOscShape:
       params_.voice_params.osc_shape = value;
       break;
-    case ControlType::kOscSkew:
+    case InstrumentControlType::kOscSkew:
       params_.voice_params.osc_skew = value;
       break;
-    case ControlType::kSliceMode:
+    case InstrumentControlType::kSliceMode:
       slice_mode_ = static_cast<SliceMode>(value);
       voice_callback_send_ = GetVoiceCallback<true>(osc_mode_, slice_mode_);
       voice_callback_receive_ = GetVoiceCallback<false>(osc_mode_, slice_mode_);
       break;
-    case ControlType::kBitCrusherDepth:
+    case InstrumentControlType::kBitCrusherDepth:
       // Offset the bit depth by 1 to normalize the range.
       params_.voice_params.bit_crusher_range = std::pow(2.0f, value - 1.0f);
       break;
-    case ControlType::kBitCrusherRate:
+    case InstrumentControlType::kBitCrusherRate:
       params_.voice_params.bit_crusher_increment = value;
       break;
-    case ControlType::kDistortionAmount:
+    case InstrumentControlType::kDistortionAmount:
       params_.voice_params.distortion_amount = value;
       break;
-    case ControlType::kDistortionDrive:
+    case InstrumentControlType::kDistortionDrive:
       params_.voice_params.distortion_drive = value;
       break;
-    case ControlType::kFilterType:
+    case InstrumentControlType::kFilterType:
       filter_type_ = static_cast<FilterType>(value);
       params_.voice_params.filter_coefficients =
           GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
       break;
-    case ControlType::kFilterFrequency:
+    case InstrumentControlType::kFilterFrequency:
       filter_frequency_ = value;
       params_.voice_params.filter_coefficients =
           GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
       break;
-    case ControlType::kFilterQ:
+    case InstrumentControlType::kFilterQ:
       filter_q_ = value;
       params_.voice_params.filter_coefficients =
           GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
       break;
-    case ControlType::kDelaySend:
+    case InstrumentControlType::kDelaySend:
       params_.voice_params.delay_send = value;
       break;
-    case ControlType::kSidechainSend:
+    case InstrumentControlType::kSidechainSend:
       params_.voice_params.sidechain_send = value;
       break;
-    case ControlType::kArpMode:
+    case InstrumentControlType::kArpMode:
       [[fallthrough]];
-    case ControlType::kArpGateRatio:
+    case InstrumentControlType::kArpGateRatio:
       [[fallthrough]];
-    case ControlType::kArpRate:
+    case InstrumentControlType::kArpRate:
       [[fallthrough]];
     default:
       assert(!"Invalid control type");

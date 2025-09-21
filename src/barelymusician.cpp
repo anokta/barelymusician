@@ -97,7 +97,7 @@ bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp) {
 }
 
 bool BarelyInstrument_Create(BarelyEngineHandle engine,
-                             const BarelyControlOverride* control_overrides,
+                             const BarelyInstrumentControlOverride* control_overrides,
                              int32_t control_override_count,
                              BarelyInstrumentHandle* out_instrument) {
   if (!engine) return false;
@@ -115,10 +115,10 @@ bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   return true;
 }
 
-bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
-                                 float* out_value) {
+bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument,
+                                 BarelyInstrumentControlType type, float* out_value) {
   if (!instrument) return false;
-  if (type >= BarelyControlType_kCount) return false;
+  if (type >= BarelyInstrumentControlType_kCount) return false;
   if (!out_value) return false;
 
   *out_value = instrument->GetControl(type);
@@ -154,10 +154,10 @@ bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   return true;
 }
 
-bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, BarelyControlType type,
-                                 float value) {
+bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
+                                 BarelyInstrumentControlType type, float value) {
   if (!instrument) return false;
-  if (type >= BarelyControlType_kCount) return false;
+  if (type >= BarelyInstrumentControlType_kCount) return false;
 
   instrument->SetControl(type, value);
   return true;

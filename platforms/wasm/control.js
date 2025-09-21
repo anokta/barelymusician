@@ -6,7 +6,7 @@ export const ArpMode = {
   COUNT: 4,
 };
 
-export const ControlType = {
+export const InstrumentControlType = {
   GAIN: 0,
   PITCH_SHIFT: 1,
   RETRIGGER: 2,
@@ -69,196 +69,196 @@ export const SliceMode = {
 };
 
 export const CONTROLS = {
-  [ControlType.GAIN]: {
+  [InstrumentControlType.GAIN]: {
     name: 'Gain',
     valueType: 'float',
     defaultValue: 0.25,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.PITCH_SHIFT]: {
+  [InstrumentControlType.PITCH_SHIFT]: {
     name: 'Pitch Shift',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: -2.0,
     maxValue: 2.0,
   },
-  // [ControlType.RETRIGGER]: {
+  // [InstrumentControlType.RETRIGGER]: {
   //   name: 'Retrigger',
   //   valueType: 'bool',
   //   defaultValue: false,
   //   minValue: 0,
   //   maxValue: 1,
   // },
-  [ControlType.STEREO_PAN]: {
+  [InstrumentControlType.STEREO_PAN]: {
     name: 'Stereo Pan',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: -1.0,
     maxValue: 1.0,
   },
-  // [ControlType.VOICE_COUNT]: {
+  // [InstrumentControlType.VOICE_COUNT]: {
   //   name: 'Voice Count',
   //   valueType: 'int',
   //   defaultValue: 8,
   //   minValue: 1,
   //   maxValue: 20,
   // },
-  [ControlType.ATTACK]: {
+  [InstrumentControlType.ATTACK]: {
     name: 'Attack (sec)',
     valueType: 'float',
     defaultValue: 0.05,
     minValue: 0.0,
     maxValue: 10.0,
   },
-  [ControlType.DECAY]: {
+  [InstrumentControlType.DECAY]: {
     name: 'Decay (sec)',
     valueType: 'float',
     defaultValue: 0.05,
     minValue: 0.0,
     maxValue: 10.0,
   },
-  [ControlType.SUSTAIN]: {
+  [InstrumentControlType.SUSTAIN]: {
     name: 'Sustain',
     valueType: 'float',
     defaultValue: 1.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.RELEASE]: {
+  [InstrumentControlType.RELEASE]: {
     name: 'Release (sec)',
     valueType: 'float',
     defaultValue: 0.1,
     minValue: 0.0,
     maxValue: 10.0,
   },
-  // [ControlType.OSC_MIX]: {
+  // [InstrumentControlType.OSC_MIX]: {
   //   name: 'Osc Mix',
   //   valueType: 'float',
   //   defaultValue: 0.0,
   //   minValue: 0.0,
   //   maxValue: 1.0,
   // },
-  // [ControlType.OSC_MODE]: {
+  // [InstrumentControlType.OSC_MODE]: {
   //   name: 'Osc Mode',
   //   valueType: 'int',
   //   defaultValue: OscMode.MIX,
   //   minValue: 0,
   //   maxValue: OscMode.COUNT - 1,
   // },
-  [ControlType.OSC_NOISE_MIX]: {
+  [InstrumentControlType.OSC_NOISE_MIX]: {
     name: 'Osc Noise Mix',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  // [ControlType.OSC_PITCH_SHIFT]: {
+  // [InstrumentControlType.OSC_PITCH_SHIFT]: {
   //   name: 'Osc Pitch Shift',
   //   valueType: 'float',
   //   defaultValue: 0.0,
   //   minValue: -4.0,
   //   maxValue: 4.0,
   // },
-  [ControlType.OSC_SHAPE]: {
+  [InstrumentControlType.OSC_SHAPE]: {
     name: 'Osc Shape',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.OSC_SKEW]: {
+  [InstrumentControlType.OSC_SKEW]: {
     name: 'Osc Skew',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: -0.5,
     maxValue: 0.5,
   },
-  // [ControlType.SLICE_MODE]: {
+  // [InstrumentControlType.SLICE_MODE]: {
   //   name: 'Slice Mode',
   //   valueType: 'int',
   //   defaultValue: SliceMode.SUSTAIN,
   //   minValue: 0,
   //   maxValue: SliceMode.COUNT - 1,
   // },
-  [ControlType.BIT_CRUSHER_DEPTH]: {
+  [InstrumentControlType.BIT_CRUSHER_DEPTH]: {
     name: 'Bitcrusher Depth',
     valueType: 'float',
     defaultValue: 16.0,
     minValue: 1.0,
     maxValue: 16.0,
   },
-  [ControlType.BIT_CRUSHER_RATE]: {
+  [InstrumentControlType.BIT_CRUSHER_RATE]: {
     name: 'Bitcrusher Rate',
     valueType: 'float',
     defaultValue: 1.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.DISTORTION_AMOUNT]: {
+  [InstrumentControlType.DISTORTION_AMOUNT]: {
     name: 'Distortion Amount',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.DISTORTION_DRIVE]: {
+  [InstrumentControlType.DISTORTION_DRIVE]: {
     name: 'Distortion Drive',
     valueType: 'float',
     defaultValue: 1.0,
     minValue: 0.0,
     maxValue: 20.0,
   },
-  [ControlType.FILTER_TYPE]: {
+  [InstrumentControlType.FILTER_TYPE]: {
     name: 'Filter Type',
     valueType: 'int',
     defaultValue: FilterType.NONE,
     minValue: 0,
     maxValue: FilterType.COUNT - 1,
   },
-  [ControlType.FILTER_FREQUENCY]: {
+  [InstrumentControlType.FILTER_FREQUENCY]: {
     name: 'Filter Frequency',
     valueType: 'float',
     defaultValue: 48000.0,
     minValue: 0.0,
     maxValue: 48000.0,
   },
-  [ControlType.FILTER_Q]: {
+  [InstrumentControlType.FILTER_Q]: {
     name: 'Filter Q',
     valueType: 'float',
     defaultValue: Math.sqrt(0.5),
     minValue: 0.1,
     maxValue: 10,
   },
-  [ControlType.DELAY_SEND]: {
+  [InstrumentControlType.DELAY_SEND]: {
     name: 'Delay Send',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.SIDECHAIN_SEND]: {
+  [InstrumentControlType.SIDECHAIN_SEND]: {
     name: 'Sidechain Send',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: -1.0,
     maxValue: 1.0,
   },
-  [ControlType.ARP_MODE]: {
+  [InstrumentControlType.ARP_MODE]: {
     name: 'Arp Mode',
     valueType: 'int',
     defaultValue: ArpMode.NONE,
     minValue: 0,
     maxValue: ArpMode.COUNT - 1,
   },
-  [ControlType.ARP_GATE_RATIO]: {
+  [InstrumentControlType.ARP_GATE_RATIO]: {
     name: 'Arp Gate Ratio',
     valueType: 'float',
     defaultValue: 0.5,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [ControlType.ARP_RATE]: {
+  [InstrumentControlType.ARP_RATE]: {
     name: 'Arp Rate',
     valueType: 'int',
     defaultValue: 1,

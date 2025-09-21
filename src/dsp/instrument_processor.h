@@ -20,13 +20,13 @@ class InstrumentProcessor {
  public:
   /// Constructs a new `InstrumentProcessor`.
   ///
-  /// @param control_overrides Span of control overrides.
+  /// @param control_overrides Span of instrument control overrides.
   /// @param rng Random number generator.
   /// @param sample_rate Sampling rate in hertz.
   /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  InstrumentProcessor(std::span<const BarelyControlOverride> control_overrides, AudioRng& rng,
-                      int sample_rate, float reference_frequency) noexcept;
+  InstrumentProcessor(std::span<const BarelyInstrumentControlOverride> control_overrides,
+                      AudioRng& rng, int sample_rate, float reference_frequency) noexcept;
 
   /// Processes the next output samples.
   ///
@@ -50,10 +50,10 @@ class InstrumentProcessor {
 
   /// Sets a control value.
   ///
-  /// @param type Control type.
-  /// @param value Control value.
+  /// @param type Instrument control type.
+  /// @param value Instrument control value.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(ControlType type, float value) noexcept;
+  void SetControl(InstrumentControlType type, float value) noexcept;
 
   /// Sets a note control value.
   ///

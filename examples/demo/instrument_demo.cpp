@@ -16,9 +16,9 @@
 namespace {
 
 using ::barely::ArpMode;
-using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::EngineControlType;
+using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -78,18 +78,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetControl(EngineControlType::kDelayTime, kDelayTime);
   engine.SetControl(EngineControlType::kDelayFeedback, kDelayFeedback);
   engine.SetControl(EngineControlType::kDelayLowPassFrequency, kDelayLowPassFrequency);
-  engine.SetControl(barely::EngineControlType::kTempo, kTempo);
+  engine.SetControl(EngineControlType::kTempo, kTempo);
 
   auto instrument = engine.CreateInstrument({{
-      {ControlType::kGain, kGain},
-      {ControlType::kOscMix, 1.0f},
-      {ControlType::kOscShape, kOscShape},
-      {ControlType::kAttack, kAttack},
-      {ControlType::kRelease, kRelease},
-      {ControlType::kVoiceCount, kVoiceCount},
-      {ControlType::kDelaySend, kDelaySend},
-      {ControlType::kArpGateRatio, kArpGateRatio},
-      {ControlType::kArpRate, kArpRate},
+      {InstrumentControlType::kGain, kGain},
+      {InstrumentControlType::kOscMix, 1.0f},
+      {InstrumentControlType::kOscShape, kOscShape},
+      {InstrumentControlType::kAttack, kAttack},
+      {InstrumentControlType::kRelease, kRelease},
+      {InstrumentControlType::kVoiceCount, kVoiceCount},
+      {InstrumentControlType::kDelaySend, kDelaySend},
+      {InstrumentControlType::kArpGateRatio, kArpGateRatio},
+      {InstrumentControlType::kArpRate, kArpRate},
   }});
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
     ConsoleLog() << "Note" << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
@@ -140,8 +140,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
     if (upper_key == '0') {
       instrument.SetControl<ArpMode>(
-          ControlType::kArpMode,
-          (instrument.GetControl<ArpMode>(ControlType::kArpMode) == ArpMode::kNone)
+          InstrumentControlType::kArpMode,
+          (instrument.GetControl<ArpMode>(InstrumentControlType::kArpMode) == ArpMode::kNone)
               ? kArpMode
               : ArpMode::kNone);
     }

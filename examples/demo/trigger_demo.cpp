@@ -13,8 +13,8 @@
 
 namespace {
 
-using ::barely::ControlType;
 using ::barely::Engine;
+using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Scale;
 using ::barely::Task;
@@ -56,11 +56,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetControl(barely::EngineControlType::kTempo, kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{
-      {ControlType::kGain, kGain},
-      {ControlType::kOscMix, 1.0f},
-      {ControlType::kOscShape, kOscShape},
-      {ControlType::kAttack, kAttack},
-      {ControlType::kRelease, kRelease},
+      {InstrumentControlType::kGain, kGain},
+      {InstrumentControlType::kOscMix, 1.0f},
+      {InstrumentControlType::kOscShape, kOscShape},
+      {InstrumentControlType::kAttack, kAttack},
+      {InstrumentControlType::kRelease, kRelease},
   }});
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
     if (type == NoteEventType::kBegin) {

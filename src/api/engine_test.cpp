@@ -6,7 +6,6 @@
 #include <functional>
 
 #include "api/performer.h"
-#include "common/constants.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 

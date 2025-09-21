@@ -29,8 +29,8 @@ constexpr std::array<float, BarelyNoteControlType_kCount> kNoteControls = {1.0f,
 TEST(InstrumentProcessorTest, SingleVoice) {
   AudioRng rng;
   InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
-  processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
-  processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
+  processor.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
+  processor.SetControl(InstrumentControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
@@ -66,8 +66,8 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 TEST(InstrumentProcessorTest, MaxVoices) {
   AudioRng rng;
   InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
-  processor.SetControl(ControlType::kVoiceCount, kVoiceCount);
-  processor.SetControl(ControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
+  processor.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
+  processor.SetControl(InstrumentControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);
@@ -110,7 +110,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
 TEST(InstrumentProcessorTest, NoVoice) {
   AudioRng rng;
   InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
-  processor.SetControl(ControlType::kVoiceCount, 0);
+  processor.SetControl(InstrumentControlType::kVoiceCount, 0);
 
   SampleData sample_data(kSlices);
   processor.SetSampleData(sample_data);

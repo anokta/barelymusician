@@ -67,7 +67,7 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
         continue;
       }
 
-      const ControlType type = static_cast<ControlType>(param_queue->getParameterId());
+      const auto type = static_cast<InstrumentControlType>(param_queue->getParameterId());
       for (int queue_index = 0; queue_index < param_queue->getPointCount(); ++queue_index) {
         Steinberg::int32 sample_offset = 0;
         double value = 0.0;
@@ -135,8 +135,8 @@ Steinberg::tresult PLUGIN_API Processor::getState(Steinberg::IBStream* state) {
     return Steinberg::kResultFalse;
   }
 
-  for (int i = 0; i < BarelyControlType_kCount; ++i) {
-    if (!stream.writeFloat(instrument_->GetControl<float>(static_cast<ControlType>(i)))) {
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+    if (!stream.writeFloat(instrument_->GetControl<float>(static_cast<InstrumentControlType>(i)))) {
       return Steinberg::kResultFalse;
     }
   }
@@ -159,12 +159,12 @@ Steinberg::tresult PLUGIN_API Processor::setState(Steinberg::IBStream* state) {
     return Steinberg::kResultFalse;
   }
 
-  for (int i = 0; i < BarelyControlType_kCount; ++i) {
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     float value = 0.0f;
     if (!stream.readFloat(value)) {
       return Steinberg::kResultFalse;
     }
-    instrument_->SetControl<float>(static_cast<ControlType>(i), value);
+    instrument_->SetControl<float>(static_cast<InstrumentControlType>(i), value);
   }
 
   return Steinberg::kResultTrue;

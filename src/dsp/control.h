@@ -52,11 +52,11 @@ struct Control {
   float max_value = std::numeric_limits<float>::max();
 };
 
-/// Control array.
-using ControlArray = std::array<Control, BarelyControlType_kCount>;
-
 /// Engine control array.
 using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
+
+/// Instrument control array.
+using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_kCount>;
 
 /// Note control array.
 using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;

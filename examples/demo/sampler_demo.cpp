@@ -19,8 +19,8 @@
 
 namespace {
 
-using ::barely::ControlType;
 using ::barely::Engine;
+using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Slice;
 using ::barely::SliceMode;
@@ -83,11 +83,11 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate, kFrameCount);
 
   auto instrument = engine.CreateInstrument({{
-      {ControlType::kGain, kGain},
-      {ControlType::kSliceMode, SliceMode::kLoop},
-      {ControlType::kAttack, kAttack},
-      {ControlType::kRelease, kRelease},
-      {ControlType::kVoiceCount, kVoiceCount},
+      {InstrumentControlType::kGain, kGain},
+      {InstrumentControlType::kSliceMode, SliceMode::kLoop},
+      {InstrumentControlType::kAttack, kAttack},
+      {InstrumentControlType::kRelease, kRelease},
+      {InstrumentControlType::kVoiceCount, kVoiceCount},
   }});
 
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));

@@ -24,10 +24,10 @@ struct BarelyInstrument {
   /// Constructs a new `BarelyInstrument`.
   ///
   /// @param engine Engine.
-  /// @param control_overrides Span of control overrides.
+  /// @param control_overrides Span of instrument control overrides.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   BarelyInstrument(BarelyEngine& engine,
-                   std::span<const BarelyControlOverride> control_overrides) noexcept;
+                   std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept;
 
   /// Destroys `BarelyInstrument`.
   ~BarelyInstrument() noexcept;
@@ -40,9 +40,9 @@ struct BarelyInstrument {
 
   /// Returns a control value.
   ///
-  /// @param type Control type.
-  /// @return Control value.
-  [[nodiscard]] float GetControl(BarelyControlType type) const noexcept;
+  /// @param type Instrument control type.
+  /// @return Instrument control value.
+  [[nodiscard]] float GetControl(BarelyInstrumentControlType type) const noexcept;
 
   /// Returns a note control value.
   ///
@@ -63,9 +63,9 @@ struct BarelyInstrument {
 
   /// Sets a control value.
   ///
-  /// @param type Control type.
-  /// @param value Control value.
-  void SetControl(BarelyControlType type, float value) noexcept;
+  /// @param type Instrument control type.
+  /// @param value Instrument control value.
+  void SetControl(BarelyInstrumentControlType type, float value) noexcept;
 
   /// Sets a note control value.
   ///
@@ -101,7 +101,7 @@ struct BarelyInstrument {
 
  private:
   // Processes a control value.
-  void ProcessControl(barely::ControlType type, float value) noexcept;
+  void ProcessControl(barely::InstrumentControlType type, float value) noexcept;
 
   // Updates the arpeggiator.
   void UpdateArp() noexcept;
@@ -110,7 +110,7 @@ struct BarelyInstrument {
   BarelyEngine& engine_;
 
   // Array of controls.
-  barely::ControlArray controls_;
+  barely::InstrumentControlArray controls_;
 
   // Map of note control arrays by their pitches.
   std::unordered_map<float, barely::NoteControlArray> note_controls_;

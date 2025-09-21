@@ -38,7 +38,7 @@ engine.SetControl(barely::EngineControlType::kTempo, 124.0f);
 auto instrument = engine.CreateInstrument();
 
 // Set the instrument to use full oscillator mix.
-instrument.SetControl(barely::ControlType::kOscMix, /*value=*/1.0f);
+instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 
 // Set an instrument note on.
 //

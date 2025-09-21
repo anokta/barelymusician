@@ -350,37 +350,37 @@ namespace Barely {
 
     private void Update() {
       UpdateSampleData();
-      SetControl(Engine.Internal.ControlType.GAIN, Gain);
-      SetControl(Engine.Internal.ControlType.PITCH_SHIFT, PitchShift);
-      SetControl(Engine.Internal.ControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
-      SetControl(Engine.Internal.ControlType.STEREO_PAN, StereoPan);
-      SetControl(Engine.Internal.ControlType.VOICE_COUNT, (float)VoiceCount);
-      SetControl(Engine.Internal.ControlType.ATTACK, Attack);
-      SetControl(Engine.Internal.ControlType.DECAY, Decay);
-      SetControl(Engine.Internal.ControlType.SUSTAIN, Sustain);
-      SetControl(Engine.Internal.ControlType.RELEASE, Release);
-      SetControl(Engine.Internal.ControlType.OSC_MIX, OscMix);
-      SetControl(Engine.Internal.ControlType.OSC_MODE, (float)OscMode);
-      SetControl(Engine.Internal.ControlType.OSC_NOISE_MIX, OscNoiseMix);
-      SetControl(Engine.Internal.ControlType.OSC_PITCH_SHIFT, OscPitchShift);
-      SetControl(Engine.Internal.ControlType.OSC_SHAPE, OscShape);
-      SetControl(Engine.Internal.ControlType.OSC_SKEW, OscSkew);
-      SetControl(Engine.Internal.ControlType.SLICE_MODE, (float)SliceMode);
-      SetControl(Engine.Internal.ControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
-      SetControl(Engine.Internal.ControlType.BIT_CRUSHER_RATE, BitCrusherRate);
-      SetControl(Engine.Internal.ControlType.DISTORTION_AMOUNT, DistortionAmount);
-      SetControl(Engine.Internal.ControlType.DISTORTION_DRIVE, DistortionDrive);
-      SetControl(Engine.Internal.ControlType.FILTER_TYPE, (float)FilterType);
-      SetControl(Engine.Internal.ControlType.FILTER_FREQUENCY, FilterFrequency);
-      SetControl(Engine.Internal.ControlType.FILTER_Q, FilterQ);
-      SetControl(Engine.Internal.ControlType.DELAY_SEND, DelaySend);
-      SetControl(Engine.Internal.ControlType.SIDECHAIN_SEND, SidechainSend);
-      SetControl(Engine.Internal.ControlType.ARP_MODE, (float)ArpMode);
-      SetControl(Engine.Internal.ControlType.ARP_GATE_RATIO, ArpGateRatio);
-      SetControl(Engine.Internal.ControlType.ARP_RATE, ArpRate);
+      SetControl(Engine.Internal.InstrumentControlType.GAIN, Gain);
+      SetControl(Engine.Internal.InstrumentControlType.PITCH_SHIFT, PitchShift);
+      SetControl(Engine.Internal.InstrumentControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
+      SetControl(Engine.Internal.InstrumentControlType.STEREO_PAN, StereoPan);
+      SetControl(Engine.Internal.InstrumentControlType.VOICE_COUNT, (float)VoiceCount);
+      SetControl(Engine.Internal.InstrumentControlType.ATTACK, Attack);
+      SetControl(Engine.Internal.InstrumentControlType.DECAY, Decay);
+      SetControl(Engine.Internal.InstrumentControlType.SUSTAIN, Sustain);
+      SetControl(Engine.Internal.InstrumentControlType.RELEASE, Release);
+      SetControl(Engine.Internal.InstrumentControlType.OSC_MIX, OscMix);
+      SetControl(Engine.Internal.InstrumentControlType.OSC_MODE, (float)OscMode);
+      SetControl(Engine.Internal.InstrumentControlType.OSC_NOISE_MIX, OscNoiseMix);
+      SetControl(Engine.Internal.InstrumentControlType.OSC_PITCH_SHIFT, OscPitchShift);
+      SetControl(Engine.Internal.InstrumentControlType.OSC_SHAPE, OscShape);
+      SetControl(Engine.Internal.InstrumentControlType.OSC_SKEW, OscSkew);
+      SetControl(Engine.Internal.InstrumentControlType.SLICE_MODE, (float)SliceMode);
+      SetControl(Engine.Internal.InstrumentControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
+      SetControl(Engine.Internal.InstrumentControlType.BIT_CRUSHER_RATE, BitCrusherRate);
+      SetControl(Engine.Internal.InstrumentControlType.DISTORTION_AMOUNT, DistortionAmount);
+      SetControl(Engine.Internal.InstrumentControlType.DISTORTION_DRIVE, DistortionDrive);
+      SetControl(Engine.Internal.InstrumentControlType.FILTER_TYPE, (float)FilterType);
+      SetControl(Engine.Internal.InstrumentControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Engine.Internal.InstrumentControlType.FILTER_Q, FilterQ);
+      SetControl(Engine.Internal.InstrumentControlType.DELAY_SEND, DelaySend);
+      SetControl(Engine.Internal.InstrumentControlType.SIDECHAIN_SEND, SidechainSend);
+      SetControl(Engine.Internal.InstrumentControlType.ARP_MODE, (float)ArpMode);
+      SetControl(Engine.Internal.InstrumentControlType.ARP_GATE_RATIO, ArpGateRatio);
+      SetControl(Engine.Internal.InstrumentControlType.ARP_RATE, ArpRate);
     }
 
-    private void SetControl(Engine.Internal.ControlType type, float value) {
+    private void SetControl(Engine.Internal.InstrumentControlType type, float value) {
       Engine.Internal.Instrument_SetControl(_handle, type, value);
     }
 

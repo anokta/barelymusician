@@ -22,10 +22,10 @@
 namespace {
 
 using ::barely::Control;
-using ::barely::ControlMessage;
 using ::barely::EngineControlArray;
 using ::barely::EngineControlMessage;
 using ::barely::EngineControlType;
+using ::barely::InstrumentControlMessage;
 using ::barely::kStereoChannelCount;
 using ::barely::MessageVisitor;
 using ::barely::NoteControlMessage;
@@ -89,7 +89,7 @@ BarelyEngine::~BarelyEngine() noexcept { mutable_instruments_.Update({}); }
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::AddInstrument(
     BarelyInstrumentHandle instrument,
-    std::span<const BarelyControlOverride> control_overrides) noexcept {
+    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
   [[maybe_unused]] const bool success =
       instruments_
           .emplace(instrument, barely::InstrumentProcessor(control_overrides, audio_rng_,
@@ -134,7 +134,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
       current_frame = message_frame;
     }
     std::visit(
-        MessageVisitor{[&instruments](ControlMessage& control_message) noexcept {
+        MessageVisitor{[&instruments](InstrumentControlMessage& control_message) noexcept {
                          // TODO(#126): This shouldn't need an instrument look up and can directly
                          // pass the processor pointer here and below once memory is fixed.
                          if (const auto it = instruments->find(control_message.instrument);

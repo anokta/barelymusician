@@ -23,10 +23,10 @@
 
 namespace {
 
-using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::EngineControlType;
 using ::barely::Instrument;
+using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Quantization;
@@ -241,15 +241,15 @@ int main(int /*argc*/, char* argv[]) {
   const auto build_instrument_fn = [&](float shape, float gain_db, float attack, float release) {
     instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
-    instrument.SetControl(ControlType::kGain, DecibelsToAmplitude(gain_db));
-    instrument.SetControl(ControlType::kOscMix, 1.0f);
+    instrument.SetControl(InstrumentControlType::kGain, DecibelsToAmplitude(gain_db));
+    instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
     if (shape < 0.0f) {
-      instrument.SetControl(ControlType::kOscNoiseMix, 1.0f);
+      instrument.SetControl(InstrumentControlType::kOscNoiseMix, 1.0f);
     } else {
-      instrument.SetControl(ControlType::kOscShape, shape);
+      instrument.SetControl(InstrumentControlType::kOscShape, shape);
     }
-    instrument.SetControl(ControlType::kAttack, attack);
-    instrument.SetControl(ControlType::kRelease, release);
+    instrument.SetControl(InstrumentControlType::kAttack, attack);
+    instrument.SetControl(InstrumentControlType::kRelease, release);
     set_note_Event_callback_fn(instruments.size(), instrument);
   };
 
@@ -293,10 +293,10 @@ int main(int /*argc*/, char* argv[]) {
   // Add percussion instrument.
   instruments.emplace_back(engine.CreateInstrument());
   auto& percussion = instruments.back();
-  percussion.SetControl(ControlType::kGain, 0.125f);
-  percussion.SetControl(ControlType::kAttack, 0.0f);
-  percussion.SetControl(ControlType::kRetrigger, true);
-  percussion.SetControl(ControlType::kSliceMode, SliceMode::kOnce);
+  percussion.SetControl(InstrumentControlType::kGain, 0.125f);
+  percussion.SetControl(InstrumentControlType::kAttack, 0.0f);
+  percussion.SetControl(InstrumentControlType::kRetrigger, true);
+  percussion.SetControl(InstrumentControlType::kSliceMode, SliceMode::kOnce);
   set_note_Event_callback_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<float, std::string>>& percussion_map) {

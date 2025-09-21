@@ -17,24 +17,24 @@ constexpr float kReferenceFrequency = 1.0f;
 TEST(InstrumentTest, SetControl) {
   BarelyEngine engine(kSampleRate, kSampleRate, kReferenceFrequency);
   BarelyInstrument instrument(engine, {});
-  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyInstrumentControlType_kGain), 1.0f);
 
-  instrument.SetControl(BarelyControlType_kGain, 0.5f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 0.5f);
+  instrument.SetControl(BarelyInstrumentControlType_kGain, 0.5f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyInstrumentControlType_kGain), 0.5f);
 
   // Verify that the control value is clamped at the minimum value.
-  instrument.SetControl(BarelyControlType_kGain, -1.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 0.0f);
+  instrument.SetControl(BarelyInstrumentControlType_kGain, -1.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyInstrumentControlType_kGain), 0.0f);
 
-  instrument.SetControl(BarelyControlType_kGain, 0.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 0.0f);
+  instrument.SetControl(BarelyInstrumentControlType_kGain, 0.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyInstrumentControlType_kGain), 0.0f);
 
   // Verify that the control value is clamped at the maximum value.
-  instrument.SetControl(BarelyControlType_kGain, 10.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
+  instrument.SetControl(BarelyInstrumentControlType_kGain, 10.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyInstrumentControlType_kGain), 1.0f);
 
-  instrument.SetControl(BarelyControlType_kGain, 1.0f);
-  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyControlType_kGain), 1.0f);
+  instrument.SetControl(BarelyInstrumentControlType_kGain, 1.0f);
+  EXPECT_FLOAT_EQ(instrument.GetControl(BarelyInstrumentControlType_kGain), 1.0f);
 }
 
 // Tests that the instrument triggers its note callbacks as expected.

@@ -15,10 +15,10 @@ class Controller : public Steinberg::Vst::EditController {
   static Steinberg::FUnknown* Create(void* context);
 
   /// Returns the span of default control values.
-  static std::span<ControlOverride> GetDefaultControls() noexcept;
+  static std::span<InstrumentControlOverride> GetDefaultControls() noexcept;
 
   /// Converts a normalized parameter value to a plain control value.
-  static float ToPlainControlValue(ControlType type, double normalized_value) noexcept;
+  static float ToPlainControlValue(InstrumentControlType type, double normalized_value) noexcept;
 
   /// Identifier.
   static const Steinberg::FUID kId;

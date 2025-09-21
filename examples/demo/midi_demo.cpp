@@ -19,9 +19,9 @@
 
 namespace {
 
-using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Task;
@@ -121,12 +121,12 @@ int main(int /*argc*/, char* argv[]) {
       ConsoleLog() << "MIDI track #" << track_index << ": Note"
                    << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
     });
-    instrument.SetControl(ControlType::kGain, kInstrumentGain);
-    instrument.SetControl(ControlType::kOscMix, 1.0f);
-    instrument.SetControl(ControlType::kOscShape, kInstrumentOscShape);
-    instrument.SetControl(ControlType::kAttack, kInstrumentEnvelopeAttack);
-    instrument.SetControl(ControlType::kRelease, kInstrumentEnvelopeRelease);
-    instrument.SetControl(ControlType::kVoiceCount, kInstrumentVoiceCount);
+    instrument.SetControl(InstrumentControlType::kGain, kInstrumentGain);
+    instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+    instrument.SetControl(InstrumentControlType::kOscShape, kInstrumentOscShape);
+    instrument.SetControl(InstrumentControlType::kAttack, kInstrumentEnvelopeAttack);
+    instrument.SetControl(InstrumentControlType::kRelease, kInstrumentEnvelopeRelease);
+    instrument.SetControl(InstrumentControlType::kVoiceCount, kInstrumentVoiceCount);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 

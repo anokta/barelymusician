@@ -2,10 +2,10 @@
 
 #include "emscripten/bind.h"
 
-using ::barely::ControlType;
 using ::barely::Engine;
 using ::barely::EngineControlType;
 using ::barely::Instrument;
+using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Quantization;
@@ -19,10 +19,10 @@ using ::emscripten::return_value_policy::take_ownership;
 
 [[nodiscard]] static Instrument Engine_CreateInstrument(Engine& engine) noexcept {
   return engine.CreateInstrument({{
-      {ControlType::kGain, 0.25f},
-      {ControlType::kAttack, 0.05f},
-      {ControlType::kRelease, 0.1f},
-      {ControlType::kOscMix, 1.0f},
+      {InstrumentControlType::kGain, 0.25f},
+      {InstrumentControlType::kAttack, 0.05f},
+      {InstrumentControlType::kRelease, 0.1f},
+      {InstrumentControlType::kOscMix, 1.0f},
   }});
 }
 
@@ -41,7 +41,7 @@ static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_
 }
 
 static void Instrument_SetControl(Instrument& instrument, int type, float value) noexcept {
-  instrument.SetControl(static_cast<ControlType>(type), value);
+  instrument.SetControl(static_cast<InstrumentControlType>(type), value);
 }
 
 static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {

@@ -11,49 +11,61 @@ using ::Steinberg::Vst::RangeParameter;
 
 namespace {
 
-const std::array<RangeParameter, BarelyControlType_kCount> kParams = {
-    RangeParameter(STR16("Gain"), BarelyControlType_kGain, STR16(""), 0.0, 1.0, 0.125),
-    RangeParameter(STR16("Pitch Shift"), BarelyControlType_kPitchShift, STR16(""), -4.0, 4.0, 0.0),
-    RangeParameter(STR16("Retrigger"), BarelyControlType_kRetrigger, STR16(""), 0, 1, 0, 1),
-    RangeParameter(STR16("Stereo Pan"), BarelyControlType_kStereoPan, STR16(""), -1.0, 1.0, 0.0),
-    RangeParameter(STR16("Voice Count"), BarelyControlType_kVoiceCount, STR16(""), 1, 16, 8, 15),
-    RangeParameter(STR16("Attack"), BarelyControlType_kAttack, STR16("sec"), 0.0, 60.0, 0.01),
-    RangeParameter(STR16("Decay"), BarelyControlType_kDecay, STR16("sec"), 0.0, 60.0, 0.0),
-    RangeParameter(STR16("Sustain"), BarelyControlType_kSustain, STR16(""), 0.0, 1.0, 1.0),
-    RangeParameter(STR16("Release"), BarelyControlType_kRelease, STR16("sec"), 0.0, 60.0, 0.05),
-    RangeParameter(STR16("Osc Mix"), BarelyControlType_kOscMix, STR16(""), 0.0, 1.0, 1.0),
-    RangeParameter(STR16("Osc Mode"), BarelyControlType_kOscMode, STR16(""), 0,
-                   BarelyOscMode_kCount - 1, 0, BarelyOscMode_kCount - 1),
-    RangeParameter(STR16("Osc Noise Mix"), BarelyControlType_kOscNoiseMix, STR16(""), 0.0, 1.0,
-                   0.0),
-    RangeParameter(STR16("Osc Pitch Shift"), BarelyControlType_kOscPitchShift, STR16(""), -4.0, 4.0,
-                   0.0),
-    RangeParameter(STR16("Osc Shape"), BarelyControlType_kOscShape, STR16(""), 0.0, 1.0, 0.0),
-    RangeParameter(STR16("Osc Skew"), BarelyControlType_kOscSkew, STR16(""), -0.5, 0.5, 0.0),
-    RangeParameter(STR16("Slice Mode"), BarelyControlType_kSliceMode, STR16(""), 0,
-                   BarelySliceMode_kCount - 1, 0, BarelySliceMode_kCount - 1),
-    RangeParameter(STR16("Bitcrusher Depth"), BarelyControlType_kBitCrusherDepth, STR16(""), 1.0,
-                   16.0, 16.0),
-    RangeParameter(STR16("Bitcrusher Rate"), BarelyControlType_kBitCrusherRate, STR16(""), 0.0, 1.0,
-                   1.0),
-    RangeParameter(STR16("Distortion Amount"), BarelyControlType_kDistortionAmount, STR16(""), 0.0,
+const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
+    RangeParameter(STR16("Gain"), BarelyInstrumentControlType_kGain, STR16(""), 0.0, 1.0, 0.125),
+    RangeParameter(STR16("Pitch Shift"), BarelyInstrumentControlType_kPitchShift, STR16(""), -4.0,
+                   4.0, 0.0),
+    RangeParameter(STR16("Retrigger"), BarelyInstrumentControlType_kRetrigger, STR16(""), 0, 1, 0,
+                   1),
+    RangeParameter(STR16("Stereo Pan"), BarelyInstrumentControlType_kStereoPan, STR16(""), -1.0,
                    1.0, 0.0),
-    RangeParameter(STR16("Distortion Drive"), BarelyControlType_kDistortionDrive, STR16(""), 0.0,
-                   20.0, 1.0),
-    RangeParameter(STR16("Filter Type"), BarelyControlType_kFilterType, STR16(""), 0,
-                   BarelyFilterType_kCount - 1, 0, BarelyFilterType_kCount - 1),
-    RangeParameter(STR16("Filter Frequency"), BarelyControlType_kFilterFrequency, STR16("hz"), 0.0,
-                   48000.0, 0.0),
-    RangeParameter(STR16("Filter Q"), BarelyControlType_kFilterQ, STR16(""), 0.1, 10.0, 0.71),
-    RangeParameter(STR16("Delay Send"), BarelyControlType_kDelaySend, STR16(""), 0.0, 1.0, 0.0),
-    RangeParameter(STR16("Sidechain Send"), BarelyControlType_kSidechainSend, STR16(""), -1.0, 1.0,
+    RangeParameter(STR16("Voice Count"), BarelyInstrumentControlType_kVoiceCount, STR16(""), 1, 16,
+                   8, 15),
+    RangeParameter(STR16("Attack"), BarelyInstrumentControlType_kAttack, STR16("sec"), 0.0, 60.0,
+                   0.01),
+    RangeParameter(STR16("Decay"), BarelyInstrumentControlType_kDecay, STR16("sec"), 0.0, 60.0,
                    0.0),
-    RangeParameter(STR16("Arpeggiator Mode"), BarelyControlType_kArpMode, STR16(""), 0,
-                   BarelyArpMode_kCount - 1, 0, BarelyArpMode_kCount - 1),
-    RangeParameter(STR16("Arpeggiator Gate Ratio"), BarelyControlType_kArpGateRatio, STR16(""), 0.0,
-                   1.0, 0.5),
-    RangeParameter(STR16("Arpeggiator Rate"), BarelyControlType_kArpRate, STR16(""), 0.0, 16.0,
+    RangeParameter(STR16("Sustain"), BarelyInstrumentControlType_kSustain, STR16(""), 0.0, 1.0,
                    1.0),
+    RangeParameter(STR16("Release"), BarelyInstrumentControlType_kRelease, STR16("sec"), 0.0, 60.0,
+                   0.05),
+    RangeParameter(STR16("Osc Mix"), BarelyInstrumentControlType_kOscMix, STR16(""), 0.0, 1.0, 1.0),
+    RangeParameter(STR16("Osc Mode"), BarelyInstrumentControlType_kOscMode, STR16(""), 0,
+                   BarelyOscMode_kCount - 1, 0, BarelyOscMode_kCount - 1),
+    RangeParameter(STR16("Osc Noise Mix"), BarelyInstrumentControlType_kOscNoiseMix, STR16(""), 0.0,
+                   1.0, 0.0),
+    RangeParameter(STR16("Osc Pitch Shift"), BarelyInstrumentControlType_kOscPitchShift, STR16(""),
+                   -4.0, 4.0, 0.0),
+    RangeParameter(STR16("Osc Shape"), BarelyInstrumentControlType_kOscShape, STR16(""), 0.0, 1.0,
+                   0.0),
+    RangeParameter(STR16("Osc Skew"), BarelyInstrumentControlType_kOscSkew, STR16(""), -0.5, 0.5,
+                   0.0),
+    RangeParameter(STR16("Slice Mode"), BarelyInstrumentControlType_kSliceMode, STR16(""), 0,
+                   BarelySliceMode_kCount - 1, 0, BarelySliceMode_kCount - 1),
+    RangeParameter(STR16("Bitcrusher Depth"), BarelyInstrumentControlType_kBitCrusherDepth,
+                   STR16(""), 1.0, 16.0, 16.0),
+    RangeParameter(STR16("Bitcrusher Rate"), BarelyInstrumentControlType_kBitCrusherRate, STR16(""),
+                   0.0, 1.0, 1.0),
+    RangeParameter(STR16("Distortion Amount"), BarelyInstrumentControlType_kDistortionAmount,
+                   STR16(""), 0.0, 1.0, 0.0),
+    RangeParameter(STR16("Distortion Drive"), BarelyInstrumentControlType_kDistortionDrive,
+                   STR16(""), 0.0, 20.0, 1.0),
+    RangeParameter(STR16("Filter Type"), BarelyInstrumentControlType_kFilterType, STR16(""), 0,
+                   BarelyFilterType_kCount - 1, 0, BarelyFilterType_kCount - 1),
+    RangeParameter(STR16("Filter Frequency"), BarelyInstrumentControlType_kFilterFrequency,
+                   STR16("hz"), 0.0, 48000.0, 0.0),
+    RangeParameter(STR16("Filter Q"), BarelyInstrumentControlType_kFilterQ, STR16(""), 0.1, 10.0,
+                   0.71),
+    RangeParameter(STR16("Delay Send"), BarelyInstrumentControlType_kDelaySend, STR16(""), 0.0, 1.0,
+                   0.0),
+    RangeParameter(STR16("Sidechain Send"), BarelyInstrumentControlType_kSidechainSend, STR16(""),
+                   -1.0, 1.0, 0.0),
+    RangeParameter(STR16("Arpeggiator Mode"), BarelyInstrumentControlType_kArpMode, STR16(""), 0,
+                   BarelyArpMode_kCount - 1, 0, BarelyArpMode_kCount - 1),
+    RangeParameter(STR16("Arpeggiator Gate Ratio"), BarelyInstrumentControlType_kArpGateRatio,
+                   STR16(""), 0.0, 1.0, 0.5),
+    RangeParameter(STR16("Arpeggiator Rate"), BarelyInstrumentControlType_kArpRate, STR16(""), 0.0,
+                   16.0, 1.0),
 };
 
 }
@@ -64,19 +76,20 @@ Steinberg::FUnknown* Controller::Create(void* /*context*/) {
   return static_cast<Steinberg::Vst::IEditController*>(new Controller());
 }
 
-std::span<ControlOverride> Controller::GetDefaultControls() noexcept {
-  static std::array<ControlOverride, BarelyControlType_kCount> controls;
-  for (int i = 0; i < BarelyControlType_kCount; ++i) {
+std::span<InstrumentControlOverride> Controller::GetDefaultControls() noexcept {
+  static std::array<InstrumentControlOverride, BarelyInstrumentControlType_kCount> controls;
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     controls[i] = {
-        static_cast<ControlType>(i),
+        static_cast<InstrumentControlType>(i),
         static_cast<float>(kParams[i].toPlain(kParams[i].getInfo().defaultNormalizedValue)),
     };
   }
   return controls;
 }
 
-float Controller::ToPlainControlValue(ControlType type, double normalized_value) noexcept {
-  assert(static_cast<int>(type) < BarelyControlType_kCount && "Invalid control type");
+float Controller::ToPlainControlValue(InstrumentControlType type,
+                                      double normalized_value) noexcept {
+  assert(static_cast<int>(type) < BarelyInstrumentControlType_kCount && "Invalid control type");
   return static_cast<float>(kParams[static_cast<int>(type)].toPlain(normalized_value));
 }
 
@@ -87,12 +100,15 @@ tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {
   }
 
   // Initialize plugin parameters.
-  for (int i = 0; i < BarelyControlType_kCount; ++i) {
-    if (i == BarelyControlType_kOscMix || i == BarelyControlType_kOscMode ||
-        i == BarelyControlType_kOscPitchShift || i == BarelyControlType_kSliceMode ||
-        i == BarelyControlType_kDelaySend || i == BarelyControlType_kSidechainSend ||
-        i == BarelyControlType_kArpMode || i == BarelyControlType_kArpGateRatio ||
-        i == BarelyControlType_kArpRate) {
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+    if (i == BarelyInstrumentControlType_kOscMix || i == BarelyInstrumentControlType_kOscMode ||
+        i == BarelyInstrumentControlType_kOscPitchShift ||
+        i == BarelyInstrumentControlType_kSliceMode ||
+        i == BarelyInstrumentControlType_kDelaySend ||
+        i == BarelyInstrumentControlType_kSidechainSend ||
+        i == BarelyInstrumentControlType_kArpMode ||
+        i == BarelyInstrumentControlType_kArpGateRatio ||
+        i == BarelyInstrumentControlType_kArpRate) {
       // TODO(#162): Support sampling features.
       continue;
     }

@@ -134,17 +134,15 @@ class Voice {
              const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
     const float gain = note_controls[BarelyNoteControlType_kGain];
     const float pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
-    if (gain > 0.0f) {
-      set_gain(gain);
-      set_pitch(pitch + pitch_shift);
-      params_ = instrument_params.voice_params;
-      params_.gain *= gain;
-      bit_crusher_.Reset();
-      filter_.Reset();
-      osc_phase_ = 0.0f;
-      slice_offset_ = 0.0f;
-      envelope_.Start(instrument_params.adsr);
-    }
+    set_gain(gain);
+    set_pitch(pitch + pitch_shift);
+    params_ = instrument_params.voice_params;
+    params_.gain *= gain;
+    bit_crusher_.Reset();
+    filter_.Reset();
+    osc_phase_ = 0.0f;
+    slice_offset_ = 0.0f;
+    envelope_.Start(instrument_params.adsr);
   }
 
   /// Stops the voice.

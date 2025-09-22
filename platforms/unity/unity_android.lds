@@ -3,9 +3,11 @@ VERS_1.0 {
     BarelyEngine_Create;
     BarelyEngine_Destroy;
     BarelyEngine_GetControl;
+    BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
     BarelyEngine_Process;
     BarelyEngine_SetControl;
+    BarelyEngine_SetTempo;
     BarelyEngine_Update;
     BarelyInstrument_Create;
     BarelyInstrument_Destroy;

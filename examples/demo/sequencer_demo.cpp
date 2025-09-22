@@ -14,7 +14,6 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EngineControlType;
 using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Task;
@@ -37,8 +36,8 @@ constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 
-constexpr float kInitialTempo = 120.0f;
-constexpr float kTempoIncrement = 10.0f;
+constexpr double kInitialTempo = 120.0;
+constexpr double kTempoIncrement = 10.0;
 
 }  // namespace
 
@@ -50,7 +49,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kFrameCount);
-  engine.SetControl(EngineControlType::kTempo, kInitialTempo);
+  engine.SetTempo(kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{
       {InstrumentControlType::kGain, kGain},
@@ -129,7 +128,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetControl<float>(EngineControlType::kTempo);
+    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (performer.IsPlaying()) {
@@ -165,9 +164,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    engine.SetControl(EngineControlType::kTempo, tempo);
-    ConsoleLog() << "Tempo set to " << engine.GetControl<float>(EngineControlType::kTempo)
-                 << " bpm";
+    engine.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

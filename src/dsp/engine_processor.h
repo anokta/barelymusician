@@ -140,8 +140,6 @@ class EngineProcessor {
       case EngineControlType::kSidechainRatio:
         target_params_.sidechain_ratio = value;
         break;
-      case EngineControlType::kTempo:
-        [[fallthrough]];
       default:
         assert(!"Invalid engine control type");
         return;

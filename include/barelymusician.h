@@ -18,7 +18,7 @@
 ///   barely::Engine engine(/*sample_rate=*/48000, /*max_frame_count=*/512);
 ///
 ///   // Set the tempo.
-///   engine.SetControl(barely::EngineControlType::kTempo, 124.0f);
+///   engine.SetTempo(/*tempo=*/124.0);
 ///
 ///   // Update the timestamp.
 ///   //
@@ -97,7 +97,7 @@
 ///                       BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
 ///
 ///   // Set the tempo.
-///   BarelyEngine_SetControl(engine, BarelyEngineControlType_kTempo, /*tempo=*/124.0f);
+///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
 ///
 ///   // Update the timestamp.
 ///   //
@@ -237,10 +237,8 @@ typedef enum BarelyArpMode {
 
 /// Engine control types.
 typedef enum BarelyEngineControlType {
-  /// Tempo in beats per minute.
-  BarelyEngineControlType_kTempo = 0,
   /// Compressor mix.
-  BarelyEngineControlType_kCompressorMix,
+  BarelyEngineControlType_kCompressorMix = 0,
   /// Compressor attack in seconds.
   BarelyEngineControlType_kCompressorAttack,
   /// Compressor release in seconds.
@@ -528,6 +526,13 @@ BARELY_API bool BarelyEngine_GetControl(BarelyEngineHandle engine, BarelyEngineC
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetSeed(BarelyEngineHandle engine, int32_t* out_seed);
 
+/// Gets the tempo of an engine.
+///
+/// @param engine Engine handle.
+/// @param out_tempo Output tempo in beats per minute.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo);
+
 /// Gets the timestamp of an engine.
 ///
 /// @param engine Engine handle.
@@ -562,6 +567,13 @@ BARELY_API bool BarelyEngine_SetControl(BarelyEngineHandle engine, BarelyEngineC
 /// @param seed Seed value.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_SetSeed(BarelyEngineHandle engine, int32_t seed);
+
+/// Sets the tempo of an engine.
+///
+/// @param engine Engine handle.
+/// @param tempo Tempo in beats per minute.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo);
 
 /// Updates an engine at timestamp.
 ///
@@ -962,8 +974,6 @@ enum class InstrumentControlType {
 
 /// Engine control types.
 enum class EngineControlType {
-  /// Tempo in beats per minute.
-  kTempo = BarelyEngineControlType_kTempo,
   /// Compressor mix.
   kCompressorMix = BarelyEngineControlType_kCompressorMix,
   /// Compressor attack in seconds.
@@ -1806,6 +1816,16 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     return static_cast<int>(seed);
   }
 
+  /// Returns the tempo.
+  ///
+  /// @return Tempo in beats per minute.
+  [[nodiscard]] double GetTempo() const noexcept {
+    double tempo = 0.0;
+    [[maybe_unused]] const bool success = BarelyEngine_GetTempo(*this, &tempo);
+    assert(success);
+    return tempo;
+  }
+
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
@@ -1846,6 +1866,14 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// Sets the random number generator seed.
   void SetSeed(int seed) noexcept {
     [[maybe_unused]] const bool success = BarelyEngine_SetSeed(*this, static_cast<int32_t>(seed));
+    assert(success);
+  }
+
+  /// Sets the tempo.
+  ///
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_SetTempo(*this, tempo);
     assert(success);
   }
 

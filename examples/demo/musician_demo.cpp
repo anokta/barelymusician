@@ -24,7 +24,6 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EngineControlType;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
@@ -62,7 +61,7 @@ constexpr int kFrameCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Performer settings.
-constexpr float kTempo = 124.0f;
+constexpr double kTempo = 124.0;
 constexpr int kBeatCount = 3;
 
 // Number of semitones in an octave.
@@ -222,7 +221,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kFrameCount);
-  engine.SetControl(barely::EngineControlType::kTempo, kTempo);
+  engine.SetTempo(kTempo);
 
   // Note event callback.
   const auto set_note_Event_callback_fn = [&](size_t index, Instrument& instrument) {
@@ -394,19 +393,15 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        engine.SetControl(EngineControlType::kTempo,
-                          engine.GenerateRandomNumber(0.5f, 0.75f) *
-                              engine.GetControl<float>(EngineControlType::kTempo));
-        ConsoleLog() << "Tempo changed to " << engine.GetControl<float>(EngineControlType::kTempo);
+        engine.SetTempo(engine.GenerateRandomNumber(0.5, 0.75) * engine.GetTempo());
+        ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case '2':
-        engine.SetControl(EngineControlType::kTempo,
-                          engine.GenerateRandomNumber(1.5f, 2.0f) *
-                              engine.GetControl<float>(EngineControlType::kTempo));
-        ConsoleLog() << "Tempo changed to " << engine.GetControl<float>(EngineControlType::kTempo);
+        engine.SetTempo(engine.GenerateRandomNumber(1.5, 2.0) * engine.GetTempo());
+        ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case 'R':
-        engine.SetControl(EngineControlType::kTempo, kTempo);
+        engine.SetTempo(kTempo);
         ConsoleLog() << "Tempo reset to " << kTempo;
         break;
       case 'D':

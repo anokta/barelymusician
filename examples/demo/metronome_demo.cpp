@@ -13,7 +13,6 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EngineControlType;
 using ::barely::InstrumentControlType;
 using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
@@ -39,8 +38,8 @@ constexpr float kBarPitch = 1.0f;
 constexpr float kBeatPitch = 0.0f;
 
 constexpr int kBeatCount = 4;
-constexpr float kInitialTempo = 120.0f;
-constexpr float kTempoIncrement = 10.0f;
+constexpr double kInitialTempo = 120.0;
+constexpr double kTempoIncrement = 10.0;
 
 }  // namespace
 
@@ -52,7 +51,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kFrameCount);
-  engine.SetControl(EngineControlType::kTempo, kInitialTempo);
+  engine.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
   auto instrument = engine.CreateInstrument({{
@@ -98,7 +97,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       return;
     }
     // Adjust tempo.
-    float tempo = engine.GetControl<float>(EngineControlType::kTempo);
+    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (metronome.IsPlaying()) {
@@ -132,10 +131,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       default:
         return;
     }
-    tempo = std::clamp(tempo, 0.0f, static_cast<float>(kSampleRate));
-    engine.SetControl(EngineControlType::kTempo, tempo);
-    ConsoleLog() << "Tempo set to " << engine.GetControl<float>(EngineControlType::kTempo)
-                 << " bpm";
+    tempo = std::clamp(tempo, 0.0, static_cast<double>(kSampleRate));
+    engine.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

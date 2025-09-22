@@ -75,6 +75,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("setControl", &Engine_SetControl)
       .function("update", &Engine::Update)
       .property("seed", &Engine::GetSeed, &Engine::SetSeed)
+      .property("tempo", &Engine::GetTempo, &Engine::SetTempo)
       .property("timestamp", &Engine::GetTimestamp);
 
   class_<Instrument>("Instrument")

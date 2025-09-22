@@ -70,7 +70,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate, kFrameCount);
-  engine.SetControl(barely::EngineControlType::kTempo, kInitialTempo);
+  engine.SetTempo(kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{
       {InstrumentControlType::kGain, kGain},

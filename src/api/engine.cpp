@@ -36,7 +36,6 @@ using ::barely::SampleDataMessage;
 // Returns an engine control array.
 EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
   return {
-      Control(120.0f, 0.0f),                    // kTempo
       Control(0.0f, 0.0f, 1.0f),                // kCompressorMix
       Control(0.0f, 0.0f, 10.0f),               // kCompressorAttack
       Control(0.0f, 0.0f, 10.0f),               // kCompressorRelease
@@ -214,13 +213,11 @@ void BarelyEngine::ScheduleMessage(barely::Message message) noexcept {
 
 void BarelyEngine::SetControl(BarelyEngineControlType type, float value) noexcept {
   if (auto& control = controls_[type]; control.SetValue(value)) {
-    if (type == BarelyEngineControlType_kTempo) {
-      tempo_ = static_cast<double>(value);
-    } else {
-      ScheduleMessage(EngineControlMessage{static_cast<EngineControlType>(type), control.value});
-    }
+    ScheduleMessage(EngineControlMessage{static_cast<EngineControlType>(type), control.value});
   }
 }
+
+void BarelyEngine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::Update(double timestamp) noexcept {

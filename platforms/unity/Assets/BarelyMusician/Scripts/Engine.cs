@@ -198,16 +198,16 @@ namespace Barely {
     private static float _sidechainRatio = 1.0f;
 
     /// Tempo in beats per minute.
-    public static float Tempo {
+    public static double Tempo {
       get { return _tempo; }
       set {
         if (_tempo != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.TEMPO, value);
-          _tempo = Internal.Engine_GetControl(Internal.EngineControlType.TEMPO);
+          Internal.Engine_SetTempo(value);
+          _tempo = Internal.Engine_GetTempo();
         }
       }
     }
-    private static float _tempo = 120.0f;
+    private static double _tempo = 120.0;
 
     /// Timestamp in seconds.
     public static double Timestamp {
@@ -278,10 +278,8 @@ namespace Barely {
 
       /// Engine control type.
       public enum EngineControlType {
-        /// Tempo in beats per minute.
-        [InspectorName("Tempo")] TEMPO = 0,
         /// Compressor mix.
-        [InspectorName("Compressor Mix")] COMPRESSOR_MIX,
+        [InspectorName("Compressor Mix")] COMPRESSOR_MIX = 0,
         /// Compressor attack in seconds.
         [InspectorName("Compressor Attack")] COMPRESSOR_ATTACK,
         /// Compressor release in seconds.
@@ -332,6 +330,17 @@ namespace Barely {
         return value;
       }
 
+      /// Returns the tempo of an engine.
+      ///
+      /// @return Tempo in beats per minute.
+      public static double Engine_GetTempo() {
+        double tempo = 0.0;
+        if (!BarelyEngine_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get engine tempo");
+        }
+        return tempo;
+      }
+
       /// Returns the timestamp of an engine.
       ///
       /// @return Timestamp in seconds.
@@ -350,6 +359,15 @@ namespace Barely {
       public static void Engine_SetControl(EngineControlType type, float value) {
         if (!BarelyEngine_SetControl(Handle, type, value) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set engine engine control");
+        }
+      }
+
+      /// Sets the tempo of an engine.
+      ///
+      /// @param tempo Tempo in beats per minute.
+      public static void Engine_SetTempo(double tempo) {
+        if (!BarelyEngine_SetTempo(Handle, tempo) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set engine tempo");
         }
       }
 
@@ -1089,7 +1107,7 @@ namespace Barely {
             Debug.LogError("Failed to initialize BarelyEngine");
             return;
           }
-          BarelyEngine_SetControl(_handle, EngineControlType.TEMPO, _tempo);
+          BarelyEngine_SetTempo(_handle, _tempo);
           BarelyEngine_SetControl(_handle, EngineControlType.COMPRESSOR_MIX, _compressorMix);
           BarelyEngine_SetControl(_handle, EngineControlType.COMPRESSOR_THRESHOLD,
                                   _compressorThreshold);
@@ -1165,6 +1183,9 @@ namespace Barely {
       private static extern bool BarelyEngine_GetControl(IntPtr engine, EngineControlType type,
                                                          ref float value);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
+      private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
+
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTimestamp")]
       private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
 
@@ -1177,6 +1198,9 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetControl")]
       private static extern bool BarelyEngine_SetControl(IntPtr engine, EngineControlType type,
                                                          float value);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
+      private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Update")]
       private static extern bool BarelyEngine_Update(IntPtr engine, double timestamp);

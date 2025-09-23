@@ -90,7 +90,7 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
     case InstrumentControlType::kVoiceCount: {
       const int voice_count = static_cast<int>(value);
       for (int i = voice_count_; i < voice_count; ++i) {
-        voice_states_[i].voice.Reset();
+        voice_states_[i].voice.Stop();
       }
       voice_count_ = voice_count;
     } break;
@@ -218,10 +218,6 @@ void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
 
 void InstrumentProcessor::SetNoteOn(
     float pitch, const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
-  if (voice_count_ == 0) {
-    // No voices available.
-    return;
-  }
   Voice& voice = AcquireVoice(pitch);
   if (const auto* sample = sample_data_.Select(pitch, *params_.rng); sample != nullptr) {
     voice.set_slice(sample);
@@ -265,7 +261,6 @@ Voice& InstrumentProcessor::AcquireVoice(float pitch) noexcept {
   if (voice_index == -1) {
     // If no voices are available to acquire, steal the oldest active voice.
     voice_index = oldest_voice_index;
-    voice_states_[voice_index].voice.Reset();
   }
   VoiceState& voice_state = voice_states_[voice_index];
   voice_state.pitch = pitch;

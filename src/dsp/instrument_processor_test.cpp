@@ -106,33 +106,5 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   }
 }
 
-// Tests that the processor processor produces silence when there are no available voices set.
-TEST(InstrumentProcessorTest, NoVoice) {
-  AudioRng rng;
-  InstrumentProcessor processor({}, rng, kSampleRate, kReferenceFrequency);
-  processor.SetControl(InstrumentControlType::kVoiceCount, 0);
-
-  SampleData sample_data(kSlices);
-  processor.SetSampleData(sample_data);
-
-  std::array<float, kStereoChannelCount> delay;
-  std::array<float, kStereoChannelCount> sidechain;
-  std::array<float, kStereoChannelCount> output;
-
-  output.fill(0.0f);
-  processor.Process(delay.data(), sidechain.data(), output.data());
-  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-    EXPECT_FLOAT_EQ(output[channel], 0.0f);
-  }
-
-  processor.SetNoteOn(0.0f, kNoteControls);
-
-  output.fill(0.0f);
-  processor.Process(delay.data(), sidechain.data(), output.data());
-  for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-    EXPECT_FLOAT_EQ(output[channel], 0.0f);
-  }
-}
-
 }  // namespace
 }  // namespace barely

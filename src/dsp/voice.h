@@ -21,6 +21,9 @@ namespace barely {
 
 /// Voice parameters.
 struct VoiceParams {
+  /// Filter coefficients.
+  BiquadFilter::Coefficients filter_coefficients = {};
+
   /// Bit crusher range (for bit depth reduction).
   float bit_crusher_range = 0.0f;
 
@@ -32,9 +35,6 @@ struct VoiceParams {
 
   /// Distortion drive.
   float distortion_drive = 1.0f;
-
-  /// Filter coefficients.
-  BiquadFilter::Coefficients filter_coefficients = {};
 
   /// Gain in linear amplitude.
   float gain = 1.0f;
@@ -63,11 +63,8 @@ struct VoiceParams {
 
 /// Instrument parameters.
 struct InstrumentParams {
-  /// Oscillator increment per sample.
-  float osc_increment = 0.0f;
-
-  /// Slice increment per sample.
-  float slice_increment = 0.0f;
+  /// Voice parameters.
+  VoiceParams voice_params = {};
 
   /// Envelope adsr.
   Envelope::Adsr adsr = {};
@@ -75,8 +72,11 @@ struct InstrumentParams {
   /// Random number generator.
   AudioRng* rng = nullptr;
 
-  /// Voice parameters.
-  VoiceParams voice_params = {};
+  /// Oscillator increment per sample.
+  float osc_increment = 0.0f;
+
+  /// Slice increment per sample.
+  float slice_increment = 0.0f;
 };
 
 /// Note parameters.
@@ -122,9 +122,6 @@ class Voice {
   ///
   /// @return True if on.
   [[nodiscard]] bool IsOn() const noexcept { return envelope_.IsOn(); }
-
-  /// Resets the voice.
-  void Reset() noexcept { return envelope_.Reset(); }
 
   /// Starts the voice.
   ///

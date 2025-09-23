@@ -2,6 +2,9 @@ import {CONTROLS} from './control.js';
 import {Instrument} from './instrument.js';
 import {Performer} from './performer.js';
 
+const MAX_INSTRUMENT_COUNT = 10;
+const MAX_PERFORMER_COUNT = 20;
+
 export class Engine {
   /**
    * @param {!Object} options
@@ -262,6 +265,9 @@ export class Engine {
           this._attachEvents();
           if (state) {
             this.loadState(state);
+          } else {
+            this.delayTime = 0.5;
+            this.delayFeedback = 0.2;
           }
           this._startUpdateLoop();
         } break;
@@ -440,11 +446,17 @@ export class Engine {
     for (const taskHandle in this._tasks) {
       this._audioNode.port.postMessage({type: 'task-get-properties', handle: taskHandle});
     }
+    const instrumentCount = Object.keys(this._instruments).length;
+    const performerCount = Math.max(Object.keys(this._performers).length - 1);
     const status = `
-      Instruments: ${Object.keys(this._instruments).length} |
-      Performers: ${Math.max(Object.keys(this._performers).length - 1, 0)} |
+      Instruments: ${instrumentCount} |
+      Performers: ${performerCount} |
       Position: ${this._metronome.position.toFixed(1)}
     `;
+    this.container.querySelector('#createInstrumentBtn').disabled =
+        (instrumentCount >= MAX_INSTRUMENT_COUNT);
+    this.container.querySelector('#createPerformerBtn').disabled =
+        (performerCount >= MAX_PERFORMER_COUNT);
     this.container.querySelector('.engine-status').textContent = status;
   }
 }

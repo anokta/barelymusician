@@ -23,6 +23,8 @@ using ::emscripten::return_value_policy::take_ownership;
       {InstrumentControlType::kAttack, 0.05f},
       {InstrumentControlType::kRelease, 0.1f},
       {InstrumentControlType::kOscMix, 1.0f},
+      {InstrumentControlType::kDelaySend, 0.1f},
+      {InstrumentControlType::kArpRate, 2.0f},
   }});
 }
 

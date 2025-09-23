@@ -188,18 +188,22 @@ export class Instrument {
 
       // Sync slider and number input
       controlInput.addEventListener('input', e => {
-        controlValueInput.value = controlInput.value;
-        this.setControl(
-            controlTypeIndex,
-            control.valueType === 'int' ? parseInt(e.target.value, 10) :
-                                          parseFloat(e.target.value));
+        let value =
+            control.valueType === 'int' ? parseInt(e.target.value, 10) : parseFloat(e.target.value);
+        if (!Number.isNaN(value)) {
+          value = Math.min(Math.max(value, controlValueInput.min), controlValueInput.max);
+          controlValueInput.value = value;
+          this.setControl(controlTypeIndex, value);
+        }
       });
-      controlValueInput.addEventListener('input', e => {
-        controlInput.value = controlValueInput.value;
-        this.setControl(
-            controlTypeIndex,
-            control.valueType === 'int' ? parseInt(e.target.value, 10) :
-                                          parseFloat(e.target.value));
+      controlValueInput.addEventListener('change', e => {
+        let value =
+            control.valueType === 'int' ? parseInt(e.target.value, 10) : parseFloat(e.target.value);
+        if (!Number.isNaN(value)) {
+          value = Math.min(Math.max(value, controlInput.min), controlInput.max);
+          controlInput.value = Math.min(Math.max(value, controlInput.min), controlInput.max);
+          this.setControl(controlTypeIndex, value);
+        }
       });
     }
   }

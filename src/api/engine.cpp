@@ -26,6 +26,7 @@ using ::barely::EngineControlArray;
 using ::barely::EngineControlMessage;
 using ::barely::EngineControlType;
 using ::barely::InstrumentControlMessage;
+using ::barely::InstrumentFilterControlMessage;
 using ::barely::kStereoChannelCount;
 using ::barely::MessageVisitor;
 using ::barely::NoteControlMessage;
@@ -133,44 +134,52 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
       current_frame = message_frame;
     }
     std::visit(
-        MessageVisitor{[&instruments](InstrumentControlMessage& control_message) noexcept {
-                         // TODO(#126): This shouldn't need an instrument look up and can directly
-                         // pass the processor pointer here and below once memory is fixed.
-                         if (const auto it = instruments->find(control_message.instrument);
-                             it != instruments->end()) {
-                           it->second->SetControl(control_message.type, control_message.value);
-                         }
-                       },
-                       [this](EngineControlMessage& engine_control_message) noexcept {
-                         engine_processor_.SetControl(engine_control_message.type,
-                                                      engine_control_message.value);
-                       },
-                       [&instruments](NoteControlMessage& note_control_message) noexcept {
-                         if (const auto it = instruments->find(note_control_message.instrument);
-                             it != instruments->end()) {
-                           it->second->SetNoteControl(note_control_message.pitch,
-                                                      note_control_message.type,
-                                                      note_control_message.value);
-                         }
-                       },
-                       [&instruments](NoteOffMessage& note_off_message) noexcept {
-                         if (const auto it = instruments->find(note_off_message.instrument);
-                             it != instruments->end()) {
-                           it->second->SetNoteOff(note_off_message.pitch);
-                         }
-                       },
-                       [&instruments](NoteOnMessage& note_on_message) noexcept {
-                         if (const auto it = instruments->find(note_on_message.instrument);
-                             it != instruments->end()) {
-                           it->second->SetNoteOn(note_on_message.pitch, note_on_message.controls);
-                         }
-                       },
-                       [&instruments](SampleDataMessage& sample_data_message) noexcept {
-                         if (const auto it = instruments->find(sample_data_message.instrument);
-                             it != instruments->end()) {
-                           it->second->SetSampleData(sample_data_message.sample_data);
-                         }
-                       }},
+        MessageVisitor{
+            [this](EngineControlMessage& engine_control_message) noexcept {
+              engine_processor_.SetControl(engine_control_message.type,
+                                           engine_control_message.value);
+            },
+            [&instruments](InstrumentControlMessage& instrument_control_message) noexcept {
+              // TODO(#126): This shouldn't need an instrument look up and can directly
+              // pass the processor pointer here and below once memory is fixed.
+              if (const auto it = instruments->find(instrument_control_message.instrument);
+                  it != instruments->end()) {
+                it->second->SetControl(instrument_control_message.type,
+                                       instrument_control_message.value);
+              }
+            },
+            [&instruments](
+                InstrumentFilterControlMessage& instrument_filter_control_message) noexcept {
+              if (const auto it = instruments->find(instrument_filter_control_message.instrument);
+                  it != instruments->end()) {
+                it->second->SetFilterCoefficients(instrument_filter_control_message.coeffs);
+              }
+            },
+            [&instruments](NoteControlMessage& note_control_message) noexcept {
+              if (const auto it = instruments->find(note_control_message.instrument);
+                  it != instruments->end()) {
+                it->second->SetNoteControl(note_control_message.pitch, note_control_message.type,
+                                           note_control_message.value);
+              }
+            },
+            [&instruments](NoteOffMessage& note_off_message) noexcept {
+              if (const auto it = instruments->find(note_off_message.instrument);
+                  it != instruments->end()) {
+                it->second->SetNoteOff(note_off_message.pitch);
+              }
+            },
+            [&instruments](NoteOnMessage& note_on_message) noexcept {
+              if (const auto it = instruments->find(note_on_message.instrument);
+                  it != instruments->end()) {
+                it->second->SetNoteOn(note_on_message.pitch, note_on_message.controls);
+              }
+            },
+            [&instruments](SampleDataMessage& sample_data_message) noexcept {
+              if (const auto it = instruments->find(sample_data_message.instrument);
+                  it != instruments->end()) {
+                it->second->SetSampleData(sample_data_message.sample_data);
+              }
+            }},
         message->second);
   }
 

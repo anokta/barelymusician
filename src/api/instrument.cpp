@@ -14,6 +14,7 @@
 
 #include "api/engine.h"
 #include "common/find_or_null.h"
+#include "dsp/biquad_filter.h"
 #include "dsp/control.h"
 #include "dsp/message.h"
 
@@ -23,6 +24,7 @@ using ::barely::Control;
 using ::barely::InstrumentControlArray;
 using ::barely::InstrumentControlMessage;
 using ::barely::InstrumentControlType;
+using ::barely::InstrumentFilterControlMessage;
 using ::barely::NoteControlArray;
 using ::barely::NoteControlMessage;
 using ::barely::NoteControlType;
@@ -99,6 +101,7 @@ BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine,
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept
     : engine_(engine),
+      sample_interval_(1.0f / static_cast<float>(engine_.GetSampleRate())),
       controls_(BuildControlArray(control_overrides)),
       arp_(engine),
       arp_task_(
@@ -224,6 +227,19 @@ void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexce
 
 void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) noexcept {
   switch (type) {
+    case InstrumentControlType::kFilterType:
+      [[fallthrough]];
+    case InstrumentControlType::kFilterFrequency:
+      [[fallthrough]];
+    case InstrumentControlType::kFilterQ:
+      engine_.ScheduleMessage(InstrumentFilterControlMessage{
+          this, barely::GetFilterCoefficients(
+                    sample_interval_,
+                    static_cast<barely::FilterType>(
+                        controls_[BarelyInstrumentControlType_kFilterType].value),
+                    controls_[BarelyInstrumentControlType_kFilterFrequency].value,
+                    controls_[BarelyInstrumentControlType_kFilterQ].value)});
+      break;
     case InstrumentControlType::kArpMode:
       if (static_cast<BarelyArpMode>(value) == BarelyArpMode_kNone) {
         if (arp_.IsPlaying()) {

@@ -50,6 +50,11 @@ struct BarelyEngine {
   /// @return Engine control value.
   [[nodiscard]] float GetControl(BarelyEngineControlType type) const noexcept;
 
+  /// Returns the sampling rate.
+  ///
+  /// @return Sampling rate in hertz.
+  [[nodiscard]] double GetSampleRate() const noexcept { return sample_rate_; }
+
   /// Returns the tempo.
   ///
   /// @return Tempo in beats per minute.

@@ -146,27 +146,18 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
     case InstrumentControlType::kDistortionDrive:
       params_.voice_params.distortion_drive = value;
       break;
-    case InstrumentControlType::kFilterType:
-      filter_type_ = static_cast<FilterType>(value);
-      params_.voice_params.filter_coefficients =
-          GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
-      break;
-    case InstrumentControlType::kFilterFrequency:
-      filter_frequency_ = value;
-      params_.voice_params.filter_coefficients =
-          GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
-      break;
-    case InstrumentControlType::kFilterQ:
-      filter_q_ = value;
-      params_.voice_params.filter_coefficients =
-          GetFilterCoefficients(sample_interval_, filter_type_, filter_frequency_, filter_q_);
-      break;
     case InstrumentControlType::kDelaySend:
       params_.voice_params.delay_send = value;
       break;
     case InstrumentControlType::kSidechainSend:
       params_.voice_params.sidechain_send = value;
       break;
+    case InstrumentControlType::kFilterType:
+      [[fallthrough]];
+    case InstrumentControlType::kFilterFrequency:
+      [[fallthrough]];
+    case InstrumentControlType::kFilterQ:
+      [[fallthrough]];
     case InstrumentControlType::kArpMode:
       [[fallthrough]];
     case InstrumentControlType::kArpGateRatio:

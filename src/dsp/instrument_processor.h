@@ -55,6 +55,14 @@ class InstrumentProcessor {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(InstrumentControlType type, float value) noexcept;
 
+  /// Sets the filter coefficients.
+  ///
+  /// @param coeff Filter coefficients.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetFilterCoefficients(const BiquadFilter::Coefficients& coeffs) noexcept {
+    params_.voice_params.filter_coefficients = coeffs;
+  }
+
   /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
@@ -103,10 +111,6 @@ class InstrumentProcessor {
   float sample_interval_ = 0.0f;
   SampleData sample_data_;
 
-  // TODO(#146): Filter coefficients should likely be calculated in `BarelyInstrument` instead.
-  FilterType filter_type_ = FilterType::kNone;
-  float filter_frequency_ = 0.0f;
-  float filter_q_ = std::sqrt(0.5f);
   OscMode osc_mode_ = OscMode::kMix;
   SliceMode slice_mode_ = SliceMode::kSustain;
 

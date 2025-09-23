@@ -109,6 +109,9 @@ struct BarelyInstrument {
   // Engine.
   BarelyEngine& engine_;
 
+  // Sampling interval in seconds.
+  float sample_interval_ = 0.0f;
+
   // Array of controls.
   barely::InstrumentControlArray controls_;
 

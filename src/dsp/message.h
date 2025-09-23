@@ -9,6 +9,7 @@
 #include <variant>
 #include <vector>
 
+#include "dsp/biquad_filter.h"
 #include "dsp/sample_data.h"
 
 namespace barely {
@@ -32,6 +33,15 @@ struct InstrumentControlMessage {
 
   /// Value.
   float value;
+};
+
+/// Instrument filter control message.
+struct InstrumentFilterControlMessage {
+  /// Instrument handle.
+  BarelyInstrumentHandle instrument;
+
+  /// Filter coefficients.
+  BiquadFilter::Coefficients coeffs;
 };
 
 /// Note control message.
@@ -80,8 +90,9 @@ struct SampleDataMessage {
 };
 
 /// Message alias.
-using Message = std::variant<EngineControlMessage, InstrumentControlMessage, NoteControlMessage,
-                             NoteOffMessage, NoteOnMessage, SampleDataMessage>;
+using Message =
+    std::variant<EngineControlMessage, InstrumentControlMessage, InstrumentFilterControlMessage,
+                 NoteControlMessage, NoteOffMessage, NoteOnMessage, SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

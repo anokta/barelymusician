@@ -64,11 +64,8 @@ class EngineProcessor {
       const std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*>& instruments,
       float* output_samples, int output_frame_count) noexcept {
     for (int frame = 0; frame < output_frame_count; ++frame) {
-      delay_frame_.fill(0.0f);
-      sidechain_frame_.fill(0.0f);
-
-      float* delay_frame = delay_frame_.data();
-      float* sidechain_frame = sidechain_frame_.data();
+      float delay_frame[kStereoChannelCount] = {};
+      float sidechain_frame[kStereoChannelCount] = {};
       float* output_frame = &output_samples[kStereoChannelCount * frame];
 
       for (const auto& [_, processor] : instruments) {
@@ -167,12 +164,6 @@ class EngineProcessor {
 
   // Sidechain.
   Sidechain sidechain_;
-
-  // Delay send frame.
-  std::array<float, kStereoChannelCount> delay_frame_ = {};
-
-  // Sidechain send frame.
-  std::array<float, kStereoChannelCount> sidechain_frame_ = {};
 
   // Current parameters.
   EffectParams current_params_ = {};

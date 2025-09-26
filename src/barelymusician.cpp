@@ -10,14 +10,13 @@
 #include "api/task.h"
 #include "common/time.h"
 
-bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count, float reference_frequency,
+bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
                          BarelyEngineHandle* out_engine) {
   if (sample_rate <= 0) return false;
   if (max_frame_count <= 0) return false;
-  if (reference_frequency <= 0.0) return false;
   if (!out_engine) return false;
 
-  *out_engine = new BarelyEngine(sample_rate, max_frame_count, reference_frequency);
+  *out_engine = new BarelyEngine(sample_rate, max_frame_count);
   return true;
 }
 

@@ -73,15 +73,13 @@ std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutable
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count, float reference_frequency) noexcept
+BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
     : sample_rate_(sample_rate),
-      reference_frequency_(reference_frequency),
       controls_(BuildEngineControlArray(static_cast<float>(sample_rate))),
       engine_processor_(sample_rate_),
       output_samples_(kStereoChannelCount * max_frame_count) {
   assert(sample_rate >= 0);
   assert(max_frame_count > 0);
-  assert(reference_frequency >= 0.0f);
 }
 
 BarelyEngine::~BarelyEngine() noexcept { mutable_instruments_.Update({}); }
@@ -92,8 +90,8 @@ void BarelyEngine::AddInstrument(
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
   [[maybe_unused]] const bool success =
       instruments_
-          .emplace(instrument, barely::InstrumentProcessor(control_overrides, audio_rng_,
-                                                           sample_rate_, reference_frequency_))
+          .emplace(instrument,
+                   barely::InstrumentProcessor(control_overrides, audio_rng_, sample_rate_))
           .second;
   assert(success);
   mutable_instruments_.Update(BuildMutableInstrumentMap(instruments_));

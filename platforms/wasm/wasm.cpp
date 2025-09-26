@@ -65,7 +65,7 @@ static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
 
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
   class_<Engine>("Engine")
-      .constructor<int, int, float>()
+      .constructor<int, int>()
       .function("createInstrument", &Engine_CreateInstrument, take_ownership())
       .function("createPerformer", &Engine::CreatePerformer, take_ownership())
       .function("generateRandomNumber",

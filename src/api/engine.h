@@ -23,9 +23,8 @@ struct BarelyEngine {
   ///
   /// @param sample_rate Sampling rate in hertz.
   /// @param max_frame_count Maximum number of frames.
-  /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  BarelyEngine(int sample_rate, int max_frame_count, float reference_frequency) noexcept;
+  BarelyEngine(int sample_rate, int max_frame_count) noexcept;
 
   /// Destroys `BarelyEngine`.
   ~BarelyEngine() noexcept;
@@ -114,9 +113,6 @@ struct BarelyEngine {
  private:
   // Sampling rate in hertz.
   int sample_rate_ = 0;
-
-  // Reference frequency at zero pitch.
-  float reference_frequency_ = 0.0f;
 
   // Array of engine controls.
   barely::EngineControlArray controls_;

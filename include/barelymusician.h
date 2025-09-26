@@ -49,7 +49,7 @@
 ///
 ///   // Set a note on.
 ///   //
-///   // The note pitch is centered around the reference frequency and measured in octaves.
+///   // The note pitch is expressed in octaves relative to middle C as the center frequency.
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
 ///   // pitch intervals within each octave.
 ///   constexpr float kC3Pitch = -1.0f;
@@ -133,7 +133,7 @@
 ///
 ///   // Set a note on.
 ///   //
-///   // The note pitch is centered around the reference frequency and measured in octaves.
+///   // The note pitch is expressed in octaves relative to middle C as the center frequency.
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
 ///   // pitch intervals within each octave.
 ///   float c3_pitch = -1.0f;
@@ -213,9 +213,6 @@
 #define BARELY_API
 #endif  // __GNUC__ >= 4
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
-
-/// Default reference frequency which is tuned to middle C.
-#define BARELY_DEFAULT_REFERENCE_FREQUENCY 261.62555f
 
 #ifdef __cplusplus
 extern "C" {
@@ -491,11 +488,10 @@ typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_dat
 ///
 /// @param sample_rate Sampling rate in hertz.
 /// @param max_frame_count Maximum number of frames.
-/// @param reference_frequency Reference frequency in hertz.
 /// @param out_engine Output engine handle.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
-                                    float reference_frequency, BarelyEngineHandle* out_engine);
+                                    BarelyEngineHandle* out_engine);
 
 /// Destroys an engine.
 ///
@@ -896,9 +892,6 @@ BARELY_API bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority);
 #include <utility>
 
 namespace barely {
-
-/// Default reference frequency which is tuned to middle C.
-inline constexpr float kDefaultReferenceFrequency = BARELY_DEFAULT_REFERENCE_FREQUENCY;
 
 /// Arpeggiator modes.
 enum class ArpMode {
@@ -1717,14 +1710,11 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   ///
   /// @param sample_rate Sampling rate in hertz.
   /// @param max_frame_count Maximum number of frames.
-  /// @param reference_frequency Reference frequency in hertz.
-  Engine(int sample_rate, int max_frame_count,
-         float reference_frequency = kDefaultReferenceFrequency) noexcept
+  Engine(int sample_rate, int max_frame_count) noexcept
       : HandleWrapper([&]() {
           BarelyEngineHandle engine = nullptr;
           [[maybe_unused]] const bool success = BarelyEngine_Create(
-              static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_frame_count),
-              reference_frequency, &engine);
+              static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_frame_count), &engine);
           assert(success);
           return engine;
         }()) {}

@@ -7,6 +7,7 @@
 #include <cmath>
 #include <span>
 
+#include "common/constants.h"
 #include "common/rng.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/sample_data.h"
@@ -57,14 +58,13 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) noexcept 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(
     std::span<const BarelyInstrumentControlOverride> control_overrides, AudioRng& rng,
-    int sample_rate, float reference_frequency) noexcept
-    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
-      reference_frequency_(reference_frequency) {
+    int sample_rate) noexcept
+    : sample_interval_(1.0f / static_cast<float>(sample_rate)) {
   assert(sample_rate > 0);
   for (const auto& [type, value] : control_overrides) {
     SetControl(static_cast<InstrumentControlType>(type), value);
   }
-  params_.osc_increment = reference_frequency * sample_interval_;
+  params_.osc_increment = kReferenceFrequency * sample_interval_;
   params_.slice_increment = sample_interval_;
   params_.rng = &rng;
 }
@@ -78,7 +78,7 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
     case InstrumentControlType::kPitchShift:
       pitch_shift_ = value;
       params_.osc_increment =
-          std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
+          std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * kReferenceFrequency * sample_interval_;
       params_.slice_increment = std::pow(2.0f, pitch_shift_) * sample_interval_;
       break;
     case InstrumentControlType::kRetrigger:
@@ -120,7 +120,7 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
     case InstrumentControlType::kOscPitchShift:
       osc_pitch_shift_ = value;
       params_.osc_increment =
-          std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * reference_frequency_ * sample_interval_;
+          std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * kReferenceFrequency * sample_interval_;
       break;
     case InstrumentControlType::kOscShape:
       params_.voice_params.osc_shape = value;

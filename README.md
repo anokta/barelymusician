@@ -42,7 +42,7 @@ instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 
 // Set an instrument note on.
 //
-// The note pitch is centered around the reference frequency and measured in octaves. Fractional
+// The note pitch is expressed in octaves relative to middle C as the center frequency. Fractional
 // note values adjust the frequency logarithmically to ensure equally perceived pitch intervals
 // within each octave.
 constexpr float kC4Pitch = 0.0f;

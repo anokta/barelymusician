@@ -23,10 +23,9 @@ class InstrumentProcessor {
   /// @param control_overrides Span of instrument control overrides.
   /// @param rng Random number generator.
   /// @param sample_rate Sampling rate in hertz.
-  /// @param reference_frequency Reference frequency in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   InstrumentProcessor(std::span<const BarelyInstrumentControlOverride> control_overrides,
-                      AudioRng& rng, int sample_rate, float reference_frequency) noexcept;
+                      AudioRng& rng, int sample_rate) noexcept;
 
   /// Processes the next output samples.
   ///
@@ -120,7 +119,6 @@ class InstrumentProcessor {
 
   float pitch_shift_ = 0.0f;
   float osc_pitch_shift_ = 0.0f;
-  float reference_frequency_ = 0.0f;
 };
 
 }  // namespace barely

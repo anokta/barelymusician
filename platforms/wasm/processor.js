@@ -1,6 +1,5 @@
 import Module from './barelymusician.js';
 
-const REFERENCE_FREQUENCY = 261.62555;
 const RENDER_QUANTUM_SIZE = 128
 
 export const EngineControlType = {
@@ -34,7 +33,7 @@ class Processor extends AudioWorkletProcessor {
 
     Module().then(module => {
       this._module = module;
-      this._engine = new this._module.Engine(sampleRate, RENDER_QUANTUM_SIZE, REFERENCE_FREQUENCY);
+      this._engine = new this._module.Engine(sampleRate, RENDER_QUANTUM_SIZE);
       this._instruments = {};
       this._performers = {};
       this._tasks = {};

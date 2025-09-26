@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <span>
 #include <unordered_map>
 #include <utility>
@@ -58,13 +59,14 @@ EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
 // Builds a new mutable instrument map.
 // NOLINTNEXTLINE(bugprone-exception-escape)
 std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutableInstrumentMap(
-    const std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor>& instruments,
+    const std::unordered_map<BarelyInstrument*, std::unique_ptr<barely::InstrumentProcessor>>&
+        instruments,
     BarelyInstrument* excluded_instrument = nullptr) noexcept {
   std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> new_instruments;
   new_instruments.reserve(instruments.size());
   for (const auto& [instrument, processor] : instruments) {
     if (instrument != excluded_instrument) {
-      new_instruments.emplace(instrument, const_cast<barely::InstrumentProcessor*>(&processor));
+      new_instruments.emplace(instrument, processor.get());
     }
   }
   return new_instruments;
@@ -90,8 +92,8 @@ void BarelyEngine::AddInstrument(
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
   [[maybe_unused]] const bool success =
       instruments_
-          .emplace(instrument,
-                   barely::InstrumentProcessor(control_overrides, audio_rng_, sample_rate_))
+          .emplace(instrument, std::make_unique<barely::InstrumentProcessor>(
+                                   control_overrides, audio_rng_, sample_rate_))
           .second;
   assert(success);
   mutable_instruments_.Update(BuildMutableInstrumentMap(instruments_));

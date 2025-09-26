@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -127,7 +128,7 @@ struct BarelyEngine {
   barely::MessageQueue message_queue_;
 
   // Map of instrument pointers to processors.
-  std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor> instruments_;
+  std::unordered_map<BarelyInstrument*, std::unique_ptr<barely::InstrumentProcessor>> instruments_;
   barely::Mutable<std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*>>
       mutable_instruments_;
 

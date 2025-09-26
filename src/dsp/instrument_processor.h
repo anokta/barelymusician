@@ -36,13 +36,17 @@ class InstrumentProcessor {
   template <bool kIsSidechainSend = false>
   void Process(float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount]) noexcept {
-    for (VoiceState& voice_state : voice_states_) {
+    for (int i = active_voice_count_ - 1; i >= 0; --i) {
+      auto& voice = active_voice_states_[i]->voice;
       if constexpr (kIsSidechainSend) {
-        voice_callback_send_(voice_state.voice, params_, delay_frame, sidechain_frame,
-                             output_frame);
+        if (!voice.IsActive()) {
+          std::swap(active_voice_states_[i], active_voice_states_[active_voice_count_ - 1]);
+          --active_voice_count_;
+          continue;
+        }
+        voice_callback_send_(voice, params_, delay_frame, sidechain_frame, output_frame);
       } else {
-        voice_callback_receive_(voice_state.voice, params_, delay_frame, sidechain_frame,
-                                output_frame);
+        voice_callback_receive_(voice, params_, delay_frame, sidechain_frame, output_frame);
       }
     }
   }
@@ -107,6 +111,9 @@ class InstrumentProcessor {
   std::array<VoiceState, kMaxVoiceCount> voice_states_;
   int voice_count_ = 8;
 
+  std::array<VoiceState*, kMaxVoiceCount> active_voice_states_;
+  int active_voice_count_ = 0;
+
   float sample_interval_ = 0.0f;
   SampleData sample_data_;
 
@@ -114,8 +121,6 @@ class InstrumentProcessor {
   SliceMode slice_mode_ = SliceMode::kSustain;
 
   InstrumentParams params_ = {};
-
-  bool should_retrigger_ = false;
 
   float pitch_shift_ = 0.0f;
   float osc_pitch_shift_ = 0.0f;

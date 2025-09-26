@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <optional>
 #include <variant>
-#include <vector>
 
 #include "dsp/biquad_filter.h"
 #include "dsp/sample_data.h"

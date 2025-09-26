@@ -77,6 +77,9 @@ struct InstrumentParams {
 
   /// Slice increment per sample.
   float slice_increment = 0.0f;
+
+  /// Denotes whether the instrument should retrigger a note.
+  bool should_retrigger = false;
 };
 
 /// Note parameters.
@@ -160,10 +163,6 @@ class Voice {
   void Process(const InstrumentParams& params, float delay_frame[kStereoChannelCount],
                float sidechain_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount]) noexcept {
-    if (!IsActive()) {
-      return;
-    }
-
     if constexpr (kIsSidechainSend) {
       if (params_.sidechain_send <= 0.0f) {
         return;

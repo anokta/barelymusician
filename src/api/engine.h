@@ -34,9 +34,11 @@ struct BarelyEngine {
   ///
   /// @param instrument Pointer to instrument.
   /// @param control_overrides Span of instrument control overrides.
+  /// @param filter_coeffs Filter coefficients.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddInstrument(BarelyInstrument* instrument,
-                     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept;
+                     std::span<const BarelyInstrumentControlOverride> control_overrides,
+                     const barely::BiquadFilter::Coefficients& filter_coeffs) noexcept;
 
   /// Adds a new performer.
   ///

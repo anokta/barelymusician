@@ -133,7 +133,13 @@ BarelyInstrument::BarelyInstrument(
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
       arp_.GetLoopLength());
 
-  engine_.AddInstrument(this, control_overrides);
+  engine_.AddInstrument(
+      this, control_overrides,
+      barely::GetFilterCoefficients(
+          sample_interval_,
+          static_cast<barely::FilterType>(controls_[BarelyInstrumentControlType_kFilterType].value),
+          controls_[BarelyInstrumentControlType_kFilterFrequency].value,
+          controls_[BarelyInstrumentControlType_kFilterQ].value));
 }
 
 BarelyInstrument::~BarelyInstrument() noexcept {

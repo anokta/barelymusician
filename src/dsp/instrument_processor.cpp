@@ -57,13 +57,14 @@ VoiceCallback GetVoiceCallback(OscMode osc_mode, SliceMode slice_mode) noexcept 
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(
-    std::span<const BarelyInstrumentControlOverride> control_overrides, AudioRng& rng,
-    int sample_rate) noexcept
+    std::span<const BarelyInstrumentControlOverride> control_overrides,
+    const BiquadFilter::Coefficients& filter_coeffs, AudioRng& rng, int sample_rate) noexcept
     : sample_interval_(1.0f / static_cast<float>(sample_rate)) {
   assert(sample_rate > 0);
   for (const auto& [type, value] : control_overrides) {
     SetControl(static_cast<InstrumentControlType>(type), value);
   }
+  params_.voice_params.filter_coefficients = filter_coeffs;
   params_.osc_increment = kReferenceFrequency * sample_interval_;
   params_.slice_increment = sample_interval_;
   params_.rng = &rng;
@@ -163,7 +164,7 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
     case InstrumentControlType::kArpGateRatio:
       [[fallthrough]];
     case InstrumentControlType::kArpRate:
-      break;  // TODO(#126): This should fallthrough, but cannot due to `control_overrides`.
+      break;
     default:
       assert(!"Invalid control type");
       return;

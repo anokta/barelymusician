@@ -9,6 +9,7 @@
 
 #include "common/constants.h"
 #include "common/rng.h"
+#include "dsp/biquad_filter.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"
 #include "dsp/voice.h"
@@ -21,11 +22,13 @@ class InstrumentProcessor {
   /// Constructs a new `InstrumentProcessor`.
   ///
   /// @param control_overrides Span of instrument control overrides.
+  /// @param filter_coeffs Filter coefficients.
   /// @param rng Random number generator.
   /// @param sample_rate Sampling rate in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   InstrumentProcessor(std::span<const BarelyInstrumentControlOverride> control_overrides,
-                      AudioRng& rng, int sample_rate) noexcept;
+                      const BiquadFilter::Coefficients& filter_coeffs, AudioRng& rng,
+                      int sample_rate) noexcept;
 
   /// Processes the next output samples.
   ///

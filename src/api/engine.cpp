@@ -87,13 +87,13 @@ BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
 BarelyEngine::~BarelyEngine() noexcept { mutable_instruments_.Update({}); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::AddInstrument(
-    BarelyInstrumentHandle instrument,
-    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
+void BarelyEngine::AddInstrument(BarelyInstrumentHandle instrument,
+                                 std::span<const BarelyInstrumentControlOverride> control_overrides,
+                                 const barely::BiquadFilter::Coefficients& filter_coeffs) noexcept {
   [[maybe_unused]] const bool success =
       instruments_
           .emplace(instrument, std::make_unique<barely::InstrumentProcessor>(
-                                   control_overrides, audio_rng_, sample_rate_))
+                                   control_overrides, filter_coeffs, audio_rng_, sample_rate_))
           .second;
   assert(success);
   mutable_instruments_.Update(BuildMutableInstrumentMap(instruments_));

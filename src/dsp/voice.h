@@ -196,6 +196,8 @@ class Voice {
       output *= osc_output + slice_output;
     } else if constexpr (kOscMode == OscMode::kFm) {
       output *= slice_sample;
+    } else if constexpr (kOscMode == OscMode::kRing) {
+      output *= osc_output * slice_sample + slice_output;
     } else if constexpr (kOscMode == OscMode::kAm) {
       output *= std::abs(osc_output) * slice_sample + slice_output;
     } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {

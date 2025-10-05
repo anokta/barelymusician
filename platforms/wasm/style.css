@@ -94,6 +94,12 @@ button {
   text-align: left;
 }
 
+.control-container select {
+  grid-column: 2 / 4;
+  min-width: 160px;
+  max-width: 100%;
+}
+
 .control-container input[type='range'] {
   grid-column: 2 / 3;
   min-width: 160px;

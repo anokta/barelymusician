@@ -160,6 +160,9 @@ class Processor extends AudioWorkletProcessor {
         case 'instrument-set-note-off': {
           this._instruments[event.data.handle]?.setNoteOff(event.data.pitch);
         } break;
+        case 'instrument-set-sample-data': {
+          this._setInstrumentSampleData(event.data.handle, event.data.slices);
+        } break;
         case 'performer-create': {
           const performer = this._engine.createPerformer();
           const handle = performer.getHandle();
@@ -339,6 +342,42 @@ class Processor extends AudioWorkletProcessor {
     this._module._free(outputSamplesPtr);
 
     return true;
+  }
+
+  /**
+   * Sets instrument sample data.
+   * @private
+   */
+  _setInstrumentSampleData(handle, slices) {
+    if (!this._instruments[handle]) return;
+
+    const sliceCount = slices.length;
+    const sliceStructSize = 24;  // sizeof(BarelySlice)
+
+    const slicesPtr = this._module._malloc(sliceCount * sliceStructSize);
+    const samplePtrs = [];
+
+    for (let i = 0; i < sliceCount; ++i) {
+      const samples = slices[i].samples;
+      const sampleCount = samples.length;
+
+      const samplesPtr = this._module._malloc(sampleCount * Float32Array.BYTES_PER_ELEMENT);
+      this._module.HEAPF32.set(samples, samplesPtr / Float32Array.BYTES_PER_ELEMENT);
+      samplePtrs.push(samplesPtr);
+
+      const offset = slicesPtr + i * sliceStructSize;
+      this._module.HEAPF32[offset / 4] = slices[i].root_pitch;
+      this._module.HEAP32[offset / 4 + 1] = slices[i].sample_rate;
+      this._module.HEAP32[offset / 4 + 2] = samplesPtr;
+      this._module.HEAP32[offset / 4 + 3] = sampleCount;
+    }
+
+    this._instruments[handle].setSampleData(slicesPtr, sliceCount);
+
+    for (const ptr of samplePtrs) {
+      this._module._free(ptr);
+    }
+    this._module._free(slicesPtr);
   }
 }
 

@@ -7,14 +7,18 @@ export class Instrument {
   /**
    * @param {!Object} params
    * @param {!Element} params.container
+   * @param {!AudioContext} params.audioContext
    * @param {!AudioWorkletNode} params.audioNode
    * @param {!Promise<number>} params.handlePromise
    * @param {function(number):void} params.noteOnCallback
    * @param {function(number):void} params.noteOffCallback
    */
-  constructor({container, audioNode, handlePromise, noteOnCallback, noteOffCallback}) {
+  constructor(
+      {container, audioContext, audioNode, handlePromise, noteOnCallback, noteOffCallback}) {
     /** @private @const {!Element} */
     this._container = container;
+    /** @private @const {!AudioContext} */
+    this._audioContext = audioContext;
     /** @private @const {!AudioWorkletNode} */
     this._audioNode = audioNode;
     /** @private @const {!Promise<number>} */
@@ -30,6 +34,9 @@ export class Instrument {
     }
 
     this._audioNode.port.postMessage({type: 'instrument-create'});
+    this.setSampleData(
+        [{pitch: 0.0, url: 'sample.wav'}],
+    );
   }
 
   /**
@@ -75,8 +82,12 @@ export class Instrument {
     if (this._container) {
       const controlContainer =
           this._container.querySelector('#controls').querySelector(`#control-${typeIndex}`);
-      controlContainer.querySelector('input').value = value;
-      controlContainer.querySelector(`#input-number-${typeIndex}`).value = value;
+      if (controlContainer.querySelector('input')) {
+        controlContainer.querySelector('input').value = value;
+        controlContainer.querySelector(`#input-number-${typeIndex}`).value = value;
+      } else {
+        controlContainer.querySelector('select').value = value;
+      }
     }
   }
 
@@ -121,6 +132,37 @@ export class Instrument {
   }
 
   /**
+   * Set instrument sample data.
+   *
+   * @param {!Array<{pitch: number, url: string}>} sampleData
+   * @return {!Promise<void>}
+   */
+  async setSampleData(sampleData) {
+    const slices = [];
+    for (const {pitch, url} of sampleData) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn(`Invalid sample data for pitch ${pitch}`);
+        continue;
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this._audioContext.decodeAudioData(arrayBuffer);
+      slices.push({
+        root_pitch: pitch,
+        sample_rate: audioBuffer.sampleRate,
+        samples: audioBuffer.getChannelData(0),  // mono assumed for now.
+      });
+    }
+    await this._withHandle(async handle => {
+      this._audioNode.port.postMessage({
+        type: 'instrument-set-sample-data',
+        handle,
+        slices,
+      });
+    });
+  }
+
+  /**
    * Creates a control UI for a given control type.
    * @param {number} controlTypeIndex
    * @param {!Element} parentContainer
@@ -143,6 +185,30 @@ export class Instrument {
     controlContainer.appendChild(controlLabel);
 
     // Input
+    if (control.valueType !== 'bool' && control.valueType !== 'float' &&
+        control.valueType !== 'int') {  // enum type
+      const select = document.createElement('select');
+      select.id = `input-${controlTypeIndex}`;
+
+      for (const [key, value] of Object.entries(control.valueType)) {
+        if (typeof value !== 'number' || key === 'COUNT') continue;
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent =
+            key.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        if (value === control.defaultValue) option.selected = true;
+        select.appendChild(option);
+      }
+
+      select.addEventListener('change', e => {
+        const value = parseInt(e.target.value, 10);
+        this.setControl(controlTypeIndex, value);
+      });
+
+      controlContainer.appendChild(select);
+      return;
+    }
+
     const controlInput = document.createElement('input');
     controlInput.id = `input-${controlTypeIndex}`;
     switch (control.valueType) {

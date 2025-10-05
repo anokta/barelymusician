@@ -170,6 +170,7 @@ export class Engine {
 
     const instrument = new Instrument({
       container: instrumentContainer,
+      audioContext: this._audioContext,
       audioNode: this._audioNode,
       handlePromise: handlePromise,
       noteOnCallback: pitch => {
@@ -248,14 +249,15 @@ export class Engine {
 
   _initAudioNode(audioContext, state) {
     const STEREO_CHANNEL_COUNT = 2;
-    this._audioNode = new AudioWorkletNode(audioContext, 'barelymusician-processor', {
+    this._audioContext = audioContext;
+    this._audioNode = new AudioWorkletNode(this._audioContext, 'barelymusician-processor', {
       numberOfInputs: 0,
       numberOfOutputs: 1,
       outputChannelCount: [STEREO_CHANNEL_COUNT],
       channelCount: STEREO_CHANNEL_COUNT,
       channelCountMode: 'explicit',
     });
-    this._audioNode.connect(audioContext.destination);
+    this._audioNode.connect(this._audioContext.destination);
     this._audioNode.port.onmessage = event => {
       if (!event.data) return;
 

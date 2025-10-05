@@ -50,6 +50,12 @@ static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
   instrument.SetNoteOn(pitch);
 }
 
+static void Instrument_SetSampleData(Instrument& instrument, uintptr_t slices,
+                                     int slice_count) noexcept {
+  instrument.SetSampleData({reinterpret_cast<const barely::Slice*>(slices),
+                            reinterpret_cast<const barely::Slice*>(slices) + slice_count});
+}
+
 [[nodiscard]] static Task Performer_CreateTask(Performer& performer, double position,
                                                double duration) noexcept {
   return performer.CreateTask(position, duration, /*priority=*/0, /*callback=*/nullptr);
@@ -99,8 +105,8 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("setNoteOn",
                 static_cast<void (Instrument::*)(float, float)>(&Instrument::SetNoteOn))
       .function("setNoteOn",
-                static_cast<void (Instrument::*)(float, float, float)>(&Instrument::SetNoteOn));
-  // TODO(#164): Add sample data support.
+                static_cast<void (Instrument::*)(float, float, float)>(&Instrument::SetNoteOn))
+      .function("setSampleData", &Instrument_SetSampleData, allow_raw_pointers());
 
   class_<Performer>("Performer")
       .function("createTask", &Performer_CreateTask, take_ownership())

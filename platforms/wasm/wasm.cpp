@@ -6,6 +6,7 @@ using ::barely::Engine;
 using ::barely::EngineControlType;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
+using ::barely::NoteControlType;
 using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Quantization;
@@ -44,6 +45,11 @@ static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_
 
 static void Instrument_SetControl(Instrument& instrument, int type, float value) noexcept {
   instrument.SetControl(static_cast<InstrumentControlType>(type), value);
+}
+
+static void Instrument_SetNoteControl(Instrument& instrument, float pitch, int type,
+                                      float value) noexcept {
+  instrument.SetNoteControl(pitch, static_cast<NoteControlType>(type), value);
 }
 
 static void Instrument_SetNoteOn(Instrument& instrument, float pitch) noexcept {
@@ -93,7 +99,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("isNoteOn", &Instrument::IsNoteOn)
       .function("setAllNotesOff", &Instrument::SetAllNotesOff)
       .function("setControl", &Instrument_SetControl)
-      .function("setNoteControl", &Instrument::SetNoteControl<float>)
+      .function("setNoteControl", &Instrument_SetNoteControl)
       .function(
           "setNoteEventCallback", optional_override([](Instrument& instrument, val js_callback) {
             return instrument.SetNoteEventCallback([js_callback](NoteEventType type, float pitch) {

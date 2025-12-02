@@ -38,9 +38,6 @@ class Processor extends AudioWorkletProcessor {
       this._performers = {};
       this._tasks = {};
 
-      // TODO(#164): Temp workaround to sync performers.
-      this._metronome = null;
-
       this.port.postMessage({type: 'init-success'});
     });
 
@@ -71,10 +68,6 @@ class Processor extends AudioWorkletProcessor {
         case 'engine-get-tempo': {
           this.port.postMessage({type: 'engine-get-tempo-response', tempo: this._engine.tempo});
         } break;
-        case 'engine-get-timestamp': {
-          this.port.postMessage(
-              {type: 'engine-get-timestamp-response', timestamp: this._engine.timestamp});
-        } break;
         case 'engine-set-delay-time': {
           this._engine.setControl(EngineControlType.DELAY_TIME, event.data.delayTime);
         } break;
@@ -86,6 +79,10 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'engine-set-tempo': {
           this._engine.tempo = event.data.tempo;
+        } break;
+        case 'engine-update': {
+          const latency = Math.max(1.0 / 60.0, RENDER_QUANTUM_SIZE / sampleRate);
+          this._engine.update(currentTime + latency);
         } break;
         case 'instrument-create': {
           const instrument = this._engine.createInstrument();
@@ -101,7 +98,7 @@ class Processor extends AudioWorkletProcessor {
             } else if (eventType == NoteEventType.END) {
               this.port.postMessage({type: 'instrument-on-note-off', handle, pitch});
             } else {
-              console.error('Invalid note event type!');
+              console.error(`Invalid note event type: ${eventType}`);
             }
           });
           this._instruments[handle] = instrument;
@@ -168,28 +165,12 @@ class Processor extends AudioWorkletProcessor {
           const handle = performer.getHandle();
           this._performers[handle] = performer;
           this.port.postMessage({type: 'performer-create-success', handle});
-
-          // TODO(#164): Temp workaround to sync performers.
-          if (Object.keys(this._performers).length === 1) {
-            this._metronome = performer;
-          } else if (this._metronome && this._metronome.isPlaying) {
-            performer.position = this._metronome.position;
-            performer.start();
-          }
         } break;
         case 'performer-destroy': {
           if (this._performers[event.data.handle]) {
-            if (this._performers[event.data.handle] == this._metronome) {
-              this._metronome = null;
-            }
             this._performers[event.data.handle].delete();
             delete this._performers[event.data.handle];
             this.port.postMessage({type: 'performer-destroy-success', handle: event.data.handle});
-          }
-
-          // TODO(#164): Temp workaround to sync performers.
-          if (Object.keys(this._performers).length === 0) {
-            this._metronome = null;
           }
         } break;
         case 'performer-get-properties': {
@@ -210,20 +191,10 @@ class Processor extends AudioWorkletProcessor {
           if (this._performers[event.data.handle]) {
             this._performers[event.data.handle].loopBeginPosition = event.data.loopBeginPosition;
           }
-
-          // TODO(#164): Temp workaround to sync performers.
-          if (this._performers[event.data.handle] && this._metronome) {
-            this._performers[event.data.handle].position = this._metronome.position;
-          }
         } break;
         case 'performer-set-loop-length': {
           if (this._performers[event.data.handle]) {
             this._performers[event.data.handle].loopLength = event.data.loopLength;
-          }
-
-          // TODO(#164): Temp workaround to sync performers.
-          if (this._performers[event.data.handle] && this._metronome) {
-            this._performers[event.data.handle].position = this._metronome.position;
           }
         } break;
         case 'performer-set-looping': {
@@ -235,27 +206,12 @@ class Processor extends AudioWorkletProcessor {
           if (this._performers[event.data.handle]) {
             this._performers[event.data.handle].position = event.data.position;
           }
-
-          // TODO(#164): Temp workaround to sync performers.
-          if (this._performers[event.data.handle] && this._metronome) {
-            this._performers[event.data.handle].position = this._metronome.position;
-          }
         } break;
         case 'performer-start': {
           this._performers[event.data.handle]?.start();
-
-          // TODO(#164): Temp workaround to sync performers.
-          if (this._performers[event.data.handle] && this._metronome) {
-            this._performers[event.data.handle].position = this._metronome.position;
-          }
         } break;
         case 'performer-stop': {
           this._performers[event.data.handle]?.stop();
-
-          // TODO(#164): Temp workaround to sync performers.
-          if (this._performers[event.data.handle] && this._metronome) {
-            this._performers[event.data.handle].position = this._metronome.position;
-          }
         } break;
         case 'task-create': {
           if (this._performers[event.data.performerHandle]) {
@@ -304,7 +260,7 @@ class Processor extends AudioWorkletProcessor {
           }
         } break;
         default:
-          console.error('Invalid message!');
+          console.error(`Invalid message: ${event.data.type}`);
       }
     };
   }
@@ -322,9 +278,6 @@ class Processor extends AudioWorkletProcessor {
 
     if (outputSampleCount == 0) return true;
     if (outputFrameCount > RENDER_QUANTUM_SIZE) return true;
-
-    const latency = Math.max(1.0 / 60.0, outputFrameCount / sampleRate);
-    this._engine.update(currentTime + latency);
 
     const outputSamplesPtr =
         this._module._malloc(outputSampleCount * Float32Array.BYTES_PER_ELEMENT);

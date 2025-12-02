@@ -34,9 +34,7 @@ export class Instrument {
     }
 
     this._audioNode.port.postMessage({type: 'instrument-create'});
-    this.setSampleData(
-        [{pitch: 0.0, url: 'sample.wav'}],
-    );
+    this.setSampleData([{pitch: 0.0, url: 'data/sample.wav'}]);
   }
 
   /**
@@ -231,7 +229,7 @@ export class Instrument {
         controlInput.value = control.defaultValue;
         break;
       default:
-        console.error('Invalid control value type: ' + control.valueType);
+        console.error(`Invalid control value type: ${control.valueType}`);
         controlContainer.remove();
         return;
     }

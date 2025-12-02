@@ -14,7 +14,6 @@ export class Engine {
 
     this.seed = 0.0;
     this._tempo = 120.0;
-    this.timestamp = 0.0;
 
     this._delayTime = 0.0;
     this._delayFeedback = 0.0;
@@ -95,9 +94,12 @@ export class Engine {
       const controlValues = {};
       const controlsContainer = instrument._container.querySelector('#controls');
       for (const controlTypeIndex in CONTROLS) {
-        const controlInput =
-            controlsContainer.querySelector(`#control-${controlTypeIndex}`).querySelector('input');
-        controlValues[controlTypeIndex] = controlInput.value;
+        const controlContainer = controlsContainer.querySelector(`#control-${controlTypeIndex}`);
+        if (controlContainer.querySelector('input')) {
+          controlValues[controlTypeIndex] = controlContainer.querySelector('input').value;
+        } else {
+          controlValues[controlTypeIndex] = controlContainer.querySelector('select').value;
+        }
       }
       return {handle, controlValues};
     });
@@ -273,9 +275,6 @@ export class Engine {
           }
           this._startUpdateLoop();
         } break;
-        case 'engine-get-timestamp-response': {
-          this.timestamp = event.data.timestamp;
-        } break;
         case 'instrument-create-success': {
           const {instrument, resolveHandle} = this._pendingInstruments.shift();
           resolveHandle(event.data.handle);
@@ -305,10 +304,9 @@ export class Engine {
         case 'performer-destroy-success': {
           delete this._performers[event.data.handle];
         } break;
-        // TODO(#164): Is this needed?
         case 'performer-get-properties-response': {
           const performer = this._performers[event.data.handle];
-          if (performer && performer === this._metronome) {
+          if (performer) {
             performer._isPlaying = event.data.isPlaying;
             performer._position = event.data.position;
           }
@@ -356,26 +354,33 @@ export class Engine {
 
       const performer = this.createPerformer(performerContainer);
       performer.isLooping = true;
+      performer.position = this._metronome.position;
+      if (this._metronome.isPlaying) {
+        performer.start();
+      }
     });
 
     // Transport controls.
     const playPauseButton = this.container.querySelector('#playPauseBtn');
     playPauseButton.addEventListener('click', () => {
       if (this._metronome.isPlaying) {
-        this._metronome.stop();
         Object.values(this._performers).forEach(performer => performer.stop());
         playPauseButton.textContent = ' Play ';
       } else {
-        this._metronome.start();
         Object.values(this._performers).forEach(performer => performer.start());
         playPauseButton.textContent = 'Pause';
       }
     });
 
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this._metronome.isPlaying) {
+        Object.values(this._performers).forEach(performer => performer.stop());
+        playPauseButton.textContent = 'Play';
+      }
+    });
+
     const stopButton = this.container.querySelector('#stopBtn');
     stopButton.addEventListener('click', () => {
-      this._metronome.stop();
-      this._metronome.position = 0.0;
       Object.values(this._performers).forEach(performer => {
         performer.stop();
         performer.position = 0.0;
@@ -440,8 +445,7 @@ export class Engine {
   }
 
   _updateStatus() {
-    this._audioNode.port.postMessage({type: 'engine-get-timestamp'});
-    // TODO(#164): Is this needed?
+    this._audioNode.port.postMessage({type: 'engine-update'});
     for (const performerHandle in this._performers) {
       this._audioNode.port.postMessage({type: 'performer-get-properties', handle: performerHandle});
     }

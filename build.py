@@ -260,8 +260,7 @@ def build(args, source_dir, build_dir):
     if args.windows:
         print("Building the Windows targets...")
         windows_build_dir = os.path.join(build_dir, "Windows")
-        windows_cmake_options = ['-G "Visual Studio 17 2022"'] + common_cmake_options
-        build_platform(args, config, source_dir, windows_build_dir, windows_cmake_options)
+        build_platform(args, config, source_dir, windows_build_dir, common_cmake_options)
 
 
 def run_daisy_program(build_dir):

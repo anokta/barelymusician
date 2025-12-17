@@ -19,6 +19,9 @@
 
 namespace barely {
 
+/// Voice index.
+using VoiceIndex = int;
+
 /// Voice parameters.
 struct VoiceParams {
   /// Filter coefficients.
@@ -63,6 +66,20 @@ struct VoiceParams {
 
 /// Instrument parameters.
 struct InstrumentParams {
+  // TODO(#126): Convert to intrusive list.
+  // List of voices with their pitch and timestamp. Voice timestamp is used to determine which voice
+  // to steal when there are no free voices available.
+  // TODO(#12): Consider a more optimized implementation for voice stealing.
+  static constexpr int kMaxVoiceCount = 16;
+  struct VoiceState {
+    VoiceIndex voice_index;
+    float pitch = 0.0f;
+    float pitch_shift = 0.0f;
+    int timestamp = 0;
+  };
+  std::array<VoiceState, kMaxVoiceCount> active_voice_states;
+  int active_voice_count = 0;
+
   /// Voice parameters.
   VoiceParams voice_params = {};
 

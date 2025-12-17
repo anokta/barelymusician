@@ -17,6 +17,7 @@
 #include "dsp/instrument_processor.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/sidechain.h"
+#include "dsp/voice_pool.h"
 
 namespace barely {
 
@@ -57,25 +58,19 @@ class EngineProcessor {
 
   /// Processes the next output samples.
   ///
-  /// @param instruments Set of instruments.
+  /// @param voice_pool Voice pool.
   /// @param output_samples Array of interleaved output samples.
   /// @param output_frame_count Number of output frames.
-  void Process(
-      const std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*>& instruments,
-      float* output_samples, int output_frame_count) noexcept {
+  void Process(VoicePool& voice_pool, float* output_samples, int output_frame_count) noexcept {
     for (int frame = 0; frame < output_frame_count; ++frame) {
       float delay_frame[kStereoChannelCount] = {};
       float sidechain_frame[kStereoChannelCount] = {};
       float* output_frame = &output_samples[kStereoChannelCount * frame];
 
-      for (const auto& [_, processor] : instruments) {
-        processor->Process<true>(delay_frame, sidechain_frame, output_frame);
-      }
+      voice_pool.Process<true>(delay_frame, sidechain_frame, output_frame);
       sidechain_.Process(sidechain_frame, current_params_.sidechain_mix,
                          current_params_.sidechain_threshold_db, current_params_.sidechain_ratio);
-      for (const auto& [_, processor] : instruments) {
-        processor->Process<false>(delay_frame, sidechain_frame, output_frame);
-      }
+      voice_pool.Process<false>(delay_frame, sidechain_frame, output_frame);
 
       delay_filter_.Process(delay_frame, output_frame, current_params_.delay_params);
 

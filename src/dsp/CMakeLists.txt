@@ -20,6 +20,7 @@ target_sources(
   sample_generators.h
   sidechain.h
   voice.h
+  voice_pool.h
 )
 
 if(ENABLE_TESTS)

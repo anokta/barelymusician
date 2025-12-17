@@ -19,8 +19,9 @@ namespace barely {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(
     std::span<const BarelyInstrumentControlOverride> control_overrides,
-    const BiquadFilter::Coefficients& filter_coeffs, AudioRng& rng, int sample_rate) noexcept
-    : sample_interval_(1.0f / static_cast<float>(sample_rate)) {
+    const BiquadFilter::Coefficients& filter_coeffs, AudioRng& rng, VoicePool& voice_pool,
+    int sample_rate) noexcept
+    : sample_interval_(1.0f / static_cast<float>(sample_rate)), voice_pool_(voice_pool) {
   assert(sample_rate > 0);
   for (const auto& [type, value] : control_overrides) {
     SetControl(static_cast<InstrumentControlType>(type), value);
@@ -29,8 +30,12 @@ InstrumentProcessor::InstrumentProcessor(
   params_.osc_increment = kReferenceFrequency * sample_interval_;
   params_.slice_increment = sample_interval_;
   params_.rng = &rng;
-  for (int i = 0; i < kMaxVoiceCount; ++i) {
-    active_voice_states_[i] = &voice_states_[i];
+}
+
+// TODO(#126): This shouldn't be necessary.
+InstrumentProcessor::~InstrumentProcessor() noexcept {
+  for (int i = 0; i < params_.active_voice_count; ++i) {
+    voice_pool_.Release(params_.active_voice_states[i].voice_index);
   }
 }
 
@@ -54,7 +59,7 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
       break;
     case InstrumentControlType::kVoiceCount: {
       params_.voice_count = static_cast<int>(value);
-      active_voice_count_ = std::min(active_voice_count_, params_.voice_count);
+      params_.active_voice_count = std::min(params_.active_voice_count, params_.voice_count);
     } break;
     case InstrumentControlType::kAttack:
       params_.adsr.SetAttack(sample_interval_, value);
@@ -131,20 +136,21 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
 void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, float value) noexcept {
   switch (type) {
     case NoteControlType::kGain:
-      for (int i = 0; i < active_voice_count_; ++i) {
-        if (Voice& voice = active_voice_states_[i]->voice;
-            active_voice_states_[i]->pitch == pitch && voice.IsOn()) {
+      for (int i = 0; i < params_.active_voice_count; ++i) {
+        if (Voice& voice = voice_pool_.Get(params_.active_voice_states[i].voice_index);
+            params_.active_voice_states[i].pitch == pitch && voice.IsOn()) {
           voice.set_gain(value);
           break;
         }
       }
       break;
     case NoteControlType::kPitchShift:
-      for (int i = 0; i < active_voice_count_; ++i) {
-        if (Voice& voice = active_voice_states_[i]->voice;
-            active_voice_states_[i]->pitch == pitch && voice.IsOn()) {
-          active_voice_states_[i]->pitch_shift = value;
-          voice.set_pitch(active_voice_states_[i]->pitch + active_voice_states_[i]->pitch_shift);
+      for (int i = 0; i < params_.active_voice_count; ++i) {
+        if (Voice& voice = voice_pool_.Get(params_.active_voice_states[i].voice_index);
+            params_.active_voice_states[i].pitch == pitch && voice.IsOn()) {
+          params_.active_voice_states[i].pitch_shift = value;
+          voice.set_pitch(params_.active_voice_states[i].pitch +
+                          params_.active_voice_states[i].pitch_shift);
           break;
         }
       }
@@ -156,10 +162,11 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
 }
 
 void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
-  for (int i = 0; i < active_voice_count_; ++i) {
-    if (active_voice_states_[i]->pitch == pitch && active_voice_states_[i]->voice.IsOn() &&
+  for (int i = 0; i < params_.active_voice_count; ++i) {
+    if (params_.active_voice_states[i].pitch == pitch &&
+        voice_pool_.Get(params_.active_voice_states[i].voice_index).IsOn() &&
         (sample_data_.empty() || params_.slice_mode != SliceMode::kOnce)) {
-      active_voice_states_[i]->voice.Stop();
+      voice_pool_.Get(params_.active_voice_states[i].voice_index).Stop();
       break;
     }
   }
@@ -167,66 +174,74 @@ void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
 
 void InstrumentProcessor::SetNoteOn(
     float pitch, const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
-  Voice& voice = AcquireVoice(pitch);
-  if (const auto* sample = sample_data_.Select(pitch, *params_.rng); sample != nullptr) {
-    voice.set_slice(sample);
+  Voice* voice = AcquireVoice(pitch);
+  if (voice == nullptr) {
+    return;
   }
-  voice.Start(params_, pitch, note_controls);
+  if (const auto* sample = sample_data_.Select(pitch, *params_.rng); sample != nullptr) {
+    voice->set_slice(sample);
+  }
+  voice->Start(params_, pitch, note_controls);
 }
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   sample_data_.Swap(sample_data);
-  for (int i = 0; i < active_voice_count_; ++i) {
-    if (const auto* sample = sample_data_.Select(active_voice_states_[i]->pitch, *params_.rng);
+  for (int i = 0; i < params_.active_voice_count; ++i) {
+    if (const auto* sample =
+            sample_data_.Select(params_.active_voice_states[i].pitch, *params_.rng);
         sample != nullptr) {
-      active_voice_states_[i]->voice.set_slice(sample);
-      active_voice_states_[i]->voice.set_pitch(active_voice_states_[i]->pitch +
-                                               active_voice_states_[i]->pitch_shift);
+      voice_pool_.Get(params_.active_voice_states[i].voice_index).set_slice(sample);
+      voice_pool_.Get(params_.active_voice_states[i].voice_index)
+          .set_pitch(params_.active_voice_states[i].pitch +
+                     params_.active_voice_states[i].pitch_shift);
     }
   }
 }
 
-Voice& InstrumentProcessor::AcquireVoice(float pitch) noexcept {
-  int voice_index = -1;
-
+Voice* InstrumentProcessor::AcquireVoice(float pitch) noexcept {
   if (params_.should_retrigger) {
-    for (int i = 0; i < active_voice_count_; ++i) {
-      if (active_voice_states_[i]->pitch == pitch) {
-        voice_index = i;
-        break;
-      }
-    }
-  }
-
-  if (voice_index == -1) {
-    if (active_voice_count_ < params_.voice_count) {
-      for (int i = 0; i < active_voice_count_; ++i) {
-        ++active_voice_states_[i]->timestamp;
-      }
-      voice_index = active_voice_count_++;
-    } else {  // no voices are available to acquire, steal the oldest active voice.
-      int oldest_voice_index = 0;
-      for (int i = 0; i < active_voice_count_; ++i) {
-        if (active_voice_states_[i]->timestamp >
-            active_voice_states_[oldest_voice_index]->timestamp) {
-          oldest_voice_index = i;
+    for (int i = 0; i < params_.active_voice_count; ++i) {
+      if (params_.active_voice_states[i].pitch == pitch) {
+        for (int j = 0; j < params_.active_voice_count; ++j) {
+          ++params_.active_voice_states[j].timestamp;
         }
-        ++active_voice_states_[i]->timestamp;
+        params_.active_voice_states[i].pitch_shift = 0.0;
+        params_.active_voice_states[i].timestamp = 0;
+        return &voice_pool_.Get(params_.active_voice_states[i].voice_index);
       }
-      voice_index = oldest_voice_index;
-    }
-  } else {
-    for (int i = 0; i < active_voice_count_; ++i) {
-      ++active_voice_states_[i]->timestamp;
     }
   }
 
-  assert(voice_index != -1);
-  VoiceState& voice_state = *active_voice_states_[voice_index];
-  voice_state.pitch = pitch;
-  voice_state.pitch_shift = 0.0;
-  voice_state.timestamp = 0;
-  return voice_state.voice;
+  if (params_.active_voice_count < params_.voice_count) {
+    for (int i = 0; i < params_.active_voice_count; ++i) {
+      ++params_.active_voice_states[i].timestamp;
+    }
+
+    auto& voice_state = params_.active_voice_states[params_.active_voice_count];
+    voice_state.voice_index = voice_pool_.Acquire(params_);
+
+    if (voice_state.voice_index == -1) {
+      return nullptr;
+    }
+
+    voice_state.pitch = pitch;
+    voice_state.pitch_shift = 0.0;
+    voice_state.timestamp = 0;
+    ++params_.active_voice_count;
+
+    return &voice_pool_.Get(voice_state.voice_index);
+  }
+
+  // No voices are available to acquire, steal the oldest active voice.
+  int oldest_active_voice_index = 0;
+  for (int i = 0; i < params_.active_voice_count; ++i) {
+    if (params_.active_voice_states[i].timestamp >
+        params_.active_voice_states[oldest_active_voice_index].timestamp) {
+      oldest_active_voice_index = i;
+    }
+    ++params_.active_voice_states[i].timestamp;
+  }
+  return &voice_pool_.Get(params_.active_voice_states[oldest_active_voice_index].voice_index);
 }
 
 }  // namespace barely

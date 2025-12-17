@@ -7,6 +7,7 @@
 #include "common/constants.h"
 #include "common/rng.h"
 #include "dsp/sample_data.h"
+#include "dsp/voice_pool.h"
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -27,7 +28,8 @@ constexpr std::array<float, BarelyNoteControlType_kCount> kNoteControls = {1.0f,
 // Tests that playing a single voice produces the expected output.
 TEST(InstrumentProcessorTest, SingleVoice) {
   AudioRng rng;
-  InstrumentProcessor processor({}, {}, rng, kSampleRate);
+  VoicePool voice_pool;
+  InstrumentProcessor processor({}, {}, rng, voice_pool, kSampleRate);
   processor.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(InstrumentControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
@@ -39,7 +41,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   std::array<float, kStereoChannelCount> output;
 
   output.fill(0.0f);
-  processor.Process(delay.data(), sidechain.data(), output.data());
+  voice_pool.Process<true>(delay.data(), sidechain.data(), output.data());
   for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
@@ -47,7 +49,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.SetNoteOn(0.0f, kNoteControls);
 
   output.fill(0.0f);
-  processor.Process(delay.data(), sidechain.data(), output.data());
+  voice_pool.Process(delay.data(), sidechain.data(), output.data());
   for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.5f * kSamples[0]);
   }
@@ -55,7 +57,7 @@ TEST(InstrumentProcessorTest, SingleVoice) {
   processor.SetNoteOff(0.0f);
 
   output.fill(0.0f);
-  processor.Process(delay.data(), sidechain.data(), output.data());
+  voice_pool.Process(delay.data(), sidechain.data(), output.data());
   for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
@@ -64,7 +66,8 @@ TEST(InstrumentProcessorTest, SingleVoice) {
 // Tests that playing voices are capped at maximum allowed number of voices.
 TEST(InstrumentProcessorTest, MaxVoices) {
   AudioRng rng;
-  InstrumentProcessor processor({}, {}, rng, kSampleRate);
+  VoicePool voice_pool;
+  InstrumentProcessor processor({}, {}, rng, voice_pool, kSampleRate);
   processor.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   processor.SetControl(InstrumentControlType::kSliceMode, static_cast<float>(SliceMode::kLoop));
 
@@ -76,7 +79,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
   std::array<float, kStereoChannelCount> output;
 
   output.fill(0.0f);
-  processor.Process(delay.data(), sidechain.data(), output.data());
+  voice_pool.Process(delay.data(), sidechain.data(), output.data());
   for (int channel = 0; channel < kStereoChannelCount; ++channel) {
     EXPECT_FLOAT_EQ(output[channel], 0.0f);
   }
@@ -88,7 +91,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
     expected_output += kSamples[i];
 
     output.fill(0.0f);
-    processor.Process(delay.data(), sidechain.data(), output.data());
+    voice_pool.Process(delay.data(), sidechain.data(), output.data());
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(output[channel], 0.5f * expected_output) << i;
     }
@@ -98,7 +101,7 @@ TEST(InstrumentProcessorTest, MaxVoices) {
     processor.SetNoteOn(static_cast<float>(kVoiceCount), kNoteControls);
 
     output.fill(0.0f);
-    processor.Process(delay.data(), sidechain.data(), output.data());
+    voice_pool.Process(delay.data(), sidechain.data(), output.data());
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(output[channel], 0.5f * expected_output) << i;
     }

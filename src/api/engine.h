@@ -16,6 +16,7 @@
 #include "dsp/engine_processor.h"
 #include "dsp/instrument_processor.h"
 #include "dsp/message_queue.h"
+#include "dsp/voice_pool.h"
 
 /// Implementation of an engine.
 struct BarelyEngine {
@@ -128,6 +129,9 @@ struct BarelyEngine {
 
   // Message queue.
   barely::MessageQueue message_queue_;
+
+  // Voice pool.
+  barely::VoicePool voice_pool_;
 
   // Map of instrument pointers to processors.
   std::unordered_map<BarelyInstrument*, std::unique_ptr<barely::InstrumentProcessor>> instruments_;

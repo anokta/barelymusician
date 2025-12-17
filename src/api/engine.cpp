@@ -92,8 +92,9 @@ void BarelyEngine::AddInstrument(BarelyInstrumentHandle instrument,
                                  const barely::BiquadFilter::Coefficients& filter_coeffs) noexcept {
   [[maybe_unused]] const bool success =
       instruments_
-          .emplace(instrument, std::make_unique<barely::InstrumentProcessor>(
-                                   control_overrides, filter_coeffs, audio_rng_, sample_rate_))
+          .emplace(instrument,
+                   std::make_unique<barely::InstrumentProcessor>(
+                       control_overrides, filter_coeffs, audio_rng_, voice_pool_, sample_rate_))
           .second;
   assert(success);
   mutable_instruments_.Update(BuildMutableInstrumentMap(instruments_));
@@ -129,7 +130,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      engine_processor_.Process(*instruments, &output_samples_[kStereoChannelCount * current_frame],
+      engine_processor_.Process(voice_pool_, &output_samples_[kStereoChannelCount * current_frame],
                                 message_frame - current_frame);
       current_frame = message_frame;
     }
@@ -185,7 +186,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    engine_processor_.Process(*instruments, &output_samples_[kStereoChannelCount * current_frame],
+    engine_processor_.Process(voice_pool_, &output_samples_[kStereoChannelCount * current_frame],
                               output_frame_count - current_frame);
   }
 

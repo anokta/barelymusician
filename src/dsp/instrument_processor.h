@@ -13,6 +13,7 @@
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"
 #include "dsp/voice.h"
+#include "dsp/voice_pool.h"
 
 namespace barely {
 
@@ -28,29 +29,10 @@ class InstrumentProcessor {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   InstrumentProcessor(std::span<const BarelyInstrumentControlOverride> control_overrides,
                       const BiquadFilter::Coefficients& filter_coeffs, AudioRng& rng,
-                      int sample_rate) noexcept;
+                      VoicePool& voice_pool, int sample_rate) noexcept;
 
-  /// Processes the next output samples.
-  ///
-  /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
-  /// @param delay_frame Delay send frame.
-  /// @param sidechain_frame Sidechain send frame.
-  /// @param output_frame Output frame.
-  template <bool kIsSidechainSend = false>
-  void Process(float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
-               float output_frame[kStereoChannelCount]) noexcept {
-    for (int i = active_voice_count_ - 1; i >= 0; --i) {
-      auto& voice = active_voice_states_[i]->voice;
-      if constexpr (kIsSidechainSend) {
-        if (!voice.IsActive()) {
-          std::swap(active_voice_states_[i], active_voice_states_[active_voice_count_ - 1]);
-          --active_voice_count_;
-          continue;
-        }
-      }
-      voice.Process<kIsSidechainSend>(params_, delay_frame, sidechain_frame, output_frame);
-    }
-  }
+  /// Destroys `InstrumentProcessor`.
+  ~InstrumentProcessor() noexcept;
 
   /// Sets a control value.
   ///
@@ -92,25 +74,10 @@ class InstrumentProcessor {
   void SetSampleData(SampleData& sample_data) noexcept;
 
  private:
-  static constexpr int kMaxVoiceCount = 16;
-
-  // List of voices with their pitch and timestamp. Voice timestamp is used to determine which voice
-  // to steal when there are no free voices available.
-  // TODO(#12): Consider a more optimized implementation for voice stealing.
-  struct VoiceState {
-    Voice voice;
-    float pitch = 0.0f;
-    float pitch_shift = 0.0f;
-    int timestamp = 0;
-  };
-
   // Acquires a new voice.
-  [[nodiscard]] Voice& AcquireVoice(float pitch) noexcept;
+  [[nodiscard]] Voice* AcquireVoice(float pitch) noexcept;
 
-  std::array<VoiceState, kMaxVoiceCount> voice_states_;
-
-  std::array<VoiceState*, kMaxVoiceCount> active_voice_states_;
-  int active_voice_count_ = 0;
+  VoicePool& voice_pool_;
 
   float sample_interval_ = 0.0f;
   SampleData sample_data_;

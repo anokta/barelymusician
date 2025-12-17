@@ -47,10 +47,8 @@ class InstrumentProcessor {
           --active_voice_count_;
           continue;
         }
-        voice_callback_send_(voice, params_, delay_frame, sidechain_frame, output_frame);
-      } else {
-        voice_callback_receive_(voice, params_, delay_frame, sidechain_frame, output_frame);
       }
+      voice.Process<kIsSidechainSend>(params_, delay_frame, sidechain_frame, output_frame);
     }
   }
 
@@ -107,10 +105,8 @@ class InstrumentProcessor {
   };
 
   // Acquires a new voice.
-  Voice& AcquireVoice(float pitch) noexcept;
+  [[nodiscard]] Voice& AcquireVoice(float pitch) noexcept;
 
-  VoiceCallback voice_callback_send_ = Voice::Process<OscMode::kMix, SliceMode::kSustain, true>;
-  VoiceCallback voice_callback_receive_ = Voice::Process<OscMode::kMix, SliceMode::kSustain, false>;
   std::array<VoiceState, kMaxVoiceCount> voice_states_;
   int voice_count_ = 8;
 
@@ -119,9 +115,6 @@ class InstrumentProcessor {
 
   float sample_interval_ = 0.0f;
   SampleData sample_data_;
-
-  OscMode osc_mode_ = OscMode::kMix;
-  SliceMode slice_mode_ = SliceMode::kSustain;
 
   InstrumentParams params_ = {};
 

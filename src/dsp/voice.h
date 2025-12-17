@@ -72,6 +72,12 @@ struct InstrumentParams {
   /// Random number generator.
   AudioRng* rng = nullptr;
 
+  /// Oscillator mode.
+  OscMode osc_mode = OscMode::kMix;
+
+  /// Slice mode.
+  SliceMode slice_mode = SliceMode::kSustain;
+
   /// Oscillator increment per sample.
   float osc_increment = 0.0f;
 
@@ -97,25 +103,6 @@ struct NoteParams {
 /// Class that wraps an instrument voice.
 class Voice {
  public:
-  /// Processes the next output frame.
-  ///
-  /// @tparam kOscMode Oscillator mode.
-  /// @tparam kSliceMode Slice mode.
-  /// @param kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
-  /// @param voice Voice.
-  /// @param params Instrument parameters.
-  /// @param delay_frame Delay send frame.
-  /// @param sidechain_frame Sidechain send frame.
-  /// @param output_frame Output frame.
-  template <OscMode kOscMode, SliceMode kSliceMode, bool kIsSidechainSend>
-  static void Process(Voice& voice, const InstrumentParams& params,
-                      float delay_frame[kStereoChannelCount],
-                      float sidechain_frame[kStereoChannelCount],
-                      float output_frame[kStereoChannelCount]) noexcept {
-    voice.Process<kOscMode, kSliceMode, kIsSidechainSend>(params, delay_frame, sidechain_frame,
-                                                          output_frame);
-  }
-
   /// Returns whether the voice is currently active (i.e., playing).
   ///
   /// @return True if active.
@@ -125,6 +112,112 @@ class Voice {
   ///
   /// @return True if on.
   [[nodiscard]] bool IsOn() const noexcept { return envelope_.IsOn(); }
+
+  /// Processes the next output frame.
+  ///
+  /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
+  /// @param voice Voice.
+  /// @param params Instrument parameters.
+  /// @param delay_frame Delay send frame.
+  /// @param sidechain_frame Sidechain send frame.
+  /// @param output_frame Output frame.
+  template <bool kIsSidechainSend = false>
+  void Process(const InstrumentParams& params, float delay_frame[kStereoChannelCount],
+               float sidechain_frame[kStereoChannelCount],
+               float output_frame[kStereoChannelCount]) noexcept {
+    if constexpr (kIsSidechainSend) {
+      if (params_.sidechain_send <= 0.0f) {
+        return;
+      }
+    } else {
+      if (params_.sidechain_send > 0.0f) {
+        return;
+      }
+    }
+
+    if (params.slice_mode == SliceMode::kOnce && !IsSliceActive()) {
+      envelope_.Stop();
+    }
+
+    assert(params.rng != nullptr);
+    const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
+    const float osc_sample =
+        (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
+        params_.osc_noise_mix * params.rng->Generate();
+    const float osc_output = params_.osc_mix * osc_sample;
+
+    const bool has_slice = (slice_ != nullptr);
+    const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
+    const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
+
+    float output = envelope_.Next();
+
+    if (params.osc_mode == OscMode::kMix || params.osc_mode == OscMode::kMf) {
+      output *= osc_output + slice_output;
+    } else if (params.osc_mode == OscMode::kFm) {
+      output *= slice_sample;
+    } else if (params.osc_mode == OscMode::kRing) {
+      output *= osc_output * slice_sample + slice_output;
+    } else if (params.osc_mode == OscMode::kAm) {
+      output *= std::abs(osc_output) * slice_sample + slice_output;
+    } else if (params.osc_mode == OscMode::kEnvelopeFollower) {
+      output *= osc_output * std::abs(slice_sample) + slice_output;
+    }
+
+    // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
+    output = bit_crusher_.Next(output, params_.bit_crusher_range, params_.bit_crusher_increment);
+    output = Distortion(output, params_.distortion_amount, params_.distortion_drive);
+    output = filter_.Next(output, params_.filter_coefficients);
+
+    output *= params_.gain;
+
+    float osc_increment = params.osc_increment * note_params_.osc_increment;
+    if (params.osc_mode == OscMode::kMf) {
+      osc_increment += slice_sample * osc_increment;
+    }
+    osc_phase_ += osc_increment;
+    if (osc_phase_ >= 1.0f) {
+      osc_phase_ -= 1.0f;
+    }
+
+    float slice_increment = params.slice_increment * note_params_.slice_increment;
+    if (slice_increment > 0) {
+      if (params.osc_mode == OscMode::kFm) {
+        slice_increment += osc_output * slice_increment;
+      }
+      slice_offset_ += slice_increment;
+      if (params.slice_mode == SliceMode::kLoop) {
+        if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
+          slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
+        }
+      }
+    }
+
+    const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
+    const float right_gain = 1.0f - left_gain;
+
+    float left_output = left_gain * output;
+    float right_output = right_gain * output;
+
+    if constexpr (kIsSidechainSend) {
+      sidechain_frame[0] += params_.sidechain_send * left_output;
+      sidechain_frame[1] += params_.sidechain_send * right_output;
+    } else {
+      if (params_.sidechain_send < 0.0f) {
+        const float sidechain_send = -params_.sidechain_send;
+        left_output = std::lerp(left_output, sidechain_frame[0] * left_output, sidechain_send);
+        right_output = std::lerp(right_output, sidechain_frame[1] * right_output, sidechain_send);
+      }
+    }
+
+    delay_frame[0] += params_.delay_send * left_output;
+    delay_frame[1] += params_.delay_send * right_output;
+
+    output_frame[0] += left_output;
+    output_frame[1] += right_output;
+
+    Approach(params.voice_params);
+  }
 
   /// Starts the voice.
   ///
@@ -159,106 +252,6 @@ class Voice {
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }
 
  private:
-  template <OscMode kOscMode, SliceMode kSliceMode, bool kIsSidechainSend>
-  void Process(const InstrumentParams& params, float delay_frame[kStereoChannelCount],
-               float sidechain_frame[kStereoChannelCount],
-               float output_frame[kStereoChannelCount]) noexcept {
-    if constexpr (kIsSidechainSend) {
-      if (params_.sidechain_send <= 0.0f) {
-        return;
-      }
-    } else {
-      if (params_.sidechain_send > 0.0f) {
-        return;
-      }
-    }
-
-    if constexpr (kSliceMode == SliceMode::kOnce) {
-      if (!IsSliceActive()) {
-        envelope_.Stop();
-      }
-    }
-
-    assert(params.rng != nullptr);
-    const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
-    const float osc_sample =
-        (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
-        params_.osc_noise_mix * params.rng->Generate();
-    const float osc_output = params_.osc_mix * osc_sample;
-
-    const bool has_slice = (slice_ != nullptr);
-    const float slice_sample = has_slice ? GenerateSliceSample(*slice_, slice_offset_) : 0.0f;
-    const float slice_output = (1.0f - params_.osc_mix) * slice_sample;
-
-    float output = envelope_.Next();
-
-    if constexpr (kOscMode == OscMode::kMix || kOscMode == OscMode::kMf) {
-      output *= osc_output + slice_output;
-    } else if constexpr (kOscMode == OscMode::kFm) {
-      output *= slice_sample;
-    } else if constexpr (kOscMode == OscMode::kRing) {
-      output *= osc_output * slice_sample + slice_output;
-    } else if constexpr (kOscMode == OscMode::kAm) {
-      output *= std::abs(osc_output) * slice_sample + slice_output;
-    } else if constexpr (kOscMode == OscMode::kEnvelopeFollower) {
-      output *= osc_output * std::abs(slice_sample) + slice_output;
-    }
-
-    // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
-    output = bit_crusher_.Next(output, params_.bit_crusher_range, params_.bit_crusher_increment);
-    output = Distortion(output, params_.distortion_amount, params_.distortion_drive);
-    output = filter_.Next(output, params_.filter_coefficients);
-
-    output *= params_.gain;
-
-    float osc_increment = params.osc_increment * note_params_.osc_increment;
-    if constexpr (kOscMode == OscMode::kMf) {
-      osc_increment += slice_sample * osc_increment;
-    }
-    osc_phase_ += osc_increment;
-    if (osc_phase_ >= 1.0f) {
-      osc_phase_ -= 1.0f;
-    }
-
-    float slice_increment = params.slice_increment * note_params_.slice_increment;
-    if (slice_increment > 0) {
-      if constexpr (kOscMode == OscMode::kFm) {
-        slice_increment += osc_output * slice_increment;
-      }
-      slice_offset_ += slice_increment;
-      if constexpr (kSliceMode == SliceMode::kLoop) {
-        if (has_slice && static_cast<int>(slice_offset_) >= slice_->sample_count) {
-          slice_offset_ = std::fmod(slice_offset_, static_cast<float>(slice_->sample_count));
-        }
-      }
-    }
-
-    const float left_gain = 0.5f * (1.0f - params_.stereo_pan);
-    const float right_gain = 1.0f - left_gain;
-
-    float left_output = left_gain * output;
-    float right_output = right_gain * output;
-
-    if constexpr (kIsSidechainSend) {
-      sidechain_frame[0] += params_.sidechain_send * left_output;
-      sidechain_frame[1] += params_.sidechain_send * right_output;
-    } else {
-      if (params_.sidechain_send < 0.0f) {
-        const float sidechain_send = -params_.sidechain_send;
-        left_output = std::lerp(left_output, sidechain_frame[0] * left_output, sidechain_send);
-        right_output = std::lerp(right_output, sidechain_frame[1] * right_output, sidechain_send);
-      }
-    }
-
-    delay_frame[0] += params_.delay_send * left_output;
-    delay_frame[1] += params_.delay_send * right_output;
-
-    output_frame[0] += left_output;
-    output_frame[1] += right_output;
-
-    Approach(params.voice_params);
-  }
-
   void Approach(const VoiceParams& params) noexcept {
     ApproachValue(params_.gain, note_params_.gain * params.gain);
     ApproachValue(params_.bit_crusher_increment, params.bit_crusher_increment);
@@ -281,7 +274,7 @@ class Voice {
     ApproachValue(params_.sidechain_send, params.sidechain_send);
   }
 
-  bool IsSliceActive() const noexcept {
+  [[nodiscard]] bool IsSliceActive() const noexcept {
     return static_cast<int>(slice_offset_) < slice_->sample_count;
   }
 
@@ -296,18 +289,6 @@ class Voice {
   const Slice* slice_ = nullptr;
   float slice_offset_ = 0.0f;
 };
-
-/// Voice callback alias.
-///
-/// @param voice Mutable voice.
-/// @param params Instrument parameters.
-/// @param delay_frame Delay send frame.
-/// @param sidechain_frame Sidechain send frame.
-/// @param output_frame Output frame.
-using VoiceCallback = void (*)(Voice& voice, const InstrumentParams& params,
-                               float delay_frame[kStereoChannelCount],
-                               float sidechain_frame[kStereoChannelCount],
-                               float output_frame[kStereoChannelCount]);
 
 }  // namespace barely
 

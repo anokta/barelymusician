@@ -81,8 +81,10 @@ class Processor extends AudioWorkletProcessor {
           this._engine.tempo = event.data.tempo;
         } break;
         case 'engine-update': {
-          const latency = Math.max(1.0 / 60.0, RENDER_QUANTUM_SIZE / sampleRate);
-          this._engine.update(currentTime + latency);
+          const deltaFrameTime = 1.0 / 60.0;
+          const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
+          this._engine.update(
+              Math.max(currentTime + latency, this._engine.timestamp + deltaFrameTime));
         } break;
         case 'instrument-create': {
           const instrument = this._engine.createInstrument();

@@ -1150,8 +1150,8 @@ namespace Barely {
 
         // Returns the next timestamp to update.
         private double GetNextTimestamp() {
-          return AudioSettings.dspTime +
-                 Math.Max(Math.Max(_dspLatency, (double)Time.deltaTime), _minLookahead);
+          return Math.Max(AudioSettings.dspTime + Math.Max(_dspLatency, _minLookahead),
+                          Timestamp + (double)Time.deltaTime);
         }
 
         // Minimum lookahead time, set to an empirical value that can be adjusted as needed.

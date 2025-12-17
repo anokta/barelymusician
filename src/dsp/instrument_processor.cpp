@@ -231,36 +231,40 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
 
 Voice& InstrumentProcessor::AcquireVoice(float pitch) noexcept {
   int voice_index = -1;
+
   if (params_.should_retrigger) {
     for (int i = 0; i < active_voice_count_; ++i) {
       if (active_voice_states_[i]->pitch == pitch) {
         voice_index = i;
         break;
       }
-      ++active_voice_states_[i]->timestamp;
     }
-    if (voice_index == -1) {
-      voice_index = active_voice_count_++;
-    } else {
-      for (int i = voice_index + 1; i < active_voice_count_; ++i) {
+  }
+
+  if (voice_index == -1) {
+    if (active_voice_count_ < voice_count_) {
+      for (int i = 0; i < active_voice_count_; ++i) {
         ++active_voice_states_[i]->timestamp;
       }
+      voice_index = active_voice_count_++;
+    } else {  // no voices are available to acquire, steal the oldest active voice.
+      int oldest_voice_index = 0;
+      for (int i = 0; i < active_voice_count_; ++i) {
+        if (active_voice_states_[i]->timestamp >
+            active_voice_states_[oldest_voice_index]->timestamp) {
+          oldest_voice_index = i;
+        }
+        ++active_voice_states_[i]->timestamp;
+      }
+      voice_index = oldest_voice_index;
     }
-  } else if (active_voice_count_ < voice_count_) {
+  } else {
     for (int i = 0; i < active_voice_count_; ++i) {
       ++active_voice_states_[i]->timestamp;
     }
-    voice_index = active_voice_count_++;
-  } else {  // no voices are available to acquire, steal the oldest active voice.
-    int oldest_voice_index = 0;
-    for (int i = 0; i < voice_count_; ++i) {
-      if (voice_states_[i].timestamp > voice_states_[oldest_voice_index].timestamp) {
-        oldest_voice_index = i;
-      }
-      ++voice_states_[i].timestamp;
-    }
-    voice_index = oldest_voice_index;
   }
+
+  assert(voice_index != -1);
   VoiceState& voice_state = *active_voice_states_[voice_index];
   voice_state.pitch = pitch;
   voice_state.pitch_shift = 0.0;

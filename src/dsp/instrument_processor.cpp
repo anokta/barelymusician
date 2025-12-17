@@ -53,8 +53,8 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
       params_.voice_params.stereo_pan = value;
       break;
     case InstrumentControlType::kVoiceCount: {
-      voice_count_ = static_cast<int>(value);
-      active_voice_count_ = std::min(active_voice_count_, voice_count_);
+      params_.voice_count = static_cast<int>(value);
+      active_voice_count_ = std::min(active_voice_count_, params_.voice_count);
     } break;
     case InstrumentControlType::kAttack:
       params_.adsr.SetAttack(sample_interval_, value);
@@ -199,7 +199,7 @@ Voice& InstrumentProcessor::AcquireVoice(float pitch) noexcept {
   }
 
   if (voice_index == -1) {
-    if (active_voice_count_ < voice_count_) {
+    if (active_voice_count_ < params_.voice_count) {
       for (int i = 0; i < active_voice_count_; ++i) {
         ++active_voice_states_[i]->timestamp;
       }

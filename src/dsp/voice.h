@@ -72,6 +72,9 @@ struct InstrumentParams {
   /// Random number generator.
   AudioRng* rng = nullptr;
 
+  /// Number of voices.
+  int voice_count = 8;
+
   /// Oscillator mode.
   OscMode osc_mode = OscMode::kMix;
 

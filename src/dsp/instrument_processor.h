@@ -108,7 +108,6 @@ class InstrumentProcessor {
   [[nodiscard]] Voice& AcquireVoice(float pitch) noexcept;
 
   std::array<VoiceState, kMaxVoiceCount> voice_states_;
-  int voice_count_ = 8;
 
   std::array<VoiceState*, kMaxVoiceCount> active_voice_states_;
   int active_voice_count_ = 0;

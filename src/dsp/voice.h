@@ -14,6 +14,7 @@
 #include "dsp/control.h"
 #include "dsp/distortion.h"
 #include "dsp/envelope.h"
+#include "dsp/sample_data.h"
 #include "dsp/sample_generators.h"
 #include "dsp/voice.h"
 
@@ -86,6 +87,9 @@ struct InstrumentParams {
   /// Envelope adsr.
   Envelope::Adsr adsr = {};
 
+  /// Sample data.
+  SampleData sample_data;
+
   /// Random number generator.
   AudioRng* rng = nullptr;
 
@@ -97,6 +101,12 @@ struct InstrumentParams {
 
   /// Slice mode.
   SliceMode slice_mode = SliceMode::kSustain;
+
+  /// Pitch shift.
+  float pitch_shift = 0.0f;
+
+  /// Oscillator pitch shift.
+  float osc_pitch_shift = 0.0f;
 
   /// Oscillator increment per sample.
   float osc_increment = 0.0f;

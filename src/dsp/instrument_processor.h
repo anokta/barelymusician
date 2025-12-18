@@ -77,15 +77,10 @@ class InstrumentProcessor {
   // Acquires a new voice.
   [[nodiscard]] Voice* AcquireVoice(float pitch) noexcept;
 
-  VoicePool& voice_pool_;
-
-  float sample_interval_ = 0.0f;
-  SampleData sample_data_;
-
   InstrumentParams params_ = {};
 
-  float pitch_shift_ = 0.0f;
-  float osc_pitch_shift_ = 0.0f;
+  VoicePool& voice_pool_;
+  float sample_interval_ = 0.0f;
 };
 
 }  // namespace barely

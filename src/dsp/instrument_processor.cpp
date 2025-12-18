@@ -21,7 +21,7 @@ InstrumentProcessor::InstrumentProcessor(
     std::span<const BarelyInstrumentControlOverride> control_overrides,
     const BiquadFilter::Coefficients& filter_coeffs, AudioRng& rng, VoicePool& voice_pool,
     int sample_rate) noexcept
-    : sample_interval_(1.0f / static_cast<float>(sample_rate)), voice_pool_(voice_pool) {
+    : voice_pool_(voice_pool), sample_interval_(1.0f / static_cast<float>(sample_rate)) {
   assert(sample_rate > 0);
   for (const auto& [type, value] : control_overrides) {
     SetControl(static_cast<InstrumentControlType>(type), value);
@@ -46,10 +46,10 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
       params_.voice_params.gain = value;
       break;
     case InstrumentControlType::kPitchShift:
-      pitch_shift_ = value;
-      params_.osc_increment =
-          std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * kReferenceFrequency * sample_interval_;
-      params_.slice_increment = std::pow(2.0f, pitch_shift_) * sample_interval_;
+      params_.pitch_shift = value;
+      params_.osc_increment = std::pow(2.0f, params_.osc_pitch_shift + params_.pitch_shift) *
+                              kReferenceFrequency * sample_interval_;
+      params_.slice_increment = std::pow(2.0f, params_.pitch_shift) * sample_interval_;
       break;
     case InstrumentControlType::kRetrigger:
       params_.should_retrigger = static_cast<bool>(value);
@@ -83,9 +83,9 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
       params_.voice_params.osc_noise_mix = value;
       break;
     case InstrumentControlType::kOscPitchShift:
-      osc_pitch_shift_ = value;
-      params_.osc_increment =
-          std::pow(2.0f, osc_pitch_shift_ + pitch_shift_) * kReferenceFrequency * sample_interval_;
+      params_.osc_pitch_shift = value;
+      params_.osc_increment = std::pow(2.0f, params_.osc_pitch_shift + params_.pitch_shift) *
+                              kReferenceFrequency * sample_interval_;
       break;
     case InstrumentControlType::kOscShape:
       params_.voice_params.osc_shape = value;
@@ -165,7 +165,7 @@ void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
   for (int i = 0; i < params_.active_voice_count; ++i) {
     if (params_.active_voice_states[i].pitch == pitch &&
         voice_pool_.Get(params_.active_voice_states[i].voice_index).IsOn() &&
-        (sample_data_.empty() || params_.slice_mode != SliceMode::kOnce)) {
+        (params_.sample_data.empty() || params_.slice_mode != SliceMode::kOnce)) {
       voice_pool_.Get(params_.active_voice_states[i].voice_index).Stop();
       break;
     }
@@ -178,17 +178,17 @@ void InstrumentProcessor::SetNoteOn(
   if (voice == nullptr) {
     return;
   }
-  if (const auto* sample = sample_data_.Select(pitch, *params_.rng); sample != nullptr) {
+  if (const auto* sample = params_.sample_data.Select(pitch, *params_.rng); sample != nullptr) {
     voice->set_slice(sample);
   }
   voice->Start(params_, pitch, note_controls);
 }
 
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
-  sample_data_.Swap(sample_data);
+  params_.sample_data.Swap(sample_data);
   for (int i = 0; i < params_.active_voice_count; ++i) {
     if (const auto* sample =
-            sample_data_.Select(params_.active_voice_states[i].pitch, *params_.rng);
+            params_.sample_data.Select(params_.active_voice_states[i].pitch, *params_.rng);
         sample != nullptr) {
       voice_pool_.Get(params_.active_voice_states[i].voice_index).set_slice(sample);
       voice_pool_.Get(params_.active_voice_states[i].voice_index)

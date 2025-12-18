@@ -17,10 +17,7 @@ class Envelope {
     /// @param sample_interval Sample interval in seconds.
     /// @param attack Attack in seconds.
     void SetAttack(float sample_interval, float attack) noexcept {
-      attack_increment_ = (attack > 0.0f) ? sample_interval / attack : 0.0f;
-      if (attack_increment_ > 1.0f) {
-        attack_increment_ = 0.0f;
-      }
+      attack_increment_ = (attack > sample_interval) ? sample_interval / attack : 0.0f;
     }
 
     /// Sets the decay.
@@ -28,10 +25,7 @@ class Envelope {
     /// @param sample_interval Sample interval in seconds.
     /// @param decay Attack in seconds.
     void SetDecay(float sample_interval, float decay) noexcept {
-      decay_increment_ = (decay > 0.0f) ? sample_interval / decay : 0.0f;
-      if (decay_increment_ > 1.0f) {
-        decay_increment_ = 0.0f;
-      }
+      decay_increment_ = (decay > sample_interval) ? sample_interval / decay : 0.0f;
     }
 
     /// Sets the release.
@@ -39,10 +33,7 @@ class Envelope {
     /// @param sample_interval Sample interval in seconds.
     /// @param release Release in seconds.
     void SetRelease(float sample_interval, float release) noexcept {
-      release_decrement_ = (release > 0.0f) ? -sample_interval / release : 0.0f;
-      if (release_decrement_ < -1.0f) {
-        release_decrement_ = 0.0f;
-      }
+      release_increment_ = (release > sample_interval) ? sample_interval / release : 0.0f;
     }
 
     /// Sets the sustain of the envelope in amplitude.
@@ -57,7 +48,7 @@ class Envelope {
     float attack_increment_ = 0.0f;
     float decay_increment_ = 0.0f;
     float sustain_ = 1.0f;
-    float release_decrement_ = 0.0f;
+    float release_increment_ = 0.0f;
   };
 
   /// Returns whether the envelope is currently active (i.e., not idle).
@@ -110,9 +101,9 @@ class Envelope {
       return output_;
     }
     if (state_ == State::kRelease) {
-      if (adsr_->release_decrement_ < 0.0f) {
+      if (adsr_->release_increment_ > 0.0f) {
         output_ = phase_ * release_output_;
-        phase_ += adsr_->release_decrement_;
+        phase_ -= adsr_->release_increment_;
         if (phase_ <= 0.0f) {
           phase_ = 0.0f;
           state_ = State::kIdle;

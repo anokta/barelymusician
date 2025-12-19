@@ -9,6 +9,7 @@ target_sources(
   distortion.h
   engine_processor.h
   envelope.h
+  instrument_params.h
   instrument_processor.cpp
   instrument_processor.h
   message.h
@@ -20,6 +21,7 @@ target_sources(
   sample_generators.h
   sidechain.h
   voice.h
+  voice_params.h
   voice_pool.h
 )
 

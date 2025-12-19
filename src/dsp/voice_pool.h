@@ -25,12 +25,10 @@ class VoicePool {
     if (instrument_params.should_retrigger) {
       for (int i = 0; i < instrument_params.active_voice_count; ++i) {
         Voice& voice = Get(instrument_params.active_voices[i]);
-        if (voice.params().pitch == pitch) {
+        if (voice.pitch() == pitch) {
           for (int j = 0; j < instrument_params.active_voice_count; ++j) {
-            ++voice.params().timestamp;
+            voice.increment_timestamp();
           }
-          voice.params().pitch_shift = 0.0;
-          voice.params().timestamp = 0;
           return &voice;
         }
       }
@@ -39,7 +37,7 @@ class VoicePool {
     if (active_voice_count_ < kMaxActiveVoiceCount &&
         instrument_params.active_voice_count < instrument_params.voice_count) {
       for (int i = 0; i < instrument_params.active_voice_count; ++i) {
-        ++Get(instrument_params.active_voices[i]).params().timestamp;
+        Get(instrument_params.active_voices[i]).increment_timestamp();
       }
 
       // Acquire new voice.
@@ -49,9 +47,6 @@ class VoicePool {
           active_voice.voice_index;
 
       Voice& voice = Get(active_voice.voice_index);
-      voice.params().pitch = pitch;
-      voice.params().pitch_shift = 0.0;
-      voice.params().timestamp = 0;
 
       return &voice;
     }
@@ -60,11 +55,11 @@ class VoicePool {
     int oldest_active_voice_index = 0;
     for (int i = 0; i < instrument_params.active_voice_count; ++i) {
       Voice& voice = Get(instrument_params.active_voices[i]);
-      if (voice.params().timestamp >
-          Get(instrument_params.active_voices[oldest_active_voice_index]).params().timestamp) {
+      if (voice.timestamp() >
+          Get(instrument_params.active_voices[oldest_active_voice_index]).timestamp()) {
         oldest_active_voice_index = i;
       }
-      ++voice.params().timestamp;
+      voice.increment_timestamp();
     }
     return &Get(instrument_params.active_voices[oldest_active_voice_index]);
   }

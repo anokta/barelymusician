@@ -28,15 +28,6 @@ struct VoiceParams {
   /// Filter coefficients.
   BiquadFilter::Coefficients filter_coefficients = {};
 
-  /// Timestamp for round-robin.
-  int timestamp = 0;
-
-  /// Note pitch.
-  float pitch = 0.0f;
-
-  /// Note pitch shift.
-  float pitch_shift = 0.0f;
-
   /// Bit crusher range (for bit depth reduction).
   float bit_crusher_range = 0.0f;
 
@@ -261,29 +252,36 @@ class Voice {
     set_gain(gain);
     params_ = instrument_params.voice_params;
     params_.gain *= gain;
-    set_pitch(pitch, pitch_shift);
+    pitch_ = pitch;
+    pitch_shift_ = pitch_shift;
+    set_pitch();
     bit_crusher_.Reset();
     filter_.Reset();
     osc_phase_ = 0.0f;
     slice_offset_ = 0.0f;
     envelope_.Start(instrument_params.adsr);
+    timestamp_ = 0;
   }
 
   /// Stops the voice.
   void Stop() noexcept { envelope_.Stop(); }
 
-  [[nodiscard]] const VoiceParams& params() const noexcept { return params_; }
-  [[nodiscard]] VoiceParams& params() noexcept { return params_; }
+  [[nodiscard]] float pitch() const noexcept { return pitch_; }
+  [[nodiscard]] int timestamp() const noexcept { return timestamp_; }
+
+  void increment_timestamp() noexcept { ++timestamp_; }
   void set_gain(float gain) noexcept { note_params_.gain = gain; }
-  void set_pitch(float pitch, float pitch_shift) noexcept {
-    params_.pitch = pitch;
-    params_.pitch_shift = pitch_shift;
-    const float shifted_pitch = pitch + pitch_shift;
-    note_params_.osc_increment = std::pow(2.0f, shifted_pitch);
+  void set_pitch() noexcept {
+    const float pitch = pitch_ + pitch_shift_;
+    note_params_.osc_increment = std::pow(2.0f, pitch);
     note_params_.slice_increment =
         (slice_ != nullptr && slice_->sample_count > 0)
-            ? slice_->sample_rate * std::pow(2.0f, shifted_pitch - slice_->root_pitch)
+            ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
             : 0.0f;
+  }
+  void set_pitch_shift(float pitch_shift) noexcept {
+    pitch_shift_ = pitch_shift;
+    set_pitch();
   }
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }
 
@@ -320,6 +318,11 @@ class Voice {
 
   NoteParams note_params_ = {};
   VoiceParams params_ = {};
+
+  int timestamp_ = 0;
+
+  float pitch_ = 0.0f;
+  float pitch_shift_ = 0.0f;
 
   float osc_phase_ = 0.0f;
   const Slice* slice_ = nullptr;

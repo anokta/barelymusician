@@ -59,6 +59,9 @@ void InstrumentProcessor::SetControl(InstrumentControlType type, float value) no
       break;
     case InstrumentControlType::kVoiceCount: {
       params_.voice_count = static_cast<int>(value);
+      for (int i = params_.voice_count; i < params_.active_voice_count; ++i) {
+        voice_pool_.Release(params_.active_voices[i]);
+      }
       params_.active_voice_count = std::min(params_.active_voice_count, params_.voice_count);
     } break;
     case InstrumentControlType::kAttack:
@@ -138,7 +141,7 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
     case NoteControlType::kGain:
       for (int i = 0; i < params_.active_voice_count; ++i) {
         if (Voice& voice = voice_pool_.Get(params_.active_voices[i]);
-            voice.params().pitch == pitch && voice.IsOn()) {
+            voice.pitch() == pitch && voice.IsOn()) {
           voice.set_gain(value);
           break;
         }
@@ -147,8 +150,8 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
     case NoteControlType::kPitchShift:
       for (int i = 0; i < params_.active_voice_count; ++i) {
         if (Voice& voice = voice_pool_.Get(params_.active_voices[i]);
-            voice.params().pitch == pitch && voice.IsOn()) {
-          voice.set_pitch(voice.params().pitch, value);
+            voice.pitch() == pitch && voice.IsOn()) {
+          voice.set_pitch_shift(value);
           break;
         }
       }
@@ -162,7 +165,7 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
 void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
   for (int i = 0; i < params_.active_voice_count; ++i) {
     if (Voice& voice = voice_pool_.Get(params_.active_voices[i]);
-        voice.params().pitch == pitch && voice.IsOn() &&
+        voice.pitch() == pitch && voice.IsOn() &&
         (params_.sample_data.empty() || params_.slice_mode != SliceMode::kOnce)) {
       voice.Stop();
       break;
@@ -186,10 +189,10 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   params_.sample_data.Swap(sample_data);
   for (int i = 0; i < params_.active_voice_count; ++i) {
     Voice& voice = voice_pool_.Get(params_.active_voices[i]);
-    if (const auto* sample = params_.sample_data.Select(voice.params().pitch, *params_.rng);
+    if (const auto* sample = params_.sample_data.Select(voice.pitch(), *params_.rng);
         sample != nullptr) {
       voice.set_slice(sample);
-      voice.set_pitch(voice.params().pitch, voice.params().pitch_shift);
+      voice.set_pitch();
     }
   }
 }

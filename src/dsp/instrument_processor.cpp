@@ -172,7 +172,7 @@ void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
 
 void InstrumentProcessor::SetNoteOn(
     float pitch, const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
-  Voice* voice = AcquireVoice(pitch);
+  Voice* voice = voice_pool_.Acquire(params_, pitch);
   if (voice == nullptr) {
     return;
   }
@@ -192,54 +192,6 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
       voice.set_pitch(voice.params().pitch, voice.params().pitch_shift);
     }
   }
-}
-
-Voice* InstrumentProcessor::AcquireVoice(float pitch) noexcept {
-  if (params_.should_retrigger) {
-    for (int i = 0; i < params_.active_voice_count; ++i) {
-      Voice& voice = voice_pool_.Get(params_.active_voices[i]);
-      if (voice.params().pitch == pitch) {
-        for (int j = 0; j < params_.active_voice_count; ++j) {
-          ++voice.params().timestamp;
-        }
-        voice.params().pitch_shift = 0.0;
-        voice.params().timestamp = 0;
-        return &voice;
-      }
-    }
-  }
-
-  if (params_.active_voice_count < params_.voice_count) {
-    for (int i = 0; i < params_.active_voice_count; ++i) {
-      ++voice_pool_.Get(params_.active_voices[i]).params().timestamp;
-    }
-
-    params_.active_voices[params_.active_voice_count] = voice_pool_.Acquire(params_);
-
-    if (params_.active_voices[params_.active_voice_count] == -1) {
-      return nullptr;
-    }
-
-    Voice& voice = voice_pool_.Get(params_.active_voices[params_.active_voice_count]);
-    voice.params().pitch = pitch;
-    voice.params().pitch_shift = 0.0;
-    voice.params().timestamp = 0;
-    ++params_.active_voice_count;
-
-    return &voice;
-  }
-
-  // No voices are available to acquire, steal the oldest active voice.
-  int oldest_active_voice_index = 0;
-  for (int i = 0; i < params_.active_voice_count; ++i) {
-    Voice& voice = voice_pool_.Get(params_.active_voices[i]);
-    if (voice.params().timestamp >
-        voice_pool_.Get(params_.active_voices[oldest_active_voice_index]).params().timestamp) {
-      oldest_active_voice_index = i;
-    }
-    ++voice.params().timestamp;
-  }
-  return &voice_pool_.Get(params_.active_voices[oldest_active_voice_index]);
 }
 
 }  // namespace barely

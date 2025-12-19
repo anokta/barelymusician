@@ -21,13 +21,52 @@ class VoicePool {
     }
   }
 
-  [[nodiscard]] VoiceIndex Acquire(InstrumentParams& instrument_params) noexcept {
-    if (active_voice_count_ < kMaxActiveVoiceCount) {
+  [[nodiscard]] Voice* Acquire(InstrumentParams& instrument_params, float pitch) noexcept {
+    if (instrument_params.should_retrigger) {
+      for (int i = 0; i < instrument_params.active_voice_count; ++i) {
+        Voice& voice = Get(instrument_params.active_voices[i]);
+        if (voice.params().pitch == pitch) {
+          for (int j = 0; j < instrument_params.active_voice_count; ++j) {
+            ++voice.params().timestamp;
+          }
+          voice.params().pitch_shift = 0.0;
+          voice.params().timestamp = 0;
+          return &voice;
+        }
+      }
+    }
+
+    if (active_voice_count_ < kMaxActiveVoiceCount &&
+        instrument_params.active_voice_count < instrument_params.voice_count) {
+      for (int i = 0; i < instrument_params.active_voice_count; ++i) {
+        ++Get(instrument_params.active_voices[i]).params().timestamp;
+      }
+
+      // Acquire new voice.
       ActiveVoice& active_voice = active_voices_[active_voice_count_++];
       active_voice.instrument_params = &instrument_params;
-      return active_voice.voice_index;
+      instrument_params.active_voices[instrument_params.active_voice_count++] =
+          active_voice.voice_index;
+
+      Voice& voice = Get(active_voice.voice_index);
+      voice.params().pitch = pitch;
+      voice.params().pitch_shift = 0.0;
+      voice.params().timestamp = 0;
+
+      return &voice;
     }
-    return -1;  // TODO(#126): Handle this gracefully with intrusive list.
+
+    // No voices are available to acquire, steal the oldest active voice.
+    int oldest_active_voice_index = 0;
+    for (int i = 0; i < instrument_params.active_voice_count; ++i) {
+      Voice& voice = Get(instrument_params.active_voices[i]);
+      if (voice.params().timestamp >
+          Get(instrument_params.active_voices[oldest_active_voice_index]).params().timestamp) {
+        oldest_active_voice_index = i;
+      }
+      ++voice.params().timestamp;
+    }
+    return &Get(instrument_params.active_voices[oldest_active_voice_index]);
   }
 
   [[nodiscard]] Voice& Get(VoiceIndex index) noexcept {

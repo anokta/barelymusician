@@ -74,9 +74,6 @@ class InstrumentProcessor {
   void SetSampleData(SampleData& sample_data) noexcept;
 
  private:
-  // Acquires a new voice.
-  [[nodiscard]] Voice* AcquireVoice(float pitch) noexcept;
-
   InstrumentParams params_ = {};
 
   VoicePool& voice_pool_;

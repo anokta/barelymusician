@@ -48,8 +48,8 @@ class DelayFilter {
   ///
   /// @param max_delay_frame_count Maximum number of delay frames.
   explicit DelayFilter(int max_delay_frame_count) noexcept
-      : max_delay_frame_count_(max_delay_frame_count),
-        delay_samples_(kStereoChannelCount * max_delay_frame_count, 0.0f) {
+      : delay_samples_(kStereoChannelCount * max_delay_frame_count, 0.0f),
+        max_delay_frame_count_(max_delay_frame_count) {
     assert(max_delay_frame_count >= 0);
   }
 
@@ -94,11 +94,11 @@ class DelayFilter {
   // High-pass filter.
   std::array<OnePoleFilter, kStereoChannelCount> hpf_;
 
-  // Maximum number of delay frames.
-  int max_delay_frame_count_ = 0;
-
   // Array of interleaved delay samples.
   std::vector<float> delay_samples_;
+
+  // Maximum number of delay frames.
+  int max_delay_frame_count_ = 0;
 
   // Write frame.
   int write_frame_ = 0;

@@ -76,10 +76,10 @@ std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*> BuildMutable
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
-    : sample_rate_(sample_rate),
-      controls_(BuildEngineControlArray(static_cast<float>(sample_rate))),
-      engine_processor_(sample_rate_),
-      output_samples_(kStereoChannelCount * max_frame_count) {
+    : controls_(BuildEngineControlArray(static_cast<float>(sample_rate))),
+      engine_processor_(sample_rate),
+      output_samples_(kStereoChannelCount * max_frame_count),
+      sample_rate_(sample_rate) {
   assert(sample_rate >= 0);
   assert(max_frame_count > 0);
 }

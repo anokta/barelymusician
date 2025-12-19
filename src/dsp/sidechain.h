@@ -60,6 +60,9 @@ class Sidechain {
   }
 
  private:
+  // Sidechain frame in decibels.
+  std::array<float, kStereoChannelCount> sidechain_db_frame_ = {};
+
   // Sample interval.
   float sample_interval_ = 0.0f;
 
@@ -68,9 +71,6 @@ class Sidechain {
 
   // Release coefficient.
   float release_coeff_ = 0.0f;
-
-  // Sidechain frame in decibels.
-  std::array<float, kStereoChannelCount> sidechain_db_frame_ = {};
 };
 
 }  // namespace barely

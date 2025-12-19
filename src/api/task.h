@@ -106,11 +106,11 @@ struct BarelyTask {
   // Duration in beats.
   double duration_;
 
-  // Priority.
-  int priority_;
-
   // Event callback.
   EventCallback event_callback_;
+
+  // Priority.
+  int priority_;
 
   // Denotes whether the task is active or not.
   bool is_active_ = false;

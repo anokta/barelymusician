@@ -119,11 +119,11 @@ class VoicePool {
     InstrumentParams* instrument_params = nullptr;
     VoiceIndex voice_index = 0;
   };
-  std::array<ActiveVoice, kMaxActiveVoiceCount> active_voices_;
-  int active_voice_count_ = 0;
 
+  std::array<ActiveVoice, kMaxActiveVoiceCount> active_voices_;
   std::array<Voice, kMaxActiveVoiceCount> voices_;
-  int voice_count_ = 0;
+
+  int active_voice_count_ = 0;
 };
 
 }  // namespace barely

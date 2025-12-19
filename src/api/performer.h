@@ -158,14 +158,12 @@ struct BarelyPerformer {
   /// Updates the key of an inactive task.
   void UpdateInactiveTaskKey(TaskKey old_task_key, BarelyTask* task) noexcept;
 
+  // Set of task position-pointer pairs.
+  std::set<std::pair<TaskKey, BarelyTask*>> active_tasks_;
+  std::set<std::pair<TaskKey, BarelyTask*>> inactive_tasks_;
+
   // Engine.
   BarelyEngine& engine_;
-
-  // Denotes whether performer is looping or not.
-  bool is_looping_ = false;
-
-  // Denotes whether performer is playing or not.
-  bool is_playing_ = false;
 
   // Loop begin position in beats.
   double loop_begin_position_ = 0.0;
@@ -176,9 +174,11 @@ struct BarelyPerformer {
   // Position in beats.
   double position_ = 0.0;
 
-  // Set of task position-pointer pairs.
-  std::set<std::pair<TaskKey, BarelyTask*>> active_tasks_;
-  std::set<std::pair<TaskKey, BarelyTask*>> inactive_tasks_;
+  // Denotes whether performer is looping or not.
+  bool is_looping_ = false;
+
+  // Denotes whether performer is playing or not.
+  bool is_playing_ = false;
 };
 
 #endif  // BARELYMUSICIAN_API_PERFORMER_H_

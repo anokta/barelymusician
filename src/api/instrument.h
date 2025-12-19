@@ -109,9 +109,6 @@ struct BarelyInstrument {
   // Engine.
   BarelyEngine& engine_;
 
-  // Sampling interval in seconds.
-  float sample_interval_ = 0.0f;
-
   // Array of controls.
   barely::InstrumentControlArray controls_;
 
@@ -125,8 +122,11 @@ struct BarelyInstrument {
   // Arpeggiator.
   BarelyPerformer arp_;
   BarelyTask arp_task_;
-  int arp_pitch_index_ = -1;
   std::optional<float> arp_pitch_ = std::nullopt;
+  int arp_pitch_index_ = -1;
+
+  // Sampling interval in seconds.
+  float sample_interval_ = 0.0f;
 };
 
 #endif  // BARELYMUSICIAN_API_INSTRUMENT_H_

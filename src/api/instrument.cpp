@@ -101,7 +101,7 @@ BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine,
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept
     : engine_(engine),
-      sample_interval_(1.0f / static_cast<float>(engine_.GetSampleRate())),
+
       controls_(BuildControlArray(control_overrides)),
       arp_(engine),
       arp_task_(
@@ -125,7 +125,8 @@ BarelyInstrument::BarelyInstrument(
                instrument->arp_pitch_ = std::nullopt;
              }
            },
-           this}) {
+           this}),
+      sample_interval_(1.0f / static_cast<float>(engine_.GetSampleRate())) {
   const float arp_rate = controls_[BarelyInstrumentControlType_kArpRate].value;
   arp_.SetLooping(true);
   arp_.SetLoopLength((arp_rate > 0.0f) ? 1.0 / static_cast<double>(arp_rate) : 0.0);

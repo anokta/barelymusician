@@ -115,11 +115,11 @@ struct BarelyEngine {
   barely::MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
-  // Sampling rate in hertz.
-  int sample_rate_ = 0;
-
   // Array of engine controls.
   barely::EngineControlArray controls_;
+
+  // Engine processor.
+  barely::EngineProcessor engine_processor_;
 
   // Random number generator for the audio thread.
   barely::AudioRng audio_rng_;
@@ -141,6 +141,9 @@ struct BarelyEngine {
   // Set of pointers to performers.
   std::unordered_set<BarelyPerformer*> performers_;
 
+  // Output samples.
+  std::vector<float> output_samples_;
+
   // Tempo in beats per minute.
   double tempo_ = 120.0;
 
@@ -150,11 +153,8 @@ struct BarelyEngine {
   // Update frame.
   int64_t update_frame_ = 0;
 
-  // Engine processor.
-  barely::EngineProcessor engine_processor_;
-
-  // Output samples.
-  std::vector<float> output_samples_;
+  // Sampling rate in hertz.
+  int sample_rate_ = 0;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

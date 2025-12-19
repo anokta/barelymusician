@@ -49,10 +49,10 @@ class EngineProcessor {
   ///
   /// @param sample_rate Sampling rate in hertz.
   explicit EngineProcessor(int sample_rate) noexcept
-      : sample_rate_(sample_rate),
-        compressor_(sample_rate),
+      : compressor_(sample_rate),
         delay_filter_(sample_rate * kMaxDelayFrameSeconds),
-        sidechain_(sample_rate) {
+        sidechain_(sample_rate),
+        sample_rate_(sample_rate) {
     assert(sample_rate > 0);
   }
 
@@ -148,9 +148,6 @@ class EngineProcessor {
     ApproachValue(current_params_.sidechain_ratio, target_params_.sidechain_ratio);
   }
 
-  // Sampling rate in hertz.
-  int sample_rate_ = 0;
-
   // Compressor.
   Compressor compressor_;
 
@@ -165,6 +162,9 @@ class EngineProcessor {
 
   // Target parameters.
   EffectParams target_params_ = {};
+
+  // Sampling rate in hertz.
+  int sample_rate_ = 0;
 };
 
 }  // namespace barely

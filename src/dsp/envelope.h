@@ -149,6 +149,9 @@ class Envelope {
   // Pointer to adsr.
   const Adsr* adsr_ = nullptr;
 
+  // Current state.
+  State state_ = State::kIdle;
+
   // Last output value.
   float output_ = 0.0f;
 
@@ -157,9 +160,6 @@ class Envelope {
 
   // Internal clock.
   float phase_ = 0.0f;
-
-  // Current state.
-  State state_ = State::kIdle;
 };
 
 }  // namespace barely

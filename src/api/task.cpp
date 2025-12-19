@@ -11,8 +11,8 @@ BarelyTask::BarelyTask(BarelyPerformer& performer, double position, double durat
     : performer_(performer),
       position_(position),
       duration_(duration),
-      priority_(priority),
-      event_callback_(callback) {
+      event_callback_(callback),
+      priority_(priority) {
   assert(duration > 0.0 && "Invalid task duration");
   performer_.AddTask(this);
 }

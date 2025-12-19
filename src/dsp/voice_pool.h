@@ -53,9 +53,9 @@ class VoicePool {
       if constexpr (kIsSidechainSend) {
         if (!voice.IsActive()) {
           for (int j = 0; j < params->active_voice_count; ++j) {
-            if (params->active_voice_states[j].voice_index == active_voices_[i].voice_index) {
-              std::swap(params->active_voice_states[j],
-                        params->active_voice_states[params->active_voice_count - 1]);
+            if (params->active_voices[j] == active_voices_[i].voice_index) {
+              std::swap(params->active_voices[j],
+                        params->active_voices[params->active_voice_count - 1]);
               --params->active_voice_count;
               break;
             }

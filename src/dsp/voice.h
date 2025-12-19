@@ -28,6 +28,15 @@ struct VoiceParams {
   /// Filter coefficients.
   BiquadFilter::Coefficients filter_coefficients = {};
 
+  /// Timestamp for round-robin.
+  int timestamp = 0;
+
+  /// Note pitch.
+  float pitch = 0.0f;
+
+  /// Note pitch shift.
+  float pitch_shift = 0.0f;
+
   /// Bit crusher range (for bit depth reduction).
   float bit_crusher_range = 0.0f;
 
@@ -67,18 +76,10 @@ struct VoiceParams {
 
 /// Instrument parameters.
 struct InstrumentParams {
-  // TODO(#126): Convert to intrusive list.
-  // List of voices with their pitch and timestamp. Voice timestamp is used to determine which voice
-  // to steal when there are no free voices available.
   // TODO(#12): Consider a more optimized implementation for voice stealing.
+  // TODO(#126): Convert to intrusive list.
   static constexpr int kMaxVoiceCount = 16;
-  struct VoiceState {
-    VoiceIndex voice_index;
-    float pitch = 0.0f;
-    float pitch_shift = 0.0f;
-    int timestamp = 0;
-  };
-  std::array<VoiceState, kMaxVoiceCount> active_voice_states;
+  std::array<VoiceIndex, kMaxVoiceCount> active_voices;
   int active_voice_count = 0;
 
   /// Voice parameters.
@@ -258,9 +259,9 @@ class Voice {
     const float gain = note_controls[BarelyNoteControlType_kGain];
     const float pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
     set_gain(gain);
-    set_pitch(pitch + pitch_shift);
     params_ = instrument_params.voice_params;
     params_.gain *= gain;
+    set_pitch(pitch, pitch_shift);
     bit_crusher_.Reset();
     filter_.Reset();
     osc_phase_ = 0.0f;
@@ -271,12 +272,17 @@ class Voice {
   /// Stops the voice.
   void Stop() noexcept { envelope_.Stop(); }
 
+  [[nodiscard]] const VoiceParams& params() const noexcept { return params_; }
+  [[nodiscard]] VoiceParams& params() noexcept { return params_; }
   void set_gain(float gain) noexcept { note_params_.gain = gain; }
-  void set_pitch(float pitch) noexcept {
-    note_params_.osc_increment = std::pow(2.0f, pitch);
+  void set_pitch(float pitch, float pitch_shift) noexcept {
+    params_.pitch = pitch;
+    params_.pitch_shift = pitch_shift;
+    const float shifted_pitch = pitch + pitch_shift;
+    note_params_.osc_increment = std::pow(2.0f, shifted_pitch);
     note_params_.slice_increment =
         (slice_ != nullptr && slice_->sample_count > 0)
-            ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
+            ? slice_->sample_rate * std::pow(2.0f, shifted_pitch - slice_->root_pitch)
             : 0.0f;
   }
   void set_slice(const Slice* slice) noexcept { slice_ = slice; }

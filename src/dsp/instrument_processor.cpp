@@ -35,7 +35,7 @@ InstrumentProcessor::InstrumentProcessor(
 // TODO(#126): This shouldn't be necessary.
 InstrumentProcessor::~InstrumentProcessor() noexcept {
   for (int i = 0; i < params_.active_voice_count; ++i) {
-    voice_pool_.Release(params_.active_voice_states[i].voice_index);
+    voice_pool_.Release(params_.active_voices[i]);
   }
 }
 
@@ -137,8 +137,8 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
   switch (type) {
     case NoteControlType::kGain:
       for (int i = 0; i < params_.active_voice_count; ++i) {
-        if (Voice& voice = voice_pool_.Get(params_.active_voice_states[i].voice_index);
-            params_.active_voice_states[i].pitch == pitch && voice.IsOn()) {
+        if (Voice& voice = voice_pool_.Get(params_.active_voices[i]);
+            voice.params().pitch == pitch && voice.IsOn()) {
           voice.set_gain(value);
           break;
         }
@@ -146,11 +146,9 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
       break;
     case NoteControlType::kPitchShift:
       for (int i = 0; i < params_.active_voice_count; ++i) {
-        if (Voice& voice = voice_pool_.Get(params_.active_voice_states[i].voice_index);
-            params_.active_voice_states[i].pitch == pitch && voice.IsOn()) {
-          params_.active_voice_states[i].pitch_shift = value;
-          voice.set_pitch(params_.active_voice_states[i].pitch +
-                          params_.active_voice_states[i].pitch_shift);
+        if (Voice& voice = voice_pool_.Get(params_.active_voices[i]);
+            voice.params().pitch == pitch && voice.IsOn()) {
+          voice.set_pitch(voice.params().pitch, value);
           break;
         }
       }
@@ -163,10 +161,10 @@ void InstrumentProcessor::SetNoteControl(float pitch, NoteControlType type, floa
 
 void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
   for (int i = 0; i < params_.active_voice_count; ++i) {
-    if (params_.active_voice_states[i].pitch == pitch &&
-        voice_pool_.Get(params_.active_voice_states[i].voice_index).IsOn() &&
+    if (Voice& voice = voice_pool_.Get(params_.active_voices[i]);
+        voice.params().pitch == pitch && voice.IsOn() &&
         (params_.sample_data.empty() || params_.slice_mode != SliceMode::kOnce)) {
-      voice_pool_.Get(params_.active_voice_states[i].voice_index).Stop();
+      voice.Stop();
       break;
     }
   }
@@ -187,13 +185,11 @@ void InstrumentProcessor::SetNoteOn(
 void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
   params_.sample_data.Swap(sample_data);
   for (int i = 0; i < params_.active_voice_count; ++i) {
-    if (const auto* sample =
-            params_.sample_data.Select(params_.active_voice_states[i].pitch, *params_.rng);
+    Voice& voice = voice_pool_.Get(params_.active_voices[i]);
+    if (const auto* sample = params_.sample_data.Select(voice.params().pitch, *params_.rng);
         sample != nullptr) {
-      voice_pool_.Get(params_.active_voice_states[i].voice_index).set_slice(sample);
-      voice_pool_.Get(params_.active_voice_states[i].voice_index)
-          .set_pitch(params_.active_voice_states[i].pitch +
-                     params_.active_voice_states[i].pitch_shift);
+      voice.set_slice(sample);
+      voice.set_pitch(voice.params().pitch, voice.params().pitch_shift);
     }
   }
 }
@@ -201,47 +197,49 @@ void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
 Voice* InstrumentProcessor::AcquireVoice(float pitch) noexcept {
   if (params_.should_retrigger) {
     for (int i = 0; i < params_.active_voice_count; ++i) {
-      if (params_.active_voice_states[i].pitch == pitch) {
+      Voice& voice = voice_pool_.Get(params_.active_voices[i]);
+      if (voice.params().pitch == pitch) {
         for (int j = 0; j < params_.active_voice_count; ++j) {
-          ++params_.active_voice_states[j].timestamp;
+          ++voice.params().timestamp;
         }
-        params_.active_voice_states[i].pitch_shift = 0.0;
-        params_.active_voice_states[i].timestamp = 0;
-        return &voice_pool_.Get(params_.active_voice_states[i].voice_index);
+        voice.params().pitch_shift = 0.0;
+        voice.params().timestamp = 0;
+        return &voice;
       }
     }
   }
 
   if (params_.active_voice_count < params_.voice_count) {
     for (int i = 0; i < params_.active_voice_count; ++i) {
-      ++params_.active_voice_states[i].timestamp;
+      ++voice_pool_.Get(params_.active_voices[i]).params().timestamp;
     }
 
-    auto& voice_state = params_.active_voice_states[params_.active_voice_count];
-    voice_state.voice_index = voice_pool_.Acquire(params_);
+    params_.active_voices[params_.active_voice_count] = voice_pool_.Acquire(params_);
 
-    if (voice_state.voice_index == -1) {
+    if (params_.active_voices[params_.active_voice_count] == -1) {
       return nullptr;
     }
 
-    voice_state.pitch = pitch;
-    voice_state.pitch_shift = 0.0;
-    voice_state.timestamp = 0;
+    Voice& voice = voice_pool_.Get(params_.active_voices[params_.active_voice_count]);
+    voice.params().pitch = pitch;
+    voice.params().pitch_shift = 0.0;
+    voice.params().timestamp = 0;
     ++params_.active_voice_count;
 
-    return &voice_pool_.Get(voice_state.voice_index);
+    return &voice;
   }
 
   // No voices are available to acquire, steal the oldest active voice.
   int oldest_active_voice_index = 0;
   for (int i = 0; i < params_.active_voice_count; ++i) {
-    if (params_.active_voice_states[i].timestamp >
-        params_.active_voice_states[oldest_active_voice_index].timestamp) {
+    Voice& voice = voice_pool_.Get(params_.active_voices[i]);
+    if (voice.params().timestamp >
+        voice_pool_.Get(params_.active_voices[oldest_active_voice_index]).params().timestamp) {
       oldest_active_voice_index = i;
     }
-    ++params_.active_voice_states[i].timestamp;
+    ++voice.params().timestamp;
   }
-  return &voice_pool_.Get(params_.active_voice_states[oldest_active_voice_index].voice_index);
+  return &voice_pool_.Get(params_.active_voices[oldest_active_voice_index]);
 }
 
 }  // namespace barely

@@ -24,12 +24,11 @@ class InstrumentProcessor {
   ///
   /// @param control_overrides Span of instrument control overrides.
   /// @param filter_coeffs Filter coefficients.
-  /// @param rng Random number generator.
   /// @param sample_rate Sampling rate in hertz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   InstrumentProcessor(std::span<const BarelyInstrumentControlOverride> control_overrides,
-                      const BiquadFilter::Coefficients& filter_coeffs, AudioRng& rng,
-                      VoicePool& voice_pool, int sample_rate) noexcept;
+                      const BiquadFilter::Coefficients& filter_coeffs, VoicePool& voice_pool,
+                      int sample_rate) noexcept;
 
   /// Destroys `InstrumentProcessor`.
   ~InstrumentProcessor() noexcept;
@@ -63,20 +62,23 @@ class InstrumentProcessor {
 
   /// Sets a note on.
   ///
+  /// @param rng Random number generator.
   /// @param pitch Note pitch.
   /// @param note_controls Array of note controls.
-  void SetNoteOn(float pitch,
+  void SetNoteOn(AudioRng& rng_, float pitch,
                  const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept;
 
   /// Sets the sample data.
   ///
+  /// @param rng Random number generator.
   /// @param sample_data Sample data.
-  void SetSampleData(SampleData& sample_data) noexcept;
+  void SetSampleData(AudioRng& rng_, SampleData& sample_data) noexcept;
 
  private:
   InstrumentParams params_ = {};
 
   VoicePool& voice_pool_;
+
   float sample_interval_ = 0.0f;
 };
 

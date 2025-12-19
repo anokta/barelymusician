@@ -58,19 +58,21 @@ class EngineProcessor {
 
   /// Processes the next output samples.
   ///
+  /// @param rng Random number generator.
   /// @param voice_pool Voice pool.
   /// @param output_samples Array of interleaved output samples.
   /// @param output_frame_count Number of output frames.
-  void Process(VoicePool& voice_pool, float* output_samples, int output_frame_count) noexcept {
+  void Process(AudioRng& rng, VoicePool& voice_pool, float* output_samples,
+               int output_frame_count) noexcept {
     for (int frame = 0; frame < output_frame_count; ++frame) {
       float delay_frame[kStereoChannelCount] = {};
       float sidechain_frame[kStereoChannelCount] = {};
       float* output_frame = &output_samples[kStereoChannelCount * frame];
 
-      voice_pool.Process<true>(delay_frame, sidechain_frame, output_frame);
+      voice_pool.Process<true>(rng, delay_frame, sidechain_frame, output_frame);
       sidechain_.Process(sidechain_frame, current_params_.sidechain_mix,
                          current_params_.sidechain_threshold_db, current_params_.sidechain_ratio);
-      voice_pool.Process<false>(delay_frame, sidechain_frame, output_frame);
+      voice_pool.Process<false>(rng, delay_frame, sidechain_frame, output_frame);
 
       delay_filter_.Process(delay_frame, output_frame, current_params_.delay_params);
 

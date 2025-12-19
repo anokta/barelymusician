@@ -19,7 +19,7 @@ namespace barely {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentProcessor::InstrumentProcessor(
     std::span<const BarelyInstrumentControlOverride> control_overrides,
-    const BiquadFilter::Coefficients& filter_coeffs, AudioRng& rng, VoicePool& voice_pool,
+    const BiquadFilter::Coefficients& filter_coeffs, VoicePool& voice_pool,
     int sample_rate) noexcept
     : voice_pool_(voice_pool), sample_interval_(1.0f / static_cast<float>(sample_rate)) {
   assert(sample_rate > 0);
@@ -29,7 +29,6 @@ InstrumentProcessor::InstrumentProcessor(
   params_.voice_params.filter_coefficients = filter_coeffs;
   params_.osc_increment = kReferenceFrequency * sample_interval_;
   params_.slice_increment = sample_interval_;
-  params_.rng = &rng;
 }
 
 // TODO(#126): This shouldn't be necessary.
@@ -174,23 +173,23 @@ void InstrumentProcessor::SetNoteOff(float pitch) noexcept {
 }
 
 void InstrumentProcessor::SetNoteOn(
-    float pitch, const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
+    AudioRng& rng, float pitch,
+    const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
   Voice* voice = voice_pool_.Acquire(params_, pitch);
   if (voice == nullptr) {
     return;
   }
-  if (const auto* sample = params_.sample_data.Select(pitch, *params_.rng); sample != nullptr) {
+  if (const auto* sample = params_.sample_data.Select(pitch, rng); sample != nullptr) {
     voice->set_slice(sample);
   }
   voice->Start(params_, pitch, note_controls);
 }
 
-void InstrumentProcessor::SetSampleData(SampleData& sample_data) noexcept {
+void InstrumentProcessor::SetSampleData(AudioRng& rng, SampleData& sample_data) noexcept {
   params_.sample_data.Swap(sample_data);
   for (int i = 0; i < params_.active_voice_count; ++i) {
     Voice& voice = voice_pool_.Get(params_.active_voices[i]);
-    if (const auto* sample = params_.sample_data.Select(voice.pitch(), *params_.rng);
-        sample != nullptr) {
+    if (const auto* sample = params_.sample_data.Select(voice.pitch(), rng); sample != nullptr) {
       voice.set_slice(sample);
       voice.set_pitch();
     }

@@ -29,9 +29,6 @@ struct InstrumentParams {
   /// Sample data.
   SampleData sample_data;
 
-  /// Random number generator.
-  AudioRng* rng = nullptr;
-
   /// Number of voices.
   int voice_count = 8;
 

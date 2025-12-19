@@ -51,12 +51,13 @@ class Voice {
   /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
   /// @param voice Voice.
   /// @param params Instrument parameters.
+  /// @param rng Random number generator.
   /// @param delay_frame Delay send frame.
   /// @param sidechain_frame Sidechain send frame.
   /// @param output_frame Output frame.
   template <bool kIsSidechainSend = false>
-  void Process(const InstrumentParams& params, float delay_frame[kStereoChannelCount],
-               float sidechain_frame[kStereoChannelCount],
+  void Process(const InstrumentParams& params, AudioRng& rng,
+               float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount]) noexcept {
     if constexpr (kIsSidechainSend) {
       if (params_.sidechain_send <= 0.0f) {
@@ -72,11 +73,10 @@ class Voice {
       envelope_.Stop();
     }
 
-    assert(params.rng != nullptr);
     const float skewed_osc_phase = std::min(1.0f, (1.0f + params_.osc_skew) * osc_phase_);
     const float osc_sample =
         (1.0f - params_.osc_noise_mix) * GenerateOscSample(skewed_osc_phase, params_.osc_shape) +
-        params_.osc_noise_mix * params.rng->Generate();
+        params_.osc_noise_mix * rng.Generate();
     const float osc_output = params_.osc_mix * osc_sample;
 
     const bool has_slice = (slice_ != nullptr);

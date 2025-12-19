@@ -74,11 +74,13 @@ class VoicePool {
   /// Processes the next output samples.
   ///
   /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
+  /// @param rng Random number generator.
   /// @param delay_frame Delay send frame.
   /// @param sidechain_frame Sidechain send frame.
   /// @param output_frame Output frame.
   template <bool kIsSidechainSend = false>
-  void Process(float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
+  void Process(AudioRng& rng, float delay_frame[kStereoChannelCount],
+               float sidechain_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount]) noexcept {
     for (int i = 0; i < active_voice_count_; ++i) {
       Voice& voice = Get(active_voices_[i].voice_index);
@@ -99,7 +101,7 @@ class VoicePool {
           continue;
         }
       }
-      voice.Process<kIsSidechainSend>(*params, delay_frame, sidechain_frame, output_frame);
+      voice.Process<kIsSidechainSend>(*params, rng, delay_frame, sidechain_frame, output_frame);
     }
   }
 

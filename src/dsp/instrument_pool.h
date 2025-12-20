@@ -92,11 +92,20 @@ inline void SetInstrumentControl(barely::InstrumentParams& params, float sample_
       params.voice_params.sidechain_send = value;
       break;
     case InstrumentControlType::kFilterType:
-      [[fallthrough]];
+      params.filter_type = static_cast<FilterType>(value);
+      params.voice_params.filter_coefficients = GetFilterCoefficients(
+          sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
+      break;
     case InstrumentControlType::kFilterFrequency:
-      [[fallthrough]];
+      params.filter_frequency = value;
+      params.voice_params.filter_coefficients = GetFilterCoefficients(
+          sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
+      break;
     case InstrumentControlType::kFilterQ:
-      [[fallthrough]];
+      params.filter_q = value;
+      params.voice_params.filter_coefficients = GetFilterCoefficients(
+          sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
+      break;
     case InstrumentControlType::kArpMode:
       [[fallthrough]];
     case InstrumentControlType::kArpGateRatio:
@@ -120,7 +129,7 @@ class InstrumentPool {
 
   [[nodiscard]] InstrumentIndex Create(
       std::span<const BarelyInstrumentControlOverride> control_overrides,
-      const barely::BiquadFilter::Coefficients& filter_coeffs, float sample_interval) noexcept {
+      float sample_interval) noexcept {
     if (active_instrument_count_ >= kMaxInstrumentCount) {
       return -1;  // TODO(#126): Handle failure properly.
     }
@@ -131,7 +140,6 @@ class InstrumentPool {
       SetInstrumentControl(params, sample_interval, static_cast<InstrumentControlType>(type),
                            value);
     }
-    params.voice_params.filter_coefficients = filter_coeffs;
     params.osc_increment = kReferenceFrequency * sample_interval;
     params.slice_increment = sample_interval;
 

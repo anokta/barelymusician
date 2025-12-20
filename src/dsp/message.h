@@ -8,7 +8,6 @@
 #include <optional>
 #include <variant>
 
-#include "dsp/biquad_filter.h"
 #include "dsp/instrument_params.h"
 #include "dsp/sample_data.h"
 
@@ -39,15 +38,6 @@ struct InstrumentControlMessage {
 
   /// Value.
   float value;
-};
-
-/// Instrument filter control message.
-struct InstrumentFilterControlMessage {
-  /// Instrument index;
-  InstrumentIndex instrument_index;
-
-  /// Filter coefficients.
-  BiquadFilter::Coefficients coeffs;
 };
 
 /// Note control message.
@@ -96,9 +86,9 @@ struct SampleDataMessage {
 };
 
 /// Message alias.
-using Message = std::variant<EngineControlMessage, InstrumentDestroyMessage,
-                             InstrumentControlMessage, InstrumentFilterControlMessage,
-                             NoteControlMessage, NoteOffMessage, NoteOnMessage, SampleDataMessage>;
+using Message =
+    std::variant<EngineControlMessage, InstrumentDestroyMessage, InstrumentControlMessage,
+                 NoteControlMessage, NoteOffMessage, NoteOnMessage, SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

@@ -4,6 +4,7 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cmath>
 
 #include "common/rng.h"
 #include "dsp/envelope.h"
@@ -40,6 +41,15 @@ struct InstrumentParams {
 
   /// Slice mode.
   SliceMode slice_mode = SliceMode::kSustain;
+
+  /// Filter type.
+  FilterType filter_type = FilterType::kNone;
+
+  /// Filter cutoff frequency.
+  float filter_frequency = 0.0f;
+
+  /// Filter resonance quality factor.
+  float filter_q = std::sqrt(0.5f);
 
   /// Pitch shift.
   float pitch_shift = 0.0f;

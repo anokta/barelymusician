@@ -14,7 +14,6 @@
 
 #include "api/engine.h"
 #include "common/find_or_null.h"
-#include "dsp/biquad_filter.h"
 #include "dsp/control.h"
 #include "dsp/message.h"
 
@@ -24,7 +23,6 @@ using ::barely::Control;
 using ::barely::InstrumentControlArray;
 using ::barely::InstrumentControlMessage;
 using ::barely::InstrumentControlType;
-using ::barely::InstrumentFilterControlMessage;
 using ::barely::NoteControlArray;
 using ::barely::NoteControlMessage;
 using ::barely::NoteControlType;
@@ -135,13 +133,7 @@ BarelyInstrument::BarelyInstrument(
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
       arp_.GetLoopLength());
 
-  instrument_index_ = engine_.AddInstrument(
-      control_overrides,
-      barely::GetFilterCoefficients(
-          sample_interval_,
-          static_cast<barely::FilterType>(controls_[BarelyInstrumentControlType_kFilterType].value),
-          controls_[BarelyInstrumentControlType_kFilterFrequency].value,
-          controls_[BarelyInstrumentControlType_kFilterQ].value));
+  instrument_index_ = engine_.AddInstrument(control_overrides);
   assert(instrument_index_ != -1);
 }
 
@@ -237,19 +229,6 @@ void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexce
 
 void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) noexcept {
   switch (type) {
-    case InstrumentControlType::kFilterType:
-      [[fallthrough]];
-    case InstrumentControlType::kFilterFrequency:
-      [[fallthrough]];
-    case InstrumentControlType::kFilterQ:
-      engine_.ScheduleMessage(InstrumentFilterControlMessage{
-          instrument_index_, barely::GetFilterCoefficients(
-                                 sample_interval_,
-                                 static_cast<barely::FilterType>(
-                                     controls_[BarelyInstrumentControlType_kFilterType].value),
-                                 controls_[BarelyInstrumentControlType_kFilterFrequency].value,
-                                 controls_[BarelyInstrumentControlType_kFilterQ].value)});
-      break;
     case InstrumentControlType::kArpMode:
       if (static_cast<BarelyArpMode>(value) == BarelyArpMode_kNone) {
         if (arp_.IsPlaying()) {

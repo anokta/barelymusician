@@ -31,12 +31,10 @@ struct BarelyEngine {
   /// Adds a new instrument.
   ///
   /// @param control_overrides Span of instrument control overrides.
-  /// @param filter_coeffs Filter coefficients.
   /// @return Instrument index.
   barely::InstrumentIndex AddInstrument(
-      std::span<const BarelyInstrumentControlOverride> control_overrides,
-      const barely::BiquadFilter::Coefficients& filter_coeffs) noexcept {
-    return instrument_pool_.Create(control_overrides, filter_coeffs, sample_interval_);
+      std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
+    return instrument_pool_.Create(control_overrides, sample_interval_);
   }
 
   /// Adds a new performer.

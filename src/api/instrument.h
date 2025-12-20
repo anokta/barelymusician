@@ -13,7 +13,6 @@
 #include "api/task.h"
 #include "common/callback.h"
 #include "dsp/control.h"
-#include "dsp/instrument_processor.h"
 
 /// Implementation an instrument.
 struct BarelyInstrument {

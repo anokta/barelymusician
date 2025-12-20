@@ -156,7 +156,7 @@ class Voice {
   ///
   /// @param instrument_params Instrument parameters.
   /// @param note_controls Array of note controls.
-  void Start(const InstrumentParams& instrument_params, float pitch,
+  void Start(const InstrumentParams& instrument_params, const Slice* slice, float pitch,
              const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
     const float gain = note_controls[BarelyNoteControlType_kGain];
     const float pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
@@ -165,7 +165,8 @@ class Voice {
     params_.gain *= gain;
     pitch_ = pitch;
     pitch_shift_ = pitch_shift;
-    set_pitch();
+    slice_ = slice;
+    UpdatePitchIncrements();
     bit_crusher_.Reset();
     filter_.Reset();
     osc_phase_ = 0.0f;
@@ -182,19 +183,16 @@ class Voice {
 
   void increment_timestamp() noexcept { ++timestamp_; }
   void set_gain(float gain) noexcept { note_params_.gain = gain; }
-  void set_pitch() noexcept {
-    const float pitch = pitch_ + pitch_shift_;
-    note_params_.osc_increment = std::pow(2.0f, pitch);
-    note_params_.slice_increment =
-        (slice_ != nullptr && slice_->sample_count > 0)
-            ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
-            : 0.0f;
-  }
   void set_pitch_shift(float pitch_shift) noexcept {
     pitch_shift_ = pitch_shift;
-    set_pitch();
+    UpdatePitchIncrements();
   }
-  void set_slice(const Slice* slice) noexcept { slice_ = slice; }
+  void set_slice(const Slice* slice) noexcept {
+    slice_ = slice;
+    if (slice_ != nullptr) {
+      UpdatePitchIncrements();
+    }
+  }
 
  private:
   void Approach(const VoiceParams& params) noexcept {
@@ -217,6 +215,15 @@ class Voice {
 
     ApproachValue(params_.delay_send, params.delay_send);
     ApproachValue(params_.sidechain_send, params.sidechain_send);
+  }
+
+  void UpdatePitchIncrements() noexcept {
+    const float pitch = pitch_ + pitch_shift_;
+    note_params_.osc_increment = std::pow(2.0f, pitch);
+    note_params_.slice_increment =
+        (slice_ != nullptr && slice_->sample_count > 0)
+            ? slice_->sample_rate * std::pow(2.0f, pitch - slice_->root_pitch)
+            : 0.0f;
   }
 
   [[nodiscard]] bool IsSliceActive() const noexcept {

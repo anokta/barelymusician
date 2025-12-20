@@ -14,7 +14,6 @@
 #include "dsp/control.h"
 #include "dsp/decibels.h"
 #include "dsp/delay_filter.h"
-#include "dsp/instrument_processor.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/sidechain.h"
 #include "dsp/voice_pool.h"

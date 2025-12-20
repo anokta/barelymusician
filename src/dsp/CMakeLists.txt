@@ -10,8 +10,6 @@ target_sources(
   engine_processor.h
   envelope.h
   instrument_params.h
-  instrument_processor.cpp
-  instrument_processor.h
   message.h
   message_queue.cpp
   message_queue.h
@@ -33,7 +31,6 @@ if(ENABLE_TESTS)
     decibels_test.cpp
     distortion_test.cpp
     envelope_test.cpp
-    instrument_processor_test.cpp
     message_queue_test.cpp
     one_pole_filter_test.cpp
     sample_data_test.cpp

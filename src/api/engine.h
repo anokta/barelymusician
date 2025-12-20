@@ -14,7 +14,7 @@
 #include "common/rng.h"
 #include "dsp/control.h"
 #include "dsp/engine_processor.h"
-#include "dsp/instrument_processor.h"
+#include "dsp/instrument_params.h"
 #include "dsp/message_queue.h"
 #include "dsp/voice_pool.h"
 
@@ -133,9 +133,9 @@ struct BarelyEngine {
   // Voice pool.
   barely::VoicePool voice_pool_;
 
-  // Map of instrument pointers to processors.
-  std::unordered_map<BarelyInstrument*, std::unique_ptr<barely::InstrumentProcessor>> instruments_;
-  barely::Mutable<std::unordered_map<BarelyInstrument*, barely::InstrumentProcessor*>>
+  // Map of instrument pointers to parameters.
+  std::unordered_map<BarelyInstrument*, std::unique_ptr<barely::InstrumentParams>> instruments_;
+  barely::Mutable<std::unordered_map<BarelyInstrument*, barely::InstrumentParams*>>
       mutable_instruments_;
 
   // Set of pointers to performers.
@@ -155,6 +155,9 @@ struct BarelyEngine {
 
   // Sampling rate in hertz.
   int sample_rate_ = 0;
+
+  // Sampling interval in seconds.
+  float sample_interval_ = 0.0f;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

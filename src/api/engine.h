@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -15,6 +14,7 @@
 #include "dsp/control.h"
 #include "dsp/engine_processor.h"
 #include "dsp/instrument_params.h"
+#include "dsp/instrument_pool.h"
 #include "dsp/message_queue.h"
 #include "dsp/voice_pool.h"
 
@@ -28,18 +28,16 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   BarelyEngine(int sample_rate, int max_frame_count) noexcept;
 
-  /// Destroys `BarelyEngine`.
-  ~BarelyEngine() noexcept;
-
   /// Adds a new instrument.
   ///
-  /// @param instrument Pointer to instrument.
   /// @param control_overrides Span of instrument control overrides.
   /// @param filter_coeffs Filter coefficients.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddInstrument(BarelyInstrument* instrument,
-                     std::span<const BarelyInstrumentControlOverride> control_overrides,
-                     const barely::BiquadFilter::Coefficients& filter_coeffs) noexcept;
+  /// @return Instrument index.
+  barely::InstrumentIndex AddInstrument(
+      std::span<const BarelyInstrumentControlOverride> control_overrides,
+      const barely::BiquadFilter::Coefficients& filter_coeffs) noexcept {
+    return instrument_pool_.Create(control_overrides, filter_coeffs, sample_interval_);
+  }
 
   /// Adds a new performer.
   ///
@@ -80,9 +78,10 @@ struct BarelyEngine {
 
   /// Removes an instrument.
   ///
-  /// @param instrument Pointer to instrument.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemoveInstrument(BarelyInstrument* instrument) noexcept;
+  /// @param instrument_index Instrument index.
+  void RemoveInstrument(barely::InstrumentIndex instrument_index) noexcept {
+    message_queue_.Add(update_frame_, barely::InstrumentDestroyMessage{instrument_index});
+  }
 
   /// Removes a performer.
   ///
@@ -130,13 +129,11 @@ struct BarelyEngine {
   // Message queue.
   barely::MessageQueue message_queue_;
 
+  // Instrument pool.
+  barely::InstrumentPool instrument_pool_;
+
   // Voice pool.
   barely::VoicePool voice_pool_;
-
-  // Map of instrument pointers to parameters.
-  std::unordered_map<BarelyInstrument*, std::unique_ptr<barely::InstrumentParams>> instruments_;
-  barely::Mutable<std::unordered_map<BarelyInstrument*, barely::InstrumentParams*>>
-      mutable_instruments_;
 
   // Set of pointers to performers.
   std::unordered_set<BarelyPerformer*> performers_;

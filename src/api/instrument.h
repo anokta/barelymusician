@@ -13,6 +13,7 @@
 #include "api/task.h"
 #include "common/callback.h"
 #include "dsp/control.h"
+#include "dsp/instrument_params.h"
 
 /// Implementation an instrument.
 struct BarelyInstrument {
@@ -123,6 +124,9 @@ struct BarelyInstrument {
   BarelyTask arp_task_;
   std::optional<float> arp_pitch_ = std::nullopt;
   int arp_pitch_index_ = -1;
+
+  /// Instrument index.
+  barely::InstrumentIndex instrument_index_ = 0;
 
   // Sampling interval in seconds.
   float sample_interval_ = 0.0f;

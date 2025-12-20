@@ -9,6 +9,7 @@
 #include <variant>
 
 #include "dsp/biquad_filter.h"
+#include "dsp/instrument_params.h"
 #include "dsp/sample_data.h"
 
 namespace barely {
@@ -22,10 +23,16 @@ struct EngineControlMessage {
   float value;
 };
 
+/// Instrument destroy message.
+struct InstrumentDestroyMessage {
+  /// Instrument index;
+  InstrumentIndex instrument_index;
+};
+
 /// Instrument control message.
 struct InstrumentControlMessage {
-  /// Instrument handle.
-  BarelyInstrumentHandle instrument;
+  /// Instrument index;
+  InstrumentIndex instrument_index;
 
   /// Type.
   InstrumentControlType type;
@@ -36,8 +43,8 @@ struct InstrumentControlMessage {
 
 /// Instrument filter control message.
 struct InstrumentFilterControlMessage {
-  /// Instrument handle.
-  BarelyInstrumentHandle instrument;
+  /// Instrument index;
+  InstrumentIndex instrument_index;
 
   /// Filter coefficients.
   BiquadFilter::Coefficients coeffs;
@@ -45,8 +52,8 @@ struct InstrumentFilterControlMessage {
 
 /// Note control message.
 struct NoteControlMessage {
-  /// Instrument handle.
-  BarelyInstrumentHandle instrument;
+  /// Instrument index;
+  InstrumentIndex instrument_index;
 
   /// Pitch.
   float pitch;
@@ -60,8 +67,8 @@ struct NoteControlMessage {
 
 /// Note off message.
 struct NoteOffMessage {
-  /// Instrument handle.
-  BarelyInstrumentHandle instrument;
+  /// Instrument index;
+  InstrumentIndex instrument_index;
 
   /// Pitch.
   float pitch;
@@ -69,8 +76,8 @@ struct NoteOffMessage {
 
 /// Note on message.
 struct NoteOnMessage {
-  /// Instrument handle.
-  BarelyInstrumentHandle instrument;
+  /// Instrument index;
+  InstrumentIndex instrument_index;
 
   /// Pitch.
   float pitch;
@@ -81,17 +88,17 @@ struct NoteOnMessage {
 
 /// Sample data message.
 struct SampleDataMessage {
-  /// Instrument handle.
-  BarelyInstrumentHandle instrument;
+  /// Instrument index;
+  InstrumentIndex instrument_index;
 
   /// Sample data.
   SampleData sample_data;
 };
 
 /// Message alias.
-using Message =
-    std::variant<EngineControlMessage, InstrumentControlMessage, InstrumentFilterControlMessage,
-                 NoteControlMessage, NoteOffMessage, NoteOnMessage, SampleDataMessage>;
+using Message = std::variant<EngineControlMessage, InstrumentDestroyMessage,
+                             InstrumentControlMessage, InstrumentFilterControlMessage,
+                             NoteControlMessage, NoteOffMessage, NoteOnMessage, SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

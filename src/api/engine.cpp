@@ -28,6 +28,7 @@ using ::barely::EngineControlMessage;
 using ::barely::EngineControlType;
 using ::barely::InstrumentControlMessage;
 using ::barely::InstrumentControlType;
+using ::barely::InstrumentDestroyMessage;
 using ::barely::InstrumentFilterControlMessage;
 using ::barely::kStereoChannelCount;
 using ::barely::MessageVisitor;
@@ -74,100 +75,6 @@ std::unordered_map<BarelyInstrument*, barely::InstrumentParams*> BuildMutableIns
   return new_instruments;
 }
 
-void SetInstrumentControl(barely::InstrumentParams& params, float sample_interval,
-                          InstrumentControlType type, float value) noexcept {
-  switch (type) {
-    case InstrumentControlType::kGain:
-      params.voice_params.gain = value;
-      break;
-    case InstrumentControlType::kPitchShift:
-      params.pitch_shift = value;
-      params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
-                             barely::kReferenceFrequency * sample_interval;
-      params.slice_increment = std::pow(2.0f, params.pitch_shift) * sample_interval;
-      break;
-    case InstrumentControlType::kRetrigger:
-      params.should_retrigger = static_cast<bool>(value);
-      break;
-    case InstrumentControlType::kStereoPan:
-      params.voice_params.stereo_pan = value;
-      break;
-    case InstrumentControlType::kVoiceCount:
-      params.voice_count = static_cast<int>(value);
-      params.active_voice_count = std::min(params.active_voice_count, params.voice_count);
-      break;
-    case InstrumentControlType::kAttack:
-      params.adsr.SetAttack(sample_interval, value);
-      break;
-    case InstrumentControlType::kDecay:
-      params.adsr.SetDecay(sample_interval, value);
-      break;
-    case InstrumentControlType::kSustain:
-      params.adsr.SetSustain(value);
-      break;
-    case InstrumentControlType::kRelease:
-      params.adsr.SetRelease(sample_interval, value);
-      break;
-    case InstrumentControlType::kOscMix:
-      params.voice_params.osc_mix = value;
-      break;
-    case InstrumentControlType::kOscMode:
-      params.osc_mode = static_cast<barely::OscMode>(value);
-      break;
-    case InstrumentControlType::kOscNoiseMix:
-      params.voice_params.osc_noise_mix = value;
-      break;
-    case InstrumentControlType::kOscPitchShift:
-      params.osc_pitch_shift = value;
-      params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
-                             barely::kReferenceFrequency * sample_interval;
-      break;
-    case InstrumentControlType::kOscShape:
-      params.voice_params.osc_shape = value;
-      break;
-    case InstrumentControlType::kOscSkew:
-      params.voice_params.osc_skew = value;
-      break;
-    case InstrumentControlType::kSliceMode:
-      params.slice_mode = static_cast<barely::SliceMode>(value);
-      break;
-    case InstrumentControlType::kBitCrusherDepth:
-      // Offset the bit depth by 1 to normalize the range.
-      params.voice_params.bit_crusher_range = std::pow(2.0f, value - 1.0f);
-      break;
-    case InstrumentControlType::kBitCrusherRate:
-      params.voice_params.bit_crusher_increment = value;
-      break;
-    case InstrumentControlType::kDistortionAmount:
-      params.voice_params.distortion_amount = value;
-      break;
-    case InstrumentControlType::kDistortionDrive:
-      params.voice_params.distortion_drive = value;
-      break;
-    case InstrumentControlType::kDelaySend:
-      params.voice_params.delay_send = value;
-      break;
-    case InstrumentControlType::kSidechainSend:
-      params.voice_params.sidechain_send = value;
-      break;
-    case InstrumentControlType::kFilterType:
-      [[fallthrough]];
-    case InstrumentControlType::kFilterFrequency:
-      [[fallthrough]];
-    case InstrumentControlType::kFilterQ:
-      [[fallthrough]];
-    case InstrumentControlType::kArpMode:
-      [[fallthrough]];
-    case InstrumentControlType::kArpGateRatio:
-      [[fallthrough]];
-    case InstrumentControlType::kArpRate:
-      break;
-    default:
-      assert(!"Invalid control type");
-      return;
-  }
-}
-
 void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& voice_pool,
                     float pitch, NoteControlType type, float value) noexcept {
   switch (type) {
@@ -208,26 +115,6 @@ BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
   assert(max_frame_count > 0);
 }
 
-BarelyEngine::~BarelyEngine() noexcept { mutable_instruments_.Update({}); }
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::AddInstrument(BarelyInstrumentHandle instrument,
-                                 std::span<const BarelyInstrumentControlOverride> control_overrides,
-                                 const barely::BiquadFilter::Coefficients& filter_coeffs) noexcept {
-  auto params = std::make_unique<barely::InstrumentParams>();
-  for (const auto& [type, value] : control_overrides) {
-    SetInstrumentControl(*params, sample_interval_, static_cast<InstrumentControlType>(type),
-                         value);
-  }
-  params->voice_params.filter_coefficients = filter_coeffs;
-  params->osc_increment = barely::kReferenceFrequency * sample_interval_;
-  params->slice_increment = sample_interval_;
-
-  [[maybe_unused]] const bool success = instruments_.emplace(instrument, std::move(params)).second;
-  assert(success);
-  mutable_instruments_.Update(BuildMutableInstrumentMap(instruments_));
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
   [[maybe_unused]] const bool success = performers_.emplace(performer).second;
@@ -251,8 +138,6 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
   const int64_t end_frame = process_frame + output_frame_count;
   int current_frame = 0;
 
-  auto instruments = mutable_instruments_.GetScopedView();
-
   // Process *all* messages before the end sample.
   for (auto* message = message_queue_.GetNext(end_frame); message;
        message = message_queue_.GetNext(end_frame)) {
@@ -269,70 +154,57 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               engine_processor_.SetControl(engine_control_message.type,
                                            engine_control_message.value);
             },
-            [this, &instruments](InstrumentControlMessage& instrument_control_message) noexcept {
-              // TODO(#126): This shouldn't need an instrument look up and can directly
-              // pass the processor pointer here and below once memory is fixed.
-              if (const auto it = instruments->find(instrument_control_message.instrument);
-                  it != instruments->end()) {
-                if (instrument_control_message.type == InstrumentControlType::kVoiceCount) {
-                  const int active_voice_count = it->second->active_voice_count;
-                  for (int i = static_cast<int>(instrument_control_message.value);
-                       i < active_voice_count; ++i) {
-                    voice_pool_.Release(it->second->active_voices[i]);
-                  }
+            [this](InstrumentDestroyMessage& instrument_destroy_message) noexcept {
+              instrument_pool_.Destroy(instrument_destroy_message.instrument_index);
+            },
+            [this](InstrumentControlMessage& instrument_control_message) noexcept {
+              auto& params = instrument_pool_.Get(instrument_control_message.instrument_index);
+              if (instrument_control_message.type == InstrumentControlType::kVoiceCount) {
+                const int active_voice_count = params.active_voice_count;
+                for (int i = static_cast<int>(instrument_control_message.value);
+                     i < active_voice_count; ++i) {
+                  voice_pool_.Release(params.active_voices[i]);
                 }
-                SetInstrumentControl(*it->second, sample_interval_, instrument_control_message.type,
-                                     instrument_control_message.value);
               }
+              SetInstrumentControl(
+                  instrument_pool_.Get(instrument_control_message.instrument_index),
+                  sample_interval_, instrument_control_message.type,
+                  instrument_control_message.value);
             },
-            [&instruments](
-                InstrumentFilterControlMessage& instrument_filter_control_message) noexcept {
-              if (const auto it = instruments->find(instrument_filter_control_message.instrument);
-                  it != instruments->end()) {
-                it->second->voice_params.filter_coefficients =
-                    instrument_filter_control_message.coeffs;
-              }
+            [this](InstrumentFilterControlMessage& instrument_filter_control_message) noexcept {
+              instrument_pool_.Get(instrument_filter_control_message.instrument_index)
+                  .voice_params.filter_coefficients = instrument_filter_control_message.coeffs;
             },
-            [this, &instruments](NoteControlMessage& note_control_message) noexcept {
-              if (const auto it = instruments->find(note_control_message.instrument);
-                  it != instruments->end()) {
-                SetNoteControl(*it->second, voice_pool_, note_control_message.pitch,
-                               note_control_message.type, note_control_message.value);
-              }
+            [this](NoteControlMessage& note_control_message) noexcept {
+              SetNoteControl(instrument_pool_.Get(note_control_message.instrument_index),
+                             voice_pool_, note_control_message.pitch, note_control_message.type,
+                             note_control_message.value);
             },
-            [this, &instruments](NoteOffMessage& note_off_message) noexcept {
-              if (const auto it = instruments->find(note_off_message.instrument);
-                  it != instruments->end()) {
-                for (int i = 0; i < it->second->active_voice_count; ++i) {
-                  if (auto& voice = voice_pool_.Get(it->second->active_voices[i]);
-                      voice.pitch() == note_off_message.pitch && voice.IsOn() &&
-                      (it->second->sample_data.empty() ||
-                       it->second->slice_mode != barely::SliceMode::kOnce)) {
-                    voice.Stop();
-                    break;
-                  }
+            [this](NoteOffMessage& note_off_message) noexcept {
+              auto& params = instrument_pool_.Get(note_off_message.instrument_index);
+              for (int i = 0; i < params.active_voice_count; ++i) {
+                if (auto& voice = voice_pool_.Get(params.active_voices[i]);
+                    voice.pitch() == note_off_message.pitch && voice.IsOn() &&
+                    (params.sample_data.empty() || params.slice_mode != barely::SliceMode::kOnce)) {
+                  voice.Stop();
+                  break;
                 }
               }
             },
-            [this, &instruments](NoteOnMessage& note_on_message) noexcept {
-              if (const auto it = instruments->find(note_on_message.instrument);
-                  it != instruments->end()) {
-                if (auto* voice = voice_pool_.Acquire(*it->second, note_on_message.pitch);
-                    voice != nullptr) {
-                  voice->Start(*it->second,
-                               it->second->sample_data.Select(note_on_message.pitch, audio_rng_),
-                               note_on_message.pitch, note_on_message.controls);
-                }
+            [this](NoteOnMessage& note_on_message) noexcept {
+              auto& params = instrument_pool_.Get(note_on_message.instrument_index);
+              if (auto* voice = voice_pool_.Acquire(params, note_on_message.pitch);
+                  voice != nullptr) {
+                voice->Start(params, params.sample_data.Select(note_on_message.pitch, audio_rng_),
+                             note_on_message.pitch, note_on_message.controls);
               }
             },
-            [this, &instruments](SampleDataMessage& sample_data_message) noexcept {
-              if (const auto it = instruments->find(sample_data_message.instrument);
-                  it != instruments->end()) {
-                it->second->sample_data.Swap(sample_data_message.sample_data);
-                for (int i = 0; i < it->second->active_voice_count; ++i) {
-                  auto& voice = voice_pool_.Get(it->second->active_voices[i]);
-                  voice.set_slice(it->second->sample_data.Select(voice.pitch(), audio_rng_));
-                }
+            [this](SampleDataMessage& sample_data_message) noexcept {
+              auto& params = instrument_pool_.Get(sample_data_message.instrument_index);
+              params.sample_data.Swap(sample_data_message.sample_data);
+              for (int i = 0; i < params.active_voice_count; ++i) {
+                auto& voice = voice_pool_.Get(params.active_voices[i]);
+                voice.set_slice(params.sample_data.Select(voice.pitch(), audio_rng_));
               }
             }},
         message->second);
@@ -359,12 +231,6 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                               output_samples_[kStereoChannelCount * frame + 1];
     }
   }
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::RemoveInstrument(BarelyInstrumentHandle instrument) noexcept {
-  mutable_instruments_.Update(BuildMutableInstrumentMap(instruments_, instrument));
-  instruments_.erase(instrument);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

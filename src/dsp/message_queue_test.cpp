@@ -22,7 +22,7 @@ TEST(MessageQueueTest, AddSingleMessage) {
   EXPECT_THAT(messages.GetNext(1), IsNull());
   EXPECT_THAT(messages.GetNext(10), IsNull());
 
-  messages.Add(1, NoteOffMessage{nullptr, 5.0f});
+  messages.Add(1, NoteOffMessage{0, 5.0f});
   EXPECT_THAT(messages.GetNext(0), IsNull());
   EXPECT_THAT(messages.GetNext(1), IsNull());
   EXPECT_THAT(
@@ -40,7 +40,7 @@ TEST(MessageQueueTest, AddMultipleMessages) {
   EXPECT_THAT(messages.GetNext(10), IsNull());
 
   for (int i = 0; i < 10; ++i) {
-    messages.Add(i, NoteOffMessage{nullptr, static_cast<float>(i)});
+    messages.Add(i, NoteOffMessage{0, static_cast<float>(i)});
   }
   for (int i = 0; i < 10; ++i) {
     EXPECT_THAT(

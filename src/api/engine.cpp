@@ -29,7 +29,6 @@ using ::barely::EngineControlMessage;
 using ::barely::EngineControlType;
 using ::barely::InstrumentControlMessage;
 using ::barely::InstrumentControlType;
-using ::barely::InstrumentCreateMessage;
 using ::barely::kStereoChannelCount;
 using ::barely::MessageVisitor;
 using ::barely::NoteControlMessage;
@@ -153,17 +152,6 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
             [this](EngineControlMessage& engine_control_message) noexcept {
               engine_processor_.SetControl(engine_control_message.type,
                                            engine_control_message.value);
-            },
-            [this](InstrumentCreateMessage& instrument_create_message) noexcept {
-              auto& params = instrument_pool_.Get(instrument_create_message.instrument_index);
-              params = {};
-              for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-                SetInstrumentControl(params, sample_interval_,
-                                     static_cast<barely::InstrumentControlType>(i),
-                                     instrument_create_message.controls[i]);
-              }
-              params.osc_increment = barely::kReferenceFrequency * sample_interval_;
-              params.slice_increment = sample_interval_;
             },
             [this](InstrumentControlMessage& instrument_control_message) noexcept {
               auto& params = instrument_pool_.Get(instrument_control_message.instrument_index);

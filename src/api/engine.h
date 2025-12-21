@@ -31,14 +31,8 @@ struct BarelyEngine {
 
   /// Adds a new instrument.
   ///
-  /// @param controls Array of instrument control values.
   /// @return Instrument index.
-  barely::InstrumentIndex AddInstrument(
-      std::array<float, BarelyInstrumentControlType_kCount> controls) noexcept {
-    const auto instrument_index = instrument_pool_.Acquire();
-    ScheduleMessage(barely::InstrumentCreateMessage{instrument_index, std::move(controls)});
-    return instrument_index;
-  }
+  barely::InstrumentIndex AddInstrument() noexcept { return instrument_pool_.Acquire(); }
 
   /// Removes an instrument.
   ///

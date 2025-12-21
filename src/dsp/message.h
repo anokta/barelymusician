@@ -22,15 +22,6 @@ struct EngineControlMessage {
   float value;
 };
 
-/// Instrument create message.
-struct InstrumentCreateMessage {
-  /// Instrument index;
-  InstrumentIndex instrument_index;
-
-  /// Array of instrument controls.
-  std::array<float, BarelyInstrumentControlType_kCount> controls;
-};
-
 /// Instrument control message.
 struct InstrumentControlMessage {
   /// Instrument index;
@@ -89,9 +80,8 @@ struct SampleDataMessage {
 };
 
 /// Message alias.
-using Message =
-    std::variant<EngineControlMessage, InstrumentCreateMessage, InstrumentControlMessage,
-                 NoteControlMessage, NoteOffMessage, NoteOnMessage, SampleDataMessage>;
+using Message = std::variant<EngineControlMessage, InstrumentControlMessage, NoteControlMessage,
+                             NoteOffMessage, NoteOnMessage, SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

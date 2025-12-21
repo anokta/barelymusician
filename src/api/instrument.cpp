@@ -143,8 +143,12 @@ BarelyInstrument::BarelyInstrument(
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
       arp_.GetLoopLength());
 
-  instrument_index_ = engine_.AddInstrument(BuildControls(controls_));
+  instrument_index_ = engine_.AddInstrument();
   assert(instrument_index_ != -1);
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+    engine_.ScheduleMessage(InstrumentControlMessage{
+        instrument_index_, static_cast<InstrumentControlType>(i), controls_[i].value});
+  }
 }
 
 BarelyInstrument::~BarelyInstrument() noexcept {

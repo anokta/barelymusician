@@ -4,6 +4,7 @@
 #include <array>
 #include <utility>
 
+#include "dsp/instrument_pool.h"
 #include "dsp/voice.h"
 
 namespace barely {
@@ -21,7 +22,8 @@ class VoicePool {
     }
   }
 
-  [[nodiscard]] Voice* Acquire(InstrumentParams& instrument_params, float pitch) noexcept {
+  [[nodiscard]] Voice* Acquire(InstrumentIndex instrument_index,
+                               InstrumentParams& instrument_params, float pitch) noexcept {
     if (instrument_params.should_retrigger) {
       for (int i = 0; i < instrument_params.active_voice_count; ++i) {
         Voice& voice = Get(instrument_params.active_voices[i]);
@@ -42,7 +44,7 @@ class VoicePool {
 
       // Acquire new voice.
       ActiveVoice& active_voice = active_voices_[active_voice_count_++];
-      active_voice.instrument_params = &instrument_params;
+      active_voice.instrument_index = instrument_index;
       instrument_params.active_voices[instrument_params.active_voice_count++] =
           active_voice.voice_index;
 
@@ -75,24 +77,24 @@ class VoicePool {
   ///
   /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
   /// @param rng Random number generator.
+  /// @param instrument_pool Instrument pool.
   /// @param delay_frame Delay send frame.
   /// @param sidechain_frame Sidechain send frame.
   /// @param output_frame Output frame.
   template <bool kIsSidechainSend = false>
-  void Process(AudioRng& rng, float delay_frame[kStereoChannelCount],
-               float sidechain_frame[kStereoChannelCount],
+  void Process(AudioRng& rng, InstrumentPool& instrument_pool,
+               float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount]) noexcept {
     for (int i = 0; i < active_voice_count_; ++i) {
       Voice& voice = Get(active_voices_[i].voice_index);
-      InstrumentParams* params = active_voices_[i].instrument_params;
-      assert(params != nullptr);
+      InstrumentParams& params = instrument_pool.Get(active_voices_[i].instrument_index);
       if constexpr (kIsSidechainSend) {
         if (!voice.IsActive()) {
-          for (int j = 0; j < params->active_voice_count; ++j) {
-            if (params->active_voices[j] == active_voices_[i].voice_index) {
-              std::swap(params->active_voices[j],
-                        params->active_voices[params->active_voice_count - 1]);
-              --params->active_voice_count;
+          for (int j = 0; j < params.active_voice_count; ++j) {
+            if (params.active_voices[j] == active_voices_[i].voice_index) {
+              std::swap(params.active_voices[j],
+                        params.active_voices[params.active_voice_count - 1]);
+              --params.active_voice_count;
               break;
             }
           }
@@ -101,24 +103,24 @@ class VoicePool {
           continue;
         }
       }
-      voice.Process<kIsSidechainSend>(*params, rng, delay_frame, sidechain_frame, output_frame);
+      voice.Process<kIsSidechainSend>(params, rng, delay_frame, sidechain_frame, output_frame);
     }
   }
 
-  void Release(VoiceIndex index) noexcept {
-    // TODO(#126): This can be avoided by switching to intrusive lists.
-    for (int i = 0; i < active_voice_count_; ++i) {
-      if (active_voices_[i].voice_index == index) {
+  void Release(InstrumentIndex instrument_index) noexcept {
+    for (int i = 0; i < active_voice_count_;) {
+      if (active_voices_[i].instrument_index == instrument_index) {
         std::swap(active_voices_[i], active_voices_[active_voice_count_ - 1]);
         --active_voice_count_;
-        break;
+      } else {
+        ++i;
       }
     }
   }
 
  private:
   struct ActiveVoice {
-    InstrumentParams* instrument_params = nullptr;
+    InstrumentIndex instrument_index = 0;
     VoiceIndex voice_index = 0;
   };
 

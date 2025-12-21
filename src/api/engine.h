@@ -3,6 +3,7 @@
 
 #include <barelymusician.h>
 
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <unordered_map>
@@ -30,11 +31,20 @@ struct BarelyEngine {
 
   /// Adds a new instrument.
   ///
-  /// @param control_overrides Span of instrument control overrides.
+  /// @param controls Array of instrument control values.
   /// @return Instrument index.
   barely::InstrumentIndex AddInstrument(
-      std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
-    return instrument_pool_.Create(control_overrides, sample_interval_);
+      std::array<float, BarelyInstrumentControlType_kCount> controls) noexcept {
+    const auto instrument_index = instrument_pool_.Acquire();
+    ScheduleMessage(barely::InstrumentCreateMessage{instrument_index, std::move(controls)});
+    return instrument_index;
+  }
+
+  /// Removes an instrument.
+  ///
+  /// @param instrument_index Instrument index.
+  void RemoveInstrument(barely::InstrumentIndex instrument_index) noexcept {
+    instrument_pool_.Destroy(instrument_index);
   }
 
   /// Adds a new performer.
@@ -73,13 +83,6 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Process(float* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
-
-  /// Removes an instrument.
-  ///
-  /// @param instrument_index Instrument index.
-  void RemoveInstrument(barely::InstrumentIndex instrument_index) noexcept {
-    message_queue_.Add(update_frame_, barely::InstrumentDestroyMessage{instrument_index});
-  }
 
   /// Removes a performer.
   ///

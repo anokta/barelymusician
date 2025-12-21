@@ -2,13 +2,11 @@
 #define BARELYMUSICIAN_DSP_INSTRUMENT_POOL_H_
 
 #include <array>
-#include <atomic>
 #include <utility>
 
 #include "common/constants.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/instrument_params.h"
-#include "dsp/voice_pool.h"
 
 namespace barely {
 
@@ -127,25 +125,11 @@ class InstrumentPool {
     }
   }
 
-  [[nodiscard]] InstrumentIndex Create(
-      std::span<const BarelyInstrumentControlOverride> control_overrides,
-      float sample_interval) noexcept {
-    if (active_instrument_count_ >= kMaxInstrumentCount) {
-      return -1;  // TODO(#126): Handle failure properly.
+  [[nodiscard]] InstrumentIndex Acquire() noexcept {
+    if (active_instrument_count_ < kMaxInstrumentCount) {
+      return active_instrument_count_++;
     }
-
-    const InstrumentIndex index = active_instrument_count_;
-    InstrumentParams& params = Get(active_instruments_[index]);
-    for (const auto& [type, value] : control_overrides) {
-      SetInstrumentControl(params, sample_interval, static_cast<InstrumentControlType>(type),
-                           value);
-    }
-    params.osc_increment = kReferenceFrequency * sample_interval;
-    params.slice_increment = sample_interval;
-
-    ++active_instrument_count_;
-
-    return index;
+    return -1;  // TODO(#126): Handle failure properly.
   }
 
   void Destroy(InstrumentIndex index) noexcept {
@@ -172,7 +156,7 @@ class InstrumentPool {
   std::array<InstrumentIndex, kMaxInstrumentCount> active_instruments_;
   std::array<InstrumentParams, kMaxInstrumentCount> instruments_;
 
-  std::atomic<int> active_instrument_count_ = 0;
+  int active_instrument_count_ = 0;
 };
 
 }  // namespace barely

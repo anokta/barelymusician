@@ -7,7 +7,6 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
-#include <span>
 #include <unordered_map>
 #include <utility>
 #include <variant>
@@ -18,7 +17,9 @@
 #include "common/time.h"
 #include "dsp/control.h"
 #include "dsp/instrument_params.h"
+#include "dsp/instrument_pool.h"
 #include "dsp/message.h"
+#include "dsp/voice_pool.h"
 
 namespace {
 
@@ -28,7 +29,7 @@ using ::barely::EngineControlMessage;
 using ::barely::EngineControlType;
 using ::barely::InstrumentControlMessage;
 using ::barely::InstrumentControlType;
-using ::barely::InstrumentDestroyMessage;
+using ::barely::InstrumentCreateMessage;
 using ::barely::kStereoChannelCount;
 using ::barely::MessageVisitor;
 using ::barely::NoteControlMessage;
@@ -142,7 +143,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      engine_processor_.Process(audio_rng_, voice_pool_,
+      engine_processor_.Process(audio_rng_, instrument_pool_, voice_pool_,
                                 &output_samples_[kStereoChannelCount * current_frame],
                                 message_frame - current_frame);
       current_frame = message_frame;
@@ -153,8 +154,16 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               engine_processor_.SetControl(engine_control_message.type,
                                            engine_control_message.value);
             },
-            [this](InstrumentDestroyMessage& instrument_destroy_message) noexcept {
-              instrument_pool_.Destroy(instrument_destroy_message.instrument_index);
+            [this](InstrumentCreateMessage& instrument_create_message) noexcept {
+              auto& params = instrument_pool_.Get(instrument_create_message.instrument_index);
+              params = {};
+              for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+                SetInstrumentControl(params, sample_interval_,
+                                     static_cast<barely::InstrumentControlType>(i),
+                                     instrument_create_message.controls[i]);
+              }
+              params.osc_increment = barely::kReferenceFrequency * sample_interval_;
+              params.slice_increment = sample_interval_;
             },
             [this](InstrumentControlMessage& instrument_control_message) noexcept {
               auto& params = instrument_pool_.Get(instrument_control_message.instrument_index);
@@ -188,7 +197,8 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
             },
             [this](NoteOnMessage& note_on_message) noexcept {
               auto& params = instrument_pool_.Get(note_on_message.instrument_index);
-              if (auto* voice = voice_pool_.Acquire(params, note_on_message.pitch);
+              if (auto* voice = voice_pool_.Acquire(note_on_message.instrument_index, params,
+                                                    note_on_message.pitch);
                   voice != nullptr) {
                 voice->Start(params, params.sample_data.Select(note_on_message.pitch, audio_rng_),
                              note_on_message.pitch, note_on_message.controls);
@@ -207,7 +217,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    engine_processor_.Process(audio_rng_, voice_pool_,
+    engine_processor_.Process(audio_rng_, instrument_pool_, voice_pool_,
                               &output_samples_[kStereoChannelCount * current_frame],
                               output_frame_count - current_frame);
   }

@@ -30,8 +30,18 @@ using ::barely::NoteOffMessage;
 using ::barely::NoteOnMessage;
 using ::barely::SampleDataMessage;
 
+// Returns an array of instrument control values from a given instrument control array.
+[[nodiscard]] std::array<float, BarelyInstrumentControlType_kCount> BuildControls(
+    const InstrumentControlArray& control_array) noexcept {
+  std::array<float, BarelyInstrumentControlType_kCount> controls;
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+    controls[i] = control_array[i].value;
+  }
+  return controls;
+}
+
 // Returns a control array with overrides.
-InstrumentControlArray BuildControlArray(
+[[nodiscard]] InstrumentControlArray BuildControlArray(
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
   InstrumentControlArray control_array = {
       Control(1.0f, 0.0f, 1.0f),                   // kGain
@@ -70,7 +80,7 @@ InstrumentControlArray BuildControlArray(
 }
 
 // Returns a note control array with overrides.
-NoteControlArray BuildNoteControlArray(
+[[nodiscard]] NoteControlArray BuildNoteControlArray(
     std::span<const BarelyNoteControlOverride> note_control_overrides) noexcept {
   NoteControlArray note_control_array = {
       Control(1.0f, 0.0f, 1.0f),  // kGain
@@ -83,7 +93,7 @@ NoteControlArray BuildNoteControlArray(
 }
 
 // Returns an array of note control values from a given note control array.
-std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
+[[nodiscard]] std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
     const NoteControlArray& note_control_array) noexcept {
   std::array<float, BarelyNoteControlType_kCount> note_controls;
   for (int i = 0; i < BarelyNoteControlType_kCount; ++i) {
@@ -133,7 +143,7 @@ BarelyInstrument::BarelyInstrument(
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
       arp_.GetLoopLength());
 
-  instrument_index_ = engine_.AddInstrument(control_overrides);
+  instrument_index_ = engine_.AddInstrument(BuildControls(controls_));
   assert(instrument_index_ != -1);
 }
 

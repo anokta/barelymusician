@@ -107,7 +107,7 @@ struct BarelyInstrument {
   void UpdateArp() noexcept;
 
   // Engine.
-  BarelyEngine& engine_;
+  BarelyEngine* engine_ = nullptr;
 
   // Array of controls.
   barely::InstrumentControlArray controls_;
@@ -127,9 +127,6 @@ struct BarelyInstrument {
 
   /// Instrument index.
   barely::InstrumentIndex instrument_index_ = 0;
-
-  // Sampling interval in seconds.
-  float sample_interval_ = 0.0f;
 };
 
 #endif  // BARELYMUSICIAN_API_INSTRUMENT_H_

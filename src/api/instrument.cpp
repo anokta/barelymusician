@@ -30,16 +30,6 @@ using ::barely::NoteOffMessage;
 using ::barely::NoteOnMessage;
 using ::barely::SampleDataMessage;
 
-// Returns an array of instrument control values from a given instrument control array.
-[[nodiscard]] std::array<float, BarelyInstrumentControlType_kCount> BuildControls(
-    const InstrumentControlArray& control_array) noexcept {
-  std::array<float, BarelyInstrumentControlType_kCount> controls;
-  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    controls[i] = control_array[i].value;
-  }
-  return controls;
-}
-
 // Returns a control array with overrides.
 [[nodiscard]] InstrumentControlArray BuildControlArray(
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {

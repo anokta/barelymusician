@@ -71,7 +71,6 @@ class VoicePool {
     assert(index < kMaxActiveVoiceCount);
     return voices_[index];
   }
-  [[nodiscard]] const Voice& Get(VoiceIndex index) const noexcept { return Get(index); }
 
   /// Processes the next output samples.
   ///

@@ -181,7 +181,7 @@ def get_cmake_targets(args):
         targets.append("barelymusician_test")
     if args.examples:
         targets.append("barelymusician_examples")
-    return f"--target {" ".join(targets)}"
+    return f'--target {" ".join(targets)}'
 
 
 def run_command(command, cwd):

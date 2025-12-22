@@ -58,22 +58,6 @@ EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
   };
 }
 
-// Builds a new mutable instrument map.
-// NOLINTNEXTLINE(bugprone-exception-escape)
-std::unordered_map<BarelyInstrument*, barely::InstrumentParams*> BuildMutableInstrumentMap(
-    const std::unordered_map<BarelyInstrument*, std::unique_ptr<barely::InstrumentParams>>&
-        instruments,
-    BarelyInstrument* excluded_instrument = nullptr) noexcept {
-  std::unordered_map<BarelyInstrument*, barely::InstrumentParams*> new_instruments;
-  new_instruments.reserve(instruments.size());
-  for (const auto& [instrument, params] : instruments) {
-    if (instrument != excluded_instrument) {
-      new_instruments.emplace(instrument, params.get());
-    }
-  }
-  return new_instruments;
-}
-
 void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& voice_pool,
                     float pitch, NoteControlType type, float value) noexcept {
   switch (type) {

@@ -43,9 +43,6 @@ class InstrumentPool {
     assert(index < kMaxInstrumentCount);
     return instruments_[index];
   }
-  [[nodiscard]] const InstrumentParams& Get(InstrumentIndex index) const noexcept {
-    return Get(index);
-  }
 
  private:
   std::array<InstrumentIndex, kMaxInstrumentCount> active_instruments_;

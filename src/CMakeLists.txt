@@ -12,8 +12,10 @@ set_target_properties(
   ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 target_compile_definitions(
-  barelymusician
-  PUBLIC BARELYMUSICIAN_EXPORTS
+  barelymusician PUBLIC
+  BARELYMUSICIAN_EXPORTS
+  BARELYMUSICIAN_MAX_INSTRUMENT_COUNT=${MAX_INSTRUMENT_COUNT}
+  BARELYMUSICIAN_MAX_VOICE_COUNT=${MAX_VOICE_COUNT}
 )
 if(MSVC)
   target_compile_options(

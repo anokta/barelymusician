@@ -12,6 +12,13 @@ ANDROID_TOOLCHAIN_FILE = os.path.join(ANDROID_NDK_HOME, "build/cmake/android.too
 DAISY_TOOLCHAIN_FILE = "_deps/libdaisy-src/cmake/toolchains/stm32h750xx.cmake"
 
 
+def count_type(value):
+    value = int(value)
+    if value < 1:
+        raise argparse.ArgumentTypeError("count must be greater than 0")
+    return value
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="build the barelymusician library",
@@ -23,6 +30,18 @@ def parse_args():
         choices=["debug", "release", "relwithdebuginfo", "asan", "msan", "tsan"],
         default="release",
         help="specify the build configuration (defaults to release)",
+    )
+    parser.add_argument(
+        "--max_instruments",
+        type=count_type,
+        default=1024,
+        help="specify the maximum number of instruments",
+    )
+    parser.add_argument(
+        "--max_voices",
+        type=count_type,
+        default=256,
+        help="specify the maximum number of voices",
     )
     parser.add_argument(
         "--linux",
@@ -201,9 +220,14 @@ def build(args, source_dir, build_dir):
 
     config = get_build_config(args)
 
+    common_cmake_options = [
+        f"-DMAX_INSTRUMENT_COUNT={args.max_instruments}",
+        f"-DMAX_VOICE_COUNT={args.max_voices}",
+    ]
+
     if args.wasm:
         wasm_build_dir = os.path.join(build_dir, "WebAssembly")
-        wasm_cmake_options = [
+        wasm_cmake_options = common_cmake_options + [
             "-DENABLE_WASM=ON",
             f'-DCMAKE_BUILD_TYPE="{config}"',
         ]
@@ -212,7 +236,7 @@ def build(args, source_dir, build_dir):
 
     if args.daisy:
         daisy_build_dir = os.path.join(build_dir, "Daisy")
-        daisy_cmake_options = [
+        daisy_cmake_options = common_cmake_options + [
             '-G "Unix Makefiles"',
             f'-DCMAKE_TOOLCHAIN_FILE="{DAISY_TOOLCHAIN_FILE}"',
             f'-DTOOLCHAIN_PREFIX="{args.daisy_toolchain_prefix}"',
@@ -220,7 +244,6 @@ def build(args, source_dir, build_dir):
         ]
         build_platform(args, config, source_dir, daisy_build_dir, daisy_cmake_options)
 
-    common_cmake_options = []
     if args.unity:
         common_cmake_options.append("-DENABLE_UNITY=ON")
     if args.vst:
@@ -237,14 +260,14 @@ def build(args, source_dir, build_dir):
         print("Building the Android targets...")
         for android_abi in args.android_abis:
             android_build_dir = os.path.join(build_dir, "Android", android_abi)
-            android_cmake_options = [
+            android_cmake_options = common_cmake_options + [
                 '-G "Ninja"',
                 f'-DCMAKE_TOOLCHAIN_FILE="{ANDROID_TOOLCHAIN_FILE}"',
                 f'-DANDROID_ABI="{android_abi}"',
                 f'-DANDROID_NDK="{ANDROID_NDK_HOME}"',
                 f'-DANDROID_PLATFORM="android-{args.android_min_api}"',
                 f'-DCMAKE_BUILD_TYPE="{config}"',
-            ] + common_cmake_options
+            ]
             build_platform(args, config, source_dir, android_build_dir, android_cmake_options)
 
     if args.config == "asan":
@@ -264,16 +287,16 @@ def build(args, source_dir, build_dir):
     if args.linux:
         print("Building the Linux targets...")
         linux_build_dir = os.path.join(build_dir, "Linux")
-        linux_cmake_options = [
+        linux_cmake_options = common_cmake_options + [
             '-G "Unix Makefiles"',
             f'-DCMAKE_BUILD_TYPE="{config}"',
-        ] + common_cmake_options
+        ]
         build_platform(args, config, source_dir, linux_build_dir, linux_cmake_options)
 
     if args.mac:
         print("Building the Mac targets...")
         mac_build_dir = os.path.join(build_dir, "Mac")
-        mac_cmake_options = ['-G "Xcode"'] + common_cmake_options
+        mac_cmake_options = common_cmake_options + ['-G "Xcode"']
         build_platform(args, config, source_dir, mac_build_dir, mac_cmake_options)
 
     if args.windows:

@@ -10,7 +10,7 @@
 namespace barely {
 
 /// Maximum number of active voices.
-inline constexpr int kMaxActiveVoiceCount = 256;
+inline constexpr int kMaxActiveVoiceCount = BARELYMUSICIAN_MAX_VOICE_COUNT;
 
 /// Voice pool.
 class VoicePool {

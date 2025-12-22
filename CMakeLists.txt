@@ -35,6 +35,16 @@ if(NOT DEFINED ENABLE_TESTS)
 endif()
 option(ENABLE_TESTS "Build tests" ${ENABLE_TESTS})
 
+if(NOT DEFINED MAX_INSTRUMENT_COUNT)
+  set(MAX_INSTRUMENT_COUNT 1024 CACHE STRING "Maximum number of instruments" FORCE)
+endif()
+option(MAX_INSTRUMENT_COUNT "Maximum number of instruments" ${MAX_INSTRUMENT_COUNT})
+
+if(NOT DEFINED MAX_VOICE_COUNT)
+  set(MAX_VOICE_COUNT 256 CACHE STRING "Maximum number of voices" FORCE)
+endif()
+option(MAX_VOICE_COUNT "Maximum number of voices" ${MAX_VOICE_COUNT})
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

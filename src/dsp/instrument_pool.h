@@ -9,7 +9,7 @@
 namespace barely {
 
 /// Maximum number of instruments.
-inline constexpr int kMaxInstrumentCount = 1024;
+inline constexpr int kMaxInstrumentCount = BARELYMUSICIAN_MAX_INSTRUMENT_COUNT;
 
 class InstrumentPool {
  public:

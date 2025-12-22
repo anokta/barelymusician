@@ -144,6 +144,27 @@ def clean(build_dir):
     shutil.rmtree(build_dir, onerror=onerror)
 
 
+def get_cmake_targets(args):
+    targets = ["barelymusician"]
+    if args.run_demo:
+        targets.append(f"barelymusician_examples_demo_{args.run_demo}")
+    if args.daisy:
+        targets.append("barelymusiciandaisy")
+    if args.unity:
+        targets.append("barelymusicianunity")
+    if args.vst:
+        targets.append("barelymusicianvst")
+    if args.wasm:
+        targets.append("barelymusicianwasm")
+    if args.benchmark:
+        targets.append("barelymusician_benchmark")
+    if args.test:
+        targets.append("barelymusician_test")
+    if args.examples:
+        targets.append("barelymusician_examples")
+    return f"--target {" ".join(targets)}"
+
+
 def run_command(command, cwd):
     print(command)
     subprocess.run(command, check=True, cwd=cwd, shell=True)
@@ -160,9 +181,7 @@ def build_platform(args, config, source_dir, build_dir, cmake_options):
         run_command(generate_command, build_dir)
 
     if not args.skip_build:
-        build_command = f'cmake --build "{build_dir}" --config {config}'
-        if args.run_demo:
-            build_command += f" --target barelymusician_examples_demo_{args.run_demo}"
+        build_command = f'cmake --build "{build_dir}" --config {config} {get_cmake_targets(args)}'
         run_command(build_command, build_dir)
 
 

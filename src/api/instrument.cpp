@@ -111,35 +111,41 @@ BarelyInstrument::BarelyInstrument(
     : engine_(&engine),
       controls_(BuildControlArray(control_overrides)),
       arp_(engine),
-      arp_task_(arp_, 0.0, 1.0, std::numeric_limits<int32_t>::max(),
-                {[](BarelyTaskEventType type, void* user_data) {
-                   auto* instrument = static_cast<BarelyInstrument*>(user_data);
-                   assert(instrument);
-                   if (type == BarelyTaskEventType_kBegin) {
-                     assert(!instrument->arp_pitch_.has_value());
-                     instrument->UpdateArp();
-                     assert(instrument->arp_pitch_.has_value());
-                     const float pitch = *instrument->arp_pitch_;
-                     instrument->note_event_callback_(BarelyNoteEventType_kBegin, pitch);
-                     instrument->engine_->ScheduleMessage(
-                         NoteOnMessage{instrument->instrument_index_, pitch,
-                                       BuildNoteControls(instrument->note_controls_.at(pitch))});
-                   } else if (type == BarelyTaskEventType_kEnd) {
-                     assert(instrument->arp_pitch_.has_value());
-                     const float pitch = *instrument->arp_pitch_;
-                     instrument->note_event_callback_(BarelyNoteEventType_kEnd, pitch);
-                     instrument->engine_->ScheduleMessage(
-                         NoteOffMessage{instrument->instrument_index_, pitch});
-                     instrument->arp_pitch_ = std::nullopt;
-                   }
-                 },
-                 this}) {
+      arp_task_{
+          {[](BarelyTaskEventType type, void* user_data) {
+             auto* instrument = static_cast<BarelyInstrument*>(user_data);
+             assert(instrument);
+             if (type == BarelyTaskEventType_kBegin) {
+               assert(!instrument->arp_pitch_.has_value());
+               instrument->UpdateArp();
+               assert(instrument->arp_pitch_.has_value());
+               const float pitch = *instrument->arp_pitch_;
+               instrument->note_event_callback_(BarelyNoteEventType_kBegin, pitch);
+               instrument->engine_->ScheduleMessage(
+                   NoteOnMessage{instrument->instrument_index_, pitch,
+                                 BuildNoteControls(instrument->note_controls_.at(pitch))});
+             } else if (type == BarelyTaskEventType_kEnd) {
+               assert(instrument->arp_pitch_.has_value());
+               const float pitch = *instrument->arp_pitch_;
+               instrument->note_event_callback_(BarelyNoteEventType_kEnd, pitch);
+               instrument->engine_->ScheduleMessage(
+                   NoteOffMessage{instrument->instrument_index_, pitch});
+               instrument->arp_pitch_ = std::nullopt;
+             }
+           },
+           this},
+          &arp_,
+          0.0,
+          1.0,
+          std::numeric_limits<int32_t>::max(),
+      } {
   const float arp_rate = controls_[BarelyInstrumentControlType_kArpRate].value;
   arp_.SetLooping(true);
   arp_.SetLoopLength((arp_rate > 0.0f) ? 1.0 / static_cast<double>(arp_rate) : 0.0);
   arp_task_.SetDuration(
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
       arp_.GetLoopLength());
+  arp_.AddTask(&arp_task_);
 
   instrument_index_ = engine_->AddInstrument();
   assert(instrument_index_ != -1);

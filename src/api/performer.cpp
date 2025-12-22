@@ -22,7 +22,7 @@ BarelyPerformer::~BarelyPerformer() noexcept { engine_.RemovePerformer(this); }
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyPerformer::AddTask(BarelyTask* task) noexcept {
   [[maybe_unused]] const bool success =
-      inactive_tasks_.emplace(TaskKey{task->GetPosition(), task->GetPriority()}, task).second;
+      inactive_tasks_.emplace(TaskKey{task->position, task->priority}, task).second;
   assert(success && "Failed to create task");
 }
 
@@ -90,14 +90,14 @@ void BarelyPerformer::ProcessAllTasksAtPosition(int max_priority) noexcept {
 }
 
 void BarelyPerformer::RemoveTask(BarelyTask* task) noexcept {
-  if (task->IsActive()) {
+  if (task->is_active) {
     [[maybe_unused]] const bool success =
-        (active_tasks_.erase({{task->GetEndPosition(), task->GetPriority()}, task}) == 1);
+        (active_tasks_.erase({{task->GetEndPosition(), task->priority}, task}) == 1);
     assert(success && "Failed to destroy active task");
     task->SetActive(false);
   } else {
     [[maybe_unused]] const bool success =
-        (inactive_tasks_.erase({{task->GetPosition(), task->GetPriority()}, task}) == 1);
+        (inactive_tasks_.erase({{task->position, task->priority}, task}) == 1);
     assert(success && "Failed to destroy inactive task");
   }
 }
@@ -157,8 +157,8 @@ void BarelyPerformer::SetPosition(double position) noexcept {
 }
 
 void BarelyPerformer::SetTaskDuration(BarelyTask* task, double old_duration) noexcept {
-  if (task->IsActive()) {
-    const TaskKey old_task_key = {task->GetPosition() + old_duration, task->GetPriority()};
+  if (task->is_active) {
+    const TaskKey old_task_key = {task->position + old_duration, task->priority};
     if (task->IsInside(position_)) {
       UpdateActiveTaskKey(old_task_key, task);
     } else {
@@ -168,8 +168,8 @@ void BarelyPerformer::SetTaskDuration(BarelyTask* task, double old_duration) noe
 }
 
 void BarelyPerformer::SetTaskPriority(BarelyTask* task, int old_priority) noexcept {
-  const TaskKey old_task_key = {task->GetPosition(), old_priority};
-  if (task->IsActive()) {
+  const TaskKey old_task_key = {task->position, old_priority};
+  if (task->is_active) {
     UpdateActiveTaskKey(old_task_key, task);
   } else {
     UpdateInactiveTaskKey(old_task_key, task);
@@ -177,15 +177,15 @@ void BarelyPerformer::SetTaskPriority(BarelyTask* task, int old_priority) noexce
 }
 
 void BarelyPerformer::SetTaskPosition(BarelyTask* task, double old_position) noexcept {
-  if (task->IsActive()) {
-    const TaskKey old_task_key = {old_position + task->GetDuration(), task->GetPriority()};
+  if (task->is_active) {
+    const TaskKey old_task_key = {old_position + task->duration, task->priority};
     if (task->IsInside(position_)) {
       UpdateActiveTaskKey(old_task_key, task);
     } else {
       SetTaskActive(active_tasks_.find({old_task_key, task}), false);
     }
   } else {
-    UpdateInactiveTaskKey({old_position, task->GetPriority()}, task);
+    UpdateInactiveTaskKey({old_position, task->priority}, task);
   }
 }
 
@@ -236,19 +236,19 @@ void BarelyPerformer::SetTaskActive(const std::set<std::pair<TaskKey, BarelyTask
                                     bool is_active) noexcept {
   BarelyTask* task = it->second;
   auto node = (is_active ? inactive_tasks_ : active_tasks_).extract(it);
-  node.value().first.first = is_active ? task->GetEndPosition() : task->GetPosition();
+  node.value().first.first = is_active ? task->GetEndPosition() : task->position;
   (is_active ? active_tasks_ : inactive_tasks_).insert(std::move(node));
   task->SetActive(is_active);
 }
 
 void BarelyPerformer::UpdateActiveTaskKey(TaskKey old_task_key, BarelyTask* task) noexcept {
   auto node = active_tasks_.extract({old_task_key, task});
-  node.value().first = {task->GetEndPosition(), task->GetPriority()};
+  node.value().first = {task->GetEndPosition(), task->priority};
   active_tasks_.insert(std::move(node));
 }
 
 void BarelyPerformer::UpdateInactiveTaskKey(TaskKey old_task_key, BarelyTask* task) noexcept {
   auto node = inactive_tasks_.extract({old_task_key, task});
-  node.value().first = {task->GetPosition(), task->GetPriority()};
+  node.value().first = {task->position, task->priority};
   inactive_tasks_.insert(std::move(node));
 }

@@ -354,14 +354,17 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double 
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
-  *out_task = new BarelyTask(*performer, position, duration, static_cast<int>(priority),
-                             {callback, user_data});
+  *out_task = new BarelyTask({callback, user_data}, performer, position, duration,
+                             static_cast<int>(priority));
+  performer->AddTask(*out_task);
+
   return *out_task;
 }
 
 bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
+  task->performer->RemoveTask(task);
   delete task;
   return true;
 }
@@ -370,7 +373,7 @@ bool BarelyTask_GetDuration(BarelyTaskHandle task, double* out_duration) {
   if (!task) return false;
   if (!out_duration) return false;
 
-  *out_duration = task->GetDuration();
+  *out_duration = task->duration;
   return true;
 }
 
@@ -378,7 +381,7 @@ bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
   if (!task) return false;
   if (!out_position) return false;
 
-  *out_position = task->GetPosition();
+  *out_position = task->position;
   return true;
 }
 
@@ -386,7 +389,7 @@ bool BarelyTask_GetPriority(BarelyTaskHandle task, int32_t* out_priority) {
   if (!task) return false;
   if (!out_priority) return false;
 
-  *out_priority = static_cast<int32_t>(task->GetPriority());
+  *out_priority = static_cast<int32_t>(task->priority);
   return true;
 }
 
@@ -394,7 +397,7 @@ bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active) {
   if (!task) return false;
   if (!out_is_active) return false;
 
-  *out_is_active = task->IsActive();
+  *out_is_active = task->is_active;
   return true;
 }
 

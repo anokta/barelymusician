@@ -32,31 +32,37 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
     task_event_type = type;
     task_position = performer.GetPosition();
   };
-  const BarelyTask task(performer, 1.0, 2.0, 0,
-                        {
-                            [](BarelyTaskEventType type, void* user_data) {
-                              (*static_cast<std::function<void(barely::TaskEventType)>*>(
-                                  user_data))(static_cast<barely::TaskEventType>(type));
-                            },
-                            &process_callback,
-                        });
+  BarelyTask task{
+      {
+          [](BarelyTaskEventType type, void* user_data) {
+            (*static_cast<std::function<void(barely::TaskEventType)>*>(user_data))(
+                static_cast<barely::TaskEventType>(type));
+          },
+          &process_callback,
+      },
+      &performer,
+      1.0,
+      2.0,
+      0,
+  };
+  performer.AddTask(&task);
 
   // Start the performer with a tempo of one beat per second.
   engine.SetTempo(60.0);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
 
   EXPECT_FALSE(performer.IsPlaying());
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   performer.Start();
   EXPECT_TRUE(performer.IsPlaying());
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
 
   // Update the timestamp just before the task, which should not be triggered.
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(1.0, 0)));
   engine.Update(1.0);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
@@ -65,7 +71,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   engine.Update(2.5);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 2.5);
-  EXPECT_TRUE(task.IsActive());
+  EXPECT_TRUE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kBegin);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
@@ -74,7 +80,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   engine.Update(3.0);
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 3.0);
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 3.0);
 }

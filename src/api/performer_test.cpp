@@ -3,7 +3,6 @@
 #include <barelymusician.h>
 
 #include <array>
-#include <deque>
 #include <functional>
 #include <utility>
 
@@ -38,18 +37,24 @@ TEST(PerformerTest, ProcessSingleTask) {
       ++task_process_end_count;
     }
   };
-  BarelyTask task(performer, 0.25, 0.6, 0,
-                  {
-                      [](BarelyTaskEventType type, void* user_data) {
-                        (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
-                      },
-                      &process_callback,
-                  });
+  BarelyTask task{
+      {
+          [](BarelyTaskEventType type, void* user_data) {
+            (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
+          },
+          &process_callback,
+      },
+      &performer,
+      0.25,
+      0.6,
+      0,
+  };
+  performer.AddTask(&task);
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
 
@@ -58,7 +63,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.25, 0)));
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
 
@@ -67,7 +72,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
 
@@ -75,7 +80,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.6, 0)));
-  EXPECT_TRUE(task.IsActive());
+  EXPECT_TRUE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 0);
 
@@ -83,7 +88,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.85);
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 1);
 
@@ -96,7 +101,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 1);
 
@@ -104,7 +109,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.6, 0)));
-  EXPECT_TRUE(task.IsActive());
+  EXPECT_TRUE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 1);
 
@@ -113,7 +118,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 2);
 
@@ -122,7 +127,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 2);
 
@@ -130,7 +135,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.25, 0)));
-  EXPECT_TRUE(task.IsActive());
+  EXPECT_TRUE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 2);
 
@@ -140,7 +145,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.8);
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   EXPECT_DOUBLE_EQ(performer.GetNextTaskKey()->first, 0.2);
-  EXPECT_TRUE(task.IsActive());
+  EXPECT_TRUE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 2);
 
@@ -149,7 +154,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.8);
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
-  EXPECT_FALSE(task.IsActive());
+  EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_process_begin_count, 3);
   EXPECT_EQ(task_process_end_count, 3);
 }
@@ -167,7 +172,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
   // Create tasks.
   std::array<std::pair<std::function<void(BarelyTaskEventType)>, bool>, kTaskCount> task_callbacks;
-  std::deque<BarelyTask> tasks;
+  std::array<BarelyTask, kTaskCount> tasks;
   for (int i = 0; i < kTaskCount; ++i) {
     task_callbacks[i] = {
         [&, i](BarelyTaskEventType type) {
@@ -179,13 +184,19 @@ TEST(PerformerTest, ProcessMultipleTasks) {
         },
         false,
     };
-    tasks.emplace_back(
-        performer, static_cast<double>(i + 1), 1.0, 0,
-        BarelyTask::EventCallback{
+    tasks[i] = {
+        {
             [](BarelyTaskEventType type, void* user_data) {
               (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
             },
-            &task_callbacks[i].first});
+            &task_callbacks[i].first,
+        },
+        &performer,
+        static_cast<double>(i + 1),
+        1.0,
+        0,
+    };
+    performer.AddTask(&tasks[i]);
   }
 
   EXPECT_FALSE(performer.IsPlaying());

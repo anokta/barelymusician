@@ -7,113 +7,72 @@
 
 /// Implementation of a task.
 struct BarelyTask {
- public:
   /// Event callback alias.
   using EventCallback = barely::Callback<BarelyTaskEventCallback>;
 
-  /// Constructs a new `BarelyTask`.
-  ///
-  /// @param performer Performer.
-  /// @param position Task position.
-  /// @param duration Task duration.
-  /// @param priority Task priority.
-  /// @param callback Task event callback.
-  BarelyTask(BarelyPerformer& performer, double position, double duration, int priority,
-             EventCallback callback) noexcept;
+  // Event callback.
+  EventCallback event_callback = {};
 
-  /// Destroys `BarelyTask`.
-  ~BarelyTask() noexcept;
+  // Pointer to performer.
+  BarelyPerformer* performer = nullptr;
 
-  /// Non-copyable and non-movable.
-  BarelyTask(const BarelyTask& other) noexcept = delete;
-  BarelyTask& operator=(const BarelyTask& other) noexcept = delete;
-  BarelyTask(BarelyTask&& other) noexcept = delete;
-  BarelyTask& operator=(BarelyTask&& other) noexcept = delete;
+  // Position in beats.
+  double position = 0.0;
 
-  /// Returns the duration.
-  ///
-  /// @return Duration in beats.
-  double GetDuration() const noexcept { return duration_; }
+  // Duration in beats.
+  double duration = 0.0;
 
-  /// Returns the position.
-  ///
-  /// @return Position in beats.
-  double GetPosition() const noexcept { return position_; }
+  // Priority.
+  int priority = 0;
+
+  // Denotes whether the task is active or not.
+  bool is_active = false;
 
   /// Returns the end position.
   ///
   /// @return End position in beats.
-  double GetEndPosition() const noexcept { return position_ + duration_; }
-
-  /// Returns the priority.
-  ///
-  /// @return Priority.
-  int GetPriority() const noexcept { return priority_; }
-
-  /// Returns whether the task is currently active or not.
-  ///
-  /// @return True if active, false otherwise.
-  bool IsActive() const noexcept { return is_active_; }
+  double GetEndPosition() const noexcept { return position + duration; }
 
   /// Returns whether a position is inside the task boundaries.
   ///
   /// @param position Position in beats.
   /// @return True if inside, false otherwise.
-  bool IsInside(double position) const noexcept {
-    return position >= position_ && position < GetEndPosition();
+  bool IsInside(double other_position) const noexcept {
+    return other_position >= position && other_position < GetEndPosition();
   }
 
   /// Processes the task.
   ///
   /// @param type Task event type.
-  void Process(BarelyTaskEventType type) noexcept { event_callback_(type); }
+  void Process(BarelyTaskEventType type) noexcept { event_callback(type); }
 
   /// Sets whether the task is currently active or not.
   ///
-  /// @param is_active True if active, false otherwise.
-  void SetActive(bool is_active) noexcept {
-    is_active_ = is_active;
-    Process(is_active_ ? BarelyTaskEventType_kBegin : BarelyTaskEventType_kEnd);
+  /// @param new_is_active True if active, false otherwise.
+  void SetActive(bool new_is_active) noexcept {
+    is_active = new_is_active;
+    Process(is_active ? BarelyTaskEventType_kBegin : BarelyTaskEventType_kEnd);
   }
 
   /// Sets the duration.
   ///
-  /// @param duration Duration in beats.
-  void SetDuration(double duration) noexcept;
+  /// @param new_duration Duration in beats.
+  void SetDuration(double other_duration) noexcept;
 
   /// Sets the event callback.
   ///
-  /// @param callback Event callback.
-  void SetEventCallback(EventCallback callback) noexcept;
+  /// @param new_event_callback Event callback.
+  void SetEventCallback(EventCallback new_event_callback) noexcept;
 
   /// Sets the position.
   ///
-  /// @param position Position in beats.
-  void SetPosition(double position) noexcept;
+  /// @param new_position Position in beats.
+  void SetPosition(double new_position) noexcept;
 
   /// Sets the priority.
   ///
-  /// @param priority Priority.
-  void SetPriority(int priority) noexcept;
-
- private:
-  // Performer.
-  BarelyPerformer& performer_;
-
-  // Position in beats.
-  double position_;
-
-  // Duration in beats.
-  double duration_;
-
-  // Event callback.
-  EventCallback event_callback_;
-
-  // Priority.
-  int priority_;
-
-  // Denotes whether the task is active or not.
-  bool is_active_ = false;
+  /// @param new_priority Priority.
+  void SetPriority(int new_priority) noexcept;
 };
 
 #endif  // BARELYMUSICIAN_API_TASK_H_

@@ -6,12 +6,9 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
-#include <memory>
-#include <unordered_map>
 #include <utility>
 #include <variant>
 
-#include "api/instrument.h"
 #include "api/performer.h"
 #include "common/constants.h"
 #include "common/time.h"

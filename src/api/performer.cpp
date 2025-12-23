@@ -10,8 +10,6 @@
 #include <set>
 #include <utility>
 
-#include "api/engine.h"
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyPerformer::AddTask(BarelyTask* task) noexcept {
   [[maybe_unused]] const bool success =

@@ -97,6 +97,12 @@ TEST(EngineTest, PlaySingleNote) {
 
   BarelyEngine engine(kSampleRate, kFrameCount);
   BarelyInstrument instrument(engine, {});
+  instrument.instrument_index = engine.AddInstrument();
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+    engine.ScheduleMessage(barely::InstrumentControlMessage{
+        instrument.instrument_index, static_cast<barely::InstrumentControlType>(i),
+        instrument.controls_[i].value});
+  }
   instrument.SetSampleData(kSlices);
 
   std::array<float, kChannelCount * kFrameCount> samples;
@@ -142,6 +148,12 @@ TEST(EngineTest, PlayMultipleNotes) {
 
   BarelyEngine engine(1, kSampleRate);
   BarelyInstrument instrument(engine, {});
+  instrument.instrument_index = engine.AddInstrument();
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+    engine.ScheduleMessage(barely::InstrumentControlMessage{
+        instrument.instrument_index, static_cast<barely::InstrumentControlType>(i),
+        instrument.controls_[i].value});
+  }
   instrument.SetSampleData(kSlices);
 
   std::array<float, kChannelCount * kSampleRate> samples;

@@ -21,6 +21,16 @@ struct BarelyInstrument {
   /// Note event callback alias.
   using NoteEventCallback = barely::Callback<BarelyNoteEventCallback>;
 
+  // Array of controls.
+  barely::InstrumentControlArray controls_;
+
+  /// Pointer to engine.
+  BarelyEngine* engine_ = nullptr;
+  BarelyPerformer arp_;
+
+  /// Instrument index.
+  barely::InstrumentIndex instrument_index = 0;
+
   /// Constructs a new `BarelyInstrument`.
   ///
   /// @param engine Engine.
@@ -28,15 +38,6 @@ struct BarelyInstrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   BarelyInstrument(BarelyEngine& engine,
                    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept;
-
-  /// Destroys `BarelyInstrument`.
-  ~BarelyInstrument() noexcept;
-
-  /// Non-copyable and non-movable.
-  BarelyInstrument(const BarelyInstrument& other) noexcept = delete;
-  BarelyInstrument& operator=(const BarelyInstrument& other) noexcept = delete;
-  BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
-  BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
 
   /// Returns a control value.
   ///
@@ -106,12 +107,6 @@ struct BarelyInstrument {
   // Updates the arpeggiator.
   void UpdateArp() noexcept;
 
-  // Engine.
-  BarelyEngine* engine_ = nullptr;
-
-  // Array of controls.
-  barely::InstrumentControlArray controls_;
-
   // Map of note control arrays by their pitches.
   std::unordered_map<float, barely::NoteControlArray> note_controls_;
   std::vector<float> pitches_;  // sorted
@@ -120,13 +115,9 @@ struct BarelyInstrument {
   NoteEventCallback note_event_callback_ = {};
 
   // Arpeggiator.
-  BarelyPerformer arp_;
   BarelyTask arp_task_;
   std::optional<float> arp_pitch_ = std::nullopt;
   int arp_pitch_index_ = -1;
-
-  /// Instrument index.
-  barely::InstrumentIndex instrument_index_ = 0;
 };
 
 #endif  // BARELYMUSICIAN_API_INSTRUMENT_H_

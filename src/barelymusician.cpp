@@ -119,12 +119,22 @@ bool BarelyInstrument_Create(BarelyEngineHandle engine,
 
   *out_instrument = new BarelyInstrument(
       *engine, {control_overrides, control_overrides + control_override_count});
+  engine->AddPerformer(&(*out_instrument)->arp_);
+  (*out_instrument)->instrument_index = engine->AddInstrument();
+  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+    engine->ScheduleMessage(barely::InstrumentControlMessage{
+        (*out_instrument)->instrument_index, static_cast<barely::InstrumentControlType>(i),
+        (*out_instrument)->controls_[i].value});
+  }
   return true;
 }
 
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
+  instrument->SetAllNotesOff();
+  instrument->engine_->RemovePerformer(&instrument->arp_);
+  instrument->engine_->RemoveInstrument(instrument->instrument_index);
   delete instrument;
   return true;
 }

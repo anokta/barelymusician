@@ -98,8 +98,8 @@ using ::barely::SampleDataMessage;
 BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine,
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept
-    : engine_(&engine),
-      controls_(BuildControlArray(control_overrides)),
+    : controls_(BuildControlArray(control_overrides)),
+      engine_(&engine),
       arp_task_{
           {[](BarelyTaskEventType type, void* user_data) {
              auto* instrument = static_cast<BarelyInstrument*>(user_data);
@@ -111,14 +111,14 @@ BarelyInstrument::BarelyInstrument(
                const float pitch = *instrument->arp_pitch_;
                instrument->note_event_callback_(BarelyNoteEventType_kBegin, pitch);
                instrument->engine_->ScheduleMessage(
-                   NoteOnMessage{instrument->instrument_index_, pitch,
+                   NoteOnMessage{instrument->instrument_index, pitch,
                                  BuildNoteControls(instrument->note_controls_.at(pitch))});
              } else if (type == BarelyTaskEventType_kEnd) {
                assert(instrument->arp_pitch_.has_value());
                const float pitch = *instrument->arp_pitch_;
                instrument->note_event_callback_(BarelyNoteEventType_kEnd, pitch);
                instrument->engine_->ScheduleMessage(
-                   NoteOffMessage{instrument->instrument_index_, pitch});
+                   NoteOffMessage{instrument->instrument_index, pitch});
                instrument->arp_pitch_ = std::nullopt;
              }
            },
@@ -135,20 +135,6 @@ BarelyInstrument::BarelyInstrument(
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
       arp_.GetLoopLength());
   arp_.AddTask(&arp_task_);
-  engine_->AddPerformer(&arp_);
-
-  instrument_index_ = engine_->AddInstrument();
-  assert(instrument_index_ != -1);
-  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    engine_->ScheduleMessage(InstrumentControlMessage{
-        instrument_index_, static_cast<InstrumentControlType>(i), controls_[i].value});
-  }
-}
-
-BarelyInstrument::~BarelyInstrument() noexcept {
-  SetAllNotesOff();
-  engine_->RemovePerformer(&arp_);
-  engine_->RemoveInstrument(instrument_index_);
 }
 
 float BarelyInstrument::GetControl(BarelyInstrumentControlType type) const noexcept {
@@ -178,7 +164,7 @@ void BarelyInstrument::SetAllNotesOff() noexcept {
   } else {
     for (const float pitch : std::exchange(pitches_, {})) {
       note_event_callback_(BarelyNoteEventType_kEnd, pitch);
-      engine_->ScheduleMessage(NoteOffMessage{instrument_index_, pitch});
+      engine_->ScheduleMessage(NoteOffMessage{instrument_index, pitch});
     }
   }
 }
@@ -194,7 +180,7 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (auto& note_control = (*note_controls)[type]; note_control.SetValue(value)) {
       engine_->ScheduleMessage(NoteControlMessage{
-          instrument_index_, pitch, static_cast<NoteControlType>(type), note_control.value});
+          instrument_index, pitch, static_cast<NoteControlType>(type), note_control.value});
     }
   }
 }
@@ -208,7 +194,7 @@ void BarelyInstrument::SetNoteOff(float pitch) noexcept {
       arp_pitch_index_ = -1;
     } else if (!arp_.IsPlaying()) {
       note_event_callback_(BarelyNoteEventType_kEnd, pitch);
-      engine_->ScheduleMessage(NoteOffMessage{instrument_index_, pitch});
+      engine_->ScheduleMessage(NoteOffMessage{instrument_index, pitch});
     }
   }
 }
@@ -227,13 +213,13 @@ void BarelyInstrument::SetNoteOn(
     } else if (!arp_.IsPlaying()) {
       note_event_callback_(BarelyNoteEventType_kBegin, pitch);
       engine_->ScheduleMessage(
-          NoteOnMessage{instrument_index_, pitch, BuildNoteControls(it->second)});
+          NoteOnMessage{instrument_index, pitch, BuildNoteControls(it->second)});
     }
   }
 }
 
 void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexcept {
-  engine_->ScheduleMessage(SampleDataMessage{instrument_index_, slices});
+  engine_->ScheduleMessage(SampleDataMessage{instrument_index, slices});
 }
 
 void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) noexcept {
@@ -246,14 +232,14 @@ void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) n
           for (const auto& [pitch, note_controls] : note_controls_) {
             note_event_callback_(BarelyNoteEventType_kBegin, pitch);
             engine_->ScheduleMessage(
-                NoteOnMessage{instrument_index_, pitch, BuildNoteControls(note_controls)});
+                NoteOnMessage{instrument_index, pitch, BuildNoteControls(note_controls)});
           }
         }
       } else if (!pitches_.empty() && !arp_.IsPlaying()) {
         arp_.Start();
         for (const float pitch : pitches_) {
           note_event_callback_(BarelyNoteEventType_kEnd, pitch);
-          engine_->ScheduleMessage(NoteOffMessage{instrument_index_, pitch});
+          engine_->ScheduleMessage(NoteOffMessage{instrument_index, pitch});
         }
       }
       break;
@@ -267,7 +253,7 @@ void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) n
           arp_.GetLoopLength());
       break;
     default:
-      engine_->ScheduleMessage(InstrumentControlMessage{instrument_index_, type, value});
+      engine_->ScheduleMessage(InstrumentControlMessage{instrument_index, type, value});
       break;
   }
 }

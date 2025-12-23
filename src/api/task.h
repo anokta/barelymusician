@@ -57,7 +57,7 @@ struct BarelyTask {
   /// Sets the duration.
   ///
   /// @param new_duration Duration in beats.
-  void SetDuration(double other_duration) noexcept;
+  void SetDuration(double new_duration) noexcept;
 
   /// Sets the event callback.
   ///

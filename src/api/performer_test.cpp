@@ -15,8 +15,6 @@ namespace {
 using ::testing::Optional;
 using ::testing::Pair;
 
-constexpr int kFrameCount = 10;
-
 // Tests that the performer processs a single task as expected.
 TEST(PerformerTest, ProcessSingleTask) {
   BarelyPerformer performer;

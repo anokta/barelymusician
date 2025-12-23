@@ -6,6 +6,7 @@
 #include <functional>
 
 #include "api/performer.h"
+#include "dsp/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 

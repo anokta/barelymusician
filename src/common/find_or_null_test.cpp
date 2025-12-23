@@ -28,7 +28,8 @@ TEST(FindOrNullTest, FindOrNullMutableMap) {
   EXPECT_EQ(FindOrNull(mutable_map, 4), nullptr);
 
   float* mutable_value = FindOrNull(mutable_map, 5);
-  EXPECT_FLOAT_EQ(*mutable_value, 50.0f);
+  *mutable_value = 60.0f;
+  EXPECT_FLOAT_EQ(*FindOrNull(mutable_map, 5), 60.0f);
 }
 
 }  // namespace

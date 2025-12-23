@@ -8,6 +8,7 @@
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "api/task.h"
+#include "dsp/message.h"
 #include "common/time.h"
 
 bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,

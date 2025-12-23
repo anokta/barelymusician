@@ -84,7 +84,7 @@ class VoicePool {
   void Process(AudioRng& rng, InstrumentPool& instrument_pool,
                float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount]) noexcept {
-    for (int i = 0; i < active_voice_count_; ++i) {
+    for (int i = 0; i < active_voice_count_;) {
       Voice& voice = Get(active_voices_[i].voice_index);
       InstrumentParams& params = instrument_pool.Get(active_voices_[i].instrument_index);
       if constexpr (kIsSidechainSend) {
@@ -103,16 +103,16 @@ class VoicePool {
         }
       }
       voice.Process<kIsSidechainSend>(params, rng, delay_frame, sidechain_frame, output_frame);
+      ++i;
     }
   }
 
-  void Release(InstrumentIndex instrument_index) noexcept {
-    for (int i = 0; i < active_voice_count_;) {
-      if (active_voices_[i].instrument_index == instrument_index) {
+  void Release(VoiceIndex voice_index) noexcept {
+    for (int i = 0; i < active_voice_count_; ++i) {
+      if (active_voices_[i].voice_index == voice_index) {
         std::swap(active_voices_[i], active_voices_[active_voice_count_ - 1]);
         --active_voice_count_;
-      } else {
-        ++i;
+        break;
       }
     }
   }

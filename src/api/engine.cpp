@@ -143,10 +143,8 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                   voice_pool_.Release(params.active_voices[i]);
                 }
               }
-              SetInstrumentControl(
-                  instrument_pool_.Get(instrument_control_message.instrument_index),
-                  sample_interval_, instrument_control_message.type,
-                  instrument_control_message.value);
+              SetInstrumentControl(params, sample_interval_, instrument_control_message.type,
+                                   instrument_control_message.value);
             },
             [this](NoteControlMessage& note_control_message) noexcept {
               SetNoteControl(instrument_pool_.Get(note_control_message.instrument_index),

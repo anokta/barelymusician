@@ -23,7 +23,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   BarelyEngine engine(kSampleRate, kSampleRate);
 
   // Create a performer.
-  BarelyPerformer performer(engine);
+  BarelyPerformer performer;
+  engine.AddPerformer(&performer);
 
   // Create a task.
   barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;

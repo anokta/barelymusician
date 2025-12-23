@@ -21,20 +21,8 @@ struct BarelyPerformer {
   /// Task key consists of a position and its priority.
   using TaskKey = std::pair<double, int>;
 
-  /// Constructs a new `BarelyPerformer`.
-  ///
-  /// @param engine Engine.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit BarelyPerformer(BarelyEngine& engine) noexcept;
-
-  /// Destroys `BarelyPerformer`.
-  ~BarelyPerformer() noexcept;
-
-  /// Non-copyable and non-movable.
-  BarelyPerformer(const BarelyPerformer& other) noexcept = delete;
-  BarelyPerformer& operator=(const BarelyPerformer& other) noexcept = delete;
-  BarelyPerformer(BarelyPerformer&& other) noexcept = delete;
-  BarelyPerformer& operator=(BarelyPerformer&& other) noexcept = delete;
+  /// Pointer to engine.
+  BarelyEngine* engine = nullptr;
 
   /// Adds a new task.
   ///
@@ -161,9 +149,6 @@ struct BarelyPerformer {
   // Set of task position-pointer pairs.
   std::set<std::pair<TaskKey, BarelyTask*>> active_tasks_;
   std::set<std::pair<TaskKey, BarelyTask*>> inactive_tasks_;
-
-  // Engine.
-  BarelyEngine& engine_;
 
   // Loop begin position in beats.
   double loop_begin_position_ = 0.0;

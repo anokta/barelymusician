@@ -224,13 +224,17 @@ bool BarelyPerformer_Create(BarelyEngineHandle engine, BarelyPerformerHandle* ou
   if (!engine) return false;
   if (!out_performer) return false;
 
-  *out_performer = new BarelyPerformer(*engine);
+  *out_performer = new BarelyPerformer();
+  (*out_performer)->engine = engine;
+  engine->AddPerformer(*out_performer);
+
   return true;
 }
 
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
+  performer->engine->RemovePerformer(performer);
   delete performer;
   return true;
 }

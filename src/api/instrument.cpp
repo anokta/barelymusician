@@ -100,7 +100,6 @@ BarelyInstrument::BarelyInstrument(
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept
     : engine_(&engine),
       controls_(BuildControlArray(control_overrides)),
-      arp_(engine),
       arp_task_{
           {[](BarelyTaskEventType type, void* user_data) {
              auto* instrument = static_cast<BarelyInstrument*>(user_data);
@@ -136,6 +135,7 @@ BarelyInstrument::BarelyInstrument(
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
       arp_.GetLoopLength());
   arp_.AddTask(&arp_task_);
+  engine_->AddPerformer(&arp_);
 
   instrument_index_ = engine_->AddInstrument();
   assert(instrument_index_ != -1);
@@ -147,6 +147,7 @@ BarelyInstrument::BarelyInstrument(
 
 BarelyInstrument::~BarelyInstrument() noexcept {
   SetAllNotesOff();
+  engine_->RemovePerformer(&arp_);
   engine_->RemoveInstrument(instrument_index_);
 }
 

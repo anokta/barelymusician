@@ -13,13 +13,6 @@
 #include "api/engine.h"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyPerformer::BarelyPerformer(BarelyEngine& engine) noexcept : engine_(engine) {
-  engine_.AddPerformer(this);
-}
-
-BarelyPerformer::~BarelyPerformer() noexcept { engine_.RemovePerformer(this); }
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyPerformer::AddTask(BarelyTask* task) noexcept {
   [[maybe_unused]] const bool success =
       inactive_tasks_.emplace(TaskKey{task->position, task->priority}, task).second;

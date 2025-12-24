@@ -24,43 +24,33 @@ struct BarelyPerformer {
   /// Pointer to engine.
   BarelyEngine* engine = nullptr;
 
+  // Loop begin position in beats.
+  double loop_begin_position = 0.0;
+
+  // Loop length in beats.
+  double loop_length = 1.0;
+
+  // Position in beats.
+  double position = 0.0;
+
+  // Denotes whether performer is looping or not.
+  bool is_looping = false;
+
+  // Denotes whether performer is playing or not.
+  bool is_playing = false;
+
   /// Adds a new task.
   ///
   /// @param task Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void AddTask(BarelyTask* task) noexcept;
 
-  /// Returns loop begin position.
-  ///
-  /// @return Loop begin position in beats.
-  [[nodiscard]] double GetLoopBeginPosition() const noexcept { return loop_begin_position_; }
-
   /// Returns loop end position.
   ///
   /// @return Loop end position in beats.
   [[nodiscard]] double GetLoopEndPosition() const noexcept {
-    return loop_begin_position_ + loop_length_;
+    return loop_begin_position + loop_length;
   }
-
-  /// Returns loop length.
-  ///
-  /// @return Loop length in beats.
-  [[nodiscard]] double GetLoopLength() const noexcept { return loop_length_; }
-
-  /// Returns position.
-  ///
-  /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept { return position_; }
-
-  /// Returns whether performer is looping or not.
-  ///
-  /// @return True if looping, false otherwise.
-  [[nodiscard]] bool IsLooping() const noexcept { return is_looping_; }
-
-  /// Returns whether performer is playing or not.
-  ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept { return is_playing_; }
 
   /// Returns the next task key.
   ///
@@ -79,24 +69,24 @@ struct BarelyPerformer {
 
   /// Sets loop begin position.
   ///
-  /// @param loop_begin_position Loop begin position in beats.
-  void SetLoopBeginPosition(double loop_begin_position) noexcept;
+  /// @param new_loop_begin_position Loop begin position in beats.
+  void SetLoopBeginPosition(double new_loop_begin_position) noexcept;
 
   /// Sets loop length.
   ///
-  /// @param loop_length Loop length in beats.
-  void SetLoopLength(double loop_length) noexcept;
+  /// @param new_loop_length Loop length in beats.
+  void SetLoopLength(double new_loop_length) noexcept;
 
   /// Sets whether performer should be looping or not.
   ///
-  /// @param is_looping True if looping.
-  void SetLooping(bool is_looping) noexcept;
+  /// @param new_is_looping True if looping.
+  void SetLooping(bool new_is_looping) noexcept;
 
   /// Sets position.
   ///
-  /// @param position Position in beats.
+  /// @param new_position Position in beats.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetPosition(double position) noexcept;
+  void SetPosition(double new_position) noexcept;
 
   /// Sets task duration.
   ///
@@ -133,8 +123,8 @@ struct BarelyPerformer {
   [[nodiscard]] std::set<std::pair<TaskKey, BarelyTask*>>::const_iterator GetNextInactiveTask()
       const noexcept;
 
-  // Loops around a given `position`.
-  [[nodiscard]] double LoopAround(double position) const noexcept;
+  // Loops around a given `new_position`.
+  [[nodiscard]] double LoopAround(double new_position) const noexcept;
 
   /// Sets the active status of a task.
   void SetTaskActive(const std::set<std::pair<TaskKey, BarelyTask*>>::iterator& it,
@@ -149,21 +139,6 @@ struct BarelyPerformer {
   // Set of task position-pointer pairs.
   std::set<std::pair<TaskKey, BarelyTask*>> active_tasks_;
   std::set<std::pair<TaskKey, BarelyTask*>> inactive_tasks_;
-
-  // Loop begin position in beats.
-  double loop_begin_position_ = 0.0;
-
-  // Loop length in beats.
-  double loop_length_ = 1.0;
-
-  // Position in beats.
-  double position_ = 0.0;
-
-  // Denotes whether performer is looping or not.
-  bool is_looping_ = false;
-
-  // Denotes whether performer is playing or not.
-  bool is_playing_ = false;
 };
 
 #endif  // BARELYMUSICIAN_API_PERFORMER_H_

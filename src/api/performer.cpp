@@ -18,7 +18,7 @@ void BarelyPerformer::AddTask(BarelyTask* task) noexcept {
 }
 
 std::optional<BarelyPerformer::TaskKey> BarelyPerformer::GetNextTaskKey() const noexcept {
-  if (!is_playing_) {
+  if (!is_playing) {
     return std::nullopt;
   }
 
@@ -28,21 +28,21 @@ std::optional<BarelyPerformer::TaskKey> BarelyPerformer::GetNextTaskKey() const 
   // Check inactive tasks.
   if (!inactive_tasks_.empty()) {
     const auto next_it =
-        inactive_tasks_.lower_bound({{position_, std::numeric_limits<int>::min()}, nullptr});
+        inactive_tasks_.lower_bound({{position, std::numeric_limits<int>::min()}, nullptr});
     // If the performer position is inside an inactive task, we can return immediately.
     // TODO(#147): This may be optimized further using an interval tree.
     for (auto it = inactive_tasks_.begin(); it != next_it; ++it) {
-      if (it->second->GetEndPosition() > position_) {
+      if (it->second->GetEndPosition() > position) {
         return TaskKey{0.0, it->first.second};
       }
     }
     // Loop around if needed.
-    if (is_looping_ &&
+    if (is_looping &&
         (next_it == inactive_tasks_.end() || next_it->first.first >= GetLoopEndPosition())) {
       if (const auto loop_it = inactive_tasks_.lower_bound(
-              {{loop_begin_position_, std::numeric_limits<int>::min()}, nullptr});
+              {{loop_begin_position, std::numeric_limits<int>::min()}, nullptr});
           loop_it != inactive_tasks_.end() && loop_it->first.first < GetLoopEndPosition()) {
-        next_key = {loop_it->first.first + loop_length_, loop_it->first.second};
+        next_key = {loop_it->first.first + loop_length, loop_it->first.second};
       }
     } else if (next_it != inactive_tasks_.end()) {
       next_key = next_it->first;
@@ -52,29 +52,29 @@ std::optional<BarelyPerformer::TaskKey> BarelyPerformer::GetNextTaskKey() const 
   // Check active tasks.
   if (!active_tasks_.empty()) {
     if (const TaskKey next_active_key =
-            is_looping_ ? TaskKey{std::min(active_tasks_.begin()->first.first, loop_end_position),
-                                  active_tasks_.begin()->first.second}
-                        : active_tasks_.begin()->first;
+            is_looping ? TaskKey{std::min(active_tasks_.begin()->first.first, loop_end_position),
+                                 active_tasks_.begin()->first.second}
+                       : active_tasks_.begin()->first;
         !next_key.has_value() || next_active_key < next_key) {
       next_key = next_active_key;
     }
   }
 
   if (next_key.has_value()) {
-    assert(next_key->first >= position_ && "Invalid next duration");
-    return TaskKey{next_key->first - position_, next_key->second};
+    assert(next_key->first >= position && "Invalid next duration");
+    return TaskKey{next_key->first - position, next_key->second};
   }
   return std::nullopt;
 }
 
 void BarelyPerformer::ProcessAllTasksAtPosition(int max_priority) noexcept {
-  if (!is_playing_) {
+  if (!is_playing) {
     return;
   }
   // Active tasks get processed in `SetPosition`, so we only need to process inactive tasks here.
   for (auto it = GetNextInactiveTask();
-       it != inactive_tasks_.end() && it->second->IsInside(position_) &&
-       (it->first.first < position_ || it->first.second <= max_priority);
+       it != inactive_tasks_.end() && it->second->IsInside(position) &&
+       (it->first.first < position || it->first.second <= max_priority);
        it = GetNextInactiveTask()) {
     SetTaskActive(it, true);
   }
@@ -93,53 +93,53 @@ void BarelyPerformer::RemoveTask(BarelyTask* task) noexcept {
   }
 }
 
-void BarelyPerformer::SetLoopBeginPosition(double loop_begin_position) noexcept {
-  if (loop_begin_position_ == loop_begin_position) {
+void BarelyPerformer::SetLoopBeginPosition(double new_loop_begin_position) noexcept {
+  if (loop_begin_position == new_loop_begin_position) {
     return;
   }
-  loop_begin_position_ = loop_begin_position;
-  if (is_looping_ && position_ >= GetLoopEndPosition()) {
-    SetPosition(LoopAround(position_));
+  loop_begin_position = new_loop_begin_position;
+  if (is_looping && position >= GetLoopEndPosition()) {
+    SetPosition(LoopAround(position));
   }
 }
 
-void BarelyPerformer::SetLoopLength(double loop_length) noexcept {
-  loop_length = std::max(loop_length, 0.0);
-  if (loop_length_ == loop_length) {
+void BarelyPerformer::SetLoopLength(double new_loop_length) noexcept {
+  new_loop_length = std::max(new_loop_length, 0.0);
+  if (loop_length == new_loop_length) {
     return;
   }
-  loop_length_ = loop_length;
-  if (is_looping_ && position_ >= GetLoopEndPosition()) {
-    SetPosition(LoopAround(position_));
+  loop_length = new_loop_length;
+  if (is_looping && position >= GetLoopEndPosition()) {
+    SetPosition(LoopAround(position));
   }
 }
 
-void BarelyPerformer::SetLooping(bool is_looping) noexcept {
-  if (is_looping_ == is_looping) {
+void BarelyPerformer::SetLooping(bool new_is_looping) noexcept {
+  if (is_looping == new_is_looping) {
     return;
   }
-  is_looping_ = is_looping;
-  if (is_looping_ && position_ >= GetLoopEndPosition()) {
-    SetPosition(LoopAround(position_));
+  is_looping = new_is_looping;
+  if (is_looping && position >= GetLoopEndPosition()) {
+    SetPosition(LoopAround(position));
   }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyPerformer::SetPosition(double position) noexcept {
-  if (position_ == position) {
+void BarelyPerformer::SetPosition(double new_position) noexcept {
+  if (position == new_position) {
     return;
   }
-  if (is_looping_ && position >= GetLoopEndPosition()) {
-    position_ = LoopAround(position);
+  if (is_looping && new_position >= GetLoopEndPosition()) {
+    position = LoopAround(new_position);
     while (!active_tasks_.empty()) {
       SetTaskActive(active_tasks_.begin(), false);
     }
   } else {
-    position_ = position;
+    position = new_position;
     for (auto it = active_tasks_.begin(); it != active_tasks_.end();) {
       // Copy the values in case `it` gets invalidated after the `Process` call.
       auto [end_position, task] = *it;
-      if (!task->IsInside(position_)) {
+      if (!task->IsInside(position)) {
         SetTaskActive(it, false);
       }
       it = active_tasks_.upper_bound({end_position, task});
@@ -150,7 +150,7 @@ void BarelyPerformer::SetPosition(double position) noexcept {
 void BarelyPerformer::SetTaskDuration(BarelyTask* task, double old_duration) noexcept {
   if (task->is_active) {
     const TaskKey old_task_key = {task->position + old_duration, task->priority};
-    if (task->IsInside(position_)) {
+    if (task->IsInside(position)) {
       UpdateActiveTaskKey(old_task_key, task);
     } else {
       SetTaskActive(active_tasks_.find({old_task_key, task}), false);
@@ -170,7 +170,7 @@ void BarelyPerformer::SetTaskPriority(BarelyTask* task, int old_priority) noexce
 void BarelyPerformer::SetTaskPosition(BarelyTask* task, double old_position) noexcept {
   if (task->is_active) {
     const TaskKey old_task_key = {old_position + task->duration, task->priority};
-    if (task->IsInside(position_)) {
+    if (task->IsInside(position)) {
       UpdateActiveTaskKey(old_task_key, task);
     } else {
       SetTaskActive(active_tasks_.find({old_task_key, task}), false);
@@ -180,10 +180,10 @@ void BarelyPerformer::SetTaskPosition(BarelyTask* task, double old_position) noe
   }
 }
 
-void BarelyPerformer::Start() noexcept { is_playing_ = true; }
+void BarelyPerformer::Start() noexcept { is_playing = true; }
 
 void BarelyPerformer::Stop() noexcept {
-  is_playing_ = false;
+  is_playing = false;
   while (!active_tasks_.empty()) {
     SetTaskActive(active_tasks_.begin(), false);
   }
@@ -191,36 +191,36 @@ void BarelyPerformer::Stop() noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyPerformer::Update(double duration) noexcept {
-  if (!is_playing_) {
+  if (!is_playing) {
     return;
   }
   assert(duration > 0.0);
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   assert(!GetNextTaskKey() || duration <= GetNextTaskKey()->first);
-  SetPosition(position_ + duration);
+  SetPosition(position + duration);
 }
 
 std::set<std::pair<BarelyPerformer::TaskKey, BarelyTask*>>::const_iterator
 BarelyPerformer::GetNextInactiveTask() const noexcept {
-  if (!is_playing_) {
+  if (!is_playing) {
     return inactive_tasks_.end();
   }
   auto next_it =
-      inactive_tasks_.lower_bound({{position_, std::numeric_limits<int>::min()}, nullptr});
+      inactive_tasks_.lower_bound({{position, std::numeric_limits<int>::min()}, nullptr});
   // Check if any inactive task became active (in case a new position was set).
   // TODO(#147): This may be optimized further using an interval tree.
   for (auto it = inactive_tasks_.begin(); it != next_it; ++it) {
-    if (it->second->GetEndPosition() > position_) {
+    if (it->second->GetEndPosition() > position) {
       return it;
     }
   }
   return next_it;
 }
 
-double BarelyPerformer::LoopAround(double position) const noexcept {
-  return loop_length_ > 0.0
-             ? loop_begin_position_ + std::fmod(position - loop_begin_position_, loop_length_)
-             : loop_begin_position_;
+double BarelyPerformer::LoopAround(double new_position) const noexcept {
+  return loop_length > 0.0
+             ? loop_begin_position + std::fmod(new_position - loop_begin_position, loop_length)
+             : loop_begin_position;
 }
 
 void BarelyPerformer::SetTaskActive(const std::set<std::pair<TaskKey, BarelyTask*>>::iterator& it,

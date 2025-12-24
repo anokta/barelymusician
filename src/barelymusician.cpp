@@ -8,8 +8,8 @@
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "api/task.h"
-#include "dsp/message.h"
 #include "common/time.h"
+#include "dsp/message.h"
 
 bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
                          BarelyEngineHandle* out_engine) {
@@ -255,7 +255,7 @@ bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
   if (!performer) return false;
   if (!out_loop_begin_position) return false;
 
-  *out_loop_begin_position = performer->GetLoopBeginPosition();
+  *out_loop_begin_position = performer->loop_begin_position;
   return true;
 }
 
@@ -263,7 +263,7 @@ bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer, double* out_
   if (!performer) return false;
   if (!out_loop_length) return false;
 
-  *out_loop_length = performer->GetLoopLength();
+  *out_loop_length = performer->loop_length;
   return true;
 }
 
@@ -271,7 +271,7 @@ bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, double* out_po
   if (!performer) return false;
   if (!out_position) return false;
 
-  *out_position = performer->GetPosition();
+  *out_position = performer->position;
   return true;
 }
 
@@ -279,7 +279,7 @@ bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool* out_is_loo
   if (!performer) return false;
   if (!out_is_looping) return false;
 
-  *out_is_looping = performer->IsLooping();
+  *out_is_looping = performer->is_looping;
   return true;
 }
 
@@ -287,7 +287,7 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
   if (!performer) return false;
   if (!out_is_playing) return false;
 
-  *out_is_playing = performer->IsPlaying();
+  *out_is_playing = performer->is_playing;
   return true;
 }
 

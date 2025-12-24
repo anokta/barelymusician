@@ -32,7 +32,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   double task_position = 0.0;
   std::function<void(barely::TaskEventType)> process_callback = [&](barely::TaskEventType type) {
     task_event_type = type;
-    task_position = performer.GetPosition();
+    task_position = performer.position;
   };
   BarelyTask task{
       {
@@ -53,17 +53,17 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   engine.SetTempo(60.0);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
 
-  EXPECT_FALSE(performer.IsPlaying());
+  EXPECT_FALSE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
   performer.Start();
-  EXPECT_TRUE(performer.IsPlaying());
+  EXPECT_TRUE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
 
   // Update the timestamp just before the task, which should not be triggered.
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(1.0, 0)));
   engine.Update(1.0);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
+  EXPECT_DOUBLE_EQ(performer.position, 1.0);
   EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
@@ -72,7 +72,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
   engine.Update(2.5);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 2.5);
+  EXPECT_DOUBLE_EQ(performer.position, 2.5);
   EXPECT_TRUE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kBegin);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
@@ -81,7 +81,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
   engine.Update(3.0);
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 3.0);
+  EXPECT_DOUBLE_EQ(performer.position, 3.0);
   EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 3.0);

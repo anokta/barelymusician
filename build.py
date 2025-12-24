@@ -34,13 +34,13 @@ def parse_args():
     parser.add_argument(
         "--max_instruments",
         type=count_type,
-        default=1024,
+        default=500,
         help="specify the maximum number of instruments",
     )
     parser.add_argument(
         "--max_voices",
         type=count_type,
-        default=256,
+        default=200,
         help="specify the maximum number of voices",
     )
     parser.add_argument(

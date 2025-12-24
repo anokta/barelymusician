@@ -4,15 +4,18 @@
 #include <array>
 #include <utility>
 
-#include "dsp/instrument_pool.h"
+#include "common/pool.h"
+#include "dsp/instrument_params.h"
 #include "dsp/voice.h"
 
 namespace barely {
 
-/// Maximum number of active voices.
+inline constexpr uint32_t kMaxInstrumentCount = BARELYMUSICIAN_MAX_INSTRUMENT_COUNT;
+
 inline constexpr int kMaxActiveVoiceCount = BARELYMUSICIAN_MAX_VOICE_COUNT;
 
-/// Voice pool.
+using InstrumentPool = Pool<InstrumentParams, kMaxInstrumentCount>;
+
 class VoicePool {
  public:
   VoicePool() noexcept {

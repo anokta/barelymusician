@@ -14,7 +14,6 @@
 #include "dsp/control.h"
 #include "dsp/engine_processor.h"
 #include "dsp/instrument_params.h"
-#include "dsp/instrument_pool.h"
 #include "dsp/message_queue.h"
 #include "dsp/voice_pool.h"
 
@@ -31,13 +30,17 @@ struct BarelyEngine {
   /// Adds a new instrument.
   ///
   /// @return Instrument index.
-  barely::InstrumentIndex AddInstrument() noexcept { return instrument_pool_.Acquire(); }
+  barely::InstrumentIndex AddInstrument() noexcept {
+    const barely::InstrumentIndex index = instrument_pool_.Acquire();
+    instrument_pool_.Get(index) = {};
+    return index;
+  }
 
   /// Removes an instrument.
   ///
   /// @param instrument_index Instrument index.
   void RemoveInstrument(barely::InstrumentIndex instrument_index) noexcept {
-    instrument_pool_.Destroy(instrument_index);
+    instrument_pool_.Release(instrument_index);
   }
 
   /// Adds a new performer.

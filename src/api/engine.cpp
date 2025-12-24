@@ -14,7 +14,6 @@
 #include "common/time.h"
 #include "dsp/control.h"
 #include "dsp/instrument_params.h"
-#include "dsp/instrument_pool.h"
 #include "dsp/message.h"
 #include "dsp/voice_pool.h"
 

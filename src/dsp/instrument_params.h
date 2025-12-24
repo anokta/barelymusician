@@ -6,6 +6,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 
 #include "common/constants.h"
 #include "common/rng.h"
@@ -17,7 +18,7 @@
 namespace barely {
 
 /// Instrument index.
-using InstrumentIndex = int;
+using InstrumentIndex = uint32_t;
 
 /// Instrument parameters.
 struct InstrumentParams {

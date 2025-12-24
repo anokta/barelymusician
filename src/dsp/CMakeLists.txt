@@ -10,7 +10,6 @@ target_sources(
   engine_processor.h
   envelope.h
   instrument_params.h
-  instrument_pool.h
   message.h
   message_queue.cpp
   message_queue.h

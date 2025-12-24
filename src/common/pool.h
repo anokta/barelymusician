@@ -2,6 +2,8 @@
 #define BARELYMUSICIAN_COMMON_POOL_H_
 
 #include <array>
+#include <bitset>
+#include <cassert>
 #include <cstdint>
 
 namespace barely {
@@ -12,7 +14,7 @@ class Pool {
  public:
   Pool() noexcept {
     for (uint32_t i = 0; i < kCount; ++i) {
-      free_items_[i] = kCount - i;
+      free_indices_[i] = kCount - i;
     }
   }
 
@@ -20,14 +22,23 @@ class Pool {
   ///
   /// @return 0 if capacity is reached, valid item index otherwise.
   [[nodiscard]] uint32_t Acquire() noexcept {
-    return (free_item_count_ > 0) ? free_items_[--free_item_count_] : 0;
+    if (free_count_ > 0) {
+      const uint32_t index = free_indices_[--free_count_];
+      assert(!in_use_.test(index));
+      in_use_.set(index);
+      return index;
+    }
+    return 0;
   }
 
   /// Releases an item.
   ///
   /// @param index Item index.
-  // TODO(#126): Must be acquired already, might be useful to keep "in-use" field to assert.
-  void Release(uint32_t index) noexcept { free_items_[free_item_count_++] = index; }
+  void Release(uint32_t index) noexcept {
+    assert(in_use_.test(index));
+    in_use_.reset(index);
+    free_indices_[free_count_++] = index;
+  }
 
   [[nodiscard]] ItemType& Get(uint32_t index) noexcept {
     assert(index <= kCount);
@@ -35,11 +46,13 @@ class Pool {
   }
 
  private:
-  std::array<ItemType, kCount + 1> items_;  // 0 is reserved for nil.
+  // 0 is reserved for nil.
+  std::array<ItemType, kCount + 1> items_;
 
-  // Cached array of free items for easier edits.
-  std::array<uint32_t, kCount> free_items_;
-  int free_item_count_ = kCount;
+  // Free indices are cached for easier edits.
+  std::array<uint32_t, kCount> free_indices_;
+  int free_count_ = kCount;
+  std::bitset<kCount + 1> in_use_ = {};
 };
 
 }  // namespace barely

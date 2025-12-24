@@ -100,7 +100,7 @@ class Voice {
     // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
     output = bit_crusher_.Next(output, params_.bit_crusher_range, params_.bit_crusher_increment);
     output = Distortion(output, params_.distortion_amount, params_.distortion_drive);
-    output = filter_.Next(output, params_.filter_coefficients);
+    output = filter_.Next(output, params_.filter_coeffs);
 
     output *= params_.gain;
 
@@ -207,11 +207,11 @@ class Voice {
     ApproachValue(params_.osc_skew, params.osc_skew);
     ApproachValue(params_.stereo_pan, params.stereo_pan);
 
-    ApproachValue(params_.filter_coefficients.a1, params.filter_coefficients.a1);
-    ApproachValue(params_.filter_coefficients.a2, params.filter_coefficients.a2);
-    ApproachValue(params_.filter_coefficients.b0, params.filter_coefficients.b0);
-    ApproachValue(params_.filter_coefficients.b1, params.filter_coefficients.b1);
-    ApproachValue(params_.filter_coefficients.b2, params.filter_coefficients.b2);
+    ApproachValue(params_.filter_coeffs.a1, params.filter_coeffs.a1);
+    ApproachValue(params_.filter_coeffs.a2, params.filter_coeffs.a2);
+    ApproachValue(params_.filter_coeffs.b0, params.filter_coeffs.b0);
+    ApproachValue(params_.filter_coeffs.b1, params.filter_coeffs.b1);
+    ApproachValue(params_.filter_coeffs.b2, params.filter_coeffs.b2);
 
     ApproachValue(params_.delay_send, params.delay_send);
     ApproachValue(params_.sidechain_send, params.sidechain_send);

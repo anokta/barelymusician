@@ -15,7 +15,7 @@ namespace barely {
 class BiquadFilter {
  public:
   /// Normalized coefficients.
-  struct Coefficients {
+  struct Coeffs {
     float a1 = 0.0f;
     float a2 = 0.0f;
     float b0 = 1.0f;
@@ -28,7 +28,7 @@ class BiquadFilter {
   /// @param input Input sample.
   /// @param coeffs Filter coefficients.
   /// @return Filtered output sample.
-  [[nodiscard]] float Next(float input, const Coefficients& coeffs) noexcept {
+  [[nodiscard]] float Next(float input, const Coeffs& coeffs) noexcept {
     // Uses Direct-Form 2.
     const float v0 = input - coeffs.a1 * state_.v1 - coeffs.a2 * state_.v2;
     const float output = coeffs.b0 * v0 + coeffs.b1 * state_.v1 + coeffs.b2 * state_.v2;
@@ -58,8 +58,8 @@ class BiquadFilter {
 /// @param cutoff_frequency Cutoff frequency.
 /// @param q Resonance quality factor.
 /// @return Biquad filter coefficients.
-inline BiquadFilter::Coefficients GetFilterCoefficients(float sample_interval, FilterType type,
-                                                        float cutoff_frequency, float q) noexcept {
+inline BiquadFilter::Coeffs GetFilterCoefficients(float sample_interval, FilterType type,
+                                                  float cutoff_frequency, float q) noexcept {
   if (type == FilterType::kNone) {
     return {};
   }

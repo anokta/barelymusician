@@ -11,7 +11,7 @@ using VoiceIndex = int;
 /// Voice parameters.
 struct VoiceParams {
   /// Filter coefficients.
-  BiquadFilter::Coefficients filter_coefficients = {};
+  BiquadFilter::Coeffs filter_coeffs = {};
 
   /// Bit crusher range (for bit depth reduction).
   float bit_crusher_range = 0.0f;

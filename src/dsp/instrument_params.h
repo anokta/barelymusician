@@ -148,17 +148,17 @@ inline void SetInstrumentControl(InstrumentParams& params, float sample_interval
       break;
     case InstrumentControlType::kFilterType:
       params.filter_type = static_cast<FilterType>(value);
-      params.voice_params.filter_coefficients = GetFilterCoefficients(
+      params.voice_params.filter_coeffs = GetFilterCoefficients(
           sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case InstrumentControlType::kFilterFrequency:
       params.filter_frequency = value;
-      params.voice_params.filter_coefficients = GetFilterCoefficients(
+      params.voice_params.filter_coeffs = GetFilterCoefficients(
           sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case InstrumentControlType::kFilterQ:
       params.filter_q = value;
-      params.voice_params.filter_coefficients = GetFilterCoefficients(
+      params.voice_params.filter_coeffs = GetFilterCoefficients(
           sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case InstrumentControlType::kArpMode:

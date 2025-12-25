@@ -4,6 +4,7 @@
 #include <barelymusician.h>
 
 #include "common/callback.h"
+#include "common/constants.h"
 
 /// Implementation of a task.
 struct BarelyTask {
@@ -13,8 +14,11 @@ struct BarelyTask {
   // Event callback.
   EventCallback event_callback = {};
 
-  // Pointer to performer.
+  // TODO(#126): Temp reference.
   BarelyPerformer* performer = nullptr;
+
+  // Task index.
+  uint32_t task_index = barely::kMaxTaskCount;
 
   // Position in beats.
   double position = 0.0;

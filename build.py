@@ -34,8 +34,20 @@ def parse_args():
     parser.add_argument(
         "--max_instruments",
         type=count_type,
-        default=500,
+        default=100,
         help="specify the maximum number of instruments",
+    )
+    parser.add_argument(
+        "--max_performers",
+        type=count_type,
+        default=100,
+        help="specify the maximum number of performers",
+    )
+    parser.add_argument(
+        "--max_tasks",
+        type=count_type,
+        default=1000,
+        help="specify the maximum number of tasks",
     )
     parser.add_argument(
         "--max_voices",
@@ -222,6 +234,8 @@ def build(args, source_dir, build_dir):
 
     common_cmake_options = [
         f"-DMAX_INSTRUMENT_COUNT={args.max_instruments}",
+        f"-DMAX_PERFORMER_COUNT={args.max_performers}",
+        f"-DMAX_TASK_COUNT={args.max_tasks}",
         f"-DMAX_VOICE_COUNT={args.max_voices}",
     ]
 

@@ -17,6 +17,8 @@
 #include "dsp/message_queue.h"
 #include "dsp/voice_pool.h"
 
+using BarelyPerformerIndex = uint32_t;
+
 /// Implementation of an engine.
 struct BarelyEngine {
  public:
@@ -30,8 +32,8 @@ struct BarelyEngine {
   /// Adds a new instrument.
   ///
   /// @return Instrument index.
-  barely::InstrumentIndex AddInstrument() noexcept {
-    const barely::InstrumentIndex index = instrument_pool_.Acquire();
+  [[nodiscard]] uint32_t AddInstrument() noexcept {
+    const uint32_t index = instrument_pool_.Acquire();
     instrument_pool_.Get(index) = {};
     return index;
   }
@@ -39,15 +41,47 @@ struct BarelyEngine {
   /// Removes an instrument.
   ///
   /// @param instrument_index Instrument index.
-  void RemoveInstrument(barely::InstrumentIndex instrument_index) noexcept {
+  void RemoveInstrument(uint32_t instrument_index) noexcept {
     instrument_pool_.Release(instrument_index);
   }
 
   /// Adds a new performer.
   ///
-  /// @return Pointer to performer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddPerformer(BarelyPerformer* performer) noexcept;
+  /// @return Performer index.
+  [[nodiscard]] uint32_t AddPerformer() noexcept {
+    const uint32_t index = performer_pool_.Acquire();
+    performer_pool_.Get(index) = {};
+    return index;
+  }
+
+  /// Removes a performer.
+  ///
+  /// @param performer_index Performer index.
+  void RemovePerformer(uint32_t performer_index) noexcept {
+    performer_pool_.Release(performer_index);
+  }
+
+  [[nodiscard]] BarelyPerformer& GetPerformer(uint32_t performer_index) noexcept {
+    return performer_pool_.Get(performer_index);
+  }
+
+  /// Adds a new task.
+  ///
+  /// @return Task index.
+  [[nodiscard]] uint32_t AddTask() noexcept {
+    const uint32_t index = task_pool_.Acquire();
+    task_pool_.Get(index) = {};
+    return index;
+  }
+
+  /// Removes a task.
+  ///
+  /// @param task_index Task index.
+  void RemoveTask(uint32_t task_index) noexcept { task_pool_.Release(task_index); }
+
+  [[nodiscard]] BarelyTask& GetTask(uint32_t task_index) noexcept {
+    return task_pool_.Get(task_index);
+  }
 
   /// Returns a control value.
   ///
@@ -79,12 +113,6 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Process(float* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept;
-
-  /// Removes a performer.
-  ///
-  /// @param performer Pointer to performer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void RemovePerformer(BarelyPerformer* performer) noexcept;
 
   /// Schedules a new message in the queue.
   ///
@@ -132,8 +160,13 @@ struct BarelyEngine {
   // Voice pool.
   barely::VoicePool voice_pool_;
 
-  // Set of pointers to performers.
-  std::unordered_set<BarelyPerformer*> performers_;
+  // Performers.
+  using PerformerPool = barely::Pool<BarelyPerformer, barely::kMaxPerformerCount>;
+  PerformerPool performer_pool_;
+
+  // Tasks.
+  using TaskPool = barely::Pool<BarelyTask, barely::kMaxTaskCount>;
+  TaskPool task_pool_;
 
   // Output samples.
   std::vector<float> output_samples_;

@@ -24,8 +24,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   BarelyEngine engine(kSampleRate, kSampleRate);
 
   // Create a performer.
-  BarelyPerformer performer;
-  engine.AddPerformer(&performer);
+  auto& performer = engine.GetPerformer(engine.AddPerformer());
 
   // Create a task.
   barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;
@@ -34,7 +33,10 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
     task_event_type = type;
     task_position = performer.position;
   };
-  BarelyTask task{
+
+  const auto task_index = engine.AddTask();
+  auto& task = engine.GetTask(task_index);
+  task = {
       {
           [](BarelyTaskEventType type, void* user_data) {
             (*static_cast<std::function<void(barely::TaskEventType)>*>(user_data))(
@@ -43,6 +45,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
           &process_callback,
       },
       &performer,
+      task_index,
       1.0,
       2.0,
       0,

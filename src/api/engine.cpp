@@ -94,12 +94,6 @@ BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
   assert(max_frame_count > 0);
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::AddPerformer(BarelyPerformer* performer) noexcept {
-  [[maybe_unused]] const bool success = performers_.emplace(performer).second;
-  assert(success);
-}
-
 float BarelyEngine::GetControl(BarelyEngineControlType type) const noexcept {
   return controls_[type].value;
 }
@@ -204,11 +198,6 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
   }
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyEngine::RemovePerformer(BarelyPerformer* performer) noexcept {
-  performers_.erase(performer);
-}
-
 void BarelyEngine::ScheduleMessage(barely::Message message) noexcept {
   message_queue_.Add(update_frame_, std::move(message));
 }
@@ -228,8 +217,8 @@ void BarelyEngine::Update(double timestamp) noexcept {
       BarelyPerformer::TaskKey next_key = {barely::SecondsToBeats(tempo_, timestamp - timestamp_),
                                            std::numeric_limits<int>::min()};
       bool has_tasks_to_process = false;
-      for (auto* performer : performers_) {
-        if (const auto maybe_next_key = performer->GetNextTaskKey();
+      for (uint32_t i = 0; i < barely::kMaxPerformerCount; ++i) {
+        if (const auto maybe_next_key = performer_pool_.Begin()[i].GetNextTaskKey();
             maybe_next_key.has_value() && *maybe_next_key < next_key) {
           has_tasks_to_process = true;
           next_key = *maybe_next_key;
@@ -240,8 +229,8 @@ void BarelyEngine::Update(double timestamp) noexcept {
       assert(update_duration > 0.0 || has_tasks_to_process);
 
       if (update_duration > 0) {
-        for (auto* performer : performers_) {
-          performer->Update(update_duration);
+        for (uint32_t i = 0; i < barely::kMaxPerformerCount; ++i) {
+          performer_pool_.Begin()[i].Update(update_duration);
         }
 
         timestamp_ += barely::BeatsToSeconds(tempo_, update_duration);
@@ -249,8 +238,8 @@ void BarelyEngine::Update(double timestamp) noexcept {
       }
 
       if (has_tasks_to_process) {
-        for (auto* performer : performers_) {
-          performer->ProcessAllTasksAtPosition(max_priority);
+        for (uint32_t i = 0; i < barely::kMaxPerformerCount; ++i) {
+          performer_pool_.Begin()[i].ProcessAllTasksAtPosition(max_priority);
         }
       }
     } else if (timestamp_ < timestamp) {

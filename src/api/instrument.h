@@ -12,6 +12,7 @@
 #include "api/performer.h"
 #include "api/task.h"
 #include "common/callback.h"
+#include "common/constants.h"
 #include "dsp/control.h"
 #include "dsp/instrument_params.h"
 
@@ -26,10 +27,15 @@ struct BarelyInstrument {
 
   /// Pointer to engine.
   BarelyEngine* engine_ = nullptr;
-  BarelyPerformer arp_;
 
   /// Instrument index.
-  barely::InstrumentIndex instrument_index = 0;
+  uint32_t instrument_index = barely::kMaxInstrumentCount;
+
+  /// Arpeggiator index.
+  uint32_t arp_index = barely::kMaxPerformerCount;
+
+  /// Arpeggiator task index.
+  uint32_t arp_task_index = barely::kMaxTaskCount;
 
   /// Constructs a new `BarelyInstrument`.
   ///
@@ -115,7 +121,6 @@ struct BarelyInstrument {
   NoteEventCallback note_event_callback_ = {};
 
   // Arpeggiator.
-  BarelyTask arp_task_;
   std::optional<float> arp_pitch_ = std::nullopt;
   int arp_pitch_index_ = -1;
 };

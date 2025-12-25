@@ -14,6 +14,7 @@
 
 #include "api/task.h"
 #include "common/callback.h"
+#include "common/constants.h"
 
 /// Implementation of a performer.
 struct BarelyPerformer {
@@ -23,6 +24,9 @@ struct BarelyPerformer {
 
   /// Pointer to engine.
   BarelyEngine* engine = nullptr;
+
+  // TODO(#126): Temp self-reference.
+  uint32_t performer_index = barely::kMaxPerformerCount;
 
   // Loop begin position in beats.
   double loop_begin_position = 0.0;

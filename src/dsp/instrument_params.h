@@ -17,9 +17,6 @@
 
 namespace barely {
 
-/// Instrument index.
-using InstrumentIndex = uint32_t;
-
 /// Instrument parameters.
 struct InstrumentParams {
   // TODO(#12): Consider a more optimized implementation for voice stealing.

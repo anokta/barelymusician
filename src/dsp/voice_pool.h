@@ -2,17 +2,15 @@
 #define BARELYMUSICIAN_DSP_VOICE_POOL_H_
 
 #include <array>
+#include <cstdint>
 #include <utility>
 
+#include "common/constants.h"
 #include "common/pool.h"
 #include "dsp/instrument_params.h"
 #include "dsp/voice.h"
 
 namespace barely {
-
-inline constexpr uint32_t kMaxInstrumentCount = BARELYMUSICIAN_MAX_INSTRUMENT_COUNT;
-
-inline constexpr int kMaxActiveVoiceCount = BARELYMUSICIAN_MAX_VOICE_COUNT;
 
 using InstrumentPool = Pool<InstrumentParams, kMaxInstrumentCount>;
 
@@ -25,8 +23,8 @@ class VoicePool {
     }
   }
 
-  [[nodiscard]] Voice* Acquire(InstrumentIndex instrument_index,
-                               InstrumentParams& instrument_params, float pitch) noexcept {
+  [[nodiscard]] Voice* Acquire(uint32_t instrument_index, InstrumentParams& instrument_params,
+                               float pitch) noexcept {
     if (instrument_params.should_retrigger) {
       for (int i = 0; i < instrument_params.active_voice_count; ++i) {
         Voice& voice = Get(instrument_params.active_voices[i]);
@@ -122,7 +120,7 @@ class VoicePool {
 
  private:
   struct ActiveVoice {
-    InstrumentIndex instrument_index = 0;
+    uint32_t instrument_index = kMaxInstrumentCount;
     VoiceIndex voice_index = 0;
   };
 

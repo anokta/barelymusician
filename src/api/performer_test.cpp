@@ -33,6 +33,7 @@ TEST(PerformerTest, ProcessSingleTask) {
       ++task_process_end_count;
     }
   };
+
   BarelyTask task{
       {
           [](BarelyTaskEventType type, void* user_data) {
@@ -41,6 +42,7 @@ TEST(PerformerTest, ProcessSingleTask) {
           &process_callback,
       },
       &performer,
+      0,
       0.25,
       0.6,
       0,
@@ -187,6 +189,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
             &task_callbacks[i].first,
         },
         &performer,
+        0,
         static_cast<double>(i + 1),
         1.0,
         0,

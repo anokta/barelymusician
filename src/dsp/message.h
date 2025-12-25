@@ -4,7 +4,7 @@
 #include <barelymusician.h>
 
 #include <array>
-#include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <variant>
 
@@ -25,7 +25,7 @@ struct EngineControlMessage {
 /// Instrument control message.
 struct InstrumentControlMessage {
   /// Instrument index;
-  InstrumentIndex instrument_index;
+  uint32_t instrument_index;
 
   /// Type.
   InstrumentControlType type;
@@ -37,7 +37,7 @@ struct InstrumentControlMessage {
 /// Note control message.
 struct NoteControlMessage {
   /// Instrument index;
-  InstrumentIndex instrument_index;
+  uint32_t instrument_index;
 
   /// Pitch.
   float pitch;
@@ -52,7 +52,7 @@ struct NoteControlMessage {
 /// Note off message.
 struct NoteOffMessage {
   /// Instrument index;
-  InstrumentIndex instrument_index;
+  uint32_t instrument_index;
 
   /// Pitch.
   float pitch;
@@ -61,7 +61,7 @@ struct NoteOffMessage {
 /// Note on message.
 struct NoteOnMessage {
   /// Instrument index;
-  InstrumentIndex instrument_index;
+  uint32_t instrument_index;
 
   /// Pitch.
   float pitch;
@@ -73,7 +73,7 @@ struct NoteOnMessage {
 /// Sample data message.
 struct SampleDataMessage {
   /// Instrument index;
-  InstrumentIndex instrument_index;
+  uint32_t instrument_index;
 
   /// Sample data.
   SampleData sample_data;

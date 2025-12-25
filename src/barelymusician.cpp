@@ -120,7 +120,7 @@ bool BarelyInstrument_Create(BarelyEngineHandle engine,
 
   *out_instrument = new BarelyInstrument(
       *engine, {control_overrides, control_overrides + control_override_count});
-  engine->AddPerformer(&(*out_instrument)->arp_);
+  (*out_instrument)->arp_index = engine->AddPerformer();
   (*out_instrument)->instrument_index = engine->AddInstrument();
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine->ScheduleMessage(barely::InstrumentControlMessage{
@@ -134,7 +134,7 @@ bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
   instrument->SetAllNotesOff();
-  instrument->engine_->RemovePerformer(&instrument->arp_);
+  instrument->engine_->RemovePerformer(instrument->arp_index);
   instrument->engine_->RemoveInstrument(instrument->instrument_index);
   delete instrument;
   return true;
@@ -235,9 +235,14 @@ bool BarelyPerformer_Create(BarelyEngineHandle engine, BarelyPerformerHandle* ou
   if (!engine) return false;
   if (!out_performer) return false;
 
-  *out_performer = new BarelyPerformer();
+  const uint32_t performer_index = engine->AddPerformer();
+  if (performer_index == barely::kMaxPerformerCount) {
+    return false;
+  }
+
+  *out_performer = &engine->GetPerformer(performer_index);
   (*out_performer)->engine = engine;
-  engine->AddPerformer(*out_performer);
+  (*out_performer)->performer_index = performer_index;
 
   return true;
 }
@@ -245,8 +250,7 @@ bool BarelyPerformer_Create(BarelyEngineHandle engine, BarelyPerformerHandle* ou
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  performer->engine->RemovePerformer(performer);
-  delete performer;
+  performer->engine->RemovePerformer(performer->performer_index);
   return true;
 }
 
@@ -369,18 +373,29 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double 
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
-  *out_task = new BarelyTask({callback, user_data}, performer, position, duration,
-                             static_cast<int>(priority));
+  const uint32_t task_index = performer->engine->AddTask();
+  if (task_index == barely::kMaxTaskCount) {
+    return false;
+  }
+
+  // TODO(#126): Clean this up once all pools are established.
+  *out_task = &performer->engine->GetTask(task_index);
+  (*out_task)->task_index = task_index;
+  (*out_task)->position = position;
+  (*out_task)->duration = duration;
+  (*out_task)->event_callback = {callback, user_data};
+  (*out_task)->priority = static_cast<int>(priority);
+  (*out_task)->performer = performer;
   performer->AddTask(*out_task);
 
-  return *out_task;
+  return true;
 }
 
 bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
   task->performer->RemoveTask(task);
-  delete task;
+  task->performer->engine->RemoveTask(task->task_index);
   return true;
 }
 

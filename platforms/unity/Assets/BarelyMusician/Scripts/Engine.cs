@@ -598,40 +598,40 @@ namespace Barely {
       /// Creates a new performer.
       ///
       /// @param performer Performer.
-      /// @param performerHandle Performer handle.
-      public static void Performer_Create(Performer performer, ref IntPtr performerHandle) {
-        if (Handle == IntPtr.Zero || performerHandle != IntPtr.Zero) {
+      /// @param performerRef Performer reference.
+      public static void Performer_Create(Performer performer, ref UInt32 performerRef) {
+        if (Handle == IntPtr.Zero || performerRef != 0) {
           return;
         }
-        if (!BarelyPerformer_Create(Handle, ref performerHandle)) {
+        if (!BarelyEngine_CreatePerformer(Handle, ref performerRef)) {
           Debug.LogError("Failed to create performer '" + performer.name + "'");
         }
-        _performers.Add(performerHandle, performer);
+        _performers.Add(performerRef, performer);
       }
 
       /// Destroys a performer.
       ///
-      /// @param performerHandle Performer handle.
-      public static void Performer_Destroy(ref IntPtr performerHandle) {
-        if (Handle == IntPtr.Zero || performerHandle == IntPtr.Zero) {
-          performerHandle = IntPtr.Zero;
+      /// @param performerRef Performer reference.
+      public static void Performer_Destroy(ref UInt32 performerRef) {
+        if (Handle == IntPtr.Zero || performerRef == 0) {
+          performerRef = 0;
           return;
         }
-        if (!BarelyPerformer_Destroy(performerHandle)) {
+        if (!BarelyEngine_DestroyPerformer(Handle, performerRef)) {
           Debug.LogError("Failed to destroy performer");
         }
-        _performers.Remove(performerHandle);
-        performerHandle = IntPtr.Zero;
+        _performers.Remove(performerRef);
+        performerRef = 0;
       }
 
       /// Returns the loop begin position of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @return Loop begin position in beats.
-      public static double Performer_GetLoopBeginPosition(IntPtr performerHandle) {
+      public static double Performer_GetLoopBeginPosition(UInt32 performerRef) {
         double loopBeginPosition = 0.0;
-        if (!BarelyPerformer_GetLoopBeginPosition(performerHandle, ref loopBeginPosition) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_GetLoopBeginPosition(Handle, performerRef, ref loopBeginPosition) &&
+            performerRef != 0) {
           Debug.LogError("Failed to get performer loop begin position");
         }
         return loopBeginPosition;
@@ -639,12 +639,12 @@ namespace Barely {
 
       /// Returns the loop length of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @return Loop length in beats.
-      public static double Performer_GetLoopLength(IntPtr performerHandle) {
+      public static double Performer_GetLoopLength(UInt32 performerRef) {
         double loopLength = 0.0;
-        if (!BarelyPerformer_GetLoopLength(performerHandle, ref loopLength) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_GetLoopLength(Handle, performerRef, ref loopLength) &&
+            performerRef != 0) {
           Debug.LogError("Failed to get performer loop length");
         }
         return loopLength;
@@ -652,12 +652,11 @@ namespace Barely {
 
       /// Returns the position of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @return Position in beats.
-      public static double Performer_GetPosition(IntPtr performerHandle) {
+      public static double Performer_GetPosition(UInt32 performerRef) {
         double position = 0.0;
-        if (!BarelyPerformer_GetPosition(performerHandle, ref position) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_GetPosition(Handle, performerRef, ref position) && performerRef != 0) {
           Debug.LogError("Failed to get performer position");
         }
         return position;
@@ -665,12 +664,11 @@ namespace Barely {
 
       /// Returns whether a performer is looping or not.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @return True if looping, false otherwise.
-      public static bool Performer_IsLooping(IntPtr performerHandle) {
+      public static bool Performer_IsLooping(UInt32 performerRef) {
         bool isLooping = false;
-        if (!BarelyPerformer_IsLooping(performerHandle, ref isLooping) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_IsLooping(Handle, performerRef, ref isLooping) && performerRef != 0) {
           Debug.LogError("Failed to get if performer is looping");
         }
         return isLooping;
@@ -678,12 +676,11 @@ namespace Barely {
 
       /// Returns whether a performer is playing or not.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @return True if playing, false otherwise.
-      public static bool Performer_IsPlaying(IntPtr performerHandle) {
+      public static bool Performer_IsPlaying(UInt32 performerRef) {
         bool isPlaying = false;
-        if (!BarelyPerformer_IsPlaying(performerHandle, ref isPlaying) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_IsPlaying(Handle, performerRef, ref isPlaying) && performerRef != 0) {
           Debug.LogError("Failed to get if performer is playing");
         }
         return isPlaying;
@@ -691,63 +688,60 @@ namespace Barely {
 
       /// Sets the loop begin position of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @param loopBeginPosition Loop begin position in beats.
-      public static void Performer_SetLoopBeginPosition(IntPtr performerHandle,
+      public static void Performer_SetLoopBeginPosition(UInt32 performerRef,
                                                         double loopBeginPosition) {
-        if (!BarelyPerformer_SetLoopBeginPosition(performerHandle, loopBeginPosition) &&
-            performerHandle != IntPtr.Zero) {
+        if (!BarelyPerformer_SetLoopBeginPosition(Handle, performerRef, loopBeginPosition) &&
+            performerRef != 0) {
           Debug.LogError("Failed to set performer loop begin position");
         }
       }
 
       /// Sets the loop length of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @param loopLength Loop length in beats.
-      public static void Performer_SetLoopLength(IntPtr performerHandle, double loopLength) {
-        if (!BarelyPerformer_SetLoopLength(performerHandle, loopLength) &&
-            performerHandle != IntPtr.Zero) {
+      public static void Performer_SetLoopLength(UInt32 performerRef, double loopLength) {
+        if (!BarelyPerformer_SetLoopLength(Handle, performerRef, loopLength) && performerRef != 0) {
           Debug.LogError("Failed to set performer loop length");
         }
       }
 
       /// Sets whether a performer is looping or not.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @param isLooping True if looping, false otherwise.
-      public static void Performer_SetLooping(IntPtr performerHandle, bool isLooping) {
-        if (!BarelyPerformer_SetLooping(performerHandle, isLooping) &&
-            performerHandle != IntPtr.Zero) {
+      public static void Performer_SetLooping(UInt32 performerRef, bool isLooping) {
+        if (!BarelyPerformer_SetLooping(Handle, performerRef, isLooping) && performerRef != 0) {
           Debug.LogError("Failed to set performer looping");
         }
       }
 
       /// Sets the position of a performer.
       ///
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @param position Position in beats.
-      public static void Performer_SetPosition(IntPtr performerHandle, double position) {
-        if (!BarelyPerformer_SetPosition(performerHandle, position) &&
-            performerHandle != IntPtr.Zero) {
+      public static void Performer_SetPosition(UInt32 performerRef, double position) {
+        if (!BarelyPerformer_SetPosition(Handle, performerRef, position) && performerRef != 0) {
           Debug.LogError("Failed to set performer position");
         }
       }
 
       /// Starts a performer.
       ///
-      /// @param performerHandle Performer handle.
-      public static void Performer_Start(IntPtr performerHandle) {
-        if (!BarelyPerformer_Start(performerHandle) && performerHandle != IntPtr.Zero) {
+      /// @param performerRef Performer reference.
+      public static void Performer_Start(UInt32 performerRef) {
+        if (!BarelyPerformer_Start(Handle, performerRef) && performerRef != 0) {
           Debug.LogError("Failed to start performer");
         }
       }
 
       /// Stops a performer.
       ///
-      /// @param performerHandle Performer handle.
-      public static void Performer_Stop(IntPtr performerHandle) {
-        if (!BarelyPerformer_Stop(performerHandle) && performerHandle != IntPtr.Zero) {
+      /// @param performerRef Performer reference.
+      public static void Performer_Stop(UInt32 performerRef) {
+        if (!BarelyPerformer_Stop(Handle, performerRef) && performerRef != 0) {
           Debug.LogError("Failed to stop performer");
         }
       }
@@ -772,17 +766,17 @@ namespace Barely {
       /// Creates a new task.
       ///
       /// @param task Task.
-      /// @param performerHandle Performer handle.
+      /// @param performerRef Performer reference.
       /// @param position Task position in beats.
       /// @param duration Task duration in beats.
       /// @param priority Task priority.
       /// @param taskHandle Task handle.
-      public static void Task_Create(Task task, IntPtr performerHandle, double position,
+      public static void Task_Create(Task task, UInt32 performerRef, double position,
                                      double duration, int priority, ref IntPtr taskHandle) {
         if (Handle == IntPtr.Zero || taskHandle != IntPtr.Zero) {
           return;
         }
-        if (!BarelyTask_Create(performerHandle, position, Math.Max(duration, _minTaskDuration),
+        if (!BarelyTask_Create(Handle, performerRef, position, Math.Max(duration, _minTaskDuration),
                                priority, Task_OnEvent, IntPtr.Zero, ref taskHandle)) {
           Debug.LogError("Failed to create task '" + task + "'");
           return;
@@ -793,9 +787,10 @@ namespace Barely {
 
       /// Destroys a task.
       ///
+      /// @param performerRef Performer reference.
       /// @param taskHandle Task handle.
-      public static void Task_Destroy(IntPtr performerHandle, ref IntPtr taskHandle) {
-        if (Handle == IntPtr.Zero || performerHandle == IntPtr.Zero || taskHandle == IntPtr.Zero) {
+      public static void Task_Destroy(UInt32 performerRef, ref IntPtr taskHandle) {
+        if (Handle == IntPtr.Zero || performerRef == 0 || taskHandle == IntPtr.Zero) {
           taskHandle = IntPtr.Zero;
           return;
         }
@@ -1005,8 +1000,8 @@ namespace Barely {
       // Array of note control overrides.
       private static NoteControlOverride[] _noteControlOverrides = null;
 
-      // Map of performers by their handles.
-      private static Dictionary<IntPtr, Performer> _performers = null;
+      // Map of performers by their references.
+      private static Dictionary<UInt32, Performer> _performers = null;
 
       // Map of tasks by their handles.
       private static Dictionary<IntPtr, Task> _tasks = null;
@@ -1136,7 +1131,7 @@ namespace Barely {
           for (int i = 0; i < _noteControlOverrides.Length; ++i) {
             _noteControlOverrides[i].type = (NoteControlType)i;
           }
-          _performers = new Dictionary<IntPtr, Performer>();
+          _performers = new Dictionary<UInt32, Performer>();
           _tasks = new Dictionary<IntPtr, Task>();
           BarelyEngine_Update(_handle, GetNextTimestamp());
         }
@@ -1252,56 +1247,63 @@ namespace Barely {
                                                                 [In] Slice[] slices,
                                                                 Int32 sliceCount);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Create")]
-      private static extern bool BarelyPerformer_Create(IntPtr engine, ref IntPtr outPerformer);
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreatePerformer")]
+      private static extern bool BarelyEngine_CreatePerformer(IntPtr engine,
+                                                              ref UInt32 outPerformer);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Destroy")]
-      private static extern bool BarelyPerformer_Destroy(IntPtr performer);
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_DestroyPerformer")]
+      private static extern bool BarelyEngine_DestroyPerformer(IntPtr engine, UInt32 performerRef);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
       private static extern bool BarelyPerformer_GetLoopBeginPosition(
-          IntPtr performer, ref double outLoopBeginPosition);
+          IntPtr engine, UInt32 performerRef, ref double outLoopBeginPosition);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopLength")]
-      private static extern bool BarelyPerformer_GetLoopLength(IntPtr performer,
+      private static extern bool BarelyPerformer_GetLoopLength(IntPtr engine, UInt32 performerRef,
                                                                ref double outLoopLength);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
-      private static extern bool BarelyPerformer_GetPosition(IntPtr performer,
+      private static extern bool BarelyPerformer_GetPosition(IntPtr engine, UInt32 performerRef,
                                                              ref double outPosition);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsLooping")]
-      private static extern bool BarelyPerformer_IsLooping(IntPtr performer, ref bool outIsLooping);
+      private static extern bool BarelyPerformer_IsLooping(IntPtr engine, UInt32 performerRef,
+                                                           ref bool outIsLooping);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
-      private static extern bool BarelyPerformer_IsPlaying(IntPtr performer, ref bool outIsPlaying);
+      private static extern bool BarelyPerformer_IsPlaying(IntPtr engine, UInt32 performerRef,
+                                                           ref bool outIsPlaying);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
-      private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr performer,
+      private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr engine,
+                                                                      UInt32 performerRef,
                                                                       double loopBeginPosition);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopLength")]
-      private static extern bool BarelyPerformer_SetLoopLength(IntPtr performer, double loopLength);
+      private static extern bool BarelyPerformer_SetLoopLength(IntPtr engine, UInt32 performerRef,
+                                                               double loopLength);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLooping")]
-      private static extern bool BarelyPerformer_SetLooping(IntPtr performer, bool isLooping);
+      private static extern bool BarelyPerformer_SetLooping(IntPtr engine, UInt32 performerRef,
+                                                            bool isLooping);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetPosition")]
-      private static extern bool BarelyPerformer_SetPosition(IntPtr performer, double position);
+      private static extern bool BarelyPerformer_SetPosition(IntPtr engine, UInt32 performerRef,
+                                                             double position);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Start")]
-      private static extern bool BarelyPerformer_Start(IntPtr performer);
+      private static extern bool BarelyPerformer_Start(IntPtr engine, UInt32 performerRef);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Stop")]
-      private static extern bool BarelyPerformer_Stop(IntPtr performer);
+      private static extern bool BarelyPerformer_Stop(IntPtr engine, UInt32 performerRef);
 
       [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
       private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
                                                       ref float outPitch);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Create")]
-      private static extern bool BarelyTask_Create(IntPtr performer, double position,
-                                                   double duration, Int32 priority,
+      private static extern bool BarelyTask_Create(IntPtr engine, UInt32 performerRef,
+                                                   double position, double duration, Int32 priority,
                                                    TaskEventCallback callback, IntPtr userData,
                                                    ref IntPtr outTask);
 
@@ -1318,7 +1320,7 @@ namespace Barely {
       private static extern bool BarelyTask_GetPriority(IntPtr task, ref Int32 outPriority);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_IsActive")]
-      private static extern bool BarelyTask_IsActive(IntPtr performer, ref bool outIsActive);
+      private static extern bool BarelyTask_IsActive(IntPtr task, ref bool outIsActive);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetDuration")]
       private static extern bool BarelyTask_SetDuration(IntPtr task, double duration);

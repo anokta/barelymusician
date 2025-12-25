@@ -66,20 +66,23 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   auto performer = engine.CreatePerformer();
+///   auto performer_ref = engine.CreatePerformer();
 ///
 ///   // Create a task.
-///   auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0,
-///                                    [](barely::TaskEventType type) { /*populate this*/ });
+///   auto task = performer_ref.CreateTask(/*position=*/0.0, /*duration=*/1.0,
+///                                        [](barely::TaskEventType type) { /*populate this*/ });
 ///
 ///   // Set to looping.
-///   performer.SetLooping(/*is_looping=*/true);
+///   performer_ref.SetLooping(/*is_looping=*/true);
 ///
 ///   // Start.
-///   performer.Start();
+///   performer_ref.Start();
 ///
 ///   // Check if started playing.
-///   const bool is_playing = performer.IsPlaying();
+///   const bool is_playing = performer_ref.IsPlaying();
+///
+///   // Destroy.
+///   engine.DestroyPerformer(performer_ref);
 ///   @endcode
 ///
 /// ------------------------------------------------------------------------------------------------
@@ -155,30 +158,30 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   BarelyPerformerHandle performer = nullptr;
-///   BarelyPerformer_Create(engine, &performer);
+///   BarelyPerformerRef performer_ref;
+///   BarelyEngine_CreatePerformer(engine, &performer_ref);
 ///
 ///   // Create a task.
 ///   BarelyTaskHandle task = nullptr;
 ///   BarelyTaskEventCallback callback{ /*populate this*/ };
-///   BarelyTask_Create(performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0, callback,
-///                     &task);
+///   BarelyTask_Create(engine, performer_ref, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
+///                     callback, &task);
 ///
 ///   // Set to looping.
-///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
+///   BarelyPerformer_SetLooping(engine, performer_ref, /*is_looping=*/true);
 ///
 ///   // Start.
-///   BarelyPerformer_Start(performer);
+///   BarelyPerformer_Start(engine, performer_ref);
 ///
 ///   // Check if started playing.
 ///   bool is_playing = false;
-///   BarelyPerformer_IsPlaying(performer, &is_playing);
+///   BarelyPerformer_IsPlaying(engine, performer_ref, &is_playing);
 ///
 ///   // Destroy the task.
 ///   BarelyTask_Destroy(task);
 ///
 ///   // Destroy.
-///   BarelyPerformer_Destroy(performer);
+///   BarelyEngine_DestroyPerformer(engine, engine, performer_ref);
 ///   @endcode
 
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
@@ -465,8 +468,8 @@ typedef struct BarelyEngine* BarelyEngineHandle;
 /// Instrument handle.
 typedef struct BarelyInstrument* BarelyInstrumentHandle;
 
-/// Performer handle.
-typedef struct BarelyPerformer* BarelyPerformerHandle;
+/// Performer reference.
+typedef uint32_t BarelyPerformerRef;
 
 /// Task handle.
 typedef struct BarelyTask* BarelyTaskHandle;
@@ -493,11 +496,26 @@ typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_dat
 BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
                                     BarelyEngineHandle* out_engine);
 
+/// Creates a new performer.
+///
+/// @param engine Engine handle.
+/// @param out_performer_ref Output performer reference.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_CreatePerformer(BarelyEngineHandle engine,
+                                             BarelyPerformerRef* out_performer_ref);
+
 /// Destroys an engine.
 ///
 /// @param engine Engine handle.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_Destroy(BarelyEngineHandle engine);
+
+/// Destroys a performer.
+///
+/// @param performer_ref Performer reference.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine,
+                                              BarelyPerformerRef performer_ref);
 
 /// Generates a new random number with uniform distribution in the normalized range [0, 1).
 ///
@@ -686,97 +704,92 @@ BARELY_API bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, fl
 BARELY_API bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument,
                                                const BarelySlice* slices, int32_t slice_count);
 
-/// Creates a performer.
-///
-/// @param engine Engine handle.
-/// @param out_performer Output performer handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_Create(BarelyEngineHandle engine,
-                                       BarelyPerformerHandle* out_performer);
-
-/// Destroys a performer.
-///
-/// @param performer Performer handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
-
 /// Gets the loop begin position of a performer.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param out_loop_begin_position Output loop begin position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
+BARELY_API bool BarelyPerformer_GetLoopBeginPosition(BarelyEngineHandle engine,
+                                                     BarelyPerformerRef performer_ref,
                                                      double* out_loop_begin_position);
 
 /// Gets the loop length of a performer.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param out_loop_length Output loop length.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer,
+BARELY_API bool BarelyPerformer_GetLoopLength(BarelyEngineHandle engine,
+                                              BarelyPerformerRef performer_ref,
                                               double* out_loop_length);
 
 /// Gets the position of a performer.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param out_position Output position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, double* out_position);
+BARELY_API bool BarelyPerformer_GetPosition(BarelyEngineHandle engine,
+                                            BarelyPerformerRef performer_ref, double* out_position);
 
 /// Gets whether a performer is looping or not.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param out_is_looping Output true if looping, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool* out_is_looping);
+BARELY_API bool BarelyPerformer_IsLooping(BarelyEngineHandle engine,
+                                          BarelyPerformerRef performer_ref, bool* out_is_looping);
 
 /// Gets whether a performer is playing or not.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing);
+BARELY_API bool BarelyPerformer_IsPlaying(BarelyEngineHandle engine,
+                                          BarelyPerformerRef performer_ref, bool* out_is_playing);
 
 /// Sets the loop begin position of a performer.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param loop_begin_position Loop begin position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
+BARELY_API bool BarelyPerformer_SetLoopBeginPosition(BarelyEngineHandle engine,
+                                                     BarelyPerformerRef performer_ref,
                                                      double loop_begin_position);
 
 /// Sets the loop length of a performer.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param loop_length Loop length in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer, double loop_length);
+BARELY_API bool BarelyPerformer_SetLoopLength(BarelyEngineHandle engine,
+                                              BarelyPerformerRef performer_ref, double loop_length);
 
 /// Sets whether a performer is looping or not.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param is_looping True if looping, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping);
+BARELY_API bool BarelyPerformer_SetLooping(BarelyEngineHandle engine,
+                                           BarelyPerformerRef performer_ref, bool is_looping);
 
 /// Sets the position of a performer.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position);
+BARELY_API bool BarelyPerformer_SetPosition(BarelyEngineHandle engine,
+                                            BarelyPerformerRef performer_ref, double position);
 
 /// Starts a performer.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_Start(BarelyPerformerHandle performer);
+BARELY_API bool BarelyPerformer_Start(BarelyEngineHandle engine, BarelyPerformerRef performer_ref);
 
 /// Stops a performer.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
+BARELY_API bool BarelyPerformer_Stop(BarelyEngineHandle engine, BarelyPerformerRef performer_ref);
 
 /// Gets a quantized position.
 ///
@@ -797,7 +810,7 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 
 /// Creates a new task.
 ///
-/// @param performer Performer handle.
+/// @param performer_ref Performer reference.
 /// @param position Task position in beats.
 /// @param duration Task duration in beats.
 /// @param priority Task priority.
@@ -805,9 +818,10 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 /// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double duration,
-                                  int32_t priority, BarelyTaskEventCallback callback,
-                                  void* user_data, BarelyTaskHandle* out_task);
+BARELY_API bool BarelyTask_Create(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                                  double position, double duration, int32_t priority,
+                                  BarelyTaskEventCallback callback, void* user_data,
+                                  BarelyTaskHandle* out_task);
 
 /// Destroys a task.
 ///
@@ -1401,17 +1415,17 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
  public:
   /// Constructs a new `Task`.
   ///
-  /// @param performer Raw performer handle.
+  /// @param performer_ref Raw performer reference.
   /// @param position Task position in beats.
   /// @param duration Task duration in beats.
   /// @param priority Task priority.
   /// @param callback Task event callback.
-  Task(BarelyPerformerHandle performer, double position, double duration, int priority,
-       TaskEventCallback callback) noexcept
+  Task(BarelyEngineHandle engine, BarelyPerformerRef performer_ref, double position,
+       double duration, int priority, TaskEventCallback callback) noexcept
       : HandleWrapper([&]() {
           BarelyTaskHandle task = nullptr;
           [[maybe_unused]] const bool success = BarelyTask_Create(
-              performer, position, duration, priority,
+              engine, performer_ref, position, duration, priority,
               [](BarelyTaskEventType type, void* user_data) noexcept {
                 if (user_data != nullptr) {
                   (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
@@ -1553,46 +1567,20 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   TaskEventCallback event_callback_;
 };
 
-/// Class that wraps a performer handle.
-class Performer : public HandleWrapper<BarelyPerformerHandle> {
+/// Class that wraps a performer reference.
+class PerformerRef {
  public:
-  /// Constructs a new `Performer`.
+  /// Constructs a new `PerformerRef` from a raw reference.
   ///
   /// @param engine Raw engine handle.
-  explicit Performer(BarelyEngineHandle engine) noexcept
-      : HandleWrapper([&]() {
-          BarelyPerformerHandle performer = nullptr;
-          [[maybe_unused]] const bool success = BarelyPerformer_Create(engine, &performer);
-          assert(success);
-          return performer;
-        }()) {}
+  /// @param performer_ref Raw performer reference.
+  PerformerRef(BarelyEngineHandle engine, BarelyPerformerRef performer_ref) noexcept
+      : engine_(engine), performer_ref_(performer_ref) {}
 
-  /// Constructs a new `Performer` from a raw handle.
+  /// Returns the raw reference.
   ///
-  /// @param performer Raw handle to performer.
-  explicit Performer(BarelyPerformerHandle performer) noexcept : HandleWrapper(performer) {}
-
-  /// Destroys `Performer`.
-  ~Performer() noexcept { BarelyPerformer_Destroy(*this); }
-
-  /// Non-copyable.
-  Performer(const Performer& other) noexcept = delete;
-  Performer& operator=(const Performer& other) noexcept = delete;
-
-  /// Default move constructor.
-  Performer(Performer&& other) noexcept = default;
-
-  /// Assigns `Performer` via move.
-  ///
-  /// @param other Other performer.
-  /// @return Performer.
-  Performer& operator=(Performer&& other) noexcept {
-    if (this != &other) {
-      BarelyPerformer_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
-    }
-    return *this;
-  }
+  /// @return Raw reference.
+  [[nodiscard]] constexpr operator BarelyPerformerRef() const noexcept { return performer_ref_; }
 
   /// Creates a new task.
   ///
@@ -1603,7 +1591,7 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @return Task.
   [[nodiscard]] Task CreateTask(double position, double duration, int priority,
                                 TaskEventCallback callback) noexcept {
-    return Task(*this, position, duration, priority, std::move(callback));
+    return Task(engine_, performer_ref_, position, duration, priority, std::move(callback));
   }
 
   /// Returns the loop begin position.
@@ -1612,7 +1600,7 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   [[nodiscard]] double GetLoopBeginPosition() const noexcept {
     double loop_begin_position = 0.0;
     [[maybe_unused]] const bool success =
-        BarelyPerformer_GetLoopBeginPosition(*this, &loop_begin_position);
+        BarelyPerformer_GetLoopBeginPosition(engine_, performer_ref_, &loop_begin_position);
     assert(success);
     return loop_begin_position;
   }
@@ -1622,7 +1610,8 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept {
     double loop_length = 0.0;
-    [[maybe_unused]] const bool success = BarelyPerformer_GetLoopLength(*this, &loop_length);
+    [[maybe_unused]] const bool success =
+        BarelyPerformer_GetLoopLength(engine_, performer_ref_, &loop_length);
     assert(success);
     return loop_length;
   }
@@ -1632,7 +1621,8 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const bool success = BarelyPerformer_GetPosition(*this, &position);
+    [[maybe_unused]] const bool success =
+        BarelyPerformer_GetPosition(engine_, performer_ref_, &position);
     assert(success);
     return position;
   }
@@ -1642,7 +1632,8 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept {
     bool is_looping = false;
-    [[maybe_unused]] const bool success = BarelyPerformer_IsLooping(*this, &is_looping);
+    [[maybe_unused]] const bool success =
+        BarelyPerformer_IsLooping(engine_, performer_ref_, &is_looping);
     assert(success);
     return is_looping;
   }
@@ -1652,7 +1643,8 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept {
     bool is_playing = false;
-    [[maybe_unused]] const bool success = BarelyPerformer_IsPlaying(*this, &is_playing);
+    [[maybe_unused]] const bool success =
+        BarelyPerformer_IsPlaying(engine_, performer_ref_, &is_playing);
     assert(success);
     return is_playing;
   }
@@ -1662,7 +1654,7 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   /// @param loop_begin_position Loop begin position in beats.
   void SetLoopBeginPosition(double loop_begin_position) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyPerformer_SetLoopBeginPosition(*this, loop_begin_position);
+        BarelyPerformer_SetLoopBeginPosition(engine_, performer_ref_, loop_begin_position);
     assert(success);
   }
 
@@ -1670,7 +1662,8 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_SetLoopLength(*this, loop_length);
+    [[maybe_unused]] const bool success =
+        BarelyPerformer_SetLoopLength(engine_, performer_ref_, loop_length);
     assert(success);
   }
 
@@ -1678,7 +1671,8 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   ///
   /// @param is_looping True if looping, false otherwise.
   void SetLooping(bool is_looping) noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_SetLooping(*this, is_looping);
+    [[maybe_unused]] const bool success =
+        BarelyPerformer_SetLooping(engine_, performer_ref_, is_looping);
     assert(success);
   }
 
@@ -1686,21 +1680,29 @@ class Performer : public HandleWrapper<BarelyPerformerHandle> {
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_SetPosition(*this, position);
+    [[maybe_unused]] const bool success =
+        BarelyPerformer_SetPosition(engine_, performer_ref_, position);
     assert(success);
   }
 
   /// Starts the performer.
   void Start() noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_Start(*this);
+    [[maybe_unused]] const bool success = BarelyPerformer_Start(engine_, performer_ref_);
     assert(success);
   }
 
   /// Stops the performer.
   void Stop() noexcept {
-    [[maybe_unused]] const bool success = BarelyPerformer_Stop(*this);
+    [[maybe_unused]] const bool success = BarelyPerformer_Stop(engine_, performer_ref_);
     assert(success);
   }
+
+ private:
+  /// Engine handle.
+  BarelyEngineHandle engine_;
+
+  /// Raw performer reference.
+  BarelyPerformerRef performer_ref_;
 };
 
 /// A class that wraps an engine handle.
@@ -1757,8 +1759,21 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
 
   /// Creates a performer.
   ///
-  /// @return Performer.
-  [[nodiscard]] Performer CreatePerformer() noexcept { return Performer(*this); }
+  /// @return PerformerRef.
+  [[nodiscard]] PerformerRef CreatePerformer() noexcept {
+    BarelyPerformerRef performer_ref = 0;
+    [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(*this, &performer_ref);
+    assert(success);
+    return PerformerRef(*this, performer_ref);
+  }
+
+  /// Destroys a performer.
+  ///
+  /// @param performer_ref Performer reference.
+  void DestroyPerformer(const PerformerRef& performer_ref) {
+    [[maybe_unused]] const bool success = BarelyEngine_DestroyPerformer(*this, performer_ref);
+    assert(success);
+  }
 
   /// Generates a random number with uniform distribution in the normalized range [0, 1).
   ///

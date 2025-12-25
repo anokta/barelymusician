@@ -6,6 +6,8 @@
 #include "common/callback.h"
 #include "common/constants.h"
 
+struct BarelyPerformer;
+
 /// Implementation of a task.
 struct BarelyTask {
   /// Event callback alias.

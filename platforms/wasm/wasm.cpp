@@ -8,7 +8,7 @@ using ::barely::Instrument;
 using ::barely::InstrumentControlType;
 using ::barely::NoteControlType;
 using ::barely::NoteEventType;
-using ::barely::Performer;
+using ::barely::PerformerRef;
 using ::barely::Quantization;
 using ::barely::Task;
 using ::barely::TaskEventType;
@@ -62,13 +62,13 @@ static void Instrument_SetSampleData(Instrument& instrument, uintptr_t slices,
                             reinterpret_cast<const barely::Slice*>(slices) + slice_count});
 }
 
-[[nodiscard]] static Task Performer_CreateTask(Performer& performer, double position,
+[[nodiscard]] static Task Performer_CreateTask(PerformerRef& performer, double position,
                                                double duration) noexcept {
   return performer.CreateTask(position, duration, /*priority=*/0, /*callback=*/nullptr);
 }
 
-[[nodiscard]] static uintptr_t Performer_GetHandle(Performer& performer) noexcept {
-  return reinterpret_cast<uintptr_t>(static_cast<BarelyPerformerHandle>(performer));
+[[nodiscard]] static BarelyPerformerRef Performer_GetHandle(PerformerRef& performer) noexcept {
+  return static_cast<BarelyPerformerRef>(performer);
 }
 
 [[nodiscard]] static uintptr_t Task_GetHandle(Task& task) noexcept {
@@ -114,17 +114,17 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
                 static_cast<void (Instrument::*)(float, float, float)>(&Instrument::SetNoteOn))
       .function("setSampleData", &Instrument_SetSampleData, allow_raw_pointers());
 
-  class_<Performer>("Performer")
+  class_<PerformerRef>("PerformerRef")
       .function("createTask", &Performer_CreateTask, take_ownership())
-      .function("getHandle", &Performer_GetHandle, allow_raw_pointers())
-      .function("start", &Performer::Start)
-      .function("stop", &Performer::Stop)
-      .property("isLooping", &Performer::IsLooping, &Performer::SetLooping)
-      .property("isPlaying", &Performer::IsPlaying)
-      .property("loopBeginPosition", &Performer::GetLoopBeginPosition,
-                &Performer::SetLoopBeginPosition)
-      .property("loopLength", &Performer::GetLoopLength, &Performer::SetLoopLength)
-      .property("position", &Performer::GetPosition, &Performer::SetPosition);
+      .function("getHandle", &Performer_GetHandle)
+      .function("start", &PerformerRef::Start)
+      .function("stop", &PerformerRef::Stop)
+      .property("isLooping", &PerformerRef::IsLooping, &PerformerRef::SetLooping)
+      .property("isPlaying", &PerformerRef::IsPlaying)
+      .property("loopBeginPosition", &PerformerRef::GetLoopBeginPosition,
+                &PerformerRef::SetLoopBeginPosition)
+      .property("loopLength", &PerformerRef::GetLoopLength, &PerformerRef::SetLoopLength)
+      .property("position", &PerformerRef::GetPosition, &PerformerRef::SetPosition);
 
   class_<Quantization>("Quantization")
       .constructor<int, float>()

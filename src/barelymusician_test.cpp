@@ -50,15 +50,14 @@ TEST(BarelyEngineTest, CreateDestroyPerformer) {
   ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, &engine));
 
   // Failures.
-  EXPECT_FALSE(BarelyPerformer_Create(engine, nullptr));
-  EXPECT_FALSE(BarelyPerformer_Destroy(nullptr));
+  EXPECT_FALSE(BarelyEngine_CreatePerformer(engine, nullptr));
+  EXPECT_FALSE(BarelyEngine_DestroyPerformer(nullptr, 0));
 
   // Success.
-  BarelyPerformerHandle performer = nullptr;
-  EXPECT_TRUE(BarelyPerformer_Create(engine, &performer));
-  EXPECT_NE(performer, nullptr);
+  BarelyPerformerRef performer_ref;
+  EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer_ref));
 
-  EXPECT_TRUE(BarelyPerformer_Destroy(performer));
+  EXPECT_TRUE(BarelyEngine_DestroyPerformer(engine, performer_ref));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
@@ -73,7 +72,7 @@ TEST(EngineTest, CreateDestroyInstrument) {
 
 TEST(EngineTest, CreateDestroyPerformer) {
   Engine engine(kSampleRate, kMaxFrameCount);
-  [[maybe_unused]] const auto performer = engine.CreatePerformer();
+  engine.DestroyPerformer(engine.CreatePerformer());
 }
 
 // Tests that a single instrument is created and destroyed as expected.

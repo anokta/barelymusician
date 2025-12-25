@@ -8,6 +8,7 @@
 #include "api/instrument.h"
 #include "api/performer.h"
 #include "api/task.h"
+#include "common/constants.h"
 #include "common/time.h"
 #include "dsp/message.h"
 
@@ -21,10 +22,27 @@ bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
   return true;
 }
 
+bool BarelyEngine_CreatePerformer(BarelyEngineHandle engine,
+                                  BarelyPerformerRef* out_performer_ref) {
+  if (!engine) return false;
+  if (!out_performer_ref) return false;
+
+  *out_performer_ref = engine->AddPerformer();
+  engine->GetPerformer((*out_performer_ref)).engine = engine;
+  return *out_performer_ref != barely::kMaxPerformerCount;
+}
+
 bool BarelyEngine_Destroy(BarelyEngineHandle engine) {
   if (!engine) return false;
 
   delete engine;
+  return true;
+}
+
+bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine, BarelyPerformerRef performer_ref) {
+  if (!engine) return false;
+
+  engine->RemovePerformer(performer_ref);
   return true;
 }
 
@@ -231,110 +249,96 @@ bool BarelyInstrument_SetSampleData(BarelyInstrumentHandle instrument, const Bar
   return true;
 }
 
-bool BarelyPerformer_Create(BarelyEngineHandle engine, BarelyPerformerHandle* out_performer) {
-  if (!engine) return false;
-  if (!out_performer) return false;
-
-  const uint32_t performer_index = engine->AddPerformer();
-  if (performer_index == barely::kMaxPerformerCount) {
-    return false;
-  }
-
-  *out_performer = &engine->GetPerformer(performer_index);
-  (*out_performer)->engine = engine;
-  (*out_performer)->performer_index = performer_index;
-
-  return true;
-}
-
-bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
-  if (!performer) return false;
-
-  performer->engine->RemovePerformer(performer->performer_index);
-  return true;
-}
-
-bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
+bool BarelyPerformer_GetLoopBeginPosition(BarelyEngineHandle engine,
+                                          BarelyPerformerRef performer_ref,
                                           double* out_loop_begin_position) {
-  if (!performer) return false;
+  if (!engine) return false;
   if (!out_loop_begin_position) return false;
 
-  *out_loop_begin_position = performer->loop_begin_position;
+  *out_loop_begin_position = engine->GetPerformer(performer_ref).loop_begin_position;
   return true;
 }
 
-bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer, double* out_loop_length) {
-  if (!performer) return false;
+bool BarelyPerformer_GetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                                   double* out_loop_length) {
+  if (!engine) return false;
   if (!out_loop_length) return false;
 
-  *out_loop_length = performer->loop_length;
+  *out_loop_length = engine->GetPerformer(performer_ref).loop_length;
   return true;
 }
 
-bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, double* out_position) {
-  if (!performer) return false;
+bool BarelyPerformer_GetPosition(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                                 double* out_position) {
+  if (!engine) return false;
   if (!out_position) return false;
 
-  *out_position = performer->position;
+  *out_position = engine->GetPerformer(performer_ref).position;
   return true;
 }
 
-bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool* out_is_looping) {
-  if (!performer) return false;
+bool BarelyPerformer_IsLooping(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                               bool* out_is_looping) {
+  if (!engine) return false;
   if (!out_is_looping) return false;
 
-  *out_is_looping = performer->is_looping;
+  *out_is_looping = engine->GetPerformer(performer_ref).is_looping;
   return true;
 }
 
-bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing) {
-  if (!performer) return false;
+bool BarelyPerformer_IsPlaying(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                               bool* out_is_playing) {
+  if (!engine) return false;
   if (!out_is_playing) return false;
 
-  *out_is_playing = performer->is_playing;
+  *out_is_playing = engine->GetPerformer(performer_ref).is_playing;
   return true;
 }
 
-bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
+bool BarelyPerformer_SetLoopBeginPosition(BarelyEngineHandle engine,
+                                          BarelyPerformerRef performer_ref,
                                           double loop_begin_position) {
-  if (!performer) return false;
+  if (!engine) return false;
 
-  performer->SetLoopBeginPosition(loop_begin_position);
+  engine->GetPerformer(performer_ref).SetLoopBeginPosition(loop_begin_position);
   return true;
 }
 
-bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer, double loop_length) {
-  if (!performer) return false;
+bool BarelyPerformer_SetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                                   double loop_length) {
+  if (!engine) return false;
 
-  performer->SetLoopLength(loop_length);
+  engine->GetPerformer(performer_ref).SetLoopLength(loop_length);
   return true;
 }
 
-bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping) {
-  if (!performer) return false;
+bool BarelyPerformer_SetLooping(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                                bool is_looping) {
+  if (!engine) return false;
 
-  performer->SetLooping(is_looping);
+  engine->GetPerformer(performer_ref).SetLooping(is_looping);
   return true;
 }
 
-bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position) {
-  if (!performer) return false;
+bool BarelyPerformer_SetPosition(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                                 double position) {
+  if (!engine) return false;
 
-  performer->SetPosition(position);
+  engine->GetPerformer(performer_ref).SetPosition(position);
   return true;
 }
 
-bool BarelyPerformer_Start(BarelyPerformerHandle performer) {
-  if (!performer) return false;
+bool BarelyPerformer_Start(BarelyEngineHandle engine, BarelyPerformerRef performer_ref) {
+  if (!engine) return false;
 
-  performer->Start();
+  engine->GetPerformer(performer_ref).Start();
   return true;
 }
 
-bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
-  if (!performer) return false;
+bool BarelyPerformer_Stop(BarelyEngineHandle engine, BarelyPerformerRef performer_ref) {
+  if (!engine) return false;
 
-  performer->Stop();
+  engine->GetPerformer(performer_ref).Stop();
   return true;
 }
 
@@ -366,27 +370,27 @@ bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_p
   return true;
 }
 
-bool BarelyTask_Create(BarelyPerformerHandle performer, double position, double duration,
-                       int32_t priority, BarelyTaskEventCallback callback, void* user_data,
-                       BarelyTaskHandle* out_task) {
-  if (!performer) return false;
+bool BarelyTask_Create(BarelyEngineHandle engine, BarelyPerformerRef performer_ref, double position,
+                       double duration, int32_t priority, BarelyTaskEventCallback callback,
+                       void* user_data, BarelyTaskHandle* out_task) {
+  if (!engine) return false;
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
-  const uint32_t task_index = performer->engine->AddTask();
+  const uint32_t task_index = engine->GetPerformer(performer_ref).engine->AddTask();
   if (task_index == barely::kMaxTaskCount) {
     return false;
   }
 
   // TODO(#126): Clean this up once all pools are established.
-  *out_task = &performer->engine->GetTask(task_index);
+  *out_task = &engine->GetPerformer(performer_ref).engine->GetTask(task_index);
   (*out_task)->task_index = task_index;
   (*out_task)->position = position;
   (*out_task)->duration = duration;
   (*out_task)->event_callback = {callback, user_data};
   (*out_task)->priority = static_cast<int>(priority);
-  (*out_task)->performer = performer;
-  performer->AddTask(*out_task);
+  (*out_task)->performer = &engine->GetPerformer(performer_ref);
+  engine->GetPerformer(performer_ref).AddTask(*out_task);
 
   return true;
 }

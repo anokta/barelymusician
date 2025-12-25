@@ -2,7 +2,9 @@ LIBRARY "barelymusicianunity"
 
 EXPORTS
   BarelyEngine_Create
+  BarelyEngine_CreatePerformer
   BarelyEngine_Destroy
+  BarelyEngine_DestroyPerformer
   BarelyEngine_GetControl
   BarelyEngine_GetTempo
   BarelyEngine_GetTimestamp
@@ -22,8 +24,6 @@ EXPORTS
   BarelyInstrument_SetNoteOff
   BarelyInstrument_SetNoteOn
   BarelyInstrument_SetSampleData
-  BarelyPerformer_Create
-  BarelyPerformer_Destroy
   BarelyPerformer_GetLoopBeginPosition
   BarelyPerformer_GetLoopLength
   BarelyPerformer_GetPosition

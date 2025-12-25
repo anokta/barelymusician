@@ -29,6 +29,8 @@ struct Repeater {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Repeater(Engine& engine, Instrument& instrument) noexcept;
 
+  ~Repeater() noexcept { engine_.DestroyPerformer(performer_ref_); }
+
   /// Clears all notes.
   void Clear() noexcept;
 
@@ -81,7 +83,7 @@ struct Repeater {
   Instrument& instrument_;
 
   // Performer.
-  Performer performer_;
+  PerformerRef performer_ref_;
 
   // Task.
   Task task_;

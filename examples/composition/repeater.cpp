@@ -12,14 +12,14 @@ namespace barely::examples {
 Repeater::Repeater(Engine& engine, Instrument& instrument) noexcept
     : engine_(engine),
       instrument_(instrument),
-      performer_(engine_.CreatePerformer()),
-      task_(performer_.CreateTask(0.0, 1.0, 0, [this](TaskEventType type) noexcept {
+      performer_ref_(engine_.CreatePerformer()),
+      task_(performer_ref_.CreateTask(0.0, 1.0, 0, [this](TaskEventType type) noexcept {
         if (type == TaskEventType::kBegin) {
           OnBeat();
         }
       })) {
-  performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
+  performer_ref_.SetLooping(true);
+  performer_ref_.SetLoopLength(1.0);
 }
 
 void Repeater::Clear() noexcept {
@@ -29,7 +29,7 @@ void Repeater::Clear() noexcept {
   pitches_.clear();
 }
 
-bool Repeater::IsPlaying() const noexcept { return performer_.IsPlaying(); }
+bool Repeater::IsPlaying() const noexcept { return performer_ref_.IsPlaying(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Pop() noexcept {
@@ -50,7 +50,7 @@ void Repeater::Push(std::optional<float> pitch_or, int length) noexcept {
 
 void Repeater::SetRate(double rate) noexcept {
   const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
-  performer_.SetLoopLength(length);
+  performer_ref_.SetLoopLength(length);
   task_.SetDuration(length);
 }
 
@@ -62,7 +62,7 @@ void Repeater::Start(float pitch_offset) noexcept {
     return;
   }
   pitch_offset_ = pitch_offset;
-  performer_.Start();
+  performer_ref_.Start();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -70,8 +70,8 @@ void Repeater::Stop() noexcept {
   if (!IsPlaying()) {
     return;
   }
-  performer_.Stop();
-  performer_.SetPosition(0.0);
+  performer_ref_.Stop();
+  performer_ref_.SetPosition(0.0);
   instrument_.SetAllNotesOff();
   index_ = -1;
   remaining_length_ = 0;

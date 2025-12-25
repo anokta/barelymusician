@@ -1,7 +1,9 @@
 VERS_1.0 {
   global:
     BarelyEngine_Create;
+    BarelyEngine_CreatePerformer;
     BarelyEngine_Destroy;
+    BarelyEngine_DestroyPerformer;
     BarelyEngine_GetControl;
     BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
@@ -21,8 +23,6 @@ VERS_1.0 {
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOn;
     BarelyInstrument_SetSampleData;
-    BarelyPerformer_Create;
-    BarelyPerformer_Destroy;
     BarelyPerformer_GetLoopBeginPosition;
     BarelyPerformer_GetLoopLength;
     BarelyPerformer_GetPosition;

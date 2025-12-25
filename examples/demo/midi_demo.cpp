@@ -23,7 +23,7 @@ using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
-using ::barely::Performer;
+using ::barely::PerformerRef;
 using ::barely::Task;
 using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
@@ -54,7 +54,7 @@ constexpr double kTempo = 132.0;
 
 // Builds the score for the given `midi_events`.
 bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instrument& instrument,
-                Performer& performer, std::vector<Task>& tasks) {
+                PerformerRef& performer, std::vector<Task>& tasks) {
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
@@ -104,7 +104,7 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate, kFrameCount);
   engine.SetTempo(kTempo);
 
-  std::vector<std::tuple<Instrument, Performer, std::vector<Task>, size_t>> tracks;
+  std::vector<std::tuple<Instrument, PerformerRef, std::vector<Task>, size_t>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
     tracks.emplace_back(engine.CreateInstrument(), engine.CreatePerformer(), std::vector<Task>{},

@@ -1194,65 +1194,6 @@ using NoteEventCallback = std::function<void(NoteEventType type, float pitch)>;
 /// @param type Task event type.
 using TaskEventCallback = std::function<void(TaskEventType type)>;
 
-/// Handle wrapper template.
-template <typename HandleType>
-class HandleWrapper {
- public:
-  /// Default constructor.
-  constexpr HandleWrapper() noexcept = default;
-
-  /// Constructs a new `HandleWrapper`.
-  ///
-  /// @param handle Raw handle.
-  explicit constexpr HandleWrapper(HandleType handle) noexcept : handle_(handle) {
-    assert(handle != nullptr);
-  }
-
-  /// Default destructor.
-  constexpr ~HandleWrapper() noexcept = default;
-
-  /// Non-copyable.
-  constexpr HandleWrapper(const HandleWrapper& other) noexcept = delete;
-  constexpr HandleWrapper& operator=(const HandleWrapper& other) noexcept = delete;
-
-  /// Constructs a new `HandleWrapper` via move.
-  ///
-  /// @param other Other handle wrapper.
-  constexpr HandleWrapper(HandleWrapper&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
-
-  /// Assigns `HandleWrapper` via move.
-  ///
-  /// @param other Other.
-  /// @return Handle wrapper.
-  constexpr HandleWrapper& operator=(HandleWrapper&& other) noexcept {
-    if (this != &other) {
-      handle_ = std::exchange(other.handle_, nullptr);
-    }
-    return *this;
-  }
-
-  /// Returns the raw handle.
-  ///
-  /// @return Raw handle.
-  [[nodiscard]] constexpr operator HandleType() const noexcept { return handle_; }
-
- protected:
-  // Helper functions to set a callback.
-  template <typename CallbackFn, typename SetCallbackFn, typename... CallbackArgs>
-  void SetCallback(SetCallbackFn set_callback_fn, std::function<void(CallbackArgs...)>& callback,
-                   CallbackFn callback_fn) {
-    [[maybe_unused]] const bool success = callback
-                                              ? set_callback_fn(handle_, callback_fn, &callback)
-                                              : set_callback_fn(handle_, nullptr, nullptr);
-    assert(success && "HandleWrapper::SetCallback failed");
-  }
-
- private:
-  // Raw handle.
-  HandleType handle_ = nullptr;
-};
-
 /// Class that wraps an instrument reference.
 class InstrumentRef {
  public:
@@ -1685,35 +1626,39 @@ class PerformerRef {
 };
 
 /// A class that wraps an engine handle.
-class Engine : public HandleWrapper<BarelyEngineHandle> {
+class Engine {
  public:
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
   /// @param max_frame_count Maximum number of frames.
-  Engine(int sample_rate, int max_frame_count) noexcept
-      : HandleWrapper([&]() {
-          BarelyEngineHandle engine = nullptr;
-          [[maybe_unused]] const bool success = BarelyEngine_Create(
-              static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_frame_count), &engine);
-          assert(success);
-          return engine;
-        }()) {}
+  Engine(int sample_rate, int max_frame_count) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_Create(
+        static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_frame_count), &engine_);
+    assert(success);
+  }
 
   /// Constructs a new `Engine` from a raw handle.
   ///
   /// @param engine Raw handle to engine.
-  explicit Engine(BarelyEngineHandle engine) noexcept : HandleWrapper(engine) {}
+  explicit Engine(BarelyEngineHandle engine) noexcept : engine_(engine) {
+    assert(engine != nullptr);
+  }
 
   /// Destroys `Engine`.
-  ~Engine() noexcept { BarelyEngine_Destroy(*this); }
+  ~Engine() noexcept { BarelyEngine_Destroy(engine_); }
 
   /// Non-copyable.
   Engine(const Engine& other) noexcept = delete;
   Engine& operator=(const Engine& other) noexcept = delete;
 
-  /// Default move constructor.
-  Engine(Engine&& other) noexcept = default;
+  /// Constructs a new `Engine` via move.
+  ///
+  /// @param other Other engine.
+  Engine(Engine&& other) noexcept
+      : engine_(std::exchange(other.engine_, nullptr)),
+        note_event_callbacks_(std::exchange(other.note_event_callbacks_, {})),
+        task_event_callbacks_(std::exchange(other.task_event_callbacks_, {})) {}
 
   /// Assigns `Engine` via move.
   ///
@@ -1721,11 +1666,18 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// @return Engine.
   Engine& operator=(Engine&& other) noexcept {
     if (this != &other) {
-      BarelyEngine_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
+      BarelyEngine_Destroy(engine_);
+      engine_ = std::exchange(other.engine_, nullptr);
+      note_event_callbacks_ = std::exchange(other.note_event_callbacks_, {});
+      task_event_callbacks_ = std::exchange(other.task_event_callbacks_, {});
     }
     return *this;
   }
+
+  /// Returns the raw handle.
+  ///
+  /// @return Raw handle.
+  [[nodiscard]] constexpr operator BarelyEngineHandle() const noexcept { return engine_; }
 
   /// Creates a new instrument.
   ///
@@ -1735,11 +1687,11 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
       std::span<const InstrumentControlOverride> control_overrides = {}) noexcept {
     BarelyInstrumentRef instrument = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(
-        *this, reinterpret_cast<const BarelyInstrumentControlOverride*>(control_overrides.data()),
+        engine_, reinterpret_cast<const BarelyInstrumentControlOverride*>(control_overrides.data()),
         static_cast<int32_t>(control_overrides.size()), &instrument);
     assert(success);
     note_event_callbacks_[instrument] = {};
-    return InstrumentRef(*this, instrument, &note_event_callbacks_[instrument]);
+    return InstrumentRef(engine_, instrument, &note_event_callbacks_[instrument]);
   }
 
   /// Creates a new performer.
@@ -1747,9 +1699,9 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// @return Performer reference.
   [[nodiscard]] PerformerRef CreatePerformer() noexcept {
     BarelyPerformerRef performer = 0;
-    [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(*this, &performer);
+    [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer);
     assert(success);
-    return PerformerRef(*this, performer);
+    return PerformerRef(engine_, performer);
   }
 
   /// Creates a new task.
@@ -1763,13 +1715,13 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   [[nodiscard]] TaskRef CreateTask(PerformerRef performer, double position, double duration,
                                    int priority, TaskEventCallback callback) noexcept {
     BarelyTaskRef task = 0;
-    [[maybe_unused]] bool success = BarelyEngine_CreateTask(*this, performer, position, duration,
+    [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
                                                             priority, nullptr, nullptr, &task);
     assert(success);
     task_event_callbacks_[task] = std::move(callback);
     // TODO(#126): Fix up event callbacks on copy/move.
     success = BarelyTask_SetEventCallback(
-        *this, task,
+        engine_, task,
         [](BarelyTaskEventType type, void* user_data) noexcept {
           if (user_data != nullptr) {
             (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
@@ -1777,14 +1729,14 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
         },
         &task_event_callbacks_[task]);
     assert(success);
-    return TaskRef(*this, task, &task_event_callbacks_[task]);
+    return TaskRef(engine_, task, &task_event_callbacks_[task]);
   }
 
   /// Destroys an instrument.
   ///
   /// @param instrument Instrument reference.
   void DestroyInstrument(InstrumentRef instrument) {
-    [[maybe_unused]] const bool success = BarelyEngine_DestroyInstrument(*this, instrument);
+    [[maybe_unused]] const bool success = BarelyEngine_DestroyInstrument(engine_, instrument);
     assert(success);
   }
 
@@ -1792,7 +1744,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   ///
   /// @param performer Performer reference.
   void DestroyPerformer(PerformerRef performer) {
-    [[maybe_unused]] const bool success = BarelyEngine_DestroyPerformer(*this, performer);
+    [[maybe_unused]] const bool success = BarelyEngine_DestroyPerformer(engine_, performer);
     assert(success);
   }
 
@@ -1800,7 +1752,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   ///
   /// @param task Task reference.
   void DestroyTask(TaskRef task) {
-    [[maybe_unused]] const bool success = BarelyEngine_DestroyTask(*this, task);
+    [[maybe_unused]] const bool success = BarelyEngine_DestroyTask(engine_, task);
     assert(success);
   }
 
@@ -1809,7 +1761,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// @return Random number.
   [[nodiscard]] double GenerateRandomNumber() noexcept {
     double number = 0.0;
-    [[maybe_unused]] const bool success = BarelyEngine_GenerateRandomNumber(*this, &number);
+    [[maybe_unused]] const bool success = BarelyEngine_GenerateRandomNumber(engine_, &number);
     assert(success);
     return number;
   }
@@ -1835,7 +1787,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
                   "ValueType is not supported");
     float value = 0.0f;
     [[maybe_unused]] const bool success =
-        BarelyEngine_GetControl(*this, static_cast<BarelyEngineControlType>(type), &value);
+        BarelyEngine_GetControl(engine_, static_cast<BarelyEngineControlType>(type), &value);
     assert(success);
     return static_cast<ValueType>(value);
   }
@@ -1845,7 +1797,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// @return Seed value.
   [[nodiscard]] int GetSeed() const noexcept {
     int32_t seed = 0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetSeed(*this, &seed);
+    [[maybe_unused]] const bool success = BarelyEngine_GetSeed(engine_, &seed);
     assert(success);
     return static_cast<int>(seed);
   }
@@ -1855,7 +1807,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept {
     double tempo = 0.0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetTempo(*this, &tempo);
+    [[maybe_unused]] const bool success = BarelyEngine_GetTempo(engine_, &tempo);
     assert(success);
     return tempo;
   }
@@ -1865,7 +1817,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept {
     double timestamp = 0.0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetTimestamp(*this, &timestamp);
+    [[maybe_unused]] const bool success = BarelyEngine_GetTimestamp(engine_, &timestamp);
     assert(success);
     return timestamp;
   }
@@ -1879,7 +1831,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   void Process(float* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyEngine_Process(*this, output_samples, static_cast<int32_t>(output_channel_count),
+        BarelyEngine_Process(engine_, output_samples, static_cast<int32_t>(output_channel_count),
                              static_cast<int32_t>(output_frame_count), timestamp);
     assert(success);
   }
@@ -1893,13 +1845,13 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyEngine_SetControl(
-        *this, static_cast<BarelyEngineControlType>(type), static_cast<float>(value));
+        engine_, static_cast<BarelyEngineControlType>(type), static_cast<float>(value));
     assert(success);
   }
 
   /// Sets the random number generator seed.
   void SetSeed(int seed) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_SetSeed(*this, static_cast<int32_t>(seed));
+    [[maybe_unused]] const bool success = BarelyEngine_SetSeed(engine_, static_cast<int32_t>(seed));
     assert(success);
   }
 
@@ -1907,7 +1859,7 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   ///
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_SetTempo(*this, tempo);
+    [[maybe_unused]] const bool success = BarelyEngine_SetTempo(engine_, tempo);
     assert(success);
   }
 
@@ -1915,11 +1867,15 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_Update(*this, timestamp);
+    [[maybe_unused]] const bool success = BarelyEngine_Update(engine_, timestamp);
     assert(success);
   }
 
  private:
+  // Raw handle.
+  BarelyEngineHandle engine_ = nullptr;
+
+  // TODO(#126): Handle copy/move for callbacks below.
   // Array of note event callbacks.
   std::array<NoteEventCallback, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> note_event_callbacks_;
 

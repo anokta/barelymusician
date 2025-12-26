@@ -1,9 +1,11 @@
 VERS_1.0 {
   global:
     BarelyEngine_Create;
+    BarelyEngine_CreateInstrument;
     BarelyEngine_CreatePerformer;
     BarelyEngine_CreateTask;
     BarelyEngine_Destroy;
+    BarelyEngine_DestroyInstrument;
     BarelyEngine_DestroyPerformer;
     BarelyEngine_DestroyTask;
     BarelyEngine_GetControl;
@@ -13,8 +15,6 @@ VERS_1.0 {
     BarelyEngine_SetControl;
     BarelyEngine_SetTempo;
     BarelyEngine_Update;
-    BarelyInstrument_Create;
-    BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
     BarelyInstrument_GetNoteControl;
     BarelyInstrument_IsNoteOn;

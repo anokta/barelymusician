@@ -128,7 +128,8 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                                            engine_control_message.value);
             },
             [this](InstrumentControlMessage& instrument_control_message) noexcept {
-              auto& params = instrument_pool_.Get(instrument_control_message.instrument_index);
+              auto& params =
+                  instrument_pool_.Get(instrument_control_message.instrument_index).params;
               if (instrument_control_message.type == InstrumentControlType::kVoiceCount) {
                 const int active_voice_count = params.active_voice_count;
                 for (int i = static_cast<int>(instrument_control_message.value);
@@ -140,12 +141,12 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                                    instrument_control_message.value);
             },
             [this](NoteControlMessage& note_control_message) noexcept {
-              SetNoteControl(instrument_pool_.Get(note_control_message.instrument_index),
+              SetNoteControl(instrument_pool_.Get(note_control_message.instrument_index).params,
                              voice_pool_, note_control_message.pitch, note_control_message.type,
                              note_control_message.value);
             },
             [this](NoteOffMessage& note_off_message) noexcept {
-              auto& params = instrument_pool_.Get(note_off_message.instrument_index);
+              auto& params = instrument_pool_.Get(note_off_message.instrument_index).params;
               for (int i = 0; i < params.active_voice_count; ++i) {
                 if (auto& voice = voice_pool_.Get(params.active_voices[i]);
                     voice.pitch() == note_off_message.pitch && voice.IsOn() &&
@@ -156,7 +157,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               }
             },
             [this](NoteOnMessage& note_on_message) noexcept {
-              auto& params = instrument_pool_.Get(note_on_message.instrument_index);
+              auto& params = instrument_pool_.Get(note_on_message.instrument_index).params;
               if (auto* voice = voice_pool_.Acquire(note_on_message.instrument_index, params,
                                                     note_on_message.pitch);
                   voice != nullptr) {
@@ -165,7 +166,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               }
             },
             [this](SampleDataMessage& sample_data_message) noexcept {
-              auto& params = instrument_pool_.Get(sample_data_message.instrument_index);
+              auto& params = instrument_pool_.Get(sample_data_message.instrument_index).params;
               params.sample_data.Swap(sample_data_message.sample_data);
               for (int i = 0; i < params.active_voice_count; ++i) {
                 auto& voice = voice_pool_.Get(params.active_voices[i]);

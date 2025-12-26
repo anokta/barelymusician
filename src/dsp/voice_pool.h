@@ -12,7 +12,7 @@
 
 namespace barely {
 
-using InstrumentPool = Pool<InstrumentParams, kMaxInstrumentCount>;
+using InstrumentPool = Pool<BarelyInstrument, kMaxInstrumentCount>;
 
 class VoicePool {
  public:
@@ -87,7 +87,7 @@ class VoicePool {
                float output_frame[kStereoChannelCount]) noexcept {
     for (int i = 0; i < active_voice_count_;) {
       Voice& voice = Get(active_voices_[i].voice_index);
-      InstrumentParams& params = instrument_pool.Get(active_voices_[i].instrument_index);
+      InstrumentParams& params = instrument_pool.Get(active_voices_[i].instrument_index).params;
       if constexpr (kIsSidechainSend) {
         if (!voice.IsActive()) {
           for (int j = 0; j < params.active_voice_count; ++j) {

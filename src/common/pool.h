@@ -48,6 +48,8 @@ class Pool {
     return items_[index];
   }
 
+  [[nodiscard]] bool InUse(uint32_t index) const noexcept { return in_use_.test(index); }
+
  private:
   // Last item is reserved for nil.
   std::array<ItemType, kCount + 1> items_;

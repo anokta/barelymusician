@@ -33,15 +33,14 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
   ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, &engine));
 
   // Failures.
-  EXPECT_FALSE(BarelyInstrument_Create(engine, nullptr, 0, nullptr));
-  EXPECT_FALSE(BarelyInstrument_Destroy(nullptr));
+  EXPECT_FALSE(BarelyEngine_CreateInstrument(engine, nullptr, 0, nullptr));
+  EXPECT_FALSE(BarelyEngine_DestroyInstrument(nullptr, 0));
 
   // Success.
-  BarelyInstrumentHandle instrument = nullptr;
-  EXPECT_TRUE(BarelyInstrument_Create(engine, nullptr, 0, &instrument));
-  EXPECT_NE(instrument, nullptr);
+  BarelyInstrumentRef instrument_ref;
+  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, nullptr, 0, &instrument_ref));
 
-  EXPECT_TRUE(BarelyInstrument_Destroy(instrument));
+  EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument_ref));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
@@ -83,22 +82,23 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
 
   float note_off_pitch = 0.0f;
   float note_on_pitch = 0.0f;
-  {
-    // Create an instrument.
-    Instrument instrument = engine.CreateInstrument({});
 
-    // Set the note callbacks.
-    instrument.SetNoteEventCallback([&](NoteEventType type, float pitch) {
-      (type == NoteEventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
-    });
-    EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
-    EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
+  // Create an instrument.
+  InstrumentRef instrument_ref = engine.CreateInstrument({});
 
-    // Set a note on.
-    instrument.SetNoteOn(kPitch);
-    EXPECT_TRUE(instrument.IsNoteOn(kPitch));
-    EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
-  }
+  // Set the note callbacks.
+  instrument_ref.SetNoteEventCallback([&](NoteEventType type, float pitch) {
+    (type == NoteEventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
+  });
+  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
+  EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
+
+  // Set a note on.
+  instrument_ref.SetNoteOn(kPitch);
+  EXPECT_TRUE(instrument_ref.IsNoteOn(kPitch));
+  EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
+
+  engine.DestroyInstrument(instrument_ref);
 
   // Note should be stopped once the instrument goes out of scope.
   EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
@@ -112,7 +112,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     Engine engine(kSampleRate, kMaxFrameCount);
 
     // Create instruments with note off callbacks.
-    std::vector<Instrument> instruments;
+    std::vector<InstrumentRef> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(engine.CreateInstrument({}));
       instruments[i].SetNoteEventCallback([&](NoteEventType type, float pitch) {

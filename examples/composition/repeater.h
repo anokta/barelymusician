@@ -25,9 +25,9 @@ struct Repeater {
   // Constructs a new `Repeater`.
   ///
   /// @param engine Engine.
-  /// @param instrument Instrument.
+  /// @param instrument Instrument reference.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Repeater(Engine& engine, Instrument& instrument) noexcept;
+  Repeater(Engine& engine, InstrumentRef instrument) noexcept;
 
   ~Repeater() noexcept { engine_.DestroyPerformer(performer_ref_); }
 
@@ -80,7 +80,7 @@ struct Repeater {
   Engine& engine_;
 
   // Instrument.
-  Instrument& instrument_;
+  InstrumentRef instrument_;
 
   // Performer.
   PerformerRef performer_ref_;

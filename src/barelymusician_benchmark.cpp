@@ -84,14 +84,13 @@ template <int kInstrumentCount>
 void BM_BarelyEngine_ProcessMultipleInstruments(State& state) {
   Engine engine(kSampleRate, kFrameCount);
 
-  std::vector<Instrument> instruments;
   for (int i = 0; i < kInstrumentCount; ++i) {
-    instruments.push_back(engine.CreateInstrument());
-    instruments.back().SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
-    instruments.back().SetControl(InstrumentControlType::kOscShape, 0.0f);
-    const int voice_count = instruments.back().GetControl<int>(InstrumentControlType::kVoiceCount);
+    auto instrument = engine.CreateInstrument();
+    instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
+    instrument.SetControl(InstrumentControlType::kOscShape, 0.0f);
+    const int voice_count = instrument.GetControl<int>(InstrumentControlType::kVoiceCount);
     for (int voice_index = 0; voice_index < voice_count; ++voice_index) {
-      instruments.back().SetNoteOn(static_cast<float>(i * voice_index) / 12.0f);
+      instrument.SetNoteOn(static_cast<float>(i * voice_index) / 12.0f);
     }
   }
 

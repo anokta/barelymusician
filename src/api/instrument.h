@@ -29,13 +29,15 @@ struct BarelyInstrument {
   BarelyEngine* engine_ = nullptr;
 
   /// Instrument index.
-  uint32_t instrument_index = barely::kMaxInstrumentCount;
+  BarelyInstrumentRef instrument_index = barely::kMaxInstrumentCount;
 
   /// Arpeggiator index.
-  uint32_t arp_index = barely::kMaxPerformerCount;
+  BarelyPerformerRef arp_index = barely::kMaxPerformerCount;
 
   /// Arpeggiator task index.
-  uint32_t arp_task_index = barely::kMaxTaskCount;
+  BarelyTaskRef arp_task_index = barely::kMaxTaskCount;
+
+  barely::InstrumentParams params = {};
 
   /// Constructs a new `BarelyInstrument`.
   ///
@@ -44,6 +46,10 @@ struct BarelyInstrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   BarelyInstrument(BarelyEngine& engine,
                    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept;
+  // TODO(#126): Temp workaround.
+  BarelyInstrument() noexcept {}
+  void Init(BarelyEngine& engine,
+            std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept;
 
   /// Returns a control value.
   ///

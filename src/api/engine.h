@@ -61,6 +61,18 @@ struct BarelyEngine {
     performer_pool_.Release(performer_index);
   }
 
+  void DestroyInstruments() noexcept {
+    for (uint32_t i = 0; i < barely::kMaxInstrumentCount; ++i) {
+      if (instrument_pool_.InUse(i)) {
+        instrument_pool_.Get(i).SetAllNotesOff();
+      }
+    }
+  }
+
+  [[nodiscard]] BarelyInstrument& GetInstrument(uint32_t instrument_index) noexcept {
+    return instrument_pool_.Get(instrument_index);
+  }
+
   [[nodiscard]] BarelyPerformer& GetPerformer(uint32_t performer_index) noexcept {
     return performer_pool_.Get(performer_index);
   }

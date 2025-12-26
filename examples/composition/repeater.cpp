@@ -9,7 +9,7 @@
 namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(Engine& engine, Instrument& instrument) noexcept
+Repeater::Repeater(Engine& engine, InstrumentRef instrument) noexcept
     : engine_(engine),
       instrument_(instrument),
       performer_ref_(engine_.CreatePerformer()),

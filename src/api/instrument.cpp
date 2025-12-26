@@ -97,11 +97,17 @@ using ::barely::SampleDataMessage;
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyInstrument::BarelyInstrument(
     BarelyEngine& engine,
-    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept
-    : controls_(BuildControlArray(control_overrides)),
-      engine_(&engine),
-      arp_index(engine.AddPerformer()),
-      arp_task_index(engine.AddTask()) {
+    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
+  Init(engine, control_overrides);
+}
+
+void BarelyInstrument::Init(
+    BarelyEngine& engine,
+    std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
+  controls_ = BuildControlArray(control_overrides);
+  engine_ = &engine;
+  arp_index = engine.AddPerformer();
+  arp_task_index = engine.AddTask();
   const float arp_rate = controls_[BarelyInstrumentControlType_kArpRate].value;
 
   auto& arp = engine.GetPerformer(arp_index);

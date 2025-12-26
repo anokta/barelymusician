@@ -20,8 +20,8 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::Instrument;
 using ::barely::InstrumentControlType;
+using ::barely::InstrumentRef;
 using ::barely::NoteEventType;
 using ::barely::PerformerRef;
 using ::barely::TaskEventType;
@@ -53,7 +53,7 @@ constexpr double kTempo = 132.0;
 
 // Builds the score for the given `midi_events`.
 bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Engine& engine,
-                Instrument& instrument, PerformerRef& performer) {
+                InstrumentRef& instrument, PerformerRef& performer) {
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
@@ -102,7 +102,7 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate, kFrameCount);
   engine.SetTempo(kTempo);
 
-  std::vector<std::tuple<Instrument, PerformerRef, size_t>> tracks;
+  std::vector<std::tuple<InstrumentRef, PerformerRef, size_t>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
     tracks.emplace_back(engine.CreateInstrument(), engine.CreatePerformer(), tracks.size() + 1);
@@ -110,6 +110,8 @@ int main(int /*argc*/, char* argv[]) {
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, engine, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
+      engine.DestroyInstrument(instrument);
+      engine.DestroyPerformer(performer);
       tracks.pop_back();
       continue;
     }

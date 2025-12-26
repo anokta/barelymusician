@@ -21,6 +21,9 @@ struct Control {
   /// Maximum value.
   float max_value = std::numeric_limits<float>::max();
 
+  /// Default constructor.
+  constexpr Control() noexcept = default;
+
   /// Constructs a new `Control`.
   ///
   /// @param default_value Default value.

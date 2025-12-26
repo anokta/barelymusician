@@ -162,10 +162,10 @@
 ///   BarelyEngine_CreatePerformer(engine, &performer_ref);
 ///
 ///   // Create a task.
-///   BarelyTaskHandle task = nullptr;
+///   BarelyTaskRef task_ref;
 ///   BarelyTaskEventCallback callback{ /*populate this*/ };
 ///   BarelyTask_Create(engine, performer_ref, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
-///                     callback, &task);
+///                     callback, &task_ref);
 ///
 ///   // Set to looping.
 ///   BarelyPerformer_SetLooping(engine, performer_ref, /*is_looping=*/true);
@@ -178,10 +178,10 @@
 ///   BarelyPerformer_IsPlaying(engine, performer_ref, &is_playing);
 ///
 ///   // Destroy the task.
-///   BarelyTask_Destroy(task);
+///   BarelyTask_Destroy(engine, task_ref);
 ///
 ///   // Destroy.
-///   BarelyEngine_DestroyPerformer(engine, engine, performer_ref);
+///   BarelyEngine_DestroyPerformer(engine, performer_ref);
 ///   @endcode
 
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
@@ -471,8 +471,8 @@ typedef struct BarelyInstrument* BarelyInstrumentHandle;
 /// Performer reference.
 typedef uint32_t BarelyPerformerRef;
 
-/// Task handle.
-typedef struct BarelyTask* BarelyTaskHandle;
+/// Task reference.
+typedef uint32_t BarelyTaskRef;
 
 /// Note event callback.
 ///
@@ -504,6 +504,21 @@ BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count
 BARELY_API bool BarelyEngine_CreatePerformer(BarelyEngineHandle engine,
                                              BarelyPerformerRef* out_performer_ref);
 
+/// Creates a new task.
+///
+/// @param performer_ref Performer reference.
+/// @param position Task position in beats.
+/// @param duration Task duration in beats.
+/// @param priority Task priority.
+/// @param callback Task event callback.
+/// @param user_data Pointer to user data.
+/// @param out_task_ref Output task reference.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_CreateTask(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                                        double position, double duration, int32_t priority,
+                                        BarelyTaskEventCallback callback, void* user_data,
+                                        BarelyTaskRef* out_task_ref);
+
 /// Destroys an engine.
 ///
 /// @param engine Engine handle.
@@ -516,6 +531,12 @@ BARELY_API bool BarelyEngine_Destroy(BarelyEngineHandle engine);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine,
                                               BarelyPerformerRef performer_ref);
+
+/// Destroys a task.
+///
+/// @param task_ref Task reference.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_DestroyTask(BarelyEngineHandle engine, BarelyTaskRef task_ref);
 
 /// Generates a new random number with uniform distribution in the normalized range [0, 1).
 ///
@@ -808,83 +829,69 @@ BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantiz
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch);
 
-/// Creates a new task.
-///
-/// @param performer_ref Performer reference.
-/// @param position Task position in beats.
-/// @param duration Task duration in beats.
-/// @param priority Task priority.
-/// @param callback Task event callback.
-/// @param user_data Pointer to user data.
-/// @param out_task Output task handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_Create(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
-                                  double position, double duration, int32_t priority,
-                                  BarelyTaskEventCallback callback, void* user_data,
-                                  BarelyTaskHandle* out_task);
-
-/// Destroys a task.
-///
-/// @param task Task handle.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_Destroy(BarelyTaskHandle task);
-
 /// Gets the duration of a task.
 ///
-/// @param task Task handle.
+/// @param task_ref Task reference.
 /// @param out_duration Output duration in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetDuration(BarelyTaskHandle task, double* out_duration);
+BARELY_API bool BarelyTask_GetDuration(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                       double* out_duration);
 
 /// Gets the position of a task.
 ///
-/// @param task Task handle.
+/// @param task_ref Task reference.
 /// @param out_position Output position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position);
+BARELY_API bool BarelyTask_GetPosition(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                       double* out_position);
 
 /// Gets the priority of a task.
 ///
-/// @param task Task handle.
+/// @param task_ref Task reference.
 /// @param out_priority Output priority.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetPriority(BarelyTaskHandle task, int32_t* out_priority);
+BARELY_API bool BarelyTask_GetPriority(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                       int32_t* out_priority);
 
 /// Gets whether the task is active or not.
 ///
-/// @param task Task handle.
+/// @param task_ref Task reference.
 /// @param out_is_active Output true if active, false otherwise.
-BARELY_API bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active);
+BARELY_API bool BarelyTask_IsActive(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                    bool* out_is_active);
 
 /// Sets the duration of a task.
 ///
-/// @param task Task handle.
+/// @param task_ref Task reference.
 /// @param duration Duration in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration);
+BARELY_API bool BarelyTask_SetDuration(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                       double duration);
 
 /// Sets the event callback of a task.
 ///
-/// @param task Task handle.
+/// @param task_ref Task reference.
 /// @param callback Event callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetEventCallback(BarelyTaskHandle task, BarelyTaskEventCallback callback,
-                                            void* user_data);
+BARELY_API bool BarelyTask_SetEventCallback(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                            BarelyTaskEventCallback callback, void* user_data);
 
 /// Sets the position of a task.
 ///
-/// @param task Task handle.
+/// @param task_ref Task reference.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetPosition(BarelyTaskHandle task, double position);
+BARELY_API bool BarelyTask_SetPosition(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                       double position);
 
 /// Sets the priority of a task.
 ///
-/// @param task Task handle.
+/// @param task_ref Task reference.
 /// @param priority Priority.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority);
+BARELY_API bool BarelyTask_SetPriority(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                       int32_t priority);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -896,6 +903,7 @@ BARELY_API bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority);
 /// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #ifdef __cplusplus
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <functional>
@@ -1410,78 +1418,29 @@ class Instrument : public HandleWrapper<BarelyInstrumentHandle> {
   NoteEventCallback note_event_callback_;
 };
 
-/// Class that wraps a task handle.
-class Task : public HandleWrapper<BarelyTaskHandle> {
+/// Class that wraps a task reference.
+class TaskRef {
  public:
-  /// Constructs a new `Task`.
+  /// Constructs a new `TaskRef` from a raw reference.
   ///
-  /// @param performer_ref Raw performer reference.
-  /// @param position Task position in beats.
-  /// @param duration Task duration in beats.
-  /// @param priority Task priority.
-  /// @param callback Task event callback.
-  Task(BarelyEngineHandle engine, BarelyPerformerRef performer_ref, double position,
-       double duration, int priority, TaskEventCallback callback) noexcept
-      : HandleWrapper([&]() {
-          BarelyTaskHandle task = nullptr;
-          [[maybe_unused]] const bool success = BarelyTask_Create(
-              engine, performer_ref, position, duration, priority,
-              [](BarelyTaskEventType type, void* user_data) noexcept {
-                if (user_data != nullptr) {
-                  (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
-                }
-              },
-              &event_callback_, &task);
-          assert(success);
-          return task;
-        }()),
-        event_callback_(std::move(callback)) {}
+  /// @param engine Raw engine handle.
+  /// @param task_ref Raw task reference.
+  /// @param event_callback Pointer to task event callback.
+  TaskRef(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+          TaskEventCallback* event_callback) noexcept
+      : engine_(engine), task_ref_(task_ref), event_callback_(event_callback) {}
 
-  /// Constructs a new `Task` from a raw handle.
+  /// Returns the raw reference.
   ///
-  /// @param task Raw handle to task.
-  explicit Task(BarelyTaskHandle task) noexcept : HandleWrapper(task) {}
-
-  /// Destroys `Task`.
-  ~Task() noexcept { BarelyTask_Destroy(*this); }
-
-  /// Non-copyable.
-  Task(const Task& other) noexcept = delete;
-  Task& operator=(const Task& other) noexcept = delete;
-
-  /// Constructs a new `Task` via move.
-  ///
-  /// @param other Other task.
-  /// @return Task.
-  Task(Task&& other) noexcept
-      : HandleWrapper(std::move(other)), event_callback_(std::exchange(other.event_callback_, {})) {
-    if (event_callback_) {
-      SetEventCallback();
-    }
-  }
-
-  /// Assigns `Task` via move.
-  ///
-  /// @param other Other task.
-  /// @return Task.
-  Task& operator=(Task&& other) noexcept {
-    if (this != &other) {
-      BarelyTask_Destroy(*this);
-      HandleWrapper::operator=(std::move(other));
-      event_callback_ = std::exchange(other.event_callback_, {});
-      if (event_callback_) {
-        SetEventCallback();
-      }
-    }
-    return *this;
-  }
+  /// @return Raw reference.
+  [[nodiscard]] constexpr operator BarelyTaskRef() const noexcept { return task_ref_; }
 
   /// Returns the duration.
   ///
   /// @return Duration in beats.
   [[nodiscard]] double GetDuration() const noexcept {
     double duration = 0.0;
-    [[maybe_unused]] const bool success = BarelyTask_GetDuration(*this, &duration);
+    [[maybe_unused]] const bool success = BarelyTask_GetDuration(engine_, task_ref_, &duration);
     assert(success);
     return duration;
   }
@@ -1491,7 +1450,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const bool success = BarelyTask_GetPosition(*this, &position);
+    [[maybe_unused]] const bool success = BarelyTask_GetPosition(engine_, task_ref_, &position);
     assert(success);
     return position;
   }
@@ -1501,7 +1460,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   /// @return Priority.
   [[nodiscard]] int GetPriority() const noexcept {
     int32_t priority = 0;
-    [[maybe_unused]] const bool success = BarelyTask_GetPriority(*this, &priority);
+    [[maybe_unused]] const bool success = BarelyTask_GetPriority(engine_, task_ref_, &priority);
     assert(success);
     return static_cast<int>(priority);
   }
@@ -1511,7 +1470,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsActive() const noexcept {
     bool is_active = false;
-    [[maybe_unused]] const bool success = BarelyTask_IsActive(*this, &is_active);
+    [[maybe_unused]] const bool success = BarelyTask_IsActive(engine_, task_ref_, &is_active);
     assert(success);
     return is_active;
   }
@@ -1520,7 +1479,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   ///
   /// @param duration Duration in beats.
   void SetDuration(double duration) noexcept {
-    [[maybe_unused]] const bool success = BarelyTask_SetDuration(*this, duration);
+    [[maybe_unused]] const bool success = BarelyTask_SetDuration(engine_, task_ref_, duration);
     assert(success);
   }
 
@@ -1528,8 +1487,8 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   ///
   /// @param callback Event callback.
   void SetEventCallback(TaskEventCallback callback) noexcept {
-    BarelyTask_SetEventCallback(*this, nullptr, nullptr);
-    event_callback_ = std::move(callback);
+    BarelyTask_SetEventCallback(engine_, task_ref_, nullptr, nullptr);
+    *event_callback_ = std::move(callback);
     SetEventCallback();
   }
 
@@ -1537,7 +1496,7 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const bool success = BarelyTask_SetPosition(*this, position);
+    [[maybe_unused]] const bool success = BarelyTask_SetPosition(engine_, task_ref_, position);
     assert(success);
   }
 
@@ -1546,25 +1505,38 @@ class Task : public HandleWrapper<BarelyTaskHandle> {
   /// @param priority Priority.
   void SetPriority(int priority) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyTask_SetPriority(*this, static_cast<int32_t>(priority));
+        BarelyTask_SetPriority(engine_, task_ref_, static_cast<int32_t>(priority));
     assert(success);
   }
 
  private:
   // Helper function to set the event callback.
   void SetEventCallback() noexcept {
-    SetCallback(BarelyTask_SetEventCallback, event_callback_,
-                [](BarelyTaskEventType type, void* user_data) noexcept {
-                  assert(user_data != nullptr && "Invalid task event callback user data");
-                  if (const auto& callback = *static_cast<TaskEventCallback*>(user_data);
-                      callback) {
-                    callback(static_cast<TaskEventType>(type));
-                  }
-                });
+    assert(event_callback_);
+    [[maybe_unused]] const bool success =
+        (*event_callback_)
+            ? BarelyTask_SetEventCallback(
+                  engine_, task_ref_,
+                  [](BarelyTaskEventType type, void* user_data) noexcept {
+                    assert(user_data != nullptr && "Invalid task event callback user data");
+                    if (const auto& callback = *static_cast<TaskEventCallback*>(user_data);
+                        callback) {
+                      callback(static_cast<TaskEventType>(type));
+                    }
+                  },
+                  event_callback_)
+            : BarelyTask_SetEventCallback(engine_, task_ref_, nullptr, nullptr);
+    assert(success && "SetCallback failed");
   }
 
+  // Engine handle.
+  BarelyEngineHandle engine_ = nullptr;
+
+  // Raw task reference.
+  BarelyTaskRef task_ref_ = 0;
+
   // Event callback.
-  TaskEventCallback event_callback_;
+  TaskEventCallback* event_callback_ = nullptr;
 };
 
 /// Class that wraps a performer reference.
@@ -1581,18 +1553,6 @@ class PerformerRef {
   ///
   /// @return Raw reference.
   [[nodiscard]] constexpr operator BarelyPerformerRef() const noexcept { return performer_ref_; }
-
-  /// Creates a new task.
-  ///
-  /// @param position Task position in beats.
-  /// @param duration Task duration in beats.
-  /// @param priority Task priority.
-  /// @param callback Task event callback.
-  /// @return Task.
-  [[nodiscard]] Task CreateTask(double position, double duration, int priority,
-                                TaskEventCallback callback) noexcept {
-    return Task(engine_, performer_ref_, position, duration, priority, std::move(callback));
-  }
 
   /// Returns the loop begin position.
   ///
@@ -1698,10 +1658,10 @@ class PerformerRef {
   }
 
  private:
-  /// Engine handle.
+  // Engine handle.
   BarelyEngineHandle engine_;
 
-  /// Raw performer reference.
+  // Raw performer reference.
   BarelyPerformerRef performer_ref_;
 };
 
@@ -1757,9 +1717,9 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     return Instrument(*this, control_overrides);
   }
 
-  /// Creates a performer.
+  /// Creates a new performer.
   ///
-  /// @return PerformerRef.
+  /// @return Performer reference.
   [[nodiscard]] PerformerRef CreatePerformer() noexcept {
     BarelyPerformerRef performer_ref = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(*this, &performer_ref);
@@ -1767,11 +1727,47 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     return PerformerRef(*this, performer_ref);
   }
 
+  /// Creates a new task.
+  ///
+  /// @param performer_ref Performer reference.
+  /// @param position Task position in beats.
+  /// @param duration Task duration in beats.
+  /// @param priority Task priority.
+  /// @param callback Task event callback.
+  /// @return Task reference.
+  [[nodiscard]] TaskRef CreateTask(PerformerRef performer_ref, double position, double duration,
+                                   int priority, TaskEventCallback callback) noexcept {
+    BarelyTaskRef task_ref = 0;
+    [[maybe_unused]] bool success = BarelyEngine_CreateTask(
+        *this, performer_ref, position, duration, priority, nullptr, nullptr, &task_ref);
+    assert(success);
+    task_event_callbacks_[task_ref] = std::move(callback);
+    // TODO(#126): Fix up event callbacks on copy/move.
+    success = BarelyTask_SetEventCallback(
+        *this, task_ref,
+        [](BarelyTaskEventType type, void* user_data) noexcept {
+          if (user_data != nullptr) {
+            (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
+          }
+        },
+        &task_event_callbacks_[task_ref]);
+    assert(success);
+    return TaskRef(*this, task_ref, &task_event_callbacks_[task_ref]);
+  }
+
   /// Destroys a performer.
   ///
   /// @param performer_ref Performer reference.
-  void DestroyPerformer(const PerformerRef& performer_ref) {
+  void DestroyPerformer(PerformerRef performer_ref) {
     [[maybe_unused]] const bool success = BarelyEngine_DestroyPerformer(*this, performer_ref);
+    assert(success);
+  }
+
+  /// Destroys a task.
+  ///
+  /// @param task_ref Task reference.
+  void DestroyTask(TaskRef task_ref) {
+    [[maybe_unused]] const bool success = BarelyEngine_DestroyTask(*this, task_ref);
     assert(success);
   }
 
@@ -1889,6 +1885,10 @@ class Engine : public HandleWrapper<BarelyEngineHandle> {
     [[maybe_unused]] const bool success = BarelyEngine_Update(*this, timestamp);
     assert(success);
   }
+
+ private:
+  // Array of task event callbacks.
+  std::array<TaskEventCallback, BARELYMUSICIAN_MAX_TASK_COUNT> task_event_callbacks_;
 };
 
 /// A musical quantization.

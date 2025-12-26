@@ -32,6 +32,31 @@ bool BarelyEngine_CreatePerformer(BarelyEngineHandle engine,
   return *out_performer_ref != barely::kMaxPerformerCount;
 }
 
+bool BarelyEngine_CreateTask(BarelyEngineHandle engine, BarelyPerformerRef performer_ref,
+                             double position, double duration, int32_t priority,
+                             BarelyTaskEventCallback callback, void* user_data,
+                             BarelyTaskRef* out_task_ref) {
+  if (!engine) return false;
+  if (duration <= 0.0) return false;
+  if (!out_task_ref) return false;
+
+  *out_task_ref = engine->AddTask();
+  if (*out_task_ref == barely::kMaxTaskCount) {
+    return false;
+  }
+
+  // TODO(#126): Clean this up once all pools are established.
+  auto& task = engine->GetTask(*out_task_ref);
+  task.position = position;
+  task.duration = duration;
+  task.event_callback = {callback, user_data};
+  task.priority = static_cast<int>(priority);
+  task.performer = &engine->GetPerformer(performer_ref);
+  engine->GetPerformer(performer_ref).AddTask(&task);
+
+  return true;
+}
+
 bool BarelyEngine_Destroy(BarelyEngineHandle engine) {
   if (!engine) return false;
 
@@ -43,6 +68,14 @@ bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine, BarelyPerformerRef
   if (!engine) return false;
 
   engine->RemovePerformer(performer_ref);
+  return true;
+}
+
+bool BarelyEngine_DestroyTask(BarelyEngineHandle engine, BarelyTaskRef task_ref) {
+  if (!engine) return false;
+
+  engine->GetTask(task_ref).performer->RemoveTask(&engine->GetTask(task_ref));
+  engine->RemoveTask(task_ref);
   return true;
 }
 
@@ -370,97 +403,67 @@ bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_p
   return true;
 }
 
-bool BarelyTask_Create(BarelyEngineHandle engine, BarelyPerformerRef performer_ref, double position,
-                       double duration, int32_t priority, BarelyTaskEventCallback callback,
-                       void* user_data, BarelyTaskHandle* out_task) {
+bool BarelyTask_GetDuration(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                            double* out_duration) {
   if (!engine) return false;
-  if (duration <= 0.0) return false;
-  if (!out_task) return false;
-
-  const uint32_t task_index = engine->GetPerformer(performer_ref).engine->AddTask();
-  if (task_index == barely::kMaxTaskCount) {
-    return false;
-  }
-
-  // TODO(#126): Clean this up once all pools are established.
-  *out_task = &engine->GetPerformer(performer_ref).engine->GetTask(task_index);
-  (*out_task)->task_index = task_index;
-  (*out_task)->position = position;
-  (*out_task)->duration = duration;
-  (*out_task)->event_callback = {callback, user_data};
-  (*out_task)->priority = static_cast<int>(priority);
-  (*out_task)->performer = &engine->GetPerformer(performer_ref);
-  engine->GetPerformer(performer_ref).AddTask(*out_task);
-
-  return true;
-}
-
-bool BarelyTask_Destroy(BarelyTaskHandle task) {
-  if (!task) return false;
-
-  task->performer->RemoveTask(task);
-  task->performer->engine->RemoveTask(task->task_index);
-  return true;
-}
-
-bool BarelyTask_GetDuration(BarelyTaskHandle task, double* out_duration) {
-  if (!task) return false;
   if (!out_duration) return false;
 
-  *out_duration = task->duration;
+  *out_duration = engine->GetTask(task_ref).duration;
   return true;
 }
 
-bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
-  if (!task) return false;
+bool BarelyTask_GetPosition(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                            double* out_position) {
+  if (!engine) return false;
   if (!out_position) return false;
 
-  *out_position = task->position;
+  *out_position = engine->GetTask(task_ref).position;
   return true;
 }
 
-bool BarelyTask_GetPriority(BarelyTaskHandle task, int32_t* out_priority) {
-  if (!task) return false;
+bool BarelyTask_GetPriority(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                            int32_t* out_priority) {
+  if (!engine) return false;
   if (!out_priority) return false;
 
-  *out_priority = static_cast<int32_t>(task->priority);
+  *out_priority = static_cast<int32_t>(engine->GetTask(task_ref).priority);
   return true;
 }
 
-bool BarelyTask_IsActive(BarelyTaskHandle task, bool* out_is_active) {
-  if (!task) return false;
+bool BarelyTask_IsActive(BarelyEngineHandle engine, BarelyTaskRef task_ref, bool* out_is_active) {
+  if (!engine) return false;
   if (!out_is_active) return false;
 
-  *out_is_active = task->is_active;
+  *out_is_active = engine->GetTask(task_ref).is_active;
   return true;
 }
 
-bool BarelyTask_SetDuration(BarelyTaskHandle task, double duration) {
-  if (!task) return false;
+bool BarelyTask_SetDuration(BarelyEngineHandle engine, BarelyTaskRef task_ref, double duration) {
+  if (!engine) return false;
   if (duration <= 0.0) return false;
 
-  task->SetDuration(duration);
+  engine->GetTask(task_ref).SetDuration(duration);
   return true;
 }
 
-bool BarelyTask_SetEventCallback(BarelyTaskHandle task, BarelyTaskEventCallback callback,
-                                 void* user_data) {
-  if (!task) return false;
+bool BarelyTask_SetEventCallback(BarelyEngineHandle engine, BarelyTaskRef task_ref,
+                                 BarelyTaskEventCallback callback, void* user_data) {
+  if (!engine) return false;
 
-  task->SetEventCallback({callback, user_data});
+  engine->GetTask(task_ref).SetEventCallback({callback, user_data});
   return true;
 }
 
-bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
-  if (!task) return false;
+bool BarelyTask_SetPosition(BarelyEngineHandle engine, BarelyTaskRef task_ref, double position) {
+  if (!engine) return false;
 
-  task->SetPosition(position);
+  engine->GetTask(task_ref).SetPosition(position);
   return true;
 }
 
-bool BarelyTask_SetPriority(BarelyTaskHandle task, int32_t priority) {
-  if (!task) return false;
+bool BarelyTask_SetPriority(BarelyEngineHandle engine, BarelyTaskRef task_ref, int32_t priority) {
+  if (!engine) return false;
 
-  task->SetPriority(static_cast<int>(priority));
+  engine->GetTask(task_ref).SetPriority(static_cast<int>(priority));
   return true;
 }

@@ -19,9 +19,6 @@ struct BarelyTask {
   // TODO(#126): Temp reference.
   BarelyPerformer* performer = nullptr;
 
-  // Task index.
-  uint32_t task_index = barely::kMaxTaskCount;
-
   // Position in beats.
   double position = 0.0;
 

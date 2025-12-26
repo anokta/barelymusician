@@ -2,8 +2,10 @@ VERS_1.0 {
   global:
     BarelyEngine_Create;
     BarelyEngine_CreatePerformer;
+    BarelyEngine_CreateTask;
     BarelyEngine_Destroy;
     BarelyEngine_DestroyPerformer;
+    BarelyEngine_DestroyTask;
     BarelyEngine_GetControl;
     BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
@@ -35,8 +37,6 @@ VERS_1.0 {
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
     BarelyScale_GetPitch;
-    BarelyTask_Create;
-    BarelyTask_Destroy;
     BarelyTask_GetDuration;
     BarelyTask_GetPosition;
     BarelyTask_GetPriority;

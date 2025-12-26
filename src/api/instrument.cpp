@@ -133,7 +133,6 @@ BarelyInstrument::BarelyInstrument(
        },
        this},
       &arp,
-      arp_task_index,
       0.0,
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
           arp.loop_length,

@@ -24,7 +24,6 @@ using ::barely::Instrument;
 using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::PerformerRef;
-using ::barely::Task;
 using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -53,13 +52,12 @@ constexpr char kMidiFileName[] = "midi/sample.mid";
 constexpr double kTempo = 132.0;
 
 // Builds the score for the given `midi_events`.
-bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instrument& instrument,
-                PerformerRef& performer, std::vector<Task>& tasks) {
+bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Engine& engine,
+                Instrument& instrument, PerformerRef& performer) {
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
   bool has_notes = false;
-  tasks.reserve(2 * midi_events.size());
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
@@ -67,14 +65,14 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
       const double duration = get_position_fn(midi_event.getTickDuration());
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float gain = static_cast<float>(midi_event.getVelocity()) / 127.0f;
-      tasks.emplace_back(performer.CreateTask(position, duration, 0,
-                                              [&, pitch, gain](TaskEventType type) noexcept {
-                                                if (type == TaskEventType::kBegin) {
-                                                  instrument.SetNoteOn(pitch, gain);
-                                                } else if (type == TaskEventType::kEnd) {
-                                                  instrument.SetNoteOff(pitch);
-                                                }
-                                              }));
+      engine.CreateTask(performer, position, duration, 0,
+                        [&, pitch, gain](TaskEventType type) noexcept {
+                          if (type == TaskEventType::kBegin) {
+                            instrument.SetNoteOn(pitch, gain);
+                          } else if (type == TaskEventType::kEnd) {
+                            instrument.SetNoteOff(pitch);
+                          }
+                        });
       has_notes = true;
     }
   }
@@ -104,14 +102,13 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate, kFrameCount);
   engine.SetTempo(kTempo);
 
-  std::vector<std::tuple<Instrument, PerformerRef, std::vector<Task>, size_t>> tracks;
+  std::vector<std::tuple<Instrument, PerformerRef, size_t>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(engine.CreateInstrument(), engine.CreatePerformer(), std::vector<Task>{},
-                        tracks.size() + 1);
-    auto& [instrument, performer, tasks, track_index] = tracks.back();
+    tracks.emplace_back(engine.CreateInstrument(), engine.CreatePerformer(), tracks.size() + 1);
+    auto& [instrument, performer, track_index] = tracks.back();
     // Build the score to perform.
-    if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer, tasks)) {
+    if (!BuildScore(midi_file[i], ticks_per_quarter, engine, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
       tracks.pop_back();
       continue;
@@ -153,7 +150,7 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
   engine.Update(kLookahead);
-  for (auto& [instrument, performer, tasks, _] : tracks) {
+  for (auto& [instrument, performer, _] : tracks) {
     performer.Start();
   }
 

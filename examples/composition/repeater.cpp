@@ -13,11 +13,12 @@ Repeater::Repeater(Engine& engine, Instrument& instrument) noexcept
     : engine_(engine),
       instrument_(instrument),
       performer_ref_(engine_.CreatePerformer()),
-      task_(performer_ref_.CreateTask(0.0, 1.0, 0, [this](TaskEventType type) noexcept {
-        if (type == TaskEventType::kBegin) {
-          OnBeat();
-        }
-      })) {
+      task_ref_(
+          engine_.CreateTask(performer_ref_, 0.0, 1.0, 0, [this](TaskEventType type) noexcept {
+            if (type == TaskEventType::kBegin) {
+              OnBeat();
+            }
+          })) {
   performer_ref_.SetLooping(true);
   performer_ref_.SetLoopLength(1.0);
 }
@@ -51,7 +52,7 @@ void Repeater::Push(std::optional<float> pitch_or, int length) noexcept {
 void Repeater::SetRate(double rate) noexcept {
   const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
   performer_ref_.SetLoopLength(length);
-  task_.SetDuration(length);
+  task_ref_.SetDuration(length);
 }
 
 void Repeater::SetStyle(RepeaterMode style) noexcept { mode_ = style; }

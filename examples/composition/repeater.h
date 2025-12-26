@@ -86,7 +86,7 @@ struct Repeater {
   PerformerRef performer_ref_;
 
   // Task.
-  Task task_;
+  TaskRef task_ref_;
 
   // Array of pitches to play.
   std::vector<std::pair<std::optional<float>, int>> pitches_;

@@ -16,8 +16,8 @@ namespace {
 using ::barely::Engine;
 using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
-using ::barely::Task;
 using ::barely::TaskEventType;
+using ::barely::TaskRef;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -85,16 +85,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.push_back({5 + 2.0 / 3.0, 1.0 / 3.0, 11.0f / 12.0f});
   score.push_back({6.0, 2.0, 1.0f});
 
-  std::unordered_map<int, Task> tasks;
+  std::unordered_map<int, TaskRef> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {
-    return performer.CreateTask(note.position, note.duration, 0,
-                                [&instrument, pitch = note.pitch](TaskEventType type) {
-                                  if (type == TaskEventType::kBegin) {
-                                    instrument.SetNoteOn(pitch);
-                                  } else if (type == TaskEventType::kEnd) {
-                                    instrument.SetNoteOff(pitch);
-                                  }
-                                });
+    return engine.CreateTask(performer, note.position, note.duration, 0,
+                             [&instrument, pitch = note.pitch](TaskEventType type) {
+                               if (type == TaskEventType::kBegin) {
+                                 instrument.SetNoteOn(pitch);
+                               } else if (type == TaskEventType::kEnd) {
+                                 instrument.SetNoteOff(pitch);
+                               }
+                             });
   };
   for (int i = 0; i < static_cast<int>(score.size()); ++i) {
     tasks.emplace(i, build_note_fn(score[i]));
@@ -119,6 +119,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
       if (const auto it = tasks.find(index - 1); it != tasks.end()) {
+        engine.DestroyTask(it->second);
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {

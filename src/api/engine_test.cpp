@@ -45,7 +45,6 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
           &process_callback,
       },
       &performer,
-      task_index,
       1.0,
       2.0,
       0,

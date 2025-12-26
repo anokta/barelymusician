@@ -58,7 +58,7 @@ auto performer = engine.CreatePerformer();
 performer.SetLooping(/*is_looping=*/true);
 
 // Create a new task that plays an instrument note every beat.
-auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
+auto task = engine.CreateTask(performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
                                  [&](barely::TaskEventType type) {
                                    constexpr float kC3Pitch = -1.0f;
                                    if (type == barely::TaskEventType::kBegin) {

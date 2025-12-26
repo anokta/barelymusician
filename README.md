@@ -59,14 +59,14 @@ performer.SetLooping(/*is_looping=*/true);
 
 // Create a new task that plays an instrument note every beat.
 auto task = engine.CreateTask(performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
-                                 [&](barely::TaskEventType type) {
-                                   constexpr float kC3Pitch = -1.0f;
-                                   if (type == barely::TaskEventType::kBegin) {
-                                     instrument.SetNoteOn(kC3Pitch);
-                                   } else if (type == barely::TaskEventType::kEnd) {
-                                     instrument.SetNoteOff(kC3Pitch);
-                                   }
-                                 });
+                              [&](barely::TaskEventType type) {
+                                constexpr float kC3Pitch = -1.0f;
+                                if (type == barely::TaskEventType::kBegin) {
+                                  instrument.SetNoteOn(kC3Pitch);
+                                } else if (type == barely::TaskEventType::kEnd) {
+                                  instrument.SetNoteOff(kC3Pitch);
+                                }
+                              });
 
 // Start the performer playback.
 performer.Start();

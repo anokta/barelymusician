@@ -41,9 +41,9 @@ TEST(PerformerTest, ProcessSingleTask) {
           },
           &process_callback,
       },
-      &performer,
       0.25,
       0.6,
+      0,
       0,
   };
   performer.AddTask(&task);
@@ -111,7 +111,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 1);
 
   // Update the task position.
-  task.SetPosition(0.75);
+  performer.SetTaskPosition(&task, 0.75);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
@@ -187,9 +187,9 @@ TEST(PerformerTest, ProcessMultipleTasks) {
             },
             &task_callbacks[i].first,
         },
-        &performer,
         static_cast<double>(i + 1),
         1.0,
+        0,
         0,
     };
     performer.AddTask(&tasks[i]);

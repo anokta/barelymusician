@@ -92,20 +92,20 @@ struct BarelyPerformer {
   /// Sets task duration.
   ///
   /// @param task Pointer to task.
-  /// @param old_duration Old task duration.
-  void SetTaskDuration(BarelyTask* task, double old_duration) noexcept;
+  /// @param new_duration Task duration.
+  void SetTaskDuration(BarelyTask* task, double new_duration) noexcept;
 
   /// Sets task position.
   ///
   /// @param task Pointer to task.
-  /// @param old_position Old task position.
-  void SetTaskPosition(BarelyTask* task, double old_position) noexcept;
+  /// @param new_position Task position.
+  void SetTaskPosition(BarelyTask* task, double new_position) noexcept;
 
   /// Sets task priority.
   ///
   /// @param task Pointer to task.
-  /// @param old_priority Old priority.
-  void SetTaskPriority(BarelyTask* task, int old_priority) noexcept;
+  /// @param new_priority Task priority.
+  void SetTaskPriority(BarelyTask* task, int new_priority) noexcept;
 
   /// Stops performer.
   void Start() noexcept;

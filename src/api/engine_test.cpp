@@ -25,7 +25,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   BarelyEngine engine(kSampleRate, kSampleRate);
 
   // Create a performer.
-  auto& performer = engine.GetPerformer(engine.AddPerformer());
+  const auto performer_index = engine.AddPerformer();
+  auto& performer = engine.GetPerformer(performer_index);
 
   // Create a task.
   barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;
@@ -45,10 +46,10 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
           },
           &process_callback,
       },
-      &performer,
       1.0,
       2.0,
       0,
+      performer_index,
   };
   performer.AddTask(&task);
 

@@ -82,7 +82,6 @@ struct BarelyEngine {
   /// @return Task index.
   [[nodiscard]] uint32_t AddTask() noexcept {
     const uint32_t index = task_pool_.Acquire();
-    task_pool_.Get(index) = {};
     return index;
   }
 

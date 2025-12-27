@@ -147,7 +147,11 @@ void BarelyPerformer::SetPosition(double new_position) noexcept {
   }
 }
 
-void BarelyPerformer::SetTaskDuration(BarelyTask* task, double old_duration) noexcept {
+void BarelyPerformer::SetTaskDuration(BarelyTask* task, double new_duration) noexcept {
+  assert(new_duration > 0.0 && "Invalid task duration");
+  if (task->duration == new_duration) return;
+  const double old_duration = task->duration;
+  task->duration = new_duration;
   if (task->is_active) {
     const TaskKey old_task_key = {task->position + old_duration, task->priority};
     if (task->IsInside(position)) {
@@ -158,16 +162,10 @@ void BarelyPerformer::SetTaskDuration(BarelyTask* task, double old_duration) noe
   }
 }
 
-void BarelyPerformer::SetTaskPriority(BarelyTask* task, int old_priority) noexcept {
-  const TaskKey old_task_key = {task->position, old_priority};
-  if (task->is_active) {
-    UpdateActiveTaskKey(old_task_key, task);
-  } else {
-    UpdateInactiveTaskKey(old_task_key, task);
-  }
-}
-
-void BarelyPerformer::SetTaskPosition(BarelyTask* task, double old_position) noexcept {
+void BarelyPerformer::SetTaskPosition(BarelyTask* task, double new_position) noexcept {
+  if (task->position == new_position) return;
+  const double old_position = task->position;
+  task->position = new_position;
   if (task->is_active) {
     const TaskKey old_task_key = {old_position + task->duration, task->priority};
     if (task->IsInside(position)) {
@@ -177,6 +175,18 @@ void BarelyPerformer::SetTaskPosition(BarelyTask* task, double old_position) noe
     }
   } else {
     UpdateInactiveTaskKey({old_position, task->priority}, task);
+  }
+}
+
+void BarelyPerformer::SetTaskPriority(BarelyTask* task, int new_priority) noexcept {
+  if (task->priority == new_priority) return;
+  const int old_priority = task->priority;
+  task->priority = new_priority;
+  const TaskKey old_task_key = {task->position, old_priority};
+  if (task->is_active) {
+    UpdateActiveTaskKey(old_task_key, task);
+  } else {
+    UpdateInactiveTaskKey(old_task_key, task);
   }
 }
 

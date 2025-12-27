@@ -66,11 +66,7 @@ bool BarelyEngine_CreateTask(BarelyEngineHandle engine, BarelyPerformerRef perfo
 
   // TODO(#126): Clean this up once all pools are established.
   auto& task = engine->GetTask(*out_task);
-  task.position = position;
-  task.duration = duration;
-  task.event_callback = {callback, user_data};
-  task.priority = static_cast<int>(priority);
-  task.performer = &engine->GetPerformer(performer);
+  task = {{callback, user_data}, position, duration, static_cast<int>(priority), performer};
   engine->GetPerformer(performer).AddTask(&task);
 
   return true;
@@ -103,7 +99,7 @@ bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine, BarelyPerformerRef
 bool BarelyEngine_DestroyTask(BarelyEngineHandle engine, BarelyTaskRef task) {
   if (!engine) return false;
 
-  engine->GetTask(task).performer->RemoveTask(&engine->GetTask(task));
+  engine->GetPerformer(engine->GetTask(task).performer_index).RemoveTask(&engine->GetTask(task));
   engine->RemoveTask(task);
   return true;
 }
@@ -442,7 +438,8 @@ bool BarelyTask_SetDuration(BarelyEngineHandle engine, BarelyTaskRef task, doubl
   if (!engine) return false;
   if (duration <= 0.0) return false;
 
-  engine->GetTask(task).SetDuration(duration);
+  engine->GetPerformer(engine->GetTask(task).performer_index)
+      .SetTaskDuration(&engine->GetTask(task), duration);
   return true;
 }
 
@@ -457,13 +454,15 @@ bool BarelyTask_SetEventCallback(BarelyEngineHandle engine, BarelyTaskRef task,
 bool BarelyTask_SetPosition(BarelyEngineHandle engine, BarelyTaskRef task, double position) {
   if (!engine) return false;
 
-  engine->GetTask(task).SetPosition(position);
+  engine->GetPerformer(engine->GetTask(task).performer_index)
+      .SetTaskPosition(&engine->GetTask(task), position);
   return true;
 }
 
 bool BarelyTask_SetPriority(BarelyEngineHandle engine, BarelyTaskRef task, int32_t priority) {
   if (!engine) return false;
 
-  engine->GetTask(task).SetPriority(static_cast<int>(priority));
+  engine->GetPerformer(engine->GetTask(task).performer_index)
+      .SetTaskPriority(&engine->GetTask(task), static_cast<int>(priority));
   return true;
 }

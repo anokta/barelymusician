@@ -6,29 +6,27 @@
 #include "common/callback.h"
 #include "common/constants.h"
 
-struct BarelyPerformer;
-
 /// Implementation of a task.
 struct BarelyTask {
   /// Event callback alias.
   using EventCallback = barely::Callback<BarelyTaskEventCallback>;
 
-  // Event callback.
+  /// Event callback.
   EventCallback event_callback = {};
 
-  // TODO(#126): Temp reference.
-  BarelyPerformer* performer = nullptr;
-
-  // Position in beats.
+  /// Position in beats.
   double position = 0.0;
 
-  // Duration in beats.
+  /// Duration in beats.
   double duration = 0.0;
 
-  // Priority.
+  /// Priority.
   int priority = 0;
 
-  // Denotes whether the task is active or not.
+  /// Performer index.
+  uint32_t performer_index = 0;
+
+  /// Denotes whether the task is active or not.
   bool is_active = false;
 
   /// Returns the end position.
@@ -57,25 +55,18 @@ struct BarelyTask {
     Process(is_active ? BarelyTaskEventType_kBegin : BarelyTaskEventType_kEnd);
   }
 
-  /// Sets the duration.
-  ///
-  /// @param new_duration Duration in beats.
-  void SetDuration(double new_duration) noexcept;
-
   /// Sets the event callback.
   ///
   /// @param new_event_callback Event callback.
-  void SetEventCallback(EventCallback new_event_callback) noexcept;
-
-  /// Sets the position.
-  ///
-  /// @param new_position Position in beats.
-  void SetPosition(double new_position) noexcept;
-
-  /// Sets the priority.
-  ///
-  /// @param new_priority Priority.
-  void SetPriority(int new_priority) noexcept;
+  void SetEventCallback(EventCallback new_event_callback) noexcept {
+    if (is_active) {
+      Process(BarelyTaskEventType_kEnd);
+    }
+    event_callback = new_event_callback;
+    if (is_active) {
+      Process(BarelyTaskEventType_kBegin);
+    }
+  }
 };
 
 #endif  // BARELYMUSICIAN_API_TASK_H_

@@ -138,11 +138,11 @@ void BarelyInstrument::Init(
          }
        },
        this},
-      &arp,
       0.0,
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
           arp.loop_length,
       std::numeric_limits<int32_t>::max(),
+      arp_index,
   };
 
   arp.AddTask(&arp_task);
@@ -260,15 +260,16 @@ void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) n
       }
     } break;
     case InstrumentControlType::kArpGateRatio:
-      engine_->GetTask(arp_task_index)
-          .SetDuration(static_cast<double>(value) * engine_->GetPerformer(arp_index).loop_length);
+      engine_->GetPerformer(arp_index).SetTaskDuration(
+          &engine_->GetTask(arp_task_index),
+          static_cast<double>(value) * engine_->GetPerformer(arp_index).loop_length);
       break;
     case InstrumentControlType::kArpRate:
       engine_->GetPerformer(arp_index).SetLoopLength(
           (value > 0.0f) ? 1.0 / static_cast<double>(value) : 0.0);
-      engine_->GetTask(arp_task_index)
-          .SetDuration(
-              static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
+      engine_->GetPerformer(arp_index).SetTaskDuration(
+          &engine_->GetTask(arp_task_index),
+          static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
               engine_->GetPerformer(arp_index).loop_length);
       break;
     default:

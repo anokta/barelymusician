@@ -1,7 +1,6 @@
 #include <barelymusician.h>
 
 #include <array>
-#include <vector>
 
 #include "benchmark/benchmark.h"
 

@@ -29,13 +29,13 @@ struct BarelyInstrument {
   BarelyEngine* engine_ = nullptr;
 
   /// Instrument index.
-  BarelyInstrumentRef instrument_index = barely::kMaxInstrumentCount;
+  BarelyInstrumentRef instrument_index = {};
 
   /// Arpeggiator index.
-  BarelyPerformerRef arp_index = barely::kMaxPerformerCount;
+  BarelyPerformerRef arp_index = {};
 
   /// Arpeggiator task index.
-  BarelyTaskRef arp_task_index = barely::kMaxTaskCount;
+  BarelyTaskRef arp_task_index = {};
 
   barely::InstrumentParams params = {};
 

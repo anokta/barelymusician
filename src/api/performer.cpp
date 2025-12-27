@@ -1,7 +1,5 @@
 #include "api/performer.h"
 
-#include <barelymusician.h>
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -9,6 +7,8 @@
 #include <optional>
 #include <set>
 #include <utility>
+
+#include "api/task.h"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyPerformer::AddTask(BarelyTask* task) noexcept {

@@ -37,7 +37,7 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
   EXPECT_FALSE(BarelyEngine_DestroyInstrument(nullptr, 0));
 
   // Success.
-  BarelyInstrumentRef instrument_ref;
+  BarelyInstrumentRef instrument_ref = {};
   EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, nullptr, 0, &instrument_ref));
 
   EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument_ref));
@@ -53,7 +53,7 @@ TEST(BarelyEngineTest, CreateDestroyPerformer) {
   EXPECT_FALSE(BarelyEngine_DestroyPerformer(nullptr, 0));
 
   // Success.
-  BarelyPerformerRef performer_ref;
+  BarelyPerformerRef performer_ref = {};
   EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer_ref));
 
   EXPECT_TRUE(BarelyEngine_DestroyPerformer(engine, performer_ref));

@@ -5,6 +5,7 @@
 #include <array>
 #include <functional>
 
+#include "api/instrument.h"
 #include "api/performer.h"
 #include "dsp/message.h"
 #include "gmock/gmock-matchers.h"

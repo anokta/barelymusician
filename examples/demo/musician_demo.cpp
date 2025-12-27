@@ -338,28 +338,27 @@ int main(int /*argc*/, char* argv[]) {
   metronome.SetLooping(true);
   int beat = 0;
   int harmonic = 0;
-  const auto metronome_trigger =
-      engine.CreateTask(metronome, 0.0, 1e-6, -1, [&](TaskEventType type) {
-        if (type != TaskEventType::kBegin) {
-          return;
-        }
-        // Update transport.
-        const int current_bar = beat / kBeatCount;
-        const int current_beat = beat % kBeatCount;
-        ++beat;
-        if (current_beat == 0) {
-          // Compose next bar.
-          harmonic = bar_composer_callback(current_bar);
-        }
-        // Update members.
-        for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
-          // Compose next beat notes.
-          if (beat_composer_callback) {
-            beat_composer_callback(current_bar, current_beat, kBeatCount, harmonic,
-                                   instruments[index], performer, tasks);
-          }
-        }
-      });
+  engine.CreateTask(metronome, 0.0, 1e-6, -1, [&](TaskEventType type) {
+    if (type != TaskEventType::kBegin) {
+      return;
+    }
+    // Update transport.
+    const int current_bar = beat / kBeatCount;
+    const int current_beat = beat % kBeatCount;
+    ++beat;
+    if (current_beat == 0) {
+      // Compose next bar.
+      harmonic = bar_composer_callback(current_bar);
+    }
+    // Update members.
+    for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
+      // Compose next beat notes.
+      if (beat_composer_callback) {
+        beat_composer_callback(current_bar, current_beat, kBeatCount, harmonic, instruments[index],
+                               performer, tasks);
+      }
+    }
+  });
 
   // Audio process callback.
   audio_output.SetProcessCallback(

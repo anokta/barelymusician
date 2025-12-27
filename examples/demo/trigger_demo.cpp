@@ -18,7 +18,6 @@ using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Scale;
 using ::barely::TaskEventType;
-using ::barely::TaskRef;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;

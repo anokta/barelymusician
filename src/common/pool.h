@@ -14,7 +14,7 @@ class Pool {
  public:
   Pool() noexcept {
     for (uint32_t i = 0; i < kCount; ++i) {
-      free_indices_[i] = kCount - i - 1;
+      free_indices_[i] = kCount - i;
     }
   }
 
@@ -28,7 +28,7 @@ class Pool {
       in_use_.set(index);
       return index;
     }
-    return kCount;
+    return 0;
   }
 
   /// Releases an item.
@@ -40,7 +40,7 @@ class Pool {
     free_indices_[free_count_++] = index;
   }
 
-  [[nodiscard]] ItemType* Begin() noexcept { return &items_[0]; }
+  [[nodiscard]] ItemType* Begin() noexcept { return &items_[1]; }
 
   [[nodiscard]] ItemType& Get(uint32_t index) noexcept {
     assert(index <= kCount);
@@ -51,7 +51,7 @@ class Pool {
   [[nodiscard]] bool InUse(uint32_t index) const noexcept { return in_use_.test(index); }
 
  private:
-  // Last item is reserved for nil.
+  // 0 is reserved for nil.
   std::array<ItemType, kCount + 1> items_;
 
   // Free indices are cached for easier edits.

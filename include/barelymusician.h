@@ -136,7 +136,7 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   BarelyInstrumentRef instrument = 0;
+///   BarelyInstrumentRef instrument = {};
 ///   BarelyEngine_CreateInstrument(engine, /*control_overrides=*/nullptr,
 ///                                 /*control_override_count=*/0, &instrument);
 ///
@@ -165,11 +165,11 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   BarelyPerformerRef performer;
+///   BarelyPerformerRef performer = {};
 ///   BarelyEngine_CreatePerformer(engine, &performer);
 ///
 ///   // Create a task.
-///   BarelyTaskRef task;
+///   BarelyTaskRef task = {};
 ///   BarelyTaskEventCallback callback{ /*populate this*/ };
 ///   BarelyEngine_CreateTask(engine, performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
 ///                           callback, &task);
@@ -1373,7 +1373,7 @@ class InstrumentRef {
   BarelyEngineHandle engine_ = nullptr;
 
   // Raw instrument reference.
-  BarelyTaskRef instrument_ = 0;
+  BarelyTaskRef instrument_ = {};
 
   // Note event callback.
   NoteEventCallback* note_event_callback_;
@@ -1493,7 +1493,7 @@ class TaskRef {
   BarelyEngineHandle engine_ = nullptr;
 
   // Raw task reference.
-  BarelyTaskRef task_ = 0;
+  BarelyTaskRef task_ = {};
 
   // Event callback.
   TaskEventCallback* event_callback_ = nullptr;
@@ -1685,7 +1685,7 @@ class Engine {
   /// @return Instrument reference.
   [[nodiscard]] InstrumentRef CreateInstrument(
       std::span<const InstrumentControlOverride> control_overrides = {}) noexcept {
-    BarelyInstrumentRef instrument = 0;
+    BarelyInstrumentRef instrument = {};
     [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(
         engine_, reinterpret_cast<const BarelyInstrumentControlOverride*>(control_overrides.data()),
         static_cast<int32_t>(control_overrides.size()), &instrument);
@@ -1698,7 +1698,7 @@ class Engine {
   ///
   /// @return Performer reference.
   [[nodiscard]] PerformerRef CreatePerformer() noexcept {
-    BarelyPerformerRef performer = 0;
+    BarelyPerformerRef performer = {};
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer);
     assert(success);
     return PerformerRef(engine_, performer);
@@ -1714,7 +1714,7 @@ class Engine {
   /// @return Task reference.
   [[nodiscard]] TaskRef CreateTask(PerformerRef performer, double position, double duration,
                                    int priority, TaskEventCallback callback) noexcept {
-    BarelyTaskRef task = 0;
+    BarelyTaskRef task = {};
     [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
                                                             priority, nullptr, nullptr, &task);
     assert(success);

@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_COMMON_POOL_H_
 
 #include <array>
-#include <bitset>
 #include <cassert>
 #include <cstdint>
 
@@ -13,8 +12,9 @@ template <typename ItemType, uint32_t kCount>
 class Pool {
  public:
   Pool() noexcept {
+    to_active_.fill(kCount);
     for (uint32_t i = 0; i < kCount; ++i) {
-      free_indices_[i] = kCount - i;
+      free_[i] = kCount - i;
     }
   }
 
@@ -23,9 +23,15 @@ class Pool {
   /// @return 0 if capacity is reached, valid item index otherwise.
   [[nodiscard]] uint32_t Acquire() noexcept {
     if (free_count_ > 0) {
-      const uint32_t index = free_indices_[--free_count_];
-      assert(!in_use_.test(index));
-      in_use_.set(index);
+      const uint32_t index = free_[--free_count_];
+      assert(index > 0);
+      assert(index <= kCount);
+
+      assert(to_active_[index] == kCount);
+      assert(active_count_ < kCount);
+      to_active_[index] = active_count_;
+      active_[active_count_++] = index;
+
       return index;
     }
     return 0;
@@ -35,29 +41,44 @@ class Pool {
   ///
   /// @param index Item index.
   void Release(uint32_t index) noexcept {
-    assert(in_use_.test(index));
-    in_use_.reset(index);
-    free_indices_[free_count_++] = index;
+    assert(index > 0);
+    assert(index <= kCount);
+
+    assert(to_active_[index] < kCount);
+    assert(active_count_ > 0);
+    const uint32_t removed_active_index = to_active_[index];
+    const uint32_t last_index = active_[--active_count_];
+    active_[removed_active_index] = last_index;
+    to_active_[last_index] = removed_active_index;
+    to_active_[index] = kCount;
+
+    free_[free_count_++] = index;
   }
 
-  [[nodiscard]] ItemType* Begin() noexcept { return &items_[1]; }
-
   [[nodiscard]] ItemType& Get(uint32_t index) noexcept {
+    assert(index > 0);
     assert(index <= kCount);
-    assert(in_use_.test(index));
+    assert(to_active_[index] < kCount);
     return items_[index];
   }
 
-  [[nodiscard]] bool InUse(uint32_t index) const noexcept { return in_use_.test(index); }
+  [[nodiscard]] ItemType& GetActive(uint32_t active_index) noexcept {
+    assert(active_index < active_count_);
+    return Get(active_[active_index]);
+  }
+
+  [[nodiscard]] uint32_t GetActiveCount() const noexcept { return active_count_; }
 
  private:
-  // 0 is reserved for nil.
+  // Index 0 is reserved for zero-initialized nil reference to keep invalid access in-bounds.
   std::array<ItemType, kCount + 1> items_;
+  std::array<uint32_t, kCount + 1> to_active_;  // maps item index to active index.
 
-  // Free indices are cached for easier edits.
-  std::array<uint32_t, kCount> free_indices_;
-  int free_count_ = kCount;
-  std::bitset<kCount + 1> in_use_ = {};
+  std::array<uint32_t, kCount> active_;
+  uint32_t active_count_ = 0;
+
+  std::array<uint32_t, kCount> free_;
+  uint32_t free_count_ = kCount;
 };
 
 }  // namespace barely

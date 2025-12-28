@@ -1877,10 +1877,10 @@ class Engine {
 
   // TODO(#126): Handle copy/move for callbacks below.
   // Array of note event callbacks.
-  std::array<NoteEventCallback, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> note_event_callbacks_;
+  std::array<NoteEventCallback, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1> note_event_callbacks_;
 
   // Array of task event callbacks.
-  std::array<TaskEventCallback, BARELYMUSICIAN_MAX_TASK_COUNT> task_event_callbacks_;
+  std::array<TaskEventCallback, BARELYMUSICIAN_MAX_TASK_COUNT + 1> task_event_callbacks_;
 };
 
 /// A musical quantization.

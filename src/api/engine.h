@@ -62,10 +62,8 @@ struct BarelyEngine {
   }
 
   void DestroyInstruments() noexcept {
-    for (uint32_t i = 0; i < barely::kMaxInstrumentCount; ++i) {
-      if (instrument_pool_.InUse(i)) {
-        instrument_pool_.Get(i).SetAllNotesOff();
-      }
+    for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
+      instrument_pool_.GetActive(i).SetAllNotesOff();
     }
   }
 

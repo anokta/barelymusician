@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument(
         "--max_tasks",
         type=count_type,
-        default=1000,
+        default=5000,
         help="specify the maximum number of tasks",
     )
     parser.add_argument(

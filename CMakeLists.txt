@@ -46,7 +46,7 @@ endif()
 option(MAX_PERFORMER_COUNT "Maximum number of performers" ${MAX_PERFORMER_COUNT})
 
 if(NOT DEFINED MAX_TASK_COUNT)
-  set(MAX_TASK_COUNT 1000 CACHE STRING "Maximum number of tasks" FORCE)
+  set(MAX_TASK_COUNT 5000 CACHE STRING "Maximum number of tasks" FORCE)
 endif()
 option(MAX_TASK_COUNT "Maximum number of tasks" ${MAX_TASK_COUNT})
 

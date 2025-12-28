@@ -48,7 +48,7 @@ bool BarelyEngine_CreatePerformer(BarelyEngineHandle engine, BarelyPerformerRef*
 
   *out_performer = engine->AddPerformer();
   engine->GetPerformer((*out_performer)).engine = engine;
-  return *out_performer != barely::kMaxPerformerCount;
+  return *out_performer != 0;
 }
 
 bool BarelyEngine_CreateTask(BarelyEngineHandle engine, BarelyPerformerRef performer,
@@ -56,11 +56,12 @@ bool BarelyEngine_CreateTask(BarelyEngineHandle engine, BarelyPerformerRef perfo
                              BarelyTaskEventCallback callback, void* user_data,
                              BarelyTaskRef* out_task) {
   if (!engine) return false;
+  if (performer == 0) return false;
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
   *out_task = engine->AddTask();
-  if (*out_task == barely::kMaxTaskCount) {
+  if (*out_task == 0) {
     return false;
   }
 
@@ -82,6 +83,7 @@ bool BarelyEngine_Destroy(BarelyEngineHandle engine) {
 
 bool BarelyEngine_DestroyInstrument(BarelyEngineHandle engine, BarelyInstrumentRef instrument) {
   if (!engine) return false;
+  if (instrument == 0) return false;
 
   engine->GetInstrument(instrument).SetAllNotesOff();
   engine->RemovePerformer(engine->GetInstrument(instrument).arp_index);
@@ -91,6 +93,7 @@ bool BarelyEngine_DestroyInstrument(BarelyEngineHandle engine, BarelyInstrumentR
 
 bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine, BarelyPerformerRef performer) {
   if (!engine) return false;
+  if (performer == 0) return false;
 
   engine->RemovePerformer(performer);
   return true;
@@ -98,6 +101,7 @@ bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine, BarelyPerformerRef
 
 bool BarelyEngine_DestroyTask(BarelyEngineHandle engine, BarelyTaskRef task) {
   if (!engine) return false;
+  if (task == 0) return false;
 
   engine->GetPerformer(engine->GetTask(task).performer_index).RemoveTask(&engine->GetTask(task));
   engine->RemoveTask(task);
@@ -190,6 +194,7 @@ bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp) {
 bool BarelyInstrument_GetControl(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
                                  BarelyInstrumentControlType type, float* out_value) {
   if (!engine) return false;
+  if (instrument == 0) return false;
   if (type >= BarelyInstrumentControlType_kCount) return false;
   if (!out_value) return false;
 
@@ -200,6 +205,7 @@ bool BarelyInstrument_GetControl(BarelyEngineHandle engine, BarelyInstrumentRef 
 bool BarelyInstrument_GetNoteControl(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
                                      float pitch, BarelyNoteControlType type, float* out_value) {
   if (!engine) return false;
+  if (instrument == 0) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
 
@@ -214,6 +220,7 @@ bool BarelyInstrument_GetNoteControl(BarelyEngineHandle engine, BarelyInstrument
 bool BarelyInstrument_IsNoteOn(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
                                float pitch, bool* out_is_note_on) {
   if (!engine) return false;
+  if (instrument == 0) return false;
   if (!out_is_note_on) return false;
 
   *out_is_note_on = engine->GetInstrument(instrument).IsNoteOn(pitch);
@@ -230,6 +237,7 @@ bool BarelyInstrument_SetAllNotesOff(BarelyEngineHandle engine, BarelyInstrument
 bool BarelyInstrument_SetControl(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
                                  BarelyInstrumentControlType type, float value) {
   if (!engine) return false;
+  if (instrument == 0) return false;
   if (type >= BarelyInstrumentControlType_kCount) return false;
 
   engine->GetInstrument(instrument).SetControl(type, value);
@@ -239,6 +247,7 @@ bool BarelyInstrument_SetControl(BarelyEngineHandle engine, BarelyInstrumentRef 
 bool BarelyInstrument_SetNoteControl(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
                                      float pitch, BarelyNoteControlType type, float value) {
   if (!engine) return false;
+  if (instrument == 0) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
 
   engine->GetInstrument(instrument).SetNoteControl(pitch, type, value);
@@ -249,6 +258,7 @@ bool BarelyInstrument_SetNoteEventCallback(BarelyEngineHandle engine,
                                            BarelyInstrumentRef instrument,
                                            BarelyNoteEventCallback callback, void* user_data) {
   if (!engine) return false;
+  if (instrument == 0) return false;
 
   engine->GetInstrument(instrument).SetNoteEventCallback({callback, user_data});
   return true;
@@ -257,6 +267,7 @@ bool BarelyInstrument_SetNoteEventCallback(BarelyEngineHandle engine,
 bool BarelyInstrument_SetNoteOff(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
                                  float pitch) {
   if (!engine) return false;
+  if (instrument == 0) return false;
 
   engine->GetInstrument(instrument).SetNoteOff(pitch);
   return true;
@@ -267,6 +278,7 @@ bool BarelyInstrument_SetNoteOn(BarelyEngineHandle engine, BarelyInstrumentRef i
                                 const BarelyNoteControlOverride* note_control_overrides,
                                 int32_t note_control_override_count) {
   if (!engine) return false;
+  if (instrument == 0) return false;
 
   engine->GetInstrument(instrument)
       .SetNoteOn(pitch,
@@ -277,6 +289,7 @@ bool BarelyInstrument_SetNoteOn(BarelyEngineHandle engine, BarelyInstrumentRef i
 bool BarelyInstrument_SetSampleData(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
                                     const BarelySlice* slices, int32_t slice_count) {
   if (!engine) return false;
+  if (instrument == 0) return false;
   if (slice_count < 0 || (!slices && slice_count > 0)) return false;
 
   engine->GetInstrument(instrument).SetSampleData({slices, slices + slice_count});
@@ -286,6 +299,7 @@ bool BarelyInstrument_SetSampleData(BarelyEngineHandle engine, BarelyInstrumentR
 bool BarelyPerformer_GetLoopBeginPosition(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                           double* out_loop_begin_position) {
   if (!engine) return false;
+  if (performer == 0) return false;
   if (!out_loop_begin_position) return false;
 
   *out_loop_begin_position = engine->GetPerformer(performer).loop_begin_position;
@@ -295,6 +309,7 @@ bool BarelyPerformer_GetLoopBeginPosition(BarelyEngineHandle engine, BarelyPerfo
 bool BarelyPerformer_GetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                    double* out_loop_length) {
   if (!engine) return false;
+  if (performer == 0) return false;
   if (!out_loop_length) return false;
 
   *out_loop_length = engine->GetPerformer(performer).loop_length;
@@ -304,6 +319,7 @@ bool BarelyPerformer_GetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef
 bool BarelyPerformer_GetPosition(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                  double* out_position) {
   if (!engine) return false;
+  if (performer == 0) return false;
   if (!out_position) return false;
 
   *out_position = engine->GetPerformer(performer).position;
@@ -313,6 +329,7 @@ bool BarelyPerformer_GetPosition(BarelyEngineHandle engine, BarelyPerformerRef p
 bool BarelyPerformer_IsLooping(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                bool* out_is_looping) {
   if (!engine) return false;
+  if (performer == 0) return false;
   if (!out_is_looping) return false;
 
   *out_is_looping = engine->GetPerformer(performer).is_looping;
@@ -322,6 +339,7 @@ bool BarelyPerformer_IsLooping(BarelyEngineHandle engine, BarelyPerformerRef per
 bool BarelyPerformer_IsPlaying(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                bool* out_is_playing) {
   if (!engine) return false;
+  if (performer == 0) return false;
   if (!out_is_playing) return false;
 
   *out_is_playing = engine->GetPerformer(performer).is_playing;
@@ -331,6 +349,7 @@ bool BarelyPerformer_IsPlaying(BarelyEngineHandle engine, BarelyPerformerRef per
 bool BarelyPerformer_SetLoopBeginPosition(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                           double loop_begin_position) {
   if (!engine) return false;
+  if (performer == 0) return false;
 
   engine->GetPerformer(performer).SetLoopBeginPosition(loop_begin_position);
   return true;
@@ -339,6 +358,7 @@ bool BarelyPerformer_SetLoopBeginPosition(BarelyEngineHandle engine, BarelyPerfo
 bool BarelyPerformer_SetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                    double loop_length) {
   if (!engine) return false;
+  if (performer == 0) return false;
 
   engine->GetPerformer(performer).SetLoopLength(loop_length);
   return true;
@@ -347,6 +367,7 @@ bool BarelyPerformer_SetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef
 bool BarelyPerformer_SetLooping(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                 bool is_looping) {
   if (!engine) return false;
+  if (performer == 0) return false;
 
   engine->GetPerformer(performer).SetLooping(is_looping);
   return true;
@@ -355,6 +376,7 @@ bool BarelyPerformer_SetLooping(BarelyEngineHandle engine, BarelyPerformerRef pe
 bool BarelyPerformer_SetPosition(BarelyEngineHandle engine, BarelyPerformerRef performer,
                                  double position) {
   if (!engine) return false;
+  if (performer == 0) return false;
 
   engine->GetPerformer(performer).SetPosition(position);
   return true;
@@ -362,6 +384,7 @@ bool BarelyPerformer_SetPosition(BarelyEngineHandle engine, BarelyPerformerRef p
 
 bool BarelyPerformer_Start(BarelyEngineHandle engine, BarelyPerformerRef performer) {
   if (!engine) return false;
+  if (performer == 0) return false;
 
   engine->GetPerformer(performer).Start();
   return true;
@@ -369,6 +392,7 @@ bool BarelyPerformer_Start(BarelyEngineHandle engine, BarelyPerformerRef perform
 
 bool BarelyPerformer_Stop(BarelyEngineHandle engine, BarelyPerformerRef performer) {
   if (!engine) return false;
+  if (performer == 0) return false;
 
   engine->GetPerformer(performer).Stop();
   return true;
@@ -404,6 +428,7 @@ bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_p
 
 bool BarelyTask_GetDuration(BarelyEngineHandle engine, BarelyTaskRef task, double* out_duration) {
   if (!engine) return false;
+  if (task == 0) return false;
   if (!out_duration) return false;
 
   *out_duration = engine->GetTask(task).duration;
@@ -412,6 +437,7 @@ bool BarelyTask_GetDuration(BarelyEngineHandle engine, BarelyTaskRef task, doubl
 
 bool BarelyTask_GetPosition(BarelyEngineHandle engine, BarelyTaskRef task, double* out_position) {
   if (!engine) return false;
+  if (task == 0) return false;
   if (!out_position) return false;
 
   *out_position = engine->GetTask(task).position;
@@ -420,6 +446,7 @@ bool BarelyTask_GetPosition(BarelyEngineHandle engine, BarelyTaskRef task, doubl
 
 bool BarelyTask_GetPriority(BarelyEngineHandle engine, BarelyTaskRef task, int32_t* out_priority) {
   if (!engine) return false;
+  if (task == 0) return false;
   if (!out_priority) return false;
 
   *out_priority = static_cast<int32_t>(engine->GetTask(task).priority);
@@ -428,6 +455,7 @@ bool BarelyTask_GetPriority(BarelyEngineHandle engine, BarelyTaskRef task, int32
 
 bool BarelyTask_IsActive(BarelyEngineHandle engine, BarelyTaskRef task, bool* out_is_active) {
   if (!engine) return false;
+  if (task == 0) return false;
   if (!out_is_active) return false;
 
   *out_is_active = engine->GetTask(task).is_active;
@@ -436,6 +464,7 @@ bool BarelyTask_IsActive(BarelyEngineHandle engine, BarelyTaskRef task, bool* ou
 
 bool BarelyTask_SetDuration(BarelyEngineHandle engine, BarelyTaskRef task, double duration) {
   if (!engine) return false;
+  if (task == 0) return false;
   if (duration <= 0.0) return false;
 
   engine->GetPerformer(engine->GetTask(task).performer_index)
@@ -446,6 +475,7 @@ bool BarelyTask_SetDuration(BarelyEngineHandle engine, BarelyTaskRef task, doubl
 bool BarelyTask_SetEventCallback(BarelyEngineHandle engine, BarelyTaskRef task,
                                  BarelyTaskEventCallback callback, void* user_data) {
   if (!engine) return false;
+  if (task == 0) return false;
 
   engine->GetTask(task).SetEventCallback({callback, user_data});
   return true;
@@ -453,6 +483,7 @@ bool BarelyTask_SetEventCallback(BarelyEngineHandle engine, BarelyTaskRef task,
 
 bool BarelyTask_SetPosition(BarelyEngineHandle engine, BarelyTaskRef task, double position) {
   if (!engine) return false;
+  if (task == 0) return false;
 
   engine->GetPerformer(engine->GetTask(task).performer_index)
       .SetTaskPosition(&engine->GetTask(task), position);
@@ -461,6 +492,7 @@ bool BarelyTask_SetPosition(BarelyEngineHandle engine, BarelyTaskRef task, doubl
 
 bool BarelyTask_SetPriority(BarelyEngineHandle engine, BarelyTaskRef task, int32_t priority) {
   if (!engine) return false;
+  if (task == 0) return false;
 
   engine->GetPerformer(engine->GetTask(task).performer_index)
       .SetTaskPriority(&engine->GetTask(task), static_cast<int>(priority));

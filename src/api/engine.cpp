@@ -58,7 +58,7 @@ void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& v
                     float pitch, NoteControlType type, float value) noexcept {
   switch (type) {
     case NoteControlType::kGain:
-      for (int i = 0; i < params.active_voice_count; ++i) {
+      for (uint32_t i = 0; i < params.active_voice_count; ++i) {
         if (auto& voice = voice_pool.Get(params.active_voices[i]);
             voice.pitch() == pitch && voice.IsOn()) {
           voice.set_gain(value);
@@ -67,7 +67,7 @@ void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& v
       }
       break;
     case NoteControlType::kPitchShift:
-      for (int i = 0; i < params.active_voice_count; ++i) {
+      for (uint32_t i = 0; i < params.active_voice_count; ++i) {
         if (auto& voice = voice_pool.Get(params.active_voices[i]);
             voice.pitch() == pitch && voice.IsOn()) {
           voice.set_pitch_shift(value);
@@ -116,7 +116,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      engine_processor_.Process(audio_rng_, instrument_pool_, voice_pool_,
+      engine_processor_.Process(audio_rng_, voice_pool_,
                                 &output_samples_[kStereoChannelCount * current_frame],
                                 message_frame - current_frame);
       current_frame = message_frame;
@@ -147,7 +147,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
             },
             [this](NoteOffMessage& note_off_message) noexcept {
               auto& params = instrument_pool_.Get(note_off_message.instrument_index).params;
-              for (int i = 0; i < params.active_voice_count; ++i) {
+              for (uint32_t i = 0; i < params.active_voice_count; ++i) {
                 if (auto& voice = voice_pool_.Get(params.active_voices[i]);
                     voice.pitch() == note_off_message.pitch && voice.IsOn() &&
                     (params.sample_data.empty() || params.slice_mode != barely::SliceMode::kOnce)) {
@@ -158,8 +158,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
             },
             [this](NoteOnMessage& note_on_message) noexcept {
               auto& params = instrument_pool_.Get(note_on_message.instrument_index).params;
-              if (auto* voice = voice_pool_.Acquire(note_on_message.instrument_index, params,
-                                                    note_on_message.pitch);
+              if (auto* voice = AcquireVoice(voice_pool_, params, note_on_message.pitch);
                   voice != nullptr) {
                 voice->Start(params, params.sample_data.Select(note_on_message.pitch, audio_rng_),
                              note_on_message.pitch, note_on_message.controls);
@@ -168,7 +167,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
             [this](SampleDataMessage& sample_data_message) noexcept {
               auto& params = instrument_pool_.Get(sample_data_message.instrument_index).params;
               params.sample_data.Swap(sample_data_message.sample_data);
-              for (int i = 0; i < params.active_voice_count; ++i) {
+              for (uint32_t i = 0; i < params.active_voice_count; ++i) {
                 auto& voice = voice_pool_.Get(params.active_voices[i]);
                 voice.set_slice(params.sample_data.Select(voice.pitch(), audio_rng_));
               }
@@ -178,7 +177,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    engine_processor_.Process(audio_rng_, instrument_pool_, voice_pool_,
+    engine_processor_.Process(audio_rng_, voice_pool_,
                               &output_samples_[kStereoChannelCount * current_frame],
                               output_frame_count - current_frame);
   }

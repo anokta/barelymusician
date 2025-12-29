@@ -17,8 +17,6 @@
 #include "dsp/message_queue.h"
 #include "dsp/voice_pool.h"
 
-using BarelyPerformerIndex = uint32_t;
-
 /// Implementation of an engine.
 struct BarelyEngine {
  public:
@@ -170,11 +168,11 @@ struct BarelyEngine {
   barely::VoicePool voice_pool_;
 
   // Performers.
-  using PerformerPool = barely::Pool<BarelyPerformer, barely::kMaxPerformerCount>;
+  using PerformerPool = barely::Pool<BarelyPerformer, BARELYMUSICIAN_MAX_PERFORMER_COUNT>;
   PerformerPool performer_pool_;
 
   // Tasks.
-  using TaskPool = barely::Pool<BarelyTask, barely::kMaxTaskCount>;
+  using TaskPool = barely::Pool<BarelyTask, BARELYMUSICIAN_MAX_TASK_COUNT>;
   TaskPool task_pool_;
 
   // Output samples.

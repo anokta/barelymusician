@@ -23,7 +23,7 @@ struct InstrumentParams {
   // TODO(#126): Convert to intrusive list.
   static constexpr int kMaxVoiceCount = 16;
   std::array<VoiceIndex, kMaxVoiceCount> active_voices;
-  int active_voice_count = 0;
+  uint32_t active_voice_count = 0;
 
   /// Voice parameters.
   VoiceParams voice_params = {};
@@ -35,7 +35,7 @@ struct InstrumentParams {
   SampleData sample_data;
 
   /// Number of voices.
-  int voice_count = 8;
+  uint32_t voice_count = 8;
 
   /// Oscillator mode.
   OscMode osc_mode = OscMode::kMix;
@@ -87,7 +87,7 @@ inline void SetInstrumentControl(InstrumentParams& params, float sample_interval
       params.voice_params.stereo_pan = value;
       break;
     case InstrumentControlType::kVoiceCount:
-      params.voice_count = static_cast<int>(value);
+      params.voice_count = static_cast<uint32_t>(value);
       params.active_voice_count = std::min(params.active_voice_count, params.voice_count);
       break;
     case InstrumentControlType::kAttack:

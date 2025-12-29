@@ -6,7 +6,7 @@
 namespace barely {
 
 /// Voice index.
-using VoiceIndex = int;
+using VoiceIndex = uint32_t;
 
 /// Voice parameters.
 struct VoiceParams {

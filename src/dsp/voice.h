@@ -156,7 +156,7 @@ class Voice {
   ///
   /// @param instrument_params Instrument parameters.
   /// @param note_controls Array of note controls.
-  void Start(const InstrumentParams& instrument_params, const Slice* slice, float pitch,
+  void Start(InstrumentParams& instrument_params, const Slice* slice, float pitch,
              const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
     const float gain = note_controls[BarelyNoteControlType_kGain];
     const float pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
@@ -173,6 +173,7 @@ class Voice {
     slice_offset_ = 0.0f;
     envelope_.Start(instrument_params.adsr);
     timestamp_ = 0;
+    instrument_params_ = &instrument_params;  // should be index
   }
 
   /// Stops the voice.
@@ -193,6 +194,9 @@ class Voice {
       UpdatePitchIncrements();
     }
   }
+
+  // TODO(#126): Convert this back to index.
+  InstrumentParams* instrument_params_ = nullptr;
 
  private:
   void Approach(const VoiceParams& params) noexcept {

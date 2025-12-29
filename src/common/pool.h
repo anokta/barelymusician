@@ -55,11 +55,21 @@ class Pool {
     free_[free_count_++] = index;
   }
 
+  [[nodiscard]] constexpr uint32_t Count() const noexcept { return kCount; }
+
   [[nodiscard]] ItemType& Get(uint32_t index) noexcept {
     assert(index > 0);
     assert(index <= kCount);
     assert(to_active_[index] < kCount);
     return items_[index];
+  }
+
+  [[nodiscard]] uint32_t GetIndex(ItemType& item) const noexcept {
+    const uint32_t index = static_cast<uint32_t>(&item - &items_[0]);
+    assert(index > 0);
+    assert(index <= kCount);
+    assert(to_active_[index] < kCount);
+    return index;
   }
 
   [[nodiscard]] ItemType& GetActive(uint32_t active_index) noexcept {

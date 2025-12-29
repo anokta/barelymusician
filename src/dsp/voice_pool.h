@@ -12,123 +12,82 @@
 
 namespace barely {
 
-using InstrumentPool = Pool<BarelyInstrument, kMaxInstrumentCount>;
+using InstrumentPool = Pool<BarelyInstrument, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
 
-class VoicePool {
- public:
-  VoicePool() noexcept {
-    // TODO(#126): This can be avoided by switching to intrusive lists.
-    for (int i = 0; i < kMaxActiveVoiceCount; ++i) {
-      active_voices_[i].voice_index = i;
-    }
-  }
+using VoicePool = Pool<Voice, BARELYMUSICIAN_MAX_VOICE_COUNT>;
 
-  [[nodiscard]] Voice* Acquire(uint32_t instrument_index, InstrumentParams& instrument_params,
-                               float pitch) noexcept {
-    if (instrument_params.should_retrigger) {
-      for (int i = 0; i < instrument_params.active_voice_count; ++i) {
-        Voice& voice = Get(instrument_params.active_voices[i]);
-        if (voice.pitch() == pitch) {
-          for (int j = 0; j < instrument_params.active_voice_count; ++j) {
-            voice.increment_timestamp();
-          }
-          return &voice;
+[[nodiscard]] inline Voice* AcquireVoice(VoicePool& voice_pool, InstrumentParams& instrument_params,
+                                         float pitch) noexcept {
+  if (instrument_params.should_retrigger) {
+    for (uint32_t i = 0; i < instrument_params.active_voice_count; ++i) {
+      Voice& voice = voice_pool.Get(instrument_params.active_voices[i]);
+      if (voice.pitch() == pitch) {
+        for (uint32_t j = 0; j < instrument_params.active_voice_count; ++j) {
+          voice.increment_timestamp();
         }
+        return &voice;
       }
     }
-
-    if (active_voice_count_ < kMaxActiveVoiceCount &&
-        instrument_params.active_voice_count < instrument_params.voice_count) {
-      for (int i = 0; i < instrument_params.active_voice_count; ++i) {
-        Get(instrument_params.active_voices[i]).increment_timestamp();
-      }
-
-      // Acquire new voice.
-      ActiveVoice& active_voice = active_voices_[active_voice_count_++];
-      active_voice.instrument_index = instrument_index;
-      instrument_params.active_voices[instrument_params.active_voice_count++] =
-          active_voice.voice_index;
-
-      Voice& voice = Get(active_voice.voice_index);
-
-      return &voice;
-    }
-
-    // No voices are available to acquire, steal the oldest active voice.
-    int oldest_active_voice_index = 0;
-    for (int i = 0; i < instrument_params.active_voice_count; ++i) {
-      Voice& voice = Get(instrument_params.active_voices[i]);
-      if (voice.timestamp() >
-          Get(instrument_params.active_voices[oldest_active_voice_index]).timestamp()) {
-        oldest_active_voice_index = i;
-      }
-      voice.increment_timestamp();
-    }
-    return &Get(instrument_params.active_voices[oldest_active_voice_index]);
   }
 
-  [[nodiscard]] Voice& Get(VoiceIndex index) noexcept {
-    assert(index >= 0);
-    assert(index < kMaxActiveVoiceCount);
-    return voices_[index];
+  if (voice_pool.GetActiveCount() < voice_pool.Count() &&
+      instrument_params.active_voice_count < instrument_params.voice_count) {
+    for (uint32_t i = 0; i < instrument_params.active_voice_count; ++i) {
+      voice_pool.Get(instrument_params.active_voices[i]).increment_timestamp();
+    }
+
+    // Acquire new voice.
+    const uint32_t voice_index = voice_pool.Acquire();
+    instrument_params.active_voices[instrument_params.active_voice_count++] = voice_index;
+    return &voice_pool.Get(voice_index);
   }
 
-  /// Processes the next output samples.
-  ///
-  /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
-  /// @param rng Random number generator.
-  /// @param instrument_pool Instrument pool.
-  /// @param delay_frame Delay send frame.
-  /// @param sidechain_frame Sidechain send frame.
-  /// @param output_frame Output frame.
-  template <bool kIsSidechainSend = false>
-  void Process(AudioRng& rng, InstrumentPool& instrument_pool,
-               float delay_frame[kStereoChannelCount], float sidechain_frame[kStereoChannelCount],
-               float output_frame[kStereoChannelCount]) noexcept {
-    for (int i = 0; i < active_voice_count_;) {
-      Voice& voice = Get(active_voices_[i].voice_index);
-      InstrumentParams& params = instrument_pool.Get(active_voices_[i].instrument_index).params;
-      if constexpr (kIsSidechainSend) {
-        if (!voice.IsActive()) {
-          for (int j = 0; j < params.active_voice_count; ++j) {
-            if (params.active_voices[j] == active_voices_[i].voice_index) {
-              std::swap(params.active_voices[j],
-                        params.active_voices[params.active_voice_count - 1]);
-              --params.active_voice_count;
-              break;
-            }
+  // No voices are available to acquire, steal th e oldest active voice.
+  uint32_t oldest_active_voice_index = 0;
+  for (uint32_t i = 0; i < instrument_params.active_voice_count; ++i) {
+    Voice& voice = voice_pool.Get(instrument_params.active_voices[i]);
+    if (voice.timestamp() >
+        voice_pool.Get(instrument_params.active_voices[oldest_active_voice_index]).timestamp()) {
+      oldest_active_voice_index = i;
+    }
+    voice.increment_timestamp();
+  }
+  return &voice_pool.Get(instrument_params.active_voices[oldest_active_voice_index]);
+}
+
+/// Processes the next output samples.
+///
+/// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
+/// @param rng Random number generator.
+/// @param voice_pool Voice pool.
+/// @param delay_frame Delay send frame.
+/// @param sidechain_frame Sidechain send frame.
+/// @param output_frame Output frame.
+template <bool kIsSidechainSend = false>
+inline void ProcessAllVoices(AudioRng& rng, VoicePool& voice_pool,
+                             float delay_frame[kStereoChannelCount],
+                             float sidechain_frame[kStereoChannelCount],
+                             float output_frame[kStereoChannelCount]) noexcept {
+  for (uint32_t i = 0; i < voice_pool.GetActiveCount();) {
+    Voice& voice = voice_pool.GetActive(i);
+    InstrumentParams& params = *voice.instrument_params_;
+    if constexpr (kIsSidechainSend) {
+      if (!voice.IsActive()) {
+        for (uint32_t j = 0; j < params.active_voice_count; ++j) {
+          if (params.active_voices[j] == voice_pool.GetIndex(voice)) {
+            std::swap(params.active_voices[j], params.active_voices[params.active_voice_count - 1]);
+            --params.active_voice_count;
+            break;
           }
-          std::swap(active_voices_[i], active_voices_[active_voice_count_ - 1]);
-          --active_voice_count_;
-          continue;
         }
-      }
-      voice.Process<kIsSidechainSend>(params, rng, delay_frame, sidechain_frame, output_frame);
-      ++i;
-    }
-  }
-
-  void Release(VoiceIndex voice_index) noexcept {
-    for (int i = 0; i < active_voice_count_; ++i) {
-      if (active_voices_[i].voice_index == voice_index) {
-        std::swap(active_voices_[i], active_voices_[active_voice_count_ - 1]);
-        --active_voice_count_;
-        break;
+        voice_pool.Release(voice_pool.GetIndex(voice));
+        continue;
       }
     }
+    voice.Process<kIsSidechainSend>(params, rng, delay_frame, sidechain_frame, output_frame);
+    ++i;
   }
-
- private:
-  struct ActiveVoice {
-    uint32_t instrument_index = kMaxInstrumentCount;
-    VoiceIndex voice_index = 0;
-  };
-
-  std::array<ActiveVoice, kMaxActiveVoiceCount> active_voices_;
-  std::array<Voice, kMaxActiveVoiceCount> voices_;
-
-  int active_voice_count_ = 0;
-};
+}
 
 }  // namespace barely
 

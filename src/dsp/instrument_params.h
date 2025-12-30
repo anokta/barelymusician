@@ -20,10 +20,8 @@ namespace barely {
 /// Instrument parameters.
 struct InstrumentParams {
   // TODO(#12): Consider a more optimized implementation for voice stealing.
-  // TODO(#126): Convert to intrusive list.
   static constexpr int kMaxVoiceCount = 16;
-  std::array<VoiceIndex, kMaxVoiceCount> active_voices;
-  uint32_t active_voice_count = 0;
+  uint32_t first_active_voice_index = 0;
 
   /// Voice parameters.
   VoiceParams voice_params = {};
@@ -88,7 +86,6 @@ inline void SetInstrumentControl(InstrumentParams& params, float sample_interval
       break;
     case InstrumentControlType::kVoiceCount:
       params.voice_count = static_cast<uint32_t>(value);
-      params.active_voice_count = std::min(params.active_voice_count, params.voice_count);
       break;
     case InstrumentControlType::kAttack:
       params.adsr.SetAttack(sample_interval, value);

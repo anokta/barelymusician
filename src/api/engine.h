@@ -168,11 +168,13 @@ struct BarelyEngine {
   barely::VoicePool voice_pool_;
 
   // Performers.
-  using PerformerPool = barely::Pool<BarelyPerformer, BARELYMUSICIAN_MAX_PERFORMER_COUNT>;
+  using PerformerPool = barely::Pool<BarelyPerformer, BARELYMUSICIAN_MAX_PERFORMER_COUNT +
+                                                          BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
   PerformerPool performer_pool_;
 
   // Tasks.
-  using TaskPool = barely::Pool<BarelyTask, BARELYMUSICIAN_MAX_TASK_COUNT>;
+  using TaskPool =
+      barely::Pool<BarelyTask, BARELYMUSICIAN_MAX_TASK_COUNT + BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
   TaskPool task_pool_;
 
   // Output samples.

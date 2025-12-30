@@ -87,6 +87,7 @@ bool BarelyEngine_DestroyInstrument(BarelyEngineHandle engine, BarelyInstrumentR
 
   engine->GetInstrument(instrument).SetAllNotesOff();
   engine->RemovePerformer(engine->GetInstrument(instrument).arp_index);
+  engine->RemoveTask(engine->GetInstrument(instrument).arp_task_index);
   engine->RemoveInstrument(instrument);
   return true;
 }

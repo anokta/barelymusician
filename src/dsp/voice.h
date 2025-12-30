@@ -198,6 +198,9 @@ class Voice {
   // TODO(#126): Convert this back to index.
   InstrumentParams* instrument_params_ = nullptr;
 
+  uint32_t previous_instrument_voice_index = 0;
+  uint32_t next_instrument_voice_index = 0;
+
  private:
   void Approach(const VoiceParams& params) noexcept {
     ApproachValue(params_.gain, note_params_.gain * params.gain);

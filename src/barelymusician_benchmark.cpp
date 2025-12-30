@@ -17,7 +17,7 @@ void BM_BarelyEngine_AddRemoveInstrument(State& state) {
   Engine engine(kSampleRate, kFrameCount);
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    [[maybe_unused]] const auto instrument = engine.CreateInstrument();
+    engine.DestroyInstrument(engine.CreateInstrument());
   }
 }
 BENCHMARK(BM_BarelyEngine_AddRemoveInstrument);
@@ -26,7 +26,7 @@ void BM_BarelyEngine_AddRemovePerformer(State& state) {
   Engine engine(kSampleRate, kFrameCount);
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    [[maybe_unused]] const auto performer = engine.CreatePerformer();
+    engine.DestroyPerformer(engine.CreatePerformer());
   }
 }
 BENCHMARK(BM_BarelyEngine_AddRemovePerformer);

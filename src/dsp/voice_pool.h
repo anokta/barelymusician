@@ -19,40 +19,55 @@ using VoicePool = Pool<Voice, BARELYMUSICIAN_MAX_VOICE_COUNT>;
 [[nodiscard]] inline Voice* AcquireVoice(VoicePool& voice_pool, InstrumentParams& instrument_params,
                                          float pitch) noexcept {
   if (instrument_params.should_retrigger) {
-    for (uint32_t i = 0; i < instrument_params.active_voice_count; ++i) {
-      Voice& voice = voice_pool.Get(instrument_params.active_voices[i]);
+    uint32_t current_voice_index = instrument_params.first_active_voice_index;
+    while (current_voice_index != 0) {
+      Voice& voice = voice_pool.Get(current_voice_index);
       if (voice.pitch() == pitch) {
-        for (uint32_t j = 0; j < instrument_params.active_voice_count; ++j) {
+        while (current_voice_index != 0) {
+          voice = voice_pool.Get(current_voice_index);
           voice.increment_timestamp();
+          current_voice_index = voice.next_instrument_voice_index;
         }
         return &voice;
       }
+      current_voice_index = voice.next_instrument_voice_index;
     }
   }
 
-  if (voice_pool.GetActiveCount() < voice_pool.Count() &&
-      instrument_params.active_voice_count < instrument_params.voice_count) {
-    for (uint32_t i = 0; i < instrument_params.active_voice_count; ++i) {
-      voice_pool.Get(instrument_params.active_voices[i]).increment_timestamp();
-    }
-
-    // Acquire new voice.
-    const uint32_t voice_index = voice_pool.Acquire();
-    instrument_params.active_voices[instrument_params.active_voice_count++] = voice_index;
-    return &voice_pool.Get(voice_index);
-  }
-
-  // No voices are available to acquire, steal th e oldest active voice.
+  uint32_t current_voice_index = instrument_params.first_active_voice_index;
   uint32_t oldest_active_voice_index = 0;
-  for (uint32_t i = 0; i < instrument_params.active_voice_count; ++i) {
-    Voice& voice = voice_pool.Get(instrument_params.active_voices[i]);
-    if (voice.timestamp() >
-        voice_pool.Get(instrument_params.active_voices[oldest_active_voice_index]).timestamp()) {
-      oldest_active_voice_index = i;
+  uint32_t active_voice_count = 0;
+  while (current_voice_index != 0) {
+    Voice& voice = voice_pool.Get(current_voice_index);
+    if (oldest_active_voice_index == 0 ||
+        voice.timestamp() > voice_pool.Get(oldest_active_voice_index).timestamp()) {
+      oldest_active_voice_index = current_voice_index;
     }
     voice.increment_timestamp();
+    ++active_voice_count;
+    if (voice.next_instrument_voice_index == 0) {  // TODO(#126): Remove double checking here.
+      break;
+    }
+    current_voice_index = voice.next_instrument_voice_index;
   }
-  return &voice_pool.Get(instrument_params.active_voices[oldest_active_voice_index]);
+
+  // Acquire new voice.
+  if (voice_pool.GetActiveCount() < voice_pool.Count() &&
+      active_voice_count < static_cast<uint32_t>(instrument_params.voice_count)) {
+    const uint32_t new_voice_index = voice_pool.Acquire();
+    Voice& new_voice = voice_pool.Get(new_voice_index);
+    new_voice.previous_instrument_voice_index = current_voice_index;
+    new_voice.next_instrument_voice_index = 0;
+    if (current_voice_index != 0) {
+      voice_pool.Get(current_voice_index).next_instrument_voice_index = new_voice_index;
+    } else {
+      instrument_params.first_active_voice_index = new_voice_index;
+    }
+    return &new_voice;
+  }
+
+  // No voices are available to acquire, steal the oldest active voice.
+  return &voice_pool.Get(oldest_active_voice_index);
 }
 
 /// Processes the next output samples.
@@ -73,13 +88,21 @@ inline void ProcessAllVoices(AudioRng& rng, VoicePool& voice_pool,
     InstrumentParams& params = *voice.instrument_params_;
     if constexpr (kIsSidechainSend) {
       if (!voice.IsActive()) {
-        for (uint32_t j = 0; j < params.active_voice_count; ++j) {
-          if (params.active_voices[j] == voice_pool.GetIndex(voice)) {
-            std::swap(params.active_voices[j], params.active_voices[params.active_voice_count - 1]);
-            --params.active_voice_count;
-            break;
+        if (voice.previous_instrument_voice_index != 0) {
+          voice_pool.Get(voice.previous_instrument_voice_index).next_instrument_voice_index =
+              voice.next_instrument_voice_index;
+          if (voice.next_instrument_voice_index != 0) {
+            voice_pool.Get(voice.next_instrument_voice_index).previous_instrument_voice_index =
+                voice.previous_instrument_voice_index;
+          }
+          voice.previous_instrument_voice_index = 0;
+        } else {
+          params.first_active_voice_index = voice.next_instrument_voice_index;
+          if (voice.next_instrument_voice_index != 0) {
+            voice_pool.Get(voice.next_instrument_voice_index).previous_instrument_voice_index = 0;
           }
         }
+        voice.next_instrument_voice_index = 0;
         voice_pool.Release(voice_pool.GetIndex(voice));
         continue;
       }

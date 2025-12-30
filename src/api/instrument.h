@@ -29,13 +29,13 @@ struct BarelyInstrument {
   BarelyEngine* engine_ = nullptr;
 
   /// Instrument index.
-  BarelyInstrumentRef instrument_index = {};
+  uint32_t instrument_index = {};
 
   /// Arpeggiator index.
-  BarelyPerformerRef arp_index = {};
+  BarelyPerformer arp;
 
   /// Arpeggiator task index.
-  BarelyTaskRef arp_task_index = {};
+  BarelyTask arp_task;
 
   barely::InstrumentParams params = {};
 

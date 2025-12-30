@@ -67,8 +67,8 @@ static void Instrument_SetSampleData(Instrument& instrument, uintptr_t slices,
   return engine.CreateTask(performer, position, duration, /*priority=*/0, /*callback=*/nullptr);
 }
 
-[[nodiscard]] static BarelyPerformerRef Performer_GetHandle(PerformerRef& performer) noexcept {
-  return static_cast<BarelyPerformerRef>(performer);
+[[nodiscard]] static BarelyRef Performer_GetHandle(PerformerRef& performer) noexcept {
+  return static_cast<BarelyRef>(performer);
 }
 
 [[nodiscard]] static uintptr_t Task_GetHandle(Task& task) noexcept {

@@ -29,35 +29,33 @@ struct BarelyEngine {
 
   /// Adds a new instrument.
   ///
-  /// @return Instrument index.
-  [[nodiscard]] uint32_t AddInstrument() noexcept {
+  /// @return Instrument reference.
+  [[nodiscard]] BarelyRef AddInstrument() noexcept {
     const uint32_t index = instrument_pool_.Acquire();
     instrument_pool_.Get(index) = {};
-    return index;
+    return {index, instrument_pool_.GetGeneration(index)};
   }
 
   /// Removes an instrument.
   ///
-  /// @param instrument_index Instrument index.
-  void RemoveInstrument(uint32_t instrument_index) noexcept {
-    instrument_pool_.Release(instrument_index);
+  /// @param instrument Instrument reference.
+  void RemoveInstrument(BarelyRef instrument) noexcept {
+    instrument_pool_.Release(instrument.index);
   }
 
   /// Adds a new performer.
   ///
   /// @return Performer index.
-  [[nodiscard]] uint32_t AddPerformer() noexcept {
+  [[nodiscard]] BarelyRef AddPerformer() noexcept {
     const uint32_t index = performer_pool_.Acquire();
     performer_pool_.Get(index) = {};
-    return index;
+    return {index, performer_pool_.GetGeneration(index)};
   }
 
   /// Removes a performer.
   ///
-  /// @param performer_index Performer index.
-  void RemovePerformer(uint32_t performer_index) noexcept {
-    performer_pool_.Release(performer_index);
-  }
+  /// @param performer_index Performer reference.
+  void RemovePerformer(BarelyRef performer) noexcept { performer_pool_.Release(performer.index); }
 
   void DestroyInstruments() noexcept {
     for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
@@ -65,39 +63,53 @@ struct BarelyEngine {
     }
   }
 
-  [[nodiscard]] BarelyInstrument& GetInstrument(uint32_t instrument_index) noexcept {
-    return instrument_pool_.Get(instrument_index);
+  [[nodiscard]] BarelyInstrument& GetInstrument(BarelyRef instrument) noexcept {
+    return instrument_pool_.Get(instrument.index);
   }
-  [[nodiscard]] const BarelyInstrument& GetInstrument(uint32_t instrument_index) const noexcept {
-    return instrument_pool_.Get(instrument_index);
+  [[nodiscard]] const BarelyInstrument& GetInstrument(BarelyRef instrument) const noexcept {
+    return instrument_pool_.Get(instrument.index);
   }
 
   [[nodiscard]] BarelyPerformer& GetPerformer(uint32_t performer_index) noexcept {
     return performer_pool_.Get(performer_index);
   }
-  [[nodiscard]] const BarelyPerformer& GetPerformer(uint32_t performer_index) const noexcept {
-    return performer_pool_.Get(performer_index);
+  [[nodiscard]] BarelyPerformer& GetPerformer(BarelyRef performer) noexcept {
+    return performer_pool_.Get(performer.index);
+  }
+  [[nodiscard]] const BarelyPerformer& GetPerformer(BarelyRef performer) const noexcept {
+    return performer_pool_.Get(performer.index);
   }
 
-  [[nodiscard]] BarelyTask& GetTask(uint32_t task_index) noexcept {
-    return task_pool_.Get(task_index);
+  [[nodiscard]] BarelyTask& GetTask(BarelyRef task) noexcept { return task_pool_.Get(task.index); }
+  [[nodiscard]] const BarelyTask& GetTask(BarelyRef task) const noexcept {
+    return task_pool_.Get(task.index);
   }
-  [[nodiscard]] const BarelyTask& GetTask(uint32_t task_index) const noexcept {
-    return task_pool_.Get(task_index);
+
+  [[nodiscard]] bool IsValidInstrument(BarelyRef instrument) const noexcept {
+    return instrument_pool_.IsActive(instrument.index, instrument.generation);
+  }
+  [[nodiscard]] bool IsValidPerformer(BarelyRef performer) const noexcept {
+    return performer_pool_.IsActive(performer.index, performer.generation);
+  }
+  [[nodiscard]] bool IsValidTask(BarelyRef task) const noexcept {
+    return task_pool_.IsActive(task.index, task.generation);
   }
 
   /// Adds a new task.
   ///
   /// @return Task index.
-  [[nodiscard]] uint32_t AddTask() noexcept {
+  [[nodiscard]] BarelyRef AddTask() noexcept {
     const uint32_t index = task_pool_.Acquire();
-    return index;
+    return {index, task_pool_.GetGeneration(index)};
   }
 
   /// Removes a task.
   ///
-  /// @param task_index Task index.
-  void RemoveTask(uint32_t task_index) noexcept { task_pool_.Release(task_index); }
+  /// @param task Task reference.
+  void RemoveTask(BarelyRef task) noexcept {
+    performer_pool_.Get(GetTask(task).performer_index).RemoveTask(&GetTask(task));
+    task_pool_.Release(task.index);
+  }
 
   /// Returns a control value.
   ///
@@ -178,13 +190,11 @@ struct BarelyEngine {
   barely::VoicePool voice_pool_;
 
   // Performers.
-  using PerformerPool = barely::Pool<BarelyPerformer, BARELYMUSICIAN_MAX_PERFORMER_COUNT +
-                                                          BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
+  using PerformerPool = barely::Pool<BarelyPerformer, BARELYMUSICIAN_MAX_PERFORMER_COUNT>;
   PerformerPool performer_pool_;
 
   // Tasks.
-  using TaskPool =
-      barely::Pool<BarelyTask, BARELYMUSICIAN_MAX_TASK_COUNT + BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
+  using TaskPool = barely::Pool<BarelyTask, BARELYMUSICIAN_MAX_TASK_COUNT>;
   TaskPool task_pool_;
 
   // Output samples.

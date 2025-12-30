@@ -136,7 +136,7 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   BarelyInstrumentRef instrument = {};
+///   BarelyRef instrument = {};
 ///   BarelyEngine_CreateInstrument(engine, /*control_overrides=*/nullptr,
 ///                                 /*control_override_count=*/0, &instrument);
 ///
@@ -165,11 +165,11 @@
 ///
 ///   @code{.cpp}
 ///   // Create.
-///   BarelyPerformerRef performer = {};
+///   BarelyRef performer = {};
 ///   BarelyEngine_CreatePerformer(engine, &performer);
 ///
 ///   // Create a task.
-///   BarelyTaskRef task = {};
+///   BarelyRef task = {};
 ///   BarelyTaskEventCallback callback{ /*populate this*/ };
 ///   BarelyEngine_CreateTask(engine, performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
 ///                           callback, &task);
@@ -412,6 +412,9 @@ typedef enum BarelyTaskEventType {
   BarelyTaskEventType_kCount,
 } BarelyTaskEventType;
 
+/// Engine.
+typedef struct BarelyEngine BarelyEngine;
+
 /// Instrument control override.
 typedef struct BarelyInstrumentControlOverride {
   /// Type.
@@ -438,6 +441,15 @@ typedef struct BarelyQuantization {
   /// Amount.
   float amount;
 } BarelyQuantization;
+
+/// Reference.
+typedef struct BarelyRef {
+  /// Index.
+  uint32_t index;
+
+  /// Generation.
+  uint16_t generation;
+} BarelyRef;
 
 /// A musical scale.
 typedef struct BarelyScale {
@@ -468,18 +480,6 @@ typedef struct BarelySlice {
   /// Number of mono samples.
   int32_t sample_count;
 } BarelySlice;
-
-/// Engine.
-typedef struct BarelyEngine BarelyEngine;
-
-/// Instrument reference.
-typedef uint32_t BarelyInstrumentRef;
-
-/// Performer reference.
-typedef uint32_t BarelyPerformerRef;
-
-/// Task reference.
-typedef uint32_t BarelyTaskRef;
 
 /// Note event callback.
 ///
@@ -512,15 +512,14 @@ BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_CreateInstrument(
     BarelyEngine* engine, const BarelyInstrumentControlOverride* control_overrides,
-    int32_t control_override_count, BarelyInstrumentRef* out_instrument);
+    int32_t control_override_count, BarelyRef* out_instrument);
 
 /// Creates a new performer.
 ///
 /// @param engine Pointer to engine.
 /// @param out_performer Output performer reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_CreatePerformer(BarelyEngine* engine,
-                                             BarelyPerformerRef* out_performer);
+BARELY_API bool BarelyEngine_CreatePerformer(BarelyEngine* engine, BarelyRef* out_performer);
 
 /// Creates a new task.
 ///
@@ -532,10 +531,10 @@ BARELY_API bool BarelyEngine_CreatePerformer(BarelyEngine* engine,
 /// @param user_data Pointer to user data.
 /// @param out_task Output task reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_CreateTask(BarelyEngine* engine, BarelyPerformerRef performer,
-                                        double position, double duration, int32_t priority,
+BARELY_API bool BarelyEngine_CreateTask(BarelyEngine* engine, BarelyRef performer, double position,
+                                        double duration, int32_t priority,
                                         BarelyTaskEventCallback callback, void* user_data,
-                                        BarelyTaskRef* out_task);
+                                        BarelyRef* out_task);
 
 /// Destroys an engine.
 ///
@@ -548,20 +547,19 @@ BARELY_API bool BarelyEngine_Destroy(BarelyEngine* engine);
 /// @param engine Pointer to engine.
 /// @param instrument Instrument reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_DestroyInstrument(BarelyEngine* engine,
-                                               BarelyInstrumentRef instrument);
+BARELY_API bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, BarelyRef instrument);
 
 /// Destroys a performer.
 ///
 /// @param performer Performer reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, BarelyPerformerRef performer);
+BARELY_API bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, BarelyRef performer);
 
 /// Destroys a task.
 ///
 /// @param task Task reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_DestroyTask(BarelyEngine* engine, BarelyTaskRef task);
+BARELY_API bool BarelyEngine_DestroyTask(BarelyEngine* engine, BarelyRef task);
 
 /// Generates a new random number with uniform distribution in the normalized range [0, 1).
 ///
@@ -649,8 +647,7 @@ BARELY_API bool BarelyEngine_Update(BarelyEngine* engine, double timestamp);
 /// @param type Instrument control type.
 /// @param out_value Output instrument control value.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_GetControl(const BarelyEngine* engine,
-                                            BarelyInstrumentRef instrument,
+BARELY_API bool BarelyInstrument_GetControl(const BarelyEngine* engine, BarelyRef instrument,
                                             BarelyInstrumentControlType type, float* out_value);
 
 /// Gets an instrument note control value.
@@ -661,9 +658,9 @@ BARELY_API bool BarelyInstrument_GetControl(const BarelyEngine* engine,
 /// @param type Note control type.
 /// @param out_value Output note control value.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine,
-                                                BarelyInstrumentRef instrument, float pitch,
-                                                BarelyNoteControlType type, float* out_value);
+BARELY_API bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, BarelyRef instrument,
+                                                float pitch, BarelyNoteControlType type,
+                                                float* out_value);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -672,17 +669,15 @@ BARELY_API bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine,
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine,
-                                          BarelyInstrumentRef instrument, float pitch,
-                                          bool* out_is_note_on);
+BARELY_API bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, BarelyRef instrument,
+                                          float pitch, bool* out_is_note_on);
 
 /// Sets all instrument notes off.
 ///
 /// @param engine Pointer to engine.
 /// @param instrument Instrument reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine,
-                                                BarelyInstrumentRef instrument);
+BARELY_API bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, BarelyRef instrument);
 
 /// Sets an instrument control value.
 ///
@@ -691,7 +686,7 @@ BARELY_API bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine,
 /// @param type Instrument control type.
 /// @param value Instrument control value.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetControl(BarelyEngine* engine, BarelyInstrumentRef instrument,
+BARELY_API bool BarelyInstrument_SetControl(BarelyEngine* engine, BarelyRef instrument,
                                             BarelyInstrumentControlType type, float value);
 
 /// Sets an instrument note control value.
@@ -702,9 +697,9 @@ BARELY_API bool BarelyInstrument_SetControl(BarelyEngine* engine, BarelyInstrume
 /// @param type Note control type.
 /// @param value Note control value.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteControl(BarelyEngine* engine,
-                                                BarelyInstrumentRef instrument, float pitch,
-                                                BarelyNoteControlType type, float value);
+BARELY_API bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, BarelyRef instrument,
+                                                float pitch, BarelyNoteControlType type,
+                                                float value);
 
 /// Sets the note event callback of an instrument.
 ///
@@ -713,8 +708,7 @@ BARELY_API bool BarelyInstrument_SetNoteControl(BarelyEngine* engine,
 /// @param callback Note event callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine,
-                                                      BarelyInstrumentRef instrument,
+BARELY_API bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, BarelyRef instrument,
                                                       BarelyNoteEventCallback callback,
                                                       void* user_data);
 
@@ -724,7 +718,7 @@ BARELY_API bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine,
 /// @param instrument Instrument reference.
 /// @param pitch Note pitch.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, BarelyInstrumentRef instrument,
+BARELY_API bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, BarelyRef instrument,
                                             float pitch);
 
 /// Sets an instrument note on.
@@ -735,8 +729,7 @@ BARELY_API bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, BarelyInstrume
 /// @param note_control_overrides Array of note control overrides.
 /// @param note_control_override_count Number of note control overrides.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, BarelyInstrumentRef instrument,
-                                           float pitch,
+BARELY_API bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, BarelyRef instrument, float pitch,
                                            const BarelyNoteControlOverride* note_control_overrides,
                                            int32_t note_control_override_count);
 
@@ -747,7 +740,7 @@ BARELY_API bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, BarelyInstrumen
 /// @param slices Array of slices.
 /// @param slice_count Number of slices.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetSampleData(BarelyEngine* engine, BarelyInstrumentRef instrument,
+BARELY_API bool BarelyInstrument_SetSampleData(BarelyEngine* engine, BarelyRef instrument,
                                                const BarelySlice* slices, int32_t slice_count);
 
 /// Gets the loop begin position of a performer.
@@ -757,7 +750,7 @@ BARELY_API bool BarelyInstrument_SetSampleData(BarelyEngine* engine, BarelyInstr
 /// @param out_loop_begin_position Output loop begin position in beats.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine,
-                                                     BarelyPerformerRef performer,
+                                                     BarelyRef performer,
                                                      double* out_loop_begin_position);
 
 /// Gets the loop length of a performer.
@@ -766,8 +759,7 @@ BARELY_API bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine,
 /// @param performer Performer reference.
 /// @param out_loop_length Output loop length.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine,
-                                              BarelyPerformerRef performer,
+BARELY_API bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, BarelyRef performer,
                                               double* out_loop_length);
 
 /// Gets the position of a performer.
@@ -776,8 +768,8 @@ BARELY_API bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine,
 /// @param performer Performer reference.
 /// @param out_position Output position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_GetPosition(const BarelyEngine* engine,
-                                            BarelyPerformerRef performer, double* out_position);
+BARELY_API bool BarelyPerformer_GetPosition(const BarelyEngine* engine, BarelyRef performer,
+                                            double* out_position);
 
 /// Gets whether a performer is looping or not.
 ///
@@ -785,7 +777,7 @@ BARELY_API bool BarelyPerformer_GetPosition(const BarelyEngine* engine,
 /// @param performer Performer reference.
 /// @param out_is_looping Output true if looping, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_IsLooping(const BarelyEngine* engine, BarelyPerformerRef performer,
+BARELY_API bool BarelyPerformer_IsLooping(const BarelyEngine* engine, BarelyRef performer,
                                           bool* out_is_looping);
 
 /// Gets whether a performer is playing or not.
@@ -794,7 +786,7 @@ BARELY_API bool BarelyPerformer_IsLooping(const BarelyEngine* engine, BarelyPerf
 /// @param performer Performer reference.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, BarelyPerformerRef performer,
+BARELY_API bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, BarelyRef performer,
                                           bool* out_is_playing);
 
 /// Sets the loop begin position of a performer.
@@ -803,8 +795,7 @@ BARELY_API bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, BarelyPerf
 /// @param performer Performer reference.
 /// @param loop_begin_position Loop begin position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine,
-                                                     BarelyPerformerRef performer,
+BARELY_API bool BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine, BarelyRef performer,
                                                      double loop_begin_position);
 
 /// Sets the loop length of a performer.
@@ -813,7 +804,7 @@ BARELY_API bool BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine,
 /// @param performer Performer reference.
 /// @param loop_length Loop length in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetLoopLength(BarelyEngine* engine, BarelyPerformerRef performer,
+BARELY_API bool BarelyPerformer_SetLoopLength(BarelyEngine* engine, BarelyRef performer,
                                               double loop_length);
 
 /// Sets whether a performer is looping or not.
@@ -822,7 +813,7 @@ BARELY_API bool BarelyPerformer_SetLoopLength(BarelyEngine* engine, BarelyPerfor
 /// @param performer Performer reference.
 /// @param is_looping True if looping, false otherwise.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetLooping(BarelyEngine* engine, BarelyPerformerRef performer,
+BARELY_API bool BarelyPerformer_SetLooping(BarelyEngine* engine, BarelyRef performer,
                                            bool is_looping);
 
 /// Sets the position of a performer.
@@ -831,7 +822,7 @@ BARELY_API bool BarelyPerformer_SetLooping(BarelyEngine* engine, BarelyPerformer
 /// @param performer Performer reference.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_SetPosition(BarelyEngine* engine, BarelyPerformerRef performer,
+BARELY_API bool BarelyPerformer_SetPosition(BarelyEngine* engine, BarelyRef performer,
                                             double position);
 
 /// Starts a performer.
@@ -839,14 +830,14 @@ BARELY_API bool BarelyPerformer_SetPosition(BarelyEngine* engine, BarelyPerforme
 /// @param engine Pointer to engine.
 /// @param performer Performer reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_Start(BarelyEngine* engine, BarelyPerformerRef performer);
+BARELY_API bool BarelyPerformer_Start(BarelyEngine* engine, BarelyRef performer);
 
 /// Stops a performer.
 ///
 /// @param engine Pointer to engine.
 /// @param performer Performer reference.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_Stop(BarelyEngine* engine, BarelyPerformerRef performer);
+BARELY_API bool BarelyPerformer_Stop(BarelyEngine* engine, BarelyRef performer);
 
 /// Gets a quantized position.
 ///
@@ -871,7 +862,7 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 /// @param task Task reference.
 /// @param out_duration Output duration in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetDuration(const BarelyEngine* engine, BarelyTaskRef task,
+BARELY_API bool BarelyTask_GetDuration(const BarelyEngine* engine, BarelyRef task,
                                        double* out_duration);
 
 /// Gets the position of a task.
@@ -880,7 +871,7 @@ BARELY_API bool BarelyTask_GetDuration(const BarelyEngine* engine, BarelyTaskRef
 /// @param task Task reference.
 /// @param out_position Output position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetPosition(const BarelyEngine* engine, BarelyTaskRef task,
+BARELY_API bool BarelyTask_GetPosition(const BarelyEngine* engine, BarelyRef task,
                                        double* out_position);
 
 /// Gets the priority of a task.
@@ -889,7 +880,7 @@ BARELY_API bool BarelyTask_GetPosition(const BarelyEngine* engine, BarelyTaskRef
 /// @param task Task reference.
 /// @param out_priority Output priority.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetPriority(const BarelyEngine* engine, BarelyTaskRef task,
+BARELY_API bool BarelyTask_GetPriority(const BarelyEngine* engine, BarelyRef task,
                                        int32_t* out_priority);
 
 /// Gets whether the task is active or not.
@@ -897,7 +888,7 @@ BARELY_API bool BarelyTask_GetPriority(const BarelyEngine* engine, BarelyTaskRef
 /// @param engine Pointer to engine.
 /// @param task Task reference.
 /// @param out_is_active Output true if active, false otherwise.
-BARELY_API bool BarelyTask_IsActive(const BarelyEngine* engine, BarelyTaskRef task,
+BARELY_API bool BarelyTask_IsActive(const BarelyEngine* engine, BarelyRef task,
                                     bool* out_is_active);
 
 /// Sets the duration of a task.
@@ -906,7 +897,7 @@ BARELY_API bool BarelyTask_IsActive(const BarelyEngine* engine, BarelyTaskRef ta
 /// @param task Task reference.
 /// @param duration Duration in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetDuration(BarelyEngine* engine, BarelyTaskRef task, double duration);
+BARELY_API bool BarelyTask_SetDuration(BarelyEngine* engine, BarelyRef task, double duration);
 
 /// Sets the event callback of a task.
 ///
@@ -915,7 +906,7 @@ BARELY_API bool BarelyTask_SetDuration(BarelyEngine* engine, BarelyTaskRef task,
 /// @param callback Event callback.
 /// @param user_data Pointer to user data.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetEventCallback(BarelyEngine* engine, BarelyTaskRef task,
+BARELY_API bool BarelyTask_SetEventCallback(BarelyEngine* engine, BarelyRef task,
                                             BarelyTaskEventCallback callback, void* user_data);
 
 /// Sets the position of a task.
@@ -924,7 +915,7 @@ BARELY_API bool BarelyTask_SetEventCallback(BarelyEngine* engine, BarelyTaskRef 
 /// @param task Task reference.
 /// @param position Position in beats.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetPosition(BarelyEngine* engine, BarelyTaskRef task, double position);
+BARELY_API bool BarelyTask_SetPosition(BarelyEngine* engine, BarelyRef task, double position);
 
 /// Sets the priority of a task.
 ///
@@ -932,7 +923,7 @@ BARELY_API bool BarelyTask_SetPosition(BarelyEngine* engine, BarelyTaskRef task,
 /// @param task Task reference.
 /// @param priority Priority.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetPriority(BarelyEngine* engine, BarelyTaskRef task, int32_t priority);
+BARELY_API bool BarelyTask_SetPriority(BarelyEngine* engine, BarelyRef task, int32_t priority);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -1197,14 +1188,14 @@ class InstrumentRef {
   /// @param engine Raw engine handle.
   /// @param instrument Raw instrument reference.
   /// @param note_event_callback Pointer to note event callback.
-  InstrumentRef(BarelyEngine* engine, BarelyInstrumentRef instrument,
+  InstrumentRef(BarelyEngine* engine, BarelyRef instrument,
                 NoteEventCallback* note_event_callback) noexcept
       : engine_(engine), instrument_(instrument), note_event_callback_(note_event_callback) {}
 
   /// Returns the raw reference.
   ///
   /// @return Raw reference.
-  [[nodiscard]] constexpr operator BarelyInstrumentRef() const noexcept { return instrument_; }
+  [[nodiscard]] constexpr operator BarelyRef() const noexcept { return instrument_; }
 
   /// Returns a control value.
   ///
@@ -1368,7 +1359,7 @@ class InstrumentRef {
   BarelyEngine* engine_ = nullptr;
 
   // Raw instrument reference.
-  BarelyTaskRef instrument_ = {};
+  BarelyRef instrument_ = {};
 
   // Note event callback.
   NoteEventCallback* note_event_callback_;
@@ -1382,13 +1373,13 @@ class TaskRef {
   /// @param engine Raw engine pointer.
   /// @param task Raw task reference.
   /// @param event_callback Pointer to task event callback.
-  TaskRef(BarelyEngine* engine, BarelyTaskRef task, TaskEventCallback* event_callback) noexcept
+  TaskRef(BarelyEngine* engine, BarelyRef task, TaskEventCallback* event_callback) noexcept
       : engine_(engine), task_(task), event_callback_(event_callback) {}
 
   /// Returns the raw reference.
   ///
   /// @return Raw reference.
-  [[nodiscard]] constexpr operator BarelyTaskRef() const noexcept { return task_; }
+  [[nodiscard]] constexpr operator BarelyRef() const noexcept { return task_; }
 
   /// Returns the duration.
   ///
@@ -1488,7 +1479,7 @@ class TaskRef {
   BarelyEngine* engine_ = nullptr;
 
   // Raw task reference.
-  BarelyTaskRef task_ = {};
+  BarelyRef task_ = {};
 
   // Event callback.
   TaskEventCallback* event_callback_ = nullptr;
@@ -1501,13 +1492,13 @@ class PerformerRef {
   ///
   /// @param engine Raw engine pointer.
   /// @param performer Raw performer reference.
-  PerformerRef(BarelyEngine* engine, BarelyPerformerRef performer) noexcept
+  PerformerRef(BarelyEngine* engine, BarelyRef performer) noexcept
       : engine_(engine), performer_(performer) {}
 
   /// Returns the raw reference.
   ///
   /// @return Raw reference.
-  [[nodiscard]] constexpr operator BarelyPerformerRef() const noexcept { return performer_; }
+  [[nodiscard]] constexpr operator BarelyRef() const noexcept { return performer_; }
 
   /// Returns the loop begin position.
   ///
@@ -1617,7 +1608,7 @@ class PerformerRef {
   BarelyEngine* engine_;
 
   // Raw performer reference.
-  BarelyPerformerRef performer_;
+  BarelyRef performer_;
 };
 
 /// A class that wraps an engine handle.
@@ -1678,20 +1669,20 @@ class Engine {
   /// @return Instrument reference.
   [[nodiscard]] InstrumentRef CreateInstrument(
       std::span<const InstrumentControlOverride> control_overrides = {}) noexcept {
-    BarelyInstrumentRef instrument = {};
+    BarelyRef instrument = {};
     [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(
         engine_, reinterpret_cast<const BarelyInstrumentControlOverride*>(control_overrides.data()),
         static_cast<int32_t>(control_overrides.size()), &instrument);
     assert(success);
-    note_event_callbacks_[instrument] = {};
-    return InstrumentRef(engine_, instrument, &note_event_callbacks_[instrument]);
+    note_event_callbacks_[instrument.index] = {};
+    return InstrumentRef(engine_, instrument, &note_event_callbacks_[instrument.index]);
   }
 
   /// Creates a new performer.
   ///
   /// @return Performer reference.
   [[nodiscard]] PerformerRef CreatePerformer() noexcept {
-    BarelyPerformerRef performer = {};
+    BarelyRef performer = {};
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer);
     assert(success);
     return PerformerRef(engine_, performer);
@@ -1707,11 +1698,11 @@ class Engine {
   /// @return Task reference.
   [[nodiscard]] TaskRef CreateTask(PerformerRef performer, double position, double duration,
                                    int priority, TaskEventCallback callback) noexcept {
-    BarelyTaskRef task = {};
+    BarelyRef task = {};
     [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
                                                             priority, nullptr, nullptr, &task);
     assert(success);
-    task_event_callbacks_[task] = std::move(callback);
+    task_event_callbacks_[task.index] = std::move(callback);
     // TODO(#126): Fix up event callbacks on copy/move.
     success = BarelyTask_SetEventCallback(
         engine_, task,
@@ -1720,9 +1711,9 @@ class Engine {
             (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
           }
         },
-        &task_event_callbacks_[task]);
+        &task_event_callbacks_[task.index]);
     assert(success);
-    return TaskRef(engine_, task, &task_event_callbacks_[task]);
+    return TaskRef(engine_, task, &task_event_callbacks_[task.index]);
   }
 
   /// Destroys an instrument.

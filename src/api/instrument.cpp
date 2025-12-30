@@ -106,15 +106,11 @@ void BarelyInstrument::Init(
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
   controls_ = BuildControlArray(control_overrides);
   engine_ = &engine;
-  arp_index = engine.AddPerformer();
-  arp_task_index = engine.AddTask();
   const float arp_rate = controls_[BarelyInstrumentControlType_kArpRate].value;
 
-  auto& arp = engine.GetPerformer(arp_index);
   arp.SetLooping(true);
   arp.SetLoopLength((arp_rate > 0.0f) ? 1.0 / static_cast<double>(arp_rate) : 0.0);
 
-  auto& arp_task = engine.GetTask(arp_task_index);
   arp_task = {
       {[](BarelyTaskEventType type, void* user_data) {
          auto* instrument = static_cast<BarelyInstrument*>(user_data);
@@ -142,9 +138,8 @@ void BarelyInstrument::Init(
       static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
           arp.loop_length,
       std::numeric_limits<int32_t>::max(),
-      arp_index,
+      0,
   };
-
   arp.AddTask(&arp_task);
 }
 
@@ -161,14 +156,12 @@ const float* BarelyInstrument::GetNoteControl(float pitch,
 }
 
 bool BarelyInstrument::IsNoteOn(float pitch) const noexcept {
-  return engine_->GetPerformer(arp_index).is_playing ? arp_pitch_.has_value()
-                                                     : note_controls_.contains(pitch);
+  return arp.is_playing ? arp_pitch_.has_value() : note_controls_.contains(pitch);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyInstrument::SetAllNotesOff() noexcept {
   note_controls_.clear();
-  auto& arp = engine_->GetPerformer(arp_index);
   if (arp.is_playing) {
     pitches_.clear();
     arp.Stop();
@@ -201,7 +194,6 @@ void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
 void BarelyInstrument::SetNoteOff(float pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
     pitches_.erase(std::find(pitches_.begin(), pitches_.end(), pitch));
-    auto& arp = engine_->GetPerformer(arp_index);
     if (pitches_.empty() && arp.is_playing) {
       arp.Stop();
       arp.SetPosition(0.0);
@@ -220,7 +212,6 @@ void BarelyInstrument::SetNoteOn(
           note_controls_.try_emplace(pitch, BuildNoteControlArray(note_control_overrides));
       success) {
     pitches_.insert(std::lower_bound(pitches_.begin(), pitches_.end(), pitch), pitch);
-    auto& arp = engine_->GetPerformer(arp_index);
     if (pitches_.size() == 1 &&
         static_cast<BarelyArpMode>(controls_[BarelyInstrumentControlType_kArpMode].value) !=
             BarelyArpMode_kNone) {
@@ -240,7 +231,6 @@ void BarelyInstrument::SetSampleData(std::span<const BarelySlice> slices) noexce
 void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) noexcept {
   switch (type) {
     case InstrumentControlType::kArpMode: {
-      auto& arp = engine_->GetPerformer(arp_index);
       if (static_cast<BarelyArpMode>(value) == BarelyArpMode_kNone) {
         if (arp.is_playing) {
           arp.Stop();
@@ -260,17 +250,14 @@ void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) n
       }
     } break;
     case InstrumentControlType::kArpGateRatio:
-      engine_->GetPerformer(arp_index).SetTaskDuration(
-          &engine_->GetTask(arp_task_index),
-          static_cast<double>(value) * engine_->GetPerformer(arp_index).loop_length);
+      arp.SetTaskDuration(&arp_task, static_cast<double>(value) * arp.loop_length);
       break;
     case InstrumentControlType::kArpRate:
-      engine_->GetPerformer(arp_index).SetLoopLength(
-          (value > 0.0f) ? 1.0 / static_cast<double>(value) : 0.0);
-      engine_->GetPerformer(arp_index).SetTaskDuration(
-          &engine_->GetTask(arp_task_index),
+      arp.SetLoopLength((value > 0.0f) ? 1.0 / static_cast<double>(value) : 0.0);
+      arp.SetTaskDuration(
+          &arp_task,
           static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value) *
-              engine_->GetPerformer(arp_index).loop_length);
+              arp.loop_length);
       break;
     default:
       engine_->ScheduleMessage(InstrumentControlMessage{instrument_index, type, value});

@@ -247,6 +247,13 @@ void BarelyEngine::Update(double timestamp) noexcept {
           next_key = *maybe_next_key;
         }
       }
+      for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
+        if (const auto maybe_next_key = instrument_pool_.GetActive(i).arp.GetNextTaskKey();
+            maybe_next_key.has_value() && *maybe_next_key < next_key) {
+          has_tasks_to_process = true;
+          next_key = *maybe_next_key;
+        }
+      }
 
       const auto& [update_duration, max_priority] = next_key;
       assert(update_duration > 0.0 || has_tasks_to_process);
@@ -254,6 +261,9 @@ void BarelyEngine::Update(double timestamp) noexcept {
       if (update_duration > 0) {
         for (uint32_t i = 0; i < performer_pool_.GetActiveCount(); ++i) {
           performer_pool_.GetActive(i).Update(update_duration);
+        }
+        for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
+          instrument_pool_.GetActive(i).arp.Update(update_duration);
         }
 
         timestamp_ += barely::BeatsToSeconds(tempo_, update_duration);
@@ -263,6 +273,9 @@ void BarelyEngine::Update(double timestamp) noexcept {
       if (has_tasks_to_process) {
         for (uint32_t i = 0; i < performer_pool_.GetActiveCount(); ++i) {
           performer_pool_.GetActive(i).ProcessAllTasksAtPosition(max_priority);
+        }
+        for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
+          instrument_pool_.GetActive(i).arp.ProcessAllTasksAtPosition(max_priority);
         }
       }
     } else if (timestamp_ < timestamp) {

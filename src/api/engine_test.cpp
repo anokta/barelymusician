@@ -25,8 +25,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   BarelyEngine engine(kSampleRate, kSampleRate);
 
   // Create a performer.
-  const auto performer_index = engine.AddPerformer();
-  auto& performer = engine.GetPerformer(performer_index);
+  const auto performer_ref = engine.AddPerformer();
+  auto& performer = engine.GetPerformer(performer_ref);
 
   // Create a task.
   barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;
@@ -49,7 +49,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
       1.0,
       2.0,
       0,
-      performer_index,
+      performer_ref.index,
   };
   performer.AddTask(&task);
 
@@ -102,7 +102,7 @@ TEST(EngineTest, PlaySingleNote) {
 
   BarelyEngine engine(kSampleRate, kFrameCount);
   BarelyInstrument instrument(engine, {});
-  instrument.instrument_index = engine.AddInstrument();
+  instrument.instrument_index = engine.AddInstrument().index;
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine.ScheduleMessage(barely::InstrumentControlMessage{
         instrument.instrument_index, static_cast<barely::InstrumentControlType>(i),
@@ -153,7 +153,7 @@ TEST(EngineTest, PlayMultipleNotes) {
 
   BarelyEngine engine(1, kSampleRate);
   BarelyInstrument instrument(engine, {});
-  instrument.instrument_index = engine.AddInstrument();
+  instrument.instrument_index = engine.AddInstrument().index;
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine.ScheduleMessage(barely::InstrumentControlMessage{
         instrument.instrument_index, static_cast<barely::InstrumentControlType>(i),

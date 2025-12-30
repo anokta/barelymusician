@@ -23,13 +23,13 @@ TEST(BarelyEngineTest, CreateDestroyEngine) {
   EXPECT_FALSE(BarelyEngine_Destroy(nullptr));
 
   // Success.
-  BarelyEngineHandle engine = nullptr;
+  BarelyEngine* engine = nullptr;
   EXPECT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, &engine));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
-  BarelyEngineHandle engine = nullptr;
+  BarelyEngine* engine = nullptr;
   ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, &engine));
 
   // Failures.
@@ -45,7 +45,7 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 }
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
-  BarelyEngineHandle engine = nullptr;
+  BarelyEngine* engine = nullptr;
   ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, &engine));
 
   // Failures.

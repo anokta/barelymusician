@@ -68,9 +68,22 @@ struct BarelyEngine {
   [[nodiscard]] BarelyInstrument& GetInstrument(uint32_t instrument_index) noexcept {
     return instrument_pool_.Get(instrument_index);
   }
+  [[nodiscard]] const BarelyInstrument& GetInstrument(uint32_t instrument_index) const noexcept {
+    return instrument_pool_.Get(instrument_index);
+  }
 
   [[nodiscard]] BarelyPerformer& GetPerformer(uint32_t performer_index) noexcept {
     return performer_pool_.Get(performer_index);
+  }
+  [[nodiscard]] const BarelyPerformer& GetPerformer(uint32_t performer_index) const noexcept {
+    return performer_pool_.Get(performer_index);
+  }
+
+  [[nodiscard]] BarelyTask& GetTask(uint32_t task_index) noexcept {
+    return task_pool_.Get(task_index);
+  }
+  [[nodiscard]] const BarelyTask& GetTask(uint32_t task_index) const noexcept {
+    return task_pool_.Get(task_index);
   }
 
   /// Adds a new task.
@@ -85,10 +98,6 @@ struct BarelyEngine {
   ///
   /// @param task_index Task index.
   void RemoveTask(uint32_t task_index) noexcept { task_pool_.Release(task_index); }
-
-  [[nodiscard]] BarelyTask& GetTask(uint32_t task_index) noexcept {
-    return task_pool_.Get(task_index);
-  }
 
   /// Returns a control value.
   ///
@@ -143,6 +152,7 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
+  const barely::MainRng& main_rng() const noexcept { return main_rng_; }
   barely::MainRng& main_rng() noexcept { return main_rng_; }
 
  private:

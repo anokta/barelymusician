@@ -12,8 +12,7 @@
 #include "common/time.h"
 #include "dsp/message.h"
 
-bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
-                         BarelyEngineHandle* out_engine) {
+bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count, BarelyEngine** out_engine) {
   if (sample_rate <= 0) return false;
   if (max_frame_count <= 0) return false;
   if (!out_engine) return false;
@@ -22,7 +21,7 @@ bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
   return true;
 }
 
-bool BarelyEngine_CreateInstrument(BarelyEngineHandle engine,
+bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
                                    const BarelyInstrumentControlOverride* control_overrides,
                                    int32_t control_override_count,
                                    BarelyInstrumentRef* out_instrument) {
@@ -42,7 +41,7 @@ bool BarelyEngine_CreateInstrument(BarelyEngineHandle engine,
   return true;
 }
 
-bool BarelyEngine_CreatePerformer(BarelyEngineHandle engine, BarelyPerformerRef* out_performer) {
+bool BarelyEngine_CreatePerformer(BarelyEngine* engine, BarelyPerformerRef* out_performer) {
   if (!engine) return false;
   if (!out_performer) return false;
 
@@ -51,10 +50,9 @@ bool BarelyEngine_CreatePerformer(BarelyEngineHandle engine, BarelyPerformerRef*
   return *out_performer != 0;
 }
 
-bool BarelyEngine_CreateTask(BarelyEngineHandle engine, BarelyPerformerRef performer,
-                             double position, double duration, int32_t priority,
-                             BarelyTaskEventCallback callback, void* user_data,
-                             BarelyTaskRef* out_task) {
+bool BarelyEngine_CreateTask(BarelyEngine* engine, BarelyPerformerRef performer, double position,
+                             double duration, int32_t priority, BarelyTaskEventCallback callback,
+                             void* user_data, BarelyTaskRef* out_task) {
   if (!engine) return false;
   if (performer == 0) return false;
   if (duration <= 0.0) return false;
@@ -73,7 +71,7 @@ bool BarelyEngine_CreateTask(BarelyEngineHandle engine, BarelyPerformerRef perfo
   return true;
 }
 
-bool BarelyEngine_Destroy(BarelyEngineHandle engine) {
+bool BarelyEngine_Destroy(BarelyEngine* engine) {
   if (!engine) return false;
 
   engine->DestroyInstruments();
@@ -81,7 +79,7 @@ bool BarelyEngine_Destroy(BarelyEngineHandle engine) {
   return true;
 }
 
-bool BarelyEngine_DestroyInstrument(BarelyEngineHandle engine, BarelyInstrumentRef instrument) {
+bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, BarelyInstrumentRef instrument) {
   if (!engine) return false;
   if (instrument == 0) return false;
 
@@ -92,7 +90,7 @@ bool BarelyEngine_DestroyInstrument(BarelyEngineHandle engine, BarelyInstrumentR
   return true;
 }
 
-bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine, BarelyPerformerRef performer) {
+bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, BarelyPerformerRef performer) {
   if (!engine) return false;
   if (performer == 0) return false;
 
@@ -100,7 +98,7 @@ bool BarelyEngine_DestroyPerformer(BarelyEngineHandle engine, BarelyPerformerRef
   return true;
 }
 
-bool BarelyEngine_DestroyTask(BarelyEngineHandle engine, BarelyTaskRef task) {
+bool BarelyEngine_DestroyTask(BarelyEngine* engine, BarelyTaskRef task) {
   if (!engine) return false;
   if (task == 0) return false;
 
@@ -109,7 +107,7 @@ bool BarelyEngine_DestroyTask(BarelyEngineHandle engine, BarelyTaskRef task) {
   return true;
 }
 
-bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_number) {
+bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* out_number) {
   if (!engine) return false;
   if (!out_number) return false;
 
@@ -117,7 +115,7 @@ bool BarelyEngine_GenerateRandomNumber(BarelyEngineHandle engine, double* out_nu
   return true;
 }
 
-bool BarelyEngine_GetControl(BarelyEngineHandle engine, BarelyEngineControlType type,
+bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
                              float* out_value) {
   if (!engine) return false;
   if (type >= BarelyEngineControlType_kCount) return false;
@@ -127,7 +125,7 @@ bool BarelyEngine_GetControl(BarelyEngineHandle engine, BarelyEngineControlType 
   return true;
 }
 
-bool BarelyEngine_GetSeed(BarelyEngineHandle engine, int32_t* out_seed) {
+bool BarelyEngine_GetSeed(const BarelyEngine* engine, int32_t* out_seed) {
   if (!engine) return false;
   if (!out_seed) return false;
 
@@ -135,7 +133,7 @@ bool BarelyEngine_GetSeed(BarelyEngineHandle engine, int32_t* out_seed) {
   return true;
 }
 
-bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo) {
+bool BarelyEngine_GetTempo(const BarelyEngine* engine, double* out_tempo) {
   if (!engine) return false;
   if (!out_tempo) return false;
 
@@ -143,7 +141,7 @@ bool BarelyEngine_GetTempo(BarelyEngineHandle engine, double* out_tempo) {
   return true;
 }
 
-bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp) {
+bool BarelyEngine_GetTimestamp(const BarelyEngine* engine, double* out_timestamp) {
   if (!engine) return false;
   if (!out_timestamp) return false;
 
@@ -151,9 +149,8 @@ bool BarelyEngine_GetTimestamp(BarelyEngineHandle engine, double* out_timestamp)
   return true;
 }
 
-bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
-                          int32_t output_channel_count, int32_t output_frame_count,
-                          double timestamp) {
+bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples, int32_t output_channel_count,
+                          int32_t output_frame_count, double timestamp) {
   if (!engine) return false;
   if (!output_samples) return false;
   if (output_channel_count <= 0 || output_frame_count <= 0) return false;
@@ -162,7 +159,7 @@ bool BarelyEngine_Process(BarelyEngineHandle engine, float* output_samples,
   return true;
 }
 
-bool BarelyEngine_SetControl(BarelyEngineHandle engine, BarelyEngineControlType type, float value) {
+bool BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type, float value) {
   if (!engine) return false;
   if (type >= BarelyEngineControlType_kCount) return false;
 
@@ -170,7 +167,7 @@ bool BarelyEngine_SetControl(BarelyEngineHandle engine, BarelyEngineControlType 
   return true;
 }
 
-bool BarelyEngine_SetSeed(BarelyEngineHandle engine, int32_t seed) {
+bool BarelyEngine_SetSeed(BarelyEngine* engine, int32_t seed) {
   if (!engine) return false;
 
   // TODO(#146): This should ideally set the seed of `audio_rng_` as well.
@@ -178,21 +175,21 @@ bool BarelyEngine_SetSeed(BarelyEngineHandle engine, int32_t seed) {
   return true;
 }
 
-bool BarelyEngine_SetTempo(BarelyEngineHandle engine, double tempo) {
+bool BarelyEngine_SetTempo(BarelyEngine* engine, double tempo) {
   if (!engine) return false;
 
   engine->SetTempo(tempo);
   return true;
 }
 
-bool BarelyEngine_Update(BarelyEngineHandle engine, double timestamp) {
+bool BarelyEngine_Update(BarelyEngine* engine, double timestamp) {
   if (!engine) return false;
 
   engine->Update(timestamp);
   return true;
 }
 
-bool BarelyInstrument_GetControl(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
+bool BarelyInstrument_GetControl(const BarelyEngine* engine, BarelyInstrumentRef instrument,
                                  BarelyInstrumentControlType type, float* out_value) {
   if (!engine) return false;
   if (instrument == 0) return false;
@@ -203,7 +200,7 @@ bool BarelyInstrument_GetControl(BarelyEngineHandle engine, BarelyInstrumentRef 
   return true;
 }
 
-bool BarelyInstrument_GetNoteControl(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
+bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, BarelyInstrumentRef instrument,
                                      float pitch, BarelyNoteControlType type, float* out_value) {
   if (!engine) return false;
   if (instrument == 0) return false;
@@ -218,7 +215,7 @@ bool BarelyInstrument_GetNoteControl(BarelyEngineHandle engine, BarelyInstrument
   return false;
 }
 
-bool BarelyInstrument_IsNoteOn(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
+bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, BarelyInstrumentRef instrument,
                                float pitch, bool* out_is_note_on) {
   if (!engine) return false;
   if (instrument == 0) return false;
@@ -228,14 +225,14 @@ bool BarelyInstrument_IsNoteOn(BarelyEngineHandle engine, BarelyInstrumentRef in
   return true;
 }
 
-bool BarelyInstrument_SetAllNotesOff(BarelyEngineHandle engine, BarelyInstrumentRef instrument) {
+bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, BarelyInstrumentRef instrument) {
   if (!engine) return false;
 
   engine->GetInstrument(instrument).SetAllNotesOff();
   return true;
 }
 
-bool BarelyInstrument_SetControl(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
+bool BarelyInstrument_SetControl(BarelyEngine* engine, BarelyInstrumentRef instrument,
                                  BarelyInstrumentControlType type, float value) {
   if (!engine) return false;
   if (instrument == 0) return false;
@@ -245,7 +242,7 @@ bool BarelyInstrument_SetControl(BarelyEngineHandle engine, BarelyInstrumentRef 
   return true;
 }
 
-bool BarelyInstrument_SetNoteControl(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
+bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, BarelyInstrumentRef instrument,
                                      float pitch, BarelyNoteControlType type, float value) {
   if (!engine) return false;
   if (instrument == 0) return false;
@@ -255,8 +252,7 @@ bool BarelyInstrument_SetNoteControl(BarelyEngineHandle engine, BarelyInstrument
   return true;
 }
 
-bool BarelyInstrument_SetNoteEventCallback(BarelyEngineHandle engine,
-                                           BarelyInstrumentRef instrument,
+bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, BarelyInstrumentRef instrument,
                                            BarelyNoteEventCallback callback, void* user_data) {
   if (!engine) return false;
   if (instrument == 0) return false;
@@ -265,7 +261,7 @@ bool BarelyInstrument_SetNoteEventCallback(BarelyEngineHandle engine,
   return true;
 }
 
-bool BarelyInstrument_SetNoteOff(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
+bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, BarelyInstrumentRef instrument,
                                  float pitch) {
   if (!engine) return false;
   if (instrument == 0) return false;
@@ -274,8 +270,7 @@ bool BarelyInstrument_SetNoteOff(BarelyEngineHandle engine, BarelyInstrumentRef 
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
-                                float pitch,
+bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, BarelyInstrumentRef instrument, float pitch,
                                 const BarelyNoteControlOverride* note_control_overrides,
                                 int32_t note_control_override_count) {
   if (!engine) return false;
@@ -287,7 +282,7 @@ bool BarelyInstrument_SetNoteOn(BarelyEngineHandle engine, BarelyInstrumentRef i
   return true;
 }
 
-bool BarelyInstrument_SetSampleData(BarelyEngineHandle engine, BarelyInstrumentRef instrument,
+bool BarelyInstrument_SetSampleData(BarelyEngine* engine, BarelyInstrumentRef instrument,
                                     const BarelySlice* slices, int32_t slice_count) {
   if (!engine) return false;
   if (instrument == 0) return false;
@@ -297,7 +292,7 @@ bool BarelyInstrument_SetSampleData(BarelyEngineHandle engine, BarelyInstrumentR
   return true;
 }
 
-bool BarelyPerformer_GetLoopBeginPosition(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine, BarelyPerformerRef performer,
                                           double* out_loop_begin_position) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -307,7 +302,7 @@ bool BarelyPerformer_GetLoopBeginPosition(BarelyEngineHandle engine, BarelyPerfo
   return true;
 }
 
-bool BarelyPerformer_GetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, BarelyPerformerRef performer,
                                    double* out_loop_length) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -317,7 +312,7 @@ bool BarelyPerformer_GetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef
   return true;
 }
 
-bool BarelyPerformer_GetPosition(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_GetPosition(const BarelyEngine* engine, BarelyPerformerRef performer,
                                  double* out_position) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -327,7 +322,7 @@ bool BarelyPerformer_GetPosition(BarelyEngineHandle engine, BarelyPerformerRef p
   return true;
 }
 
-bool BarelyPerformer_IsLooping(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_IsLooping(const BarelyEngine* engine, BarelyPerformerRef performer,
                                bool* out_is_looping) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -337,7 +332,7 @@ bool BarelyPerformer_IsLooping(BarelyEngineHandle engine, BarelyPerformerRef per
   return true;
 }
 
-bool BarelyPerformer_IsPlaying(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, BarelyPerformerRef performer,
                                bool* out_is_playing) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -347,7 +342,7 @@ bool BarelyPerformer_IsPlaying(BarelyEngineHandle engine, BarelyPerformerRef per
   return true;
 }
 
-bool BarelyPerformer_SetLoopBeginPosition(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine, BarelyPerformerRef performer,
                                           double loop_begin_position) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -356,7 +351,7 @@ bool BarelyPerformer_SetLoopBeginPosition(BarelyEngineHandle engine, BarelyPerfo
   return true;
 }
 
-bool BarelyPerformer_SetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_SetLoopLength(BarelyEngine* engine, BarelyPerformerRef performer,
                                    double loop_length) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -365,7 +360,7 @@ bool BarelyPerformer_SetLoopLength(BarelyEngineHandle engine, BarelyPerformerRef
   return true;
 }
 
-bool BarelyPerformer_SetLooping(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_SetLooping(BarelyEngine* engine, BarelyPerformerRef performer,
                                 bool is_looping) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -374,7 +369,7 @@ bool BarelyPerformer_SetLooping(BarelyEngineHandle engine, BarelyPerformerRef pe
   return true;
 }
 
-bool BarelyPerformer_SetPosition(BarelyEngineHandle engine, BarelyPerformerRef performer,
+bool BarelyPerformer_SetPosition(BarelyEngine* engine, BarelyPerformerRef performer,
                                  double position) {
   if (!engine) return false;
   if (performer == 0) return false;
@@ -383,7 +378,7 @@ bool BarelyPerformer_SetPosition(BarelyEngineHandle engine, BarelyPerformerRef p
   return true;
 }
 
-bool BarelyPerformer_Start(BarelyEngineHandle engine, BarelyPerformerRef performer) {
+bool BarelyPerformer_Start(BarelyEngine* engine, BarelyPerformerRef performer) {
   if (!engine) return false;
   if (performer == 0) return false;
 
@@ -391,7 +386,7 @@ bool BarelyPerformer_Start(BarelyEngineHandle engine, BarelyPerformerRef perform
   return true;
 }
 
-bool BarelyPerformer_Stop(BarelyEngineHandle engine, BarelyPerformerRef performer) {
+bool BarelyPerformer_Stop(BarelyEngine* engine, BarelyPerformerRef performer) {
   if (!engine) return false;
   if (performer == 0) return false;
 
@@ -427,7 +422,7 @@ bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_p
   return true;
 }
 
-bool BarelyTask_GetDuration(BarelyEngineHandle engine, BarelyTaskRef task, double* out_duration) {
+bool BarelyTask_GetDuration(const BarelyEngine* engine, BarelyTaskRef task, double* out_duration) {
   if (!engine) return false;
   if (task == 0) return false;
   if (!out_duration) return false;
@@ -436,7 +431,7 @@ bool BarelyTask_GetDuration(BarelyEngineHandle engine, BarelyTaskRef task, doubl
   return true;
 }
 
-bool BarelyTask_GetPosition(BarelyEngineHandle engine, BarelyTaskRef task, double* out_position) {
+bool BarelyTask_GetPosition(const BarelyEngine* engine, BarelyTaskRef task, double* out_position) {
   if (!engine) return false;
   if (task == 0) return false;
   if (!out_position) return false;
@@ -445,7 +440,7 @@ bool BarelyTask_GetPosition(BarelyEngineHandle engine, BarelyTaskRef task, doubl
   return true;
 }
 
-bool BarelyTask_GetPriority(BarelyEngineHandle engine, BarelyTaskRef task, int32_t* out_priority) {
+bool BarelyTask_GetPriority(const BarelyEngine* engine, BarelyTaskRef task, int32_t* out_priority) {
   if (!engine) return false;
   if (task == 0) return false;
   if (!out_priority) return false;
@@ -454,7 +449,7 @@ bool BarelyTask_GetPriority(BarelyEngineHandle engine, BarelyTaskRef task, int32
   return true;
 }
 
-bool BarelyTask_IsActive(BarelyEngineHandle engine, BarelyTaskRef task, bool* out_is_active) {
+bool BarelyTask_IsActive(const BarelyEngine* engine, BarelyTaskRef task, bool* out_is_active) {
   if (!engine) return false;
   if (task == 0) return false;
   if (!out_is_active) return false;
@@ -463,7 +458,7 @@ bool BarelyTask_IsActive(BarelyEngineHandle engine, BarelyTaskRef task, bool* ou
   return true;
 }
 
-bool BarelyTask_SetDuration(BarelyEngineHandle engine, BarelyTaskRef task, double duration) {
+bool BarelyTask_SetDuration(BarelyEngine* engine, BarelyTaskRef task, double duration) {
   if (!engine) return false;
   if (task == 0) return false;
   if (duration <= 0.0) return false;
@@ -473,7 +468,7 @@ bool BarelyTask_SetDuration(BarelyEngineHandle engine, BarelyTaskRef task, doubl
   return true;
 }
 
-bool BarelyTask_SetEventCallback(BarelyEngineHandle engine, BarelyTaskRef task,
+bool BarelyTask_SetEventCallback(BarelyEngine* engine, BarelyTaskRef task,
                                  BarelyTaskEventCallback callback, void* user_data) {
   if (!engine) return false;
   if (task == 0) return false;
@@ -482,7 +477,7 @@ bool BarelyTask_SetEventCallback(BarelyEngineHandle engine, BarelyTaskRef task,
   return true;
 }
 
-bool BarelyTask_SetPosition(BarelyEngineHandle engine, BarelyTaskRef task, double position) {
+bool BarelyTask_SetPosition(BarelyEngine* engine, BarelyTaskRef task, double position) {
   if (!engine) return false;
   if (task == 0) return false;
 
@@ -491,7 +486,7 @@ bool BarelyTask_SetPosition(BarelyEngineHandle engine, BarelyTaskRef task, doubl
   return true;
 }
 
-bool BarelyTask_SetPriority(BarelyEngineHandle engine, BarelyTaskRef task, int32_t priority) {
+bool BarelyTask_SetPriority(BarelyEngine* engine, BarelyTaskRef task, int32_t priority) {
   if (!engine) return false;
   if (task == 0) return false;
 

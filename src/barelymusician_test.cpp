@@ -37,10 +37,10 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
   EXPECT_FALSE(BarelyEngine_DestroyInstrument(nullptr, {}));
 
   // Success.
-  BarelyRef instrument_ref = {};
-  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, nullptr, 0, &instrument_ref));
+  BarelyRef instrument = {};
+  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, nullptr, 0, &instrument));
 
-  EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument_ref));
+  EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
@@ -53,10 +53,10 @@ TEST(BarelyEngineTest, CreateDestroyPerformer) {
   EXPECT_FALSE(BarelyEngine_DestroyPerformer(nullptr, {}));
 
   // Success.
-  BarelyRef performer_ref = {};
-  EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer_ref));
+  BarelyRef performer = {};
+  EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer));
 
-  EXPECT_TRUE(BarelyEngine_DestroyPerformer(engine, performer_ref));
+  EXPECT_TRUE(BarelyEngine_DestroyPerformer(engine, performer));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
@@ -84,7 +84,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   float note_on_pitch = 0.0f;
 
   // Create an instrument.
-  InstrumentRef instrument_ref = engine.CreateInstrument({});
+  Instrument instrument_ref = engine.CreateInstrument({});
 
   // Set the note callbacks.
   instrument_ref.SetNoteEventCallback([&](NoteEventType type, float pitch) {
@@ -112,7 +112,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     Engine engine(kSampleRate, kMaxFrameCount);
 
     // Create instruments with note off callbacks.
-    std::vector<InstrumentRef> instruments;
+    std::vector<Instrument> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(engine.CreateInstrument({}));
       instruments[i].SetNoteEventCallback([&](NoteEventType type, float pitch) {

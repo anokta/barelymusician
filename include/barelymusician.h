@@ -1181,15 +1181,15 @@ using NoteEventCallback = std::function<void(NoteEventType type, float pitch)>;
 using TaskEventCallback = std::function<void(TaskEventType type)>;
 
 /// Class that wraps an instrument reference.
-class InstrumentRef {
+class Instrument {
  public:
-  /// Constructs a new `InstrumentRef` from a raw reference.
+  /// Constructs a new `Instrument` from a raw reference.
   ///
   /// @param engine Raw engine handle.
   /// @param instrument Raw instrument reference.
   /// @param note_event_callback Pointer to note event callback.
-  InstrumentRef(BarelyEngine* engine, BarelyRef instrument,
-                NoteEventCallback* note_event_callback) noexcept
+  Instrument(BarelyEngine* engine, BarelyRef instrument,
+             NoteEventCallback* note_event_callback) noexcept
       : engine_(engine), instrument_(instrument), note_event_callback_(note_event_callback) {}
 
   /// Returns the raw reference.
@@ -1366,14 +1366,14 @@ class InstrumentRef {
 };
 
 /// Class that wraps a task reference.
-class TaskRef {
+class Task {
  public:
-  /// Constructs a new `TaskRef` from a raw reference.
+  /// Constructs a new `Task` from a raw reference.
   ///
   /// @param engine Raw engine pointer.
   /// @param task Raw task reference.
   /// @param event_callback Pointer to task event callback.
-  TaskRef(BarelyEngine* engine, BarelyRef task, TaskEventCallback* event_callback) noexcept
+  Task(BarelyEngine* engine, BarelyRef task, TaskEventCallback* event_callback) noexcept
       : engine_(engine), task_(task), event_callback_(event_callback) {}
 
   /// Returns the raw reference.
@@ -1486,13 +1486,13 @@ class TaskRef {
 };
 
 /// Class that wraps a performer reference.
-class PerformerRef {
+class Performer {
  public:
-  /// Constructs a new `PerformerRef` from a raw reference.
+  /// Constructs a new `Performer` from a raw reference.
   ///
   /// @param engine Raw engine pointer.
   /// @param performer Raw performer reference.
-  PerformerRef(BarelyEngine* engine, BarelyRef performer) noexcept
+  Performer(BarelyEngine* engine, BarelyRef performer) noexcept
       : engine_(engine), performer_(performer) {}
 
   /// Returns the raw reference.
@@ -1667,7 +1667,7 @@ class Engine {
   ///
   /// @param control_overrides Span of instrument control overrides.
   /// @return Instrument reference.
-  [[nodiscard]] InstrumentRef CreateInstrument(
+  [[nodiscard]] Instrument CreateInstrument(
       std::span<const InstrumentControlOverride> control_overrides = {}) noexcept {
     BarelyRef instrument = {};
     [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(
@@ -1675,17 +1675,17 @@ class Engine {
         static_cast<int32_t>(control_overrides.size()), &instrument);
     assert(success);
     note_event_callbacks_[instrument.index] = {};
-    return InstrumentRef(engine_, instrument, &note_event_callbacks_[instrument.index]);
+    return Instrument(engine_, instrument, &note_event_callbacks_[instrument.index]);
   }
 
   /// Creates a new performer.
   ///
   /// @return Performer reference.
-  [[nodiscard]] PerformerRef CreatePerformer() noexcept {
+  [[nodiscard]] Performer CreatePerformer() noexcept {
     BarelyRef performer = {};
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer);
     assert(success);
-    return PerformerRef(engine_, performer);
+    return Performer(engine_, performer);
   }
 
   /// Creates a new task.
@@ -1696,8 +1696,8 @@ class Engine {
   /// @param priority Task priority.
   /// @param callback Task event callback.
   /// @return Task reference.
-  [[nodiscard]] TaskRef CreateTask(PerformerRef performer, double position, double duration,
-                                   int priority, TaskEventCallback callback) noexcept {
+  [[nodiscard]] Task CreateTask(Performer performer, double position, double duration, int priority,
+                                TaskEventCallback callback) noexcept {
     BarelyRef task = {};
     [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
                                                             priority, nullptr, nullptr, &task);
@@ -1713,13 +1713,13 @@ class Engine {
         },
         &task_event_callbacks_[task.index]);
     assert(success);
-    return TaskRef(engine_, task, &task_event_callbacks_[task.index]);
+    return Task(engine_, task, &task_event_callbacks_[task.index]);
   }
 
   /// Destroys an instrument.
   ///
   /// @param instrument Instrument reference.
-  void DestroyInstrument(InstrumentRef instrument) {
+  void DestroyInstrument(Instrument instrument) {
     [[maybe_unused]] const bool success = BarelyEngine_DestroyInstrument(engine_, instrument);
     assert(success);
   }
@@ -1727,7 +1727,7 @@ class Engine {
   /// Destroys a performer.
   ///
   /// @param performer Performer reference.
-  void DestroyPerformer(PerformerRef performer) {
+  void DestroyPerformer(Performer performer) {
     [[maybe_unused]] const bool success = BarelyEngine_DestroyPerformer(engine_, performer);
     assert(success);
   }
@@ -1735,7 +1735,7 @@ class Engine {
   /// Destroys a task.
   ///
   /// @param task Task reference.
-  void DestroyTask(TaskRef task) {
+  void DestroyTask(Task task) {
     [[maybe_unused]] const bool success = BarelyEngine_DestroyTask(engine_, task);
     assert(success);
   }

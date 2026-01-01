@@ -228,20 +228,6 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Arpeggiator modes.
-typedef enum BarelyArpMode {
-  /// None.
-  BarelyArpMode_kNone = 0,
-  /// Up.
-  BarelyArpMode_kUp,
-  /// Down.
-  BarelyArpMode_kDown,
-  /// Random.
-  BarelyArpMode_kRandom,
-  /// Number of arpeggiator modes.
-  BarelyArpMode_kCount,
-} BarelyArpMode;
-
 /// Engine control types.
 typedef enum BarelyEngineControlType {
   /// Compressor mix.
@@ -277,18 +263,6 @@ typedef enum BarelyEngineControlType {
   // Number of engine control types.
   BarelyEngineControlType_kCount,
 } BarelyEngineControlType;
-
-/// Filter types.
-typedef enum BarelyFilterType {
-  /// None.
-  BarelyFilterType_kNone = 0,
-  /// Low pass.
-  BarelyFilterType_kLowPass,
-  /// High pass.
-  BarelyFilterType_kHighPass,
-  /// Number of filters.
-  BarelyFilterType_kCount,
-} BarelyFilterType;
 
 /// Instrument control types.
 typedef enum BarelyInstrumentControlType {
@@ -362,15 +336,31 @@ typedef enum BarelyNoteControlType {
   BarelyNoteControlType_kCount,
 } BarelyNoteControlType;
 
-/// Note event types.
-typedef enum BarelyNoteEventType {
-  /// Begin.
-  BarelyNoteEventType_kBegin = 0,
-  /// End.
-  BarelyNoteEventType_kEnd,
-  /// Number of note event types.
-  BarelyNoteEventType_kCount,
-} BarelyNoteEventType;
+/// Arpeggiator modes.
+typedef enum BarelyArpMode {
+  /// None.
+  BarelyArpMode_kNone = 0,
+  /// Up.
+  BarelyArpMode_kUp,
+  /// Down.
+  BarelyArpMode_kDown,
+  /// Random.
+  BarelyArpMode_kRandom,
+  /// Number of arpeggiator modes.
+  BarelyArpMode_kCount,
+} BarelyArpMode;
+
+/// Filter types.
+typedef enum BarelyFilterType {
+  /// None.
+  BarelyFilterType_kNone = 0,
+  /// Low pass.
+  BarelyFilterType_kLowPass,
+  /// High pass.
+  BarelyFilterType_kHighPass,
+  /// Number of filters.
+  BarelyFilterType_kCount,
+} BarelyFilterType;
 
 /// Oscillator modes.
 typedef enum BarelyOscMode {
@@ -402,6 +392,16 @@ typedef enum BarelySliceMode {
   BarelySliceMode_kCount,
 } BarelySliceMode;
 
+/// Note event types.
+typedef enum BarelyNoteEventType {
+  /// Begin.
+  BarelyNoteEventType_kBegin = 0,
+  /// End.
+  BarelyNoteEventType_kEnd,
+  /// Number of note event types.
+  BarelyNoteEventType_kCount,
+} BarelyNoteEventType;
+
 /// Task event types.
 typedef enum BarelyTaskEventType {
   /// Begin.
@@ -414,6 +414,15 @@ typedef enum BarelyTaskEventType {
 
 /// Engine.
 typedef struct BarelyEngine BarelyEngine;
+
+/// Reference.
+typedef struct BarelyRef {
+  /// Index.
+  uint32_t index;
+
+  /// Generation.
+  uint16_t generation;
+} BarelyRef;
 
 /// Instrument control override.
 typedef struct BarelyInstrumentControlOverride {
@@ -433,6 +442,21 @@ typedef struct BarelyNoteControlOverride {
   float value;
 } BarelyNoteControlOverride;
 
+/// Slice of sample data.
+typedef struct BarelySlice {
+  /// Root note pitch.
+  float root_pitch;
+
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
+
+  /// Array of mono samples.
+  const float* samples;
+
+  /// Number of mono samples.
+  int32_t sample_count;
+} BarelySlice;
+
 /// A musical quantization.
 typedef struct BarelyQuantization {
   /// Subdivision of a beat.
@@ -441,15 +465,6 @@ typedef struct BarelyQuantization {
   /// Amount.
   float amount;
 } BarelyQuantization;
-
-/// Reference.
-typedef struct BarelyRef {
-  /// Index.
-  uint32_t index;
-
-  /// Generation.
-  uint16_t generation;
-} BarelyRef;
 
 /// A musical scale.
 typedef struct BarelyScale {
@@ -465,21 +480,6 @@ typedef struct BarelyScale {
   /// Mode index.
   int32_t mode;
 } BarelyScale;
-
-/// Slice of sample data.
-typedef struct BarelySlice {
-  /// Root note pitch.
-  float root_pitch;
-
-  /// Sampling rate in hertz.
-  int32_t sample_rate;
-
-  /// Array of mono samples.
-  const float* samples;
-
-  /// Number of mono samples.
-  int32_t sample_count;
-} BarelySlice;
 
 /// Note event callback.
 ///
@@ -839,23 +839,6 @@ BARELY_API bool BarelyPerformer_Start(BarelyEngine* engine, BarelyRef performer)
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_Stop(BarelyEngine* engine, BarelyRef performer);
 
-/// Gets a quantized position.
-///
-/// @param quantization Pointer to quantization.
-/// @param position Position.
-/// @param out_position Output position.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
-                                               double position, double* out_position);
-
-/// Gets a scale note pitch for a given degree.
-///
-/// @param scale Pointer to scale.
-/// @param degree Scale degree.
-/// @param out_pitch Output note pitch.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch);
-
 /// Gets the duration of a task.
 ///
 /// @param engine Pointer to engine.
@@ -925,6 +908,23 @@ BARELY_API bool BarelyTask_SetPosition(BarelyEngine* engine, BarelyRef task, dou
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPriority(BarelyEngine* engine, BarelyRef task, int32_t priority);
 
+/// Gets a quantized position.
+///
+/// @param quantization Pointer to quantization.
+/// @param position Position.
+/// @param out_position Output position.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
+                                               double position, double* out_position);
+
+/// Gets a scale note pitch for a given degree.
+///
+/// @param scale Pointer to scale.
+/// @param degree Scale degree.
+/// @param out_pitch Output note pitch.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
@@ -946,18 +946,6 @@ BARELY_API bool BarelyTask_SetPriority(BarelyEngine* engine, BarelyRef task, int
 #include <utility>
 
 namespace barely {
-
-/// Arpeggiator modes.
-enum class ArpMode {
-  /// None.
-  kNone = BarelyArpMode_kNone,
-  /// Up.
-  kUp = BarelyArpMode_kUp,
-  /// Down.
-  kDown = BarelyArpMode_kDown,
-  /// Random.
-  kRandom = BarelyArpMode_kRandom,
-};
 
 /// Instrument control types.
 enum class InstrumentControlType {
@@ -1053,16 +1041,6 @@ enum class EngineControlType {
   kSidechainRatio = BarelyEngineControlType_kSidechainRatio,
 };
 
-/// Filter types.
-enum class FilterType {
-  /// None.
-  kNone = BarelyFilterType_kNone,
-  /// Low pass.
-  kLowPass = BarelyFilterType_kLowPass,
-  /// High pass.
-  kHighPass = BarelyFilterType_kHighPass,
-};
-
 /// Note control types.
 enum class NoteControlType {
   /// Gain in linear amplitude.
@@ -1071,12 +1049,26 @@ enum class NoteControlType {
   kPitchShift = BarelyNoteControlType_kPitchShift,
 };
 
-/// Note event types.
-enum class NoteEventType {
-  /// Begin.
-  kBegin = BarelyNoteEventType_kBegin,
-  /// End.
-  kEnd = BarelyNoteEventType_kEnd,
+/// Arpeggiator modes.
+enum class ArpMode {
+  /// None.
+  kNone = BarelyArpMode_kNone,
+  /// Up.
+  kUp = BarelyArpMode_kUp,
+  /// Down.
+  kDown = BarelyArpMode_kDown,
+  /// Random.
+  kRandom = BarelyArpMode_kRandom,
+};
+
+/// Filter types.
+enum class FilterType {
+  /// None.
+  kNone = BarelyFilterType_kNone,
+  /// Low pass.
+  kLowPass = BarelyFilterType_kLowPass,
+  /// High pass.
+  kHighPass = BarelyFilterType_kHighPass,
 };
 
 /// Oscillator modes.
@@ -1103,6 +1095,14 @@ enum class SliceMode {
   kLoop = BarelySliceMode_kLoop,
   /// Once.
   kOnce = BarelySliceMode_kOnce,
+};
+
+/// Note event types.
+enum class NoteEventType {
+  /// Begin.
+  kBegin = BarelyNoteEventType_kBegin,
+  /// End.
+  kEnd = BarelyNoteEventType_kEnd,
 };
 
 /// Task event types.
@@ -1279,8 +1279,30 @@ class Instrument {
   ///
   /// @param callback Note event callback.
   void SetNoteEventCallback(NoteEventCallback callback) noexcept {
+    assert(note_event_callback_ != nullptr);
     *note_event_callback_ = std::move(callback);
-    SetNoteEventCallback();
+    if (*note_event_callback_) {
+      SetNoteEventCallback(
+          [](BarelyNoteEventType type, float pitch, void* user_data) noexcept {
+            assert(user_data != nullptr && "Invalid note event callback user data");
+            if (const auto& callback = *static_cast<NoteEventCallback*>(user_data); callback) {
+              callback(static_cast<NoteEventType>(type), pitch);
+            }
+          },
+          note_event_callback_);
+    } else {
+      SetNoteEventCallback(nullptr, nullptr);
+    }
+  }
+
+  /// Sets the note event callback from a raw callback typek.
+  ///
+  /// @param callback Raw note event callback.
+  /// @param user_data Pointer to user_data.
+  void SetNoteEventCallback(BarelyNoteEventCallback callback, void* user_data) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_SetNoteEventCallback(engine_, instrument_, callback, user_data);
+    assert(success);
   }
 
   /// Sets a note off.
@@ -1336,33 +1358,14 @@ class Instrument {
   }
 
  private:
-  // Helper function to set the note event callback.
-  void SetNoteEventCallback() noexcept {
-    assert(note_event_callback_);
-    [[maybe_unused]] const bool success =
-        (*note_event_callback_)
-            ? BarelyInstrument_SetNoteEventCallback(
-                  engine_, instrument_,
-                  [](BarelyNoteEventType type, float pitch, void* user_data) noexcept {
-                    assert(user_data != nullptr && "Invalid note event callback user data");
-                    if (const auto& callback = *static_cast<NoteEventCallback*>(user_data);
-                        callback) {
-                      callback(static_cast<NoteEventType>(type), pitch);
-                    }
-                  },
-                  note_event_callback_)
-            : BarelyInstrument_SetNoteEventCallback(engine_, instrument_, nullptr, nullptr);
-    assert(success && "SetEventCallback failed");
-  }
-
   // Raw engine pointer.
   BarelyEngine* engine_ = nullptr;
 
   // Raw instrument reference.
   BarelyRef instrument_ = {};
 
-  // Note event callback.
-  NoteEventCallback* note_event_callback_;
+  // Pointer to note event callback.
+  NoteEventCallback* note_event_callback_ = nullptr;
 };
 
 /// Class that wraps a task reference.
@@ -1433,9 +1436,33 @@ class Task {
   ///
   /// @param callback Event callback.
   void SetEventCallback(TaskEventCallback callback) noexcept {
-    BarelyTask_SetEventCallback(engine_, task_, nullptr, nullptr);
+    assert(event_callback_ != nullptr);
+    if (*event_callback_) {
+      SetEventCallback(nullptr, nullptr);
+    }
     *event_callback_ = std::move(callback);
-    SetEventCallback();
+    if (*event_callback_) {
+      SetEventCallback(
+          [](BarelyTaskEventType type, void* user_data) noexcept {
+            assert(user_data != nullptr && "Invalid task event callback user data");
+            if (const auto& callback = *static_cast<TaskEventCallback*>(user_data); callback) {
+              callback(static_cast<TaskEventType>(type));
+            }
+          },
+          event_callback_);
+    } else {
+      SetEventCallback(nullptr, nullptr);
+    }
+  }
+
+  /// Sets the event callback from a raw callback type.
+  ///
+  /// @param callback Raw event callback.
+  /// @param user_data Pointer to user_data.
+  void SetEventCallback(BarelyTaskEventCallback callback, void* user_data) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyTask_SetEventCallback(engine_, task_, callback, user_data);
+    assert(success);
   }
 
   /// Sets the position.
@@ -1456,32 +1483,13 @@ class Task {
   }
 
  private:
-  // Helper function to set the event callback.
-  void SetEventCallback() noexcept {
-    assert(event_callback_);
-    [[maybe_unused]] const bool success =
-        (*event_callback_)
-            ? BarelyTask_SetEventCallback(
-                  engine_, task_,
-                  [](BarelyTaskEventType type, void* user_data) noexcept {
-                    assert(user_data != nullptr && "Invalid task event callback user data");
-                    if (const auto& callback = *static_cast<TaskEventCallback*>(user_data);
-                        callback) {
-                      callback(static_cast<TaskEventType>(type));
-                    }
-                  },
-                  event_callback_)
-            : BarelyTask_SetEventCallback(engine_, task_, nullptr, nullptr);
-    assert(success && "SetEventCallback failed");
-  }
-
   // Pointer to engine.
   BarelyEngine* engine_ = nullptr;
 
   // Raw task reference.
   BarelyRef task_ = {};
 
-  // Event callback.
+  // Pointer to event callback.
   TaskEventCallback* event_callback_ = nullptr;
 };
 

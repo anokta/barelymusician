@@ -1281,27 +1281,19 @@ class Instrument {
   void SetNoteEventCallback(NoteEventCallback callback) noexcept {
     assert(note_event_callback_ != nullptr);
     *note_event_callback_ = std::move(callback);
-    if (*note_event_callback_) {
-      SetNoteEventCallback(
-          [](BarelyNoteEventType type, float pitch, void* user_data) noexcept {
-            assert(user_data != nullptr && "Invalid note event callback user data");
-            if (const auto& callback = *static_cast<NoteEventCallback*>(user_data); callback) {
-              callback(static_cast<NoteEventType>(type), pitch);
-            }
-          },
-          note_event_callback_);
-    } else {
-      SetNoteEventCallback(nullptr, nullptr);
-    }
-  }
-
-  /// Sets the note event callback from a raw callback typek.
-  ///
-  /// @param callback Raw note event callback.
-  /// @param user_data Pointer to user_data.
-  void SetNoteEventCallback(BarelyNoteEventCallback callback, void* user_data) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteEventCallback(engine_, instrument_, callback, user_data);
+        (*note_event_callback_)
+            ? BarelyInstrument_SetNoteEventCallback(
+                  engine_, instrument_,
+                  [](BarelyNoteEventType type, float pitch, void* user_data) noexcept {
+                    assert(user_data != nullptr && "Invalid note event callback user data");
+                    if (const auto& callback = *static_cast<NoteEventCallback*>(user_data);
+                        callback) {
+                      callback(static_cast<NoteEventType>(type), pitch);
+                    }
+                  },
+                  note_event_callback_)
+            : BarelyInstrument_SetNoteEventCallback(engine_, instrument_, nullptr, nullptr);
     assert(success);
   }
 
@@ -1438,30 +1430,24 @@ class Task {
   void SetEventCallback(TaskEventCallback callback) noexcept {
     assert(event_callback_ != nullptr);
     if (*event_callback_) {
-      SetEventCallback(nullptr, nullptr);
+      [[maybe_unused]] const bool success =
+          BarelyTask_SetEventCallback(engine_, task_, nullptr, nullptr);
+      assert(success);
     }
     *event_callback_ = std::move(callback);
-    if (*event_callback_) {
-      SetEventCallback(
-          [](BarelyTaskEventType type, void* user_data) noexcept {
-            assert(user_data != nullptr && "Invalid task event callback user data");
-            if (const auto& callback = *static_cast<TaskEventCallback*>(user_data); callback) {
-              callback(static_cast<TaskEventType>(type));
-            }
-          },
-          event_callback_);
-    } else {
-      SetEventCallback(nullptr, nullptr);
-    }
-  }
-
-  /// Sets the event callback from a raw callback type.
-  ///
-  /// @param callback Raw event callback.
-  /// @param user_data Pointer to user_data.
-  void SetEventCallback(BarelyTaskEventCallback callback, void* user_data) noexcept {
     [[maybe_unused]] const bool success =
-        BarelyTask_SetEventCallback(engine_, task_, callback, user_data);
+        (*event_callback_)
+            ? BarelyTask_SetEventCallback(
+                  engine_, task_,
+                  [](BarelyTaskEventType type, void* user_data) noexcept {
+                    assert(user_data != nullptr && "Invalid task event callback user data");
+                    if (const auto& callback = *static_cast<TaskEventCallback*>(user_data);
+                        callback) {
+                      callback(static_cast<TaskEventType>(type));
+                    }
+                  },
+                  event_callback_)
+            : BarelyTask_SetEventCallback(engine_, task_, nullptr, nullptr);
     assert(success);
   }
 
@@ -1682,8 +1668,8 @@ class Engine {
         engine_, reinterpret_cast<const BarelyInstrumentControlOverride*>(control_overrides.data()),
         static_cast<int32_t>(control_overrides.size()), &instrument);
     assert(success);
-    note_event_callbacks_[instrument.index] = {};
-    return Instrument(engine_, instrument, &note_event_callbacks_[instrument.index]);
+    note_event_callbacks_.get()[instrument.index] = {};
+    return Instrument(engine_, instrument, &note_event_callbacks_.get()[instrument.index]);
   }
 
   /// Creates a new performer.
@@ -1710,8 +1696,7 @@ class Engine {
     [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
                                                             priority, nullptr, nullptr, &task);
     assert(success);
-    task_event_callbacks_[task.index] = std::move(callback);
-    // TODO(#126): Fix up event callbacks on copy/move.
+    task_event_callbacks_.get()[task.index] = std::move(callback);
     success = BarelyTask_SetEventCallback(
         engine_, task,
         [](BarelyTaskEventType type, void* user_data) noexcept {
@@ -1719,7 +1704,7 @@ class Engine {
             (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
           }
         },
-        &task_event_callbacks_[task.index]);
+        &task_event_callbacks_.get()[task.index]);
     assert(success);
     return Task(engine_, task, &task_event_callbacks_[task.index]);
   }
@@ -1867,12 +1852,13 @@ class Engine {
   // Raw pointer.
   BarelyEngine* engine_ = nullptr;
 
-  // TODO(#126): Handle copy/move for callbacks below.
-  // Array of note event callbacks.
-  std::array<NoteEventCallback, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1> note_event_callbacks_;
+  // Heap allocated array of note event callbacks (for pointer stability on move).
+  std::unique_ptr<NoteEventCallback[]> note_event_callbacks_ =
+      std::make_unique<NoteEventCallback[]>(BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1);
 
-  // Array of task event callbacks.
-  std::array<TaskEventCallback, BARELYMUSICIAN_MAX_TASK_COUNT + 1> task_event_callbacks_;
+  // Heap allocated array of task event callbacks (for pointer stability on move).
+  std::unique_ptr<TaskEventCallback[]> task_event_callbacks_ =
+      std::make_unique<TaskEventCallback[]>(BARELYMUSICIAN_MAX_TASK_COUNT + 1);
 };
 
 /// A musical quantization.

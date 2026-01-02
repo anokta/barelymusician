@@ -6,7 +6,7 @@
 #include <functional>
 #include <utility>
 
-#include "api/task.h"
+#include "engine/task_state.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -34,7 +34,7 @@ TEST(PerformerTest, ProcessSingleTask) {
     }
   };
 
-  BarelyTask task{
+  TaskState task{
       {
           [](BarelyTaskEventType type, void* user_data) {
             (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
@@ -168,7 +168,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
   // Create tasks.
   std::array<std::pair<std::function<void(BarelyTaskEventType)>, bool>, kTaskCount> task_callbacks;
-  std::array<BarelyTask, kTaskCount> tasks;
+  std::array<TaskState, kTaskCount> tasks;
   for (int i = 0; i < kTaskCount; ++i) {
     task_callbacks[i] = {
         [&, i](BarelyTaskEventType type) {

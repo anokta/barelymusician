@@ -6,7 +6,6 @@ target_sources(
   instrument.h
   performer.cpp
   performer.h
-  task.h
 )
 
 if(ENABLE_TESTS)

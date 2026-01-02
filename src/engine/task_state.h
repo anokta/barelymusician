@@ -1,27 +1,26 @@
-#ifndef BARELYMUSICIAN_API_TASK_H_
-#define BARELYMUSICIAN_API_TASK_H_
+#ifndef BARELYMUSICIAN_ENGINE_TASK_STATE_H_
+#define BARELYMUSICIAN_ENGINE_TASK_STATE_H_
 
 #include <barelymusician.h>
 
+#include <cstdint>
+
 #include "common/callback.h"
-#include "common/constants.h"
 
-/// Implementation of a task.
-struct BarelyTask {
-  /// Event callback alias.
-  using EventCallback = barely::Callback<BarelyTaskEventCallback>;
+namespace barely {
 
-  /// Event callback.
-  EventCallback event_callback = {};
+struct TaskState {
+  /// Task event callback.
+  Callback<BarelyTaskEventCallback> callback = {};
 
-  /// Position in beats.
+  /// Task position in beats.
   double position = 0.0;
 
-  /// Duration in beats.
+  /// Task duration in beats.
   double duration = 0.0;
 
-  /// Priority.
-  int priority = 0;
+  /// Task priority.
+  int32_t priority = 0;
 
   /// Performer index.
   uint32_t performer_index = 0;
@@ -42,31 +41,32 @@ struct BarelyTask {
     return other_position >= position && other_position < GetEndPosition();
   }
 
-  /// Processes the task.
-  ///
-  /// @param type Task event type.
-  void Process(BarelyTaskEventType type) noexcept { event_callback(type); }
-
   /// Sets whether the task is currently active or not.
   ///
   /// @param new_is_active True if active, false otherwise.
   void SetActive(bool new_is_active) noexcept {
     is_active = new_is_active;
-    Process(is_active ? BarelyTaskEventType_kBegin : BarelyTaskEventType_kEnd);
+    callback(is_active ? BarelyTaskEventType_kBegin : BarelyTaskEventType_kEnd);
   }
 
   /// Sets the event callback.
   ///
-  /// @param new_event_callback Event callback.
-  void SetEventCallback(EventCallback new_event_callback) noexcept {
+  /// @param new_callback New callback.
+  /// @param new_user_data New user data.
+  void SetEventCallback(BarelyTaskEventCallback new_callback, void* new_user_data) noexcept {
     if (is_active) {
-      Process(BarelyTaskEventType_kEnd);
+      callback(BarelyTaskEventType_kEnd);
     }
-    event_callback = new_event_callback;
+    callback = {new_callback, new_user_data};
     if (is_active) {
-      Process(BarelyTaskEventType_kBegin);
+      callback(BarelyTaskEventType_kBegin);
     }
   }
 };
 
-#endif  // BARELYMUSICIAN_API_TASK_H_
+}  // namespace barely
+
+// TODO(#126): temp shortcut
+using TaskState = ::barely::TaskState;
+
+#endif  // BARELYMUSICIAN_ENGINE_TASK_STATE_H_

@@ -12,9 +12,9 @@
 #include <unordered_set>
 #include <utility>
 
-#include "api/task.h"
 #include "common/callback.h"
 #include "common/constants.h"
+#include "engine/task_state.h"
 
 /// Implementation of a performer.
 struct BarelyPerformer {
@@ -44,7 +44,7 @@ struct BarelyPerformer {
   ///
   /// @param task Pointer to task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void AddTask(BarelyTask* task) noexcept;
+  void AddTask(TaskState* task) noexcept;
 
   /// Returns loop end position.
   ///
@@ -66,7 +66,7 @@ struct BarelyPerformer {
   /// Removes a task.
   ///
   /// @param task Pointer to task.
-  void RemoveTask(BarelyTask* task) noexcept;
+  void RemoveTask(TaskState* task) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -93,19 +93,19 @@ struct BarelyPerformer {
   ///
   /// @param task Pointer to task.
   /// @param new_duration Task duration.
-  void SetTaskDuration(BarelyTask* task, double new_duration) noexcept;
+  void SetTaskDuration(TaskState* task, double new_duration) noexcept;
 
   /// Sets task position.
   ///
   /// @param task Pointer to task.
   /// @param new_position Task position.
-  void SetTaskPosition(BarelyTask* task, double new_position) noexcept;
+  void SetTaskPosition(TaskState* task, double new_position) noexcept;
 
   /// Sets task priority.
   ///
   /// @param task Pointer to task.
   /// @param new_priority Task priority.
-  void SetTaskPriority(BarelyTask* task, int new_priority) noexcept;
+  void SetTaskPriority(TaskState* task, int new_priority) noexcept;
 
   /// Stops performer.
   void Start() noexcept;
@@ -121,25 +121,25 @@ struct BarelyPerformer {
 
  private:
   //  Returns an iterator to the next inactive task to process.
-  [[nodiscard]] std::set<std::pair<TaskKey, BarelyTask*>>::const_iterator GetNextInactiveTask()
+  [[nodiscard]] std::set<std::pair<TaskKey, TaskState*>>::const_iterator GetNextInactiveTask()
       const noexcept;
 
   // Loops around a given `new_position`.
   [[nodiscard]] double LoopAround(double new_position) const noexcept;
 
   /// Sets the active status of a task.
-  void SetTaskActive(const std::set<std::pair<TaskKey, BarelyTask*>>::iterator& it,
+  void SetTaskActive(const std::set<std::pair<TaskKey, TaskState*>>::iterator& it,
                      bool is_active) noexcept;
 
   /// Updates the key of an active task.
-  void UpdateActiveTaskKey(TaskKey old_task_key, BarelyTask* task) noexcept;
+  void UpdateActiveTaskKey(TaskKey old_task_key, TaskState* task) noexcept;
 
   /// Updates the key of an inactive task.
-  void UpdateInactiveTaskKey(TaskKey old_task_key, BarelyTask* task) noexcept;
+  void UpdateInactiveTaskKey(TaskKey old_task_key, TaskState* task) noexcept;
 
   // Set of task position-pointer pairs.
-  std::set<std::pair<TaskKey, BarelyTask*>> active_tasks_;
-  std::set<std::pair<TaskKey, BarelyTask*>> inactive_tasks_;
+  std::set<std::pair<TaskKey, TaskState*>> active_tasks_;
+  std::set<std::pair<TaskKey, TaskState*>> inactive_tasks_;
 };
 
 #endif  // BARELYMUSICIAN_API_PERFORMER_H_

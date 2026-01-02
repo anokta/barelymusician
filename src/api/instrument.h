@@ -10,11 +10,11 @@
 #include <vector>
 
 #include "api/performer.h"
-#include "api/task.h"
 #include "common/callback.h"
 #include "common/constants.h"
 #include "dsp/control.h"
 #include "dsp/instrument_params.h"
+#include "engine/task_state.h"
 
 /// Implementation an instrument.
 struct BarelyInstrument {
@@ -35,7 +35,7 @@ struct BarelyInstrument {
   BarelyPerformer arp;
 
   /// Arpeggiator task index.
-  BarelyTask arp_task;
+  TaskState arp_task;
 
   barely::InstrumentParams params = {};
 

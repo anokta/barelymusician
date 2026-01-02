@@ -7,7 +7,6 @@
 #include "api/engine.h"
 #include "api/instrument.h"
 #include "api/performer.h"
-#include "api/task.h"
 #include "common/constants.h"
 #include "common/time.h"
 #include "dsp/message.h"
@@ -64,7 +63,7 @@ bool BarelyEngine_CreateTask(BarelyEngine* engine, BarelyRef performer, double p
 
   // TODO(#126): Clean this up once all pools are established.
   auto& task = engine->GetTask(*out_task);
-  task = {{callback, user_data}, position, duration, static_cast<int>(priority), performer.index};
+  task = {{callback, user_data}, position, duration, priority, performer.index};
   engine->GetPerformer(performer).AddTask(&task);
 
   return true;
@@ -409,7 +408,7 @@ bool BarelyTask_GetPriority(const BarelyEngine* engine, BarelyRef task, int32_t*
   if (!engine->IsValidTask(task)) return false;
   if (!out_priority) return false;
 
-  *out_priority = static_cast<int32_t>(engine->GetTask(task).priority);
+  *out_priority = engine->GetTask(task).priority;
   return true;
 }
 
@@ -437,7 +436,7 @@ bool BarelyTask_SetEventCallback(BarelyEngine* engine, BarelyRef task,
   if (!engine) return false;
   if (!engine->IsValidTask(task)) return false;
 
-  engine->GetTask(task).SetEventCallback({callback, user_data});
+  engine->GetTask(task).SetEventCallback(callback, user_data);
   return true;
 }
 
@@ -455,7 +454,7 @@ bool BarelyTask_SetPriority(BarelyEngine* engine, BarelyRef task, int32_t priori
   if (!engine->IsValidTask(task)) return false;
 
   engine->GetPerformer(engine->GetTask(task).performer_index)
-      .SetTaskPriority(&engine->GetTask(task), static_cast<int>(priority));
+      .SetTaskPriority(&engine->GetTask(task), priority);
   return true;
 }
 

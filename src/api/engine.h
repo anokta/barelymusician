@@ -16,6 +16,7 @@
 #include "dsp/instrument_params.h"
 #include "dsp/message_queue.h"
 #include "dsp/voice_pool.h"
+#include "engine/task_state.h"
 
 /// Implementation of an engine.
 struct BarelyEngine {
@@ -80,8 +81,8 @@ struct BarelyEngine {
     return performer_pool_.Get(performer.index);
   }
 
-  [[nodiscard]] BarelyTask& GetTask(BarelyRef task) noexcept { return task_pool_.Get(task.index); }
-  [[nodiscard]] const BarelyTask& GetTask(BarelyRef task) const noexcept {
+  [[nodiscard]] TaskState& GetTask(BarelyRef task) noexcept { return task_pool_.Get(task.index); }
+  [[nodiscard]] const TaskState& GetTask(BarelyRef task) const noexcept {
     return task_pool_.Get(task.index);
   }
 
@@ -194,7 +195,7 @@ struct BarelyEngine {
   PerformerPool performer_pool_;
 
   // Tasks.
-  using TaskPool = barely::Pool<BarelyTask, BARELYMUSICIAN_MAX_TASK_COUNT>;
+  using TaskPool = barely::Pool<TaskState, BARELYMUSICIAN_MAX_TASK_COUNT>;
   TaskPool task_pool_;
 
   // Output samples.

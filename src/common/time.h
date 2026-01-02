@@ -28,7 +28,7 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
 /// @param sample_rate Sampling rate in hertz.
 /// @param frames Number of frames.
 /// @return Number of seconds.
-constexpr double FramesToSeconds(int sample_rate, int64_t frames) noexcept {
+[[nodiscard]] constexpr double FramesToSeconds(int sample_rate, int64_t frames) noexcept {
   assert(sample_rate > 0);
   return static_cast<double>(frames) / static_cast<double>(sample_rate);
 }

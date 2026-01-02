@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "api/engine.h"
-#include "common/find_or_null.h"
 #include "dsp/control.h"
 #include "dsp/message.h"
 
@@ -149,8 +148,8 @@ float BarelyInstrument::GetControl(BarelyInstrumentControlType type) const noexc
 
 const float* BarelyInstrument::GetNoteControl(float pitch,
                                               BarelyNoteControlType type) const noexcept {
-  if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    return &(*note_controls)[type].value;
+  if (const auto it = note_controls_.find(pitch); it != note_controls_.end()) {
+    return &it->second[type].value;
   }
   return nullptr;
 }
@@ -183,8 +182,8 @@ void BarelyInstrument::SetControl(BarelyInstrumentControlType type, float value)
 
 void BarelyInstrument::SetNoteControl(float pitch, BarelyNoteControlType type,
                                       float value) noexcept {
-  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (auto& note_control = (*note_controls)[type]; note_control.SetValue(value)) {
+  if (const auto it = note_controls_.find(pitch); it != note_controls_.end()) {
+    if (auto& note_control = it->second[type]; note_control.SetValue(value)) {
       engine_->ScheduleMessage(NoteControlMessage{
           instrument_index, pitch, static_cast<NoteControlType>(type), note_control.value});
     }

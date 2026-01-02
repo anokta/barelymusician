@@ -13,16 +13,11 @@
 #include "dsp/biquad_filter.h"
 #include "dsp/envelope.h"
 #include "dsp/sample_data.h"
-#include "dsp/voice_params.h"
+#include "engine/voice_params.h"
 
 namespace barely {
 
-/// Instrument parameters.
 struct InstrumentParams {
-  // TODO(#12): Consider a more optimized implementation for voice stealing.
-  static constexpr int kMaxVoiceCount = 16;
-  uint32_t first_active_voice_index = 0;
-
   /// Voice parameters.
   VoiceParams voice_params = {};
 
@@ -30,10 +25,7 @@ struct InstrumentParams {
   Envelope::Adsr adsr = {};
 
   /// Sample data.
-  SampleData sample_data;
-
-  /// Number of voices.
-  uint32_t voice_count = 8;
+  SampleData sample_data = {};
 
   /// Oscillator mode.
   OscMode osc_mode = OscMode::kMix;
@@ -48,7 +40,7 @@ struct InstrumentParams {
   float filter_frequency = 0.0f;
 
   /// Filter resonance quality factor.
-  float filter_q = std::sqrt(0.5f);
+  float filter_q = 0.0f;
 
   /// Pitch shift.
   float pitch_shift = 0.0f;
@@ -61,6 +53,12 @@ struct InstrumentParams {
 
   /// Slice increment per sample.
   float slice_increment = 0.0f;
+
+  /// First active voice index.
+  uint32_t first_active_voice_index = 0;
+
+  /// Number of voices.
+  uint32_t voice_count = 0;
 
   /// Denotes whether the instrument should retrigger a note.
   bool should_retrigger = false;

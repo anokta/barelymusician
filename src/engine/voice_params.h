@@ -1,11 +1,10 @@
-#ifndef BARELYMUSICIAN_DSP_VOICE_PARAMS_H_
-#define BARELYMUSICIAN_DSP_VOICE_PARAMS_H_
+#ifndef BARELYMUSICIAN_ENGINE_VOICE_PARAMS_H_
+#define BARELYMUSICIAN_ENGINE_VOICE_PARAMS_H_
 
 #include "dsp/biquad_filter.h"
 
 namespace barely {
 
-/// Voice parameters.
 struct VoiceParams {
   /// Filter coefficients.
   BiquadFilter::Coeffs filter_coeffs = {};
@@ -49,4 +48,4 @@ struct VoiceParams {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_DSP_VOICE_PARAMS_H_
+#endif  // BARELYMUSICIAN_ENGINE_VOICE_PARAMS_H_

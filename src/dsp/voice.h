@@ -17,21 +17,10 @@
 #include "dsp/instrument_params.h"
 #include "dsp/sample_generators.h"
 #include "dsp/voice.h"
-#include "dsp/voice_params.h"
+#include "engine/note_params.h"
+#include "engine/voice_params.h"
 
 namespace barely {
-
-/// Note parameters.
-struct NoteParams {
-  /// Gain in linear amplitude.
-  float gain = 1.0f;
-
-  /// Oscillator increment per sample.
-  float osc_increment = 0.0f;
-
-  /// Slice increment per sample.
-  float slice_increment = 0.0f;
-};
 
 /// Class that wraps an instrument voice.
 class Voice {

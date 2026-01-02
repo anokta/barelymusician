@@ -3,7 +3,9 @@ target_sources(
   message.h
   message_queue.cpp
   message_queue.h
+  note_params.h
   task_state.h
+  voice_params.h
 )
 
 if(ENABLE_TESTS)

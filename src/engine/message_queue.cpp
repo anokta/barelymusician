@@ -1,9 +1,9 @@
-#include "dsp/message_queue.h"
+#include "engine/message_queue.h"
 
 #include <cstdint>
 #include <utility>
 
-#include "dsp/message.h"
+#include "engine/message.h"
 
 namespace barely {
 

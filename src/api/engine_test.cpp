@@ -7,7 +7,7 @@
 
 #include "api/instrument.h"
 #include "api/performer.h"
-#include "dsp/message.h"
+#include "engine/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 

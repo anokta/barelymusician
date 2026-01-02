@@ -1,12 +1,12 @@
-#ifndef BARELYMUSICIAN_DSP_MESSAGE_QUEUE_H_
-#define BARELYMUSICIAN_DSP_MESSAGE_QUEUE_H_
+#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_
+#define BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_
 
 #include <array>
 #include <atomic>
 #include <cstdint>
 #include <utility>
 
-#include "dsp/message.h"
+#include "engine/message.h"
 
 namespace barely {
 
@@ -42,4 +42,4 @@ class MessageQueue {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_DSP_MESSAGE_QUEUE_H_
+#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_

@@ -14,7 +14,7 @@
 
 #include "api/engine.h"
 #include "dsp/control.h"
-#include "dsp/message.h"
+#include "engine/message.h"
 
 namespace {
 

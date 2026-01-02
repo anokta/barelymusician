@@ -14,8 +14,8 @@
 #include "common/time.h"
 #include "dsp/control.h"
 #include "dsp/instrument_params.h"
-#include "dsp/message.h"
 #include "dsp/voice_pool.h"
+#include "engine/message.h"
 
 namespace {
 

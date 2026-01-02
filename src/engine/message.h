@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_DSP_MESSAGE_H_
-#define BARELYMUSICIAN_DSP_MESSAGE_H_
+#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_H_
+#define BARELYMUSICIAN_ENGINE_MESSAGE_H_
 
 #include <barelymusician.h>
 
@@ -93,4 +93,4 @@ MessageVisitor(MessageTypes...) -> MessageVisitor<MessageTypes...>;
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_DSP_MESSAGE_H_
+#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_H_

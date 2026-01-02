@@ -14,8 +14,8 @@
 #include "dsp/control.h"
 #include "dsp/engine_processor.h"
 #include "dsp/instrument_params.h"
-#include "dsp/message_queue.h"
 #include "dsp/voice_pool.h"
+#include "engine/message_queue.h"
 #include "engine/task_state.h"
 
 /// Implementation of an engine.

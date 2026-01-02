@@ -1,5 +1,7 @@
 target_sources(
   barelymusician PRIVATE
+  instrument_params.h
+  instrument_processor.h
   message.h
   message_queue.cpp
   message_queue.h

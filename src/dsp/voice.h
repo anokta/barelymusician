@@ -14,9 +14,9 @@
 #include "dsp/control.h"
 #include "dsp/distortion.h"
 #include "dsp/envelope.h"
-#include "dsp/instrument_params.h"
 #include "dsp/sample_generators.h"
 #include "dsp/voice.h"
+#include "engine/instrument_params.h"
 #include "engine/note_params.h"
 #include "engine/voice_params.h"
 

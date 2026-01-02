@@ -13,7 +13,7 @@
 #include "common/callback.h"
 #include "common/constants.h"
 #include "dsp/control.h"
-#include "dsp/instrument_params.h"
+#include "engine/instrument_params.h"
 #include "engine/task_state.h"
 
 /// Implementation an instrument.

@@ -5,10 +5,8 @@
 
 #include <array>
 #include <cstdint>
-#include <optional>
 #include <variant>
 
-#include "dsp/instrument_params.h"
 #include "dsp/sample_data.h"
 
 namespace barely {

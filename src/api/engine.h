@@ -13,8 +13,8 @@
 #include "common/rng.h"
 #include "dsp/control.h"
 #include "dsp/engine_processor.h"
-#include "dsp/instrument_params.h"
 #include "dsp/voice_pool.h"
+#include "engine/instrument_params.h"
 #include "engine/message_queue.h"
 #include "engine/task_state.h"
 

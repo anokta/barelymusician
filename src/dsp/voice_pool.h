@@ -7,8 +7,8 @@
 
 #include "common/constants.h"
 #include "common/pool.h"
-#include "dsp/instrument_params.h"
 #include "dsp/voice.h"
+#include "engine/instrument_params.h"
 
 namespace barely {
 
@@ -19,7 +19,7 @@ using VoicePool = Pool<Voice, BARELYMUSICIAN_MAX_VOICE_COUNT>;
 [[nodiscard]] inline Voice* AcquireVoice(VoicePool& voice_pool, InstrumentParams& instrument_params,
                                          float pitch) noexcept {
   if (instrument_params.should_retrigger) {
-    uint32_t current_voice_index = instrument_params.first_active_voice_index;
+    uint32_t current_voice_index = instrument_params.first_voice_index;
     while (current_voice_index != 0) {
       Voice& voice = voice_pool.Get(current_voice_index);
       if (voice.pitch() == pitch) {
@@ -34,7 +34,7 @@ using VoicePool = Pool<Voice, BARELYMUSICIAN_MAX_VOICE_COUNT>;
     }
   }
 
-  uint32_t current_voice_index = instrument_params.first_active_voice_index;
+  uint32_t current_voice_index = instrument_params.first_voice_index;
   uint32_t oldest_active_voice_index = 0;
   uint32_t active_voice_count = 0;
   while (current_voice_index != 0) {
@@ -61,7 +61,7 @@ using VoicePool = Pool<Voice, BARELYMUSICIAN_MAX_VOICE_COUNT>;
     if (current_voice_index != 0) {
       voice_pool.Get(current_voice_index).next_instrument_voice_index = new_voice_index;
     } else {
-      instrument_params.first_active_voice_index = new_voice_index;
+      instrument_params.first_voice_index = new_voice_index;
     }
     return &new_voice;
   }
@@ -97,7 +97,7 @@ inline void ProcessAllVoices(AudioRng& rng, VoicePool& voice_pool,
           }
           voice.previous_instrument_voice_index = 0;
         } else {
-          params.first_active_voice_index = voice.next_instrument_voice_index;
+          params.first_voice_index = voice.next_instrument_voice_index;
           if (voice.next_instrument_voice_index != 0) {
             voice_pool.Get(voice.next_instrument_voice_index).previous_instrument_voice_index = 0;
           }

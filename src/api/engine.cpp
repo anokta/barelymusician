@@ -13,8 +13,9 @@
 #include "common/constants.h"
 #include "common/time.h"
 #include "dsp/control.h"
-#include "dsp/instrument_params.h"
 #include "dsp/voice_pool.h"
+#include "engine/instrument_params.h"
+#include "engine/instrument_processor.h"
 #include "engine/message.h"
 
 namespace {
@@ -58,7 +59,7 @@ void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& v
                     float pitch, NoteControlType type, float value) noexcept {
   switch (type) {
     case NoteControlType::kGain: {
-      uint32_t voice_index = params.first_active_voice_index;
+      uint32_t voice_index = params.first_voice_index;
       while (voice_index != 0) {
         auto& voice = voice_pool.Get(voice_index);
         if (voice.pitch() == pitch && voice.IsOn()) {
@@ -69,7 +70,7 @@ void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& v
       }
     } break;
     case NoteControlType::kPitchShift: {
-      uint32_t voice_index = params.first_active_voice_index;
+      uint32_t voice_index = params.first_voice_index;
       while (voice_index != 0) {
         auto& voice = voice_pool.Get(voice_index);
         if (voice.pitch() == pitch && voice.IsOn()) {
@@ -138,7 +139,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                 const uint32_t new_voice_count =
                     static_cast<uint32_t>(instrument_control_message.value);
                 uint32_t active_voice_count = 0;
-                uint32_t active_voice_index = params.first_active_voice_index;
+                uint32_t active_voice_index = params.first_voice_index;
                 while (active_voice_index != 0 && active_voice_count <= new_voice_count) {
                   active_voice_index =
                       voice_pool_.Get(active_voice_index).next_instrument_voice_index;
@@ -166,7 +167,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
             },
             [this](NoteOffMessage& note_off_message) noexcept {
               auto& params = instrument_pool_.Get(note_off_message.instrument_index).params;
-              uint32_t active_voice_index = params.first_active_voice_index;
+              uint32_t active_voice_index = params.first_voice_index;
               while (active_voice_index != 0) {
                 auto& voice = voice_pool_.Get(active_voice_index);
                 if (voice.pitch() == note_off_message.pitch && voice.IsOn() &&
@@ -188,7 +189,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
             [this](SampleDataMessage& sample_data_message) noexcept {
               auto& params = instrument_pool_.Get(sample_data_message.instrument_index).params;
               params.sample_data.Swap(sample_data_message.sample_data);
-              uint32_t active_voice_index = params.first_active_voice_index;
+              uint32_t active_voice_index = params.first_voice_index;
               while (active_voice_index != 0) {
                 auto& voice = voice_pool_.Get(active_voice_index);
                 voice.set_slice(params.sample_data.Select(voice.pitch(), audio_rng_));

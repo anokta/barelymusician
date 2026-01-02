@@ -9,7 +9,6 @@ target_sources(
   distortion.h
   engine_processor.h
   envelope.h
-  instrument_params.h
   one_pole_filter.h
   sample_data.cpp
   sample_data.h

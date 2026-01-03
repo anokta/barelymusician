@@ -62,22 +62,23 @@ void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& v
       uint32_t voice_index = params.first_voice_index;
       while (voice_index != 0) {
         auto& voice = voice_pool.Get(voice_index);
-        if (voice.pitch() == pitch && voice.IsOn()) {
-          voice.set_gain(value);
+        if (voice.pitch == pitch && voice.IsOn()) {
+          voice.note_params.gain = value;
           break;
         }
-        voice_index = voice.next_instrument_voice_index;
+        voice_index = voice.next_voice_index;
       }
     } break;
     case NoteControlType::kPitchShift: {
       uint32_t voice_index = params.first_voice_index;
       while (voice_index != 0) {
         auto& voice = voice_pool.Get(voice_index);
-        if (voice.pitch() == pitch && voice.IsOn()) {
-          voice.set_pitch_shift(value);
+        if (voice.pitch == pitch && voice.IsOn()) {
+          voice.pitch_shift = value;
+          voice.UpdatePitchIncrements();
           break;
         }
-        voice_index = voice.next_instrument_voice_index;
+        voice_index = voice.next_voice_index;
       }
     } break;
     default:
@@ -121,7 +122,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      engine_processor_.Process(audio_rng_, voice_pool_,
+      engine_processor_.Process(audio_rng_, instrument_pool_, voice_pool_,
                                 &output_samples_[kStereoChannelCount * current_frame],
                                 message_frame - current_frame);
       current_frame = message_frame;
@@ -141,20 +142,18 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                 uint32_t active_voice_count = 0;
                 uint32_t active_voice_index = params.first_voice_index;
                 while (active_voice_index != 0 && active_voice_count <= new_voice_count) {
-                  active_voice_index =
-                      voice_pool_.Get(active_voice_index).next_instrument_voice_index;
+                  active_voice_index = voice_pool_.Get(active_voice_index).next_voice_index;
                   ++active_voice_count;
                 }
                 while (active_voice_index != 0) {
                   auto& voice = voice_pool_.Get(active_voice_index);
-                  if (voice.previous_instrument_voice_index != 0) {
-                    voice_pool_.Get(voice.previous_instrument_voice_index)
-                        .next_instrument_voice_index = 0;
-                    voice.previous_instrument_voice_index = 0;
+                  if (voice.previous_voice_index != 0) {
+                    voice_pool_.Get(voice.previous_voice_index).next_voice_index = 0;
+                    voice.previous_voice_index = 0;
                   }
                   voice_pool_.Release(active_voice_index);
-                  active_voice_index = voice.next_instrument_voice_index;
-                  voice.next_instrument_voice_index = 0;
+                  active_voice_index = voice.next_voice_index;
+                  voice.next_voice_index = 0;
                 }
               }
               SetInstrumentControl(params, sample_interval_, instrument_control_message.type,
@@ -170,19 +169,20 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               uint32_t active_voice_index = params.first_voice_index;
               while (active_voice_index != 0) {
                 auto& voice = voice_pool_.Get(active_voice_index);
-                if (voice.pitch() == note_off_message.pitch && voice.IsOn() &&
+                if (voice.pitch == note_off_message.pitch && voice.IsOn() &&
                     (params.sample_data.empty() || params.slice_mode != barely::SliceMode::kOnce)) {
                   voice.Stop();
                   break;
                 }
-                active_voice_index = voice.next_instrument_voice_index;
+                active_voice_index = voice.next_voice_index;
               }
             },
             [this](NoteOnMessage& note_on_message) noexcept {
               auto& params = instrument_pool_.Get(note_on_message.instrument_index).params;
               if (auto* voice = AcquireVoice(voice_pool_, params, note_on_message.pitch);
                   voice != nullptr) {
-                voice->Start(params, params.sample_data.Select(note_on_message.pitch, audio_rng_),
+                voice->Start(params, note_on_message.instrument_index,
+                             params.sample_data.Select(note_on_message.pitch, audio_rng_),
                              note_on_message.pitch, note_on_message.controls);
               }
             },
@@ -192,8 +192,9 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               uint32_t active_voice_index = params.first_voice_index;
               while (active_voice_index != 0) {
                 auto& voice = voice_pool_.Get(active_voice_index);
-                voice.set_slice(params.sample_data.Select(voice.pitch(), audio_rng_));
-                active_voice_index = voice.next_instrument_voice_index;
+                voice.slice = params.sample_data.Select(voice.pitch, audio_rng_);
+                voice.UpdatePitchIncrements();
+                active_voice_index = voice.next_voice_index;
               }
             }},
         message->second);
@@ -201,7 +202,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    engine_processor_.Process(audio_rng_, voice_pool_,
+    engine_processor_.Process(audio_rng_, instrument_pool_, voice_pool_,
                               &output_samples_[kStereoChannelCount * current_frame],
                               output_frame_count - current_frame);
   }

@@ -7,30 +7,32 @@
 
 #include "common/constants.h"
 #include "common/pool.h"
-#include "dsp/voice.h"
 #include "engine/instrument_params.h"
+#include "engine/voice_processor.h"
+#include "engine/voice_state.h"
 
 namespace barely {
 
 using InstrumentPool = Pool<BarelyInstrument, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
 
-using VoicePool = Pool<Voice, BARELYMUSICIAN_MAX_VOICE_COUNT>;
+using VoicePool = Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT>;
 
-[[nodiscard]] inline Voice* AcquireVoice(VoicePool& voice_pool, InstrumentParams& instrument_params,
-                                         float pitch) noexcept {
+[[nodiscard]] inline VoiceState* AcquireVoice(VoicePool& voice_pool,
+                                              InstrumentParams& instrument_params,
+                                              float pitch) noexcept {
   if (instrument_params.should_retrigger) {
     uint32_t current_voice_index = instrument_params.first_voice_index;
     while (current_voice_index != 0) {
-      Voice& voice = voice_pool.Get(current_voice_index);
-      if (voice.pitch() == pitch) {
+      VoiceState& voice = voice_pool.Get(current_voice_index);
+      if (voice.pitch == pitch) {
         while (current_voice_index != 0) {
           voice = voice_pool.Get(current_voice_index);
-          voice.increment_timestamp();
-          current_voice_index = voice.next_instrument_voice_index;
+          ++voice.timestamp;
+          current_voice_index = voice.next_voice_index;
         }
         return &voice;
       }
-      current_voice_index = voice.next_instrument_voice_index;
+      current_voice_index = voice.next_voice_index;
     }
   }
 
@@ -38,28 +40,28 @@ using VoicePool = Pool<Voice, BARELYMUSICIAN_MAX_VOICE_COUNT>;
   uint32_t oldest_active_voice_index = 0;
   uint32_t active_voice_count = 0;
   while (current_voice_index != 0) {
-    Voice& voice = voice_pool.Get(current_voice_index);
+    VoiceState& voice = voice_pool.Get(current_voice_index);
     if (oldest_active_voice_index == 0 ||
-        voice.timestamp() > voice_pool.Get(oldest_active_voice_index).timestamp()) {
+        voice.timestamp > voice_pool.Get(oldest_active_voice_index).timestamp) {
       oldest_active_voice_index = current_voice_index;
     }
-    voice.increment_timestamp();
+    ++voice.timestamp;
     ++active_voice_count;
-    if (voice.next_instrument_voice_index == 0) {  // TODO(#126): Remove double checking here.
+    if (voice.next_voice_index == 0) {  // TODO(#126): Remove double checking here.
       break;
     }
-    current_voice_index = voice.next_instrument_voice_index;
+    current_voice_index = voice.next_voice_index;
   }
 
   // Acquire new voice.
   if (voice_pool.GetActiveCount() < voice_pool.Count() &&
       active_voice_count < static_cast<uint32_t>(instrument_params.voice_count)) {
     const uint32_t new_voice_index = voice_pool.Acquire();
-    Voice& new_voice = voice_pool.Get(new_voice_index);
-    new_voice.previous_instrument_voice_index = current_voice_index;
-    new_voice.next_instrument_voice_index = 0;
+    VoiceState& new_voice = voice_pool.Get(new_voice_index);
+    new_voice.previous_voice_index = current_voice_index;
+    new_voice.next_voice_index = 0;
     if (current_voice_index != 0) {
-      voice_pool.Get(current_voice_index).next_instrument_voice_index = new_voice_index;
+      voice_pool.Get(current_voice_index).next_voice_index = new_voice_index;
     } else {
       instrument_params.first_voice_index = new_voice_index;
     }
@@ -74,40 +76,40 @@ using VoicePool = Pool<Voice, BARELYMUSICIAN_MAX_VOICE_COUNT>;
 ///
 /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
 /// @param rng Random number generator.
+/// @param instrument_pool Instrument pool.
 /// @param voice_pool Voice pool.
 /// @param delay_frame Delay send frame.
 /// @param sidechain_frame Sidechain send frame.
 /// @param output_frame Output frame.
 template <bool kIsSidechainSend = false>
-inline void ProcessAllVoices(AudioRng& rng, VoicePool& voice_pool,
+inline void ProcessAllVoices(AudioRng& rng, InstrumentPool& instrument_pool, VoicePool& voice_pool,
                              float delay_frame[kStereoChannelCount],
                              float sidechain_frame[kStereoChannelCount],
                              float output_frame[kStereoChannelCount]) noexcept {
   for (uint32_t i = 0; i < voice_pool.GetActiveCount();) {
-    Voice& voice = voice_pool.GetActive(i);
-    InstrumentParams& params = *voice.instrument_params_;
+    VoiceState& voice = voice_pool.GetActive(i);
+    InstrumentParams& params = instrument_pool.Get(voice.instrument_index).params;
     if constexpr (kIsSidechainSend) {
       if (!voice.IsActive()) {
-        if (voice.previous_instrument_voice_index != 0) {
-          voice_pool.Get(voice.previous_instrument_voice_index).next_instrument_voice_index =
-              voice.next_instrument_voice_index;
-          if (voice.next_instrument_voice_index != 0) {
-            voice_pool.Get(voice.next_instrument_voice_index).previous_instrument_voice_index =
-                voice.previous_instrument_voice_index;
+        if (voice.previous_voice_index != 0) {
+          voice_pool.Get(voice.previous_voice_index).next_voice_index = voice.next_voice_index;
+          if (voice.next_voice_index != 0) {
+            voice_pool.Get(voice.next_voice_index).previous_voice_index =
+                voice.previous_voice_index;
           }
-          voice.previous_instrument_voice_index = 0;
+          voice.previous_voice_index = 0;
         } else {
-          params.first_voice_index = voice.next_instrument_voice_index;
-          if (voice.next_instrument_voice_index != 0) {
-            voice_pool.Get(voice.next_instrument_voice_index).previous_instrument_voice_index = 0;
+          params.first_voice_index = voice.next_voice_index;
+          if (voice.next_voice_index != 0) {
+            voice_pool.Get(voice.next_voice_index).previous_voice_index = 0;
           }
         }
-        voice.next_instrument_voice_index = 0;
+        voice.next_voice_index = 0;
         voice_pool.Release(voice_pool.GetIndex(voice));
         continue;
       }
     }
-    voice.Process<kIsSidechainSend>(params, rng, delay_frame, sidechain_frame, output_frame);
+    ProcessVoice<kIsSidechainSend>(voice, params, rng, delay_frame, sidechain_frame, output_frame);
     ++i;
   }
 }

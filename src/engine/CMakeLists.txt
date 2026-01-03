@@ -8,6 +8,8 @@ target_sources(
   note_params.h
   task_state.h
   voice_params.h
+  voice_processor.h
+  voice_state.h
 )
 
 if(ENABLE_TESTS)

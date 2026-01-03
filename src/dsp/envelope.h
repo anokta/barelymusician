@@ -54,12 +54,12 @@ class Envelope {
   /// Returns whether the envelope is currently active (i.e., not idle).
   ///
   /// @return True if active.
-  [[nodiscard]] bool IsActive() const noexcept { return state_ != State::kIdle; }
+  [[nodiscard]] constexpr bool IsActive() const noexcept { return state_ != State::kIdle; }
 
   /// Returns whether the envelope is currently on (i.e., not idle or released).
   ///
   /// @return True if on.
-  [[nodiscard]] bool IsOn() const noexcept {
+  [[nodiscard]] constexpr bool IsOn() const noexcept {
     return static_cast<int>(state_) < static_cast<int>(State::kRelease);
   }
 

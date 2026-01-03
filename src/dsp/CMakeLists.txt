@@ -14,7 +14,6 @@ target_sources(
   sample_data.h
   sample_generators.h
   sidechain.h
-  voice.h
   voice_pool.h
 )
 

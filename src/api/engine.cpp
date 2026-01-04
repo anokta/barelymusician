@@ -122,7 +122,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      engine_processor_.Process(audio_rng_, instrument_pool_, voice_pool_,
+      engine_processor_.Process(audio_rng_, params_array_, voice_pool_,
                                 &output_samples_[kStereoChannelCount * current_frame],
                                 message_frame - current_frame);
       current_frame = message_frame;
@@ -134,8 +134,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                                            engine_control_message.value);
             },
             [this](InstrumentControlMessage& instrument_control_message) noexcept {
-              auto& params =
-                  instrument_pool_.Get(instrument_control_message.instrument_index).params;
+              auto& params = params_array_[instrument_control_message.instrument_index];
               if (instrument_control_message.type == InstrumentControlType::kVoiceCount) {
                 const uint32_t new_voice_count =
                     static_cast<uint32_t>(instrument_control_message.value);
@@ -160,12 +159,12 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
                                    instrument_control_message.value);
             },
             [this](NoteControlMessage& note_control_message) noexcept {
-              SetNoteControl(instrument_pool_.Get(note_control_message.instrument_index).params,
-                             voice_pool_, note_control_message.pitch, note_control_message.type,
+              SetNoteControl(params_array_[note_control_message.instrument_index], voice_pool_,
+                             note_control_message.pitch, note_control_message.type,
                              note_control_message.value);
             },
             [this](NoteOffMessage& note_off_message) noexcept {
-              auto& params = instrument_pool_.Get(note_off_message.instrument_index).params;
+              auto& params = params_array_[note_off_message.instrument_index];
               uint32_t active_voice_index = params.first_voice_index;
               while (active_voice_index != 0) {
                 auto& voice = voice_pool_.Get(active_voice_index);
@@ -178,7 +177,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               }
             },
             [this](NoteOnMessage& note_on_message) noexcept {
-              auto& params = instrument_pool_.Get(note_on_message.instrument_index).params;
+              auto& params = params_array_[note_on_message.instrument_index];
               if (auto* voice = AcquireVoice(voice_pool_, params, note_on_message.pitch);
                   voice != nullptr) {
                 voice->Start(params, note_on_message.instrument_index,
@@ -187,7 +186,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               }
             },
             [this](SampleDataMessage& sample_data_message) noexcept {
-              auto& params = instrument_pool_.Get(sample_data_message.instrument_index).params;
+              auto& params = params_array_[sample_data_message.instrument_index];
               params.sample_data.Swap(sample_data_message.sample_data);
               uint32_t active_voice_index = params.first_voice_index;
               while (active_voice_index != 0) {
@@ -202,7 +201,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    engine_processor_.Process(audio_rng_, instrument_pool_, voice_pool_,
+    engine_processor_.Process(audio_rng_, params_array_, voice_pool_,
                               &output_samples_[kStereoChannelCount * current_frame],
                               output_frame_count - current_frame);
   }

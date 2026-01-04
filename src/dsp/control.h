@@ -10,7 +10,6 @@
 
 namespace barely {
 
-/// Control.
 struct Control {
   /// Value.
   float value = 0.0f;

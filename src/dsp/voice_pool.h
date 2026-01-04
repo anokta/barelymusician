@@ -13,6 +13,7 @@
 
 namespace barely {
 
+using InstrumentParamsArray = std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
 using InstrumentPool = Pool<BarelyInstrument, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
 
 using VoicePool = Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT>;
@@ -76,19 +77,19 @@ using VoicePool = Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT>;
 ///
 /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
 /// @param rng Random number generator.
-/// @param instrument_pool Instrument pool.
+/// @param params_array Array of instrument parameters.
 /// @param voice_pool Voice pool.
 /// @param delay_frame Delay send frame.
 /// @param sidechain_frame Sidechain send frame.
 /// @param output_frame Output frame.
 template <bool kIsSidechainSend = false>
-inline void ProcessAllVoices(AudioRng& rng, InstrumentPool& instrument_pool, VoicePool& voice_pool,
-                             float delay_frame[kStereoChannelCount],
+inline void ProcessAllVoices(AudioRng& rng, InstrumentParamsArray& params_array,
+                             VoicePool& voice_pool, float delay_frame[kStereoChannelCount],
                              float sidechain_frame[kStereoChannelCount],
                              float output_frame[kStereoChannelCount]) noexcept {
   for (uint32_t i = 0; i < voice_pool.GetActiveCount();) {
     VoiceState& voice = voice_pool.GetActive(i);
-    InstrumentParams& params = instrument_pool.Get(voice.instrument_index).params;
+    InstrumentParams& params = params_array[voice.instrument_index];
     if constexpr (kIsSidechainSend) {
       if (!voice.IsActive()) {
         if (voice.previous_voice_index != 0) {

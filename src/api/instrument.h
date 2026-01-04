@@ -13,7 +13,6 @@
 #include "common/callback.h"
 #include "common/constants.h"
 #include "dsp/control.h"
-#include "engine/instrument_params.h"
 #include "engine/task_state.h"
 
 /// Implementation an instrument.
@@ -36,8 +35,6 @@ struct BarelyInstrument {
 
   /// Arpeggiator task index.
   TaskState arp_task;
-
-  barely::InstrumentParams params = {};
 
   /// Constructs a new `BarelyInstrument`.
   ///

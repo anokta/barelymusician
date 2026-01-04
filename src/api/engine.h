@@ -34,6 +34,7 @@ struct BarelyEngine {
   [[nodiscard]] BarelyRef AddInstrument() noexcept {
     const uint32_t index = instrument_pool_.Acquire();
     instrument_pool_.Get(index) = {};
+    params_array_[index] = {};  // TODO(#126): move this to audio thread
     return {index, instrument_pool_.GetGeneration(index)};
   }
 
@@ -186,6 +187,7 @@ struct BarelyEngine {
 
   // Instrument pool.
   barely::InstrumentPool instrument_pool_;
+  barely::InstrumentParamsArray params_array_;
 
   // Voice pool.
   barely::VoicePool voice_pool_;

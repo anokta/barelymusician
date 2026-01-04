@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "api/performer.h"
 #include "common/rng.h"
 #include "dsp/control.h"
 #include "dsp/engine_processor.h"

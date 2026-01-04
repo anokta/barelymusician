@@ -4,16 +4,14 @@
 #include <barelymusician.h>
 
 #include <cstdint>
-#include <optional>
 #include <span>
 #include <unordered_map>
 #include <vector>
 
-#include "api/performer.h"
 #include "common/callback.h"
 #include "common/constants.h"
 #include "dsp/control.h"
-#include "engine/task_state.h"
+#include "engine/arp_state.h"
 
 /// Implementation an instrument.
 struct BarelyInstrument {
@@ -23,18 +21,16 @@ struct BarelyInstrument {
 
   // Array of controls.
   barely::InstrumentControlArray controls_;
+  std::vector<float> pitches_;  // sorted
+
+  // Arpeggiator state.
+  barely::ArpState arp = {};
 
   /// Pointer to engine.
   BarelyEngine* engine_ = nullptr;
 
   /// Instrument index.
   uint32_t instrument_index = {};
-
-  /// Arpeggiator index.
-  BarelyPerformer arp;
-
-  /// Arpeggiator task index.
-  TaskState arp_task;
 
   /// Constructs a new `BarelyInstrument`.
   ///
@@ -109,23 +105,18 @@ struct BarelyInstrument {
   /// @param slices Span of slices.
   void SetSampleData(std::span<const BarelySlice> slices) noexcept;
 
+  void ProcessArp() noexcept;
+  void Update(double duration) noexcept;
+
  private:
   // Processes a control value.
   void ProcessControl(barely::InstrumentControlType type, float value) noexcept;
 
-  // Updates the arpeggiator.
-  void UpdateArp() noexcept;
-
   // Map of note control arrays by their pitches.
   std::unordered_map<float, barely::NoteControlArray> note_controls_;
-  std::vector<float> pitches_;  // sorted
 
   // Note event callback.
   NoteEventCallback note_event_callback_ = {};
-
-  // Arpeggiator.
-  std::optional<float> arp_pitch_ = std::nullopt;
-  int arp_pitch_index_ = -1;
 };
 
 #endif  // BARELYMUSICIAN_API_INSTRUMENT_H_

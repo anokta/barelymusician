@@ -1,5 +1,6 @@
 target_sources(
   barelymusician PRIVATE
+  arp_state.h
   instrument_params.h
   instrument_processor.h
   message.h

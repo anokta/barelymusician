@@ -249,10 +249,17 @@ void BarelyEngine::Update(double timestamp) noexcept {
         }
       }
       for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
-        if (const auto maybe_next_key = instrument_pool_.GetActive(i).arp.GetNextTaskKey();
-            maybe_next_key.has_value() && *maybe_next_key < next_key) {
+        auto& instrument = instrument_pool_.GetActive(i);
+        if (static_cast<BarelyArpMode>(
+                instrument.controls_[BarelyInstrumentControlType_kArpMode].value) ==
+                BarelyArpMode_kNone ||
+            instrument.pitches_.empty()) {
+          continue;
+        }
+        if (const auto maybe_next_duration = instrument.arp.GetNextDuration();
+            maybe_next_duration.has_value() && *maybe_next_duration < next_key.first) {
           has_tasks_to_process = true;
-          next_key = *maybe_next_key;
+          next_key = {*maybe_next_duration, std::numeric_limits<int>::max()};
         }
       }
 
@@ -264,7 +271,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
           performer_pool_.GetActive(i).Update(update_duration);
         }
         for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
-          instrument_pool_.GetActive(i).arp.Update(update_duration);
+          instrument_pool_.GetActive(i).Update(update_duration);
         }
 
         timestamp_ += barely::BeatsToSeconds(tempo_, update_duration);
@@ -275,8 +282,10 @@ void BarelyEngine::Update(double timestamp) noexcept {
         for (uint32_t i = 0; i < performer_pool_.GetActiveCount(); ++i) {
           performer_pool_.GetActive(i).ProcessAllTasksAtPosition(max_priority);
         }
-        for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
-          instrument_pool_.GetActive(i).arp.ProcessAllTasksAtPosition(max_priority);
+        if (max_priority == std::numeric_limits<int>::max()) {
+          for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
+            instrument_pool_.GetActive(i).ProcessArp();
+          }
         }
       }
     } else if (timestamp_ < timestamp) {

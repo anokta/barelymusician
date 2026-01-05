@@ -8,19 +8,14 @@
 namespace barely {
 
 struct ArpState {
-  double rate = 0.0;
-
-  double ratio = 0.0;
-
   double phase = 0.0;
 
-  float pitch = 0.0f;
-
   int pitch_index = -1;
+  float pitch = 0.0f;
 
   bool is_active = false;
 
-  std::optional<double> GetNextDuration() const noexcept {
+  std::optional<double> GetNextDuration(double rate, double ratio) const noexcept {
     if (rate <= 0.0) {
       return std::nullopt;
     }
@@ -30,8 +25,8 @@ struct ArpState {
     return (ratio - phase) / rate;
   }
 
-  void Update(double duration) noexcept {
-    assert(GetNextDuration().has_value() && duration <= *GetNextDuration());
+  void Update(double duration, double rate, [[maybe_unused]] double ratio) noexcept {
+    assert(GetNextDuration(rate, ratio).has_value() && duration <= *GetNextDuration(rate, ratio));
     phase = std::fmod(phase + duration * rate, 1.0);
   }
 };

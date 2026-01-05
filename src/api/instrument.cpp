@@ -104,9 +104,6 @@ void BarelyInstrument::Init(
     std::span<const BarelyInstrumentControlOverride> control_overrides) noexcept {
   controls_ = BuildControlArray(control_overrides);
   engine_ = &engine;
-
-  arp.rate = static_cast<double>(controls_[BarelyInstrumentControlType_kArpRate].value);
-  arp.ratio = static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value);
 }
 
 float BarelyInstrument::GetControl(BarelyInstrumentControlType type) const noexcept {
@@ -122,7 +119,7 @@ const float* BarelyInstrument::GetNoteControl(float pitch,
 }
 
 bool BarelyInstrument::IsNoteOn(float pitch) const noexcept {
-  return arp.is_active ? arp.pitch : note_controls_.contains(pitch);
+  return arp.is_active ? (arp.pitch == pitch) : note_controls_.contains(pitch);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -225,10 +222,8 @@ void BarelyInstrument::ProcessControl(InstrumentControlType type, float value) n
       }
     } break;
     case InstrumentControlType::kArpGateRatio:
-      arp.ratio = static_cast<double>(value);
-      break;
+      [[fallthrough]];
     case InstrumentControlType::kArpRate:
-      arp.rate = static_cast<double>(value);
       break;
     default:
       engine_->ScheduleMessage(InstrumentControlMessage{instrument_index, type, value});
@@ -265,7 +260,9 @@ void BarelyInstrument::ProcessArp() noexcept {
     note_event_callback_(BarelyNoteEventType_kBegin, arp.pitch);
     engine_->ScheduleMessage(NoteOnMessage{instrument_index, arp.pitch,
                                            BuildNoteControls(note_controls_.at(arp.pitch))});
-  } else if (arp.is_active && arp.phase == arp.ratio) {
+  } else if (arp.is_active &&
+             arp.phase ==
+                 static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value)) {
     arp.is_active = false;
     note_event_callback_(BarelyNoteEventType_kEnd, arp.pitch);
     engine_->ScheduleMessage(NoteOffMessage{instrument_index, arp.pitch});
@@ -276,6 +273,7 @@ void BarelyInstrument::Update(double duration) noexcept {
   if (static_cast<BarelyArpMode>(controls_[BarelyInstrumentControlType_kArpMode].value) !=
           BarelyArpMode_kNone &&
       !pitches_.empty()) {
-    arp.Update(duration);
+    arp.Update(duration, static_cast<double>(controls_[BarelyInstrumentControlType_kArpRate].value),
+               static_cast<double>(controls_[BarelyInstrumentControlType_kArpGateRatio].value));
   }
 }

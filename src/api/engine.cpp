@@ -256,7 +256,11 @@ void BarelyEngine::Update(double timestamp) noexcept {
             instrument.pitches_.empty()) {
           continue;
         }
-        if (const auto maybe_next_duration = instrument.arp.GetNextDuration();
+        if (const auto maybe_next_duration = instrument.arp.GetNextDuration(
+                static_cast<double>(
+                    instrument.controls_[BarelyInstrumentControlType_kArpRate].value),
+                static_cast<double>(
+                    instrument.controls_[BarelyInstrumentControlType_kArpGateRatio].value));
             maybe_next_duration.has_value() && *maybe_next_duration < next_key.first) {
           has_tasks_to_process = true;
           next_key = {*maybe_next_duration, std::numeric_limits<int>::max()};

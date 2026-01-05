@@ -8,13 +8,14 @@
 #include "common/constants.h"
 #include "common/pool.h"
 #include "engine/instrument_params.h"
+#include "engine/instrument_state.h"
 #include "engine/voice_processor.h"
 #include "engine/voice_state.h"
 
 namespace barely {
 
 using InstrumentParamsArray = std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
-using InstrumentPool = Pool<BarelyInstrument, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
+using InstrumentPool = Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
 
 using VoicePool = Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT>;
 

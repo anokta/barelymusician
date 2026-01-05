@@ -62,14 +62,14 @@ struct BarelyEngine {
 
   void DestroyInstruments() noexcept {
     for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
-      instrument_pool_.GetActive(i).SetAllNotesOff();
+      SetAllInstrumentNotesOff(instrument_pool_.GetActiveIndex(i));
     }
   }
 
-  [[nodiscard]] BarelyInstrument& GetInstrument(BarelyRef instrument) noexcept {
+  [[nodiscard]] barely::InstrumentState& GetInstrument(BarelyRef instrument) noexcept {
     return instrument_pool_.Get(instrument.index);
   }
-  [[nodiscard]] const BarelyInstrument& GetInstrument(BarelyRef instrument) const noexcept {
+  [[nodiscard]] const barely::InstrumentState& GetInstrument(BarelyRef instrument) const noexcept {
     return instrument_pool_.Get(instrument.index);
   }
 
@@ -96,6 +96,95 @@ struct BarelyEngine {
   }
   [[nodiscard]] bool IsValidTask(BarelyRef task) const noexcept {
     return task_pool_.IsActive(task.index, task.generation);
+  }
+
+  void ProcessInstrumentControl(uint32_t instrument_index, barely::InstrumentControlType type,
+                                float value) noexcept {
+    auto& instrument = instrument_pool_.Get(instrument_index);
+    switch (type) {
+      case barely::InstrumentControlType::kArpMode: {
+        if (static_cast<BarelyArpMode>(value) == BarelyArpMode_kNone) {
+          if (instrument.arp.pitch_index != -1) {
+            instrument.arp.is_active = false;
+            instrument.arp.phase = 0.0;
+            instrument.arp.pitch_index = -1;
+            instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp.pitch);
+            ScheduleMessage(barely::NoteOffMessage{instrument_index, instrument.arp.pitch});
+            for (const auto& [pitch, note_controls] : instrument.note_controls) {
+              instrument.note_event_callback(BarelyNoteEventType_kBegin, pitch);
+              ScheduleMessage(barely::NoteOnMessage{instrument_index, pitch,
+                                                    barely::BuildNoteControls(note_controls)});
+            }
+          }
+        } else if (!instrument.pitches.empty() && !instrument.arp.is_active) {
+          for (const float pitch : instrument.pitches) {
+            instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
+            ScheduleMessage(barely::NoteOffMessage{instrument_index, pitch});
+          }
+        }
+      } break;
+      case barely::InstrumentControlType::kArpGateRatio:
+        [[fallthrough]];
+      case barely::InstrumentControlType::kArpRate:
+        break;
+      default:
+        ScheduleMessage(barely::InstrumentControlMessage{instrument_index, type, value});
+        break;
+    }
+  }
+
+  void SetAllInstrumentNotesOff(uint32_t instrument_index) noexcept {
+    auto& instrument = instrument_pool_.Get(instrument_index);
+    instrument.note_controls.clear();
+    if (instrument.arp.is_active) {
+      instrument.pitches.clear();
+      instrument.arp.is_active = false;
+      instrument.arp.phase = 0.0;
+      instrument.arp.pitch_index = -1;
+      instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp.pitch);
+      ScheduleMessage(barely::NoteOffMessage{instrument_index, instrument.arp.pitch});
+    } else {
+      for (const float pitch : std::exchange(instrument.pitches, {})) {
+        instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
+        ScheduleMessage(barely::NoteOffMessage{instrument_index, pitch});
+      }
+    }
+  }
+
+  void SetInstrumentNoteOff(uint32_t instrument_index, float pitch) noexcept {
+    auto& instrument = instrument_pool_.Get(instrument_index);
+    if (instrument.note_controls.erase(pitch) > 0) {
+      instrument.pitches.erase(
+          std::find(instrument.pitches.begin(), instrument.pitches.end(), pitch));
+      if (instrument.pitches.empty() && instrument.IsArpEnabled()) {
+        instrument.arp.is_active = false;
+        instrument.arp.phase = 0.0;
+        instrument.arp.pitch_index = -1;
+        instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp.pitch);
+        ScheduleMessage(barely::NoteOffMessage{instrument_index, instrument.arp.pitch});
+      } else if (!instrument.IsArpEnabled()) {
+        instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
+        ScheduleMessage(barely::NoteOffMessage{instrument_index, pitch});
+      }
+    }
+  }
+
+  void SetInstrumentNoteOn(
+      uint32_t instrument_index, float pitch,
+      std::span<const BarelyNoteControlOverride> note_control_overrides) noexcept {
+    auto& instrument = instrument_pool_.Get(instrument_index);
+    if (const auto [it, success] = instrument.note_controls.try_emplace(
+            pitch, barely::BuildNoteControlArray(note_control_overrides));
+        success) {
+      instrument.pitches.insert(
+          std::lower_bound(instrument.pitches.begin(), instrument.pitches.end(), pitch), pitch);
+      if (instrument.pitches.size() == 1 && instrument.IsArpEnabled()) {
+      } else if (!instrument.IsArpEnabled()) {
+        instrument.note_event_callback(BarelyNoteEventType_kBegin, pitch);
+        ScheduleMessage(
+            barely::NoteOnMessage{instrument_index, pitch, barely::BuildNoteControls(it->second)});
+      }
+    }
   }
 
   /// Adds a new task.
@@ -171,6 +260,8 @@ struct BarelyEngine {
   barely::MainRng& main_rng() noexcept { return main_rng_; }
 
  private:
+  void ProcessArp(uint32_t instrument_index) noexcept;
+
   // Array of engine controls.
   barely::EngineControlArray controls_;
 

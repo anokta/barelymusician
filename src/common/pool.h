@@ -97,6 +97,12 @@ class Pool {
     return Get(active_[active_index]);
   }
 
+  // TODO(#126): Clean up redundant getters.
+  [[nodiscard]] uint32_t GetActiveIndex(uint32_t active_index) noexcept {
+    assert(active_index < active_count_);
+    return active_[active_index];
+  }
+
   [[nodiscard]] uint32_t GetActiveCount() const noexcept { return active_count_; }
 
  private:

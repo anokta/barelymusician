@@ -3,6 +3,7 @@ target_sources(
   arp_state.h
   instrument_params.h
   instrument_processor.h
+  instrument_state.h
   message.h
   message_queue.cpp
   message_queue.h
@@ -16,6 +17,8 @@ target_sources(
 if(ENABLE_TESTS)
   target_sources(
     barelymusician_test PRIVATE
+    # TODO(#126): move this to instrument_processor_test
+    # instrument_test.cpp
     message_queue_test.cpp
   )
 endif()

@@ -250,17 +250,14 @@ void BarelyEngine::Update(double timestamp) noexcept {
       }
       for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
         auto& instrument = instrument_pool_.GetActive(i);
-        if (static_cast<BarelyArpMode>(
-                instrument.controls_[BarelyInstrumentControlType_kArpMode].value) ==
-                BarelyArpMode_kNone ||
-            instrument.pitches_.empty()) {
+        if (!instrument.IsArpEnabled() || instrument.pitches.empty()) {
           continue;
         }
         if (const auto maybe_next_duration = instrument.arp.GetNextDuration(
                 static_cast<double>(
-                    instrument.controls_[BarelyInstrumentControlType_kArpRate].value),
+                    instrument.controls[BarelyInstrumentControlType_kArpRate].value),
                 static_cast<double>(
-                    instrument.controls_[BarelyInstrumentControlType_kArpGateRatio].value));
+                    instrument.controls[BarelyInstrumentControlType_kArpGateRatio].value));
             maybe_next_duration.has_value() && *maybe_next_duration < next_key.first) {
           has_tasks_to_process = true;
           next_key = {*maybe_next_duration, std::numeric_limits<int>::max()};
@@ -288,7 +285,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
         }
         if (max_priority == std::numeric_limits<int>::max()) {
           for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
-            instrument_pool_.GetActive(i).ProcessArp();
+            ProcessArp(instrument_pool_.GetActiveIndex(i));
           }
         }
       }
@@ -296,5 +293,47 @@ void BarelyEngine::Update(double timestamp) noexcept {
       timestamp_ = timestamp;
       update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);
     }
+  }
+}
+
+void BarelyEngine::ProcessArp(uint32_t instrument_index) noexcept {
+  auto& instrument = instrument_pool_.Get(instrument_index);
+  if (!instrument.IsArpEnabled() || instrument.pitches.empty()) {
+    return;
+  }
+  if (!instrument.arp.is_active && instrument.arp.phase == 0.0) {
+    const int size = static_cast<int>(instrument.pitches.size());
+    switch (static_cast<BarelyArpMode>(
+        instrument.controls[BarelyInstrumentControlType_kArpMode].value)) {
+      case BarelyArpMode_kUp:
+        instrument.arp.pitch_index = (instrument.arp.pitch_index + 1) % size;
+        break;
+      case BarelyArpMode_kDown:
+        instrument.arp.pitch_index = (instrument.arp.pitch_index == -1)
+                                         ? size - 1
+                                         : (instrument.arp.pitch_index + size - 1) % size;
+        break;
+      case BarelyArpMode_kRandom:
+        instrument.arp.pitch_index = main_rng_.Generate(0, size);
+        break;
+      default:
+        assert(!"Invalid arpeggiator mode");
+        return;
+    }
+    assert(instrument.arp.pitch_index >= 0 && instrument.arp.pitch_index < size);
+    instrument.arp.pitch = instrument.pitches[instrument.arp.pitch_index];
+
+    instrument.arp.is_active = true;
+    instrument.note_event_callback(BarelyNoteEventType_kBegin, instrument.arp.pitch);
+    ScheduleMessage(barely::NoteOnMessage{
+        instrument_index, instrument.arp.pitch,
+        barely::BuildNoteControls(instrument.note_controls.at(instrument.arp.pitch))});
+  } else if (instrument.arp.is_active &&
+             instrument.arp.phase ==
+                 static_cast<double>(
+                     instrument.controls[BarelyInstrumentControlType_kArpGateRatio].value)) {
+    instrument.arp.is_active = false;
+    instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp.pitch);
+    ScheduleMessage(barely::NoteOffMessage{instrument_index, instrument.arp.pitch});
   }
 }

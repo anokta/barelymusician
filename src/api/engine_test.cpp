@@ -5,7 +5,6 @@
 #include <array>
 #include <functional>
 
-#include "api/instrument.h"
 #include "api/performer.h"
 #include "engine/message.h"
 #include "gmock/gmock-matchers.h"
@@ -101,14 +100,14 @@ TEST(EngineTest, PlaySingleNote) {
   };
 
   BarelyEngine engine(kSampleRate, kFrameCount);
-  BarelyInstrument instrument(engine, {});
-  instrument.instrument_index = engine.AddInstrument().index;
+  const auto instrument = engine.AddInstrument();
+  engine.GetInstrument(instrument).controls = barely::BuildControlArray({});
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine.ScheduleMessage(barely::InstrumentControlMessage{
-        instrument.instrument_index, static_cast<barely::InstrumentControlType>(i),
-        instrument.controls_[i].value});
+        instrument.index, static_cast<barely::InstrumentControlType>(i),
+        engine.GetInstrument(instrument).controls[i].value});
   }
-  instrument.SetSampleData(kSlices);
+  engine.ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
 
   std::array<float, kChannelCount * kFrameCount> samples;
 
@@ -120,8 +119,8 @@ TEST(EngineTest, PlaySingleNote) {
   }
 
   // Set a note on.
-  instrument.SetNoteOn(kPitch, {{{BarelyNoteControlType_kGain, kGain}}});
-  EXPECT_TRUE(instrument.IsNoteOn(kPitch));
+  engine.SetInstrumentNoteOn(instrument.index, kPitch, {{{BarelyNoteControlType_kGain, kGain}}});
+  EXPECT_TRUE(engine.GetInstrument(instrument).IsNoteOn(kPitch));
 
   samples.fill(0.0f);
   engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
@@ -132,8 +131,8 @@ TEST(EngineTest, PlaySingleNote) {
   }
 
   // Set the note off.
-  instrument.SetNoteOff(kPitch);
-  EXPECT_FALSE(instrument.IsNoteOn(kPitch));
+  engine.SetInstrumentNoteOff(instrument.index, kPitch);
+  EXPECT_FALSE(engine.GetInstrument(instrument).IsNoteOn(kPitch));
 
   samples.fill(0.0f);
   engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
@@ -152,14 +151,14 @@ TEST(EngineTest, PlayMultipleNotes) {
   };
 
   BarelyEngine engine(1, kSampleRate);
-  BarelyInstrument instrument(engine, {});
-  instrument.instrument_index = engine.AddInstrument().index;
+  const auto instrument = engine.AddInstrument();
+  engine.GetInstrument(instrument).controls = barely::BuildControlArray({});
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine.ScheduleMessage(barely::InstrumentControlMessage{
-        instrument.instrument_index, static_cast<barely::InstrumentControlType>(i),
-        instrument.controls_[i].value});
+        instrument.index, static_cast<barely::InstrumentControlType>(i),
+        engine.GetInstrument(instrument).controls[i].value});
   }
-  instrument.SetSampleData(kSlices);
+  engine.ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
 
   std::array<float, kChannelCount * kSampleRate> samples;
 
@@ -172,9 +171,9 @@ TEST(EngineTest, PlayMultipleNotes) {
 
   // Start a new note per each i in the samples.
   for (int i = 0; i < kSampleRate; ++i) {
-    instrument.SetNoteOn(static_cast<float>(i), {});
+    engine.SetInstrumentNoteOn(instrument.index, static_cast<float>(i), {});
     engine.Update(i + 1);
-    instrument.SetNoteOff(static_cast<float>(i));
+    engine.SetInstrumentNoteOff(instrument.index, static_cast<float>(i));
   }
 
   samples.fill(0.0f);

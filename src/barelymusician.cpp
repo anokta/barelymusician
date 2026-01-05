@@ -5,9 +5,7 @@
 #include <cstdint>
 
 #include "api/engine.h"
-#include "api/instrument.h"
 #include "api/performer.h"
-#include "common/constants.h"
 #include "common/time.h"
 
 bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count, BarelyEngine** out_engine) {
@@ -27,13 +25,12 @@ bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
 
   *out_instrument = engine->AddInstrument();
   auto& instrument = engine->GetInstrument(*out_instrument);
-  instrument.Init(*engine, {control_overrides, control_overrides + control_override_count});
-
-  instrument.instrument_index = out_instrument->index;
+  instrument.controls =
+      barely::BuildControlArray({control_overrides, control_overrides + control_override_count});
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine->ScheduleMessage(barely::InstrumentControlMessage{
-        instrument.instrument_index, static_cast<barely::InstrumentControlType>(i),
-        instrument.controls_[i].value});
+        out_instrument->index, static_cast<barely::InstrumentControlType>(i),
+        instrument.controls[i].value});
   }
   return true;
 }
@@ -80,7 +77,7 @@ bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, BarelyRef instrument) 
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument)) return false;
 
-  engine->GetInstrument(instrument).SetAllNotesOff();
+  engine->SetAllInstrumentNotesOff(instrument.index);
   engine->RemoveInstrument(instrument);
   return true;
 }
@@ -190,7 +187,7 @@ bool BarelyInstrument_GetControl(const BarelyEngine* engine, BarelyRef instrumen
   if (type >= BarelyInstrumentControlType_kCount) return false;
   if (!out_value) return false;
 
-  *out_value = engine->GetInstrument(instrument).GetControl(type);
+  *out_value = engine->GetInstrument(instrument).controls[type].value;
   return true;
 }
 
@@ -201,9 +198,9 @@ bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, BarelyRef instr
   if (type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
 
-  if (const auto* value = engine->GetInstrument(instrument).GetNoteControl(pitch, type);
-      value != nullptr) {
-    *out_value = *value;
+  if (const auto it = engine->GetInstrument(instrument).note_controls.find(pitch);
+      it != engine->GetInstrument(instrument).note_controls.end()) {
+    *out_value = it->second[type].value;
     return true;
   }
   return false;
@@ -221,8 +218,9 @@ bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, BarelyRef instrument,
 
 bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, BarelyRef instrument) {
   if (!engine) return false;
+  if (!engine->IsValidInstrument(instrument)) return false;
 
-  engine->GetInstrument(instrument).SetAllNotesOff();
+  engine->SetAllInstrumentNotesOff(instrument.index);
   return true;
 }
 
@@ -232,7 +230,10 @@ bool BarelyInstrument_SetControl(BarelyEngine* engine, BarelyRef instrument,
   if (!engine->IsValidInstrument(instrument)) return false;
   if (type >= BarelyInstrumentControlType_kCount) return false;
 
-  engine->GetInstrument(instrument).SetControl(type, value);
+  if (auto& control = engine->GetInstrument(instrument).controls[type]; control.SetValue(value)) {
+    engine->ProcessInstrumentControl(
+        instrument.index, static_cast<barely::InstrumentControlType>(type), control.value);
+  }
   return true;
 }
 
@@ -242,7 +243,13 @@ bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, BarelyRef instrument,
   if (!engine->IsValidInstrument(instrument)) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
 
-  engine->GetInstrument(instrument).SetNoteControl(pitch, type, value);
+  if (const auto it = engine->GetInstrument(instrument).note_controls.find(pitch);
+      it != engine->GetInstrument(instrument).note_controls.end()) {
+    if (auto& note_control = it->second[type]; note_control.SetValue(value)) {
+      engine->ScheduleMessage(barely::NoteControlMessage{
+          instrument.index, pitch, static_cast<barely::NoteControlType>(type), note_control.value});
+    }
+  }
   return true;
 }
 
@@ -251,7 +258,7 @@ bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, BarelyRef instr
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument)) return false;
 
-  engine->GetInstrument(instrument).SetNoteEventCallback({callback, user_data});
+  engine->GetInstrument(instrument).note_event_callback = {callback, user_data};
   return true;
 }
 
@@ -259,7 +266,7 @@ bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, BarelyRef instrument, flo
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument)) return false;
 
-  engine->GetInstrument(instrument).SetNoteOff(pitch);
+  engine->SetInstrumentNoteOff(instrument.index, pitch);
   return true;
 }
 
@@ -269,9 +276,9 @@ bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, BarelyRef instrument, floa
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument)) return false;
 
-  engine->GetInstrument(instrument)
-      .SetNoteOn(pitch,
-                 {note_control_overrides, note_control_overrides + note_control_override_count});
+  engine->SetInstrumentNoteOn(
+      instrument.index, pitch,
+      {note_control_overrides, note_control_overrides + note_control_override_count});
   return true;
 }
 
@@ -281,7 +288,8 @@ bool BarelyInstrument_SetSampleData(BarelyEngine* engine, BarelyRef instrument,
   if (!engine->IsValidInstrument(instrument)) return false;
   if (slice_count < 0 || (!slices && slice_count > 0)) return false;
 
-  engine->GetInstrument(instrument).SetSampleData({slices, slices + slice_count});
+  engine->ScheduleMessage(barely::SampleDataMessage{
+      instrument.index, barely::SampleData({slices, slices + slice_count})});
   return true;
 }
 

@@ -1,11 +1,12 @@
 target_sources(
   barelymusician PRIVATE
   arp_state.h
+  instrument_controller.cpp
+  instrument_controller.h
   instrument_params.h
   instrument_processor.h
   instrument_state.h
   message.h
-  message_queue.cpp
   message_queue.h
   note_params.h
   task_state.h
@@ -17,7 +18,7 @@ target_sources(
 if(ENABLE_TESTS)
   target_sources(
     barelymusician_test PRIVATE
-    # TODO(#126): move this to instrument_processor_test
+    # TODO(#126): move this to instrument_controller_test
     # instrument_test.cpp
     message_queue_test.cpp
   )

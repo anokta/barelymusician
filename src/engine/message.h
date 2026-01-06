@@ -14,10 +14,16 @@ namespace barely {
 /// Engine control message.
 struct EngineControlMessage {
   /// Type.
-  EngineControlType type;
+  BarelyEngineControlType type;
 
   /// Value.
   float value;
+};
+
+/// Instrument create message.
+struct InstrumentCreateMessage {
+  /// Instrument index;
+  uint32_t instrument_index;
 };
 
 /// Instrument control message.
@@ -26,7 +32,7 @@ struct InstrumentControlMessage {
   uint32_t instrument_index;
 
   /// Type.
-  InstrumentControlType type;
+  BarelyInstrumentControlType type;
 
   /// Value.
   float value;
@@ -41,7 +47,7 @@ struct NoteControlMessage {
   float pitch;
 
   /// Type.
-  NoteControlType type;
+  BarelyNoteControlType type;
 
   /// Value.
   float value;
@@ -78,8 +84,9 @@ struct SampleDataMessage {
 };
 
 /// Message alias.
-using Message = std::variant<EngineControlMessage, InstrumentControlMessage, NoteControlMessage,
-                             NoteOffMessage, NoteOnMessage, SampleDataMessage>;
+using Message =
+    std::variant<EngineControlMessage, InstrumentCreateMessage, InstrumentControlMessage,
+                 NoteControlMessage, NoteOffMessage, NoteOnMessage, SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

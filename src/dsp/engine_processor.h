@@ -88,51 +88,51 @@ class EngineProcessor {
   /// @param type Control type.
   /// @param value Control value.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(EngineControlType type, float value) noexcept {
+  void SetControl(BarelyEngineControlType type, float value) noexcept {
     switch (type) {
-      case EngineControlType::kCompressorMix:
+      case BarelyEngineControlType_kCompressorMix:
         target_params_.compressor_params.mix = value;
         break;
-      case EngineControlType::kCompressorAttack:
+      case BarelyEngineControlType_kCompressorAttack:
         compressor_.SetAttack(value);
         break;
-      case EngineControlType::kCompressorRelease:
+      case BarelyEngineControlType_kCompressorRelease:
         compressor_.SetRelease(value);
         break;
-      case EngineControlType::kCompressorThreshold:
+      case BarelyEngineControlType_kCompressorThreshold:
         target_params_.compressor_params.threshold_db = AmplitudeToDecibels(value);
         break;
-      case EngineControlType::kCompressorRatio:
+      case BarelyEngineControlType_kCompressorRatio:
         target_params_.compressor_params.ratio = value;
         break;
-      case EngineControlType::kDelayMix:
+      case BarelyEngineControlType_kDelayMix:
         target_params_.delay_params.mix = value;
         break;
-      case EngineControlType::kDelayTime:
+      case BarelyEngineControlType_kDelayTime:
         target_params_.delay_params.frame_count = value * static_cast<float>(sample_rate_);
         break;
-      case EngineControlType::kDelayFeedback:
+      case BarelyEngineControlType_kDelayFeedback:
         target_params_.delay_params.feedback = value;
         break;
-      case EngineControlType::kDelayLowPassFrequency:
+      case BarelyEngineControlType_kDelayLowPassFrequency:
         target_params_.delay_params.low_pass_coeff = GetFilterCoefficient(sample_rate_, value);
         break;
-      case EngineControlType::kDelayHighPassFrequency:
+      case BarelyEngineControlType_kDelayHighPassFrequency:
         target_params_.delay_params.high_pass_coeff = GetFilterCoefficient(sample_rate_, value);
         break;
-      case EngineControlType::kSidechainMix:
+      case BarelyEngineControlType_kSidechainMix:
         target_params_.sidechain_mix = value;
         break;
-      case EngineControlType::kSidechainAttack:
+      case BarelyEngineControlType_kSidechainAttack:
         sidechain_.SetAttack(value);
         break;
-      case EngineControlType::kSidechainRelease:
+      case BarelyEngineControlType_kSidechainRelease:
         sidechain_.SetRelease(value);
         break;
-      case EngineControlType::kSidechainThreshold:
+      case BarelyEngineControlType_kSidechainThreshold:
         target_params_.sidechain_threshold_db = AmplitudeToDecibels(value);
         break;
-      case EngineControlType::kSidechainRatio:
+      case BarelyEngineControlType_kSidechainRatio:
         target_params_.sidechain_ratio = value;
         break;
       default:

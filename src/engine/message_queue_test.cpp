@@ -22,13 +22,13 @@ TEST(MessageQueueTest, AddSingleMessage) {
   EXPECT_THAT(messages.GetNext(1), IsNull());
   EXPECT_THAT(messages.GetNext(10), IsNull());
 
-  messages.Add(1, NoteOffMessage{0, 5.0f});
+  messages.Add(1, InstrumentCreateMessage{5});
   EXPECT_THAT(messages.GetNext(0), IsNull());
   EXPECT_THAT(messages.GetNext(1), IsNull());
   EXPECT_THAT(
       messages.GetNext(10),
-      AllOf(NotNull(),
-            Pointee(Pair(1, VariantWith<NoteOffMessage>(Field(&NoteOffMessage::pitch, 5.0f))))));
+      AllOf(NotNull(), Pointee(Pair(1, VariantWith<InstrumentCreateMessage>(Field(
+                                           &InstrumentCreateMessage::instrument_index, 5))))));
 
   // Message is already returned.
   EXPECT_THAT(messages.GetNext(10), IsNull());
@@ -39,14 +39,14 @@ TEST(MessageQueueTest, AddMultipleMessages) {
   MessageQueue messages;
   EXPECT_THAT(messages.GetNext(10), IsNull());
 
-  for (int i = 0; i < 10; ++i) {
-    messages.Add(i, NoteOffMessage{0, static_cast<float>(i)});
+  for (uint32_t i = 0; i < 10; ++i) {
+    messages.Add(i, InstrumentCreateMessage{i});
   }
-  for (int i = 0; i < 10; ++i) {
+  for (uint32_t i = 0; i < 10; ++i) {
     EXPECT_THAT(
         messages.GetNext(10),
-        AllOf(NotNull(), Pointee(Pair(i, VariantWith<NoteOffMessage>(Field(
-                                             &NoteOffMessage::pitch, static_cast<float>(i)))))));
+        AllOf(NotNull(), Pointee(Pair(i, VariantWith<InstrumentCreateMessage>(Field(
+                                             &InstrumentCreateMessage::instrument_index, i))))));
   }
 
   // All messages are already returned.

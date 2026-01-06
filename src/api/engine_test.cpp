@@ -94,19 +94,12 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 TEST(EngineTest, PlaySingleNote) {
   constexpr int kFrameCount = 5;
   constexpr float kPitch = 1.0f;
-  constexpr float kGain = 0.5f;
   constexpr std::array<BarelySlice, 1> kSlices = {
       BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
   };
 
   BarelyEngine engine(kSampleRate, kFrameCount);
-  const auto instrument = engine.AddInstrument();
-  engine.GetInstrument(instrument).controls = barely::BuildControlArray({});
-  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    engine.ScheduleMessage(barely::InstrumentControlMessage{
-        instrument.index, static_cast<barely::InstrumentControlType>(i),
-        engine.GetInstrument(instrument).controls[i].value});
-  }
+  const auto instrument = engine.instrument_controller().Acquire(nullptr, 0);
   engine.ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
 
   std::array<float, kChannelCount * kFrameCount> samples;
@@ -119,20 +112,19 @@ TEST(EngineTest, PlaySingleNote) {
   }
 
   // Set a note on.
-  engine.SetInstrumentNoteOn(instrument.index, kPitch, {{{BarelyNoteControlType_kGain, kGain}}});
-  EXPECT_TRUE(engine.GetInstrument(instrument).IsNoteOn(kPitch));
+  engine.instrument_controller().SetNoteOn(instrument.index, kPitch, nullptr, 0);
+  EXPECT_TRUE(engine.instrument_controller().IsNoteOn(instrument.index, kPitch));
 
   samples.fill(0.0f);
   engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], (i / kChannelCount < kSampleRate)
-                                    ? 0.5f * kSamples[i / kChannelCount] * kGain
-                                    : 0.0f);
+    EXPECT_FLOAT_EQ(samples[i],
+                    (i / kChannelCount < kSampleRate) ? 0.5f * kSamples[i / kChannelCount] : 0.0f);
   }
 
   // Set the note off.
-  engine.SetInstrumentNoteOff(instrument.index, kPitch);
-  EXPECT_FALSE(engine.GetInstrument(instrument).IsNoteOn(kPitch));
+  engine.instrument_controller().SetNoteOff(instrument.index, kPitch);
+  EXPECT_FALSE(engine.instrument_controller().IsNoteOn(instrument.index, kPitch));
 
   samples.fill(0.0f);
   engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
@@ -151,13 +143,7 @@ TEST(EngineTest, PlayMultipleNotes) {
   };
 
   BarelyEngine engine(1, kSampleRate);
-  const auto instrument = engine.AddInstrument();
-  engine.GetInstrument(instrument).controls = barely::BuildControlArray({});
-  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    engine.ScheduleMessage(barely::InstrumentControlMessage{
-        instrument.index, static_cast<barely::InstrumentControlType>(i),
-        engine.GetInstrument(instrument).controls[i].value});
-  }
+  const auto instrument = engine.instrument_controller().Acquire(nullptr, 0);
   engine.ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
 
   std::array<float, kChannelCount * kSampleRate> samples;
@@ -171,9 +157,9 @@ TEST(EngineTest, PlayMultipleNotes) {
 
   // Start a new note per each i in the samples.
   for (int i = 0; i < kSampleRate; ++i) {
-    engine.SetInstrumentNoteOn(instrument.index, static_cast<float>(i), {});
+    engine.instrument_controller().SetNoteOn(instrument.index, static_cast<float>(i), nullptr, 0);
     engine.Update(i + 1);
-    engine.SetInstrumentNoteOff(instrument.index, static_cast<float>(i));
+    engine.instrument_controller().SetNoteOff(instrument.index, static_cast<float>(i));
   }
 
   samples.fill(0.0f);

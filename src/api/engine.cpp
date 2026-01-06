@@ -26,6 +26,7 @@ using ::barely::EngineControlMessage;
 using ::barely::EngineControlType;
 using ::barely::InstrumentControlMessage;
 using ::barely::InstrumentControlType;
+using ::barely::InstrumentCreateMessage;
 using ::barely::kStereoChannelCount;
 using ::barely::MessageVisitor;
 using ::barely::NoteControlMessage;
@@ -56,9 +57,9 @@ EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
 }
 
 void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& voice_pool,
-                    float pitch, NoteControlType type, float value) noexcept {
+                    float pitch, BarelyNoteControlType type, float value) noexcept {
   switch (type) {
-    case NoteControlType::kGain: {
+    case BarelyNoteControlType_kGain: {
       uint32_t voice_index = params.first_voice_index;
       while (voice_index != 0) {
         auto& voice = voice_pool.Get(voice_index);
@@ -69,7 +70,7 @@ void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& v
         voice_index = voice.next_voice_index;
       }
     } break;
-    case NoteControlType::kPitchShift: {
+    case BarelyNoteControlType_kPitchShift: {
       uint32_t voice_index = params.first_voice_index;
       while (voice_index != 0) {
         auto& voice = voice_pool.Get(voice_index);
@@ -95,7 +96,8 @@ BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
       engine_processor_(sample_rate),
       output_samples_(kStereoChannelCount * max_frame_count),
       sample_rate_(sample_rate),
-      sample_interval_(1.0f / static_cast<float>(sample_rate)) {
+      sample_interval_(1.0f / static_cast<float>(sample_rate)),
+      instrument_controller_(instrument_pool_, message_queue_, update_frame_) {
   assert(sample_rate >= 0);
   assert(max_frame_count > 0);
 }
@@ -133,9 +135,12 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
               engine_processor_.SetControl(engine_control_message.type,
                                            engine_control_message.value);
             },
+            [this](InstrumentCreateMessage& instrument_create_message) noexcept {
+              params_array_[instrument_create_message.instrument_index] = {};
+            },
             [this](InstrumentControlMessage& instrument_control_message) noexcept {
               auto& params = params_array_[instrument_control_message.instrument_index];
-              if (instrument_control_message.type == InstrumentControlType::kVoiceCount) {
+              if (instrument_control_message.type == BarelyInstrumentControlType_kVoiceCount) {
                 const uint32_t new_voice_count =
                     static_cast<uint32_t>(instrument_control_message.value);
                 uint32_t active_voice_count = 0;
@@ -228,7 +233,7 @@ void BarelyEngine::ScheduleMessage(barely::Message message) noexcept {
 
 void BarelyEngine::SetControl(BarelyEngineControlType type, float value) noexcept {
   if (auto& control = controls_[type]; control.SetValue(value)) {
-    ScheduleMessage(EngineControlMessage{static_cast<EngineControlType>(type), control.value});
+    ScheduleMessage(EngineControlMessage{type, control.value});
   }
 }
 
@@ -284,56 +289,12 @@ void BarelyEngine::Update(double timestamp) noexcept {
           performer_pool_.GetActive(i).ProcessAllTasksAtPosition(max_priority);
         }
         if (max_priority == std::numeric_limits<int>::max()) {
-          for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
-            ProcessArp(instrument_pool_.GetActiveIndex(i));
-          }
+          instrument_controller_.ProcessArp(main_rng_);
         }
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
       update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);
     }
-  }
-}
-
-void BarelyEngine::ProcessArp(uint32_t instrument_index) noexcept {
-  auto& instrument = instrument_pool_.Get(instrument_index);
-  if (!instrument.IsArpEnabled() || instrument.pitches.empty()) {
-    return;
-  }
-  if (!instrument.arp.is_active && instrument.arp.phase == 0.0) {
-    const int size = static_cast<int>(instrument.pitches.size());
-    switch (static_cast<BarelyArpMode>(
-        instrument.controls[BarelyInstrumentControlType_kArpMode].value)) {
-      case BarelyArpMode_kUp:
-        instrument.arp.pitch_index = (instrument.arp.pitch_index + 1) % size;
-        break;
-      case BarelyArpMode_kDown:
-        instrument.arp.pitch_index = (instrument.arp.pitch_index == -1)
-                                         ? size - 1
-                                         : (instrument.arp.pitch_index + size - 1) % size;
-        break;
-      case BarelyArpMode_kRandom:
-        instrument.arp.pitch_index = main_rng_.Generate(0, size);
-        break;
-      default:
-        assert(!"Invalid arpeggiator mode");
-        return;
-    }
-    assert(instrument.arp.pitch_index >= 0 && instrument.arp.pitch_index < size);
-    instrument.arp.pitch = instrument.pitches[instrument.arp.pitch_index];
-
-    instrument.arp.is_active = true;
-    instrument.note_event_callback(BarelyNoteEventType_kBegin, instrument.arp.pitch);
-    ScheduleMessage(barely::NoteOnMessage{
-        instrument_index, instrument.arp.pitch,
-        barely::BuildNoteControls(instrument.note_controls.at(instrument.arp.pitch))});
-  } else if (instrument.arp.is_active &&
-             instrument.arp.phase ==
-                 static_cast<double>(
-                     instrument.controls[BarelyInstrumentControlType_kArpGateRatio].value)) {
-    instrument.arp.is_active = false;
-    instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp.pitch);
-    ScheduleMessage(barely::NoteOffMessage{instrument_index, instrument.arp.pitch});
   }
 }

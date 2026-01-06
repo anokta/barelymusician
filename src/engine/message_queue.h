@@ -18,13 +18,29 @@ class MessageQueue {
   /// @param message_frame Message frame.
   /// @param message Message.
   /// @return True if successful, false otherwise.
-  bool Add(int64_t message_frame, Message message) noexcept;
+  bool Add(int64_t message_frame, Message message) noexcept {
+    const int index = write_index_;
+    const int next_index = (index + 1) % kMaxMessageCount;
+    if (next_index == read_index_) {
+      return false;
+    }
+    messages_[index] = {message_frame, std::move(message)};
+    write_index_ = next_index;
+    return true;
+  }
 
   /// Returns the next message before an end frame.
   ///
   /// @param end_frame End frame.
   /// @return Pointer to message if successful, `nullptr` otherwise.
-  std::pair<int64_t, Message>* GetNext(int64_t end_frame) noexcept;
+  std::pair<int64_t, Message>* GetNext(int64_t end_frame) noexcept {
+    const int index = read_index_;
+    if (index == write_index_ || messages_[index].first >= end_frame) {
+      return nullptr;
+    }
+    read_index_ = (index + 1) % kMaxMessageCount;
+    return &messages_[index];
+  }
 
  private:
   // Maximum number of messages.

@@ -12,8 +12,8 @@
 #include <unordered_set>
 #include <utility>
 
-#include "common/callback.h"
-#include "common/constants.h"
+#include "core/callback.h"
+#include "core/constants.h"
 #include "engine/task_state.h"
 
 /// Implementation of a performer.

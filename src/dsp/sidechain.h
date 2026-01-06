@@ -4,7 +4,7 @@
 #include <array>
 #include <cmath>
 
-#include "common/constants.h"
+#include "core/constants.h"
 #include "dsp/decibels.h"
 
 namespace barely {

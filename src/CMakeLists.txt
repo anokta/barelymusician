@@ -60,6 +60,6 @@ if(ENABLE_TESTS)
 endif()
 
 add_subdirectory(api)
-add_subdirectory(common)
+add_subdirectory(core)
 add_subdirectory(dsp)
 add_subdirectory(engine)

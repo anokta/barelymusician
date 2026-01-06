@@ -4,7 +4,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "common/constants.h"
+#include "core/constants.h"
 #include "dsp/biquad_filter.h"
 #include "engine/instrument_params.h"
 

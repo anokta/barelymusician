@@ -5,7 +5,7 @@
 #include <array>
 #include <cmath>
 
-#include "common/constants.h"
+#include "core/constants.h"
 #include "dsp/control.h"
 #include "dsp/decibels.h"
 

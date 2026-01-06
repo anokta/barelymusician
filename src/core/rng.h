@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMMON_RNG_H_
-#define BARELYMUSICIAN_COMMON_RNG_H_
+#ifndef BARELYMUSICIAN_CORE_RNG_H_
+#define BARELYMUSICIAN_CORE_RNG_H_
 
 #include <cassert>
 #include <random>
@@ -57,4 +57,4 @@ using MainRng = Rng<std::mt19937_64, double>;
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMMON_RNG_H_
+#endif  // BARELYMUSICIAN_CORE_RNG_H_

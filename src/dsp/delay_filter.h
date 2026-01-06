@@ -6,7 +6,7 @@
 #include <cmath>
 #include <vector>
 
-#include "common/constants.h"
+#include "core/constants.h"
 #include "dsp/control.h"
 #include "dsp/one_pole_filter.h"
 

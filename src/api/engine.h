@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "api/performer.h"
-#include "common/rng.h"
+#include "core/rng.h"
 #include "dsp/control.h"
 #include "dsp/engine_processor.h"
 #include "dsp/voice_pool.h"

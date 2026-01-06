@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMMON_CALLBACK_H_
-#define BARELYMUSICIAN_COMMON_CALLBACK_H_
+#ifndef BARELYMUSICIAN_CORE_CALLBACK_H_
+#define BARELYMUSICIAN_CORE_CALLBACK_H_
 
 namespace barely {
 
@@ -30,4 +30,4 @@ struct Callback {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMMON_CALLBACK_H_
+#endif  // BARELYMUSICIAN_CORE_CALLBACK_H_

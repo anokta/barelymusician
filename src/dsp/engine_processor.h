@@ -8,7 +8,7 @@
 #include <cassert>
 #include <unordered_map>
 
-#include "common/constants.h"
+#include "core/constants.h"
 #include "dsp/compressor.h"
 #include "dsp/control.h"
 #include "dsp/decibels.h"

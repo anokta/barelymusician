@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-#include "common/callback.h"
+#include "core/callback.h"
 
 namespace barely {
 

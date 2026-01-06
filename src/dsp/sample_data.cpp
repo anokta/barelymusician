@@ -5,7 +5,7 @@
 #include <span>
 #include <vector>
 
-#include "common/rng.h"
+#include "core/rng.h"
 
 namespace barely {
 

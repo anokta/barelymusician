@@ -10,8 +10,8 @@
 #include <variant>
 
 #include "api/performer.h"
-#include "common/constants.h"
-#include "common/time.h"
+#include "core/constants.h"
+#include "core/time.h"
 #include "dsp/control.h"
 #include "dsp/voice_pool.h"
 #include "engine/instrument_params.h"

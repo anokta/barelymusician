@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMMON_CONSTANTS_H_
-#define BARELYMUSICIAN_COMMON_CONSTANTS_H_
+#ifndef BARELYMUSICIAN_CORE_CONSTANTS_H_
+#define BARELYMUSICIAN_CORE_CONSTANTS_H_
 
 #include <cstdint>
 
@@ -13,4 +13,4 @@ inline constexpr int kStereoChannelCount = 2;
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMMON_CONSTANTS_H_
+#endif  // BARELYMUSICIAN_CORE_CONSTANTS_H_

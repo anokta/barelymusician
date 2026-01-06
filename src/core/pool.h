@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMMON_POOL_H_
-#define BARELYMUSICIAN_COMMON_POOL_H_
+#ifndef BARELYMUSICIAN_CORE_POOL_H_
+#define BARELYMUSICIAN_CORE_POOL_H_
 
 #include <array>
 #include <cassert>
@@ -121,4 +121,4 @@ class Pool {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMMON_POOL_H_
+#endif  // BARELYMUSICIAN_CORE_POOL_H_

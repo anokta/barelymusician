@@ -5,8 +5,8 @@
 #include <cstdint>
 #include <utility>
 
-#include "common/constants.h"
-#include "common/pool.h"
+#include "core/constants.h"
+#include "core/pool.h"
 #include "engine/instrument_params.h"
 #include "engine/instrument_state.h"
 #include "engine/voice_processor.h"

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMMON_TIME_H_
-#define BARELYMUSICIAN_COMMON_TIME_H_
+#ifndef BARELYMUSICIAN_CORE_TIME_H_
+#define BARELYMUSICIAN_CORE_TIME_H_
 
 #include <cassert>
 #include <cmath>
@@ -70,4 +70,4 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMMON_TIME_H_
+#endif  // BARELYMUSICIAN_CORE_TIME_H_

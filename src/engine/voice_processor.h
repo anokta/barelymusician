@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <cmath>
 
-#include "common/constants.h"
-#include "common/rng.h"
+#include "core/constants.h"
+#include "core/rng.h"
 #include "dsp/distortion.h"
 #include "dsp/sample_generators.h"
 #include "engine/instrument_params.h"

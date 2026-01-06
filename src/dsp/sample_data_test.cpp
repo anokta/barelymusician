@@ -4,7 +4,7 @@
 
 #include <array>
 
-#include "common/rng.h"
+#include "core/rng.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 

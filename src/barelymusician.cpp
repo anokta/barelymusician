@@ -6,7 +6,7 @@
 
 #include "api/engine.h"
 #include "api/performer.h"
-#include "common/time.h"
+#include "core/time.h"
 
 bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count, BarelyEngine** out_engine) {
   if (sample_rate <= 0) return false;

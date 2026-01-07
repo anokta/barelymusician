@@ -15,7 +15,6 @@
 namespace barely {
 
 using InstrumentParamsArray = std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
-using InstrumentPool = Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT>;
 
 using VoicePool = Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT>;
 

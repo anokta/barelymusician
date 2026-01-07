@@ -5,8 +5,9 @@
 
 #include <cstdint>
 
+#include "core/pool.h"
 #include "core/rng.h"
-#include "dsp/voice_pool.h"
+#include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "engine/message_queue.h"
 
@@ -14,8 +15,8 @@ namespace barely {
 
 class InstrumentController {
  public:
-  InstrumentController(InstrumentPool& instrument_pool, MessageQueue& message_queue,
-                       const int64_t& update_frame) noexcept;
+  InstrumentController(MessageQueue& message_queue, const int64_t& update_frame) noexcept
+      : message_queue_(message_queue), update_frame_(update_frame) {}
 
   BarelyRef Acquire(const BarelyInstrumentControlOverride* control_overrides,
                     int32_t control_override_count) noexcept;
@@ -39,12 +40,21 @@ class InstrumentController {
                               BarelyNoteControlType type) const noexcept;
   bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
 
-  void ProcessArp(MainRng& main_rng) noexcept;  // TODO(#126): clean this up?
+  bool IsActive(BarelyRef instrument) const noexcept {
+    return instrument_pool_.IsActive(instrument.index, instrument.generation);
+  }
+
+  // TODO(#126): clean this up?
+  void ProcessArp(MainRng& main_rng) noexcept;
+  void Update(double duration) noexcept;
+  double GetNextDuration() const noexcept;
 
  private:
-  InstrumentPool& instrument_pool_;
   MessageQueue& message_queue_;
   const int64_t& update_frame_;
+
+  // Instrument pool.
+  Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_pool_ = {};
 };
 
 }  // namespace barely

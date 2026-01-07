@@ -61,7 +61,7 @@ struct BarelyEngine {
   }
 
   [[nodiscard]] bool IsValidInstrument(BarelyRef instrument) const noexcept {
-    return instrument_pool_.IsActive(instrument.index, instrument.generation);
+    return instrument_controller_.IsActive(instrument);
   }
   [[nodiscard]] bool IsValidPerformer(BarelyRef performer) const noexcept {
     return performer_pool_.IsActive(performer.index, performer.generation);
@@ -163,7 +163,6 @@ struct BarelyEngine {
   barely::MessageQueue message_queue_;
 
   // Instrument pool.
-  barely::InstrumentPool instrument_pool_;
   barely::InstrumentParamsArray params_array_;
 
   // Voice pool.

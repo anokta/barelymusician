@@ -9,7 +9,7 @@
 #include <cstdint>
 
 #include "dsp/control.h"
-#include "dsp/voice_pool.h"
+#include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "engine/message_queue.h"
 
@@ -82,13 +82,6 @@ namespace {
 }
 
 }  // namespace
-
-InstrumentController::InstrumentController(InstrumentPool& instrument_pool,
-                                           MessageQueue& message_queue,
-                                           const int64_t& update_frame) noexcept
-    : instrument_pool_(instrument_pool),
-      message_queue_(message_queue),
-      update_frame_(update_frame) {}
 
 BarelyRef InstrumentController::Acquire(const BarelyInstrumentControlOverride* control_overrides,
                                         int32_t control_override_count) noexcept {
@@ -294,6 +287,30 @@ void InstrumentController::ProcessArp(MainRng& main_rng) noexcept {
                          NoteOffMessage{instrument_pool_.GetActiveIndex(i), instrument.arp.pitch});
     }
   }
+}
+
+void InstrumentController::Update(double duration) noexcept {
+  for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
+    instrument_pool_.GetActive(i).Update(duration);
+  }
+}
+
+double InstrumentController::GetNextDuration() const noexcept {
+  double next_duration = std::numeric_limits<double>::max();
+  for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
+    auto& instrument = instrument_pool_.GetActive(i);
+    if (!instrument.IsArpEnabled() || instrument.pitches.empty()) {
+      continue;
+    }
+    if (const auto maybe_next_duration = instrument.arp.GetNextDuration(
+            static_cast<double>(instrument.controls[BarelyInstrumentControlType_kArpRate].value),
+            static_cast<double>(
+                instrument.controls[BarelyInstrumentControlType_kArpGateRatio].value));
+        maybe_next_duration.has_value() && *maybe_next_duration < next_duration) {
+      next_duration = *maybe_next_duration;
+    }
+  }
+  return next_duration;
 }
 
 }  // namespace barely

@@ -97,7 +97,7 @@ BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
       output_samples_(kStereoChannelCount * max_frame_count),
       sample_rate_(sample_rate),
       sample_interval_(1.0f / static_cast<float>(sample_rate)),
-      instrument_controller_(instrument_pool_, message_queue_, update_frame_) {
+      instrument_controller_(message_queue_, update_frame_) {
   assert(sample_rate >= 0);
   assert(max_frame_count > 0);
 }
@@ -253,20 +253,10 @@ void BarelyEngine::Update(double timestamp) noexcept {
           next_key = *maybe_next_key;
         }
       }
-      for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
-        auto& instrument = instrument_pool_.GetActive(i);
-        if (!instrument.IsArpEnabled() || instrument.pitches.empty()) {
-          continue;
-        }
-        if (const auto maybe_next_duration = instrument.arp.GetNextDuration(
-                static_cast<double>(
-                    instrument.controls[BarelyInstrumentControlType_kArpRate].value),
-                static_cast<double>(
-                    instrument.controls[BarelyInstrumentControlType_kArpGateRatio].value));
-            maybe_next_duration.has_value() && *maybe_next_duration < next_key.first) {
-          has_tasks_to_process = true;
-          next_key = {*maybe_next_duration, std::numeric_limits<int>::max()};
-        }
+      if (const double next_duration = instrument_controller_.GetNextDuration();
+          next_duration < next_key.first) {
+        has_tasks_to_process = true;
+        next_key = {next_duration, std::numeric_limits<int>::max()};
       }
 
       const auto& [update_duration, max_priority] = next_key;
@@ -276,9 +266,7 @@ void BarelyEngine::Update(double timestamp) noexcept {
         for (uint32_t i = 0; i < performer_pool_.GetActiveCount(); ++i) {
           performer_pool_.GetActive(i).Update(update_duration);
         }
-        for (uint32_t i = 0; i < instrument_pool_.GetActiveCount(); ++i) {
-          instrument_pool_.GetActive(i).Update(update_duration);
-        }
+        instrument_controller_.Update(update_duration);
 
         timestamp_ += barely::BeatsToSeconds(tempo_, update_duration);
         update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);

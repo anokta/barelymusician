@@ -25,7 +25,7 @@ bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
 
   *out_instrument =
       engine->instrument_controller().Acquire(control_overrides, control_override_count);
-  return true;
+  return out_instrument->index > 0;
 }
 
 bool BarelyEngine_CreatePerformer(BarelyEngine* engine, BarelyRef* out_performer) {

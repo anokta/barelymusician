@@ -153,8 +153,8 @@ bool BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type,
 bool BarelyEngine_SetSeed(BarelyEngine* engine, int32_t seed) {
   if (!engine) return false;
 
-  // TODO(#146): This should ideally set the seed of `audio_rng_` as well.
   engine->main_rng().SetSeed(seed);
+  engine->ScheduleMessage(barely::EngineSeedMessage{seed});
   return true;
 }
 

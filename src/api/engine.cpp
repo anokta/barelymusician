@@ -60,7 +60,7 @@ EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
     : controls_(BuildEngineControlArray(static_cast<float>(sample_rate))),
-      processor_(audio_rng_, sample_rate),
+      processor_(sample_rate),
       output_samples_(kStereoChannelCount * max_frame_count),
       sample_rate_(sample_rate),
       instrument_controller_(message_queue_, update_frame_) {

@@ -47,8 +47,8 @@ class EngineProcessor {
   /// Constructs a new `EngineProcessor`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  EngineProcessor(AudioRng& rng, int sample_rate) noexcept
-      : instrument_processor_(rng, 1.0f / static_cast<float>(sample_rate)),
+  explicit EngineProcessor(int sample_rate) noexcept
+      : instrument_processor_(rng_, 1.0f / static_cast<float>(sample_rate)),
         compressor_(sample_rate),
         delay_filter_(sample_rate * kMaxDelayFrameSeconds),
         sidechain_(sample_rate),
@@ -84,6 +84,9 @@ class EngineProcessor {
     std::visit(
         MessageVisitor{[this](EngineControlMessage& engine_control_message) noexcept {
                          SetControl(engine_control_message.type, engine_control_message.value);
+                       },
+                       [this](EngineSeedMessage& engine_seed_message) noexcept {
+                         rng_.SetSeed(engine_seed_message.seed);
                        },
                        [this](InstrumentCreateMessage& instrument_create_message) noexcept {
                          instrument_processor_.Init(instrument_create_message.instrument_index);
@@ -181,6 +184,9 @@ class EngineProcessor {
     ApproachValue(current_params_.sidechain_threshold_db, target_params_.sidechain_threshold_db);
     ApproachValue(current_params_.sidechain_ratio, target_params_.sidechain_ratio);
   }
+
+  // Random number generator for the audio thread.
+  AudioRng rng_;
 
   // Instrument processor.
   InstrumentProcessor instrument_processor_;

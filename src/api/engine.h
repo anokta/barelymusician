@@ -152,9 +152,6 @@ struct BarelyEngine {
   // Engine processor.
   barely::EngineProcessor processor_;
 
-  // Random number generator for the audio thread.
-  barely::AudioRng audio_rng_;
-
   // Random number generator for the main thread.
   barely::MainRng main_rng_;
 

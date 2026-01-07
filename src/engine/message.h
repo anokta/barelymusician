@@ -20,6 +20,12 @@ struct EngineControlMessage {
   float value;
 };
 
+/// Engine seed message.
+struct EngineSeedMessage {
+  /// Seed.
+  int32_t seed;
+};
+
 /// Instrument create message.
 struct InstrumentCreateMessage {
   /// Instrument index;
@@ -84,9 +90,9 @@ struct SampleDataMessage {
 };
 
 /// Message alias.
-using Message =
-    std::variant<EngineControlMessage, InstrumentCreateMessage, InstrumentControlMessage,
-                 NoteControlMessage, NoteOffMessage, NoteOnMessage, SampleDataMessage>;
+using Message = std::variant<EngineControlMessage, EngineSeedMessage, InstrumentCreateMessage,
+                             InstrumentControlMessage, NoteControlMessage, NoteOffMessage,
+                             NoteOnMessage, SampleDataMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

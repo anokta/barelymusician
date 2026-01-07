@@ -1,9 +1,11 @@
 target_sources(
   barelymusician PRIVATE
   arp_state.h
+  engine_processor.h
   instrument_controller.cpp
   instrument_controller.h
   instrument_params.h
+  instrument_processor.cpp
   instrument_processor.h
   instrument_state.h
   message.h
@@ -11,7 +13,6 @@ target_sources(
   note_params.h
   task_state.h
   voice_params.h
-  voice_processor.h
   voice_state.h
 )
 

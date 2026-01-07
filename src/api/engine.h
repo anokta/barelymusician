@@ -13,8 +13,7 @@
 #include "api/performer.h"
 #include "core/rng.h"
 #include "dsp/control.h"
-#include "dsp/engine_processor.h"
-#include "dsp/voice_pool.h"
+#include "engine/engine_processor.h"
 #include "engine/instrument_controller.h"
 #include "engine/instrument_params.h"
 #include "engine/message.h"
@@ -151,7 +150,7 @@ struct BarelyEngine {
   barely::EngineControlArray controls_;
 
   // Engine processor.
-  barely::EngineProcessor engine_processor_;
+  barely::EngineProcessor processor_;
 
   // Random number generator for the audio thread.
   barely::AudioRng audio_rng_;
@@ -162,12 +161,6 @@ struct BarelyEngine {
   // Message queue.
   barely::MessageQueue message_queue_;
 
-  // Instrument pool.
-  barely::InstrumentParamsArray params_array_;
-
-  // Voice pool.
-  barely::VoicePool voice_pool_;
-
   // Performers.
   using PerformerPool = barely::Pool<BarelyPerformer, BARELYMUSICIAN_MAX_PERFORMER_COUNT>;
   PerformerPool performer_pool_;
@@ -175,6 +168,8 @@ struct BarelyEngine {
   // Tasks.
   using TaskPool = barely::Pool<TaskState, BARELYMUSICIAN_MAX_TASK_COUNT>;
   TaskPool task_pool_;
+
+  barely::InstrumentController instrument_controller_;
 
   // Output samples.
   std::vector<float> output_samples_;
@@ -190,11 +185,6 @@ struct BarelyEngine {
 
   // Sampling rate in hertz.
   int sample_rate_ = 0;
-
-  // Sampling interval in seconds.
-  float sample_interval_ = 0.0f;
-
-  barely::InstrumentController instrument_controller_;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

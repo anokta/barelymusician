@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_DSP_ENGINE_PROCESSOR_H_
-#define BARELYMUSICIAN_DSP_ENGINE_PROCESSOR_H_
+#ifndef BARELYMUSICIAN_ENGINE_ENGINE_PROCESSOR_H_
+#define BARELYMUSICIAN_ENGINE_ENGINE_PROCESSOR_H_
 
 #include <barelymusician.h>
 
@@ -15,7 +15,8 @@
 #include "dsp/delay_filter.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/sidechain.h"
-#include "dsp/voice_pool.h"
+#include "engine/instrument_processor.h"
+#include "engine/message.h"
 
 namespace barely {
 
@@ -46,8 +47,9 @@ class EngineProcessor {
   /// Constructs a new `EngineProcessor`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  explicit EngineProcessor(int sample_rate) noexcept
-      : compressor_(sample_rate),
+  EngineProcessor(AudioRng& rng, int sample_rate) noexcept
+      : instrument_processor_(rng, 1.0f / static_cast<float>(sample_rate)),
+        compressor_(sample_rate),
         delay_filter_(sample_rate * kMaxDelayFrameSeconds),
         sidechain_(sample_rate),
         sample_rate_(sample_rate) {
@@ -57,23 +59,18 @@ class EngineProcessor {
   /// Processes the next output samples.
   ///
   /// @param rng Random number generator.
-  /// @param params_array Array of instrument parameters.
-  /// @param voice_pool Voice pool.
   /// @param output_samples Array of interleaved output samples.
   /// @param output_frame_count Number of output frames.
-  void Process(AudioRng& rng, InstrumentParamsArray& params_array, VoicePool& voice_pool,
-               float* output_samples, int output_frame_count) noexcept {
+  void Process(float* output_samples, int output_frame_count) noexcept {
     for (int frame = 0; frame < output_frame_count; ++frame) {
       float delay_frame[kStereoChannelCount] = {};
       float sidechain_frame[kStereoChannelCount] = {};
       float* output_frame = &output_samples[kStereoChannelCount * frame];
 
-      ProcessAllVoices<true>(rng, params_array, voice_pool, delay_frame, sidechain_frame,
-                             output_frame);
+      instrument_processor_.ProcessAllVoices<true>(delay_frame, sidechain_frame, output_frame);
       sidechain_.Process(sidechain_frame, current_params_.sidechain_mix,
                          current_params_.sidechain_threshold_db, current_params_.sidechain_ratio);
-      ProcessAllVoices<false>(rng, params_array, voice_pool, delay_frame, sidechain_frame,
-                              output_frame);
+      instrument_processor_.ProcessAllVoices<false>(delay_frame, sidechain_frame, output_frame);
 
       delay_filter_.Process(delay_frame, output_frame, current_params_.delay_params);
 
@@ -81,6 +78,40 @@ class EngineProcessor {
 
       Approach();
     }
+  }
+
+  void ProcessMessage(Message& message) noexcept {
+    std::visit(
+        MessageVisitor{[this](EngineControlMessage& engine_control_message) noexcept {
+                         SetControl(engine_control_message.type, engine_control_message.value);
+                       },
+                       [this](InstrumentCreateMessage& instrument_create_message) noexcept {
+                         instrument_processor_.Init(instrument_create_message.instrument_index);
+                       },
+                       [this](InstrumentControlMessage& instrument_control_message) noexcept {
+                         instrument_processor_.SetControl(
+                             instrument_control_message.instrument_index,
+                             instrument_control_message.type, instrument_control_message.value);
+                       },
+                       [this](NoteControlMessage& note_control_message) noexcept {
+                         instrument_processor_.SetNoteControl(
+                             note_control_message.instrument_index, note_control_message.pitch,
+                             note_control_message.type, note_control_message.value);
+                       },
+                       [this](NoteOffMessage& note_off_message) noexcept {
+                         instrument_processor_.SetNoteOff(note_off_message.instrument_index,
+                                                          note_off_message.pitch);
+                       },
+                       [this](NoteOnMessage& note_on_message) noexcept {
+                         instrument_processor_.SetNoteOn(note_on_message.instrument_index,
+                                                         note_on_message.pitch,
+                                                         note_on_message.controls);
+                       },
+                       [this](SampleDataMessage& sample_data_message) noexcept {
+                         instrument_processor_.SetSampleData(sample_data_message.instrument_index,
+                                                             sample_data_message.sample_data);
+                       }},
+        message);
   }
 
   /// Sets a control value.
@@ -151,6 +182,9 @@ class EngineProcessor {
     ApproachValue(current_params_.sidechain_ratio, target_params_.sidechain_ratio);
   }
 
+  // Instrument processor.
+  InstrumentProcessor instrument_processor_;
+
   // Compressor.
   Compressor compressor_;
 
@@ -172,4 +206,4 @@ class EngineProcessor {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_DSP_ENGINE_PROCESSOR_H_
+#endif  // BARELYMUSICIAN_ENGINE_ENGINE_PROCESSOR_H_

@@ -35,26 +35,27 @@ class InstrumentController {
                  const BarelyNoteControlOverride* note_control_overrides,
                  int32_t note_control_override_count) noexcept;
 
-  float GetControl(uint32_t instrument_index, BarelyInstrumentControlType type) const noexcept;
-  const float* GetNoteControl(uint32_t instrument_index, float pitch,
-                              BarelyNoteControlType type) const noexcept;
-  bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
+  [[nodiscard]] float GetControl(uint32_t instrument_index,
+                                 BarelyInstrumentControlType type) const noexcept;
+  [[nodiscard]] const float* GetNoteControl(uint32_t instrument_index, float pitch,
+                                            BarelyNoteControlType type) const noexcept;
+  [[nodiscard]] bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
 
-  bool IsActive(BarelyRef instrument) const noexcept {
+  [[nodiscard]] bool IsActive(BarelyRef instrument) const noexcept {
     return instrument_pool_.IsActive(instrument.index, instrument.generation);
   }
 
   // TODO(#126): clean this up?
   void ProcessArp(MainRng& main_rng) noexcept;
   void Update(double duration) noexcept;
-  double GetNextDuration() const noexcept;
+  [[nodiscard]] double GetNextDuration() const noexcept;
 
  private:
-  MessageQueue& message_queue_;
-  const int64_t& update_frame_;
-
   // Instrument pool.
   Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_pool_ = {};
+
+  MessageQueue& message_queue_;
+  const int64_t& update_frame_;
 };
 
 }  // namespace barely

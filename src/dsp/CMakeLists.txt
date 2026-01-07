@@ -7,14 +7,12 @@ target_sources(
   decibels.h
   delay_filter.h
   distortion.h
-  engine_processor.h
   envelope.h
   one_pole_filter.h
   sample_data.cpp
   sample_data.h
   sample_generators.h
   sidechain.h
-  voice_pool.h
 )
 
 if(ENABLE_TESTS)

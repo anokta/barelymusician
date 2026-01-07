@@ -13,7 +13,6 @@
 #include "core/constants.h"
 #include "core/time.h"
 #include "dsp/control.h"
-#include "dsp/voice_pool.h"
 #include "engine/instrument_params.h"
 #include "engine/instrument_processor.h"
 #include "engine/message.h"
@@ -56,47 +55,14 @@ EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
   };
 }
 
-void SetNoteControl(const barely::InstrumentParams& params, barely::VoicePool& voice_pool,
-                    float pitch, BarelyNoteControlType type, float value) noexcept {
-  switch (type) {
-    case BarelyNoteControlType_kGain: {
-      uint32_t voice_index = params.first_voice_index;
-      while (voice_index != 0) {
-        auto& voice = voice_pool.Get(voice_index);
-        if (voice.pitch == pitch && voice.IsOn()) {
-          voice.note_params.gain = value;
-          break;
-        }
-        voice_index = voice.next_voice_index;
-      }
-    } break;
-    case BarelyNoteControlType_kPitchShift: {
-      uint32_t voice_index = params.first_voice_index;
-      while (voice_index != 0) {
-        auto& voice = voice_pool.Get(voice_index);
-        if (voice.pitch == pitch && voice.IsOn()) {
-          voice.pitch_shift = value;
-          voice.UpdatePitchIncrements();
-          break;
-        }
-        voice_index = voice.next_voice_index;
-      }
-    } break;
-    default:
-      assert(!"Invalid note control type");
-      break;
-  }
-}
-
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
     : controls_(BuildEngineControlArray(static_cast<float>(sample_rate))),
-      engine_processor_(sample_rate),
+      processor_(audio_rng_, sample_rate),
       output_samples_(kStereoChannelCount * max_frame_count),
       sample_rate_(sample_rate),
-      sample_interval_(1.0f / static_cast<float>(sample_rate)),
       instrument_controller_(message_queue_, update_frame_) {
   assert(sample_rate >= 0);
   assert(max_frame_count > 0);
@@ -124,91 +90,17 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
        message = message_queue_.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      engine_processor_.Process(audio_rng_, params_array_, voice_pool_,
-                                &output_samples_[kStereoChannelCount * current_frame],
-                                message_frame - current_frame);
+      processor_.Process(&output_samples_[kStereoChannelCount * current_frame],
+                         message_frame - current_frame);
       current_frame = message_frame;
     }
-    std::visit(
-        MessageVisitor{
-            [this](EngineControlMessage& engine_control_message) noexcept {
-              engine_processor_.SetControl(engine_control_message.type,
-                                           engine_control_message.value);
-            },
-            [this](InstrumentCreateMessage& instrument_create_message) noexcept {
-              params_array_[instrument_create_message.instrument_index] = {};
-            },
-            [this](InstrumentControlMessage& instrument_control_message) noexcept {
-              auto& params = params_array_[instrument_control_message.instrument_index];
-              if (instrument_control_message.type == BarelyInstrumentControlType_kVoiceCount) {
-                const uint32_t new_voice_count =
-                    static_cast<uint32_t>(instrument_control_message.value);
-                uint32_t active_voice_count = 0;
-                uint32_t active_voice_index = params.first_voice_index;
-                while (active_voice_index != 0 && active_voice_count <= new_voice_count) {
-                  active_voice_index = voice_pool_.Get(active_voice_index).next_voice_index;
-                  ++active_voice_count;
-                }
-                while (active_voice_index != 0) {
-                  auto& voice = voice_pool_.Get(active_voice_index);
-                  if (voice.previous_voice_index != 0) {
-                    voice_pool_.Get(voice.previous_voice_index).next_voice_index = 0;
-                    voice.previous_voice_index = 0;
-                  }
-                  voice_pool_.Release(active_voice_index);
-                  active_voice_index = voice.next_voice_index;
-                  voice.next_voice_index = 0;
-                }
-              }
-              SetInstrumentControl(params, sample_interval_, instrument_control_message.type,
-                                   instrument_control_message.value);
-            },
-            [this](NoteControlMessage& note_control_message) noexcept {
-              SetNoteControl(params_array_[note_control_message.instrument_index], voice_pool_,
-                             note_control_message.pitch, note_control_message.type,
-                             note_control_message.value);
-            },
-            [this](NoteOffMessage& note_off_message) noexcept {
-              auto& params = params_array_[note_off_message.instrument_index];
-              uint32_t active_voice_index = params.first_voice_index;
-              while (active_voice_index != 0) {
-                auto& voice = voice_pool_.Get(active_voice_index);
-                if (voice.pitch == note_off_message.pitch && voice.IsOn() &&
-                    (params.sample_data.empty() || params.slice_mode != barely::SliceMode::kOnce)) {
-                  voice.Stop();
-                  break;
-                }
-                active_voice_index = voice.next_voice_index;
-              }
-            },
-            [this](NoteOnMessage& note_on_message) noexcept {
-              auto& params = params_array_[note_on_message.instrument_index];
-              if (auto* voice = AcquireVoice(voice_pool_, params, note_on_message.pitch);
-                  voice != nullptr) {
-                voice->Start(params, note_on_message.instrument_index,
-                             params.sample_data.Select(note_on_message.pitch, audio_rng_),
-                             note_on_message.pitch, note_on_message.controls);
-              }
-            },
-            [this](SampleDataMessage& sample_data_message) noexcept {
-              auto& params = params_array_[sample_data_message.instrument_index];
-              params.sample_data.Swap(sample_data_message.sample_data);
-              uint32_t active_voice_index = params.first_voice_index;
-              while (active_voice_index != 0) {
-                auto& voice = voice_pool_.Get(active_voice_index);
-                voice.slice = params.sample_data.Select(voice.pitch, audio_rng_);
-                voice.UpdatePitchIncrements();
-                active_voice_index = voice.next_voice_index;
-              }
-            }},
-        message->second);
+    processor_.ProcessMessage(message->second);
   }
 
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    engine_processor_.Process(audio_rng_, params_array_, voice_pool_,
-                              &output_samples_[kStereoChannelCount * current_frame],
-                              output_frame_count - current_frame);
+    processor_.Process(&output_samples_[kStereoChannelCount * current_frame],
+                       output_frame_count - current_frame);
   }
 
   // Fill the output samples.

@@ -1,5 +1,7 @@
 #include "engine/message_queue.h"
 
+#include <cstdint>
+
 #include "engine/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"

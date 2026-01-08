@@ -60,7 +60,6 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_test)
 endif()
 
-add_subdirectory(api)
 add_subdirectory(core)
 add_subdirectory(dsp)
 add_subdirectory(engine)

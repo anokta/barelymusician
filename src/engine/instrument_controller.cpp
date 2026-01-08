@@ -7,11 +7,13 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <limits>
+#include <utility>
 
+#include "core/rng.h"
 #include "dsp/control.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
-#include "engine/message_queue.h"
 
 namespace barely {
 

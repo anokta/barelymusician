@@ -21,7 +21,7 @@ namespace barely {
 struct PerformerState {
  public:
   /// Task key consists of a position and its priority.
-  using TaskKey = std::pair<double, int>;
+  using TaskKey = std::pair<double, int32_t>;
 
   // Set of task position-pointer pairs.
   std::set<std::pair<TaskKey, TaskState*>> active_tasks_;
@@ -63,7 +63,7 @@ struct PerformerState {
   /// Processes all tasks at the current position.
   ///
   /// @param max_priority Maximum task priority to process.
-  void ProcessAllTasksAtPosition(int max_priority) noexcept;
+  void ProcessAllTasksAtPosition(int32_t max_priority) noexcept;
 
   /// Removes a task.
   ///
@@ -107,7 +107,7 @@ struct PerformerState {
   ///
   /// @param task Pointer to task.
   /// @param new_priority Task priority.
-  void SetTaskPriority(TaskState* task, int new_priority) noexcept;
+  void SetTaskPriority(TaskState* task, int32_t new_priority) noexcept;
 
   /// Stops performer.
   void Start() noexcept;

@@ -4,7 +4,6 @@
 #include <barelymusician.h>
 
 #include <cstdint>
-#include <limits>
 #include <optional>
 
 #include "core/pool.h"
@@ -56,7 +55,7 @@ class PerformerController {
   }
 
   [[nodiscard]] PerformerState::TaskKey GetNextTaskKey(double duration) const noexcept {
-    PerformerState::TaskKey next_key = {duration, std::numeric_limits<int>::min()};
+    PerformerState::TaskKey next_key = {duration, INT32_MIN};
     for (uint32_t i = 0; i < engine_.performer_pool.GetActiveCount(); ++i) {
       if (const auto maybe_next_key = engine_.performer_pool.GetActive(i).GetNextTaskKey();
           maybe_next_key.has_value() && *maybe_next_key < next_key) {

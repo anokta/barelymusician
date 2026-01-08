@@ -23,6 +23,14 @@ struct InstrumentState {
   // Note event callback.
   Callback<BarelyNoteEventCallback> note_event_callback = {};
 
+  void Update(double duration) noexcept {
+    if (IsArpEnabled() && !pitches.empty()) {
+      arp.Update(duration,
+                 static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value),
+                 static_cast<double>(controls[BarelyInstrumentControlType_kArpGateRatio].value));
+    }
+  }
+
   /// Returns whether the arpeggiator is enabled.
   bool IsArpEnabled() const noexcept {
     return static_cast<BarelyArpMode>(controls[BarelyInstrumentControlType_kArpMode].value) !=
@@ -32,14 +40,6 @@ struct InstrumentState {
   /// Returns whether a note is on or not.
   bool IsNoteOn(float pitch) const noexcept {
     return arp.is_active ? (arp.pitch == pitch) : note_controls.contains(pitch);
-  }
-
-  void Update(double duration) noexcept {
-    if (IsArpEnabled() && !pitches.empty()) {
-      arp.Update(duration,
-                 static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value),
-                 static_cast<double>(controls[BarelyInstrumentControlType_kArpGateRatio].value));
-    }
   }
 };
 

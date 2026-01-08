@@ -232,7 +232,7 @@ uint32_t InstrumentProcessor::AcquireVoice(uint32_t instrument_index, float pitc
 
   // Acquire new voice.
   if (engine_.voice_pool.GetActiveCount() < engine_.voice_pool.Count() &&
-      active_voice_count < static_cast<uint32_t>(params.voice_count)) {
+      active_voice_count < params.voice_count) {
     const uint32_t new_voice_index = engine_.voice_pool.Acquire();
     VoiceState& new_voice = engine_.voice_pool.Get(new_voice_index);
     new_voice.previous_voice_index = current_voice_index;

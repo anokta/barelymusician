@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <limits>
+#include <cstdint>
 #include <optional>
 #include <set>
 #include <utility>
@@ -29,8 +29,7 @@ std::optional<PerformerState::TaskKey> PerformerState::GetNextTaskKey() const no
 
   // Check inactive tasks.
   if (!inactive_tasks_.empty()) {
-    const auto next_it =
-        inactive_tasks_.lower_bound({{position, std::numeric_limits<int>::min()}, nullptr});
+    const auto next_it = inactive_tasks_.lower_bound({{position, INT32_MIN}, nullptr});
     // If the performer position is inside an inactive task, we can return immediately.
     // TODO(#147): This may be optimized further using an interval tree.
     for (auto it = inactive_tasks_.begin(); it != next_it; ++it) {
@@ -41,8 +40,8 @@ std::optional<PerformerState::TaskKey> PerformerState::GetNextTaskKey() const no
     // Loop around if needed.
     if (is_looping &&
         (next_it == inactive_tasks_.end() || next_it->first.first >= GetLoopEndPosition())) {
-      if (const auto loop_it = inactive_tasks_.lower_bound(
-              {{loop_begin_position, std::numeric_limits<int>::min()}, nullptr});
+      if (const auto loop_it =
+              inactive_tasks_.lower_bound({{loop_begin_position, INT32_MIN}, nullptr});
           loop_it != inactive_tasks_.end() && loop_it->first.first < GetLoopEndPosition()) {
         next_key = {loop_it->first.first + loop_length, loop_it->first.second};
       }
@@ -69,7 +68,7 @@ std::optional<PerformerState::TaskKey> PerformerState::GetNextTaskKey() const no
   return std::nullopt;
 }
 
-void PerformerState::ProcessAllTasksAtPosition(int max_priority) noexcept {
+void PerformerState::ProcessAllTasksAtPosition(int32_t max_priority) noexcept {
   if (!is_playing) {
     return;
   }
@@ -180,9 +179,9 @@ void PerformerState::SetTaskPosition(TaskState* task, double new_position) noexc
   }
 }
 
-void PerformerState::SetTaskPriority(TaskState* task, int new_priority) noexcept {
+void PerformerState::SetTaskPriority(TaskState* task, int32_t new_priority) noexcept {
   if (task->priority == new_priority) return;
-  const int old_priority = task->priority;
+  const int32_t old_priority = task->priority;
   task->priority = new_priority;
   const TaskKey old_task_key = {task->position, old_priority};
   if (task->is_active) {
@@ -217,8 +216,7 @@ PerformerState::GetNextInactiveTask() const noexcept {
   if (!is_playing) {
     return inactive_tasks_.end();
   }
-  auto next_it =
-      inactive_tasks_.lower_bound({{position, std::numeric_limits<int>::min()}, nullptr});
+  auto next_it = inactive_tasks_.lower_bound({{position, INT32_MIN}, nullptr});
   // Check if any inactive task became active (in case a new position was set).
   // TODO(#147): This may be optimized further using an interval tree.
   for (auto it = inactive_tasks_.begin(); it != next_it; ++it) {

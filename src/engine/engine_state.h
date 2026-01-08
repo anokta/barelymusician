@@ -118,6 +118,37 @@ struct EngineState {
   void ScheduleMessage(Message message) noexcept {
     message_queue.Add(update_frame, std::move(message));
   }
+
+  /// Sets a control value.
+  void SetControl(BarelyEngineControlType type, float value) noexcept {
+    if (auto& control = controls[type]; control.SetValue(value)) {
+      ScheduleMessage(EngineControlMessage{type, control.value});
+    }
+  }
+
+  [[nodiscard]] PerformerState& GetPerformer(uint32_t performer_index) noexcept {
+    return performer_pool.Get(performer_index);
+  }
+
+  [[nodiscard]] const PerformerState& GetPerformer(uint32_t performer_index) const noexcept {
+    return performer_pool.Get(performer_index);
+  }
+
+  [[nodiscard]] const TaskState& GetTask(uint32_t task_index) const noexcept {
+    return task_pool.Get(task_index);
+  }
+
+  [[nodiscard]] bool IsValidInstrument(BarelyRef instrument) const noexcept {
+    return instrument_pool.IsActive(instrument.index, instrument.generation);
+  }
+
+  [[nodiscard]] bool IsValidPerformer(BarelyRef performer) const noexcept {
+    return performer_pool.IsActive(performer.index, performer.generation);
+  }
+
+  [[nodiscard]] bool IsValidTask(BarelyRef task) const noexcept {
+    return task_pool.IsActive(task.index, task.generation);
+  }
 };
 
 }  // namespace barely

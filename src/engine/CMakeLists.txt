@@ -2,6 +2,7 @@ target_sources(
   barelymusician PRIVATE
   arp_state.h
   effect_params.h
+  engine_controller.h
   engine_processor.h
   engine_state.h
   instrument_controller.cpp
@@ -26,6 +27,7 @@ if(ENABLE_TESTS)
   target_sources(
     barelymusician_test PRIVATE
     # TODO(#126): clean up and reenable
+    # engine_test.cpp
     # instrument_test.cpp
     # performer_test.cpp
     message_queue_test.cpp

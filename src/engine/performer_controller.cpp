@@ -4,6 +4,9 @@
 
 #include <cstdint>
 
+#include "engine/performer_state.h"
+#include "engine/task_state.h"
+
 namespace barely {
 
 BarelyRef PerformerController::Acquire() noexcept {

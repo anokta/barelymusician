@@ -9,13 +9,13 @@
 #include <utility>
 #include <variant>
 
-#include "api/performer.h"
 #include "core/constants.h"
 #include "core/time.h"
 #include "dsp/control.h"
 #include "engine/instrument_params.h"
 #include "engine/instrument_processor.h"
 #include "engine/message.h"
+#include "engine/performer_state.h"
 
 namespace {
 
@@ -135,39 +135,25 @@ void BarelyEngine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.
 void BarelyEngine::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      BarelyPerformer::TaskKey next_key = {barely::SecondsToBeats(tempo_, timestamp - timestamp_),
-                                           std::numeric_limits<int>::min()};
-      bool has_tasks_to_process = false;
-      for (uint32_t i = 0; i < performer_pool_.GetActiveCount(); ++i) {
-        if (const auto maybe_next_key = performer_pool_.GetActive(i).GetNextTaskKey();
-            maybe_next_key.has_value() && *maybe_next_key < next_key) {
-          has_tasks_to_process = true;
-          next_key = *maybe_next_key;
-        }
-      }
+      const double update_duration = barely::SecondsToBeats(tempo_, timestamp - timestamp_);
+
+      auto next_key = performer_controller_.GetNextTaskKey(update_duration);
       if (const double next_duration = instrument_controller_.GetNextDuration();
           next_duration < next_key.first) {
-        has_tasks_to_process = true;
         next_key = {next_duration, std::numeric_limits<int>::max()};
       }
+      const auto& [next_update_duration, max_priority] = next_key;
 
-      const auto& [update_duration, max_priority] = next_key;
-      assert(update_duration > 0.0 || has_tasks_to_process);
+      if (next_update_duration > 0) {
+        performer_controller_.Update(next_update_duration);
+        instrument_controller_.Update(next_update_duration);
 
-      if (update_duration > 0) {
-        for (uint32_t i = 0; i < performer_pool_.GetActiveCount(); ++i) {
-          performer_pool_.GetActive(i).Update(update_duration);
-        }
-        instrument_controller_.Update(update_duration);
-
-        timestamp_ += barely::BeatsToSeconds(tempo_, update_duration);
+        timestamp_ += barely::BeatsToSeconds(tempo_, next_update_duration);
         update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);
       }
 
-      if (has_tasks_to_process) {
-        for (uint32_t i = 0; i < performer_pool_.GetActiveCount(); ++i) {
-          performer_pool_.GetActive(i).ProcessAllTasksAtPosition(max_priority);
-        }
+      if (next_update_duration < update_duration) {
+        performer_controller_.ProcessAllTasksAtPosition(max_priority);
         if (max_priority == std::numeric_limits<int>::max()) {
           instrument_controller_.ProcessArp(main_rng_);
         }

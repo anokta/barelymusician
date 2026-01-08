@@ -1,4 +1,4 @@
-#include "api/performer.h"
+#include "engine/performer_state.h"
 
 #include <algorithm>
 #include <cassert>
@@ -10,14 +10,16 @@
 
 #include "engine/task_state.h"
 
+namespace barely {
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyPerformer::AddTask(TaskState* task) noexcept {
+void PerformerState::AddTask(TaskState* task) noexcept {
   [[maybe_unused]] const bool success =
       inactive_tasks_.emplace(TaskKey{task->position, task->priority}, task).second;
   assert(success && "Failed to create task");
 }
 
-std::optional<BarelyPerformer::TaskKey> BarelyPerformer::GetNextTaskKey() const noexcept {
+std::optional<PerformerState::TaskKey> PerformerState::GetNextTaskKey() const noexcept {
   if (!is_playing) {
     return std::nullopt;
   }
@@ -67,7 +69,7 @@ std::optional<BarelyPerformer::TaskKey> BarelyPerformer::GetNextTaskKey() const 
   return std::nullopt;
 }
 
-void BarelyPerformer::ProcessAllTasksAtPosition(int max_priority) noexcept {
+void PerformerState::ProcessAllTasksAtPosition(int max_priority) noexcept {
   if (!is_playing) {
     return;
   }
@@ -80,7 +82,7 @@ void BarelyPerformer::ProcessAllTasksAtPosition(int max_priority) noexcept {
   }
 }
 
-void BarelyPerformer::RemoveTask(TaskState* task) noexcept {
+void PerformerState::RemoveTask(TaskState* task) noexcept {
   if (task->is_active) {
     [[maybe_unused]] const bool success =
         (active_tasks_.erase({{task->GetEndPosition(), task->priority}, task}) == 1);
@@ -93,7 +95,7 @@ void BarelyPerformer::RemoveTask(TaskState* task) noexcept {
   }
 }
 
-void BarelyPerformer::SetLoopBeginPosition(double new_loop_begin_position) noexcept {
+void PerformerState::SetLoopBeginPosition(double new_loop_begin_position) noexcept {
   if (loop_begin_position == new_loop_begin_position) {
     return;
   }
@@ -103,7 +105,7 @@ void BarelyPerformer::SetLoopBeginPosition(double new_loop_begin_position) noexc
   }
 }
 
-void BarelyPerformer::SetLoopLength(double new_loop_length) noexcept {
+void PerformerState::SetLoopLength(double new_loop_length) noexcept {
   new_loop_length = std::max(new_loop_length, 0.0);
   if (loop_length == new_loop_length) {
     return;
@@ -114,7 +116,7 @@ void BarelyPerformer::SetLoopLength(double new_loop_length) noexcept {
   }
 }
 
-void BarelyPerformer::SetLooping(bool new_is_looping) noexcept {
+void PerformerState::SetLooping(bool new_is_looping) noexcept {
   if (is_looping == new_is_looping) {
     return;
   }
@@ -125,7 +127,7 @@ void BarelyPerformer::SetLooping(bool new_is_looping) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyPerformer::SetPosition(double new_position) noexcept {
+void PerformerState::SetPosition(double new_position) noexcept {
   if (position == new_position) {
     return;
   }
@@ -147,7 +149,7 @@ void BarelyPerformer::SetPosition(double new_position) noexcept {
   }
 }
 
-void BarelyPerformer::SetTaskDuration(TaskState* task, double new_duration) noexcept {
+void PerformerState::SetTaskDuration(TaskState* task, double new_duration) noexcept {
   assert(new_duration > 0.0 && "Invalid task duration");
   if (task->duration == new_duration) return;
   const double old_duration = task->duration;
@@ -162,7 +164,7 @@ void BarelyPerformer::SetTaskDuration(TaskState* task, double new_duration) noex
   }
 }
 
-void BarelyPerformer::SetTaskPosition(TaskState* task, double new_position) noexcept {
+void PerformerState::SetTaskPosition(TaskState* task, double new_position) noexcept {
   if (task->position == new_position) return;
   const double old_position = task->position;
   task->position = new_position;
@@ -178,7 +180,7 @@ void BarelyPerformer::SetTaskPosition(TaskState* task, double new_position) noex
   }
 }
 
-void BarelyPerformer::SetTaskPriority(TaskState* task, int new_priority) noexcept {
+void PerformerState::SetTaskPriority(TaskState* task, int new_priority) noexcept {
   if (task->priority == new_priority) return;
   const int old_priority = task->priority;
   task->priority = new_priority;
@@ -190,9 +192,9 @@ void BarelyPerformer::SetTaskPriority(TaskState* task, int new_priority) noexcep
   }
 }
 
-void BarelyPerformer::Start() noexcept { is_playing = true; }
+void PerformerState::Start() noexcept { is_playing = true; }
 
-void BarelyPerformer::Stop() noexcept {
+void PerformerState::Stop() noexcept {
   is_playing = false;
   while (!active_tasks_.empty()) {
     SetTaskActive(active_tasks_.begin(), false);
@@ -200,7 +202,7 @@ void BarelyPerformer::Stop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void BarelyPerformer::Update(double duration) noexcept {
+void PerformerState::Update(double duration) noexcept {
   if (!is_playing) {
     return;
   }
@@ -210,8 +212,8 @@ void BarelyPerformer::Update(double duration) noexcept {
   SetPosition(position + duration);
 }
 
-std::set<std::pair<BarelyPerformer::TaskKey, TaskState*>>::const_iterator
-BarelyPerformer::GetNextInactiveTask() const noexcept {
+std::set<std::pair<PerformerState::TaskKey, TaskState*>>::const_iterator
+PerformerState::GetNextInactiveTask() const noexcept {
   if (!is_playing) {
     return inactive_tasks_.end();
   }
@@ -227,14 +229,14 @@ BarelyPerformer::GetNextInactiveTask() const noexcept {
   return next_it;
 }
 
-double BarelyPerformer::LoopAround(double new_position) const noexcept {
+double PerformerState::LoopAround(double new_position) const noexcept {
   return loop_length > 0.0
              ? loop_begin_position + std::fmod(new_position - loop_begin_position, loop_length)
              : loop_begin_position;
 }
 
-void BarelyPerformer::SetTaskActive(const std::set<std::pair<TaskKey, TaskState*>>::iterator& it,
-                                    bool is_active) noexcept {
+void PerformerState::SetTaskActive(const std::set<std::pair<TaskKey, TaskState*>>::iterator& it,
+                                   bool is_active) noexcept {
   TaskState* task = it->second;
   auto node = (is_active ? inactive_tasks_ : active_tasks_).extract(it);
   node.value().first.first = is_active ? task->GetEndPosition() : task->position;
@@ -242,14 +244,16 @@ void BarelyPerformer::SetTaskActive(const std::set<std::pair<TaskKey, TaskState*
   task->SetActive(is_active);
 }
 
-void BarelyPerformer::UpdateActiveTaskKey(TaskKey old_task_key, TaskState* task) noexcept {
+void PerformerState::UpdateActiveTaskKey(TaskKey old_task_key, TaskState* task) noexcept {
   auto node = active_tasks_.extract({old_task_key, task});
   node.value().first = {task->GetEndPosition(), task->priority};
   active_tasks_.insert(std::move(node));
 }
 
-void BarelyPerformer::UpdateInactiveTaskKey(TaskKey old_task_key, TaskState* task) noexcept {
+void PerformerState::UpdateInactiveTaskKey(TaskKey old_task_key, TaskState* task) noexcept {
   auto node = inactive_tasks_.extract({old_task_key, task});
   node.value().first = {task->position, task->priority};
   inactive_tasks_.insert(std::move(node));
 }
+
+}  // namespace barely

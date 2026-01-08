@@ -10,6 +10,7 @@
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
+namespace barely {
 namespace {
 
 using ::testing::Optional;
@@ -17,7 +18,7 @@ using ::testing::Pair;
 
 // Tests that the performer processs a single task as expected.
 TEST(PerformerTest, ProcessSingleTask) {
-  BarelyPerformer performer;
+  PerformerState performer;
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -160,7 +161,7 @@ TEST(PerformerTest, ProcessSingleTask) {
 TEST(PerformerTest, ProcessMultipleTasks) {
   constexpr int kTaskCount = 4;
 
-  BarelyPerformer performer;
+  PerformerState performer;
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -236,7 +237,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
 // Tests that the performer sets its current position as expected.
 TEST(PerformerTest, SetPosition) {
-  BarelyPerformer performer;
+  PerformerState performer;
   EXPECT_EQ(performer.position, 0.0);
 
   performer.SetPosition(2.75);
@@ -269,3 +270,4 @@ TEST(PerformerTest, SetPosition) {
 }
 
 }  // namespace
+}  // namespace barely

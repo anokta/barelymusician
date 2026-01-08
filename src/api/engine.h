@@ -10,15 +10,12 @@
 #include <unordered_set>
 #include <vector>
 
-#include "api/performer.h"
 #include "core/rng.h"
 #include "dsp/control.h"
 #include "engine/engine_processor.h"
 #include "engine/instrument_controller.h"
-#include "engine/instrument_params.h"
-#include "engine/message.h"
 #include "engine/message_queue.h"
-#include "engine/task_state.h"
+#include "engine/performer_controller.h"
 
 /// Implementation of an engine.
 struct BarelyEngine {
@@ -30,59 +27,14 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   BarelyEngine(int sample_rate, int max_frame_count) noexcept;
 
-  /// Adds a new performer.
-  ///
-  /// @return Performer index.
-  [[nodiscard]] BarelyRef AddPerformer() noexcept {
-    const uint32_t index = performer_pool_.Acquire();
-    performer_pool_.Get(index) = {};
-    return {index, performer_pool_.GetGeneration(index)};
-  }
-
-  /// Removes a performer.
-  ///
-  /// @param performer_index Performer reference.
-  void RemovePerformer(BarelyRef performer) noexcept { performer_pool_.Release(performer.index); }
-
-  [[nodiscard]] BarelyPerformer& GetPerformer(uint32_t performer_index) noexcept {
-    return performer_pool_.Get(performer_index);
-  }
-  [[nodiscard]] BarelyPerformer& GetPerformer(BarelyRef performer) noexcept {
-    return performer_pool_.Get(performer.index);
-  }
-  [[nodiscard]] const BarelyPerformer& GetPerformer(BarelyRef performer) const noexcept {
-    return performer_pool_.Get(performer.index);
-  }
-
-  [[nodiscard]] TaskState& GetTask(BarelyRef task) noexcept { return task_pool_.Get(task.index); }
-  [[nodiscard]] const TaskState& GetTask(BarelyRef task) const noexcept {
-    return task_pool_.Get(task.index);
-  }
-
   [[nodiscard]] bool IsValidInstrument(BarelyRef instrument) const noexcept {
     return instrument_controller_.IsActive(instrument);
   }
   [[nodiscard]] bool IsValidPerformer(BarelyRef performer) const noexcept {
-    return performer_pool_.IsActive(performer.index, performer.generation);
+    return performer_controller_.IsActive(performer);
   }
   [[nodiscard]] bool IsValidTask(BarelyRef task) const noexcept {
-    return task_pool_.IsActive(task.index, task.generation);
-  }
-
-  /// Adds a new task.
-  ///
-  /// @return Task index.
-  [[nodiscard]] BarelyRef AddTask() noexcept {
-    const uint32_t index = task_pool_.Acquire();
-    return {index, task_pool_.GetGeneration(index)};
-  }
-
-  /// Removes a task.
-  ///
-  /// @param task Task reference.
-  void RemoveTask(BarelyRef task) noexcept {
-    performer_pool_.Get(GetTask(task).performer_index).RemoveTask(&GetTask(task));
-    task_pool_.Release(task.index);
+    return performer_controller_.IsActiveTask(task);
   }
 
   /// Returns a control value.
@@ -144,6 +96,10 @@ struct BarelyEngine {
   const barely::InstrumentController& instrument_controller() const noexcept {
     return instrument_controller_;
   }
+  barely::PerformerController& performer_controller() noexcept { return performer_controller_; }
+  const barely::PerformerController& performer_controller() const noexcept {
+    return performer_controller_;
+  }
 
  private:
   // Array of engine controls.
@@ -158,15 +114,8 @@ struct BarelyEngine {
   // Message queue.
   barely::MessageQueue message_queue_;
 
-  // Performers.
-  using PerformerPool = barely::Pool<BarelyPerformer, BARELYMUSICIAN_MAX_PERFORMER_COUNT>;
-  PerformerPool performer_pool_;
-
-  // Tasks.
-  using TaskPool = barely::Pool<TaskState, BARELYMUSICIAN_MAX_TASK_COUNT>;
-  TaskPool task_pool_;
-
   barely::InstrumentController instrument_controller_;
+  barely::PerformerController performer_controller_;
 
   // Output samples.
   std::vector<float> output_samples_;

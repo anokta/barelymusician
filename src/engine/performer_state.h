@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_API_PERFORMER_H_
-#define BARELYMUSICIAN_API_PERFORMER_H_
+#ifndef BARELYMUSICIAN_ENGINE_PERFORMER_STATE_H_
+#define BARELYMUSICIAN_ENGINE_PERFORMER_STATE_H_
 
 #include <barelymusician.h>
 
@@ -16,14 +16,16 @@
 #include "core/constants.h"
 #include "engine/task_state.h"
 
-/// Implementation of a performer.
-struct BarelyPerformer {
+namespace barely {
+
+struct PerformerState {
  public:
   /// Task key consists of a position and its priority.
   using TaskKey = std::pair<double, int>;
 
-  /// Pointer to engine.
-  BarelyEngine* engine = nullptr;
+  // Set of task position-pointer pairs.
+  std::set<std::pair<TaskKey, TaskState*>> active_tasks_;
+  std::set<std::pair<TaskKey, TaskState*>> inactive_tasks_;
 
   // Loop begin position in beats.
   double loop_begin_position = 0.0;
@@ -136,10 +138,8 @@ struct BarelyPerformer {
 
   /// Updates the key of an inactive task.
   void UpdateInactiveTaskKey(TaskKey old_task_key, TaskState* task) noexcept;
-
-  // Set of task position-pointer pairs.
-  std::set<std::pair<TaskKey, TaskState*>> active_tasks_;
-  std::set<std::pair<TaskKey, TaskState*>> inactive_tasks_;
 };
 
-#endif  // BARELYMUSICIAN_API_PERFORMER_H_
+}  // namespace barely
+
+#endif  // BARELYMUSICIAN_ENGINE_PERFORMER_STATE_H_

@@ -18,8 +18,8 @@ class InstrumentController {
   InstrumentController(MessageQueue& message_queue, const int64_t& update_frame) noexcept
       : message_queue_(message_queue), update_frame_(update_frame) {}
 
-  BarelyRef Acquire(const BarelyInstrumentControlOverride* control_overrides,
-                    int32_t control_override_count) noexcept;
+  [[nodiscard]] BarelyRef Acquire(const BarelyInstrumentControlOverride* control_overrides,
+                                  int32_t control_override_count) noexcept;
   void Release(uint32_t instrument_index) noexcept;
 
   void SetAllNotesOff() noexcept;

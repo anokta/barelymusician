@@ -5,8 +5,8 @@
 #include <array>
 #include <functional>
 
-#include "api/performer.h"
 #include "engine/message.h"
+#include "engine/performer_state.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -24,8 +24,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   BarelyEngine engine(kSampleRate, kSampleRate);
 
   // Create a performer.
-  const auto performer_ref = engine.AddPerformer();
-  auto& performer = engine.GetPerformer(performer_ref);
+  const auto performer_index = engine.performer_controller().Acquire().index;
+  auto& performer = engine.performer_controller().Get(performer_index);
 
   // Create a task.
   barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;
@@ -35,22 +35,16 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
     task_position = performer.position;
   };
 
-  const auto task_index = engine.AddTask();
-  auto& task = engine.GetTask(task_index);
-  task = {
-      {
-          [](BarelyTaskEventType type, void* user_data) {
-            (*static_cast<std::function<void(barely::TaskEventType)>*>(user_data))(
-                static_cast<barely::TaskEventType>(type));
-          },
-          &process_callback,
-      },
-      1.0,
-      2.0,
-      0,
-      performer_ref.index,
-  };
-  performer.AddTask(&task);
+  const auto task_index = engine.performer_controller()
+                              .AcquireTask(
+                                  performer_index, 1.0, 2.0, 0,
+                                  [](BarelyTaskEventType type, void* user_data) {
+                                    (*static_cast<std::function<void(barely::TaskEventType)>*>(
+                                        user_data))(static_cast<barely::TaskEventType>(type));
+                                  },
+                                  &process_callback)
+                              .index;
+  auto& task = engine.performer_controller().GetTask(task_index);
 
   // Start the performer with a tempo of one beat per second.
   engine.SetTempo(60.0);

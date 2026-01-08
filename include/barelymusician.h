@@ -15,7 +15,7 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create.
-///   barely::Engine engine(/*sample_rate=*/48000, /*max_frame_count=*/512);
+///   barely::Engine engine(/*sample_rate=*/48000);
 ///
 ///   // Set the tempo.
 ///   engine.SetTempo(/*tempo=*/124.0);
@@ -102,8 +102,7 @@
 ///
 ///   // Create.
 ///   BarelyEngine* engine = nullptr;
-///   BarelyEngine_Create(/*sample_rate=*/48000, /*max_frame_count=*/512,
-///                       BARELY_DEFAULT_REFERENCE_FREQUENCY, &engine);
+///   BarelyEngine_Create(/*sample_rate=*/48000, &engine);
 ///
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
@@ -497,11 +496,9 @@ typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_dat
 /// Creates a new engine.
 ///
 /// @param sample_rate Sampling rate in hertz.
-/// @param max_frame_count Maximum number of frames.
 /// @param out_engine Output pointer to engine.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count,
-                                    BarelyEngine** out_engine);
+BARELY_API bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine);
 
 /// Creates a new instrument.
 ///
@@ -1611,10 +1608,9 @@ class Engine {
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param max_frame_count Maximum number of frames.
-  Engine(int sample_rate, int max_frame_count) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_Create(
-        static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_frame_count), &engine_);
+  explicit Engine(int sample_rate) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyEngine_Create(static_cast<int32_t>(sample_rate), &engine_);
     assert(success);
   }
 

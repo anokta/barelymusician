@@ -77,7 +77,7 @@ static void Instrument_SetSampleData(Instrument& instrument, uintptr_t slices,
 
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
   class_<Engine>("Engine")
-      .constructor<int, int>()
+      .constructor<int>()
       .function("createInstrument", &Engine_CreateInstrument, take_ownership())
       .function("createPerformer", &Engine::CreatePerformer, take_ownership())
       .function("generateRandomNumber",

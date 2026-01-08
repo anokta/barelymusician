@@ -48,7 +48,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{

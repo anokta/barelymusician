@@ -74,7 +74,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
   engine.SetControl(EngineControlType::kDelayTime, kDelayTime);
   engine.SetControl(EngineControlType::kDelayFeedback, kDelayFeedback);
   engine.SetControl(EngineControlType::kDelayLowPassFrequency, kDelayLowPassFrequency);

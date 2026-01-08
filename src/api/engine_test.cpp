@@ -22,7 +22,7 @@ constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
-  auto engine = std::make_unique<BarelyEngine>(kSampleRate, kSampleRate);
+  auto engine = std::make_unique<BarelyEngine>(kSampleRate);
 
   // Create a performer.
   const auto performer_index = engine->performer_controller().Acquire().index;
@@ -93,7 +93,7 @@ TEST(EngineTest, PlaySingleNote) {
       BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
   };
 
-  auto engine = std::make_unique<BarelyEngine>(kSampleRate, kFrameCount);
+  auto engine = std::make_unique<BarelyEngine>(kSampleRate);
   const auto instrument = engine->instrument_controller().Acquire(nullptr, 0);
   engine->ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
 
@@ -137,7 +137,7 @@ TEST(EngineTest, PlayMultipleNotes) {
       BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
   };
 
-  auto engine = std::make_unique<BarelyEngine>(1, kSampleRate);
+  auto engine = std::make_unique<BarelyEngine>(1);
   const auto instrument = engine->instrument_controller().Acquire(nullptr, 0);
   engine->ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
 
@@ -172,7 +172,7 @@ TEST(EngineTest, PlayMultipleNotes) {
 
 // Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
-  auto engine = std::make_unique<BarelyEngine>(kSampleRate, kSampleRate);
+  auto engine = std::make_unique<BarelyEngine>(kSampleRate);
   EXPECT_DOUBLE_EQ(engine->GetTempo(), 120.0);
 
   engine->SetTempo(200.0);

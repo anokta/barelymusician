@@ -8,12 +8,11 @@
 #include "core/time.h"
 #include "engine/performer_state.h"
 
-bool BarelyEngine_Create(int32_t sample_rate, int32_t max_frame_count, BarelyEngine** out_engine) {
+bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
   if (sample_rate <= 0) return false;
-  if (max_frame_count <= 0) return false;
   if (!out_engine) return false;
 
-  *out_engine = new BarelyEngine(sample_rate, max_frame_count);
+  *out_engine = new BarelyEngine(sample_rate);
   return true;
 }
 

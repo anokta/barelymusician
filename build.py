@@ -32,6 +32,12 @@ def parse_args():
         help="specify the build configuration (defaults to release)",
     )
     parser.add_argument(
+        "--max_frames",
+        type=count_type,
+        default=4096,
+        help="specify the maximum number of frames per process block",
+    )
+    parser.add_argument(
         "--max_instruments",
         type=count_type,
         default=100,
@@ -233,6 +239,7 @@ def build(args, source_dir, build_dir):
     config = get_build_config(args)
 
     common_cmake_options = [
+        f"-DMAX_FRAME_COUNT={args.max_frames}",
         f"-DMAX_INSTRUMENT_COUNT={args.max_instruments}",
         f"-DMAX_PERFORMER_COUNT={args.max_performers}",
         f"-DMAX_TASK_COUNT={args.max_tasks}",

@@ -3,6 +3,7 @@
 #include <barelymusician.h>
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <limits>
@@ -37,14 +38,12 @@ using ::barely::SampleDataMessage;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
+BarelyEngine::BarelyEngine(int sample_rate) noexcept
     : state_(sample_rate),
       instrument_controller_(state_),
       performer_controller_(state_),
-      processor_(state_),
-      output_samples_(kStereoChannelCount * max_frame_count) {
+      processor_(state_) {
   assert(sample_rate >= 0);
-  assert(max_frame_count > 0);
 }
 
 float BarelyEngine::GetControl(BarelyEngineControlType type) const noexcept {
@@ -57,8 +56,10 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
   assert(output_samples != nullptr);
   assert(output_channel_count > 0);
   assert(output_frame_count > 0);
+  assert(output_frame_count <= BARELYMUSICIAN_MAX_FRAME_COUNT);
 
-  std::fill_n(output_samples_.begin(), kStereoChannelCount * output_frame_count, 0.0f);
+  float temp_samples[kStereoChannelCount * BARELYMUSICIAN_MAX_FRAME_COUNT];
+  std::fill_n(temp_samples, kStereoChannelCount * output_frame_count, 0.0f);
 
   const int64_t process_frame = barely::SecondsToFrames(state_.sample_rate, timestamp);
   const int64_t end_frame = process_frame + output_frame_count;
@@ -69,7 +70,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
        message = state_.message_queue.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
-      processor_.Process(&output_samples_[kStereoChannelCount * current_frame],
+      processor_.Process(&temp_samples[kStereoChannelCount * current_frame],
                          message_frame - current_frame);
       current_frame = message_frame;
     }
@@ -78,7 +79,7 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
   // Process the rest of the samples.
   if (current_frame < output_frame_count) {
-    processor_.Process(&output_samples_[kStereoChannelCount * current_frame],
+    processor_.Process(&temp_samples[kStereoChannelCount * current_frame],
                        output_frame_count - current_frame);
   }
 
@@ -86,14 +87,14 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
   if (output_channel_count > 1) {
     std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
     for (int frame = 0; frame < output_frame_count; ++frame) {
-      output_samples[output_channel_count * frame] = output_samples_[kStereoChannelCount * frame];
+      output_samples[output_channel_count * frame] = temp_samples[kStereoChannelCount * frame];
       output_samples[output_channel_count * frame + 1] =
-          output_samples_[kStereoChannelCount * frame + 1];
+          temp_samples[kStereoChannelCount * frame + 1];
     }
   } else {  // downmix to mono.
     for (int frame = 0; frame < output_frame_count; ++frame) {
-      output_samples[frame] = output_samples_[kStereoChannelCount * frame] +
-                              output_samples_[kStereoChannelCount * frame + 1];
+      output_samples[frame] =
+          temp_samples[kStereoChannelCount * frame] + temp_samples[kStereoChannelCount * frame + 1];
     }
   }
 }

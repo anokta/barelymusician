@@ -6,9 +6,6 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 #include "core/rng.h"
 #include "dsp/control.h"
@@ -26,9 +23,8 @@ struct BarelyEngine {
   /// Constructs a new `BarelyEngine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param max_frame_count Maximum number of frames.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  BarelyEngine(int sample_rate, int max_frame_count) noexcept;
+  explicit BarelyEngine(int sample_rate) noexcept;
 
   [[nodiscard]] barely::PerformerState& GetPerformer(uint32_t performer_index) noexcept {
     return state_.performer_pool.Get(performer_index);
@@ -124,7 +120,6 @@ struct BarelyEngine {
   barely::InstrumentController instrument_controller_;
   barely::PerformerController performer_controller_;
   barely::EngineProcessor processor_;
-  std::vector<float> output_samples_;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

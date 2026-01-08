@@ -35,6 +35,11 @@ if(NOT DEFINED ENABLE_TESTS)
 endif()
 option(ENABLE_TESTS "Build tests" ${ENABLE_TESTS})
 
+if(NOT DEFINED MAX_FRAME_COUNT)
+  set(MAX_FRAME_COUNT 4096 CACHE STRING "Maximum number of frames per process block" FORCE)
+endif()
+option(MAX_FRAME_COUNT "Maximum number of frames per process block" ${MAX_FRAME_COUNT})
+
 if(NOT DEFINED MAX_INSTRUMENT_COUNT)
   set(MAX_INSTRUMENT_COUNT 500 CACHE STRING "Maximum number of instruments" FORCE)
 endif()

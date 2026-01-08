@@ -14,6 +14,7 @@
 #include "dsp/distortion.h"
 #include "dsp/sample_data.h"
 #include "dsp/sample_generators.h"
+#include "engine/engine_state.h"
 #include "engine/instrument_params.h"
 #include "engine/voice_state.h"
 
@@ -21,8 +22,7 @@ namespace barely {
 
 class InstrumentProcessor {
  public:
-  explicit InstrumentProcessor(AudioRng& rng, float sample_interval) noexcept
-      : rng_(rng), sample_interval_(sample_interval) {}
+  explicit InstrumentProcessor(EngineState& engine) noexcept : engine_(engine) {}
 
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
                   float value) noexcept;
@@ -33,32 +33,35 @@ class InstrumentProcessor {
                  const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept;
   void SetSampleData(uint32_t instrument_index, SampleData& sample_data) noexcept;
 
-  void Init(uint32_t instrument_index) noexcept { params_[instrument_index] = {}; }
+  void Init(uint32_t instrument_index) noexcept {
+    engine_.instrument_params[instrument_index] = {};
+  }
 
   template <bool kIsSidechainSend = false>
   void ProcessAllVoices(float delay_frame[kStereoChannelCount],
                         float sidechain_frame[kStereoChannelCount],
                         float output_frame[kStereoChannelCount]) noexcept {
-    for (uint32_t i = 0; i < voice_pool_.GetActiveCount();) {
-      VoiceState& voice = voice_pool_.GetActive(i);
-      InstrumentParams& params = params_[voice.instrument_index];
+    for (uint32_t i = 0; i < engine_.voice_pool.GetActiveCount();) {
+      VoiceState& voice = engine_.voice_pool.GetActive(i);
+      InstrumentParams& params = engine_.instrument_params[voice.instrument_index];
       if constexpr (kIsSidechainSend) {
         if (!voice.IsActive()) {
           if (voice.previous_voice_index != 0) {
-            voice_pool_.Get(voice.previous_voice_index).next_voice_index = voice.next_voice_index;
+            engine_.voice_pool.Get(voice.previous_voice_index).next_voice_index =
+                voice.next_voice_index;
             if (voice.next_voice_index != 0) {
-              voice_pool_.Get(voice.next_voice_index).previous_voice_index =
+              engine_.voice_pool.Get(voice.next_voice_index).previous_voice_index =
                   voice.previous_voice_index;
             }
             voice.previous_voice_index = 0;
           } else {
             params.first_voice_index = voice.next_voice_index;
             if (voice.next_voice_index != 0) {
-              voice_pool_.Get(voice.next_voice_index).previous_voice_index = 0;
+              engine_.voice_pool.Get(voice.next_voice_index).previous_voice_index = 0;
             }
           }
           voice.next_voice_index = 0;
-          voice_pool_.Release(voice_pool_.GetIndex(voice));
+          engine_.voice_pool.Release(engine_.voice_pool.GetIndex(voice));
           continue;
         }
       }
@@ -101,7 +104,7 @@ class InstrumentProcessor {
     const float skewed_osc_phase = std::min(1.0f, (1.0f + voice.params.osc_skew) * voice.osc_phase);
     const float osc_sample = (1.0f - voice.params.osc_noise_mix) *
                                  GenerateOscSample(skewed_osc_phase, voice.params.osc_shape) +
-                             voice.params.osc_noise_mix * rng_.Generate();
+                             voice.params.osc_noise_mix * engine_.audio_rng.Generate();
     const float osc_output = voice.params.osc_mix * osc_sample;
 
     const bool has_slice = (voice.slice != nullptr);
@@ -180,14 +183,7 @@ class InstrumentProcessor {
     voice.Approach(instrument_params.voice_params);
   }
 
-  // Array of instrument parameters (indices should match `InstrumentController::instrument_pool_`).
-  std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1> params_ = {};
-
-  // Voice pool.
-  Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT> voice_pool_ = {};
-
-  AudioRng& rng_;
-  float sample_interval_ = 0.0f;
+  EngineState& engine_;
 };
 
 }  // namespace barely

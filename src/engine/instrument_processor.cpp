@@ -14,7 +14,7 @@ namespace barely {
 
 void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
                                      float value) noexcept {
-  auto& params = params_[instrument_index];
+  auto& params = engine_.instrument_params[instrument_index];
 
   // TODO(#126): clean this up?
   if (type == BarelyInstrumentControlType_kVoiceCount) {
@@ -22,16 +22,16 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     uint32_t active_voice_count = 0;
     uint32_t active_voice_index = params.first_voice_index;
     while (active_voice_index != 0 && active_voice_count <= new_voice_count) {
-      active_voice_index = voice_pool_.Get(active_voice_index).next_voice_index;
+      active_voice_index = engine_.voice_pool.Get(active_voice_index).next_voice_index;
       ++active_voice_count;
     }
     while (active_voice_index != 0) {
-      auto& voice = voice_pool_.Get(active_voice_index);
+      auto& voice = engine_.voice_pool.Get(active_voice_index);
       if (voice.previous_voice_index != 0) {
-        voice_pool_.Get(voice.previous_voice_index).next_voice_index = 0;
+        engine_.voice_pool.Get(voice.previous_voice_index).next_voice_index = 0;
         voice.previous_voice_index = 0;
       }
-      voice_pool_.Release(active_voice_index);
+      engine_.voice_pool.Release(active_voice_index);
       active_voice_index = voice.next_voice_index;
       voice.next_voice_index = 0;
     }
@@ -44,8 +44,8 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kPitchShift:
       params.pitch_shift = value;
       params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
-                             kReferenceFrequency * sample_interval_;
-      params.slice_increment = std::pow(2.0f, params.pitch_shift) * sample_interval_;
+                             kReferenceFrequency * engine_.sample_interval;
+      params.slice_increment = std::pow(2.0f, params.pitch_shift) * engine_.sample_interval;
       break;
     case BarelyInstrumentControlType_kRetrigger:
       params.should_retrigger = static_cast<bool>(value);
@@ -57,16 +57,16 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.voice_count = static_cast<uint32_t>(value);
       break;
     case BarelyInstrumentControlType_kAttack:
-      params.adsr.SetAttack(sample_interval_, value);
+      params.adsr.SetAttack(engine_.sample_interval, value);
       break;
     case BarelyInstrumentControlType_kDecay:
-      params.adsr.SetDecay(sample_interval_, value);
+      params.adsr.SetDecay(engine_.sample_interval, value);
       break;
     case BarelyInstrumentControlType_kSustain:
       params.adsr.SetSustain(value);
       break;
     case BarelyInstrumentControlType_kRelease:
-      params.adsr.SetRelease(sample_interval_, value);
+      params.adsr.SetRelease(engine_.sample_interval, value);
       break;
     case BarelyInstrumentControlType_kOscMix:
       params.voice_params.osc_mix = value;
@@ -80,7 +80,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kOscPitchShift:
       params.osc_pitch_shift = value;
       params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
-                             kReferenceFrequency * sample_interval_;
+                             kReferenceFrequency * engine_.sample_interval;
       break;
     case BarelyInstrumentControlType_kOscShape:
       params.voice_params.osc_shape = value;
@@ -113,17 +113,17 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kFilterType:
       params.filter_type = static_cast<FilterType>(value);
       params.voice_params.filter_coeffs = GetFilterCoefficients(
-          sample_interval_, params.filter_type, params.filter_frequency, params.filter_q);
+          engine_.sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case BarelyInstrumentControlType_kFilterFrequency:
       params.filter_frequency = value;
       params.voice_params.filter_coeffs = GetFilterCoefficients(
-          sample_interval_, params.filter_type, params.filter_frequency, params.filter_q);
+          engine_.sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case BarelyInstrumentControlType_kFilterQ:
       params.filter_q = value;
       params.voice_params.filter_coeffs = GetFilterCoefficients(
-          sample_interval_, params.filter_type, params.filter_frequency, params.filter_q);
+          engine_.sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case BarelyInstrumentControlType_kArpMode:
       [[fallthrough]];
@@ -139,12 +139,12 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
 
 void InstrumentProcessor::SetNoteControl(uint32_t instrument_index, float pitch,
                                          BarelyNoteControlType type, float value) noexcept {
-  auto& params = params_[instrument_index];
+  auto& params = engine_.instrument_params[instrument_index];
   switch (type) {
     case BarelyNoteControlType_kGain: {
       uint32_t voice_index = params.first_voice_index;
       while (voice_index != 0) {
-        auto& voice = voice_pool_.Get(voice_index);
+        auto& voice = engine_.voice_pool.Get(voice_index);
         if (voice.pitch == pitch && voice.IsOn()) {
           voice.note_params.gain = value;
           break;
@@ -155,7 +155,7 @@ void InstrumentProcessor::SetNoteControl(uint32_t instrument_index, float pitch,
     case BarelyNoteControlType_kPitchShift: {
       uint32_t voice_index = params.first_voice_index;
       while (voice_index != 0) {
-        auto& voice = voice_pool_.Get(voice_index);
+        auto& voice = engine_.voice_pool.Get(voice_index);
         if (voice.pitch == pitch && voice.IsOn()) {
           voice.pitch_shift = value;
           voice.UpdatePitchIncrements();
@@ -171,10 +171,10 @@ void InstrumentProcessor::SetNoteControl(uint32_t instrument_index, float pitch,
 }
 
 void InstrumentProcessor::SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
-  auto& params = params_[instrument_index];
+  auto& params = engine_.instrument_params[instrument_index];
   uint32_t active_voice_index = params.first_voice_index;
   while (active_voice_index != 0) {
-    auto& voice = voice_pool_.Get(active_voice_index);
+    auto& voice = engine_.voice_pool.Get(active_voice_index);
     if (voice.pitch == pitch && voice.IsOn() &&
         (params.sample_data.empty() || params.slice_mode != SliceMode::kOnce)) {
       voice.Stop();
@@ -187,27 +187,27 @@ void InstrumentProcessor::SetNoteOff(uint32_t instrument_index, float pitch) noe
 void InstrumentProcessor::SetNoteOn(
     uint32_t instrument_index, float pitch,
     const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
-  auto& params = params_[instrument_index];
+  auto& params = engine_.instrument_params[instrument_index];
   if (const uint32_t voice_index = AcquireVoice(instrument_index, pitch); voice_index > 0) {
-    voice_pool_.Get(voice_index)
-        .Start(params, instrument_index, params.sample_data.Select(pitch, rng_), pitch,
+    engine_.voice_pool.Get(voice_index)
+        .Start(params, instrument_index, params.sample_data.Select(pitch, engine_.audio_rng), pitch,
                note_controls);
   }
 }
 
 uint32_t InstrumentProcessor::AcquireVoice(uint32_t instrument_index, float pitch) noexcept {
-  auto& params = params_[instrument_index];
+  auto& params = engine_.instrument_params[instrument_index];
   if (params.should_retrigger) {
     uint32_t current_voice_index = params.first_voice_index;
     while (current_voice_index != 0) {
-      VoiceState& voice = voice_pool_.Get(current_voice_index);
+      VoiceState& voice = engine_.voice_pool.Get(current_voice_index);
       if (voice.pitch == pitch) {
         while (current_voice_index != 0) {
-          voice = voice_pool_.Get(current_voice_index);
+          voice = engine_.voice_pool.Get(current_voice_index);
           ++voice.timestamp;
           current_voice_index = voice.next_voice_index;
         }
-        return voice_pool_.GetIndex(voice);
+        return engine_.voice_pool.GetIndex(voice);
       }
       current_voice_index = voice.next_voice_index;
     }
@@ -217,9 +217,9 @@ uint32_t InstrumentProcessor::AcquireVoice(uint32_t instrument_index, float pitc
   uint32_t oldest_active_voice_index = 0;
   uint32_t active_voice_count = 0;
   while (current_voice_index != 0) {
-    VoiceState& voice = voice_pool_.Get(current_voice_index);
+    VoiceState& voice = engine_.voice_pool.Get(current_voice_index);
     if (oldest_active_voice_index == 0 ||
-        voice.timestamp > voice_pool_.Get(oldest_active_voice_index).timestamp) {
+        voice.timestamp > engine_.voice_pool.Get(oldest_active_voice_index).timestamp) {
       oldest_active_voice_index = current_voice_index;
     }
     ++voice.timestamp;
@@ -231,14 +231,14 @@ uint32_t InstrumentProcessor::AcquireVoice(uint32_t instrument_index, float pitc
   }
 
   // Acquire new voice.
-  if (voice_pool_.GetActiveCount() < voice_pool_.Count() &&
+  if (engine_.voice_pool.GetActiveCount() < engine_.voice_pool.Count() &&
       active_voice_count < static_cast<uint32_t>(params.voice_count)) {
-    const uint32_t new_voice_index = voice_pool_.Acquire();
-    VoiceState& new_voice = voice_pool_.Get(new_voice_index);
+    const uint32_t new_voice_index = engine_.voice_pool.Acquire();
+    VoiceState& new_voice = engine_.voice_pool.Get(new_voice_index);
     new_voice.previous_voice_index = current_voice_index;
     new_voice.next_voice_index = 0;
     if (current_voice_index != 0) {
-      voice_pool_.Get(current_voice_index).next_voice_index = new_voice_index;
+      engine_.voice_pool.Get(current_voice_index).next_voice_index = new_voice_index;
     } else {
       params.first_voice_index = new_voice_index;
     }
@@ -251,12 +251,12 @@ uint32_t InstrumentProcessor::AcquireVoice(uint32_t instrument_index, float pitc
 
 void InstrumentProcessor::SetSampleData(uint32_t instrument_index,
                                         SampleData& sample_data) noexcept {
-  auto& params = params_[instrument_index];
+  auto& params = engine_.instrument_params[instrument_index];
   params.sample_data.Swap(sample_data);
   uint32_t active_voice_index = params.first_voice_index;
   while (active_voice_index != 0) {
-    auto& voice = voice_pool_.Get(active_voice_index);
-    voice.slice = params.sample_data.Select(voice.pitch, rng_);
+    auto& voice = engine_.voice_pool.Get(active_voice_index);
+    voice.slice = params.sample_data.Select(voice.pitch, engine_.audio_rng);
     voice.UpdatePitchIncrements();
     active_voice_index = voice.next_voice_index;
   }

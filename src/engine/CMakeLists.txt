@@ -3,6 +3,7 @@ target_sources(
   arp_state.h
   effect_params.h
   engine_processor.h
+  engine_state.h
   instrument_controller.cpp
   instrument_controller.h
   instrument_params.h

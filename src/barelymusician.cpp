@@ -272,8 +272,7 @@ bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine, BarelyRef 
   if (!engine->IsValidPerformer(performer)) return false;
   if (!out_loop_begin_position) return false;
 
-  *out_loop_begin_position =
-      engine->performer_controller().Get(performer.index).loop_begin_position;
+  *out_loop_begin_position = engine->GetPerformer(performer.index).loop_begin_position;
   return true;
 }
 
@@ -283,7 +282,7 @@ bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, BarelyRef perform
   if (!engine->IsValidPerformer(performer)) return false;
   if (!out_loop_length) return false;
 
-  *out_loop_length = engine->performer_controller().Get(performer.index).loop_length;
+  *out_loop_length = engine->GetPerformer(performer.index).loop_length;
   return true;
 }
 
@@ -293,7 +292,7 @@ bool BarelyPerformer_GetPosition(const BarelyEngine* engine, BarelyRef performer
   if (!engine->IsValidPerformer(performer)) return false;
   if (!out_position) return false;
 
-  *out_position = engine->performer_controller().Get(performer.index).position;
+  *out_position = engine->GetPerformer(performer.index).position;
   return true;
 }
 
@@ -303,7 +302,7 @@ bool BarelyPerformer_IsLooping(const BarelyEngine* engine, BarelyRef performer,
   if (!engine->IsValidPerformer(performer)) return false;
   if (!out_is_looping) return false;
 
-  *out_is_looping = engine->performer_controller().Get(performer.index).is_looping;
+  *out_is_looping = engine->GetPerformer(performer.index).is_looping;
   return true;
 }
 
@@ -313,7 +312,7 @@ bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, BarelyRef performer,
   if (!engine->IsValidPerformer(performer)) return false;
   if (!out_is_playing) return false;
 
-  *out_is_playing = engine->performer_controller().Get(performer.index).is_playing;
+  *out_is_playing = engine->GetPerformer(performer.index).is_playing;
   return true;
 }
 
@@ -322,7 +321,7 @@ bool BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine, BarelyRef perfor
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer)) return false;
 
-  engine->performer_controller().Get(performer.index).SetLoopBeginPosition(loop_begin_position);
+  engine->GetPerformer(performer.index).SetLoopBeginPosition(loop_begin_position);
   return true;
 }
 
@@ -330,7 +329,7 @@ bool BarelyPerformer_SetLoopLength(BarelyEngine* engine, BarelyRef performer, do
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer)) return false;
 
-  engine->performer_controller().Get(performer.index).SetLoopLength(loop_length);
+  engine->GetPerformer(performer.index).SetLoopLength(loop_length);
   return true;
 }
 
@@ -338,7 +337,7 @@ bool BarelyPerformer_SetLooping(BarelyEngine* engine, BarelyRef performer, bool 
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer)) return false;
 
-  engine->performer_controller().Get(performer.index).SetLooping(is_looping);
+  engine->GetPerformer(performer.index).SetLooping(is_looping);
   return true;
 }
 
@@ -346,7 +345,7 @@ bool BarelyPerformer_SetPosition(BarelyEngine* engine, BarelyRef performer, doub
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer)) return false;
 
-  engine->performer_controller().Get(performer.index).SetPosition(position);
+  engine->GetPerformer(performer.index).SetPosition(position);
   return true;
 }
 
@@ -354,7 +353,7 @@ bool BarelyPerformer_Start(BarelyEngine* engine, BarelyRef performer) {
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer)) return false;
 
-  engine->performer_controller().Get(performer.index).Start();
+  engine->GetPerformer(performer.index).Start();
   return true;
 }
 
@@ -362,7 +361,7 @@ bool BarelyPerformer_Stop(BarelyEngine* engine, BarelyRef performer) {
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer)) return false;
 
-  engine->performer_controller().Get(performer.index).Stop();
+  engine->GetPerformer(performer.index).Stop();
   return true;
 }
 
@@ -371,7 +370,7 @@ bool BarelyTask_GetDuration(const BarelyEngine* engine, BarelyRef task, double* 
   if (!engine->IsValidTask(task)) return false;
   if (!out_duration) return false;
 
-  *out_duration = engine->performer_controller().GetTask(task.index).duration;
+  *out_duration = engine->GetTask(task.index).duration;
   return true;
 }
 
@@ -380,7 +379,7 @@ bool BarelyTask_GetPosition(const BarelyEngine* engine, BarelyRef task, double* 
   if (!engine->IsValidTask(task)) return false;
   if (!out_position) return false;
 
-  *out_position = engine->performer_controller().GetTask(task.index).position;
+  *out_position = engine->GetTask(task.index).position;
   return true;
 }
 
@@ -389,7 +388,7 @@ bool BarelyTask_GetPriority(const BarelyEngine* engine, BarelyRef task, int32_t*
   if (!engine->IsValidTask(task)) return false;
   if (!out_priority) return false;
 
-  *out_priority = engine->performer_controller().GetTask(task.index).priority;
+  *out_priority = engine->GetTask(task.index).priority;
   return true;
 }
 
@@ -398,7 +397,7 @@ bool BarelyTask_IsActive(const BarelyEngine* engine, BarelyRef task, bool* out_i
   if (!engine->IsValidTask(task)) return false;
   if (!out_is_active) return false;
 
-  *out_is_active = engine->performer_controller().GetTask(task.index).is_active;
+  *out_is_active = engine->GetTask(task.index).is_active;
   return true;
 }
 

@@ -34,42 +34,21 @@ using ::barely::NoteOffMessage;
 using ::barely::NoteOnMessage;
 using ::barely::SampleDataMessage;
 
-// Returns an engine control array.
-EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
-  return {
-      Control(0.0f, 0.0f, 1.0f),                // kCompressorMix
-      Control(0.0f, 0.0f, 10.0f),               // kCompressorAttack
-      Control(0.0f, 0.0f, 10.0f),               // kCompressorRelease
-      Control(1.0f, 0.0f, 1.0f),                // kCompressorThreshold
-      Control(1.0f, 1.0f, 64.0f),               // kCompressorRatio
-      Control(1.0f, 0.0f, 1.0f),                // kDelayMix
-      Control(0.0f, 0.0f, 10.0f),               // kDelayTime
-      Control(0.0f, 0.0f, 1.0f),                // kDelayFeedback
-      Control(sample_rate, 0.0f, sample_rate),  // kDelayLowPassFrequency
-      Control(0.0f, 0.0f, sample_rate),         // kDelayHighPassFrequency
-      Control(1.0f, 0.0f, 1.0f),                // kSidechainMix
-      Control(0.0f, 0.0f, 10.0f),               // kSidechainAttack
-      Control(0.0f, 0.0f, 10.0f),               // kSidechainRelease
-      Control(1.0f, 0.0f, 1.0f),                // kSidechainThreshold
-      Control(1.0f, 1.0f, 64.0f),               // kSidechainRatio
-  };
-}
-
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 BarelyEngine::BarelyEngine(int sample_rate, int max_frame_count) noexcept
-    : controls_(BuildEngineControlArray(static_cast<float>(sample_rate))),
-      processor_(sample_rate),
-      output_samples_(kStereoChannelCount * max_frame_count),
-      sample_rate_(sample_rate),
-      instrument_controller_(message_queue_, update_frame_) {
+    : state_(sample_rate),
+      instrument_controller_(state_),
+      performer_controller_(state_),
+      processor_(state_),
+      output_samples_(kStereoChannelCount * max_frame_count) {
   assert(sample_rate >= 0);
   assert(max_frame_count > 0);
 }
 
 float BarelyEngine::GetControl(BarelyEngineControlType type) const noexcept {
-  return controls_[type].value;
+  return state_.controls[type].value;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -81,13 +60,13 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
 
   std::fill_n(output_samples_.begin(), kStereoChannelCount * output_frame_count, 0.0f);
 
-  const int64_t process_frame = barely::SecondsToFrames(sample_rate_, timestamp);
+  const int64_t process_frame = barely::SecondsToFrames(state_.sample_rate, timestamp);
   const int64_t end_frame = process_frame + output_frame_count;
   int current_frame = 0;
 
   // Process *all* messages before the end sample.
-  for (auto* message = message_queue_.GetNext(end_frame); message;
-       message = message_queue_.GetNext(end_frame)) {
+  for (auto* message = state_.message_queue.GetNext(end_frame); message;
+       message = state_.message_queue.GetNext(end_frame)) {
     if (const int message_frame = static_cast<int>(message->first - process_frame);
         current_frame < message_frame) {
       processor_.Process(&output_samples_[kStereoChannelCount * current_frame],
@@ -119,23 +98,20 @@ void BarelyEngine::Process(float* output_samples, int output_channel_count, int 
   }
 }
 
-void BarelyEngine::ScheduleMessage(barely::Message message) noexcept {
-  message_queue_.Add(update_frame_, std::move(message));
-}
-
 void BarelyEngine::SetControl(BarelyEngineControlType type, float value) noexcept {
-  if (auto& control = controls_[type]; control.SetValue(value)) {
+  if (auto& control = state_.controls[type]; control.SetValue(value)) {
     ScheduleMessage(EngineControlMessage{type, control.value});
   }
 }
 
-void BarelyEngine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
+void BarelyEngine::SetTempo(double tempo) noexcept { state_.tempo = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void BarelyEngine::Update(double timestamp) noexcept {
-  while (timestamp_ < timestamp) {
-    if (tempo_ > 0.0) {
-      const double update_duration = barely::SecondsToBeats(tempo_, timestamp - timestamp_);
+  while (state_.timestamp < timestamp) {
+    if (state_.tempo > 0.0) {
+      const double update_duration =
+          barely::SecondsToBeats(state_.tempo, timestamp - state_.timestamp);
 
       auto next_key = performer_controller_.GetNextTaskKey(update_duration);
       if (const double next_duration = instrument_controller_.GetNextDuration();
@@ -148,19 +124,19 @@ void BarelyEngine::Update(double timestamp) noexcept {
         performer_controller_.Update(next_update_duration);
         instrument_controller_.Update(next_update_duration);
 
-        timestamp_ += barely::BeatsToSeconds(tempo_, next_update_duration);
-        update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);
+        state_.timestamp += barely::BeatsToSeconds(state_.tempo, next_update_duration);
+        state_.update_frame = barely::SecondsToFrames(state_.sample_rate, state_.timestamp);
       }
 
       if (next_update_duration < update_duration) {
         performer_controller_.ProcessAllTasksAtPosition(max_priority);
         if (max_priority == std::numeric_limits<int>::max()) {
-          instrument_controller_.ProcessArp(main_rng_);
+          instrument_controller_.ProcessArp(state_.main_rng);
         }
       }
-    } else if (timestamp_ < timestamp) {
-      timestamp_ = timestamp;
-      update_frame_ = barely::SecondsToFrames(sample_rate_, timestamp_);
+    } else if (state_.timestamp < timestamp) {
+      state_.timestamp = timestamp;
+      state_.update_frame = barely::SecondsToFrames(state_.sample_rate, state_.timestamp);
     }
   }
 }

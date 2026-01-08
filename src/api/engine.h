@@ -13,9 +13,12 @@
 #include "core/rng.h"
 #include "dsp/control.h"
 #include "engine/engine_processor.h"
+#include "engine/engine_state.h"
 #include "engine/instrument_controller.h"
 #include "engine/message_queue.h"
 #include "engine/performer_controller.h"
+#include "engine/performer_state.h"
+#include "engine/task_state.h"
 
 /// Implementation of an engine.
 struct BarelyEngine {
@@ -27,14 +30,27 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   BarelyEngine(int sample_rate, int max_frame_count) noexcept;
 
+  [[nodiscard]] barely::PerformerState& GetPerformer(uint32_t performer_index) noexcept {
+    return state_.performer_pool.Get(performer_index);
+  }
+
+  [[nodiscard]] const barely::PerformerState& GetPerformer(
+      uint32_t performer_index) const noexcept {
+    return state_.performer_pool.Get(performer_index);
+  }
+
+  [[nodiscard]] const barely::TaskState& GetTask(uint32_t task_index) const noexcept {
+    return state_.task_pool.Get(task_index);
+  }
+
   [[nodiscard]] bool IsValidInstrument(BarelyRef instrument) const noexcept {
-    return instrument_controller_.IsActive(instrument);
+    return state_.instrument_pool.IsActive(instrument.index, instrument.generation);
   }
   [[nodiscard]] bool IsValidPerformer(BarelyRef performer) const noexcept {
-    return performer_controller_.IsActive(performer);
+    return state_.performer_pool.IsActive(performer.index, performer.generation);
   }
   [[nodiscard]] bool IsValidTask(BarelyRef task) const noexcept {
-    return performer_controller_.IsActiveTask(task);
+    return state_.task_pool.IsActive(task.index, task.generation);
   }
 
   /// Returns a control value.
@@ -46,17 +62,17 @@ struct BarelyEngine {
   /// Returns the sampling rate.
   ///
   /// @return Sampling rate in hertz.
-  [[nodiscard]] double GetSampleRate() const noexcept { return sample_rate_; }
+  [[nodiscard]] double GetSampleRate() const noexcept { return state_.sample_rate; }
 
   /// Returns the tempo.
   ///
   /// @return Tempo in beats per minute.
-  [[nodiscard]] double GetTempo() const noexcept { return tempo_; }
+  [[nodiscard]] double GetTempo() const noexcept { return state_.tempo; }
 
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
-  [[nodiscard]] double GetTimestamp() const noexcept { return timestamp_; }
+  [[nodiscard]] double GetTimestamp() const noexcept { return state_.timestamp; }
 
   /// Processes output samples at timestamp.
   ///
@@ -71,7 +87,9 @@ struct BarelyEngine {
   /// Schedules a new message in the queue.
   ///
   /// @param message Message
-  void ScheduleMessage(barely::Message message) noexcept;
+  void ScheduleMessage(barely::Message message) noexcept {
+    state_.ScheduleMessage(std::move(message));
+  }
 
   /// Sets a control value.
   ///
@@ -90,8 +108,8 @@ struct BarelyEngine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
-  const barely::MainRng& main_rng() const noexcept { return main_rng_; }
-  barely::MainRng& main_rng() noexcept { return main_rng_; }
+  const barely::MainRng& main_rng() const noexcept { return state_.main_rng; }
+  barely::MainRng& main_rng() noexcept { return state_.main_rng; }
   barely::InstrumentController& instrument_controller() noexcept { return instrument_controller_; }
   const barely::InstrumentController& instrument_controller() const noexcept {
     return instrument_controller_;
@@ -102,35 +120,11 @@ struct BarelyEngine {
   }
 
  private:
-  // Array of engine controls.
-  barely::EngineControlArray controls_;
-
-  // Engine processor.
-  barely::EngineProcessor processor_;
-
-  // Random number generator for the main thread.
-  barely::MainRng main_rng_;
-
-  // Message queue.
-  barely::MessageQueue message_queue_;
-
+  barely::EngineState state_;
   barely::InstrumentController instrument_controller_;
   barely::PerformerController performer_controller_;
-
-  // Output samples.
+  barely::EngineProcessor processor_;
   std::vector<float> output_samples_;
-
-  // Tempo in beats per minute.
-  double tempo_ = 120.0;
-
-  // Timestamp in seconds.
-  double timestamp_ = 0.0;
-
-  // Update frame.
-  int64_t update_frame_ = 0;
-
-  // Sampling rate in hertz.
-  int sample_rate_ = 0;
 };
 
 #endif  // BARELYMUSICIAN_API_ENGINE_H_

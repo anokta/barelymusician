@@ -16,6 +16,7 @@
 #include "dsp/one_pole_filter.h"
 #include "dsp/sidechain.h"
 #include "engine/effect_params.h"
+#include "engine/engine_state.h"
 #include "engine/instrument_processor.h"
 #include "engine/message.h"
 
@@ -24,15 +25,8 @@ namespace barely {
 /// Class that wraps the audio processing of an effect.
 class EngineProcessor {
  public:
-  /// Constructs a new `EngineProcessor`.
-  ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit EngineProcessor(int sample_rate) noexcept
-      : sample_rate_(sample_rate),
-        sample_interval_(1.0f / static_cast<float>(sample_rate)),
-        instrument_processor_(rng_, sample_interval_) {
-    assert(sample_rate > 0);
-  }
+  explicit EngineProcessor(EngineState& engine) noexcept
+      : engine_(engine), instrument_processor_(engine_) {}
 
   /// Processes the next output samples.
   ///
@@ -46,15 +40,16 @@ class EngineProcessor {
       float* output_frame = &output_samples[kStereoChannelCount * frame];
 
       instrument_processor_.ProcessAllVoices<true>(delay_frame, sidechain_frame, output_frame);
-      sidechain_.Process(sidechain_frame, current_params_.sidechain_mix,
-                         current_params_.sidechain_threshold_db, current_params_.sidechain_ratio);
+      engine_.sidechain.Process(sidechain_frame, engine_.current_params.sidechain_mix,
+                                engine_.current_params.sidechain_threshold_db,
+                                engine_.current_params.sidechain_ratio);
       instrument_processor_.ProcessAllVoices<false>(delay_frame, sidechain_frame, output_frame);
 
-      delay_filter_.Process(delay_frame, output_frame, current_params_.delay_params);
+      engine_.delay_filter.Process(delay_frame, output_frame, engine_.current_params.delay_params);
 
-      compressor_.Process(output_frame, current_params_.compressor_params);
+      engine_.compressor.Process(output_frame, engine_.current_params.compressor_params);
 
-      Approach();
+      engine_.Approach();
     }
   }
 
@@ -64,7 +59,7 @@ class EngineProcessor {
                          SetControl(engine_control_message.type, engine_control_message.value);
                        },
                        [this](EngineSeedMessage& engine_seed_message) noexcept {
-                         rng_.SetSeed(engine_seed_message.seed);
+                         engine_.audio_rng.SetSeed(engine_seed_message.seed);
                        },
                        [this](InstrumentCreateMessage& instrument_create_message) noexcept {
                          instrument_processor_.Init(instrument_create_message.instrument_index);
@@ -103,50 +98,53 @@ class EngineProcessor {
   void SetControl(BarelyEngineControlType type, float value) noexcept {
     switch (type) {
       case BarelyEngineControlType_kCompressorMix:
-        target_params_.compressor_params.mix = value;
+        engine_.target_params.compressor_params.mix = value;
         break;
       case BarelyEngineControlType_kCompressorAttack:
-        compressor_.SetAttack(value, sample_interval_);
+        engine_.compressor.SetAttack(value, engine_.sample_interval);
         break;
       case BarelyEngineControlType_kCompressorRelease:
-        compressor_.SetRelease(value, sample_interval_);
+        engine_.compressor.SetRelease(value, engine_.sample_interval);
         break;
       case BarelyEngineControlType_kCompressorThreshold:
-        target_params_.compressor_params.threshold_db = AmplitudeToDecibels(value);
+        engine_.target_params.compressor_params.threshold_db = AmplitudeToDecibels(value);
         break;
       case BarelyEngineControlType_kCompressorRatio:
-        target_params_.compressor_params.ratio = value;
+        engine_.target_params.compressor_params.ratio = value;
         break;
       case BarelyEngineControlType_kDelayMix:
-        target_params_.delay_params.mix = value;
+        engine_.target_params.delay_params.mix = value;
         break;
       case BarelyEngineControlType_kDelayTime:
-        target_params_.delay_params.frame_count = std::min(value * static_cast<float>(sample_rate_),
-                                                           static_cast<float>(kMaxDelayFrameCount));
+        engine_.target_params.delay_params.frame_count =
+            std::min(value * static_cast<float>(engine_.sample_rate),
+                     static_cast<float>(kMaxDelayFrameCount));
         break;
       case BarelyEngineControlType_kDelayFeedback:
-        target_params_.delay_params.feedback = value;
+        engine_.target_params.delay_params.feedback = value;
         break;
       case BarelyEngineControlType_kDelayLowPassFrequency:
-        target_params_.delay_params.low_pass_coeff = GetFilterCoefficient(sample_rate_, value);
+        engine_.target_params.delay_params.low_pass_coeff =
+            GetFilterCoefficient(engine_.sample_rate, value);
         break;
       case BarelyEngineControlType_kDelayHighPassFrequency:
-        target_params_.delay_params.high_pass_coeff = GetFilterCoefficient(sample_rate_, value);
+        engine_.target_params.delay_params.high_pass_coeff =
+            GetFilterCoefficient(engine_.sample_rate, value);
         break;
       case BarelyEngineControlType_kSidechainMix:
-        target_params_.sidechain_mix = value;
+        engine_.target_params.sidechain_mix = value;
         break;
       case BarelyEngineControlType_kSidechainAttack:
-        sidechain_.SetAttack(value, sample_interval_);
+        engine_.sidechain.SetAttack(value, engine_.sample_interval);
         break;
       case BarelyEngineControlType_kSidechainRelease:
-        sidechain_.SetRelease(value, sample_interval_);
+        engine_.sidechain.SetRelease(value, engine_.sample_interval);
         break;
       case BarelyEngineControlType_kSidechainThreshold:
-        target_params_.sidechain_threshold_db = AmplitudeToDecibels(value);
+        engine_.target_params.sidechain_threshold_db = AmplitudeToDecibels(value);
         break;
       case BarelyEngineControlType_kSidechainRatio:
-        target_params_.sidechain_ratio = value;
+        engine_.target_params.sidechain_ratio = value;
         break;
       default:
         assert(!"Invalid engine control type");
@@ -155,40 +153,7 @@ class EngineProcessor {
   }
 
  private:
-  // Approaches parameters.
-  void Approach() noexcept {
-    current_params_.compressor_params.Approach(target_params_.compressor_params);
-    current_params_.delay_params.Approach(target_params_.delay_params);
-    ApproachValue(current_params_.sidechain_mix, target_params_.sidechain_mix);
-    ApproachValue(current_params_.sidechain_threshold_db, target_params_.sidechain_threshold_db);
-    ApproachValue(current_params_.sidechain_ratio, target_params_.sidechain_ratio);
-  }
-
-  // Random number generator for the audio thread.
-  AudioRng rng_;
-
-  // Compressor.
-  Compressor compressor_;
-
-  // Delay filter.
-  DelayFilter delay_filter_;
-
-  // Sidechain.
-  Sidechain sidechain_;
-
-  // Current parameters.
-  EffectParams current_params_ = {};
-
-  // Target parameters.
-  EffectParams target_params_ = {};
-
-  // Sampling rate in hertz.
-  int sample_rate_ = 0;
-
-  // Sampling interval in seconds.
-  float sample_interval_ = 0.0f;
-
-  // Instrument processor.
+  EngineState& engine_;
   InstrumentProcessor instrument_processor_;
 };
 

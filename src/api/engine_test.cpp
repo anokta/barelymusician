@@ -26,7 +26,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
   // Create a performer.
   const auto performer_index = engine->performer_controller().Acquire().index;
-  auto& performer = engine->performer_controller().Get(performer_index);
+  auto& performer = engine->GetPerformer(performer_index);
 
   // Create a task.
   barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;
@@ -45,7 +45,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
                                   },
                                   &process_callback)
                               .index;
-  auto& task = engine->performer_controller().GetTask(task_index);
+  auto& task = engine->GetTask(task_index);
 
   // Start the performer with a tempo of one beat per second.
   engine->SetTempo(60.0);

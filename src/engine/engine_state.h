@@ -1,0 +1,125 @@
+#ifndef BARELYMUSICIAN_ENGINE_ENGINE_STATE_H_
+#define BARELYMUSICIAN_ENGINE_ENGINE_STATE_H_
+
+#include <array>
+#include <cstdint>
+
+#include "core/pool.h"
+#include "core/rng.h"
+#include "dsp/compressor.h"
+#include "dsp/control.h"
+#include "dsp/delay_filter.h"
+#include "dsp/sidechain.h"
+#include "engine/effect_params.h"
+#include "engine/instrument_params.h"
+#include "engine/instrument_state.h"
+#include "engine/message.h"
+#include "engine/message_queue.h"
+#include "engine/performer_state.h"
+#include "engine/task_state.h"
+#include "engine/voice_state.h"
+
+namespace barely {
+
+/// Returns an engine control array.
+inline EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
+  return {
+      Control(0.0f, 0.0f, 1.0f),                // kCompressorMix
+      Control(0.0f, 0.0f, 10.0f),               // kCompressorAttack
+      Control(0.0f, 0.0f, 10.0f),               // kCompressorRelease
+      Control(1.0f, 0.0f, 1.0f),                // kCompressorThreshold
+      Control(1.0f, 1.0f, 64.0f),               // kCompressorRatio
+      Control(1.0f, 0.0f, 1.0f),                // kDelayMix
+      Control(0.0f, 0.0f, 10.0f),               // kDelayTime
+      Control(0.0f, 0.0f, 1.0f),                // kDelayFeedback
+      Control(sample_rate, 0.0f, sample_rate),  // kDelayLowPassFrequency
+      Control(0.0f, 0.0f, sample_rate),         // kDelayHighPassFrequency
+      Control(1.0f, 0.0f, 1.0f),                // kSidechainMix
+      Control(0.0f, 0.0f, 10.0f),               // kSidechainAttack
+      Control(0.0f, 0.0f, 10.0f),               // kSidechainRelease
+      Control(1.0f, 0.0f, 1.0f),                // kSidechainThreshold
+      Control(1.0f, 1.0f, 64.0f),               // kSidechainRatio
+  };
+}
+
+struct EngineState {
+  // Performer pool.
+  Pool<PerformerState, BARELYMUSICIAN_MAX_PERFORMER_COUNT> performer_pool = {};
+
+  // Task pool.
+  Pool<TaskState, BARELYMUSICIAN_MAX_TASK_COUNT> task_pool = {};
+
+  // Instrument pool.
+  Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_pool = {};
+
+  /// Array of engine controls.
+  EngineControlArray controls = {};
+
+  /// Random number generator for the main thread.
+  MainRng main_rng = {};
+
+  /// Message queue.
+  MessageQueue message_queue = {};
+
+  /// Array of instrument parameters.
+  std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1> instrument_params = {};
+
+  /// Voice pool.
+  Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT> voice_pool = {};
+
+  /// Random number generator for the audio thread.
+  AudioRng audio_rng = {};
+
+  /// Current parameters.
+  EffectParams current_params = {};
+
+  /// Target parameters.
+  EffectParams target_params = {};
+
+  /// Compressor.
+  Compressor compressor = {};
+
+  /// Delay filter.
+  DelayFilter delay_filter = {};
+
+  /// Sidechain.
+  Sidechain sidechain = {};
+
+  /// Tempo in beats per minute.
+  double tempo = 120.0;
+
+  /// Timestamp in seconds.
+  double timestamp = 0.0;
+
+  /// Update frame.
+  int64_t update_frame = 0;
+
+  /// Sampling interval in seconds.
+  float sample_interval = 0;
+
+  /// Sampling rate in hertz.
+  int32_t sample_rate = 0;
+
+  explicit EngineState(int sample_rate) noexcept
+      : sample_interval(1.0f / static_cast<float>(sample_rate)),
+        sample_rate(sample_rate),
+        controls(BuildEngineControlArray(static_cast<float>(sample_rate))) {}
+
+  /// Approaches parameters.
+  void Approach() noexcept {
+    current_params.compressor_params.Approach(target_params.compressor_params);
+    current_params.delay_params.Approach(target_params.delay_params);
+    ApproachValue(current_params.sidechain_mix, target_params.sidechain_mix);
+    ApproachValue(current_params.sidechain_threshold_db, target_params.sidechain_threshold_db);
+    ApproachValue(current_params.sidechain_ratio, target_params.sidechain_ratio);
+  }
+
+  /// Schedules a new message in the queue.
+  void ScheduleMessage(Message message) noexcept {
+    message_queue.Add(update_frame, std::move(message));
+  }
+};
+
+}  // namespace barely
+
+#endif  // BARELYMUSICIAN_ENGINE_ENGINE_STATE_H_

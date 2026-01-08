@@ -4,6 +4,7 @@
 
 #include <array>
 #include <functional>
+#include <memory>
 
 #include "engine/message.h"
 #include "engine/performer_state.h"
@@ -21,11 +22,11 @@ constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 // Tests that a single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
-  BarelyEngine engine(kSampleRate, kSampleRate);
+  auto engine = std::make_unique<BarelyEngine>(kSampleRate, kSampleRate);
 
   // Create a performer.
-  const auto performer_index = engine.performer_controller().Acquire().index;
-  auto& performer = engine.performer_controller().Get(performer_index);
+  const auto performer_index = engine->performer_controller().Acquire().index;
+  auto& performer = engine->performer_controller().Get(performer_index);
 
   // Create a task.
   barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;
@@ -35,7 +36,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
     task_position = performer.position;
   };
 
-  const auto task_index = engine.performer_controller()
+  const auto task_index = engine->performer_controller()
                               .AcquireTask(
                                   performer_index, 1.0, 2.0, 0,
                                   [](BarelyTaskEventType type, void* user_data) {
@@ -44,11 +45,11 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
                                   },
                                   &process_callback)
                               .index;
-  auto& task = engine.performer_controller().GetTask(task_index);
+  auto& task = engine->performer_controller().GetTask(task_index);
 
   // Start the performer with a tempo of one beat per second.
-  engine.SetTempo(60.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
+  engine->SetTempo(60.0);
+  EXPECT_DOUBLE_EQ(engine->GetTempo(), 60.0);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
@@ -58,7 +59,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
   // Update the timestamp just before the task, which should not be triggered.
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(1.0, 0)));
-  engine.Update(1.0);
+  engine->Update(1.0);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
   EXPECT_DOUBLE_EQ(performer.position, 1.0);
   EXPECT_FALSE(task.is_active);
@@ -67,7 +68,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
   // Update the timestamp inside the task, which should be triggered now.
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
-  engine.Update(2.5);
+  engine->Update(2.5);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
   EXPECT_DOUBLE_EQ(performer.position, 2.5);
   EXPECT_TRUE(task.is_active);
@@ -76,7 +77,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
   // Update the timestamp just past the task, which should not be active anymore.
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
-  engine.Update(3.0);
+  engine->Update(3.0);
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
   EXPECT_DOUBLE_EQ(performer.position, 3.0);
   EXPECT_FALSE(task.is_active);
@@ -92,36 +93,36 @@ TEST(EngineTest, PlaySingleNote) {
       BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
   };
 
-  BarelyEngine engine(kSampleRate, kFrameCount);
-  const auto instrument = engine.instrument_controller().Acquire(nullptr, 0);
-  engine.ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
+  auto engine = std::make_unique<BarelyEngine>(kSampleRate, kFrameCount);
+  const auto instrument = engine->instrument_controller().Acquire(nullptr, 0);
+  engine->ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
 
   std::array<float, kChannelCount * kFrameCount> samples;
 
   // Control is set to its default value.
   samples.fill(0.0f);
-  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
+  engine->Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
 
   // Set a note on.
-  engine.instrument_controller().SetNoteOn(instrument.index, kPitch, nullptr, 0);
-  EXPECT_TRUE(engine.instrument_controller().IsNoteOn(instrument.index, kPitch));
+  engine->instrument_controller().SetNoteOn(instrument.index, kPitch, nullptr, 0);
+  EXPECT_TRUE(engine->instrument_controller().IsNoteOn(instrument.index, kPitch));
 
   samples.fill(0.0f);
-  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
+  engine->Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i],
                     (i / kChannelCount < kSampleRate) ? 0.5f * kSamples[i / kChannelCount] : 0.0f);
   }
 
   // Set the note off.
-  engine.instrument_controller().SetNoteOff(instrument.index, kPitch);
-  EXPECT_FALSE(engine.instrument_controller().IsNoteOn(instrument.index, kPitch));
+  engine->instrument_controller().SetNoteOff(instrument.index, kPitch);
+  EXPECT_FALSE(engine->instrument_controller().IsNoteOn(instrument.index, kPitch));
 
   samples.fill(0.0f);
-  engine.Process(samples.data(), kChannelCount, kFrameCount, 0);
+  engine->Process(samples.data(), kChannelCount, kFrameCount, 0);
   for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -136,34 +137,34 @@ TEST(EngineTest, PlayMultipleNotes) {
       BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
   };
 
-  BarelyEngine engine(1, kSampleRate);
-  const auto instrument = engine.instrument_controller().Acquire(nullptr, 0);
-  engine.ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
+  auto engine = std::make_unique<BarelyEngine>(1, kSampleRate);
+  const auto instrument = engine->instrument_controller().Acquire(nullptr, 0);
+  engine->ScheduleMessage(barely::SampleDataMessage{instrument.index, barely::SampleData(kSlices)});
 
   std::array<float, kChannelCount * kSampleRate> samples;
 
   // Control is set to its default value.
   samples.fill(0.0f);
-  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
+  engine->Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
 
   // Start a new note per each i in the samples.
   for (int i = 0; i < kSampleRate; ++i) {
-    engine.instrument_controller().SetNoteOn(instrument.index, static_cast<float>(i), nullptr, 0);
-    engine.Update(i + 1);
-    engine.instrument_controller().SetNoteOff(instrument.index, static_cast<float>(i));
+    engine->instrument_controller().SetNoteOn(instrument.index, static_cast<float>(i), nullptr, 0);
+    engine->Update(i + 1);
+    engine->instrument_controller().SetNoteOff(instrument.index, static_cast<float>(i));
   }
 
   samples.fill(0.0f);
-  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
+  engine->Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i / kChannelCount]);
   }
 
   samples.fill(0.0f);
-  engine.Process(samples.data(), kChannelCount, kSampleRate, 0);
+  engine->Process(samples.data(), kChannelCount, kSampleRate, 0);
   for (int i = 0; i < kChannelCount * kSampleRate; ++i) {
     EXPECT_FLOAT_EQ(samples[i], 0.0f);
   }
@@ -171,17 +172,17 @@ TEST(EngineTest, PlayMultipleNotes) {
 
 // Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
-  BarelyEngine engine(kSampleRate, kSampleRate);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
+  auto engine = std::make_unique<BarelyEngine>(kSampleRate, kSampleRate);
+  EXPECT_DOUBLE_EQ(engine->GetTempo(), 120.0);
 
-  engine.SetTempo(200.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 200.0);
+  engine->SetTempo(200.0);
+  EXPECT_DOUBLE_EQ(engine->GetTempo(), 200.0);
 
-  engine.SetTempo(0.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 0.0);
+  engine->SetTempo(0.0);
+  EXPECT_DOUBLE_EQ(engine->GetTempo(), 0.0);
 
-  engine.SetTempo(-100.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 0.0);
+  engine->SetTempo(-100.0);
+  EXPECT_DOUBLE_EQ(engine->GetTempo(), 0.0);
 }
 
 }  // namespace

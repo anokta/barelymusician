@@ -34,12 +34,6 @@ struct CompressorParams {
 /// Compressor.
 class Compressor {
  public:
-  /// Constructs a new `Compressor`.
-  ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit Compressor(int sample_rate) noexcept
-      : sample_interval_(1.0f / static_cast<float>(sample_rate)) {}
-
   /// Processes the next compressor frame.
   ///
   /// @param frame Input/output frame.
@@ -64,21 +58,20 @@ class Compressor {
   /// Sets the attack.
   ///
   /// @param attack Attack in seconds.
-  void SetAttack(float attack) noexcept {
-    attack_coeff_ = (attack > 0.0f) ? std::exp(-sample_interval_ / attack) : 0.0f;
+  /// @param sample_interval Sampling interval in seconds.
+  void SetAttack(float attack, float sample_interval) noexcept {
+    attack_coeff_ = (attack > 0.0f) ? std::exp(-sample_interval / attack) : 0.0f;
   }
 
   /// Sets the release.
   ///
   /// @param release Release in seconds.
-  void SetRelease(float release) noexcept {
-    release_coeff_ = (release > 0.0f) ? std::exp(-sample_interval_ / release) : 0.0f;
+  /// @param sample_interval Sampling interval in seconds.
+  void SetRelease(float release, float sample_interval) noexcept {
+    release_coeff_ = (release > 0.0f) ? std::exp(-sample_interval / release) : 0.0f;
   }
 
  private:
-  // Sample interval.
-  float sample_interval_ = 0.0f;
-
   // Attack coefficient.
   float attack_coeff_ = 0.0f;
 

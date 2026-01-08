@@ -15,31 +15,11 @@
 #include "dsp/delay_filter.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/sidechain.h"
+#include "engine/effect_params.h"
 #include "engine/instrument_processor.h"
 #include "engine/message.h"
 
 namespace barely {
-
-// Maximum number of delay seconds.
-inline constexpr int kMaxDelayFrameSeconds = 10;
-
-/// Effect parameters.
-struct EffectParams {
-  /// Compressor parameters.
-  CompressorParams compressor_params = {};
-
-  /// Delay parameters.
-  DelayParams delay_params = {};
-
-  /// Sidechain mix.
-  float sidechain_mix = 1.0f;
-
-  /// Sidechain threshold in decibels.
-  float sidechain_threshold_db = 0.0f;
-
-  /// Sidechain ratio.
-  float sidechain_ratio = 1.0f;
-};
 
 /// Class that wraps the audio processing of an effect.
 class EngineProcessor {
@@ -48,11 +28,9 @@ class EngineProcessor {
   ///
   /// @param sample_rate Sampling rate in hertz.
   explicit EngineProcessor(int sample_rate) noexcept
-      : instrument_processor_(rng_, 1.0f / static_cast<float>(sample_rate)),
-        compressor_(sample_rate),
-        delay_filter_(sample_rate * kMaxDelayFrameSeconds),
-        sidechain_(sample_rate),
-        sample_rate_(sample_rate) {
+      : sample_rate_(sample_rate),
+        sample_interval_(1.0f / static_cast<float>(sample_rate)),
+        instrument_processor_(rng_, sample_interval_) {
     assert(sample_rate > 0);
   }
 
@@ -128,10 +106,10 @@ class EngineProcessor {
         target_params_.compressor_params.mix = value;
         break;
       case BarelyEngineControlType_kCompressorAttack:
-        compressor_.SetAttack(value);
+        compressor_.SetAttack(value, sample_interval_);
         break;
       case BarelyEngineControlType_kCompressorRelease:
-        compressor_.SetRelease(value);
+        compressor_.SetRelease(value, sample_interval_);
         break;
       case BarelyEngineControlType_kCompressorThreshold:
         target_params_.compressor_params.threshold_db = AmplitudeToDecibels(value);
@@ -143,7 +121,8 @@ class EngineProcessor {
         target_params_.delay_params.mix = value;
         break;
       case BarelyEngineControlType_kDelayTime:
-        target_params_.delay_params.frame_count = value * static_cast<float>(sample_rate_);
+        target_params_.delay_params.frame_count = std::min(value * static_cast<float>(sample_rate_),
+                                                           static_cast<float>(kMaxDelayFrameCount));
         break;
       case BarelyEngineControlType_kDelayFeedback:
         target_params_.delay_params.feedback = value;
@@ -158,10 +137,10 @@ class EngineProcessor {
         target_params_.sidechain_mix = value;
         break;
       case BarelyEngineControlType_kSidechainAttack:
-        sidechain_.SetAttack(value);
+        sidechain_.SetAttack(value, sample_interval_);
         break;
       case BarelyEngineControlType_kSidechainRelease:
-        sidechain_.SetRelease(value);
+        sidechain_.SetRelease(value, sample_interval_);
         break;
       case BarelyEngineControlType_kSidechainThreshold:
         target_params_.sidechain_threshold_db = AmplitudeToDecibels(value);
@@ -188,9 +167,6 @@ class EngineProcessor {
   // Random number generator for the audio thread.
   AudioRng rng_;
 
-  // Instrument processor.
-  InstrumentProcessor instrument_processor_;
-
   // Compressor.
   Compressor compressor_;
 
@@ -208,6 +184,12 @@ class EngineProcessor {
 
   // Sampling rate in hertz.
   int sample_rate_ = 0;
+
+  // Sampling interval in seconds.
+  float sample_interval_ = 0.0f;
+
+  // Instrument processor.
+  InstrumentProcessor instrument_processor_;
 };
 
 }  // namespace barely

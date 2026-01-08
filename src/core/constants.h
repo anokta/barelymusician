@@ -5,6 +5,9 @@
 
 namespace barely {
 
+/// Maximum number of delay frames.
+inline constexpr int kMaxDelayFrameCount = 10 * 48000;
+
 /// Reference frequency which is tuned to middle C in hertz.
 inline constexpr float kReferenceFrequency = 261.62555f;
 

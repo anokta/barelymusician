@@ -44,8 +44,8 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kPitchShift:
       params.pitch_shift = value;
       params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
-                             kReferenceFrequency * engine_.sample_interval;
-      params.slice_increment = std::pow(2.0f, params.pitch_shift) * engine_.sample_interval;
+                             kReferenceFrequency / engine_.sample_rate;
+      params.slice_increment = std::pow(2.0f, params.pitch_shift) / engine_.sample_rate;
       break;
     case BarelyInstrumentControlType_kRetrigger:
       params.should_retrigger = static_cast<bool>(value);
@@ -57,16 +57,16 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.voice_count = static_cast<uint32_t>(value);
       break;
     case BarelyInstrumentControlType_kAttack:
-      params.adsr.SetAttack(engine_.sample_interval, value);
+      params.adsr.SetAttack(engine_.sample_rate, value);
       break;
     case BarelyInstrumentControlType_kDecay:
-      params.adsr.SetDecay(engine_.sample_interval, value);
+      params.adsr.SetDecay(engine_.sample_rate, value);
       break;
     case BarelyInstrumentControlType_kSustain:
       params.adsr.SetSustain(value);
       break;
     case BarelyInstrumentControlType_kRelease:
-      params.adsr.SetRelease(engine_.sample_interval, value);
+      params.adsr.SetRelease(engine_.sample_rate, value);
       break;
     case BarelyInstrumentControlType_kOscMix:
       params.voice_params.osc_mix = value;
@@ -80,7 +80,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kOscPitchShift:
       params.osc_pitch_shift = value;
       params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
-                             kReferenceFrequency * engine_.sample_interval;
+                             kReferenceFrequency / engine_.sample_rate;
       break;
     case BarelyInstrumentControlType_kOscShape:
       params.voice_params.osc_shape = value;
@@ -113,17 +113,17 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kFilterType:
       params.filter_type = static_cast<FilterType>(value);
       params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
+          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case BarelyInstrumentControlType_kFilterFrequency:
       params.filter_frequency = value;
       params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
+          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case BarelyInstrumentControlType_kFilterQ:
       params.filter_q = value;
       params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_interval, params.filter_type, params.filter_frequency, params.filter_q);
+          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
       break;
     case BarelyInstrumentControlType_kArpMode:
       [[fallthrough]];

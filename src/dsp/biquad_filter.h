@@ -53,23 +53,23 @@ class BiquadFilter {
 
 /// Returns the corresponding biquad filter coefficients for a given set of filter parameters.
 ///
-/// @param sample_interval Sampling interval in seconds.
+/// @param sample_rate Sampling rate in hertz.
 /// @param type Filter type.
 /// @param cutoff_frequency Cutoff frequency.
 /// @param q Resonance quality factor.
 /// @return Biquad filter coefficients.
-inline BiquadFilter::Coeffs GetFilterCoefficients(float sample_interval, FilterType type,
+inline BiquadFilter::Coeffs GetFilterCoefficients(float sample_rate, FilterType type,
                                                   float cutoff_frequency, float q) noexcept {
   if (type == FilterType::kNone) {
     return {};
   }
 
-  assert(sample_interval >= 0.0f);
+  assert(sample_rate > 0.0f);
   assert(cutoff_frequency >= 0.0f);
   assert(q > 0.0f);
 
   const float w0 =
-      2.0f * std::numbers::pi_v<float> * std::min(0.5f, cutoff_frequency * sample_interval);
+      2.0f * std::numbers::pi_v<float> * std::min(0.5f, cutoff_frequency / sample_rate);
   const float cosw0 = std::cos(w0);
   const float alpha = std::sin(w0) / (2.0f * q);
   const float a0 = 1.0f + alpha;

@@ -12,8 +12,10 @@
 #include "engine/message.h"
 
 struct BarelyEngine {
-  explicit BarelyEngine(int sample_rate) noexcept
-      : state(sample_rate), controller(state), processor(state) {}
+  explicit BarelyEngine(int sample_rate) noexcept : controller(state), processor(state) {
+    state.sample_rate = static_cast<float>(sample_rate);
+    state.controls = barely::BuildEngineControlArray(state.sample_rate);
+  }
 
   barely::EngineState state;
   barely::EngineController controller;

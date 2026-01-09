@@ -6,6 +6,7 @@
 
 #include "core/pool.h"
 #include "core/rng.h"
+#include "core/time.h"
 #include "dsp/compressor.h"
 #include "dsp/control.h"
 #include "dsp/delay_filter.h"
@@ -52,6 +53,9 @@ struct EngineState {
   // Instrument pool.
   Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_pool = {};
 
+  /// Array of engine controls.
+  EngineControlArray controls = {};
+
   /// Random number generator for the main thread.
   MainRng main_rng = {};
 
@@ -88,22 +92,8 @@ struct EngineState {
   /// Timestamp in seconds.
   double timestamp = 0.0;
 
-  /// Update frame.
-  int64_t update_frame = 0;
-
   /// Sampling rate in hertz.
-  int32_t sample_rate = 0;
-
-  /// Sampling interval in seconds.
-  float sample_interval = 0;
-
-  /// Array of engine controls.
-  EngineControlArray controls = {};
-
-  explicit EngineState(int engine_sample_rate) noexcept
-      : sample_rate(engine_sample_rate),
-        sample_interval(1.0f / static_cast<float>(sample_rate)),
-        controls(BuildEngineControlArray(static_cast<float>(sample_rate))) {}
+  float sample_rate = 0.0f;
 
   /// Approaches parameters.
   void Approach() noexcept {
@@ -116,7 +106,7 @@ struct EngineState {
 
   /// Schedules a new message in the queue.
   void ScheduleMessage(Message message) noexcept {
-    message_queue.Add(update_frame, std::move(message));
+    message_queue.Add(SecondsToFrames(sample_rate, timestamp), std::move(message));
   }
 
   [[nodiscard]] PerformerState& GetPerformer(uint32_t performer_index) noexcept {

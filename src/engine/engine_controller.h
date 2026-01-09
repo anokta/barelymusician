@@ -46,7 +46,6 @@ class EngineController {
           instrument_controller_.Update(next_update_duration);
 
           engine_.timestamp += BeatsToSeconds(engine_.tempo, next_update_duration);
-          engine_.update_frame = SecondsToFrames(engine_.sample_rate, engine_.timestamp);
         }
 
         if (next_update_duration < update_duration) {
@@ -57,7 +56,6 @@ class EngineController {
         }
       } else if (engine_.timestamp < timestamp) {
         engine_.timestamp = timestamp;
-        engine_.update_frame = SecondsToFrames(engine_.sample_rate, engine_.timestamp);
       }
     }
   }

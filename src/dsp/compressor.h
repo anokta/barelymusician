@@ -58,17 +58,17 @@ class Compressor {
   /// Sets the attack.
   ///
   /// @param attack Attack in seconds.
-  /// @param sample_interval Sampling interval in seconds.
-  void SetAttack(float attack, float sample_interval) noexcept {
-    attack_coeff_ = (attack > 0.0f) ? std::exp(-sample_interval / attack) : 0.0f;
+  /// @param sample_rate Sampling rate in hertz.
+  void SetAttack(float attack, float sample_rate) noexcept {
+    attack_coeff_ = (attack > 0.0f) ? std::exp(-1.0f / (attack * sample_rate)) : 0.0f;
   }
 
   /// Sets the release.
   ///
   /// @param release Release in seconds.
-  /// @param sample_interval Sampling interval in seconds.
-  void SetRelease(float release, float sample_interval) noexcept {
-    release_coeff_ = (release > 0.0f) ? std::exp(-sample_interval / release) : 0.0f;
+  /// @param sample_rate Sampling rate in hertz.
+  void SetRelease(float release, float sample_rate) noexcept {
+    release_coeff_ = (release > 0.0f) ? std::exp(-1.0f / (release * sample_rate)) : 0.0f;
   }
 
  private:

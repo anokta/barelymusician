@@ -91,10 +91,10 @@ class EngineProcessor {
         engine_.target_params.compressor_params.mix = value;
         break;
       case BarelyEngineControlType_kCompressorAttack:
-        engine_.compressor.SetAttack(value, engine_.sample_interval);
+        engine_.compressor.SetAttack(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kCompressorRelease:
-        engine_.compressor.SetRelease(value, engine_.sample_interval);
+        engine_.compressor.SetRelease(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kCompressorThreshold:
         engine_.target_params.compressor_params.threshold_db = AmplitudeToDecibels(value);
@@ -107,8 +107,7 @@ class EngineProcessor {
         break;
       case BarelyEngineControlType_kDelayTime:
         engine_.target_params.delay_params.frame_count =
-            std::min(value * static_cast<float>(engine_.sample_rate),
-                     static_cast<float>(kMaxDelayFrameCount));
+            std::min(value * engine_.sample_rate, static_cast<float>(kMaxDelayFrameCount));
         break;
       case BarelyEngineControlType_kDelayFeedback:
         engine_.target_params.delay_params.feedback = value;
@@ -125,10 +124,10 @@ class EngineProcessor {
         engine_.target_params.sidechain_mix = value;
         break;
       case BarelyEngineControlType_kSidechainAttack:
-        engine_.sidechain.SetAttack(value, engine_.sample_interval);
+        engine_.sidechain.SetAttack(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kSidechainRelease:
-        engine_.sidechain.SetRelease(value, engine_.sample_interval);
+        engine_.sidechain.SetRelease(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kSidechainThreshold:
         engine_.target_params.sidechain_threshold_db = AmplitudeToDecibels(value);

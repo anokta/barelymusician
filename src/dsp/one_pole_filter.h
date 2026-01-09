@@ -45,12 +45,11 @@ class OnePoleFilter {
 /// @param sample_rate Sampling rate in hertz.
 /// @param cuttoff_frequency Cutoff frequency in hertz.
 /// @return Filter coefficient.
-inline float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) noexcept {
-  assert(sample_rate > 0);
+inline float GetFilterCoefficient(float sample_rate, float cuttoff_frequency) noexcept {
+  assert(sample_rate > 0.0f);
   assert(cuttoff_frequency >= 0.0f);
   // c = exp(-2 * pi * fc / fs).
-  return std::clamp(std::exp(-2.0f * std::numbers::pi_v<float> * cuttoff_frequency /
-                             static_cast<float>(sample_rate)),
+  return std::clamp(std::exp(-2.0f * std::numbers::pi_v<float> * cuttoff_frequency / sample_rate),
                     0.0f, 1.0f);
 }
 

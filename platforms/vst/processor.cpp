@@ -53,7 +53,7 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
   if (data.numOutputs == 0 || data.numSamples <= 0) {
     return Steinberg::kResultTrue;
   }
-  if (!engine_.has_value() || !instrument_.has_value()) {
+  if (!engine_.has_value()) {
     return Steinberg::kResultTrue;
   }
 
@@ -72,7 +72,7 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
         Steinberg::int32 sample_offset = 0;
         double value = 0.0;
         if (param_queue->getPoint(queue_index, sample_offset, value) == Steinberg::kResultTrue) {
-          instrument_->SetControl(type, Controller::ToPlainControlValue(type, value));
+          instrument_.SetControl(type, Controller::ToPlainControlValue(type, value));
         }
       }
     }
@@ -86,9 +86,9 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
         continue;
       }
       if (event.type == Steinberg::Vst::Event::kNoteOnEvent) {
-        instrument_->SetNoteOn(MidiNoteToPitch(event.noteOn.pitch), event.noteOn.velocity);
+        instrument_.SetNoteOn(MidiNoteToPitch(event.noteOn.pitch), event.noteOn.velocity);
       } else if (event.type == Steinberg::Vst::Event::kNoteOffEvent) {
-        instrument_->SetNoteOff(MidiNoteToPitch(event.noteOff.pitch));
+        instrument_.SetNoteOff(MidiNoteToPitch(event.noteOff.pitch));
       }
     }
   }
@@ -121,7 +121,6 @@ Steinberg::tresult PLUGIN_API Processor::setProcessing(Steinberg::TBool /*state*
 }
 
 Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::ProcessSetup& setup) {
-  instrument_ = std::nullopt;
   engine_ = Engine(static_cast<int>(setup.sampleRate));
   instrument_ = engine_->CreateInstrument(Controller::GetDefaultControls());
   output_samples_.resize(kStereoChannelCount * setup.maxSamplesPerBlock);
@@ -131,12 +130,12 @@ Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::Process
 Steinberg::tresult PLUGIN_API Processor::getState(Steinberg::IBStream* state) {
   Steinberg::IBStreamer stream(state, kLittleEndian);
 
-  if (!stream.writeBool(engine_.has_value() && instrument_.has_value())) {
+  if (!stream.writeBool(engine_.has_value())) {
     return Steinberg::kResultFalse;
   }
 
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    if (!stream.writeFloat(instrument_->GetControl<float>(static_cast<InstrumentControlType>(i)))) {
+    if (!stream.writeFloat(instrument_.GetControl<float>(static_cast<InstrumentControlType>(i)))) {
       return Steinberg::kResultFalse;
     }
   }
@@ -155,7 +154,7 @@ Steinberg::tresult PLUGIN_API Processor::setState(Steinberg::IBStream* state) {
     return Steinberg::kResultTrue;
   }
 
-  if (!engine_.has_value() || !instrument_.has_value()) {
+  if (!engine_.has_value()) {
     return Steinberg::kResultFalse;
   }
 
@@ -164,7 +163,7 @@ Steinberg::tresult PLUGIN_API Processor::setState(Steinberg::IBStream* state) {
     if (!stream.readFloat(value)) {
       return Steinberg::kResultFalse;
     }
-    instrument_->SetControl<float>(static_cast<InstrumentControlType>(i), value);
+    instrument_.SetControl<float>(static_cast<InstrumentControlType>(i), value);
   }
 
   return Steinberg::kResultTrue;

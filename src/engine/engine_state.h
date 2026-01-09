@@ -52,9 +52,6 @@ struct EngineState {
   // Instrument pool.
   Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_pool = {};
 
-  /// Array of engine controls.
-  EngineControlArray controls = {};
-
   /// Random number generator for the main thread.
   MainRng main_rng = {};
 
@@ -94,15 +91,18 @@ struct EngineState {
   /// Update frame.
   int64_t update_frame = 0;
 
-  /// Sampling interval in seconds.
-  float sample_interval = 0;
-
   /// Sampling rate in hertz.
   int32_t sample_rate = 0;
 
-  explicit EngineState(int sample_rate) noexcept
-      : sample_interval(1.0f / static_cast<float>(sample_rate)),
-        sample_rate(sample_rate),
+  /// Sampling interval in seconds.
+  float sample_interval = 0;
+
+  /// Array of engine controls.
+  EngineControlArray controls = {};
+
+  explicit EngineState(int engine_sample_rate) noexcept
+      : sample_rate(engine_sample_rate),
+        sample_interval(1.0f / static_cast<float>(sample_rate)),
         controls(BuildEngineControlArray(static_cast<float>(sample_rate))) {}
 
   /// Approaches parameters.

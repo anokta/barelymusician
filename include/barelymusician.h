@@ -936,6 +936,7 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 #include <cassert>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <random>
 #include <span>
@@ -1180,6 +1181,9 @@ using TaskEventCallback = std::function<void(TaskEventType type)>;
 /// Class that wraps an instrument reference.
 class Instrument {
  public:
+  /// Default constructor.
+  Instrument() noexcept = default;
+
   /// Constructs a new `Instrument` from a raw reference.
   ///
   /// @param engine Raw engine handle.
@@ -1360,6 +1364,9 @@ class Instrument {
 /// Class that wraps a task reference.
 class Task {
  public:
+  /// Default constructor.
+  Task() noexcept = default;
+
   /// Constructs a new `Task` from a raw reference.
   ///
   /// @param engine Raw engine pointer.
@@ -1479,6 +1486,9 @@ class Task {
 /// Class that wraps a performer reference.
 class Performer {
  public:
+  /// Default constructor.
+  Performer() noexcept = default;
+
   /// Constructs a new `Performer` from a raw reference.
   ///
   /// @param engine Raw engine pointer.

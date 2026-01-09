@@ -420,7 +420,7 @@ typedef struct BarelyRef {
   uint32_t index;
 
   /// Generation.
-  uint16_t generation;
+  uint32_t generation;
 } BarelyRef;
 
 /// Instrument control override.

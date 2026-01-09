@@ -54,7 +54,7 @@ struct VoiceState {
   uint32_t next_voice_index = 0;
 
   /// Voice timestamp (incremented in each voice start for round-robin voice stealing).
-  uint16_t timestamp = 0;
+  uint32_t timestamp = 0;
 
   /// Returns whether the voice is currently active (i.e., playing).
   ///

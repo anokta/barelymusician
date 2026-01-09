@@ -119,13 +119,6 @@ struct EngineState {
     message_queue.Add(update_frame, std::move(message));
   }
 
-  /// Sets a control value.
-  void SetControl(BarelyEngineControlType type, float value) noexcept {
-    if (auto& control = controls[type]; control.SetValue(value)) {
-      ScheduleMessage(EngineControlMessage{type, control.value});
-    }
-  }
-
   [[nodiscard]] PerformerState& GetPerformer(uint32_t performer_index) noexcept {
     return performer_pool.Get(performer_index);
   }

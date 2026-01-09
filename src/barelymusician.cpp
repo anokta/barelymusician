@@ -7,22 +7,17 @@
 #include "core/time.h"
 #include "dsp/sample_data.h"
 #include "engine/engine_controller.h"
+#include "engine/engine_processor.h"
 #include "engine/engine_state.h"
-#include "engine/instrument_controller.h"
 #include "engine/message.h"
-#include "engine/performer_controller.h"
 
 struct BarelyEngine {
   explicit BarelyEngine(int sample_rate) noexcept
-      : state(sample_rate),
-        controller(state),
-        instrument_controller(state),
-        performer_controller(state) {}
+      : state(sample_rate), controller(state), processor(state) {}
 
   barely::EngineState state;
   barely::EngineController controller;
-  barely::InstrumentController instrument_controller;
-  barely::PerformerController performer_controller;
+  barely::EngineProcessor processor;
 };
 
 bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
@@ -40,7 +35,7 @@ bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
   if (!out_instrument) return false;
 
   *out_instrument =
-      engine->instrument_controller.Acquire(control_overrides, control_override_count);
+      engine->controller.instrument_controller().Acquire(control_overrides, control_override_count);
   return out_instrument->index > 0;
 }
 
@@ -48,7 +43,7 @@ bool BarelyEngine_CreatePerformer(BarelyEngine* engine, BarelyRef* out_performer
   if (!engine) return false;
   if (!out_performer) return false;
 
-  *out_performer = engine->performer_controller.Acquire();
+  *out_performer = engine->controller.performer_controller().Acquire();
   return out_performer->index > 0;
 }
 
@@ -60,15 +55,15 @@ bool BarelyEngine_CreateTask(BarelyEngine* engine, BarelyRef performer, double p
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
-  *out_task = engine->performer_controller.AcquireTask(performer.index, position, duration,
-                                                       priority, callback, user_data);
+  *out_task = engine->controller.performer_controller().AcquireTask(
+      performer.index, position, duration, priority, callback, user_data);
   return out_task->index > 0;
 }
 
 bool BarelyEngine_Destroy(BarelyEngine* engine) {
   if (!engine) return false;
 
-  engine->instrument_controller.SetAllNotesOff();
+  engine->controller.instrument_controller().SetAllNotesOff();
   delete engine;
   return true;
 }
@@ -77,7 +72,7 @@ bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, BarelyRef instrument) 
   if (!engine) return false;
   if (!engine->state.IsValidInstrument(instrument)) return false;
 
-  engine->instrument_controller.Release(instrument.index);
+  engine->controller.instrument_controller().Release(instrument.index);
   return true;
 }
 
@@ -85,7 +80,7 @@ bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, BarelyRef performer) {
   if (!engine) return false;
   if (!engine->state.IsValidPerformer(performer)) return false;
 
-  engine->performer_controller.Release(performer.index);
+  engine->controller.performer_controller().Release(performer.index);
   return true;
 }
 
@@ -93,7 +88,7 @@ bool BarelyEngine_DestroyTask(BarelyEngine* engine, BarelyRef task) {
   if (!engine) return false;
   if (!engine->state.IsValidTask(task)) return false;
 
-  engine->performer_controller.ReleaseTask(task.index);
+  engine->controller.performer_controller().ReleaseTask(task.index);
   return true;
 }
 
@@ -145,7 +140,7 @@ bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples, int32_t o
   if (!output_samples) return false;
   if (output_channel_count <= 0 || output_frame_count <= 0) return false;
 
-  engine->controller.Process(output_samples, output_channel_count, output_frame_count, timestamp);
+  engine->processor.Process(output_samples, output_channel_count, output_frame_count, timestamp);
   return true;
 }
 
@@ -153,7 +148,7 @@ bool BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type,
   if (!engine) return false;
   if (type >= BarelyEngineControlType_kCount) return false;
 
-  engine->state.SetControl(type, value);
+  engine->controller.SetControl(type, value);
   return true;
 }
 
@@ -176,7 +171,7 @@ bool BarelyEngine_SetTempo(BarelyEngine* engine, double tempo) {
 bool BarelyEngine_Update(BarelyEngine* engine, double timestamp) {
   if (!engine) return false;
 
-  engine->controller.Update(engine->instrument_controller, engine->performer_controller, timestamp);
+  engine->controller.Update(timestamp);
   return true;
 }
 
@@ -187,7 +182,7 @@ bool BarelyInstrument_GetControl(const BarelyEngine* engine, BarelyRef instrumen
   if (type >= BarelyInstrumentControlType_kCount) return false;
   if (!out_value) return false;
 
-  *out_value = engine->instrument_controller.GetControl(instrument.index, type);
+  *out_value = engine->controller.instrument_controller().GetControl(instrument.index, type);
   return true;
 }
 
@@ -198,8 +193,8 @@ bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, BarelyRef instr
   if (type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
 
-  if (const float* value =
-          engine->instrument_controller.GetNoteControl(instrument.index, pitch, type)) {
+  if (const float* value = engine->controller.instrument_controller().GetNoteControl(
+          instrument.index, pitch, type)) {
     *out_value = *value;
     return true;
   }
@@ -212,7 +207,7 @@ bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, BarelyRef instrument,
   if (!engine->state.IsValidInstrument(instrument)) return false;
   if (!out_is_note_on) return false;
 
-  *out_is_note_on = engine->instrument_controller.IsNoteOn(instrument.index, pitch);
+  *out_is_note_on = engine->controller.instrument_controller().IsNoteOn(instrument.index, pitch);
   return true;
 }
 
@@ -220,7 +215,7 @@ bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, BarelyRef instrument)
   if (!engine) return false;
   if (!engine->state.IsValidInstrument(instrument)) return false;
 
-  engine->instrument_controller.SetAllNotesOff(instrument.index);
+  engine->controller.instrument_controller().SetAllNotesOff(instrument.index);
   return true;
 }
 
@@ -230,7 +225,7 @@ bool BarelyInstrument_SetControl(BarelyEngine* engine, BarelyRef instrument,
   if (!engine->state.IsValidInstrument(instrument)) return false;
   if (type >= BarelyInstrumentControlType_kCount) return false;
 
-  engine->instrument_controller.SetControl(instrument.index, type, value);
+  engine->controller.instrument_controller().SetControl(instrument.index, type, value);
   return true;
 }
 
@@ -240,7 +235,7 @@ bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, BarelyRef instrument,
   if (!engine->state.IsValidInstrument(instrument)) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
 
-  engine->instrument_controller.SetNoteControl(instrument.index, pitch, type, value);
+  engine->controller.instrument_controller().SetNoteControl(instrument.index, pitch, type, value);
   return true;
 }
 
@@ -249,7 +244,8 @@ bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, BarelyRef instr
   if (!engine) return false;
   if (!engine->state.IsValidInstrument(instrument)) return false;
 
-  engine->instrument_controller.SetNoteEventCallback(instrument.index, callback, user_data);
+  engine->controller.instrument_controller().SetNoteEventCallback(instrument.index, callback,
+                                                                  user_data);
   return true;
 }
 
@@ -257,7 +253,7 @@ bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, BarelyRef instrument, flo
   if (!engine) return false;
   if (!engine->state.IsValidInstrument(instrument)) return false;
 
-  engine->instrument_controller.SetNoteOff(instrument.index, pitch);
+  engine->controller.instrument_controller().SetNoteOff(instrument.index, pitch);
   return true;
 }
 
@@ -267,8 +263,8 @@ bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, BarelyRef instrument, floa
   if (!engine) return false;
   if (!engine->state.IsValidInstrument(instrument)) return false;
 
-  engine->instrument_controller.SetNoteOn(instrument.index, pitch, note_control_overrides,
-                                          note_control_override_count);
+  engine->controller.instrument_controller().SetNoteOn(
+      instrument.index, pitch, note_control_overrides, note_control_override_count);
   return true;
 }
 
@@ -423,7 +419,7 @@ bool BarelyTask_SetDuration(BarelyEngine* engine, BarelyRef task, double duratio
   if (!engine->state.IsValidTask(task)) return false;
   if (duration <= 0.0) return false;
 
-  engine->performer_controller.SetTaskDuration(task.index, duration);
+  engine->controller.performer_controller().SetTaskDuration(task.index, duration);
   return true;
 }
 
@@ -432,7 +428,7 @@ bool BarelyTask_SetEventCallback(BarelyEngine* engine, BarelyRef task,
   if (!engine) return false;
   if (!engine->state.IsValidTask(task)) return false;
 
-  engine->performer_controller.SetTaskEventCallback(task.index, callback, user_data);
+  engine->controller.performer_controller().SetTaskEventCallback(task.index, callback, user_data);
   return true;
 }
 
@@ -440,7 +436,7 @@ bool BarelyTask_SetPosition(BarelyEngine* engine, BarelyRef task, double positio
   if (!engine) return false;
   if (!engine->state.IsValidTask(task)) return false;
 
-  engine->performer_controller.SetTaskPosition(task.index, position);
+  engine->controller.performer_controller().SetTaskPosition(task.index, position);
   return true;
 }
 
@@ -448,7 +444,7 @@ bool BarelyTask_SetPriority(BarelyEngine* engine, BarelyRef task, int32_t priori
   if (!engine) return false;
   if (!engine->state.IsValidTask(task)) return false;
 
-  engine->performer_controller.SetTaskPriority(task.index, priority);
+  engine->controller.performer_controller().SetTaskPriority(task.index, priority);
   return true;
 }
 

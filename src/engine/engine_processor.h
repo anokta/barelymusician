@@ -22,79 +22,69 @@
 
 namespace barely {
 
-/// Class that wraps the audio processing of an effect.
 class EngineProcessor {
  public:
   explicit EngineProcessor(EngineState& engine) noexcept
       : engine_(engine), instrument_processor_(engine_) {}
 
-  /// Processes the next output samples.
+  /// Processes output samples at timestamp.
   ///
-  /// @param rng Random number generator.
   /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  void Process(float* output_samples, int output_frame_count) noexcept {
-    for (int frame = 0; frame < output_frame_count; ++frame) {
-      float delay_frame[kStereoChannelCount] = {};
-      float sidechain_frame[kStereoChannelCount] = {};
-      float* output_frame = &output_samples[kStereoChannelCount * frame];
+  /// @param timestamp Timestamp in seconds.
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
+               double timestamp) noexcept {
+    assert(output_samples != nullptr);
+    assert(output_channel_count > 0);
+    assert(output_frame_count > 0);
+    assert(output_frame_count <= BARELYMUSICIAN_MAX_FRAME_COUNT);
 
-      instrument_processor_.ProcessAllVoices<true>(delay_frame, sidechain_frame, output_frame);
-      engine_.sidechain.Process(sidechain_frame, engine_.current_params.sidechain_mix,
-                                engine_.current_params.sidechain_threshold_db,
-                                engine_.current_params.sidechain_ratio);
-      instrument_processor_.ProcessAllVoices<false>(delay_frame, sidechain_frame, output_frame);
+    float temp_samples[kStereoChannelCount * BARELYMUSICIAN_MAX_FRAME_COUNT];
+    std::fill_n(temp_samples, kStereoChannelCount * output_frame_count, 0.0f);
 
-      engine_.delay_filter.Process(delay_frame, output_frame, engine_.current_params.delay_params);
+    const int64_t process_frame = SecondsToFrames(engine_.sample_rate, timestamp);
+    const int64_t end_frame = process_frame + output_frame_count;
+    int current_frame = 0;
 
-      engine_.compressor.Process(output_frame, engine_.current_params.compressor_params);
-
-      engine_.Approach();
+    // Process *all* messages before the end sample.
+    for (auto* message = engine_.message_queue.GetNext(end_frame); message;
+         message = engine_.message_queue.GetNext(end_frame)) {
+      if (const int message_frame = static_cast<int>(message->first - process_frame);
+          current_frame < message_frame) {
+        ProcessSamples(&temp_samples[kStereoChannelCount * current_frame],
+                       message_frame - current_frame);
+        current_frame = message_frame;
+      }
+      ProcessMessage(message->second);
     }
-  }
 
-  void ProcessMessage(Message& message) noexcept {
-    std::visit(
-        MessageVisitor{[this](EngineControlMessage& engine_control_message) noexcept {
-                         SetControl(engine_control_message.type, engine_control_message.value);
-                       },
-                       [this](EngineSeedMessage& engine_seed_message) noexcept {
-                         engine_.audio_rng.SetSeed(engine_seed_message.seed);
-                       },
-                       [this](InstrumentCreateMessage& instrument_create_message) noexcept {
-                         instrument_processor_.Init(instrument_create_message.instrument_index);
-                       },
-                       [this](InstrumentControlMessage& instrument_control_message) noexcept {
-                         instrument_processor_.SetControl(
-                             instrument_control_message.instrument_index,
-                             instrument_control_message.type, instrument_control_message.value);
-                       },
-                       [this](NoteControlMessage& note_control_message) noexcept {
-                         instrument_processor_.SetNoteControl(
-                             note_control_message.instrument_index, note_control_message.pitch,
-                             note_control_message.type, note_control_message.value);
-                       },
-                       [this](NoteOffMessage& note_off_message) noexcept {
-                         instrument_processor_.SetNoteOff(note_off_message.instrument_index,
-                                                          note_off_message.pitch);
-                       },
-                       [this](NoteOnMessage& note_on_message) noexcept {
-                         instrument_processor_.SetNoteOn(note_on_message.instrument_index,
-                                                         note_on_message.pitch,
-                                                         note_on_message.controls);
-                       },
-                       [this](SampleDataMessage& sample_data_message) noexcept {
-                         instrument_processor_.SetSampleData(sample_data_message.instrument_index,
-                                                             sample_data_message.sample_data);
-                       }},
-        message);
+    // Process the rest of the samples.
+    if (current_frame < output_frame_count) {
+      ProcessSamples(&temp_samples[kStereoChannelCount * current_frame],
+                     output_frame_count - current_frame);
+    }
+
+    // Fill the output samples.
+    if (output_channel_count > 1) {
+      std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
+      for (int frame = 0; frame < output_frame_count; ++frame) {
+        output_samples[output_channel_count * frame] = temp_samples[kStereoChannelCount * frame];
+        output_samples[output_channel_count * frame + 1] =
+            temp_samples[kStereoChannelCount * frame + 1];
+      }
+    } else {  // downmix to mono.
+      for (int frame = 0; frame < output_frame_count; ++frame) {
+        output_samples[frame] = temp_samples[kStereoChannelCount * frame] +
+                                temp_samples[kStereoChannelCount * frame + 1];
+      }
+    }
   }
 
   /// Sets a control value.
   ///
   /// @param type Control type.
   /// @param value Control value.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetControl(BarelyEngineControlType type, float value) noexcept {
     switch (type) {
       case BarelyEngineControlType_kCompressorMix:
@@ -153,6 +143,63 @@ class EngineProcessor {
   }
 
  private:
+  void ProcessMessage(Message& message) noexcept {
+    std::visit(
+        MessageVisitor{[this](EngineControlMessage& engine_control_message) noexcept {
+                         SetControl(engine_control_message.type, engine_control_message.value);
+                       },
+                       [this](EngineSeedMessage& engine_seed_message) noexcept {
+                         engine_.audio_rng.SetSeed(engine_seed_message.seed);
+                       },
+                       [this](InstrumentCreateMessage& instrument_create_message) noexcept {
+                         instrument_processor_.Init(instrument_create_message.instrument_index);
+                       },
+                       [this](InstrumentControlMessage& instrument_control_message) noexcept {
+                         instrument_processor_.SetControl(
+                             instrument_control_message.instrument_index,
+                             instrument_control_message.type, instrument_control_message.value);
+                       },
+                       [this](NoteControlMessage& note_control_message) noexcept {
+                         instrument_processor_.SetNoteControl(
+                             note_control_message.instrument_index, note_control_message.pitch,
+                             note_control_message.type, note_control_message.value);
+                       },
+                       [this](NoteOffMessage& note_off_message) noexcept {
+                         instrument_processor_.SetNoteOff(note_off_message.instrument_index,
+                                                          note_off_message.pitch);
+                       },
+                       [this](NoteOnMessage& note_on_message) noexcept {
+                         instrument_processor_.SetNoteOn(note_on_message.instrument_index,
+                                                         note_on_message.pitch,
+                                                         note_on_message.controls);
+                       },
+                       [this](SampleDataMessage& sample_data_message) noexcept {
+                         instrument_processor_.SetSampleData(sample_data_message.instrument_index,
+                                                             sample_data_message.sample_data);
+                       }},
+        message);
+  }
+
+  void ProcessSamples(float* output_samples, int output_frame_count) noexcept {
+    for (int frame = 0; frame < output_frame_count; ++frame) {
+      float delay_frame[kStereoChannelCount] = {};
+      float sidechain_frame[kStereoChannelCount] = {};
+      float* output_frame = &output_samples[kStereoChannelCount * frame];
+
+      instrument_processor_.ProcessAllVoices<true>(delay_frame, sidechain_frame, output_frame);
+      engine_.sidechain.Process(sidechain_frame, engine_.current_params.sidechain_mix,
+                                engine_.current_params.sidechain_threshold_db,
+                                engine_.current_params.sidechain_ratio);
+      instrument_processor_.ProcessAllVoices<false>(delay_frame, sidechain_frame, output_frame);
+
+      engine_.delay_filter.Process(delay_frame, output_frame, engine_.current_params.delay_params);
+
+      engine_.compressor.Process(output_frame, engine_.current_params.compressor_params);
+
+      engine_.Approach();
+    }
+  }
+
   EngineState& engine_;
   InstrumentProcessor instrument_processor_;
 };

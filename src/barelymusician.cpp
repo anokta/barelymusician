@@ -36,8 +36,9 @@ bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
   if (!engine) return false;
   if (!out_instrument) return false;
 
-  *out_instrument =
+  out_instrument->index =
       engine->controller.instrument_controller().Acquire(control_overrides, control_override_count);
+  out_instrument->generation = engine->state.instrument_generations[out_instrument->index];
   return out_instrument->index > 0;
 }
 
@@ -45,7 +46,8 @@ bool BarelyEngine_CreatePerformer(BarelyEngine* engine, BarelyRef* out_performer
   if (!engine) return false;
   if (!out_performer) return false;
 
-  *out_performer = engine->controller.performer_controller().Acquire();
+  out_performer->index = engine->controller.performer_controller().Acquire();
+  out_performer->generation = engine->state.performer_generations[out_performer->index];
   return out_performer->index > 0;
 }
 
@@ -57,8 +59,9 @@ bool BarelyEngine_CreateTask(BarelyEngine* engine, BarelyRef performer, double p
   if (duration <= 0.0) return false;
   if (!out_task) return false;
 
-  *out_task = engine->controller.performer_controller().AcquireTask(
+  out_task->index = engine->controller.performer_controller().AcquireTask(
       performer.index, position, duration, priority, callback, user_data);
+  out_task->generation = engine->state.task_generations[out_task->index];
   return out_task->index > 0;
 }
 
@@ -75,6 +78,7 @@ bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, BarelyRef instrument) 
   if (!engine->state.IsValidInstrument(instrument)) return false;
 
   engine->controller.instrument_controller().Release(instrument.index);
+  ++engine->state.instrument_generations[instrument.index];
   return true;
 }
 
@@ -83,6 +87,7 @@ bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, BarelyRef performer) {
   if (!engine->state.IsValidPerformer(performer)) return false;
 
   engine->controller.performer_controller().Release(performer.index);
+  ++engine->state.performer_generations[performer.index];
   return true;
 }
 
@@ -91,6 +96,7 @@ bool BarelyEngine_DestroyTask(BarelyEngine* engine, BarelyRef task) {
   if (!engine->state.IsValidTask(task)) return false;
 
   engine->controller.performer_controller().ReleaseTask(task.index);
+  ++engine->state.task_generations[task.index];
   return true;
 }
 

@@ -85,11 +85,11 @@ namespace {
 
 }  // namespace
 
-BarelyRef InstrumentController::Acquire(const BarelyInstrumentControlOverride* control_overrides,
-                                        int32_t control_override_count) noexcept {
+uint32_t InstrumentController::Acquire(const BarelyInstrumentControlOverride* control_overrides,
+                                       int32_t control_override_count) noexcept {
   const uint32_t instrument_index = engine_.instrument_pool.Acquire();
   if (instrument_index == 0) {
-    return {};
+    return 0;
   }
 
   InstrumentState& instrument = engine_.instrument_pool.Get(instrument_index);
@@ -103,7 +103,7 @@ BarelyRef InstrumentController::Acquire(const BarelyInstrumentControlOverride* c
                                                      instrument.controls[i].value});
   }
 
-  return {instrument_index, engine_.instrument_pool.GetGeneration(instrument_index)};
+  return instrument_index;
 }
 
 void InstrumentController::Release(uint32_t instrument_index) noexcept {

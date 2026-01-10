@@ -47,11 +47,20 @@ struct EngineState {
   // Performer pool.
   Pool<PerformerState, BARELYMUSICIAN_MAX_PERFORMER_COUNT> performer_pool = {};
 
+  // Array of performer generations.
+  std::array<uint32_t, BARELYMUSICIAN_MAX_PERFORMER_COUNT + 1> performer_generations = {};
+
   // Task pool.
   Pool<TaskState, BARELYMUSICIAN_MAX_TASK_COUNT> task_pool = {};
 
+  // Array of task generations.
+  std::array<uint32_t, BARELYMUSICIAN_MAX_TASK_COUNT + 1> task_generations = {};
+
   // Instrument pool.
   Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_pool = {};
+
+  // Array of instrument generations.
+  std::array<uint32_t, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1> instrument_generations = {};
 
   /// Array of engine controls.
   EngineControlArray controls = {};
@@ -122,15 +131,17 @@ struct EngineState {
   }
 
   [[nodiscard]] bool IsValidInstrument(BarelyRef instrument) const noexcept {
-    return instrument_pool.IsActive(instrument.index, instrument.generation);
+    return instrument_pool.IsActive(instrument.index) &&
+           instrument.generation == instrument_generations[instrument.index];
   }
 
   [[nodiscard]] bool IsValidPerformer(BarelyRef performer) const noexcept {
-    return performer_pool.IsActive(performer.index, performer.generation);
+    return performer_pool.IsActive(performer.index) &&
+           performer.generation == performer_generations[performer.index];
   }
 
   [[nodiscard]] bool IsValidTask(BarelyRef task) const noexcept {
-    return task_pool.IsActive(task.index, task.generation);
+    return task_pool.IsActive(task.index) && task.generation == task_generations[task.index];
   }
 };
 

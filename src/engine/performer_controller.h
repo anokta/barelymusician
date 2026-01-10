@@ -17,12 +17,12 @@ class PerformerController {
  public:
   explicit PerformerController(EngineState& engine) : engine_(engine) {}
 
-  [[nodiscard]] BarelyRef Acquire() noexcept;
+  [[nodiscard]] uint32_t Acquire() noexcept;
   void Release(uint32_t performer_index) noexcept;
 
-  [[nodiscard]] BarelyRef AcquireTask(uint32_t performer_index, double position, double duration,
-                                      int32_t priority, BarelyTaskEventCallback callback,
-                                      void* user_data) noexcept;
+  [[nodiscard]] uint32_t AcquireTask(uint32_t performer_index, double position, double duration,
+                                     int32_t priority, BarelyTaskEventCallback callback,
+                                     void* user_data) noexcept;
   void ReleaseTask(uint32_t task_index) noexcept;
 
   void SetTaskDuration(uint32_t task_index, double duration) noexcept {

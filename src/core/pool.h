@@ -53,7 +53,6 @@ class Pool {
     to_active_[index] = kCount;
 
     free_[free_count_++] = index;
-    ++generation_[index];
   }
 
   [[nodiscard]] constexpr uint32_t Count() const noexcept { return kCount; }
@@ -80,16 +79,9 @@ class Pool {
     return index;
   }
 
-  [[nodiscard]] uint32_t GetGeneration(uint32_t index) const noexcept {
-    assert(index > 0);
+  [[nodiscard]] bool IsActive(uint32_t index) const noexcept {
     assert(index <= kCount);
-    assert(to_active_[index] < kCount);
-    return generation_[index];
-  }
-
-  [[nodiscard]] bool IsActive(uint32_t index, uint32_t generation) const noexcept {
-    assert(index <= kCount);
-    return to_active_[index] < kCount && generation == generation_[index];
+    return to_active_[index] < kCount;
   }
 
   [[nodiscard]] ItemType& GetActive(uint32_t active_index) noexcept {
@@ -120,8 +112,6 @@ class Pool {
 
   std::array<uint32_t, kCount> free_;
   uint32_t free_count_ = kCount;
-
-  std::array<uint32_t, kCount + 1> generation_;
 };
 
 }  // namespace barely

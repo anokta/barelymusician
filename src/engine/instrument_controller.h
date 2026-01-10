@@ -18,8 +18,8 @@ class InstrumentController {
  public:
   InstrumentController(EngineState& engine) noexcept : engine_(engine) {}
 
-  [[nodiscard]] BarelyRef Acquire(const BarelyInstrumentControlOverride* control_overrides,
-                                  int32_t control_override_count) noexcept;
+  [[nodiscard]] uint32_t Acquire(const BarelyInstrumentControlOverride* control_overrides,
+                                 int32_t control_override_count) noexcept;
   void Release(uint32_t instrument_index) noexcept;
 
   void SetAllNotesOff() noexcept;

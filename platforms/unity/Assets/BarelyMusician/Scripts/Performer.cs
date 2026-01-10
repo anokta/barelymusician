@@ -13,12 +13,12 @@ namespace Barely {
     public bool Loop {
       get { return _loop; }
       set {
-        if (_ref == 0) {
+        if (_id == 0) {
           _loop = value;
           return;
         }
-        Engine.Internal.Performer_SetLooping(_ref, value);
-        _loop = Engine.Internal.Performer_IsLooping(_ref);
+        Engine.Internal.Performer_SetLooping(_id, value);
+        _loop = Engine.Internal.Performer_IsLooping(_id);
       }
     }
     [SerializeField]
@@ -28,12 +28,12 @@ namespace Barely {
     public double LoopBeginPosition {
       get { return _loopBeginPosition; }
       set {
-        if (_ref == 0) {
+        if (_id == 0) {
           _loopBeginPosition = value;
           return;
         }
-        Engine.Internal.Performer_SetLoopBeginPosition(_ref, value);
-        _loopBeginPosition = Engine.Internal.Performer_GetLoopBeginPosition(_ref);
+        Engine.Internal.Performer_SetLoopBeginPosition(_id, value);
+        _loopBeginPosition = Engine.Internal.Performer_GetLoopBeginPosition(_id);
       }
     }
     [SerializeField]
@@ -43,12 +43,12 @@ namespace Barely {
     public double LoopLength {
       get { return _loopLength; }
       set {
-        if (_ref == 0) {
+        if (_id == 0) {
           _loopLength = value;
           return;
         }
-        Engine.Internal.Performer_SetLoopLength(_ref, value);
-        _loopLength = Engine.Internal.Performer_GetLoopLength(_ref);
+        Engine.Internal.Performer_SetLoopLength(_id, value);
+        _loopLength = Engine.Internal.Performer_GetLoopLength(_id);
       }
     }
     [SerializeField]
@@ -60,40 +60,40 @@ namespace Barely {
 
     /// True if playing, false otherwise.
     public bool IsPlaying {
-      get { return Engine.Internal.Performer_IsPlaying(_ref); }
+      get { return Engine.Internal.Performer_IsPlaying(_id); }
     }
 
     /// Position in beats.
     public double Position {
-      get { return Engine.Internal.Performer_GetPosition(_ref); }
-      set { Engine.Internal.Performer_SetPosition(_ref, value); }
+      get { return Engine.Internal.Performer_GetPosition(_id); }
+      set { Engine.Internal.Performer_SetPosition(_id, value); }
     }
 
     /// Starts the performer.
     public void Play() {
-      _playOnEnable = (_ref == 0);
-      Engine.Internal.Performer_Start(_ref);
+      _playOnEnable = (_id == 0);
+      Engine.Internal.Performer_Start(_id);
     }
 
     /// Stops the performer.
     public void Stop() {
       _playOnEnable = false;
-      Engine.Internal.Performer_Stop(_ref);
+      Engine.Internal.Performer_Stop(_id);
     }
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Returns the handle.
-      public static UInt32 GetHandle(Performer performer) {
-        return performer ? performer._ref : 0;
+      /// Returns the identifier.
+      public static UInt32 GetId(Performer performer) {
+        return performer ? performer._id : 0;
       }
     }
 
-    // Raw reference.
-    private UInt32 _ref = 0;
+    // Identifier.
+    private UInt32 _id = 0;
 
     private void OnEnable() {
-      Engine.Internal.Performer_Create(this, ref _ref);
+      Engine.Internal.Performer_Create(this, ref _id);
       Update();
       if (PlayOnAwake || _playOnEnable) {
         Play();
@@ -110,7 +110,7 @@ namespace Barely {
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(null);
       }
-      Engine.Internal.Performer_Destroy(ref _ref);
+      Engine.Internal.Performer_Destroy(ref _id);
     }
 
     private void Update() {

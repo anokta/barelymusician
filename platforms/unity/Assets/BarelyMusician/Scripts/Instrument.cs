@@ -258,7 +258,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @return Note gain in linear amplitude.
     public float GetNoteGain(float pitch) {
-      return Engine.Internal.Instrument_GetNoteControl(_handle, pitch,
+      return Engine.Internal.Instrument_GetNoteControl(_id, pitch,
                                                        Engine.Internal.NoteControlType.GAIN);
     }
 
@@ -267,7 +267,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @return Pitch shift.
     public float GetNotePitchShift(float pitch) {
-      return Engine.Internal.Instrument_GetNoteControl(_handle, pitch,
+      return Engine.Internal.Instrument_GetNoteControl(_id, pitch,
                                                        Engine.Internal.NoteControlType.PITCH_SHIFT);
     }
 
@@ -276,12 +276,12 @@ namespace Barely {
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
     public bool IsNoteOn(float pitch) {
-      return Engine.Internal.Instrument_IsNoteOn(_handle, pitch);
+      return Engine.Internal.Instrument_IsNoteOn(_id, pitch);
     }
 
     /// Sets all notes off.
     public void SetAllNotesOff() {
-      Engine.Internal.Instrument_SetAllNotesOff(_handle);
+      Engine.Internal.Instrument_SetAllNotesOff(_id);
     }
 
     /// Sets the gain of a note.
@@ -289,15 +289,15 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param gain Gain in linear amplitude.
     public void SetNoteGain(float pitch, float gain) {
-      Engine.Internal.Instrument_SetNoteControl(_handle, pitch,
-                                                Engine.Internal.NoteControlType.GAIN, gain);
+      Engine.Internal.Instrument_SetNoteControl(_id, pitch, Engine.Internal.NoteControlType.GAIN,
+                                                gain);
     }
 
     /// Sets a note off.
     ///
     /// @param pitch Note pitch.
     public void SetNoteOff(float pitch) {
-      Engine.Internal.Instrument_SetNoteOff(_handle, pitch);
+      Engine.Internal.Instrument_SetNoteOff(_id, pitch);
     }
 
     /// Sets the pitch shift of a note.
@@ -306,7 +306,7 @@ namespace Barely {
     /// @param pitchShift Note pitch shift.
     public void SetNotePitchShift(float pitch, float pitchShift) {
       Engine.Internal.Instrument_SetNoteControl(
-          _handle, pitch, Engine.Internal.NoteControlType.PITCH_SHIFT, pitchShift);
+          _id, pitch, Engine.Internal.NoteControlType.PITCH_SHIFT, pitchShift);
     }
 
     /// Sets a note on.
@@ -315,14 +315,14 @@ namespace Barely {
     /// @param gain Note gain.
     /// @param pitchShift Note pitch shift.
     public void SetNoteOn(float pitch, float gain = 1.0f, float pitchShift = 0.0f) {
-      Engine.Internal.Instrument_SetNoteOn(_handle, pitch, gain, pitchShift);
+      Engine.Internal.Instrument_SetNoteOn(_id, pitch, gain, pitchShift);
     }
 
     /// Class that wraps the internal api.
     public static class Internal {
-      /// Returns the handle.
-      public static IntPtr GetHandle(Instrument instrument) {
-        return instrument ? instrument._handle : IntPtr.Zero;
+      /// Returns the identifier.
+      public static UInt32 GetId(Instrument instrument) {
+        return instrument ? instrument._id : 0;
       }
 
       /// Internal note off callback.
@@ -339,12 +339,12 @@ namespace Barely {
     }
 
     private void OnEnable() {
-      Engine.Internal.Instrument_Create(this, ref _handle);
+      Engine.Internal.Instrument_Create(this, ref _id);
       Update();
     }
 
     private void OnDisable() {
-      Engine.Internal.Instrument_Destroy(ref _handle);
+      Engine.Internal.Instrument_Destroy(ref _id);
       _sliceCount = 0;
     }
 
@@ -381,18 +381,18 @@ namespace Barely {
     }
 
     private void SetControl(Engine.Internal.InstrumentControlType type, float value) {
-      Engine.Internal.Instrument_SetControl(_handle, type, value);
+      Engine.Internal.Instrument_SetControl(_id, type, value);
     }
 
     private void UpdateSampleData() {
       if (Slices != null &&
           (Slices.Count != _sliceCount || Slices.Any(slice => slice.HasChanged))) {
         _sliceCount = Slices.Count;
-        Engine.Internal.Instrument_SetSampleData(_handle, Slices);
+        Engine.Internal.Instrument_SetSampleData(_id, Slices);
       }
     }
 
-    // Raw handle.
-    private IntPtr _handle = IntPtr.Zero;
+    // Identifier.
+    private UInt32 _id = 0;
   }
 }  // namespace Barely

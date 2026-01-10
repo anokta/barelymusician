@@ -25,7 +25,7 @@ struct Repeater {
   // Constructs a new `Repeater`.
   ///
   /// @param engine Engine.
-  /// @param instrument Instrument reference.
+  /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Repeater(Engine& engine, Instrument instrument) noexcept;
 

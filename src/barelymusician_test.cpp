@@ -1,6 +1,7 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstdint>
 #include <vector>
 
 #include "gmock/gmock-matchers.h"
@@ -35,10 +36,10 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
   EXPECT_FALSE(BarelyEngine_DestroyInstrument(nullptr, {}));
 
   // Success.
-  BarelyRef instrument = {};
-  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, nullptr, 0, &instrument));
+  uint32_t instrument_id = 0;
+  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, nullptr, 0, &instrument_id));
 
-  EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument));
+  EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument_id));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
@@ -51,10 +52,10 @@ TEST(BarelyEngineTest, CreateDestroyPerformer) {
   EXPECT_FALSE(BarelyEngine_DestroyPerformer(nullptr, {}));
 
   // Success.
-  BarelyRef performer = {};
-  EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer));
+  uint32_t performer_id = 0;
+  EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer_id));
 
-  EXPECT_TRUE(BarelyEngine_DestroyPerformer(engine, performer));
+  EXPECT_TRUE(BarelyEngine_DestroyPerformer(engine, performer_id));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 

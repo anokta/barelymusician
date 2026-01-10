@@ -129,20 +129,6 @@ struct EngineState {
   [[nodiscard]] const TaskState& GetTask(uint32_t task_index) const noexcept {
     return task_pool.Get(task_index);
   }
-
-  [[nodiscard]] bool IsValidInstrument(BarelyRef instrument) const noexcept {
-    return instrument_pool.IsActive(instrument.index) &&
-           instrument.generation == instrument_generations[instrument.index];
-  }
-
-  [[nodiscard]] bool IsValidPerformer(BarelyRef performer) const noexcept {
-    return performer_pool.IsActive(performer.index) &&
-           performer.generation == performer_generations[performer.index];
-  }
-
-  [[nodiscard]] bool IsValidTask(BarelyRef task) const noexcept {
-    return task_pool.IsActive(task.index) && task.generation == task_generations[task.index];
-  }
 };
 
 }  // namespace barely

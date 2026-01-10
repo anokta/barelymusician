@@ -11,15 +11,54 @@
 #include "engine/engine_state.h"
 #include "engine/message.h"
 
+static_assert(BARELYMUSICIAN_ID_INDEX_BIT_COUNT > 0 && BARELYMUSICIAN_ID_INDEX_BIT_COUNT < 32);
+static_assert(BARELYMUSICIAN_MAX_FRAME_COUNT > 0);
+
+static constexpr uint32_t kMaxIdIndex = ((1 << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) - 1);
+
+static_assert(BARELYMUSICIAN_MAX_INSTRUMENT_COUNT > 0 &&
+              BARELYMUSICIAN_MAX_INSTRUMENT_COUNT < kMaxIdIndex);
+static_assert(BARELYMUSICIAN_MAX_PERFORMER_COUNT > 0 &&
+              BARELYMUSICIAN_MAX_PERFORMER_COUNT < kMaxIdIndex);
+static_assert(BARELYMUSICIAN_MAX_TASK_COUNT > 0 && BARELYMUSICIAN_MAX_TASK_COUNT < kMaxIdIndex);
+
+[[nodiscard]] static uint32_t BuildId(uint32_t index, uint32_t generation) noexcept {
+  return (generation << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) | index;
+}
+
+[[nodiscard]] static uint32_t GetGeneration(uint32_t id) noexcept {
+  return id >> BARELYMUSICIAN_ID_INDEX_BIT_COUNT;
+}
+
+[[nodiscard]] static uint32_t GetIndex(uint32_t id) noexcept { return id & kMaxIdIndex; }
+
 struct BarelyEngine {
+  barely::EngineState state;
+  barely::EngineController controller;
+  barely::EngineProcessor processor;
+
   explicit BarelyEngine(int sample_rate) noexcept : controller(state), processor(state) {
     state.sample_rate = static_cast<float>(sample_rate);
     state.controls = barely::BuildEngineControlArray(state.sample_rate);
   }
 
-  barely::EngineState state;
-  barely::EngineController controller;
-  barely::EngineProcessor processor;
+  [[nodiscard]] bool IsValidInstrument(uint32_t instrument_id) const noexcept {
+    const uint32_t instrument_index = GetIndex(instrument_id);
+    return state.instrument_pool.IsActive(instrument_index) &&
+           GetGeneration(instrument_id) == state.instrument_generations[instrument_index];
+  }
+
+  [[nodiscard]] bool IsValidPerformer(uint32_t performer_id) const noexcept {
+    const uint32_t performer_index = GetIndex(performer_id);
+    return state.performer_pool.IsActive(performer_index) &&
+           GetGeneration(performer_id) == state.performer_generations[performer_index];
+  }
+
+  [[nodiscard]] bool IsValidTask(uint32_t task_id) const noexcept {
+    const uint32_t task_index = GetIndex(task_id);
+    return state.task_pool.IsActive(task_index) &&
+           GetGeneration(task_id) == state.task_generations[task_index];
+  }
 };
 
 bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
@@ -32,37 +71,39 @@ bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
 
 bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
                                    const BarelyInstrumentControlOverride* control_overrides,
-                                   int32_t control_override_count, BarelyRef* out_instrument) {
+                                   int32_t control_override_count, uint32_t* out_instrument_id) {
   if (!engine) return false;
-  if (!out_instrument) return false;
+  if (!out_instrument_id) return false;
 
-  out_instrument->index =
+  const uint32_t instrument_index =
       engine->controller.instrument_controller().Acquire(control_overrides, control_override_count);
-  out_instrument->generation = engine->state.instrument_generations[out_instrument->index];
-  return out_instrument->index > 0;
+  *out_instrument_id =
+      BuildId(instrument_index, engine->state.instrument_generations[instrument_index]);
+  return *out_instrument_id > 0;
 }
 
-bool BarelyEngine_CreatePerformer(BarelyEngine* engine, BarelyRef* out_performer) {
+bool BarelyEngine_CreatePerformer(BarelyEngine* engine, uint32_t* out_performer_id) {
   if (!engine) return false;
-  if (!out_performer) return false;
+  if (!out_performer_id) return false;
 
-  out_performer->index = engine->controller.performer_controller().Acquire();
-  out_performer->generation = engine->state.performer_generations[out_performer->index];
-  return out_performer->index > 0;
+  const uint32_t performer_index = engine->controller.performer_controller().Acquire();
+  *out_performer_id =
+      BuildId(performer_index, engine->state.performer_generations[performer_index]);
+  return *out_performer_id > 0;
 }
 
-bool BarelyEngine_CreateTask(BarelyEngine* engine, BarelyRef performer, double position,
+bool BarelyEngine_CreateTask(BarelyEngine* engine, uint32_t performer_id, double position,
                              double duration, int32_t priority, BarelyTaskEventCallback callback,
-                             void* user_data, BarelyRef* out_task) {
+                             void* user_data, uint32_t* out_task_id) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
   if (duration <= 0.0) return false;
-  if (!out_task) return false;
+  if (!out_task_id) return false;
 
-  out_task->index = engine->controller.performer_controller().AcquireTask(
-      performer.index, position, duration, priority, callback, user_data);
-  out_task->generation = engine->state.task_generations[out_task->index];
-  return out_task->index > 0;
+  const uint32_t task_index = engine->controller.performer_controller().AcquireTask(
+      GetIndex(performer_id), position, duration, priority, callback, user_data);
+  *out_task_id = BuildId(task_index, engine->state.task_generations[task_index]);
+  return *out_task_id > 0;
 }
 
 bool BarelyEngine_Destroy(BarelyEngine* engine) {
@@ -73,30 +114,33 @@ bool BarelyEngine_Destroy(BarelyEngine* engine) {
   return true;
 }
 
-bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, BarelyRef instrument) {
+bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, uint32_t instrument_id) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
 
-  engine->controller.instrument_controller().Release(instrument.index);
-  ++engine->state.instrument_generations[instrument.index];
+  const uint32_t instrument_index = GetIndex(instrument_id);
+  engine->controller.instrument_controller().Release(instrument_index);
+  ++engine->state.instrument_generations[instrument_index];
   return true;
 }
 
-bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, BarelyRef performer) {
+bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, uint32_t performer_id) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->controller.performer_controller().Release(performer.index);
-  ++engine->state.performer_generations[performer.index];
+  const uint32_t performer_index = GetIndex(performer_id);
+  engine->controller.performer_controller().Release(performer_index);
+  ++engine->state.performer_generations[performer_index];
   return true;
 }
 
-bool BarelyEngine_DestroyTask(BarelyEngine* engine, BarelyRef task) {
+bool BarelyEngine_DestroyTask(BarelyEngine* engine, uint32_t task_id) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
 
-  engine->controller.performer_controller().ReleaseTask(task.index);
-  ++engine->state.task_generations[task.index];
+  const uint32_t task_index = GetIndex(task_id);
+  engine->controller.performer_controller().ReleaseTask(task_index);
+  ++engine->state.task_generations[task_index];
   return true;
 }
 
@@ -183,276 +227,280 @@ bool BarelyEngine_Update(BarelyEngine* engine, double timestamp) {
   return true;
 }
 
-bool BarelyInstrument_GetControl(const BarelyEngine* engine, BarelyRef instrument,
+bool BarelyInstrument_GetControl(const BarelyEngine* engine, uint32_t instrument_id,
                                  BarelyInstrumentControlType type, float* out_value) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
   if (type >= BarelyInstrumentControlType_kCount) return false;
   if (!out_value) return false;
 
-  *out_value = engine->controller.instrument_controller().GetControl(instrument.index, type);
+  *out_value = engine->controller.instrument_controller().GetControl(GetIndex(instrument_id), type);
   return true;
 }
 
-bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, BarelyRef instrument, float pitch,
-                                     BarelyNoteControlType type, float* out_value) {
+bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, uint32_t instrument_id,
+                                     float pitch, BarelyNoteControlType type, float* out_value) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
   if (!out_value) return false;
 
   if (const float* value = engine->controller.instrument_controller().GetNoteControl(
-          instrument.index, pitch, type)) {
+          GetIndex(instrument_id), pitch, type)) {
     *out_value = *value;
     return true;
   }
   return false;
 }
 
-bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, BarelyRef instrument, float pitch,
+bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, uint32_t instrument_id, float pitch,
                                bool* out_is_note_on) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
   if (!out_is_note_on) return false;
 
-  *out_is_note_on = engine->controller.instrument_controller().IsNoteOn(instrument.index, pitch);
+  *out_is_note_on =
+      engine->controller.instrument_controller().IsNoteOn(GetIndex(instrument_id), pitch);
   return true;
 }
 
-bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, BarelyRef instrument) {
+bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, uint32_t instrument_id) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
 
-  engine->controller.instrument_controller().SetAllNotesOff(instrument.index);
+  engine->controller.instrument_controller().SetAllNotesOff(GetIndex(instrument_id));
   return true;
 }
 
-bool BarelyInstrument_SetControl(BarelyEngine* engine, BarelyRef instrument,
+bool BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instrument_id,
                                  BarelyInstrumentControlType type, float value) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
   if (type >= BarelyInstrumentControlType_kCount) return false;
 
-  engine->controller.instrument_controller().SetControl(instrument.index, type, value);
+  engine->controller.instrument_controller().SetControl(GetIndex(instrument_id), type, value);
   return true;
 }
 
-bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, BarelyRef instrument, float pitch,
+bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_id, float pitch,
                                      BarelyNoteControlType type, float value) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
 
-  engine->controller.instrument_controller().SetNoteControl(instrument.index, pitch, type, value);
+  engine->controller.instrument_controller().SetNoteControl(GetIndex(instrument_id), pitch, type,
+                                                            value);
   return true;
 }
 
-bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, BarelyRef instrument,
+bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, uint32_t instrument_id,
                                            BarelyNoteEventCallback callback, void* user_data) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
 
-  engine->controller.instrument_controller().SetNoteEventCallback(instrument.index, callback,
+  engine->controller.instrument_controller().SetNoteEventCallback(GetIndex(instrument_id), callback,
                                                                   user_data);
   return true;
 }
 
-bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, BarelyRef instrument, float pitch) {
+bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id, float pitch) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
 
-  engine->controller.instrument_controller().SetNoteOff(instrument.index, pitch);
+  engine->controller.instrument_controller().SetNoteOff(GetIndex(instrument_id), pitch);
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, BarelyRef instrument, float pitch,
+bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id, float pitch,
                                 const BarelyNoteControlOverride* note_control_overrides,
                                 int32_t note_control_override_count) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
 
   engine->controller.instrument_controller().SetNoteOn(
-      instrument.index, pitch, note_control_overrides, note_control_override_count);
+      GetIndex(instrument_id), pitch, note_control_overrides, note_control_override_count);
   return true;
 }
 
-bool BarelyInstrument_SetSampleData(BarelyEngine* engine, BarelyRef instrument,
+bool BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t instrument_id,
                                     const BarelySlice* slices, int32_t slice_count) {
   if (!engine) return false;
-  if (!engine->state.IsValidInstrument(instrument)) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
   if (slice_count < 0 || (!slices && slice_count > 0)) return false;
 
   engine->state.ScheduleMessage(barely::SampleDataMessage{
-      instrument.index, barely::SampleData({slices, slices + slice_count})});
+      GetIndex(instrument_id), barely::SampleData({slices, slices + slice_count})});
   return true;
 }
 
-bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine, BarelyRef performer,
+bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine, uint32_t performer_id,
                                           double* out_loop_begin_position) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
   if (!out_loop_begin_position) return false;
 
-  *out_loop_begin_position = engine->state.GetPerformer(performer.index).loop_begin_position;
+  *out_loop_begin_position = engine->state.GetPerformer(GetIndex(performer_id)).loop_begin_position;
   return true;
 }
 
-bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, BarelyRef performer,
+bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, uint32_t performer_id,
                                    double* out_loop_length) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
   if (!out_loop_length) return false;
 
-  *out_loop_length = engine->state.GetPerformer(performer.index).loop_length;
+  *out_loop_length = engine->state.GetPerformer(GetIndex(performer_id)).loop_length;
   return true;
 }
 
-bool BarelyPerformer_GetPosition(const BarelyEngine* engine, BarelyRef performer,
+bool BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performer_id,
                                  double* out_position) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
   if (!out_position) return false;
 
-  *out_position = engine->state.GetPerformer(performer.index).position;
+  *out_position = engine->state.GetPerformer(GetIndex(performer_id)).position;
   return true;
 }
 
-bool BarelyPerformer_IsLooping(const BarelyEngine* engine, BarelyRef performer,
+bool BarelyPerformer_IsLooping(const BarelyEngine* engine, uint32_t performer_id,
                                bool* out_is_looping) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
   if (!out_is_looping) return false;
 
-  *out_is_looping = engine->state.GetPerformer(performer.index).is_looping;
+  *out_is_looping = engine->state.GetPerformer(GetIndex(performer_id)).is_looping;
   return true;
 }
 
-bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, BarelyRef performer,
+bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, uint32_t performer_id,
                                bool* out_is_playing) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
   if (!out_is_playing) return false;
 
-  *out_is_playing = engine->state.GetPerformer(performer.index).is_playing;
+  *out_is_playing = engine->state.GetPerformer(GetIndex(performer_id)).is_playing;
   return true;
 }
 
-bool BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine, BarelyRef performer,
+bool BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine, uint32_t performer_id,
                                           double loop_begin_position) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(performer.index).SetLoopBeginPosition(loop_begin_position);
+  engine->state.GetPerformer(GetIndex(performer_id)).SetLoopBeginPosition(loop_begin_position);
   return true;
 }
 
-bool BarelyPerformer_SetLoopLength(BarelyEngine* engine, BarelyRef performer, double loop_length) {
+bool BarelyPerformer_SetLoopLength(BarelyEngine* engine, uint32_t performer_id,
+                                   double loop_length) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(performer.index).SetLoopLength(loop_length);
+  engine->state.GetPerformer(GetIndex(performer_id)).SetLoopLength(loop_length);
   return true;
 }
 
-bool BarelyPerformer_SetLooping(BarelyEngine* engine, BarelyRef performer, bool is_looping) {
+bool BarelyPerformer_SetLooping(BarelyEngine* engine, uint32_t performer_id, bool is_looping) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(performer.index).SetLooping(is_looping);
+  engine->state.GetPerformer(GetIndex(performer_id)).SetLooping(is_looping);
   return true;
 }
 
-bool BarelyPerformer_SetPosition(BarelyEngine* engine, BarelyRef performer, double position) {
+bool BarelyPerformer_SetPosition(BarelyEngine* engine, uint32_t performer_id, double position) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(performer.index).SetPosition(position);
+  engine->state.GetPerformer(GetIndex(performer_id)).SetPosition(position);
   return true;
 }
 
-bool BarelyPerformer_Start(BarelyEngine* engine, BarelyRef performer) {
+bool BarelyPerformer_Start(BarelyEngine* engine, uint32_t performer_id) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(performer.index).Start();
+  engine->state.GetPerformer(GetIndex(performer_id)).Start();
   return true;
 }
 
-bool BarelyPerformer_Stop(BarelyEngine* engine, BarelyRef performer) {
+bool BarelyPerformer_Stop(BarelyEngine* engine, uint32_t performer_id) {
   if (!engine) return false;
-  if (!engine->state.IsValidPerformer(performer)) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(performer.index).Stop();
+  engine->state.GetPerformer(GetIndex(performer_id)).Stop();
   return true;
 }
 
-bool BarelyTask_GetDuration(const BarelyEngine* engine, BarelyRef task, double* out_duration) {
+bool BarelyTask_GetDuration(const BarelyEngine* engine, uint32_t task_id, double* out_duration) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
   if (!out_duration) return false;
 
-  *out_duration = engine->state.GetTask(task.index).duration;
+  *out_duration = engine->state.GetTask(GetIndex(task_id)).duration;
   return true;
 }
 
-bool BarelyTask_GetPosition(const BarelyEngine* engine, BarelyRef task, double* out_position) {
+bool BarelyTask_GetPosition(const BarelyEngine* engine, uint32_t task_id, double* out_position) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
   if (!out_position) return false;
 
-  *out_position = engine->state.GetTask(task.index).position;
+  *out_position = engine->state.GetTask(GetIndex(task_id)).position;
   return true;
 }
 
-bool BarelyTask_GetPriority(const BarelyEngine* engine, BarelyRef task, int32_t* out_priority) {
+bool BarelyTask_GetPriority(const BarelyEngine* engine, uint32_t task_id, int32_t* out_priority) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
   if (!out_priority) return false;
 
-  *out_priority = engine->state.GetTask(task.index).priority;
+  *out_priority = engine->state.GetTask(GetIndex(task_id)).priority;
   return true;
 }
 
-bool BarelyTask_IsActive(const BarelyEngine* engine, BarelyRef task, bool* out_is_active) {
+bool BarelyTask_IsActive(const BarelyEngine* engine, uint32_t task_id, bool* out_is_active) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
   if (!out_is_active) return false;
 
-  *out_is_active = engine->state.GetTask(task.index).is_active;
+  *out_is_active = engine->state.GetTask(GetIndex(task_id)).is_active;
   return true;
 }
 
-bool BarelyTask_SetDuration(BarelyEngine* engine, BarelyRef task, double duration) {
+bool BarelyTask_SetDuration(BarelyEngine* engine, uint32_t task_id, double duration) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
   if (duration <= 0.0) return false;
 
-  engine->controller.performer_controller().SetTaskDuration(task.index, duration);
+  engine->controller.performer_controller().SetTaskDuration(GetIndex(task_id), duration);
   return true;
 }
 
-bool BarelyTask_SetEventCallback(BarelyEngine* engine, BarelyRef task,
+bool BarelyTask_SetEventCallback(BarelyEngine* engine, uint32_t task_id,
                                  BarelyTaskEventCallback callback, void* user_data) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
 
-  engine->controller.performer_controller().SetTaskEventCallback(task.index, callback, user_data);
+  engine->controller.performer_controller().SetTaskEventCallback(GetIndex(task_id), callback,
+                                                                 user_data);
   return true;
 }
 
-bool BarelyTask_SetPosition(BarelyEngine* engine, BarelyRef task, double position) {
+bool BarelyTask_SetPosition(BarelyEngine* engine, uint32_t task_id, double position) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
 
-  engine->controller.performer_controller().SetTaskPosition(task.index, position);
+  engine->controller.performer_controller().SetTaskPosition(GetIndex(task_id), position);
   return true;
 }
 
-bool BarelyTask_SetPriority(BarelyEngine* engine, BarelyRef task, int32_t priority) {
+bool BarelyTask_SetPriority(BarelyEngine* engine, uint32_t task_id, int32_t priority) {
   if (!engine) return false;
-  if (!engine->state.IsValidTask(task)) return false;
+  if (!engine->IsValidTask(task_id)) return false;
 
-  engine->controller.performer_controller().SetTaskPriority(task.index, priority);
+  engine->controller.performer_controller().SetTaskPriority(GetIndex(task_id), priority);
   return true;
 }
 

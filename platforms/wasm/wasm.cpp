@@ -39,8 +39,8 @@ static void Engine_Process(Engine& engine, uintptr_t output_samples, int output_
                  timestamp);
 }
 
-[[nodiscard]] static uintptr_t Instrument_GetHandle(Instrument& instrument) noexcept {
-  return reinterpret_cast<uintptr_t>(static_cast<BarelyInstrumentHandle>(instrument));
+[[nodiscard]] static uint32_t Instrument_GetId(Instrument& instrument) noexcept {
+  return static_cast<uint32_t>(instrument);
 }
 
 static void Instrument_SetControl(Instrument& instrument, int type, float value) noexcept {
@@ -62,17 +62,17 @@ static void Instrument_SetSampleData(Instrument& instrument, uintptr_t slices,
                             reinterpret_cast<const barely::Slice*>(slices) + slice_count});
 }
 
-[[nodiscard]] static Task Performer_CreateTask(Performer& performer, double position,
-                                               double duration) noexcept {
+[[nodiscard]] static Task Engine_CreateTask(Engine& engine, Performer& performer, double position,
+                                            double duration) noexcept {
   return engine.CreateTask(performer, position, duration, /*priority=*/0, /*callback=*/nullptr);
 }
 
-[[nodiscard]] static BarelyRef Performer_GetHandle(Performer& performer) noexcept {
-  return static_cast<BarelyRef>(performer);
+[[nodiscard]] static uint32_t Performer_GetId(Performer& performer) noexcept {
+  return static_cast<uint32_t>(performer);
 }
 
-[[nodiscard]] static uintptr_t Task_GetHandle(Task& task) noexcept {
-  return reinterpret_cast<uintptr_t>(static_cast<BarelyTaskHandle>(task));
+[[nodiscard]] static uint32_t Task_GetId(Task& task) noexcept {
+  return static_cast<uint32_t>(task);
 }
 
 EMSCRIPTEN_BINDINGS(barelymusician_main) {
@@ -80,6 +80,10 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .constructor<int>()
       .function("createInstrument", &Engine_CreateInstrument, take_ownership())
       .function("createPerformer", &Engine::CreatePerformer, take_ownership())
+      .function("createTask", &Engine_CreateTask, take_ownership())
+      .function("destroyInstrument", &Engine::DestroyInstrument)
+      .function("destroyPerformer", &Engine::DestroyPerformer)
+      .function("destroyTask", &Engine::DestroyTask)
       .function("generateRandomNumber",
                 static_cast<double (Engine::*)()>(&Engine::GenerateRandomNumber))
       .function("generateRandomNumber", &Engine::GenerateRandomNumber<double>)
@@ -94,7 +98,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
 
   class_<Instrument>("Instrument")
       .function("getControl", &Instrument::GetControl<float>)
-      .function("getHandle", &Instrument_GetHandle, allow_raw_pointers())
+      .function("getId", &Instrument_GetId)
       .function("getNoteControl", &Instrument::GetNoteControl<float>)
       .function("isNoteOn", &Instrument::IsNoteOn)
       .function("setAllNotesOff", &Instrument::SetAllNotesOff)
@@ -115,8 +119,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("setSampleData", &Instrument_SetSampleData, allow_raw_pointers());
 
   class_<Performer>("Performer")
-      .function("createTask", &Performer_CreateTask, take_ownership())
-      .function("getHandle", &Performer_GetHandle)
+      .function("getId", &Performer_GetId)
       .function("start", &Performer::Start)
       .function("stop", &Performer::Stop)
       .property("isLooping", &Performer::IsLooping, &Performer::SetLooping)
@@ -131,7 +134,7 @@ EMSCRIPTEN_BINDINGS(barelymusician_main) {
       .function("getPosition", &Quantization::GetPosition);
 
   class_<Task>("Task")
-      .function("getHandle", &Task_GetHandle, allow_raw_pointers())
+      .function("getId", &Task_GetId)
       .function("setEventCallback", optional_override([](Task& task, val js_callback) {
                   return task.SetEventCallback(
                       [js_callback](TaskEventType type) { js_callback(static_cast<int>(type)); });

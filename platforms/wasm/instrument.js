@@ -42,8 +42,8 @@ export class Instrument {
    * @return {!Promise<void>}
    */
   async destroy() {
-    await this._withHandle(handle => {
-      this._audioNode.port.postMessage({type: 'instrument-destroy', handle});
+    await this._withId(id => {
+      this._audioNode.port.postMessage({type: 'instrument-destroy', id});
     });
     if (this._container) {
       this._container.remove();
@@ -54,10 +54,10 @@ export class Instrument {
    * Sets all notes off.
    */
   setAllNotesOff() {
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-all-notes-off',
-        handle,
+        id,
       });
     });
   }
@@ -68,10 +68,10 @@ export class Instrument {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-control',
-        handle,
+        id,
         typeIndex,
         value,
       });
@@ -94,10 +94,10 @@ export class Instrument {
    * @param {number} note
    */
   setNoteOff(note) {
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-note-off',
-        handle,
+        id,
         pitch: this._noteToPitch(note),
       });
 
@@ -114,10 +114,10 @@ export class Instrument {
    * @param {number=} pitchShift
    */
   setNoteOn(note, gain = 1.0, pitchShift = 0.0) {
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-note-on',
-        handle,
+        id,
         pitch: this._noteToPitch(note),
         gain,
         pitchShift,
@@ -151,10 +151,10 @@ export class Instrument {
         samples: audioBuffer.getChannelData(0),  // mono assumed for now.
       });
     }
-    await this._withHandle(async handle => {
+    await this._withId(async id => {
       this._audioNode.port.postMessage({
         type: 'instrument-set-sample-data',
-        handle,
+        id,
         slices,
       });
     });
@@ -375,8 +375,8 @@ export class Instrument {
     this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
 
     // Set id and label
-    this._withHandle(handle => {
-      this._container.id = `instrument#${handle}`;
+    this._withId(id => {
+      this._container.id = `instrument#${id}`;
       const label = this._container.querySelector('label');
       label.textContent = this._container.id;
     });
@@ -393,13 +393,13 @@ export class Instrument {
   }
 
   /**
-   * Helper to run a function with the resolved handle.
+   * Helper to run a function with the resolved id.
    * @param {function(number):void} fn
    * @return {!Promise}
    * @private
    */
-  async _withHandle(fn) {
-    const handle = await this._handlePromise;
-    return fn(handle);
+  async _withId(fn) {
+    const id = await this._handlePromise;
+    return fn(id);
   }
 }

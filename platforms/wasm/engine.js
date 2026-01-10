@@ -57,7 +57,7 @@ export class Engine {
         instrument.setControl(controlTypeIndex, instrumentJson.controlValues[controlTypeIndex]);
       }
 
-      tempInstruments[instrumentJson.handle] = instrument;
+      tempInstruments[instrumentJson.id] = instrument;
     });
 
     const performersContainer = this.container.querySelector('.performers');
@@ -73,9 +73,9 @@ export class Engine {
           note => performer._addNote(note.position, note.duration, note.pitch, note.gain));
 
       if (tempInstruments[performerJson.instrumentHandle]) {
-        tempInstruments[performerJson.instrumentHandle]._withHandle(handle => {
+        tempInstruments[performerJson.instrumentHandle]._withId(id => {
           performer.updateInstrumentSelect(this._instruments);
-          performer._container.querySelector('#instrumentSelect').value = handle;
+          performer._container.querySelector('#instrumentSelect').value = id;
         });
       }
     });
@@ -89,8 +89,8 @@ export class Engine {
     const tempoJson = this._tempo;
     const delayTimeJson = this._delayTime;
     const delayFeedbackJson = this._delayFeedback;
-    const instrumentsJson = Object.keys(this._instruments).map(handle => {
-      const instrument = this._instruments[handle];
+    const instrumentsJson = Object.keys(this._instruments).map(id => {
+      const instrument = this._instruments[id];
       const controlValues = {};
       const controlsContainer = instrument._container.querySelector('#controls');
       for (const controlTypeIndex in CONTROLS) {
@@ -101,7 +101,7 @@ export class Engine {
           controlValues[controlTypeIndex] = controlContainer.querySelector('select').value;
         }
       }
-      return {handle, controlValues};
+      return {id, controlValues};
     });
     const performersJson = Object.values(this._performers)
                                .filter(performer => performer !== this._metronome)
@@ -277,35 +277,35 @@ export class Engine {
         } break;
         case 'instrument-create-success': {
           const {instrument, resolveHandle} = this._pendingInstruments.shift();
-          resolveHandle(event.data.handle);
-          this._instruments[event.data.handle] = instrument;
-          for (const handle in this._performers) {
-            this._performers[handle].updateInstrumentSelect(this._instruments);
+          resolveHandle(event.data.id);
+          this._instruments[event.data.id] = instrument;
+          for (const id in this._performers) {
+            this._performers[id].updateInstrumentSelect(this._instruments);
           }
         } break;
         case 'instrument-destroy-success': {
-          delete this._instruments[event.data.handle];
-          for (const handle in this._performers) {
-            this._performers[handle].updateInstrumentSelect(this._instruments);
+          delete this._instruments[event.data.id];
+          for (const id in this._performers) {
+            this._performers[id].updateInstrumentSelect(this._instruments);
           }
         } break;
         case 'instrument-on-note-on': {
-          this._instruments[event.data.handle]?.noteOnCallback(event.data.pitch);
+          this._instruments[event.data.id]?.noteOnCallback(event.data.pitch);
         } break;
         case 'instrument-on-note-off': {
-          this._instruments[event.data.handle]?.noteOffCallback(event.data.pitch);
+          this._instruments[event.data.id]?.noteOffCallback(event.data.pitch);
         } break;
         case 'performer-create-success': {
           const {performer, resolveHandle} = this._pendingPerformers.shift();
-          resolveHandle(event.data.handle);
-          this._performers[event.data.handle] = performer;
-          this._performers[event.data.handle].updateInstrumentSelect(this._instruments);
+          resolveHandle(event.data.id);
+          this._performers[event.data.id] = performer;
+          this._performers[event.data.id].updateInstrumentSelect(this._instruments);
         } break;
         case 'performer-destroy-success': {
-          delete this._performers[event.data.handle];
+          delete this._performers[event.data.id];
         } break;
         case 'performer-get-properties-response': {
-          const performer = this._performers[event.data.handle];
+          const performer = this._performers[event.data.id];
           if (performer) {
             performer._isPlaying = event.data.isPlaying;
             performer._position = event.data.position;
@@ -314,14 +314,14 @@ export class Engine {
         case 'task-create-success': {
           const performer = this._performers[event.data.performerHandle];
           if (performer) {
-            this._tasks[event.data.handle] = performer.onTaskCreateSuccess(event.data.handle);
+            this._tasks[event.data.id] = performer.onTaskCreateSuccess(event.data.id);
           }
         } break;
         case 'task-destroy-success': {
-          delete this._tasks[event.data.handle];
+          delete this._tasks[event.data.id];
         } break;
         case 'task-get-properties-response': {
-          const task = this._tasks[event.data.handle];
+          const task = this._tasks[event.data.id];
           if (task) {
             task._duration = event.data.duration;
             task._isActive = event.data.isActive;
@@ -329,7 +329,7 @@ export class Engine {
           }
         } break;
         case 'task-on-event': {
-          this._tasks[event.data.handle]?.eventCallback(event.data.eventType);
+          this._tasks[event.data.id]?.eventCallback(event.data.eventType);
         } break;
       }
     };
@@ -423,11 +423,11 @@ export class Engine {
   _reset() {
     this._metronome = null;
 
-    for (const handle in this._instruments) {
-      this._instruments[handle].destroy();
+    for (const id in this._instruments) {
+      this._instruments[id].destroy();
     }
-    for (const handle in this._performers) {
-      this._performers[handle].destroy();
+    for (const id in this._performers) {
+      this._performers[id].destroy();
     }
     this._instruments = {};
     this._performers = {};
@@ -447,10 +447,10 @@ export class Engine {
   _updateStatus() {
     this._audioNode.port.postMessage({type: 'engine-update'});
     for (const performerHandle in this._performers) {
-      this._audioNode.port.postMessage({type: 'performer-get-properties', handle: performerHandle});
+      this._audioNode.port.postMessage({type: 'performer-get-properties', id: performerHandle});
     }
     for (const taskHandle in this._tasks) {
-      this._audioNode.port.postMessage({type: 'task-get-properties', handle: taskHandle});
+      this._audioNode.port.postMessage({type: 'task-get-properties', id: taskHandle});
     }
     const instrumentCount = Object.keys(this._instruments).length;
     const performerCount = Math.max(Object.keys(this._performers).length - 1);

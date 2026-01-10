@@ -1179,7 +1179,7 @@ class Instrument {
 
   /// Constructs a new `Instrument`.
   ///
-  /// @param engine Raw engine handle.
+  /// @param engine Raw engine pointer.
   /// @param instrument_id Instrument identifier.
   /// @param note_event_callback Pointer to note event callback.
   Instrument(BarelyEngine* engine, uint32_t instrument_id,
@@ -1606,7 +1606,7 @@ class Performer {
   uint32_t performer_id_;
 };
 
-/// A class that wraps an engine handle.
+/// A class that wraps an engine.
 class Engine {
  public:
   /// Constructs a new `Engine`.
@@ -1618,7 +1618,7 @@ class Engine {
     assert(success);
   }
 
-  /// Constructs a new `Engine` from a raw handle.
+  /// Constructs a new `Engine`.
   ///
   /// @param engine Raw engine pointer.
   explicit Engine(BarelyEngine* engine) noexcept : engine_(engine) { assert(engine != nullptr); }
@@ -1652,9 +1652,9 @@ class Engine {
     return *this;
   }
 
-  /// Returns the raw handle.
+  /// Returns the raw pointer.
   ///
-  /// @return Raw handle.
+  /// @return Raw pointer.
   [[nodiscard]] constexpr operator BarelyEngine*() const noexcept { return engine_; }
 
   /// Creates a new instrument.

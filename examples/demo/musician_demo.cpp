@@ -47,7 +47,7 @@ using ::barely::examples::WavFile;
 // @param beat Current beat.
 // @param beat_count Number of beats in a bar.
 // @param harmonic Harmonic index.
-// @param instrument Instrument handle.
+// @param instrument Instrument.
 // @param performer Performer.
 using BeatComposerCallback =
     std::function<void(int bar, int beat, int beat_count, int harmonic, Instrument& instrument,

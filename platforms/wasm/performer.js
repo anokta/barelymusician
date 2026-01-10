@@ -60,10 +60,10 @@ export class Performer {
 
     this._pendingTasks.push({task, resolveHandle});
 
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'task-create',
-        performerHandle: handle,
+        performerHandle: id,
         position,
         duration,
       });
@@ -78,8 +78,8 @@ export class Performer {
    */
   async destroy() {
     this._destroyAllNotes();
-    await this._withHandle(handle => {
-      this._audioNode.port.postMessage({type: 'performer-destroy', handle});
+    await this._withId(id => {
+      this._audioNode.port.postMessage({type: 'performer-destroy', id});
     });
     if (this._container) {
       this._container.remove();
@@ -95,12 +95,12 @@ export class Performer {
   }
 
   /**
-   * @param {number} handle
+   * @param {number} id
    * @return {!Task}
    */
-  onTaskCreateSuccess(handle) {
+  onTaskCreateSuccess(id) {
     const {task, resolveHandle} = this._pendingTasks.shift();
-    resolveHandle(handle);
+    resolveHandle(id);
     return task;
   }
 
@@ -109,8 +109,8 @@ export class Performer {
    */
   start() {
     this._isPlaying = true;
-    this._withHandle(handle => {
-      this._audioNode.port.postMessage({type: 'performer-start', handle});
+    this._withId(id => {
+      this._audioNode.port.postMessage({type: 'performer-start', id});
     });
   }
 
@@ -119,8 +119,8 @@ export class Performer {
    */
   stop() {
     this._isPlaying = false;
-    this._withHandle(handle => {
-      this._audioNode.port.postMessage({type: 'performer-stop', handle});
+    this._withId(id => {
+      this._audioNode.port.postMessage({type: 'performer-stop', id});
     });
   }
 
@@ -140,10 +140,10 @@ export class Performer {
     noneOption.textContent = 'none';
     instrumentSelect.appendChild(noneOption);
 
-    Object.keys(instruments).forEach(handle => {
+    Object.keys(instruments).forEach(id => {
       const option = document.createElement('option');
-      option.value = handle;
-      option.textContent = `instrument#${handle}`;
+      option.value = id;
+      option.textContent = `instrument#${id}`;
       instrumentSelect.appendChild(option);
     });
 
@@ -493,8 +493,8 @@ export class Performer {
     this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
 
     // id
-    this._withHandle(handle => {
-      this._container.id = `performer#${handle}`;
+    this._withId(id => {
+      this._container.id = `performer#${id}`;
 
       // label
       const label = this._container.querySelector('label');
@@ -537,10 +537,10 @@ export class Performer {
     if (this._isLooping === newIsLooping) return;
 
     this._isLooping = newIsLooping;
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'performer-set-looping',
-        handle,
+        id,
         isLooping: newIsLooping,
       });
     });
@@ -553,10 +553,10 @@ export class Performer {
     if (this._loopBeginPosition === newLoopBeginPosition) return;
 
     this._loopBeginPosition = newLoopBeginPosition;
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'performer-set-loop-begin-position',
-        handle,
+        id,
         loopBeginPosition: newLoopBeginPosition,
       });
     });
@@ -569,10 +569,10 @@ export class Performer {
     if (this._loopLength === newLoopLength) return;
 
     this._loopLength = Math.max(newLoopLength, 0.0);
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'performer-set-loop-length',
-        handle,
+        id,
         loopLength: newLoopLength,
       });
     });
@@ -589,10 +589,10 @@ export class Performer {
     if (this._position === newPosition) return;
 
     this._position = newPosition;
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'performer-set-position',
-        handle,
+        id,
         position: newPosition,
       });
     });
@@ -621,8 +621,8 @@ export class Performer {
     render();
   }
 
-  async _withHandle(fn) {
-    const handle = await this._handlePromise;
-    return fn(handle);
+  async _withId(fn) {
+    const id = await this._handlePromise;
+    return fn(id);
   }
 }

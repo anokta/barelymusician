@@ -46,21 +46,21 @@ class InstrumentProcessor {
       InstrumentParams& params = engine_.instrument_params[voice.instrument_index];
       if constexpr (kIsSidechainSend) {
         if (!voice.IsActive()) {
-          if (voice.previous_voice_index != 0) {
+          if (voice.previous_voice_index != UINT32_MAX) {
             engine_.voice_pool.Get(voice.previous_voice_index).next_voice_index =
                 voice.next_voice_index;
-            if (voice.next_voice_index != 0) {
+            if (voice.next_voice_index != UINT32_MAX) {
               engine_.voice_pool.Get(voice.next_voice_index).previous_voice_index =
                   voice.previous_voice_index;
             }
-            voice.previous_voice_index = 0;
+            voice.previous_voice_index = UINT32_MAX;
           } else {
             params.first_voice_index = voice.next_voice_index;
-            if (voice.next_voice_index != 0) {
-              engine_.voice_pool.Get(voice.next_voice_index).previous_voice_index = 0;
+            if (voice.next_voice_index != UINT32_MAX) {
+              engine_.voice_pool.Get(voice.next_voice_index).previous_voice_index = UINT32_MAX;
             }
           }
-          voice.next_voice_index = 0;
+          voice.next_voice_index = UINT32_MAX;
           engine_.voice_pool.Release(engine_.voice_pool.GetIndex(voice));
           continue;
         }

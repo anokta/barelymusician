@@ -48,19 +48,19 @@ struct EngineState {
   Pool<PerformerState, BARELYMUSICIAN_MAX_PERFORMER_COUNT> performer_pool = {};
 
   // Array of performer generations.
-  std::array<uint32_t, BARELYMUSICIAN_MAX_PERFORMER_COUNT + 1> performer_generations = {};
+  std::array<uint32_t, BARELYMUSICIAN_MAX_PERFORMER_COUNT> performer_generations = {};
 
   // Task pool.
   Pool<TaskState, BARELYMUSICIAN_MAX_TASK_COUNT> task_pool = {};
 
   // Array of task generations.
-  std::array<uint32_t, BARELYMUSICIAN_MAX_TASK_COUNT + 1> task_generations = {};
+  std::array<uint32_t, BARELYMUSICIAN_MAX_TASK_COUNT> task_generations = {};
 
   // Instrument pool.
   Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_pool = {};
 
   // Array of instrument generations.
-  std::array<uint32_t, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1> instrument_generations = {};
+  std::array<uint32_t, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_generations = {};
 
   /// Array of engine controls.
   EngineControlArray controls = {};
@@ -72,7 +72,7 @@ struct EngineState {
   MessageQueue message_queue = {};
 
   /// Array of instrument parameters.
-  std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1> instrument_params = {};
+  std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_params = {};
 
   /// Voice pool.
   Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT> voice_pool = {};

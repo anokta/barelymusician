@@ -15,22 +15,27 @@ static_assert(BARELYMUSICIAN_ID_INDEX_BIT_COUNT > 0 && BARELYMUSICIAN_ID_INDEX_B
 static_assert(BARELYMUSICIAN_MAX_FRAME_COUNT > 0);
 
 static constexpr uint32_t kMaxIdIndex = ((1 << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) - 1);
+static constexpr uint32_t kMaxIdGeneration = ((1 << (32 - BARELYMUSICIAN_ID_INDEX_BIT_COUNT)) - 1);
 
 static_assert(BARELYMUSICIAN_MAX_INSTRUMENT_COUNT > 0 &&
-              BARELYMUSICIAN_MAX_INSTRUMENT_COUNT < kMaxIdIndex);
+              BARELYMUSICIAN_MAX_INSTRUMENT_COUNT <= kMaxIdIndex);
 static_assert(BARELYMUSICIAN_MAX_PERFORMER_COUNT > 0 &&
-              BARELYMUSICIAN_MAX_PERFORMER_COUNT < kMaxIdIndex);
-static_assert(BARELYMUSICIAN_MAX_TASK_COUNT > 0 && BARELYMUSICIAN_MAX_TASK_COUNT < kMaxIdIndex);
+              BARELYMUSICIAN_MAX_PERFORMER_COUNT <= kMaxIdIndex);
+static_assert(BARELYMUSICIAN_MAX_TASK_COUNT > 0 && BARELYMUSICIAN_MAX_TASK_COUNT <= kMaxIdIndex);
 
 [[nodiscard]] static uint32_t BuildId(uint32_t index, uint32_t generation) noexcept {
-  return (generation << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) | index;
+  return (generation << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) | (index + 1);
 }
 
 [[nodiscard]] static uint32_t GetGeneration(uint32_t id) noexcept {
   return id >> BARELYMUSICIAN_ID_INDEX_BIT_COUNT;
 }
 
-[[nodiscard]] static uint32_t GetIndex(uint32_t id) noexcept { return id & kMaxIdIndex; }
+[[nodiscard]] static uint32_t GetIndex(uint32_t id) noexcept { return (id & kMaxIdIndex) - 1; }
+
+[[nodiscard]] static uint32_t GetNextGeneration(uint32_t generation) noexcept {
+  return (generation + 1) & kMaxIdGeneration;
+}
 
 struct BarelyEngine {
   barely::EngineState state;
@@ -120,7 +125,8 @@ bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, uint32_t instrument_id
 
   const uint32_t instrument_index = GetIndex(instrument_id);
   engine->controller.instrument_controller().Release(instrument_index);
-  ++engine->state.instrument_generations[instrument_index];
+  engine->state.instrument_generations[instrument_index] =
+      GetNextGeneration(engine->state.instrument_generations[instrument_index]);
   return true;
 }
 
@@ -130,7 +136,8 @@ bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, uint32_t performer_id) 
 
   const uint32_t performer_index = GetIndex(performer_id);
   engine->controller.performer_controller().Release(performer_index);
-  ++engine->state.performer_generations[performer_index];
+  engine->state.performer_generations[performer_index] =
+      GetNextGeneration(engine->state.performer_generations[performer_index]);
   return true;
 }
 
@@ -140,7 +147,8 @@ bool BarelyEngine_DestroyTask(BarelyEngine* engine, uint32_t task_id) {
 
   const uint32_t task_index = GetIndex(task_id);
   engine->controller.performer_controller().ReleaseTask(task_index);
-  ++engine->state.task_generations[task_index];
+  engine->state.task_generations[task_index] =
+      GetNextGeneration(engine->state.task_generations[task_index]);
   return true;
 }
 

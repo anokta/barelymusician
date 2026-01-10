@@ -23,7 +23,7 @@ struct TaskState {
   int32_t priority = 0;
 
   /// Performer index.
-  uint32_t performer_index = 0;
+  uint32_t performer_index = UINT32_MAX;
 
   /// Denotes whether the task is active or not.
   bool is_active = false;

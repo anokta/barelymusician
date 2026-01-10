@@ -12,9 +12,9 @@ template <typename ItemType, uint32_t kCount>
 class Pool {
  public:
   Pool() noexcept {
-    to_active_.fill(kCount);
+    to_active_.fill(UINT32_MAX);
     for (uint32_t i = 0; i < kCount; ++i) {
-      free_[i] = kCount - i;
+      free_[i] = kCount - i - 1;
     }
   }
 
@@ -24,33 +24,30 @@ class Pool {
   [[nodiscard]] uint32_t Acquire() noexcept {
     if (free_count_ > 0) {
       const uint32_t index = free_[--free_count_];
-      assert(index > 0);
-      assert(index <= kCount);
+      assert(index < kCount);
 
-      assert(to_active_[index] == kCount);
+      assert(to_active_[index] == UINT32_MAX);
       assert(active_count_ < kCount);
       to_active_[index] = active_count_;
       active_[active_count_++] = index;
 
       return index;
     }
-    return 0;
+    return UINT32_MAX;
   }
 
   /// Releases an item.
   ///
   /// @param index Item index.
   void Release(uint32_t index) noexcept {
-    assert(index > 0);
-    assert(index <= kCount);
-
-    assert(to_active_[index] < kCount);
+    assert(IsActive(index));
     assert(active_count_ > 0);
+
     const uint32_t removed_active_index = to_active_[index];
     const uint32_t last_index = active_[--active_count_];
     active_[removed_active_index] = last_index;
     to_active_[last_index] = removed_active_index;
-    to_active_[index] = kCount;
+    to_active_[index] = UINT32_MAX;
 
     free_[free_count_++] = index;
   }
@@ -58,30 +55,23 @@ class Pool {
   [[nodiscard]] constexpr uint32_t Count() const noexcept { return kCount; }
 
   [[nodiscard]] ItemType& Get(uint32_t index) noexcept {
-    assert(index > 0);
-    assert(index <= kCount);
-    assert(to_active_[index] < kCount);
+    assert(IsActive(index));
     return items_[index];
   }
 
   [[nodiscard]] const ItemType& Get(uint32_t index) const noexcept {
-    assert(index > 0);
-    assert(index <= kCount);
-    assert(to_active_[index] < kCount);
+    assert(IsActive(index));
     return items_[index];
   }
 
   [[nodiscard]] uint32_t GetIndex(ItemType& item) const noexcept {
     const uint32_t index = static_cast<uint32_t>(&item - &items_[0]);
-    assert(index > 0);
-    assert(index <= kCount);
-    assert(to_active_[index] < kCount);
+    assert(IsActive(index));
     return index;
   }
 
   [[nodiscard]] bool IsActive(uint32_t index) const noexcept {
-    assert(index <= kCount);
-    return to_active_[index] < kCount;
+    return index < kCount && to_active_[index] < kCount;
   }
 
   [[nodiscard]] ItemType& GetActive(uint32_t active_index) noexcept {
@@ -103,9 +93,8 @@ class Pool {
   [[nodiscard]] uint32_t GetActiveCount() const noexcept { return active_count_; }
 
  private:
-  // Index 0 is reserved for zero-initialized nil reference to keep invalid access in-bounds.
-  std::array<ItemType, kCount + 1> items_;
-  std::array<uint32_t, kCount + 1> to_active_;  // maps item index to active index.
+  std::array<ItemType, kCount> items_;
+  std::array<uint32_t, kCount> to_active_;  // maps item index to active index.
 
   std::array<uint32_t, kCount> active_;
   uint32_t active_count_ = 0;

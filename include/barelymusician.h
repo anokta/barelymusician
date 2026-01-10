@@ -1669,7 +1669,8 @@ class Engine {
         static_cast<int32_t>(control_overrides.size()), &instrument_id);
     assert(success);
     NoteEventCallback& note_event_callback =
-        note_event_callbacks_.get()[instrument_id & ((1 << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) - 1)];
+        note_event_callbacks_
+            .get()[(instrument_id & ((1 << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) - 1)) - 1];
     note_event_callback = {};
     return Instrument(engine_, instrument_id, &note_event_callback);
   }
@@ -1699,7 +1700,7 @@ class Engine {
                                                             priority, nullptr, nullptr, &task_id);
     assert(success);
     TaskEventCallback& task_event_callback =
-        task_event_callbacks_.get()[task_id & ((1 << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) - 1)];
+        task_event_callbacks_.get()[(task_id & ((1 << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) - 1)) - 1];
     task_event_callback = std::move(callback);
     success = BarelyTask_SetEventCallback(
         engine_, task_id,
@@ -1858,11 +1859,11 @@ class Engine {
 
   // Heap allocated array of note event callbacks (for pointer stability on move).
   std::unique_ptr<NoteEventCallback[]> note_event_callbacks_ =
-      std::make_unique<NoteEventCallback[]>(BARELYMUSICIAN_MAX_INSTRUMENT_COUNT + 1);
+      std::make_unique<NoteEventCallback[]>(BARELYMUSICIAN_MAX_INSTRUMENT_COUNT);
 
   // Heap allocated array of task event callbacks (for pointer stability on move).
   std::unique_ptr<TaskEventCallback[]> task_event_callbacks_ =
-      std::make_unique<TaskEventCallback[]>(BARELYMUSICIAN_MAX_TASK_COUNT + 1);
+      std::make_unique<TaskEventCallback[]>(BARELYMUSICIAN_MAX_TASK_COUNT);
 };
 
 /// A musical quantization.

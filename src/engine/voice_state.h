@@ -45,13 +45,13 @@ struct VoiceState {
   float slice_offset = 0.0f;
 
   /// Instrument index.
-  uint32_t instrument_index = 0;
+  uint32_t instrument_index = UINT32_MAX;
 
   /// Previous voice index.
-  uint32_t previous_voice_index = 0;
+  uint32_t previous_voice_index = UINT32_MAX;
 
   /// Next voice index.
-  uint32_t next_voice_index = 0;
+  uint32_t next_voice_index = UINT32_MAX;
 
   /// Voice timestamp (incremented in each voice start for round-robin voice stealing).
   uint32_t timestamp = 0;

@@ -49,7 +49,7 @@ struct InstrumentParams {
   float slice_increment = 0.0f;
 
   /// First voice index.
-  uint32_t first_voice_index = 0;
+  uint32_t first_voice_index = UINT32_MAX;
 
   /// Number of voices.
   uint32_t voice_count = 0;

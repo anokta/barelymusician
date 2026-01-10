@@ -15,19 +15,19 @@ TEST(PoolTest, AcquireMax) {
 
   // Acquire up to maximum capacity.
   for (uint32_t i = 0; i < kCount; ++i) {
-    EXPECT_NE(pool.Acquire(), 0);
+    EXPECT_LT(pool.Acquire(), kCount);
     EXPECT_EQ(pool.GetActiveCount(), i + 1);
   }
 
   // Exceeded maximum capacity.
   for (uint32_t i = 0; i < kCount; ++i) {
-    EXPECT_EQ(pool.Acquire(), 0);
+    EXPECT_EQ(pool.Acquire(), UINT32_MAX);
     EXPECT_EQ(pool.GetActiveCount(), kCount);
   }
 
   // Capacity should recover after freeing an item.
   pool.Release(1);
-  EXPECT_NE(pool.Acquire(), 0);
+  EXPECT_LT(pool.Acquire(), kCount);
 }
 
 }  // namespace

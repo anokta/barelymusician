@@ -88,21 +88,18 @@ namespace {
 uint32_t InstrumentController::Acquire(const BarelyInstrumentControlOverride* control_overrides,
                                        int32_t control_override_count) noexcept {
   const uint32_t instrument_index = engine_.instrument_pool.Acquire();
-  if (instrument_index == 0) {
-    return 0;
+  if (instrument_index != UINT32_MAX) {
+    InstrumentState& instrument = engine_.instrument_pool.Get(instrument_index);
+    instrument = {};
+    instrument.controls = BuildControlArray(control_overrides, control_override_count);
+
+    engine_.ScheduleMessage(InstrumentCreateMessage{instrument_index});
+    for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
+      engine_.ScheduleMessage(InstrumentControlMessage{instrument_index,
+                                                       static_cast<BarelyInstrumentControlType>(i),
+                                                       instrument.controls[i].value});
+    }
   }
-
-  InstrumentState& instrument = engine_.instrument_pool.Get(instrument_index);
-  instrument = {};
-  instrument.controls = BuildControlArray(control_overrides, control_override_count);
-
-  engine_.ScheduleMessage(InstrumentCreateMessage{instrument_index});
-  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    engine_.ScheduleMessage(InstrumentControlMessage{instrument_index,
-                                                     static_cast<BarelyInstrumentControlType>(i),
-                                                     instrument.controls[i].value});
-  }
-
   return instrument_index;
 }
 

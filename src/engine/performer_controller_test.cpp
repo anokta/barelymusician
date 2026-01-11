@@ -1,4 +1,4 @@
-#include "api/performer.h"
+#include "engine/performer_controller.h"
 
 #include <barelymusician.h>
 
@@ -6,6 +6,8 @@
 #include <functional>
 #include <utility>
 
+#include "engine/engine_state.h"
+#include "engine/performer_state.h"
 #include "engine/task_state.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -16,9 +18,14 @@ namespace {
 using ::testing::Optional;
 using ::testing::Pair;
 
-// Tests that the performer processs a single task as expected.
-TEST(PerformerTest, ProcessSingleTask) {
-  PerformerState performer;
+// Tests that a performer processses a single task as expected.
+TEST(PerformerControllerTest, ProcessSingleTask) {
+  auto engine = std::make_unique<EngineState>();
+  PerformerController controller(*engine);
+
+  // Create a performer.
+  const uint32_t performer_index = controller.Acquire();
+  auto& performer = engine->GetPerformer(performer_index);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -35,19 +42,13 @@ TEST(PerformerTest, ProcessSingleTask) {
     }
   };
 
-  TaskState task{
-      {
-          [](BarelyTaskEventType type, void* user_data) {
-            (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
-          },
-          &process_callback,
+  const uint32_t task_index = controller.AcquireTask(
+      performer_index, 0.25, 0.6, 0,
+      [](BarelyTaskEventType type, void* user_data) {
+        (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
       },
-      0.25,
-      0.6,
-      0,
-      0,
-  };
-  performer.AddTask(&task);
+      &process_callback);
+  auto& task = engine->GetTask(task_index);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -66,7 +67,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 0);
 
   // Process the task.
-  performer.Update(0.25);
+  controller.Update(0.25);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
@@ -74,7 +75,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
 
-  performer.ProcessAllTasksAtPosition(0);
+  controller.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.6, 0)));
@@ -82,7 +83,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 0);
 
-  performer.Update(0.6);
+  controller.Update(0.6);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.85);
   EXPECT_FALSE(performer.GetNextTaskKey().has_value());
@@ -95,7 +96,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.4, 0)));
 
   // Process the next task with a loop back.
-  performer.Update(0.4);
+  controller.Update(0.4);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
@@ -103,7 +104,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 1);
 
-  performer.ProcessAllTasksAtPosition(0);
+  controller.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.6, 0)));
@@ -112,7 +113,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 1);
 
   // Update the task position.
-  performer.SetTaskPosition(&task, 0.75);
+  controller.SetTaskPosition(task_index, 0.75);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
@@ -121,7 +122,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 2);
 
   // Process the task with the updated position.
-  performer.Update(0.5);
+  controller.Update(0.5);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.75);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
@@ -129,7 +130,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 2);
 
-  performer.ProcessAllTasksAtPosition(0);
+  controller.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.75);
   EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.25, 0)));
@@ -138,7 +139,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 2);
 
   // Update the position while task is still active.
-  performer.Update(0.05);
+  controller.Update(0.05);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.8);
   // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -157,11 +158,16 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 3);
 }
 
-// Tests that the performer processs multiple tasks as expected.
-TEST(PerformerTest, ProcessMultipleTasks) {
+// Tests that a performer processes multiple tasks as expected.
+TEST(PerformerControllerTest, ProcessMultipleTasks) {
   constexpr int kTaskCount = 4;
 
-  PerformerState performer;
+  auto engine = std::make_unique<EngineState>();
+  PerformerController controller(*engine);
+
+  // Create a performer.
+  const uint32_t performer_index = controller.Acquire();
+  auto& performer = engine->GetPerformer(performer_index);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -169,7 +175,6 @@ TEST(PerformerTest, ProcessMultipleTasks) {
 
   // Create tasks.
   std::array<std::pair<std::function<void(BarelyTaskEventType)>, bool>, kTaskCount> task_callbacks;
-  std::array<TaskState, kTaskCount> tasks;
   for (int i = 0; i < kTaskCount; ++i) {
     task_callbacks[i] = {
         [&, i](BarelyTaskEventType type) {
@@ -181,19 +186,12 @@ TEST(PerformerTest, ProcessMultipleTasks) {
         },
         false,
     };
-    tasks[i] = {
-        {
-            [](BarelyTaskEventType type, void* user_data) {
-              (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
-            },
-            &task_callbacks[i].first,
+    [[maybe_unused]] const uint32_t task_index = controller.AcquireTask(
+        performer_index, static_cast<double>(i + 1), 1.0, 0,
+        [](BarelyTaskEventType type, void* user_data) {
+          (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
         },
-        static_cast<double>(i + 1),
-        1.0,
-        0,
-        0,
-    };
-    performer.AddTask(&tasks[i]);
+        &task_callbacks[i].first);
   }
 
   EXPECT_FALSE(performer.is_playing);
@@ -217,11 +215,11 @@ TEST(PerformerTest, ProcessMultipleTasks) {
     ASSERT_THAT(performer.GetNextTaskKey(), Optional(Pair(1.0, 0)));
 
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-    performer.Update(performer.GetNextTaskKey()->first);
+    controller.Update(performer.GetNextTaskKey()->first);
     EXPECT_DOUBLE_EQ(performer.position, static_cast<double>(i));
 
-    performer.ProcessAllTasksAtPosition(0);  // beat callback
-    performer.ProcessAllTasksAtPosition(0);
+    controller.ProcessAllTasksAtPosition(0);  // beat callback
+    controller.ProcessAllTasksAtPosition(0);
     for (int j = 1; j <= kTaskCount; ++j) {
       EXPECT_EQ(task_callbacks[j - 1].second, i == j);
     }
@@ -233,40 +231,6 @@ TEST(PerformerTest, ProcessMultipleTasks) {
   for (int i = 1; i <= kTaskCount; ++i) {
     EXPECT_EQ(task_callbacks[i - 1].second, false);
   }
-}
-
-// Tests that the performer sets its current position as expected.
-TEST(PerformerTest, SetPosition) {
-  PerformerState performer;
-  EXPECT_EQ(performer.position, 0.0);
-
-  performer.SetPosition(2.75);
-  EXPECT_DOUBLE_EQ(performer.position, 2.75);
-
-  performer.SetPosition(1.25);
-  EXPECT_DOUBLE_EQ(performer.position, 1.25);
-
-  // Set looping on which should wrap the current position back.
-  performer.SetLooping(true);
-  EXPECT_DOUBLE_EQ(performer.position, 0.25);
-
-  performer.SetPosition(3.5);
-  EXPECT_DOUBLE_EQ(performer.position, 0.5);
-
-  // Set loop begin position.
-  performer.SetLoopBeginPosition(0.75);
-  EXPECT_DOUBLE_EQ(performer.position, 0.5);
-
-  // Set loop length.
-  performer.SetLoopLength(2.0);
-  EXPECT_DOUBLE_EQ(performer.position, 0.5);
-
-  performer.SetPosition(4.0f);
-  EXPECT_DOUBLE_EQ(performer.position, 2.0);
-
-  // Resetting back position before the loop should still be okay.
-  performer.SetPosition(0.25);
-  EXPECT_DOUBLE_EQ(performer.position, 0.25);
 }
 
 }  // namespace

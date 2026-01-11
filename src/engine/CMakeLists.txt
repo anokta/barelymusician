@@ -25,10 +25,10 @@ target_sources(
 if(ENABLE_TESTS)
   target_sources(
     barelymusician_test PRIVATE
-    # TODO(#126): clean up and reenable
-    # engine_test.cpp
-    # instrument_test.cpp
-    # performer_test.cpp
+    engine_controller_test.cpp
+    engine_processor_test.cpp
+    instrument_controller_test.cpp
+    performer_controller_test.cpp
     message_queue_test.cpp
   )
 endif()

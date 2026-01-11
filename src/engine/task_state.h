@@ -66,7 +66,4 @@ struct TaskState {
 
 }  // namespace barely
 
-// TODO(#126): temp shortcut
-using TaskState = ::barely::TaskState;
-
 #endif  // BARELYMUSICIAN_ENGINE_TASK_STATE_H_

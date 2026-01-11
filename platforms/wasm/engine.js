@@ -165,16 +165,16 @@ export class Engine {
    * @return {!Instrument}
    */
   createInstrument(instrumentContainer) {
-    let resolveHandle;
-    const handlePromise = new Promise(resolve => {
-      resolveHandle = resolve;
+    let resolveId;
+    const idPromise = new Promise(resolve => {
+      resolveId = resolve;
     });
 
     const instrument = new Instrument({
       container: instrumentContainer,
       audioContext: this._audioContext,
       audioNode: this._audioNode,
-      handlePromise: handlePromise,
+      idPromise: idPromise,
       noteOnCallback: pitch => {
         console.log(`[${instrumentContainer.id}] NoteOn(${pitch.toFixed(1)})`);
       },
@@ -183,7 +183,7 @@ export class Engine {
       },
     });
 
-    this._pendingInstruments.push({instrument, resolveHandle});
+    this._pendingInstruments.push({instrument, resolveId});
 
     return instrument;
   }
@@ -193,18 +193,18 @@ export class Engine {
    * @return {!Performer}
    */
   createPerformer(performerContainer) {
-    let resolveHandle;
-    const handlePromise = new Promise(resolve => {
-      resolveHandle = resolve;
+    let resolveId;
+    const idPromise = new Promise(resolve => {
+      resolveId = resolve;
     });
     const performer = new Performer({
       container: performerContainer,
       audioNode: this._audioNode,
-      handlePromise: handlePromise,
+      idPromise: idPromise,
       instruments: this._instruments,
     });
 
-    this._pendingPerformers.push({performer, resolveHandle});
+    this._pendingPerformers.push({performer, resolveId});
 
     return performer;
   }
@@ -276,8 +276,8 @@ export class Engine {
           this._startUpdateLoop();
         } break;
         case 'instrument-create-success': {
-          const {instrument, resolveHandle} = this._pendingInstruments.shift();
-          resolveHandle(event.data.id);
+          const {instrument, resolveId} = this._pendingInstruments.shift();
+          resolveId(event.data.id);
           this._instruments[event.data.id] = instrument;
           for (const id in this._performers) {
             this._performers[id].updateInstrumentSelect(this._instruments);
@@ -296,8 +296,8 @@ export class Engine {
           this._instruments[event.data.id]?.noteOffCallback(event.data.pitch);
         } break;
         case 'performer-create-success': {
-          const {performer, resolveHandle} = this._pendingPerformers.shift();
-          resolveHandle(event.data.id);
+          const {performer, resolveId} = this._pendingPerformers.shift();
+          resolveId(event.data.id);
           this._performers[event.data.id] = performer;
           this._performers[event.data.id].updateInstrumentSelect(this._instruments);
         } break;

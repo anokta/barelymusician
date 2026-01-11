@@ -9,12 +9,11 @@ export class Instrument {
    * @param {!Element} params.container
    * @param {!AudioContext} params.audioContext
    * @param {!AudioWorkletNode} params.audioNode
-   * @param {!Promise<number>} params.handlePromise
+   * @param {!Promise<number>} params.idPromise
    * @param {function(number):void} params.noteOnCallback
    * @param {function(number):void} params.noteOffCallback
    */
-  constructor(
-      {container, audioContext, audioNode, handlePromise, noteOnCallback, noteOffCallback}) {
+  constructor({container, audioContext, audioNode, idPromise, noteOnCallback, noteOffCallback}) {
     /** @private @const {!Element} */
     this._container = container;
     /** @private @const {!AudioContext} */
@@ -22,7 +21,7 @@ export class Instrument {
     /** @private @const {!AudioWorkletNode} */
     this._audioNode = audioNode;
     /** @private @const {!Promise<number>} */
-    this._handlePromise = handlePromise;
+    this._idPromise = idPromise;
 
     /** @public */
     this.noteOnCallback = noteOnCallback;
@@ -399,7 +398,7 @@ export class Instrument {
    * @private
    */
   async _withId(fn) {
-    const id = await this._handlePromise;
+    const id = await this._idPromise;
     return fn(id);
   }
 }

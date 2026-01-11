@@ -5,9 +5,9 @@ export const TaskEventType = {
 };
 
 export class Task {
-  constructor({audioNode, handlePromise, position, duration, eventCallback}) {
+  constructor({audioNode, idPromise, position, duration, eventCallback}) {
     this._audioNode = audioNode;
-    this._handlePromise = handlePromise;
+    this._idPromise = idPromise;
 
     this._position = position;
     this._duration = duration;
@@ -77,7 +77,7 @@ export class Task {
    * @private
    */
   async _withId(fn) {
-    const id = await this._handlePromise;
+    const id = await this._idPromise;
     return fn(id);
   }
 }

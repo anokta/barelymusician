@@ -16,10 +16,10 @@ export class Performer {
   /**
    * @param {!Object} options
    */
-  constructor({container, audioNode, handlePromise, instruments}) {
+  constructor({container, audioNode, idPromise, instruments}) {
     this._container = container;
     this._audioNode = audioNode;
-    this._handlePromise = handlePromise;
+    this._idPromise = idPromise;
 
     this._isLooping = false;
     this._isPlaying = false;
@@ -46,19 +46,19 @@ export class Performer {
    * @return {!Task}
    */
   createTask(position, duration, eventCallback) {
-    let resolveHandle;
-    const handlePromise = new Promise(resolve => {
-      resolveHandle = resolve;
+    let resolveId;
+    const idPromise = new Promise(resolve => {
+      resolveId = resolve;
     });
     const task = new Task({
       audioNode: this._audioNode,
-      handlePromise,
+      idPromise,
       position,
       duration,
       eventCallback,
     });
 
-    this._pendingTasks.push({task, resolveHandle});
+    this._pendingTasks.push({task, resolveId});
 
     this._withId(id => {
       this._audioNode.port.postMessage({
@@ -99,8 +99,8 @@ export class Performer {
    * @return {!Task}
    */
   onTaskCreateSuccess(id) {
-    const {task, resolveHandle} = this._pendingTasks.shift();
-    resolveHandle(id);
+    const {task, resolveId} = this._pendingTasks.shift();
+    resolveId(id);
     return task;
   }
 
@@ -622,7 +622,7 @@ export class Performer {
   }
 
   async _withId(fn) {
-    const id = await this._handlePromise;
+    const id = await this._idPromise;
     return fn(id);
   }
 }

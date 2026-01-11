@@ -71,7 +71,7 @@ class InstrumentProcessor {
   }
 
  private:
-  [[nodiscard]] uint32_t AcquireVoice(uint32_t instrument_index, float pitch) noexcept;
+  [[nodiscard]] uint32_t AcquireVoice(InstrumentParams& params, float pitch) noexcept;
 
   /// Processes the next output frame of a voice.
   ///

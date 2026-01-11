@@ -8,9 +8,15 @@
 #include <limits>
 
 #include "core/callback.h"
-#include "dsp/control.h"
+#include "core/control.h"
 
 namespace barely {
+
+/// Instrument control array.
+using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_kCount>;
+
+/// Note control array.
+using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
 
 // Returns a control array with overrides.
 [[nodiscard]] inline InstrumentControlArray BuildControlArray(

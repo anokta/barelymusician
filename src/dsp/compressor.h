@@ -6,7 +6,7 @@
 #include <cmath>
 
 #include "core/constants.h"
-#include "dsp/control.h"
+#include "core/control.h"
 #include "dsp/decibels.h"
 
 namespace barely {

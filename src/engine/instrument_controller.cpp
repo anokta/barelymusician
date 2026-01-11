@@ -10,8 +10,8 @@
 #include <limits>
 #include <utility>
 
+#include "core/control.h"
 #include "core/rng.h"
-#include "dsp/control.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
 

@@ -9,8 +9,8 @@
 #include <unordered_map>
 
 #include "core/constants.h"
+#include "core/control.h"
 #include "dsp/compressor.h"
-#include "dsp/control.h"
 #include "dsp/decibels.h"
 #include "dsp/delay_filter.h"
 #include "dsp/one_pole_filter.h"

@@ -3,7 +3,6 @@ target_sources(
   biquad_filter.h
   bit_crusher.h
   compressor.h
-  control.h
   decibels.h
   delay_filter.h
   distortion.h

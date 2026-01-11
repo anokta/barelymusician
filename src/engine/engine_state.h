@@ -8,7 +8,7 @@
 #include "core/rng.h"
 #include "core/time.h"
 #include "dsp/compressor.h"
-#include "dsp/control.h"
+#include "core/control.h"
 #include "dsp/delay_filter.h"
 #include "dsp/sidechain.h"
 #include "engine/effect_params.h"
@@ -21,6 +21,9 @@
 #include "engine/voice_state.h"
 
 namespace barely {
+
+/// Engine control array.
+using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
 
 /// Returns an engine control array.
 inline EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {

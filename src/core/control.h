@@ -1,10 +1,7 @@
-#ifndef BARELYMUSICIAN_DSP_CONTROL_H_
-#define BARELYMUSICIAN_DSP_CONTROL_H_
-
-#include <barelymusician.h>
+#ifndef BARELYMUSICIAN_CORE_CONTROL_H_
+#define BARELYMUSICIAN_CORE_CONTROL_H_
 
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <limits>
 
@@ -54,15 +51,6 @@ struct Control {
   }
 };
 
-/// Engine control array.
-using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
-
-/// Instrument control array.
-using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_kCount>;
-
-/// Note control array.
-using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
-
 /// Approaches a value to a target value with smoothing.
 ///
 /// @param current_value Current value.
@@ -74,4 +62,4 @@ inline constexpr void ApproachValue(float& current_value, float target_value) no
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_DSP_CONTROL_H_
+#endif  // BARELYMUSICIAN_CORE_CONTROL_H_

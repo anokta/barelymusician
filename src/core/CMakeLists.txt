@@ -2,6 +2,7 @@ target_sources(
   barelymusician PRIVATE
   callback.h
   constants.h
+  control.h
   pool.h
   rng.h
   time.h

@@ -3,9 +3,9 @@
 
 #include <array>
 
+#include "core/control.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
-#include "dsp/control.h"
 #include "dsp/envelope.h"
 #include "engine/instrument_params.h"
 #include "engine/note_params.h"

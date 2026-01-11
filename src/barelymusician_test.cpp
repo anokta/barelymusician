@@ -1,6 +1,7 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstdint>
 #include <vector>
 
 #include "gmock/gmock-matchers.h"
@@ -13,93 +14,88 @@ using ::testing::ElementsAre;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kSampleRate = 48000;
-constexpr int kMaxFrameCount = 512;
 
 TEST(BarelyEngineTest, CreateDestroyEngine) {
   // Failures.
-  EXPECT_FALSE(BarelyEngine_Create(0, 0, nullptr));
-  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, 0, nullptr));
-  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(0, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, nullptr));
   EXPECT_FALSE(BarelyEngine_Destroy(nullptr));
 
   // Success.
-  BarelyEngineHandle engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, &engine));
+  BarelyEngine* engine = nullptr;
+  EXPECT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
-  BarelyEngineHandle engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, &engine));
+  BarelyEngine* engine = nullptr;
+  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
 
   // Failures.
-  EXPECT_FALSE(BarelyInstrument_Create(engine, nullptr, 0, nullptr));
-  EXPECT_FALSE(BarelyInstrument_Destroy(nullptr));
+  EXPECT_FALSE(BarelyEngine_CreateInstrument(engine, nullptr, 0, nullptr));
+  EXPECT_FALSE(BarelyEngine_DestroyInstrument(nullptr, {}));
 
   // Success.
-  BarelyInstrumentHandle instrument = nullptr;
-  EXPECT_TRUE(BarelyInstrument_Create(engine, nullptr, 0, &instrument));
-  EXPECT_NE(instrument, nullptr);
+  uint32_t instrument_id = 0;
+  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, nullptr, 0, &instrument_id));
 
-  EXPECT_TRUE(BarelyInstrument_Destroy(instrument));
+  EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument_id));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
-  BarelyEngineHandle engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, kMaxFrameCount, &engine));
+  BarelyEngine* engine = nullptr;
+  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
 
   // Failures.
-  EXPECT_FALSE(BarelyPerformer_Create(engine, nullptr));
-  EXPECT_FALSE(BarelyPerformer_Destroy(nullptr));
+  EXPECT_FALSE(BarelyEngine_CreatePerformer(engine, nullptr));
+  EXPECT_FALSE(BarelyEngine_DestroyPerformer(nullptr, {}));
 
   // Success.
-  BarelyPerformerHandle performer = nullptr;
-  EXPECT_TRUE(BarelyPerformer_Create(engine, &performer));
-  EXPECT_NE(performer, nullptr);
+  uint32_t performer_id = 0;
+  EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer_id));
 
-  EXPECT_TRUE(BarelyPerformer_Destroy(performer));
+  EXPECT_TRUE(BarelyEngine_DestroyPerformer(engine, performer_id));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
-TEST(EngineTest, CreateDestroyEngine) {
-  [[maybe_unused]] const Engine engine(kSampleRate, kMaxFrameCount);
-}
+TEST(EngineTest, CreateDestroyEngine) { [[maybe_unused]] const Engine engine(kSampleRate); }
 
 TEST(EngineTest, CreateDestroyInstrument) {
-  Engine engine(kSampleRate, kMaxFrameCount);
+  Engine engine(kSampleRate);
   [[maybe_unused]] const auto instrument = engine.CreateInstrument();
 }
 
 TEST(EngineTest, CreateDestroyPerformer) {
-  Engine engine(kSampleRate, kMaxFrameCount);
-  [[maybe_unused]] const auto performer = engine.CreatePerformer();
+  Engine engine(kSampleRate);
+  engine.DestroyPerformer(engine.CreatePerformer());
 }
 
 // Tests that a single instrument is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySingleInstrument) {
   constexpr float kPitch = 0.5;
 
-  Engine engine(kSampleRate, kMaxFrameCount);
+  Engine engine(kSampleRate);
 
   float note_off_pitch = 0.0f;
   float note_on_pitch = 0.0f;
-  {
-    // Create an instrument.
-    Instrument instrument = engine.CreateInstrument({});
 
-    // Set the note callbacks.
-    instrument.SetNoteEventCallback([&](NoteEventType type, float pitch) {
-      (type == NoteEventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
-    });
-    EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
-    EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
+  // Create an instrument.
+  Instrument instrument_ref = engine.CreateInstrument({});
 
-    // Set a note on.
-    instrument.SetNoteOn(kPitch);
-    EXPECT_TRUE(instrument.IsNoteOn(kPitch));
-    EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
-  }
+  // Set the note callbacks.
+  instrument_ref.SetNoteEventCallback([&](NoteEventType type, float pitch) {
+    (type == NoteEventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
+  });
+  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
+  EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
+
+  // Set a note on.
+  instrument_ref.SetNoteOn(kPitch);
+  EXPECT_TRUE(instrument_ref.IsNoteOn(kPitch));
+  EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
+
+  engine.DestroyInstrument(instrument_ref);
 
   // Note should be stopped once the instrument goes out of scope.
   EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
@@ -110,7 +106,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
   std::vector<float> note_off_pitches;
 
   {
-    Engine engine(kSampleRate, kMaxFrameCount);
+    Engine engine(kSampleRate);
 
     // Create instruments with note off callbacks.
     std::vector<Instrument> instruments;
@@ -142,7 +138,7 @@ TEST(EngineTest, GenerateRandomNumber) {
   constexpr int kMin = -7;
   constexpr int kMax = 35;
 
-  Engine engine(1, kSampleRate);
+  Engine engine(1);
   for (int i = 0; i < kValueCount; ++i) {
     const int value = engine.GenerateRandomNumber(kMin, kMax);
     EXPECT_GE(value, kMin);
@@ -155,7 +151,7 @@ TEST(EngineTest, SetSeed) {
   constexpr int kSeed = 1;
   constexpr int kValueCount = 10;
 
-  Engine engine(1, kSampleRate);
+  Engine engine(1);
   engine.SetSeed(kSeed);
 
   // Generate some random values.

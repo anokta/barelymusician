@@ -35,6 +35,31 @@ if(NOT DEFINED ENABLE_TESTS)
 endif()
 option(ENABLE_TESTS "Build tests" ${ENABLE_TESTS})
 
+if(NOT DEFINED MAX_FRAME_COUNT)
+  set(MAX_FRAME_COUNT 4096 CACHE STRING "Maximum number of frames per process block" FORCE)
+endif()
+option(MAX_FRAME_COUNT "Maximum number of frames per process block" ${MAX_FRAME_COUNT})
+
+if(NOT DEFINED MAX_INSTRUMENT_COUNT)
+  set(MAX_INSTRUMENT_COUNT 500 CACHE STRING "Maximum number of instruments" FORCE)
+endif()
+option(MAX_INSTRUMENT_COUNT "Maximum number of instruments" ${MAX_INSTRUMENT_COUNT})
+
+if(NOT DEFINED MAX_PERFORMER_COUNT)
+  set(MAX_PERFORMER_COUNT 100 CACHE STRING "Maximum number of performers" FORCE)
+endif()
+option(MAX_PERFORMER_COUNT "Maximum number of performers" ${MAX_PERFORMER_COUNT})
+
+if(NOT DEFINED MAX_TASK_COUNT)
+  set(MAX_TASK_COUNT 5000 CACHE STRING "Maximum number of tasks" FORCE)
+endif()
+option(MAX_TASK_COUNT "Maximum number of tasks" ${MAX_TASK_COUNT})
+
+if(NOT DEFINED MAX_VOICE_COUNT)
+  set(MAX_VOICE_COUNT 200 CACHE STRING "Maximum number of voices" FORCE)
+endif()
+option(MAX_VOICE_COUNT "Maximum number of voices" ${MAX_VOICE_COUNT})
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

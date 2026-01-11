@@ -5,8 +5,7 @@
 namespace barely {
 namespace {
 
-constexpr int kSampleRate = 1000;
-constexpr float kSampleInterval = 1.0f / kSampleRate;
+constexpr float kSampleRate = 1000;
 
 // Envelope ADSR.
 constexpr float kAttack = 0.02f;
@@ -40,10 +39,10 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   constexpr int kReleaseSampleCount = static_cast<int>(kSampleRate * kRelease);
 
   Envelope::Adsr adsr;
-  adsr.SetAttack(kSampleInterval, kAttack);
-  adsr.SetDecay(kSampleInterval, kDecay);
+  adsr.SetAttack(kSampleRate, kAttack);
+  adsr.SetDecay(kSampleRate, kDecay);
   adsr.SetSustain(kSustain);
-  adsr.SetRelease(kSampleInterval, kRelease);
+  adsr.SetRelease(kSampleRate, kRelease);
 
   Envelope envelope;
 

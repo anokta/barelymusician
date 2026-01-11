@@ -14,35 +14,29 @@ class Envelope {
    public:
     /// Sets the attack.
     ///
-    /// @param sample_interval Sample interval in seconds.
+    /// @param sample_rate Sampling rate in hertz.
     /// @param attack Attack in seconds.
-    void SetAttack(float sample_interval, float attack) noexcept {
-      attack_increment_ = (attack > 0.0f) ? sample_interval / attack : 0.0f;
-      if (attack_increment_ > 1.0f) {
-        attack_increment_ = 0.0f;
-      }
+    void SetAttack(float sample_rate, float attack) noexcept {
+      const float attack_samples = sample_rate * attack;
+      attack_increment_ = (attack_samples >= 1.0f) ? 1.0f / attack_samples : 0.0f;
     }
 
     /// Sets the decay.
     ///
-    /// @param sample_interval Sample interval in seconds.
+    /// @param sample_rate Sampling rate in hertz.
     /// @param decay Attack in seconds.
-    void SetDecay(float sample_interval, float decay) noexcept {
-      decay_increment_ = (decay > 0.0f) ? sample_interval / decay : 0.0f;
-      if (decay_increment_ > 1.0f) {
-        decay_increment_ = 0.0f;
-      }
+    void SetDecay(float sample_rate, float decay) noexcept {
+      const float decay_samples = sample_rate * decay;
+      decay_increment_ = (decay_samples >= 1.0f) ? 1.0f / decay_samples : 0.0f;
     }
 
     /// Sets the release.
     ///
-    /// @param sample_interval Sample interval in seconds.
+    /// @param sample_rate Sampling rate in hertz.
     /// @param release Release in seconds.
-    void SetRelease(float sample_interval, float release) noexcept {
-      release_decrement_ = (release > 0.0f) ? -sample_interval / release : 0.0f;
-      if (release_decrement_ < -1.0f) {
-        release_decrement_ = 0.0f;
-      }
+    void SetRelease(float sample_rate, float release) noexcept {
+      const float release_samples = sample_rate * release;
+      release_increment_ = (release_samples >= 1.0f) ? 1.0f / release_samples : 0.0f;
     }
 
     /// Sets the sustain of the envelope in amplitude.
@@ -57,18 +51,18 @@ class Envelope {
     float attack_increment_ = 0.0f;
     float decay_increment_ = 0.0f;
     float sustain_ = 1.0f;
-    float release_decrement_ = 0.0f;
+    float release_increment_ = 0.0f;
   };
 
   /// Returns whether the envelope is currently active (i.e., not idle).
   ///
   /// @return True if active.
-  [[nodiscard]] bool IsActive() const noexcept { return state_ != State::kIdle; }
+  [[nodiscard]] constexpr bool IsActive() const noexcept { return state_ != State::kIdle; }
 
   /// Returns whether the envelope is currently on (i.e., not idle or released).
   ///
   /// @return True if on.
-  [[nodiscard]] bool IsOn() const noexcept {
+  [[nodiscard]] constexpr bool IsOn() const noexcept {
     return static_cast<int>(state_) < static_cast<int>(State::kRelease);
   }
 
@@ -110,9 +104,9 @@ class Envelope {
       return output_;
     }
     if (state_ == State::kRelease) {
-      if (adsr_->release_decrement_ < 0.0f) {
+      if (adsr_->release_increment_ > 0.0f) {
         output_ = phase_ * release_output_;
-        phase_ += adsr_->release_decrement_;
+        phase_ -= adsr_->release_increment_;
         if (phase_ <= 0.0f) {
           phase_ = 0.0f;
           state_ = State::kIdle;
@@ -158,6 +152,9 @@ class Envelope {
   // Pointer to adsr.
   const Adsr* adsr_ = nullptr;
 
+  // Current state.
+  State state_ = State::kIdle;
+
   // Last output value.
   float output_ = 0.0f;
 
@@ -166,9 +163,6 @@ class Envelope {
 
   // Internal clock.
   float phase_ = 0.0f;
-
-  // Current state.
-  State state_ = State::kIdle;
 };
 
 }  // namespace barely

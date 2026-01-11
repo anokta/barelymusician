@@ -9,11 +9,11 @@
 namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Repeater::Repeater(Engine& engine, Instrument& instrument) noexcept
+Repeater::Repeater(Engine& engine, Instrument instrument) noexcept
     : engine_(engine),
       instrument_(instrument),
       performer_(engine_.CreatePerformer()),
-      task_(performer_.CreateTask(0.0, 1.0, 0, [this](TaskEventType type) noexcept {
+      task_(engine_.CreateTask(performer_, 0.0, 1.0, 0, [this](TaskEventType type) noexcept {
         if (type == TaskEventType::kBegin) {
           OnBeat();
         }

@@ -1,7 +1,6 @@
 #include <barelymusician.h>
 
 #include <array>
-#include <vector>
 
 #include "benchmark/benchmark.h"
 
@@ -15,25 +14,25 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
 void BM_BarelyEngine_AddRemoveInstrument(State& state) {
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    [[maybe_unused]] const auto instrument = engine.CreateInstrument();
+    engine.DestroyInstrument(engine.CreateInstrument());
   }
 }
 BENCHMARK(BM_BarelyEngine_AddRemoveInstrument);
 
 void BM_BarelyEngine_AddRemovePerformer(State& state) {
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
   for (auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
-    [[maybe_unused]] const auto performer = engine.CreatePerformer();
+    engine.DestroyPerformer(engine.CreatePerformer());
   }
 }
 BENCHMARK(BM_BarelyEngine_AddRemovePerformer);
 
 void BM_BarelyEngine_ProcessEmpty(State& state) {
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
   std::array<float, kChannelCount * kFrameCount> output_samples;
 
@@ -45,7 +44,7 @@ BENCHMARK(BM_BarelyEngine_ProcessEmpty);
 
 template <int kUpdateCount>
 void BM_BarelyEngine_ProcessInstrumentUpdates(State& state) {
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
@@ -82,16 +81,15 @@ BENCHMARK(BM_BarelyEngine_ProcessInstrumentUpdates<100>);
 
 template <int kInstrumentCount>
 void BM_BarelyEngine_ProcessMultipleInstruments(State& state) {
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
-  std::vector<Instrument> instruments;
   for (int i = 0; i < kInstrumentCount; ++i) {
-    instruments.push_back(engine.CreateInstrument());
-    instruments.back().SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
-    instruments.back().SetControl(InstrumentControlType::kOscShape, 0.0f);
-    const int voice_count = instruments.back().GetControl<int>(InstrumentControlType::kVoiceCount);
+    auto instrument = engine.CreateInstrument();
+    instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
+    instrument.SetControl(InstrumentControlType::kOscShape, 0.0f);
+    const int voice_count = instrument.GetControl<int>(InstrumentControlType::kVoiceCount);
     for (int voice_index = 0; voice_index < voice_count; ++voice_index) {
-      instruments.back().SetNoteOn(static_cast<float>(i * voice_index) / 12.0f);
+      instrument.SetNoteOn(static_cast<float>(i * voice_index) / 12.0f);
     }
   }
 
@@ -111,7 +109,7 @@ void BM_BarelyInstrument_PlaySingleNoteWithLoopingSample(State& state) {
   constexpr std::array<float, 5> kSamples = {-0.5f, -0.25f, 0.0f, 0.25f, 1.0f};
   const std::array<Slice, 1> kSlices = {Slice(0.0, kSampleRate, kSamples)};
 
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kSliceMode, SliceMode::kLoop);
@@ -132,7 +130,7 @@ BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithLoopingSample<FilterType::kLowPa
 
 template <float kOscShape, FilterType kFilterType>
 void BM_BarelyInstrument_PlaySingleNoteWithOsc(State& state) {
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
@@ -155,7 +153,7 @@ BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<1.0f, FilterType::kLowPass>)
 
 template <float kOscShape, FilterType kFilterType>
 void BM_BarelyInstrument_PlayMultipleNotesWithOsc(State& state) {
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
@@ -180,7 +178,7 @@ BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<1.0f, FilterType::kNone>)
 BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<1.0f, FilterType::kLowPass>);
 
 void BM_BarelyInstrument_SetMultipleControls(State& state) {
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
   int i = 0;

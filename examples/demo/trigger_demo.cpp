@@ -17,7 +17,6 @@ using ::barely::Engine;
 using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Scale;
-using ::barely::Task;
 using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -52,7 +51,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{
@@ -69,7 +68,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   std::vector<std::pair<double, double>> triggers;
-  std::vector<Task> tasks;
 
   auto performer = engine.CreatePerformer();
   double stop_position = 0.0;
@@ -89,25 +87,25 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(0.0, 1.0, 0, play_note_fn(0)));
+  engine.CreateTask(performer, 0.0, 1.0, 0, play_note_fn(0));
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(1.0, 1.0, 0, play_note_fn(1)));
+  engine.CreateTask(performer, 1.0, 1.0, 0, play_note_fn(1));
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(2.0, 1.0, 0, play_note_fn(2)));
+  engine.CreateTask(performer, 2.0, 1.0, 0, play_note_fn(2));
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(3.0, 0.66, 0, play_note_fn(3)));
-  tasks.emplace_back(performer.CreateTask(3.66, 0.34, 0, play_note_fn(4)));
+  engine.CreateTask(performer, 3.0, 0.66, 0, play_note_fn(3));
+  engine.CreateTask(performer, 3.66, 0.34, 0, play_note_fn(4));
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  tasks.emplace_back(performer.CreateTask(4.0, 0.33, 0, play_note_fn(5)));
-  tasks.emplace_back(performer.CreateTask(4.33, 0.33, 0, play_note_fn(6)));
-  tasks.emplace_back(performer.CreateTask(4.66, 0.34, 0, play_note_fn(7)));
+  engine.CreateTask(performer, 4.0, 0.33, 0, play_note_fn(5));
+  engine.CreateTask(performer, 4.33, 0.33, 0, play_note_fn(6));
+  engine.CreateTask(performer, 4.66, 0.34, 0, play_note_fn(7));
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  tasks.emplace_back(performer.CreateTask(5.0, 2.0, 0, play_note_fn(8)));
+  engine.CreateTask(performer, 5.0, 2.0, 0, play_note_fn(8));
 
   // Audio process callback.
   audio_output.SetProcessCallback(

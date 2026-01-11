@@ -48,7 +48,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
   auto instrument = engine.CreateInstrument({{
@@ -87,14 +87,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   std::unordered_map<int, Task> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {
-    return performer.CreateTask(note.position, note.duration, 0,
-                                [&instrument, pitch = note.pitch](TaskEventType type) {
-                                  if (type == TaskEventType::kBegin) {
-                                    instrument.SetNoteOn(pitch);
-                                  } else if (type == TaskEventType::kEnd) {
-                                    instrument.SetNoteOff(pitch);
-                                  }
-                                });
+    return engine.CreateTask(performer, note.position, note.duration, 0,
+                             [&instrument, pitch = note.pitch](TaskEventType type) {
+                               if (type == TaskEventType::kBegin) {
+                                 instrument.SetNoteOn(pitch);
+                               } else if (type == TaskEventType::kEnd) {
+                                 instrument.SetNoteOff(pitch);
+                               }
+                             });
   };
   for (int i = 0; i < static_cast<int>(score.size()); ++i) {
     tasks.emplace(i, build_note_fn(score[i]));
@@ -119,6 +119,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
       if (const auto it = tasks.find(index - 1); it != tasks.end()) {
+        engine.DestroyTask(it->second);
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {

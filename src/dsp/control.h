@@ -10,8 +10,19 @@
 
 namespace barely {
 
-/// Control.
 struct Control {
+  /// Value.
+  float value = 0.0f;
+
+  /// Minimum value.
+  float min_value = std::numeric_limits<float>::lowest();
+
+  /// Maximum value.
+  float max_value = std::numeric_limits<float>::max();
+
+  /// Default constructor.
+  constexpr Control() noexcept = default;
+
   /// Constructs a new `Control`.
   ///
   /// @param default_value Default value.
@@ -41,15 +52,6 @@ struct Control {
     }
     return false;
   }
-
-  /// Value.
-  float value = 0.0f;
-
-  /// Minimum value.
-  float min_value = std::numeric_limits<float>::lowest();
-
-  /// Maximum value.
-  float max_value = std::numeric_limits<float>::max();
 };
 
 /// Engine control array.

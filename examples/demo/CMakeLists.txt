@@ -17,7 +17,9 @@ function(add_demo demo_name)
     barelymusician_examples_data
     ${ARGN}
   )
+  add_dependencies(barelymusician_examples ${DEMO_TARGET_NAME})
 endfunction()
+add_custom_target(barelymusician_examples)
 add_demo(instrument_demo)
 add_demo(metronome_demo)
 add_demo(midi_demo midifile)

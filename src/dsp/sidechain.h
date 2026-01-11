@@ -4,7 +4,7 @@
 #include <array>
 #include <cmath>
 
-#include "common/constants.h"
+#include "core/constants.h"
 #include "dsp/decibels.h"
 
 namespace barely {
@@ -12,12 +12,6 @@ namespace barely {
 /// Sidechain compressor.
 class Sidechain {
  public:
-  /// Constructs a new `Sidechain`.
-  ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit Sidechain(int sample_rate) noexcept
-      : sample_interval_(1.0f / static_cast<float>(sample_rate)) {}
-
   /// Processes the next sidechain frame.
   ///
   /// @param sidechain_frame Input/output sidechain frame.
@@ -48,29 +42,28 @@ class Sidechain {
   /// Sets the attack.
   ///
   /// @param attack Attack in seconds.
-  void SetAttack(float attack) noexcept {
-    attack_coeff_ = (attack > 0.0f) ? std::exp(-sample_interval_ / attack) : 0.0f;
+  /// @param sample_rate Sampling rate in hertz.
+  void SetAttack(float attack, float sample_rate) noexcept {
+    attack_coeff_ = (attack > 0.0f) ? std::exp(-1.0f / (attack * sample_rate)) : 0.0f;
   }
 
   /// Sets the release.
   ///
   /// @param release Release in seconds.
-  void SetRelease(float release) noexcept {
-    release_coeff_ = (release > 0.0f) ? std::exp(-sample_interval_ / release) : 0.0f;
+  /// @param sample_rate Sampling rate in hertz.
+  void SetRelease(float release, float sample_rate) noexcept {
+    release_coeff_ = (release > 0.0f) ? std::exp(-1.0f / (release * sample_rate)) : 0.0f;
   }
 
  private:
-  // Sample interval.
-  float sample_interval_ = 0.0f;
+  // Sidechain frame in decibels.
+  std::array<float, kStereoChannelCount> sidechain_db_frame_ = {};
 
   // Attack coefficient.
   float attack_coeff_ = 0.0f;
 
   // Release coefficient.
   float release_coeff_ = 0.0f;
-
-  // Sidechain frame in decibels.
-  std::array<float, kStereoChannelCount> sidechain_db_frame_ = {};
 };
 
 }  // namespace barely

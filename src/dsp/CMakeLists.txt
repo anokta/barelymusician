@@ -7,19 +7,12 @@ target_sources(
   decibels.h
   delay_filter.h
   distortion.h
-  engine_processor.h
   envelope.h
-  instrument_processor.cpp
-  instrument_processor.h
-  message.h
-  message_queue.cpp
-  message_queue.h
   one_pole_filter.h
   sample_data.cpp
   sample_data.h
   sample_generators.h
   sidechain.h
-  voice.h
 )
 
 if(ENABLE_TESTS)
@@ -30,8 +23,6 @@ if(ENABLE_TESTS)
     decibels_test.cpp
     distortion_test.cpp
     envelope_test.cpp
-    instrument_processor_test.cpp
-    message_queue_test.cpp
     one_pole_filter_test.cpp
     sample_data_test.cpp
     sample_generators_test.cpp

@@ -33,7 +33,7 @@ class Processor extends AudioWorkletProcessor {
 
     Module().then(module => {
       this._module = module;
-      this._engine = new this._module.Engine(sampleRate, RENDER_QUANTUM_SIZE);
+      this._engine = new this._module.Engine(sampleRate);
       this._instruments = {};
       this._performers = {};
       this._tasks = {};
@@ -88,7 +88,7 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'instrument-create': {
           const instrument = this._engine.createInstrument();
-          const handle = instrument.getHandle();
+          const id = instrument.getId();
           instrument.setNoteEventCallback((eventType, pitch) => {
             const NoteEventType = {
               BEGIN: 0,
@@ -96,91 +96,93 @@ class Processor extends AudioWorkletProcessor {
               COUNT: 2,
             };
             if (eventType == NoteEventType.BEGIN) {
-              this.port.postMessage({type: 'instrument-on-note-on', handle, pitch});
+              this.port.postMessage({type: 'instrument-on-note-on', id, pitch});
             } else if (eventType == NoteEventType.END) {
-              this.port.postMessage({type: 'instrument-on-note-off', handle, pitch});
+              this.port.postMessage({type: 'instrument-on-note-off', id, pitch});
             } else {
               console.error(`Invalid note event type: ${eventType}`);
             }
           });
-          this._instruments[handle] = instrument;
+          this._instruments[id] = instrument;
 
-          this.port.postMessage({type: 'instrument-create-success', handle})
+          this.port.postMessage({type: 'instrument-create-success', id})
         } break;
         case 'instrument-destroy': {
-          if (this._instruments[event.data.handle]) {
-            this._instruments[event.data.handle].delete();
-            delete this._instruments[event.data.handle];
-            this.port.postMessage({type: 'instrument-destroy-success', handle: event.data.handle});
+          if (this._instruments[event.data.id]) {
+            this._engine.destroyInstrument(this._instruments[event.data.id]);
+            this._instruments[event.data.id].delete();
+            delete this._instruments[event.data.id];
+            this.port.postMessage({type: 'instrument-destroy-success', id: event.data.id});
           }
         } break;
         case 'instrument-get-control': {
-          if (this._instruments[event.data.handle]) {
+          if (this._instruments[event.data.id]) {
             this.port.postMessage({
               type: 'instrument-get-control-response',
-              handle: event.data.handle,
-              value: this._instruments[event.data.handle].getControl(event.data.typeIndex)
+              id: event.data.id,
+              value: this._instruments[event.data.id].getControl(event.data.typeIndex)
             });
           }
         } break;
         case 'instrument-get-note-control': {
-          if (this._instruments[event.data.handle]) {
+          if (this._instruments[event.data.id]) {
             this.port.postMessage({
               type: 'instrument-get-note-control-response',
-              handle: event.data.handle,
-              value: this._instruments[event.data.handle].getNoteControl(
+              id: event.data.id,
+              value: this._instruments[event.data.id].getNoteControl(
                   event.data.pitch, event.data.typeIndex)
             });
           }
         } break;
         case 'instrument-is-note-on': {
-          if (this._instruments[event.data.handle]) {
+          if (this._instruments[event.data.id]) {
             this.port.postMessage({
               type: 'instrument-is-note-on-response',
-              handle: event.data.handle,
-              isNoteOn: this._instruments[event.data.handle].isNoteOn(event.data.pitch)
+              id: event.data.id,
+              isNoteOn: this._instruments[event.data.id].isNoteOn(event.data.pitch)
             });
           }
         } break;
         case 'instrument-set-control': {
-          this._instruments[event.data.handle]?.setControl(event.data.typeIndex, event.data.value);
+          this._instruments[event.data.id]?.setControl(event.data.typeIndex, event.data.value);
         } break;
         case 'instrument-set-note-control': {
-          this._instruments[event.data.handle]?.setNoteControl(
+          this._instruments[event.data.id]?.setNoteControl(
               event.data.pitch, event.data.typeIndex, event.data.value);
         } break;
         case 'instrument-set-all-notes-off': {
-          this._instruments[event.data.handle]?.setAllNotesOff();
+          this._instruments[event.data.id]?.setAllNotesOff();
         } break;
         case 'instrument-set-note-on': {
-          this._instruments[event.data.handle]?.setNoteOn(
+          this._instruments[event.data.id]?.setNoteOn(
               event.data.pitch, event.data.gain, event.data.pitchShift);
         } break;
         case 'instrument-set-note-off': {
-          this._instruments[event.data.handle]?.setNoteOff(event.data.pitch);
+          this._instruments[event.data.id]?.setNoteOff(event.data.pitch);
         } break;
         case 'instrument-set-sample-data': {
-          this._setInstrumentSampleData(event.data.handle, event.data.slices);
+          this._setInstrumentSampleData(event.data.id, event.data.slices);
         } break;
         case 'performer-create': {
           const performer = this._engine.createPerformer();
-          const handle = performer.getHandle();
-          this._performers[handle] = performer;
-          this.port.postMessage({type: 'performer-create-success', handle});
+          const id = performer.getId();
+          this._performers[id] = performer;
+          this.port.postMessage({type: 'performer-create-success', id});
         } break;
         case 'performer-destroy': {
-          if (this._performers[event.data.handle]) {
-            this._performers[event.data.handle].delete();
-            delete this._performers[event.data.handle];
-            this.port.postMessage({type: 'performer-destroy-success', handle: event.data.handle});
+          if (this._performers[event.data.id]) {
+            this._engine.destroyPerformer(this._performers[event.data.id]);
+            this._performers[event.data.id].delete();
+            delete this._performers[event.data.id];
+            this.port.postMessage({type: 'performer-destroy-success', id: event.data.id});
           }
         } break;
         case 'performer-get-properties': {
-          const performer = this._performers[event.data.handle];
+          const performer = this._performers[event.data.id];
           if (performer) {
             this.port.postMessage({
               type: 'performer-get-properties-response',
-              handle: event.data.handle,
+              id: event.data.id,
               isLooping: performer.isLooping,
               isPlaying: performer.isPlaying,
               loopBeginPosition: performer.loopBeginPosition,
@@ -190,61 +192,63 @@ class Processor extends AudioWorkletProcessor {
           }
         } break;
         case 'performer-set-loop-begin-position': {
-          if (this._performers[event.data.handle]) {
-            this._performers[event.data.handle].loopBeginPosition = event.data.loopBeginPosition;
+          if (this._performers[event.data.id]) {
+            this._performers[event.data.id].loopBeginPosition = event.data.loopBeginPosition;
           }
         } break;
         case 'performer-set-loop-length': {
-          if (this._performers[event.data.handle]) {
-            this._performers[event.data.handle].loopLength = event.data.loopLength;
+          if (this._performers[event.data.id]) {
+            this._performers[event.data.id].loopLength = event.data.loopLength;
           }
         } break;
         case 'performer-set-looping': {
-          if (this._performers[event.data.handle]) {
-            this._performers[event.data.handle].isLooping = event.data.isLooping;
+          if (this._performers[event.data.id]) {
+            this._performers[event.data.id].isLooping = event.data.isLooping;
           }
         } break;
         case 'performer-set-position': {
-          if (this._performers[event.data.handle]) {
-            this._performers[event.data.handle].position = event.data.position;
+          if (this._performers[event.data.id]) {
+            this._performers[event.data.id].position = event.data.position;
           }
         } break;
         case 'performer-start': {
-          this._performers[event.data.handle]?.start();
+          this._performers[event.data.id]?.start();
         } break;
         case 'performer-stop': {
-          this._performers[event.data.handle]?.stop();
+          this._performers[event.data.id]?.stop();
         } break;
         case 'task-create': {
           if (this._performers[event.data.performerHandle]) {
-            const task = this._performers[event.data.performerHandle].createTask(
-                event.data.position, event.data.duration);
-            const handle = task.getHandle();
+            const task = this._engine.createTask(
+                this._performers[event.data.performerHandle], event.data.position,
+                event.data.duration);
+            const id = task.getId();
             task.setEventCallback(
                 (eventType) => this.port.postMessage(
-                    {type: 'task-on-event', handle, position: task.position, eventType}));
-            this._tasks[handle] = task;
+                    {type: 'task-on-event', id, position: task.position, eventType}));
+            this._tasks[id] = task;
 
             this.port.postMessage({
               type: 'task-create-success',
               performerHandle: event.data.performerHandle,
-              handle,
+              id,
             });
           }
         } break;
         case 'task-destroy': {
-          if (this._tasks[event.data.handle]) {
-            this._tasks[event.data.handle].delete();
-            delete this._tasks[event.data.handle];
-            this.port.postMessage({type: 'task-destroy-success', handle: event.data.handle});
+          if (this._tasks[event.data.id]) {
+            this._engine.destroyTask(this._tasks[event.data.id]);
+            this._tasks[event.data.id].delete();
+            delete this._tasks[event.data.id];
+            this.port.postMessage({type: 'task-destroy-success', id: event.data.id});
           }
         } break;
         case 'task-get-properties': {
-          const task = this._tasks[event.data.handle];
+          const task = this._tasks[event.data.id];
           if (task) {
             this.port.postMessage({
               type: 'task-get-properties-response',
-              handle: event.data.handle,
+              id: event.data.id,
               duration: task.duration,
               isActive: task.isActive,
               position: task.position,
@@ -252,13 +256,13 @@ class Processor extends AudioWorkletProcessor {
           }
         } break;
         case 'task-set-duration': {
-          if (this._tasks[event.data.handle]) {
-            this._tasks[event.data.handle].duration = event.data.duration;
+          if (this._tasks[event.data.id]) {
+            this._tasks[event.data.id].duration = event.data.duration;
           }
         } break;
         case 'task-set-position': {
-          if (this._tasks[event.data.handle]) {
-            this._tasks[event.data.handle].position = event.data.position;
+          if (this._tasks[event.data.id]) {
+            this._tasks[event.data.id].position = event.data.position;
           }
         } break;
         default:
@@ -303,8 +307,8 @@ class Processor extends AudioWorkletProcessor {
    * Sets instrument sample data.
    * @private
    */
-  _setInstrumentSampleData(handle, slices) {
-    if (!this._instruments[handle]) return;
+  _setInstrumentSampleData(id, slices) {
+    if (!this._instruments[id]) return;
 
     const sliceCount = slices.length;
     const sliceStructSize = 24;  // sizeof(BarelySlice)
@@ -327,7 +331,7 @@ class Processor extends AudioWorkletProcessor {
       this._module.HEAP32[offset / 4 + 3] = sampleCount;
     }
 
-    this._instruments[handle].setSampleData(slicesPtr, sliceCount);
+    this._instruments[id].setSampleData(slicesPtr, sliceCount);
 
     for (const ptr of samplePtrs) {
       this._module._free(ptr);

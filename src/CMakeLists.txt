@@ -12,8 +12,14 @@ set_target_properties(
   ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 target_compile_definitions(
-  barelymusician
-  PUBLIC BARELYMUSICIAN_EXPORTS
+  barelymusician PUBLIC
+  BARELYMUSICIAN_EXPORTS
+  BARELYMUSICIAN_ID_INDEX_BIT_COUNT=20
+  BARELYMUSICIAN_MAX_FRAME_COUNT=${MAX_FRAME_COUNT}
+  BARELYMUSICIAN_MAX_INSTRUMENT_COUNT=${MAX_INSTRUMENT_COUNT}
+  BARELYMUSICIAN_MAX_PERFORMER_COUNT=${MAX_PERFORMER_COUNT}
+  BARELYMUSICIAN_MAX_TASK_COUNT=${MAX_TASK_COUNT}
+  BARELYMUSICIAN_MAX_VOICE_COUNT=${MAX_VOICE_COUNT}
 )
 if(MSVC)
   target_compile_options(
@@ -55,7 +61,6 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_test)
 endif()
 
-add_subdirectory(algorithm)
-add_subdirectory(api)
-add_subdirectory(common)
+add_subdirectory(core)
 add_subdirectory(dsp)
+add_subdirectory(engine)

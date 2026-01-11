@@ -5,9 +5,9 @@ export const TaskEventType = {
 };
 
 export class Task {
-  constructor({audioNode, handlePromise, position, duration, eventCallback}) {
+  constructor({audioNode, idPromise, position, duration, eventCallback}) {
     this._audioNode = audioNode;
-    this._handlePromise = handlePromise;
+    this._idPromise = idPromise;
 
     this._position = position;
     this._duration = duration;
@@ -21,8 +21,8 @@ export class Task {
    * @return {!Promise<void>}
    */
   async destroy() {
-    await this._withHandle(handle => {
-      this._audioNode.port.postMessage({type: 'task-destroy', handle});
+    await this._withId(id => {
+      this._audioNode.port.postMessage({type: 'task-destroy', id});
     });
   }
 
@@ -45,10 +45,10 @@ export class Task {
     if (this._duration === newDuration) return;
 
     this._duration = newDuration;
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'task-set-duration',
-        handle,
+        id,
         duration: newDuration,
       });
     });
@@ -61,23 +61,23 @@ export class Task {
     if (this._position === newPosition) return;
 
     this._position = newPosition;
-    this._withHandle(handle => {
+    this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'task-set-position',
-        handle,
+        id,
         position: newPosition,
       });
     });
   }
 
   /**
-   * Helper to run a function with the resolved handle.
+   * Helper to run a function with the resolved id.
    * @param {function(number):void} fn
    * @return {!Promise}
    * @private
    */
-  async _withHandle(fn) {
-    const handle = await this._handlePromise;
-    return fn(handle);
+  async _withId(fn) {
+    const id = await this._idPromise;
+    return fn(id);
   }
 }

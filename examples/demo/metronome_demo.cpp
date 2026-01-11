@@ -50,7 +50,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  Engine engine(kSampleRate, kFrameCount);
+  Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
@@ -67,7 +67,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   auto metronome = engine.CreatePerformer();
   metronome.SetLooping(true);
   int beat = 0;
-  const auto metronome_trigger = metronome.CreateTask(0.0, 1e-6, 0, [&](TaskEventType type) {
+  engine.CreateTask(metronome, 0.0, 1e-6, 0, [&](TaskEventType type) {
     if (type != TaskEventType::kBegin) {
       return;
     }

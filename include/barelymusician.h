@@ -938,6 +938,40 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 
 namespace barely {
 
+/// Engine control types.
+enum class EngineControlType {
+  /// Compressor mix.
+  kCompressorMix = BarelyEngineControlType_kCompressorMix,
+  /// Compressor attack in seconds.
+  kCompressorAttack = BarelyEngineControlType_kCompressorAttack,
+  /// Compressor release in seconds.
+  kCompressorRelease = BarelyEngineControlType_kCompressorRelease,
+  /// Compressor threshold.
+  kCompressorThreshold = BarelyEngineControlType_kCompressorThreshold,
+  /// Compressor ratio.
+  kCompressorRatio = BarelyEngineControlType_kCompressorRatio,
+  /// Delay mix.
+  kDelayMix = BarelyEngineControlType_kDelayMix,
+  /// Delay time in seconds.
+  kDelayTime = BarelyEngineControlType_kDelayTime,
+  /// Delay feedback.
+  kDelayFeedback = BarelyEngineControlType_kDelayFeedback,
+  /// Delay low-pass frequency.
+  kDelayLowPassFrequency = BarelyEngineControlType_kDelayLowPassFrequency,
+  /// Delay high-pass frequency.
+  kDelayHighPassFrequency = BarelyEngineControlType_kDelayHighPassFrequency,
+  /// Sidechain mix.
+  kSidechainMix = BarelyEngineControlType_kSidechainMix,
+  /// Sidechain attack in seconds.
+  kSidechainAttack = BarelyEngineControlType_kSidechainAttack,
+  /// Sidechain release in seconds.
+  kSidechainRelease = BarelyEngineControlType_kSidechainRelease,
+  /// Sidechain threshold.
+  kSidechainThreshold = BarelyEngineControlType_kSidechainThreshold,
+  /// Sidechain ratio.
+  kSidechainRatio = BarelyEngineControlType_kSidechainRatio,
+};
+
 /// Instrument control types.
 enum class InstrumentControlType {
   /// Gain in linear amplitude.
@@ -996,40 +1030,6 @@ enum class InstrumentControlType {
   kArpGateRatio = BarelyInstrumentControlType_kArpGateRatio,
   /// Arpeggiator rate.
   kArpRate = BarelyInstrumentControlType_kArpRate,
-};
-
-/// Engine control types.
-enum class EngineControlType {
-  /// Compressor mix.
-  kCompressorMix = BarelyEngineControlType_kCompressorMix,
-  /// Compressor attack in seconds.
-  kCompressorAttack = BarelyEngineControlType_kCompressorAttack,
-  /// Compressor release in seconds.
-  kCompressorRelease = BarelyEngineControlType_kCompressorRelease,
-  /// Compressor threshold.
-  kCompressorThreshold = BarelyEngineControlType_kCompressorThreshold,
-  /// Compressor ratio.
-  kCompressorRatio = BarelyEngineControlType_kCompressorRatio,
-  /// Delay mix.
-  kDelayMix = BarelyEngineControlType_kDelayMix,
-  /// Delay time in seconds.
-  kDelayTime = BarelyEngineControlType_kDelayTime,
-  /// Delay feedback.
-  kDelayFeedback = BarelyEngineControlType_kDelayFeedback,
-  /// Delay low-pass frequency.
-  kDelayLowPassFrequency = BarelyEngineControlType_kDelayLowPassFrequency,
-  /// Delay high-pass frequency.
-  kDelayHighPassFrequency = BarelyEngineControlType_kDelayHighPassFrequency,
-  /// Sidechain mix.
-  kSidechainMix = BarelyEngineControlType_kSidechainMix,
-  /// Sidechain attack in seconds.
-  kSidechainAttack = BarelyEngineControlType_kSidechainAttack,
-  /// Sidechain release in seconds.
-  kSidechainRelease = BarelyEngineControlType_kSidechainRelease,
-  /// Sidechain threshold.
-  kSidechainThreshold = BarelyEngineControlType_kSidechainThreshold,
-  /// Sidechain ratio.
-  kSidechainRatio = BarelyEngineControlType_kSidechainRatio,
 };
 
 /// Note control types.

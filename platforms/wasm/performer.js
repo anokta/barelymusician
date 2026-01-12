@@ -494,7 +494,7 @@ export class Performer {
 
     // id
     this._withId(id => {
-      this._container.id = `performer#${id}`;
+      this._container.id = `performer#${(id - 1)}`;
 
       // label
       const label = this._container.querySelector('label');

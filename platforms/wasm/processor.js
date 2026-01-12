@@ -1,6 +1,7 @@
 import Module from './barelymusician.js';
 
 const RENDER_QUANTUM_SIZE = 128
+const STEREO_CHANNEL_COUNT = 2
 
 export const EngineControlType = {
   COMPRESSOR_MIX: 0,
@@ -31,12 +32,18 @@ class Processor extends AudioWorkletProcessor {
     this._performers = null;
     this._tasks = null;
 
+    this._outputSamplesPtr = null;
+
     Module().then(module => {
       this._module = module;
       this._engine = new this._module.Engine(sampleRate);
       this._instruments = {};
       this._performers = {};
       this._tasks = {};
+
+      // No need to call `_free` as this will be freed as part of the module teardown.
+      this._outputSamplesPtr = this._module._malloc(
+          STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float32Array.BYTES_PER_ELEMENT);
 
       this.port.postMessage({type: 'init-success'});
     });
@@ -83,8 +90,7 @@ class Processor extends AudioWorkletProcessor {
         case 'engine-update': {
           const deltaFrameTime = 1.0 / 60.0;
           const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
-          this._engine.update(
-              Math.max(currentTime + latency, this._engine.timestamp + deltaFrameTime));
+          this._engine.update(currentTime + latency);
         } break;
         case 'instrument-create': {
           const instrument = this._engine.createInstrument();
@@ -278,27 +284,23 @@ class Processor extends AudioWorkletProcessor {
     if (!this._engine || !this._module || !this._module.HEAPF32) return true;
 
     const output = outputs[0];
-    const outputChannelCount = output.length;
+    const outputChannelCount = Math.min(output.length, STEREO_CHANNEL_COUNT);
     const outputFrameCount = output[0].length;
     const outputSampleCount = outputChannelCount * outputFrameCount;
 
     if (outputSampleCount == 0) return true;
     if (outputFrameCount > RENDER_QUANTUM_SIZE) return true;
 
-    const outputSamplesPtr =
-        this._module._malloc(outputSampleCount * Float32Array.BYTES_PER_ELEMENT);
     const outputSamples =
-        new Float32Array(this._module.HEAPF32.buffer, outputSamplesPtr, outputSampleCount);
+        new Float32Array(this._module.HEAPF32.buffer, this._outputSamplesPtr, outputSampleCount);
 
-    this._engine.process(outputSamplesPtr, outputChannelCount, outputFrameCount, currentTime);
+    this._engine.process(this._outputSamplesPtr, outputChannelCount, outputFrameCount, currentTime);
 
     for (let frame = 0; frame < outputFrameCount; ++frame) {
       for (let channel = 0; channel < outputChannelCount; ++channel) {
         output[channel][frame] = outputSamples[frame * outputChannelCount + channel];
       }
     }
-
-    this._module._free(outputSamplesPtr);
 
     return true;
   }

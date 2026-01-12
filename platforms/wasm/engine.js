@@ -3,7 +3,7 @@ import {Instrument} from './instrument.js';
 import {Performer} from './performer.js';
 
 const MAX_INSTRUMENT_COUNT = 10;
-const MAX_PERFORMER_COUNT = 20;
+const MAX_PERFORMER_COUNT = 10;
 
 export class Engine {
   /**

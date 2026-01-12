@@ -15,7 +15,6 @@ target_sources(
   note_params.h
   performer_controller.cpp
   performer_controller.h
-  performer_state.cpp
   performer_state.h
   task_state.h
   voice_params.h

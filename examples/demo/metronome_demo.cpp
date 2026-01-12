@@ -156,5 +156,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
+  audio_output.Stop();
+
   return 0;
 }

@@ -204,7 +204,7 @@ void InstrumentController::ProcessArp(MainRng& main_rng) noexcept {
   for (uint32_t i = 0; i < engine_.instrument_pool.GetActiveCount(); ++i) {
     auto& instrument = engine_.instrument_pool.GetActive(i);
     if (!instrument.IsArpEnabled() || instrument.pitches.empty()) {
-      return;
+      continue;
     }
     if (!instrument.is_arp_pitch_on && instrument.arp_phase == 0.0) {
       const int size = static_cast<int>(instrument.pitches.size());

@@ -11,6 +11,8 @@
 #include "engine/engine_state.h"
 #include "engine/message.h"
 
+namespace {
+
 static_assert(BARELYMUSICIAN_ID_INDEX_BIT_COUNT > 0 && BARELYMUSICIAN_ID_INDEX_BIT_COUNT < 32);
 static_assert(BARELYMUSICIAN_MAX_FRAME_COUNT > 0);
 
@@ -23,19 +25,21 @@ static_assert(BARELYMUSICIAN_MAX_PERFORMER_COUNT > 0 &&
               BARELYMUSICIAN_MAX_PERFORMER_COUNT <= kMaxIdIndex);
 static_assert(BARELYMUSICIAN_MAX_TASK_COUNT > 0 && BARELYMUSICIAN_MAX_TASK_COUNT <= kMaxIdIndex);
 
-[[nodiscard]] static uint32_t BuildId(uint32_t index, uint32_t generation) noexcept {
+[[nodiscard]] uint32_t BuildId(uint32_t index, uint32_t generation) noexcept {
   return (generation << BARELYMUSICIAN_ID_INDEX_BIT_COUNT) | (index + 1);
 }
 
-[[nodiscard]] static uint32_t GetGeneration(uint32_t id) noexcept {
+[[nodiscard]] uint32_t GetGeneration(uint32_t id) noexcept {
   return id >> BARELYMUSICIAN_ID_INDEX_BIT_COUNT;
 }
 
-[[nodiscard]] static uint32_t GetIndex(uint32_t id) noexcept { return (id & kMaxIdIndex) - 1; }
+[[nodiscard]] uint32_t GetIndex(uint32_t id) noexcept { return (id & kMaxIdIndex) - 1; }
 
-[[nodiscard]] static uint32_t GetNextGeneration(uint32_t generation) noexcept {
+[[nodiscard]] uint32_t GetNextGeneration(uint32_t generation) noexcept {
   return (generation + 1) & kMaxIdGeneration;
 }
+
+}  // namespace
 
 struct BarelyEngine {
   barely::EngineState state;
@@ -396,7 +400,8 @@ bool BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine, uint32_t perform
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(GetIndex(performer_id)).SetLoopBeginPosition(loop_begin_position);
+  engine->controller.performer_controller().SetLoopBeginPosition(GetIndex(performer_id),
+                                                                 loop_begin_position);
   return true;
 }
 
@@ -405,7 +410,7 @@ bool BarelyPerformer_SetLoopLength(BarelyEngine* engine, uint32_t performer_id,
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(GetIndex(performer_id)).SetLoopLength(loop_length);
+  engine->controller.performer_controller().SetLoopLength(GetIndex(performer_id), loop_length);
   return true;
 }
 
@@ -413,7 +418,7 @@ bool BarelyPerformer_SetLooping(BarelyEngine* engine, uint32_t performer_id, boo
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(GetIndex(performer_id)).SetLooping(is_looping);
+  engine->controller.performer_controller().SetLooping(GetIndex(performer_id), is_looping);
   return true;
 }
 
@@ -421,7 +426,7 @@ bool BarelyPerformer_SetPosition(BarelyEngine* engine, uint32_t performer_id, do
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(GetIndex(performer_id)).SetPosition(position);
+  engine->controller.performer_controller().SetPosition(GetIndex(performer_id), position);
   return true;
 }
 
@@ -429,7 +434,7 @@ bool BarelyPerformer_Start(BarelyEngine* engine, uint32_t performer_id) {
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(GetIndex(performer_id)).Start();
+  engine->controller.performer_controller().Start(GetIndex(performer_id));
   return true;
 }
 
@@ -437,7 +442,7 @@ bool BarelyPerformer_Stop(BarelyEngine* engine, uint32_t performer_id) {
   if (!engine) return false;
   if (!engine->IsValidPerformer(performer_id)) return false;
 
-  engine->state.GetPerformer(GetIndex(performer_id)).Stop();
+  engine->controller.performer_controller().Stop(GetIndex(performer_id));
   return true;
 }
 

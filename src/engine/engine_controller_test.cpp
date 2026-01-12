@@ -2,20 +2,17 @@
 
 #include <barelymusician.h>
 
-#include <array>
 #include <cstdint>
 #include <functional>
 #include <memory>
 
 #include "engine/engine_state.h"
-#include "engine/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
-using ::testing::Optional;
 using ::testing::Pair;
 
 // Tests that a single performer is acquired and released as expected.
@@ -42,38 +39,38 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
             static_cast<barely::TaskEventType>(type));
       },
       &process_callback);
-  auto& task = engine->GetTask(task_index);
+  const auto& task = engine->GetTask(task_index);
 
   // Start the performer with a tempo of one beat per second.
   engine->tempo = 60.0;
   EXPECT_FALSE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
-  performer.Start();
+  controller.performer_controller().Start(performer_index);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(1.0, 0)));
+  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(1.0, 0));
   controller.Update(1.0);
-  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
+  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(0.0, 0));
   EXPECT_DOUBLE_EQ(performer.position, 1.0);
   EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp inside the task, which should be triggered now.
-  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.0, 0)));
+  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(0.0, 0));
   controller.Update(2.5);
-  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
+  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(0.5, 0));
   EXPECT_DOUBLE_EQ(performer.position, 2.5);
   EXPECT_TRUE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kBegin);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Update the timestamp just past the task, which should not be active anymore.
-  EXPECT_THAT(performer.GetNextTaskKey(), Optional(Pair(0.5, 0)));
+  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(0.5, 0));
   controller.Update(3.0);
-  EXPECT_FALSE(performer.GetNextTaskKey().has_value());
+  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(10.0, INT32_MIN));
   EXPECT_DOUBLE_EQ(performer.position, 3.0);
   EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);

@@ -41,7 +41,7 @@ endif()
 option(MAX_FRAME_COUNT "Maximum number of frames per process block" ${MAX_FRAME_COUNT})
 
 if(NOT DEFINED MAX_INSTRUMENT_COUNT)
-  set(MAX_INSTRUMENT_COUNT 500 CACHE STRING "Maximum number of instruments" FORCE)
+  set(MAX_INSTRUMENT_COUNT 100 CACHE STRING "Maximum number of instruments" FORCE)
 endif()
 option(MAX_INSTRUMENT_COUNT "Maximum number of instruments" ${MAX_INSTRUMENT_COUNT})
 

@@ -10,6 +10,7 @@
 
 #include "core/callback.h"
 #include "core/control.h"
+#include "engine/arp_state.h"
 #include "engine/note_state.h"
 
 namespace barely {
@@ -57,28 +58,20 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
 }
 
 struct InstrumentState {
-  // Array of controls.
   InstrumentControlArray controls = {};
 
-  // Note event callback.
+  ArpState arp = {};
+
   Callback<BarelyNoteEventCallback> note_event_callback = {};
 
-  // Arpeggiator state.
-  double arp_phase = 0.0;
-  uint32_t arp_note_index = UINT32_MAX;
-  bool is_arp_note_on = false;
-  bool should_release_arp_note = false;
-
-  // First active note index.
   uint32_t first_note_index = UINT32_MAX;
-
   uint32_t note_count = 0;
 
   void Update(double duration) noexcept {
     if (first_note_index != UINT32_MAX && IsArpEnabled()) {
       assert(duration <= GetNextArpDuration());
       const double rate = static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value);
-      arp_phase = std::fmod(arp_phase + duration * rate, 1.0);
+      arp.phase = std::fmod(arp.phase + duration * rate, 1.0);
     }
   }
 
@@ -92,10 +85,10 @@ struct InstrumentState {
     }
     const double ratio =
         static_cast<double>(controls[BarelyInstrumentControlType_kArpGateRatio].value);
-    if (!is_arp_note_on) {
-      return (arp_phase < ratio) ? 0.0 : (1.0 - arp_phase) / rate;
+    if (!arp.is_note_on) {
+      return (arp.phase < ratio) ? 0.0 : (1.0 - arp.phase) / rate;
     }
-    return (ratio - arp_phase) / rate;
+    return (ratio - arp.phase) / rate;
   }
 
   bool IsArpEnabled() const noexcept {

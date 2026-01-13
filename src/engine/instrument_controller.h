@@ -42,11 +42,15 @@ class InstrumentController {
   [[nodiscard]] bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
 
   // TODO(#126): clean this up?
-  void ProcessArp(MainRng& main_rng) noexcept;
+  void ProcessArp() noexcept;
   void Update(double duration) noexcept;
   [[nodiscard]] double GetNextDuration() const noexcept;
 
  private:
+  [[nodiscard]] uint32_t GetNote(const InstrumentState& instrument, float pitch) const noexcept;
+
+  void ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept;
+
   EngineState& engine_;
 };
 

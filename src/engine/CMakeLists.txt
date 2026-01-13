@@ -13,6 +13,7 @@ target_sources(
   message.h
   message_queue.h
   note_params.h
+  note_state.h
   performer_controller.cpp
   performer_controller.h
   performer_state.h

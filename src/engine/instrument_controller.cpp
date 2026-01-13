@@ -14,24 +14,11 @@
 #include "core/rng.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
+#include "engine/note_state.h"
 
 namespace barely {
 
 namespace {
-
-// Returns a note control array with overrides.
-[[nodiscard]] NoteControlArray BuildNoteControlArray(
-    const BarelyNoteControlOverride* note_control_overrides,
-    int32_t note_control_override_count) noexcept {
-  NoteControlArray note_control_array = {
-      Control(1.0f, 0.0f, 1.0f),  // kGain
-      Control(0.0f),              // kPitchShift
-  };
-  for (int i = 0; i < note_control_override_count; ++i) {
-    note_control_array[note_control_overrides[i].type].SetValue(note_control_overrides[i].value);
-  }
-  return note_control_array;
-}
 
 // Returns an array of note control values from a given note control array.
 [[nodiscard]] std::array<float, BarelyNoteControlType_kCount> BuildNoteControls(
@@ -76,20 +63,25 @@ void InstrumentController::SetAllNotesOff() noexcept {
 
 void InstrumentController::SetAllNotesOff(uint32_t instrument_index) noexcept {
   auto& instrument = engine_.instrument_pool.Get(instrument_index);
-  instrument.note_controls.clear();
-  if (instrument.is_arp_pitch_on) {
-    instrument.pitches.clear();
-    instrument.is_arp_pitch_on = false;
-    instrument.arp_phase = 0.0;
-    instrument.arp_pitch_index = -1;
-    instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp_pitch);
-    engine_.ScheduleMessage(NoteOffMessage{instrument_index, instrument.arp_pitch});
-  } else {
-    for (const float pitch : std::exchange(instrument.pitches, {})) {
-      instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
-      engine_.ScheduleMessage(NoteOffMessage{instrument_index, pitch});
+
+  uint32_t note_index = instrument.first_note_index;
+  for (uint32_t i = 0; i < instrument.note_count; ++i) {
+    const auto& note = engine_.note_pool.Get(note_index);
+    if (!instrument.IsArpEnabled() || note_index == instrument.arp_note_index) {
+      instrument.note_event_callback(BarelyNoteEventType_kEnd, note.pitch);
+      engine_.ScheduleMessage(NoteOffMessage{instrument_index, note.pitch});
     }
+    const uint32_t next_note_index = note.next_note_index;
+    engine_.note_pool.Release(note_index);
+    note_index = next_note_index;
   }
+
+  instrument.note_count = 0;
+  instrument.is_arp_note_on = false;
+  instrument.should_release_arp_note = false;
+  instrument.arp_note_index = UINT32_MAX;
+  instrument.arp_phase = 0.0;
+  instrument.first_note_index = UINT32_MAX;
 }
 
 void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
@@ -99,23 +91,38 @@ void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumen
     switch (type) {
       case BarelyInstrumentControlType_kArpMode:
         if (static_cast<BarelyArpMode>(value) == BarelyArpMode_kNone) {
-          if (instrument.arp_pitch_index != -1) {
-            instrument.is_arp_pitch_on = false;
+          if (instrument.arp_note_index != UINT32_MAX) {
+            if (instrument.is_arp_note_on) {
+              const float pitch = engine_.note_pool.Get(instrument.arp_note_index).pitch;
+              instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
+              engine_.ScheduleMessage(NoteOffMessage{instrument_index, pitch});
+              if (instrument.should_release_arp_note) {
+                ReleaseNote(instrument, instrument.arp_note_index);
+              }
+            }
+            instrument.is_arp_note_on = false;
+            instrument.should_release_arp_note = false;
+            instrument.arp_note_index = UINT32_MAX;
             instrument.arp_phase = 0.0;
-            instrument.arp_pitch_index = -1;
-            instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp_pitch);
-            engine_.ScheduleMessage(NoteOffMessage{instrument_index, instrument.arp_pitch});
-            for (const auto& [pitch, note_controls] : instrument.note_controls) {
-              instrument.note_event_callback(BarelyNoteEventType_kBegin, pitch);
+
+            uint32_t note_index = instrument.first_note_index;
+            for (uint32_t i = 0; i < instrument.note_count; ++i) {
+              const auto& note = engine_.note_pool.Get(note_index);
+              instrument.note_event_callback(BarelyNoteEventType_kBegin, note.pitch);
               engine_.ScheduleMessage(
-                  NoteOnMessage{instrument_index, pitch, BuildNoteControls(note_controls)});
+                  NoteOnMessage{instrument_index, note.pitch, BuildNoteControls(note.controls)});
+              note_index = note.next_note_index;
             }
           }
-        } else if (!instrument.pitches.empty() && !instrument.is_arp_pitch_on) {
-          for (const float pitch : instrument.pitches) {
-            instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
-            engine_.ScheduleMessage(NoteOffMessage{instrument_index, pitch});
+        } else if (!instrument.is_arp_note_on) {
+          uint32_t note_index = instrument.first_note_index;
+          for (uint32_t i = 0; i < instrument.note_count; ++i) {
+            const auto& note = engine_.note_pool.Get(note_index);
+            instrument.note_event_callback(BarelyNoteEventType_kEnd, note.pitch);
+            engine_.ScheduleMessage(NoteOffMessage{instrument_index, note.pitch});
+            note_index = note.next_note_index;
           }
+          instrument.arp_note_index = instrument.first_note_index;
         }
         break;
       case BarelyInstrumentControlType_kArpGateRatio:
@@ -131,9 +138,10 @@ void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumen
 
 void InstrumentController::SetNoteControl(uint32_t instrument_index, float pitch,
                                           BarelyNoteControlType type, float value) noexcept {
-  auto& instrument = engine_.instrument_pool.Get(instrument_index);
-  if (const auto it = instrument.note_controls.find(pitch); it != instrument.note_controls.end()) {
-    if (auto& note_control = it->second[type]; note_control.SetValue(value)) {
+  if (const uint32_t note_index = GetNote(engine_.instrument_pool.Get(instrument_index), pitch);
+      note_index != UINT32_MAX) {
+    if (auto& note_control = engine_.note_pool.Get(note_index).controls[type];
+        note_control.SetValue(value)) {
       engine_.ScheduleMessage(
           NoteControlMessage{instrument_index, pitch, type, note_control.value});
     }
@@ -148,19 +156,27 @@ void InstrumentController::SetNoteEventCallback(uint32_t instrument_index,
 
 void InstrumentController::SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
   auto& instrument = engine_.instrument_pool.Get(instrument_index);
-  if (instrument.note_controls.erase(pitch) > 0) {
-    instrument.pitches.erase(
-        std::find(instrument.pitches.begin(), instrument.pitches.end(), pitch));
-    if (instrument.pitches.empty() && instrument.IsArpEnabled()) {
-      instrument.is_arp_pitch_on = false;
-      instrument.arp_phase = 0.0;
-      instrument.arp_pitch_index = -1;
-      instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp_pitch);
-      engine_.ScheduleMessage(NoteOffMessage{instrument_index, instrument.arp_pitch});
-    } else if (!instrument.IsArpEnabled()) {
+
+  const uint32_t note_index = GetNote(instrument, pitch);
+  if (note_index == UINT32_MAX) {
+    return;
+  }
+
+  if (!instrument.IsArpEnabled()) {
+    instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
+    engine_.ScheduleMessage(NoteOffMessage{instrument_index, pitch});
+    ReleaseNote(instrument, note_index);
+  } else if (instrument.note_count == 1) {
+    if (instrument.is_arp_note_on) {
       instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
       engine_.ScheduleMessage(NoteOffMessage{instrument_index, pitch});
+      instrument.is_arp_note_on = false;
     }
+    ReleaseNote(instrument, note_index);
+  } else if (instrument.arp_note_index != note_index) {
+    ReleaseNote(instrument, note_index);
+  } else {
+    instrument.should_release_arp_note = true;
   }
 }
 
@@ -168,17 +184,60 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
                                      const BarelyNoteControlOverride* note_control_overrides,
                                      int32_t note_control_override_count) noexcept {
   auto& instrument = engine_.instrument_pool.Get(instrument_index);
-  if (const auto [it, success] = instrument.note_controls.try_emplace(
-          pitch, BuildNoteControlArray(note_control_overrides, note_control_override_count));
-      success) {
-    instrument.pitches.insert(
-        std::lower_bound(instrument.pitches.begin(), instrument.pitches.end(), pitch), pitch);
-    if (instrument.pitches.size() == 1 && instrument.IsArpEnabled()) {
-    } else if (!instrument.IsArpEnabled()) {
-      instrument.note_event_callback(BarelyNoteEventType_kBegin, pitch);
-      engine_.ScheduleMessage(
-          NoteOnMessage{instrument_index, pitch, BuildNoteControls(it->second)});
+
+  uint32_t note_index = instrument.first_note_index;
+  for (uint32_t i = 0; i < instrument.note_count; ++i) {
+    auto& note = engine_.note_pool.Get(note_index);
+    if (note.pitch == pitch) {  // note already exists.
+      return;
+    } else if (note.next_note_index == instrument.first_note_index || pitch < note.pitch) {
+      break;
     }
+    note_index = note.next_note_index;
+  }
+
+  const uint32_t new_note_index = engine_.note_pool.Acquire();
+  if (new_note_index == UINT32_MAX) {
+    assert(!"Maximum note count exceeded!");
+    return;
+  }
+
+  auto& new_note = engine_.note_pool.Get(new_note_index);
+  new_note = {};
+  new_note.controls = BuildNoteControlArray(note_control_overrides, note_control_override_count);
+  new_note.pitch = pitch;
+
+  ++instrument.note_count;
+
+  if (note_index == UINT32_MAX) {
+    instrument.first_note_index = new_note_index;
+    // Circle the note back to itself for easier iteration.
+    new_note.next_note_index = new_note_index;
+    new_note.previous_note_index = new_note_index;
+  } else {
+    auto& note = engine_.note_pool.Get(note_index);
+    if (pitch < note.pitch) {
+      if (note_index == instrument.first_note_index) {
+        instrument.first_note_index = new_note_index;
+      }
+      new_note.next_note_index = note_index;
+      new_note.previous_note_index = note.previous_note_index;
+      engine_.note_pool.Get(new_note.previous_note_index).next_note_index = new_note_index;
+      note.previous_note_index = new_note_index;
+    } else {
+      new_note.previous_note_index = note_index;
+      new_note.next_note_index = note.next_note_index;
+      engine_.note_pool.Get(new_note.next_note_index).previous_note_index = new_note_index;
+      note.next_note_index = new_note_index;
+    }
+  }
+
+  if (!instrument.IsArpEnabled()) {
+    instrument.note_event_callback(BarelyNoteEventType_kBegin, pitch);
+    engine_.ScheduleMessage(
+        NoteOnMessage{instrument_index, pitch, BuildNoteControls(new_note.controls)});
+  } else if (instrument.note_count == 1) {
+    instrument.arp_note_index = instrument.first_note_index;
   }
 }
 
@@ -190,57 +249,65 @@ float InstrumentController::GetControl(uint32_t instrument_index,
 const float* InstrumentController::GetNoteControl(uint32_t instrument_index, float pitch,
                                                   BarelyNoteControlType type) const noexcept {
   const auto& instrument = engine_.instrument_pool.Get(instrument_index);
-  if (const auto it = instrument.note_controls.find(pitch); it != instrument.note_controls.end()) {
-    return &it->second[type].value;
+  if (const uint32_t note_index = GetNote(instrument, pitch); note_index != UINT32_MAX) {
+    return &engine_.note_pool.Get(note_index).controls[type].value;
   }
   return nullptr;
 }
 
 bool InstrumentController::IsNoteOn(uint32_t instrument_index, float pitch) const noexcept {
-  return engine_.instrument_pool.Get(instrument_index).IsNoteOn(pitch);
+  const auto& instrument = engine_.instrument_pool.Get(instrument_index);
+  return instrument.IsArpEnabled()
+             ? (instrument.is_arp_note_on &&
+                engine_.note_pool.Get(instrument.arp_note_index).pitch == pitch)
+             : (GetNote(instrument, pitch) != UINT32_MAX);
 }
 
-void InstrumentController::ProcessArp(MainRng& main_rng) noexcept {
+void InstrumentController::ProcessArp() noexcept {
   for (uint32_t i = 0; i < engine_.instrument_pool.GetActiveCount(); ++i) {
     auto& instrument = engine_.instrument_pool.GetActive(i);
-    if (!instrument.IsArpEnabled() || instrument.pitches.empty()) {
+    if (instrument.first_note_index == UINT32_MAX || !instrument.IsArpEnabled()) {
       continue;
     }
-    if (!instrument.is_arp_pitch_on && instrument.arp_phase == 0.0) {
-      const int size = static_cast<int>(instrument.pitches.size());
+    if (!instrument.is_arp_note_on && instrument.arp_phase == 0.0) {
+      const auto& note = engine_.note_pool.Get(instrument.arp_note_index);
+      instrument.is_arp_note_on = true;
+      instrument.note_event_callback(BarelyNoteEventType_kBegin, note.pitch);
+      engine_.ScheduleMessage(NoteOnMessage{engine_.instrument_pool.GetActiveIndex(i), note.pitch,
+                                            BuildNoteControls(note.controls)});
+    } else if (instrument.is_arp_note_on &&
+               instrument.arp_phase ==
+                   static_cast<double>(
+                       instrument.controls[BarelyInstrumentControlType_kArpGateRatio].value)) {
+      const auto& note = engine_.note_pool.Get(instrument.arp_note_index);
+      instrument.note_event_callback(BarelyNoteEventType_kEnd, note.pitch);
+      engine_.ScheduleMessage(
+          NoteOffMessage{engine_.instrument_pool.GetActiveIndex(i), note.pitch});
+      if (instrument.should_release_arp_note) {
+        ReleaseNote(instrument, instrument.arp_note_index);
+        instrument.should_release_arp_note = false;
+      }
+      instrument.is_arp_note_on = false;
       switch (static_cast<BarelyArpMode>(
           instrument.controls[BarelyInstrumentControlType_kArpMode].value)) {
         case BarelyArpMode_kUp:
-          instrument.arp_pitch_index = (instrument.arp_pitch_index + 1) % size;
+          instrument.arp_note_index = note.next_note_index;
           break;
         case BarelyArpMode_kDown:
-          instrument.arp_pitch_index = (instrument.arp_pitch_index == -1)
-                                           ? size - 1
-                                           : (instrument.arp_pitch_index + size - 1) % size;
+          instrument.arp_note_index = note.previous_note_index;
           break;
-        case BarelyArpMode_kRandom:
-          instrument.arp_pitch_index = main_rng.Generate(0, size);
-          break;
+        case BarelyArpMode_kRandom: {
+          uint32_t note_index = instrument.arp_note_index;
+          for (int n = 0; n < engine_.main_rng.Generate(0, static_cast<int>(instrument.note_count));
+               ++n) {
+            note_index = engine_.note_pool.Get(note_index).next_note_index;
+          }
+          instrument.arp_note_index = note_index;
+        } break;
         default:
           assert(!"Invalid arpeggiator mode");
           return;
       }
-      assert(instrument.arp_pitch_index >= 0 && instrument.arp_pitch_index < size);
-      instrument.arp_pitch = instrument.pitches[instrument.arp_pitch_index];
-
-      instrument.is_arp_pitch_on = true;
-      instrument.note_event_callback(BarelyNoteEventType_kBegin, instrument.arp_pitch);
-      engine_.ScheduleMessage(
-          NoteOnMessage{engine_.instrument_pool.GetActiveIndex(i), instrument.arp_pitch,
-                        BuildNoteControls(instrument.note_controls.at(instrument.arp_pitch))});
-    } else if (instrument.is_arp_pitch_on &&
-               instrument.arp_phase ==
-                   static_cast<double>(
-                       instrument.controls[BarelyInstrumentControlType_kArpGateRatio].value)) {
-      instrument.is_arp_pitch_on = false;
-      instrument.note_event_callback(BarelyNoteEventType_kEnd, instrument.arp_pitch);
-      engine_.ScheduleMessage(
-          NoteOffMessage{engine_.instrument_pool.GetActiveIndex(i), instrument.arp_pitch});
     }
   }
 }
@@ -258,6 +325,39 @@ double InstrumentController::GetNextDuration() const noexcept {
         std::min(engine_.instrument_pool.GetActive(i).GetNextArpDuration(), next_duration);
   }
   return next_duration;
+}
+
+uint32_t InstrumentController::GetNote(const InstrumentState& instrument,
+                                       float pitch) const noexcept {
+  uint32_t note_index = instrument.first_note_index;
+  for (uint32_t i = 0; i < instrument.note_count; ++i) {
+    const auto& note = engine_.note_pool.Get(note_index);
+    if (note.pitch == pitch) {
+      return (!instrument.should_release_arp_note || instrument.arp_note_index != note_index)
+                 ? note_index
+                 : UINT32_MAX;
+    }
+    note_index = note.next_note_index;
+  }
+  return UINT32_MAX;
+}
+
+void InstrumentController::ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept {
+  auto& note = engine_.note_pool.Get(note_index);
+
+  if (instrument.note_count == 1) {
+    instrument.first_note_index = UINT32_MAX;
+    instrument.arp_phase = 0.0;
+  } else {
+    if (note_index == instrument.first_note_index) {
+      instrument.first_note_index = note.next_note_index;
+    }
+    engine_.note_pool.Get(note.previous_note_index).next_note_index = note.next_note_index;
+    engine_.note_pool.Get(note.next_note_index).previous_note_index = note.previous_note_index;
+  }
+
+  engine_.note_pool.Release(note_index);
+  --instrument.note_count;
 }
 
 }  // namespace barely

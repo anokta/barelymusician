@@ -86,9 +86,12 @@ bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
 
   const uint32_t instrument_index =
       engine->controller.instrument_controller().Acquire(control_overrides, control_override_count);
-  *out_instrument_id =
-      BuildId(instrument_index, engine->state.instrument_generations[instrument_index]);
-  return *out_instrument_id > 0;
+  if (instrument_index != UINT32_MAX) {
+    *out_instrument_id =
+        BuildId(instrument_index, engine->state.instrument_generations[instrument_index]);
+    return true;
+  }
+  return false;
 }
 
 bool BarelyEngine_CreatePerformer(BarelyEngine* engine, uint32_t* out_performer_id) {
@@ -96,9 +99,12 @@ bool BarelyEngine_CreatePerformer(BarelyEngine* engine, uint32_t* out_performer_
   if (!out_performer_id) return false;
 
   const uint32_t performer_index = engine->controller.performer_controller().Acquire();
-  *out_performer_id =
-      BuildId(performer_index, engine->state.performer_generations[performer_index]);
-  return *out_performer_id > 0;
+  if (performer_index != UINT32_MAX) {
+    *out_performer_id =
+        BuildId(performer_index, engine->state.performer_generations[performer_index]);
+    return true;
+  }
+  return false;
 }
 
 bool BarelyEngine_CreateTask(BarelyEngine* engine, uint32_t performer_id, double position,
@@ -111,8 +117,11 @@ bool BarelyEngine_CreateTask(BarelyEngine* engine, uint32_t performer_id, double
 
   const uint32_t task_index = engine->controller.performer_controller().AcquireTask(
       GetIndex(performer_id), position, duration, priority, callback, user_data);
-  *out_task_id = BuildId(task_index, engine->state.task_generations[task_index]);
-  return *out_task_id > 0;
+  if (task_index != UINT32_MAX) {
+    *out_task_id = BuildId(task_index, engine->state.task_generations[task_index]);
+    return true;
+  }
+  return false;
 }
 
 bool BarelyEngine_Destroy(BarelyEngine* engine) {

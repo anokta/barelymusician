@@ -351,6 +351,10 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Update members.
     for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
+      for (auto& task : tasks) {
+        engine.DestroyTask(task);
+      }
+      tasks.clear();
       // Compose next beat notes.
       if (beat_composer_callback) {
         beat_composer_callback(current_bar, current_beat, kBeatCount, harmonic, instruments[index],

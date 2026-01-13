@@ -44,6 +44,12 @@ def parse_args():
         help="specify the maximum number of instruments",
     )
     parser.add_argument(
+        "--max_notes",
+        type=count_type,
+        default=1000,
+        help="specify the maximum number of notes",
+    )
+    parser.add_argument(
         "--max_performers",
         type=count_type,
         default=100,

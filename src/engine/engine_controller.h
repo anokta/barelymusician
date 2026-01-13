@@ -51,7 +51,7 @@ class EngineController {
         if (next_update_duration < update_duration) {
           performer_controller_.ProcessAllTasksAtPosition(max_priority);
           if (max_priority == INT32_MAX) {
-            instrument_controller_.ProcessArp(engine_.main_rng);
+            instrument_controller_.ProcessArp();
           }
         }
       } else if (engine_.timestamp < timestamp) {

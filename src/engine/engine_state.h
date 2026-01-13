@@ -4,11 +4,11 @@
 #include <array>
 #include <cstdint>
 
+#include "core/control.h"
 #include "core/pool.h"
 #include "core/rng.h"
 #include "core/time.h"
 #include "dsp/compressor.h"
-#include "core/control.h"
 #include "dsp/delay_filter.h"
 #include "dsp/sidechain.h"
 #include "engine/effect_params.h"
@@ -16,16 +16,17 @@
 #include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "engine/message_queue.h"
+#include "engine/note_state.h"
 #include "engine/performer_state.h"
 #include "engine/task_state.h"
 #include "engine/voice_state.h"
 
 namespace barely {
 
-/// Engine control array.
+// Engine control array.
 using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
 
-/// Returns an engine control array.
+// Returns an engine control array.
 inline EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
   return {
       Control(0.0f, 0.0f, 1.0f),                // kCompressorMix
@@ -65,49 +66,52 @@ struct EngineState {
   // Array of instrument generations.
   std::array<uint32_t, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_generations = {};
 
-  /// Array of engine controls.
+  // Note pool.
+  Pool<NoteState, BARELYMUSICIAN_MAX_NOTE_COUNT> note_pool = {};
+
+  // Array of engine controls.
   EngineControlArray controls = {};
 
-  /// Random number generator for the main thread.
+  // Random number generator for the main thread.
   MainRng main_rng = {};
 
-  /// Message queue.
+  // Message queue.
   MessageQueue message_queue = {};
 
-  /// Array of instrument parameters.
+  // Array of instrument parameters.
   std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_params = {};
 
-  /// Voice pool.
+  // Voice pool.
   Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT> voice_pool = {};
 
-  /// Random number generator for the audio thread.
+  // Random number generator for the audio thread.
   AudioRng audio_rng = {};
 
-  /// Current parameters.
+  // Current parameters.
   EffectParams current_params = {};
 
-  /// Target parameters.
+  // Target parameters.
   EffectParams target_params = {};
 
-  /// Compressor.
+  // Compressor.
   Compressor compressor = {};
 
-  /// Delay filter.
+  // Delay filter.
   DelayFilter delay_filter = {};
 
-  /// Sidechain.
+  // Sidechain.
   Sidechain sidechain = {};
 
-  /// Tempo in beats per minute.
+  // Tempo in beats per minute.
   double tempo = 120.0;
 
-  /// Timestamp in seconds.
+  // Timestamp in seconds.
   double timestamp = 0.0;
 
-  /// Sampling rate in hertz.
+  // Sampling rate in hertz.
   float sample_rate = 0.0f;
 
-  /// Approaches parameters.
+  // Approaches parameters.
   void Approach() noexcept {
     current_params.compressor_params.Approach(target_params.compressor_params);
     current_params.delay_params.Approach(target_params.delay_params);
@@ -116,7 +120,7 @@ struct EngineState {
     ApproachValue(current_params.sidechain_ratio, target_params.sidechain_ratio);
   }
 
-  /// Schedules a new message in the queue.
+  // Schedules a new message in the queue.
   void ScheduleMessage(Message message) noexcept {
     message_queue.Add(SecondsToFrames(sample_rate, timestamp), std::move(message));
   }

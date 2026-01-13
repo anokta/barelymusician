@@ -3,20 +3,18 @@
 
 #include <barelymusician.h>
 
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <limits>
 
 #include "core/callback.h"
 #include "core/control.h"
+#include "engine/note_state.h"
 
 namespace barely {
 
-/// Instrument control array.
 using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_kCount>;
-
-/// Note control array.
-using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
 
 // Returns a control array with overrides.
 [[nodiscard]] inline InstrumentControlArray BuildControlArray(
@@ -61,22 +59,23 @@ using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
 struct InstrumentState {
   // Array of controls.
   InstrumentControlArray controls = {};
-  std::vector<float> pitches = {};  // sorted
-
-  // Map of note control arrays by their pitches.
-  std::unordered_map<float, barely::NoteControlArray> note_controls = {};
 
   // Note event callback.
   Callback<BarelyNoteEventCallback> note_event_callback = {};
 
   // Arpeggiator state.
   double arp_phase = 0.0;
-  float arp_pitch = 0.0f;
-  int arp_pitch_index = -1;
-  bool is_arp_pitch_on = false;
+  uint32_t arp_note_index = UINT32_MAX;
+  bool is_arp_note_on = false;
+  bool should_release_arp_note = false;
+
+  // First active note index.
+  uint32_t first_note_index = UINT32_MAX;
+
+  uint32_t note_count = 0;
 
   void Update(double duration) noexcept {
-    if (IsArpEnabled() && !pitches.empty()) {
+    if (first_note_index != UINT32_MAX && IsArpEnabled()) {
       assert(duration <= GetNextArpDuration());
       const double rate = static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value);
       arp_phase = std::fmod(arp_phase + duration * rate, 1.0);
@@ -84,7 +83,7 @@ struct InstrumentState {
   }
 
   double GetNextArpDuration() const noexcept {
-    if (!IsArpEnabled() || pitches.empty()) {
+    if (first_note_index == UINT32_MAX || !IsArpEnabled()) {
       return std::numeric_limits<double>::max();
     }
     const double rate = static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value);
@@ -93,21 +92,15 @@ struct InstrumentState {
     }
     const double ratio =
         static_cast<double>(controls[BarelyInstrumentControlType_kArpGateRatio].value);
-    if (!is_arp_pitch_on) {
+    if (!is_arp_note_on) {
       return (arp_phase < ratio) ? 0.0 : (1.0 - arp_phase) / rate;
     }
     return (ratio - arp_phase) / rate;
   }
 
-  /// Returns whether the arpeggiator is enabled.
   bool IsArpEnabled() const noexcept {
     return static_cast<BarelyArpMode>(controls[BarelyInstrumentControlType_kArpMode].value) !=
            BarelyArpMode_kNone;
-  }
-
-  /// Returns whether a note is on or not.
-  bool IsNoteOn(float pitch) const noexcept {
-    return is_arp_pitch_on ? (arp_pitch == pitch) : note_controls.contains(pitch);
   }
 };
 

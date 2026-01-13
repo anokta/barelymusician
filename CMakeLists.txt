@@ -45,6 +45,11 @@ if(NOT DEFINED MAX_INSTRUMENT_COUNT)
 endif()
 option(MAX_INSTRUMENT_COUNT "Maximum number of instruments" ${MAX_INSTRUMENT_COUNT})
 
+if(NOT DEFINED MAX_NOTE_COUNT)
+  set(MAX_NOTE_COUNT 1000 CACHE STRING "Maximum number of notes" FORCE)
+endif()
+option(MAX_NOTE_COUNT "Maximum number of notes" ${MAX_NOTE_COUNT})
+
 if(NOT DEFINED MAX_PERFORMER_COUNT)
   set(MAX_PERFORMER_COUNT 100 CACHE STRING "Maximum number of performers" FORCE)
 endif()

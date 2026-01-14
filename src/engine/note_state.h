@@ -28,7 +28,7 @@ using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
 struct NoteState {
   NoteControlArray controls = {};
   float pitch = 0.0;
-  uint32_t previous_note_index = UINT32_MAX;
+  uint32_t prev_note_index = UINT32_MAX;
   uint32_t next_note_index = UINT32_MAX;
 };
 

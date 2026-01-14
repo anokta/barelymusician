@@ -205,7 +205,7 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
     instrument.first_note_index = new_note_index;
     // Circle the note back to itself for easier iteration.
     new_note.next_note_index = new_note_index;
-    new_note.previous_note_index = new_note_index;
+    new_note.prev_note_index = new_note_index;
   } else {
     auto& note = engine_.note_pool.Get(note_index);
     if (pitch < note.pitch) {
@@ -213,13 +213,13 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
         instrument.first_note_index = new_note_index;
       }
       new_note.next_note_index = note_index;
-      new_note.previous_note_index = note.previous_note_index;
-      engine_.note_pool.Get(new_note.previous_note_index).next_note_index = new_note_index;
-      note.previous_note_index = new_note_index;
+      new_note.prev_note_index = note.prev_note_index;
+      engine_.note_pool.Get(new_note.prev_note_index).next_note_index = new_note_index;
+      note.prev_note_index = new_note_index;
     } else {
-      new_note.previous_note_index = note_index;
+      new_note.prev_note_index = note_index;
       new_note.next_note_index = note.next_note_index;
-      engine_.note_pool.Get(new_note.next_note_index).previous_note_index = new_note_index;
+      engine_.note_pool.Get(new_note.next_note_index).prev_note_index = new_note_index;
       note.next_note_index = new_note_index;
     }
   }
@@ -286,7 +286,7 @@ void InstrumentController::ProcessArp() noexcept {
           instrument.arp.note_index = note.next_note_index;
           break;
         case BarelyArpMode_kDown:
-          instrument.arp.note_index = note.previous_note_index;
+          instrument.arp.note_index = note.prev_note_index;
           break;
         case BarelyArpMode_kRandom: {
           uint32_t note_index = instrument.arp.note_index;
@@ -344,8 +344,8 @@ void InstrumentController::ReleaseNote(InstrumentState& instrument, uint32_t not
     if (note_index == instrument.first_note_index) {
       instrument.first_note_index = note.next_note_index;
     }
-    engine_.note_pool.Get(note.previous_note_index).next_note_index = note.next_note_index;
-    engine_.note_pool.Get(note.next_note_index).previous_note_index = note.previous_note_index;
+    engine_.note_pool.Get(note.prev_note_index).next_note_index = note.next_note_index;
+    engine_.note_pool.Get(note.next_note_index).prev_note_index = note.prev_note_index;
   }
 
   engine_.note_pool.Release(note_index);

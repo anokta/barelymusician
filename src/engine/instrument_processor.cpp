@@ -27,9 +27,9 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     }
     while (active_voice_index != UINT32_MAX) {
       auto& voice = engine_.voice_pool.Get(active_voice_index);
-      if (voice.previous_voice_index != UINT32_MAX) {
-        engine_.voice_pool.Get(voice.previous_voice_index).next_voice_index = UINT32_MAX;
-        voice.previous_voice_index = UINT32_MAX;
+      if (voice.prev_voice_index != UINT32_MAX) {
+        engine_.voice_pool.Get(voice.prev_voice_index).next_voice_index = UINT32_MAX;
+        voice.prev_voice_index = UINT32_MAX;
       }
       engine_.voice_pool.Release(active_voice_index);
       active_voice_index = voice.next_voice_index;
@@ -223,7 +223,7 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
       active_voice_count < params.voice_count) {
     const uint32_t new_voice_index = engine_.voice_pool.Acquire();
     VoiceState& new_voice = engine_.voice_pool.Get(new_voice_index);
-    new_voice.previous_voice_index = current_voice_index;
+    new_voice.prev_voice_index = current_voice_index;
     new_voice.next_voice_index = UINT32_MAX;
     if (current_voice_index != UINT32_MAX) {
       engine_.voice_pool.Get(current_voice_index).next_voice_index = new_voice_index;

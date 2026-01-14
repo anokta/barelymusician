@@ -49,7 +49,7 @@ struct VoiceState {
   uint32_t instrument_index = UINT32_MAX;
 
   /// Previous voice index.
-  uint32_t previous_voice_index = UINT32_MAX;
+  uint32_t prev_voice_index = UINT32_MAX;
 
   /// Next voice index.
   uint32_t next_voice_index = UINT32_MAX;

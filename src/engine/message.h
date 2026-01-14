@@ -46,11 +46,8 @@ struct InstrumentControlMessage {
 
 /// Note control message.
 struct NoteControlMessage {
-  /// Instrument index;
-  uint32_t instrument_index;
-
-  /// Pitch.
-  float pitch;
+  /// Note index.
+  uint32_t note_index;
 
   /// Type.
   BarelyNoteControlType type;
@@ -61,15 +58,15 @@ struct NoteControlMessage {
 
 /// Note off message.
 struct NoteOffMessage {
-  /// Instrument index;
-  uint32_t instrument_index;
-
-  /// Pitch.
-  float pitch;
+  /// Note index.
+  uint32_t note_index;
 };
 
 /// Note on message.
 struct NoteOnMessage {
+  /// Note index.
+  uint32_t note_index;
+
   /// Instrument index;
   uint32_t instrument_index;
 

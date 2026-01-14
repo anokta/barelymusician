@@ -15,6 +15,7 @@ namespace barely {
 namespace {
 
 constexpr uint32_t kInstrumentIndex = 1;
+constexpr uint32_t kNoteIndex = 2;
 constexpr int kSampleRate = 4;
 constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
@@ -47,7 +48,7 @@ TEST(EngineProcessorTest, PlaySingleNote) {
   }
 
   // Set a note on.
-  engine->ScheduleMessage(NoteOnMessage{kInstrumentIndex, kPitch, {1.0f, 0.0f}});
+  engine->ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, kPitch, {1.0f, 0.0f}});
 
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
@@ -58,7 +59,7 @@ TEST(EngineProcessorTest, PlaySingleNote) {
   }
 
   // Set the note off.
-  engine->ScheduleMessage(NoteOffMessage{kInstrumentIndex, kPitch});
+  engine->ScheduleMessage(NoteOffMessage{kNoteIndex});
 
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
@@ -99,9 +100,10 @@ TEST(EngineProcessorTest, PlayMultipleNotes) {
 
   // Start a new note per each i in the samples.
   for (int i = 0; i < kSampleRate; ++i) {
-    engine->ScheduleMessage(NoteOnMessage{kInstrumentIndex, static_cast<float>(i), {1.0f, 0.0f}});
+    engine->ScheduleMessage(
+        NoteOnMessage{kNoteIndex, kInstrumentIndex, static_cast<float>(i), {1.0f, 0.0f}});
     engine->timestamp = static_cast<double>(i + 1) / static_cast<double>(kSampleRate);
-    engine->ScheduleMessage(NoteOffMessage{kInstrumentIndex, static_cast<float>(i)});
+    engine->ScheduleMessage(NoteOffMessage{kNoteIndex});
   }
 
   samples.fill(0.0f);

@@ -26,10 +26,9 @@ class InstrumentProcessor {
 
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
                   float value) noexcept;
-  void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
-                      float value) noexcept;
-  void SetNoteOff(uint32_t instrument_index, float pitch) noexcept;
-  void SetNoteOn(uint32_t instrument_index, float pitch,
+  void SetNoteControl(uint32_t note_index, BarelyNoteControlType type, float value) noexcept;
+  void SetNoteOff(uint32_t note_index) noexcept;
+  void SetNoteOn(uint32_t note_index, uint32_t instrument_index, float pitch,
                  const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept;
   void SetSampleData(uint32_t instrument_index, SampleData& sample_data) noexcept;
 
@@ -96,7 +95,7 @@ class InstrumentProcessor {
       }
     }
 
-    if (instrument_params.slice_mode == SliceMode::kOnce &&
+    if (instrument_params.slice_mode == SliceMode::kOnce && voice.slice != nullptr &&
         static_cast<int>(voice.slice_offset) >= voice.slice->sample_count) {
       voice.envelope.Stop();
     }

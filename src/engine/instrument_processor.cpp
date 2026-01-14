@@ -137,61 +137,48 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
   }
 }
 
-void InstrumentProcessor::SetNoteControl(uint32_t instrument_index, float pitch,
-                                         BarelyNoteControlType type, float value) noexcept {
-  auto& params = engine_.instrument_params[instrument_index];
+void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlType type,
+                                         float value) noexcept {
+  const uint32_t voice_index = engine_.note_to_voice[note_index];
+  if (!engine_.voice_pool.IsActive(voice_index)) {
+    return;
+  }
+  auto& voice = engine_.voice_pool.Get(voice_index);
   switch (type) {
-    case BarelyNoteControlType_kGain: {
-      uint32_t voice_index = params.first_voice_index;
-      while (voice_index != UINT32_MAX) {
-        auto& voice = engine_.voice_pool.Get(voice_index);
-        if (voice.pitch == pitch && voice.IsOn()) {
-          voice.note_params.gain = value;
-          break;
-        }
-        voice_index = voice.next_voice_index;
-      }
-    } break;
-    case BarelyNoteControlType_kPitchShift: {
-      uint32_t voice_index = params.first_voice_index;
-      while (voice_index != UINT32_MAX) {
-        auto& voice = engine_.voice_pool.Get(voice_index);
-        if (voice.pitch == pitch && voice.IsOn()) {
-          voice.pitch_shift = value;
-          voice.UpdatePitchIncrements();
-          break;
-        }
-        voice_index = voice.next_voice_index;
-      }
-    } break;
+    case BarelyNoteControlType_kGain:
+      voice.note_params.gain = value;
+      break;
+    case BarelyNoteControlType_kPitchShift:
+      voice.pitch_shift = value;
+      voice.UpdatePitchIncrements();
+      break;
     default:
       assert(!"Invalid note control type");
       break;
   }
 }
 
-void InstrumentProcessor::SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
-  auto& params = engine_.instrument_params[instrument_index];
-  uint32_t active_voice_index = params.first_voice_index;
-  while (active_voice_index != UINT32_MAX) {
-    auto& voice = engine_.voice_pool.Get(active_voice_index);
-    if (voice.pitch == pitch && voice.IsOn() &&
-        (params.sample_data.empty() || params.slice_mode != SliceMode::kOnce)) {
-      voice.Stop();
-      break;
-    }
-    active_voice_index = voice.next_voice_index;
+void InstrumentProcessor::SetNoteOff(uint32_t note_index) noexcept {
+  const uint32_t voice_index = engine_.note_to_voice[note_index];
+  if (!engine_.voice_pool.IsActive(voice_index)) {
+    return;
+  }
+  auto& voice = engine_.voice_pool.Get(voice_index);
+  if (const auto& instrument_params = engine_.instrument_params[voice.instrument_index];
+      instrument_params.sample_data.empty() || instrument_params.slice_mode != SliceMode::kOnce) {
+    voice.envelope.Stop();
   }
 }
 
 void InstrumentProcessor::SetNoteOn(
-    uint32_t instrument_index, float pitch,
+    uint32_t note_index, uint32_t instrument_index, float pitch,
     const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
   if (const uint32_t voice_index = AcquireVoice(params, pitch); voice_index != UINT32_MAX) {
-    engine_.voice_pool.Get(voice_index)
-        .Start(params, instrument_index, params.sample_data.Select(pitch, engine_.audio_rng), pitch,
-               note_controls);
+    engine_.note_to_voice[note_index] = voice_index;
+    auto& voice = engine_.voice_pool.Get(voice_index);
+    voice.instrument_index = instrument_index;
+    voice.Start(params, params.sample_data.Select(pitch, engine_.audio_rng), pitch, note_controls);
   }
 }
 

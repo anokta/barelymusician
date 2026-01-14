@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_VOICE_STATE_H_
 
 #include <array>
+#include <cstdint>
 
 #include "core/control.h"
 #include "dsp/biquad_filter.h"
@@ -94,12 +95,10 @@ struct VoiceState {
   /// Starts the voice.
   ///
   /// @param instrument_params Instrument parameters.
-  /// @param note_instrument_index Note instrument index.
   /// @param note_slice Note slice.
   /// @param note_pitch Note pitch.
   /// @param note_controls Array of note controls.
-  void Start(const InstrumentParams& instrument_params, uint32_t note_instrument_index,
-             const Slice* note_slice, float note_pitch,
+  void Start(const InstrumentParams& instrument_params, const Slice* note_slice, float note_pitch,
              const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
     const float note_gain = note_controls[BarelyNoteControlType_kGain];
     const float note_pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
@@ -115,12 +114,8 @@ struct VoiceState {
     osc_phase = 0.0f;
     slice_offset = 0.0f;
     envelope.Start(instrument_params.adsr);
-    instrument_index = note_instrument_index;
     timestamp = 0;
   }
-
-  /// Stops the voice.
-  void Stop() noexcept { envelope.Stop(); }
 
   /// Updates the pitch increments.
   void UpdatePitchIncrements() noexcept {

@@ -159,18 +159,17 @@ class EngineProcessor {
                              instrument_control_message.type, instrument_control_message.value);
                        },
                        [this](NoteControlMessage& note_control_message) noexcept {
-                         instrument_processor_.SetNoteControl(
-                             note_control_message.instrument_index, note_control_message.pitch,
-                             note_control_message.type, note_control_message.value);
+                         instrument_processor_.SetNoteControl(note_control_message.note_index,
+                                                              note_control_message.type,
+                                                              note_control_message.value);
                        },
                        [this](NoteOffMessage& note_off_message) noexcept {
-                         instrument_processor_.SetNoteOff(note_off_message.instrument_index,
-                                                          note_off_message.pitch);
+                         instrument_processor_.SetNoteOff(note_off_message.note_index);
                        },
                        [this](NoteOnMessage& note_on_message) noexcept {
-                         instrument_processor_.SetNoteOn(note_on_message.instrument_index,
-                                                         note_on_message.pitch,
-                                                         note_on_message.controls);
+                         instrument_processor_.SetNoteOn(
+                             note_on_message.note_index, note_on_message.instrument_index,
+                             note_on_message.pitch, note_on_message.controls);
                        },
                        [this](SampleDataMessage& sample_data_message) noexcept {
                          instrument_processor_.SetSampleData(sample_data_message.instrument_index,

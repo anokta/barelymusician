@@ -81,6 +81,9 @@ struct EngineState {
   // Array of instrument parameters.
   std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_params = {};
 
+  // Maps note indices to voice indices.
+  std::array<uint32_t, BARELYMUSICIAN_MAX_NOTE_COUNT> note_to_voice = {};
+
   // Voice pool.
   Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT> voice_pool = {};
 

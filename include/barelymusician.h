@@ -1661,7 +1661,7 @@ class Engine {
   ///
   /// @param control_overrides Span of instrument control overrides.
   /// @return Instrument.
-  [[nodiscard]] Instrument CreateInstrument(
+  Instrument CreateInstrument(
       std::span<const InstrumentControlOverride> control_overrides = {}) noexcept {
     uint32_t instrument_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(
@@ -1678,7 +1678,7 @@ class Engine {
   /// Creates a new performer.
   ///
   /// @return Performer.
-  [[nodiscard]] Performer CreatePerformer() noexcept {
+  Performer CreatePerformer() noexcept {
     uint32_t performer_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer_id);
     assert(success);
@@ -1693,8 +1693,8 @@ class Engine {
   /// @param priority Task priority.
   /// @param callback Task event callback.
   /// @return Task.
-  [[nodiscard]] Task CreateTask(Performer performer, double position, double duration, int priority,
-                                TaskEventCallback callback) noexcept {
+  Task CreateTask(Performer performer, double position, double duration, int priority,
+                  TaskEventCallback callback) noexcept {
     uint32_t task_id = 0;
     [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
                                                             priority, nullptr, nullptr, &task_id);

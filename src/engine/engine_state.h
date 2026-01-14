@@ -128,16 +128,32 @@ struct EngineState {
     message_queue.Add(SecondsToFrames(sample_rate, timestamp), std::move(message));
   }
 
+  [[nodiscard]] InstrumentState& GetInstrument(uint32_t instrument_index) noexcept {
+    return instrument_pool.Get(instrument_index);
+  }
+  [[nodiscard]] const InstrumentState& GetInstrument(uint32_t instrument_index) const noexcept {
+    return instrument_pool.Get(instrument_index);
+  }
+
   [[nodiscard]] PerformerState& GetPerformer(uint32_t performer_index) noexcept {
     return performer_pool.Get(performer_index);
   }
-
   [[nodiscard]] const PerformerState& GetPerformer(uint32_t performer_index) const noexcept {
     return performer_pool.Get(performer_index);
   }
 
+  [[nodiscard]] TaskState& GetTask(uint32_t task_index) noexcept {
+    return task_pool.Get(task_index);
+  }
   [[nodiscard]] const TaskState& GetTask(uint32_t task_index) const noexcept {
     return task_pool.Get(task_index);
+  }
+
+  [[nodiscard]] VoiceState& GetVoice(uint32_t voice_index) noexcept {
+    return voice_pool.Get(voice_index);
+  }
+  [[nodiscard]] const VoiceState& GetVoice(uint32_t voice_index) const noexcept {
+    return voice_pool.Get(voice_index);
   }
 };
 

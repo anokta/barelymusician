@@ -30,7 +30,7 @@ class PerformerController {
   [[nodiscard]] TaskKey GetNextTaskKey(double duration) const noexcept;
 
   void SetLoopBeginPosition(uint32_t performer_index, double loop_begin_position) noexcept {
-    auto& performer = engine_.performer_pool.Get(performer_index);
+    auto& performer = engine_.GetPerformer(performer_index);
     if (performer.loop_begin_position == loop_begin_position) {
       return;
     }
@@ -41,7 +41,7 @@ class PerformerController {
   }
 
   void SetLoopLength(uint32_t performer_index, double loop_length) noexcept {
-    auto& performer = engine_.performer_pool.Get(performer_index);
+    auto& performer = engine_.GetPerformer(performer_index);
     if (performer.loop_length == loop_length) {
       return;
     }
@@ -52,7 +52,7 @@ class PerformerController {
   }
 
   void SetLooping(uint32_t performer_index, bool is_looping) noexcept {
-    auto& performer = engine_.performer_pool.Get(performer_index);
+    auto& performer = engine_.GetPerformer(performer_index);
     if (performer.is_looping == is_looping) {
       return;
     }
@@ -63,7 +63,7 @@ class PerformerController {
   }
 
   void SetPosition(uint32_t performer_index, double position) noexcept {
-    auto& performer = engine_.performer_pool.Get(performer_index);
+    auto& performer = engine_.GetPerformer(performer_index);
     if (performer.position == position) {
       return;
     }
@@ -77,7 +77,7 @@ class PerformerController {
       for (auto it = performer.active_tasks.begin(); it != performer.active_tasks.end();) {
         // Copy the values in case `it` gets invalidated after the `Process` call.
         auto [end_position, task_index] = *it;
-        if (!engine_.task_pool.Get(task_index).IsInside(performer.position)) {
+        if (!engine_.GetTask(task_index).IsInside(performer.position)) {
           SetTaskActive(performer, it, false);
         }
         it = performer.active_tasks.upper_bound({end_position, task_index});
@@ -86,11 +86,11 @@ class PerformerController {
   }
 
   void Start(uint32_t performer_index) noexcept {
-    engine_.performer_pool.Get(performer_index).is_playing = true;
+    engine_.GetPerformer(performer_index).is_playing = true;
   }
 
   void Stop(uint32_t performer_index) noexcept {
-    auto& performer = engine_.performer_pool.Get(performer_index);
+    auto& performer = engine_.GetPerformer(performer_index);
     performer.is_playing = false;
     while (!performer.active_tasks.empty()) {
       SetTaskActive(performer, performer.active_tasks.begin(), false);
@@ -99,8 +99,8 @@ class PerformerController {
 
   void SetTaskDuration(uint32_t task_index, double duration) noexcept {
     assert(duration > 0.0 && "Invalid task duration");
-    auto& task = engine_.task_pool.Get(task_index);
-    auto& performer = engine_.performer_pool.Get(task.performer_index);
+    auto& task = engine_.GetTask(task_index);
+    auto& performer = engine_.GetPerformer(task.performer_index);
     if (task.duration == duration) return;
     const double old_duration = task.duration;
     task.duration = duration;
@@ -116,12 +116,12 @@ class PerformerController {
 
   void SetTaskEventCallback(uint32_t task_index, BarelyTaskEventCallback callback,
                             void* user_data) noexcept {
-    engine_.task_pool.Get(task_index).SetEventCallback(callback, user_data);
+    engine_.GetTask(task_index).SetEventCallback(callback, user_data);
   }
 
   void SetTaskPosition(uint32_t task_index, double position) noexcept {
-    auto& task = engine_.task_pool.Get(task_index);
-    auto& performer = engine_.performer_pool.Get(task.performer_index);
+    auto& task = engine_.GetTask(task_index);
+    auto& performer = engine_.GetPerformer(task.performer_index);
     if (task.position == position) return;
     const double old_position = task.position;
     task.position = position;
@@ -138,8 +138,8 @@ class PerformerController {
   }
 
   void SetTaskPriority(uint32_t task_index, int32_t priority) noexcept {
-    auto& task = engine_.task_pool.Get(task_index);
-    auto& performer = engine_.performer_pool.Get(task.performer_index);
+    auto& task = engine_.GetTask(task_index);
+    auto& performer = engine_.GetPerformer(task.performer_index);
     if (task.priority == priority) return;
     const int32_t old_priority = task.priority;
     task.priority = priority;
@@ -158,7 +158,7 @@ class PerformerController {
                      const std::set<std::pair<TaskKey, uint32_t>>::iterator& it,
                      bool is_active) noexcept {
     const uint32_t task_index = it->second;
-    auto& task = engine_.task_pool.Get(task_index);
+    auto& task = engine_.GetTask(task_index);
     auto node = (is_active ? performer.inactive_tasks : performer.active_tasks).extract(it);
     node.value().first.first = is_active ? task.GetEndPosition() : task.position;
     (is_active ? performer.active_tasks : performer.inactive_tasks).insert(std::move(node));
@@ -168,7 +168,7 @@ class PerformerController {
   void UpdateActiveTaskKey(PerformerState& performer, TaskKey old_task_key,
                            uint32_t task_index) noexcept {
     auto node = performer.active_tasks.extract({old_task_key, task_index});
-    auto& task = engine_.task_pool.Get(task_index);
+    auto& task = engine_.GetTask(task_index);
     node.value().first = {task.GetEndPosition(), task.priority};
     performer.active_tasks.insert(std::move(node));
   }
@@ -176,7 +176,7 @@ class PerformerController {
   void UpdateInactiveTaskKey(PerformerState& performer, TaskKey old_task_key,
                              uint32_t task_index) noexcept {
     auto node = performer.inactive_tasks.extract({old_task_key, task_index});
-    auto& task = engine_.task_pool.Get(task_index);
+    auto& task = engine_.GetTask(task_index);
     node.value().first = {task.position, task.priority};
     performer.inactive_tasks.insert(std::move(node));
   }
@@ -190,7 +190,7 @@ class PerformerController {
     // Check if any inactive task became active (in case a new position was set).
     // TODO(#147): This may be optimized further using an interval tree.
     for (auto it = performer.inactive_tasks.begin(); it != next_it; ++it) {
-      if (engine_.task_pool.Get(it->second).GetEndPosition() > performer.position) {
+      if (engine_.GetTask(it->second).GetEndPosition() > performer.position) {
         return it;
       }
     }

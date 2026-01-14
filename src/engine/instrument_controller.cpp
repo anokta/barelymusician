@@ -36,7 +36,7 @@ uint32_t InstrumentController::Acquire(const BarelyInstrumentControlOverride* co
                                        int32_t control_override_count) noexcept {
   const uint32_t instrument_index = engine_.instrument_pool.Acquire();
   if (instrument_index != UINT32_MAX) {
-    InstrumentState& instrument = engine_.instrument_pool.Get(instrument_index);
+    InstrumentState& instrument = engine_.GetInstrument(instrument_index);
     instrument = {};
     instrument.controls = BuildControlArray(control_overrides, control_override_count);
 
@@ -62,7 +62,7 @@ void InstrumentController::SetAllNotesOff() noexcept {
 }
 
 void InstrumentController::SetAllNotesOff(uint32_t instrument_index) noexcept {
-  auto& instrument = engine_.instrument_pool.Get(instrument_index);
+  auto& instrument = engine_.GetInstrument(instrument_index);
 
   uint32_t note_index = instrument.first_note_index;
   for (uint32_t i = 0; i < instrument.note_count; ++i) {
@@ -83,7 +83,7 @@ void InstrumentController::SetAllNotesOff(uint32_t instrument_index) noexcept {
 
 void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
                                       float value) noexcept {
-  auto& instrument = engine_.instrument_pool.Get(instrument_index);
+  auto& instrument = engine_.GetInstrument(instrument_index);
   if (auto& control = instrument.controls[type]; control.SetValue(value)) {
     switch (type) {
       case BarelyInstrumentControlType_kArpMode:
@@ -131,7 +131,7 @@ void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumen
 
 void InstrumentController::SetNoteControl(uint32_t instrument_index, float pitch,
                                           BarelyNoteControlType type, float value) noexcept {
-  if (const uint32_t note_index = GetNote(engine_.instrument_pool.Get(instrument_index), pitch);
+  if (const uint32_t note_index = GetNote(engine_.GetInstrument(instrument_index), pitch);
       note_index != UINT32_MAX) {
     if (auto& note_control = engine_.note_pool.Get(note_index).controls[type];
         note_control.SetValue(value)) {
@@ -143,11 +143,11 @@ void InstrumentController::SetNoteControl(uint32_t instrument_index, float pitch
 void InstrumentController::SetNoteEventCallback(uint32_t instrument_index,
                                                 BarelyNoteEventCallback callback,
                                                 void* user_data) noexcept {
-  engine_.instrument_pool.Get(instrument_index).note_event_callback = {callback, user_data};
+  engine_.GetInstrument(instrument_index).note_event_callback = {callback, user_data};
 }
 
 void InstrumentController::SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
-  auto& instrument = engine_.instrument_pool.Get(instrument_index);
+  auto& instrument = engine_.GetInstrument(instrument_index);
 
   const uint32_t note_index = GetNote(instrument, pitch);
   if (note_index == UINT32_MAX) {
@@ -175,7 +175,7 @@ void InstrumentController::SetNoteOff(uint32_t instrument_index, float pitch) no
 void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
                                      const BarelyNoteControlOverride* note_control_overrides,
                                      int32_t note_control_override_count) noexcept {
-  auto& instrument = engine_.instrument_pool.Get(instrument_index);
+  auto& instrument = engine_.GetInstrument(instrument_index);
 
   uint32_t note_index = instrument.first_note_index;
   for (uint32_t i = 0; i < instrument.note_count; ++i) {
@@ -235,12 +235,12 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
 
 float InstrumentController::GetControl(uint32_t instrument_index,
                                        BarelyInstrumentControlType type) const noexcept {
-  return engine_.instrument_pool.Get(instrument_index).controls[type].value;
+  return engine_.GetInstrument(instrument_index).controls[type].value;
 }
 
 const float* InstrumentController::GetNoteControl(uint32_t instrument_index, float pitch,
                                                   BarelyNoteControlType type) const noexcept {
-  const auto& instrument = engine_.instrument_pool.Get(instrument_index);
+  const auto& instrument = engine_.GetInstrument(instrument_index);
   if (const uint32_t note_index = GetNote(instrument, pitch); note_index != UINT32_MAX) {
     return &engine_.note_pool.Get(note_index).controls[type].value;
   }
@@ -248,7 +248,7 @@ const float* InstrumentController::GetNoteControl(uint32_t instrument_index, flo
 }
 
 bool InstrumentController::IsNoteOn(uint32_t instrument_index, float pitch) const noexcept {
-  const auto& instrument = engine_.instrument_pool.Get(instrument_index);
+  const auto& instrument = engine_.GetInstrument(instrument_index);
   return instrument.IsArpEnabled()
              ? (instrument.arp.is_note_on &&
                 engine_.note_pool.Get(instrument.arp.note_index).pitch == pitch)

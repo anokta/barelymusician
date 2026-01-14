@@ -20,7 +20,7 @@ void PerformerController::ProcessAllTasksAtPosition(int32_t max_priority) noexce
     // Active tasks get processed in `SetPosition`, so we only need to process inactive tasks.
     for (auto it = GetNextInactiveTask(performer);
          it != performer.inactive_tasks.end() &&
-         engine_.task_pool.Get(it->second).IsInside(performer.position) &&
+         engine_.GetTask(it->second).IsInside(performer.position) &&
          (it->first.first < performer.position || it->first.second <= max_priority);
          it = GetNextInactiveTask(performer)) {
       SetTaskActive(performer, it, true);
@@ -42,16 +42,16 @@ void PerformerController::Update(double duration) noexcept {
 uint32_t PerformerController::Acquire() noexcept {
   const uint32_t performer_index = engine_.performer_pool.Acquire();
   if (performer_index != UINT32_MAX) {
-    PerformerState& performer = engine_.performer_pool.Get(performer_index);
+    PerformerState& performer = engine_.GetPerformer(performer_index);
     performer = {};
   }
   return performer_index;
 }
 
 void PerformerController::Release(uint32_t performer_index) noexcept {
-  auto& performer = engine_.performer_pool.Get(performer_index);
+  auto& performer = engine_.GetPerformer(performer_index);
   for (const auto& [_, task_index] : performer.active_tasks) {
-    engine_.task_pool.Get(task_index).SetActive(false);
+    engine_.GetTask(task_index).SetActive(false);
     engine_.task_pool.Release(task_index);
   }
   for (const auto& [_, task_index] : performer.inactive_tasks) {
@@ -66,10 +66,10 @@ uint32_t PerformerController::AcquireTask(uint32_t performer_index, double posit
                                           void* user_data) noexcept {
   const uint32_t task_index = engine_.task_pool.Acquire();
   if (task_index != UINT32_MAX) {
-    TaskState& task = engine_.task_pool.Get(task_index);
+    TaskState& task = engine_.GetTask(task_index);
     task = {{callback, user_data}, position, duration, priority, performer_index};
     [[maybe_unused]] const bool success =
-        engine_.performer_pool.Get(performer_index)
+        engine_.GetPerformer(performer_index)
             .inactive_tasks.emplace(TaskKey{position, priority}, task_index)
             .second;
     assert(success && "Failed to acquire task");
@@ -78,8 +78,8 @@ uint32_t PerformerController::AcquireTask(uint32_t performer_index, double posit
 }
 
 void PerformerController::ReleaseTask(uint32_t task_index) noexcept {
-  auto& task = engine_.task_pool.Get(task_index);
-  auto& performer = engine_.performer_pool.Get(task.performer_index);
+  auto& task = engine_.GetTask(task_index);
+  auto& performer = engine_.GetPerformer(task.performer_index);
   if (task.is_active) {
     [[maybe_unused]] const bool success =
         (performer.active_tasks.erase({{task.GetEndPosition(), task.priority}, task_index}) == 1);
@@ -115,7 +115,7 @@ void PerformerController::UpdateNextKey(const PerformerState& performer,
     // If the performer position is inside an inactive task, we can return immediately.
     // TODO(#147): This may be optimized further using an interval tree.
     for (auto it = performer.inactive_tasks.begin(); it != next_it; ++it) {
-      if (engine_.task_pool.Get(it->second).GetEndPosition() > performer.position) {
+      if (engine_.GetTask(it->second).GetEndPosition() > performer.position) {
         next_key = {0.0, std::min(next_key.second, it->first.second)};
         return;
       }

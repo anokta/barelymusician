@@ -46,17 +46,15 @@ class InstrumentProcessor {
       if constexpr (kIsSidechainSend) {
         if (!voice.IsActive()) {
           if (voice.prev_voice_index != UINT32_MAX) {
-            engine_.voice_pool.Get(voice.prev_voice_index).next_voice_index =
-                voice.next_voice_index;
+            engine_.GetVoice(voice.prev_voice_index).next_voice_index = voice.next_voice_index;
             if (voice.next_voice_index != UINT32_MAX) {
-              engine_.voice_pool.Get(voice.next_voice_index).prev_voice_index =
-                  voice.prev_voice_index;
+              engine_.GetVoice(voice.next_voice_index).prev_voice_index = voice.prev_voice_index;
             }
             voice.prev_voice_index = UINT32_MAX;
           } else {
             params.first_voice_index = voice.next_voice_index;
             if (voice.next_voice_index != UINT32_MAX) {
-              engine_.voice_pool.Get(voice.next_voice_index).prev_voice_index = UINT32_MAX;
+              engine_.GetVoice(voice.next_voice_index).prev_voice_index = UINT32_MAX;
             }
           }
           voice.next_voice_index = UINT32_MAX;

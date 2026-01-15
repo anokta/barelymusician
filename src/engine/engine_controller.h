@@ -32,23 +32,27 @@ class EngineController {
   void Update(double timestamp) noexcept {
     while (engine_.timestamp < timestamp) {
       if (engine_.tempo > 0.0) {
-        const double update_duration = SecondsToBeats(engine_.tempo, timestamp - engine_.timestamp);
+        const double max_update_duration =
+            SecondsToBeats(engine_.tempo, timestamp - engine_.timestamp);
 
-        auto next_key = performer_controller_.GetNextTaskKey(update_duration);
+        double update_duration = max_update_duration;
+        int32_t max_priority = INT32_MIN;
+
+        performer_controller_.GetNextTaskEvent(update_duration, max_priority);
         if (const double next_duration = instrument_controller_.GetNextDuration();
-            next_duration < next_key.first) {
-          next_key = {next_duration, INT32_MAX};
-        }
-        const auto& [next_update_duration, max_priority] = next_key;
-
-        if (next_update_duration > 0) {
-          performer_controller_.Update(next_update_duration);
-          instrument_controller_.Update(next_update_duration);
-
-          engine_.timestamp += BeatsToSeconds(engine_.tempo, next_update_duration);
+            next_duration < update_duration) {
+          update_duration = next_duration;
+          max_priority = INT32_MAX;
         }
 
-        if (next_update_duration < update_duration) {
+        if (update_duration > 0) {
+          performer_controller_.Update(update_duration);
+          instrument_controller_.Update(update_duration);
+
+          engine_.timestamp += BeatsToSeconds(engine_.tempo, update_duration);
+        }
+
+        if (update_duration < max_update_duration) {
           performer_controller_.ProcessAllTasksAtPosition(max_priority);
           if (max_priority == INT32_MAX) {
             instrument_controller_.ProcessArp();

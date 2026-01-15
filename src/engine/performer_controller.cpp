@@ -18,12 +18,14 @@ void PerformerController::ProcessAllTasksAtPosition(int32_t max_priority) noexce
       continue;
     }
     // Active tasks get processed in `SetPosition`, so we only need to process inactive tasks.
-    for (auto it = GetNextInactiveTask(performer);
-         it != performer.inactive_tasks.end() &&
-         engine_.GetTask(it->second).IsInside(performer.position) &&
-         (it->first.first < performer.position || it->first.second <= max_priority);
-         it = GetNextInactiveTask(performer)) {
-      SetTaskActive(performer, it, true);
+    for (uint32_t task_index = GetNextInactiveTask(performer); task_index != UINT32_MAX;
+         task_index = GetNextInactiveTask(performer)) {
+      const auto& task = engine_.GetTask(task_index);
+      if (!task.IsInside(performer.position) ||
+          (task.position >= performer.position && task.priority > max_priority)) {
+        break;
+      }
+      SetTaskActive(performer, task_index, true);
     }
   }
 }
@@ -50,13 +52,24 @@ uint32_t PerformerController::Acquire() noexcept {
 
 void PerformerController::Release(uint32_t performer_index) noexcept {
   auto& performer = engine_.GetPerformer(performer_index);
-  for (const auto& [_, task_index] : performer.active_tasks) {
-    engine_.GetTask(task_index).SetActive(false);
+
+  uint32_t task_index = performer.first_active_task_index;
+  while (task_index != UINT32_MAX) {
+    auto& task = engine_.GetTask(task_index);
+    task.is_active = false;
+    task.callback(BarelyTaskEventType_kEnd);
     engine_.task_pool.Release(task_index);
+    task_index = task.next_task_index;
   }
-  for (const auto& [_, task_index] : performer.inactive_tasks) {
+  performer.first_active_task_index = UINT32_MAX;
+
+  task_index = performer.first_inactive_task_index;
+  while (task_index != UINT32_MAX) {
     engine_.task_pool.Release(task_index);
+    task_index = engine_.GetTask(task_index).next_task_index;
   }
+  performer.first_inactive_task_index = UINT32_MAX;
+
   engine_.performer_pool.Release(performer_index);
 }
 
@@ -68,41 +81,22 @@ uint32_t PerformerController::AcquireTask(uint32_t performer_index, double posit
   if (task_index != UINT32_MAX) {
     TaskState& task = engine_.GetTask(task_index);
     task = {{callback, user_data}, position, duration, priority, performer_index};
-    [[maybe_unused]] const bool success =
-        engine_.GetPerformer(performer_index)
-            .inactive_tasks.emplace(TaskKey{position, priority}, task_index)
-            .second;
-    assert(success && "Failed to acquire task");
+    InsertInactiveTask(engine_.GetPerformer(performer_index), task_index);
   }
   return task_index;
 }
 
 void PerformerController::ReleaseTask(uint32_t task_index) noexcept {
   auto& task = engine_.GetTask(task_index);
-  auto& performer = engine_.GetPerformer(task.performer_index);
+  RemoveTask(engine_.GetPerformer(task.performer_index), task_index);
   if (task.is_active) {
-    [[maybe_unused]] const bool success =
-        (performer.active_tasks.erase({{task.GetEndPosition(), task.priority}, task_index}) == 1);
-    assert(success && "Failed to destroy active task");
-    task.SetActive(false);
-  } else {
-    [[maybe_unused]] const bool success =
-        (performer.inactive_tasks.erase({{task.position, task.priority}, task_index}) == 1);
-    assert(success && "Failed to destroy inactive task");
+    task.is_active = false;
+    task.callback(BarelyTaskEventType_kEnd);
   }
-  engine_.task_pool.Release(task_index);
 }
 
-TaskKey PerformerController::GetNextTaskKey(double duration) const noexcept {
-  TaskKey next_key = {duration, INT32_MIN};
-  for (uint32_t i = 0; i < engine_.performer_pool.GetActiveCount(); ++i) {
-    UpdateNextKey(engine_.performer_pool.GetActive(i), next_key);
-  }
-  return next_key;
-}
-
-void PerformerController::UpdateNextKey(const PerformerState& performer,
-                                        TaskKey& next_key) const noexcept {
+void PerformerController::GetNextTaskEvent(const PerformerState& performer, double& duration,
+                                           int32_t& priority) const noexcept {
   if (!performer.is_playing) {
     return;
   }
@@ -110,40 +104,50 @@ void PerformerController::UpdateNextKey(const PerformerState& performer,
   const double loop_end_position = performer.GetLoopEndPosition();
 
   // Check inactive tasks.
-  if (!performer.inactive_tasks.empty()) {
-    const auto next_it = performer.inactive_tasks.lower_bound({{performer.position, INT32_MIN}, 0});
-    // If the performer position is inside an inactive task, we can return immediately.
-    // TODO(#147): This may be optimized further using an interval tree.
-    for (auto it = performer.inactive_tasks.begin(); it != next_it; ++it) {
-      if (engine_.GetTask(it->second).GetEndPosition() > performer.position) {
-        next_key = {0.0, std::min(next_key.second, it->first.second)};
+  uint32_t task_index = performer.first_inactive_task_index;
+  while (task_index != UINT32_MAX) {
+    const auto& task = engine_.GetTask(task_index);
+    if (task.position < performer.position ||
+        (task.position == performer.position && task.priority <= priority)) {
+      // If the performer position is inside an inactive task, we can return immediately.
+      if (task.GetEndPosition() > performer.position) {
+        duration = 0.0;
+        priority = std::min(task.priority, priority);
         return;
+      } else if (performer.is_looping && task.position >= performer.loop_begin_position &&
+                 task.position < loop_end_position) {
+        const double looped_inactive_duration =
+            task.position - performer.position + performer.loop_length;
+        if (looped_inactive_duration < duration ||
+            (looped_inactive_duration == duration && task.priority < priority)) {
+          duration = looped_inactive_duration;
+          priority = task.priority;
+        }
       }
-    }
-    // Loop around if needed.
-    if (performer.is_looping &&
-        (next_it == performer.inactive_tasks.end() || next_it->first.first >= loop_end_position)) {
-      if (const auto loop_it =
-              performer.inactive_tasks.lower_bound({{performer.loop_begin_position, INT32_MIN}, 0});
-          loop_it != performer.inactive_tasks.end() && loop_it->first.first < loop_end_position) {
-        next_key = std::min({loop_it->first.first + performer.loop_length - performer.position,
-                             loop_it->first.second},
-                            next_key);
+    } else {
+      const double inactive_duration = task.position - performer.position;
+      if (inactive_duration < duration ||
+          (inactive_duration == duration && task.priority < priority)) {
+        duration = inactive_duration;
+        priority = task.priority;
       }
-    } else if (next_it != performer.inactive_tasks.end()) {
-      next_key = std::min({next_it->first.first - performer.position, next_it->second}, next_key);
+      break;
     }
+    task_index = task.next_task_index;
   }
 
   // Check active tasks.
-  if (!performer.active_tasks.empty()) {
-    const TaskKey next_active_key =
-        performer.is_looping
-            ? TaskKey{std::min(performer.active_tasks.begin()->first.first, loop_end_position),
-                      performer.active_tasks.begin()->first.second}
-            : performer.active_tasks.begin()->first;
-    next_key =
-        std::min({next_active_key.first - performer.position, next_active_key.second}, next_key);
+  if (performer.first_active_task_index != UINT32_MAX) {
+    const auto& active_task = engine_.GetTask(performer.first_active_task_index);
+    const double end_position = performer.is_looping
+                                    ? std::min(active_task.GetEndPosition(), loop_end_position)
+                                    : active_task.GetEndPosition();
+    const double active_duration = end_position - performer.position;
+    if (active_duration < duration ||
+        (active_duration == duration && active_task.priority < priority)) {
+      duration = active_duration;
+      priority = active_task.priority;
+    }
   }
 }
 

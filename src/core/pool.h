@@ -64,7 +64,7 @@ class Pool {
     return items_[index];
   }
 
-  [[nodiscard]] uint32_t GetIndex(ItemType& item) const noexcept {
+  [[nodiscard]] uint32_t GetIndex(const ItemType& item) const noexcept {
     const uint32_t index = static_cast<uint32_t>(&item - &items_[0]);
     assert(IsActive(index));
     return index;

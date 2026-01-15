@@ -49,28 +49,62 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
   EXPECT_TRUE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
 
+  double duration = 10.0;
+  int32_t max_priority = INT32_MIN;
+
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(1.0, 0));
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
+  EXPECT_DOUBLE_EQ(duration, 1.0);
+  EXPECT_EQ(max_priority, 0);
+
   controller.Update(1.0);
-  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(0.0, 0));
+
+  duration = 10.0;
+  max_priority = INT32_MIN;
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
+  EXPECT_DOUBLE_EQ(duration, 0.0);
+  EXPECT_EQ(max_priority, 0);
+
   EXPECT_DOUBLE_EQ(performer.position, 1.0);
   EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp inside the task, which should be triggered now.
-  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(0.0, 0));
+  duration = 10.0;
+  max_priority = INT32_MIN;
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
+  EXPECT_DOUBLE_EQ(duration, 0.0);
+  EXPECT_EQ(max_priority, 0);
+
   controller.Update(2.5);
-  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(0.5, 0));
+
+  duration = 10.0;
+  max_priority = INT32_MIN;
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
+  EXPECT_DOUBLE_EQ(duration, 0.5);
+  EXPECT_EQ(max_priority, 0);
+
   EXPECT_DOUBLE_EQ(performer.position, 2.5);
   EXPECT_TRUE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kBegin);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Update the timestamp just past the task, which should not be active anymore.
-  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(0.5, 0));
+  duration = 10.0;
+  max_priority = INT32_MIN;
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
+  EXPECT_DOUBLE_EQ(duration, 0.5);
+  EXPECT_EQ(max_priority, 0);
+
   controller.Update(3.0);
-  EXPECT_THAT(controller.performer_controller().GetNextTaskKey(10.0), Pair(10.0, INT32_MIN));
+
+  duration = 10.0;
+  max_priority = INT32_MIN;
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
+  EXPECT_DOUBLE_EQ(duration, 10.0);
+  EXPECT_EQ(max_priority, INT32_MIN);
+
   EXPECT_DOUBLE_EQ(performer.position, 3.0);
   EXPECT_FALSE(task.is_active);
   EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);

@@ -25,6 +25,12 @@ struct TaskState {
   /// Performer index.
   uint32_t performer_index = UINT32_MAX;
 
+  /// Previous task index.
+  uint32_t prev_task_index = UINT32_MAX;
+
+  /// Next task index.
+  uint32_t next_task_index = UINT32_MAX;
+
   /// Denotes whether the task is active or not.
   bool is_active = false;
 
@@ -33,20 +39,23 @@ struct TaskState {
   /// @return End position in beats.
   double GetEndPosition() const noexcept { return position + duration; }
 
+  bool IsActiveBefore(const TaskState& other) const noexcept {
+    const double end_position = GetEndPosition();
+    const double other_end_position = other.GetEndPosition();
+    return end_position < other_end_position ||
+           (end_position == other_end_position && priority < other.priority);
+  }
+
+  bool IsInactiveBefore(const TaskState& other) const noexcept {
+    return position < other.position || (position == other.position && priority < other.priority);
+  }
+
   /// Returns whether a position is inside the task boundaries.
   ///
   /// @param position Position in beats.
   /// @return True if inside, false otherwise.
   bool IsInside(double other_position) const noexcept {
     return other_position >= position && other_position < GetEndPosition();
-  }
-
-  /// Sets whether the task is currently active or not.
-  ///
-  /// @param new_is_active True if active, false otherwise.
-  void SetActive(bool new_is_active) noexcept {
-    is_active = new_is_active;
-    callback(is_active ? BarelyTaskEventType_kBegin : BarelyTaskEventType_kEnd);
   }
 
   /// Sets the event callback.

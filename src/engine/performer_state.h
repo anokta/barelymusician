@@ -5,23 +5,14 @@
 
 #include <cmath>
 #include <cstdint>
-#include <set>
-#include <utility>
 
 #include "core/callback.h"
 #include "engine/task_state.h"
 
 namespace barely {
 
-/// Task key consists of a position and its priority.
-using TaskKey = std::pair<double, int32_t>;
-
 struct PerformerState {
  public:
-  // Set of task position-index pairs.
-  std::set<std::pair<TaskKey, uint32_t>> active_tasks;
-  std::set<std::pair<TaskKey, uint32_t>> inactive_tasks;
-
   // Loop begin position in beats.
   double loop_begin_position = 0.0;
 
@@ -30,6 +21,12 @@ struct PerformerState {
 
   // Position in beats.
   double position = 0.0;
+
+  // First active task index.
+  uint32_t first_active_task_index = UINT32_MAX;
+
+  // First inactive task index.
+  uint32_t first_inactive_task_index = UINT32_MAX;
 
   // Denotes whether performer is looping or not.
   bool is_looping = false;

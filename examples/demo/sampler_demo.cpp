@@ -59,7 +59,7 @@ std::vector<Slice> GetSampleData(const std::string& file_path) {
   assert(success);
 
   const static std::vector<float> samples = sample_file.GetData();
-  return {Slice(kRootPitch, sample_file.GetSampleRate(), samples)};
+  return {Slice(samples, sample_file.GetSampleRate(), kRootPitch)};
 }
 
 // Returns the pitch for a given `key`.

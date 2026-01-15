@@ -18,9 +18,9 @@ TEST(SampleDataTest, Select) {
   constexpr int kSampleRate = 1;
   constexpr std::array<float, 1> kSamples = {1.0f};
   const std::array<BarelySlice, 3> kSlices = {
-      BarelySlice{5.0f, kSampleRate, kSamples.data(), 1},
-      BarelySlice{15.0f, kSampleRate, kSamples.data(), 1},
-      BarelySlice{35.0f, kSampleRate, kSamples.data(), 1},
+      BarelySlice{kSamples.data(), 1, kSampleRate, 5.0f},
+      BarelySlice{kSamples.data(), 1, kSampleRate, 15.0f},
+      BarelySlice{kSamples.data(), 1, kSampleRate, 35.0f},
   };
 
   AudioRng rng;

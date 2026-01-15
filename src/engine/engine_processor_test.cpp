@@ -24,7 +24,7 @@ TEST(EngineProcessorTest, PlaySingleNote) {
   constexpr int kFrameCount = 5;
   constexpr float kPitch = 1.0f;
   constexpr std::array<BarelySlice, 1> kSlices = {
-      BarelySlice{kPitch, kSampleRate, kSamples.data(), kSampleRate},
+      BarelySlice{kSamples.data(), kSampleRate, kSampleRate, kPitch},
   };
 
   auto engine = std::make_unique<EngineState>();
@@ -71,10 +71,10 @@ TEST(EngineProcessorTest, PlaySingleNote) {
 // Tests that an instrument plays multiple notes as expected.
 TEST(EngineProcessorTest, PlayMultipleNotes) {
   constexpr std::array<BarelySlice, kSampleRate> kSlices = {
-      BarelySlice{0.0f, kSampleRate, kSamples.data(), 1},
-      BarelySlice{1.0f, kSampleRate, kSamples.data() + 1, 1},
-      BarelySlice{2.0f, kSampleRate, kSamples.data() + 2, 1},
-      BarelySlice{3.0f, kSampleRate, kSamples.data() + 3, 1},
+      BarelySlice{kSamples.data(), 1, kSampleRate, 0.0f},
+      BarelySlice{kSamples.data() + 1, 1, kSampleRate, 1.0f},
+      BarelySlice{kSamples.data() + 2, 1, kSampleRate, 2.0f},
+      BarelySlice{kSamples.data() + 3, 1, kSampleRate, 3.0f},
   };
 
   auto engine = std::make_unique<EngineState>();

@@ -114,7 +114,7 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
   assert(success);
 
   samples = sample_file.GetData();
-  slices.emplace_back(pitch, sample_file.GetSampleRate(), samples);
+  slices.emplace_back(samples, sample_file.GetSampleRate(), pitch);
 }
 
 // Schedules performer to play an instrument note.

@@ -21,7 +21,7 @@ TEST(SampleGeneratorsTest, GenerateOscSample) {
 TEST(SampleGeneratorsTest, GenerateSliceSample) {
   static constexpr int kDataLength = 5;
   static constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
-  static constexpr Slice kSlice = Slice(0.0f, 1, kData);
+  static constexpr Slice kSlice = Slice(kData, 1, 0.0f);
 
   for (int i = 0; i < kDataLength; ++i) {
     EXPECT_FLOAT_EQ(GenerateSliceSample(kSlice, static_cast<float>(i)), kData[i]);

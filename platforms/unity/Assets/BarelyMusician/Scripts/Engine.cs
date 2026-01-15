@@ -580,12 +580,12 @@ namespace Barely {
           for (int i = 0; i < slices.Length; ++i) {
             instrumentSlices[i].Sample.LoadAudioData();
             slices[i] = new Slice() {
-              rootPitch = instrumentSlices[i].RootPitch / 12.0f,
-              sampleRate =
-                  (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.frequency : 0,
               samples = instrumentSlices[i].Data,
               sampleCount =
                   (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.samples : 0,
+              sampleRate =
+                  (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.frequency : 0,
+              rootPitch = instrumentSlices[i].RootPitch / 12.0f,
             };
           }
         }
@@ -952,17 +952,17 @@ namespace Barely {
       // Slice of sample data.
       [StructLayout(LayoutKind.Sequential)]
       private struct Slice {
-        // Root note pitch.
-        public float rootPitch;
-
-        // Sampling rate in hertz.
-        public Int32 sampleRate;
-
         // Array of mono samples.
         public float[] samples;
 
         // Number of mono samples.
         public Int32 sampleCount;
+
+        // Sampling rate in hertz.
+        public Int32 sampleRate;
+
+        // Root note pitch.
+        public float rootPitch;
       }
 
       [StructLayout(LayoutKind.Sequential)]

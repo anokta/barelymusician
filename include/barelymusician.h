@@ -435,17 +435,17 @@ typedef struct BarelyNoteControlOverride {
 
 /// Slice of sample data.
 typedef struct BarelySlice {
-  /// Root note pitch.
-  float root_pitch;
-
-  /// Sampling rate in hertz.
-  int32_t sample_rate;
-
   /// Array of mono samples.
   const float* samples;
 
   /// Number of mono samples.
   int32_t sample_count;
+
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
+
+  /// Root note pitch.
+  float root_pitch;
 } BarelySlice;
 
 /// A musical quantization.
@@ -1144,12 +1144,12 @@ struct NoteControlOverride : public BarelyNoteControlOverride {
 struct Slice : public BarelySlice {
   /// Constructs a new `Slice`.
   ///
-  /// @param root_pitch Root pitch.
-  /// @param sample_rate Sampling rate in hertz.
   /// @param samples Span of mono samples.
-  explicit constexpr Slice(float root_pitch, int sample_rate,
-                           std::span<const float> samples) noexcept
-      : Slice({root_pitch, sample_rate, samples.data(), static_cast<int32_t>(samples.size())}) {
+  /// @param sample_rate Sampling rate in hertz.
+  /// @param root_pitch Root pitch.
+  explicit constexpr Slice(std::span<const float> samples, int sample_rate,
+                           float root_pitch) noexcept
+      : Slice({samples.data(), static_cast<int32_t>(samples.size()), sample_rate, root_pitch}) {
     assert(sample_rate >= 0);
   }
 

@@ -327,10 +327,10 @@ class Processor extends AudioWorkletProcessor {
       samplePtrs.push(samplesPtr);
 
       const offset = slicesPtr + i * sliceStructSize;
-      this._module.HEAPF32[offset / 4] = slices[i].root_pitch;
-      this._module.HEAP32[offset / 4 + 1] = slices[i].sample_rate;
-      this._module.HEAP32[offset / 4 + 2] = samplesPtr;
-      this._module.HEAP32[offset / 4 + 3] = sampleCount;
+      this._module.HEAP32[offset / 4] = samplesPtr;
+      this._module.HEAP32[offset / 4 + 1] = sampleCount;
+      this._module.HEAP32[offset / 4 + 2] = slices[i].sample_rate;
+      this._module.HEAP32[offset / 4 + 3] = slices[i].root_pitch;
     }
 
     this._instruments[id].setSampleData(slicesPtr, sliceCount);

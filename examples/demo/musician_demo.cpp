@@ -117,6 +117,20 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
   slices.emplace_back(samples, sample_file.GetSampleRate(), pitch);
 }
 
+// Builds percussion sample data from a given `percussion_map`.
+std::pair<std::vector<Slice>, std::vector<std::vector<float>>> BuildPercussionSampleData(
+    const std::vector<std::pair<float, std::string>>& percussion_map, char* argv[]) {
+  std::pair<std::vector<Slice>, std::vector<std::vector<float>>> res;
+  res.first.reserve(percussion_map.size());
+  res.second.reserve(percussion_map.size());
+  for (const auto& [pitch, file_path] : percussion_map) {
+    res.second.emplace_back();
+    InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), res.second.back(),
+                  res.first);
+  }
+  return res;
+}
+
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, float pitch, float gain, Engine& engine,
                   Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
@@ -292,32 +306,31 @@ int main(int /*argc*/, char* argv[]) {
                           line_2_beat_composer_callback, instruments.size() - 1);
 
   // Add percussion instrument.
+  const auto default_percussion_sample_data = BuildPercussionSampleData(
+      {
+          {kPitchKick, "basic_kick.wav"},
+          {kPitchSnare, "basic_snare.wav"},
+          {kPitchHihatClosed, "basic_hihat_closed.wav"},
+          {kPitchHihatOpen, "basic_hihat_open.wav"},
+      },
+      argv);
+  const auto hihat_only_percussion_sample_data = BuildPercussionSampleData(
+      {
+          {kPitchKick, "basic_hihat_closed.wav"},
+          {kPitchSnare, "basic_hihat_open.wav"},
+          {kPitchHihatClosed, "basic_hihat_closed.wav"},
+          {kPitchHihatOpen, "basic_hihat_open.wav"},
+      },
+      argv);
+
   instruments.emplace_back(engine.CreateInstrument());
   auto& percussion = instruments.back();
   percussion.SetControl(InstrumentControlType::kGain, 0.125f);
   percussion.SetControl(InstrumentControlType::kAttack, 0.0f);
   percussion.SetControl(InstrumentControlType::kRetrigger, true);
   percussion.SetControl(InstrumentControlType::kSliceMode, SliceMode::kOnce);
+  percussion.SetSampleData(default_percussion_sample_data.first);
   set_note_event_callback_fn(instruments.size(), percussion);
-  const auto set_percussion_pad_map_fn =
-      [&](const std::vector<std::pair<float, std::string>>& percussion_map) {
-        std::vector<Slice> slices;
-        std::vector<std::vector<float>> samples;
-        slices.reserve(percussion_map.size());
-        samples.reserve(percussion_map.size());
-        for (const auto& [pitch, file_path] : percussion_map) {
-          samples.emplace_back();
-          InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), samples.back(),
-                        slices);
-        }
-        percussion.SetSampleData(slices);
-      };
-  set_percussion_pad_map_fn({
-      {kPitchKick, "basic_kick.wav"},
-      {kPitchSnare, "basic_snare.wav"},
-      {kPitchHihatClosed, "basic_hihat_closed.wav"},
-      {kPitchHihatOpen, "basic_hihat_open.wav"},
-  });
   const auto percussion_beat_composer_callback =
       [&](int bar, int beat, int beat_count, int /*harmonic*/, Instrument& instrument,
           Performer& performer, std::vector<Task>& tasks) {
@@ -411,20 +424,10 @@ int main(int /*argc*/, char* argv[]) {
         ConsoleLog() << "Tempo reset to " << kTempo;
         break;
       case 'D':
-        set_percussion_pad_map_fn({
-            {kPitchKick, "basic_kick.wav"},
-            {kPitchSnare, "basic_snare.wav"},
-            {kPitchHihatClosed, "basic_hihat_closed.wav"},
-            {kPitchHihatOpen, "basic_hihat_open.wav"},
-        });
+        percussion.SetSampleData(default_percussion_sample_data.first);
         break;
       case 'H':
-        set_percussion_pad_map_fn({
-            {kPitchKick, "basic_hihat_closed.wav"},
-            {kPitchSnare, "basic_hihat_open.wav"},
-            {kPitchHihatClosed, "basic_hihat_closed.wav"},
-            {kPitchHihatOpen, "basic_hihat_open.wav"},
-        });
+        percussion.SetSampleData(hihat_only_percussion_sample_data.first);
         break;
       case 'Q':
         scale.mode = (scale.mode - 1 + scale.GetPitchCount()) % scale.GetPitchCount();

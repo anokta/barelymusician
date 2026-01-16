@@ -13,9 +13,7 @@ namespace barely {
 SampleData::SampleData(std::span<const BarelySlice> slices) noexcept {
   slices_.reserve(slices.size());
   for (int i = 0; i < static_cast<int>(slices.size()); ++i) {
-    slices_.emplace_back(slices[i], std::vector<float>(slices[i].samples,
-                                                       slices[i].samples + slices[i].sample_count));
-    slices_[i].first.samples = slices_[i].second.data();
+    slices_.emplace_back(slices[i]);
   }
 }
 
@@ -25,21 +23,20 @@ const Slice* SampleData::Select(float pitch, AudioRng& rng) const noexcept {
   }
   const int slice_count = static_cast<int>(slices_.size());
   // TODO(#139): `std::upper_bound` turned out to be slow here, but this may be optimized further.
-  float current_pitch = slices_.front().first.root_pitch;
+  float current_pitch = slices_.front().root_pitch;
   int current_start_index = 0;
   for (int i = 0; i < slice_count; ++i) {
-    const auto* current = &slices_[i].first;
+    const auto* current = &slices_[i];
     if (current_pitch != current->root_pitch) {
       if (pitch <= current->root_pitch) {
         if (pitch - current_pitch > current->root_pitch - pitch) {
           current_start_index = i;
-          while (i < slice_count && slices_[i].first.root_pitch == current->root_pitch) {
+          while (i < slice_count && slices_[i].root_pitch == current->root_pitch) {
             ++i;
           }
         }
         return &slices_[(current_start_index + 1 == i) ? current_start_index
-                                                       : rng.Generate(current_start_index, i)]
-                    .first;
+                                                       : rng.Generate(current_start_index, i)];
       }
       current_pitch = current->root_pitch;
       current_start_index = i;
@@ -47,8 +44,7 @@ const Slice* SampleData::Select(float pitch, AudioRng& rng) const noexcept {
   }
   return &slices_[(current_start_index + 1 == slice_count)
                       ? current_start_index
-                      : rng.Generate(current_start_index, slice_count)]
-              .first;
+                      : rng.Generate(current_start_index, slice_count)];
 }
 
 }  // namespace barely

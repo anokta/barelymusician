@@ -90,7 +90,8 @@ int main(int /*argc*/, char* argv[]) {
       {InstrumentControlType::kVoiceCount, kVoiceCount},
   }});
 
-  instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
+  const auto sample_data = GetSampleData(GetDataFilePath(kSamplePath, argv));
+  instrument.SetSampleData(sample_data);
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
     ConsoleLog() << "Note" << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
   });

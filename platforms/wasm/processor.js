@@ -34,6 +34,9 @@ class Processor extends AudioWorkletProcessor {
 
     this._outputSamplesPtr = null;
 
+    this._slices = {};
+    this._slicesToRemove = [];
+
     Module().then(module => {
       this._module = module;
       this._engine = new this._module.Engine(sampleRate);
@@ -115,10 +118,20 @@ class Processor extends AudioWorkletProcessor {
         } break;
         case 'instrument-destroy': {
           if (this._instruments[event.data.id]) {
-            this._engine.destroyInstrument(this._instruments[event.data.id]);
-            this._instruments[event.data.id].delete();
-            delete this._instruments[event.data.id];
-            this.port.postMessage({type: 'instrument-destroy-success', id: event.data.id});
+            const id = event.data.id;
+            this._engine.destroyInstrument(this._instruments[id]);
+            this._instruments[id].delete();
+            delete this._instruments[id];
+
+            if (this._slices[id]) {
+              this._slicesToRemove.push({
+                ...this._slices[id],
+                timestamp: this._engine.timestamp,
+              });
+              delete this._slices[id];
+            }
+
+            this.port.postMessage({type: 'instrument-destroy-success', id: id});
           }
         } break;
         case 'instrument-get-control': {
@@ -295,6 +308,7 @@ class Processor extends AudioWorkletProcessor {
         new Float32Array(this._module.HEAPF32.buffer, this._outputSamplesPtr, outputSampleCount);
 
     this._engine.process(this._outputSamplesPtr, outputChannelCount, outputFrameCount, currentTime);
+    this._cleanUpInstrumentSampleData(currentTime);
 
     for (let frame = 0; frame < outputFrameCount; ++frame) {
       for (let channel = 0; channel < outputChannelCount; ++channel) {
@@ -311,6 +325,13 @@ class Processor extends AudioWorkletProcessor {
    */
   _setInstrumentSampleData(id, slices) {
     if (!this._instruments[id]) return;
+
+    if (this._slices[id]) {
+      this._slicesToRemove.push({
+        ...this._slices[id],
+        timestamp: this._engine.timestamp,
+      });
+    }
 
     const sliceCount = slices.length;
     const sliceStructSize = 24;  // sizeof(BarelySlice)
@@ -335,10 +356,33 @@ class Processor extends AudioWorkletProcessor {
 
     this._instruments[id].setSampleData(slicesPtr, sliceCount);
 
-    for (const ptr of samplePtrs) {
-      this._module._free(ptr);
+    this._slices[id] = {
+      slicesPtr: slicesPtr,
+      samplePtrs: samplePtrs,
+    };
+  }
+
+  /**
+   * Cleans up instrument sample data.
+   * @private
+   */
+  _cleanUpInstrumentSampleData(timestamp) {
+    let keepIndex = 0;
+    for (let i = 0; i < this._slicesToRemove.length; ++i) {
+      const slice = this._slicesToRemove[i];
+      if (timestamp > slice.timestamp) {
+        for (const ptr of slice.samplePtrs) {
+          this._module._free(ptr);
+        }
+        this._module._free(slice.slicesPtr);
+        keepIndex = i + 1;
+      } else {
+        break;  // timestamps are guaranteed to be sorted.
+      }
     }
-    this._module._free(slicesPtr);
+    if (keepIndex > 0) {
+      this._slicesToRemove = this._slicesToRemove.slice(keepIndex);
+    }
   }
 }
 

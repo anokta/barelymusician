@@ -455,6 +455,10 @@ namespace Barely {
           Debug.LogError("Failed to destroy instrument");
         }
         _instruments.Remove(instrumentId);
+        if (_instrumentSlices.TryGetValue(instrumentId, out List<float[]> slices)) {
+          _instrumentSlicesToRemove.Enqueue((slices, Timestamp));
+          _instrumentSlices.Remove(instrumentId);
+        }
         instrumentId = 0;
       }
 
@@ -574,7 +578,11 @@ namespace Barely {
       /// @param instrumentSlices List of instrument slices.
       public static void Instrument_SetSampleData(UInt32 instrumentId,
                                                   List<Instrument.Slice> instrumentSlices) {
+        if (_instrumentSlices.TryGetValue(instrumentId, out List<float[]> existingSlices)) {
+          _instrumentSlicesToRemove.Enqueue((existingSlices, Timestamp));
+        }
         Slice[] slices = null;
+        _instrumentSlices[instrumentId] = new List<float[]>();
         if (instrumentSlices.Count > 0) {
           slices = new Slice[instrumentSlices.Count];
           for (int i = 0; i < slices.Length; ++i) {
@@ -587,6 +595,7 @@ namespace Barely {
                   (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.frequency : 0,
               rootPitch = instrumentSlices[i].RootPitch / 12.0f,
             };
+            _instrumentSlices[instrumentId].Add(slices[i].samples);
           }
         }
         if (!BarelyInstrument_SetSampleData(Handle, instrumentId, slices, instrumentSlices.Count) &&
@@ -1011,6 +1020,12 @@ namespace Barely {
       // Map of instruments by their handles.
       private static Dictionary<UInt32, Instrument> _instruments = null;
 
+      // Map of instrument slices by their handles.
+      private static Dictionary<UInt32, List<float[]>> _instrumentSlices = null;
+
+      // List of instrument slices to remove.
+      private static Queue<(List<float[]>, double)> _instrumentSlicesToRemove = null;
+
       // Array of instrument control overrides.
       private static InstrumentControlOverride[] _instrumentControlOverrides = null;
 
@@ -1105,6 +1120,7 @@ namespace Barely {
 
         private void LateUpdate() {
           BarelyEngine_Update(_handle, GetNextTimestamp());
+          CleanUpInstrumentSampleData(AudioSettings.dspTime);
         }
 
         // Initializes the internal state.
@@ -1138,6 +1154,8 @@ namespace Barely {
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_RATIO, _sidechainRatio);
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<UInt32, Instrument>();
+          _instrumentSlices = new Dictionary<UInt32, List<float[]>>();
+          _instrumentSlicesToRemove = new Queue<(List<float[]>, double)>();
           _instrumentControlOverrides =
               new InstrumentControlOverride[Enum.GetNames(typeof(InstrumentControlType)).Length];
           for (int i = 0; i < _instrumentControlOverrides.Length; ++i) {
@@ -1158,6 +1176,18 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyEngine_Destroy(_handle);
           _handle = IntPtr.Zero;
+        }
+
+        // Cleans up instrument sample data.
+        private void CleanUpInstrumentSampleData(double dspTime) {
+          while (_instrumentSlicesToRemove.Count > 0) {
+            var (slice, timestamp) = _instrumentSlicesToRemove.Peek();
+            if (dspTime > timestamp) {
+              _instrumentSlicesToRemove.Dequeue();
+            } else {
+              break;
+            }
+          }
         }
 
         // Returns the next timestamp to update.

@@ -4,7 +4,6 @@
 #include <barelymusician.h>
 
 #include <span>
-#include <utility>
 #include <vector>
 
 #include "core/rng.h"
@@ -38,7 +37,7 @@ class SampleData {
 
  private:
   // Array of slices.
-  std::vector<std::pair<Slice, std::vector<float>>> slices_;
+  std::vector<Slice> slices_;
 };
 
 }  // namespace barely

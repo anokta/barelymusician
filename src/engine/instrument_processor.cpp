@@ -160,6 +160,7 @@ void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlT
 
 void InstrumentProcessor::SetNoteOff(uint32_t note_index) noexcept {
   const uint32_t voice_index = engine_.note_to_voice[note_index];
+  engine_.note_to_voice[note_index] = UINT32_MAX;
   if (!engine_.voice_pool.IsActive(voice_index)) {
     return;
   }
@@ -168,6 +169,7 @@ void InstrumentProcessor::SetNoteOff(uint32_t note_index) noexcept {
       instrument_params.sample_data.empty() || instrument_params.slice_mode != SliceMode::kOnce) {
     voice.envelope.Stop();
   }
+  voice.note_index = UINT32_MAX;
 }
 
 void InstrumentProcessor::SetNoteOn(
@@ -178,6 +180,7 @@ void InstrumentProcessor::SetNoteOn(
     engine_.note_to_voice[note_index] = voice_index;
     auto& voice = engine_.GetVoice(voice_index);
     voice.instrument_index = instrument_index;
+    voice.note_index = note_index;
     voice.Start(params, params.sample_data.Select(pitch, engine_.audio_rng), pitch, note_controls);
   }
 }

@@ -58,6 +58,9 @@ class InstrumentProcessor {
             }
           }
           voice.next_voice_index = UINT32_MAX;
+          if (voice.note_index != UINT32_MAX) {
+            engine_.note_to_voice[voice.note_index] = UINT32_MAX;
+          }
           engine_.voice_pool.Release(engine_.voice_pool.GetIndex(voice));
           continue;
         }

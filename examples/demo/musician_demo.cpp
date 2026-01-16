@@ -224,7 +224,7 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetTempo(kTempo);
 
   // Note event callback.
-  const auto set_note_Event_callback_fn = [&](size_t index, Instrument& instrument) {
+  const auto set_note_event_callback_fn = [&](size_t index, Instrument& instrument) {
     instrument.SetNoteEventCallback([index](NoteEventType type, float pitch) {
       ConsoleLog() << "Instrument #" << index << ": Note"
                    << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
@@ -249,7 +249,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     instrument.SetControl(InstrumentControlType::kAttack, attack);
     instrument.SetControl(InstrumentControlType::kRelease, release);
-    set_note_Event_callback_fn(instruments.size(), instrument);
+    set_note_event_callback_fn(instruments.size(), instrument);
   };
 
   Scale scale = {kDiatonicPitches, kRootPitch};
@@ -298,7 +298,7 @@ int main(int /*argc*/, char* argv[]) {
   percussion.SetControl(InstrumentControlType::kAttack, 0.0f);
   percussion.SetControl(InstrumentControlType::kRetrigger, true);
   percussion.SetControl(InstrumentControlType::kSliceMode, SliceMode::kOnce);
-  set_note_Event_callback_fn(instruments.size(), percussion);
+  set_note_event_callback_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::vector<std::pair<float, std::string>>& percussion_map) {
         std::vector<Slice> slices;

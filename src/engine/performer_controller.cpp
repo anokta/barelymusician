@@ -58,15 +58,17 @@ void PerformerController::Release(uint32_t performer_index) noexcept {
     auto& task = engine_.GetTask(task_index);
     task.is_active = false;
     task.callback(BarelyTaskEventType_kEnd);
+    const uint32_t next_task_index = task.next_task_index;
     engine_.task_pool.Release(task_index);
-    task_index = task.next_task_index;
+    task_index = next_task_index;
   }
   performer.first_active_task_index = UINT32_MAX;
 
   task_index = performer.first_inactive_task_index;
   while (task_index != UINT32_MAX) {
+    const uint32_t next_task_index = engine_.GetTask(task_index).next_task_index;
     engine_.task_pool.Release(task_index);
-    task_index = engine_.GetTask(task_index).next_task_index;
+    task_index = next_task_index;
   }
   performer.first_inactive_task_index = UINT32_MAX;
 
@@ -93,6 +95,7 @@ void PerformerController::ReleaseTask(uint32_t task_index) noexcept {
     task.is_active = false;
     task.callback(BarelyTaskEventType_kEnd);
   }
+  engine_.task_pool.Release(task_index);
 }
 
 void PerformerController::GetNextTaskEvent(const PerformerState& performer, double& duration,

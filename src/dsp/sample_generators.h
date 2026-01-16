@@ -1,10 +1,9 @@
 #ifndef BARELYMUSICIAN_DSP_SAMPLE_GENERATORS_H_
 #define BARELYMUSICIAN_DSP_SAMPLE_GENERATORS_H_
 
-#include <barelymusician.h>
-
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <numbers>
 
 namespace barely {
@@ -69,15 +68,17 @@ namespace barely {
 
 /// Generates a slice sample.
 //
-/// @param slice Pointer to slice.
-/// @param slice_offset Slice offset.
+/// @param samples Array of slice samples.
+/// @param sample_cuount Number of slice samples.
+/// @param offset Slice offset.
 /// @return Sample.
-[[nodiscard]] inline float GenerateSliceSample(const Slice& slice, float slice_offset) noexcept {
-  const int index = static_cast<int>(slice_offset);
-  return (index < slice.sample_count)
-             ? std::lerp(slice.samples[index], slice.samples[(index + 1) % slice.sample_count],
-                         slice_offset - static_cast<float>(index))
-             : 0.0f;
+[[nodiscard]] inline float GenerateSliceSample(const float* samples, int32_t sample_count,
+                                               float offset) noexcept {
+  assert((samples != nullptr || sample_count == 0) && "GenerateSliceSample");
+  const int32_t index = static_cast<int32_t>(offset);
+  return (index < sample_count) ? std::lerp(samples[index], samples[(index + 1) % sample_count],
+                                            offset - static_cast<float>(index))
+                                : 0.0f;
 }
 
 }  // namespace barely

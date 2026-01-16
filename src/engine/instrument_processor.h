@@ -109,7 +109,9 @@ class InstrumentProcessor {
 
     const bool has_slice = (voice.slice != nullptr);
     const float slice_sample =
-        has_slice ? GenerateSliceSample(*voice.slice, voice.slice_offset) : 0.0f;
+        has_slice ? GenerateSliceSample(voice.slice->samples, voice.slice->sample_count,
+                                        voice.slice_offset)
+                  : 0.0f;
     const float slice_output = (1.0f - voice.params.osc_mix) * slice_sample;
 
     float output = voice.envelope.Next();

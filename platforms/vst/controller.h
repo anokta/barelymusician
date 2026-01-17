@@ -11,22 +11,16 @@ namespace barely::vst {
 
 class Controller : public Steinberg::Vst::EditController {
  public:
-  /// Creates a `Controller` instance for the VST3 factory.
   static Steinberg::FUnknown* Create(void* context);
 
-  /// Returns the span of default control values.
   static std::span<InstrumentControlOverride> GetDefaultControls() noexcept;
-
-  /// Converts a normalized parameter value to a plain control value.
   static float ToPlainControlValue(InstrumentControlType type, double normalized_value) noexcept;
 
-  /// Identifier.
   static const Steinberg::FUID kId;
 
-  /// Constructs a new `Controller`.
   Controller() noexcept = default;
 
-  /// Implements `Steinberg::Vst::EditController`.
+  // Implements `Steinberg::Vst::EditController`.
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) SMTG_OVERRIDE;
   Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream* state);
   Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID tag,

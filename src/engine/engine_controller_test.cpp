@@ -7,13 +7,10 @@
 #include <memory>
 
 #include "engine/engine_state.h"
-#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
-
-using ::testing::Pair;
 
 // Tests that a single performer is acquired and released as expected.
 TEST(EngineControllerTest, AcquireReleasePerformer) {

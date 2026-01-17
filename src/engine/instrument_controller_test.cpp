@@ -3,6 +3,7 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstdint>
 #include <memory>
 #include <utility>
 

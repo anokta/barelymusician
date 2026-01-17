@@ -12,13 +12,10 @@ namespace barely::vst {
 
 class Processor : public Steinberg::Vst::AudioEffect {
  public:
-  /// Creates a `Processor` instance for the VST3 factory.
   static Steinberg::FUnknown* Create(void* context);
 
-  /// Identifier.
   static const Steinberg::FUID kId;
 
-  /// Constructs a new `Processor`.
   Processor() noexcept;
 
   // Implements `Steinberg::Vst::AudioEffect`.

@@ -2,8 +2,8 @@
 
 #include <barelymusician.h>
 
+#include <atomic>
 #include <cstdint>
-#include <memory>
 
 namespace barely {
 

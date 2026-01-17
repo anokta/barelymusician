@@ -26,7 +26,6 @@ class AudioOutput {
   /// @param frame_count Number of frames.
   AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept;
 
-  /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;
 
   /// Non-copyable and non-movable.

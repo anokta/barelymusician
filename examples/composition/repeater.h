@@ -22,13 +22,7 @@ enum class RepeaterMode {
 /// Class that plays a repeating sequence of instrument notes.
 struct Repeater {
  public:
-  // Constructs a new `Repeater`.
-  ///
-  /// @param engine Engine.
-  /// @param instrument Instrument.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
   Repeater(Engine& engine, Instrument instrument) noexcept;
-
   ~Repeater() noexcept { engine_.DestroyPerformer(performer_); }
 
   /// Clears all notes.

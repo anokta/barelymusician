@@ -5,10 +5,8 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cmath>
 #include <cstdint>
 #include <limits>
-#include <utility>
 
 #include "core/control.h"
 #include "core/rng.h"
@@ -184,7 +182,8 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
     auto& note = engine_.note_pool.Get(note_index);
     if (note.pitch == pitch) {  // note already exists.
       return;
-    } else if (note.next_note_index == instrument.first_note_index || pitch < note.pitch) {
+    }
+    if (note.next_note_index == instrument.first_note_index || pitch < note.pitch) {
       break;
     }
     note_index = note.next_note_index;
@@ -301,8 +300,9 @@ void InstrumentController::ProcessArp() noexcept {
           break;
         case BarelyArpMode_kRandom: {
           uint32_t note_index = instrument.arp.note_index;
-          for (int n = 0; n < engine_.main_rng.Generate(0, static_cast<int>(instrument.note_count));
-               ++n) {
+          const uint32_t random_count =
+              engine_.main_rng.Generate(0, static_cast<int>(instrument.note_count));
+          for (uint32_t n = 0; n < random_count; ++n) {
             note_index = engine_.note_pool.Get(note_index).next_note_index;
           }
           instrument.arp.note_index = note_index;

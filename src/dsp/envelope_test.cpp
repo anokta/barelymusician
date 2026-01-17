@@ -51,7 +51,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   float expected_sample = 0.0f;
 
   envelope.Start(adsr);
-  for (int i = 0; i < kSustainSampleCount + kSampleRate; ++i) {
+  for (int i = 0; i < kSustainSampleCount + static_cast<int>(kSampleRate); ++i) {
     if (i < kAttackSampleCount) {
       // Attack.
       expected_sample = static_cast<float>(i) / static_cast<float>(kAttackSampleCount);
@@ -67,7 +67,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   }
 
   envelope.Stop();
-  for (int i = 0; i < kReleaseSampleCount + kSampleRate; ++i) {
+  for (int i = 0; i < kReleaseSampleCount + static_cast<int>(kSampleRate); ++i) {
     if (i < kReleaseSampleCount) {
       // Release.
       expected_sample =

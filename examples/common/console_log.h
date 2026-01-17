@@ -10,10 +10,7 @@ namespace barely::examples {
 /// Simple helper class that logs to the console output with a newline.
 class ConsoleLog {
  public:
-  /// Default constructor.
   ConsoleLog() = default;
-
-  /// Destroys `ConsoleLog`.
   ~ConsoleLog() noexcept { std::cout << stream_.str() << std::endl; }
 
   /// Non-copyable and non-movable.

@@ -188,7 +188,7 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
   if (params.should_retrigger) {
     uint32_t current_voice_index = params.first_voice_index;
     while (current_voice_index != UINT32_MAX) {
-      VoiceState& voice = engine_.GetVoice(current_voice_index);
+      auto& voice = engine_.GetVoice(current_voice_index);
       if (voice.pitch == pitch) {
         const uint32_t retrigger_voice_index = current_voice_index;
         current_voice_index = params.first_voice_index;
@@ -207,7 +207,7 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
   uint32_t oldest_active_voice_index = UINT32_MAX;
   uint32_t active_voice_count = 0;
   while (current_voice_index != UINT32_MAX) {
-    VoiceState& voice = engine_.GetVoice(current_voice_index);
+    auto& voice = engine_.GetVoice(current_voice_index);
     if (oldest_active_voice_index == UINT32_MAX ||
         voice.timestamp > engine_.GetVoice(oldest_active_voice_index).timestamp) {
       oldest_active_voice_index = current_voice_index;

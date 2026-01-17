@@ -15,8 +15,8 @@ namespace {
 static_assert(BARELY_ID_INDEX_BIT_COUNT > 0 && BARELY_ID_INDEX_BIT_COUNT < 32);
 static_assert(BARELY_MAX_FRAME_COUNT > 0);
 
-static constexpr uint32_t kMaxIdIndex = ((1 << BARELY_ID_INDEX_BIT_COUNT) - 1);
-static constexpr uint32_t kMaxIdGeneration = ((1 << (32 - BARELY_ID_INDEX_BIT_COUNT)) - 1);
+constexpr uint32_t kMaxIdIndex = ((1 << BARELY_ID_INDEX_BIT_COUNT) - 1);
+constexpr uint32_t kMaxIdGeneration = ((1 << (32 - BARELY_ID_INDEX_BIT_COUNT)) - 1);
 
 static_assert(BARELY_MAX_INSTRUMENT_COUNT > 0 && BARELY_MAX_INSTRUMENT_COUNT <= kMaxIdIndex);
 static_assert(BARELY_MAX_PERFORMER_COUNT > 0 && BARELY_MAX_PERFORMER_COUNT <= kMaxIdIndex);

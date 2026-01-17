@@ -1,7 +1,5 @@
 #include "dsp/sample_generators.h"
 
-#include <barelymusician.h>
-
 #include <cstdint>
 
 #include "gtest/gtest.h"

@@ -31,10 +31,7 @@ class InputManager {
   /// @param key Keyboard key.
   using KeyUpCallback = std::function<void(const Key& key)>;
 
-  /// Constructs new `InputManager`.
   InputManager();
-
-  /// Destructs `InputManager`.
   ~InputManager() noexcept;
 
   /// Sets keyboard key down callback.

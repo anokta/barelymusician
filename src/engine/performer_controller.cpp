@@ -13,7 +13,7 @@ namespace barely {
 
 void PerformerController::ProcessAllTasksAtPosition(int32_t max_priority) noexcept {
   for (uint32_t i = 0; i < engine_.performer_pool.GetActiveCount(); ++i) {
-    PerformerState& performer = engine_.performer_pool.GetActive(i);
+    auto& performer = engine_.performer_pool.GetActive(i);
     if (!performer.is_playing) {
       continue;
     }
@@ -33,7 +33,7 @@ void PerformerController::ProcessAllTasksAtPosition(int32_t max_priority) noexce
 void PerformerController::Update(double duration) noexcept {
   assert(duration > 0.0);
   for (uint32_t i = 0; i < engine_.performer_pool.GetActiveCount(); ++i) {
-    PerformerState& performer = engine_.performer_pool.GetActive(i);
+    auto& performer = engine_.performer_pool.GetActive(i);
     if (!performer.is_playing) {
       continue;
     }
@@ -44,7 +44,7 @@ void PerformerController::Update(double duration) noexcept {
 uint32_t PerformerController::Acquire() noexcept {
   const uint32_t performer_index = engine_.performer_pool.Acquire();
   if (performer_index != UINT32_MAX) {
-    PerformerState& performer = engine_.GetPerformer(performer_index);
+    auto& performer = engine_.GetPerformer(performer_index);
     performer = {};
   }
   return performer_index;
@@ -98,6 +98,117 @@ void PerformerController::ReleaseTask(uint32_t task_index) noexcept {
   engine_.task_pool.Release(task_index);
 }
 
+void PerformerController::InsertActiveTask(PerformerState& performer,
+                                           uint32_t task_index) noexcept {
+  auto& task = engine_.GetTask(task_index);
+  if (performer.first_active_task_index == UINT32_MAX) {
+    performer.first_active_task_index = task_index;
+    task.prev_task_index = UINT32_MAX;
+    task.next_task_index = UINT32_MAX;
+  } else if (auto& first_active_task = engine_.GetTask(performer.first_active_task_index);
+             task.IsActiveBefore(first_active_task)) {
+    first_active_task.prev_task_index = task_index;
+    task.next_task_index = performer.first_active_task_index;
+    performer.first_active_task_index = task_index;
+  } else {
+    uint32_t active_task_index = performer.first_active_task_index;
+    while (active_task_index != UINT32_MAX) {
+      const auto& active_task = engine_.GetTask(active_task_index);
+      if (active_task.next_task_index == UINT32_MAX ||
+          task.IsActiveBefore(engine_.GetTask(active_task.next_task_index))) {
+        break;
+      }
+      active_task_index = active_task.next_task_index;
+    }
+    auto& active_task = engine_.GetTask(active_task_index);
+    if (active_task.next_task_index != UINT32_MAX) {
+      engine_.GetTask(active_task.next_task_index).prev_task_index = task_index;
+    }
+    task.next_task_index = active_task.next_task_index;
+    active_task.next_task_index = task_index;
+    task.prev_task_index = active_task_index;
+  }
+}
+
+void PerformerController::InsertInactiveTask(PerformerState& performer,
+                                             uint32_t task_index) noexcept {
+  auto& task = engine_.GetTask(task_index);
+  if (performer.first_inactive_task_index == UINT32_MAX) {
+    performer.first_inactive_task_index = task_index;
+    task.prev_task_index = UINT32_MAX;
+    task.next_task_index = UINT32_MAX;
+  } else if (auto& first_inactive_task = engine_.GetTask(performer.first_inactive_task_index);
+             task.IsInactiveBefore(first_inactive_task)) {
+    first_inactive_task.prev_task_index = task_index;
+    task.next_task_index = performer.first_inactive_task_index;
+    performer.first_inactive_task_index = task_index;
+  } else {
+    uint32_t inactive_task_index = performer.first_inactive_task_index;
+    while (inactive_task_index != UINT32_MAX) {
+      const auto& inactive_task = engine_.GetTask(inactive_task_index);
+      if (inactive_task.next_task_index == UINT32_MAX ||
+          task.IsInactiveBefore(engine_.GetTask(inactive_task.next_task_index))) {
+        break;
+      }
+      inactive_task_index = inactive_task.next_task_index;
+    }
+    auto& inactive_task = engine_.GetTask(inactive_task_index);
+    if (inactive_task.next_task_index != UINT32_MAX) {
+      engine_.GetTask(inactive_task.next_task_index).prev_task_index = task_index;
+    }
+    task.next_task_index = inactive_task.next_task_index;
+    inactive_task.next_task_index = task_index;
+    task.prev_task_index = inactive_task_index;
+  }
+}
+
+void PerformerController::RemoveTask(PerformerState& performer, uint32_t task_index) noexcept {
+  auto& task = engine_.GetTask(task_index);
+  if (task.prev_task_index == UINT32_MAX) {
+    (task.is_active ? performer.first_active_task_index : performer.first_inactive_task_index) =
+        task.next_task_index;
+  } else {
+    engine_.GetTask(task.prev_task_index).next_task_index = task.next_task_index;
+  }
+  if (task.next_task_index != UINT32_MAX) {
+    engine_.GetTask(task.next_task_index).prev_task_index = task.prev_task_index;
+  }
+  task.prev_task_index = UINT32_MAX;
+  task.next_task_index = UINT32_MAX;
+}
+
+void PerformerController::SetTaskActive(PerformerState& performer, uint32_t task_index,
+                                        bool is_active) noexcept {
+  auto& task = engine_.GetTask(task_index);
+  assert(task.is_active != is_active);
+
+  RemoveTask(performer, task_index);
+  task.is_active = is_active;
+
+  if (is_active) {
+    InsertActiveTask(performer, task_index);
+    task.callback(BarelyTaskEventType_kBegin);
+  } else {
+    InsertInactiveTask(performer, task_index);
+    task.callback(BarelyTaskEventType_kEnd);
+  }
+}
+
+uint32_t PerformerController::GetNextInactiveTask(const PerformerState& performer) const noexcept {
+  if (!performer.is_playing) {
+    return UINT32_MAX;
+  }
+  uint32_t task_index = performer.first_inactive_task_index;
+  while (task_index != UINT32_MAX) {
+    const auto& task = engine_.GetTask(task_index);
+    if (task.position >= performer.position || task.GetEndPosition() > performer.position) {
+      return task_index;
+    }
+    task_index = task.next_task_index;
+  }
+  return UINT32_MAX;
+}
+
 void PerformerController::GetNextTaskEvent(const PerformerState& performer, double& duration,
                                            int32_t& priority) const noexcept {
   if (!performer.is_playing) {
@@ -117,8 +228,9 @@ void PerformerController::GetNextTaskEvent(const PerformerState& performer, doub
         duration = 0.0;
         priority = std::min(task.priority, priority);
         return;
-      } else if (performer.is_looping && task.position >= performer.loop_begin_position &&
-                 task.position < loop_end_position) {
+      }
+      if (performer.is_looping && task.position >= performer.loop_begin_position &&
+          task.position < loop_end_position) {
         const double looped_inactive_duration =
             task.position - performer.position + performer.loop_length;
         if (looped_inactive_duration < duration ||

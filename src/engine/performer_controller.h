@@ -158,116 +158,14 @@ class PerformerController {
   }
 
  private:
+  void InsertActiveTask(PerformerState& performer, uint32_t task_index) noexcept;
+  void InsertInactiveTask(PerformerState& performer, uint32_t task_index) noexcept;
+  void RemoveTask(PerformerState& performer, uint32_t task_index) noexcept;
+  void SetTaskActive(PerformerState& performer, uint32_t task_index, bool is_active) noexcept;
+
+  [[nodiscard]] uint32_t GetNextInactiveTask(const PerformerState& performer) const noexcept;
   void GetNextTaskEvent(const PerformerState& performer, double& duration,
                         int32_t& priority) const noexcept;
-
-  void SetTaskActive(PerformerState& performer, uint32_t task_index, bool is_active) noexcept {
-    auto& task = engine_.GetTask(task_index);
-    assert(task.is_active != is_active);
-
-    RemoveTask(performer, task_index);
-    task.is_active = is_active;
-
-    if (is_active) {
-      InsertActiveTask(performer, task_index);
-      task.callback(BarelyTaskEventType_kBegin);
-    } else {
-      InsertInactiveTask(performer, task_index);
-      task.callback(BarelyTaskEventType_kEnd);
-    }
-  }
-
-  void InsertActiveTask(PerformerState& performer, uint32_t task_index) noexcept {
-    auto& task = engine_.GetTask(task_index);
-    if (performer.first_active_task_index == UINT32_MAX) {
-      performer.first_active_task_index = task_index;
-      task.prev_task_index = UINT32_MAX;
-      task.next_task_index = UINT32_MAX;
-    } else if (auto& first_active_task = engine_.GetTask(performer.first_active_task_index);
-               task.IsActiveBefore(first_active_task)) {
-      first_active_task.prev_task_index = task_index;
-      task.next_task_index = performer.first_active_task_index;
-      performer.first_active_task_index = task_index;
-    } else {
-      uint32_t active_task_index = performer.first_active_task_index;
-      while (active_task_index != UINT32_MAX) {
-        const auto& active_task = engine_.GetTask(active_task_index);
-        if (active_task.next_task_index == UINT32_MAX ||
-            task.IsActiveBefore(engine_.GetTask(active_task.next_task_index))) {
-          break;
-        }
-        active_task_index = active_task.next_task_index;
-      }
-      auto& active_task = engine_.GetTask(active_task_index);
-      if (active_task.next_task_index != UINT32_MAX) {
-        engine_.GetTask(active_task.next_task_index).prev_task_index = task_index;
-      }
-      task.next_task_index = active_task.next_task_index;
-      active_task.next_task_index = task_index;
-      task.prev_task_index = active_task_index;
-    }
-  }
-
-  void InsertInactiveTask(PerformerState& performer, uint32_t task_index) noexcept {
-    auto& task = engine_.GetTask(task_index);
-    if (performer.first_inactive_task_index == UINT32_MAX) {
-      performer.first_inactive_task_index = task_index;
-      task.prev_task_index = UINT32_MAX;
-      task.next_task_index = UINT32_MAX;
-    } else if (auto& first_inactive_task = engine_.GetTask(performer.first_inactive_task_index);
-               task.IsInactiveBefore(first_inactive_task)) {
-      first_inactive_task.prev_task_index = task_index;
-      task.next_task_index = performer.first_inactive_task_index;
-      performer.first_inactive_task_index = task_index;
-    } else {
-      uint32_t inactive_task_index = performer.first_inactive_task_index;
-      while (inactive_task_index != UINT32_MAX) {
-        const auto& inactive_task = engine_.GetTask(inactive_task_index);
-        if (inactive_task.next_task_index == UINT32_MAX ||
-            task.IsInactiveBefore(engine_.GetTask(inactive_task.next_task_index))) {
-          break;
-        }
-        inactive_task_index = inactive_task.next_task_index;
-      }
-      auto& inactive_task = engine_.GetTask(inactive_task_index);
-      if (inactive_task.next_task_index != UINT32_MAX) {
-        engine_.GetTask(inactive_task.next_task_index).prev_task_index = task_index;
-      }
-      task.next_task_index = inactive_task.next_task_index;
-      inactive_task.next_task_index = task_index;
-      task.prev_task_index = inactive_task_index;
-    }
-  }
-
-  void RemoveTask(PerformerState& performer, uint32_t task_index) noexcept {
-    auto& task = engine_.GetTask(task_index);
-    if (task.prev_task_index == UINT32_MAX) {
-      (task.is_active ? performer.first_active_task_index : performer.first_inactive_task_index) =
-          task.next_task_index;
-    } else {
-      engine_.GetTask(task.prev_task_index).next_task_index = task.next_task_index;
-    }
-    if (task.next_task_index != UINT32_MAX) {
-      engine_.GetTask(task.next_task_index).prev_task_index = task.prev_task_index;
-    }
-    task.prev_task_index = UINT32_MAX;
-    task.next_task_index = UINT32_MAX;
-  }
-
-  [[nodiscard]] uint32_t GetNextInactiveTask(const PerformerState& performer) const noexcept {
-    if (!performer.is_playing) {
-      return UINT32_MAX;
-    }
-    uint32_t task_index = performer.first_inactive_task_index;
-    while (task_index != UINT32_MAX) {
-      const auto& task = engine_.GetTask(task_index);
-      if (task.position >= performer.position || task.GetEndPosition() > performer.position) {
-        return task_index;
-      }
-      task_index = task.next_task_index;
-    }
-    return UINT32_MAX;
-  }
 
   EngineState& engine_;
 };

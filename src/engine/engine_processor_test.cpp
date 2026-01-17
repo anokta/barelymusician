@@ -30,13 +30,16 @@ TEST(EngineProcessorTest, PlaySingleNote) {
   auto engine = std::make_unique<EngineState>();
   engine->sample_rate = static_cast<float>(kSampleRate);
 
+  const uint32_t slice_index =
+      engine->slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));
+
   EngineProcessor processor(*engine);
   const auto controls = BuildControlArray(nullptr, 0);
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine->ScheduleMessage(InstrumentControlMessage{
         kInstrumentIndex, static_cast<BarelyInstrumentControlType>(i), controls[i].value});
   }
-  engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, SampleData(kSlices)});
+  engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
 
   std::array<float, kStereoChannelCount * kFrameCount> samples;
 
@@ -80,6 +83,9 @@ TEST(EngineProcessorTest, PlayMultipleNotes) {
   auto engine = std::make_unique<EngineState>();
   engine->sample_rate = static_cast<float>(kSampleRate);
 
+  const uint32_t slice_index =
+      engine->slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));
+
   EngineProcessor processor(*engine);
   engine->ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
   const auto controls = BuildControlArray(nullptr, 0);
@@ -87,7 +93,7 @@ TEST(EngineProcessorTest, PlayMultipleNotes) {
     engine->ScheduleMessage(InstrumentControlMessage{
         kInstrumentIndex, static_cast<BarelyInstrumentControlType>(i), controls[i].value});
   }
-  engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, SampleData(kSlices)});
+  engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
 
   std::array<float, kStereoChannelCount * kSampleRate> samples;
 

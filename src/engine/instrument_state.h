@@ -67,6 +67,8 @@ struct InstrumentState {
   uint32_t first_note_index = UINT32_MAX;
   uint32_t note_count = 0;
 
+  uint32_t first_slice_index = UINT32_MAX;
+
   void Update(double duration) noexcept {
     if (first_note_index != UINT32_MAX && IsArpEnabled()) {
       assert(duration <= GetNextArpDuration());

@@ -34,6 +34,8 @@ class InstrumentController {
   void SetNoteOn(uint32_t instrument_index, float pitch,
                  const BarelyNoteControlOverride* note_control_overrides,
                  int32_t note_control_override_count) noexcept;
+  void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
+                     int32_t slice_count) noexcept;
 
   [[nodiscard]] float GetControl(uint32_t instrument_index,
                                  BarelyInstrumentControlType type) const noexcept;
@@ -50,6 +52,7 @@ class InstrumentController {
   [[nodiscard]] uint32_t GetNote(const InstrumentState& instrument, float pitch) const noexcept;
 
   void ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept;
+  void ReleaseSampleData(InstrumentState& instrument) noexcept;
 
   EngineState& engine_;
 };

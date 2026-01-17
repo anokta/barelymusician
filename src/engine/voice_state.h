@@ -30,9 +30,6 @@ struct VoiceState {
   /// Voice parameters.
   VoiceParams params = {};
 
-  /// Pointer to slice.
-  const Slice* slice = nullptr;
-
   /// Voice pitch.
   float pitch = 0.0f;
 
@@ -50,6 +47,9 @@ struct VoiceState {
 
   /// Note index.
   uint32_t note_index = UINT32_MAX;
+
+  /// Slice index.
+  uint32_t slice_index = UINT32_MAX;
 
   /// Previous voice index.
   uint32_t prev_voice_index = UINT32_MAX;
@@ -98,10 +98,10 @@ struct VoiceState {
   /// Starts the voice.
   ///
   /// @param instrument_params Instrument parameters.
-  /// @param note_slice Note slice.
+  /// @param slice Pointer to slice.
   /// @param note_pitch Note pitch.
   /// @param note_controls Array of note controls.
-  void Start(const InstrumentParams& instrument_params, const Slice* note_slice, float note_pitch,
+  void Start(const InstrumentParams& instrument_params, const SliceState* slice, float note_pitch,
              const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
     const float note_gain = note_controls[BarelyNoteControlType_kGain];
     const float note_pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
@@ -110,8 +110,7 @@ struct VoiceState {
     params.gain *= note_gain;
     pitch = note_pitch;
     pitch_shift = note_pitch_shift;
-    slice = note_slice;
-    UpdatePitchIncrements();
+    UpdatePitchIncrements(slice);
     bit_crusher.Reset();
     filter.Reset();
     osc_phase = 0.0f;
@@ -121,7 +120,7 @@ struct VoiceState {
   }
 
   /// Updates the pitch increments.
-  void UpdatePitchIncrements() noexcept {
+  void UpdatePitchIncrements(const SliceState* slice) noexcept {
     const float shifted_pitch = pitch + pitch_shift;
     note_params.osc_increment = std::pow(2.0f, shifted_pitch);
     note_params.slice_increment =

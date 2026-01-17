@@ -1142,6 +1142,9 @@ struct NoteControlOverride : public BarelyNoteControlOverride {
 
 /// Slice of sample data.
 struct Slice : public BarelySlice {
+  /// Default constructor.
+  Slice() noexcept = default;
+
   /// Constructs a new `Slice`.
   ///
   /// @param samples Span of mono samples.

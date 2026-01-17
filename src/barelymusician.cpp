@@ -5,7 +5,6 @@
 #include <cstdint>
 
 #include "core/time.h"
-#include "dsp/sample_data.h"
 #include "engine/engine_controller.h"
 #include "engine/engine_processor.h"
 #include "engine/engine_state.h"
@@ -349,8 +348,8 @@ bool BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t instrument_id
   if (!engine->IsValidInstrument(instrument_id)) return false;
   if (slice_count < 0 || (!slices && slice_count > 0)) return false;
 
-  engine->state.ScheduleMessage(barely::SampleDataMessage{
-      GetIndex(instrument_id), barely::SampleData({slices, slices + slice_count})});
+  engine->controller.instrument_controller().SetSampleData(GetIndex(instrument_id), slices,
+                                                           slice_count);
   return true;
 }
 

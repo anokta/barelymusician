@@ -56,6 +56,12 @@ def parse_args():
         help="specify the maximum number of performers",
     )
     parser.add_argument(
+        "--max_slices",
+        type=count_type,
+        default=1000,
+        help="specify the maximum number of sample slices",
+    )
+    parser.add_argument(
         "--max_tasks",
         type=count_type,
         default=5000,
@@ -248,6 +254,7 @@ def build(args, source_dir, build_dir):
         f"-DMAX_FRAME_COUNT={args.max_frames}",
         f"-DMAX_INSTRUMENT_COUNT={args.max_instruments}",
         f"-DMAX_PERFORMER_COUNT={args.max_performers}",
+        f"-DMAX_SLICE_COUNT={args.max_slices}",
         f"-DMAX_TASK_COUNT={args.max_tasks}",
         f"-DMAX_VOICE_COUNT={args.max_voices}",
     ]

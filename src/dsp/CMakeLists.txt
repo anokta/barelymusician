@@ -8,8 +8,6 @@ target_sources(
   distortion.h
   envelope.h
   one_pole_filter.h
-  sample_data.cpp
-  sample_data.h
   sample_generators.h
   sidechain.h
 )
@@ -23,7 +21,6 @@ if(ENABLE_TESTS)
     distortion_test.cpp
     envelope_test.cpp
     one_pole_filter_test.cpp
-    sample_data_test.cpp
     sample_generators_test.cpp
   )
 endif()

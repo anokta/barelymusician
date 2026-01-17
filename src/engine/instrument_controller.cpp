@@ -12,6 +12,7 @@
 
 #include "core/control.h"
 #include "core/rng.h"
+#include "core/time.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "engine/note_state.h"
@@ -52,6 +53,7 @@ uint32_t InstrumentController::Acquire(const BarelyInstrumentControlOverride* co
 
 void InstrumentController::Release(uint32_t instrument_index) noexcept {
   SetAllNotesOff(instrument_index);
+  ReleaseSampleData(engine_.GetInstrument(instrument_index));
   engine_.instrument_pool.Release(instrument_index);
 }
 
@@ -233,6 +235,15 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
   }
 }
 
+void InstrumentController::SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
+                                         int32_t slice_count) noexcept {
+  auto& instrument = engine_.GetInstrument(instrument_index);
+  ReleaseSampleData(instrument);
+  instrument.first_slice_index =
+      engine_.slice_pool.Acquire(slices, static_cast<uint32_t>(slice_count));
+  engine_.ScheduleMessage(SampleDataMessage{instrument_index, instrument.first_slice_index});
+}
+
 float InstrumentController::GetControl(uint32_t instrument_index,
                                        BarelyInstrumentControlType type) const noexcept {
   return engine_.GetInstrument(instrument_index).controls[type].value;
@@ -350,6 +361,13 @@ void InstrumentController::ReleaseNote(InstrumentState& instrument, uint32_t not
 
   engine_.note_pool.Release(note_index);
   --instrument.note_count;
+}
+
+void InstrumentController::ReleaseSampleData(InstrumentState& instrument) noexcept {
+  if (instrument.first_slice_index != UINT32_MAX) {
+    engine_.slice_pool.ReleaseAt(instrument.first_slice_index,
+                                 SecondsToFrames(engine_.sample_rate, engine_.timestamp));
+  }
 }
 
 }  // namespace barely

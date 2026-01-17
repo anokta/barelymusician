@@ -12,10 +12,10 @@
 #include "core/pool.h"
 #include "core/rng.h"
 #include "dsp/distortion.h"
-#include "dsp/sample_data.h"
 #include "dsp/sample_generators.h"
 #include "engine/engine_state.h"
 #include "engine/instrument_params.h"
+#include "engine/slice_state.h"
 #include "engine/voice_state.h"
 
 namespace barely {
@@ -30,7 +30,7 @@ class InstrumentProcessor {
   void SetNoteOff(uint32_t note_index) noexcept;
   void SetNoteOn(uint32_t note_index, uint32_t instrument_index, float pitch,
                  const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept;
-  void SetSampleData(uint32_t instrument_index, SampleData& sample_data) noexcept;
+  void SetSampleData(uint32_t instrument_index, uint32_t first_slice_index) noexcept;
 
   void Init(uint32_t instrument_index) noexcept {
     engine_.instrument_params[instrument_index] = {};
@@ -96,8 +96,10 @@ class InstrumentProcessor {
       }
     }
 
-    if (instrument_params.slice_mode == SliceMode::kOnce && voice.slice != nullptr &&
-        static_cast<int>(voice.slice_offset) >= voice.slice->sample_count) {
+    const SliceState* slice = engine_.slice_pool.Get(voice.slice_index);
+
+    if (instrument_params.slice_mode == SliceMode::kOnce && slice != nullptr &&
+        static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
       voice.envelope.Stop();
     }
 
@@ -107,11 +109,10 @@ class InstrumentProcessor {
                              voice.params.osc_noise_mix * engine_.audio_rng.Generate();
     const float osc_output = voice.params.osc_mix * osc_sample;
 
-    const bool has_slice = (voice.slice != nullptr);
     const float slice_sample =
-        has_slice ? GenerateSliceSample(voice.slice->samples, voice.slice->sample_count,
-                                        voice.slice_offset)
-                  : 0.0f;
+        (slice != nullptr)
+            ? GenerateSliceSample(slice->samples, slice->sample_count, voice.slice_offset)
+            : 0.0f;
     const float slice_output = (1.0f - voice.params.osc_mix) * slice_sample;
 
     float output = voice.envelope.Next();
@@ -152,9 +153,9 @@ class InstrumentProcessor {
       }
       voice.slice_offset += slice_increment;
       if (instrument_params.slice_mode == SliceMode::kLoop) {
-        if (has_slice && static_cast<int>(voice.slice_offset) >= voice.slice->sample_count) {
+        if (slice != nullptr && static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
           voice.slice_offset =
-              std::fmod(voice.slice_offset, static_cast<float>(voice.slice->sample_count));
+              std::fmod(voice.slice_offset, static_cast<float>(slice->sample_count));
         }
       }
     }

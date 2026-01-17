@@ -150,7 +150,7 @@ void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlT
       break;
     case BarelyNoteControlType_kPitchShift:
       voice.pitch_shift = value;
-      voice.UpdatePitchIncrements();
+      voice.UpdatePitchIncrements(engine_.slice_pool.Get(voice.slice_index));
       break;
     default:
       assert(!"Invalid note control type");
@@ -166,7 +166,8 @@ void InstrumentProcessor::SetNoteOff(uint32_t note_index) noexcept {
   }
   auto& voice = engine_.GetVoice(voice_index);
   if (const auto& instrument_params = engine_.instrument_params[voice.instrument_index];
-      instrument_params.sample_data.empty() || instrument_params.slice_mode != SliceMode::kOnce) {
+      instrument_params.first_slice_index == UINT32_MAX ||
+      instrument_params.slice_mode != SliceMode::kOnce) {
     voice.envelope.Stop();
   }
   voice.note_index = UINT32_MAX;
@@ -181,7 +182,9 @@ void InstrumentProcessor::SetNoteOn(
     auto& voice = engine_.GetVoice(voice_index);
     voice.instrument_index = instrument_index;
     voice.note_index = note_index;
-    voice.Start(params, params.sample_data.Select(pitch, engine_.audio_rng), pitch, note_controls);
+    voice.slice_index =
+        engine_.slice_pool.Select(params.first_slice_index, pitch, engine_.audio_rng);
+    voice.Start(params, engine_.slice_pool.Get(voice.slice_index), pitch, note_controls);
   }
 }
 
@@ -241,14 +244,15 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
 }
 
 void InstrumentProcessor::SetSampleData(uint32_t instrument_index,
-                                        SampleData& sample_data) noexcept {
+                                        uint32_t first_slice_index) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
-  params.sample_data.Swap(sample_data);
+  params.first_slice_index = first_slice_index;
   uint32_t active_voice_index = params.first_voice_index;
   while (active_voice_index != UINT32_MAX) {
     auto& voice = engine_.GetVoice(active_voice_index);
-    voice.slice = params.sample_data.Select(voice.pitch, engine_.audio_rng);
-    voice.UpdatePitchIncrements();
+    voice.slice_index =
+        engine_.slice_pool.Select(params.first_slice_index, voice.pitch, engine_.audio_rng);
+    voice.UpdatePitchIncrements(engine_.slice_pool.Get(voice.slice_index));
     active_voice_index = voice.next_voice_index;
   }
 }

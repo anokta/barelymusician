@@ -34,8 +34,9 @@ class Rng {
   /// @param min Minimum value (inclusive).
   /// @param max Maximum value (exclusive).
   /// @return Random integer.
-  [[nodiscard]] int Generate(int min, int max) noexcept {
-    return min + static_cast<int>(Generate() * static_cast<RealType>(max - min));
+  template <typename T>
+  [[nodiscard]] T Generate(T min, T max) noexcept {
+    return min + static_cast<T>(Generate() * static_cast<RealType>(max - min));
   }
 
  private:

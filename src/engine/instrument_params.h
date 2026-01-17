@@ -6,7 +6,6 @@
 #include <cstdint>
 
 #include "dsp/envelope.h"
-#include "dsp/sample_data.h"
 #include "engine/voice_params.h"
 
 namespace barely {
@@ -17,9 +16,6 @@ struct InstrumentParams {
 
   /// Envelope adsr.
   Envelope::Adsr adsr = {};
-
-  /// Sample data.
-  SampleData sample_data = {};
 
   /// Oscillator mode.
   OscMode osc_mode = OscMode::kMix;
@@ -47,6 +43,9 @@ struct InstrumentParams {
 
   /// Slice increment per sample.
   float slice_increment = 0.0f;
+
+  /// First slice index.
+  uint32_t first_slice_index = UINT32_MAX;
 
   /// First voice index.
   uint32_t first_voice_index = UINT32_MAX;

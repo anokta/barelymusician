@@ -65,6 +65,8 @@ class EngineProcessor {
                      output_frame_count - current_frame);
     }
 
+    engine_.slice_pool.MarkSafeToRelease(end_frame);
+
     // Fill the output samples.
     if (output_channel_count > 1) {
       std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
@@ -173,7 +175,7 @@ class EngineProcessor {
                        },
                        [this](SampleDataMessage& sample_data_message) noexcept {
                          instrument_processor_.SetSampleData(sample_data_message.instrument_index,
-                                                             sample_data_message.sample_data);
+                                                             sample_data_message.first_slice_index);
                        }},
         message);
   }

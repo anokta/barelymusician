@@ -69,12 +69,13 @@ namespace barely {
 /// Generates a slice sample.
 //
 /// @param samples Array of slice samples.
-/// @param sample_cuount Number of slice samples.
+/// @param sample_count Number of slice samples.
 /// @param offset Slice offset.
 /// @return Sample.
 [[nodiscard]] inline float GenerateSliceSample(const float* samples, int32_t sample_count,
                                                float offset) noexcept {
   assert((samples != nullptr || sample_count == 0) && "GenerateSliceSample");
+  assert(offset >= 0.0f && "GenerateSliceSample");
   const int32_t index = static_cast<int32_t>(offset);
   return (index < sample_count) ? std::lerp(samples[index], samples[(index + 1) % sample_count],
                                             offset - static_cast<float>(index))

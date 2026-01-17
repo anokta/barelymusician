@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_STATE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_STATE_H_
 
+#include <barelymusician.h>
+
 #include <array>
 #include <cstdint>
 
@@ -18,6 +20,7 @@
 #include "engine/message_queue.h"
 #include "engine/note_state.h"
 #include "engine/performer_state.h"
+#include "engine/slice_pool.h"
 #include "engine/task_state.h"
 #include "engine/voice_state.h"
 
@@ -68,6 +71,9 @@ struct EngineState {
 
   // Note pool.
   Pool<NoteState, BARELYMUSICIAN_MAX_NOTE_COUNT> note_pool = {};
+
+  // Slice pool.
+  SlicePool slice_pool = {};
 
   // Array of engine controls.
   EngineControlArray controls = {};

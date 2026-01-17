@@ -2,6 +2,8 @@
 
 #include <barelymusician.h>
 
+#include <cstdint>
+
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -19,13 +21,13 @@ TEST(SampleGeneratorsTest, GenerateOscSample) {
 
 // Tests that the slice samples are generated as expected.
 TEST(SampleGeneratorsTest, GenerateSliceSample) {
-  static constexpr int kDataLength = 5;
+  static constexpr uint32_t kDataLength = 5;
   static constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
-  for (int i = 0; i < kDataLength; ++i) {
+  for (uint32_t i = 0; i < kDataLength; ++i) {
     EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i)), kData[i]);
     if (i < kDataLength - 1) {
-      EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i + 0.5f)),
+      EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i) + 0.5f),
                       0.5f * (kData[i] + kData[i + 1]));
     }
   }

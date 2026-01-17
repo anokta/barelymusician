@@ -18,6 +18,8 @@ target_sources(
   performer_controller.cpp
   performer_controller.h
   performer_state.h
+  slice_pool.h
+  slice_state.h
   task_state.h
   voice_params.h
   voice_state.h
@@ -29,7 +31,8 @@ if(ENABLE_TESTS)
     engine_controller_test.cpp
     engine_processor_test.cpp
     instrument_controller_test.cpp
-    performer_controller_test.cpp
     message_queue_test.cpp
+    performer_controller_test.cpp
+    slice_pool_test.cpp
   )
 endif()

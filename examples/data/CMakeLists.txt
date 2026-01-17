@@ -5,5 +5,5 @@ add_library(
 )
 target_compile_definitions(
   barelymusician_examples_data
-  PRIVATE BARELYMUSICIAN_EXAMPLES_DATA_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"
+  PRIVATE BARELY_EXAMPLES_DATA_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"
 )

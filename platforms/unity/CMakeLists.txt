@@ -4,7 +4,7 @@ add_library(
 )
 target_compile_definitions(
   barelymusicianunity PUBLIC
-  BARELYMUSICIAN_EXPORTS
+  BARELY_EXPORT
 )
 target_link_libraries(
   barelymusicianunity PUBLIC

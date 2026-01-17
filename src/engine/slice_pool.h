@@ -130,7 +130,7 @@ class SlicePool {
   }
 
  private:
-  static constexpr uint32_t kCount = BARELYMUSICIAN_MAX_SLICE_COUNT;
+  static constexpr uint32_t kCount = BARELY_MAX_SLICE_COUNT;
 
   std::array<SliceState, kCount> slices_;
 

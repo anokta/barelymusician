@@ -24,7 +24,7 @@ set_target_properties(
 )
 target_compile_definitions(
   barelymusicianwasm PUBLIC
-  BARELYMUSICIAN_EXPORTS
+  BARELY_EXPORT
 )
 target_link_libraries(
   barelymusicianwasm PRIVATE

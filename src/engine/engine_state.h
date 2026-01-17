@@ -52,25 +52,25 @@ inline EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
 
 struct EngineState {
   // Performer pool.
-  Pool<PerformerState, BARELYMUSICIAN_MAX_PERFORMER_COUNT> performer_pool = {};
+  Pool<PerformerState, BARELY_MAX_PERFORMER_COUNT> performer_pool = {};
 
   // Array of performer generations.
-  std::array<uint32_t, BARELYMUSICIAN_MAX_PERFORMER_COUNT> performer_generations = {};
+  std::array<uint32_t, BARELY_MAX_PERFORMER_COUNT> performer_generations = {};
 
   // Task pool.
-  Pool<TaskState, BARELYMUSICIAN_MAX_TASK_COUNT> task_pool = {};
+  Pool<TaskState, BARELY_MAX_TASK_COUNT> task_pool = {};
 
   // Array of task generations.
-  std::array<uint32_t, BARELYMUSICIAN_MAX_TASK_COUNT> task_generations = {};
+  std::array<uint32_t, BARELY_MAX_TASK_COUNT> task_generations = {};
 
   // Instrument pool.
-  Pool<InstrumentState, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_pool = {};
+  Pool<InstrumentState, BARELY_MAX_INSTRUMENT_COUNT> instrument_pool = {};
 
   // Array of instrument generations.
-  std::array<uint32_t, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_generations = {};
+  std::array<uint32_t, BARELY_MAX_INSTRUMENT_COUNT> instrument_generations = {};
 
   // Note pool.
-  Pool<NoteState, BARELYMUSICIAN_MAX_NOTE_COUNT> note_pool = {};
+  Pool<NoteState, BARELY_MAX_NOTE_COUNT> note_pool = {};
 
   // Slice pool.
   SlicePool slice_pool = {};
@@ -85,13 +85,13 @@ struct EngineState {
   MessageQueue message_queue = {};
 
   // Array of instrument parameters.
-  std::array<InstrumentParams, BARELYMUSICIAN_MAX_INSTRUMENT_COUNT> instrument_params = {};
+  std::array<InstrumentParams, BARELY_MAX_INSTRUMENT_COUNT> instrument_params = {};
 
   // Maps note indices to voice indices.
-  std::array<uint32_t, BARELYMUSICIAN_MAX_NOTE_COUNT> note_to_voice = {};
+  std::array<uint32_t, BARELY_MAX_NOTE_COUNT> note_to_voice = {};
 
   // Voice pool.
-  Pool<VoiceState, BARELYMUSICIAN_MAX_VOICE_COUNT> voice_pool = {};
+  Pool<VoiceState, BARELY_MAX_VOICE_COUNT> voice_pool = {};
 
   // Random number generator for the audio thread.
   AudioRng audio_rng = {};

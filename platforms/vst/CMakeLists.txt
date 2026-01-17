@@ -37,7 +37,7 @@ set_target_properties(
 )
 target_compile_definitions(
   barelymusicianvst PUBLIC
-  BARELYMUSICIAN_EXPORTS
+  BARELY_EXPORT
 )
 target_include_directories(
   barelymusicianvst PRIVATE

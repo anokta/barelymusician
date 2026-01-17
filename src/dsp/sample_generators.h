@@ -8,43 +8,22 @@
 
 namespace barely {
 
-/// Generates a sine wave sample.
-///
-/// @param phase Phase.
-/// @return Sample.
 [[nodiscard]] inline float GenerateSineSample(float phase) noexcept {
   return std::sin(phase * 2.0f * std::numbers::pi_v<float>);
 }
 
-/// Generates a triangle wave sample.
-///
-/// @param phase Phase.
-/// @return Sample.
 [[nodiscard]] inline float GenerateTriangleSample(float phase) noexcept {
   return 4.0f * std::abs(phase - std::floor(phase + 0.75f) + 0.25f) - 1.0f;
 }
 
-/// Generates a square wave sample.
-///
-/// @param phase Phase.
-/// @return Sample.
 [[nodiscard]] inline float GenerateSquareSample(float phase) noexcept {
   return (phase < 0.5f) ? 1.0f : -1.0f;
 }
 
-/// Generates a sawtooth wave sample.
-///
-/// @param phase Phase.
-/// @return Sample.
 [[nodiscard]] inline float GenerateSawtoothSample(float phase) noexcept {
   return 2.0f * (phase - std::floor(phase + 0.5f));
 }
 
-/// Generates an oscillator sample.
-///
-/// @param osc_phase Oscillator phase.
-/// @param osc_shape Oscillator shape.
-/// @return Sample.
 [[nodiscard]] inline float GenerateOscSample(float osc_phase, float osc_shape) noexcept {
   assert(osc_phase >= 0.0f && osc_phase <= 1.0f && "GenerateOscSample");
   assert(osc_shape >= 0.0f && osc_shape <= 1.0f && "GenerateOscSample");
@@ -66,12 +45,6 @@ namespace barely {
   }
 }
 
-/// Generates a slice sample.
-//
-/// @param samples Array of slice samples.
-/// @param sample_count Number of slice samples.
-/// @param offset Slice offset.
-/// @return Sample.
 [[nodiscard]] inline float GenerateSliceSample(const float* samples, int32_t sample_count,
                                                float offset) noexcept {
   assert((samples != nullptr || sample_count == 0) && "GenerateSliceSample");

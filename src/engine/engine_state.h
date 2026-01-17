@@ -120,7 +120,6 @@ struct EngineState {
   // Sampling rate in hertz.
   float sample_rate = 0.0f;
 
-  // Approaches parameters.
   void Approach() noexcept {
     current_params.compressor_params.Approach(target_params.compressor_params);
     current_params.delay_params.Approach(target_params.delay_params);
@@ -129,7 +128,6 @@ struct EngineState {
     ApproachValue(current_params.sidechain_ratio, target_params.sidechain_ratio);
   }
 
-  // Schedules a new message in the queue.
   void ScheduleMessage(Message message) noexcept {
     message_queue.Add(SecondsToFrames(sample_rate, timestamp), std::move(message));
   }

@@ -8,12 +8,7 @@
 
 namespace barely {
 
-/// Applies soft-clip distortion effect to the input sample.
-///
-/// @param input Input sample.
-/// @param amount Distortion amount.
-/// @param drive Distortion drive.
-/// @return Output sample.
+// Applies soft-clip distortion effect to the input sample.
 [[nodiscard]] inline float Distortion(float input, float amount, float drive) noexcept {
   assert(amount >= 0.0f);
   assert(drive >= 0.0f);

@@ -18,6 +18,7 @@ target_sources(
   performer_controller.cpp
   performer_controller.h
   performer_state.h
+  slice_pool.cpp
   slice_pool.h
   slice_state.h
   task_state.h

@@ -7,7 +7,7 @@
 
 namespace barely {
 
-/// Memory pool template for a given item type.
+// Memory pool template for a given item type.
 template <typename ItemType, uint32_t kCount>
 class Pool {
  public:
@@ -18,9 +18,7 @@ class Pool {
     }
   }
 
-  /// Acquires a new item.
-  ///
-  /// @return Invalid index if capacity is reached, valid item index otherwise.
+  // Acquires a new item, or returns invalid index if maximum capacity was reached.
   [[nodiscard]] uint32_t Acquire() noexcept {
     if (active_count_ < kCount) {
       const uint32_t index = free_[free_read_index_];
@@ -37,9 +35,6 @@ class Pool {
     return UINT32_MAX;
   }
 
-  /// Releases an item.
-  ///
-  /// @param index Item index.
   void Release(uint32_t index) noexcept {
     assert(IsActive(index));
     assert(active_count_ > 0);

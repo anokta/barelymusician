@@ -11,10 +11,10 @@
 
 namespace barely {
 
-/// Biquad filter with smooth coefficient interpolation.
+// Biquad filter with smooth coefficient interpolation.
 class BiquadFilter {
  public:
-  /// Normalized coefficients.
+  // Normalized coefficients.
   struct Coeffs {
     float a1 = 0.0f;
     float a2 = 0.0f;
@@ -23,11 +23,6 @@ class BiquadFilter {
     float b2 = 0.0f;
   };
 
-  /// Filters the next input sample.
-  ///
-  /// @param input Input sample.
-  /// @param coeffs Filter coefficients.
-  /// @return Filtered output sample.
   [[nodiscard]] float Next(float input, const Coeffs& coeffs) noexcept {
     // Uses Direct-Form 2.
     const float v0 = input - coeffs.a1 * state_.v1 - coeffs.a2 * state_.v2;
@@ -39,7 +34,6 @@ class BiquadFilter {
     return output;
   }
 
-  /// Resets the filter.
   void Reset() noexcept { state_ = {}; }
 
  private:
@@ -51,13 +45,6 @@ class BiquadFilter {
   State state_ = {};
 };
 
-/// Returns the corresponding biquad filter coefficients for a given set of filter parameters.
-///
-/// @param sample_rate Sampling rate in hertz.
-/// @param type Filter type.
-/// @param cutoff_frequency Cutoff frequency.
-/// @param q Resonance quality factor.
-/// @return Biquad filter coefficients.
 inline BiquadFilter::Coeffs GetFilterCoefficients(float sample_rate, FilterType type,
                                                   float cutoff_frequency, float q) noexcept {
   if (type == FilterType::kNone) {

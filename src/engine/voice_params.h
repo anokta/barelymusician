@@ -6,43 +6,43 @@
 namespace barely {
 
 struct VoiceParams {
-  /// Filter coefficients.
+  // Filter coefficients.
   BiquadFilter::Coeffs filter_coeffs = {};
 
-  /// Bit crusher range (for bit depth reduction).
+  // Bit crusher range (for bit depth reduction).
   float bit_crusher_range = 0.0f;
 
-  /// Bit crusher increment (for sample rate reduction).
+  // Bit crusher increment (for sample rate reduction).
   float bit_crusher_increment = 1.0f;
 
-  /// Distortion amount.
+  // Distortion amount.
   float distortion_amount = 0.0f;
 
-  /// Distortion drive.
+  // Distortion drive.
   float distortion_drive = 1.0f;
 
-  /// Gain in linear amplitude.
+  // Gain in linear amplitude.
   float gain = 1.0f;
 
-  /// Oscillator mix.
+  // Oscillator mix.
   float osc_mix = 0.0f;
 
-  /// Oscillator noise mix.
+  // Oscillator noise mix.
   float osc_noise_mix = 0.0f;
 
-  /// Oscillator shape.
+  // Oscillator shape.
   float osc_shape = 0.0f;
 
-  /// Oscillator skew.
+  // Oscillator skew.
   float osc_skew = 0.0f;
 
-  /// Stereo pan.
+  // Stereo pan.
   float stereo_pan = 0.0f;
 
-  /// Delay send.
+  // Delay send.
   float delay_send = 0.0f;
 
-  /// Sidechain send.
+  // Sidechain send.
   float sidechain_send = 0.0f;
 };
 

@@ -9,87 +9,77 @@
 
 namespace barely {
 
-/// Engine control message.
 struct EngineControlMessage {
-  /// Type.
+  // Type.
   BarelyEngineControlType type = BarelyEngineControlType_kCount;
 
-  /// Value.
+  // Value.
   float value = 0.0f;
 };
 
-/// Engine seed message.
 struct EngineSeedMessage {
-  /// Seed.
+  // Seed.
   int32_t seed = 0;
 };
 
-/// Instrument create message.
 struct InstrumentCreateMessage {
-  /// Instrument index;
+  // Instrument index;
   uint32_t instrument_index = UINT32_MAX;
 };
 
-/// Instrument control message.
 struct InstrumentControlMessage {
-  /// Instrument index;
+  // Instrument index;
   uint32_t instrument_index = UINT32_MAX;
 
-  /// Type.
+  // Type.
   BarelyInstrumentControlType type = BarelyInstrumentControlType_kCount;
 
-  /// Value.
+  // Value.
   float value;
 };
 
-/// Note control message.
 struct NoteControlMessage {
-  /// Note index.
+  // Note index.
   uint32_t note_index = UINT32_MAX;
 
-  /// Type.
+  // Type.
   BarelyNoteControlType type = BarelyNoteControlType_kCount;
 
-  /// Value.
+  // Value.
   float value = 0.0f;
 };
 
-/// Note off message.
 struct NoteOffMessage {
-  /// Note index.
+  // Note index.
   uint32_t note_index = UINT32_MAX;
 };
 
-/// Note on message.
 struct NoteOnMessage {
-  /// Note index.
+  // Note index.
   uint32_t note_index = UINT32_MAX;
 
-  /// Instrument index;
+  // Instrument index;
   uint32_t instrument_index = UINT32_MAX;
 
-  /// Pitch.
+  // Pitch.
   float pitch = 0.0f;
 
-  /// Array of note controls.
+  // Array of note controls.
   std::array<float, BarelyNoteControlType_kCount> controls = {};
 };
 
-/// Sample data message.
 struct SampleDataMessage {
-  /// Instrument index;
+  // Instrument index;
   uint32_t instrument_index = UINT32_MAX;
 
-  /// First slice index.
+  // First slice index.
   uint32_t first_slice_index = UINT32_MAX;
 };
 
-/// Message alias.
 using Message = std::variant<EngineControlMessage, EngineSeedMessage, InstrumentCreateMessage,
                              InstrumentControlMessage, NoteControlMessage, NoteOffMessage,
                              NoteOnMessage, SampleDataMessage>;
 
-// Message visitor.
 template <typename... MessageTypes>
 struct MessageVisitor : MessageTypes... {
   using MessageTypes::operator()...;

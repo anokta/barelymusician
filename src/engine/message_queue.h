@@ -10,14 +10,9 @@
 
 namespace barely {
 
-/// Single-consumer single-producer message queue.
+// Single-consumer single-producer message queue.
 class MessageQueue {
  public:
-  /// Adds a message at a frame.
-  ///
-  /// @param message_frame Message frame.
-  /// @param message Message.
-  /// @return True if successful, false otherwise.
   bool Add(int64_t message_frame, Message message) noexcept {
     const int index = write_index_.load(std::memory_order_relaxed);
     const int next_index = (index + 1) % kMaxMessageCount;
@@ -29,10 +24,6 @@ class MessageQueue {
     return true;
   }
 
-  /// Returns the next message before an end frame.
-  ///
-  /// @param end_frame End frame.
-  /// @return Pointer to message if successful, `nullptr` otherwise.
   std::pair<int64_t, Message>* GetNext(int64_t end_frame) noexcept {
     const int index = read_index_.load(std::memory_order_relaxed);
     if (index == write_index_.load(std::memory_order_acquire) ||

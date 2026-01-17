@@ -8,15 +8,9 @@
 
 namespace barely {
 
-/// Bit crusher effect with bit depth and sample rate reduction.
+// Bit crusher effect with bit depth and sample rate reduction.
 class BitCrusher {
  public:
-  /// Applies the bit crusher effect to the next input sample.
-  ///
-  /// @param input Input sample.
-  /// @param range Sample value range (for bit depth reduction).
-  /// @param increment Sample step increment (for sample rate reduction).
-  /// @return Output sample.
   [[nodiscard]] float Next(float input, float range, float increment) noexcept {
     assert(range >= 0.0f);
     assert(increment >= 0.0f);
@@ -28,7 +22,6 @@ class BitCrusher {
     return output_;
   }
 
-  /// Resets the effect state.
   void Reset() noexcept {
     output_ = 0.0f;
     phase_ = 0.0f;

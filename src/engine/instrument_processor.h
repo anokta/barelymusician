@@ -73,14 +73,6 @@ class InstrumentProcessor {
  private:
   [[nodiscard]] uint32_t AcquireVoice(InstrumentParams& params, float pitch) noexcept;
 
-  /// Processes the next output frame of a voice.
-  ///
-  /// @tparam kIsSidechainSend Denotes whether the sidechain frame is for send or receive.
-  /// @param voice Voice.
-  /// @param instrument_params Instrument parameters.
-  /// @param delay_frame Delay send frame.
-  /// @param sidechain_frame Sidechain send frame.
-  /// @param output_frame Output frame.
   template <bool kIsSidechainSend = false>
   void ProcessVoice(VoiceState& voice, const InstrumentParams& instrument_params,
                     float delay_frame[kStereoChannelCount],

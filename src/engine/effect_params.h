@@ -6,21 +6,20 @@
 
 namespace barely {
 
-/// Effect parameters.
 struct EffectParams {
-  /// Compressor parameters.
+  // Compressor parameters.
   CompressorParams compressor_params = {};
 
-  /// Delay parameters.
+  // Delay parameters.
   DelayParams delay_params = {};
 
-  /// Sidechain mix.
+  // Sidechain mix.
   float sidechain_mix = 1.0f;
 
-  /// Sidechain threshold in decibels.
+  // Sidechain threshold in decibels.
   float sidechain_threshold_db = 0.0f;
 
-  /// Sidechain ratio.
+  // Sidechain ratio.
   float sidechain_ratio = 1.0f;
 };
 

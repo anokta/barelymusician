@@ -15,28 +15,6 @@ namespace barely {
 void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
                                      float value) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
-
-  // TODO(#126): clean this up?
-  if (type == BarelyInstrumentControlType_kVoiceCount) {
-    const uint32_t new_voice_count = static_cast<uint32_t>(value);
-    uint32_t active_voice_count = 0;
-    uint32_t active_voice_index = params.first_voice_index;
-    while (active_voice_index != UINT32_MAX && active_voice_count <= new_voice_count) {
-      active_voice_index = engine_.GetVoice(active_voice_index).next_voice_index;
-      ++active_voice_count;
-    }
-    while (active_voice_index != UINT32_MAX) {
-      auto& voice = engine_.GetVoice(active_voice_index);
-      if (voice.prev_voice_index != UINT32_MAX) {
-        engine_.GetVoice(voice.prev_voice_index).next_voice_index = UINT32_MAX;
-        voice.prev_voice_index = UINT32_MAX;
-      }
-      engine_.voice_pool.Release(active_voice_index);
-      active_voice_index = voice.next_voice_index;
-      voice.next_voice_index = UINT32_MAX;
-    }
-  }
-
   switch (type) {
     case BarelyInstrumentControlType_kGain:
       params.voice_params.gain = value;
@@ -53,9 +31,27 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kStereoPan:
       params.voice_params.stereo_pan = value;
       break;
-    case BarelyInstrumentControlType_kVoiceCount:
-      params.voice_count = static_cast<uint32_t>(value);
-      break;
+    case BarelyInstrumentControlType_kVoiceCount: {
+      const uint32_t new_voice_count = static_cast<uint32_t>(value);
+      uint32_t active_voice_count = 0;
+      uint32_t active_voice_index = params.first_voice_index;
+      while (active_voice_index != UINT32_MAX && active_voice_count <= new_voice_count) {
+        active_voice_index = engine_.GetVoice(active_voice_index).next_voice_index;
+        ++active_voice_count;
+      }
+      while (active_voice_index != UINT32_MAX) {
+        auto& voice = engine_.GetVoice(active_voice_index);
+        if (voice.prev_voice_index != UINT32_MAX) {
+          engine_.GetVoice(voice.prev_voice_index).next_voice_index = UINT32_MAX;
+          voice.prev_voice_index = UINT32_MAX;
+        }
+        const uint32_t next_voice_index = voice.next_voice_index;
+        voice.next_voice_index = UINT32_MAX;
+        engine_.voice_pool.Release(active_voice_index);
+        active_voice_index = next_voice_index;
+      }
+      params.voice_count = new_voice_count;
+    } break;
     case BarelyInstrumentControlType_kAttack:
       params.adsr.SetAttack(engine_.sample_rate, value);
       break;

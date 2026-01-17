@@ -9,15 +9,9 @@
 
 namespace barely {
 
-/// Sidechain compressor.
+// Sidechain compressor.
 class Sidechain {
  public:
-  /// Processes the next sidechain frame.
-  ///
-  /// @param sidechain_frame Input/output sidechain frame.
-  /// @param mix Sidechain mix.
-  /// @param threshold_db Sidechain threshold in decibels.
-  /// @param ratio Sidechain ratio.
   void Process(float sidechain_frame[kStereoChannelCount], float mix, float threshold_db,
                float ratio) noexcept {
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
@@ -39,18 +33,10 @@ class Sidechain {
     }
   }
 
-  /// Sets the attack.
-  ///
-  /// @param attack Attack in seconds.
-  /// @param sample_rate Sampling rate in hertz.
   void SetAttack(float attack, float sample_rate) noexcept {
     attack_coeff_ = (attack > 0.0f) ? std::exp(-1.0f / (attack * sample_rate)) : 0.0f;
   }
 
-  /// Sets the release.
-  ///
-  /// @param release Release in seconds.
-  /// @param sample_rate Sampling rate in hertz.
   void SetRelease(float release, float sample_rate) noexcept {
     release_coeff_ = (release > 0.0f) ? std::exp(-1.0f / (release * sample_rate)) : 0.0f;
   }

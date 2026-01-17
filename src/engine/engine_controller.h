@@ -16,19 +16,12 @@ class EngineController {
   explicit EngineController(EngineState& engine) noexcept
       : engine_(engine), instrument_controller_(engine_), performer_controller_(engine_) {}
 
-  /// Sets a control value.
   void SetControl(BarelyEngineControlType type, float value) noexcept {
     if (auto& control = engine_.controls[type]; control.SetValue(value)) {
       engine_.ScheduleMessage(EngineControlMessage{type, control.value});
     }
   }
 
-  /// Updates the engine at timestamp.
-  ///
-  /// @param instrument_controller Instrument controller.
-  /// @param performer_controller Performer controller.
-  /// @param timestamp Timestamp in seconds.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept {
     while (engine_.timestamp < timestamp) {
       if (engine_.tempo > 0.0) {

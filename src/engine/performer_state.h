@@ -34,16 +34,12 @@ struct PerformerState {
   // Denotes whether performer is playing or not.
   bool is_playing = false;
 
-  // Loops around a given `new_position`.
   [[nodiscard]] double LoopAround(double new_position) const noexcept {
     return loop_length > 0.0
                ? loop_begin_position + std::fmod(new_position - loop_begin_position, loop_length)
                : loop_begin_position;
   }
 
-  /// Returns loop end position.
-  ///
-  /// @return Loop end position in beats.
   [[nodiscard]] double GetLoopEndPosition() const noexcept {
     return loop_begin_position + loop_length;
   }

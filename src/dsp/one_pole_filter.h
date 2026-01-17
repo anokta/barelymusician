@@ -10,15 +10,9 @@
 
 namespace barely {
 
-/// One-pole filter that processes basic low-pass and high-pass filtering.
+// One-pole filter that processes basic low-pass and high-pass filtering.
 class OnePoleFilter {
  public:
-  /// Filters the next input sample.
-  ///
-  /// @tparam kType Filter type.
-  /// @param input Input sample.
-  /// @param coefficient Filter coefficient.
-  /// @return Filtered output sample.
   template <FilterType kType>
   [[nodiscard]] float Next(float input, float coefficient) noexcept {
     static_assert(kType != FilterType::kNone, "Invalid filter type");
@@ -32,7 +26,6 @@ class OnePoleFilter {
     }
   }
 
-  /// Resets the filter output.
   void Reset() noexcept { output_ = 0.0f; }
 
  private:
@@ -40,11 +33,6 @@ class OnePoleFilter {
   float output_ = 0.0f;
 };
 
-/// Returns the corresponding one-pole filter coefficient for a given cutoff frequency.
-///
-/// @param sample_rate Sampling rate in hertz.
-/// @param cuttoff_frequency Cutoff frequency in hertz.
-/// @return Filter coefficient.
 inline float GetFilterCoefficient(float sample_rate, float cuttoff_frequency) noexcept {
   assert(sample_rate > 0.0f);
   assert(cuttoff_frequency >= 0.0f);

@@ -6,19 +6,19 @@
 namespace barely {
 
 struct SliceState {
-  /// Array of mono samples.
+  // Array of mono samples.
   const float* samples = nullptr;
 
-  /// Number of mono samples.
+  // Number of mono samples.
   int32_t sample_count = 0;
 
-  /// Sampling rate in hertz.
+  // Sampling rate in hertz.
   int32_t sample_rate = 0;
 
-  /// Root note pitch.
+  // Root note pitch.
   float root_pitch = 0.0f;
 
-  /// Next slice index.
+  // Next slice index.
   uint32_t next_slice_index = UINT32_MAX;
 };
 

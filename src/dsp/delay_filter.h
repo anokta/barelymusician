@@ -12,26 +12,22 @@
 
 namespace barely {
 
-/// Delay parameters.
 struct DelayParams {
-  /// Delay mix.
+  // Delay mix.
   float mix = 1.0f;
 
-  /// Number of delay frames.
+  // Number of delay frames.
   float frame_count = 0.0f;
 
-  /// Delay feedback.
+  // Delay feedback.
   float feedback = 0.0f;
 
-  /// Low-pass coefficient.
+  // Low-pass coefficient.
   float low_pass_coeff = 0.0f;
 
-  /// High-pass coefficient.
+  // High-pass coefficient.
   float high_pass_coeff = 1.0f;
 
-  /// Approaches parameters.
-  ///
-  /// @param params Delay parameters to approach to.
   void Approach(const DelayParams& params) noexcept {
     ApproachValue(mix, params.mix);
     ApproachValue(frame_count, params.frame_count);
@@ -41,16 +37,9 @@ struct DelayParams {
   }
 };
 
-/// Delay filter with smooth interpolation.
+// Delay filter with smooth interpolation.
 class DelayFilter {
  public:
-  /// Processes the next delay frame.
-  ///
-  /// @param input_frame Input frame.
-  /// @param output_frame Output frame.
-  /// @param delay_mix Delay mix.
-  /// @param delay_frame_count Number of delay frames.
-  /// @param delay_feedback Delay feedback.
   void Process(float input_frame[kStereoChannelCount], float output_frame[kStereoChannelCount],
                const DelayParams& params) noexcept {
     assert(params.frame_count >= 0);

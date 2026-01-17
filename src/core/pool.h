@@ -14,18 +14,19 @@ class Pool {
   Pool() noexcept {
     to_active_.fill(UINT32_MAX);
     for (uint32_t i = 0; i < kCount; ++i) {
-      free_[i] = kCount - i - 1;
+      free_[i] = i;
     }
   }
 
   /// Acquires a new item.
   ///
-  /// @return 0 if capacity is reached, valid item index otherwise.
+  /// @return Invalid index if capacity is reached, valid item index otherwise.
   [[nodiscard]] uint32_t Acquire() noexcept {
-    if (free_count_ > 0) {
-      const uint32_t index = free_[--free_count_];
-      assert(index < kCount);
+    if (active_count_ < kCount) {
+      const uint32_t index = free_[free_read_index_];
+      free_read_index_ = (free_read_index_ + 1) % kCount;
 
+      assert(index < kCount);
       assert(to_active_[index] == UINT32_MAX);
       assert(active_count_ < kCount);
       to_active_[index] = active_count_;
@@ -49,7 +50,8 @@ class Pool {
     to_active_[last_index] = removed_active_index;
     to_active_[index] = UINT32_MAX;
 
-    free_[free_count_++] = index;
+    free_[free_write_index_] = index;
+    free_write_index_ = (free_write_index_ + 1) % kCount;
   }
 
   [[nodiscard]] constexpr uint32_t Count() const noexcept { return kCount; }
@@ -100,7 +102,8 @@ class Pool {
   uint32_t active_count_ = 0;
 
   std::array<uint32_t, kCount> free_;
-  uint32_t free_count_ = kCount;
+  uint32_t free_read_index_ = 0;
+  uint32_t free_write_index_ = 0;
 };
 
 }  // namespace barely

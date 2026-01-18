@@ -14,10 +14,8 @@ namespace {
 constexpr int kInputLength = 5;
 constexpr float kInput[kInputLength] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-// Test coefficent.
 constexpr float kCoefficient = 0.5f;
 
-// Tests that a low-pass filter generates the expected output when an arbitrary coefficient is set.
 TEST(OnePoleFilterTest, LowPass) {
   OnePoleFilter filter;
   for (int i = 0; i < kInputLength; ++i) {
@@ -27,7 +25,6 @@ TEST(OnePoleFilterTest, LowPass) {
   }
 }
 
-// Tests that a low-pass filter does not alter the input when the coefficient is set to all-pass.
 TEST(OnePoleFilterTest, LowPassAllPass) {
   OnePoleFilter filter;
   for (const float input : kInput) {
@@ -35,7 +32,6 @@ TEST(OnePoleFilterTest, LowPassAllPass) {
   }
 }
 
-// Tests that a high-pass filter generates the expected output when an arbitrary coefficient is set.
 TEST(OnePoleFilterTest, HighPass) {
   OnePoleFilter filter;
   for (int i = 0; i < kInputLength; ++i) {
@@ -45,7 +41,6 @@ TEST(OnePoleFilterTest, HighPass) {
   }
 }
 
-// Tests that a high-pass filter does not alter the input when the coefficient is set to all-pass.
 TEST(OnePoleFilterTest, HighPassAllPass) {
   OnePoleFilter filter;
   for (const float input : kInput) {
@@ -53,8 +48,6 @@ TEST(OnePoleFilterTest, HighPassAllPass) {
   }
 }
 
-// Tests that the expected filter coefficients are generated for an arbitrary set of cutoff
-// frequencies.
 TEST(OnePoleFilterTest, GetFilterCoefficient) {
   constexpr float kEpsilon = 1e-2f;
   constexpr int kSampleRate = 8000;

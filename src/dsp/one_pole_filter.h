@@ -29,7 +29,6 @@ class OnePoleFilter {
   void Reset() noexcept { output_ = 0.0f; }
 
  private:
-  // The last output sample.
   float output_ = 0.0f;
 };
 

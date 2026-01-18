@@ -11,7 +11,6 @@ namespace {
 constexpr int kInputLength = 5;
 constexpr float kInput[kInputLength] = {0.2f, -0.4f, 0.6f, -0.8f, 1.0f};
 
-// Tests that a bit crusher reduces the bit depth as expected.
 TEST(BitCrusherTest, BitDepth) {
   constexpr float kIncrement = 1.0f;
 
@@ -22,7 +21,6 @@ TEST(BitCrusherTest, BitDepth) {
   }
 }
 
-// Tests that a bit crusher reduces the sample rate as expected.
 TEST(BitCrusherTest, SampleRate) {
   constexpr float kRange = 0.0f;
 

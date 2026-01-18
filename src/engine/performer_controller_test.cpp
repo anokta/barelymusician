@@ -11,15 +11,11 @@
 #include "engine/engine_state.h"
 #include "engine/performer_state.h"
 #include "engine/task_state.h"
-#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
-using ::testing::Pair;
-
-// Tests that a performer processses a single task as expected.
 TEST(PerformerControllerTest, ProcessSingleTask) {
   auto engine = std::make_unique<EngineState>();
   PerformerController controller(*engine);
@@ -237,7 +233,6 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 3);
 }
 
-// Tests that a performer processes multiple tasks as expected.
 TEST(PerformerControllerTest, ProcessMultipleTasks) {
   constexpr int kTaskCount = 4;
 

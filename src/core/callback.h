@@ -5,10 +5,7 @@ namespace barely {
 
 template <typename CallbackType>
 struct Callback {
-  // Callback.
   CallbackType callback = nullptr;
-
-  // Pointer to user data.
   void* user_data = nullptr;
 
   constexpr operator bool() const noexcept { return callback; }

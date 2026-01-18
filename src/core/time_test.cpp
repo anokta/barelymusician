@@ -9,7 +9,6 @@
 namespace barely {
 namespace {
 
-// Tests that beats and seconds are converted to each other as expected.
 TEST(TimeTest, BeatsSecondsConversion) {
   constexpr double kTempo = 120.0;
 
@@ -27,7 +26,6 @@ TEST(TimeTest, BeatsSecondsConversion) {
   }
 }
 
-// Tests that frames and seconds are converted to each other as expected.
 TEST(TimeTest, FramesSecondsConversion) {
   constexpr int kSampleRate = 8000;
 
@@ -57,7 +55,6 @@ constexpr int kThirtySecondTripletNotesPerBeat = 12;
 
 class QuantizationTestWithParam : public testing::TestWithParam<int> {};
 
-// Tests that the position gets quantized as expected with respect to the given resolution.
 TEST_P(QuantizationTestWithParam, Quantize) {
   constexpr double kPosition = 0.99;
 

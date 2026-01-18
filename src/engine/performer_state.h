@@ -13,25 +13,14 @@ namespace barely {
 
 struct PerformerState {
  public:
-  // Loop begin position in beats.
   double loop_begin_position = 0.0;
-
-  // Loop length in beats.
   double loop_length = 1.0;
-
-  // Position in beats.
   double position = 0.0;
 
-  // First active task index.
   uint32_t first_active_task_index = UINT32_MAX;
-
-  // First inactive task index.
   uint32_t first_inactive_task_index = UINT32_MAX;
 
-  // Denotes whether performer is looping or not.
   bool is_looping = false;
-
-  // Denotes whether performer is playing or not.
   bool is_playing = false;
 
   [[nodiscard]] double LoopAround(double new_position) const noexcept {

@@ -10,25 +10,15 @@
 namespace barely {
 
 struct TaskState {
-  // Task event callback.
   Callback<BarelyTaskEventCallback> callback = {};
 
-  // Task position in beats.
   double position = 0.0;
-
-  // Task duration in beats.
   double duration = 0.0;
-
-  // Task priority.
   int32_t priority = 0;
 
-  // Performer index.
   uint32_t performer_index = UINT32_MAX;
 
-  // Previous task index.
   uint32_t prev_task_index = UINT32_MAX;
-
-  // Next task index.
   uint32_t next_task_index = UINT32_MAX;
 
   // Denotes whether the task is active or not.

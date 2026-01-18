@@ -5,7 +5,6 @@
 
 namespace barely {
 
-// Minimum decibel threshold.
 inline constexpr float kMinDecibels = -80.0f;
 
 inline constexpr float AmplitudeToDecibels(float amplitude) noexcept {

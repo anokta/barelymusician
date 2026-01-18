@@ -17,7 +17,6 @@ using ::testing::VariantWith;
 namespace barely {
 namespace {
 
-// Tests that adding a single message is queued as expected.
 TEST(MessageQueueTest, AddSingleMessage) {
   MessageQueue messages;
   EXPECT_THAT(messages.GetNext(0), IsNull());
@@ -36,7 +35,6 @@ TEST(MessageQueueTest, AddSingleMessage) {
   EXPECT_THAT(messages.GetNext(10), IsNull());
 }
 
-// Tests that adding multiple messages are queued as expected.
 TEST(MessageQueueTest, AddMultipleMessages) {
   MessageQueue messages;
   EXPECT_THAT(messages.GetNext(10), IsNull());
@@ -54,8 +52,6 @@ TEST(MessageQueueTest, AddMultipleMessages) {
   // All messages are already returned.
   EXPECT_THAT(messages.GetNext(10), IsNull());
 }
-
-// TODO(#97): Add more tests with concurrency.
 
 }  // namespace
 }  // namespace barely

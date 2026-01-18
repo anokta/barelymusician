@@ -20,7 +20,6 @@ constexpr uint32_t kNoteIndex = 2;
 constexpr int kSampleRate = 4;
 constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
-// Tests that an instrument plays a single note as expected.
 TEST(EngineProcessorTest, PlaySingleNote) {
   constexpr int kFrameCount = 5;
   constexpr float kPitch = 1.0f;
@@ -72,7 +71,6 @@ TEST(EngineProcessorTest, PlaySingleNote) {
   }
 }
 
-// Tests that an instrument plays multiple notes as expected.
 TEST(EngineProcessorTest, PlayMultipleNotes) {
   constexpr std::array<BarelySlice, kSampleRate> kSlices = {
       BarelySlice{kSamples.data(), 1, kSampleRate, 0.0f},

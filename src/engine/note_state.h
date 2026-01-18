@@ -11,7 +11,14 @@ namespace barely {
 
 using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
 
-// Returns a note control array with overrides.
+struct NoteState {
+  NoteControlArray controls = {};
+  float pitch = 0.0;
+
+  uint32_t prev_note_index = UINT32_MAX;
+  uint32_t next_note_index = UINT32_MAX;
+};
+
 [[nodiscard]] inline NoteControlArray BuildNoteControlArray(
     const BarelyNoteControlOverride* note_control_overrides,
     int32_t note_control_override_count) noexcept {
@@ -24,13 +31,6 @@ using NoteControlArray = std::array<Control, BarelyNoteControlType_kCount>;
   }
   return note_control_array;
 }
-
-struct NoteState {
-  NoteControlArray controls = {};
-  float pitch = 0.0;
-  uint32_t prev_note_index = UINT32_MAX;
-  uint32_t next_note_index = UINT32_MAX;
-};
 
 }  // namespace barely
 

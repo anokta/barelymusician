@@ -42,13 +42,9 @@ class Sidechain {
   }
 
  private:
-  // Sidechain frame in decibels.
   std::array<float, kStereoChannelCount> sidechain_db_frame_ = {};
 
-  // Attack coefficient.
   float attack_coeff_ = 0.0f;
-
-  // Release coefficient.
   float release_coeff_ = 0.0f;
 };
 

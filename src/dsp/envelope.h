@@ -32,7 +32,6 @@ class Envelope {
    private:
     friend class Envelope;
 
-    // ADSR values.
     float attack_increment_ = 0.0f;
     float decay_increment_ = 0.0f;
     float sustain_ = 1.0f;
@@ -117,22 +116,15 @@ class Envelope {
   }
 
  private:
-  // Envelope state.
   enum class State { kAttack = 0, kDecay, kSustain, kRelease, kIdle };
 
-  // Pointer to adsr.
   const Adsr* adsr_ = nullptr;
 
-  // Current state.
   State state_ = State::kIdle;
 
-  // Last output value.
   float output_ = 0.0f;
-
-  // Last output value on release.
   float release_output_ = 0.0f;
 
-  // Internal clock.
   float phase_ = 0.0f;
 };
 

@@ -13,19 +13,12 @@
 namespace barely {
 
 struct DelayParams {
-  // Delay mix.
   float mix = 1.0f;
 
-  // Number of delay frames.
   float frame_count = 0.0f;
-
-  // Delay feedback.
   float feedback = 0.0f;
 
-  // Low-pass coefficient.
   float low_pass_coeff = 0.0f;
-
-  // High-pass coefficient.
   float high_pass_coeff = 1.0f;
 
   void Approach(const DelayParams& params) noexcept {
@@ -67,16 +60,11 @@ class DelayFilter {
   }
 
  private:
-  // Low-pass filter.
   std::array<OnePoleFilter, kStereoChannelCount> lpf_ = {};
-
-  // High-pass filter.
   std::array<OnePoleFilter, kStereoChannelCount> hpf_ = {};
 
   // Array of interleaved delay samples.
   std::array<float, kStereoChannelCount * kMaxDelayFrameCount> delay_samples_ = {};
-
-  // Write frame.
   int write_frame_ = 0;
 };
 

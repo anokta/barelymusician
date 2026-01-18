@@ -12,13 +12,8 @@
 namespace barely {
 
 struct CompressorParams {
-  // Compressor mix.
   float mix = 0.0f;
-
-  // Compressor threshold in decibels.
   float threshold_db = 0.0f;
-
-  // Compressor ratio.
   float ratio = 1.0f;
 
   void Approach(const CompressorParams& params) noexcept {
@@ -56,13 +51,9 @@ class Compressor {
   }
 
  private:
-  // Attack coefficient.
   float attack_coeff_ = 0.0f;
-
-  // Release coefficient.
   float release_coeff_ = 0.0f;
 
-  // Last peak value in decibels.
   float peak_db_ = kMinDecibels;
 };
 

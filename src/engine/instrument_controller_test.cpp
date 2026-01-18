@@ -13,7 +13,6 @@
 namespace barely {
 namespace {
 
-// Tests that an instrument sets a control value as expected.
 TEST(InstrumentControllerTest, SetControl) {
   auto engine = std::make_unique<EngineState>();
   InstrumentController controller(*engine);
@@ -39,7 +38,6 @@ TEST(InstrumentControllerTest, SetControl) {
   EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 1.0f);
 }
 
-// Tests that an instrument triggers its note callbacks as expected.
 TEST(InstrumentControllerTest, SetNoteCallbacks) {
   constexpr float kPitch = 3.3f;
 
@@ -87,7 +85,6 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   EXPECT_FLOAT_EQ(note_pitch.second, kPitch + 2.0f);
 }
 
-// Tests that an instrument stops all notes as expected.
 TEST(InstrumentControllerTest, SetAllNotesOff) {
   constexpr std::array<float, 3> kPitches = {1.0f, 2.0f, 3.0f};
 

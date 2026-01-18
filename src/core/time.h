@@ -7,10 +7,7 @@
 
 namespace barely {
 
-// Converts minutes to seconds.
 inline constexpr double kMinutesToSeconds = 60.0;
-
-// Converts seconds to minutes.
 inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
 
 [[nodiscard]] constexpr double FramesToSeconds(float sample_rate, int64_t frames) noexcept {

@@ -26,29 +26,7 @@
 
 namespace barely {
 
-// Engine control array.
 using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
-
-// Returns an engine control array.
-inline EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
-  return {
-      Control(0.0f, 0.0f, 1.0f),                // kCompressorMix
-      Control(0.0f, 0.0f, 10.0f),               // kCompressorAttack
-      Control(0.0f, 0.0f, 10.0f),               // kCompressorRelease
-      Control(1.0f, 0.0f, 1.0f),                // kCompressorThreshold
-      Control(1.0f, 1.0f, 64.0f),               // kCompressorRatio
-      Control(1.0f, 0.0f, 1.0f),                // kDelayMix
-      Control(0.0f, 0.0f, 10.0f),               // kDelayTime
-      Control(0.0f, 0.0f, 1.0f),                // kDelayFeedback
-      Control(sample_rate, 0.0f, sample_rate),  // kDelayLowPassFrequency
-      Control(0.0f, 0.0f, sample_rate),         // kDelayHighPassFrequency
-      Control(1.0f, 0.0f, 1.0f),                // kSidechainMix
-      Control(0.0f, 0.0f, 10.0f),               // kSidechainAttack
-      Control(0.0f, 0.0f, 10.0f),               // kSidechainRelease
-      Control(1.0f, 0.0f, 1.0f),                // kSidechainThreshold
-      Control(1.0f, 1.0f, 64.0f),               // kSidechainRatio
-  };
-}
 
 struct EngineState {
   // Performer pool.
@@ -160,6 +138,26 @@ struct EngineState {
     return voice_pool.Get(voice_index);
   }
 };
+
+inline EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
+  return {
+      Control(0.0f, 0.0f, 1.0f),                // kCompressorMix
+      Control(0.0f, 0.0f, 10.0f),               // kCompressorAttack
+      Control(0.0f, 0.0f, 10.0f),               // kCompressorRelease
+      Control(1.0f, 0.0f, 1.0f),                // kCompressorThreshold
+      Control(1.0f, 1.0f, 64.0f),               // kCompressorRatio
+      Control(1.0f, 0.0f, 1.0f),                // kDelayMix
+      Control(0.0f, 0.0f, 10.0f),               // kDelayTime
+      Control(0.0f, 0.0f, 1.0f),                // kDelayFeedback
+      Control(sample_rate, 0.0f, sample_rate),  // kDelayLowPassFrequency
+      Control(0.0f, 0.0f, sample_rate),         // kDelayHighPassFrequency
+      Control(1.0f, 0.0f, 1.0f),                // kSidechainMix
+      Control(0.0f, 0.0f, 10.0f),               // kSidechainAttack
+      Control(0.0f, 0.0f, 10.0f),               // kSidechainRelease
+      Control(1.0f, 0.0f, 1.0f),                // kSidechainThreshold
+      Control(1.0f, 1.0f, 64.0f),               // kSidechainRatio
+  };
+}
 
 }  // namespace barely
 

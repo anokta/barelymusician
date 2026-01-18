@@ -32,15 +32,10 @@ class Rng {
 
   // Random number generator engine.
   EngineType engine_;
-
-  // Random number generator seed value.
   int seed_ = static_cast<int>(EngineType::default_seed);
 };
 
-// Random nubmer generator for the audio thread.
 using AudioRng = Rng<std::minstd_rand, float>;
-
-// Random nubmer generator for the main thread.
 using MainRng = Rng<std::mt19937_64, double>;
 
 }  // namespace barely

@@ -12,7 +12,6 @@
 namespace barely {
 namespace {
 
-// Tests that a single performer is acquired and released as expected.
 TEST(EngineControllerTest, AcquireReleasePerformer) {
   auto engine = std::make_unique<EngineState>();
   EngineController controller(*engine);

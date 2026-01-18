@@ -28,10 +28,7 @@ class BitCrusher {
   }
 
  private:
-  // Last output sample.
   float output_ = 0.0f;
-
-  // Sample step phase.
   float phase_ = 0.0f;
 };
 

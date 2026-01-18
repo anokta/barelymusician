@@ -15,49 +15,27 @@
 namespace barely {
 
 struct VoiceState {
-  // Bit crusher.
   BitCrusher bit_crusher = {};
-
-  // ADSR envelope.
   Envelope envelope = {};
-
-  // Biquad filter.
   BiquadFilter filter = {};
 
-  // Note parameters.
   NoteParams note_params = {};
-
-  // Voice parameters.
   VoiceParams params = {};
 
-  // Voice pitch.
   float pitch = 0.0f;
-
-  // Voice pitch shift.
   float pitch_shift = 0.0f;
 
-  // Oscillator phase.
   float osc_phase = 0.0f;
-
-  // Slice offset in samples.
   float slice_offset = 0.0f;
 
-  // Instrument index.
   uint32_t instrument_index = UINT32_MAX;
-
-  // Note index.
   uint32_t note_index = UINT32_MAX;
-
-  // Slice index.
   uint32_t slice_index = UINT32_MAX;
 
-  // Previous voice index.
   uint32_t prev_voice_index = UINT32_MAX;
-
-  // Next voice index.
   uint32_t next_voice_index = UINT32_MAX;
 
-  // Voice timestamp (incremented in each voice start for round-robin voice stealing).
+  // Timestamp gets incremented in each voice start for round-robin voice stealing.
   uint32_t timestamp = 0;
 
   [[nodiscard]] constexpr bool IsActive() const noexcept { return envelope.IsActive(); }

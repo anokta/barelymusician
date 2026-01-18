@@ -7,7 +7,9 @@ namespace barely {
 
 struct ArpState {
   double phase = 0.0;
+
   uint32_t note_index = UINT32_MAX;
+
   bool is_note_on = false;
   bool should_release_note = false;
 };

@@ -8,13 +8,8 @@
 namespace barely {
 
 struct Control {
-  // Value.
   float value = 0.0f;
-
-  // Minimum value.
   float min_value = std::numeric_limits<float>::lowest();
-
-  // Maximum value.
   float max_value = std::numeric_limits<float>::max();
 
   constexpr Control() noexcept = default;

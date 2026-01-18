@@ -7,7 +7,6 @@
 namespace barely {
 namespace {
 
-// Tests that amplitude/decibels conversion returns expected results.
 TEST(DecibelsTest, AmplitudeDecibelsConversion) {
   constexpr float kEpsilon = 5e-2f;
 
@@ -25,7 +24,6 @@ TEST(DecibelsTest, AmplitudeDecibelsConversion) {
   }
 }
 
-// Tests that amplitude/decibels conversion snaps to `kMinDecibels` threshold.
 TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_FLOAT_EQ(AmplitudeToDecibels(0.0f), kMinDecibels);
   EXPECT_FLOAT_EQ(DecibelsToAmplitude(kMinDecibels), 0.0f);

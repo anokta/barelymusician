@@ -71,7 +71,6 @@ TEST(EngineTest, CreateDestroyPerformer) {
   engine.DestroyPerformer(engine.CreatePerformer());
 }
 
-// Tests that a single instrument is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySingleInstrument) {
   constexpr float kPitch = 0.5;
 
@@ -101,7 +100,6 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
 }
 
-// Tests that multiple instruments are created and destroyed as expected.
 TEST(EngineTest, CreateDestroyMultipleInstruments) {
   std::vector<float> note_off_pitches;
 
@@ -132,7 +130,6 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
   EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0f, -2.0f, -1.0f, 1.0f, 2.0f, 3.0f));
 }
 
-// Tests that the engine generates uniform numbers that are always within a given range.
 TEST(EngineTest, GenerateRandomNumber) {
   constexpr int kValueCount = 1000;
   constexpr int kMin = -7;
@@ -146,7 +143,6 @@ TEST(EngineTest, GenerateRandomNumber) {
   }
 }
 
-// Tests that the engine generates the same values the seed is reset with the same value.
 TEST(EngineTest, SetSeed) {
   constexpr int kSeed = 1;
   constexpr int kValueCount = 10;

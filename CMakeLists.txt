@@ -36,7 +36,7 @@ endif()
 option(ENABLE_TESTS "Build tests" ${ENABLE_TESTS})
 
 if(NOT DEFINED MAX_FRAME_COUNT)
-  set(MAX_FRAME_COUNT 4096 CACHE STRING "Maximum number of frames per process block" FORCE)
+  set(MAX_FRAME_COUNT 2048 CACHE STRING "Maximum number of frames per process block" FORCE)
 endif()
 option(MAX_FRAME_COUNT "Maximum number of frames per process block" ${MAX_FRAME_COUNT})
 

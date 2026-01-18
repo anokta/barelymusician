@@ -23,6 +23,8 @@ constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 16;
 
+static_assert(kFrameCount <= BARELY_MAX_FRAME_COUNT);
+
 // Instrument settings.
 constexpr float kGain = 0.125f;
 constexpr float kAttack = 0.05f;

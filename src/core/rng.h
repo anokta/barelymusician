@@ -21,9 +21,9 @@ class Rng {
   [[nodiscard]] RealType Generate() noexcept { return distribution_(engine_); }
 
   // Generates a new random number with uniform distribution in the range [min, max).
-  template <typename T>
-  [[nodiscard]] T Generate(T min, T max) noexcept {
-    return min + static_cast<T>(Generate() * static_cast<RealType>(max - min));
+  [[nodiscard]] uint32_t Generate(uint32_t min, uint32_t max) noexcept {
+    assert(min <= max);
+    return min + static_cast<uint32_t>(Generate() * static_cast<RealType>(max - min));
   }
 
  private:

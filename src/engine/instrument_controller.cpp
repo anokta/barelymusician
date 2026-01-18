@@ -300,8 +300,7 @@ void InstrumentController::ProcessArp() noexcept {
           break;
         case BarelyArpMode_kRandom: {
           uint32_t note_index = instrument.arp.note_index;
-          const uint32_t random_count =
-              engine_.main_rng.Generate(0, static_cast<int>(instrument.note_count));
+          const uint32_t random_count = engine_.main_rng.Generate(0, instrument.note_count);
           for (uint32_t n = 0; n < random_count; ++n) {
             note_index = engine_.note_pool.Get(note_index).next_note_index;
           }

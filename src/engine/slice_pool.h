@@ -70,7 +70,7 @@ class SlicePool {
           }
           return selected_slices[(selected_slice_count == 1)
                                      ? 0
-                                     : rng.Generate(0U, selected_slice_count)];
+                                     : rng.Generate(0, selected_slice_count)];
         }
         selected_slices[0] = slice_index;
         selected_slice_count = 1;
@@ -79,8 +79,7 @@ class SlicePool {
     }
 
     assert(selected_slice_count > 0);
-    return selected_slices[(selected_slice_count == 1) ? 0
-                                                       : rng.Generate(0U, selected_slice_count)];
+    return selected_slices[(selected_slice_count == 1) ? 0 : rng.Generate(0, selected_slice_count)];
   }
 
  private:

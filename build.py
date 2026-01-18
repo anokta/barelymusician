@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument(
         "--max_frames",
         type=count_type,
-        default=4096,
+        default=2048,
         help="specify the maximum number of frames per process block",
     )
     parser.add_argument(

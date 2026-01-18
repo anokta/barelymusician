@@ -63,7 +63,7 @@ export class Performer {
     this._withId(id => {
       this._audioNode.port.postMessage({
         type: 'task-create',
-        performerHandle: id,
+        performerId: id,
         position,
         duration,
       });

@@ -1,18 +1,58 @@
 set(CMAKE_FOLDER platforms)
 
+set(BARELY_EXPORTED_FUNCTIONS "['_malloc','_free',
+  '_BarelyEngine_Create',
+  '_BarelyEngine_CreateInstrument',
+  '_BarelyEngine_CreateTask',
+  '_BarelyEngine_CreatePerformer',
+  '_BarelyEngine_Destroy',
+  '_BarelyEngine_DestroyInstrument',
+  '_BarelyEngine_DestroyPerformer',
+  '_BarelyEngine_DestroyTask',
+  '_BarelyEngine_Process',
+  '_BarelyEngine_SetControl',
+  '_BarelyEngine_SetTempo',
+  '_BarelyEngine_Update',
+  '_BarelyInstrument_SetAllNotesOff',
+  '_BarelyInstrument_SetControl',
+  '_BarelyInstrument_SetNoteControl',
+  '_BarelyInstrument_SetNoteEventCallback',
+  '_BarelyInstrument_SetNoteOff',
+  '_BarelyInstrument_SetNoteOn',
+  '_BarelyInstrument_SetSampleData',
+  '_BarelyPerformer_GetLoopBeginPosition',
+  '_BarelyPerformer_GetLoopLength',
+  '_BarelyPerformer_GetPosition',
+  '_BarelyPerformer_IsLooping',
+  '_BarelyPerformer_IsPlaying',
+  '_BarelyPerformer_Start',
+  '_BarelyPerformer_Stop',
+  '_BarelyPerformer_SetLoopBeginPosition',
+  '_BarelyPerformer_SetLoopLength',
+  '_BarelyPerformer_SetLooping',
+  '_BarelyPerformer_SetPosition',
+  '_BarelyTask_GetDuration',
+  '_BarelyTask_GetPosition',
+  '_BarelyTask_IsActive',
+  '_BarelyTask_SetDuration',
+  '_BarelyTask_SetEventCallback',
+  '_BarelyTask_SetPosition'
+  ]"
+)
+
 add_executable(
   barelymusicianwasm
   wasm.cpp
 )
-# TODO: Remove EXPORT_ALL.
 set_target_properties(
   barelymusicianwasm PROPERTIES
-  LINK_FLAGS "--bind \
+  LINK_FLAGS " \
+    -s ALLOW_TABLE_GROWTH=1 \
     -s ASSERTIONS=0 \
     -s ENVIRONMENT=web,worker \
-    -s EXPORT_ALL=1 \
+    -s EXPORTED_FUNCTIONS=${BARELY_EXPORTED_FUNCTIONS} \
+    -s EXPORTED_RUNTIME_METHODS=['HEAP32','HEAPF32','addFunction','getValue'] \
     -s EXPORT_ES6=1 \
-    -s EXPORTED_FUNCTIONS=['_malloc','_free'] \
     -s EXPORT_NAME=barelymusician \
     -s MODULARIZE=1 \
     -s NO_FILESYSTEM=1 \

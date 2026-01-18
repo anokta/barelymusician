@@ -145,9 +145,9 @@ export class Instrument {
       const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = await this._audioContext.decodeAudioData(arrayBuffer);
       slices.push({
-        root_pitch: pitch,
-        sample_rate: audioBuffer.sampleRate,
-        samples: audioBuffer.getChannelData(0),  // mono assumed for now.
+        rootPitch: pitch,
+        sampleRate: audioBuffer.sampleRate,
+        samples: audioBuffer.getChannelData(0),  // mono only.
       });
     }
     await this._withId(async id => {

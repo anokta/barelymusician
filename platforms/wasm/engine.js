@@ -312,7 +312,7 @@ export class Engine {
           }
         } break;
         case 'task-create-success': {
-          const performer = this._performers[event.data.performerHandle];
+          const performer = this._performers[event.data.performerId];
           if (performer) {
             this._tasks[event.data.id] = performer.onTaskCreateSuccess(event.data.id);
           }

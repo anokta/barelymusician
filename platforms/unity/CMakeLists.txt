@@ -1,6 +1,6 @@
 add_library(
   barelymusicianunity SHARED
-  empty.cpp
+  unity.cpp
 )
 target_compile_definitions(
   barelymusicianunity PUBLIC

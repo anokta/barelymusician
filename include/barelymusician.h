@@ -14,7 +14,7 @@
 ///   @code{.cpp}
 ///   #include <barelymusician.h>
 ///
-///   // Create.
+///   // Create a new engine.
 ///   barely::Engine engine(/*sample_rate=*/48000);
 ///
 ///   // Set the tempo.
@@ -31,7 +31,7 @@
 ///   double timestamp = 1.0;
 ///   engine.Update(timestamp + kLookahead);
 ///
-///   // Process.
+///   // Process the next output samples.
 ///   //
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
@@ -44,10 +44,10 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   // Create.
+///   // Create a new instrument.
 ///   auto instrument = engine.CreateInstrument();
 ///
-///   // Set a note on.
+///   // Set an instrument note on.
 ///   //
 ///   // The note pitch is expressed in octaves relative to middle C as the center frequency.
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
@@ -55,39 +55,39 @@
 ///   constexpr float kC3Pitch = -1.0f;
 ///   instrument.SetNoteOn(kC3Pitch);
 ///
-///   // Check if the note is on.
+///   // Check if the instrument note is on.
 ///   const bool is_note_on = instrument.IsNoteOn(kC3Pitch);
 ///
 ///   // Set the instrument to use full oscillator mix.
 ///   instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 ///
-///   // Destroy.
+///   // Destroy the instrument.
 ///   engine.DestroyInstrument(instrument);
 ///   @endcode
 ///
 /// - Performer:
 ///
 ///   @code{.cpp}
-///   // Create.
+///   // Create a new performer.
 ///   auto performer = engine.CreatePerformer();
 ///
-///   // Create a task.
+///   // Create a new task.
 ///   auto task = engine.CreateTask(performer, /*position=*/0.0, /*duration=*/1.0,
 ///                                 [](barely::TaskEventType type) { /*populate this*/ });
 ///
-///   // Set to looping.
+///   // Set the performer to looping.
 ///   performer.SetLooping(/*is_looping=*/true);
 ///
-///   // Start.
+///   // Start the performer playback.
 ///   performer.Start();
 ///
-///   // Check if started playing.
+///   // Check if the performer started playing.
 ///   const bool is_playing = performer.IsPlaying();
 ///
-///   // Destroy task.
+///   // Destroy the task.
 ///   engine.DestroyTask(task);
 ///
-///   // Destroy.
+///   // Destroy the performer.
 ///   engine.DestroyPerformer(performer);
 ///   @endcode
 ///
@@ -100,7 +100,7 @@
 ///   @code{.cpp}
 ///   #include <barelymusician.h>
 ///
-///   // Create.
+///   // Create a new engine.
 ///   BarelyEngine* engine = nullptr;
 ///   BarelyEngine_Create(/*sample_rate=*/48000, &engine);
 ///
@@ -118,28 +118,26 @@
 ///   double timestamp = 0.0;
 ///   BarelyEngine_Update(engine, timestamp + lookahead);
 ///
-///   // Process.
-///   //
-///   // Process the next output samples of the engine.
+///   // Process the next output samples.
 ///   //
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
 ///   float output_samples[2 * 512];
 ///   BarelyEngine_Process(engine, output_samples, 2, 512, timestamp);
 ///
-///   // Destroy.
+///   // Destroy the engine.
 ///   BarelyEngine_Destroy(engine);
 ///   @endcode
 ///
 /// - Instrument:
 ///
 ///   @code{.cpp}
-///   // Create.
+///   // Create a new instrument.
 ///   uint32_t instrument_id = 0;
 ///   BarelyEngine_CreateInstrument(engine, /*control_overrides=*/nullptr,
 ///                                 /*control_override_count=*/0, &instrument_id);
 ///
-///   // Set a note on.
+///   // Set an instrument note on.
 ///   //
 ///   // The note pitch is expressed in octaves relative to middle C as the center frequency.
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
@@ -149,45 +147,45 @@
 ///                              /*note_control_overrides=*/nullptr,
 ///                              /*note_control_override_count=*/0);
 ///
-///   // Check if the note is on.
+///   // Check if the instrument note is on.
 ///   bool is_note_on = false;
 ///   BarelyInstrument_IsNoteOn(engine, instrument_id, c3_pitch, &is_note_on);
 ///
-///   // Set a control value.
+///   // Set the instrument to use full oscillator mix.
 ///   BarelyInstrument_SetControl(engine, instrument_id, BarelyInstrumentControlType_kOscMix,
 ///                               /*value=*/1.0f);
 ///
-///   // Destroy.
+///   // Destroy the instrument.
 ///   BarelyEngine_DestroyInstrument(engine, instrument_id);
 ///   @endcode
 ///
 /// - Performer:
 ///
 ///   @code{.cpp}
-///   // Create.
+///   // Create a new performer.
 ///   uint32_t performer_id = 0;
 ///   BarelyEngine_CreatePerformer(engine, &performer_id);
 ///
-///   // Create a task.
+///   // Create a new task.
 ///   uint32_t task_id = 0;
 ///   BarelyTaskEventCallback callback{ /*populate this*/ };
 ///   BarelyEngine_CreateTask(engine, performer_id, /*position=*/0.0, /*duration=*/1.0,
 ///                           /*priority=*/0, callback, &task_id);
 ///
-///   // Set to looping.
+///   // Set the performer to looping.
 ///   BarelyPerformer_SetLooping(engine, performer_id, /*is_looping=*/true);
 ///
-///   // Start.
+///   // Start the performer playback.
 ///   BarelyPerformer_Start(engine, performer_id);
 ///
-///   // Check if started playing.
+///   // Check if the performer started playing.
 ///   bool is_playing = false;
 ///   BarelyPerformer_IsPlaying(engine, performer_id, &is_playing);
 ///
 ///   // Destroy the task.
 ///   BarelyEngine_DestroyTask(engine, task_id);
 ///
-///   // Destroy.
+///   // Destroy the performer.
 ///   BarelyEngine_DestroyPerformer(engine, performer_id);
 ///   @endcode
 
@@ -412,7 +410,7 @@ typedef enum BarelyTaskEventType {
   BarelyTaskEventType_kCount,
 } BarelyTaskEventType;
 
-/// Engine.
+/// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
 
 /// Instrument control override.
@@ -815,14 +813,14 @@ BARELY_API bool BarelyPerformer_SetLooping(BarelyEngine* engine, uint32_t perfor
 BARELY_API bool BarelyPerformer_SetPosition(BarelyEngine* engine, uint32_t performer_id,
                                             double position);
 
-/// Starts a performer.
+/// Starts the playback of a performer.
 ///
 /// @param engine Pointer to engine.
 /// @param performer_id Performer identifier.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_Start(BarelyEngine* engine, uint32_t performer_id);
 
-/// Stops a performer.
+/// Stops the playback of a performer.
 ///
 /// @param engine Pointer to engine.
 /// @param performer_id Performer identifier.
@@ -1182,7 +1180,7 @@ class Instrument {
 
   /// Constructs a new `Instrument`.
   ///
-  /// @param engine Raw engine pointer.
+  /// @param engine Pointer to raw engine.
   /// @param instrument_id Instrument identifier.
   /// @param note_event_callback Pointer to note event callback.
   Instrument(BarelyEngine* engine, uint32_t instrument_id,
@@ -1348,7 +1346,7 @@ class Instrument {
   }
 
  private:
-  // Raw engine pointer.
+  // Pointer to raw engine.
   BarelyEngine* engine_ = nullptr;
 
   // Instrument identifier.
@@ -1366,7 +1364,7 @@ class Task {
 
   /// Constructs a new `Task`.
   ///
-  /// @param engine Raw engine pointer.
+  /// @param engine Pointer to raw engine.
   /// @param task_id Task identifier.
   /// @param event_callback Pointer to task event callback.
   Task(BarelyEngine* engine, uint32_t task_id, TaskEventCallback* event_callback) noexcept
@@ -1488,7 +1486,7 @@ class Performer {
 
   /// Constructs a new `Performer`.
   ///
-  /// @param engine Raw engine pointer.
+  /// @param engine Pointer to raw engine.
   /// @param performer_id Performer identifier.
   Performer(BarelyEngine* engine, uint32_t performer_id) noexcept
       : engine_(engine), performer_id_(performer_id) {}
@@ -1589,20 +1587,20 @@ class Performer {
     assert(success);
   }
 
-  /// Starts the performer.
+  /// Starts the playback.
   void Start() noexcept {
     [[maybe_unused]] const bool success = BarelyPerformer_Start(engine_, performer_id_);
     assert(success);
   }
 
-  /// Stops the performer.
+  /// Stops the playback.
   void Stop() noexcept {
     [[maybe_unused]] const bool success = BarelyPerformer_Stop(engine_, performer_id_);
     assert(success);
   }
 
  private:
-  // Raw engine pointer.
+  // Pointer to raw engine.
   BarelyEngine* engine_;
 
   // Performer identifier.
@@ -1623,7 +1621,7 @@ class Engine {
 
   /// Constructs a new `Engine`.
   ///
-  /// @param engine Raw engine pointer.
+  /// @param engine Pointer to raw engine.
   explicit Engine(BarelyEngine* engine) noexcept : engine_(engine) { assert(engine != nullptr); }
 
   /// Destroys `Engine`.
@@ -1655,9 +1653,9 @@ class Engine {
     return *this;
   }
 
-  /// Returns the raw pointer.
+  /// Returns the pointer to raw engine.
   ///
-  /// @return Raw pointer.
+  /// @return Pointer to raw engine.
   [[nodiscard]] constexpr operator BarelyEngine*() const noexcept { return engine_; }
 
   /// Creates a new instrument.
@@ -1856,7 +1854,7 @@ class Engine {
   }
 
  private:
-  // Raw pointer.
+  // Pointer to raw engine.
   BarelyEngine* engine_ = nullptr;
 
   // Heap allocated array of note event callbacks (for pointer stability on move).

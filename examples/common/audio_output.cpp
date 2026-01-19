@@ -2,7 +2,6 @@
 #include "common/audio_output.h"
 
 #include <cassert>
-#include <utility>
 
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
@@ -46,9 +45,5 @@ void AudioOutput::Start() {
 }
 
 void AudioOutput::Stop() noexcept { ma_device_stop(&device_); }
-
-void AudioOutput::SetProcessCallback(ProcessCallback process_callback) noexcept {
-  process_callback_ = std::move(process_callback);
-}
 
 }  // namespace barely::examples

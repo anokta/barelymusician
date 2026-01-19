@@ -7,7 +7,7 @@
 
 namespace barely::examples {
 
-/// Simple helper class that logs to the console output with a newline.
+// Simple helper that logs to the console output with a newline.
 class ConsoleLog {
  public:
   ConsoleLog() = default;
@@ -19,10 +19,6 @@ class ConsoleLog {
   ConsoleLog(ConsoleLog&& other) noexcept = delete;
   ConsoleLog& operator=(ConsoleLog&& other) noexcept = delete;
 
-  /// Overloads output stream operator.
-  ///
-  /// @param value Value to output.
-  /// @return Output stream.
   template <typename Type>
   std::ostream& operator<<(const Type& value) noexcept {
     stream_ << value;
@@ -30,7 +26,6 @@ class ConsoleLog {
   }
 
  private:
-  // Logging stream.
   std::ostringstream stream_;
 };
 

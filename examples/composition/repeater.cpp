@@ -29,8 +29,6 @@ void Repeater::Clear() noexcept {
   pitches_.clear();
 }
 
-bool Repeater::IsPlaying() const noexcept { return performer_.IsPlaying(); }
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Pop() noexcept {
   if (pitches_.empty()) {
@@ -47,14 +45,6 @@ void Repeater::Pop() noexcept {
 void Repeater::Push(std::optional<float> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
-
-void Repeater::SetRate(double rate) noexcept {
-  const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
-  performer_.SetLoopLength(length);
-  task_.SetDuration(length);
-}
-
-void Repeater::SetStyle(RepeaterMode style) noexcept { mode_ = style; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Start(float pitch_offset) noexcept {
@@ -76,6 +66,14 @@ void Repeater::Stop() noexcept {
   index_ = -1;
   remaining_length_ = 0;
 }
+
+void Repeater::SetRate(double rate) noexcept {
+  const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
+  performer_.SetLoopLength(length);
+  task_.SetDuration(length);
+}
+
+void Repeater::SetStyle(RepeaterMode style) noexcept { mode_ = style; }
 
 void Repeater::OnBeat() noexcept {
   if (pitches_.empty()) {

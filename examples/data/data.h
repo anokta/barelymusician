@@ -6,11 +6,7 @@
 
 namespace barely::examples {
 
-/// Returns the absolute data file path for a given relative file path.
-///
-/// @param relative_file_path Relative file path.
-/// @param argv Array of command line arguments.
-/// @return Absolute data file path.
+// Returns the absolute data file path for a given relative file path.
 std::string GetDataFilePath(std::string_view relative_file_path, char* argv[]);
 
 }  // namespace barely::examples

@@ -1,7 +1,5 @@
 #include "common/input_manager.h"
 
-#include <utility>
-
 namespace barely::examples {
 
 // NOLINTBEGIN(misc-include-cleaner)
@@ -60,14 +58,6 @@ InputManager::~InputManager() noexcept {
   CGEventTapEnable(event_tap_, false);
   CFRunLoopRemoveSource(CFRunLoopGetCurrent(), run_loop_source_, kCFRunLoopCommonModes);
 #endif  // defined(__APPLE__)
-}
-
-void InputManager::SetKeyDownCallback(KeyDownCallback key_down_callback) noexcept {
-  key_down_callback_ = std::move(key_down_callback);
-}
-
-void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept {
-  key_up_callback_ = std::move(key_up_callback);
 }
 
 // NOLINTBEGIN(misc-include-cleaner)

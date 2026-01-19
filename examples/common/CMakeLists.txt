@@ -1,6 +1,5 @@
 add_library(
   barelymusician_examples_common
-  audio_clock.cpp
   audio_clock.h
   audio_output.cpp
   audio_output.h

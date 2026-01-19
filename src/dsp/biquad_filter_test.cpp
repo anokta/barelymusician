@@ -19,6 +19,7 @@ constexpr float kEpsilon = 1e-5f;
 
 TEST(BiquadFilterTest, LowPassAllPass) {
   const auto coeffs =
+      // NOLINTNEXTLINE(readability-suspicious-call-argument)
       GetFilterCoefficients(kSampleInterval, FilterType::kLowPass, kSampleRate, kFilterQ);
 
   BiquadFilter filter;

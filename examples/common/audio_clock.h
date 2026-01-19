@@ -2,29 +2,27 @@
 #define BARELYMUSICIAN_EXAMPLES_COMMON_AUDIO_CLOCK_H_
 
 #include <atomic>
+#include <cassert>
 
 namespace barely::examples {
 
-/// Thread-safe audio dsp clock.
+// Thread-safe audio dsp clock.
 class AudioClock {
  public:
-  explicit AudioClock(int sample_rate) noexcept;
+  explicit AudioClock(int sample_rate) noexcept
+      : sample_rate_(static_cast<double>(sample_rate)), timestamp_(0.0) {
+    assert(sample_rate > 0);
+  }
 
-  /// Returns the timestamp.
-  ///
-  /// @return Timestamp in seconds.
-  double GetTimestamp() const noexcept;
+  void Update(int frame_count) noexcept {
+    assert(frame_count >= 0);
+    timestamp_ = timestamp_ + static_cast<double>(frame_count) / sample_rate_;
+  }
 
-  /// Updates the clock.
-  ///
-  /// @param frame_count Number of frames to iterate.
-  void Update(int frame_count) noexcept;
+  double GetTimestamp() const noexcept { return timestamp_; }
 
  private:
-  // Sampling rate in hertz.
-  const int sample_rate_;
-
-  // Monothonic timestamp in seconds.
+  double sample_rate_;
   std::atomic<double> timestamp_;
 };
 

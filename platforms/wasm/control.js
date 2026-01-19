@@ -1,9 +1,20 @@
-export const ArpMode = {
-  NONE: 0,
-  UP: 1,
-  DOWN: 2,
-  RANDOM: 3,
-  COUNT: 4,
+export const EngineControlType = {
+  COMPRESSOR_MIX: 0,
+  COMPRESSOR_ATTACK: 1,
+  COMPRESSOR_RELEASE: 2,
+  COMPRESSOR_THRESHOLD: 3,
+  COMPRESSOR_RATIO: 4,
+  DELAY_MIX: 5,
+  DELAY_TIME: 6,
+  DELAY_FEEDBACK: 7,
+  DELAY_LOW_PASS_FREQUENCY: 8,
+  DELAY_HIGH_PASS_FREQUENCY: 9,
+  SIDECHAIN_MIX: 10,
+  SIDECHAIN_ATTACK: 11,
+  SIDECHAIN_RELEASE: 12,
+  SIDECHAIN_THRESHOLD: 13,
+  SIDECHAIN_RATIO: 14,
+  COUNT: 15,
 };
 
 export const InstrumentControlType = {
@@ -38,17 +49,24 @@ export const InstrumentControlType = {
   COUNT: 28,
 };
 
+export const NoteControlType = {
+  GAIN: 0,
+  PITCH_SHIFT: 1,
+  COUNT: 2,
+};
+export const ArpMode = {
+  NONE: 0,
+  UP: 1,
+  DOWN: 2,
+  RANDOM: 3,
+  COUNT: 4,
+};
+
 export const FilterType = {
   NONE: 0,
   LOW_PASS: 1,
   HIGH_PASS: 2,
   COUNT: 3,
-};
-
-export const NoteControlType = {
-  GAIN: 0,
-  PITCH_SHIFT: 1,
-  COUNT: 2,
 };
 
 export const OscMode = {

@@ -1,4 +1,4 @@
-import {CONTROLS} from './control.js';
+import {CONTROLS, EngineControlType} from './control.js';
 import {Instrument} from './instrument.js';
 import {Performer} from './performer.js';
 
@@ -236,7 +236,11 @@ export class Engine {
     this._delayTime = newDelayTime;
     this.delayTimeSlider.value = this._delayTime;
     this.delayTimeValue.textContent = this._delayTime.toFixed(1);
-    this._audioNode.port.postMessage({type: 'engine-set-delay-time', delayTime: this._delayTime});
+    this._audioNode.port.postMessage({
+      type: 'engine-set-control',
+      typeIndex: EngineControlType.DELAY_TIME,
+      value: this._delayTime,
+    });
   }
 
   set delayFeedback(newDelayFeedback) {
@@ -245,8 +249,11 @@ export class Engine {
     this._delayFeedback = newDelayFeedback;
     this.delayFeedbackSlider.value = this._delayFeedback;
     this.delayFeedbackValue.textContent = this._delayFeedback.toFixed(2);
-    this._audioNode.port.postMessage(
-        {type: 'engine-set-delay-feedback', delayFeedback: this._delayFeedback});
+    this._audioNode.port.postMessage({
+      type: 'engine-set-control',
+      typeIndex: EngineControlType.DELAY_FEEDBACK,
+      value: this._delayFeedback,
+    });
   }
 
   _initAudioNode(audioContext, state) {
@@ -323,9 +330,7 @@ export class Engine {
         case 'task-get-properties-response': {
           const task = this._tasks[event.data.id];
           if (task) {
-            task._duration = event.data.duration;
             task._isActive = event.data.isActive;
-            task._position = event.data.position;
           }
         } break;
         case 'task-on-event': {

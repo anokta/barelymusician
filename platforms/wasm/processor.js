@@ -8,25 +8,6 @@ const SLICE_SIZE = 24;                       // sizeof(BarelySlice)
 const RENDER_QUANTUM_SIZE = 128;
 const STEREO_CHANNEL_COUNT = 2;
 
-export const EngineControlType = {
-  COMPRESSOR_MIX: 0,
-  COMPRESSOR_ATTACK: 1,
-  COMPRESSOR_RELEASE: 2,
-  COMPRESSOR_THRESHOLD: 3,
-  COMPRESSOR_RATIO: 4,
-  DELAY_MIX: 5,
-  DELAY_TIME: 6,
-  DELAY_FEEDBACK: 7,
-  DELAY_LOW_PASS_FREQUENCY: 8,
-  DELAY_HIGH_PASS_FREQUENCY: 9,
-  SIDECHAIN_MIX: 10,
-  SIDECHAIN_ATTACK: 11,
-  SIDECHAIN_RELEASE: 12,
-  SIDECHAIN_THRESHOLD: 13,
-  SIDECHAIN_RATIO: 14,
-  COUNT: 15,
-};
-
 class Processor extends AudioWorkletProcessor {
   constructor() {
     super();
@@ -78,13 +59,9 @@ class Processor extends AudioWorkletProcessor {
       }
 
       switch (event.data.type) {
-        case 'engine-set-delay-time':
+        case 'engine-set-control':
           this._module._BarelyEngine_SetControl(
-              this._engine, EngineControlType.DELAY_TIME, event.data.delayTime);
-          break;
-        case 'engine-set-delay-feedback':
-          this._module._BarelyEngine_SetControl(
-              this._engine, EngineControlType.DELAY_FEEDBACK, event.data.delayFeedback);
+              this._engine, event.data.typeIndex, event.data.value);
           break;
         case 'engine-set-tempo':
           this._module._BarelyEngine_SetTempo(this._engine, event.data.tempo);
@@ -145,6 +122,9 @@ class Processor extends AudioWorkletProcessor {
           }
           this.port.postMessage({type: 'instrument-destroy-success', id: event.data.id});
           break;
+        case 'instrument-set-all-notes-off':
+          this._module._BarelyInstrument_SetAllNotesOff(this._engine, event.data.id);
+          break;
         case 'instrument-set-control':
           this._module._BarelyInstrument_SetControl(
               this._engine, event.data.id, event.data.typeIndex, event.data.value);
@@ -154,8 +134,8 @@ class Processor extends AudioWorkletProcessor {
               this._engine, event.data.id, event.data.pitch, event.data.typeIndex,
               event.data.value);
           break;
-        case 'instrument-set-all-notes-off':
-          this._module._BarelyInstrument_SetAllNotesOff(this._engine, event.data.id);
+        case 'instrument-set-note-off':
+          this._module._BarelyInstrument_SetNoteOff(this._engine, event.data.id, event.data.pitch);
           break;
         case 'instrument-set-note-on': {
           const gainOffset = this._noteControlOverridesPtr / Uint32Array.BYTES_PER_ELEMENT;
@@ -169,9 +149,6 @@ class Processor extends AudioWorkletProcessor {
               this._engine, event.data.id, event.data.pitch, this._noteControlOverridesPtr,
               NoteControlType.COUNT);
         } break;
-        case 'instrument-set-note-off':
-          this._module._BarelyInstrument_SetNoteOff(this._engine, event.data.id, event.data.pitch);
-          break;
         case 'instrument-set-sample-data':
           this._setInstrumentSampleData(event.data.id, event.data.slices);
           break;
@@ -185,24 +162,14 @@ class Processor extends AudioWorkletProcessor {
           this.port.postMessage({type: 'performer-destroy-success', id: event.data.id});
           break;
         case 'performer-get-properties': {
-          this._module._BarelyPerformer_IsLooping(this._engine, event.data.id, this._uint8Ptr);
-          const isLooping = (this._module.getValue(this._uint8Ptr) !== 0);
           this._module._BarelyPerformer_IsPlaying(this._engine, event.data.id, this._uint8Ptr);
           const isPlaying = (this._module.getValue(this._uint8Ptr) !== 0);
-          this._module._BarelyPerformer_GetLoopBeginPosition(
-              this._engine, event.data.id, this._doublePtr);
-          const loopBeginPosition = this._module.getValue(this._doublePtr, 'double');
-          this._module._BarelyPerformer_GetLoopLength(this._engine, event.data.id, this._doublePtr);
-          const loopLength = this._module.getValue(this._doublePtr, 'double');
           this._module._BarelyPerformer_GetPosition(this._engine, event.data.id, this._doublePtr);
           const position = this._module.getValue(this._doublePtr, 'double');
           this.port.postMessage({
             type: 'performer-get-properties-response',
             id: event.data.id,
-            isLooping,
             isPlaying,
-            loopBeginPosition,
-            loopLength,
             position,
           });
         } break;
@@ -255,16 +222,10 @@ class Processor extends AudioWorkletProcessor {
         case 'task-get-properties': {
           this._module._BarelyTask_IsActive(this._engine, event.data.id, this._uint8Ptr);
           const isActive = (this._module.getValue(this._uint8Ptr) !== 0);
-          this._module._BarelyTask_GetDuration(this._engine, event.data.id, this._doublePtr);
-          const duration = this._module.getValue(this._doublePtr, 'double');
-          this._module._BarelyTask_GetPosition(this._engine, event.data.id, this._doublePtr);
-          const position = this._module.getValue(this._doublePtr, 'double');
           this.port.postMessage({
             type: 'task-get-properties-response',
             id: event.data.id,
             isActive,
-            duration,
-            position,
           });
         } break;
         case 'task-set-duration':

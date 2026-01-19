@@ -87,7 +87,9 @@ class SlicePool {
 
   std::array<SliceState, kCount> slices_;
 
-  std::atomic<int64_t> end_frame_ = 0;
+  // Seqlock to workaround 64-bit atomic on platforms lacking hardware support.
+  int64_t end_frame_ = 0;
+  std::atomic<uint32_t> end_frame_seq_ = 0;
 
   // Free queue.
   std::array<uint32_t, kCount> free_;

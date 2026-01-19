@@ -37,7 +37,18 @@ void SlicePool::ReleaseAt(uint32_t first_slice_index, int64_t frame) noexcept {
 }
 
 void SlicePool::CleanUpSafeToRelease() noexcept {
-  const int64_t end_frame = end_frame_.load(std::memory_order_relaxed);
+  int64_t end_frame = 0;
+  {
+    uint32_t seq_before = 0;
+    uint32_t seq_after = 0;
+    do {
+      seq_before = end_frame_seq_.load(std::memory_order_acquire);
+      if ((seq_before & 1) == 0) {
+        end_frame = end_frame_;
+        seq_after = end_frame_seq_.load(std::memory_order_acquire);
+      }
+    } while (seq_before != seq_after);  // busy loop while `end_frame_` is being written.
+  }
   while (to_release_read_index_ != to_release_write_index_) {
     auto& [first_slice_index, frame] = to_release_[to_release_read_index_];
     if (frame >= end_frame) {
@@ -55,7 +66,10 @@ void SlicePool::CleanUpSafeToRelease() noexcept {
 }
 
 void SlicePool::MarkSafeToRelease(int64_t end_frame) noexcept {
-  end_frame_.store(end_frame, std::memory_order_release);
+  const uint32_t seq = end_frame_seq_.load(std::memory_order_relaxed);
+  end_frame_seq_.store(seq + 1, std::memory_order_release);
+  end_frame_ = end_frame;
+  end_frame_seq_.store(seq + 2, std::memory_order_release);
 }
 
 }  // namespace barely

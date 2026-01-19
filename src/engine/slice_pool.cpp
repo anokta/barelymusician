@@ -5,11 +5,13 @@
 #include <atomic>
 #include <cstdint>
 
+#include "core/constants.h"
+
 namespace barely {
 
 uint32_t SlicePool::Acquire(const BarelySlice* slices, uint32_t slice_count) noexcept {
   if (free_count_ < slice_count) {
-    return UINT32_MAX;
+    return kInvalidIndex;
   }
 
   const uint32_t first_slice_index = free_[free_read_index_];
@@ -19,7 +21,8 @@ uint32_t SlicePool::Acquire(const BarelySlice* slices, uint32_t slice_count) noe
     free_read_index_ = (free_read_index_ + 1) % kCount;
 
     const BarelySlice& slice = slices[i];
-    const uint32_t next_slice_index = (i + 1 < slice_count) ? free_[free_read_index_] : UINT32_MAX;
+    const uint32_t next_slice_index =
+        (i + 1 < slice_count) ? free_[free_read_index_] : kInvalidIndex;
     slices_[slice_index] = {
         slice.samples, slice.sample_count, slice.sample_rate, slice.root_pitch, next_slice_index,
     };
@@ -55,7 +58,7 @@ void SlicePool::CleanUpSafeToRelease() noexcept {
       break;
     }
     uint32_t slice_index = first_slice_index;
-    while (slice_index != UINT32_MAX) {
+    while (slice_index != kInvalidIndex) {
       free_[free_write_index_] = slice_index;
       free_write_index_ = (free_write_index_ + 1) % kCount;
       slice_index = slices_[slice_index].next_slice_index;

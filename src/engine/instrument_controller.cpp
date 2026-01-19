@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <limits>
 
+#include "core/constants.h"
 #include "core/control.h"
 #include "core/rng.h"
 #include "core/time.h"
@@ -34,7 +35,7 @@ namespace {
 uint32_t InstrumentController::Acquire(const BarelyInstrumentControlOverride* control_overrides,
                                        int32_t control_override_count) noexcept {
   const uint32_t instrument_index = engine_.instrument_pool.Acquire();
-  if (instrument_index != UINT32_MAX) {
+  if (instrument_index != kInvalidIndex) {
     InstrumentState& instrument = engine_.GetInstrument(instrument_index);
     instrument = {};
     instrument.controls = BuildControlArray(control_overrides, control_override_count);
@@ -77,7 +78,7 @@ void InstrumentController::SetAllNotesOff(uint32_t instrument_index) noexcept {
   }
 
   instrument.arp = {};
-  instrument.first_note_index = UINT32_MAX;
+  instrument.first_note_index = kInvalidIndex;
   instrument.note_count = 0;
 }
 
@@ -88,7 +89,7 @@ void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumen
     switch (type) {
       case BarelyInstrumentControlType_kArpMode:
         if (static_cast<BarelyArpMode>(value) == BarelyArpMode_kNone) {
-          if (instrument.arp.note_index != UINT32_MAX) {
+          if (instrument.arp.note_index != kInvalidIndex) {
             if (instrument.arp.is_note_on) {
               const float pitch = engine_.note_pool.Get(instrument.arp.note_index).pitch;
               instrument.note_event_callback(BarelyNoteEventType_kEnd, pitch);
@@ -132,7 +133,7 @@ void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumen
 void InstrumentController::SetNoteControl(uint32_t instrument_index, float pitch,
                                           BarelyNoteControlType type, float value) noexcept {
   if (const uint32_t note_index = GetNote(engine_.GetInstrument(instrument_index), pitch);
-      note_index != UINT32_MAX) {
+      note_index != kInvalidIndex) {
     if (auto& note_control = engine_.note_pool.Get(note_index).controls[type];
         note_control.SetValue(value)) {
       engine_.ScheduleMessage(NoteControlMessage{note_index, type, note_control.value});
@@ -150,7 +151,7 @@ void InstrumentController::SetNoteOff(uint32_t instrument_index, float pitch) no
   auto& instrument = engine_.GetInstrument(instrument_index);
 
   const uint32_t note_index = GetNote(instrument, pitch);
-  if (note_index == UINT32_MAX) {
+  if (note_index == kInvalidIndex) {
     return;
   }
 
@@ -190,7 +191,7 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
   }
 
   const uint32_t new_note_index = engine_.note_pool.Acquire();
-  if (new_note_index == UINT32_MAX) {
+  if (new_note_index == kInvalidIndex) {
     assert(!"Maximum note count exceeded!");
     return;
   }
@@ -202,7 +203,7 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch,
 
   ++instrument.note_count;
 
-  if (note_index == UINT32_MAX) {
+  if (note_index == kInvalidIndex) {
     instrument.first_note_index = new_note_index;
     // Circle the note back to itself for easier iteration.
     new_note.next_note_index = new_note_index;
@@ -251,7 +252,7 @@ float InstrumentController::GetControl(uint32_t instrument_index,
 const float* InstrumentController::GetNoteControl(uint32_t instrument_index, float pitch,
                                                   BarelyNoteControlType type) const noexcept {
   const auto& instrument = engine_.GetInstrument(instrument_index);
-  if (const uint32_t note_index = GetNote(instrument, pitch); note_index != UINT32_MAX) {
+  if (const uint32_t note_index = GetNote(instrument, pitch); note_index != kInvalidIndex) {
     return &engine_.note_pool.Get(note_index).controls[type].value;
   }
   return nullptr;
@@ -262,14 +263,14 @@ bool InstrumentController::IsNoteOn(uint32_t instrument_index, float pitch) cons
   return instrument.IsArpEnabled()
              ? (instrument.arp.is_note_on &&
                 engine_.note_pool.Get(instrument.arp.note_index).pitch == pitch)
-             : (GetNote(instrument, pitch) != UINT32_MAX);
+             : (GetNote(instrument, pitch) != kInvalidIndex);
 }
 
 void InstrumentController::ProcessArp() noexcept {
   for (uint32_t i = 0; i < engine_.instrument_pool.ActiveCount(); ++i) {
     const uint32_t instrument_index = engine_.instrument_pool.GetActive(i);
     auto& instrument = engine_.GetInstrument(instrument_index);
-    if (instrument.first_note_index == UINT32_MAX || !instrument.IsArpEnabled()) {
+    if (instrument.first_note_index == kInvalidIndex || !instrument.IsArpEnabled()) {
       continue;
     }
     if (!instrument.arp.is_note_on && instrument.arp.phase == 0.0) {
@@ -338,18 +339,18 @@ uint32_t InstrumentController::GetNote(const InstrumentState& instrument,
     if (note.pitch == pitch) {
       return (!instrument.arp.should_release_note || instrument.arp.note_index != note_index)
                  ? note_index
-                 : UINT32_MAX;
+                 : kInvalidIndex;
     }
     note_index = note.next_note_index;
   }
-  return UINT32_MAX;
+  return kInvalidIndex;
 }
 
 void InstrumentController::ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept {
   auto& note = engine_.note_pool.Get(note_index);
 
   if (instrument.note_count == 1) {
-    instrument.first_note_index = UINT32_MAX;
+    instrument.first_note_index = kInvalidIndex;
     instrument.arp.phase = 0.0;
   } else {
     if (note_index == instrument.first_note_index) {
@@ -364,7 +365,7 @@ void InstrumentController::ReleaseNote(InstrumentState& instrument, uint32_t not
 }
 
 void InstrumentController::ReleaseSampleData(InstrumentState& instrument) noexcept {
-  if (instrument.first_slice_index != UINT32_MAX) {
+  if (instrument.first_slice_index != kInvalidIndex) {
     engine_.slice_pool.ReleaseAt(instrument.first_slice_index,
                                  SecondsToFrames(engine_.sample_rate, engine_.timestamp));
   }

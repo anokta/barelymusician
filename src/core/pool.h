@@ -5,6 +5,8 @@
 #include <cassert>
 #include <cstdint>
 
+#include "core/constants.h"
+
 namespace barely {
 
 // Memory pool template for a given item type.
@@ -12,7 +14,7 @@ template <typename ItemType, uint32_t kCount>
 class Pool {
  public:
   Pool() noexcept {
-    to_active_.fill(UINT32_MAX);
+    to_active_.fill(kInvalidIndex);
     for (uint32_t i = 0; i < kCount; ++i) {
       free_[i] = i;
     }
@@ -25,13 +27,13 @@ class Pool {
       free_read_index_ = (free_read_index_ + 1) % kCount;
 
       assert(index < kCount);
-      assert(to_active_[index] == UINT32_MAX);
+      assert(to_active_[index] == kInvalidIndex);
       to_active_[index] = active_count_;
       active_[active_count_++] = index;
 
       return index;
     }
-    return UINT32_MAX;
+    return kInvalidIndex;
   }
 
   void Release(uint32_t index) noexcept {
@@ -42,7 +44,7 @@ class Pool {
     const uint32_t last_index = active_[--active_count_];
     active_[removed_active_index] = last_index;
     to_active_[last_index] = removed_active_index;
-    to_active_[index] = UINT32_MAX;
+    to_active_[index] = kInvalidIndex;
 
     free_[free_write_index_] = index;
     free_write_index_ = (free_write_index_ + 1) % kCount;
@@ -72,6 +74,8 @@ class Pool {
   }
 
  private:
+  static_assert(kCount != kInvalidIndex);
+
   std::array<ItemType, kCount> items_;
   std::array<uint32_t, kCount> to_active_;  // maps item index to active index.
 

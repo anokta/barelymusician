@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include "core/callback.h"
+#include "core/constants.h"
 
 namespace barely {
 
@@ -16,10 +17,10 @@ struct TaskState {
   double duration = 0.0;
   int32_t priority = 0;
 
-  uint32_t performer_index = UINT32_MAX;
+  uint32_t performer_index = kInvalidIndex;
 
-  uint32_t prev_task_index = UINT32_MAX;
-  uint32_t next_task_index = UINT32_MAX;
+  uint32_t prev_task_index = kInvalidIndex;
+  uint32_t next_task_index = kInvalidIndex;
 
   // Denotes whether the task is active or not.
   bool is_active = false;

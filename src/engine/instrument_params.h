@@ -5,6 +5,7 @@
 
 #include <cstdint>
 
+#include "core/constants.h"
 #include "dsp/envelope.h"
 #include "engine/voice_params.h"
 
@@ -28,8 +29,8 @@ struct InstrumentParams {
   float osc_increment = 0.0f;
   float slice_increment = 0.0f;
 
-  uint32_t first_slice_index = UINT32_MAX;
-  uint32_t first_voice_index = UINT32_MAX;
+  uint32_t first_slice_index = kInvalidIndex;
+  uint32_t first_voice_index = kInvalidIndex;
 
   uint32_t voice_count = 0;
 

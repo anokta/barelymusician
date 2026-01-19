@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 
+#include "core/constants.h"
 #include "core/control.h"
 #include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
@@ -28,12 +29,12 @@ struct VoiceState {
   float osc_phase = 0.0f;
   float slice_offset = 0.0f;
 
-  uint32_t instrument_index = UINT32_MAX;
-  uint32_t note_index = UINT32_MAX;
-  uint32_t slice_index = UINT32_MAX;
+  uint32_t instrument_index = kInvalidIndex;
+  uint32_t note_index = kInvalidIndex;
+  uint32_t slice_index = kInvalidIndex;
 
-  uint32_t prev_voice_index = UINT32_MAX;
-  uint32_t next_voice_index = UINT32_MAX;
+  uint32_t prev_voice_index = kInvalidIndex;
+  uint32_t next_voice_index = kInvalidIndex;
 
   // Timestamp gets incremented in each voice start for round-robin voice stealing.
   uint32_t timestamp = 0;

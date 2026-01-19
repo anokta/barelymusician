@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 
+#include "core/constants.h"
 #include "core/rng.h"
 #include "engine/slice_state.h"
 #include "gmock/gmock-matchers.h"
@@ -33,7 +34,7 @@ TEST(SlicePoolTest, Select) {
 
   for (int i = 0; i <= 40; ++i) {
     const uint32_t slice_index = slice_pool.Select(first_slice_index, static_cast<float>(i), rng);
-    ASSERT_NE(slice_index, UINT32_MAX);
+    ASSERT_NE(slice_index, kInvalidIndex);
     EXPECT_THAT(
         slice_pool.Get(slice_index),
         Pointee(Field(&SliceState::root_pitch, ((i <= 10) ? 5.0f : (i <= 25.0f ? 15.0f : 35.0f)))))

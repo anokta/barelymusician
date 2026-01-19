@@ -7,6 +7,7 @@
 #include <cstdint>
 
 #include "core/callback.h"
+#include "core/constants.h"
 #include "engine/task_state.h"
 
 namespace barely {
@@ -17,8 +18,8 @@ struct PerformerState {
   double loop_length = 1.0;
   double position = 0.0;
 
-  uint32_t first_active_task_index = UINT32_MAX;
-  uint32_t first_inactive_task_index = UINT32_MAX;
+  uint32_t first_active_task_index = kInvalidIndex;
+  uint32_t first_inactive_task_index = kInvalidIndex;
 
   bool is_looping = false;
   bool is_playing = false;

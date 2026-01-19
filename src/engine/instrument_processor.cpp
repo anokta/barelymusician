@@ -35,19 +35,19 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       const uint32_t new_voice_count = static_cast<uint32_t>(value);
       uint32_t active_voice_count = 0;
       uint32_t active_voice_index = params.first_voice_index;
-      while (active_voice_index != UINT32_MAX && active_voice_count <= new_voice_count) {
+      while (active_voice_index != kInvalidIndex && active_voice_count <= new_voice_count) {
         active_voice_index = engine_.GetVoice(active_voice_index).next_voice_index;
         ++active_voice_count;
       }
       // Release the previously active voices beyond the new voice count.
-      while (active_voice_index != UINT32_MAX) {
+      while (active_voice_index != kInvalidIndex) {
         auto& voice = engine_.GetVoice(active_voice_index);
-        if (voice.prev_voice_index != UINT32_MAX) {
-          engine_.GetVoice(voice.prev_voice_index).next_voice_index = UINT32_MAX;
-          voice.prev_voice_index = UINT32_MAX;
+        if (voice.prev_voice_index != kInvalidIndex) {
+          engine_.GetVoice(voice.prev_voice_index).next_voice_index = kInvalidIndex;
+          voice.prev_voice_index = kInvalidIndex;
         }
         const uint32_t next_voice_index = voice.next_voice_index;
-        voice.next_voice_index = UINT32_MAX;
+        voice.next_voice_index = kInvalidIndex;
         engine_.voice_pool.Release(active_voice_index);
         active_voice_index = next_voice_index;
       }
@@ -157,24 +157,24 @@ void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlT
 
 void InstrumentProcessor::SetNoteOff(uint32_t note_index) noexcept {
   const uint32_t voice_index = engine_.note_to_voice[note_index];
-  engine_.note_to_voice[note_index] = UINT32_MAX;
+  engine_.note_to_voice[note_index] = kInvalidIndex;
   if (!engine_.voice_pool.IsActive(voice_index)) {
     return;
   }
   auto& voice = engine_.GetVoice(voice_index);
   if (const auto& instrument_params = engine_.instrument_params[voice.instrument_index];
-      instrument_params.first_slice_index == UINT32_MAX ||
+      instrument_params.first_slice_index == kInvalidIndex ||
       instrument_params.slice_mode != SliceMode::kOnce) {
     voice.envelope.Stop();
   }
-  voice.note_index = UINT32_MAX;
+  voice.note_index = kInvalidIndex;
 }
 
 void InstrumentProcessor::SetNoteOn(
     uint32_t note_index, uint32_t instrument_index, float pitch,
     const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
-  if (const uint32_t voice_index = AcquireVoice(params, pitch); voice_index != UINT32_MAX) {
+  if (const uint32_t voice_index = AcquireVoice(params, pitch); voice_index != kInvalidIndex) {
     engine_.note_to_voice[note_index] = voice_index;
     auto& voice = engine_.GetVoice(voice_index);
     voice.instrument_index = instrument_index;
@@ -188,7 +188,7 @@ void InstrumentProcessor::SetNoteOn(
 uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch) noexcept {
   if (params.should_retrigger) {
     uint32_t current_voice_index = params.first_voice_index;
-    while (current_voice_index != UINT32_MAX) {
+    while (current_voice_index != kInvalidIndex) {
       auto& voice = engine_.GetVoice(current_voice_index);
       if (voice.pitch == pitch) {
         const uint32_t retrigger_voice_index = current_voice_index;
@@ -197,7 +197,7 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
           VoiceState& timestamp_voice = engine_.GetVoice(current_voice_index);
           ++timestamp_voice.timestamp;
           current_voice_index = timestamp_voice.next_voice_index;
-        } while (current_voice_index != UINT32_MAX);
+        } while (current_voice_index != kInvalidIndex);
         return retrigger_voice_index;
       }
       current_voice_index = voice.next_voice_index;
@@ -208,7 +208,7 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
   uint32_t last_voice_index = current_voice_index;
   uint32_t oldest_active_voice_index = current_voice_index;
   uint32_t active_voice_count = 0;
-  while (current_voice_index != UINT32_MAX) {
+  while (current_voice_index != kInvalidIndex) {
     auto& voice = engine_.GetVoice(current_voice_index);
     if (voice.timestamp > engine_.GetVoice(oldest_active_voice_index).timestamp) {
       oldest_active_voice_index = current_voice_index;
@@ -224,8 +224,8 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
     const uint32_t new_voice_index = engine_.voice_pool.Acquire();
     VoiceState& new_voice = engine_.GetVoice(new_voice_index);
     new_voice.prev_voice_index = last_voice_index;
-    new_voice.next_voice_index = UINT32_MAX;
-    if (last_voice_index != UINT32_MAX) {
+    new_voice.next_voice_index = kInvalidIndex;
+    if (last_voice_index != kInvalidIndex) {
       engine_.GetVoice(last_voice_index).next_voice_index = new_voice_index;
     } else {
       params.first_voice_index = new_voice_index;
@@ -242,7 +242,7 @@ void InstrumentProcessor::SetSampleData(uint32_t instrument_index,
   auto& params = engine_.instrument_params[instrument_index];
   params.first_slice_index = first_slice_index;
   uint32_t active_voice_index = params.first_voice_index;
-  while (active_voice_index != UINT32_MAX) {
+  while (active_voice_index != kInvalidIndex) {
     auto& voice = engine_.GetVoice(active_voice_index);
     voice.slice_index =
         engine_.slice_pool.Select(params.first_slice_index, voice.pitch, engine_.audio_rng);

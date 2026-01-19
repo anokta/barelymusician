@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "core/constants.h"
+
 namespace barely {
 
 struct SliceState {
@@ -14,7 +16,7 @@ struct SliceState {
 
   float root_pitch = 0.0f;
 
-  uint32_t next_slice_index = UINT32_MAX;
+  uint32_t next_slice_index = kInvalidIndex;
 };
 
 }  // namespace barely

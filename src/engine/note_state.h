@@ -5,6 +5,7 @@
 
 #include <array>
 
+#include "core/constants.h"
 #include "core/control.h"
 
 namespace barely {
@@ -15,8 +16,8 @@ struct NoteState {
   NoteControlArray controls = {};
   float pitch = 0.0;
 
-  uint32_t prev_note_index = UINT32_MAX;
-  uint32_t next_note_index = UINT32_MAX;
+  uint32_t prev_note_index = kInvalidIndex;
+  uint32_t next_note_index = kInvalidIndex;
 };
 
 [[nodiscard]] inline NoteControlArray BuildNoteControlArray(

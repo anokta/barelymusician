@@ -5,6 +5,9 @@
 
 namespace barely {
 
+// Invalid pool index.
+inline constexpr uint32_t kInvalidIndex = UINT32_MAX;
+
 // Maximum number of delay frames.
 inline constexpr int kMaxDelayFrameCount = 10 * 48000;
 

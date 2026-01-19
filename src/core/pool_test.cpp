@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include "core/constants.h"
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -21,7 +22,7 @@ TEST(PoolTest, AcquireMax) {
 
   // Exceeded maximum capacity.
   for (uint32_t i = 0; i < kCount; ++i) {
-    EXPECT_EQ(pool.Acquire(), UINT32_MAX);
+    EXPECT_EQ(pool.Acquire(), kInvalidIndex);
     EXPECT_EQ(pool.ActiveCount(), kCount);
   }
 

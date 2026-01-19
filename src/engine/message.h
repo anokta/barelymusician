@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <variant>
 
+#include "core/constants.h"
+
 namespace barely {
 
 struct EngineControlMessage {
@@ -19,35 +21,35 @@ struct EngineSeedMessage {
 };
 
 struct InstrumentCreateMessage {
-  uint32_t instrument_index = UINT32_MAX;
+  uint32_t instrument_index = kInvalidIndex;
 };
 
 struct InstrumentControlMessage {
-  uint32_t instrument_index = UINT32_MAX;
+  uint32_t instrument_index = kInvalidIndex;
   BarelyInstrumentControlType type = BarelyInstrumentControlType_kCount;
   float value;
 };
 
 struct NoteControlMessage {
-  uint32_t note_index = UINT32_MAX;
+  uint32_t note_index = kInvalidIndex;
   BarelyNoteControlType type = BarelyNoteControlType_kCount;
   float value = 0.0f;
 };
 
 struct NoteOffMessage {
-  uint32_t note_index = UINT32_MAX;
+  uint32_t note_index = kInvalidIndex;
 };
 
 struct NoteOnMessage {
-  uint32_t note_index = UINT32_MAX;
-  uint32_t instrument_index = UINT32_MAX;
+  uint32_t note_index = kInvalidIndex;
+  uint32_t instrument_index = kInvalidIndex;
   float pitch = 0.0f;
   std::array<float, BarelyNoteControlType_kCount> controls = {/*kGain=*/1.0f, /*kPitchShift=*/0.0f};
 };
 
 struct SampleDataMessage {
-  uint32_t instrument_index = UINT32_MAX;
-  uint32_t first_slice_index = UINT32_MAX;
+  uint32_t instrument_index = kInvalidIndex;
+  uint32_t first_slice_index = kInvalidIndex;
 };
 
 using Message = std::variant<EngineControlMessage, EngineSeedMessage, InstrumentCreateMessage,

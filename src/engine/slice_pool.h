@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <utility>
 
+#include "core/constants.h"
 #include "core/rng.h"
 #include "engine/slice_state.h"
 
@@ -37,8 +38,8 @@ class SlicePool {
 
   [[nodiscard]] uint32_t Select(uint32_t first_slice_index, float pitch,
                                 AudioRng& rng) const noexcept {
-    if (first_slice_index == UINT32_MAX) {
-      return UINT32_MAX;
+    if (first_slice_index == kInvalidIndex) {
+      return kInvalidIndex;
     }
 
     static constexpr uint32_t kMaxSelectedCount = 16;
@@ -46,7 +47,7 @@ class SlicePool {
     uint32_t selected_slice_count = 0;
 
     uint32_t slice_index = first_slice_index;
-    while (slice_index != UINT32_MAX) {
+    while (slice_index != kInvalidIndex) {
       if (selected_slice_count == 0 ||
           slices_[slice_index].root_pitch ==
               slices_[selected_slices[selected_slice_count - 1]].root_pitch) {
@@ -60,7 +61,7 @@ class SlicePool {
           if (pitch - previous_root_pitch > slice.root_pitch - pitch) {
             selected_slices[0] = slice_index;
             selected_slice_count = 1;
-            while (slice_index != UINT32_MAX &&
+            while (slice_index != kInvalidIndex &&
                    slices_[slice_index].root_pitch == slice.root_pitch) {
               if (selected_slice_count < kMaxSelectedCount) {
                 selected_slices[selected_slice_count++] = slice_index;

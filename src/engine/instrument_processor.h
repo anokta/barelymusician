@@ -60,21 +60,21 @@ class InstrumentProcessor {
   [[nodiscard]] uint32_t AcquireVoice(InstrumentParams& params, float pitch) noexcept;
 
   void ReleaseVoice(VoiceState& voice, InstrumentParams& params) noexcept {
-    if (voice.prev_voice_index != UINT32_MAX) {
+    if (voice.prev_voice_index != kInvalidIndex) {
       engine_.GetVoice(voice.prev_voice_index).next_voice_index = voice.next_voice_index;
-      if (voice.next_voice_index != UINT32_MAX) {
+      if (voice.next_voice_index != kInvalidIndex) {
         engine_.GetVoice(voice.next_voice_index).prev_voice_index = voice.prev_voice_index;
       }
-      voice.prev_voice_index = UINT32_MAX;
+      voice.prev_voice_index = kInvalidIndex;
     } else {
       params.first_voice_index = voice.next_voice_index;
-      if (voice.next_voice_index != UINT32_MAX) {
-        engine_.GetVoice(voice.next_voice_index).prev_voice_index = UINT32_MAX;
+      if (voice.next_voice_index != kInvalidIndex) {
+        engine_.GetVoice(voice.next_voice_index).prev_voice_index = kInvalidIndex;
       }
     }
-    voice.next_voice_index = UINT32_MAX;
-    if (voice.note_index != UINT32_MAX) {
-      engine_.note_to_voice[voice.note_index] = UINT32_MAX;
+    voice.next_voice_index = kInvalidIndex;
+    if (voice.note_index != kInvalidIndex) {
+      engine_.note_to_voice[voice.note_index] = kInvalidIndex;
     }
   }
 

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 
+#include "core/constants.h"
 #include "core/time.h"
 #include "engine/engine_controller.h"
 #include "engine/engine_processor.h"
@@ -21,6 +22,8 @@ constexpr uint32_t kMaxIdGeneration = ((1 << (32 - BARELY_ID_INDEX_BIT_COUNT)) -
 static_assert(BARELY_MAX_INSTRUMENT_COUNT > 0 && BARELY_MAX_INSTRUMENT_COUNT <= kMaxIdIndex);
 static_assert(BARELY_MAX_PERFORMER_COUNT > 0 && BARELY_MAX_PERFORMER_COUNT <= kMaxIdIndex);
 static_assert(BARELY_MAX_TASK_COUNT > 0 && BARELY_MAX_TASK_COUNT <= kMaxIdIndex);
+
+static_assert((barely::kInvalidIndex + 1) == 0);
 
 [[nodiscard]] uint32_t BuildId(uint32_t index, uint32_t generation) noexcept {
   return (generation << BARELY_ID_INDEX_BIT_COUNT) | (index + 1);
@@ -83,7 +86,7 @@ bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
 
   const uint32_t instrument_index =
       engine->controller.instrument_controller().Acquire(control_overrides, control_override_count);
-  if (instrument_index != UINT32_MAX) {
+  if (instrument_index != barely::kInvalidIndex) {
     *out_instrument_id =
         BuildId(instrument_index, engine->state.instrument_generations[instrument_index]);
     return true;
@@ -96,7 +99,7 @@ bool BarelyEngine_CreatePerformer(BarelyEngine* engine, uint32_t* out_performer_
   if (!out_performer_id) return false;
 
   const uint32_t performer_index = engine->controller.performer_controller().Acquire();
-  if (performer_index != UINT32_MAX) {
+  if (performer_index != barely::kInvalidIndex) {
     *out_performer_id =
         BuildId(performer_index, engine->state.performer_generations[performer_index]);
     return true;
@@ -114,7 +117,7 @@ bool BarelyEngine_CreateTask(BarelyEngine* engine, uint32_t performer_id, double
 
   const uint32_t task_index = engine->controller.performer_controller().AcquireTask(
       GetIndex(performer_id), position, duration, priority, callback, user_data);
-  if (task_index != UINT32_MAX) {
+  if (task_index != barely::kInvalidIndex) {
     *out_task_id = BuildId(task_index, engine->state.task_generations[task_index]);
     return true;
   }

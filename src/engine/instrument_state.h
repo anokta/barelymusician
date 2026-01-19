@@ -9,6 +9,7 @@
 #include <limits>
 
 #include "core/callback.h"
+#include "core/constants.h"
 #include "core/control.h"
 #include "engine/arp_state.h"
 #include "engine/note_state.h"
@@ -24,13 +25,13 @@ struct InstrumentState {
 
   Callback<BarelyNoteEventCallback> note_event_callback = {};
 
-  uint32_t first_note_index = UINT32_MAX;
+  uint32_t first_note_index = kInvalidIndex;
   uint32_t note_count = 0;
 
-  uint32_t first_slice_index = UINT32_MAX;
+  uint32_t first_slice_index = kInvalidIndex;
 
   void Update(double duration) noexcept {
-    if (first_note_index != UINT32_MAX && IsArpEnabled()) {
+    if (first_note_index != kInvalidIndex && IsArpEnabled()) {
       assert(duration <= GetNextArpDuration());
       const double rate = static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value);
       arp.phase = std::fmod(arp.phase + duration * rate, 1.0);
@@ -38,7 +39,7 @@ struct InstrumentState {
   }
 
   double GetNextArpDuration() const noexcept {
-    if (first_note_index == UINT32_MAX || !IsArpEnabled()) {
+    if (first_note_index == kInvalidIndex || !IsArpEnabled()) {
       return std::numeric_limits<double>::max();
     }
     const double rate = static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value);

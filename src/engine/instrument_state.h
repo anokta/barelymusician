@@ -11,7 +11,6 @@
 #include "core/callback.h"
 #include "core/constants.h"
 #include "core/control.h"
-#include "engine/arp_state.h"
 #include "engine/note_state.h"
 
 namespace barely {
@@ -21,9 +20,14 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
 struct InstrumentState {
   InstrumentControlArray controls = {};
 
-  ArpState arp = {};
-
   Callback<BarelyNoteEventCallback> note_event_callback = {};
+
+  struct {
+    double phase = 0.0;
+    uint32_t note_index = kInvalidIndex;
+    bool is_note_on = false;
+    bool should_release_note = false;
+  } arp = {};
 
   uint32_t first_note_index = kInvalidIndex;
   uint32_t note_count = 0;

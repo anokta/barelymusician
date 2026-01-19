@@ -1,6 +1,5 @@
 target_sources(
   barelymusician PRIVATE
-  arp_state.h
   effect_params.h
   engine_controller.h
   engine_processor.h
@@ -13,7 +12,6 @@ target_sources(
   instrument_state.h
   message.h
   message_queue.h
-  note_params.h
   note_state.h
   performer_controller.cpp
   performer_controller.h

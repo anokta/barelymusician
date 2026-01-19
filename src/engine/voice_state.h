@@ -10,7 +10,6 @@
 #include "dsp/bit_crusher.h"
 #include "dsp/envelope.h"
 #include "engine/instrument_params.h"
-#include "engine/note_params.h"
 #include "engine/voice_params.h"
 
 namespace barely {
@@ -20,8 +19,13 @@ struct VoiceState {
   Envelope envelope = {};
   BiquadFilter filter = {};
 
-  NoteParams note_params = {};
   VoiceParams params = {};
+
+  struct {
+    float gain = 1.0f;
+    float osc_increment = 0.0f;
+    float slice_increment = 0.0f;
+  } note_params = {};
 
   float pitch = 0.0f;
   float pitch_shift = 0.0f;

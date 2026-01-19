@@ -8,11 +8,11 @@ namespace Barely {
   public enum ArpMode {
     /// None.
     [InspectorName("None")] NONE = 0,
-    /// None.
+    /// Up.
     [InspectorName("Up")] UP,
-    /// None.
+    /// Down.
     [InspectorName("Down")] DOWN,
-    /// None.
+    /// Random.
     [InspectorName("Random")] RANDOM,
   }
 
@@ -318,20 +318,11 @@ namespace Barely {
       Engine.Internal.Instrument_SetNoteOn(_id, pitch, gain, pitchShift);
     }
 
-    /// Class that wraps the internal api.
     public static class Internal {
-      /// Returns the identifier.
-      public static UInt32 GetId(Instrument instrument) {
-        return instrument ? instrument._id : 0;
-      }
-
-      /// Internal note off callback.
       public static void OnNoteOff(Instrument instrument, float pitch) {
         instrument.OnNoteOff?.Invoke(pitch);
         instrument.OnNoteOffEvent?.Invoke(pitch);
       }
-
-      /// Internal note on callback.
       public static void OnNoteOn(Instrument instrument, float pitch) {
         instrument.OnNoteOn?.Invoke(pitch);
         instrument.OnNoteOnEvent?.Invoke(pitch);
@@ -392,7 +383,6 @@ namespace Barely {
       }
     }
 
-    // Identifier.
     private UInt32 _id = 0;
   }
 }  // namespace Barely

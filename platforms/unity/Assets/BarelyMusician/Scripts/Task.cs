@@ -107,19 +107,14 @@ namespace Barely {
       }
     }
 
-    /// Class that wraps the internal api.
     public static class Internal {
-      /// Internal process callback.
       public static void OnProcess(Task task, TaskEventType type) {
         task.OnProcess?.Invoke(type);
         task.OnProcessEvent?.Invoke(type);
       }
     }
 
-    /// Performer.
     private Performer _performer = null;
-
-    // Identifier.
     private UInt32 _id = 0;
   }
 }  // namespace Barely

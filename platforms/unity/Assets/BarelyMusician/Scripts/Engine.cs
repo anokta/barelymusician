@@ -214,114 +214,106 @@ namespace Barely {
       get { return Internal.Engine_GetTimestamp(); }
     }
 
-    /// Class that wraps the internal api.
     public static class Internal {
-      /// Instrument control type.
       public enum InstrumentControlType {
-        /// Gain in linear amplitude.
+        // Gain in linear amplitude.
         [InspectorName("Gain")] GAIN = 0,
-        /// Pitch shift.
+        // Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
-        /// Retrigger.
+        // Retrigger.
         [InspectorName("Retrigger")] RETRIGGER,
-        /// Stereo pan.
+        // Stereo pan.
         [InspectorName("Stereo Pan")] STEREO_PAN,
-        /// Number of voices.
+        // Number of voices.
         [InspectorName("Voice Count")] VOICE_COUNT,
-        /// Envelope attack in seconds.
+        // Envelope attack in seconds.
         [InspectorName("Attack")] ATTACK,
-        /// Envelope decay in seconds.
+        // Envelope decay in seconds.
         [InspectorName("Decay")] DECAY,
-        /// Envelope sustain.
+        // Envelope sustain.
         [InspectorName("Sustain")] SUSTAIN,
-        /// Envelope release in seconds.
+        // Envelope release in seconds.
         [InspectorName("Release")] RELEASE,
-        /// Oscillator mix.
+        // Oscillator mix.
         [InspectorName("Oscillator Mix")] OSC_MIX,
-        /// Oscillator mode.
+        // Oscillator mode.
         [InspectorName("Oscillator Mode")] OSC_MODE,
-        /// Oscillator noise mix.
+        // Oscillator noise mix.
         [InspectorName("Oscillator Noise Mix")] OSC_NOISE_MIX,
-        /// Oscillator pitch shift.
+        // Oscillator pitch shift.
         [InspectorName("Oscillator Pitch Shift")] OSC_PITCH_SHIFT,
-        /// Oscillator shape.
+        // Oscillator shape.
         [InspectorName("Oscillator Shape")] OSC_SHAPE,
-        /// Oscillator skew.
+        // Oscillator skew.
         [InspectorName("Oscillator Skew")] OSC_SKEW,
-        /// Slice mode.
+        // Slice mode.
         [InspectorName("Slice Mode")] SLICE_MODE,
-        /// Bit crusher depth.
+        // Bit crusher depth.
         [InspectorName("Bit Crusher Depth")] BIT_CRUSHER_DEPTH,
-        /// Bit crusher rate.
+        // Bit crusher rate.
         [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
-        /// Distortion amount.
+        // Distortion amount.
         [InspectorName("Distortion Amount")] DISTORTION_AMOUNT,
-        /// Distortion drive.
+        // Distortion drive.
         [InspectorName("Distortion Drive")] DISTORTION_DRIVE,
-        /// Filter type.
+        // Filter type.
         [InspectorName("Filter Type")] FILTER_TYPE,
-        /// Filter frequency in hertz.
+        // Filter frequency in hertz.
         [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
-        /// Filter Q factor.
+        // Filter Q factor.
         [InspectorName("Filter Q")] FILTER_Q,
-        /// Delay send.
+        // Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
-        /// Sidechain send.
+        // Sidechain send.
         [InspectorName("Sidechain Send")] SIDECHAIN_SEND,
-        /// Arpeggiator mode.
+        // Arpeggiator mode.
         [InspectorName("Arpeggiator Mode")] ARP_MODE,
-        /// Arpeggiator gate ratio.
+        // Arpeggiator gate ratio.
         [InspectorName("Arpeggiator Gate Ratio")] ARP_GATE_RATIO,
-        /// Arpeggiator rate.
+        // Arpeggiator rate.
         [InspectorName("Arpeggiator Rate")] ARP_RATE,
       }
 
-      /// Engine control type.
       public enum EngineControlType {
-        /// Compressor mix.
+        // Compressor mix.
         [InspectorName("Compressor Mix")] COMPRESSOR_MIX = 0,
-        /// Compressor attack in seconds.
+        // Compressor attack in seconds.
         [InspectorName("Compressor Attack")] COMPRESSOR_ATTACK,
-        /// Compressor release in seconds.
+        // Compressor release in seconds.
         [InspectorName("Compressor Release")] COMPRESSOR_RELEASE,
-        /// Compressor threshold.
+        // Compressor threshold.
         [InspectorName("Compressor Threshold")] COMPRESSOR_THRESHOLD,
-        /// Compressor ratio.
+        // Compressor ratio.
         [InspectorName("Compressor Ratio")] COMPRESSOR_RATIO,
-        /// Delay mix.
+        // Delay mix.
         [InspectorName("Delay Mix")] DELAY_MIX,
-        /// Delay time in seconds.
+        // Delay time in seconds.
         [InspectorName("Delay Time")] DELAY_TIME,
-        /// Delay feedback.
+        // Delay feedback.
         [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
-        /// Delay low-pass frequency.
+        // Delay low-pass frequency.
         [InspectorName("Delay Low-Pass Frequency")] DELAY_LOW_PASS_FREQUENCY,
-        /// Delay high-pass frequency.
+        // Delay high-pass frequency.
         [InspectorName("Delay High-Pass Frequency")] DELAY_HIGH_PASS_FREQUENCY,
-        /// Sidechain mix.
+        // Sidechain mix.
         [InspectorName("Sidechain Mix")] SIDECHAIN_MIX,
-        /// Sidechain attack in seconds.
+        // Sidechain attack in seconds.
         [InspectorName("Sidechain Attack")] SIDECHAIN_ATTACK,
-        /// Sidechain release in seconds.
+        // Sidechain release in seconds.
         [InspectorName("Sidechain Release")] SIDECHAIN_RELEASE,
-        /// Sidechain threshold.
+        // Sidechain threshold.
         [InspectorName("Sidechain Threshold")] SIDECHAIN_THRESHOLD,
-        /// Sidechain ratio.
+        // Sidechain ratio.
         [InspectorName("Sidechain Ratio")] SIDECHAIN_RATIO,
       }
 
-      /// Note control type.
       public enum NoteControlType {
-        /// Gain in linear amplitude.
+        // Gain in linear amplitude.
         [InspectorName("Gain")] GAIN = 0,
-        /// Pitch shift.
+        // Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
       }
 
-      /// Returns a control of an engine.
-      ///
-      /// @param type Engine control type.
-      /// @return Engine control value.
       public static float Engine_GetControl(EngineControlType type) {
         float value = 0.0f;
         if (!BarelyEngine_GetControl(Handle, type, ref value) && _handle != IntPtr.Zero) {
@@ -330,9 +322,6 @@ namespace Barely {
         return value;
       }
 
-      /// Returns the tempo of an engine.
-      ///
-      /// @return Tempo in beats per minute.
       public static double Engine_GetTempo() {
         double tempo = 0.0;
         if (!BarelyEngine_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
@@ -341,9 +330,6 @@ namespace Barely {
         return tempo;
       }
 
-      /// Returns the timestamp of an engine.
-      ///
-      /// @return Timestamp in seconds.
       public static double Engine_GetTimestamp() {
         double timestamp = 0.0;
         if (!BarelyEngine_GetTimestamp(Handle, ref timestamp) && _handle != IntPtr.Zero) {
@@ -352,29 +338,18 @@ namespace Barely {
         return timestamp;
       }
 
-      /// Sets a control of an engine.
-      ///
-      /// @param type Engine control type.
-      /// @param value Engine control value.
       public static void Engine_SetControl(EngineControlType type, float value) {
         if (!BarelyEngine_SetControl(Handle, type, value) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set engine engine control");
         }
       }
 
-      /// Sets the tempo of an engine.
-      ///
-      /// @param tempo Tempo in beats per minute.
       public static void Engine_SetTempo(double tempo) {
         if (!BarelyEngine_SetTempo(Handle, tempo) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set engine tempo");
         }
       }
 
-      /// Creates a new instrument.
-      ///
-      /// @param instrument Instrument.
-      /// @param instrumentId Instrument identifier.
       public static void Instrument_Create(Instrument instrument, ref UInt32 instrumentId) {
 #if UNITY_EDITOR
         if (!Application.isPlaying) {
@@ -443,9 +418,6 @@ namespace Barely {
                                               ref instrumentId);
       }
 
-      /// Destroys an instrument.
-      ///
-      /// @param instrumentId Instrument identifier.
       public static void Instrument_Destroy(ref UInt32 instrumentId) {
         if (Handle == IntPtr.Zero || instrumentId == 0) {
           instrumentId = 0;
@@ -462,11 +434,6 @@ namespace Barely {
         instrumentId = 0;
       }
 
-      /// Returns the value of an instrument control.
-      ///
-      /// @param instrumentId Instrument identifier.
-      /// @param type Instrument control type.
-      /// @return Instrument control value.
       public static float Instrument_GetControl(UInt32 instrumentId, InstrumentControlType type) {
         float value = 0.0f;
         if (!BarelyInstrument_GetControl(Handle, instrumentId, type, ref value) &&
@@ -476,12 +443,6 @@ namespace Barely {
         return value;
       }
 
-      /// Returns the value of an instrument note control.
-      ///
-      /// @param instrumentId Instrument identifier.
-      /// @param pitch Note pitch.
-      /// @param type Note control type.
-      /// @return Note control value.
       public static float Instrument_GetNoteControl(UInt32 instrumentId, float pitch,
                                                     NoteControlType type) {
         float value = 0.0f;
@@ -492,11 +453,6 @@ namespace Barely {
         return value;
       }
 
-      /// Returns whether an instrument note is on or not.
-      ///
-      /// @param instrumentId Instrument identifier.
-      /// @param pitch Note pitch.
-      /// @return True if on, false otherwise.
       public static bool Instrument_IsNoteOn(UInt32 instrumentId, float pitch) {
         bool isNoteOn = false;
         if (!BarelyInstrument_IsNoteOn(Handle, instrumentId, pitch, ref isNoteOn) &&
@@ -506,9 +462,6 @@ namespace Barely {
         return isNoteOn;
       }
 
-      /// Sets all instrument notes off.
-      ///
-      /// @param instrumentId Instrument identifier.
       public static void Instrument_SetAllNotesOff(UInt32 instrumentId) {
         if (!BarelyInstrument_SetAllNotesOff(Handle, instrumentId) && _handle != IntPtr.Zero &&
             instrumentId > 0) {
@@ -516,11 +469,6 @@ namespace Barely {
         }
       }
 
-      /// Sets an instrument control value.
-      ///
-      /// @param instrumentId Instrument identifier.
-      /// @param type Instrument control type.
-      /// @param value Instrument control value.
       public static void Instrument_SetControl(UInt32 instrumentId, InstrumentControlType type,
                                                float value) {
         if (!BarelyInstrument_SetControl(Handle, instrumentId, type, value) &&
@@ -529,12 +477,6 @@ namespace Barely {
         }
       }
 
-      /// Sets an instrument note control value.
-      ///
-      /// @param instrumentId Instrument identifier.
-      /// @param pitch Note pitch.
-      /// @param type Note control type.
-      /// @param value Note control value.
       public static void Instrument_SetNoteControl(UInt32 instrumentId, float pitch,
                                                    NoteControlType type, float value) {
         if (!BarelyInstrument_SetNoteControl(Handle, instrumentId, pitch, type, value) &&
@@ -544,10 +486,6 @@ namespace Barely {
         }
       }
 
-      /// Sets an instrument note off.
-      ///
-      /// @param instrumentId Instrument identifier.
-      /// @param pitch Note pitch.
       public static void Instrument_SetNoteOff(UInt32 instrumentId, float pitch) {
         if (!BarelyInstrument_SetNoteOff(Handle, instrumentId, pitch) && _handle != IntPtr.Zero &&
             instrumentId > 0) {
@@ -555,12 +493,6 @@ namespace Barely {
         }
       }
 
-      /// Sets an instrument note on.
-      ///
-      /// @param instrumentId Instrument identifier.
-      /// @param pitch Note pitch.
-      /// @param gain Note gain.
-      /// @param pitchShift Note pitch shift.
       public static void Instrument_SetNoteOn(UInt32 instrumentId, float pitch, float gain,
                                               float pitchShift) {
         _noteControlOverrides[(int)NoteControlType.GAIN].value = gain;
@@ -572,10 +504,6 @@ namespace Barely {
         }
       }
 
-      /// Sets instrument data.
-      ///
-      /// @param instrumentId Instrument identifier.
-      /// @param instrumentSlices List of instrument slices.
       public static void Instrument_SetSampleData(UInt32 instrumentId,
                                                   List<Instrument.Slice> instrumentSlices) {
         if (_instrumentSlices.TryGetValue(instrumentId, out List<float[]> existingSlices)) {
@@ -604,10 +532,6 @@ namespace Barely {
         }
       }
 
-      /// Creates a new performer.
-      ///
-      /// @param performer Performer.
-      /// @param performerId Performer identifier.
       public static void Performer_Create(Performer performer, ref UInt32 performerId) {
         if (Handle == IntPtr.Zero || _handle != IntPtr.Zero && performerId > 0) {
           return;
@@ -619,9 +543,6 @@ namespace Barely {
         _performers.Add(performerId, performer);
       }
 
-      /// Destroys a performer.
-      ///
-      /// @param performerId Performer identifier.
       public static void Performer_Destroy(ref UInt32 performerId) {
         if (Handle == IntPtr.Zero || performerId == 0) {
           performerId = 0;
@@ -634,10 +555,6 @@ namespace Barely {
         performerId = 0;
       }
 
-      /// Returns the loop begin position of a performer.
-      ///
-      /// @param performerId Performer identifier.
-      /// @return Loop begin position in beats.
       public static double Performer_GetLoopBeginPosition(UInt32 performerId) {
         double loopBeginPosition = 0.0;
         if (!BarelyPerformer_GetLoopBeginPosition(_handle, performerId, ref loopBeginPosition) &&
@@ -647,10 +564,6 @@ namespace Barely {
         return loopBeginPosition;
       }
 
-      /// Returns the loop length of a performer.
-      ///
-      /// @param performerId Performer identifier.
-      /// @return Loop length in beats.
       public static double Performer_GetLoopLength(UInt32 performerId) {
         double loopLength = 0.0;
         if (!BarelyPerformer_GetLoopLength(_handle, performerId, ref loopLength) &&
@@ -660,10 +573,6 @@ namespace Barely {
         return loopLength;
       }
 
-      /// Returns the position of a performer.
-      ///
-      /// @param performerId Performer identifier.
-      /// @return Position in beats.
       public static double Performer_GetPosition(UInt32 performerId) {
         double position = 0.0;
         if (!BarelyPerformer_GetPosition(_handle, performerId, ref position) &&
@@ -673,10 +582,6 @@ namespace Barely {
         return position;
       }
 
-      /// Returns whether a performer is looping or not.
-      ///
-      /// @param performerId Performer identifier.
-      /// @return True if looping, false otherwise.
       public static bool Performer_IsLooping(UInt32 performerId) {
         bool isLooping = false;
         if (!BarelyPerformer_IsLooping(_handle, performerId, ref isLooping) &&
@@ -686,10 +591,6 @@ namespace Barely {
         return isLooping;
       }
 
-      /// Returns whether a performer is playing or not.
-      ///
-      /// @param performerId Performer identifier.
-      /// @return True if playing, false otherwise.
       public static bool Performer_IsPlaying(UInt32 performerId) {
         bool isPlaying = false;
         if (!BarelyPerformer_IsPlaying(_handle, performerId, ref isPlaying) &&
@@ -699,10 +600,6 @@ namespace Barely {
         return isPlaying;
       }
 
-      /// Sets the loop begin position of a performer.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param loopBeginPosition Loop begin position in beats.
       public static void Performer_SetLoopBeginPosition(UInt32 performerId,
                                                         double loopBeginPosition) {
         if (!BarelyPerformer_SetLoopBeginPosition(_handle, performerId, loopBeginPosition) &&
@@ -711,10 +608,6 @@ namespace Barely {
         }
       }
 
-      /// Sets the loop length of a performer.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param loopLength Loop length in beats.
       public static void Performer_SetLoopLength(UInt32 performerId, double loopLength) {
         if (!BarelyPerformer_SetLoopLength(_handle, performerId, loopLength) &&
             _handle != IntPtr.Zero && performerId > 0) {
@@ -722,10 +615,6 @@ namespace Barely {
         }
       }
 
-      /// Sets whether a performer is looping or not.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param isLooping True if looping, false otherwise.
       public static void Performer_SetLooping(UInt32 performerId, bool isLooping) {
         if (!BarelyPerformer_SetLooping(_handle, performerId, isLooping) &&
             _handle != IntPtr.Zero && performerId > 0) {
@@ -733,10 +622,6 @@ namespace Barely {
         }
       }
 
-      /// Sets the position of a performer.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param position Position in beats.
       public static void Performer_SetPosition(UInt32 performerId, double position) {
         if (!BarelyPerformer_SetPosition(_handle, performerId, position) &&
             _handle != IntPtr.Zero && performerId > 0) {
@@ -744,9 +629,6 @@ namespace Barely {
         }
       }
 
-      /// Starts a performer.
-      ///
-      /// @param performerId Performer identifier.
       public static void Performer_Start(UInt32 performerId) {
         if (!BarelyPerformer_Start(_handle, performerId) && _handle != IntPtr.Zero &&
             performerId > 0) {
@@ -754,9 +636,6 @@ namespace Barely {
         }
       }
 
-      /// Stops a performer.
-      ///
-      /// @param performerId Performer identifier.
       public static void Performer_Stop(UInt32 performerId) {
         if (!BarelyPerformer_Stop(_handle, performerId) && _handle != IntPtr.Zero &&
             performerId > 0) {
@@ -764,31 +643,6 @@ namespace Barely {
         }
       }
 
-      /// Gets a scale note pitch for a given degree.
-      ///
-      /// @param scale Pointer to scale.
-      /// @param degree Scale degree.
-      /// @return Output note pitch.
-      public static float Scale_GetPitch(Barely.Scale scale, int degree) {
-        float pitch = 0.0f;
-        _scale.pitches = scale.Pitches;
-        _scale.pitchCount = scale.PitchCount;
-        _scale.rootPitch = scale.RootPitch;
-        _scale.mode = scale.Mode;
-        if (!BarelyScale_GetPitch(ref _scale, degree, ref pitch)) {
-          Debug.LogError("Failed to get scale " + scale + " note pitch with a degree " + degree);
-        }
-        return pitch;
-      }
-
-      /// Creates a new task.
-      ///
-      /// @param task Task.
-      /// @param performerId Performer identifier.
-      /// @param position Task position in beats.
-      /// @param duration Task duration in beats.
-      /// @param priority Task priority.
-      /// @param taskId Task identifier.
       public static void Task_Create(Task task, UInt32 performerId, double position,
                                      double duration, int priority, ref UInt32 taskId) {
         if (Handle == IntPtr.Zero || _handle != IntPtr.Zero && taskId > 0) {
@@ -804,10 +658,6 @@ namespace Barely {
         BarelyTask_SetEventCallback(_handle, taskId, Task_OnEvent, ref taskId);
       }
 
-      /// Destroys a task.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param taskId Task identifier.
       public static void Task_Destroy(UInt32 performerId, ref UInt32 taskId) {
         if (Handle == IntPtr.Zero || performerId == 0 || taskId == 0) {
           taskId = 0;
@@ -820,10 +670,6 @@ namespace Barely {
         taskId = 0;
       }
 
-      /// Returns the duration of a task.
-      ///
-      /// @param taskId Task identifier.
-      /// @return Duration in beats.
       public static double Task_GetDuration(UInt32 taskId) {
         double duration = 0.0;
         if (!BarelyTask_GetDuration(_handle, taskId, ref duration) && _handle != IntPtr.Zero &&
@@ -833,10 +679,6 @@ namespace Barely {
         return (duration > _minTaskDuration) ? duration : 0.0;
       }
 
-      /// Returns the position of a task.
-      ///
-      /// @param taskId Task identifier.
-      /// @return Position in beats.
       public static double Task_GetPosition(UInt32 taskId) {
         double position = 0.0;
         if (!BarelyTask_GetPosition(_handle, taskId, ref position) && _handle != IntPtr.Zero &&
@@ -846,10 +688,6 @@ namespace Barely {
         return position;
       }
 
-      /// Returns the priority of a task.
-      ///
-      /// @param taskId Task identifier.
-      /// @return Priority.
       public static int Task_GetPriority(UInt32 taskId) {
         int priority = 0;
         if (!BarelyTask_GetPriority(_handle, taskId, ref priority) && _handle != IntPtr.Zero &&
@@ -859,10 +697,6 @@ namespace Barely {
         return priority;
       }
 
-      /// Returns whether a task is active or not.
-      ///
-      /// @param taskId Task identifier.
-      /// @return True if active, false otherwise.
       public static bool Task_IsActive(UInt32 taskId) {
         bool isActive = false;
         if (!BarelyTask_IsActive(_handle, taskId, ref isActive) && _handle != IntPtr.Zero &&
@@ -872,10 +706,6 @@ namespace Barely {
         return isActive;
       }
 
-      /// Sets the duration of a task.
-      ///
-      /// @param taskId Task identifier.
-      /// @param duration Task duration in beats.
       public static void Task_SetDuration(UInt32 taskId, double duration) {
         if (!BarelyTask_SetDuration(_handle, taskId, Math.Max(duration, _minTaskDuration)) &&
             _handle != IntPtr.Zero && taskId > 0) {
@@ -883,10 +713,6 @@ namespace Barely {
         }
       }
 
-      /// Sets the position of a task.
-      ///
-      /// @param taskId Task identifier.
-      /// @param position Task position in beats.
       public static void Task_SetPosition(UInt32 taskId, double position) {
         if (!BarelyTask_SetPosition(_handle, taskId, position) && _handle != IntPtr.Zero &&
             taskId > 0) {
@@ -894,10 +720,6 @@ namespace Barely {
         }
       }
 
-      /// Sets the priority of a task.
-      ///
-      /// @param taskId Task identifier.
-      /// @param priority Task priority.
       public static void Task_SetPriority(UInt32 taskId, int priority) {
         if (!BarelyTask_SetPriority(_handle, taskId, priority) && _handle != IntPtr.Zero &&
             taskId > 0) {
@@ -905,7 +727,18 @@ namespace Barely {
         }
       }
 
-      // Note event callback.
+      public static float Scale_GetPitch(Barely.Scale scale, int degree) {
+        float pitch = 0.0f;
+        _scale.pitches = scale.Pitches;
+        _scale.pitchCount = scale.PitchCount;
+        _scale.rootPitch = scale.RootPitch;
+        _scale.mode = scale.Mode;
+        if (!BarelyScale_GetPitch(ref _scale, degree, ref pitch)) {
+          Debug.LogError("Failed to get scale " + scale + " note pitch with a degree " + degree);
+        }
+        return pitch;
+      }
+
       private delegate void NoteEventCallback(NoteEventType type, float pitch, ref UInt32 userData);
       [AOT.MonoPInvokeCallback(typeof(NoteEventCallback))]
       private static void Instrument_OnNoteEvent(NoteEventType type, float pitch,
@@ -921,7 +754,6 @@ namespace Barely {
         }
       }
 
-      // Task event callback.
       private delegate void TaskEventCallback(TaskEventType type, ref UInt32 userData);
       [AOT.MonoPInvokeCallback(typeof(TaskEventCallback))]
       private static void Task_OnEvent(TaskEventType type, ref UInt32 userData) {
@@ -930,62 +762,36 @@ namespace Barely {
         }
       }
 
-      // Instrument control override.
       [StructLayout(LayoutKind.Sequential)]
       private struct InstrumentControlOverride {
-        // Type.
         public InstrumentControlType type;
-
-        // Value.
         public float value;
       }
 
-      // Instrument control override.
       [StructLayout(LayoutKind.Sequential)]
       private struct NoteControlOverride {
-        // Type.
         public NoteControlType type;
-
-        // Value.
         public float value;
       }
 
-      // Note event types.
       private enum NoteEventType {
-        // Begin.
         [InspectorName("BEGIN")] BEGIN = 0,
-        // End.
         [InspectorName("END")] END,
       }
 
-      // Slice of sample data.
       [StructLayout(LayoutKind.Sequential)]
       private struct Slice {
-        // Array of mono samples.
         public float[] samples;
-
-        // Number of mono samples.
         public Int32 sampleCount;
-
-        // Sampling rate in hertz.
         public Int32 sampleRate;
-
-        // Root note pitch.
         public float rootPitch;
       }
 
       [StructLayout(LayoutKind.Sequential)]
       private struct Scale {
-        // Array of note pitches relative to the root note pitch.
         public float[] pitches;
-
-        // Number of note pitches.
         public Int32 pitchCount;
-
-        // Root note pitch of the scale.
         public float rootPitch;
-
-        // Mode index.
         public Int32 mode;
       }
 
@@ -1017,28 +823,16 @@ namespace Barely {
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
 
-      // Map of instruments by their handles.
       private static Dictionary<UInt32, Instrument> _instruments = null;
-
-      // Map of instrument slices by their handles.
-      private static Dictionary<UInt32, List<float[]>> _instrumentSlices = null;
-
-      // List of instrument slices to remove.
-      private static Queue<(List<float[]>, double)> _instrumentSlicesToRemove = null;
-
-      // Array of instrument control overrides.
-      private static InstrumentControlOverride[] _instrumentControlOverrides = null;
-
-      // Array of note control overrides.
-      private static NoteControlOverride[] _noteControlOverrides = null;
-
-      // Map of performers by their references.
       private static Dictionary<UInt32, Performer> _performers = null;
-
-      // Map of tasks by their handles.
       private static Dictionary<UInt32, Task> _tasks = null;
 
-      // Scale.
+      private static Dictionary<UInt32, List<float[]>> _instrumentSlices = null;
+      private static Queue<(List<float[]>, double)> _instrumentSlicesToRemove = null;
+
+      private static InstrumentControlOverride[] _instrumentControlOverrides = null;
+      private static NoteControlOverride[] _noteControlOverrides = null;
+
       private static Scale _scale = new Scale {
         pitches = null,
         pitchCount = 0,
@@ -1123,7 +917,6 @@ namespace Barely {
           CleanUpInstrumentSampleData(AudioSettings.dspTime);
         }
 
-        // Initializes the internal state.
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
@@ -1171,14 +964,12 @@ namespace Barely {
           BarelyEngine_Update(_handle, GetNextTimestamp());
         }
 
-        // Shuts down the internal state.
         private void Shutdown() {
           _isShuttingDown = true;
           BarelyEngine_Destroy(_handle);
           _handle = IntPtr.Zero;
         }
 
-        // Cleans up instrument sample data.
         private void CleanUpInstrumentSampleData(double dspTime) {
           while (_instrumentSlicesToRemove.Count > 0) {
             var (slice, timestamp) = _instrumentSlicesToRemove.Peek();
@@ -1190,7 +981,6 @@ namespace Barely {
           }
         }
 
-        // Returns the next timestamp to update.
         private double GetNextTimestamp() {
           return Math.Max(AudioSettings.dspTime + Math.Max(_dspLatency, _minLookahead),
                           Timestamp + (double)Time.deltaTime);
@@ -1198,8 +988,6 @@ namespace Barely {
 
         // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
         private const double _minLookahead = 0.025;
-
-        // DSP latency in seconds.
         private double _dspLatency = 0.0;
       }
 

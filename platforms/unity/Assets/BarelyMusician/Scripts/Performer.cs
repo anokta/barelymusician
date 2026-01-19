@@ -81,16 +81,11 @@ namespace Barely {
       Engine.Internal.Performer_Stop(_id);
     }
 
-    /// Class that wraps the internal api.
     public static class Internal {
-      /// Returns the identifier.
       public static UInt32 GetId(Performer performer) {
-        return performer ? performer._id : 0;
+        return performer ? performer._id : UInt32.MaxValue;
       }
     }
-
-    // Identifier.
-    private UInt32 _id = 0;
 
     private void OnEnable() {
       Engine.Internal.Performer_Create(this, ref _id);
@@ -121,5 +116,7 @@ namespace Barely {
         Tasks[i].Update(this);
       }
     }
+
+    private UInt32 _id = 0;
   }
 }  // namespace Barely

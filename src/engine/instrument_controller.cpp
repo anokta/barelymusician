@@ -56,8 +56,8 @@ void InstrumentController::Release(uint32_t instrument_index) noexcept {
 }
 
 void InstrumentController::SetAllNotesOff() noexcept {
-  for (uint32_t i = 0; i < engine_.instrument_pool.GetActiveCount(); ++i) {
-    SetAllNotesOff(engine_.instrument_pool.GetActiveIndex(i));
+  for (uint32_t i = 0; i < engine_.instrument_pool.ActiveCount(); ++i) {
+    SetAllNotesOff(engine_.instrument_pool.GetActive(i));
   }
 }
 
@@ -266,8 +266,9 @@ bool InstrumentController::IsNoteOn(uint32_t instrument_index, float pitch) cons
 }
 
 void InstrumentController::ProcessArp() noexcept {
-  for (uint32_t i = 0; i < engine_.instrument_pool.GetActiveCount(); ++i) {
-    auto& instrument = engine_.instrument_pool.GetActive(i);
+  for (uint32_t i = 0; i < engine_.instrument_pool.ActiveCount(); ++i) {
+    const uint32_t instrument_index = engine_.instrument_pool.GetActive(i);
+    auto& instrument = engine_.GetInstrument(instrument_index);
     if (instrument.first_note_index == UINT32_MAX || !instrument.IsArpEnabled()) {
       continue;
     }
@@ -275,8 +276,7 @@ void InstrumentController::ProcessArp() noexcept {
       const auto& note = engine_.note_pool.Get(instrument.arp.note_index);
       instrument.arp.is_note_on = true;
       instrument.note_event_callback(BarelyNoteEventType_kBegin, note.pitch);
-      engine_.ScheduleMessage(NoteOnMessage{instrument.arp.note_index,
-                                            engine_.instrument_pool.GetActiveIndex(i), note.pitch,
+      engine_.ScheduleMessage(NoteOnMessage{instrument.arp.note_index, instrument_index, note.pitch,
                                             BuildNoteControls(note.controls)});
     } else if (instrument.arp.is_note_on &&
                instrument.arp.phase ==
@@ -301,7 +301,7 @@ void InstrumentController::ProcessArp() noexcept {
         case BarelyArpMode_kRandom: {
           uint32_t note_index = instrument.arp.note_index;
           const uint32_t random_count = engine_.main_rng.Generate(0, instrument.note_count);
-          for (uint32_t n = 0; n < random_count; ++n) {
+          for (uint32_t _ = 0; _ < random_count; ++_) {
             note_index = engine_.note_pool.Get(note_index).next_note_index;
           }
           instrument.arp.note_index = note_index;
@@ -315,16 +315,17 @@ void InstrumentController::ProcessArp() noexcept {
 }
 
 void InstrumentController::Update(double duration) noexcept {
-  for (uint32_t i = 0; i < engine_.instrument_pool.GetActiveCount(); ++i) {
-    engine_.instrument_pool.GetActive(i).Update(duration);
+  for (uint32_t i = 0; i < engine_.instrument_pool.ActiveCount(); ++i) {
+    engine_.GetInstrument(engine_.instrument_pool.GetActive(i)).Update(duration);
   }
 }
 
 double InstrumentController::GetNextDuration() const noexcept {
   double next_duration = std::numeric_limits<double>::max();
-  for (uint32_t i = 0; i < engine_.instrument_pool.GetActiveCount(); ++i) {
+  for (uint32_t i = 0; i < engine_.instrument_pool.ActiveCount(); ++i) {
     next_duration =
-        std::min(engine_.instrument_pool.GetActive(i).GetNextArpDuration(), next_duration);
+        std::min(engine_.GetInstrument(engine_.instrument_pool.GetActive(i)).GetNextArpDuration(),
+                 next_duration);
   }
   return next_duration;
 }

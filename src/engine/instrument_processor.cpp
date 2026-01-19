@@ -39,6 +39,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
         active_voice_index = engine_.GetVoice(active_voice_index).next_voice_index;
         ++active_voice_count;
       }
+      // Release the previously active voices beyond the new voice count.
       while (active_voice_index != UINT32_MAX) {
         auto& voice = engine_.GetVoice(active_voice_index);
         if (voice.prev_voice_index != UINT32_MAX) {
@@ -204,31 +205,28 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
   }
 
   uint32_t current_voice_index = params.first_voice_index;
-  uint32_t oldest_active_voice_index = UINT32_MAX;
+  uint32_t last_voice_index = current_voice_index;
+  uint32_t oldest_active_voice_index = current_voice_index;
   uint32_t active_voice_count = 0;
   while (current_voice_index != UINT32_MAX) {
     auto& voice = engine_.GetVoice(current_voice_index);
-    if (oldest_active_voice_index == UINT32_MAX ||
-        voice.timestamp > engine_.GetVoice(oldest_active_voice_index).timestamp) {
+    if (voice.timestamp > engine_.GetVoice(oldest_active_voice_index).timestamp) {
       oldest_active_voice_index = current_voice_index;
     }
     ++voice.timestamp;
     ++active_voice_count;
-    if (voice.next_voice_index == UINT32_MAX) {  // TODO(#126): Remove double checking here.
-      break;
-    }
+    last_voice_index = current_voice_index;
     current_voice_index = voice.next_voice_index;
   }
 
-  // Acquire new voice.
-  if (engine_.voice_pool.GetActiveCount() < engine_.voice_pool.Count() &&
-      active_voice_count < params.voice_count) {
+  // Try to acquire a new voice.
+  if (engine_.voice_pool.CanAcquire() && active_voice_count < params.voice_count) {
     const uint32_t new_voice_index = engine_.voice_pool.Acquire();
     VoiceState& new_voice = engine_.GetVoice(new_voice_index);
-    new_voice.prev_voice_index = current_voice_index;
+    new_voice.prev_voice_index = last_voice_index;
     new_voice.next_voice_index = UINT32_MAX;
-    if (current_voice_index != UINT32_MAX) {
-      engine_.GetVoice(current_voice_index).next_voice_index = new_voice_index;
+    if (last_voice_index != UINT32_MAX) {
+      engine_.GetVoice(last_voice_index).next_voice_index = new_voice_index;
     } else {
       params.first_voice_index = new_voice_index;
     }

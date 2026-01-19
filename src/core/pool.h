@@ -26,7 +26,6 @@ class Pool {
 
       assert(index < kCount);
       assert(to_active_[index] == UINT32_MAX);
-      assert(active_count_ < kCount);
       to_active_[index] = active_count_;
       active_[active_count_++] = index;
 
@@ -49,7 +48,13 @@ class Pool {
     free_write_index_ = (free_write_index_ + 1) % kCount;
   }
 
-  [[nodiscard]] constexpr uint32_t Count() const noexcept { return kCount; }
+  [[nodiscard]] uint32_t ActiveCount() const noexcept { return active_count_; }
+
+  [[nodiscard]] bool CanAcquire() const noexcept { return active_count_ < kCount; }
+
+  [[nodiscard]] bool IsActive(uint32_t index) const noexcept {
+    return index < kCount && to_active_[index] < kCount;
+  }
 
   [[nodiscard]] ItemType& Get(uint32_t index) noexcept {
     assert(IsActive(index));
@@ -61,33 +66,10 @@ class Pool {
     return items_[index];
   }
 
-  [[nodiscard]] uint32_t GetIndex(const ItemType& item) const noexcept {
-    const uint32_t index = static_cast<uint32_t>(&item - &items_[0]);
-    assert(IsActive(index));
-    return index;
-  }
-
-  [[nodiscard]] bool IsActive(uint32_t index) const noexcept {
-    return index < kCount && to_active_[index] < kCount;
-  }
-
-  [[nodiscard]] ItemType& GetActive(uint32_t active_index) noexcept {
-    assert(active_index < active_count_);
-    return Get(active_[active_index]);
-  }
-
-  [[nodiscard]] const ItemType& GetActive(uint32_t active_index) const noexcept {
-    assert(active_index < active_count_);
-    return Get(active_[active_index]);
-  }
-
-  // TODO(#126): Clean up redundant getters.
-  [[nodiscard]] uint32_t GetActiveIndex(uint32_t active_index) noexcept {
+  [[nodiscard]] uint32_t GetActive(uint32_t active_index) const noexcept {
     assert(active_index < active_count_);
     return active_[active_index];
   }
-
-  [[nodiscard]] uint32_t GetActiveCount() const noexcept { return active_count_; }
 
  private:
   std::array<ItemType, kCount> items_;

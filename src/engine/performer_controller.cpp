@@ -195,8 +195,8 @@ void PerformerController::SetTaskPriority(uint32_t task_index, int32_t priority)
 }
 
 void PerformerController::ProcessAllTasksAtPosition(int32_t max_priority) noexcept {
-  for (uint32_t i = 0; i < engine_.performer_pool.GetActiveCount(); ++i) {
-    auto& performer = engine_.performer_pool.GetActive(i);
+  for (uint32_t i = 0; i < engine_.performer_pool.ActiveCount(); ++i) {
+    auto& performer = engine_.GetPerformer(engine_.performer_pool.GetActive(i));
     if (!performer.is_playing) {
       continue;
     }
@@ -215,12 +215,11 @@ void PerformerController::ProcessAllTasksAtPosition(int32_t max_priority) noexce
 
 void PerformerController::Update(double duration) noexcept {
   assert(duration > 0.0);
-  for (uint32_t i = 0; i < engine_.performer_pool.GetActiveCount(); ++i) {
-    auto& performer = engine_.performer_pool.GetActive(i);
-    if (!performer.is_playing) {
-      continue;
+  for (uint32_t i = 0; i < engine_.performer_pool.ActiveCount(); ++i) {
+    const uint32_t performer_index = engine_.performer_pool.GetActive(i);
+    if (const auto& performer = engine_.GetPerformer(performer_index); performer.is_playing) {
+      SetPosition(performer_index, performer.position + duration);
     }
-    SetPosition(engine_.performer_pool.GetIndex(performer), performer.position + duration);
   }
 }
 

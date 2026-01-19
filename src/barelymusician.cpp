@@ -211,8 +211,8 @@ bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples, int32_t o
   if (output_channel_count <= 0 || output_frame_count <= 0) return false;
 
   if (output_frame_count > BARELY_MAX_FRAME_COUNT) {
-    const uint32_t extra_process_count = output_frame_count / BARELY_MAX_FRAME_COUNT - 1;
-    for (uint32_t i = 0; i < extra_process_count; ++i) {
+    const int32_t extra_process_count = output_frame_count / BARELY_MAX_FRAME_COUNT - 1;
+    for (int32_t i = 0; i < extra_process_count; ++i) {
       engine->processor.Process(output_samples, output_channel_count, BARELY_MAX_FRAME_COUNT,
                                 timestamp);
       timestamp += barely::FramesToSeconds(engine->state.sample_rate, BARELY_MAX_FRAME_COUNT);

@@ -40,8 +40,9 @@ class PerformerController {
   void Update(double duration) noexcept;
 
   void GetNextTaskEvent(double& duration, int32_t& priority) const noexcept {
-    for (uint32_t i = 0; i < engine_.performer_pool.GetActiveCount(); ++i) {
-      GetNextTaskEvent(engine_.performer_pool.GetActive(i), duration, priority);
+    for (uint32_t i = 0; i < engine_.performer_pool.ActiveCount(); ++i) {
+      GetNextTaskEvent(engine_.GetPerformer(engine_.performer_pool.GetActive(i)), duration,
+                       priority);
     }
   }
 

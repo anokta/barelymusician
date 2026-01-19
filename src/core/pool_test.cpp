@@ -16,13 +16,13 @@ TEST(PoolTest, AcquireMax) {
   // Acquire up to maximum capacity.
   for (uint32_t i = 0; i < kCount; ++i) {
     EXPECT_LT(pool.Acquire(), kCount);
-    EXPECT_EQ(pool.GetActiveCount(), i + 1);
+    EXPECT_EQ(pool.ActiveCount(), i + 1);
   }
 
   // Exceeded maximum capacity.
   for (uint32_t i = 0; i < kCount; ++i) {
     EXPECT_EQ(pool.Acquire(), UINT32_MAX);
-    EXPECT_EQ(pool.GetActiveCount(), kCount);
+    EXPECT_EQ(pool.ActiveCount(), kCount);
   }
 
   // Capacity should recover after freeing an item.

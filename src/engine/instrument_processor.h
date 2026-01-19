@@ -40,28 +40,14 @@ class InstrumentProcessor {
   void ProcessAllVoices(float delay_frame[kStereoChannelCount],
                         float sidechain_frame[kStereoChannelCount],
                         float output_frame[kStereoChannelCount]) noexcept {
-    for (uint32_t i = 0; i < engine_.voice_pool.GetActiveCount();) {
-      VoiceState& voice = engine_.voice_pool.GetActive(i);
+    for (uint32_t i = 0; i < engine_.voice_pool.ActiveCount();) {
+      const uint32_t voice_index = engine_.voice_pool.GetActive(i);
+      VoiceState& voice = engine_.GetVoice(voice_index);
       InstrumentParams& params = engine_.instrument_params[voice.instrument_index];
       if constexpr (kIsSidechainSend) {
         if (!voice.IsActive()) {
-          if (voice.prev_voice_index != UINT32_MAX) {
-            engine_.GetVoice(voice.prev_voice_index).next_voice_index = voice.next_voice_index;
-            if (voice.next_voice_index != UINT32_MAX) {
-              engine_.GetVoice(voice.next_voice_index).prev_voice_index = voice.prev_voice_index;
-            }
-            voice.prev_voice_index = UINT32_MAX;
-          } else {
-            params.first_voice_index = voice.next_voice_index;
-            if (voice.next_voice_index != UINT32_MAX) {
-              engine_.GetVoice(voice.next_voice_index).prev_voice_index = UINT32_MAX;
-            }
-          }
-          voice.next_voice_index = UINT32_MAX;
-          if (voice.note_index != UINT32_MAX) {
-            engine_.note_to_voice[voice.note_index] = UINT32_MAX;
-          }
-          engine_.voice_pool.Release(engine_.voice_pool.GetIndex(voice));
+          ReleaseVoice(voice, params);
+          engine_.voice_pool.Release(voice_index);
           continue;
         }
       }
@@ -72,6 +58,25 @@ class InstrumentProcessor {
 
  private:
   [[nodiscard]] uint32_t AcquireVoice(InstrumentParams& params, float pitch) noexcept;
+
+  void ReleaseVoice(VoiceState& voice, InstrumentParams& params) noexcept {
+    if (voice.prev_voice_index != UINT32_MAX) {
+      engine_.GetVoice(voice.prev_voice_index).next_voice_index = voice.next_voice_index;
+      if (voice.next_voice_index != UINT32_MAX) {
+        engine_.GetVoice(voice.next_voice_index).prev_voice_index = voice.prev_voice_index;
+      }
+      voice.prev_voice_index = UINT32_MAX;
+    } else {
+      params.first_voice_index = voice.next_voice_index;
+      if (voice.next_voice_index != UINT32_MAX) {
+        engine_.GetVoice(voice.next_voice_index).prev_voice_index = UINT32_MAX;
+      }
+    }
+    voice.next_voice_index = UINT32_MAX;
+    if (voice.note_index != UINT32_MAX) {
+      engine_.note_to_voice[voice.note_index] = UINT32_MAX;
+    }
+  }
 
   template <bool kIsSidechainSend = false>
   void ProcessVoice(VoiceState& voice, const InstrumentParams& instrument_params,

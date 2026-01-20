@@ -458,7 +458,7 @@ export class Engine {
       this._audioNode.port.postMessage({type: 'task-get-properties', id: taskHandle});
     }
     const instrumentCount = Object.keys(this._instruments).length;
-    const performerCount = Math.max(Object.keys(this._performers).length - 1);
+    const performerCount = Math.max(Object.keys(this._performers).length - 1, 0);
     const status = `
       Instruments: ${instrumentCount} |
       Performers: ${performerCount} |

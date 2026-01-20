@@ -15,7 +15,7 @@ namespace barely {
 struct DelayParams {
   float mix = 1.0f;
 
-  float frame_count = 0.0f;
+  float frame_count = 1.0f;
   float feedback = 0.0f;
 
   float low_pass_coeff = 0.0f;
@@ -35,7 +35,7 @@ class DelayFilter {
  public:
   void Process(float input_frame[kStereoChannelCount], float output_frame[kStereoChannelCount],
                const DelayParams& params) noexcept {
-    assert(params.frame_count >= 0);
+    assert(params.frame_count > 0);
     assert(static_cast<int>(params.frame_count) <= kMaxDelayFrameCount);
 
     const int delay_frame_count = static_cast<int>(params.frame_count);

@@ -3,8 +3,8 @@ set(CMAKE_FOLDER platforms)
 set(BARELY_EXPORTED_FUNCTIONS "['_malloc','_free',
   '_BarelyEngine_Create',
   '_BarelyEngine_CreateInstrument',
-  '_BarelyEngine_CreateTask',
   '_BarelyEngine_CreatePerformer',
+  '_BarelyEngine_CreateTask',
   '_BarelyEngine_Destroy',
   '_BarelyEngine_DestroyInstrument',
   '_BarelyEngine_DestroyPerformer',
@@ -22,16 +22,17 @@ set(BARELY_EXPORTED_FUNCTIONS "['_malloc','_free',
   '_BarelyInstrument_SetSampleData',
   '_BarelyPerformer_GetPosition',
   '_BarelyPerformer_IsPlaying',
-  '_BarelyPerformer_Start',
-  '_BarelyPerformer_Stop',
   '_BarelyPerformer_SetLoopBeginPosition',
   '_BarelyPerformer_SetLoopLength',
   '_BarelyPerformer_SetLooping',
   '_BarelyPerformer_SetPosition',
+  '_BarelyPerformer_Start',
+  '_BarelyPerformer_Stop',
   '_BarelyTask_IsActive',
   '_BarelyTask_SetDuration',
   '_BarelyTask_SetEventCallback',
-  '_BarelyTask_SetPosition'
+  '_BarelyTask_SetPosition',
+  '_BarelyTask_SetPriority'
   ]"
 )
 
@@ -69,7 +70,8 @@ target_link_libraries(
 function(package_barelymusicianwasm)
   add_custom_command(
     TARGET barelymusicianwasm POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusicianwasm> ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND
+    ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusicianwasm> ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 endfunction()
 package_barelymusicianwasm()

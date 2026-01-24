@@ -1,39 +1,18 @@
-import {CONTROLS} from './control.js';
+import {INSTRUMENT_CONTROLS} from '../src/control.js';
 
 /**
- * Implements UI and logic of a musical instrument.
+ * Implements UI of a musical instrument.
  */
-export class Instrument {
-  /**
-   * @param {!Object} params
-   * @param {!Element} params.container
-   * @param {!AudioContext} params.audioContext
-   * @param {!AudioWorkletNode} params.audioNode
-   * @param {!Promise<number>} params.idPromise
-   * @param {function(number):void} params.noteOnCallback
-   * @param {function(number):void} params.noteOffCallback
-   */
-  constructor({container, audioContext, audioNode, idPromise, noteOnCallback, noteOffCallback}) {
+export class InstrumentUi {
+  constructor({container, instrument, destroyCallback}) {
     /** @private @const {!Element} */
     this._container = container;
-    /** @private @const {!AudioContext} */
-    this._audioContext = audioContext;
-    /** @private @const {!AudioWorkletNode} */
-    this._audioNode = audioNode;
-    /** @private @const {!Promise<number>} */
-    this._idPromise = idPromise;
 
-    /** @public */
-    this.noteOnCallback = noteOnCallback;
-    /** @public */
-    this.noteOffCallback = noteOffCallback;
+    /** @private @const {!Instrument} */
+    this._instrument = instrument;
 
-    if (this._container) {
-      this._initContainer();
-    }
-
-    this._audioNode.port.postMessage({type: 'instrument-create'});
-    this.setSampleData([{pitch: 0.0, url: 'data/sample.wav'}]);
+    this._initContainer(destroyCallback);
+    this._instrument.setSampleData([{pitch: 0.0, url: '../data/sample.wav'}]);
   }
 
   /**
@@ -41,24 +20,12 @@ export class Instrument {
    * @return {!Promise<void>}
    */
   async destroy() {
-    await this._withId(id => {
-      this._audioNode.port.postMessage({type: 'instrument-destroy', id});
-    });
-    if (this._container) {
-      this._container.remove();
-    }
+    this._instrument.destroy();
+    this._container.remove();
   }
 
-  /**
-   * Sets all notes off.
-   */
   setAllNotesOff() {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'instrument-set-all-notes-off',
-        id,
-      });
-    });
+    this._instrument.setAllNotesOff();
   }
 
   /**
@@ -67,24 +34,19 @@ export class Instrument {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'instrument-set-control',
-        id,
-        typeIndex,
-        value,
-      });
-    });
-
-    if (this._container) {
-      const controlContainer =
-          this._container.querySelector('#controls').querySelector(`#control-${typeIndex}`);
-      if (controlContainer.querySelector('input')) {
-        controlContainer.querySelector('input').value = value;
-        controlContainer.querySelector(`#input-number-${typeIndex}`).value = value;
+    this._instrument.setControl(typeIndex, value);
+    const controlContainer =
+        this._container.querySelector('#controls').querySelector(`#control-${typeIndex}`);
+    const input = controlContainer.querySelector('input');
+    if (input) {
+      if (input.type == 'checkbox') {
+        input.checked = (value > 0.0);
       } else {
-        controlContainer.querySelector('select').value = value;
+        input.value = value;
+        controlContainer.querySelector(`#input-number-${typeIndex}`).value = value;
       }
+    } else {
+      controlContainer.querySelector('select').value = value;
     }
   }
 
@@ -93,17 +55,8 @@ export class Instrument {
    * @param {number} note
    */
   setNoteOff(note) {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'instrument-set-note-off',
-        id,
-        pitch: this._noteToPitch(note),
-      });
-
-      if (this._container) {
-        this._container.querySelector(`[data-note="${note}"]`)?.classList.remove('active');
-      }
-    });
+    this._instrument.setNoteOff(this._semitoneToPitch(note));
+    this._container.querySelector(`[data-note="${note}"]`)?.classList.remove('active');
   }
 
   /**
@@ -113,50 +66,8 @@ export class Instrument {
    * @param {number=} pitchShift
    */
   setNoteOn(note, gain = 1.0, pitchShift = 0.0) {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'instrument-set-note-on',
-        id,
-        pitch: this._noteToPitch(note),
-        gain,
-        pitchShift,
-      });
-
-      if (this._container) {
-        this._container.querySelector(`[data-note="${note}"]`)?.classList.add('active');
-      }
-    });
-  }
-
-  /**
-   * Set instrument sample data.
-   *
-   * @param {!Array<{pitch: number, url: string}>} sampleData
-   * @return {!Promise<void>}
-   */
-  async setSampleData(sampleData) {
-    const slices = [];
-    for (const {pitch, url} of sampleData) {
-      const response = await fetch(url);
-      if (!response.ok) {
-        console.warn(`Invalid sample data for pitch ${pitch}`);
-        continue;
-      }
-      const arrayBuffer = await response.arrayBuffer();
-      const audioBuffer = await this._audioContext.decodeAudioData(arrayBuffer);
-      slices.push({
-        rootPitch: pitch,
-        sampleRate: audioBuffer.sampleRate,
-        samples: audioBuffer.getChannelData(0),  // mono only.
-      });
-    }
-    await this._withId(async id => {
-      this._audioNode.port.postMessage({
-        type: 'instrument-set-sample-data',
-        id,
-        slices,
-      });
-    });
+    this._instrument.setNoteOn(this._semitoneToPitch(note), gain, pitchShift);
+    this._container.querySelector(`[data-note="${note}"]`)?.classList.add('active');
   }
 
   /**
@@ -166,8 +77,8 @@ export class Instrument {
    * @private
    */
   _createControlContainer(controlTypeIndex, parentContainer) {
-    if (!CONTROLS[controlTypeIndex]) return;
-    const control = CONTROLS[controlTypeIndex];
+    if (!INSTRUMENT_CONTROLS[controlTypeIndex]) return;
+    const control = INSTRUMENT_CONTROLS[controlTypeIndex];
 
     // Container
     const controlContainer = document.createElement('div');
@@ -275,7 +186,7 @@ export class Instrument {
    * Initializes the container for the instrument UI.
    * @private
    */
-  _initContainer() {
+  _initContainer(destroyCallback) {
     this._container.innerHTML = `
       <label id="name"></label>
       <div id="controls"></div>
@@ -302,7 +213,7 @@ export class Instrument {
 
     // Controls
     const controlsContainer = this._container.querySelector('#controls');
-    for (const controlTypeIndex in CONTROLS) {
+    for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
       this._createControlContainer(controlTypeIndex, controlsContainer);
     }
 
@@ -371,10 +282,13 @@ export class Instrument {
     }, {passive: false});
 
     // Delete button
-    this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
+    this._container.querySelector('#deleteBtn').addEventListener('click', () => {
+      destroyCallback();
+      this.destroy();
+    });
 
     // Set id and label
-    this._withId(id => {
+    this._instrument.id.then(id => {
       this._container.id = `instrument#${id}`;
       const label = this._container.querySelector('label');
       label.textContent = this._container.id;
@@ -383,22 +297,11 @@ export class Instrument {
 
   /**
    * Returns the corresponding note pitch for a given note in semitones.
-   * @param {number} note
+   * @param {number} semitone
    * @return {number}
    * @private
    */
-  _noteToPitch(note) {
-    return note / 12.0;
-  }
-
-  /**
-   * Helper to run a function with the resolved id.
-   * @param {function(number):void} fn
-   * @return {!Promise}
-   * @private
-   */
-  async _withId(fn) {
-    const id = await this._idPromise;
-    return fn(id);
+  _semitoneToPitch(semitone) {
+    return semitone / 12.0;
   }
 }

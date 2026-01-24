@@ -1,16 +1,16 @@
-import {TaskEventType} from './task.js';
+import {TaskEventType} from '../src/task.js';
 
 export class Note {
-  constructor(performer, position, duration, pitch, gain) {
-    this._performer = performer;
+  constructor(engine, performerui, position, duration, pitch, gain) {
+    this._performerui = performerui;
     this._pitch = pitch;
     this.gain = gain;
 
-    this._task = performer.createTask(position, duration, type => {
+    this._task = engine.createTask(performerui.performer, position, duration, type => {
       if (type === TaskEventType.BEGIN) {
-        this._performer.selectedInstrument?.setNoteOn(this._pitch, this.gain);
+        this._performerui.selectedInstrument?.setNoteOn(this._pitch, this.gain);
       } else if (type === TaskEventType.END) {
-        this._performer.selectedInstrument?.setNoteOff(this._pitch);
+        this._performerui.selectedInstrument?.setNoteOff(this._pitch);
       }
     });
 
@@ -21,7 +21,7 @@ export class Note {
    * Destroys the note.
    */
   destroy() {
-    this._performer.selectedInstrument?.setNoteOff(this._pitch);
+    this._performerui.selectedInstrument?.setNoteOff(this._pitch);
     this._task.destroy();
   }
 
@@ -48,10 +48,10 @@ export class Note {
   set pitch(newPitch) {
     if (this._pitch === newPitch) return;
 
-    this._performer.selectedInstrument?.setNoteOff(this._pitch);
+    this._performerui.selectedInstrument?.setNoteOff(this._pitch);
     this._pitch = newPitch;
     if (this.isActive) {
-      this._performer.selectedInstrument?.setNoteOn(this._pitch, this.gain);
+      this._performerui.selectedInstrument?.setNoteOn(this._pitch, this.gain);
     }
   }
 

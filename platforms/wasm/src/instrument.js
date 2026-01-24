@@ -1,0 +1,180 @@
+import {MessageType} from './message.js'
+
+/**
+ * A representation of a musical instrument that can be played in real-time.
+ */
+export class Instrument {
+  /**
+   * @param {{
+   *   audioContext: !AudioContext,
+   *   audioNode: !AudioWorkletNode,
+   *   idPromise: !Promise<number>,
+   *   noteOnCallback: function(number):void,
+   *   noteOffCallback: function(number):void
+   * }} params
+   */
+  constructor({audioContext, audioNode, idPromise, noteOnCallback, noteOffCallback}) {
+    /** @private @const {!AudioContext} */
+    this._audioContext = audioContext;
+
+    /** @private @const {!AudioWorkletNode} */
+    this._audioNode = audioNode;
+
+    /** @private @const {!Promise<number>} */
+    this._idPromise = idPromise;
+
+    /** @private {boolean} */
+    this._isDestroyed = false;
+
+    /** @public */
+    this.noteOnCallback = noteOnCallback;
+
+    /** @public */
+    this.noteOffCallback = noteOffCallback;
+  }
+
+  /**
+   * Destroys the instrument.
+   * @return {!Promise<void>}
+   */
+  async destroy() {
+    if (this._isDestroyed) return;
+
+    this._isDestroyed = true;
+    await this._withId(id => {
+      this._audioNode.port.postMessage({
+        type: MessageType.INSTRUMENT_DESTROY,
+        id,
+      });
+    });
+  }
+
+  /**
+   * Sets all notes off.
+   */
+  setAllNotesOff() {
+    this._withId(id => {
+      this._audioNode.port.postMessage({
+        type: MessageType.INSTRUMENT_SET_ALL_NOTES_OFF,
+        id,
+      });
+    });
+  }
+
+  /**
+   * Sets a control value.
+   * @param {number} typeIndex
+   * @param {number} value
+   */
+  setControl(typeIndex, value) {
+    this._withId(id => {
+      this._audioNode.port.postMessage({
+        type: MessageType.INSTRUMENT_SET_CONTROL,
+        id,
+        typeIndex,
+        value,
+      });
+    });
+  }
+
+  /**
+   * Sets a note control value.
+   * @param {number} pitch
+   * @param {number} typeIndex
+   * @param {number} value
+   */
+  setNoteControl(pitch, typeIndex, value) {
+    this._withId(id => {
+      this._audioNode.port.postMessage({
+        type: MessageType.INSTRUMENT_SET_NOTE_CONTROL,
+        id,
+        pitch,
+        typeIndex,
+        value,
+      });
+    });
+  }
+
+  /**
+   * Sets a note off.
+   * @param {number} pitch
+   */
+  setNoteOff(pitch) {
+    this._withId(id => {
+      this._audioNode.port.postMessage({
+        type: MessageType.INSTRUMENT_SET_NOTE_OFF,
+        id,
+        pitch,
+      });
+    });
+  }
+
+  /**
+   * Sets a note on.
+   * @param {number} pitch
+   * @param {number=} gain
+   * @param {number=} pitchShift
+   */
+  setNoteOn(pitch, gain = 1.0, pitchShift = 0.0) {
+    this._withId(id => {
+      this._audioNode.port.postMessage({
+        type: MessageType.INSTRUMENT_SET_NOTE_ON,
+        id,
+        pitch,
+        gain,
+        pitchShift,
+      });
+    });
+  }
+
+  /**
+   * Loads and assigns sample data to the instrument.
+   * @param {!Array<{pitch: number, url: string}>} sampleData
+   * @return {!Promise<void>}
+   */
+  async setSampleData(sampleData) {
+    const slices = [];
+
+    for (const {pitch, url} of sampleData) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.warn(`Invalid sample data for pitch ${pitch}`);
+        continue;
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this._audioContext.decodeAudioData(arrayBuffer);
+
+      slices.push({
+        rootPitch: pitch,
+        sampleRate: audioBuffer.sampleRate,
+        samples: audioBuffer.getChannelData(0),  // mono only
+      });
+    }
+
+    await this._withId(id => {
+      this._audioNode.port.postMessage({
+        type: MessageType.INSTRUMENT_SET_SAMPLE_DATA,
+        id,
+        slices,
+      });
+    });
+  }
+
+  /** @return {!Promise<void>} */
+  get id() {
+    return this._idPromise;
+  }
+
+  /**
+   * Runs a function once the instrument identifier is resolved.
+   * @param {function(number): (void|!Promise<void>)} fn
+   * @return {!Promise<void>}
+   * @private
+   */
+  async _withId(fn) {
+    if (this._isDestroyed) return;
+    const id = await this._idPromise;
+    await fn(id);
+  }
+}

@@ -86,7 +86,101 @@ export const SliceMode = {
   COUNT: 3,
 };
 
-export const CONTROLS = {
+export const ENGINE_CONTROLS = {
+  [EngineControlType.COMPRESSOR_MIX]: {
+    name: 'Compressor Mix',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [EngineControlType.COMPRESSOR_ATTACK]: {
+    name: 'Compressor Attack',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 10.0,
+  },
+  [EngineControlType.COMPRESSOR_RELEASE]: {
+    name: 'Compressor Release',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 10.0,
+  },
+  [EngineControlType.COMPRESSOR_THRESHOLD]: {
+    name: 'Compressor Threshold',
+    valueType: 'float',
+    defaultValue: 1.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [EngineControlType.COMPRESSOR_RATIO]: {
+    name: 'Compressor Ratio',
+    valueType: 'float',
+    defaultValue: 1.0,
+    minValue: 1.0,
+    maxValue: 64.0,
+  },
+  [EngineControlType.DELAY_MIX]: {
+    name: 'Delay Mix',
+    valueType: 'float',
+    defaultValue: 1.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [EngineControlType.DELAY_TIME]: {
+    name: 'Delay Time',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 10.0,
+  },
+  [EngineControlType.DELAY_FEEDBACK]: {
+    name: 'Delay Feedback',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [EngineControlType.SIDECHAIN_MIX]: {
+    name: 'Sidechain Mix',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [EngineControlType.SIDECHAIN_ATTACK]: {
+    name: 'Sidechain Attack',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 10.0,
+  },
+  [EngineControlType.SIDECHAIN_RELEASE]: {
+    name: 'Sidechain Release',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 10.0,
+  },
+  [EngineControlType.SIDECHAIN_THRESHOLD]: {
+    name: 'Sidechain Threshold',
+    valueType: 'float',
+    defaultValue: 1.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [EngineControlType.SIDECHAIN_RATIO]: {
+    name: 'Sidechain Ratio',
+    valueType: 'float',
+    defaultValue: 1.0,
+    minValue: 1.0,
+    maxValue: 64.0,
+  },
+};
+
+export const INSTRUMENT_CONTROLS = {
   [InstrumentControlType.GAIN]: {
     name: 'Gain',
     valueType: 'float',
@@ -101,13 +195,13 @@ export const CONTROLS = {
     minValue: -2.0,
     maxValue: 2.0,
   },
-  // [InstrumentControlType.RETRIGGER]: {
-  //   name: 'Retrigger',
-  //   valueType: 'bool',
-  //   defaultValue: false,
-  //   minValue: 0,
-  //   maxValue: 1,
-  // },
+  [InstrumentControlType.RETRIGGER]: {
+    name: 'Retrigger',
+    valueType: 'bool',
+    defaultValue: false,
+    minValue: 0,
+    maxValue: 1,
+  },
   [InstrumentControlType.STEREO_PAN]: {
     name: 'Stereo Pan',
     valueType: 'float',
@@ -115,13 +209,13 @@ export const CONTROLS = {
     minValue: -1.0,
     maxValue: 1.0,
   },
-  // [InstrumentControlType.VOICE_COUNT]: {
-  //   name: 'Voice Count',
-  //   valueType: 'int',
-  //   defaultValue: 8,
-  //   minValue: 1,
-  //   maxValue: 20,
-  // },
+  [InstrumentControlType.VOICE_COUNT]: {
+    name: 'Voice Count',
+    valueType: 'int',
+    defaultValue: 8,
+    minValue: 1,
+    maxValue: 20,
+  },
   [InstrumentControlType.ATTACK]: {
     name: 'Attack (sec)',
     valueType: 'float',
@@ -255,13 +349,13 @@ export const CONTROLS = {
     minValue: 0.0,
     maxValue: 1.0,
   },
-  // [InstrumentControlType.SIDECHAIN_SEND]: {
-  //   name: 'Sidechain Send',
-  //   valueType: 'float',
-  //   defaultValue: 0.0,
-  //   minValue: -1.0,
-  //   maxValue: 1.0,
-  // },
+  [InstrumentControlType.SIDECHAIN_SEND]: {
+    name: 'Sidechain Send',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: -1.0,
+    maxValue: 1.0,
+  },
   [InstrumentControlType.ARP_MODE]: {
     name: 'Arp Mode',
     valueType: ArpMode,
@@ -282,5 +376,22 @@ export const CONTROLS = {
     defaultValue: 2,
     minValue: 1,
     maxValue: 16,
+  },
+};
+
+export const NOTE_CONTROLS = {
+  [NoteControlType.GAIN]: {
+    name: 'Gain',
+    valueType: 'float',
+    defaultValue: 1.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [NoteControlType.PITCH_SHIFT]: {
+    name: 'Pitch Shift',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: -2.0,
+    maxValue: 2.0,
   },
 };

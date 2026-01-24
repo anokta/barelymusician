@@ -1,5 +1,4 @@
-import {Note} from './note.js';
-import {Task} from './task.js';
+import {Note} from '../demo/note.js';
 
 const PITCHES = 14;
 const CLIP_HEIGHT = 240;
@@ -12,64 +11,21 @@ const MAX_LOOP_LENGTH = 16;
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const BASE_OCTAVE = 4;
 
-export class Performer {
+export class PerformerUi {
   /**
    * @param {!Object} options
    */
-  constructor({container, audioNode, idPromise, instruments}) {
+  constructor({container, engine, performer, instruments, destroyCallback}) {
     this._container = container;
-    this._audioNode = audioNode;
-    this._idPromise = idPromise;
-
-    this._isLooping = false;
-    this._isPlaying = false;
-    this._loopBeginPosition = 0.0;
-    this._loopLength = 1.0;
-    this._position = 0.0;
-
-    this._pendingTasks = [];
+    this._engine = engine;
+    this.performer = performer;
 
     this._notes = [];
     this._selectedInstrument = null;
 
     if (this._container) {
-      this._initContainer(instruments);
+      this._initContainer(instruments, destroyCallback);
     }
-
-    this._audioNode.port.postMessage({type: 'performer-create'});
-  }
-
-  /**
-   * @param {number} position
-   * @param {number} duration
-   * @param {function} eventCallback
-   * @return {!Task}
-   */
-  createTask(position, duration, eventCallback) {
-    let resolveId;
-    const idPromise = new Promise(resolve => {
-      resolveId = resolve;
-    });
-    const task = new Task({
-      audioNode: this._audioNode,
-      idPromise,
-      position,
-      duration,
-      eventCallback,
-    });
-
-    this._pendingTasks.push({task, resolveId});
-
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'task-create',
-        performerId: id,
-        position,
-        duration,
-      });
-    });
-
-    return task;
   }
 
   /**
@@ -78,9 +34,7 @@ export class Performer {
    */
   async destroy() {
     this._destroyAllNotes();
-    await this._withId(id => {
-      this._audioNode.port.postMessage({type: 'performer-destroy', id});
-    });
+    this.performer.destroy();
     if (this._container) {
       this._container.remove();
     }
@@ -95,36 +49,6 @@ export class Performer {
   }
 
   /**
-   * @param {number} id
-   * @return {!Task}
-   */
-  onTaskCreateSuccess(id) {
-    const {task, resolveId} = this._pendingTasks.shift();
-    resolveId(id);
-    return task;
-  }
-
-  /**
-   * Starts playback.
-   */
-  start() {
-    this._isPlaying = true;
-    this._withId(id => {
-      this._audioNode.port.postMessage({type: 'performer-start', id});
-    });
-  }
-
-  /**
-   * Stops playback.
-   */
-  stop() {
-    this._isPlaying = false;
-    this._withId(id => {
-      this._audioNode.port.postMessage({type: 'performer-stop', id});
-    });
-  }
-
-  /**
    * Updates the instrument select dropdown.
    * @param {!Object} instruments
    */
@@ -132,7 +56,7 @@ export class Performer {
     if (!this._container) return;
 
     const instrumentSelect = this._container.querySelector('#instrumentSelect');
-    const currentInstrumentHandle = instrumentSelect.value;
+    const currentInstrumentHandle = parseInt(instrumentSelect.value);
     instrumentSelect.innerHTML = '';
 
     const noneOption = document.createElement('option');
@@ -140,17 +64,17 @@ export class Performer {
     noneOption.textContent = 'none';
     instrumentSelect.appendChild(noneOption);
 
-    Object.keys(instruments).forEach(id => {
+    for (const id of instruments.keys()) {
       const option = document.createElement('option');
       option.value = id;
       option.textContent = `instrument#${id}`;
       instrumentSelect.appendChild(option);
-    });
+    }
 
-    if (instruments[currentInstrumentHandle]) {
+    if (instruments.has(currentInstrumentHandle)) {
       instrumentSelect.value = currentInstrumentHandle;
     }
-    this._selectedInstrument = instruments[currentInstrumentHandle];
+    this._selectedInstrument = instruments.get(currentInstrumentHandle);
   }
 
   _renderClip() {
@@ -201,23 +125,24 @@ export class Performer {
         const marker = document.createElement('div');
         marker.className = 'clip-marker';
         marker.style.left = `${x}px`;
-        marker.textContent = (this._loopLength * i / GRID_DIVISIONS).toFixed(3);
+        marker.textContent = (this.performer.loopLength * i / GRID_DIVISIONS).toFixed(3);
         clip.appendChild(marker);
       }
     }
 
     // Draw notes
     for (const note of this._notes) {
-      if (note.position >= this._loopLength) continue;
+      if (note.position >= this.performer.loopLength) continue;
 
       const clampedDuration =
-          Math.min(note.position + note.duration, this._loopLength) - note.position;
+          Math.min(note.position + note.duration, this.performer.loopLength) - note.position;
 
       note.noteDiv = document.createElement('div');
       note.noteDiv.className = 'clip-note';
       note.noteDiv.style.left = `${
-          (note.position + this._loopLength / GRID_DIVISIONS) * CLIP_WIDTH / this._loopLength}px`;
-      note.noteDiv.style.width = `${clampedDuration * CLIP_WIDTH / this._loopLength}px`;
+          (note.position + this.performer.loopLength / GRID_DIVISIONS) * CLIP_WIDTH /
+          this.performer.loopLength}px`;
+      note.noteDiv.style.width = `${clampedDuration * CLIP_WIDTH / this.performer.loopLength}px`;
       note.noteDiv.style.top = `${(PITCHES - 1 - note.pitch) * ROW_HEIGHT}px`;
       note.noteDiv.style.height = `${ROW_HEIGHT - 2}px`;
 
@@ -273,7 +198,7 @@ export class Performer {
     }
 
     const pitch = PITCHES - 1 - Math.floor(y / ROW_HEIGHT);
-    const start = (this._loopLength * x) / CLIP_WIDTH;
+    const start = (this.performer.loopLength * x) / CLIP_WIDTH;
 
     const noteDiv = document.createElement('div');
     noteDiv.className = 'clip-note';
@@ -308,9 +233,9 @@ export class Performer {
       document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('touchend', onTouchEnd);
       const endX = Math.min(upEvent.clientX - rect.left, CLIP_WIDTH + GRID_SIZE);
-      const duration = this._snapToGrid(endX - x) / CLIP_WIDTH * this._loopLength;
+      const duration = this._snapToGrid(endX - x) / CLIP_WIDTH * this.performer.loopLength;
       if (duration > 0) {
-        this._addNote(start - this._loopLength / GRID_DIVISIONS, duration, pitch, 1.0);
+        this._addNote(start - this.performer.loopLength / GRID_DIVISIONS, duration, pitch, 1.0);
       }
       clip.removeChild(noteDiv);
       this._renderClip();
@@ -323,7 +248,7 @@ export class Performer {
   }
 
   _addNote(start, duration, pitch, gain) {
-    const note = new Note(this, start, duration, pitch, gain);
+    const note = new Note(this._engine, this, start, duration, pitch, gain);
     this._notes.push(note);
   }
 
@@ -420,19 +345,19 @@ export class Performer {
       const finalTop = parseFloat(noteDiv.style.top);
 
       if (dragMode === 'move') {
-        note.position =
-            (finalLeft * this._loopLength) / CLIP_WIDTH - this._loopLength / GRID_DIVISIONS;
+        note.position = (finalLeft * this.performer.loopLength) / CLIP_WIDTH -
+            this.performer.loopLength / GRID_DIVISIONS;
         note.pitch = PITCHES - 1 - Math.round(finalTop / ROW_HEIGHT);
       } else if (dragMode === 'resize-left') {
-        const newStart =
-            (finalLeft * this._loopLength) / CLIP_WIDTH - this._loopLength / GRID_DIVISIONS;
+        const newStart = (finalLeft * this.performer.loopLength) / CLIP_WIDTH -
+            this.performer.loopLength / GRID_DIVISIONS;
         const newDuration = origPosition + origDuration - newStart;
         if (newDuration > 0) {
           note.position = newStart;
           note.duration = newDuration;
         }
       } else if (dragMode === 'resize-right') {
-        const newDuration = (finalWidth * this._loopLength) / CLIP_WIDTH;
+        const newDuration = (finalWidth * this.performer.loopLength) / CLIP_WIDTH;
         if (newDuration > 0) {
           note.duration = newDuration;
         }
@@ -446,11 +371,11 @@ export class Performer {
     document.addEventListener('touchend', onTouchEnd, {passive: false});
   }
 
-  _initContainer(instruments) {
+  _initContainer(instruments, destroyCallback) {
     this._container.innerHTML = `
       <label id="name"></label>
       <button id="loopDecBtn">-</button>
-      <span id="loopLengthLabel">${this._loopLength}</span>
+      <span id="loopLengthLabel">${this.performer.loopLength}</span>
       <button id="loopIncBtn">+</button>
       <select id="instrumentSelect"></select>
       <button id="clearNotesBtn">Clear</button>
@@ -466,7 +391,7 @@ export class Performer {
       if (this._selectedInstrument) {
         this._selectedInstrument.setAllNotesOff();
       }
-      this._selectedInstrument = instruments[instrumentSelect.value];
+      this._selectedInstrument = instruments.get(parseInt(instrumentSelect.value));
     });
 
     this.updateInstrumentSelect(instruments);
@@ -479,21 +404,24 @@ export class Performer {
 
     const loopLengthLabel = this._container.querySelector('#loopLengthLabel');
     this._container.querySelector('#loopDecBtn').addEventListener('click', () => {
-      this.loopLength = Math.max(this.loopLength - 1, 1);
-      loopLengthLabel.textContent = this.loopLength;
+      this.performer.loopLength = Math.max(this.performer.loopLength - 1, 1);
+      loopLengthLabel.textContent = this.performer.loopLength;
       this._renderClip();
     });
     this._container.querySelector('#loopIncBtn').addEventListener('click', () => {
-      this.loopLength = Math.min(this.loopLength + 1, MAX_LOOP_LENGTH);
-      loopLengthLabel.textContent = this.loopLength;
+      this.performer.loopLength = Math.min(this.performer.loopLength + 1, MAX_LOOP_LENGTH);
+      loopLengthLabel.textContent = this.performer.loopLength;
       this._renderClip();
     });
 
     // delete
-    this._container.querySelector('#deleteBtn').addEventListener('click', () => this.destroy());
+    this._container.querySelector('#deleteBtn').addEventListener('click', () => {
+      destroyCallback();
+      this.destroy();
+    });
 
     // id
-    this._withId(id => {
+    this.performer.id.then(id => {
       this._container.id = `performer#${(id - 1)}`;
 
       // label
@@ -510,92 +438,15 @@ export class Performer {
     return this._selectedInstrument;
   }
 
-  get isLooping() {
-    return this._isLooping;
-  }
-
-  get isPlaying() {
-    return this._isPlaying;
-  }
-
-  get loopBeginPosition() {
-    return this._loopBeginPosition;
-  }
-
-  get loopLength() {
-    return this._loopLength;
-  }
-
-  get position() {
-    return this._position;
-  }
-
-  /**
-   * @param {boolean} newIsLooping
-   */
-  set isLooping(newIsLooping) {
-    if (this._isLooping === newIsLooping) return;
-
-    this._isLooping = newIsLooping;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'performer-set-looping',
-        id,
-        isLooping: newIsLooping,
-      });
-    });
-  }
-
-  /**
-   * @param {number} newLoopBeginPosition
-   */
-  set loopBeginPosition(newLoopBeginPosition) {
-    if (this._loopBeginPosition === newLoopBeginPosition) return;
-
-    this._loopBeginPosition = newLoopBeginPosition;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'performer-set-loop-begin-position',
-        id,
-        loopBeginPosition: newLoopBeginPosition,
-      });
-    });
-  }
-
   /**
    * @param {number} newLoopLength
    */
   set loopLength(newLoopLength) {
-    if (this._loopLength === newLoopLength) return;
-
-    this._loopLength = Math.max(newLoopLength, 0.0);
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'performer-set-loop-length',
-        id,
-        loopLength: newLoopLength,
-      });
-    });
-
+    if (this.performer.loopLength === newLoopLength) return;
+    this.performer.loopLength = newLoopLength;
     if (this._container) {
-      this._container.querySelector('#loopLengthLabel').textContent = this._loopLength;
+      this._container.querySelector('#loopLengthLabel').textContent = newLoopLength;
     }
-  }
-
-  /**
-   * @param {number} newPosition
-   */
-  set position(newPosition) {
-    if (this._position === newPosition) return;
-
-    this._position = newPosition;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: 'performer-set-position',
-        id,
-        position: newPosition,
-      });
-    });
   }
 
   _destroyAllNotes() {
@@ -619,10 +470,5 @@ export class Performer {
       requestAnimationFrame(render);
     };
     render();
-  }
-
-  async _withId(fn) {
-    const id = await this._idPromise;
-    return fn(id);
   }
 }

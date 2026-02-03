@@ -42,11 +42,10 @@ export class Performer {
    */
   async destroy() {
     if (this._isDestroyed) return;
-
-    this._isDestroyed = true;
     await this._withId(id => {
       this._audioNode.port.postMessage({type: MessageType.PERFORMER_DESTROY, id});
     });
+    this._isDestroyed = true;
   }
 
   /** Starts playback. */

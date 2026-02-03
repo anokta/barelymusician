@@ -57,14 +57,13 @@ export class Task {
    */
   async destroy() {
     if (this._isDestroyed) return;
-
-    this._isDestroyed = true;
     await this._withId(id => {
       this._audioNode.port.postMessage({
         type: MessageType.TASK_DESTROY,
         id,
       });
     });
+    this._isDestroyed = true;
   }
 
   /** @param {number} newDuration */

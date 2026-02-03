@@ -39,14 +39,13 @@ export class Instrument {
    */
   async destroy() {
     if (this._isDestroyed) return;
-
-    this._isDestroyed = true;
     await this._withId(id => {
       this._audioNode.port.postMessage({
         type: MessageType.INSTRUMENT_DESTROY,
         id,
       });
     });
+    this._isDestroyed = true;
   }
 
   /**

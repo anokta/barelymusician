@@ -23,8 +23,8 @@ class Processor extends AudioWorkletProcessor {
     this._noteControlOverridesPtr = null;
     this._outputSamplesPtr = null;
 
-    this._instrumentCallbacks = {};
-    this._taskCallbacks = {};
+    this._instruments = new Map();
+    this._tasks = new Map();
 
     this._slices = {};
     this._slicesToRemove = [];
@@ -103,13 +103,13 @@ class Processor extends AudioWorkletProcessor {
                   {type: MessageType.INSTRUMENT_ON_NOTE_OFF, id: instrumentId, pitch});
             }
           };
-          this._instrumentCallbacks[instrumentId] = noteEventCallback;
           const noteEventCallbackPtr = this._module.addFunction((eventType, pitch, userData) => {
-            const callback = this._instrumentCallbacks[userData];
+            const callback = this._instruments.get(userData)?.eventCallback;
             if (callback) {
               callback(eventType, pitch);
             }
           }, 'vifi');
+          this._instruments.set(instrumentId, {noteEventCallback, noteEventCallbackPtr});
           this._module._BarelyInstrument_SetNoteEventCallback(
               this._engine, instrumentId, noteEventCallbackPtr, instrumentId);
 
@@ -129,6 +129,8 @@ class Processor extends AudioWorkletProcessor {
             delete this._slices[event.data.id];
           }
           this.port.postMessage({type: MessageType.INSTRUMENT_DESTROY_SUCCESS, id: event.data.id});
+          this._module.removeFunction(this._instruments.get(event.data.id).noteEventCallbackPtr);
+          this._instruments.delete(event.data.id);
           break;
         case MessageType.INSTRUMENT_SET_ALL_NOTES_OFF:
           this._module._BarelyInstrument_SetAllNotesOff(this._engine, event.data.id);
@@ -217,13 +219,13 @@ class Processor extends AudioWorkletProcessor {
 
           const eventCallback = (eventType) =>
               this.port.postMessage({type: MessageType.TASK_ON_EVENT, id: taskId, eventType});
-          this._taskCallbacks[taskId] = eventCallback;
           const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
-            const callback = this._taskCallbacks[userData];
+            const callback = this._tasks.get(userData)?.eventCallback;
             if (callback) {
               callback(eventType);
             }
           }, 'vii');
+          this._tasks.set(taskId, {eventCallback, eventCallbackPtr});
           this._module._BarelyTask_SetEventCallback(this._engine, taskId, eventCallbackPtr, taskId);
 
           this.port.postMessage({
@@ -235,6 +237,8 @@ class Processor extends AudioWorkletProcessor {
         case MessageType.TASK_DESTROY:
           this._module._BarelyEngine_DestroyTask(this._engine, event.data.id);
           this.port.postMessage({type: MessageType.TASK_DESTROY_SUCCESS, id: event.data.id});
+          this._module.removeFunction(this._tasks.get(event.data.id).eventCallbackPtr);
+          this._tasks.delete(event.data.id);
           break;
         case MessageType.TASK_GET_PROPERTIES: {
           this._module._BarelyTask_IsActive(this._engine, event.data.id, this._uint8Ptr);

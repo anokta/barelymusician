@@ -142,19 +142,6 @@ export class Engine {
    */
   update() {
     this._audioNode.port.postMessage({type: MessageType.ENGINE_UPDATE});
-
-    for (const id of this._performers.keys()) {
-      this._audioNode.port.postMessage({
-        type: MessageType.PERFORMER_GET_PROPERTIES,
-        id,
-      });
-    }
-    for (const id of this._tasks.keys()) {
-      this._audioNode.port.postMessage({
-        type: MessageType.TASK_GET_PROPERTIES,
-        id,
-      });
-    }
   }
 
   /** @param {number} newTempo */
@@ -237,7 +224,7 @@ export class Engine {
         case MessageType.PERFORMER_DESTROY_SUCCESS:
           this._performers.delete(data.id);
           break;
-        case MessageType.PERFORMER_GET_PROPERTIES_RESPONSE: {
+        case MessageType.PERFORMER_GET_PROPERTIES_SUCCESS: {
           const performer = this._performers.get(data.id);
           if (performer) {
             performer._isPlaying = data.isPlaying;
@@ -255,7 +242,7 @@ export class Engine {
         case MessageType.TASK_DESTROY_SUCCESS:
           this._tasks.delete(data.id);
           break;
-        case MessageType.TASK_GET_PROPERTIES_RESPONSE: {
+        case MessageType.TASK_GET_PROPERTIES_SUCCESS: {
           const task = this._tasks.get(data.id);
           if (task) {
             task._isActive = data.isActive;

@@ -24,6 +24,7 @@ class Processor extends AudioWorkletProcessor {
     this._outputSamplesPtr = null;
 
     this._instruments = new Map();
+    this._performers = new Set();
     this._tasks = new Map();
 
     this._slices = {};
@@ -72,6 +73,27 @@ class Processor extends AudioWorkletProcessor {
           const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
           this._timestamp = currentTime + latency;
           this._module._BarelyEngine_Update(this._engine, this._timestamp);
+          for (const performerId of this._performers) {
+            this._module._BarelyPerformer_IsPlaying(this._engine, performerId, this._uint8Ptr);
+            const isPlaying = (this._module.getValue(this._uint8Ptr) !== 0);
+            this._module._BarelyPerformer_GetPosition(this._engine, performerId, this._doublePtr);
+            const position = this._module.getValue(this._doublePtr, 'double');
+            this.port.postMessage({
+              type: MessageType.PERFORMER_GET_PROPERTIES_SUCCESS,
+              id: performerId,
+              isPlaying,
+              position,
+            });
+          }
+          for (const taskId of this._tasks.keys()) {
+            this._module._BarelyTask_IsActive(this._engine, taskId, this._uint8Ptr);
+            const isActive = (this._module.getValue(this._uint8Ptr) !== 0);
+            this.port.postMessage({
+              type: MessageType.TASK_GET_PROPERTIES_SUCCESS,
+              id: taskId,
+              isActive,
+            });
+          }
         } break;
         case MessageType.INSTRUMENT_CREATE: {
           let i = 0;
@@ -109,9 +131,9 @@ class Processor extends AudioWorkletProcessor {
               callback(eventType, pitch);
             }
           }, 'vifi');
-          this._instruments.set(instrumentId, {noteEventCallback, noteEventCallbackPtr});
           this._module._BarelyInstrument_SetNoteEventCallback(
               this._engine, instrumentId, noteEventCallbackPtr, instrumentId);
+          this._instruments.set(instrumentId, {noteEventCallback, noteEventCallbackPtr});
 
           this.port.postMessage({
             type: MessageType.INSTRUMENT_CREATE_SUCCESS,
@@ -167,6 +189,7 @@ class Processor extends AudioWorkletProcessor {
         case MessageType.PERFORMER_CREATE: {
           this._module._BarelyEngine_CreatePerformer(this._engine, this._uint32Ptr);
           const performerId = this._module.getValue(this._uint32Ptr, 'i32');
+          this._performers.add(performerId);
           this.port.postMessage({
             type: MessageType.PERFORMER_CREATE_SUCCESS,
             id: performerId,
@@ -176,19 +199,8 @@ class Processor extends AudioWorkletProcessor {
         case MessageType.PERFORMER_DESTROY:
           this._module._BarelyEngine_DestroyPerformer(this._engine, event.data.id);
           this.port.postMessage({type: MessageType.PERFORMER_DESTROY_SUCCESS, id: event.data.id});
+          this._performers.delete(event.data.id);
           break;
-        case MessageType.PERFORMER_GET_PROPERTIES: {
-          this._module._BarelyPerformer_IsPlaying(this._engine, event.data.id, this._uint8Ptr);
-          const isPlaying = (this._module.getValue(this._uint8Ptr) !== 0);
-          this._module._BarelyPerformer_GetPosition(this._engine, event.data.id, this._doublePtr);
-          const position = this._module.getValue(this._doublePtr, 'double');
-          this.port.postMessage({
-            type: MessageType.PERFORMER_GET_PROPERTIES_RESPONSE,
-            id: event.data.id,
-            isPlaying,
-            position,
-          });
-        } break;
         case MessageType.PERFORMER_SET_LOOP_BEGIN_POSITION:
           this._module._BarelyPerformer_SetLoopBeginPosition(
               this._engine, event.data.id, event.data.loopBeginPosition);
@@ -225,8 +237,8 @@ class Processor extends AudioWorkletProcessor {
               callback(eventType);
             }
           }, 'vii');
-          this._tasks.set(taskId, {eventCallback, eventCallbackPtr});
           this._module._BarelyTask_SetEventCallback(this._engine, taskId, eventCallbackPtr, taskId);
+          this._tasks.set(taskId, {eventCallback, eventCallbackPtr});
 
           this.port.postMessage({
             type: MessageType.TASK_CREATE_SUCCESS,
@@ -240,15 +252,6 @@ class Processor extends AudioWorkletProcessor {
           this._module.removeFunction(this._tasks.get(event.data.id).eventCallbackPtr);
           this._tasks.delete(event.data.id);
           break;
-        case MessageType.TASK_GET_PROPERTIES: {
-          this._module._BarelyTask_IsActive(this._engine, event.data.id, this._uint8Ptr);
-          const isActive = (this._module.getValue(this._uint8Ptr) !== 0);
-          this.port.postMessage({
-            type: MessageType.TASK_GET_PROPERTIES_RESPONSE,
-            id: event.data.id,
-            isActive,
-          });
-        } break;
         case MessageType.TASK_SET_DURATION:
           this._module._BarelyTask_SetDuration(this._engine, event.data.id, event.data.duration);
           break;

@@ -172,61 +172,78 @@ export class Engine {
         case MessageType.INIT_SUCCESS:
           initCallback();
           break;
-        case MessageType.INSTRUMENT_CREATE_SUCCESS: {
-          const {resolveId, instrument} = this._pendingRequests.get(data.requestId);
-          resolveId(data.id);
-          this._pendingRequests.delete(data.requestId);
-          this._instruments.set(data.id, instrument);
-          break;
-        }
-        case MessageType.INSTRUMENT_DESTROY_SUCCESS:
-          this._instruments.delete(data.id);
-          break;
-        case MessageType.INSTRUMENT_ON_NOTE_ON:
-          this._instruments.get(data.id)?.noteOnCallback(data.pitch);
-          break;
-        case MessageType.INSTRUMENT_ON_NOTE_OFF:
-          this._instruments.get(data.id)?.noteOffCallback(data.pitch);
-          break;
-        case MessageType.PERFORMER_CREATE_SUCCESS: {
-          const {resolveId, performer} = this._pendingRequests.get(data.requestId);
-          this._pendingRequests.delete(data.requestId);
-          resolveId(data.id);
-          this._performers.set(data.id, performer);
-          break;
-        }
-        case MessageType.PERFORMER_DESTROY_SUCCESS:
-          this._performers.delete(data.id);
-          break;
-        case MessageType.PERFORMER_GET_PROPERTIES_SUCCESS: {
-          const performer = this._performers.get(data.id);
-          if (performer) {
-            performer._position = data.position;
+        case MessageType.ENGINE_UPDATE_SUCCESS:
+          for (const message of data.messages) {
+            this._processMessage(message);
           }
           break;
-        }
-        case MessageType.TASK_CREATE_SUCCESS: {
-          const {resolveId, task} = this._pendingRequests.get(data.requestId);
-          this._pendingRequests.delete(data.requestId);
-          resolveId(data.id);
-          this._tasks.set(data.id, task);
-          break;
-        }
-        case MessageType.TASK_DESTROY_SUCCESS:
-          this._tasks.delete(data.id);
-          break;
-        case MessageType.TASK_GET_PROPERTIES_SUCCESS: {
-          const task = this._tasks.get(data.id);
-          if (task) {
-            task._isActive = data.isActive;
-          }
-          break;
-        }
-        case MessageType.TASK_ON_EVENT:
-          this._tasks.get(data.id)?.eventCallback(data.eventType);
-          break;
+        default:
+          console.error(`Invalid message: ${data.type}`);
+      };
+    }
+  }
+
+  /**
+   * Processes a message.
+   * @param {!Object} message
+   * @private
+   */
+  _processMessage(message) {
+    switch (message.type) {
+      case MessageType.INSTRUMENT_CREATE_SUCCESS: {
+        const {resolveId, instrument} = this._pendingRequests.get(message.requestId);
+        resolveId(message.id);
+        this._pendingRequests.delete(message.requestId);
+        this._instruments.set(message.id, instrument);
+        break;
       }
-    };
+      case MessageType.INSTRUMENT_DESTROY_SUCCESS:
+        this._instruments.delete(message.id);
+        break;
+      case MessageType.INSTRUMENT_ON_NOTE_ON:
+        this._instruments.get(message.id)?.noteOnCallback(message.pitch);
+        break;
+      case MessageType.INSTRUMENT_ON_NOTE_OFF:
+        this._instruments.get(message.id)?.noteOffCallback(message.pitch);
+        break;
+      case MessageType.PERFORMER_CREATE_SUCCESS: {
+        const {resolveId, performer} = this._pendingRequests.get(message.requestId);
+        this._pendingRequests.delete(message.requestId);
+        resolveId(message.id);
+        this._performers.set(message.id, performer);
+        break;
+      }
+      case MessageType.PERFORMER_DESTROY_SUCCESS:
+        this._performers.delete(message.id);
+        break;
+      case MessageType.PERFORMER_GET_PROPERTIES_SUCCESS: {
+        const performer = this._performers.get(message.id);
+        if (performer) {
+          performer._position = message.position;
+        }
+        break;
+      }
+      case MessageType.TASK_CREATE_SUCCESS: {
+        const {resolveId, task} = this._pendingRequests.get(message.requestId);
+        this._pendingRequests.delete(message.requestId);
+        resolveId(message.id);
+        this._tasks.set(message.id, task);
+        break;
+      }
+      case MessageType.TASK_DESTROY_SUCCESS:
+        this._tasks.delete(message.id);
+        break;
+      case MessageType.TASK_GET_PROPERTIES_SUCCESS: {
+        const task = this._tasks.get(message.id);
+        if (task) {
+          task._isActive = message.isActive;
+        }
+        break;
+      }
+      case MessageType.TASK_ON_EVENT:
+        this._tasks.get(message.id)?.eventCallback(message.eventType);
+        break;
+    }
   }
 
   /**

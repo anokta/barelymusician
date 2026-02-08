@@ -8,6 +8,7 @@ export const MessageType = {
   ENGINE_SET_TEMPO: 'engine-set-tempo',
   ENGINE_SET_CONTROL: 'engine-set-control',
   ENGINE_UPDATE: 'engine-update',
+  ENGINE_UPDATE_SUCCESS: 'engine-update-success',
 
   INSTRUMENT_CREATE: 'instrument-create',
   INSTRUMENT_CREATE_SUCCESS: 'instrument-create-success',

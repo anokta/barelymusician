@@ -12,9 +12,6 @@ export class Engine {
    * @param {function():void} initCallback
    */
   constructor(audioContext, initCallback) {
-    /** @private {number} */
-    this._tempo = 120.0;
-
     /** @private {!Map<number, !Instrument>} */
     this._instruments = new Map();
 
@@ -144,20 +141,12 @@ export class Engine {
     this._audioNode.port.postMessage({type: MessageType.ENGINE_UPDATE});
   }
 
-  /** @param {number} newTempo */
-  set tempo(newTempo) {
-    if (this._tempo === newTempo) return;
-
-    this._tempo = newTempo;
+  /** @param {number} tempo */
+  setTempo(tempo) {
     this._audioNode.port.postMessage({
       type: MessageType.ENGINE_SET_TEMPO,
-      tempo: newTempo,
+      tempo,
     });
-  }
-
-  /** @return {number} */
-  get tempo() {
-    return this._tempo;
   }
 
   /** @return {!AudioWorkletNode} */
@@ -227,7 +216,6 @@ export class Engine {
         case MessageType.PERFORMER_GET_PROPERTIES_SUCCESS: {
           const performer = this._performers.get(data.id);
           if (performer) {
-            performer._isPlaying = data.isPlaying;
             performer._position = data.position;
           }
           break;

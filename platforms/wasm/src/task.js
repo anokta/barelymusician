@@ -35,15 +35,6 @@ export class Task {
     /** @private {boolean} */
     this._isDestroyed = false;
 
-    /** @private {number} */
-    this._position = position;
-
-    /** @private {number} */
-    this._duration = duration;
-
-    /** @private {number} */
-    this._priority = priority;
-
     /** @private {boolean} */
     this._isActive = false;
 
@@ -66,51 +57,37 @@ export class Task {
     this._isDestroyed = true;
   }
 
-  /** @param {number} newDuration */
-  set duration(newDuration) {
-    if (this._duration === newDuration) return;
-
-    this._duration = newDuration;
+  /** @param {number} duration */
+  setDuration(duration) {
     this._withId(id => {
       this._audioNode.port.postMessage({
         type: MessageType.TASK_SET_DURATION,
         id,
-        duration: newDuration,
+        duration,
       });
     });
   }
 
-  /** @param {number} newPosition */
-  set position(newPosition) {
-    if (this._position === newPosition) return;
-
-    this._position = newPosition;
+  /** @param {number} position */
+  setPosition(position) {
     this._withId(id => {
       this._audioNode.port.postMessage({
         type: MessageType.TASK_SET_POSITION,
         id,
-        position: newPosition,
+        position,
       });
     });
   }
 
-  /** @param {number} newPriority */
-  set priority(newPriority) {
-    if (this._priority === newPriority) return;
-
-    this._priority = newPriority;
+  /** @param {number} priority */
+  setPriority(priority) {
     this._withId(id => {
       this._audioNode.port.postMessage({
         type: MessageType.TASK_SET_PRIORITY,
         id,
-        priority: newPriority,
+        priority,
       });
     });
-  }
-
-  /** @return {number} */
-  get duration() {
-    return this._duration;
   }
 
   /** @return {!Promise<void>} */
@@ -121,16 +98,6 @@ export class Task {
   /** @return {boolean} */
   get isActive() {
     return this._isActive;
-  }
-
-  /** @return {number} */
-  get position() {
-    return this._position;
-  }
-
-  /** @return {number} */
-  get priority() {
-    return this._priority;
   }
 
   /**

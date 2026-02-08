@@ -74,14 +74,11 @@ class Processor extends AudioWorkletProcessor {
           this._timestamp = currentTime + latency;
           this._module._BarelyEngine_Update(this._engine, this._timestamp);
           for (const performerId of this._performers) {
-            this._module._BarelyPerformer_IsPlaying(this._engine, performerId, this._uint8Ptr);
-            const isPlaying = (this._module.getValue(this._uint8Ptr) !== 0);
             this._module._BarelyPerformer_GetPosition(this._engine, performerId, this._doublePtr);
             const position = this._module.getValue(this._doublePtr, 'double');
             this.port.postMessage({
               type: MessageType.PERFORMER_GET_PROPERTIES_SUCCESS,
               id: performerId,
-              isPlaying,
               position,
             });
           }

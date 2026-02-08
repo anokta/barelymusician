@@ -23,6 +23,12 @@ export class PerformerUi {
     this._notes = [];
     this._selectedInstrument = null;
 
+    /** @private {boolean} */
+    this._isPlaying = false;
+
+    /** @private {number} */
+    this._loopLength = 1.0;
+
     if (this._container) {
       this._initContainer(instruments, destroyCallback);
     }
@@ -77,6 +83,20 @@ export class PerformerUi {
     this._selectedInstrument = instruments.get(currentInstrumentHandle);
   }
 
+  start() {
+    this._isPlaying = true;
+    this.performer.start();
+  }
+
+  stop() {
+    this._isPlaying = false;
+    this.performer.stop();
+  }
+
+  get isPlaying() {
+    return this._isPlaying;
+  }
+
   _renderClip() {
     const clip = this._container.querySelector('.clip');
     clip.innerHTML = '';
@@ -125,24 +145,23 @@ export class PerformerUi {
         const marker = document.createElement('div');
         marker.className = 'clip-marker';
         marker.style.left = `${x}px`;
-        marker.textContent = (this.performer.loopLength * i / GRID_DIVISIONS).toFixed(3);
+        marker.textContent = (this._loopLength * i / GRID_DIVISIONS).toFixed(3);
         clip.appendChild(marker);
       }
     }
 
     // Draw notes
     for (const note of this._notes) {
-      if (note.position >= this.performer.loopLength) continue;
+      if (note.position >= this._loopLength) continue;
 
       const clampedDuration =
-          Math.min(note.position + note.duration, this.performer.loopLength) - note.position;
+          Math.min(note.position + note.duration, this._loopLength) - note.position;
 
       note.noteDiv = document.createElement('div');
       note.noteDiv.className = 'clip-note';
       note.noteDiv.style.left = `${
-          (note.position + this.performer.loopLength / GRID_DIVISIONS) * CLIP_WIDTH /
-          this.performer.loopLength}px`;
-      note.noteDiv.style.width = `${clampedDuration * CLIP_WIDTH / this.performer.loopLength}px`;
+          (note.position + this._loopLength / GRID_DIVISIONS) * CLIP_WIDTH / this._loopLength}px`;
+      note.noteDiv.style.width = `${clampedDuration * CLIP_WIDTH / this._loopLength}px`;
       note.noteDiv.style.top = `${(PITCHES - 1 - note.pitch) * ROW_HEIGHT}px`;
       note.noteDiv.style.height = `${ROW_HEIGHT - 2}px`;
 
@@ -198,7 +217,7 @@ export class PerformerUi {
     }
 
     const pitch = PITCHES - 1 - Math.floor(y / ROW_HEIGHT);
-    const start = (this.performer.loopLength * x) / CLIP_WIDTH;
+    const start = (this._loopLength * x) / CLIP_WIDTH;
 
     const noteDiv = document.createElement('div');
     noteDiv.className = 'clip-note';
@@ -233,9 +252,9 @@ export class PerformerUi {
       document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('touchend', onTouchEnd);
       const endX = Math.min(upEvent.clientX - rect.left, CLIP_WIDTH + GRID_SIZE);
-      const duration = this._snapToGrid(endX - x) / CLIP_WIDTH * this.performer.loopLength;
+      const duration = this._snapToGrid(endX - x) / CLIP_WIDTH * this._loopLength;
       if (duration > 0) {
-        this._addNote(start - this.performer.loopLength / GRID_DIVISIONS, duration, pitch, 1.0);
+        this._addNote(start - this._loopLength / GRID_DIVISIONS, duration, pitch, 1.0);
       }
       clip.removeChild(noteDiv);
       this._renderClip();
@@ -345,19 +364,19 @@ export class PerformerUi {
       const finalTop = parseFloat(noteDiv.style.top);
 
       if (dragMode === 'move') {
-        note.position = (finalLeft * this.performer.loopLength) / CLIP_WIDTH -
-            this.performer.loopLength / GRID_DIVISIONS;
+        note.position =
+            (finalLeft * this._loopLength) / CLIP_WIDTH - this._loopLength / GRID_DIVISIONS;
         note.pitch = PITCHES - 1 - Math.round(finalTop / ROW_HEIGHT);
       } else if (dragMode === 'resize-left') {
-        const newStart = (finalLeft * this.performer.loopLength) / CLIP_WIDTH -
-            this.performer.loopLength / GRID_DIVISIONS;
+        const newStart =
+            (finalLeft * this._loopLength) / CLIP_WIDTH - this._loopLength / GRID_DIVISIONS;
         const newDuration = origPosition + origDuration - newStart;
         if (newDuration > 0) {
           note.position = newStart;
           note.duration = newDuration;
         }
       } else if (dragMode === 'resize-right') {
-        const newDuration = (finalWidth * this.performer.loopLength) / CLIP_WIDTH;
+        const newDuration = (finalWidth * this._loopLength) / CLIP_WIDTH;
         if (newDuration > 0) {
           note.duration = newDuration;
         }
@@ -375,7 +394,7 @@ export class PerformerUi {
     this._container.innerHTML = `
       <label id="name"></label>
       <button id="loopDecBtn">-</button>
-      <span id="loopLengthLabel">${this.performer.loopLength}</span>
+      <span id="loopLengthLabel">${this._loopLength}</span>
       <button id="loopIncBtn">+</button>
       <select id="instrumentSelect"></select>
       <button id="clearNotesBtn">Clear</button>
@@ -404,13 +423,15 @@ export class PerformerUi {
 
     const loopLengthLabel = this._container.querySelector('#loopLengthLabel');
     this._container.querySelector('#loopDecBtn').addEventListener('click', () => {
-      this.performer.loopLength = Math.max(this.performer.loopLength - 1, 1);
-      loopLengthLabel.textContent = this.performer.loopLength;
+      this._loopLength = Math.max(this._loopLength - 1, 1);
+      this.performer.setLoopLength(this._loopLength);
+      loopLengthLabel.textContent = this._loopLength;
       this._renderClip();
     });
     this._container.querySelector('#loopIncBtn').addEventListener('click', () => {
-      this.performer.loopLength = Math.min(this.performer.loopLength + 1, MAX_LOOP_LENGTH);
-      loopLengthLabel.textContent = this.performer.loopLength;
+      this._loopLength = Math.min(this._loopLength + 1, MAX_LOOP_LENGTH);
+      this.performer.setLoopLength(this._loopLength);
+      loopLengthLabel.textContent = this._loopLength;
       this._renderClip();
     });
 
@@ -442,8 +463,9 @@ export class PerformerUi {
    * @param {number} newLoopLength
    */
   set loopLength(newLoopLength) {
-    if (this.performer.loopLength === newLoopLength) return;
-    this.performer.loopLength = newLoopLength;
+    if (this._loopLength === newLoopLength) return;
+    this._loopLength = newLoopLength;
+    this.setLoopLength(this._loopLength);
     if (this._container) {
       this._container.querySelector('#loopLengthLabel').textContent = newLoopLength;
     }

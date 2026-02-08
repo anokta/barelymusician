@@ -6,6 +6,12 @@ export class Note {
     this._pitch = pitch;
     this.gain = gain;
 
+    /** @private {number} */
+    this._position = position;
+
+    /** @private {number} */
+    this._duration = duration;
+
     this._task = engine.createTask(performerui.performer, position, duration, type => {
       if (type === TaskEventType.BEGIN) {
         this._performerui.selectedInstrument?.setNoteOn(this._pitch, this.gain);
@@ -25,24 +31,10 @@ export class Note {
     this._task.destroy();
   }
 
-  get duration() {
-    return this._task.duration;
-  }
-
-  get isActive() {
-    return this._task.isActive;
-  }
-
-  get pitch() {
-    return this._pitch;
-  }
-
-  get position() {
-    return this._task.position;
-  }
-
   set duration(newDuration) {
-    this._task.duration = newDuration;
+    if (this._duration === newDuration) return;
+    this._duration = newDuration;
+    this._task.setDuration(newDuration);
   }
 
   set pitch(newPitch) {
@@ -56,6 +48,24 @@ export class Note {
   }
 
   set position(newPosition) {
-    this._task.position = newPosition;
+    if (this._position === newPosition) return;
+    this._position = newPosition;
+    this._task.setPosition(newPosition);
+  }
+
+  get duration() {
+    return this._duration;
+  }
+
+  get isActive() {
+    return this._task.isActive;
+  }
+
+  get pitch() {
+    return this._pitch;
+  }
+
+  get position() {
+    return this._position;
   }
 }

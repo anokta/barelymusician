@@ -16,6 +16,9 @@ export class EngineUi {
     this.container = container;
 
     /** @private {number} */
+    this._tempo = 120.0;
+
+    /** @private {number} */
     this._delayTime = 0.0;
 
     /** @private {number} */
@@ -39,7 +42,7 @@ export class EngineUi {
       if (state) {
         this.loadState(state);
       } else {
-        this.tempo = 120.0;
+        this._tempo = 120.0;
         this.delayTime = 0.5;
         this.delayFeedback = 0.2;
       }
@@ -58,7 +61,7 @@ export class EngineUi {
     const {tempoJson, delayTimeJson, delayFeedbackJson, instrumentsJson, performersJson} =
         JSON.parse(decodeURIComponent(atob(stateStr)));
 
-    this.engine.tempo = tempoJson;
+    this.engine.setTempo(tempoJson);
     this.delayTime = delayTimeJson;
     this.delayFeedback = delayFeedbackJson;
 
@@ -86,8 +89,9 @@ export class EngineUi {
       performersContainer.appendChild(performerContainer);
 
       const performerUi = this._createPerformer(performerContainer);
-      performerUi.performer.isLooping = true;
-      performerUi.performer.loopLength = performerJson.loopLength;
+      performerUi.performer.setLooping(true);
+      performerUi.performer.setLoopLength(performerJson.loopLength);
+      performerUi._loopLength = performerJson.loopLength;
 
       performerJson.notes.forEach(note => {
         performerUi._addNote(note.position, note.duration, note.pitch, note.gain);
@@ -108,7 +112,7 @@ export class EngineUi {
    * @return {string}
    */
   saveState() {
-    const tempoJson = this.engine.tempo;
+    const tempoJson = this._tempo;
     const delayTimeJson = this._delayTime;
     const delayFeedbackJson = this._delayFeedback;
 
@@ -241,11 +245,12 @@ export class EngineUi {
   }
 
   set tempo(newTempo) {
-    if (this.engine.tempo === newTempo) return;
+    if (this._tempo === newTempo) return;
 
     this.tempoSlider.value = newTempo;
     this.tempoValue.textContent = newTempo;
-    this.engine.tempo = newTempo;
+    this._tempo = newTempo;
+    this.engine.setTempo(this._tempo);
   }
 
   set delayTime(newDelayTime) {
@@ -292,28 +297,28 @@ export class EngineUi {
       performersContainer.appendChild(performerContainer);
 
       const performerUi = this._createPerformer(performerContainer);
-      performerUi.performer.isLooping = true;
-      performerUi.performer.position = this._metronome.performer.position;
-      if (this._metronome.performer.isPlaying) {
-        performerUi.performer.start();
+      performerUi.performer.setLooping(true);
+      performerUi.performer.setPosition(this._metronome.performer.position); // TODO
+      if (this._metronome.isPlaying) {
+        performerUi.start();
       }
     });
 
     // Transport controls.
     const playPauseButton = this.container.querySelector('#playPauseBtn');
     playPauseButton.addEventListener('click', () => {
-      if (this._metronome.performer.isPlaying) {
-        this._performers.values().forEach(performerUi => performerUi.performer.stop());
+      if (this._metronome.isPlaying) {
+        this._performers.values().forEach(performerUi => performerUi.stop());
         playPauseButton.textContent = ' Play ';
       } else {
-        this._performers.values().forEach(performerUi => performerUi.performer.start());
+        this._performers.values().forEach(performerUi => performerUi.start());
         playPauseButton.textContent = 'Pause';
       }
     });
 
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden && this._metronome.performer.isPlaying) {
-        this._performers.values().forEach(performerUi => performerUi.performer.stop());
+      if (document.hidden && this._metronome.isPlaying) {
+        this._performers.values().forEach(performerUi => performerUi.stop());
         playPauseButton.textContent = 'Play';
       }
     });
@@ -321,8 +326,8 @@ export class EngineUi {
     const stopButton = this.container.querySelector('#stopBtn');
     stopButton.addEventListener('click', () => {
       this._performers.values().forEach(performerUi => {
-        performerUi.performer.stop();
-        performerUi.performer.position = 0.0;
+        performerUi.stop();
+        performerUi.performer.setPosition(0.0);
       });
       playPauseButton.textContent = 'Play';
     });

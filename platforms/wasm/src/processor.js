@@ -60,206 +60,39 @@ class Processor extends AudioWorkletProcessor {
         return;
       }
 
-      switch (event.data.type) {
-        case MessageType.ENGINE_SET_CONTROL:
-          this._module._BarelyEngine_SetControl(
-              this._engine, event.data.typeIndex, event.data.value);
-          break;
-        case MessageType.ENGINE_SET_TEMPO:
-          this._module._BarelyEngine_SetTempo(this._engine, event.data.tempo);
-          break;
-        case MessageType.ENGINE_UPDATE: {
-          const deltaFrameTime = 1.0 / 60.0;
-          const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
-          this._timestamp = currentTime + latency;
-          this._module._BarelyEngine_Update(this._engine, this._timestamp);
-          for (const performerId of this._performers) {
-            this._module._BarelyPerformer_GetPosition(this._engine, performerId, this._doublePtr);
-            const position = this._module.getValue(this._doublePtr, 'double');
-            this.port.postMessage({
-              type: MessageType.PERFORMER_GET_PROPERTIES_SUCCESS,
-              id: performerId,
-              position,
-            });
-          }
-          for (const taskId of this._tasks.keys()) {
-            this._module._BarelyTask_IsActive(this._engine, taskId, this._uint8Ptr);
-            const isActive = (this._module.getValue(this._uint8Ptr) !== 0);
-            this.port.postMessage({
-              type: MessageType.TASK_GET_PROPERTIES_SUCCESS,
-              id: taskId,
-              isActive,
-            });
-          }
-        } break;
-        case MessageType.INSTRUMENT_CREATE: {
-          let i = 0;
-          for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
-            const controlOffset =
-                (this._instrumentControlOverridesPtr + i * INSTRUMENT_CONTROL_OVERRIDE_SIZE) /
-                Uint32Array.BYTES_PER_ELEMENT;
-            this._module.HEAP32[controlOffset] = controlTypeIndex;
-            this._module.HEAPF32[controlOffset + 1] =
-                INSTRUMENT_CONTROLS[controlTypeIndex].defaultValue;
-            ++i;
-          }
-          this._module._BarelyEngine_CreateInstrument(
-              this._engine, this._instrumentControlOverridesPtr,
-              Object.keys(INSTRUMENT_CONTROLS).length, this._uint32Ptr);
-          const instrumentId = this._module.getValue(this._uint32Ptr, 'i32');
+      if (event.data.type !== MessageType.ENGINE_UPDATE) {
+        console.error('Invalid message');
+        return;
+      }
 
-          const NoteEventType = {
-            BEGIN: 0,
-            END: 1,
-            COUNT: 2,
-          };
-          const noteEventCallback = (eventType, pitch) => {
-            if (eventType === NoteEventType.BEGIN) {
-              this.port.postMessage(
-                  {type: MessageType.INSTRUMENT_ON_NOTE_ON, id: instrumentId, pitch});
-            } else if (eventType === NoteEventType.END) {
-              this.port.postMessage(
-                  {type: MessageType.INSTRUMENT_ON_NOTE_OFF, id: instrumentId, pitch});
-            }
-          };
-          const noteEventCallbackPtr = this._module.addFunction((eventType, pitch, userData) => {
-            const callback = this._instruments.get(userData)?.eventCallback;
-            if (callback) {
-              callback(eventType, pitch);
-            }
-          }, 'vifi');
-          this._module._BarelyInstrument_SetNoteEventCallback(
-              this._engine, instrumentId, noteEventCallbackPtr, instrumentId);
-          this._instruments.set(instrumentId, {noteEventCallback, noteEventCallbackPtr});
+      if (event.data.messages) {
+        for (const message of event.data.messages) {
+          this._processMessage(message);
+        }
+      }
 
-          this.port.postMessage({
-            type: MessageType.INSTRUMENT_CREATE_SUCCESS,
-            id: instrumentId,
-            requestId: event.data.requestId,
-          });
-        } break;
-        case MessageType.INSTRUMENT_DESTROY:
-          this._module._BarelyEngine_DestroyInstrument(this._engine, event.data.id);
-          if (this._slices[event.data.id]) {
-            this._slicesToRemove.push({
-              ...this._slices[event.data.id],
-              timestamp: this._timestamp,
-            });
-            delete this._slices[event.data.id];
-          }
-          this.port.postMessage({type: MessageType.INSTRUMENT_DESTROY_SUCCESS, id: event.data.id});
-          this._module.removeFunction(this._instruments.get(event.data.id).noteEventCallbackPtr);
-          this._instruments.delete(event.data.id);
-          break;
-        case MessageType.INSTRUMENT_SET_ALL_NOTES_OFF:
-          this._module._BarelyInstrument_SetAllNotesOff(this._engine, event.data.id);
-          break;
-        case MessageType.INSTRUMENT_SET_CONTROL:
-          this._module._BarelyInstrument_SetControl(
-              this._engine, event.data.id, event.data.typeIndex, event.data.value);
-          break;
-        case MessageType.INSTRUMENT_SET_NOTE_CONTROL:
-          this._module._BarelyInstrument_SetNoteControl(
-              this._engine, event.data.id, event.data.pitch, event.data.typeIndex,
-              event.data.value);
-          break;
-        case MessageType.INSTRUMENT_SET_NOTE_OFF:
-          this._module._BarelyInstrument_SetNoteOff(this._engine, event.data.id, event.data.pitch);
-          break;
-        case MessageType.INSTRUMENT_SET_NOTE_ON: {
-          const gainOffset = this._noteControlOverridesPtr / Uint32Array.BYTES_PER_ELEMENT;
-          this._module.HEAP32[gainOffset] = NoteControlType.GAIN;
-          this._module.HEAPF32[gainOffset + 1] = event.data.gain;
+      const deltaFrameTime = 1.0 / 60.0;
+      const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
+      this._timestamp = currentTime + latency;
+      this._module._BarelyEngine_Update(this._engine, this._timestamp);
 
-          const pitchShiftOffset = (this._noteControlOverridesPtr + NOTE_CONTROL_OVERRIDE_SIZE) /
-              Uint32Array.BYTES_PER_ELEMENT;
-          this._module.HEAP32[pitchShiftOffset] = NoteControlType.PITCH_SHIFT;
-          this._module.HEAPF32[pitchShiftOffset + 1] = event.data.pitchShift;
-
-          this._module._BarelyInstrument_SetNoteOn(
-              this._engine, event.data.id, event.data.pitch, this._noteControlOverridesPtr,
-              NoteControlType.COUNT);
-        } break;
-        case MessageType.INSTRUMENT_SET_SAMPLE_DATA:
-          this._setInstrumentSampleData(event.data.id, event.data.slices);
-          break;
-        case MessageType.PERFORMER_CREATE: {
-          this._module._BarelyEngine_CreatePerformer(this._engine, this._uint32Ptr);
-          const performerId = this._module.getValue(this._uint32Ptr, 'i32');
-          this._performers.add(performerId);
-          this.port.postMessage({
-            type: MessageType.PERFORMER_CREATE_SUCCESS,
-            id: performerId,
-            requestId: event.data.requestId,
-          });
-        } break;
-        case MessageType.PERFORMER_DESTROY:
-          this._module._BarelyEngine_DestroyPerformer(this._engine, event.data.id);
-          this.port.postMessage({type: MessageType.PERFORMER_DESTROY_SUCCESS, id: event.data.id});
-          this._performers.delete(event.data.id);
-          break;
-        case MessageType.PERFORMER_SET_LOOP_BEGIN_POSITION:
-          this._module._BarelyPerformer_SetLoopBeginPosition(
-              this._engine, event.data.id, event.data.loopBeginPosition);
-          break;
-        case MessageType.PERFORMER_SET_LOOP_LENGTH:
-          this._module._BarelyPerformer_SetLoopLength(
-              this._engine, event.data.id, event.data.loopLength);
-          break;
-        case MessageType.PERFORMER_SET_LOOPING:
-          this._module._BarelyPerformer_SetLooping(
-              this._engine, event.data.id, event.data.isLooping);
-          break;
-        case MessageType.PERFORMER_SET_POSITION:
-          this._module._BarelyPerformer_SetPosition(
-              this._engine, event.data.id, event.data.position);
-          break;
-        case MessageType.PERFORMER_START:
-          this._module._BarelyPerformer_Start(this._engine, event.data.id);
-          break;
-        case MessageType.PERFORMER_STOP:
-          this._module._BarelyPerformer_Stop(this._engine, event.data.id);
-          break;
-        case MessageType.TASK_CREATE: {
-          this._module._BarelyEngine_CreateTask(
-              this._engine, event.data.performerId, event.data.position, event.data.duration,
-              event.data.priority, null, null, this._uint32Ptr);
-          const taskId = this._module.getValue(this._uint32Ptr, 'i32');
-
-          const eventCallback = (eventType) =>
-              this.port.postMessage({type: MessageType.TASK_ON_EVENT, id: taskId, eventType});
-          const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
-            const callback = this._tasks.get(userData)?.eventCallback;
-            if (callback) {
-              callback(eventType);
-            }
-          }, 'vii');
-          this._module._BarelyTask_SetEventCallback(this._engine, taskId, eventCallbackPtr, taskId);
-          this._tasks.set(taskId, {eventCallback, eventCallbackPtr});
-
-          this.port.postMessage({
-            type: MessageType.TASK_CREATE_SUCCESS,
-            id: taskId,
-            requestId: event.data.requestId,
-          });
-        } break;
-        case MessageType.TASK_DESTROY:
-          this._module._BarelyEngine_DestroyTask(this._engine, event.data.id);
-          this.port.postMessage({type: MessageType.TASK_DESTROY_SUCCESS, id: event.data.id});
-          this._module.removeFunction(this._tasks.get(event.data.id).eventCallbackPtr);
-          this._tasks.delete(event.data.id);
-          break;
-        case MessageType.TASK_SET_DURATION:
-          this._module._BarelyTask_SetDuration(this._engine, event.data.id, event.data.duration);
-          break;
-        case MessageType.TASK_SET_POSITION:
-          this._module._BarelyTask_SetPosition(this._engine, event.data.id, event.data.position);
-          break;
-        case MessageType.TASK_SET_PRIORITY:
-          this._module._BarelyTask_SetPriority(this._engine, event.data.id, event.data.priority);
-          break;
-        default:
-          console.error(`Invalid message: ${event.data.type}`);
+      for (const performerId of this._performers) {
+        this._module._BarelyPerformer_GetPosition(this._engine, performerId, this._doublePtr);
+        const position = this._module.getValue(this._doublePtr, 'double');
+        this.port.postMessage({
+          type: MessageType.PERFORMER_GET_PROPERTIES_SUCCESS,
+          id: performerId,
+          position,
+        });
+      }
+      for (const taskId of this._tasks.keys()) {
+        this._module._BarelyTask_IsActive(this._engine, taskId, this._uint8Ptr);
+        const isActive = (this._module.getValue(this._uint8Ptr) !== 0);
+        this.port.postMessage({
+          type: MessageType.TASK_GET_PROPERTIES_SUCCESS,
+          id: taskId,
+          isActive,
+        });
       }
     };
   }
@@ -292,6 +125,186 @@ class Processor extends AudioWorkletProcessor {
     }
 
     return true;
+  }
+
+  /**
+   * Processes a message.
+   * @param {!Object} message
+   * @private
+   */
+  _processMessage(message) {
+    switch (message.type) {
+      case MessageType.ENGINE_SET_CONTROL:
+        this._module._BarelyEngine_SetControl(this._engine, message.typeIndex, message.value);
+        break;
+      case MessageType.ENGINE_SET_TEMPO:
+        this._module._BarelyEngine_SetTempo(this._engine, message.tempo);
+        break;
+      case MessageType.INSTRUMENT_CREATE: {
+        let i = 0;
+        for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
+          const controlOffset =
+              (this._instrumentControlOverridesPtr + i * INSTRUMENT_CONTROL_OVERRIDE_SIZE) /
+              Uint32Array.BYTES_PER_ELEMENT;
+          this._module.HEAP32[controlOffset] = controlTypeIndex;
+          this._module.HEAPF32[controlOffset + 1] =
+              INSTRUMENT_CONTROLS[controlTypeIndex].defaultValue;
+          ++i;
+        }
+        this._module._BarelyEngine_CreateInstrument(
+            this._engine, this._instrumentControlOverridesPtr,
+            Object.keys(INSTRUMENT_CONTROLS).length, this._uint32Ptr);
+        const instrumentId = this._module.getValue(this._uint32Ptr, 'i32');
+
+        const NoteEventType = {
+          BEGIN: 0,
+          END: 1,
+          COUNT: 2,
+        };
+        const noteEventCallback = (eventType, pitch) => {
+          if (eventType === NoteEventType.BEGIN) {
+            this.port.postMessage(
+                {type: MessageType.INSTRUMENT_ON_NOTE_ON, id: instrumentId, pitch});
+          } else if (eventType === NoteEventType.END) {
+            this.port.postMessage(
+                {type: MessageType.INSTRUMENT_ON_NOTE_OFF, id: instrumentId, pitch});
+          }
+        };
+        const noteEventCallbackPtr = this._module.addFunction((eventType, pitch, userData) => {
+          const callback = this._instruments.get(userData)?.eventCallback;
+          if (callback) {
+            callback(eventType, pitch);
+          }
+        }, 'vifi');
+        this._module._BarelyInstrument_SetNoteEventCallback(
+            this._engine, instrumentId, noteEventCallbackPtr, instrumentId);
+        this._instruments.set(instrumentId, {noteEventCallback, noteEventCallbackPtr});
+
+        this.port.postMessage({
+          type: MessageType.INSTRUMENT_CREATE_SUCCESS,
+          id: instrumentId,
+          requestId: message.requestId,
+        });
+      } break;
+      case MessageType.INSTRUMENT_DESTROY:
+        this._module._BarelyEngine_DestroyInstrument(this._engine, message.id);
+        if (this._slices[message.id]) {
+          this._slicesToRemove.push({
+            ...this._slices[message.id],
+            timestamp: this._timestamp,
+          });
+          delete this._slices[message.id];
+        }
+        this.port.postMessage({type: MessageType.INSTRUMENT_DESTROY_SUCCESS, id: message.id});
+        this._module.removeFunction(this._instruments.get(message.id).noteEventCallbackPtr);
+        this._instruments.delete(message.id);
+        break;
+      case MessageType.INSTRUMENT_SET_ALL_NOTES_OFF:
+        this._module._BarelyInstrument_SetAllNotesOff(this._engine, message.id);
+        break;
+      case MessageType.INSTRUMENT_SET_CONTROL:
+        this._module._BarelyInstrument_SetControl(
+            this._engine, message.id, message.typeIndex, message.value);
+        break;
+      case MessageType.INSTRUMENT_SET_NOTE_CONTROL:
+        this._module._BarelyInstrument_SetNoteControl(
+            this._engine, message.id, message.pitch, message.typeIndex, message.value);
+        break;
+      case MessageType.INSTRUMENT_SET_NOTE_OFF:
+        this._module._BarelyInstrument_SetNoteOff(this._engine, message.id, message.pitch);
+        break;
+      case MessageType.INSTRUMENT_SET_NOTE_ON: {
+        const gainOffset = this._noteControlOverridesPtr / Uint32Array.BYTES_PER_ELEMENT;
+        this._module.HEAP32[gainOffset] = NoteControlType.GAIN;
+        this._module.HEAPF32[gainOffset + 1] = message.gain;
+
+        const pitchShiftOffset = (this._noteControlOverridesPtr + NOTE_CONTROL_OVERRIDE_SIZE) /
+            Uint32Array.BYTES_PER_ELEMENT;
+        this._module.HEAP32[pitchShiftOffset] = NoteControlType.PITCH_SHIFT;
+        this._module.HEAPF32[pitchShiftOffset + 1] = message.pitchShift;
+
+        this._module._BarelyInstrument_SetNoteOn(
+            this._engine, message.id, message.pitch, this._noteControlOverridesPtr,
+            NoteControlType.COUNT);
+      } break;
+      case MessageType.INSTRUMENT_SET_SAMPLE_DATA:
+        this._setInstrumentSampleData(message.id, message.slices);
+        break;
+      case MessageType.PERFORMER_CREATE: {
+        this._module._BarelyEngine_CreatePerformer(this._engine, this._uint32Ptr);
+        const performerId = this._module.getValue(this._uint32Ptr, 'i32');
+        this._performers.add(performerId);
+        this.port.postMessage({
+          type: MessageType.PERFORMER_CREATE_SUCCESS,
+          id: performerId,
+          requestId: message.requestId,
+        });
+      } break;
+      case MessageType.PERFORMER_DESTROY:
+        this._module._BarelyEngine_DestroyPerformer(this._engine, message.id);
+        this.port.postMessage({type: MessageType.PERFORMER_DESTROY_SUCCESS, id: message.id});
+        this._performers.delete(message.id);
+        break;
+      case MessageType.PERFORMER_SET_LOOP_BEGIN_POSITION:
+        this._module._BarelyPerformer_SetLoopBeginPosition(
+            this._engine, message.id, message.loopBeginPosition);
+        break;
+      case MessageType.PERFORMER_SET_LOOP_LENGTH:
+        this._module._BarelyPerformer_SetLoopLength(this._engine, message.id, message.loopLength);
+        break;
+      case MessageType.PERFORMER_SET_LOOPING:
+        this._module._BarelyPerformer_SetLooping(this._engine, message.id, message.isLooping);
+        break;
+      case MessageType.PERFORMER_SET_POSITION:
+        this._module._BarelyPerformer_SetPosition(this._engine, message.id, message.position);
+        break;
+      case MessageType.PERFORMER_START:
+        this._module._BarelyPerformer_Start(this._engine, message.id);
+        break;
+      case MessageType.PERFORMER_STOP:
+        this._module._BarelyPerformer_Stop(this._engine, message.id);
+        break;
+      case MessageType.TASK_CREATE: {
+        this._module._BarelyEngine_CreateTask(
+            this._engine, message.performerId, message.position, message.duration, message.priority,
+            null, null, this._uint32Ptr);
+        const taskId = this._module.getValue(this._uint32Ptr, 'i32');
+
+        const eventCallback = (eventType) =>
+            this.port.postMessage({type: MessageType.TASK_ON_EVENT, id: taskId, eventType});
+        const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
+          const callback = this._tasks.get(userData)?.eventCallback;
+          if (callback) {
+            callback(eventType);
+          }
+        }, 'vii');
+        this._module._BarelyTask_SetEventCallback(this._engine, taskId, eventCallbackPtr, taskId);
+        this._tasks.set(taskId, {eventCallback, eventCallbackPtr});
+
+        this.port.postMessage({
+          type: MessageType.TASK_CREATE_SUCCESS,
+          id: taskId,
+          requestId: message.requestId,
+        });
+      } break;
+      case MessageType.TASK_DESTROY:
+        this._module._BarelyEngine_DestroyTask(this._engine, message.id);
+        this.port.postMessage({type: MessageType.TASK_DESTROY_SUCCESS, id: message.id});
+        this._module.removeFunction(this._tasks.get(message.id).eventCallbackPtr);
+        this._tasks.delete(message.id);
+        break;
+      case MessageType.TASK_SET_DURATION:
+        this._module._BarelyTask_SetDuration(this._engine, message.id, message.duration);
+        break;
+      case MessageType.TASK_SET_POSITION:
+        this._module._BarelyTask_SetPosition(this._engine, message.id, message.position);
+        break;
+      case MessageType.TASK_SET_PRIORITY:
+        this._module._BarelyTask_SetPriority(this._engine, message.id, message.priority);
+        break;
+      default:
+        console.error(`Invalid message: ${message.type}`);
+    }
   }
 
   /**

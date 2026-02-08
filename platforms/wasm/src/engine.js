@@ -12,6 +12,9 @@ export class Engine {
    * @param {function():void} initCallback
    */
   constructor(audioContext, initCallback) {
+    /** @private {!AudioContext} */
+    this._audioContext = audioContext;
+
     /** @private {!Map<number, !Instrument>} */
     this._instruments = new Map();
 
@@ -30,8 +33,8 @@ export class Engine {
      */
     this._pendingRequests = new Map();
 
-    /** @private {!AudioContext} */
-    this._audioContext = audioContext;
+    /** @private {!Array<!Object>} */
+    this._pendingMessages = [];
 
     /** @private {!AudioWorkletNode} */
     this._audioNode = this._createAudioNode(audioContext);
@@ -51,17 +54,11 @@ export class Engine {
     let resolveId;
     const idPromise = new Promise(resolve => (resolveId = resolve));
 
-    const instrument = new Instrument({
-      audioContext: this._audioContext,
-      audioNode: this._audioNode,
-      idPromise,
-      noteOnCallback,
-      noteOffCallback,
-    });
+    const instrument = new Instrument(this, idPromise, noteOnCallback, noteOffCallback);
 
     const requestId = this._nextRequestId++;
     this._pendingRequests.set(requestId, {resolveId, instrument});
-    this._audioNode.port.postMessage({type: MessageType.INSTRUMENT_CREATE, requestId});
+    this._pushMessage({type: MessageType.INSTRUMENT_CREATE, requestId});
 
     return instrument;
   }
@@ -74,11 +71,11 @@ export class Engine {
     let resolveId;
     const idPromise = new Promise(resolve => (resolveId = resolve));
 
-    const performer = new Performer({audioNode: this._audioNode, idPromise});
+    const performer = new Performer(this, idPromise);
 
     const requestId = this._nextRequestId++;
     this._pendingRequests.set(requestId, {resolveId, performer});
-    this._audioNode.port.postMessage({type: MessageType.PERFORMER_CREATE, requestId});
+    this._pushMessage({type: MessageType.PERFORMER_CREATE, requestId});
 
     return performer;
   }
@@ -96,19 +93,12 @@ export class Engine {
     let resolveId;
     const idPromise = new Promise(resolve => (resolveId = resolve));
 
-    const task = new Task({
-      audioNode: this._audioNode,
-      idPromise,
-      position,
-      duration,
-      priority,
-      eventCallback,
-    });
+    const task = new Task(this, idPromise, eventCallback);
 
     const requestId = this._nextRequestId++;
     this._pendingRequests.set(requestId, {resolveId, task});
     performer.id.then(performerId => {
-      this._audioNode.port.postMessage({
+      this._pushMessage({
         type: MessageType.TASK_CREATE,
         requestId,
         performerId,
@@ -127,26 +117,21 @@ export class Engine {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._audioNode.port.postMessage({
-      type: MessageType.ENGINE_SET_CONTROL,
-      typeIndex,
-      value,
-    });
+    this._pushMessage({type: MessageType.ENGINE_SET_CONTROL, typeIndex, value});
   }
 
   /**
    * Updates the internal state.
    */
   update() {
-    this._audioNode.port.postMessage({type: MessageType.ENGINE_UPDATE});
+    this._audioNode.port.postMessage(
+        {type: MessageType.ENGINE_UPDATE, messages: this._pendingMessages});
+    this._pendingMessages = [];
   }
 
   /** @param {number} tempo */
   setTempo(tempo) {
-    this._audioNode.port.postMessage({
-      type: MessageType.ENGINE_SET_TEMPO,
-      tempo,
-    });
+    this._pushMessage({type: MessageType.ENGINE_SET_TEMPO, tempo});
   }
 
   /** @return {!AudioWorkletNode} */
@@ -242,5 +227,13 @@ export class Engine {
           break;
       }
     };
+  }
+
+  /**
+   * @param {!Object} message
+   * @private
+   */
+  _pushMessage(message) {
+    this._pendingMessages.push(message);
   }
 }

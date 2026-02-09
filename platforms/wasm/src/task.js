@@ -1,4 +1,4 @@
-import {MessageType} from './message.js'
+import {CommandType} from './command.js'
 
 /**
  * Task event types.
@@ -44,7 +44,7 @@ export class Task {
   async destroy() {
     if (this._isDestroyed) return;
     await this._withId(id => {
-      this._engine._pushMessage({type: MessageType.TASK_DESTROY, id});
+      this._engine._pushCommand({type: CommandType.TASK_DESTROY, id});
     });
     this._isDestroyed = true;
   }
@@ -52,21 +52,21 @@ export class Task {
   /** @param {number} duration */
   setDuration(duration) {
     this._withId(id => {
-      this._engine._pushMessage({type: MessageType.TASK_SET_DURATION, id, duration});
+      this._engine._pushCommand({type: CommandType.TASK_SET_DURATION, id, duration});
     });
   }
 
   /** @param {number} position */
   setPosition(position) {
     this._withId(id => {
-      this._engine._pushMessage({type: MessageType.TASK_SET_POSITION, id, position});
+      this._engine._pushCommand({type: CommandType.TASK_SET_POSITION, id, position});
     });
   }
 
   /** @param {number} priority */
   setPriority(priority) {
     this._withId(id => {
-      this._engine._pushMessage({type: MessageType.TASK_SET_PRIORITY, id, priority});
+      this._engine._pushCommand({type: CommandType.TASK_SET_PRIORITY, id, priority});
     });
   }
 

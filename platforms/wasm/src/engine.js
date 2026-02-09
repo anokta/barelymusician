@@ -1,5 +1,5 @@
+import {CommandType, MessageType} from './command.js';
 import {Instrument} from './instrument.js';
-import {MessageType} from './message.js';
 import {Performer} from './performer.js';
 import {Task} from './task.js';
 
@@ -34,12 +34,26 @@ export class Engine {
     this._pendingRequests = new Map();
 
     /** @private {!Array<!Object>} */
-    this._pendingMessages = [];
+    this._pendingCommands = [];
 
     /** @private {!AudioWorkletNode} */
     this._audioNode = this._createAudioNode(audioContext);
 
-    this._bindMessageHandlers(initCallback);
+    this._audioNode.port.onmessage = event => {
+      if (!event.data) return;
+      switch (event.data.type) {
+        case MessageType.INIT_SUCCESS:
+          initCallback();
+          break;
+        case MessageType.UPDATE_SUCCESS:
+          for (const command of event.data.commands) {
+            this._processCommand(command);
+          }
+          break;
+        default:
+          console.error(`Invalid message: ${event.data.type}`);
+      };
+    }
   }
 
   /**
@@ -58,7 +72,7 @@ export class Engine {
 
     const requestId = this._nextRequestId++;
     this._pendingRequests.set(requestId, {resolveId, instrument});
-    this._pushMessage({type: MessageType.INSTRUMENT_CREATE, requestId});
+    this._pushCommand({type: CommandType.INSTRUMENT_CREATE, requestId});
 
     return instrument;
   }
@@ -75,7 +89,7 @@ export class Engine {
 
     const requestId = this._nextRequestId++;
     this._pendingRequests.set(requestId, {resolveId, performer});
-    this._pushMessage({type: MessageType.PERFORMER_CREATE, requestId});
+    this._pushCommand({type: CommandType.PERFORMER_CREATE, requestId});
 
     return performer;
   }
@@ -98,8 +112,8 @@ export class Engine {
     const requestId = this._nextRequestId++;
     this._pendingRequests.set(requestId, {resolveId, task});
     performer.id.then(performerId => {
-      this._pushMessage({
-        type: MessageType.TASK_CREATE,
+      this._pushCommand({
+        type: CommandType.TASK_CREATE,
         requestId,
         performerId,
         position,
@@ -117,21 +131,20 @@ export class Engine {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._pushMessage({type: MessageType.ENGINE_SET_CONTROL, typeIndex, value});
+    this._pushCommand({type: CommandType.ENGINE_SET_CONTROL, typeIndex, value});
   }
 
   /**
    * Updates the internal state.
    */
   update() {
-    this._audioNode.port.postMessage(
-        {type: MessageType.ENGINE_UPDATE, messages: this._pendingMessages});
-    this._pendingMessages = [];
+    this._audioNode.port.postMessage({type: MessageType.UPDATE, commands: this._pendingCommands});
+    this._pendingCommands = [];
   }
 
   /** @param {number} tempo */
   setTempo(tempo) {
-    this._pushMessage({type: MessageType.ENGINE_SET_TEMPO, tempo});
+    this._pushCommand({type: CommandType.ENGINE_SET_TEMPO, tempo});
   }
 
   /** @return {!AudioWorkletNode} */
@@ -160,97 +173,75 @@ export class Engine {
   }
 
   /**
-   * @param {function():void} initCallback
+   * Processes a command.
+   * @param {!Object} command
    * @private
    */
-  _bindMessageHandlers(initCallback) {
-    this._audioNode.port.onmessage = event => {
-      const data = event.data;
-      if (!data?.type) return;
-
-      switch (data.type) {
-        case MessageType.INIT_SUCCESS:
-          initCallback();
-          break;
-        case MessageType.ENGINE_UPDATE_SUCCESS:
-          for (const message of data.messages) {
-            this._processMessage(message);
-          }
-          break;
-        default:
-          console.error(`Invalid message: ${data.type}`);
-      };
-    }
-  }
-
-  /**
-   * Processes a message.
-   * @param {!Object} message
-   * @private
-   */
-  _processMessage(message) {
-    switch (message.type) {
-      case MessageType.INSTRUMENT_CREATE_SUCCESS: {
-        const {resolveId, instrument} = this._pendingRequests.get(message.requestId);
-        resolveId(message.id);
-        this._pendingRequests.delete(message.requestId);
-        this._instruments.set(message.id, instrument);
+  _processCommand(command) {
+    switch (command.type) {
+      case CommandType.INSTRUMENT_CREATE_SUCCESS: {
+        const {resolveId, instrument} = this._pendingRequests.get(command.requestId);
+        resolveId(command.id);
+        this._pendingRequests.delete(command.requestId);
+        this._instruments.set(command.id, instrument);
         break;
       }
-      case MessageType.INSTRUMENT_DESTROY_SUCCESS:
-        this._instruments.delete(message.id);
+      case CommandType.INSTRUMENT_DESTROY_SUCCESS:
+        this._instruments.delete(command.id);
         break;
-      case MessageType.INSTRUMENT_ON_NOTE_ON:
-        this._instruments.get(message.id)?.noteOnCallback(message.pitch);
+      case CommandType.INSTRUMENT_ON_NOTE_ON:
+        this._instruments.get(command.id)?.noteOnCallback(command.pitch);
         break;
-      case MessageType.INSTRUMENT_ON_NOTE_OFF:
-        this._instruments.get(message.id)?.noteOffCallback(message.pitch);
+      case CommandType.INSTRUMENT_ON_NOTE_OFF:
+        this._instruments.get(command.id)?.noteOffCallback(command.pitch);
         break;
-      case MessageType.PERFORMER_CREATE_SUCCESS: {
-        const {resolveId, performer} = this._pendingRequests.get(message.requestId);
-        this._pendingRequests.delete(message.requestId);
-        resolveId(message.id);
-        this._performers.set(message.id, performer);
+      case CommandType.PERFORMER_CREATE_SUCCESS: {
+        const {resolveId, performer} = this._pendingRequests.get(command.requestId);
+        this._pendingRequests.delete(command.requestId);
+        resolveId(command.id);
+        this._performers.set(command.id, performer);
         break;
       }
-      case MessageType.PERFORMER_DESTROY_SUCCESS:
-        this._performers.delete(message.id);
+      case CommandType.PERFORMER_DESTROY_SUCCESS:
+        this._performers.delete(command.id);
         break;
-      case MessageType.PERFORMER_GET_PROPERTIES_SUCCESS: {
-        const performer = this._performers.get(message.id);
+      case CommandType.PERFORMER_GET_PROPERTIES_SUCCESS: {
+        const performer = this._performers.get(command.id);
         if (performer) {
-          performer._position = message.position;
+          performer._position = command.position;
         }
         break;
       }
-      case MessageType.TASK_CREATE_SUCCESS: {
-        const {resolveId, task} = this._pendingRequests.get(message.requestId);
-        this._pendingRequests.delete(message.requestId);
-        resolveId(message.id);
-        this._tasks.set(message.id, task);
+      case CommandType.TASK_CREATE_SUCCESS: {
+        const {resolveId, task} = this._pendingRequests.get(command.requestId);
+        this._pendingRequests.delete(command.requestId);
+        resolveId(command.id);
+        this._tasks.set(command.id, task);
         break;
       }
-      case MessageType.TASK_DESTROY_SUCCESS:
-        this._tasks.delete(message.id);
+      case CommandType.TASK_DESTROY_SUCCESS:
+        this._tasks.delete(command.id);
         break;
-      case MessageType.TASK_GET_PROPERTIES_SUCCESS: {
-        const task = this._tasks.get(message.id);
+      case CommandType.TASK_GET_PROPERTIES_SUCCESS: {
+        const task = this._tasks.get(command.id);
         if (task) {
-          task._isActive = message.isActive;
+          task._isActive = command.isActive;
         }
         break;
       }
-      case MessageType.TASK_ON_EVENT:
-        this._tasks.get(message.id)?.eventCallback(message.eventType);
+      case CommandType.TASK_ON_EVENT:
+        this._tasks.get(command.id)?.eventCallback(command.eventType);
         break;
+      default:
+        console.error(`Invalid command: ${command.type}`);
     }
   }
 
   /**
-   * @param {!Object} message
+   * @param {!Object} command
    * @private
    */
-  _pushMessage(message) {
-    this._pendingMessages.push(message);
+  _pushCommand(command) {
+    this._pendingCommands.push(command);
   }
 }

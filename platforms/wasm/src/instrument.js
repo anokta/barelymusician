@@ -1,4 +1,4 @@
-import {MessageType} from './message.js'
+import {CommandType} from './command.js'
 
 /**
  * A representation of a musical instrument that can be played in real-time.
@@ -34,7 +34,7 @@ export class Instrument {
   async destroy() {
     if (this._isDestroyed) return;
     await this._withId(id => {
-      this._engine._pushMessage({type: MessageType.INSTRUMENT_DESTROY, id});
+      this._engine._pushCommand({type: CommandType.INSTRUMENT_DESTROY, id});
     });
     this._isDestroyed = true;
   }
@@ -44,7 +44,7 @@ export class Instrument {
    */
   setAllNotesOff() {
     this._withId(id => {
-      this._engine._pushMessage({type: MessageType.INSTRUMENT_SET_ALL_NOTES_OFF, id});
+      this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_ALL_NOTES_OFF, id});
     });
   }
 
@@ -55,7 +55,7 @@ export class Instrument {
    */
   setControl(typeIndex, value) {
     this._withId(id => {
-      this._engine._pushMessage({type: MessageType.INSTRUMENT_SET_CONTROL, id, typeIndex, value});
+      this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_CONTROL, id, typeIndex, value});
     });
   }
 
@@ -67,8 +67,8 @@ export class Instrument {
    */
   setNoteControl(pitch, typeIndex, value) {
     this._withId(id => {
-      this._engine._pushMessage(
-          {type: MessageType.INSTRUMENT_SET_NOTE_CONTROL, id, pitch, typeIndex, value});
+      this._engine._pushCommand(
+          {type: CommandType.INSTRUMENT_SET_NOTE_CONTROL, id, pitch, typeIndex, value});
     });
   }
 
@@ -78,7 +78,7 @@ export class Instrument {
    */
   setNoteOff(pitch) {
     this._withId(id => {
-      this._engine._pushMessage({type: MessageType.INSTRUMENT_SET_NOTE_OFF, id, pitch});
+      this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_NOTE_OFF, id, pitch});
     });
   }
 
@@ -90,8 +90,8 @@ export class Instrument {
    */
   setNoteOn(pitch, gain = 1.0, pitchShift = 0.0) {
     this._withId(id => {
-      this._engine._pushMessage(
-          {type: MessageType.INSTRUMENT_SET_NOTE_ON, id, pitch, gain, pitchShift});
+      this._engine._pushCommand(
+          {type: CommandType.INSTRUMENT_SET_NOTE_ON, id, pitch, gain, pitchShift});
     });
   }
 
@@ -121,7 +121,7 @@ export class Instrument {
     }
 
     await this._withId(id => {
-      this._engine._pushMessage({type: MessageType.INSTRUMENT_SET_SAMPLE_DATA, id, slices});
+      this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_SAMPLE_DATA, id, slices});
     });
   }
 

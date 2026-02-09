@@ -1,4 +1,4 @@
-import {CommandType} from './command.js'
+import {CommandType} from './context.js'
 
 /**
  * Task event types.
@@ -11,24 +11,20 @@ export const TaskEventType = {
 };
 
 /**
- * A representation of a recurring task that can be performed by a musical
- * performer in real-time.
+ * A representation of a recurring task that can be performed by a musical performer in real-time.
  */
 export class Task {
   /**
    * @param {!Engine} engine
-   * @param {!Promise<number>} idPromise
+   * @param {number} id
    * @param {function(number):void} eventCallback
    */
-  constructor(engine, idPromise, eventCallback) {
+  constructor(engine, id, eventCallback) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
-    /** @private @const {!Promise<number>} */
-    this._idPromise = idPromise;
-
-    /** @private {boolean} */
-    this._isDestroyed = false;
+    /** @private @const {number} */
+    this._id = id;
 
     /** @private {boolean} */
     this._isActive = false;
@@ -39,55 +35,34 @@ export class Task {
 
   /**
    * Destroys the task.
-   * @return {!Promise<void>}
    */
-  async destroy() {
-    if (this._isDestroyed) return;
-    await this._withId(id => {
-      this._engine._pushCommand({type: CommandType.TASK_DESTROY, id});
-    });
-    this._isDestroyed = true;
+  destroy() {
+    this._engine._tasks.delete(this._id);
+    this._engine._pushCommand({type: CommandType.TASK_DESTROY, id: this._id});
   }
 
   /** @param {number} duration */
   setDuration(duration) {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.TASK_SET_DURATION, id, duration});
-    });
+    this._engine._pushCommand({type: CommandType.TASK_SET_DURATION, id: this._id, duration});
   }
 
   /** @param {number} position */
   setPosition(position) {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.TASK_SET_POSITION, id, position});
-    });
+    this._engine._pushCommand({type: CommandType.TASK_SET_POSITION, id: this._id, position});
   }
 
   /** @param {number} priority */
   setPriority(priority) {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.TASK_SET_PRIORITY, id, priority});
-    });
+    this._engine._pushCommand({type: CommandType.TASK_SET_PRIORITY, id: this._id, priority});
   }
 
-  /** @return {!Promise<void>} */
+  /** @return {number} */
   get id() {
-    return this._idPromise;
+    return this._id;
   }
 
   /** @return {boolean} */
   get isActive() {
     return this._isActive;
-  }
-
-  /**
-   * @param {function(number):(void|!Promise<void>)} fn
-   * @return {!Promise<void>}
-   * @private
-   */
-  async _withId(fn) {
-    if (this._isDestroyed) return;
-    const id = await this._idPromise;
-    await fn(id);
   }
 }

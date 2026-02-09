@@ -269,6 +269,7 @@ export class PerformerUi {
   _addNote(start, duration, pitch, gain) {
     const note = new Note(this._engine, this, start, duration, pitch, gain);
     this._notes.push(note);
+    this._renderClip();
   }
 
   _removeNote(note) {
@@ -442,16 +443,13 @@ export class PerformerUi {
     });
 
     // id
-    this.performer.id.then(id => {
-      this._container.id = `performer#${(id - 1)}`;
+    this._container.id = `performer#${this.performer.id}`;
 
-      // label
-      const label = this._container.querySelector('label');
-      label.textContent = this._container.id;
+    // label
+    const label = this._container.querySelector('label');
+    label.textContent = this._container.id;
 
-      this._renderClip();
-    });
-
+    this._renderClip();
     this._startRenderLoop();
   }
 

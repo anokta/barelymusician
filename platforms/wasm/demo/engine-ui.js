@@ -99,11 +99,12 @@ export class EngineUi {
 
       const instrumentUi = tempInstruments.get(performerJson.instrumentHandle);
       if (instrumentUi) {
-        instrumentUi._instrument.id.then(id => {
-          performerUi.updateInstrumentSelect(this._instruments);
-          performerUi._container.querySelector('#instrumentSelect').value = id;
-        });
+        performerUi.updateInstrumentSelect(this._instruments);
+        performerUi._container.querySelector('#instrumentSelect').value =
+            instrumentUi._instrument.id;
       }
+
+      this._updateAllPerformerInstrumentSelects();
     });
   }
 
@@ -209,17 +210,13 @@ export class EngineUi {
       container,
       instrument,
       destroyCallback: () => {
-        instrument.id.then(id => {
-          this._instruments.delete(id);
-          this._updateAllPerformerInstrumentSelects();
-        });
+        this._instruments.delete(instrument.id);
+        this._updateAllPerformerInstrumentSelects();
       },
     });
 
-    instrument.id.then(id => {
-      this._instruments.set(id, instrumentUi);
-      this._updateAllPerformerInstrumentSelects();
-    });
+    this._instruments.set(instrument.id, instrumentUi);
+    this._updateAllPerformerInstrumentSelects();
 
     return instrumentUi;
   }
@@ -232,14 +229,12 @@ export class EngineUi {
       performer,
       instruments: this._instruments,
       destroyCallback: () => {
-        performer.id.then(id => this._performers.delete(id));
+        this._performers.delete(performer.id);
       },
     });
 
-    performer.id.then(id => {
-      this._performers.set(id, performerUi);
-      this._updateAllPerformerInstrumentSelects();
-    });
+    this._performers.set(performer.id, performerUi);
+    this._updateAllPerformerInstrumentSelects();
 
     return performerUi;
   }
@@ -298,7 +293,7 @@ export class EngineUi {
 
       const performerUi = this._createPerformer(performerContainer);
       performerUi.performer.setLooping(true);
-      performerUi.performer.setPosition(this._metronome.performer.position); // TODO
+      performerUi.performer.setPosition(this._metronome.performer.position);  // TODO
       if (this._metronome.isPlaying) {
         performerUi.start();
       }

@@ -1,4 +1,4 @@
-import {CommandType, MessageType} from './command.js';
+import {CommandType, MessageType} from './context.js';
 import {Instrument} from './instrument.js';
 import {Performer} from './performer.js';
 import {Task} from './task.js';
@@ -25,13 +25,7 @@ export class Engine {
     this._tasks = new Map();
 
     /** @private {number} */
-    this._nextRequestId = 0;
-
-    /**
-     * @private {!Map<number, {resolveId:function(number):void, instrument?:!Instrument,
-     *     performer?:!Performer, task?:!Task}>}
-     */
-    this._pendingRequests = new Map();
+    this._nextId = 1;
 
     /** @private {!Array<!Object>} */
     this._pendingCommands = [];
@@ -65,15 +59,10 @@ export class Engine {
    * @return {!Instrument}
    */
   createInstrument({noteOnCallback = () => {}, noteOffCallback = () => {}} = {}) {
-    let resolveId;
-    const idPromise = new Promise(resolve => (resolveId = resolve));
-
-    const instrument = new Instrument(this, idPromise, noteOnCallback, noteOffCallback);
-
-    const requestId = this._nextRequestId++;
-    this._pendingRequests.set(requestId, {resolveId, instrument});
-    this._pushCommand({type: CommandType.INSTRUMENT_CREATE, requestId});
-
+    const id = this._nextId++;
+    const instrument = new Instrument(this, id, noteOnCallback, noteOffCallback);
+    this._instruments.set(id, instrument);
+    this._pushCommand({type: CommandType.INSTRUMENT_CREATE, id});
     return instrument;
   }
 
@@ -82,15 +71,10 @@ export class Engine {
    * @return {!Performer}
    */
   createPerformer() {
-    let resolveId;
-    const idPromise = new Promise(resolve => (resolveId = resolve));
-
-    const performer = new Performer(this, idPromise);
-
-    const requestId = this._nextRequestId++;
-    this._pendingRequests.set(requestId, {resolveId, performer});
-    this._pushCommand({type: CommandType.PERFORMER_CREATE, requestId});
-
+    const id = this._nextId++;
+    const performer = new Performer(this, id);
+    this._performers.set(id, performer);
+    this._pushCommand({type: CommandType.PERFORMER_CREATE, id});
     return performer;
   }
 
@@ -104,24 +88,17 @@ export class Engine {
    * @return {!Task}
    */
   createTask(performer, position, duration, eventCallback, priority = 0) {
-    let resolveId;
-    const idPromise = new Promise(resolve => (resolveId = resolve));
-
-    const task = new Task(this, idPromise, eventCallback);
-
-    const requestId = this._nextRequestId++;
-    this._pendingRequests.set(requestId, {resolveId, task});
-    performer.id.then(performerId => {
-      this._pushCommand({
-        type: CommandType.TASK_CREATE,
-        requestId,
-        performerId,
-        position,
-        duration,
-        priority,
-      });
+    const id = this._nextId++;
+    const task = new Task(this, id, eventCallback);
+    this._tasks.set(id, task);
+    this._pushCommand({
+      type: CommandType.TASK_CREATE,
+      id,
+      performerId: performer.id,
+      position,
+      duration,
+      priority,
     });
-
     return task;
   }
 
@@ -179,31 +156,11 @@ export class Engine {
    */
   _processCommand(command) {
     switch (command.type) {
-      case CommandType.INSTRUMENT_CREATE_SUCCESS: {
-        const {resolveId, instrument} = this._pendingRequests.get(command.requestId);
-        resolveId(command.id);
-        this._pendingRequests.delete(command.requestId);
-        this._instruments.set(command.id, instrument);
-        break;
-      }
-      case CommandType.INSTRUMENT_DESTROY_SUCCESS:
-        this._instruments.delete(command.id);
-        break;
       case CommandType.INSTRUMENT_ON_NOTE_ON:
         this._instruments.get(command.id)?.noteOnCallback(command.pitch);
         break;
       case CommandType.INSTRUMENT_ON_NOTE_OFF:
         this._instruments.get(command.id)?.noteOffCallback(command.pitch);
-        break;
-      case CommandType.PERFORMER_CREATE_SUCCESS: {
-        const {resolveId, performer} = this._pendingRequests.get(command.requestId);
-        this._pendingRequests.delete(command.requestId);
-        resolveId(command.id);
-        this._performers.set(command.id, performer);
-        break;
-      }
-      case CommandType.PERFORMER_DESTROY_SUCCESS:
-        this._performers.delete(command.id);
         break;
       case CommandType.PERFORMER_GET_PROPERTIES_SUCCESS: {
         const performer = this._performers.get(command.id);
@@ -212,16 +169,6 @@ export class Engine {
         }
         break;
       }
-      case CommandType.TASK_CREATE_SUCCESS: {
-        const {resolveId, task} = this._pendingRequests.get(command.requestId);
-        this._pendingRequests.delete(command.requestId);
-        resolveId(command.id);
-        this._tasks.set(command.id, task);
-        break;
-      }
-      case CommandType.TASK_DESTROY_SUCCESS:
-        this._tasks.delete(command.id);
-        break;
       case CommandType.TASK_GET_PROPERTIES_SUCCESS: {
         const task = this._tasks.get(command.id);
         if (task) {

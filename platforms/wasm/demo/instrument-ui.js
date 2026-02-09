@@ -288,11 +288,9 @@ export class InstrumentUi {
     });
 
     // Set id and label
-    this._instrument.id.then(id => {
-      this._container.id = `instrument#${id}`;
-      const label = this._container.querySelector('label');
-      label.textContent = this._container.id;
-    });
+    this._container.id = `instrument#${this._instrument.id}`;
+    const label = this._container.querySelector('label');
+    label.textContent = this._container.id;
   }
 
   /**

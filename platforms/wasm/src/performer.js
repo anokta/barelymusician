@@ -1,4 +1,4 @@
-import {CommandType} from './command.js'
+import {CommandType} from './context.js'
 
 /**
  * A representation of a musical performer that can perform rhythmic tasks in real-time.
@@ -6,17 +6,14 @@ import {CommandType} from './command.js'
 export class Performer {
   /**
    * @param {!Engine} engine
-   * @param {!Promise<number>} idPromise
+   * @param {number} id
    */
-  constructor(engine, idPromise) {
+  constructor(engine, id) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
-    /** @private @const {!Promise<number>} */
-    this._idPromise = idPromise;
-
-    /** @private {boolean} */
-    this._isDestroyed = false;
+    /** @private @const {number} */
+    this._id = id;
 
     /** @private {number} */
     this._position = 0.0;
@@ -24,78 +21,52 @@ export class Performer {
 
   /**
    * Destroys the performer.
-   * @return {!Promise<void>}
    */
-  async destroy() {
-    if (this._isDestroyed) return;
-    await this._withId(id => {
-      this._engine._pushCommand({type: CommandType.PERFORMER_DESTROY, id});
-    });
-    this._isDestroyed = true;
+  destroy() {
+    this._engine._performers.delete(this._id);
+    this._engine._pushCommand({type: CommandType.PERFORMER_DESTROY, id: this._id});
   }
 
   /** Starts playback. */
   start() {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.PERFORMER_START, id});
-    });
+    this._engine._pushCommand({type: CommandType.PERFORMER_START, id: this._id});
   }
 
   /** Stops playback. */
   stop() {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.PERFORMER_STOP, id});
-    });
+    this._engine._pushCommand({type: CommandType.PERFORMER_STOP, id: this._id});
   }
 
   /** @param {boolean} isLooping */
   setLooping(isLooping) {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.PERFORMER_SET_LOOPING, id, isLooping});
-    });
+    this._engine._pushCommand({type: CommandType.PERFORMER_SET_LOOPING, id: this._id, isLooping});
   }
 
   /** @param {number} loopBeginPosition */
   setLoopBeginPosition(loopBeginPosition) {
-    this._withId(id => {
-      this._engine._pushCommand(
-          {type: CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION, id, loopBeginPosition});
-    });
+    this._engine._pushCommand(
+        {type: CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION, id: this._id, loopBeginPosition});
   }
 
   /** @param {number} loopLength */
   setLoopLength(loopLength) {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.PERFORMER_SET_LOOP_LENGTH, id, loopLength});
-    });
+    this._engine._pushCommand(
+        {type: CommandType.PERFORMER_SET_LOOP_LENGTH, id: this._id, loopLength});
   }
 
   /** @param {number} position */
   setPosition(position) {
     this._position = position;
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.PERFORMER_SET_POSITION, id, position});
-    });
+    this._engine._pushCommand({type: CommandType.PERFORMER_SET_POSITION, id: this._id, position});
   }
 
-  /** @return {!Promise<void>} */
+  /** @return {number} */
   get id() {
-    return this._idPromise;
+    return this._id;
   }
 
   /** @return {number} */
   get position() {
     return this._position;
-  }
-
-  /**
-   * @param {function(number):(void|!Promise<void>)} fn
-   * @return {!Promise<void>}
-   * @private
-   */
-  async _withId(fn) {
-    if (this._isDestroyed) return;
-    const id = await this._idPromise;
-    await fn(id);
   }
 }

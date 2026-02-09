@@ -1,5 +1,5 @@
 import Module from './barelymusician.js';
-import {CommandType, MessageType} from './command.js'
+import {CommandType, Context, MessageType} from './context.js'
 import {INSTRUMENT_CONTROLS, NoteControlType} from './control.js';
 
 const INSTRUMENT_CONTROL_OVERRIDE_SIZE = 8;  // sizeof(BarelyInstrumentControlOverride)
@@ -15,6 +15,7 @@ class Processor extends AudioWorkletProcessor {
 
     this._module = null;
     this._engine = null;
+    this._context = null;
 
     this._doublePtr = null;
     this._uint8Ptr = null;
@@ -24,10 +25,8 @@ class Processor extends AudioWorkletProcessor {
     this._outputSamplesPtr = null;
 
     this._instruments = new Map();
-    this._performers = new Set();
+    this._performers = new Map();
     this._tasks = new Map();
-
-    this._pendingCommands = [];
 
     this._slices = {};
     this._slicesToRemove = [];
@@ -50,13 +49,16 @@ class Processor extends AudioWorkletProcessor {
 
       this._module._BarelyEngine_Create(sampleRate, this._uint32Ptr);
       this._engine = this._module.getValue(this._uint32Ptr, 'i32');
+      if (this._module && this._engine) {
+        this._context = new Context(this._module, this._engine);
+      }
 
       this.port.postMessage({type: MessageType.INIT_SUCCESS});
     });
 
     this.port.onmessage = event => {
       if (!event.data) return;
-      if (!this._module || !this._engine) {
+      if (!this._context) {
         console.error('barelymusician not initialized!');
         return;
       }
@@ -74,22 +76,23 @@ class Processor extends AudioWorkletProcessor {
       const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
       this._timestamp = currentTime + latency;
       this._module._BarelyEngine_Update(this._engine, this._timestamp);
-      for (const performerId of this._performers) {
-        this._module._BarelyPerformer_GetPosition(this._engine, performerId, this._doublePtr);
+      for (const [id, value] of this._performers) {
+        this._module._BarelyPerformer_GetPosition(this._engine, value.performerId, this._doublePtr);
         const position = this._module.getValue(this._doublePtr, 'double');
-        this._pendingCommands.push(
-            {type: CommandType.PERFORMER_GET_PROPERTIES_SUCCESS, id: performerId, position});
+        this._context._pendingCommands.push(
+            {type: CommandType.PERFORMER_GET_PROPERTIES_SUCCESS, id, position});
       }
-      for (const taskId of this._tasks.keys()) {
-        this._module._BarelyTask_IsActive(this._engine, taskId, this._uint8Ptr);
+      for (const [id, value] of this._tasks) {
+        this._module._BarelyTask_IsActive(this._engine, value.taskId, this._uint8Ptr);
         const isActive = (this._module.getValue(this._uint8Ptr) !== 0);
-        this._pendingCommands.push(
-            {type: CommandType.TASK_GET_PROPERTIES_SUCCESS, id: taskId, isActive});
+        this._context._pendingCommands.push(
+            {type: CommandType.TASK_GET_PROPERTIES_SUCCESS, id, isActive});
       }
 
-      if (this._pendingCommands.length > 0) {
-        this.port.postMessage({type: MessageType.UPDATE_SUCCESS, commands: this._pendingCommands});
-        this._pendingCommands = [];
+      if (this._context._pendingCommands.length > 0) {
+        this.port.postMessage(
+            {type: MessageType.UPDATE_SUCCESS, commands: this._context._pendingCommands});
+        this._context._pendingCommands = [];
       }
     };
   }
@@ -132,10 +135,10 @@ class Processor extends AudioWorkletProcessor {
   _processCommand(command) {
     switch (command.type) {
       case CommandType.ENGINE_SET_CONTROL:
-        this._module._BarelyEngine_SetControl(this._engine, command.typeIndex, command.value);
+        this._context.engineSetControl(command.typeIndex, command.value);
         break;
       case CommandType.ENGINE_SET_TEMPO:
-        this._module._BarelyEngine_SetTempo(this._engine, command.tempo);
+        this._context.engineSetTempo(command.tempo);
         break;
       case CommandType.INSTRUMENT_CREATE: {
         let i = 0;
@@ -160,55 +163,53 @@ class Processor extends AudioWorkletProcessor {
         };
         const noteEventCallback = (eventType, pitch) => {
           if (eventType === NoteEventType.BEGIN) {
-            this._pendingCommands.push(
-                {type: CommandType.INSTRUMENT_ON_NOTE_ON, id: instrumentId, pitch});
+            this._context._pendingCommands.push(
+                {type: CommandType.INSTRUMENT_ON_NOTE_ON, id: command.id, pitch});
           } else if (eventType === NoteEventType.END) {
-            this._pendingCommands.push(
-                {type: CommandType.INSTRUMENT_ON_NOTE_OFF, id: instrumentId, pitch});
+            this._context._pendingCommands.push(
+                {type: CommandType.INSTRUMENT_ON_NOTE_OFF, id: command.id, pitch});
           }
         };
         const noteEventCallbackPtr = this._module.addFunction((eventType, pitch, userData) => {
-          const callback = this._instruments.get(userData)?.eventCallback;
+          const callback = this._instruments.get(userData)?.noteEventCallback;
           if (callback) {
             callback(eventType, pitch);
           }
         }, 'vifi');
         this._module._BarelyInstrument_SetNoteEventCallback(
-            this._engine, instrumentId, noteEventCallbackPtr, instrumentId);
-        this._instruments.set(instrumentId, {noteEventCallback, noteEventCallbackPtr});
-
-        this._pendingCommands.push({
-          type: CommandType.INSTRUMENT_CREATE_SUCCESS,
-          id: instrumentId,
-          requestId: command.requestId,
-        });
+            this._engine, instrumentId, noteEventCallbackPtr, command.id);
+        this._instruments.set(command.id, {instrumentId, noteEventCallback, noteEventCallbackPtr});
       } break;
-      case CommandType.INSTRUMENT_DESTROY:
-        this._module._BarelyEngine_DestroyInstrument(this._engine, command.id);
-        if (this._slices[command.id]) {
+      case CommandType.INSTRUMENT_DESTROY: {
+        const instrumentId = this._instruments.get(command.id)?.instrumentId ?? 0;
+        this._module._BarelyEngine_DestroyInstrument(this._engine, instrumentId);
+        if (this._slices[instrumentId]) {
           this._slicesToRemove.push({
-            ...this._slices[command.id],
+            ...this._slices[instrumentId],
             timestamp: this._timestamp,
           });
-          delete this._slices[command.id];
+          delete this._slices[instrumentId];
         }
-        this._pendingCommands.push({type: CommandType.INSTRUMENT_DESTROY_SUCCESS, id: command.id});
         this._module.removeFunction(this._instruments.get(command.id).noteEventCallbackPtr);
         this._instruments.delete(command.id);
-        break;
+      } break;
       case CommandType.INSTRUMENT_SET_ALL_NOTES_OFF:
-        this._module._BarelyInstrument_SetAllNotesOff(this._engine, command.id);
+        this._module._BarelyInstrument_SetAllNotesOff(
+            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0);
         break;
       case CommandType.INSTRUMENT_SET_CONTROL:
         this._module._BarelyInstrument_SetControl(
-            this._engine, command.id, command.typeIndex, command.value);
+            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0, command.typeIndex,
+            command.value);
         break;
       case CommandType.INSTRUMENT_SET_NOTE_CONTROL:
         this._module._BarelyInstrument_SetNoteControl(
-            this._engine, command.id, command.pitch, command.typeIndex, command.value);
+            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0, command.pitch,
+            command.typeIndex, command.value);
         break;
       case CommandType.INSTRUMENT_SET_NOTE_OFF:
-        this._module._BarelyInstrument_SetNoteOff(this._engine, command.id, command.pitch);
+        this._module._BarelyInstrument_SetNoteOff(
+            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0, command.pitch);
         break;
       case CommandType.INSTRUMENT_SET_NOTE_ON: {
         const gainOffset = this._noteControlOverridesPtr / Uint32Array.BYTES_PER_ELEMENT;
@@ -221,80 +222,80 @@ class Processor extends AudioWorkletProcessor {
         this._module.HEAPF32[pitchShiftOffset + 1] = command.pitchShift;
 
         this._module._BarelyInstrument_SetNoteOn(
-            this._engine, command.id, command.pitch, this._noteControlOverridesPtr,
-            NoteControlType.COUNT);
+            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0, command.pitch,
+            this._noteControlOverridesPtr, NoteControlType.COUNT);
       } break;
       case CommandType.INSTRUMENT_SET_SAMPLE_DATA:
-        this._setInstrumentSampleData(command.id, command.slices);
+        this._setInstrumentSampleData(
+            this._instruments.get(command.id)?.instrumentId ?? 0, command.slices);
         break;
       case CommandType.PERFORMER_CREATE: {
         this._module._BarelyEngine_CreatePerformer(this._engine, this._uint32Ptr);
         const performerId = this._module.getValue(this._uint32Ptr, 'i32');
-        this._performers.add(performerId);
-        this._pendingCommands.push({
-          type: CommandType.PERFORMER_CREATE_SUCCESS,
-          id: performerId,
-          requestId: command.requestId,
-        });
+        this._performers.set(command.id, {performerId});
       } break;
       case CommandType.PERFORMER_DESTROY:
-        this._module._BarelyEngine_DestroyPerformer(this._engine, command.id);
-        this._pendingCommands.push({type: CommandType.PERFORMER_DESTROY_SUCCESS, id: command.id});
+        this._module._BarelyEngine_DestroyPerformer(
+            this._engine, this._performers.get(command.id)?.performerId ?? 0);
         this._performers.delete(command.id);
         break;
       case CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION:
         this._module._BarelyPerformer_SetLoopBeginPosition(
-            this._engine, command.id, command.loopBeginPosition);
+            this._engine, this._performers.get(command.id)?.performerId ?? 0,
+            command.loopBeginPosition);
         break;
       case CommandType.PERFORMER_SET_LOOP_LENGTH:
-        this._module._BarelyPerformer_SetLoopLength(this._engine, command.id, command.loopLength);
+        this._module._BarelyPerformer_SetLoopLength(
+            this._engine, this._performers.get(command.id)?.performerId ?? 0, command.loopLength);
         break;
       case CommandType.PERFORMER_SET_LOOPING:
-        this._module._BarelyPerformer_SetLooping(this._engine, command.id, command.isLooping);
+        this._module._BarelyPerformer_SetLooping(
+            this._engine, this._performers.get(command.id)?.performerId ?? 0, command.isLooping);
         break;
       case CommandType.PERFORMER_SET_POSITION:
-        this._module._BarelyPerformer_SetPosition(this._engine, command.id, command.position);
+        this._context.performerSetPosition(
+            this._performers.get(command.id)?.performerId ?? 0, command.position);
         break;
       case CommandType.PERFORMER_START:
-        this._module._BarelyPerformer_Start(this._engine, command.id);
+        this._context.performerStart(this._performers.get(command.id)?.performerId ?? 0);
         break;
       case CommandType.PERFORMER_STOP:
-        this._module._BarelyPerformer_Stop(this._engine, command.id);
+        this._context.performerStop(this._performers.get(command.id)?.performerId ?? 0);
         break;
       case CommandType.TASK_CREATE: {
         this._module._BarelyEngine_CreateTask(
-            this._engine, command.performerId, command.position, command.duration, command.priority,
-            null, null, this._uint32Ptr);
+            this._engine, this._performers.get(command.performerId)?.performerId ?? 0,
+            command.position, command.duration, command.priority, null, null, this._uint32Ptr);
         const taskId = this._module.getValue(this._uint32Ptr, 'i32');
-
-        const eventCallback = (eventType) =>
-            this._pendingCommands.push({type: CommandType.TASK_ON_EVENT, id: taskId, eventType});
+        const eventCallback = (eventType) => this._context._pendingCommands.push(
+            {type: CommandType.TASK_ON_EVENT, id: command.id, eventType});
         const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
           const callback = this._tasks.get(userData)?.eventCallback;
           if (callback) {
             callback(eventType);
           }
         }, 'vii');
-        this._module._BarelyTask_SetEventCallback(this._engine, taskId, eventCallbackPtr, taskId);
-        this._tasks.set(taskId, {eventCallback, eventCallbackPtr});
-
-        this._pendingCommands.push(
-            {type: CommandType.TASK_CREATE_SUCCESS, id: taskId, requestId: command.requestId});
+        this._module._BarelyTask_SetEventCallback(
+            this._engine, taskId, eventCallbackPtr, command.id);
+        this._tasks.set(command.id, {taskId, eventCallback, eventCallbackPtr});
       } break;
-      case CommandType.TASK_DESTROY:
-        this._module._BarelyEngine_DestroyTask(this._engine, command.id);
-        this._pendingCommands.push({type: CommandType.TASK_DESTROY_SUCCESS, id: command.id});
+      case CommandType.TASK_DESTROY: {
+        this._module._BarelyEngine_DestroyTask(
+            this._engine, this._tasks.get(command.id)?.taskId ?? 0);
         this._module.removeFunction(this._tasks.get(command.id).eventCallbackPtr);
         this._tasks.delete(command.id);
-        break;
+      } break;
       case CommandType.TASK_SET_DURATION:
-        this._module._BarelyTask_SetDuration(this._engine, command.id, command.duration);
+        this._module._BarelyTask_SetDuration(
+            this._engine, this._tasks.get(command.id)?.taskId ?? 0, command.duration);
         break;
       case CommandType.TASK_SET_POSITION:
-        this._module._BarelyTask_SetPosition(this._engine, command.id, command.position);
+        this._module._BarelyTask_SetPosition(
+            this._engine, this._tasks.get(command.id)?.taskId ?? 0, command.position);
         break;
       case CommandType.TASK_SET_PRIORITY:
-        this._module._BarelyTask_SetPriority(this._engine, command.id, command.priority);
+        this._module._BarelyTask_SetPriority(
+            this._engine, this._tasks.get(command.id)?.taskId ?? 0, command.priority);
         break;
       default:
         console.error(`Invalid command: ${command.type}`);
@@ -303,14 +304,14 @@ class Processor extends AudioWorkletProcessor {
 
   /**
    * Sets instrument sample data.
-   * @param {number} id
+   * @param {number} instrumentId
    * @param {!Array<{rootPitch: number, sampleRate: string, samples: Array<float>}>} slices
    * @private
    */
-  _setInstrumentSampleData(id, slices) {
-    if (this._slices[id]) {
+  _setInstrumentSampleData(instrumentId, slices) {
+    if (this._slices[instrumentId]) {
       this._slicesToRemove.push({
-        ...this._slices[id],
+        ...this._slices[instrumentId],
         timestamp: this._timestamp,
       });
     }
@@ -334,9 +335,9 @@ class Processor extends AudioWorkletProcessor {
       this._module.HEAPF32[offset + 3] = slices[i].rootPitch;
     }
 
-    this._module._BarelyInstrument_SetSampleData(this._engine, id, slicesPtr, sliceCount);
+    this._module._BarelyInstrument_SetSampleData(this._engine, instrumentId, slicesPtr, sliceCount);
 
-    this._slices[id] = {
+    this._slices[instrumentId] = {
       slicesPtr: slicesPtr,
       samplePtrs: samplePtrs,
     };

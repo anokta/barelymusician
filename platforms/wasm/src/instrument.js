@@ -1,4 +1,4 @@
-import {CommandType} from './command.js'
+import {CommandType} from './context.js'
 
 /**
  * A representation of a musical instrument that can be played in real-time.
@@ -6,19 +6,16 @@ import {CommandType} from './command.js'
 export class Instrument {
   /**
    * @param {!Engine} engine
-   * @param {!Promise<number>} idPromise
+   * @param {number} id
    * @param {function(number):void} noteOnCallback
    * @param {function(number):void} noteOffCallback
    */
-  constructor(engine, idPromise, noteOnCallback, noteOffCallback) {
+  constructor(engine, id, noteOnCallback, noteOffCallback) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
-    /** @private @const {!Promise<number>} */
-    this._idPromise = idPromise;
-
-    /** @private {boolean} */
-    this._isDestroyed = false;
+    /** @private @const {number} */
+    this._id = id;
 
     /** @public */
     this.noteOnCallback = noteOnCallback;
@@ -29,23 +26,17 @@ export class Instrument {
 
   /**
    * Destroys the instrument.
-   * @return {!Promise<void>}
    */
-  async destroy() {
-    if (this._isDestroyed) return;
-    await this._withId(id => {
-      this._engine._pushCommand({type: CommandType.INSTRUMENT_DESTROY, id});
-    });
-    this._isDestroyed = true;
+  destroy() {
+    this._engine._instruments.delete(this._id);
+    this._engine._pushCommand({type: CommandType.INSTRUMENT_DESTROY, id: this._id});
   }
 
   /**
    * Sets all notes off.
    */
   setAllNotesOff() {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_ALL_NOTES_OFF, id});
-    });
+    this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_ALL_NOTES_OFF, id: this._id});
   }
 
   /**
@@ -54,9 +45,8 @@ export class Instrument {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_CONTROL, id, typeIndex, value});
-    });
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_CONTROL, id: this._id, typeIndex, value});
   }
 
   /**
@@ -66,10 +56,8 @@ export class Instrument {
    * @param {number} value
    */
   setNoteControl(pitch, typeIndex, value) {
-    this._withId(id => {
-      this._engine._pushCommand(
-          {type: CommandType.INSTRUMENT_SET_NOTE_CONTROL, id, pitch, typeIndex, value});
-    });
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_NOTE_CONTROL, id: this._id, pitch, typeIndex, value});
   }
 
   /**
@@ -77,9 +65,7 @@ export class Instrument {
    * @param {number} pitch
    */
   setNoteOff(pitch) {
-    this._withId(id => {
-      this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_NOTE_OFF, id, pitch});
-    });
+    this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_NOTE_OFF, id: this._id, pitch});
   }
 
   /**
@@ -89,10 +75,8 @@ export class Instrument {
    * @param {number=} pitchShift
    */
   setNoteOn(pitch, gain = 1.0, pitchShift = 0.0) {
-    this._withId(id => {
-      this._engine._pushCommand(
-          {type: CommandType.INSTRUMENT_SET_NOTE_ON, id, pitch, gain, pitchShift});
-    });
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_NOTE_ON, id: this._id, pitch, gain, pitchShift});
   }
 
   /**
@@ -120,25 +104,11 @@ export class Instrument {
       });
     }
 
-    await this._withId(id => {
-      this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_SAMPLE_DATA, id, slices});
-    });
+    this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_SAMPLE_DATA, id: this._id, slices});
   }
 
-  /** @return {!Promise<void>} */
+  /** @return {number} */
   get id() {
-    return this._idPromise;
-  }
-
-  /**
-   * Runs a function once the instrument identifier is resolved.
-   * @param {function(number): (void|!Promise<void>)} fn
-   * @return {!Promise<void>}
-   * @private
-   */
-  async _withId(fn) {
-    if (this._isDestroyed) return;
-    const id = await this._idPromise;
-    await fn(id);
+    return this._id;
   }
 }

@@ -33,9 +33,7 @@ export class Task {
     this.eventCallback = eventCallback;
   }
 
-  /**
-   * Destroys the task.
-   */
+  /** Destroys the task. */
   destroy() {
     this._engine._tasks.delete(this._handle);
     this._engine._pushCommand({type: CommandType.TASK_DESTROY, handle: this._handle});

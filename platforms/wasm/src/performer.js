@@ -19,22 +19,10 @@ export class Performer {
     this._position = 0.0;
   }
 
-  /**
-   * Destroys the performer.
-   */
+  /** Destroys the performer. */
   destroy() {
     this._engine._performers.delete(this._handle);
     this._engine._pushCommand({type: CommandType.PERFORMER_DESTROY, handle: this._handle});
-  }
-
-  /** Starts playback. */
-  start() {
-    this._engine._pushCommand({type: CommandType.PERFORMER_START, handle: this._handle});
-  }
-
-  /** Stops playback. */
-  stop() {
-    this._engine._pushCommand({type: CommandType.PERFORMER_STOP, handle: this._handle});
   }
 
   /** @param {boolean} isLooping */
@@ -63,6 +51,30 @@ export class Performer {
     this._position = position;
     this._engine._pushCommand(
         {type: CommandType.PERFORMER_SET_POSITION, handle: this._handle, position});
+  }
+
+  /** Starts the playback. */
+  start() {
+    this._engine._pushCommand({type: CommandType.PERFORMER_START, handle: this._handle});
+  }
+
+  /** Stops the playback. */
+  stop() {
+    this._engine._pushCommand({type: CommandType.PERFORMER_STOP, handle: this._handle});
+  }
+
+  /**
+   * Syncs the performer position to another performer with an optional offset.
+   * @param {!Performer} otherPerformer
+   * @param {number=} offset
+   */
+  syncTo(otherPerformer, offset = 0.0) {
+    this._engine._pushCommand({
+      type: CommandType.PERFORMER_SYNC_TO,
+      handle: this._handle,
+      otherHandle: otherPerformer._handle,
+      offset,
+    });
   }
 
   /** @return {number} */

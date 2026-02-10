@@ -24,17 +24,13 @@ export class Instrument {
     this.noteOffCallback = noteOffCallback;
   }
 
-  /**
-   * Destroys the instrument.
-   */
+  /** Destroys the instrument. */
   destroy() {
     this._engine._instruments.delete(this._handle);
     this._engine._pushCommand({type: CommandType.INSTRUMENT_DESTROY, handle: this._handle});
   }
 
-  /**
-   * Sets all notes off.
-   */
+  /** Sets all notes off. */
   setAllNotesOff() {
     this._engine._pushCommand(
         {type: CommandType.INSTRUMENT_SET_ALL_NOTES_OFF, handle: this._handle});

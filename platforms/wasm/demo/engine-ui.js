@@ -293,7 +293,7 @@ export class EngineUi {
 
       const performerUi = this._createPerformer(performerContainer);
       performerUi.performer.setLooping(true);
-      performerUi.performer.setPosition(this._metronome.performer.position);  // TODO
+      performerUi.performer.syncTo(this._metronome.performer);
       if (this._metronome.isPlaying) {
         performerUi.start();
       }

@@ -287,6 +287,15 @@ class Processor extends AudioWorkletProcessor {
         if (!performerId) return;
         this._context.performerStop(performerId);
       } break;
+      case CommandType.PERFORMER_SYNC_TO: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
+        const otherPerformerId = this._performers.get(command.otherHandle)?.performerId;
+        if (!otherPerformerId) return;
+        this._module._BarelyPerformer_GetPosition(this._engine, otherPerformerId, this._doublePtr);
+        this._context.performerSetPosition(
+            performerId, this._module.getValue(this._doublePtr, 'double'));
+      } break;
       case CommandType.TASK_CREATE: {
         this._module._BarelyEngine_CreateTask(
             this._engine, this._performers.get(command.performerHandle)?.performerId ?? 0,

@@ -76,17 +76,17 @@ class Processor extends AudioWorkletProcessor {
       const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
       this._timestamp = currentTime + latency;
       this._module._BarelyEngine_Update(this._engine, this._timestamp);
-      for (const [id, value] of this._performers) {
+      for (const [handle, value] of this._performers) {
         this._module._BarelyPerformer_GetPosition(this._engine, value.performerId, this._doublePtr);
         const position = this._module.getValue(this._doublePtr, 'double');
         this._context._pendingCommands.push(
-            {type: CommandType.PERFORMER_GET_PROPERTIES_SUCCESS, id, position});
+            {type: CommandType.PERFORMER_GET_PROPERTIES_SUCCESS, handle, position});
       }
-      for (const [id, value] of this._tasks) {
+      for (const [handle, value] of this._tasks) {
         this._module._BarelyTask_IsActive(this._engine, value.taskId, this._uint8Ptr);
         const isActive = (this._module.getValue(this._uint8Ptr) !== 0);
         this._context._pendingCommands.push(
-            {type: CommandType.TASK_GET_PROPERTIES_SUCCESS, id, isActive});
+            {type: CommandType.TASK_GET_PROPERTIES_SUCCESS, handle, isActive});
       }
 
       if (this._context._pendingCommands.length > 0) {
@@ -164,10 +164,10 @@ class Processor extends AudioWorkletProcessor {
         const noteEventCallback = (eventType, pitch) => {
           if (eventType === NoteEventType.BEGIN) {
             this._context._pendingCommands.push(
-                {type: CommandType.INSTRUMENT_ON_NOTE_ON, id: command.id, pitch});
+                {type: CommandType.INSTRUMENT_ON_NOTE_ON, handle: command.handle, pitch});
           } else if (eventType === NoteEventType.END) {
             this._context._pendingCommands.push(
-                {type: CommandType.INSTRUMENT_ON_NOTE_OFF, id: command.id, pitch});
+                {type: CommandType.INSTRUMENT_ON_NOTE_OFF, handle: command.handle, pitch});
           }
         };
         const noteEventCallbackPtr = this._module.addFunction((eventType, pitch, userData) => {
@@ -177,11 +177,13 @@ class Processor extends AudioWorkletProcessor {
           }
         }, 'vifi');
         this._module._BarelyInstrument_SetNoteEventCallback(
-            this._engine, instrumentId, noteEventCallbackPtr, command.id);
-        this._instruments.set(command.id, {instrumentId, noteEventCallback, noteEventCallbackPtr});
+            this._engine, instrumentId, noteEventCallbackPtr, command.handle);
+        this._instruments.set(
+            command.handle, {instrumentId, noteEventCallback, noteEventCallbackPtr});
       } break;
       case CommandType.INSTRUMENT_DESTROY: {
-        const instrumentId = this._instruments.get(command.id)?.instrumentId ?? 0;
+        const {instrumentId, noteEventCallbackPtr} = this._instruments.get(command.handle);
+        if (!instrumentId) return;
         this._module._BarelyEngine_DestroyInstrument(this._engine, instrumentId);
         if (this._slices[instrumentId]) {
           this._slicesToRemove.push({
@@ -190,28 +192,35 @@ class Processor extends AudioWorkletProcessor {
           });
           delete this._slices[instrumentId];
         }
-        this._module.removeFunction(this._instruments.get(command.id).noteEventCallbackPtr);
-        this._instruments.delete(command.id);
+        this._module.removeFunction(noteEventCallbackPtr);
+        this._instruments.delete(command.handle);
       } break;
-      case CommandType.INSTRUMENT_SET_ALL_NOTES_OFF:
-        this._module._BarelyInstrument_SetAllNotesOff(
-            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0);
-        break;
-      case CommandType.INSTRUMENT_SET_CONTROL:
+      case CommandType.INSTRUMENT_SET_ALL_NOTES_OFF: {
+        const instrumentId = this._instruments.get(command.handle)?.instrumentId;
+        if (!instrumentId) return;
+        this._module._BarelyInstrument_SetAllNotesOff(this._engine, instrumentId);
+      } break;
+      case CommandType.INSTRUMENT_SET_CONTROL: {
+        const instrumentId = this._instruments.get(command.handle)?.instrumentId;
+        if (!instrumentId) return;
         this._module._BarelyInstrument_SetControl(
-            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0, command.typeIndex,
-            command.value);
-        break;
-      case CommandType.INSTRUMENT_SET_NOTE_CONTROL:
+            this._engine, instrumentId, command.typeIndex, command.value);
+      } break;
+      case CommandType.INSTRUMENT_SET_NOTE_CONTROL: {
+        const instrumentId = this._instruments.get(command.handle)?.instrumentId;
+        if (!instrumentId) return;
         this._module._BarelyInstrument_SetNoteControl(
-            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0, command.pitch,
-            command.typeIndex, command.value);
-        break;
-      case CommandType.INSTRUMENT_SET_NOTE_OFF:
-        this._module._BarelyInstrument_SetNoteOff(
-            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0, command.pitch);
-        break;
+            this._engine, instrumentId, command.pitch, command.typeIndex, command.value);
+      } break;
+      case CommandType.INSTRUMENT_SET_NOTE_OFF: {
+        const instrumentId = this._instruments.get(command.handle)?.instrumentId;
+        if (!instrumentId) return;
+        this._module._BarelyInstrument_SetNoteOff(this._engine, instrumentId, command.pitch);
+      } break;
       case CommandType.INSTRUMENT_SET_NOTE_ON: {
+        const instrumentId = this._instruments.get(command.handle)?.instrumentId;
+        if (!instrumentId) return;
+
         const gainOffset = this._noteControlOverridesPtr / Uint32Array.BYTES_PER_ELEMENT;
         this._module.HEAP32[gainOffset] = NoteControlType.GAIN;
         this._module.HEAPF32[gainOffset + 1] = command.gain;
@@ -222,53 +231,63 @@ class Processor extends AudioWorkletProcessor {
         this._module.HEAPF32[pitchShiftOffset + 1] = command.pitchShift;
 
         this._module._BarelyInstrument_SetNoteOn(
-            this._engine, this._instruments.get(command.id)?.instrumentId ?? 0, command.pitch,
-            this._noteControlOverridesPtr, NoteControlType.COUNT);
+            this._engine, instrumentId, command.pitch, this._noteControlOverridesPtr,
+            NoteControlType.COUNT);
       } break;
-      case CommandType.INSTRUMENT_SET_SAMPLE_DATA:
-        this._setInstrumentSampleData(
-            this._instruments.get(command.id)?.instrumentId ?? 0, command.slices);
-        break;
+      case CommandType.INSTRUMENT_SET_SAMPLE_DATA: {
+        const instrumentId = this._instruments.get(command.handle)?.instrumentId;
+        if (!instrumentId) return;
+        this._setInstrumentSampleData(instrumentId, command.slices);
+      } break;
       case CommandType.PERFORMER_CREATE: {
         this._module._BarelyEngine_CreatePerformer(this._engine, this._uint32Ptr);
         const performerId = this._module.getValue(this._uint32Ptr, 'i32');
-        this._performers.set(command.id, {performerId});
+        this._performers.set(command.handle, {performerId});
       } break;
-      case CommandType.PERFORMER_DESTROY:
-        this._module._BarelyEngine_DestroyPerformer(
-            this._engine, this._performers.get(command.id)?.performerId ?? 0);
-        this._performers.delete(command.id);
-        break;
-      case CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION:
+      case CommandType.PERFORMER_DESTROY: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
+        this._module._BarelyEngine_DestroyPerformer(this._engine, performerId);
+        this._performers.delete(command.handle);
+      } break;
+      case CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
         this._module._BarelyPerformer_SetLoopBeginPosition(
-            this._engine, this._performers.get(command.id)?.performerId ?? 0,
-            command.loopBeginPosition);
-        break;
-      case CommandType.PERFORMER_SET_LOOP_LENGTH:
-        this._module._BarelyPerformer_SetLoopLength(
-            this._engine, this._performers.get(command.id)?.performerId ?? 0, command.loopLength);
-        break;
-      case CommandType.PERFORMER_SET_LOOPING:
-        this._module._BarelyPerformer_SetLooping(
-            this._engine, this._performers.get(command.id)?.performerId ?? 0, command.isLooping);
-        break;
-      case CommandType.PERFORMER_SET_POSITION:
-        this._context.performerSetPosition(
-            this._performers.get(command.id)?.performerId ?? 0, command.position);
-        break;
-      case CommandType.PERFORMER_START:
-        this._context.performerStart(this._performers.get(command.id)?.performerId ?? 0);
-        break;
-      case CommandType.PERFORMER_STOP:
-        this._context.performerStop(this._performers.get(command.id)?.performerId ?? 0);
-        break;
+            this._engine, performerId, command.loopBeginPosition);
+      } break;
+      case CommandType.PERFORMER_SET_LOOP_LENGTH: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
+        this._module._BarelyPerformer_SetLoopLength(this._engine, performerId, command.loopLength);
+      } break;
+      case CommandType.PERFORMER_SET_LOOPING: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
+        this._module._BarelyPerformer_SetLooping(this._engine, performerId, command.isLooping);
+      } break;
+      case CommandType.PERFORMER_SET_POSITION: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
+        this._context.performerSetPosition(performerId, command.position);
+      } break;
+      case CommandType.PERFORMER_START: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
+        this._context.performerStart(performerId);
+      } break;
+      case CommandType.PERFORMER_STOP: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
+        this._context.performerStop(performerId);
+      } break;
       case CommandType.TASK_CREATE: {
         this._module._BarelyEngine_CreateTask(
-            this._engine, this._performers.get(command.performerId)?.performerId ?? 0,
+            this._engine, this._performers.get(command.performerHandle)?.performerId ?? 0,
             command.position, command.duration, command.priority, null, null, this._uint32Ptr);
         const taskId = this._module.getValue(this._uint32Ptr, 'i32');
         const eventCallback = (eventType) => this._context._pendingCommands.push(
-            {type: CommandType.TASK_ON_EVENT, id: command.id, eventType});
+            {type: CommandType.TASK_ON_EVENT, handle: command.handle, eventType});
         const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
           const callback = this._tasks.get(userData)?.eventCallback;
           if (callback) {
@@ -276,27 +295,31 @@ class Processor extends AudioWorkletProcessor {
           }
         }, 'vii');
         this._module._BarelyTask_SetEventCallback(
-            this._engine, taskId, eventCallbackPtr, command.id);
-        this._tasks.set(command.id, {taskId, eventCallback, eventCallbackPtr});
+            this._engine, taskId, eventCallbackPtr, command.handle);
+        this._tasks.set(command.handle, {taskId, eventCallback, eventCallbackPtr});
       } break;
       case CommandType.TASK_DESTROY: {
-        this._module._BarelyEngine_DestroyTask(
-            this._engine, this._tasks.get(command.id)?.taskId ?? 0);
-        this._module.removeFunction(this._tasks.get(command.id).eventCallbackPtr);
-        this._tasks.delete(command.id);
+        const {taskId, eventCallbackPtr} = this._tasks.get(command.handle)?.taskId;
+        if (!taskId) return;
+        this._module._BarelyEngine_DestroyTask(this._engine, taskId);
+        this._module.removeFunction(eventCallbackPtr);
+        this._tasks.delete(command.handle);
       } break;
-      case CommandType.TASK_SET_DURATION:
-        this._module._BarelyTask_SetDuration(
-            this._engine, this._tasks.get(command.id)?.taskId ?? 0, command.duration);
-        break;
-      case CommandType.TASK_SET_POSITION:
-        this._module._BarelyTask_SetPosition(
-            this._engine, this._tasks.get(command.id)?.taskId ?? 0, command.position);
-        break;
-      case CommandType.TASK_SET_PRIORITY:
-        this._module._BarelyTask_SetPriority(
-            this._engine, this._tasks.get(command.id)?.taskId ?? 0, command.priority);
-        break;
+      case CommandType.TASK_SET_DURATION: {
+        const taskId = this._tasks.get(command.handle)?.taskId;
+        if (!taskId) return;
+        this._module._BarelyTask_SetDuration(this._engine, taskId, command.duration);
+      } break;
+      case CommandType.TASK_SET_POSITION: {
+        const taskId = this._tasks.get(command.handle)?.taskId;
+        if (!taskId) return;
+        this._module._BarelyTask_SetPosition(this._engine, taskId, command.position);
+      } break;
+      case CommandType.TASK_SET_PRIORITY: {
+        const taskId = this._tasks.get(command.handle)?.taskId;
+        if (!taskId) return;
+        this._module._BarelyTask_SetPriority(this._engine, taskId, command.priority);
+      } break;
       default:
         console.error(`Invalid command: ${command.type}`);
     }

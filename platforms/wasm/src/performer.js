@@ -6,14 +6,14 @@ import {CommandType} from './context.js'
 export class Performer {
   /**
    * @param {!Engine} engine
-   * @param {number} id
+   * @param {number} handle
    */
-  constructor(engine, id) {
+  constructor(engine, handle) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
     /** @private @const {number} */
-    this._id = id;
+    this._handle = handle;
 
     /** @private {number} */
     this._position = 0.0;
@@ -23,46 +23,51 @@ export class Performer {
    * Destroys the performer.
    */
   destroy() {
-    this._engine._performers.delete(this._id);
-    this._engine._pushCommand({type: CommandType.PERFORMER_DESTROY, id: this._id});
+    this._engine._performers.delete(this._handle);
+    this._engine._pushCommand({type: CommandType.PERFORMER_DESTROY, handle: this._handle});
   }
 
   /** Starts playback. */
   start() {
-    this._engine._pushCommand({type: CommandType.PERFORMER_START, id: this._id});
+    this._engine._pushCommand({type: CommandType.PERFORMER_START, handle: this._handle});
   }
 
   /** Stops playback. */
   stop() {
-    this._engine._pushCommand({type: CommandType.PERFORMER_STOP, id: this._id});
+    this._engine._pushCommand({type: CommandType.PERFORMER_STOP, handle: this._handle});
   }
 
   /** @param {boolean} isLooping */
   setLooping(isLooping) {
-    this._engine._pushCommand({type: CommandType.PERFORMER_SET_LOOPING, id: this._id, isLooping});
+    this._engine._pushCommand(
+        {type: CommandType.PERFORMER_SET_LOOPING, handle: this._handle, isLooping});
   }
 
   /** @param {number} loopBeginPosition */
   setLoopBeginPosition(loopBeginPosition) {
-    this._engine._pushCommand(
-        {type: CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION, id: this._id, loopBeginPosition});
+    this._engine._pushCommand({
+      type: CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION,
+      handle: this._handle,
+      loopBeginPosition,
+    });
   }
 
   /** @param {number} loopLength */
   setLoopLength(loopLength) {
     this._engine._pushCommand(
-        {type: CommandType.PERFORMER_SET_LOOP_LENGTH, id: this._id, loopLength});
+        {type: CommandType.PERFORMER_SET_LOOP_LENGTH, handle: this._handle, loopLength});
   }
 
   /** @param {number} position */
   setPosition(position) {
     this._position = position;
-    this._engine._pushCommand({type: CommandType.PERFORMER_SET_POSITION, id: this._id, position});
+    this._engine._pushCommand(
+        {type: CommandType.PERFORMER_SET_POSITION, handle: this._handle, position});
   }
 
   /** @return {number} */
-  get id() {
-    return this._id;
+  get handle() {
+    return this._handle;
   }
 
   /** @return {number} */

@@ -443,7 +443,7 @@ export class PerformerUi {
     });
 
     // id
-    this._container.id = `performer#${this.performer.id}`;
+    this._container.id = `performer#${this.performer.handle}`;
 
     // label
     const label = this._container.querySelector('label');

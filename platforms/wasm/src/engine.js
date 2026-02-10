@@ -25,7 +25,7 @@ export class Engine {
     this._tasks = new Map();
 
     /** @private {number} */
-    this._nextId = 1;
+    this._nextHandle = 1;
 
     /** @private {!Array<!Object>} */
     this._pendingCommands = [];
@@ -59,10 +59,10 @@ export class Engine {
    * @return {!Instrument}
    */
   createInstrument({noteOnCallback = () => {}, noteOffCallback = () => {}} = {}) {
-    const id = this._nextId++;
-    const instrument = new Instrument(this, id, noteOnCallback, noteOffCallback);
-    this._instruments.set(id, instrument);
-    this._pushCommand({type: CommandType.INSTRUMENT_CREATE, id});
+    const handle = this._nextHandle++;
+    const instrument = new Instrument(this, handle, noteOnCallback, noteOffCallback);
+    this._instruments.set(handle, instrument);
+    this._pushCommand({type: CommandType.INSTRUMENT_CREATE, handle});
     return instrument;
   }
 
@@ -71,10 +71,10 @@ export class Engine {
    * @return {!Performer}
    */
   createPerformer() {
-    const id = this._nextId++;
-    const performer = new Performer(this, id);
-    this._performers.set(id, performer);
-    this._pushCommand({type: CommandType.PERFORMER_CREATE, id});
+    const handle = this._nextHandle++;
+    const performer = new Performer(this, handle);
+    this._performers.set(handle, performer);
+    this._pushCommand({type: CommandType.PERFORMER_CREATE, handle});
     return performer;
   }
 
@@ -88,13 +88,13 @@ export class Engine {
    * @return {!Task}
    */
   createTask(performer, position, duration, eventCallback, priority = 0) {
-    const id = this._nextId++;
-    const task = new Task(this, id, eventCallback);
-    this._tasks.set(id, task);
+    const handle = this._nextHandle++;
+    const task = new Task(this, handle, eventCallback);
+    this._tasks.set(handle, task);
     this._pushCommand({
       type: CommandType.TASK_CREATE,
-      id,
-      performerId: performer.id,
+      handle,
+      performerHandle: performer.handle,
       position,
       duration,
       priority,
@@ -157,27 +157,27 @@ export class Engine {
   _processCommand(command) {
     switch (command.type) {
       case CommandType.INSTRUMENT_ON_NOTE_ON:
-        this._instruments.get(command.id)?.noteOnCallback(command.pitch);
+        this._instruments.get(command.handle)?.noteOnCallback(command.pitch);
         break;
       case CommandType.INSTRUMENT_ON_NOTE_OFF:
-        this._instruments.get(command.id)?.noteOffCallback(command.pitch);
+        this._instruments.get(command.handle)?.noteOffCallback(command.pitch);
         break;
       case CommandType.PERFORMER_GET_PROPERTIES_SUCCESS: {
-        const performer = this._performers.get(command.id);
+        const performer = this._performers.get(command.handle);
         if (performer) {
           performer._position = command.position;
         }
         break;
       }
       case CommandType.TASK_GET_PROPERTIES_SUCCESS: {
-        const task = this._tasks.get(command.id);
+        const task = this._tasks.get(command.handle);
         if (task) {
           task._isActive = command.isActive;
         }
         break;
       }
       case CommandType.TASK_ON_EVENT:
-        this._tasks.get(command.id)?.eventCallback(command.eventType);
+        this._tasks.get(command.handle)?.eventCallback(command.eventType);
         break;
       default:
         console.error(`Invalid command: ${command.type}`);

@@ -6,16 +6,16 @@ import {CommandType} from './context.js'
 export class Instrument {
   /**
    * @param {!Engine} engine
-   * @param {number} id
+   * @param {number} handle
    * @param {function(number):void} noteOnCallback
    * @param {function(number):void} noteOffCallback
    */
-  constructor(engine, id, noteOnCallback, noteOffCallback) {
+  constructor(engine, handle, noteOnCallback, noteOffCallback) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
     /** @private @const {number} */
-    this._id = id;
+    this._handle = handle;
 
     /** @public */
     this.noteOnCallback = noteOnCallback;
@@ -28,15 +28,16 @@ export class Instrument {
    * Destroys the instrument.
    */
   destroy() {
-    this._engine._instruments.delete(this._id);
-    this._engine._pushCommand({type: CommandType.INSTRUMENT_DESTROY, id: this._id});
+    this._engine._instruments.delete(this._handle);
+    this._engine._pushCommand({type: CommandType.INSTRUMENT_DESTROY, handle: this._handle});
   }
 
   /**
    * Sets all notes off.
    */
   setAllNotesOff() {
-    this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_ALL_NOTES_OFF, id: this._id});
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_ALL_NOTES_OFF, handle: this._handle});
   }
 
   /**
@@ -46,7 +47,7 @@ export class Instrument {
    */
   setControl(typeIndex, value) {
     this._engine._pushCommand(
-        {type: CommandType.INSTRUMENT_SET_CONTROL, id: this._id, typeIndex, value});
+        {type: CommandType.INSTRUMENT_SET_CONTROL, handle: this._handle, typeIndex, value});
   }
 
   /**
@@ -56,8 +57,13 @@ export class Instrument {
    * @param {number} value
    */
   setNoteControl(pitch, typeIndex, value) {
-    this._engine._pushCommand(
-        {type: CommandType.INSTRUMENT_SET_NOTE_CONTROL, id: this._id, pitch, typeIndex, value});
+    this._engine._pushCommand({
+      type: CommandType.INSTRUMENT_SET_NOTE_CONTROL,
+      handle: this._handle,
+      pitch,
+      typeIndex,
+      value
+    });
   }
 
   /**
@@ -65,7 +71,8 @@ export class Instrument {
    * @param {number} pitch
    */
   setNoteOff(pitch) {
-    this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_NOTE_OFF, id: this._id, pitch});
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_NOTE_OFF, handle: this._handle, pitch});
   }
 
   /**
@@ -76,7 +83,7 @@ export class Instrument {
    */
   setNoteOn(pitch, gain = 1.0, pitchShift = 0.0) {
     this._engine._pushCommand(
-        {type: CommandType.INSTRUMENT_SET_NOTE_ON, id: this._id, pitch, gain, pitchShift});
+        {type: CommandType.INSTRUMENT_SET_NOTE_ON, handle: this._handle, pitch, gain, pitchShift});
   }
 
   /**
@@ -104,11 +111,12 @@ export class Instrument {
       });
     }
 
-    this._engine._pushCommand({type: CommandType.INSTRUMENT_SET_SAMPLE_DATA, id: this._id, slices});
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_SAMPLE_DATA, handle: this._handle, slices});
   }
 
   /** @return {number} */
-  get id() {
-    return this._id;
+  get handle() {
+    return this._handle;
   }
 }

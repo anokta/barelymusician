@@ -16,15 +16,15 @@ export const TaskEventType = {
 export class Task {
   /**
    * @param {!Engine} engine
-   * @param {number} id
+   * @param {number} handle
    * @param {function(number):void} eventCallback
    */
-  constructor(engine, id, eventCallback) {
+  constructor(engine, handle, eventCallback) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
     /** @private @const {number} */
-    this._id = id;
+    this._handle = handle;
 
     /** @private {boolean} */
     this._isActive = false;
@@ -37,28 +37,31 @@ export class Task {
    * Destroys the task.
    */
   destroy() {
-    this._engine._tasks.delete(this._id);
-    this._engine._pushCommand({type: CommandType.TASK_DESTROY, id: this._id});
+    this._engine._tasks.delete(this._handle);
+    this._engine._pushCommand({type: CommandType.TASK_DESTROY, handle: this._handle});
   }
 
   /** @param {number} duration */
   setDuration(duration) {
-    this._engine._pushCommand({type: CommandType.TASK_SET_DURATION, id: this._id, duration});
+    this._engine._pushCommand(
+        {type: CommandType.TASK_SET_DURATION, handle: this._handle, duration});
   }
 
   /** @param {number} position */
   setPosition(position) {
-    this._engine._pushCommand({type: CommandType.TASK_SET_POSITION, id: this._id, position});
+    this._engine._pushCommand(
+        {type: CommandType.TASK_SET_POSITION, handle: this._handle, position});
   }
 
   /** @param {number} priority */
   setPriority(priority) {
-    this._engine._pushCommand({type: CommandType.TASK_SET_PRIORITY, id: this._id, priority});
+    this._engine._pushCommand(
+        {type: CommandType.TASK_SET_PRIORITY, handle: this._handle, priority});
   }
 
   /** @return {number} */
-  get id() {
-    return this._id;
+  get handle() {
+    return this._handle;
   }
 
   /** @return {boolean} */

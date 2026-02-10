@@ -101,7 +101,7 @@ export class EngineUi {
       if (instrumentUi) {
         performerUi.updateInstrumentSelect(this._instruments);
         performerUi._container.querySelector('#instrumentSelect').value =
-            instrumentUi._instrument.id;
+            instrumentUi._instrument.handle;
       }
 
       this._updateAllPerformerInstrumentSelects();
@@ -210,12 +210,12 @@ export class EngineUi {
       container,
       instrument,
       destroyCallback: () => {
-        this._instruments.delete(instrument.id);
+        this._instruments.delete(instrument.handle);
         this._updateAllPerformerInstrumentSelects();
       },
     });
 
-    this._instruments.set(instrument.id, instrumentUi);
+    this._instruments.set(instrument.handle, instrumentUi);
     this._updateAllPerformerInstrumentSelects();
 
     return instrumentUi;
@@ -229,11 +229,11 @@ export class EngineUi {
       performer,
       instruments: this._instruments,
       destroyCallback: () => {
-        this._performers.delete(performer.id);
+        this._performers.delete(performer.handle);
       },
     });
 
-    this._performers.set(performer.id, performerUi);
+    this._performers.set(performer.handle, performerUi);
     this._updateAllPerformerInstrumentSelects();
 
     return performerUi;

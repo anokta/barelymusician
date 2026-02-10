@@ -72,26 +72,32 @@ class Processor extends AudioWorkletProcessor {
           this._processCommand(command);
         }
       }
+
       const deltaFrameTime = 1.0 / 60.0;
       const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
       this._timestamp = currentTime + latency;
       this._module._BarelyEngine_Update(this._engine, this._timestamp);
+
+      const performer_properties = [];
       for (const [handle, value] of this._performers) {
         this._module._BarelyPerformer_GetPosition(this._engine, value.performerId, this._doublePtr);
-        const position = this._module.getValue(this._doublePtr, 'double');
-        this._context._pendingCommands.push(
-            {type: CommandType.PERFORMER_GET_PROPERTIES_SUCCESS, handle, position});
+        performer_properties.push(
+            {handle, position: this._module.getValue(this._doublePtr, 'double')});
       }
+      const task_properties = [];
       for (const [handle, value] of this._tasks) {
         this._module._BarelyTask_IsActive(this._engine, value.taskId, this._uint8Ptr);
-        const isActive = (this._module.getValue(this._uint8Ptr) !== 0);
-        this._context._pendingCommands.push(
-            {type: CommandType.TASK_GET_PROPERTIES_SUCCESS, handle, isActive});
+        task_properties.push({handle, isActive: (this._module.getValue(this._uint8Ptr) !== 0)});
       }
 
-      if (this._context._pendingCommands.length > 0) {
-        this.port.postMessage(
-            {type: MessageType.UPDATE_SUCCESS, commands: this._context._pendingCommands});
+      if (this._context._pendingCommands.length > 0 || performer_properties.length > 0 ||
+          task_properties.length > 0) {
+        this.port.postMessage({
+          type: MessageType.UPDATE_SUCCESS,
+          commands: this._context._pendingCommands,
+          performer_properties,
+          task_properties,
+        });
         this._context._pendingCommands = [];
       }
     };

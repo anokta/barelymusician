@@ -40,6 +40,18 @@ export class Engine {
           initCallback();
           break;
         case MessageType.UPDATE_SUCCESS:
+          for (const {handle, position} of event.data.performer_properties) {
+            const performer = this._performers.get(handle);
+            if (performer) {
+              performer._position = position;
+            }
+          }
+          for (const {handle, isActive} of event.data.task_properties) {
+            const task = this._tasks.get(handle);
+            if (task) {
+              task._isActive = isActive;
+            }
+          }
           for (const command of event.data.commands) {
             this._processCommand(command);
           }
@@ -162,20 +174,6 @@ export class Engine {
       case CommandType.INSTRUMENT_ON_NOTE_OFF:
         this._instruments.get(command.handle)?.noteOffCallback(command.pitch);
         break;
-      case CommandType.PERFORMER_GET_PROPERTIES_SUCCESS: {
-        const performer = this._performers.get(command.handle);
-        if (performer) {
-          performer._position = command.position;
-        }
-        break;
-      }
-      case CommandType.TASK_GET_PROPERTIES_SUCCESS: {
-        const task = this._tasks.get(command.handle);
-        if (task) {
-          task._isActive = command.isActive;
-        }
-        break;
-      }
       case CommandType.TASK_ON_EVENT:
         this._tasks.get(command.handle)?.eventCallback(command.eventType);
         break;

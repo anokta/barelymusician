@@ -256,7 +256,9 @@ export class PerformerUi {
       if (duration > 0) {
         this._addNote(start - this._loopLength / GRID_DIVISIONS, duration, pitch, 1.0);
       }
-      clip.removeChild(noteDiv);
+      if (noteDiv.parentElement === clip) {
+        clip.removeChild(noteDiv);
+      }
       this._renderClip();
     };
 

@@ -1,5 +1,5 @@
 import Module from './barelymusician.js';
-import {CommandType, Context, MessageType} from './context.js'
+import {CommandType, MessageType} from './command.js'
 import {INSTRUMENT_CONTROLS, NoteControlType} from './control.js';
 
 const INSTRUMENT_CONTROL_OVERRIDE_SIZE = 8;  // sizeof(BarelyInstrumentControlOverride)
@@ -15,7 +15,6 @@ class Processor extends AudioWorkletProcessor {
 
     this._module = null;
     this._engine = null;
-    this._context = null;
 
     this._doublePtr = null;
     this._uint8Ptr = null;
@@ -23,6 +22,8 @@ class Processor extends AudioWorkletProcessor {
     this._instrumentControlOverridesPtr = null;
     this._noteControlOverridesPtr = null;
     this._outputSamplesPtr = null;
+
+    this._pendingCommands = [];
 
     this._instruments = new Map();
     this._performers = new Map();
@@ -49,16 +50,14 @@ class Processor extends AudioWorkletProcessor {
 
       this._module._BarelyEngine_Create(sampleRate, this._uint32Ptr);
       this._engine = this._module.getValue(this._uint32Ptr, 'i32');
-      if (this._module && this._engine) {
-        this._context = new Context(this._module, this._engine);
-      }
 
       this.port.postMessage({type: MessageType.INIT_SUCCESS});
     });
 
     this.port.onmessage = event => {
       if (!event.data) return;
-      if (!this._context) {
+
+      if (!this._engine) {
         console.error('barelymusician not initialized!');
         return;
       }
@@ -90,15 +89,15 @@ class Processor extends AudioWorkletProcessor {
         task_properties.push({handle, isActive: (this._module.getValue(this._uint8Ptr) !== 0)});
       }
 
-      if (this._context._pendingCommands.length > 0 || performer_properties.length > 0 ||
-          task_properties.length > 0) {
+      if (performer_properties.length > 0 || task_properties.length > 0 ||
+          this._pendingCommands.length > 0) {
         this.port.postMessage({
           type: MessageType.UPDATE_SUCCESS,
-          commands: this._context._pendingCommands,
+          commands: this._pendingCommands,
           performer_properties,
           task_properties,
         });
-        this._context._pendingCommands = [];
+        this._pendingCommands = [];
       }
     };
   }
@@ -107,7 +106,7 @@ class Processor extends AudioWorkletProcessor {
    * Audio processing callback.
    */
   process(inputs, outputs, parameters) {
-    if (!this._engine || !this._module || !this._module.HEAPF32) return true;
+    if (!this._engine || !this._module) return true;
 
     const output = outputs[0];
     const outputChannelCount = Math.min(output.length, STEREO_CHANNEL_COUNT);
@@ -141,10 +140,10 @@ class Processor extends AudioWorkletProcessor {
   _processCommand(command) {
     switch (command.type) {
       case CommandType.ENGINE_SET_CONTROL:
-        this._context.engineSetControl(command.typeIndex, command.value);
+        this._module._BarelyEngine_SetControl(this._engine, command.typeIndex, command.value);
         break;
       case CommandType.ENGINE_SET_TEMPO:
-        this._context.engineSetTempo(command.tempo);
+        this._module._BarelyEngine_SetTempo(this._engine, command.tempo);
         break;
       case CommandType.INSTRUMENT_CREATE: {
         let i = 0;
@@ -169,10 +168,10 @@ class Processor extends AudioWorkletProcessor {
         };
         const noteEventCallback = (eventType, pitch) => {
           if (eventType === NoteEventType.BEGIN) {
-            this._context._pendingCommands.push(
+            this._pendingCommands.push(
                 {type: CommandType.INSTRUMENT_ON_NOTE_ON, handle: command.handle, pitch});
           } else if (eventType === NoteEventType.END) {
-            this._context._pendingCommands.push(
+            this._pendingCommands.push(
                 {type: CommandType.INSTRUMENT_ON_NOTE_OFF, handle: command.handle, pitch});
           }
         };
@@ -275,17 +274,17 @@ class Processor extends AudioWorkletProcessor {
       case CommandType.PERFORMER_SET_POSITION: {
         const performerId = this._performers.get(command.handle)?.performerId;
         if (!performerId) return;
-        this._context.performerSetPosition(performerId, command.position);
+        this._module._BarelyPerformer_SetPosition(this._engine, performerId, command.position);
       } break;
       case CommandType.PERFORMER_START: {
         const performerId = this._performers.get(command.handle)?.performerId;
         if (!performerId) return;
-        this._context.performerStart(performerId);
+        this._module._BarelyPerformer_Start(this._engine, performerId);
       } break;
       case CommandType.PERFORMER_STOP: {
         const performerId = this._performers.get(command.handle)?.performerId;
         if (!performerId) return;
-        this._context.performerStop(performerId);
+        this._module._BarelyPerformer_Stop(this._engine, performerId);
       } break;
       case CommandType.PERFORMER_SYNC_TO: {
         const performerId = this._performers.get(command.handle)?.performerId;
@@ -301,7 +300,7 @@ class Processor extends AudioWorkletProcessor {
             this._engine, this._performers.get(command.performerHandle)?.performerId ?? 0,
             command.position, command.duration, command.priority, null, null, this._uint32Ptr);
         const taskId = this._module.getValue(this._uint32Ptr, 'i32');
-        const eventCallback = (eventType) => this._context._pendingCommands.push(
+        const eventCallback = (eventType) => this._pendingCommands.push(
             {type: CommandType.TASK_ON_EVENT, handle: command.handle, eventType});
         const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
           const callback = this._tasks.get(userData)?.eventCallback;

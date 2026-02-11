@@ -1,4 +1,4 @@
-import {CommandType} from './context.js'
+import {CommandType} from './command.js'
 
 /**
  * A representation of a musical performer that can perform rhythmic tasks in real-time.

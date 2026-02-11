@@ -1,4 +1,4 @@
-import {CommandType} from './context.js'
+import {CommandType} from './command.js'
 
 /**
  * A representation of a musical instrument that can be played in real-time.

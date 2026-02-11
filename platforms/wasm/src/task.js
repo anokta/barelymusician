@@ -1,4 +1,4 @@
-import {CommandType} from './context.js'
+import {CommandType} from './command.js'
 
 /**
  * Task event types.

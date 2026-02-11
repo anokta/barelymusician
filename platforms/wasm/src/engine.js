@@ -1,4 +1,4 @@
-import {CommandType, MessageType} from './context.js';
+import {CommandType, MessageType} from './command.js';
 import {Instrument} from './instrument.js';
 import {Performer} from './performer.js';
 import {Task} from './task.js';

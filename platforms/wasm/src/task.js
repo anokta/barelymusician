@@ -1,25 +1,14 @@
 import {CommandType} from './command.js'
 
 /**
- * Task event types.
- * @enum {number}
- */
-export const TaskEventType = {
-  BEGIN: 0,
-  END: 1,
-  COUNT: 2,
-};
-
-/**
  * A representation of a recurring task that can be performed by a musical performer in real-time.
  */
 export class Task {
   /**
    * @param {!Engine} engine
    * @param {number} handle
-   * @param {function(number):void} eventCallback
    */
-  constructor(engine, handle, eventCallback) {
+  constructor(engine, handle) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
@@ -28,15 +17,23 @@ export class Task {
 
     /** @private {boolean} */
     this._isActive = false;
-
-    /** @public */
-    this.eventCallback = eventCallback;
   }
 
   /** Destroys the task. */
   destroy() {
     this._engine._tasks.delete(this._handle);
     this._engine._pushCommand({type: CommandType.TASK_DESTROY, handle: this._handle});
+  }
+
+  /**
+   * @param {{
+   *   beginCommands: (!Array<Object>=)
+   *   endCommands: (!Array<Object>=)
+   * }=} params
+   */
+  setCommands({beginCommands = [], endCommands = []} = {}) {
+    this._engine._pushCommand(
+        {type: CommandType.TASK_SET_COMMANDS, handle: this._handle, beginCommands, endCommands})
   }
 
   /** @param {number} duration */

@@ -164,7 +164,6 @@ class Processor extends AudioWorkletProcessor {
         const NoteEventType = {
           BEGIN: 0,
           END: 1,
-          COUNT: 2,
         };
         const noteEventCallback = (eventType, pitch) => {
           if (eventType === NoteEventType.BEGIN) {
@@ -300,16 +299,32 @@ class Processor extends AudioWorkletProcessor {
             this._engine, this._performers.get(command.performerHandle)?.performerId ?? 0,
             command.position, command.duration, command.priority, null, null, this._uint32Ptr);
         const taskId = this._module.getValue(this._uint32Ptr, 'i32');
-        const eventCallback = (eventType) => this._pendingCommands.push(
-            {type: CommandType.TASK_ON_EVENT, handle: command.handle, eventType});
+
+        const TaskEventType = {
+          BEGIN: 0,
+          END: 1,
+        };
+        const eventCallback = (task, eventType) => {
+          if (eventType === TaskEventType.BEGIN && task.beginCommands) {
+            for (const command of task.beginCommands) {
+              this._processCommand(command);
+            }
+          } else if (eventType === TaskEventType.END && task.endCommands) {
+            for (const command of task.endCommands) {
+              this._processCommand(command);
+            }
+          }
+        };
         const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
-          const callback = this._tasks.get(userData)?.eventCallback;
-          if (callback) {
-            callback(eventType);
+          const task = this._tasks.get(userData);
+          if (!task) return;
+          if (task.eventCallback) {
+            task.eventCallback(task, eventType);
           }
         }, 'vii');
         this._module._BarelyTask_SetEventCallback(
             this._engine, taskId, eventCallbackPtr, command.handle);
+
         this._tasks.set(command.handle, {taskId, eventCallback, eventCallbackPtr});
       } break;
       case CommandType.TASK_DESTROY: {
@@ -318,6 +333,20 @@ class Processor extends AudioWorkletProcessor {
         this._module._BarelyEngine_DestroyTask(this._engine, taskId);
         this._module.removeFunction(eventCallbackPtr);
         this._tasks.delete(command.handle);
+      } break;
+      case CommandType.TASK_SET_COMMANDS: {
+        const task = this._tasks.get(command.handle);
+        if (!task) return;
+        if (task.endCommands) {  // stop the current task
+          this._module._BarelyTask_IsActive(this._engine, task.taskId, this._uint8Ptr);
+          if (this._module.getValue(this._uint8Ptr) !== 0) {
+            for (const command of task.endCommands) {
+              this._processCommand(command);
+            }
+          }
+        }
+        task.beginCommands = command.beginCommands;
+        task.endCommands = command.endCommands;
       } break;
       case CommandType.TASK_SET_DURATION: {
         const taskId = this._tasks.get(command.handle)?.taskId;

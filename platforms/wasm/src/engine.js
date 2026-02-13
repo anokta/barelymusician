@@ -174,9 +174,6 @@ export class Engine {
       case CommandType.INSTRUMENT_ON_NOTE_OFF:
         this._instruments.get(command.handle)?.noteOffCallback(command.pitch);
         break;
-      case CommandType.TASK_ON_EVENT:
-        this._tasks.get(command.handle)?.eventCallback(command.eventType);
-        break;
       default:
         console.error(`Invalid command: ${command.type}`);
     }

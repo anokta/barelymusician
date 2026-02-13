@@ -101,7 +101,7 @@ export class EngineUi {
       if (instrumentUi) {
         performerUi.updateInstrumentSelect(this._instruments);
         performerUi._container.querySelector('#instrumentSelect').value =
-            instrumentUi._instrument.handle;
+            instrumentUi.instrument.handle;
       }
 
       this._updateAllPerformerInstrumentSelects();

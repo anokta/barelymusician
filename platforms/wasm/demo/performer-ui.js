@@ -81,6 +81,9 @@ export class PerformerUi {
       instrumentSelect.value = currentInstrumentHandle;
     }
     this._selectedInstrument = instruments.get(currentInstrumentHandle);
+    for (const note of this._notes) {
+      note.updateInstrument(this._selectedInstrument?.instrument);
+    }
   }
 
   start() {
@@ -414,6 +417,9 @@ export class PerformerUi {
         this._selectedInstrument.setAllNotesOff();
       }
       this._selectedInstrument = instruments.get(parseInt(instrumentSelect.value));
+      for (const note of this._notes) {
+        note.updateInstrument(this._selectedInstrument?.instrument);
+      }
     });
 
     this.updateInstrumentSelect(instruments);

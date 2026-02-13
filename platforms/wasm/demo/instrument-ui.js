@@ -9,10 +9,10 @@ export class InstrumentUi {
     this._container = container;
 
     /** @private @const {!Instrument} */
-    this._instrument = instrument;
+    this.instrument = instrument;
 
     this._initContainer(destroyCallback);
-    this._instrument.setSampleData([{pitch: 0.0, url: '../data/sample.wav'}]);
+    this.instrument.setSampleData([{pitch: 0.0, url: '../data/sample.wav'}]);
   }
 
   /**
@@ -20,12 +20,12 @@ export class InstrumentUi {
    * @return {!Promise<void>}
    */
   async destroy() {
-    this._instrument.destroy();
+    this.instrument.destroy();
     this._container.remove();
   }
 
   setAllNotesOff() {
-    this._instrument.setAllNotesOff();
+    this.instrument.setAllNotesOff();
   }
 
   /**
@@ -34,7 +34,7 @@ export class InstrumentUi {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._instrument.setControl(typeIndex, value);
+    this.instrument.setControl(typeIndex, value);
     const controlContainer =
         this._container.querySelector('#controls').querySelector(`#control-${typeIndex}`);
     const input = controlContainer.querySelector('input');
@@ -55,8 +55,7 @@ export class InstrumentUi {
    * @param {number} note
    */
   setNoteOff(note) {
-    this._instrument.setNoteOff(this._semitoneToPitch(note));
-    this._container.querySelector(`[data-note="${note}"]`)?.classList.remove('active');
+    this.instrument.setNoteOff(this._semitoneToPitch(note));
   }
 
   /**
@@ -65,9 +64,8 @@ export class InstrumentUi {
    * @param {number=} gain
    * @param {number=} pitchShift
    */
-  setNoteOn(note, gain = 1.0, pitchShift = 0.0) {
-    this._instrument.setNoteOn(this._semitoneToPitch(note), gain, pitchShift);
-    this._container.querySelector(`[data-note="${note}"]`)?.classList.add('active');
+  setNoteOn(note) {
+    this.instrument.setNoteOn(this._semitoneToPitch(note));
   }
 
   /**
@@ -281,6 +279,13 @@ export class InstrumentUi {
       }
     }, {passive: false});
 
+    this.instrument.noteOnCallback = (pitch) =>
+        this._container.querySelector(`[data-note="${this._pitchToSemitone(pitch)}"]`)
+            ?.classList.add('active');
+    this.instrument.noteOffCallback = (pitch) =>
+        this._container.querySelector(`[data-note="${this._pitchToSemitone(pitch)}"]`)
+            ?.classList.remove('active');
+
     // Delete button
     this._container.querySelector('#deleteBtn').addEventListener('click', () => {
       destroyCallback();
@@ -288,9 +293,19 @@ export class InstrumentUi {
     });
 
     // Set id and label
-    this._container.id = `instrument#${this._instrument.handle}`;
+    this._container.id = `instrument#${this.instrument.handle}`;
     const label = this._container.querySelector('label');
     label.textContent = this._container.id;
+  }
+
+  /**
+   * Returns the corresponding note in semitones for a given note pitch.
+   * @param {number} pitch
+   * @return {number}
+   * @private
+   */
+  _pitchToSemitone(pitch) {
+    return Math.round(pitch * 12.0);
   }
 
   /**

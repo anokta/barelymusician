@@ -1,4 +1,4 @@
-import {CommandType, MessageType} from './command.js';
+import {CommandType, EventCallbackType, MessageType} from './command.js';
 import {Instrument} from './instrument.js';
 import {Performer} from './performer.js';
 import {Task} from './task.js';
@@ -33,7 +33,7 @@ export class Engine {
     /** @private {!AudioWorkletNode} */
     this._audioNode = this._createAudioNode(audioContext);
 
-    this._audioNode.port.onmessage = event => {
+    this._audioNode.port.onmessage = (event) => {
       if (!event.data) return;
       switch (event.data.type) {
         case MessageType.INIT_SUCCESS:
@@ -52,8 +52,8 @@ export class Engine {
               task._isActive = isActive;
             }
           }
-          for (const command of event.data.commands) {
-            this._processCommand(command);
+          for (const eventCallback of event.data.eventCallbacks) {
+            this._processEventCallback(eventCallback);
           }
           break;
         default:
@@ -172,26 +172,26 @@ export class Engine {
   }
 
   /**
-   * Processes a command.
-   * @param {!Object} command
+   * Processes an event callback.
+   * @param {!Object} eventCallback
    * @private
    */
-  _processCommand(command) {
-    switch (command.type) {
-      case CommandType.INSTRUMENT_ON_NOTE_BEGIN:
-        this._instruments.get(command.handle)?.onNoteBegin(command.pitch);
+  _processEventCallback(eventCallback) {
+    switch (eventCallback.type) {
+      case EventCallbackType.INSTRUMENT_ON_NOTE_BEGIN:
+        this._instruments.get(eventCallback.handle)?.onNoteBegin(eventCallback.pitch);
         break;
-      case CommandType.INSTRUMENT_ON_NOTE_END:
-        this._instruments.get(command.handle)?.onNoteEnd(command.pitch);
+      case EventCallbackType.INSTRUMENT_ON_NOTE_END:
+        this._instruments.get(eventCallback.handle)?.onNoteEnd(eventCallback.pitch);
         break;
-      case CommandType.TASK_ON_BEGIN:
-        this._tasks.get(command.handle)?.onBegin();
+      case EventCallbackType.TASK_ON_BEGIN:
+        this._tasks.get(eventCallback.handle)?.onBegin();
         break;
-      case CommandType.TASK_ON_END:
-        this._tasks.get(command.handle)?.onEnd();
+      case EventCallbackType.TASK_ON_END:
+        this._tasks.get(eventCallback.handle)?.onEnd();
         break;
       default:
-        console.error(`Invalid command: ${command.type}`);
+        console.error(`Invalid event callback: ${eventCallback.type}`);
     }
   }
 

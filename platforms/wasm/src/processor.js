@@ -1,5 +1,5 @@
 import Module from './barelymusician.js';
-import {CommandType, MessageType} from './command.js'
+import {CommandType, EventCallbackType, MessageType} from './command.js'
 import {INSTRUMENT_CONTROLS, NoteControlType} from './control.js';
 
 const INSTRUMENT_CONTROL_OVERRIDE_SIZE = 8;  // sizeof(BarelyInstrumentControlOverride)
@@ -23,7 +23,7 @@ class Processor extends AudioWorkletProcessor {
     this._noteControlOverridesPtr = null;
     this._outputSamplesPtr = null;
 
-    this._pendingCommands = [];
+    this._pendingEventCallbacks = [];
 
     this._instruments = new Map();
     this._performers = new Map();
@@ -54,7 +54,7 @@ class Processor extends AudioWorkletProcessor {
       this.port.postMessage({type: MessageType.INIT_SUCCESS});
     });
 
-    this.port.onmessage = event => {
+    this.port.onmessage = (event) => {
       if (!event.data) return;
 
       if (!this._engine) {
@@ -90,14 +90,14 @@ class Processor extends AudioWorkletProcessor {
       }
 
       if (performer_properties.length > 0 || task_properties.length > 0 ||
-          this._pendingCommands.length > 0) {
+          this._pendingEventCallbacks.length > 0) {
         this.port.postMessage({
           type: MessageType.UPDATE_SUCCESS,
-          commands: this._pendingCommands,
+          eventCallbacks: this._pendingEventCallbacks,
           performer_properties,
           task_properties,
         });
-        this._pendingCommands = [];
+        this._pendingEventCallbacks = [];
       }
     };
   }
@@ -167,11 +167,11 @@ class Processor extends AudioWorkletProcessor {
         };
         const noteEventCallback = (eventType, pitch) => {
           if (eventType === NoteEventType.BEGIN) {
-            this._pendingCommands.push(
-                {type: CommandType.INSTRUMENT_ON_NOTE_BEGIN, handle: command.handle, pitch});
+            this._pendingEventCallbacks.push(
+                {type: EventCallbackType.INSTRUMENT_ON_NOTE_BEGIN, handle: command.handle, pitch});
           } else if (eventType === NoteEventType.END) {
-            this._pendingCommands.push(
-                {type: CommandType.INSTRUMENT_ON_NOTE_END, handle: command.handle, pitch});
+            this._pendingEventCallbacks.push(
+                {type: EventCallbackType.INSTRUMENT_ON_NOTE_END, handle: command.handle, pitch});
           } else {
             console.error(`Invalid note event: ${eventType}`);
           }
@@ -313,14 +313,16 @@ class Processor extends AudioWorkletProcessor {
                 this._processCommand(command);
               }
             }
-            this._pendingCommands.push({type: CommandType.TASK_ON_BEGIN, handle: command.handle});
+            this._pendingEventCallbacks.push(
+                {type: EventCallbackType.TASK_ON_BEGIN, handle: command.handle});
           } else if (eventType === TaskEventType.END) {
             if (task.endCommands) {
               for (const command of task.endCommands) {
                 this._processCommand(command);
               }
             }
-            this._pendingCommands.push({type: CommandType.TASK_ON_END, handle: command.handle});
+            this._pendingEventCallbacks.push(
+                {type: EventCallbackType.TASK_ON_END, handle: command.handle});
           } else {
             console.error(`Invalid task event: ${eventType}`);
           }

@@ -5,19 +5,19 @@ const {execSync} = require('child_process');
 (async () => {
   const rootDir = path.join(__dirname, '..');
   const demoDir = path.join(rootDir, 'demo');
-  const distDir = path.join(rootDir, 'dist');
 
-  await fs.mkdir(distDir, {recursive: true});
+  const buildDir = path.join(rootDir, 'build');
+  await fs.mkdir(buildDir, {recursive: true});
 
   // Copy data directory.
-  execSync(`cp -r "${path.join(demoDir, 'data')}" "${distDir}"`);
+  execSync(`cp -r "${path.join(demoDir, 'data')}" "${buildDir}"`);
 
   // Copy index.html
   const indexPath = path.join(demoDir, 'index.html');
   try {
     let index = await fs.readFile(indexPath, 'utf8');
     index = index.replace(/main\.js/g, 'bundle.js');
-    await fs.writeFile(path.join(distDir, 'index.html'), index, 'utf8');
+    await fs.writeFile(path.join(buildDir, 'index.html'), index, 'utf8');
   } catch (err) {
     console.error('failed to copy index.html:', err.message);
   }
@@ -25,13 +25,13 @@ const {execSync} = require('child_process');
   // Copy style.css
   const cssSrc = path.join(demoDir, 'style.css');
   try {
-    await fs.copyFile(cssSrc, path.join(distDir, 'style.css'));
+    await fs.copyFile(cssSrc, path.join(buildDir, 'style.css'));
   } catch (err) {
     console.error('failed to copy style.css:', err.message);
   }
 
   // Replace processor.js path
-  const bundlePath = path.join(distDir, 'bundle.js');
+  const bundlePath = path.join(buildDir, 'bundle.js');
   try {
     let bundle = await fs.readFile(bundlePath, 'utf8');
     const originalPath = '../src/processor.js';
@@ -91,5 +91,5 @@ const {execSync} = require('child_process');
       console.error('failed to add build info:', err.message);
     }
   }
-  await addBuildInfo(path.join(distDir, 'index.html'));
+  await addBuildInfo(path.join(buildDir, 'index.html'));
 })();

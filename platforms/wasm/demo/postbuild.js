@@ -3,11 +3,14 @@ const path = require('path');
 const {execSync} = require('child_process');
 
 (async () => {
-  const rootDir = __dirname;
-  const demoDir = path.join(__dirname, 'demo');
-  const distDir = path.join(__dirname, 'dist');
+  const rootDir = path.join(__dirname, '..');
+  const demoDir = path.join(rootDir, 'demo');
+  const distDir = path.join(rootDir, 'dist');
 
   await fs.mkdir(distDir, {recursive: true});
+
+  // Copy data directory.
+  execSync(`cp -r "${path.join(demoDir, 'data')}" "${distDir}"`);
 
   // Copy index.html
   const indexPath = path.join(demoDir, 'index.html');

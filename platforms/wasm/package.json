@@ -5,7 +5,7 @@
   "scripts": {
     "build:bundle": "esbuild demo/main.js --minify --bundle --outfile=dist/bundle.js --format=esm",
     "build:processor": "esbuild src/processor.js --minify --bundle --outfile=dist/processor.js --format=esm",
-    "build": "npm run build:bundle && npm run build:processor && node postbuild.js"
+    "build": "npm run build:bundle && npm run build:processor && node demo/postbuild.js"
   },
   "devDependencies": {
     "esbuild": "^0.19.0"

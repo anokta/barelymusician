@@ -12,7 +12,7 @@ export class InstrumentUi {
     this.instrument = instrument;
 
     this._initContainer(destroyCallback);
-    this.instrument.setSampleData([{pitch: 0.0, url: '../data/sample.wav'}]);
+    this.instrument.setSampleData([{pitch: 0.0, url: 'data/sample.wav'}]);
   }
 
   /**

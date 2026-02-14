@@ -1,4 +1,4 @@
-export const EngineControlType = {
+export const EngineControlType = Object.freeze({
   COMPRESSOR_MIX: 0,
   COMPRESSOR_ATTACK: 1,
   COMPRESSOR_RELEASE: 2,
@@ -15,9 +15,9 @@ export const EngineControlType = {
   SIDECHAIN_THRESHOLD: 13,
   SIDECHAIN_RATIO: 14,
   COUNT: 15,
-};
+});
 
-export const InstrumentControlType = {
+export const InstrumentControlType = Object.freeze({
   GAIN: 0,
   PITCH_SHIFT: 1,
   RETRIGGER: 2,
@@ -47,29 +47,30 @@ export const InstrumentControlType = {
   ARP_GATE_RATIO: 26,
   ARP_RATE: 27,
   COUNT: 28,
-};
+});
 
-export const NoteControlType = {
+export const NoteControlType = Object.freeze({
   GAIN: 0,
   PITCH_SHIFT: 1,
   COUNT: 2,
-};
-export const ArpMode = {
+});
+
+export const ArpMode = Object.freeze({
   NONE: 0,
   UP: 1,
   DOWN: 2,
   RANDOM: 3,
   COUNT: 4,
-};
+});
 
-export const FilterType = {
+export const FilterType = Object.freeze({
   NONE: 0,
   LOW_PASS: 1,
   HIGH_PASS: 2,
   COUNT: 3,
-};
+});
 
-export const OscMode = {
+export const OscMode = Object.freeze({
   MIX: 0,
   AM: 1,
   ENVELOPE_FOLLOWER: 2,
@@ -77,16 +78,16 @@ export const OscMode = {
   MF: 4,
   RING: 5,
   COUNT: 6,
-};
+});
 
-export const SliceMode = {
+export const SliceMode = Object.freeze({
   SUSTAIN: 0,
   LOOP: 1,
   ONCE: 2,
   COUNT: 3,
-};
+});
 
-export const ENGINE_CONTROLS = {
+export const ENGINE_CONTROLS = Object.freeze({
   [EngineControlType.COMPRESSOR_MIX]: {
     name: 'Compressor Mix',
     valueType: 'float',
@@ -178,9 +179,9 @@ export const ENGINE_CONTROLS = {
     minValue: 1.0,
     maxValue: 64.0,
   },
-};
+});
 
-export const INSTRUMENT_CONTROLS = {
+export const INSTRUMENT_CONTROLS = Object.freeze({
   [InstrumentControlType.GAIN]: {
     name: 'Gain',
     valueType: 'float',
@@ -377,9 +378,9 @@ export const INSTRUMENT_CONTROLS = {
     minValue: 1,
     maxValue: 16,
   },
-};
+});
 
-export const NOTE_CONTROLS = {
+export const NOTE_CONTROLS = Object.freeze({
   [NoteControlType.GAIN]: {
     name: 'Gain',
     valueType: 'float',
@@ -394,4 +395,4 @@ export const NOTE_CONTROLS = {
     minValue: -2.0,
     maxValue: 2.0,
   },
-};
+});

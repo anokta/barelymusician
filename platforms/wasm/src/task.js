@@ -1,146 +1,75 @@
-import {MessageType} from './message.js'
+import {CommandType} from './command.js'
 
 /**
- * Task event types.
- * @enum {number}
- */
-export const TaskEventType = {
-  BEGIN: 0,
-  END: 1,
-  COUNT: 2,
-};
-
-/**
- * A representation of a recurring task that can be performed by a musical
- * performer in real-time.
+ * A representation of a recurring task that can be performed by a musical performer in real-time.
  */
 export class Task {
   /**
-   * @param {{
-   *   audioNode: !AudioWorkletNode,
-   *   idPromise: !Promise<number>,
-   *   position: number,
-   *   duration: number,
-   *   priority: number,
-   *   eventCallback: function(number):void
-   * }} params
+   * @param {!Engine} engine
+   * @param {number} handle
+   * @param {function():void} onBegin
+   * @param {function():void} onEnd
    */
-  constructor({audioNode, idPromise, position, duration, priority, eventCallback}) {
-    /** @private @const {!AudioWorkletNode} */
-    this._audioNode = audioNode;
+  constructor(engine, handle, onBegin, onEnd) {
+    /** @private @const {!Engine} */
+    this._engine = engine;
 
-    /** @private @const {!Promise<number>} */
-    this._idPromise = idPromise;
-
-    /** @private {boolean} */
-    this._isDestroyed = false;
-
-    /** @private {number} */
-    this._position = position;
-
-    /** @private {number} */
-    this._duration = duration;
-
-    /** @private {number} */
-    this._priority = priority;
+    /** @private @const {number} */
+    this._handle = handle;
 
     /** @private {boolean} */
     this._isActive = false;
 
     /** @public */
-    this.eventCallback = eventCallback;
+    this.onBegin = onBegin;
+
+    /** @public */
+    this.onEnd = onEnd;
+  }
+
+  /** Destroys the task. */
+  destroy() {
+    this._engine._tasks.delete(this._handle);
+    this._engine._pushCommand({type: CommandType.TASK_DESTROY, handle: this._handle});
   }
 
   /**
-   * Destroys the task.
-   * @return {!Promise<void>}
+   * Sets event commands with sample accurate timing.
+   * @param {{
+   *   beginCommands: (!Array<Object>=)
+   *   endCommands: (!Array<Object>=)
+   * }=} params
    */
-  async destroy() {
-    if (this._isDestroyed) return;
-    await this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.TASK_DESTROY,
-        id,
-      });
-    });
-    this._isDestroyed = true;
+  setCommands({beginCommands = [], endCommands = []} = {}) {
+    this._engine._pushCommand(
+        {type: CommandType.TASK_SET_COMMANDS, handle: this._handle, beginCommands, endCommands})
   }
 
-  /** @param {number} newDuration */
-  set duration(newDuration) {
-    if (this._duration === newDuration) return;
-
-    this._duration = newDuration;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.TASK_SET_DURATION,
-        id,
-        duration: newDuration,
-      });
-    });
+  /** @param {number} duration */
+  setDuration(duration) {
+    this._engine._pushCommand(
+        {type: CommandType.TASK_SET_DURATION, handle: this._handle, duration});
   }
 
-  /** @param {number} newPosition */
-  set position(newPosition) {
-    if (this._position === newPosition) return;
-
-    this._position = newPosition;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.TASK_SET_POSITION,
-        id,
-        position: newPosition,
-      });
-    });
+  /** @param {number} position */
+  setPosition(position) {
+    this._engine._pushCommand(
+        {type: CommandType.TASK_SET_POSITION, handle: this._handle, position});
   }
 
-  /** @param {number} newPriority */
-  set priority(newPriority) {
-    if (this._priority === newPriority) return;
-
-    this._priority = newPriority;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.TASK_SET_PRIORITY,
-        id,
-        priority: newPriority,
-      });
-    });
+  /** @param {number} priority */
+  setPriority(priority) {
+    this._engine._pushCommand(
+        {type: CommandType.TASK_SET_PRIORITY, handle: this._handle, priority});
   }
 
   /** @return {number} */
-  get duration() {
-    return this._duration;
-  }
-
-  /** @return {!Promise<void>} */
-  get id() {
-    return this._idPromise;
+  get handle() {
+    return this._handle;
   }
 
   /** @return {boolean} */
   get isActive() {
     return this._isActive;
-  }
-
-  /** @return {number} */
-  get position() {
-    return this._position;
-  }
-
-  /** @return {number} */
-  get priority() {
-    return this._priority;
-  }
-
-  /**
-   * @param {function(number):(void|!Promise<void>)} fn
-   * @return {!Promise<void>}
-   * @private
-   */
-  async _withId(fn) {
-    if (this._isDestroyed) return;
-    const id = await this._idPromise;
-    await fn(id);
   }
 }

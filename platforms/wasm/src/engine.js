@@ -1,5 +1,5 @@
+import {CommandType, EventCallbackType, MessageType} from './command.js';
 import {Instrument} from './instrument.js';
-import {MessageType} from './message.js';
 import {Performer} from './performer.js';
 import {Task} from './task.js';
 
@@ -12,8 +12,8 @@ export class Engine {
    * @param {function():void} initCallback
    */
   constructor(audioContext, initCallback) {
-    /** @private {number} */
-    this._tempo = 120.0;
+    /** @private {!AudioContext} */
+    this._audioContext = audioContext;
 
     /** @private {!Map<number, !Instrument>} */
     this._instruments = new Map();
@@ -25,47 +25,56 @@ export class Engine {
     this._tasks = new Map();
 
     /** @private {number} */
-    this._nextRequestId = 0;
+    this._nextHandle = 1;
 
-    /**
-     * @private {!Map<number, {resolveId:function(number):void, instrument?:!Instrument,
-     *     performer?:!Performer, task?:!Task}>}
-     */
-    this._pendingRequests = new Map();
-
-    /** @private {!AudioContext} */
-    this._audioContext = audioContext;
+    /** @private {!Array<!Object>} */
+    this._pendingCommands = [];
 
     /** @private {!AudioWorkletNode} */
     this._audioNode = this._createAudioNode(audioContext);
 
-    this._bindMessageHandlers(initCallback);
+    this._audioNode.port.onmessage = (event) => {
+      if (!event.data) return;
+      switch (event.data.type) {
+        case MessageType.INIT_SUCCESS:
+          initCallback();
+          break;
+        case MessageType.UPDATE_SUCCESS:
+          for (const {handle, position} of event.data.performer_properties) {
+            const performer = this._performers.get(handle);
+            if (performer) {
+              performer._position = position;
+            }
+          }
+          for (const {handle, isActive} of event.data.task_properties) {
+            const task = this._tasks.get(handle);
+            if (task) {
+              task._isActive = isActive;
+            }
+          }
+          for (const eventCallback of event.data.eventCallbacks) {
+            this._processEventCallback(eventCallback);
+          }
+          break;
+        default:
+          console.error(`Invalid message: ${event.data.type}`);
+      };
+    }
   }
 
   /**
    * Creates a new instrument.
    * @param {{
-   *   noteOnCallback: (function(number):void),
-   *   noteOffCallback: (function(number):void)
+   *   onNoteBegin: function(number):void,
+   *   onNoteEnd: function(number):void
    * }=} params
    * @return {!Instrument}
    */
-  createInstrument({noteOnCallback = () => {}, noteOffCallback = () => {}} = {}) {
-    let resolveId;
-    const idPromise = new Promise(resolve => (resolveId = resolve));
-
-    const instrument = new Instrument({
-      audioContext: this._audioContext,
-      audioNode: this._audioNode,
-      idPromise,
-      noteOnCallback,
-      noteOffCallback,
-    });
-
-    const requestId = this._nextRequestId++;
-    this._pendingRequests.set(requestId, {resolveId, instrument});
-    this._audioNode.port.postMessage({type: MessageType.INSTRUMENT_CREATE, requestId});
-
+  createInstrument({onNoteBegin = () => {}, onNoteEnd = () => {}} = {}) {
+    const handle = this._nextHandle++;
+    const instrument = new Instrument(this, handle, onNoteBegin, onNoteEnd);
+    this._instruments.set(handle, instrument);
+    this._pushCommand({type: CommandType.INSTRUMENT_CREATE, handle});
     return instrument;
   }
 
@@ -74,53 +83,44 @@ export class Engine {
    * @return {!Performer}
    */
   createPerformer() {
-    let resolveId;
-    const idPromise = new Promise(resolve => (resolveId = resolve));
-
-    const performer = new Performer({audioNode: this._audioNode, idPromise});
-
-    const requestId = this._nextRequestId++;
-    this._pendingRequests.set(requestId, {resolveId, performer});
-    this._audioNode.port.postMessage({type: MessageType.PERFORMER_CREATE, requestId});
-
+    const handle = this._nextHandle++;
+    const performer = new Performer(this, handle);
+    this._performers.set(handle, performer);
+    this._pushCommand({type: CommandType.PERFORMER_CREATE, handle});
     return performer;
   }
 
   /**
    * Creates a new task.
-   * @param {!Performer} performer
-   * @param {number} position
-   * @param {number} duration
-   * @param {function(number):void} eventCallback
-   * @param {number=} priority
+   * @param {{
+   *   performer: !Performer,
+   *   position: number,
+   *   duration: number,
+   *   priority?: number,
+   *   onBegin?: function():void,
+   *   onEnd?: function():void
+   * }} params
    * @return {!Task}
    */
-  createTask(performer, position, duration, eventCallback, priority = 0) {
-    let resolveId;
-    const idPromise = new Promise(resolve => (resolveId = resolve));
-
-    const task = new Task({
-      audioNode: this._audioNode,
-      idPromise,
+  createTask({
+    performer,
+    position,
+    duration,
+    priority = 0,
+    onBegin = () => {},
+    onEnd = () => {},
+  }) {
+    const handle = this._nextHandle++;
+    const task = new Task(this, handle, onBegin, onEnd);
+    this._tasks.set(handle, task);
+    this._pushCommand({
+      type: CommandType.TASK_CREATE,
+      handle,
+      performerHandle: performer.handle,
       position,
       duration,
       priority,
-      eventCallback,
     });
-
-    const requestId = this._nextRequestId++;
-    this._pendingRequests.set(requestId, {resolveId, task});
-    performer.id.then(performerId => {
-      this._audioNode.port.postMessage({
-        type: MessageType.TASK_CREATE,
-        requestId,
-        performerId,
-        position,
-        duration,
-        priority,
-      });
-    });
-
     return task;
   }
 
@@ -130,34 +130,20 @@ export class Engine {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._audioNode.port.postMessage({
-      type: MessageType.ENGINE_SET_CONTROL,
-      typeIndex,
-      value,
-    });
+    this._pushCommand({type: CommandType.ENGINE_SET_CONTROL, typeIndex, value});
   }
 
   /**
    * Updates the internal state.
    */
   update() {
-    this._audioNode.port.postMessage({type: MessageType.ENGINE_UPDATE});
+    this._audioNode.port.postMessage({type: MessageType.UPDATE, commands: this._pendingCommands});
+    this._pendingCommands = [];
   }
 
-  /** @param {number} newTempo */
-  set tempo(newTempo) {
-    if (this._tempo === newTempo) return;
-
-    this._tempo = newTempo;
-    this._audioNode.port.postMessage({
-      type: MessageType.ENGINE_SET_TEMPO,
-      tempo: newTempo,
-    });
-  }
-
-  /** @return {number} */
-  get tempo() {
-    return this._tempo;
+  /** @param {number} tempo */
+  setTempo(tempo) {
+    this._pushCommand({type: CommandType.ENGINE_SET_TEMPO, tempo});
   }
 
   /** @return {!AudioWorkletNode} */
@@ -186,73 +172,34 @@ export class Engine {
   }
 
   /**
-   * @param {function():void} initCallback
+   * Processes an event callback.
+   * @param {!Object} eventCallback
    * @private
    */
-  _bindMessageHandlers(initCallback) {
-    this._audioNode.port.onmessage = event => {
-      const data = event.data;
-      if (!data?.type) return;
+  _processEventCallback(eventCallback) {
+    switch (eventCallback.type) {
+      case EventCallbackType.INSTRUMENT_ON_NOTE_BEGIN:
+        this._instruments.get(eventCallback.handle)?.onNoteBegin(eventCallback.pitch);
+        break;
+      case EventCallbackType.INSTRUMENT_ON_NOTE_END:
+        this._instruments.get(eventCallback.handle)?.onNoteEnd(eventCallback.pitch);
+        break;
+      case EventCallbackType.TASK_ON_BEGIN:
+        this._tasks.get(eventCallback.handle)?.onBegin();
+        break;
+      case EventCallbackType.TASK_ON_END:
+        this._tasks.get(eventCallback.handle)?.onEnd();
+        break;
+      default:
+        console.error(`Invalid event callback: ${eventCallback.type}`);
+    }
+  }
 
-      switch (data.type) {
-        case MessageType.INIT_SUCCESS:
-          initCallback();
-          break;
-        case MessageType.INSTRUMENT_CREATE_SUCCESS: {
-          const {resolveId, instrument} = this._pendingRequests.get(data.requestId);
-          resolveId(data.id);
-          this._pendingRequests.delete(data.requestId);
-          this._instruments.set(data.id, instrument);
-          break;
-        }
-        case MessageType.INSTRUMENT_DESTROY_SUCCESS:
-          this._instruments.delete(data.id);
-          break;
-        case MessageType.INSTRUMENT_ON_NOTE_ON:
-          this._instruments.get(data.id)?.noteOnCallback(data.pitch);
-          break;
-        case MessageType.INSTRUMENT_ON_NOTE_OFF:
-          this._instruments.get(data.id)?.noteOffCallback(data.pitch);
-          break;
-        case MessageType.PERFORMER_CREATE_SUCCESS: {
-          const {resolveId, performer} = this._pendingRequests.get(data.requestId);
-          this._pendingRequests.delete(data.requestId);
-          resolveId(data.id);
-          this._performers.set(data.id, performer);
-          break;
-        }
-        case MessageType.PERFORMER_DESTROY_SUCCESS:
-          this._performers.delete(data.id);
-          break;
-        case MessageType.PERFORMER_GET_PROPERTIES_SUCCESS: {
-          const performer = this._performers.get(data.id);
-          if (performer) {
-            performer._isPlaying = data.isPlaying;
-            performer._position = data.position;
-          }
-          break;
-        }
-        case MessageType.TASK_CREATE_SUCCESS: {
-          const {resolveId, task} = this._pendingRequests.get(data.requestId);
-          this._pendingRequests.delete(data.requestId);
-          resolveId(data.id);
-          this._tasks.set(data.id, task);
-          break;
-        }
-        case MessageType.TASK_DESTROY_SUCCESS:
-          this._tasks.delete(data.id);
-          break;
-        case MessageType.TASK_GET_PROPERTIES_SUCCESS: {
-          const task = this._tasks.get(data.id);
-          if (task) {
-            task._isActive = data.isActive;
-          }
-          break;
-        }
-        case MessageType.TASK_ON_EVENT:
-          this._tasks.get(data.id)?.eventCallback(data.eventType);
-          break;
-      }
-    };
+  /**
+   * @param {!Object} command
+   * @private
+   */
+  _pushCommand(command) {
+    this._pendingCommands.push(command);
   }
 }

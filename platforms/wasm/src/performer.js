@@ -1,163 +1,89 @@
-import {MessageType} from './message.js'
+import {CommandType} from './command.js'
 
 /**
  * A representation of a musical performer that can perform rhythmic tasks in real-time.
  */
 export class Performer {
   /**
-   * @param {{
-   *   audioNode: !AudioWorkletNode,
-   *   idPromise: !Promise<number>
-   * }} params
+   * @param {!Engine} engine
+   * @param {number} handle
    */
-  constructor({audioNode, idPromise}) {
-    /** @private @const {!AudioWorkletNode} */
-    this._audioNode = audioNode;
+  constructor(engine, handle) {
+    /** @private @const {!Engine} */
+    this._engine = engine;
 
-    /** @private @const {!Promise<number>} */
-    this._idPromise = idPromise;
-
-    /** @private {boolean} */
-    this._isDestroyed = false;
-
-    /** @private {boolean} */
-    this._isLooping = false;
-
-    /** @private {boolean} */
-    this._isPlaying = false;
-
-    /** @private {number} */
-    this._loopBeginPosition = 0.0;
-
-    /** @private {number} */
-    this._loopLength = 1.0;
+    /** @private @const {number} */
+    this._handle = handle;
 
     /** @private {number} */
     this._position = 0.0;
   }
 
-  /**
-   * Destroys the performer.
-   * @return {!Promise<void>}
-   */
-  async destroy() {
-    if (this._isDestroyed) return;
-    await this._withId(id => {
-      this._audioNode.port.postMessage({type: MessageType.PERFORMER_DESTROY, id});
-    });
-    this._isDestroyed = true;
+  /** Destroys the performer. */
+  destroy() {
+    this._engine._performers.delete(this._handle);
+    this._engine._pushCommand({type: CommandType.PERFORMER_DESTROY, handle: this._handle});
   }
 
-  /** Starts playback. */
+  /** @param {boolean} isLooping */
+  setLooping(isLooping) {
+    this._engine._pushCommand(
+        {type: CommandType.PERFORMER_SET_LOOPING, handle: this._handle, isLooping});
+  }
+
+  /** @param {number} loopBeginPosition */
+  setLoopBeginPosition(loopBeginPosition) {
+    this._engine._pushCommand({
+      type: CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION,
+      handle: this._handle,
+      loopBeginPosition,
+    });
+  }
+
+  /** @param {number} loopLength */
+  setLoopLength(loopLength) {
+    this._engine._pushCommand(
+        {type: CommandType.PERFORMER_SET_LOOP_LENGTH, handle: this._handle, loopLength});
+  }
+
+  /** @param {number} position */
+  setPosition(position) {
+    this._position = position;
+    this._engine._pushCommand(
+        {type: CommandType.PERFORMER_SET_POSITION, handle: this._handle, position});
+  }
+
+  /** Starts the playback. */
   start() {
-    this._isPlaying = true;
-    this._withId(id => {
-      this._audioNode.port.postMessage({type: MessageType.PERFORMER_START, id});
-    });
+    this._engine._pushCommand({type: CommandType.PERFORMER_START, handle: this._handle});
   }
 
-  /** Stops playback. */
+  /** Stops the playback. */
   stop() {
-    this._isPlaying = false;
-    this._withId(id => {
-      this._audioNode.port.postMessage({type: MessageType.PERFORMER_STOP, id});
+    this._engine._pushCommand({type: CommandType.PERFORMER_STOP, handle: this._handle});
+  }
+
+  /**
+   * Syncs the performer position to another performer with an optional offset.
+   * @param {!Performer} otherPerformer
+   * @param {number=} offset
+   */
+  syncTo(otherPerformer, offset = 0.0) {
+    this._engine._pushCommand({
+      type: CommandType.PERFORMER_SYNC_TO,
+      handle: this._handle,
+      otherHandle: otherPerformer._handle,
+      offset,
     });
-  }
-
-  /** @param {boolean} newIsLooping */
-  set isLooping(newIsLooping) {
-    if (this._isLooping === newIsLooping) return;
-
-    this._isLooping = newIsLooping;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.PERFORMER_SET_LOOPING,
-        id,
-        isLooping: newIsLooping,
-      });
-    });
-  }
-
-  /** @param {number} newLoopBeginPosition */
-  set loopBeginPosition(newLoopBeginPosition) {
-    if (this._loopBeginPosition === newLoopBeginPosition) return;
-
-    this._loopBeginPosition = newLoopBeginPosition;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.PERFORMER_SET_LOOP_BEGIN_POSITION,
-        id,
-        loopBeginPosition: newLoopBeginPosition,
-      });
-    });
-  }
-
-  /** @param {number} newLoopLength */
-  set loopLength(newLoopLength) {
-    if (this._loopLength === newLoopLength) return;
-
-    this._loopLength = Math.max(newLoopLength, 0.0);
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.PERFORMER_SET_LOOP_LENGTH,
-        id,
-        loopLength: this._loopLength,
-      });
-    });
-  }
-
-  /** @param {number} newPosition */
-  set position(newPosition) {
-    if (this._position === newPosition) return;
-
-    this._position = newPosition;
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.PERFORMER_SET_POSITION,
-        id,
-        position: newPosition,
-      });
-    });
-  }
-
-  /** @return {!Promise<void>} */
-  get id() {
-    return this._idPromise;
-  }
-
-  /** @return {boolean} */
-  get isLooping() {
-    return this._isLooping;
-  }
-
-  /** @return {boolean} */
-  get isPlaying() {
-    return this._isPlaying;
   }
 
   /** @return {number} */
-  get loopBeginPosition() {
-    return this._loopBeginPosition;
-  }
-
-  /** @return {number} */
-  get loopLength() {
-    return this._loopLength;
+  get handle() {
+    return this._handle;
   }
 
   /** @return {number} */
   get position() {
     return this._position;
-  }
-
-  /**
-   * @param {function(number):(void|!Promise<void>)} fn
-   * @return {!Promise<void>}
-   * @private
-   */
-  async _withId(fn) {
-    if (this._isDestroyed) return;
-    const id = await this._idPromise;
-    await fn(id);
   }
 }

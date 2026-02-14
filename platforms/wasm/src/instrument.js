@@ -1,63 +1,39 @@
-import {MessageType} from './message.js'
+import {CommandType} from './command.js'
 
 /**
  * A representation of a musical instrument that can be played in real-time.
  */
 export class Instrument {
   /**
-   * @param {{
-   *   audioContext: !AudioContext,
-   *   audioNode: !AudioWorkletNode,
-   *   idPromise: !Promise<number>,
-   *   noteOnCallback: function(number):void,
-   *   noteOffCallback: function(number):void
-   * }} params
+   * @param {!Engine} engine
+   * @param {number} handle
+   * @param {function(number):void} onNoteBegin
+   * @param {function(number):void} onNoteEnd
    */
-  constructor({audioContext, audioNode, idPromise, noteOnCallback, noteOffCallback}) {
-    /** @private @const {!AudioContext} */
-    this._audioContext = audioContext;
+  constructor(engine, handle, onNoteBegin, onNoteEnd) {
+    /** @private @const {!Engine} */
+    this._engine = engine;
 
-    /** @private @const {!AudioWorkletNode} */
-    this._audioNode = audioNode;
-
-    /** @private @const {!Promise<number>} */
-    this._idPromise = idPromise;
-
-    /** @private {boolean} */
-    this._isDestroyed = false;
+    /** @private @const {number} */
+    this._handle = handle;
 
     /** @public */
-    this.noteOnCallback = noteOnCallback;
+    this.onNoteBegin = onNoteBegin;
 
     /** @public */
-    this.noteOffCallback = noteOffCallback;
+    this.onNoteEnd = onNoteEnd;
   }
 
-  /**
-   * Destroys the instrument.
-   * @return {!Promise<void>}
-   */
-  async destroy() {
-    if (this._isDestroyed) return;
-    await this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.INSTRUMENT_DESTROY,
-        id,
-      });
-    });
-    this._isDestroyed = true;
+  /** Destroys the instrument. */
+  destroy() {
+    this._engine._instruments.delete(this._handle);
+    this._engine._pushCommand({type: CommandType.INSTRUMENT_DESTROY, handle: this._handle});
   }
 
-  /**
-   * Sets all notes off.
-   */
+  /** Sets all notes off. */
   setAllNotesOff() {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.INSTRUMENT_SET_ALL_NOTES_OFF,
-        id,
-      });
-    });
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_ALL_NOTES_OFF, handle: this._handle});
   }
 
   /**
@@ -66,14 +42,8 @@ export class Instrument {
    * @param {number} value
    */
   setControl(typeIndex, value) {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.INSTRUMENT_SET_CONTROL,
-        id,
-        typeIndex,
-        value,
-      });
-    });
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_CONTROL, handle: this._handle, typeIndex, value});
   }
 
   /**
@@ -83,14 +53,12 @@ export class Instrument {
    * @param {number} value
    */
   setNoteControl(pitch, typeIndex, value) {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.INSTRUMENT_SET_NOTE_CONTROL,
-        id,
-        pitch,
-        typeIndex,
-        value,
-      });
+    this._engine._pushCommand({
+      type: CommandType.INSTRUMENT_SET_NOTE_CONTROL,
+      handle: this._handle,
+      pitch,
+      typeIndex,
+      value
     });
   }
 
@@ -99,13 +67,8 @@ export class Instrument {
    * @param {number} pitch
    */
   setNoteOff(pitch) {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.INSTRUMENT_SET_NOTE_OFF,
-        id,
-        pitch,
-      });
-    });
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_NOTE_OFF, handle: this._handle, pitch});
   }
 
   /**
@@ -115,15 +78,8 @@ export class Instrument {
    * @param {number=} pitchShift
    */
   setNoteOn(pitch, gain = 1.0, pitchShift = 0.0) {
-    this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.INSTRUMENT_SET_NOTE_ON,
-        id,
-        pitch,
-        gain,
-        pitchShift,
-      });
-    });
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_NOTE_ON, handle: this._handle, pitch, gain, pitchShift});
   }
 
   /**
@@ -142,7 +98,7 @@ export class Instrument {
       }
 
       const arrayBuffer = await response.arrayBuffer();
-      const audioBuffer = await this._audioContext.decodeAudioData(arrayBuffer);
+      const audioBuffer = await this._engine._audioContext.decodeAudioData(arrayBuffer);
 
       slices.push({
         rootPitch: pitch,
@@ -151,29 +107,12 @@ export class Instrument {
       });
     }
 
-    await this._withId(id => {
-      this._audioNode.port.postMessage({
-        type: MessageType.INSTRUMENT_SET_SAMPLE_DATA,
-        id,
-        slices,
-      });
-    });
+    this._engine._pushCommand(
+        {type: CommandType.INSTRUMENT_SET_SAMPLE_DATA, handle: this._handle, slices});
   }
 
-  /** @return {!Promise<void>} */
-  get id() {
-    return this._idPromise;
-  }
-
-  /**
-   * Runs a function once the instrument identifier is resolved.
-   * @param {function(number): (void|!Promise<void>)} fn
-   * @return {!Promise<void>}
-   * @private
-   */
-  async _withId(fn) {
-    if (this._isDestroyed) return;
-    const id = await this._idPromise;
-    await fn(id);
+  /** @return {number} */
+  get handle() {
+    return this._handle;
   }
 }

@@ -7,8 +7,10 @@ export class Task {
   /**
    * @param {!Engine} engine
    * @param {number} handle
+   * @param {function():void} onBegin
+   * @param {function():void} onEnd
    */
-  constructor(engine, handle) {
+  constructor(engine, handle, onBegin, onEnd) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
@@ -17,6 +19,12 @@ export class Task {
 
     /** @private {boolean} */
     this._isActive = false;
+
+    /** @public */
+    this.onBegin = onBegin;
+
+    /** @public */
+    this.onEnd = onEnd;
   }
 
   /** Destroys the task. */
@@ -26,6 +34,7 @@ export class Task {
   }
 
   /**
+   * Sets event commands with sample accurate timing.
    * @param {{
    *   beginCommands: (!Array<Object>=)
    *   endCommands: (!Array<Object>=)

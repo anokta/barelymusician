@@ -65,14 +65,14 @@ export class Engine {
   /**
    * Creates a new instrument.
    * @param {{
-   *   noteOnCallback: (function(number):void),
-   *   noteOffCallback: (function(number):void)
+   *   onNoteBegin: function(number):void,
+   *   onNoteEnd: function(number):void
    * }=} params
    * @return {!Instrument}
    */
-  createInstrument({noteOnCallback = () => {}, noteOffCallback = () => {}} = {}) {
+  createInstrument({onNoteBegin = () => {}, onNoteEnd = () => {}} = {}) {
     const handle = this._nextHandle++;
-    const instrument = new Instrument(this, handle, noteOnCallback, noteOffCallback);
+    const instrument = new Instrument(this, handle, onNoteBegin, onNoteEnd);
     this._instruments.set(handle, instrument);
     this._pushCommand({type: CommandType.INSTRUMENT_CREATE, handle});
     return instrument;
@@ -92,16 +92,26 @@ export class Engine {
 
   /**
    * Creates a new task.
-   * @param {!Performer} performer
-   * @param {number} position
-   * @param {number} duration
-   * @param {function(number):void} eventCallback
-   * @param {number=} priority
+   * @param {{
+   *   performer: !Performer,
+   *   position: number,
+   *   duration: number,
+   *   priority?: number,
+   *   onBegin?: function():void,
+   *   onEnd?: function():void
+   * }} params
    * @return {!Task}
    */
-  createTask(performer, position, duration, eventCallback, priority = 0) {
+  createTask({
+    performer,
+    position,
+    duration,
+    priority = 0,
+    onBegin = () => {},
+    onEnd = () => {},
+  }) {
     const handle = this._nextHandle++;
-    const task = new Task(this, handle, eventCallback);
+    const task = new Task(this, handle, onBegin, onEnd);
     this._tasks.set(handle, task);
     this._pushCommand({
       type: CommandType.TASK_CREATE,
@@ -168,11 +178,17 @@ export class Engine {
    */
   _processCommand(command) {
     switch (command.type) {
-      case CommandType.INSTRUMENT_ON_NOTE_ON:
-        this._instruments.get(command.handle)?.noteOnCallback(command.pitch);
+      case CommandType.INSTRUMENT_ON_NOTE_BEGIN:
+        this._instruments.get(command.handle)?.onNoteBegin(command.pitch);
         break;
-      case CommandType.INSTRUMENT_ON_NOTE_OFF:
-        this._instruments.get(command.handle)?.noteOffCallback(command.pitch);
+      case CommandType.INSTRUMENT_ON_NOTE_END:
+        this._instruments.get(command.handle)?.onNoteEnd(command.pitch);
+        break;
+      case CommandType.TASK_ON_BEGIN:
+        this._tasks.get(command.handle)?.onBegin();
+        break;
+      case CommandType.TASK_ON_END:
+        this._tasks.get(command.handle)?.onEnd();
         break;
       default:
         console.error(`Invalid command: ${command.type}`);

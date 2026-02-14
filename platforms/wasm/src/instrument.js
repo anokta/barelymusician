@@ -7,10 +7,10 @@ export class Instrument {
   /**
    * @param {!Engine} engine
    * @param {number} handle
-   * @param {function(number):void} noteOnCallback
-   * @param {function(number):void} noteOffCallback
+   * @param {function(number):void} onNoteBegin
+   * @param {function(number):void} onNoteEnd
    */
-  constructor(engine, handle, noteOnCallback, noteOffCallback) {
+  constructor(engine, handle, onNoteBegin, onNoteEnd) {
     /** @private @const {!Engine} */
     this._engine = engine;
 
@@ -18,10 +18,10 @@ export class Instrument {
     this._handle = handle;
 
     /** @public */
-    this.noteOnCallback = noteOnCallback;
+    this.onNoteBegin = onNoteBegin;
 
     /** @public */
-    this.noteOffCallback = noteOffCallback;
+    this.onNoteEnd = onNoteEnd;
   }
 
   /** Destroys the instrument. */

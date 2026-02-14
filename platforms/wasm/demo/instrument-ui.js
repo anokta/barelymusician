@@ -279,10 +279,10 @@ export class InstrumentUi {
       }
     }, {passive: false});
 
-    this.instrument.noteOnCallback = (pitch) =>
+    this.instrument.onNoteBegin = (pitch) =>
         this._container.querySelector(`[data-note="${this._pitchToSemitone(pitch)}"]`)
             ?.classList.add('active');
-    this.instrument.noteOffCallback = (pitch) =>
+    this.instrument.onNoteEnd = (pitch) =>
         this._container.querySelector(`[data-note="${this._pitchToSemitone(pitch)}"]`)
             ?.classList.remove('active');
 

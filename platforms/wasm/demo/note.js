@@ -12,7 +12,7 @@ export class Note {
     /** @private {number} */
     this._duration = duration;
 
-    this._task = engine.createTask(performerui.performer, position, duration);
+    this._task = engine.createTask({performer: performerui.performer, position, duration});
     this.updateInstrument(this._performerui.selectedInstrument?.instrument);
 
     this.noteDiv = null;

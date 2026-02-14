@@ -168,10 +168,12 @@ class Processor extends AudioWorkletProcessor {
         const noteEventCallback = (eventType, pitch) => {
           if (eventType === NoteEventType.BEGIN) {
             this._pendingCommands.push(
-                {type: CommandType.INSTRUMENT_ON_NOTE_ON, handle: command.handle, pitch});
+                {type: CommandType.INSTRUMENT_ON_NOTE_BEGIN, handle: command.handle, pitch});
           } else if (eventType === NoteEventType.END) {
             this._pendingCommands.push(
-                {type: CommandType.INSTRUMENT_ON_NOTE_OFF, handle: command.handle, pitch});
+                {type: CommandType.INSTRUMENT_ON_NOTE_END, handle: command.handle, pitch});
+          } else {
+            console.error(`Invalid note event: ${eventType}`);
           }
         };
         const noteEventCallbackPtr = this._module.addFunction((eventType, pitch, userData) => {
@@ -305,14 +307,22 @@ class Processor extends AudioWorkletProcessor {
           END: 1,
         };
         const eventCallback = (task, eventType) => {
-          if (eventType === TaskEventType.BEGIN && task.beginCommands) {
-            for (const command of task.beginCommands) {
-              this._processCommand(command);
+          if (eventType === TaskEventType.BEGIN) {
+            if (task.beginCommands) {
+              for (const command of task.beginCommands) {
+                this._processCommand(command);
+              }
             }
-          } else if (eventType === TaskEventType.END && task.endCommands) {
-            for (const command of task.endCommands) {
-              this._processCommand(command);
+            this._pendingCommands.push({type: CommandType.TASK_ON_BEGIN, handle: command.handle});
+          } else if (eventType === TaskEventType.END) {
+            if (task.endCommands) {
+              for (const command of task.endCommands) {
+                this._processCommand(command);
+              }
             }
+            this._pendingCommands.push({type: CommandType.TASK_ON_END, handle: command.handle});
+          } else {
+            console.error(`Invalid task event: ${eventType}`);
           }
         };
         const eventCallbackPtr = this._module.addFunction((eventType, userData) => {

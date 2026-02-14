@@ -69,7 +69,7 @@ export class EngineUi {
     const tempInstruments = new Map();
 
     const instrumentsContainer = this.container.querySelector('.instruments');
-    instrumentsJson.forEach(({id, controlValues}) => {
+    instrumentsJson.forEach(({handle, controlValues}) => {
       const instrumentContainer = document.createElement('div');
       instrumentContainer.className = 'instrument';
       instrumentsContainer.appendChild(instrumentContainer);
@@ -79,7 +79,7 @@ export class EngineUi {
         instrumentUi.setControl(controlTypeIndex, controlValues[controlTypeIndex]);
       }
 
-      tempInstruments.set(id, instrumentUi);
+      tempInstruments.set(handle, instrumentUi);
     });
 
     const performersContainer = this.container.querySelector('.performers');
@@ -90,14 +90,13 @@ export class EngineUi {
 
       const performerUi = this._createPerformer(performerContainer);
       performerUi.performer.setLooping(true);
-      performerUi.performer.setLoopLength(performerJson.loopLength);
-      performerUi._loopLength = performerJson.loopLength;
+      performerUi.loopLength = performerJson.loopLength;
 
       performerJson.notes.forEach(note => {
         performerUi._addNote(note.position, note.duration, note.pitch, note.gain);
       });
 
-      const instrumentUi = tempInstruments.get(performerJson.instrumentHandle);
+      const instrumentUi = tempInstruments.get(Number(performerJson.instrumentHandle));
       if (instrumentUi) {
         performerUi.updateInstrumentSelect(this._instruments);
         performerUi._container.querySelector('#instrumentSelect').value =
@@ -117,10 +116,10 @@ export class EngineUi {
     const delayTimeJson = this._delayTime;
     const delayFeedbackJson = this._delayFeedback;
 
-    const instrumentsJson = Array.from(this._instruments.entries()).map(([id, instrument]) => {
+    const instrumentsJson = Array.from(this._instruments.entries()).map(([handle, instrument]) => {
       const controlValues = {};
       const controlsContainer = instrument._container.querySelector('#controls');
-      if (!controlsContainer) return {id, controlValues};
+      if (!controlsContainer) return {handle, controlValues};
 
       for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
         const controlContainer = controlsContainer.querySelector(`#control-${controlTypeIndex}`);
@@ -132,7 +131,7 @@ export class EngineUi {
             controlContainer.querySelector('select')?.value;
       }
 
-      return {id, controlValues};
+      return {handle, controlValues};
     });
 
     const performersJson = Array.from(this._performers.values())

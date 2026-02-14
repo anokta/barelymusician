@@ -471,10 +471,17 @@ export class PerformerUi {
   set loopLength(newLoopLength) {
     if (this._loopLength === newLoopLength) return;
     this._loopLength = newLoopLength;
-    this.setLoopLength(this._loopLength);
+    this.performer.setLoopLength(this._loopLength);
     if (this._container) {
       this._container.querySelector('#loopLengthLabel').textContent = newLoopLength;
     }
+  }
+
+  /**
+   * @return {number}
+   */
+  get loopLength() {
+    return this._loopLength;
   }
 
   _destroyAllNotes() {

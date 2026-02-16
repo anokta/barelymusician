@@ -248,6 +248,18 @@ typedef enum BarelyEngineControlType {
   BarelyEngineControlType_kDelayLowPassFrequency,
   /// Delay high-pass frequency.
   BarelyEngineControlType_kDelayHighPassFrequency,
+  /// Delay reverb send.
+  BarelyEngineControlType_kDelayReverbSend,
+  /// Reverb mix.
+  BarelyEngineControlType_kReverbMix,
+  /// Reverb damping ratio.
+  BarelyEngineControlType_kReverbDampingRatio,
+  /// Reverb room size.
+  BarelyEngineControlType_kReverbRoomSize,
+  /// Reverb stereo width.
+  BarelyEngineControlType_kReverbStereoWidth,
+  /// Reverb freeze.
+  BarelyEngineControlType_kReverbFreeze,
   /// Sidechain mix.
   BarelyEngineControlType_kSidechainMix,
   /// Sidechain attack in seconds.
@@ -312,6 +324,8 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kFilterQ,
   /// Delay send.
   BarelyInstrumentControlType_kDelaySend,
+  /// Reverb send.
+  BarelyInstrumentControlType_kReverbSend,
   /// Sidechain send.
   BarelyInstrumentControlType_kSidechainSend,
   /// Arpeggiator mode.
@@ -958,6 +972,18 @@ enum class EngineControlType {
   kDelayLowPassFrequency = BarelyEngineControlType_kDelayLowPassFrequency,
   /// Delay high-pass frequency.
   kDelayHighPassFrequency = BarelyEngineControlType_kDelayHighPassFrequency,
+  /// Delay reverb send.
+  kDelayReverbSend = BarelyEngineControlType_kDelayReverbSend,
+  /// Reverb mix.
+  kReverbMix = BarelyEngineControlType_kReverbMix,
+  /// Reverb damping ratio.
+  kReverbDampingRatio = BarelyEngineControlType_kReverbDampingRatio,
+  /// Reverb room size.
+  kReverbRoomSize = BarelyEngineControlType_kReverbRoomSize,
+  /// Reverb stereo width.
+  kReverbStereoWidth = BarelyEngineControlType_kReverbStereoWidth,
+  /// Reverb freeze.
+  kReverbFreeze = BarelyEngineControlType_kReverbFreeze,
   /// Sidechain mix.
   kSidechainMix = BarelyEngineControlType_kSidechainMix,
   /// Sidechain attack in seconds.
@@ -1020,6 +1046,8 @@ enum class InstrumentControlType {
   kFilterQ = BarelyInstrumentControlType_kFilterQ,
   /// Delay send.
   kDelaySend = BarelyInstrumentControlType_kDelaySend,
+  /// Reverb send.
+  kReverbSend = BarelyInstrumentControlType_kReverbSend,
   /// Sidechain send.
   kSidechainSend = BarelyInstrumentControlType_kSidechainSend,
   /// Arpeggiator mode.

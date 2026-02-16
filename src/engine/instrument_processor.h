@@ -38,6 +38,7 @@ class InstrumentProcessor {
 
   template <bool kIsSidechainSend = false>
   void ProcessAllVoices(float delay_frame[kStereoChannelCount],
+                        float reverb_frame[kStereoChannelCount],
                         float sidechain_frame[kStereoChannelCount],
                         float output_frame[kStereoChannelCount]) noexcept {
     for (uint32_t i = 0; i < engine_.voice_pool.ActiveCount();) {
@@ -51,7 +52,8 @@ class InstrumentProcessor {
           continue;
         }
       }
-      ProcessVoice<kIsSidechainSend>(voice, params, delay_frame, sidechain_frame, output_frame);
+      ProcessVoice<kIsSidechainSend>(voice, params, delay_frame, reverb_frame, sidechain_frame,
+                                     output_frame);
       ++i;
     }
   }
@@ -80,7 +82,7 @@ class InstrumentProcessor {
 
   template <bool kIsSidechainSend = false>
   void ProcessVoice(VoiceState& voice, const InstrumentParams& instrument_params,
-                    float delay_frame[kStereoChannelCount],
+                    float delay_frame[kStereoChannelCount], float reverb_frame[kStereoChannelCount],
                     float sidechain_frame[kStereoChannelCount],
                     float output_frame[kStereoChannelCount]) noexcept {
     if constexpr (kIsSidechainSend) {
@@ -176,6 +178,9 @@ class InstrumentProcessor {
 
     delay_frame[0] += voice.params.delay_send * left_output;
     delay_frame[1] += voice.params.delay_send * right_output;
+
+    reverb_frame[0] += voice.params.reverb_send * left_output;
+    reverb_frame[1] += voice.params.reverb_send * right_output;
 
     output_frame[0] += left_output;
     output_frame[1] += right_output;

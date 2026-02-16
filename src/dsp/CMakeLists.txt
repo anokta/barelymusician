@@ -8,6 +8,7 @@ target_sources(
   distortion.h
   envelope.h
   one_pole_filter.h
+  reverb.h
   sample_generators.h
   sidechain.h
 )

@@ -216,6 +216,10 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float DelaySend = 0.0f;
 
+    /// Reverb send.
+    [Range(0.0f, 1.0f)]
+    public float ReverbSend = 0.0f;
+
     /// Sidechain send.
     [Range(-1.0f, 1.0f)]
     public float SidechainSend = 0.0f;
@@ -365,6 +369,7 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.FILTER_FREQUENCY, FilterFrequency);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_Q, FilterQ);
       SetControl(Engine.Internal.InstrumentControlType.DELAY_SEND, DelaySend);
+      SetControl(Engine.Internal.InstrumentControlType.REVERB_SEND, ReverbSend);
       SetControl(Engine.Internal.InstrumentControlType.SIDECHAIN_SEND, SidechainSend);
       SetControl(Engine.Internal.InstrumentControlType.ARP_MODE, (float)ArpMode);
       SetControl(Engine.Internal.InstrumentControlType.ARP_GATE_RATIO, ArpGateRatio);

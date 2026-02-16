@@ -112,6 +112,24 @@ class EngineProcessor {
         engine_.target_params.delay_params.high_pass_coeff =
             GetFilterCoefficient(engine_.sample_rate, value);
         break;
+      case BarelyEngineControlType_kDelayReverbSend:
+        engine_.target_params.delay_params.reverb_send = value;
+        break;
+      case BarelyEngineControlType_kReverbMix:
+        engine_.target_params.reverb_params.mix = value;
+        break;
+      case BarelyEngineControlType_kReverbDampingRatio:
+        engine_.target_params.reverb_params.damping_ratio = value;
+        break;
+      case BarelyEngineControlType_kReverbRoomSize:
+        engine_.target_params.reverb_params.SetFeedback(value);
+        break;
+      case BarelyEngineControlType_kReverbStereoWidth:
+        engine_.target_params.reverb_params.width = value;
+        break;
+      case BarelyEngineControlType_kReverbFreeze:
+        engine_.target_params.reverb_params.freeze = static_cast<bool>(value);
+        break;
       case BarelyEngineControlType_kSidechainMix:
         engine_.target_params.sidechain_mix = value;
         break;
@@ -173,16 +191,21 @@ class EngineProcessor {
   void ProcessSamples(float* output_samples, int output_frame_count) noexcept {
     for (int frame = 0; frame < output_frame_count; ++frame) {
       float delay_frame[kStereoChannelCount] = {};
+      float reverb_frame[kStereoChannelCount] = {};
       float sidechain_frame[kStereoChannelCount] = {};
       float* output_frame = &output_samples[kStereoChannelCount * frame];
 
-      instrument_processor_.ProcessAllVoices<true>(delay_frame, sidechain_frame, output_frame);
+      instrument_processor_.ProcessAllVoices<true>(delay_frame, reverb_frame, sidechain_frame,
+                                                   output_frame);
       engine_.sidechain.Process(sidechain_frame, engine_.current_params.sidechain_mix,
                                 engine_.current_params.sidechain_threshold_db,
                                 engine_.current_params.sidechain_ratio);
-      instrument_processor_.ProcessAllVoices<false>(delay_frame, sidechain_frame, output_frame);
+      instrument_processor_.ProcessAllVoices<false>(delay_frame, reverb_frame, sidechain_frame,
+                                                    output_frame);
 
-      engine_.delay_filter.Process(delay_frame, output_frame, engine_.current_params.delay_params);
+      engine_.delay_filter.Process(delay_frame, reverb_frame, output_frame,
+                                   engine_.current_params.delay_params);
+      engine_.reverb.Process(reverb_frame, output_frame, engine_.current_params.reverb_params);
 
       engine_.compressor.Process(output_frame, engine_.current_params.compressor_params);
 

@@ -24,6 +24,12 @@ export class EngineUi {
     /** @private {number} */
     this._delayFeedback = 0.0;
 
+    /** @private {number} */
+    this._reverbDampingRatio = 0.0;
+
+    /** @private {number} */
+    this._reverbRoomSize = 0.0;
+
     /** @private {!Map<number, !InstrumentUi>} */
     this._instruments = new Map();
 
@@ -45,6 +51,8 @@ export class EngineUi {
         this._tempo = 120.0;
         this.delayTime = 0.5;
         this.delayFeedback = 0.2;
+        this.reverbDampingRatio = 0.1;
+        this.reverbRoomSize = 0.6;
       }
 
       this._startUpdateLoop();
@@ -58,12 +66,21 @@ export class EngineUi {
    * @param {string} stateStr
    */
   loadState(stateStr) {
-    const {tempoJson, delayTimeJson, delayFeedbackJson, instrumentsJson, performersJson} =
-        JSON.parse(decodeURIComponent(atob(stateStr)));
+    const {
+      tempoJson,
+      delayTimeJson,
+      delayFeedbackJson,
+      reverbDampingRatioJson,
+      reverbRoomSizeJson,
+      instrumentsJson,
+      performersJson,
+    } = JSON.parse(decodeURIComponent(atob(stateStr)));
 
     this.engine.setTempo(tempoJson);
     this.delayTime = delayTimeJson;
     this.delayFeedback = delayFeedbackJson;
+    this.reverbDampingRatio = reverbDampingRatioJson;
+    this.reverbRoomSize = reverbRoomSizeJson;
 
     /** @type {!Map<number, !InstrumentUi>} */
     const tempInstruments = new Map();
@@ -115,6 +132,8 @@ export class EngineUi {
     const tempoJson = this._tempo;
     const delayTimeJson = this._delayTime;
     const delayFeedbackJson = this._delayFeedback;
+    const reverbDampingRatioJson = this._reverbDampingRatio;
+    const reverbRoomSizeJson = this._reverbRoomSize;
 
     const instrumentsJson = Array.from(this._instruments.entries()).map(([handle, instrument]) => {
       const controlValues = {};
@@ -151,6 +170,8 @@ export class EngineUi {
       tempoJson,
       delayTimeJson,
       delayFeedbackJson,
+      reverbDampingRatioJson,
+      reverbRoomSizeJson,
       instrumentsJson,
       performersJson,
     })));
@@ -185,6 +206,18 @@ export class EngineUi {
           <input type="range" min="0.0" max="1.0" value="${this._delayFeedback}"
                  step="0.05" id="delayFeedbackSlider">
           <span id="delayFeedbackValue">${this._delayFeedback.toFixed(2)}</span>
+        </div>
+
+        <div class="engine-reverb">
+          <label for="reverbDampingRatioSlider">Reverb Damping</label>
+          <input type="range" min="0.0" max="0.4" value="${this._reverbDampingRatio}"
+                 step="0.05" id="reverbDampingRatioSlider">
+          <span id="reverbDampingRatioValue">${this._reverbDampingRatio.toFixed(2)}</span>
+
+          <label for="reverbRoomSizeSlider">Room Size</label>
+          <input type="range" min="0.0" max="1.0" value="${this._reverbRoomSize}"
+                 step="0.05" id="reverbRoomSizeSlider">
+          <span id="reverbRoomSizeValue">${this._reverbRoomSize.toFixed(2)}</span>
         </div>
       </div>
 
@@ -265,12 +298,38 @@ export class EngineUi {
     this.engine.setControl(EngineControlType.DELAY_FEEDBACK, newDelayFeedback);
   }
 
+  set reverbDampingRatio(newReverbDampingRatio) {
+    if (this._reverbDampingRatio === newReverbDampingRatio) return;
+
+    this._reverbDampingRatio = newReverbDampingRatio;
+    this.reverbDampingRatioSlider.value = this._reverbDampingRatio;
+    this.reverbDampingRatioValue.textContent = this._reverbDampingRatio.toFixed(1);
+    this.engine.setControl(EngineControlType.REVERB_DAMPING_RATIO, newReverbDampingRatio);
+  }
+
+  set reverbRoomSize(newReverbRoomSize) {
+    if (this._reverbRoomSize === newReverbRoomSize) return;
+
+    this._reverbRoomSize = newReverbRoomSize;
+    this.reverbRoomSizeSlider.value = this._reverbRoomSize;
+    this.reverbRoomSizeValue.textContent = this._reverbRoomSize.toFixed(2);
+    this.engine.setControl(EngineControlType.REVERB_ROOM_SIZE, newReverbRoomSize);
+  }
+
   get delayTime() {
     return this._delayTime;
   }
 
   get delayFeedback() {
     return this._delayFeedback;
+  }
+
+  get reverbDampingRatio() {
+    return this._reverbDampingRatio;
+  }
+
+  get reverbRoomSize() {
+    return this._reverbRoomSize;
   }
 
   _attachEvents() {
@@ -341,6 +400,16 @@ export class EngineUi {
     this.delayFeedbackValue = this.container.querySelector('#delayFeedbackValue');
     this.delayFeedbackSlider.addEventListener('input', () => {
       this.delayFeedback = Number(this.delayFeedbackSlider.value);
+    });
+    this.reverbDampingRatioSlider = this.container.querySelector('#reverbDampingRatioSlider');
+    this.reverbDampingRatioValue = this.container.querySelector('#reverbDampingRatioValue');
+    this.reverbDampingRatioSlider.addEventListener('input', () => {
+      this.reverbDampingRatio = Number(this.reverbDampingRatioSlider.value);
+    });
+    this.reverbRoomSizeSlider = this.container.querySelector('#reverbRoomSizeSlider');
+    this.reverbRoomSizeValue = this.container.querySelector('#reverbRoomSizeValue');
+    this.reverbRoomSizeSlider.addEventListener('input', () => {
+      this.reverbRoomSize = Number(this.reverbRoomSizeSlider.value);
     });
 
     // Reset

@@ -49,6 +49,7 @@ struct BarelyEngine {
   explicit BarelyEngine(int sample_rate) noexcept : controller(state), processor(state) {
     state.sample_rate = static_cast<float>(sample_rate);
     state.controls = barely::BuildEngineControlArray(state.sample_rate);
+    state.reverb.SetSampleRate(state.sample_rate);
   }
 
   [[nodiscard]] bool IsValidInstrument(uint32_t instrument_id) const noexcept {

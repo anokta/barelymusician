@@ -66,6 +66,7 @@ struct VoiceState {
     ApproachValue(params.filter_coeffs.b2, new_params.filter_coeffs.b2);
 
     ApproachValue(params.delay_send, new_params.delay_send);
+    ApproachValue(params.reverb_send, new_params.reverb_send);
     ApproachValue(params.sidechain_send, new_params.sidechain_send);
   }
 

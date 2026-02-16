@@ -3,12 +3,14 @@
 
 #include "dsp/compressor.h"
 #include "dsp/delay_filter.h"
+#include "dsp/reverb.h"
 
 namespace barely {
 
 struct EffectParams {
   CompressorParams compressor_params = {};
   DelayParams delay_params = {};
+  ReverbParams reverb_params = {};
 
   float sidechain_mix = 1.0f;
   float sidechain_threshold_db = 0.0f;

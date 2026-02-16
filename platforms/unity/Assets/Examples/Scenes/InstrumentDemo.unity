@@ -232,7 +232,7 @@ MonoBehaviour:
   oscShape: 0
   oscMode: 0
   sliceMode: 1
-  arpeggiatorMode: 1
+  arpMode: 1
 --- !u!114 &675413002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -480,15 +480,19 @@ MonoBehaviour:
   Slices:
   - RootPitch: 0
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
+  BitCrusherDepth: 16
+  BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
   FilterType: 0
   FilterFrequency: 0
   FilterQ: 0.71
-  BitCrusherDepth: 16
-  BitCrusherRate: 1
   DelaySend: 0.1
-  ArpeggiatorMode: 0
-  ArpeggiatorGateRatio: 0.5
-  ArpeggiatorRate: 1
+  ReverbSend: 0.25
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -535,9 +539,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 120
+  CompressorMix: 0
+  CompressorAttack: 0.001
+  CompressorRelease: 0.01
+  CompressorThreshold: 1
+  CompressorRatio: 1
   DelayMix: 1
   DelayTime: 0.5
   DelayFeedback: 0.2
+  DelayLowPassFrequency: 48000
+  DelayHighPassFrequency: 0
+  DelayReverbSend: 0
+  ReverbMix: 1
+  ReverbDampingRatio: 0.1
+  ReverbRoomSize: 0.65
+  ReverbStereoWidth: 1
+  ReverbFreeze: 0
+  SidechainMix: 1
+  SidechainAttack: 0.001
+  SidechainRelease: 0.01
+  SidechainThreshold: 1
+  SidechainRatio: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

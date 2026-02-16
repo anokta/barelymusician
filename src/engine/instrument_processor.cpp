@@ -104,6 +104,9 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kDelaySend:
       params.voice_params.delay_send = value;
       break;
+    case BarelyInstrumentControlType_kReverbSend:
+      params.voice_params.reverb_send = value;
+      break;
     case BarelyInstrumentControlType_kSidechainSend:
       params.voice_params.sidechain_send = value;
       break;

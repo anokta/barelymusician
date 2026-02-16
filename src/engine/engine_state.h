@@ -12,6 +12,7 @@
 #include "core/time.h"
 #include "dsp/compressor.h"
 #include "dsp/delay_filter.h"
+#include "dsp/reverb.h"
 #include "dsp/sidechain.h"
 #include "engine/effect_params.h"
 #include "engine/instrument_params.h"
@@ -31,20 +32,14 @@ using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
 struct EngineState {
   // Performer pool.
   Pool<PerformerState, BARELY_MAX_PERFORMER_COUNT> performer_pool = {};
-
-  // Array of performer generations.
   std::array<uint32_t, BARELY_MAX_PERFORMER_COUNT> performer_generations = {};
 
   // Task pool.
   Pool<TaskState, BARELY_MAX_TASK_COUNT> task_pool = {};
-
-  // Array of task generations.
   std::array<uint32_t, BARELY_MAX_TASK_COUNT> task_generations = {};
 
   // Instrument pool.
   Pool<InstrumentState, BARELY_MAX_INSTRUMENT_COUNT> instrument_pool = {};
-
-  // Array of instrument generations.
   std::array<uint32_t, BARELY_MAX_INSTRUMENT_COUNT> instrument_generations = {};
 
   // Note pool.
@@ -86,6 +81,9 @@ struct EngineState {
   // Delay filter.
   DelayFilter delay_filter = {};
 
+  // Reverb.
+  Reverb reverb = {};
+
   // Sidechain.
   Sidechain sidechain = {};
 
@@ -101,6 +99,7 @@ struct EngineState {
   void Approach() noexcept {
     current_params.compressor_params.Approach(target_params.compressor_params);
     current_params.delay_params.Approach(target_params.delay_params);
+    current_params.reverb_params.Approach(target_params.reverb_params);
     ApproachValue(current_params.sidechain_mix, target_params.sidechain_mix);
     ApproachValue(current_params.sidechain_threshold_db, target_params.sidechain_threshold_db);
     ApproachValue(current_params.sidechain_ratio, target_params.sidechain_ratio);
@@ -151,6 +150,12 @@ inline EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
       Control(0.0f, 0.0f, 1.0f),                // kDelayFeedback
       Control(sample_rate, 0.0f, sample_rate),  // kDelayLowPassFrequency
       Control(0.0f, 0.0f, sample_rate),         // kDelayHighPassFrequency
+      Control(0.0f, 0.0f, 1.0f),                // kDelayReverbSend
+      Control(1.0f, 0.0f, 1.0f),                // kReverbMix
+      Control(0.0f, 0.0f, 0.4f),                // kReverbDamping
+      Control(0.0f, 0.0f, 1.0f),                // kReverbRoomSize
+      Control(1.0f, 0.0f, 1.0f),                // kReverbStereoWidth
+      Control(false),                           // kReverbFreeze
       Control(1.0f, 0.0f, 1.0f),                // kSidechainMix
       Control(0.0f, 0.0f, 10.0f),               // kSidechainAttack
       Control(0.0f, 0.0f, 10.0f),               // kSidechainRelease

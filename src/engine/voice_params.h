@@ -25,6 +25,7 @@ struct VoiceParams {
   float stereo_pan = 0.0f;
 
   float delay_send = 0.0f;
+  float reverb_send = 0.0f;
   float sidechain_send = 0.0f;
 };
 

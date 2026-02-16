@@ -58,6 +58,8 @@ const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
                    0.71),
     RangeParameter(STR16("Delay Send"), BarelyInstrumentControlType_kDelaySend, STR16(""), 0.0, 1.0,
                    0.0),
+    RangeParameter(STR16("Reverb Send"), BarelyInstrumentControlType_kReverbSend, STR16(""), 0.0,
+                   1.0, 0.0),
     RangeParameter(STR16("Sidechain Send"), BarelyInstrumentControlType_kSidechainSend, STR16(""),
                    -1.0, 1.0, 0.0),
     RangeParameter(STR16("Arpeggiator Mode"), BarelyInstrumentControlType_kArpMode, STR16(""), 0,
@@ -105,6 +107,7 @@ tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {
         i == BarelyInstrumentControlType_kOscPitchShift ||
         i == BarelyInstrumentControlType_kSliceMode ||
         i == BarelyInstrumentControlType_kDelaySend ||
+        i == BarelyInstrumentControlType_kReverbSend ||
         i == BarelyInstrumentControlType_kSidechainSend ||
         i == BarelyInstrumentControlType_kArpMode ||
         i == BarelyInstrumentControlType_kArpGateRatio ||

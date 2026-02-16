@@ -21,20 +21,23 @@ struct DelayParams {
   float low_pass_coeff = 0.0f;
   float high_pass_coeff = 1.0f;
 
+  float reverb_send = 0.0f;
+
   void Approach(const DelayParams& params) noexcept {
     ApproachValue(mix, params.mix);
     ApproachValue(frame_count, params.frame_count);
     ApproachValue(feedback, params.feedback);
     ApproachValue(low_pass_coeff, params.low_pass_coeff);
     ApproachValue(high_pass_coeff, params.high_pass_coeff);
+    ApproachValue(reverb_send, params.reverb_send);
   }
 };
 
 // Delay filter with smooth interpolation.
 class DelayFilter {
  public:
-  void Process(float input_frame[kStereoChannelCount], float output_frame[kStereoChannelCount],
-               const DelayParams& params) noexcept {
+  void Process(float input_frame[kStereoChannelCount], float reverb_frame[kStereoChannelCount],
+               float output_frame[kStereoChannelCount], const DelayParams& params) noexcept {
     assert(params.frame_count > 0);
     assert(static_cast<int>(params.frame_count) <= kMaxDelayFrameCount);
 
@@ -51,9 +54,12 @@ class DelayFilter {
       output_sample = lpf_[channel].Next<FilterType::kLowPass>(
           hpf_[channel].Next<FilterType::kHighPass>(output_sample, params.high_pass_coeff),
           params.low_pass_coeff);
-      output_frame[channel] += params.mix * output_sample;
       delay_samples_[kStereoChannelCount * write_frame_ + channel] =
           input_frame[channel] + output_sample * params.feedback;
+
+      output_sample *= params.mix;
+      reverb_frame[channel] += params.reverb_send * output_sample;
+      output_frame[channel] += output_sample;
     }
 
     write_frame_ = (write_frame_ + 1) % kMaxDelayFrameCount;

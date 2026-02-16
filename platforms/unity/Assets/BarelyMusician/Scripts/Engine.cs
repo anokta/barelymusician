@@ -134,6 +134,82 @@ namespace Barely {
     }
     private static float _delayHighPassFrequency = 0.0f;
 
+    /// Delay reverb send.
+    public static float DelayReverbSend {
+      get { return _delayReverbSend; }
+      set {
+        if (_delayReverbSend != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_REVERB_SEND, value);
+          _delayReverbSend =
+              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_REVERB_SEND);
+        }
+      }
+    }
+    private static float _delayReverbSend = 0.0f;
+
+    /// Reverb mix.
+    public static float ReverbMix {
+      get { return _reverbMix; }
+      set {
+        if (_reverbMix != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_MIX, value);
+          _reverbMix = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_MIX);
+        }
+      }
+    }
+    private static float _reverbMix = 1.0f;
+
+    /// Reverb damping ratio.
+    public static float ReverbDampingRatio {
+      get { return _reverbDampingRatio; }
+      set {
+        if (_reverbDampingRatio != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_DAMPING_RATIO, value);
+          _reverbDampingRatio =
+              Internal.Engine_GetControl(Internal.EngineControlType.REVERB_DAMPING_RATIO);
+        }
+      }
+    }
+    private static float _reverbDampingRatio = 0.0f;
+
+    /// Reverb room size.
+    public static float ReverbRoomSize {
+      get { return _reverbRoomSize; }
+      set {
+        if (_reverbRoomSize != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_ROOM_SIZE, value);
+          _reverbRoomSize = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_ROOM_SIZE);
+        }
+      }
+    }
+    private static float _reverbRoomSize = 0.0f;
+
+    /// Reverb stereo width.
+    public static float ReverbStereoWidth {
+      get { return _reverbStereoWidth; }
+      set {
+        if (_reverbStereoWidth != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_STEREO_WIDTH, value);
+          _reverbStereoWidth =
+              Internal.Engine_GetControl(Internal.EngineControlType.REVERB_STEREO_WIDTH);
+        }
+      }
+    }
+    private static float _reverbStereoWidth = 1.0f;
+
+    /// Reverb freeze.
+    public static bool ReverbFreeze {
+      get { return _reverbFreeze; }
+      set {
+        if (_reverbFreeze != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_FREEZE, value ? 1.0f : 0.0f);
+          _reverbFreeze =
+              Internal.Engine_GetControl(Internal.EngineControlType.REVERB_FREEZE) > 0.0f;
+        }
+      }
+    }
+    private static bool _reverbFreeze = false;
+
     /// Sidechain mix.
     public static float SidechainMix {
       get { return _sidechainMix; }
@@ -264,6 +340,8 @@ namespace Barely {
         [InspectorName("Filter Q")] FILTER_Q,
         // Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
+        // Reverb send.
+        [InspectorName("Reverb Send")] REVERB_SEND,
         // Sidechain send.
         [InspectorName("Sidechain Send")] SIDECHAIN_SEND,
         // Arpeggiator mode.
@@ -295,6 +373,18 @@ namespace Barely {
         [InspectorName("Delay Low-Pass Frequency")] DELAY_LOW_PASS_FREQUENCY,
         // Delay high-pass frequency.
         [InspectorName("Delay High-Pass Frequency")] DELAY_HIGH_PASS_FREQUENCY,
+        // Delay reverb send.
+        [InspectorName("Delay Reverb Send")] DELAY_REVERB_SEND,
+        // Reverb mix.
+        [InspectorName("Reverb Mix")] REVERB_MIX,
+        // Reverb damping ratio.
+        [InspectorName("Reverb Damping Ratio")] REVERB_DAMPING_RATIO,
+        // Reverb room size.
+        [InspectorName("Reverb Room Size")] REVERB_ROOM_SIZE,
+        // Reverb stereo width.
+        [InspectorName("Reverb Stereo Width")] REVERB_STEREO_WIDTH,
+        // Reverb freeze.
+        [InspectorName("Reverb Freeze")] REVERB_FREEZE,
         // Sidechain mix.
         [InspectorName("Sidechain Mix")] SIDECHAIN_MIX,
         // Sidechain attack in seconds.
@@ -399,6 +489,8 @@ namespace Barely {
         _instrumentControlOverrides[(int)InstrumentControlType.FILTER_Q].value = instrument.FilterQ;
         _instrumentControlOverrides[(int)InstrumentControlType.DELAY_SEND].value =
             instrument.DelaySend;
+        _instrumentControlOverrides[(int)InstrumentControlType.REVERB_SEND].value =
+            instrument.ReverbSend;
         _instrumentControlOverrides[(int)InstrumentControlType.SIDECHAIN_SEND].value =
             instrument.SidechainSend;
         _instrumentControlOverrides[(int)InstrumentControlType.ARP_MODE].value =
@@ -939,6 +1031,15 @@ namespace Barely {
                                   _delayLowPassFrequency);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_HIGH_PASS_FREQUENCY,
                                   _delayHighPassFrequency);
+          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_REVERB_SEND, _delayReverbSend);
+          BarelyEngine_SetControl(_handle, EngineControlType.REVERB_MIX, _reverbMix);
+          BarelyEngine_SetControl(_handle, EngineControlType.REVERB_DAMPING_RATIO,
+                                  _reverbDampingRatio);
+          BarelyEngine_SetControl(_handle, EngineControlType.REVERB_ROOM_SIZE, _reverbRoomSize);
+          BarelyEngine_SetControl(_handle, EngineControlType.REVERB_STEREO_WIDTH,
+                                  _reverbStereoWidth);
+          BarelyEngine_SetControl(_handle, EngineControlType.REVERB_FREEZE,
+                                  _reverbFreeze ? 1.0f : 0.0f);
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_MIX, _sidechainMix);
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_THRESHOLD,
                                   _sidechainThreshold);

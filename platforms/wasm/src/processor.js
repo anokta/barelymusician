@@ -293,8 +293,8 @@ class Processor extends AudioWorkletProcessor {
         const otherPerformerId = this._performers.get(command.otherHandle)?.performerId;
         if (!otherPerformerId) return;
         this._module._BarelyPerformer_GetPosition(this._engine, otherPerformerId, this._doublePtr);
-        this._context.performerSetPosition(
-            performerId, this._module.getValue(this._doublePtr, 'double'));
+        this._module._BarelyPerformer_SetPosition(
+            this._engine, performerId, this._module.getValue(this._doublePtr, 'double'));
       } break;
       case CommandType.TASK_CREATE: {
         this._module._BarelyEngine_CreateTask(
@@ -340,7 +340,7 @@ class Processor extends AudioWorkletProcessor {
         this._tasks.set(command.handle, {taskId, eventCallback, eventCallbackPtr});
       } break;
       case CommandType.TASK_DESTROY: {
-        const {taskId, eventCallbackPtr} = this._tasks.get(command.handle)?.taskId;
+        const {taskId, eventCallbackPtr} = this._tasks.get(command.handle);
         if (!taskId) return;
         this._module._BarelyEngine_DestroyTask(this._engine, taskId);
         this._module.removeFunction(eventCallbackPtr);

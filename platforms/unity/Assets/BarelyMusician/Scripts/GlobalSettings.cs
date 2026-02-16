@@ -38,6 +38,23 @@ namespace Barely {
     public float DelayHighPassFrequency = 0.0f;
 
     [Range(0.0f, 1.0f)]
+    public float DelayReverbSend = 0.0f;
+
+    [Range(0.0f, 1.0f)]
+    public float ReverbMix = 1.0f;
+
+    [Range(0.0f, 0.4f)]
+    public float ReverbDampingRatio = 0.0f;
+
+    [Range(0.0f, 1.0f)]
+    public float ReverbRoomSize = 0.0f;
+
+    [Range(0.0f, 1.0f)]
+    public float ReverbStereoWidth = 1.0f;
+
+    public bool ReverbFreeze = false;
+
+    [Range(0.0f, 1.0f)]
     public float SidechainMix = 1.0f;
 
     [Range(0.001f, 1.0f)]
@@ -64,6 +81,12 @@ namespace Barely {
       Engine.DelayFeedback = DelayFeedback;
       Engine.DelayLowPassFrequency = DelayLowPassFrequency;
       Engine.DelayHighPassFrequency = DelayHighPassFrequency;
+      Engine.DelayReverbSend = DelayReverbSend;
+      Engine.ReverbMix = ReverbMix;
+      Engine.ReverbDampingRatio = ReverbDampingRatio;
+      Engine.ReverbRoomSize = ReverbRoomSize;
+      Engine.ReverbStereoWidth = ReverbStereoWidth;
+      Engine.ReverbFreeze = ReverbFreeze;
       Engine.SidechainMix = SidechainMix;
       Engine.SidechainAttack = SidechainAttack;
       Engine.SidechainRelease = SidechainRelease;

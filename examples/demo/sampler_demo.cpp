@@ -20,6 +20,7 @@
 namespace {
 
 using ::barely::Engine;
+using ::barely::EngineControlType;
 using ::barely::InstrumentControlType;
 using ::barely::NoteEventType;
 using ::barely::Slice;
@@ -35,12 +36,17 @@ constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
+// Engine settings.
+constexpr float kReverbDampingRatio = 0.1f;
+constexpr float kReverbRoomSize = 0.65f;
+
 // Instrument settings.
 constexpr float kGain = 0.25f;
 constexpr bool kLoop = true;
 constexpr float kAttack = 0.0125f;
 constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
+constexpr float kReverbSend = 0.5f;
 
 constexpr char kSamplePath[] = "audio/sample.wav";
 
@@ -81,6 +87,8 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
+  engine.SetControl(EngineControlType::kReverbDampingRatio, kReverbDampingRatio);
+  engine.SetControl(EngineControlType::kReverbRoomSize, kReverbRoomSize);
 
   auto instrument = engine.CreateInstrument({{
       {InstrumentControlType::kGain, kGain},
@@ -88,6 +96,7 @@ int main(int /*argc*/, char* argv[]) {
       {InstrumentControlType::kAttack, kAttack},
       {InstrumentControlType::kRelease, kRelease},
       {InstrumentControlType::kVoiceCount, kVoiceCount},
+      {InstrumentControlType::kReverbSend, kReverbSend},
   }});
 
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));

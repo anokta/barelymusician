@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_DELAY_FILTER_H_
 #define BARELYMUSICIAN_DSP_DELAY_FILTER_H_
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
@@ -58,8 +59,9 @@ class DelayFilter {
           input_frame[channel] + output_sample * params.feedback;
 
       output_sample *= params.mix;
-      reverb_frame[channel] += params.reverb_send * output_sample;
-      output_frame[channel] += output_sample;
+      reverb_frame[channel] += std::min(params.reverb_send, 1.0f) * output_sample;
+      output_frame[channel] +=
+          ((params.reverb_send <= 1.0f) ? 1.0f : (2.0f - params.reverb_send)) * output_sample;
     }
 
     write_frame_ = (write_frame_ + 1) % kMaxDelayFrameCount;

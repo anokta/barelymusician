@@ -217,7 +217,7 @@ namespace Barely {
     public float DelaySend = 0.0f;
 
     /// Reverb send.
-    [Range(0.0f, 1.0f)]
+    [Range(0.0f, 2.0f)]
     public float ReverbSend = 0.0f;
 
     /// Sidechain send.

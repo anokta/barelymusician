@@ -37,7 +37,7 @@ namespace Barely {
     [Range(0.0f, 48000.0f)]
     public float DelayHighPassFrequency = 0.0f;
 
-    [Range(0.0f, 1.0f)]
+    [Range(0.0f, 2.0f)]
     public float DelayReverbSend = 0.0f;
 
     [Range(0.0f, 1.0f)]

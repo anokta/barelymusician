@@ -179,11 +179,14 @@ class InstrumentProcessor {
     delay_frame[0] += voice.params.delay_send * left_output;
     delay_frame[1] += voice.params.delay_send * right_output;
 
-    reverb_frame[0] += voice.params.reverb_send * left_output;
-    reverb_frame[1] += voice.params.reverb_send * right_output;
+    const float wet_scale = std::min(voice.params.reverb_send, 1.0f);
+    reverb_frame[0] += wet_scale * left_output;
+    reverb_frame[1] += wet_scale * right_output;
 
-    output_frame[0] += left_output;
-    output_frame[1] += right_output;
+    const float dry_scale =
+        (voice.params.reverb_send <= 1.0f) ? 1.0f : (2.0f - voice.params.reverb_send);
+    output_frame[0] += dry_scale * left_output;
+    output_frame[1] += dry_scale * right_output;
 
     voice.Approach(instrument_params.voice_params);
   }

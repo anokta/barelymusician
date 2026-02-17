@@ -156,7 +156,7 @@ export const ENGINE_CONTROLS = Object.freeze({
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 1.0,
+    maxValue: 2.0,
   },
   [EngineControlType.REVERB_MIX]: {
     name: 'Reverb Mix',
@@ -404,7 +404,7 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     valueType: 'float',
     defaultValue: 0.25,
     minValue: 0.0,
-    maxValue: 1.0,
+    maxValue: 2.0,
   },
   [InstrumentControlType.SIDECHAIN_SEND]: {
     name: 'Sidechain Send',

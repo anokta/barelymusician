@@ -150,7 +150,7 @@ inline EngineControlArray BuildEngineControlArray(float sample_rate) noexcept {
       Control(0.0f, 0.0f, 1.0f),                // kDelayFeedback
       Control(sample_rate, 0.0f, sample_rate),  // kDelayLowPassFrequency
       Control(0.0f, 0.0f, sample_rate),         // kDelayHighPassFrequency
-      Control(0.0f, 0.0f, 1.0f),                // kDelayReverbSend
+      Control(0.0f, 0.0f, 2.0f),                // kDelayReverbSend
       Control(1.0f, 0.0f, 1.0f),                // kReverbMix
       Control(0.0f, 0.0f, 0.4f),                // kReverbDamping
       Control(0.0f, 0.0f, 1.0f),                // kReverbRoomSize

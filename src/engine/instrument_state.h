@@ -92,7 +92,7 @@ struct InstrumentState {
       Control(0.0f, 0.0f),                         // kFilterFrequency
       Control(std::sqrt(0.5f), 0.1f),              // kFilterQ
       Control(0.0f, 0.0f, 1.0f),                   // kDelaySend
-      Control(0.0f, 0.0f, 1.0f),                   // kReverbSend
+      Control(0.0f, 0.0f, 2.0f),                   // kReverbSend
       Control(0.0f, -1.0f, 1.0f),                  // kSidechainSend
       Control(0, 0, BarelyArpMode_kCount - 1),     // kArpMode
       Control(0.5f, 0.001f, 1.0f),                 // kArpGateRatio

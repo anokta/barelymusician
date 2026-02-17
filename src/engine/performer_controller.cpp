@@ -160,7 +160,7 @@ void PerformerController::SetTaskDuration(uint32_t task_index, double duration) 
 void PerformerController::SetTaskEventCallback(uint32_t task_index,
                                                BarelyTaskEventCallback callback,
                                                void* user_data) noexcept {
-  engine_.GetTask(task_index).SetEventCallback(callback, user_data);
+  engine_.GetTask(task_index).callback = {callback, user_data};
 }
 
 void PerformerController::SetTaskPosition(uint32_t task_index, double position) noexcept {

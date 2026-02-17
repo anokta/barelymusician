@@ -1456,11 +1456,6 @@ class Task {
   /// @param callback Event callback.
   void SetEventCallback(TaskEventCallback callback) noexcept {
     assert(event_callback_ != nullptr);
-    if (*event_callback_) {
-      [[maybe_unused]] const bool success =
-          BarelyTask_SetEventCallback(engine_, task_id_, nullptr, nullptr);
-      assert(success);
-    }
     *event_callback_ = std::move(callback);
     [[maybe_unused]] const bool success =
         (*event_callback_)

@@ -41,16 +41,6 @@ struct TaskState {
   bool IsInside(double other_position) const noexcept {
     return other_position >= position && other_position < GetEndPosition();
   }
-
-  void SetEventCallback(BarelyTaskEventCallback new_callback, void* new_user_data) noexcept {
-    if (is_active) {
-      callback(BarelyTaskEventType_kEnd);
-    }
-    callback = {new_callback, new_user_data};
-    if (is_active) {
-      callback(BarelyTaskEventType_kBegin);
-    }
-  }
 };
 
 }  // namespace barely

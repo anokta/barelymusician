@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <unordered_map>
 
 #include "core/constants.h"
@@ -102,15 +103,15 @@ class EngineProcessor {
             std::max(value * engine_.sample_rate, 1.0f), static_cast<float>(kMaxDelayFrameCount));
         break;
       case BarelyEngineControlType_kDelayFeedback:
-        engine_.target_params.delay_params.feedback = value;
+        engine_.target_params.delay_params.feedback = std::min(value, kMaxDelayFeedback);
         break;
-      case BarelyEngineControlType_kDelayLowPassFrequency:
+      case BarelyEngineControlType_kDelayLowPassCutoff:
         engine_.target_params.delay_params.low_pass_coeff =
-            GetFilterCoefficient(engine_.sample_rate, value);
+            GetFilterCoefficient(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
         break;
-      case BarelyEngineControlType_kDelayHighPassFrequency:
+      case BarelyEngineControlType_kDelayHighPassCutoff:
         engine_.target_params.delay_params.high_pass_coeff =
-            GetFilterCoefficient(engine_.sample_rate, value);
+            GetFilterCoefficient(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
         break;
       case BarelyEngineControlType_kDelayReverbSend:
         engine_.target_params.delay_params.reverb_send = value;

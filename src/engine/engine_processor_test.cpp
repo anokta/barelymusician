@@ -34,7 +34,7 @@ TEST(EngineProcessorTest, PlaySingleNote) {
       engine->slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));
 
   EngineProcessor processor(*engine);
-  const auto controls = BuildControlArray(nullptr, 0);
+  const auto controls = BuildInstrumentControlArray(nullptr, 0);
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine->ScheduleMessage(InstrumentControlMessage{
         kInstrumentIndex, static_cast<BarelyInstrumentControlType>(i), controls[i].value});
@@ -87,7 +87,7 @@ TEST(EngineProcessorTest, PlayMultipleNotes) {
 
   EngineProcessor processor(*engine);
   engine->ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
-  const auto controls = BuildControlArray(nullptr, 0);
+  const auto controls = BuildInstrumentControlArray(nullptr, 0);
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
     engine->ScheduleMessage(InstrumentControlMessage{
         kInstrumentIndex, static_cast<BarelyInstrumentControlType>(i), controls[i].value});

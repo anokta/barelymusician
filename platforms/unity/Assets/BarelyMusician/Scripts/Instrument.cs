@@ -202,9 +202,9 @@ namespace Barely {
     /// Filter type.
     public FilterType FilterType = FilterType.NONE;
 
-    /// Filter frequency in hertz.
-    [Range(0.0f, 48000.0f)]
-    public float FilterFrequency = 0.0f;
+    /// Filter cutoff.
+    [Range(0.0f, 1.0f)]
+    public float FilterCutoff = 0.0f;
 
     /// Filter Q factor.
     [Range(0.1f, 10.0f)]
@@ -366,7 +366,7 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_AMOUNT, DistortionAmount);
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_DRIVE, DistortionDrive);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_TYPE, (float)FilterType);
-      SetControl(Engine.Internal.InstrumentControlType.FILTER_FREQUENCY, FilterFrequency);
+      SetControl(Engine.Internal.InstrumentControlType.FILTER_CUTOFF, FilterCutoff);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_Q, FilterQ);
       SetControl(Engine.Internal.InstrumentControlType.DELAY_SEND, DelaySend);
       SetControl(Engine.Internal.InstrumentControlType.REVERB_SEND, ReverbSend);

@@ -24,13 +24,14 @@ class BiquadFilter {
   };
 
   [[nodiscard]] float Next(float input, const Coeffs& coeffs) noexcept {
-    // Uses Direct-Form 2.
-    const float v0 = input - coeffs.a1 * state_.v1 - coeffs.a2 * state_.v2;
-    const float output = coeffs.b0 * v0 + coeffs.b1 * state_.v1 + coeffs.b2 * state_.v2;
-
-    state_.v2 = state_.v1;
-    state_.v1 = v0;
-
+    // Uses Transposed Direct-Form 2.
+    const float output = coeffs.b0 * input + state_.v1;
+    if (!std::isfinite(output)) {
+      state_ = {};
+      return 0.0f;
+    }
+    state_.v1 = coeffs.b1 * input - coeffs.a1 * output + state_.v2;
+    state_.v2 = coeffs.b2 * input - coeffs.a2 * output;
     return output;
   }
 

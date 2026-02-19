@@ -38,7 +38,7 @@ uint32_t InstrumentController::Acquire(const BarelyInstrumentControlOverride* co
   if (instrument_index != kInvalidIndex) {
     InstrumentState& instrument = engine_.GetInstrument(instrument_index);
     instrument = {};
-    instrument.controls = BuildControlArray(control_overrides, control_override_count);
+    instrument.controls = BuildInstrumentControlArray(control_overrides, control_override_count);
 
     engine_.ScheduleMessage(InstrumentCreateMessage{instrument_index});
     for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {

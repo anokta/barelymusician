@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <limits>
 
 namespace barely {
@@ -39,6 +40,13 @@ struct Control {
 inline constexpr void ApproachValue(float& current_value, float target_value) noexcept {
   constexpr float kSmoothingCoeff = 0.002f;
   current_value += (target_value - current_value) * kSmoothingCoeff;
+}
+
+inline float GetFrequency(float sample_rate, float cutoff) noexcept {
+  static constexpr float kMinHz = 20.0f;
+  static constexpr float kMinHzInverse = 1.0f / kMinHz;
+  const float max_hz = 0.5f * sample_rate;
+  return std::min(kMinHz * std::pow(max_hz * kMinHzInverse, cutoff), max_hz);
 }
 
 }  // namespace barely

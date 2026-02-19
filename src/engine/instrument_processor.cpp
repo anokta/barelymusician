@@ -115,8 +115,8 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.voice_params.filter_coeffs = GetFilterCoefficients(
           engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
       break;
-    case BarelyInstrumentControlType_kFilterFrequency:
-      params.filter_frequency = value;
+    case BarelyInstrumentControlType_kFilterCutoff:
+      params.filter_frequency = GetFrequency(engine_.sample_rate, value);
       params.voice_params.filter_coeffs = GetFilterCoefficients(
           engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
       break;

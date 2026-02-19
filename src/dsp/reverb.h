@@ -35,7 +35,7 @@ class Reverb {
   void Process(float input_frame[kStereoChannelCount], float output_frame[kStereoChannelCount],
                const ReverbParams& params) noexcept {
     float damping_ratio = 0.0f;
-    float feedback = 1.0f;
+    float feedback = kMaxDelayFeedback;
     float input_sample = 0.0f;
     if (!params.freeze) {
       damping_ratio = params.damping_ratio;

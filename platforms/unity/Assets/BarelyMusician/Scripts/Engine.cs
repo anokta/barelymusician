@@ -108,31 +108,31 @@ namespace Barely {
     }
     private static float _delayFeedback = 0.0f;
 
-    /// Delay low-pass frequency.
-    public static float DelayLowPassFrequency {
-      get { return _delayLowPassFrequency; }
+    /// Delay low-pass cutoff.
+    public static float DelayLowPassCutoff {
+      get { return _delayLowPassCutoff; }
       set {
-        if (_delayLowPassFrequency != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_LOW_PASS_FREQUENCY, value);
-          _delayLowPassFrequency =
-              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_LOW_PASS_FREQUENCY);
+        if (_delayLowPassCutoff != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_LOW_PASS_CUTOFF, value);
+          _delayLowPassCutoff =
+              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_LOW_PASS_CUTOFF);
         }
       }
     }
-    private static float _delayLowPassFrequency = 48000.0f;
+    private static float _delayLowPassCutoff = 1.0f;
 
-    /// Delay high-pass frequency.
-    public static float DelayHighPassFrequency {
-      get { return _delayHighPassFrequency; }
+    /// Delay high-pass cutoff.
+    public static float DelayHighPassCutoff {
+      get { return _delayHighPassCutoff; }
       set {
-        if (_delayHighPassFrequency != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_HIGH_PASS_FREQUENCY, value);
-          _delayHighPassFrequency =
-              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_HIGH_PASS_FREQUENCY);
+        if (_delayHighPassCutoff != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_HIGH_PASS_CUTOFF, value);
+          _delayHighPassCutoff =
+              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_HIGH_PASS_CUTOFF);
         }
       }
     }
-    private static float _delayHighPassFrequency = 0.0f;
+    private static float _delayHighPassCutoff = 0.0f;
 
     /// Delay reverb send.
     public static float DelayReverbSend {
@@ -334,8 +334,8 @@ namespace Barely {
         [InspectorName("Distortion Drive")] DISTORTION_DRIVE,
         // Filter type.
         [InspectorName("Filter Type")] FILTER_TYPE,
-        // Filter frequency in hertz.
-        [InspectorName("Filter Frequency")] FILTER_FREQUENCY,
+        // Filter cutoff.
+        [InspectorName("Filter Cutoff")] FILTER_CUTOFF,
         // Filter Q factor.
         [InspectorName("Filter Q")] FILTER_Q,
         // Delay send.
@@ -369,10 +369,10 @@ namespace Barely {
         [InspectorName("Delay Time")] DELAY_TIME,
         // Delay feedback.
         [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
-        // Delay low-pass frequency.
-        [InspectorName("Delay Low-Pass Frequency")] DELAY_LOW_PASS_FREQUENCY,
-        // Delay high-pass frequency.
-        [InspectorName("Delay High-Pass Frequency")] DELAY_HIGH_PASS_FREQUENCY,
+        // Delay low-pass cutoff.
+        [InspectorName("Delay Low-Pass Cutoff")] DELAY_LOW_PASS_CUTOFF,
+        // Delay high-pass cutoff.
+        [InspectorName("Delay High-Pass Cutoff")] DELAY_HIGH_PASS_CUTOFF,
         // Delay reverb send.
         [InspectorName("Delay Reverb Send")] DELAY_REVERB_SEND,
         // Reverb mix.
@@ -484,8 +484,8 @@ namespace Barely {
             instrument.DistortionDrive;
         _instrumentControlOverrides[(int)InstrumentControlType.FILTER_TYPE].value =
             (float)instrument.FilterType;
-        _instrumentControlOverrides[(int)InstrumentControlType.FILTER_FREQUENCY].value =
-            instrument.FilterFrequency;
+        _instrumentControlOverrides[(int)InstrumentControlType.FILTER_CUTOFF].value =
+            instrument.FilterCutoff;
         _instrumentControlOverrides[(int)InstrumentControlType.FILTER_Q].value = instrument.FilterQ;
         _instrumentControlOverrides[(int)InstrumentControlType.DELAY_SEND].value =
             instrument.DelaySend;
@@ -1027,10 +1027,10 @@ namespace Barely {
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_MIX, _delayMix);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_TIME, _delayTime);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_FEEDBACK, _delayFeedback);
-          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_LOW_PASS_FREQUENCY,
-                                  _delayLowPassFrequency);
-          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_HIGH_PASS_FREQUENCY,
-                                  _delayHighPassFrequency);
+          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_LOW_PASS_CUTOFF,
+                                  _delayLowPassCutoff);
+          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_HIGH_PASS_CUTOFF,
+                                  _delayHighPassCutoff);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_REVERB_SEND, _delayReverbSend);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_MIX, _reverbMix);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_DAMPING_RATIO,

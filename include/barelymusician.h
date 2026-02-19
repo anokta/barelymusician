@@ -244,10 +244,10 @@ typedef enum BarelyEngineControlType {
   BarelyEngineControlType_kDelayTime,
   /// Delay feedback.
   BarelyEngineControlType_kDelayFeedback,
-  /// Delay low-pass frequency.
-  BarelyEngineControlType_kDelayLowPassFrequency,
-  /// Delay high-pass frequency.
-  BarelyEngineControlType_kDelayHighPassFrequency,
+  /// Delay low-pass cutoff.
+  BarelyEngineControlType_kDelayLowPassCutoff,
+  /// Delay high-pass cutoff.
+  BarelyEngineControlType_kDelayHighPassCutoff,
   /// Delay reverb send.
   BarelyEngineControlType_kDelayReverbSend,
   /// Reverb mix.
@@ -318,8 +318,8 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kDistortionDrive,
   /// Filter type.
   BarelyInstrumentControlType_kFilterType,
-  /// Filter frequency in hertz.
-  BarelyInstrumentControlType_kFilterFrequency,
+  /// Filter cutoff.
+  BarelyInstrumentControlType_kFilterCutoff,
   /// Filter Q factor.
   BarelyInstrumentControlType_kFilterQ,
   /// Delay send.
@@ -968,10 +968,10 @@ enum class EngineControlType {
   kDelayTime = BarelyEngineControlType_kDelayTime,
   /// Delay feedback.
   kDelayFeedback = BarelyEngineControlType_kDelayFeedback,
-  /// Delay low-pass frequency.
-  kDelayLowPassFrequency = BarelyEngineControlType_kDelayLowPassFrequency,
-  /// Delay high-pass frequency.
-  kDelayHighPassFrequency = BarelyEngineControlType_kDelayHighPassFrequency,
+  /// Delay low-pass cutoff.
+  kDelayLowPassCutoff = BarelyEngineControlType_kDelayLowPassCutoff,
+  /// Delay high-pass cutoff.
+  kDelayHighPassCutoff = BarelyEngineControlType_kDelayHighPassCutoff,
   /// Delay reverb send.
   kDelayReverbSend = BarelyEngineControlType_kDelayReverbSend,
   /// Reverb mix.
@@ -1040,8 +1040,8 @@ enum class InstrumentControlType {
   kDistortionDrive = BarelyInstrumentControlType_kDistortionDrive,
   /// Filter type.
   kFilterType = BarelyInstrumentControlType_kFilterType,
-  /// Filter frequency in hertz.
-  kFilterFrequency = BarelyInstrumentControlType_kFilterFrequency,
+  /// Filter cutoff.
+  kFilterCutoff = BarelyInstrumentControlType_kFilterCutoff,
   /// Filter Q factor.
   kFilterQ = BarelyInstrumentControlType_kFilterQ,
   /// Delay send.

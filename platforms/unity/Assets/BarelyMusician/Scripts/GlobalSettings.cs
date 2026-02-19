@@ -31,11 +31,11 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float DelayFeedback = 0.0f;
 
-    [Range(0.0f, 48000.0f)]
-    public float DelayLowPassFrequency = 48000.0f;
+    [Range(0.0f, 1.0f)]
+    public float DelayLowPassCutoff = 1.0f;
 
-    [Range(0.0f, 48000.0f)]
-    public float DelayHighPassFrequency = 0.0f;
+    [Range(0.0f, 1.0f)]
+    public float DelayHighPassCutoff = 0.0f;
 
     [Range(0.0f, 2.0f)]
     public float DelayReverbSend = 0.0f;
@@ -79,8 +79,8 @@ namespace Barely {
       Engine.DelayMix = DelayMix;
       Engine.DelayTime = DelayTime;
       Engine.DelayFeedback = DelayFeedback;
-      Engine.DelayLowPassFrequency = DelayLowPassFrequency;
-      Engine.DelayHighPassFrequency = DelayHighPassFrequency;
+      Engine.DelayLowPassCutoff = DelayLowPassCutoff;
+      Engine.DelayHighPassCutoff = DelayHighPassCutoff;
       Engine.DelayReverbSend = DelayReverbSend;
       Engine.ReverbMix = ReverbMix;
       Engine.ReverbDampingRatio = ReverbDampingRatio;

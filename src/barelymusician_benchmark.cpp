@@ -115,7 +115,7 @@ void BM_BarelyInstrument_PlaySingleNoteWithLoopingSample(State& state) {
   instrument.SetControl(InstrumentControlType::kSliceMode, SliceMode::kLoop);
   instrument.SetSampleData(kSlices);
   instrument.SetControl(InstrumentControlType::kFilterType, kFilterType);
-  instrument.SetControl(InstrumentControlType::kFilterFrequency, 1000.0f);
+  instrument.SetControl(InstrumentControlType::kFilterCutoff, 0.5f);
   instrument.SetNoteOn(1.0);
 
   std::array<float, kChannelCount * kFrameCount> output_samples;
@@ -136,7 +136,7 @@ void BM_BarelyInstrument_PlaySingleNoteWithOsc(State& state) {
   instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(InstrumentControlType::kOscShape, 0.0f);
   instrument.SetControl(InstrumentControlType::kFilterType, kFilterType);
-  instrument.SetControl(InstrumentControlType::kFilterFrequency, 1000.0f);
+  instrument.SetControl(InstrumentControlType::kFilterCutoff, 0.5f);
   instrument.SetNoteOn(0.0);
 
   std::array<float, kChannelCount * kFrameCount> output_samples;
@@ -159,7 +159,7 @@ void BM_BarelyInstrument_PlayMultipleNotesWithOsc(State& state) {
   instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kFilterType, kFilterType);
-  instrument.SetControl(InstrumentControlType::kFilterFrequency, 1000.0f);
+  instrument.SetControl(InstrumentControlType::kFilterCutoff, 0.5f);
   const int voice_count = instrument.GetControl<int>(InstrumentControlType::kVoiceCount);
   for (int i = 0; i < voice_count; ++i) {
     instrument.SetNoteOn(static_cast<float>(i));

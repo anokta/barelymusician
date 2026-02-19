@@ -485,7 +485,7 @@ MonoBehaviour:
   DistortionAmount: 0
   DistortionDrive: 1
   FilterType: 0
-  FilterFrequency: 0
+  FilterCutoff: 0
   FilterQ: 0.71
   DelaySend: 0.1
   ReverbSend: 0.25
@@ -547,7 +547,7 @@ MonoBehaviour:
   DelayMix: 1
   DelayTime: 0.5
   DelayFeedback: 0.2
-  DelayLowPassFrequency: 48000
+  DelayLowPassFrequency: 1
   DelayHighPassFrequency: 0
   DelayReverbSend: 0
   ReverbMix: 1

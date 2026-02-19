@@ -50,8 +50,6 @@ constexpr float kReverbSend = 0.5f;
 
 constexpr char kSamplePath[] = "audio/sample.wav";
 
-constexpr float kLowPassCutoffFrequency = 2000.0f;
-
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};

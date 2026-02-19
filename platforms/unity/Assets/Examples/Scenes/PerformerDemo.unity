@@ -420,6 +420,7 @@ MonoBehaviour:
   Gain: 0.25
   PitchShift: 0
   Retrigger: 0
+  StereoPan: 0
   VoiceCount: 8
   Attack: 0.02
   Decay: 0.05
@@ -433,11 +434,19 @@ MonoBehaviour:
   OscSkew: 0
   SliceMode: 0
   Slices: []
-  FilterType: 0
-  FilterFrequency: 800
-  FilterQ: 0.5
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0.5
+  FilterQ: 0.5
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -476,10 +485,10 @@ MonoBehaviour:
   _loop: 1
   _loopBeginPosition: 0
   _loopLength: 0.5
-  Triggers: []
   Tasks:
   - _position: 0
     _duration: 1
+    _priority: 0
     OnProcessEvent:
       m_PersistentCalls:
         m_Calls:
@@ -524,6 +533,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 110
+  CompressorMix: 0
+  CompressorAttack: 0.001
+  CompressorRelease: 0.01
+  CompressorThreshold: 1
+  CompressorRatio: 1
+  DelayMix: 1
+  DelayTime: 0
+  DelayFeedback: 0
+  DelayLowPassCutoff: 1
+  DelayHighPassCutoff: 0
+  DelayReverbSend: 0
+  ReverbMix: 1
+  ReverbDampingRatio: 0
+  ReverbRoomSize: 0
+  ReverbStereoWidth: 1
+  ReverbFreeze: 0
+  SidechainMix: 1
+  SidechainAttack: 0.001
+  SidechainRelease: 0.01
+  SidechainThreshold: 1
+  SidechainRatio: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

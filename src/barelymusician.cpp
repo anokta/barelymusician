@@ -223,6 +223,11 @@ bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples, int32_t o
     output_frame_count -= extra_process_count * BARELY_MAX_FRAME_COUNT;
   }
   engine->processor.Process(output_samples, output_channel_count, output_frame_count, timestamp);
+
+  for (int32_t i = 0; i < output_channel_count * output_frame_count; ++i) {
+    output_samples[i] = std::tanh(output_samples[i]);  // soft-clip
+  }
+
   return true;
 }
 

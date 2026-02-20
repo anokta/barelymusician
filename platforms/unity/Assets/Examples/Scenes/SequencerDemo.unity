@@ -221,7 +221,7 @@ MonoBehaviour:
   OscSkew: 0
   SliceMode: 0
   Slices: []
-  BitCrusherDepth: 16
+  BitCrusherDepth: 1
   BitCrusherRate: 1
   DistortionAmount: 0
   DistortionDrive: 1
@@ -695,7 +695,7 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
-  BitCrusherDepth: 16
+  BitCrusherDepth: 1
   BitCrusherRate: 1
   DistortionAmount: 0
   DistortionDrive: 1
@@ -907,7 +907,7 @@ MonoBehaviour:
   OscSkew: 0
   SliceMode: 0
   Slices: []
-  BitCrusherDepth: 16
+  BitCrusherDepth: 1
   BitCrusherRate: 1
   DistortionAmount: 0
   DistortionDrive: 1
@@ -1169,7 +1169,7 @@ MonoBehaviour:
   OscSkew: -0.1
   SliceMode: 0
   Slices: []
-  BitCrusherDepth: 16
+  BitCrusherDepth: 1
   BitCrusherRate: 1
   DistortionAmount: 0
   DistortionDrive: 1
@@ -1306,7 +1306,7 @@ MonoBehaviour:
   Slices:
   - RootPitch: 9
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  BitCrusherDepth: 16
+  BitCrusherDepth: 1
   BitCrusherRate: 1
   DistortionAmount: 0
   DistortionDrive: 1

@@ -480,7 +480,7 @@ MonoBehaviour:
   Slices:
   - RootPitch: 0
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  BitCrusherDepth: 16
+  BitCrusherDepth: 1
   BitCrusherRate: 1
   DistortionAmount: 0
   DistortionDrive: 1

@@ -180,10 +180,10 @@ namespace Barely {
     [Header("Bit Crusher")]
 
     /// Bit crusher depth.
-    [Range(1.0f, 16.0f)]
-    public float BitCrusherDepth = 16.0f;
+    [Range(0.0f, 1.0f)]
+    public float BitCrusherDepth = 1.0f;
 
-    /// Normalized bit crusher rate.
+    /// Bit crusher rate.
     [Range(0.0f, 1.0f)]
     public float BitCrusherRate = 1.0f;
 

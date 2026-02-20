@@ -360,9 +360,9 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
   [InstrumentControlType.BIT_CRUSHER_DEPTH]: {
     name: 'Bitcrusher Depth',
     valueType: 'float',
-    defaultValue: 16.0,
-    minValue: 1.0,
-    maxValue: 16.0,
+    defaultValue: 1.0,
+    minValue: 0.0,
+    maxValue: 1.0,
   },
   [InstrumentControlType.BIT_CRUSHER_RATE]: {
     name: 'Bitcrusher Rate',

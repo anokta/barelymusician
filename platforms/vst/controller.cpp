@@ -43,7 +43,7 @@ const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
     RangeParameter(STR16("Slice Mode"), BarelyInstrumentControlType_kSliceMode, STR16(""), 0,
                    BarelySliceMode_kCount - 1, 0, BarelySliceMode_kCount - 1),
     RangeParameter(STR16("Bitcrusher Depth"), BarelyInstrumentControlType_kBitCrusherDepth,
-                   STR16(""), 1.0, 16.0, 16.0),
+                   STR16(""), 0.0, 1.0, 1.0),
     RangeParameter(STR16("Bitcrusher Rate"), BarelyInstrumentControlType_kBitCrusherRate, STR16(""),
                    0.0, 1.0, 1.0),
     RangeParameter(STR16("Distortion Amount"), BarelyInstrumentControlType_kDistortionAmount,

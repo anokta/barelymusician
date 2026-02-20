@@ -37,7 +37,7 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
       Control(0.0f, 0.0f, 1.0f),                   // kOscShape
       Control(0.0f, -0.5f, 0.5f),                  // kOscSkew
       Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
-      Control(16.0f, 1.0f, 16.0f),                 // kBitCrusherDepth
+      Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherDepth
       Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
       Control(0.0f, 0.0f, 1.0f),                   // kDistortionAmount
       Control(1.0f, 0.0f, 20.0f),                  // kDistortionDrive

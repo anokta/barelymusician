@@ -639,7 +639,7 @@ MonoBehaviour:
   OscSkew: 0
   SliceMode: 0
   Slices: []
-  BitCrusherDepth: 16
+  BitCrusherDepth: 1
   BitCrusherRate: 1
   DistortionAmount: 0
   DistortionDrive: 1

@@ -89,11 +89,11 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.slice_mode = static_cast<SliceMode>(value);
       break;
     case BarelyInstrumentControlType_kBitCrusherDepth:
-      // Offset the bit depth by 1 to normalize the range.
-      params.voice_params.bit_crusher_range = std::pow(2.0f, value - 1.0f);
+      params.voice_params.bit_crusher_range = std::pow(2.0f, value * 15.0f);
       break;
     case BarelyInstrumentControlType_kBitCrusherRate:
-      params.voice_params.bit_crusher_increment = value;
+      params.voice_params.bit_crusher_increment =
+          std::min(2.0f * GetFrequency(engine_.sample_rate, value) / engine_.sample_rate, 1.0f);
       break;
     case BarelyInstrumentControlType_kDistortionAmount:
       params.voice_params.distortion_amount = value;

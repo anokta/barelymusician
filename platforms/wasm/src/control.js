@@ -248,7 +248,7 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
   [InstrumentControlType.GAIN]: {
     name: 'Gain',
     valueType: 'float',
-    defaultValue: 0.25,
+    defaultValue: 1.0,
     minValue: 0.0,
     maxValue: 1.0,
   },

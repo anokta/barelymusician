@@ -107,7 +107,7 @@ namespace Barely {
       private AudioClip _sample = null;
     }
 
-    /// Gain in linear amplitude.
+    /// Gain in logarithmic scale.
     [Range(0.0f, 1.0f)]
     public float Gain = 1.0f;
 
@@ -260,7 +260,7 @@ namespace Barely {
     /// Returns the gain of a note.
     ///
     /// @param pitch Note pitch.
-    /// @return Note gain in linear amplitude.
+    /// @return Note gain in logarithmic scale.
     public float GetNoteGain(float pitch) {
       return Engine.Internal.Instrument_GetNoteControl(_id, pitch,
                                                        Engine.Internal.NoteControlType.GAIN);
@@ -291,7 +291,7 @@ namespace Barely {
     /// Sets the gain of a note.
     ///
     /// @param pitch Note pitch.
-    /// @param gain Gain in linear amplitude.
+    /// @param gain Gain in logarithmic scale.
     public void SetNoteGain(float pitch, float gain) {
       Engine.Internal.Instrument_SetNoteControl(_id, pitch, Engine.Internal.NoteControlType.GAIN,
                                                 gain);

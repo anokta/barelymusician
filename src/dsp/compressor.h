@@ -7,7 +7,7 @@
 
 #include "core/constants.h"
 #include "core/control.h"
-#include "dsp/decibels.h"
+#include "core/decibels.h"
 
 namespace barely {
 

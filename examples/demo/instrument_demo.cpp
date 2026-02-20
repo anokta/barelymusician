@@ -39,7 +39,7 @@ constexpr float kDelayLowPassCutoff = 0.2f;
 constexpr double kTempo = 128.0;
 
 // Instrument settings.
-constexpr float kGain = 0.125f;
+constexpr float kGain = 1.0f;
 constexpr float kOscShape = 0.75f;
 constexpr float kAttack = 0.005f;
 constexpr float kRelease = 0.125f;

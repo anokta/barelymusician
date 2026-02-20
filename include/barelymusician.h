@@ -276,7 +276,7 @@ typedef enum BarelyEngineControlType {
 
 /// Instrument control types.
 typedef enum BarelyInstrumentControlType {
-  /// Gain in linear amplitude.
+  /// Normalized gain in logarithmic scale.
   BarelyInstrumentControlType_kGain = 0,
   /// Pitch shift.
   BarelyInstrumentControlType_kPitchShift,
@@ -340,7 +340,7 @@ typedef enum BarelyInstrumentControlType {
 
 /// Note control types.
 typedef enum BarelyNoteControlType {
-  /// Gain in linear amplitude.
+  /// Normalized gain in logarithmic scale.
   BarelyNoteControlType_kGain = 0,
   /// Pitch shift.
   BarelyNoteControlType_kPitchShift,
@@ -998,7 +998,7 @@ enum class EngineControlType {
 
 /// Instrument control types.
 enum class InstrumentControlType {
-  /// Gain in linear amplitude.
+  /// Normalized gain in logarithmic scale.
   kGain = BarelyInstrumentControlType_kGain,
   /// Pitch shift.
   kPitchShift = BarelyInstrumentControlType_kPitchShift,
@@ -1060,7 +1060,7 @@ enum class InstrumentControlType {
 
 /// Note control types.
 enum class NoteControlType {
-  /// Gain in linear amplitude.
+  /// Normalized gain in logarithmic scale.
   kGain = BarelyNoteControlType_kGain,
   /// Pitch shift.
   kPitchShift = BarelyNoteControlType_kPitchShift,

@@ -3,6 +3,7 @@ target_sources(
   callback.h
   constants.h
   control.h
+  decibels.h
   pool.h
   rng.h
   time.h
@@ -11,6 +12,7 @@ target_sources(
 if(ENABLE_TESTS)
   target_sources(
     barelymusician_test PRIVATE
+    decibels_test.cpp
     pool_test.cpp
     time_test.cpp
   )

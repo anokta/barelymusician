@@ -44,7 +44,7 @@ constexpr float kInstrumentOscShape = 0.5f;
 constexpr float kInstrumentEnvelopeAttack = 0.0f;
 constexpr float kInstrumentEnvelopeRelease = 0.2f;
 constexpr int kInstrumentVoiceCount = 16;
-constexpr float kInstrumentGain = 0.1f;
+constexpr float kInstrumentGain = 0.85f;
 
 // Midi file name.
 constexpr char kMidiFileName[] = "midi/sample.mid";

@@ -151,7 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.1
+  Gain: 0.9
   PitchShift: 0
   Retrigger: 0
   StereoPan: 0
@@ -168,11 +168,19 @@ MonoBehaviour:
   OscSkew: 0
   SliceMode: 0
   Slices: []
-  FilterType: 0
-  FilterFrequency: 0
-  FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0
+  FilterQ: 0.71
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

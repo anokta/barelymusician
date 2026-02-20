@@ -3,7 +3,6 @@ target_sources(
   biquad_filter.h
   bit_crusher.h
   compressor.h
-  decibels.h
   delay_filter.h
   distortion.h
   envelope.h
@@ -18,7 +17,6 @@ if(ENABLE_TESTS)
     barelymusician_test PRIVATE
     biquad_filter_test.cpp
     bit_crusher_test.cpp
-    decibels_test.cpp
     distortion_test.cpp
     envelope_test.cpp
     one_pole_filter_test.cpp

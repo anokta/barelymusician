@@ -96,7 +96,7 @@ namespace Barely.Examples {
       var instrument = tempGameObject.AddComponent<Instrument>();
       instrument.OscMix = 1.0f;
       instrument.OscShape = 0.75f;
-      instrument.Gain = 0.25f;
+      instrument.Gain = 0.9f;
       instrument.Attack = 0.0f;
       instrument.Release = 0.05f;
       _performer = tempGameObject.AddComponent<Performer>();

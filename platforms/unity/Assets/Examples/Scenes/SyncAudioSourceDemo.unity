@@ -356,7 +356,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 6975487e2e525c7429b87492a346d039, type: 3}
+  m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 6975487e2e525c7429b87492a346d039, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -459,10 +459,10 @@ MonoBehaviour:
   _loop: 1
   _loopBeginPosition: 0
   _loopLength: 1
-  Triggers: []
   Tasks:
   - _position: 0
     _duration: 0
+    _priority: 0
     OnProcessEvent:
       m_PersistentCalls:
         m_Calls:
@@ -480,6 +480,7 @@ MonoBehaviour:
           m_CallState: 2
   - _position: 0.5
     _duration: 0
+    _priority: 0
     OnProcessEvent:
       m_PersistentCalls:
         m_Calls:
@@ -621,9 +622,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.5
+  Gain: 1
   PitchShift: 0
   Retrigger: 0
+  StereoPan: 0
   VoiceCount: 4
   Attack: 0
   Decay: 0.1
@@ -637,11 +639,19 @@ MonoBehaviour:
   OscSkew: 0
   SliceMode: 0
   Slices: []
-  FilterType: 0
-  FilterFrequency: 0
-  FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0
+  FilterQ: 0.71
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "core/constants.h"
+#include "core/control.h"
 #include "engine/engine_state.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
@@ -57,7 +58,7 @@ TEST(EngineProcessorTest, PlaySingleNote) {
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int i = 0; i < kStereoChannelCount * kFrameCount; ++i) {
     EXPECT_FLOAT_EQ(samples[i], (i / kStereoChannelCount < kSampleRate)
-                                    ? 0.5f * kSamples[i / kStereoChannelCount]
+                                    ? 0.5f * GetGain(1.0f) * kSamples[i / kStereoChannelCount]
                                     : 0.0f);
   }
 
@@ -114,7 +115,7 @@ TEST(EngineProcessorTest, PlayMultipleNotes) {
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kSampleRate, 0.0);
   for (int i = 0; i < kStereoChannelCount * kSampleRate; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i / kStereoChannelCount]);
+    EXPECT_FLOAT_EQ(samples[i], 0.5f * GetGain(1.0f) * kSamples[i / kStereoChannelCount]);
   }
 
   samples.fill(0.0f);

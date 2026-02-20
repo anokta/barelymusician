@@ -292,7 +292,7 @@ namespace Barely {
 
     public static class Internal {
       public enum InstrumentControlType {
-        // Gain in linear amplitude.
+        // Gain in logarithmic scale.
         [InspectorName("Gain")] GAIN = 0,
         // Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
@@ -398,7 +398,7 @@ namespace Barely {
       }
 
       public enum NoteControlType {
-        // Gain in linear amplitude.
+        // Gain in logarithmic scale.
         [InspectorName("Gain")] GAIN = 0,
         // Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,

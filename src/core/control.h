@@ -6,6 +6,8 @@
 #include <cmath>
 #include <limits>
 
+#include "core/decibels.h"
+
 namespace barely {
 
 struct Control {
@@ -42,11 +44,17 @@ inline constexpr void ApproachValue(float& current_value, float target_value) no
   current_value += (target_value - current_value) * kSmoothingCoeff;
 }
 
-inline float GetFrequency(float sample_rate, float cutoff) noexcept {
+inline float GetFrequency(float sample_rate, float normalized_cutoff) noexcept {
   static constexpr float kMinHz = 20.0f;
   static constexpr float kMinHzInverse = 1.0f / kMinHz;
   const float max_hz = 0.5f * sample_rate;
-  return std::min(kMinHz * std::pow(max_hz * kMinHzInverse, cutoff), max_hz);
+  return std::min(kMinHz * std::pow(max_hz * kMinHzInverse, normalized_cutoff), max_hz);
+}
+
+inline float GetGain(float normalized_gain) noexcept {
+  static constexpr float kMaxDecibels = -6.0f;
+  static constexpr float kDecibelsRange = kMaxDecibels - kMinDecibels;
+  return DecibelsToAmplitude(kMinDecibels + kDecibelsRange * normalized_gain);
 }
 
 }  // namespace barely

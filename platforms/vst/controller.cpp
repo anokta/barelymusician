@@ -12,7 +12,7 @@ using ::Steinberg::Vst::RangeParameter;
 namespace {
 
 const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
-    RangeParameter(STR16("Gain"), BarelyInstrumentControlType_kGain, STR16(""), 0.0, 1.0, 0.125),
+    RangeParameter(STR16("Gain"), BarelyInstrumentControlType_kGain, STR16(""), 0.0, 1.0, 1.0),
     RangeParameter(STR16("Pitch Shift"), BarelyInstrumentControlType_kPitchShift, STR16(""), -4.0,
                    4.0, 0.0),
     RangeParameter(STR16("Retrigger"), BarelyInstrumentControlType_kRetrigger, STR16(""), 0, 1, 0,

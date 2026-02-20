@@ -228,11 +228,11 @@ MonoBehaviour:
   controller: {fileID: 1737834379}
   pixel: {fileID: 2800000, guid: 831f86318f630fc4db677a7235341f4d, type: 3}
   color: {r: 1, g: 0.8745098, b: 0.7294118, a: 1}
-  arpeggiator: {fileID: 0}
   enableModeSwitch: 0
   oscShape: 0
   oscMode: 1
   sliceMode: 3
+  arpMode: 1
 --- !u!114 &675413002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -440,11 +440,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 1737834380}
-  arpeggiator: {fileID: 0}
-  repeater: {fileID: 0}
   octaveOffset: 0
   noteGain: 1
-  repeaterNoteLength: 1
 --- !u!114 &1737834380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -457,9 +454,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.125
+  Gain: 1
   PitchShift: 0
   Retrigger: 1
+  StereoPan: 0
   VoiceCount: 4
   Attack: 0
   Decay: 0
@@ -481,11 +479,19 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
-  FilterType: 0
-  FilterFrequency: 0
-  FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0
+  FilterQ: 0.71
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

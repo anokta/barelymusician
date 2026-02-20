@@ -204,7 +204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.075
+  Gain: 0.85
   PitchShift: 0
   Retrigger: 0
   StereoPan: 0.25
@@ -221,11 +221,19 @@ MonoBehaviour:
   OscSkew: 0
   SliceMode: 0
   Slices: []
-  FilterType: 0
-  FilterFrequency: 0
-  FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0
+  FilterQ: 0.71
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -408,6 +416,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 121
+  CompressorMix: 0
+  CompressorAttack: 0.001
+  CompressorRelease: 0.01
+  CompressorThreshold: 1
+  CompressorRatio: 1
+  DelayMix: 1
+  DelayTime: 0
+  DelayFeedback: 0
+  DelayLowPassCutoff: 1
+  DelayHighPassCutoff: 0
+  DelayReverbSend: 0
+  ReverbMix: 1
+  ReverbDampingRatio: 0
+  ReverbRoomSize: 0
+  ReverbStereoWidth: 1
+  ReverbFreeze: 0
+  SidechainMix: 1
+  SidechainAttack: 0.001
+  SidechainRelease: 0.01
+  SidechainThreshold: 1
+  SidechainRatio: 1
 --- !u!114 &675413002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -641,7 +670,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.25
+  Gain: 0.9
   PitchShift: 0
   Retrigger: 1
   StereoPan: 0
@@ -666,11 +695,19 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
-  FilterType: 0
-  FilterFrequency: 0
-  FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0
+  FilterQ: 0.71
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -853,7 +890,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.1
+  Gain: 0.85
   PitchShift: 0
   Retrigger: 0
   StereoPan: -0.25
@@ -870,11 +907,19 @@ MonoBehaviour:
   OscSkew: 0
   SliceMode: 0
   Slices: []
-  FilterType: 0
-  FilterFrequency: 0
-  FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0
+  FilterQ: 0.71
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1107,7 +1152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.1
+  Gain: 0.8
   PitchShift: 0
   Retrigger: 0
   StereoPan: 0
@@ -1124,11 +1169,19 @@ MonoBehaviour:
   OscSkew: -0.1
   SliceMode: 0
   Slices: []
-  FilterType: 0
-  FilterFrequency: 0
-  FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0
+  FilterQ: 0.71
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1234,7 +1287,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.4
+  Gain: 1
   PitchShift: 0
   Retrigger: 0
   StereoPan: 0
@@ -1253,11 +1306,19 @@ MonoBehaviour:
   Slices:
   - RootPitch: 9
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  FilterType: 0
-  FilterFrequency: 0
-  FilterQ: 0.71
   BitCrusherDepth: 16
   BitCrusherRate: 1
+  DistortionAmount: 0
+  DistortionDrive: 1
+  FilterType: 0
+  FilterCutoff: 0
+  FilterQ: 0.71
+  DelaySend: 0
+  ReverbSend: 0
+  SidechainSend: 0
+  ArpMode: 0
+  ArpGateRatio: 0.5
+  ArpRate: 1
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

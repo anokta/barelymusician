@@ -41,7 +41,7 @@ constexpr float kReverbDampingRatio = 0.1f;
 constexpr float kReverbRoomSize = 0.65f;
 
 // Instrument settings.
-constexpr float kGain = 0.25f;
+constexpr float kGain = 1.0f;
 constexpr bool kLoop = true;
 constexpr float kAttack = 0.0125f;
 constexpr float kRelease = 0.125f;

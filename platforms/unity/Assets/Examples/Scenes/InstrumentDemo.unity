@@ -461,7 +461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.125
+  Gain: 1
   PitchShift: 0
   Retrigger: 0
   StereoPan: 0
@@ -547,8 +547,8 @@ MonoBehaviour:
   DelayMix: 1
   DelayTime: 0.5
   DelayFeedback: 0.2
-  DelayLowPassFrequency: 1
-  DelayHighPassFrequency: 0
+  DelayLowPassCutoff: 1
+  DelayHighPassCutoff: 0
   DelayReverbSend: 0
   ReverbMix: 1
   ReverbDampingRatio: 0.1

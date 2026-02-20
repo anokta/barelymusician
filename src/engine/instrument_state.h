@@ -26,10 +26,10 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
       Control(false),                              // kRetrigger
       Control(0.0f, -1.0f, 1.0f),                  // kStereoPan
       Control(8, 1, 16),                           // kVoiceCount
-      Control(0.0f, 0.0f, 60.0f),                  // kAttack
-      Control(0.0f, 0.0f, 60.0f),                  // kDecay
+      Control(0.0f, 0.0f, 10.0f),                  // kAttack
+      Control(0.0f, 0.0f, 10.0f),                  // kDecay
       Control(1.0f, 0.0f, 1.0f),                   // kSustain
-      Control(0.0f, 0.0f, 60.0f),                  // kRelease
+      Control(0.0f, 0.0f, 10.0f),                  // kRelease
       Control(0.0f, 0.0f, 1.0f),                   // kOscMix
       Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
       Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
@@ -48,7 +48,7 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
       Control(0.0f, 0.0f, 2.0f),                   // kReverbSend
       Control(0.0f, -1.0f, 1.0f),                  // kSidechainSend
       Control(0, 0, BarelyArpMode_kCount - 1),     // kArpMode
-      Control(0.5f, 0.001f, 1.0f),                 // kArpGateRatio
+      Control(0.5f, 0.0f, 1.0f),                   // kArpGateRatio
       Control(1.0f, 0.0f, 16.0f),                  // kArpRate
   };
   for (int i = 0; i < control_override_count; ++i) {

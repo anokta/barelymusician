@@ -43,7 +43,7 @@ using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
       Control(0.0f, 0.0f, 1.0f),   // kDelayHighPassCutoff
       Control(0.0f, 0.0f, 2.0f),   // kDelayReverbSend
       Control(1.0f, 0.0f, 1.0f),   // kReverbMix
-      Control(0.0f, 0.0f, 0.4f),   // kReverbDamping
+      Control(0.0f, 0.0f, 1.0f),   // kReverbDampingRatio
       Control(0.0f, 0.0f, 1.0f),   // kReverbRoomSize
       Control(1.0f, 0.0f, 1.0f),   // kReverbStereoWidth
       Control(false),              // kReverbFreeze

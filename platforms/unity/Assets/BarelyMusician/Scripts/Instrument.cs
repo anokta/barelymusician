@@ -128,11 +128,11 @@ namespace Barely {
     [Header("Envelope")]
 
     /// Envelope attack in seconds.
-    [Range(0.0f, 60.0f)]
+    [Range(0.0f, 10.0f)]
     public float Attack = 0.05f;
 
     /// Envelope decay in seconds.
-    [Range(0.0f, 60.0f)]
+    [Range(0.0f, 10.0f)]
     public float Decay = 0.0f;
 
     /// Envelope sustain.
@@ -140,7 +140,7 @@ namespace Barely {
     public float Sustain = 1.0f;
 
     /// Envelope release in seconds.
-    [Range(0.0f, 60.0f)]
+    [Range(0.0f, 10.0f)]
     public float Release = 0.25f;
 
     [Header("Oscillator")]

@@ -312,8 +312,8 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kBitCrusherDepth,
   /// Bit crusher rate.
   BarelyInstrumentControlType_kBitCrusherRate,
-  /// Distortion amount.
-  BarelyInstrumentControlType_kDistortionAmount,
+  /// Distortion mix.
+  BarelyInstrumentControlType_kDistortionMix,
   /// Distortion drive.
   BarelyInstrumentControlType_kDistortionDrive,
   /// Filter type.
@@ -1034,8 +1034,8 @@ enum class InstrumentControlType {
   kBitCrusherDepth = BarelyInstrumentControlType_kBitCrusherDepth,
   /// Bit crusher rate.
   kBitCrusherRate = BarelyInstrumentControlType_kBitCrusherRate,
-  /// Distortion amount.
-  kDistortionAmount = BarelyInstrumentControlType_kDistortionAmount,
+  /// Distortion mix.
+  kDistortionMix = BarelyInstrumentControlType_kDistortionMix,
   /// Distortion drive.
   kDistortionDrive = BarelyInstrumentControlType_kDistortionDrive,
   /// Filter type.

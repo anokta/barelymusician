@@ -42,7 +42,7 @@ export const InstrumentControlType = Object.freeze({
   SLICE_MODE: 15,
   BIT_CRUSHER_DEPTH: 16,
   BIT_CRUSHER_RATE: 17,
-  DISTORTION_AMOUNT: 18,
+  DISTORTION_MIX: 18,
   DISTORTION_DRIVE: 19,
   FILTER_TYPE: 20,
   FILTER_CUTOFF: 21,
@@ -371,8 +371,8 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [InstrumentControlType.DISTORTION_AMOUNT]: {
-    name: 'Distortion Amount',
+  [InstrumentControlType.DISTORTION_MIX]: {
+    name: 'Distortion Mix',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
@@ -381,9 +381,9 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
   [InstrumentControlType.DISTORTION_DRIVE]: {
     name: 'Distortion Drive',
     valueType: 'float',
-    defaultValue: 1.0,
+    defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 20.0,
+    maxValue: 1.0,
   },
   [InstrumentControlType.FILTER_TYPE]: {
     name: 'Filter Type',

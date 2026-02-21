@@ -13,7 +13,7 @@ constexpr float kInput[kInputLength] = {0.2f, -0.4f, 0.6f, -0.8f, 1.0f};
 
 constexpr float kDrive = 1.0f;
 
-TEST(DistortionTest, FullAmount) {
+TEST(DistortionTest, FullMix) {
   for (const float input : kInput) {
     EXPECT_FLOAT_EQ(Distortion(input, 1.0f, kDrive), std::tanh(input));
   }

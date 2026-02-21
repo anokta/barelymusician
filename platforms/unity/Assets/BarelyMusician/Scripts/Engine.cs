@@ -328,8 +328,8 @@ namespace Barely {
         [InspectorName("Bit Crusher Depth")] BIT_CRUSHER_DEPTH,
         // Bit crusher rate.
         [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
-        // Distortion amount.
-        [InspectorName("Distortion Amount")] DISTORTION_AMOUNT,
+        // Distortion mix.
+        [InspectorName("Distortion Mix")] DISTORTION_MIX,
         // Distortion drive.
         [InspectorName("Distortion Drive")] DISTORTION_DRIVE,
         // Filter type.
@@ -478,8 +478,8 @@ namespace Barely {
             instrument.BitCrusherDepth;
         _instrumentControlOverrides[(int)InstrumentControlType.BIT_CRUSHER_RATE].value =
             instrument.BitCrusherRate;
-        _instrumentControlOverrides[(int)InstrumentControlType.DISTORTION_AMOUNT].value =
-            instrument.DistortionAmount;
+        _instrumentControlOverrides[(int)InstrumentControlType.DISTORTION_MIX].value =
+            instrument.DistortionMix;
         _instrumentControlOverrides[(int)InstrumentControlType.DISTORTION_DRIVE].value =
             instrument.DistortionDrive;
         _instrumentControlOverrides[(int)InstrumentControlType.FILTER_TYPE].value =

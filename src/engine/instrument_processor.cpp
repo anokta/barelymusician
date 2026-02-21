@@ -95,11 +95,11 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.voice_params.bit_crusher_increment =
           std::min(2.0f * GetFrequency(engine_.sample_rate, value) / engine_.sample_rate, 1.0f);
       break;
-    case BarelyInstrumentControlType_kDistortionAmount:
+    case BarelyInstrumentControlType_kDistortionMix:
       params.voice_params.distortion_amount = value;
       break;
     case BarelyInstrumentControlType_kDistortionDrive:
-      params.voice_params.distortion_drive = value;
+      params.voice_params.distortion_drive = 1.0f + kDistortionDriveRange * value;
       break;
     case BarelyInstrumentControlType_kDelaySend:
       params.voice_params.delay_send = value;

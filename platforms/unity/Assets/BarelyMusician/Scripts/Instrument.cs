@@ -189,13 +189,13 @@ namespace Barely {
 
     [Header("Distortion")]
 
-    /// Distortion amount.
+    /// Distortion mix.
     [Range(0.0f, 1.0f)]
-    public float DistortionAmount = 0.0f;
+    public float DistortionMix = 0.0f;
 
     /// Distortion drive.
-    [Range(0.0f, 20.0f)]
-    public float DistortionDrive = 1.0f;
+    [Range(0.0f, 1.0f)]
+    public float DistortionDrive = 0.0f;
 
     [Header("Filter")]
 
@@ -363,7 +363,7 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.SLICE_MODE, (float)SliceMode);
       SetControl(Engine.Internal.InstrumentControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.InstrumentControlType.BIT_CRUSHER_RATE, BitCrusherRate);
-      SetControl(Engine.Internal.InstrumentControlType.DISTORTION_AMOUNT, DistortionAmount);
+      SetControl(Engine.Internal.InstrumentControlType.DISTORTION_MIX, DistortionMix);
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_DRIVE, DistortionDrive);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_TYPE, (float)FilterType);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_CUTOFF, FilterCutoff);

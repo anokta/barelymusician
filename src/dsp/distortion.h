@@ -8,11 +8,14 @@
 
 namespace barely {
 
+// [1.0f, 20.0f]
+inline constexpr float kDistortionDriveRange = 19.0f;
+
 // Applies soft-clip distortion effect to the input sample.
-[[nodiscard]] inline float Distortion(float input, float amount, float drive) noexcept {
-  assert(amount >= 0.0f);
+[[nodiscard]] inline float Distortion(float input, float mix, float drive) noexcept {
+  assert(mix >= 0.0f);
   assert(drive >= 0.0f);
-  return std::lerp(input, std::tanh(input * drive), amount);
+  return std::lerp(input, std::tanh(input * drive), mix);
 }
 
 }  // namespace barely

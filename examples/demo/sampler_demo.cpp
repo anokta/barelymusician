@@ -37,7 +37,7 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
 // Engine settings.
-constexpr float kReverbDampingRatio = 0.1f;
+constexpr float kReverbDamping = 0.25f;
 constexpr float kReverbRoomSize = 0.65f;
 
 // Instrument settings.
@@ -85,7 +85,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
-  engine.SetControl(EngineControlType::kReverbDampingRatio, kReverbDampingRatio);
+  engine.SetControl(EngineControlType::kReverbDamping, kReverbDamping);
   engine.SetControl(EngineControlType::kReverbRoomSize, kReverbRoomSize);
 
   auto instrument = engine.CreateInstrument({{

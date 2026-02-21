@@ -25,7 +25,7 @@ export class EngineUi {
     this._delayFeedback = 0.0;
 
     /** @private {number} */
-    this._reverbDampingRatio = 0.0;
+    this._reverbDamping = 0.0;
 
     /** @private {number} */
     this._reverbRoomSize = 0.0;
@@ -51,7 +51,7 @@ export class EngineUi {
         this._tempo = 120.0;
         this.delayTime = 0.5;
         this.delayFeedback = 0.2;
-        this.reverbDampingRatio = 0.1;
+        this.reverbDamping = 0.1;
         this.reverbRoomSize = 0.6;
       }
 
@@ -70,7 +70,7 @@ export class EngineUi {
       tempoJson,
       delayTimeJson,
       delayFeedbackJson,
-      reverbDampingRatioJson,
+      reverbDampingJson,
       reverbRoomSizeJson,
       instrumentsJson,
       performersJson,
@@ -79,7 +79,7 @@ export class EngineUi {
     this.engine.setTempo(tempoJson);
     this.delayTime = delayTimeJson;
     this.delayFeedback = delayFeedbackJson;
-    this.reverbDampingRatio = reverbDampingRatioJson;
+    this.reverbDamping = reverbDampingJson;
     this.reverbRoomSize = reverbRoomSizeJson;
 
     /** @type {!Map<number, !InstrumentUi>} */
@@ -132,7 +132,7 @@ export class EngineUi {
     const tempoJson = this._tempo;
     const delayTimeJson = this._delayTime;
     const delayFeedbackJson = this._delayFeedback;
-    const reverbDampingRatioJson = this._reverbDampingRatio;
+    const reverbDampingJson = this._reverbDamping;
     const reverbRoomSizeJson = this._reverbRoomSize;
 
     const instrumentsJson = Array.from(this._instruments.entries()).map(([handle, instrument]) => {
@@ -170,7 +170,7 @@ export class EngineUi {
       tempoJson,
       delayTimeJson,
       delayFeedbackJson,
-      reverbDampingRatioJson,
+      reverbDampingJson,
       reverbRoomSizeJson,
       instrumentsJson,
       performersJson,
@@ -209,10 +209,10 @@ export class EngineUi {
         </div>
 
         <div class="engine-reverb">
-          <label for="reverbDampingRatioSlider">Reverb Damping</label>
-          <input type="range" min="0.0" max="0.4" value="${this._reverbDampingRatio}"
-                 step="0.05" id="reverbDampingRatioSlider">
-          <span id="reverbDampingRatioValue">${this._reverbDampingRatio.toFixed(2)}</span>
+          <label for="reverbDampingSlider">Reverb Damping</label>
+          <input type="range" min="0.0" max="0.4" value="${this._reverbDamping}"
+                 step="0.05" id="reverbDampingSlider">
+          <span id="reverbDampingValue">${this._reverbDamping.toFixed(2)}</span>
 
           <label for="reverbRoomSizeSlider">Room Size</label>
           <input type="range" min="0.0" max="1.0" value="${this._reverbRoomSize}"
@@ -298,13 +298,13 @@ export class EngineUi {
     this.engine.setControl(EngineControlType.DELAY_FEEDBACK, newDelayFeedback);
   }
 
-  set reverbDampingRatio(newReverbDampingRatio) {
-    if (this._reverbDampingRatio === newReverbDampingRatio) return;
+  set reverbDamping(newReverbDamping) {
+    if (this._reverbDamping === newReverbDamping) return;
 
-    this._reverbDampingRatio = newReverbDampingRatio;
-    this.reverbDampingRatioSlider.value = this._reverbDampingRatio;
-    this.reverbDampingRatioValue.textContent = this._reverbDampingRatio.toFixed(1);
-    this.engine.setControl(EngineControlType.REVERB_DAMPING_RATIO, newReverbDampingRatio);
+    this._reverbDamping = newReverbDamping;
+    this.reverbDampingSlider.value = this._reverbDamping;
+    this.reverbDampingValue.textContent = this._reverbDamping.toFixed(1);
+    this.engine.setControl(EngineControlType.REVERB_DAMPING, newReverbDamping);
   }
 
   set reverbRoomSize(newReverbRoomSize) {
@@ -324,8 +324,8 @@ export class EngineUi {
     return this._delayFeedback;
   }
 
-  get reverbDampingRatio() {
-    return this._reverbDampingRatio;
+  get reverbDamping() {
+    return this._reverbDamping;
   }
 
   get reverbRoomSize() {
@@ -401,10 +401,10 @@ export class EngineUi {
     this.delayFeedbackSlider.addEventListener('input', () => {
       this.delayFeedback = Number(this.delayFeedbackSlider.value);
     });
-    this.reverbDampingRatioSlider = this.container.querySelector('#reverbDampingRatioSlider');
-    this.reverbDampingRatioValue = this.container.querySelector('#reverbDampingRatioValue');
-    this.reverbDampingRatioSlider.addEventListener('input', () => {
-      this.reverbDampingRatio = Number(this.reverbDampingRatioSlider.value);
+    this.reverbDampingSlider = this.container.querySelector('#reverbDampingSlider');
+    this.reverbDampingValue = this.container.querySelector('#reverbDampingValue');
+    this.reverbDampingSlider.addEventListener('input', () => {
+      this.reverbDamping = Number(this.reverbDampingSlider.value);
     });
     this.reverbRoomSizeSlider = this.container.querySelector('#reverbRoomSizeSlider');
     this.reverbRoomSizeValue = this.container.querySelector('#reverbRoomSizeValue');

@@ -49,8 +49,8 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float ReverbMix = 1.0f;
 
-    [Range(0.0f, 0.4f)]
-    public float ReverbDampingRatio = 0.0f;
+    [Range(0.0f, 1.0f)]
+    public float ReverbDamping = 0.0f;
 
     [Range(0.0f, 1.0f)]
     public float ReverbRoomSize = 0.0f;
@@ -91,7 +91,7 @@ namespace Barely {
       Engine.DelayHighPassCutoff = DelayHighPassCutoff;
       Engine.DelayReverbSend = DelayReverbSend;
       Engine.ReverbMix = ReverbMix;
-      Engine.ReverbDampingRatio = ReverbDampingRatio;
+      Engine.ReverbDamping = ReverbDamping;
       Engine.ReverbRoomSize = ReverbRoomSize;
       Engine.ReverbStereoWidth = ReverbStereoWidth;
       Engine.ReverbFreeze = ReverbFreeze;

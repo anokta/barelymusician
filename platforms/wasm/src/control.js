@@ -11,7 +11,7 @@ export const EngineControlType = Object.freeze({
   DELAY_HIGH_PASS_CUTOFF: 9,
   DELAY_REVERB_SEND: 10,
   REVERB_MIX: 11,
-  REVERB_DAMPING_RATIO: 12,
+  REVERB_DAMPING: 12,
   REVERB_ROOM_SIZE: 13,
   REVERB_STEREO_WIDTH: 14,
   REVERB_FREEZE: 15,
@@ -179,8 +179,8 @@ export const ENGINE_CONTROLS = Object.freeze({
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [EngineControlType.REVERB_DAMPING_RATIO]: {
-    name: 'Reverb Damping Ratio',
+  [EngineControlType.REVERB_DAMPING]: {
+    name: 'Reverb Damping',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,

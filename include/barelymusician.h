@@ -253,7 +253,7 @@ typedef enum BarelyEngineControlType {
   /// Reverb mix.
   BarelyEngineControlType_kReverbMix,
   /// Reverb damping ratio.
-  BarelyEngineControlType_kReverbDampingRatio,
+  BarelyEngineControlType_kReverbDamping,
   /// Reverb room size.
   BarelyEngineControlType_kReverbRoomSize,
   /// Reverb stereo width.
@@ -977,7 +977,7 @@ enum class EngineControlType {
   /// Reverb mix.
   kReverbMix = BarelyEngineControlType_kReverbMix,
   /// Reverb damping ratio.
-  kReverbDampingRatio = BarelyEngineControlType_kReverbDampingRatio,
+  kReverbDamping = BarelyEngineControlType_kReverbDamping,
   /// Reverb room size.
   kReverbRoomSize = BarelyEngineControlType_kReverbRoomSize,
   /// Reverb stereo width.

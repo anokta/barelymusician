@@ -156,17 +156,16 @@ namespace Barely {
     private static float _reverbMix = 1.0f;
 
     /// Reverb damping ratio.
-    public static float ReverbDampingRatio {
-      get { return _reverbDampingRatio; }
+    public static float ReverbDamping {
+      get { return _reverbDamping; }
       set {
-        if (_reverbDampingRatio != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_DAMPING_RATIO, value);
-          _reverbDampingRatio =
-              Internal.Engine_GetControl(Internal.EngineControlType.REVERB_DAMPING_RATIO);
+        if (_reverbDamping != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_DAMPING, value);
+          _reverbDamping = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_DAMPING);
         }
       }
     }
-    private static float _reverbDampingRatio = 0.0f;
+    private static float _reverbDamping = 0.0f;
 
     /// Reverb room size.
     public static float ReverbRoomSize {
@@ -374,7 +373,7 @@ namespace Barely {
         // Reverb mix.
         [InspectorName("Reverb Mix")] REVERB_MIX,
         // Reverb damping ratio.
-        [InspectorName("Reverb Damping Ratio")] REVERB_DAMPING_RATIO,
+        [InspectorName("Reverb Damping")] REVERB_DAMPING,
         // Reverb room size.
         [InspectorName("Reverb Room Size")] REVERB_ROOM_SIZE,
         // Reverb stereo width.
@@ -1027,8 +1026,7 @@ namespace Barely {
                                   _delayHighPassCutoff);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_REVERB_SEND, _delayReverbSend);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_MIX, _reverbMix);
-          BarelyEngine_SetControl(_handle, EngineControlType.REVERB_DAMPING_RATIO,
-                                  _reverbDampingRatio);
+          BarelyEngine_SetControl(_handle, EngineControlType.REVERB_DAMPING, _reverbDamping);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_ROOM_SIZE, _reverbRoomSize);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_STEREO_WIDTH,
                                   _reverbStereoWidth);

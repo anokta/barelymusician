@@ -463,15 +463,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 1
   PitchShift: 0
-  Retrigger: 0
   StereoPan: 0
+  Retrigger: 0
   VoiceCount: 8
   Attack: 0.05
   Decay: 0
   Sustain: 1
   Release: 0.25
-  OscMode: 0
   OscMix: 0
+  OscMode: 0
   OscNoiseMix: 0
   OscPitchShift: 0
   OscShape: 0
@@ -551,7 +551,7 @@ MonoBehaviour:
   DelayHighPassCutoff: 0
   DelayReverbSend: 0
   ReverbMix: 1
-  ReverbDampingRatio: 0.1
+  ReverbDamping: 0.25
   ReverbRoomSize: 0.65
   ReverbStereoWidth: 1
   ReverbFreeze: 0

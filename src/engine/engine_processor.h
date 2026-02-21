@@ -119,7 +119,7 @@ class EngineProcessor {
       case BarelyEngineControlType_kReverbMix:
         engine_.target_params.reverb_params.mix = value;
         break;
-      case BarelyEngineControlType_kReverbDampingRatio:
+      case BarelyEngineControlType_kReverbDamping:
         engine_.target_params.reverb_params.damping_ratio = value * kMaxDampingRatio;
         break;
       case BarelyEngineControlType_kReverbRoomSize:

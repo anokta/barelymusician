@@ -10,7 +10,7 @@ namespace Barely.Examples {
     public bool enableModeSwitch = false;
     [Range(0.0f, 1.0f)]
     public float oscShape = 0.0f;
-    public OscMode oscMode = OscMode.MIX;
+    public OscMode oscMode = OscMode.CROSSFADE;
     public SliceMode sliceMode = SliceMode.LOOP;
     public ArpMode arpMode = ArpMode.UP;
 

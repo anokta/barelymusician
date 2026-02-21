@@ -78,10 +78,10 @@ export const FilterType = Object.freeze({
 });
 
 export const OscMode = Object.freeze({
-  MIX: 0,
+  CROSSFADE: 0,
   AM: 1,
-  ENVELOPE_FOLLOWER: 2,
-  FM: 3,
+  FM: 2,
+  MA: 3,
   MF: 4,
   RING: 5,
   COUNT: 6,
@@ -318,7 +318,7 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
   [InstrumentControlType.OSC_MODE]: {
     name: 'Osc Mode',
     valueType: OscMode,
-    defaultValue: OscMode.MIX,
+    defaultValue: OscMode.CROSSFADE,
     minValue: 0,
     maxValue: OscMode.COUNT - 1,
   },

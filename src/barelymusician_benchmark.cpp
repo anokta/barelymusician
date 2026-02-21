@@ -47,7 +47,7 @@ void BM_BarelyEngine_ProcessInstrumentUpdates(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
-  instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
+  instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kCrossfade);
   instrument.SetControl(InstrumentControlType::kOscShape, 0.0f);
 
   std::array<float, kChannelCount * kFrameCount> output_samples;
@@ -85,7 +85,7 @@ void BM_BarelyEngine_ProcessMultipleInstruments(State& state) {
 
   for (int i = 0; i < kInstrumentCount; ++i) {
     auto instrument = engine.CreateInstrument();
-    instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
+    instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kCrossfade);
     instrument.SetControl(InstrumentControlType::kOscShape, 0.0f);
     const int voice_count = instrument.GetControl<int>(InstrumentControlType::kVoiceCount);
     for (int voice_index = 0; voice_index < voice_count; ++voice_index) {
@@ -133,7 +133,7 @@ void BM_BarelyInstrument_PlaySingleNoteWithOsc(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
-  instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
+  instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kCrossfade);
   instrument.SetControl(InstrumentControlType::kOscShape, 0.0f);
   instrument.SetControl(InstrumentControlType::kFilterType, kFilterType);
   instrument.SetControl(InstrumentControlType::kFilterCutoff, 0.5f);
@@ -156,7 +156,7 @@ void BM_BarelyInstrument_PlayMultipleNotesWithOsc(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
-  instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kMix);
+  instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kCrossfade);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kFilterType, kFilterType);
   instrument.SetControl(InstrumentControlType::kFilterCutoff, 0.5f);

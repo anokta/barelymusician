@@ -376,15 +376,15 @@ typedef enum BarelyFilterType {
 
 /// Oscillator modes.
 typedef enum BarelyOscMode {
-  /// Mix.
-  BarelyOscMode_kMix = 0,
-  /// Amplitude modulation by the oscillator applied to the slice.
+  /// Linear crossfade between the slice and the oscillator.
+  BarelyOscMode_kCrossfade = 0,
+  /// Amplitude modulation applied to the slice by the oscillator.
   BarelyOscMode_kAm,
-  /// Amplitude modulation by the slice applied to the oscillator.
-  BarelyOscMode_kEnvelopeFollower,
-  /// Frequency modulation using oscillator applied to slice.
+  /// Frequency modulation applied to the slice by the oscillator.
   BarelyOscMode_kFm,
-  /// Frequency modulation using slice applied to oscillator.
+  /// Amplitude modulation applied to the oscillator by the slice.
+  BarelyOscMode_kMa,
+  /// Frequency modulation applied to the oscillator by the slice.
   BarelyOscMode_kMf,
   /// Ring modulation.
   BarelyOscMode_kRing,
@@ -1090,15 +1090,15 @@ enum class FilterType {
 
 /// Oscillator modes.
 enum class OscMode {
-  /// Mix.
-  kMix = BarelyOscMode_kMix,
-  /// Amplitude modulation by the oscillator applied to the slice.
+  /// Linear crossfade between the slice and the oscillator.
+  kCrossfade = BarelyOscMode_kCrossfade,
+  /// Amplitude modulation applied to the slice by the oscillator.
   kAm = BarelyOscMode_kAm,
-  /// Amplitude modulation by the slice applied to the oscillator.
-  kEnvelopeFollower = BarelyOscMode_kEnvelopeFollower,
-  /// Frequency modulation by the oscillator applied to the slice.
+  /// Frequency modulation applied to the slice by the oscillator.
   kFm = BarelyOscMode_kFm,
-  /// Frequency modulation by the slice applied to the oscillator.
+  /// Amplitude modulation applied to the oscillator by the slice.
+  kMa = BarelyOscMode_kMa,
+  /// Frequency modulation applied to the oscillator by the slice.
   kMf = BarelyOscMode_kMf,
   /// Ring modulation.
   kRing = BarelyOscMode_kRing,

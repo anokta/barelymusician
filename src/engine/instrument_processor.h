@@ -116,7 +116,8 @@ class InstrumentProcessor {
 
     float output = voice.envelope.Next();
 
-    if (instrument_params.osc_mode == OscMode::kMix || instrument_params.osc_mode == OscMode::kMf) {
+    if (instrument_params.osc_mode == OscMode::kCrossfade ||
+        instrument_params.osc_mode == OscMode::kMf) {
       output *= osc_output + slice_output;
     } else if (instrument_params.osc_mode == OscMode::kFm) {
       output *= slice_sample;
@@ -124,7 +125,7 @@ class InstrumentProcessor {
       output *= osc_output * slice_sample + slice_output;
     } else if (instrument_params.osc_mode == OscMode::kAm) {
       output *= std::abs(osc_output) * slice_sample + slice_output;
-    } else if (instrument_params.osc_mode == OscMode::kEnvelopeFollower) {
+    } else if (instrument_params.osc_mode == OscMode::kMa) {
       output *= osc_output * std::abs(slice_sample) + slice_output;
     }
 

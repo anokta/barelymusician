@@ -15,7 +15,7 @@ struct InstrumentParams {
   VoiceParams voice_params = {};
   Envelope::Adsr adsr = {};
 
-  OscMode osc_mode = OscMode::kMix;
+  OscMode osc_mode = OscMode::kCrossfade;
   SliceMode slice_mode = SliceMode::kSustain;
 
   FilterType filter_type = FilterType::kNone;

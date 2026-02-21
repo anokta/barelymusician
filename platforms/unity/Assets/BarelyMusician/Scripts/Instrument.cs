@@ -28,15 +28,15 @@ namespace Barely {
 
   /// Oscillator modes.
   public enum OscMode {
-    /// Mix.
-    [InspectorName("Mix")] MIX = 0,
-    /// Amplitude modulation by the oscillator applied to the slice.
+    /// Linear crossfade between the slice and the oscillator.
+    [InspectorName("Crossfade")] CROSSFADE = 0,
+    /// Amplitude modulation applied to the slice by the oscillator.
     [InspectorName("AM")] AM,
-    /// Aamplitude modulation by the slice applied to the oscillator.
-    [InspectorName("Envelope Follower")] ENVELOPE_FOLLOWER,
-    /// Frequency modulation by the oscillator applied to the slice.
+    /// Frequency modulation applied to the slice by the oscillator.
     [InspectorName("FM")] FM,
-    /// Frequency modulation by the slice applied to the oscillator.
+    /// Aamplitude modulation applied to the oscillator by the slice.
+    [InspectorName("MA")] MA,
+    /// Frequency modulation applied to the oscillator by the slice.
     [InspectorName("MF")] MF,
     /// Ring modulation.
     [InspectorName("Ring")] RING,
@@ -115,11 +115,11 @@ namespace Barely {
     [Range(-2.0f, 2.0f)]
     public float PitchShift = 0.0f;
 
-    /// Retrigger.
-    public bool Retrigger = false;
-
     [Range(-1.0f, 1.0f)]
     public float StereoPan = 0.0f;
+
+    /// Retrigger.
+    public bool Retrigger = false;
 
     /// Number of voices.
     [Range(1, 16)]
@@ -145,12 +145,12 @@ namespace Barely {
 
     [Header("Oscillator")]
 
-    /// Oscillator mode.
-    public OscMode OscMode = OscMode.MIX;
-
     /// Oscillator mix.
     [Range(0.0f, 1.0f)]
     public float OscMix = 0.5f;
+
+    /// Oscillator mode.
+    public OscMode OscMode = OscMode.CROSSFADE;
 
     /// Oscillator noise mix.
     [Range(0.0f, 1.0f)]

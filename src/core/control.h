@@ -51,10 +51,14 @@ inline float GetFrequency(float sample_rate, float normalized_cutoff) noexcept {
   return std::min(kMinHz * std::pow(max_hz * kMinHzInverse, normalized_cutoff), max_hz);
 }
 
-inline float GetGain(float normalized_gain) noexcept {
+inline float GetGainDb(float normalized_gain) noexcept {
   static constexpr float kMaxDecibels = -6.0f;
   static constexpr float kDecibelsRange = kMaxDecibels - kMinDecibels;
-  return DecibelsToAmplitude(kMinDecibels + kDecibelsRange * normalized_gain);
+  return kMinDecibels + kDecibelsRange * normalized_gain;
+}
+
+inline float GetGain(float normalized_gain) noexcept {
+  return DecibelsToAmplitude(GetGainDb(normalized_gain));
 }
 
 }  // namespace barely

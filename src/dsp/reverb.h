@@ -11,6 +11,8 @@
 
 namespace barely {
 
+inline constexpr float kMaxDampingRatio = 0.4f;
+
 struct ReverbParams {
   float mix = 1.0f;
   float feedback = 0.0f;

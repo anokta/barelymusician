@@ -90,7 +90,7 @@ class EngineProcessor {
         engine_.compressor.SetRelease(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kCompressorThreshold:
-        engine_.target_params.compressor_params.threshold_db = AmplitudeToDecibels(value);
+        engine_.target_params.compressor_params.threshold_db = GetGainDb(value);
         break;
       case BarelyEngineControlType_kCompressorRatio:
         engine_.target_params.compressor_params.ratio = value;
@@ -103,7 +103,7 @@ class EngineProcessor {
             std::max(value * engine_.sample_rate, 1.0f), static_cast<float>(kMaxDelayFrameCount));
         break;
       case BarelyEngineControlType_kDelayFeedback:
-        engine_.target_params.delay_params.feedback = std::min(value, kMaxDelayFeedback);
+        engine_.target_params.delay_params.feedback = value * kMaxDelayFeedback;
         break;
       case BarelyEngineControlType_kDelayLowPassCutoff:
         engine_.target_params.delay_params.low_pass_coeff =
@@ -120,7 +120,7 @@ class EngineProcessor {
         engine_.target_params.reverb_params.mix = value;
         break;
       case BarelyEngineControlType_kReverbDampingRatio:
-        engine_.target_params.reverb_params.damping_ratio = 0.4f * value;
+        engine_.target_params.reverb_params.damping_ratio = value * kMaxDampingRatio;
         break;
       case BarelyEngineControlType_kReverbRoomSize:
         engine_.target_params.reverb_params.SetFeedback(value);
@@ -141,7 +141,7 @@ class EngineProcessor {
         engine_.sidechain.SetRelease(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kSidechainThreshold:
-        engine_.target_params.sidechain_threshold_db = AmplitudeToDecibels(value);
+        engine_.target_params.sidechain_threshold_db = GetGainDb(value);
         break;
       case BarelyEngineControlType_kSidechainRatio:
         engine_.target_params.sidechain_ratio = value;

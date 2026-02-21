@@ -223,7 +223,7 @@ MonoBehaviour:
   Slices: []
   BitCrusherDepth: 1
   BitCrusherRate: 1
-  DistortionAmount: 0
+  DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
@@ -417,8 +417,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Bpm: 121
   CompressorMix: 0
-  CompressorAttack: 0.001
-  CompressorRelease: 0.01
+  CompressorAttack: 0
+  CompressorRelease: 0
   CompressorThreshold: 1
   CompressorRatio: 1
   DelayMix: 1
@@ -433,8 +433,8 @@ MonoBehaviour:
   ReverbStereoWidth: 1
   ReverbFreeze: 0
   SidechainMix: 1
-  SidechainAttack: 0.001
-  SidechainRelease: 0.01
+  SidechainAttack: 0
+  SidechainRelease: 0
   SidechainThreshold: 1
   SidechainRatio: 1
 --- !u!114 &675413002
@@ -697,7 +697,7 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
   BitCrusherDepth: 1
   BitCrusherRate: 1
-  DistortionAmount: 0
+  DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
@@ -909,7 +909,7 @@ MonoBehaviour:
   Slices: []
   BitCrusherDepth: 1
   BitCrusherRate: 1
-  DistortionAmount: 0
+  DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
@@ -1171,7 +1171,7 @@ MonoBehaviour:
   Slices: []
   BitCrusherDepth: 1
   BitCrusherRate: 1
-  DistortionAmount: 0
+  DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
@@ -1308,7 +1308,7 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   BitCrusherDepth: 1
   BitCrusherRate: 1
-  DistortionAmount: 0
+  DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0

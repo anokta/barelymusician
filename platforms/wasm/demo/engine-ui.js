@@ -198,7 +198,7 @@ export class EngineUi {
 
         <div class="engine-delay">
           <label for="delayTimeSlider">Delay Time</label>
-          <input type="range" min="0.0" max="10.0" value="${this._delayTime}"
+          <input type="range" min="0.0" max="8.0" value="${this._delayTime}"
                  step="0.1" id="delayTimeSlider">
           <span id="delayTimeValue">${this._delayTime.toFixed(1)}</span>
 

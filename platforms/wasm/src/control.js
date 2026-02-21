@@ -107,14 +107,14 @@ export const ENGINE_CONTROLS = Object.freeze({
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 10.0,
+    maxValue: 8.0,
   },
   [EngineControlType.COMPRESSOR_RELEASE]: {
     name: 'Compressor Release',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 10.0,
+    maxValue: 8.0,
   },
   [EngineControlType.COMPRESSOR_THRESHOLD]: {
     name: 'Compressor Threshold',
@@ -142,7 +142,7 @@ export const ENGINE_CONTROLS = Object.freeze({
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 10.0,
+    maxValue: 8.0,
   },
   [EngineControlType.DELAY_FEEDBACK]: {
     name: 'Delay Feedback',
@@ -219,14 +219,14 @@ export const ENGINE_CONTROLS = Object.freeze({
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 10.0,
+    maxValue: 8.0,
   },
   [EngineControlType.SIDECHAIN_RELEASE]: {
     name: 'Sidechain Release',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 10.0,
+    maxValue: 8.0,
   },
   [EngineControlType.SIDECHAIN_THRESHOLD]: {
     name: 'Sidechain Threshold',

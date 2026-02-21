@@ -10,11 +10,11 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float CompressorMix = 0.0f;
 
-    [Range(0.001f, 1.0f)]
-    public float CompressorAttack = 0.001f;
+    [Range(0.0f, 8.0f)]
+    public float CompressorAttack = 0.0f;
 
-    [Range(0.01f, 3.0f)]
-    public float CompressorRelease = 0.01f;
+    [Range(0.0f, 8.0f)]
+    public float CompressorRelease = 0.0f;
 
     [Range(0.0f, 1.0f)]
     public float CompressorThreshold = 1.0f;
@@ -25,7 +25,7 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float DelayMix = 1.0f;
 
-    [Range(0.0f, 10.0f)]
+    [Range(0.0f, 8.0f)]
     public float DelayTime = 0.0f;
 
     [Range(0.0f, 1.0f)]
@@ -57,11 +57,11 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float SidechainMix = 1.0f;
 
-    [Range(0.001f, 1.0f)]
-    public float SidechainAttack = 0.001f;
+    [Range(0.0f, 8.0f)]
+    public float SidechainAttack = 0.0f;
 
-    [Range(0.01f, 3.0f)]
-    public float SidechainRelease = 0.01f;
+    [Range(0.0f, 8.0f)]
+    public float SidechainRelease = 0.0f;
 
     [Range(0.0f, 1.0f)]
     public float SidechainThreshold = 1.0f;

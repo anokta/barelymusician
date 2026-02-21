@@ -32,12 +32,12 @@ using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
 [[nodiscard]] inline EngineControlArray BuildEngineControlArray() noexcept {
   return {
       Control(0.0f, 0.0f, 1.0f),   // kCompressorMix
-      Control(0.0f, 0.0f, 10.0f),  // kCompressorAttack
-      Control(0.0f, 0.0f, 10.0f),  // kCompressorRelease
+      Control(0.0f, 0.0f, 8.0f),   // kCompressorAttack
+      Control(0.0f, 0.0f, 8.0f),   // kCompressorRelease
       Control(1.0f, 0.0f, 1.0f),   // kCompressorThreshold
       Control(1.0f, 1.0f, 64.0f),  // kCompressorRatio
       Control(1.0f, 0.0f, 1.0f),   // kDelayMix
-      Control(0.0f, 0.0f, 10.0f),  // kDelayTime
+      Control(0.0f, 0.0f, 8.0f),   // kDelayTime
       Control(0.0f, 0.0f, 1.0f),   // kDelayFeedback
       Control(1.0f, 0.0f, 1.0f),   // kDelayLowPassCutoff
       Control(0.0f, 0.0f, 1.0f),   // kDelayHighPassCutoff
@@ -48,8 +48,8 @@ using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
       Control(1.0f, 0.0f, 1.0f),   // kReverbStereoWidth
       Control(false),              // kReverbFreeze
       Control(1.0f, 0.0f, 1.0f),   // kSidechainMix
-      Control(0.0f, 0.0f, 10.0f),  // kSidechainAttack
-      Control(0.0f, 0.0f, 10.0f),  // kSidechainRelease
+      Control(0.0f, 0.0f, 8.0f),   // kSidechainAttack
+      Control(0.0f, 0.0f, 8.0f),   // kSidechainRelease
       Control(1.0f, 0.0f, 1.0f),   // kSidechainThreshold
       Control(1.0f, 1.0f, 64.0f),  // kSidechainRatio
   };

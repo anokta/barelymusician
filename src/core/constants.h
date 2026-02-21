@@ -12,7 +12,7 @@ inline constexpr uint32_t kInvalidIndex = UINT32_MAX;
 inline constexpr float kMaxDelayFeedback = 0.9995f;
 
 // Maximum number of delay frames.
-inline constexpr int kMaxDelayFrameCount = 10 * 48000;
+inline constexpr int kMaxDelayFrameCount = 8 * 48000;
 
 // Reference frequency which is tuned to middle C in hertz.
 inline constexpr float kReferenceFrequency = 261.62555f;

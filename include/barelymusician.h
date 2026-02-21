@@ -229,15 +229,15 @@ extern "C" {
 /// Engine control types.
 typedef enum BarelyEngineControlType {
   /// Compressor mix.
-  BarelyEngineControlType_kCompressorMix = 0,
+  BarelyEngineControlType_CompMix = 0,
   /// Compressor attack in seconds.
-  BarelyEngineControlType_kCompressorAttack,
+  BarelyEngineControlType_CompAttack,
   /// Compressor release in seconds.
-  BarelyEngineControlType_kCompressorRelease,
+  BarelyEngineControlType_CompRelease,
   /// Compressor threshold.
-  BarelyEngineControlType_kCompressorThreshold,
+  BarelyEngineControlType_CompThreshold,
   /// Compressor ratio.
-  BarelyEngineControlType_kCompressorRatio,
+  BarelyEngineControlType_CompRatio,
   /// Delay mix.
   BarelyEngineControlType_kDelayMix,
   /// Delay time in seconds.
@@ -953,15 +953,15 @@ namespace barely {
 /// Engine control types.
 enum class EngineControlType {
   /// Compressor mix.
-  kCompressorMix = BarelyEngineControlType_kCompressorMix,
+  CompMix = BarelyEngineControlType_CompMix,
   /// Compressor attack in seconds.
-  kCompressorAttack = BarelyEngineControlType_kCompressorAttack,
+  CompAttack = BarelyEngineControlType_CompAttack,
   /// Compressor release in seconds.
-  kCompressorRelease = BarelyEngineControlType_kCompressorRelease,
+  CompRelease = BarelyEngineControlType_CompRelease,
   /// Compressor threshold.
-  kCompressorThreshold = BarelyEngineControlType_kCompressorThreshold,
+  CompThreshold = BarelyEngineControlType_CompThreshold,
   /// Compressor ratio.
-  kCompressorRatio = BarelyEngineControlType_kCompressorRatio,
+  CompRatio = BarelyEngineControlType_CompRatio,
   /// Delay mix.
   kDelayMix = BarelyEngineControlType_kDelayMix,
   /// Delay time in seconds.

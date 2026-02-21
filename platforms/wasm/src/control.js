@@ -1,9 +1,9 @@
 export const EngineControlType = Object.freeze({
-  COMPRESSOR_MIX: 0,
-  COMPRESSOR_ATTACK: 1,
-  COMPRESSOR_RELEASE: 2,
-  COMPRESSOR_THRESHOLD: 3,
-  COMPRESSOR_RATIO: 4,
+  COMP_MIX: 0,
+  COMP_ATTACK: 1,
+  COMP_RELEASE: 2,
+  COMP_THRESHOLD: 3,
+  COMP_RATIO: 4,
   DELAY_MIX: 5,
   DELAY_TIME: 6,
   DELAY_FEEDBACK: 7,
@@ -95,40 +95,40 @@ export const SliceMode = Object.freeze({
 });
 
 export const ENGINE_CONTROLS = Object.freeze({
-  [EngineControlType.COMPRESSOR_MIX]: {
-    name: 'Compressor Mix',
+  [EngineControlType.COMP_MIX]: {
+    name: 'Comp Mix',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [EngineControlType.COMPRESSOR_ATTACK]: {
-    name: 'Compressor Attack',
+  [EngineControlType.COMP_ATTACK]: {
+    name: 'Comp Attack',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 8.0,
   },
-  [EngineControlType.COMPRESSOR_RELEASE]: {
-    name: 'Compressor Release',
+  [EngineControlType.COMP_RELEASE]: {
+    name: 'Comp Release',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
     maxValue: 8.0,
   },
-  [EngineControlType.COMPRESSOR_THRESHOLD]: {
-    name: 'Compressor Threshold',
+  [EngineControlType.COMP_THRESHOLD]: {
+    name: 'Comp Threshold',
     valueType: 'float',
     defaultValue: 1.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [EngineControlType.COMPRESSOR_RATIO]: {
-    name: 'Compressor Ratio',
+  [EngineControlType.COMP_RATIO]: {
+    name: 'Comp Ratio',
     valueType: 'float',
-    defaultValue: 1.0,
-    minValue: 1.0,
-    maxValue: 64.0,
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 1.0,
   },
   [EngineControlType.DELAY_MIX]: {
     name: 'Delay Mix',
@@ -238,9 +238,9 @@ export const ENGINE_CONTROLS = Object.freeze({
   [EngineControlType.SIDECHAIN_RATIO]: {
     name: 'Sidechain Ratio',
     valueType: 'float',
-    defaultValue: 1.0,
-    minValue: 1.0,
-    maxValue: 64.0,
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 1.0,
   },
 });
 

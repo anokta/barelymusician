@@ -539,11 +539,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 120
-  CompressorMix: 0
-  CompressorAttack: 0.001
-  CompressorRelease: 0.01
-  CompressorThreshold: 1
-  CompressorRatio: 1
+  CompMix: 1
+  CompAttack: 0
+  CompRelease: 0
+  CompThreshold: 1
+  CompRatio: 0
   DelayMix: 1
   DelayTime: 0.5
   DelayFeedback: 0.2
@@ -556,10 +556,10 @@ MonoBehaviour:
   ReverbStereoWidth: 1
   ReverbFreeze: 0
   SidechainMix: 1
-  SidechainAttack: 0.001
-  SidechainRelease: 0.01
+  SidechainAttack: 0
+  SidechainRelease: 0
   SidechainThreshold: 1
-  SidechainRatio: 1
+  SidechainRatio: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

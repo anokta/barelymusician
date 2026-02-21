@@ -9,68 +9,64 @@ namespace Barely {
   /// A representation of an engine that governs all musical components.
   public static class Engine {
     /// Compressor mix.
-    public static float CompressorMix {
-      get { return _compressorMix; }
+    public static float CompMix {
+      get { return _compMix; }
       set {
-        if (_compressorMix != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_MIX, value);
-          _compressorMix = Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_MIX);
+        if (_compMix != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.COMP_MIX, value);
+          _compMix = Internal.Engine_GetControl(Internal.EngineControlType.COMP_MIX);
         }
       }
     }
-    private static float _compressorMix = 1.0f;
+    private static float _compMix = 1.0f;
 
     /// Compressor attack.
-    public static float CompressorAttack {
-      get { return _compressorAttack; }
+    public static float CompAttack {
+      get { return _compAttack; }
       set {
-        if (_compressorAttack != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_ATTACK, value);
-          _compressorAttack =
-              Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_ATTACK);
+        if (_compAttack != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.COMP_ATTACK, value);
+          _compAttack = Internal.Engine_GetControl(Internal.EngineControlType.COMP_ATTACK);
         }
       }
     }
-    private static float _compressorAttack = 0.0f;
+    private static float _compAttack = 0.0f;
 
     /// Compressor release.
-    public static float CompressorRelease {
-      get { return _compressorRelease; }
+    public static float CompRelease {
+      get { return _compRelease; }
       set {
-        if (_compressorRelease != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_RELEASE, value);
-          _compressorRelease =
-              Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_RELEASE);
+        if (_compRelease != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.COMP_RELEASE, value);
+          _compRelease = Internal.Engine_GetControl(Internal.EngineControlType.COMP_RELEASE);
         }
       }
     }
-    private static float _compressorRelease = 0.0f;
+    private static float _compRelease = 0.0f;
 
     /// Compressor threshold.
-    public static float CompressorThreshold {
-      get { return _compressorThreshold; }
+    public static float CompThreshold {
+      get { return _compThreshold; }
       set {
-        if (_compressorThreshold != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_THRESHOLD, value);
-          _compressorThreshold =
-              Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_THRESHOLD);
+        if (_compThreshold != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.COMP_THRESHOLD, value);
+          _compThreshold = Internal.Engine_GetControl(Internal.EngineControlType.COMP_THRESHOLD);
         }
       }
     }
-    private static float _compressorThreshold = 1.0f;
+    private static float _compThreshold = 1.0f;
 
     /// Compressor ratio.
-    public static float CompressorRatio {
-      get { return _compressorRatio; }
+    public static float CompRatio {
+      get { return _compRatio; }
       set {
-        if (_compressorRatio != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.COMPRESSOR_RATIO, value);
-          _compressorRatio =
-              Internal.Engine_GetControl(Internal.EngineControlType.COMPRESSOR_RATIO);
+        if (_compRatio != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.COMP_RATIO, value);
+          _compRatio = Internal.Engine_GetControl(Internal.EngineControlType.COMP_RATIO);
         }
       }
     }
-    private static float _compressorRatio = 1.0f;
+    private static float _compRatio = 0.0f;
 
     /// Delay mix.
     public static float DelayMix {
@@ -271,7 +267,7 @@ namespace Barely {
         }
       }
     }
-    private static float _sidechainRatio = 1.0f;
+    private static float _sidechainRatio = 0.0f;
 
     /// Tempo in beats per minute.
     public static double Tempo {
@@ -354,15 +350,15 @@ namespace Barely {
 
       public enum EngineControlType {
         // Compressor mix.
-        [InspectorName("Compressor Mix")] COMPRESSOR_MIX = 0,
+        [InspectorName("Comp Mix")] COMP_MIX = 0,
         // Compressor attack in seconds.
-        [InspectorName("Compressor Attack")] COMPRESSOR_ATTACK,
+        [InspectorName("Comp Attack")] COMP_ATTACK,
         // Compressor release in seconds.
-        [InspectorName("Compressor Release")] COMPRESSOR_RELEASE,
+        [InspectorName("Comp Release")] COMP_RELEASE,
         // Compressor threshold.
-        [InspectorName("Compressor Threshold")] COMPRESSOR_THRESHOLD,
+        [InspectorName("Comp Threshold")] COMP_THRESHOLD,
         // Compressor ratio.
-        [InspectorName("Compressor Ratio")] COMPRESSOR_RATIO,
+        [InspectorName("Comp Ratio")] COMP_RATIO,
         // Delay mix.
         [InspectorName("Delay Mix")] DELAY_MIX,
         // Delay time in seconds.
@@ -1017,13 +1013,11 @@ namespace Barely {
             return;
           }
           BarelyEngine_SetTempo(_handle, _tempo);
-          BarelyEngine_SetControl(_handle, EngineControlType.COMPRESSOR_MIX, _compressorMix);
-          BarelyEngine_SetControl(_handle, EngineControlType.COMPRESSOR_THRESHOLD,
-                                  _compressorThreshold);
-          BarelyEngine_SetControl(_handle, EngineControlType.COMPRESSOR_ATTACK, _compressorAttack);
-          BarelyEngine_SetControl(_handle, EngineControlType.COMPRESSOR_RELEASE,
-                                  _compressorRelease);
-          BarelyEngine_SetControl(_handle, EngineControlType.COMPRESSOR_RATIO, _compressorRatio);
+          BarelyEngine_SetControl(_handle, EngineControlType.COMP_MIX, _compMix);
+          BarelyEngine_SetControl(_handle, EngineControlType.COMP_THRESHOLD, _compThreshold);
+          BarelyEngine_SetControl(_handle, EngineControlType.COMP_ATTACK, _compAttack);
+          BarelyEngine_SetControl(_handle, EngineControlType.COMP_RELEASE, _compRelease);
+          BarelyEngine_SetControl(_handle, EngineControlType.COMP_RATIO, _compRatio);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_MIX, _delayMix);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_TIME, _delayTime);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_FEEDBACK, _delayFeedback);

@@ -31,27 +31,27 @@ using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
 
 [[nodiscard]] inline EngineControlArray BuildEngineControlArray() noexcept {
   return {
-      Control(0.0f, 0.0f, 1.0f),   // kCompressorMix
-      Control(0.0f, 0.0f, 8.0f),   // kCompressorAttack
-      Control(0.0f, 0.0f, 8.0f),   // kCompressorRelease
-      Control(1.0f, 0.0f, 1.0f),   // kCompressorThreshold
-      Control(1.0f, 1.0f, 64.0f),  // kCompressorRatio
-      Control(1.0f, 0.0f, 1.0f),   // kDelayMix
-      Control(0.0f, 0.0f, 8.0f),   // kDelayTime
-      Control(0.0f, 0.0f, 1.0f),   // kDelayFeedback
-      Control(1.0f, 0.0f, 1.0f),   // kDelayLowPassCutoff
-      Control(0.0f, 0.0f, 1.0f),   // kDelayHighPassCutoff
-      Control(0.0f, 0.0f, 2.0f),   // kDelayReverbSend
-      Control(1.0f, 0.0f, 1.0f),   // kReverbMix
-      Control(0.0f, 0.0f, 1.0f),   // kReverbDampingRatio
-      Control(0.0f, 0.0f, 1.0f),   // kReverbRoomSize
-      Control(1.0f, 0.0f, 1.0f),   // kReverbStereoWidth
-      Control(false),              // kReverbFreeze
-      Control(1.0f, 0.0f, 1.0f),   // kSidechainMix
-      Control(0.0f, 0.0f, 8.0f),   // kSidechainAttack
-      Control(0.0f, 0.0f, 8.0f),   // kSidechainRelease
-      Control(1.0f, 0.0f, 1.0f),   // kSidechainThreshold
-      Control(1.0f, 1.0f, 64.0f),  // kSidechainRatio
+      Control(1.0f, 0.0f, 1.0f),  // CompMix
+      Control(0.0f, 0.0f, 8.0f),  // CompAttack
+      Control(0.0f, 0.0f, 8.0f),  // CompRelease
+      Control(1.0f, 0.0f, 1.0f),  // CompThreshold
+      Control(0.0f, 0.0f, 1.0f),  // CompRatio
+      Control(1.0f, 0.0f, 1.0f),  // kDelayMix
+      Control(0.0f, 0.0f, 8.0f),  // kDelayTime
+      Control(0.0f, 0.0f, 1.0f),  // kDelayFeedback
+      Control(1.0f, 0.0f, 1.0f),  // kDelayLowPassCutoff
+      Control(0.0f, 0.0f, 1.0f),  // kDelayHighPassCutoff
+      Control(0.0f, 0.0f, 2.0f),  // kDelayReverbSend
+      Control(1.0f, 0.0f, 1.0f),  // kReverbMix
+      Control(0.0f, 0.0f, 1.0f),  // kReverbDampingRatio
+      Control(0.0f, 0.0f, 1.0f),  // kReverbRoomSize
+      Control(1.0f, 0.0f, 1.0f),  // kReverbStereoWidth
+      Control(false),             // kReverbFreeze
+      Control(1.0f, 0.0f, 1.0f),  // kSidechainMix
+      Control(0.0f, 0.0f, 8.0f),  // kSidechainAttack
+      Control(0.0f, 0.0f, 8.0f),  // kSidechainRelease
+      Control(1.0f, 0.0f, 1.0f),  // kSidechainThreshold
+      Control(0.0f, 0.0f, 1.0f),  // kSidechainRatio
   };
 }
 
@@ -102,7 +102,7 @@ struct EngineState {
   EffectParams target_params = {};
 
   // Compressor.
-  Compressor compressor = {};
+  Compressor comp = {};
 
   // Delay filter.
   DelayFilter delay_filter = {};
@@ -123,12 +123,10 @@ struct EngineState {
   float sample_rate = 0.0f;
 
   void Approach() noexcept {
-    current_params.compressor_params.Approach(target_params.compressor_params);
+    current_params.comp_params.Approach(target_params.comp_params);
+    current_params.sidechain_params.Approach(target_params.sidechain_params);
     current_params.delay_params.Approach(target_params.delay_params);
     current_params.reverb_params.Approach(target_params.reverb_params);
-    ApproachValue(current_params.sidechain_mix, target_params.sidechain_mix);
-    ApproachValue(current_params.sidechain_threshold_db, target_params.sidechain_threshold_db);
-    ApproachValue(current_params.sidechain_ratio, target_params.sidechain_ratio);
   }
 
   void ScheduleMessage(Message message) noexcept {

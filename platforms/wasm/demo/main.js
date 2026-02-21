@@ -1,7 +1,6 @@
 import {EngineUi} from './engine-ui.js';
 
-const DEFAULT_STATE =
-    '';
+const DEFAULT_STATE = '';
 
 /**
  * Initializes the barelymusician engine on page load.

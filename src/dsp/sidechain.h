@@ -6,19 +6,20 @@
 
 #include "core/constants.h"
 #include "core/decibels.h"
+#include "dsp/compressor.h"
 
 namespace barely {
 
 // Sidechain compressor.
 class Sidechain {
  public:
-  void Process(float sidechain_frame[kStereoChannelCount], float mix, float threshold_db,
-               float ratio) noexcept {
+  void Process(float sidechain_frame[kStereoChannelCount],
+               const CompressorParams& params) noexcept {
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       float sidechain_db = AmplitudeToDecibels(std::abs(sidechain_frame[channel]));
-      if (sidechain_db > threshold_db) {
-        const float overshoot_db = sidechain_db - threshold_db;
-        sidechain_db = overshoot_db / ratio - overshoot_db;
+      if (sidechain_db > params.threshold_db) {
+        const float overshoot_db = sidechain_db - params.threshold_db;
+        sidechain_db = overshoot_db / params.ratio - overshoot_db;
       } else {
         sidechain_db = 0.0f;  // no gain reduction
       }
@@ -29,7 +30,7 @@ class Sidechain {
       sidechain_db_frame_[channel] = std::lerp(sidechain_db, sidechain_db_frame_[channel], coeff);
 
       sidechain_frame[channel] =
-          std::lerp(1.0f, DecibelsToAmplitude(sidechain_db_frame_[channel]), mix);
+          std::lerp(1.0f, DecibelsToAmplitude(sidechain_db_frame_[channel]), params.mix);
     }
   }
 

@@ -170,8 +170,8 @@ MonoBehaviour:
   Slices: []
   BitCrusherDepth: 16
   BitCrusherRate: 1
-  DistortionAmount: 0
-  DistortionDrive: 1
+  DistortionMix: 0
+  DistortionDrive: 0
   FilterType: 0
   FilterCutoff: 0
   FilterQ: 0.71

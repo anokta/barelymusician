@@ -80,20 +80,20 @@ class EngineProcessor {
 
   void SetControl(BarelyEngineControlType type, float value) noexcept {
     switch (type) {
-      case BarelyEngineControlType_kCompressorMix:
-        engine_.target_params.compressor_params.mix = value;
+      case BarelyEngineControlType_CompMix:
+        engine_.target_params.comp_params.mix = value;
         break;
-      case BarelyEngineControlType_kCompressorAttack:
-        engine_.compressor.SetAttack(value, engine_.sample_rate);
+      case BarelyEngineControlType_CompAttack:
+        engine_.comp.SetAttack(value, engine_.sample_rate);
         break;
-      case BarelyEngineControlType_kCompressorRelease:
-        engine_.compressor.SetRelease(value, engine_.sample_rate);
+      case BarelyEngineControlType_CompRelease:
+        engine_.comp.SetRelease(value, engine_.sample_rate);
         break;
-      case BarelyEngineControlType_kCompressorThreshold:
-        engine_.target_params.compressor_params.threshold_db = GetGainDb(value);
+      case BarelyEngineControlType_CompThreshold:
+        engine_.target_params.comp_params.threshold_db = GetGainDb(value);
         break;
-      case BarelyEngineControlType_kCompressorRatio:
-        engine_.target_params.compressor_params.ratio = value;
+      case BarelyEngineControlType_CompRatio:
+        engine_.target_params.comp_params.SetRatio(value);
         break;
       case BarelyEngineControlType_kDelayMix:
         engine_.target_params.delay_params.mix = value;
@@ -132,7 +132,7 @@ class EngineProcessor {
         engine_.target_params.reverb_params.freeze = static_cast<bool>(value);
         break;
       case BarelyEngineControlType_kSidechainMix:
-        engine_.target_params.sidechain_mix = value;
+        engine_.target_params.sidechain_params.mix = value;
         break;
       case BarelyEngineControlType_kSidechainAttack:
         engine_.sidechain.SetAttack(value, engine_.sample_rate);
@@ -141,10 +141,10 @@ class EngineProcessor {
         engine_.sidechain.SetRelease(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kSidechainThreshold:
-        engine_.target_params.sidechain_threshold_db = GetGainDb(value);
+        engine_.target_params.sidechain_params.threshold_db = GetGainDb(value);
         break;
       case BarelyEngineControlType_kSidechainRatio:
-        engine_.target_params.sidechain_ratio = value;
+        engine_.target_params.sidechain_params.SetRatio(value);
         break;
       default:
         assert(!"Invalid engine control type");
@@ -198,9 +198,7 @@ class EngineProcessor {
 
       instrument_processor_.ProcessAllVoices<true>(delay_frame, reverb_frame, sidechain_frame,
                                                    output_frame);
-      engine_.sidechain.Process(sidechain_frame, engine_.current_params.sidechain_mix,
-                                engine_.current_params.sidechain_threshold_db,
-                                engine_.current_params.sidechain_ratio);
+      engine_.sidechain.Process(sidechain_frame, engine_.current_params.sidechain_params);
       instrument_processor_.ProcessAllVoices<false>(delay_frame, reverb_frame, sidechain_frame,
                                                     output_frame);
 
@@ -208,7 +206,7 @@ class EngineProcessor {
                                    engine_.current_params.delay_params);
       engine_.reverb.Process(reverb_frame, output_frame, engine_.current_params.reverb_params);
 
-      engine_.compressor.Process(output_frame, engine_.current_params.compressor_params);
+      engine_.comp.Process(output_frame, engine_.current_params.comp_params);
 
       engine_.Approach();
     }

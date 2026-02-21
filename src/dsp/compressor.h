@@ -12,7 +12,7 @@
 namespace barely {
 
 struct CompressorParams {
-  float mix = 0.0f;
+  float mix = 1.0f;
   float threshold_db = 0.0f;
   float ratio = 1.0f;
 
@@ -20,6 +20,11 @@ struct CompressorParams {
     ApproachValue(mix, params.mix);
     ApproachValue(threshold_db, params.threshold_db);
     ApproachValue(ratio, params.ratio);
+  }
+
+  void SetRatio(float normalized_ratio) noexcept {
+    static constexpr float kCompRatioRange = 31.0f;  // [1.0f, 32.0f]
+    ratio = 1.0f + normalized_ratio * kCompRatioRange;
   }
 };
 

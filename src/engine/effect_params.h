@@ -8,13 +8,10 @@
 namespace barely {
 
 struct EffectParams {
-  CompressorParams compressor_params = {};
+  CompressorParams comp_params = {};
+  CompressorParams sidechain_params = {};
   DelayParams delay_params = {};
   ReverbParams reverb_params = {};
-
-  float sidechain_mix = 1.0f;
-  float sidechain_threshold_db = 0.0f;
-  float sidechain_ratio = 1.0f;
 };
 
 }  // namespace barely

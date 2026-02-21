@@ -416,11 +416,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 121
-  CompressorMix: 0
-  CompressorAttack: 0
-  CompressorRelease: 0
-  CompressorThreshold: 1
-  CompressorRatio: 1
+  CompMix: 1
+  CompAttack: 0
+  CompRelease: 0
+  CompThreshold: 1
+  CompRatio: 0
   DelayMix: 1
   DelayTime: 0
   DelayFeedback: 0
@@ -435,7 +435,7 @@ MonoBehaviour:
   SidechainMix: 1
   SidechainAttack: 0
   SidechainRelease: 0
-  SidechainThreshold: 1
+  SidechainThreshold: 0
   SidechainRatio: 1
 --- !u!114 &675413002
 MonoBehaviour:

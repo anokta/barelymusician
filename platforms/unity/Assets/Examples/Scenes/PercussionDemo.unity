@@ -481,7 +481,7 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
   BitCrusherDepth: 1
   BitCrusherRate: 1
-  DistortionAmount: 0
+  DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0

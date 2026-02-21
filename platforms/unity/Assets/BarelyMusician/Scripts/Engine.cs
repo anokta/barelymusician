@@ -296,10 +296,10 @@ namespace Barely {
         [InspectorName("Gain")] GAIN = 0,
         // Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
-        // Retrigger.
-        [InspectorName("Retrigger")] RETRIGGER,
         // Stereo pan.
         [InspectorName("Stereo Pan")] STEREO_PAN,
+        // Retrigger.
+        [InspectorName("Retrigger")] RETRIGGER,
         // Number of voices.
         [InspectorName("Voice Count")] VOICE_COUNT,
         // Envelope attack in seconds.
@@ -452,10 +452,10 @@ namespace Barely {
         _instrumentControlOverrides[(int)InstrumentControlType.GAIN].value = instrument.Gain;
         _instrumentControlOverrides[(int)InstrumentControlType.PITCH_SHIFT].value =
             instrument.PitchShift;
-        _instrumentControlOverrides[(int)InstrumentControlType.RETRIGGER].value =
-            instrument.Retrigger ? 1.0f : 0.0f;
         _instrumentControlOverrides[(int)InstrumentControlType.STEREO_PAN].value =
             (float)instrument.StereoPan;
+        _instrumentControlOverrides[(int)InstrumentControlType.RETRIGGER].value =
+            instrument.Retrigger ? 1.0f : 0.0f;
         _instrumentControlOverrides[(int)InstrumentControlType.VOICE_COUNT].value =
             (float)instrument.VoiceCount;
         _instrumentControlOverrides[(int)InstrumentControlType.ATTACK].value = instrument.Attack;

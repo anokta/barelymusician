@@ -347,8 +347,8 @@ namespace Barely {
       UpdateSampleData();
       SetControl(Engine.Internal.InstrumentControlType.GAIN, Gain);
       SetControl(Engine.Internal.InstrumentControlType.PITCH_SHIFT, PitchShift);
-      SetControl(Engine.Internal.InstrumentControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
       SetControl(Engine.Internal.InstrumentControlType.STEREO_PAN, StereoPan);
+      SetControl(Engine.Internal.InstrumentControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
       SetControl(Engine.Internal.InstrumentControlType.VOICE_COUNT, (float)VoiceCount);
       SetControl(Engine.Internal.InstrumentControlType.ATTACK, Attack);
       SetControl(Engine.Internal.InstrumentControlType.DECAY, Decay);

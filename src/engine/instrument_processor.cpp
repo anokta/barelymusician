@@ -25,11 +25,11 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
                              kReferenceFrequency / engine_.sample_rate;
       params.slice_increment = std::pow(2.0f, params.pitch_shift) / engine_.sample_rate;
       break;
-    case BarelyInstrumentControlType_kRetrigger:
-      params.should_retrigger = static_cast<bool>(value);
-      break;
     case BarelyInstrumentControlType_kStereoPan:
       params.voice_params.stereo_pan = value;
+      break;
+    case BarelyInstrumentControlType_kRetrigger:
+      params.should_retrigger = static_cast<bool>(value);
       break;
     case BarelyInstrumentControlType_kVoiceCount: {
       const uint32_t new_voice_count = static_cast<uint32_t>(value);

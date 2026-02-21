@@ -26,8 +26,8 @@ export const EngineControlType = Object.freeze({
 export const InstrumentControlType = Object.freeze({
   GAIN: 0,
   PITCH_SHIFT: 1,
-  RETRIGGER: 2,
-  STEREO_PAN: 3,
+  STEREO_PAN: 2,
+  RETRIGGER: 3,
   VOICE_COUNT: 4,
   ATTACK: 5,
   DECAY: 6,
@@ -259,19 +259,19 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     minValue: -2.0,
     maxValue: 2.0,
   },
-  [InstrumentControlType.RETRIGGER]: {
-    name: 'Retrigger',
-    valueType: 'bool',
-    defaultValue: false,
-    minValue: 0,
-    maxValue: 1,
-  },
   [InstrumentControlType.STEREO_PAN]: {
     name: 'Stereo Pan',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: -1.0,
     maxValue: 1.0,
+  },
+  [InstrumentControlType.RETRIGGER]: {
+    name: 'Retrigger',
+    valueType: 'bool',
+    defaultValue: false,
+    minValue: 0,
+    maxValue: 1,
   },
   [InstrumentControlType.VOICE_COUNT]: {
     name: 'Voice Count',

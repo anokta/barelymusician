@@ -23,8 +23,8 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
   InstrumentControlArray control_array = {
       Control(1.0f, 0.0f, 1.0f),                   // kGain
       Control(0.0f),                               // kPitchShift
-      Control(false),                              // kRetrigger
       Control(0.0f, -1.0f, 1.0f),                  // kStereoPan
+      Control(false),                              // kRetrigger
       Control(8, 1, 16),                           // kVoiceCount
       Control(0.0f, 0.0f, 8.0f),                   // kAttack
       Control(0.0f, 0.0f, 8.0f),                   // kDecay

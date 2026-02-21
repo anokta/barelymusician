@@ -280,10 +280,10 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kGain = 0,
   /// Pitch shift.
   BarelyInstrumentControlType_kPitchShift,
-  /// Retrigger.
-  BarelyInstrumentControlType_kRetrigger,
   /// Stereo pan.
   BarelyInstrumentControlType_kStereoPan,
+  /// Retrigger.
+  BarelyInstrumentControlType_kRetrigger,
   /// Number of voices.
   BarelyInstrumentControlType_kVoiceCount,
   /// Envelope attack in seconds.
@@ -1002,10 +1002,10 @@ enum class InstrumentControlType {
   kGain = BarelyInstrumentControlType_kGain,
   /// Pitch shift.
   kPitchShift = BarelyInstrumentControlType_kPitchShift,
-  /// Retrigger.
-  kRetrigger = BarelyInstrumentControlType_kRetrigger,
   /// Stereo pan.
   kStereoPan = BarelyInstrumentControlType_kStereoPan,
+  /// Retrigger.
+  kRetrigger = BarelyInstrumentControlType_kRetrigger,
   /// Number of voices.
   kVoiceCount = BarelyInstrumentControlType_kVoiceCount,
   /// Envelope attack in seconds.

@@ -43,7 +43,7 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
       Control(0.0f, 0.0f, 1.0f),                   // kDistortionDrive
       Control(0, 0, BarelyFilterType_kCount - 1),  // kFilterType
       Control(0.0f, 0.0f, 1.0f),                   // kFilterCutoff
-      Control(std::sqrt(0.5f), 0.1f),              // kFilterQ
+      Control(0.5f, 0.0f, 1.0f),                   // kFilterResonance
       Control(0.0f, 0.0f, 1.0f),                   // kDelaySend
       Control(0.0f, 0.0f, 2.0f),                   // kReverbSend
       Control(0.0f, -1.0f, 1.0f),                  // kSidechainSend

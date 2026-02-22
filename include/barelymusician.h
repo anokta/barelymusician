@@ -229,15 +229,15 @@ extern "C" {
 /// Engine control types.
 typedef enum BarelyEngineControlType {
   /// Compressor mix.
-  BarelyEngineControlType_CompMix = 0,
+  BarelyEngineControlType_kCompMix = 0,
   /// Compressor attack in seconds.
-  BarelyEngineControlType_CompAttack,
+  BarelyEngineControlType_kCompAttack,
   /// Compressor release in seconds.
-  BarelyEngineControlType_CompRelease,
+  BarelyEngineControlType_kCompRelease,
   /// Compressor threshold.
-  BarelyEngineControlType_CompThreshold,
+  BarelyEngineControlType_kCompThreshold,
   /// Compressor ratio.
-  BarelyEngineControlType_CompRatio,
+  BarelyEngineControlType_kCompRatio,
   /// Delay mix.
   BarelyEngineControlType_kDelayMix,
   /// Delay time in seconds.
@@ -320,8 +320,8 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kFilterType,
   /// Filter cutoff.
   BarelyInstrumentControlType_kFilterCutoff,
-  /// Filter Q factor.
-  BarelyInstrumentControlType_kFilterQ,
+  /// Filter resonance.
+  BarelyInstrumentControlType_kFilterResonance,
   /// Delay send.
   BarelyInstrumentControlType_kDelaySend,
   /// Reverb send.
@@ -953,15 +953,15 @@ namespace barely {
 /// Engine control types.
 enum class EngineControlType {
   /// Compressor mix.
-  CompMix = BarelyEngineControlType_CompMix,
+  kCompMix = BarelyEngineControlType_kCompMix,
   /// Compressor attack in seconds.
-  CompAttack = BarelyEngineControlType_CompAttack,
+  kCompAttack = BarelyEngineControlType_kCompAttack,
   /// Compressor release in seconds.
-  CompRelease = BarelyEngineControlType_CompRelease,
+  kCompRelease = BarelyEngineControlType_kCompRelease,
   /// Compressor threshold.
-  CompThreshold = BarelyEngineControlType_CompThreshold,
+  kCompThreshold = BarelyEngineControlType_kCompThreshold,
   /// Compressor ratio.
-  CompRatio = BarelyEngineControlType_CompRatio,
+  kCompRatio = BarelyEngineControlType_kCompRatio,
   /// Delay mix.
   kDelayMix = BarelyEngineControlType_kDelayMix,
   /// Delay time in seconds.
@@ -1042,8 +1042,8 @@ enum class InstrumentControlType {
   kFilterType = BarelyInstrumentControlType_kFilterType,
   /// Filter cutoff.
   kFilterCutoff = BarelyInstrumentControlType_kFilterCutoff,
-  /// Filter Q factor.
-  kFilterQ = BarelyInstrumentControlType_kFilterQ,
+  /// Filter resonance.
+  kFilterResonance = BarelyInstrumentControlType_kFilterResonance,
   /// Delay send.
   kDelaySend = BarelyInstrumentControlType_kDelaySend,
   /// Reverb send.

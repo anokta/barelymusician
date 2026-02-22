@@ -80,19 +80,19 @@ class EngineProcessor {
 
   void SetControl(BarelyEngineControlType type, float value) noexcept {
     switch (type) {
-      case BarelyEngineControlType_CompMix:
+      case BarelyEngineControlType_kCompMix:
         engine_.target_params.comp_params.mix = value;
         break;
-      case BarelyEngineControlType_CompAttack:
+      case BarelyEngineControlType_kCompAttack:
         engine_.comp.SetAttack(value, engine_.sample_rate);
         break;
-      case BarelyEngineControlType_CompRelease:
+      case BarelyEngineControlType_kCompRelease:
         engine_.comp.SetRelease(value, engine_.sample_rate);
         break;
-      case BarelyEngineControlType_CompThreshold:
+      case BarelyEngineControlType_kCompThreshold:
         engine_.target_params.comp_params.threshold_db = GetGainDb(value);
         break;
-      case BarelyEngineControlType_CompRatio:
+      case BarelyEngineControlType_kCompRatio:
         engine_.target_params.comp_params.SetRatio(value);
         break;
       case BarelyEngineControlType_kDelayMix:

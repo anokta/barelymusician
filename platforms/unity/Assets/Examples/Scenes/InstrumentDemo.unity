@@ -483,10 +483,10 @@ MonoBehaviour:
   BitCrusherDepth: 1
   BitCrusherRate: 1
   DistortionMix: 0
-  DistortionDrive: 1
+  DistortionDrive: 0.5
   FilterType: 0
   FilterCutoff: 0
-  FilterQ: 0.71
+  FilterResonance: 0.5
   DelaySend: 0.1
   ReverbSend: 0.25
   SidechainSend: 0

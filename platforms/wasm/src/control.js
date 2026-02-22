@@ -46,7 +46,7 @@ export const InstrumentControlType = Object.freeze({
   DISTORTION_DRIVE: 19,
   FILTER_TYPE: 20,
   FILTER_CUTOFF: 21,
-  FILTER_Q: 22,
+  FILTER_RESONANCE: 22,
   DELAY_SEND: 23,
   REVERB_SEND: 24,
   SIDECHAIN_SEND: 25,
@@ -399,12 +399,12 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [InstrumentControlType.FILTER_Q]: {
-    name: 'Filter Q',
+  [InstrumentControlType.FILTER_RESONANCE]: {
+    name: 'Filter Resonance',
     valueType: 'float',
-    defaultValue: Math.sqrt(0.5),
-    minValue: 0.1,
-    maxValue: 10,
+    defaultValue: 0.5,
+    minValue: 0.0,
+    maxValue: 1.0,
   },
   [InstrumentControlType.DELAY_SEND]: {
     name: 'Delay Send',

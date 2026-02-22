@@ -51,6 +51,13 @@ inline float GetFrequency(float sample_rate, float normalized_cutoff) noexcept {
   return std::min(kMinHz * std::pow(max_hz * kMinHzInverse, normalized_cutoff), max_hz);
 }
 
+inline float GetFilterQ(float normalized_resonance) noexcept {
+  static constexpr float kMinQ = 0.05f;
+  static constexpr float kMinQInverse = 1.0f / kMinQ;
+  static constexpr float kMaxQ = 10.0f;
+  return std::min(kMinQ * std::pow(kMaxQ * kMinQInverse, normalized_resonance), kMaxQ);
+}
+
 inline float GetGainDb(float normalized_gain) noexcept {
   static constexpr float kMaxDecibels = -6.0f;
   static constexpr float kDecibelsRange = kMaxDecibels - kMinDecibels;

@@ -331,8 +331,8 @@ namespace Barely {
         [InspectorName("Filter Type")] FILTER_TYPE,
         // Filter cutoff.
         [InspectorName("Filter Cutoff")] FILTER_CUTOFF,
-        // Filter Q factor.
-        [InspectorName("Filter Q")] FILTER_Q,
+        // Filter resonance.
+        [InspectorName("Filter Resonance")] FILTER_RESONANCE,
         // Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
         // Reverb send.
@@ -481,7 +481,8 @@ namespace Barely {
             (float)instrument.FilterType;
         _instrumentControlOverrides[(int)InstrumentControlType.FILTER_CUTOFF].value =
             instrument.FilterCutoff;
-        _instrumentControlOverrides[(int)InstrumentControlType.FILTER_Q].value = instrument.FilterQ;
+        _instrumentControlOverrides[(int)InstrumentControlType.FILTER_RESONANCE].value =
+            instrument.FilterResonance;
         _instrumentControlOverrides[(int)InstrumentControlType.DELAY_SEND].value =
             instrument.DelaySend;
         _instrumentControlOverrides[(int)InstrumentControlType.REVERB_SEND].value =

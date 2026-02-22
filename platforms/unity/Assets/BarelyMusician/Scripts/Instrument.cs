@@ -165,7 +165,7 @@ namespace Barely {
     public float OscShape = 0.0f;
 
     /// Oscillator skew.
-    [Range(-0.5f, 0.5f)]
+    [Range(-1.0f, 1.0f)]
     public float OscSkew = 0.0f;
 
     [Header("Slice")]
@@ -230,11 +230,11 @@ namespace Barely {
     public ArpMode ArpMode = ArpMode.NONE;
 
     /// Arpeggiator gate ratio.
-    [Range(0.0f, 1.0f)]
-    public float ArpGateRatio = 0.5f;
+    [Range(0.001f, 1.0f)]
+    public float ArpGate = 0.5f;
 
     /// Arpeggiator rate.
-    [Range(0.0f, 16.0f)]
+    [Range(0.001f, 16.0f)]
     public float ArpRate = 1.0f;
 
     /// Note off callback.
@@ -372,7 +372,7 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.REVERB_SEND, ReverbSend);
       SetControl(Engine.Internal.InstrumentControlType.SIDECHAIN_SEND, SidechainSend);
       SetControl(Engine.Internal.InstrumentControlType.ARP_MODE, (float)ArpMode);
-      SetControl(Engine.Internal.InstrumentControlType.ARP_GATE_RATIO, ArpGateRatio);
+      SetControl(Engine.Internal.InstrumentControlType.ARP_GATE, ArpGate);
       SetControl(Engine.Internal.InstrumentControlType.ARP_RATE, ArpRate);
     }
 

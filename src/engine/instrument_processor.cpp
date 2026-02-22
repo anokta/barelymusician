@@ -83,7 +83,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.voice_params.osc_shape = value;
       break;
     case BarelyInstrumentControlType_kOscSkew:
-      params.voice_params.osc_skew = value;
+      params.voice_params.osc_skew = value * kOscSkewRange;
       break;
     case BarelyInstrumentControlType_kSliceMode:
       params.slice_mode = static_cast<SliceMode>(value);
@@ -127,7 +127,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       break;
     case BarelyInstrumentControlType_kArpMode:
       [[fallthrough]];
-    case BarelyInstrumentControlType_kArpGateRatio:
+    case BarelyInstrumentControlType_kArpGate:
       [[fallthrough]];
     case BarelyInstrumentControlType_kArpRate:
       break;

@@ -37,7 +37,7 @@ const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
                    -4.0, 4.0, 0.0),
     RangeParameter(STR16("Osc Shape"), BarelyInstrumentControlType_kOscShape, STR16(""), 0.0, 1.0,
                    0.0),
-    RangeParameter(STR16("Osc Skew"), BarelyInstrumentControlType_kOscSkew, STR16(""), -0.5, 0.5,
+    RangeParameter(STR16("Osc Skew"), BarelyInstrumentControlType_kOscSkew, STR16(""), -1.0, 1.0,
                    0.0),
     RangeParameter(STR16("Slice Mode"), BarelyInstrumentControlType_kSliceMode, STR16(""), 0,
                    BarelySliceMode_kCount - 1, 0, BarelySliceMode_kCount - 1),
@@ -61,12 +61,12 @@ const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
                    1.0, 0.0),
     RangeParameter(STR16("Sidechain Send"), BarelyInstrumentControlType_kSidechainSend, STR16(""),
                    -1.0, 1.0, 0.0),
-    RangeParameter(STR16("Arpeggiator Mode"), BarelyInstrumentControlType_kArpMode, STR16(""), 0,
+    RangeParameter(STR16("Arp Mode"), BarelyInstrumentControlType_kArpMode, STR16(""), 0,
                    BarelyArpMode_kCount - 1, 0, BarelyArpMode_kCount - 1),
-    RangeParameter(STR16("Arpeggiator Gate Ratio"), BarelyInstrumentControlType_kArpGateRatio,
-                   STR16(""), 0.0, 1.0, 0.5),
-    RangeParameter(STR16("Arpeggiator Rate"), BarelyInstrumentControlType_kArpRate, STR16(""), 0.0,
-                   16.0, 1.0),
+    RangeParameter(STR16("Arp Gate"), BarelyInstrumentControlType_kArpGate, STR16(""), 0.0, 1.0,
+                   0.5),
+    RangeParameter(STR16("Arp Rate"), BarelyInstrumentControlType_kArpRate, STR16(""), 0.0, 16.0,
+                   1.0),
 };
 
 }
@@ -108,8 +108,7 @@ tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {
         i == BarelyInstrumentControlType_kDelaySend ||
         i == BarelyInstrumentControlType_kReverbSend ||
         i == BarelyInstrumentControlType_kSidechainSend ||
-        i == BarelyInstrumentControlType_kArpMode ||
-        i == BarelyInstrumentControlType_kArpGateRatio ||
+        i == BarelyInstrumentControlType_kArpMode || i == BarelyInstrumentControlType_kArpGate ||
         i == BarelyInstrumentControlType_kArpRate) {
       // TODO(#162): Support sampling features.
       continue;

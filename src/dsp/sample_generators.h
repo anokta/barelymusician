@@ -8,6 +8,8 @@
 
 namespace barely {
 
+inline constexpr float kOscSkewRange = 0.25f;
+
 [[nodiscard]] inline float GenerateSineSample(float phase) noexcept {
   return std::sin(phase * 2.0f * std::numbers::pi_v<float>);
 }

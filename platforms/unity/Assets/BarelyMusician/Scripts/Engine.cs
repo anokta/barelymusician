@@ -306,17 +306,17 @@ namespace Barely {
         // Envelope release in seconds.
         [InspectorName("Release")] RELEASE,
         // Oscillator mix.
-        [InspectorName("Oscillator Mix")] OSC_MIX,
+        [InspectorName("Osc Mix")] OSC_MIX,
         // Oscillator mode.
-        [InspectorName("Oscillator Mode")] OSC_MODE,
+        [InspectorName("Osc Mode")] OSC_MODE,
         // Oscillator noise mix.
-        [InspectorName("Oscillator Noise Mix")] OSC_NOISE_MIX,
+        [InspectorName("Osc Noise Mix")] OSC_NOISE_MIX,
         // Oscillator pitch shift.
-        [InspectorName("Oscillator Pitch Shift")] OSC_PITCH_SHIFT,
+        [InspectorName("Osc Pitch Shift")] OSC_PITCH_SHIFT,
         // Oscillator shape.
-        [InspectorName("Oscillator Shape")] OSC_SHAPE,
+        [InspectorName("Osc Shape")] OSC_SHAPE,
         // Oscillator skew.
-        [InspectorName("Oscillator Skew")] OSC_SKEW,
+        [InspectorName("Osc Skew")] OSC_SKEW,
         // Slice mode.
         [InspectorName("Slice Mode")] SLICE_MODE,
         // Bit crusher depth.
@@ -340,11 +340,11 @@ namespace Barely {
         // Sidechain send.
         [InspectorName("Sidechain Send")] SIDECHAIN_SEND,
         // Arpeggiator mode.
-        [InspectorName("Arpeggiator Mode")] ARP_MODE,
+        [InspectorName("Arp Mode")] ARP_MODE,
         // Arpeggiator gate ratio.
-        [InspectorName("Arpeggiator Gate Ratio")] ARP_GATE_RATIO,
+        [InspectorName("Arp Gate")] ARP_GATE,
         // Arpeggiator rate.
-        [InspectorName("Arpeggiator Rate")] ARP_RATE,
+        [InspectorName("Arp Rate")] ARP_RATE,
       }
 
       public enum EngineControlType {
@@ -491,8 +491,7 @@ namespace Barely {
             instrument.SidechainSend;
         _instrumentControlOverrides[(int)InstrumentControlType.ARP_MODE].value =
             (float)instrument.ArpMode;
-        _instrumentControlOverrides[(int)InstrumentControlType.ARP_GATE_RATIO].value =
-            instrument.ArpGateRatio;
+        _instrumentControlOverrides[(int)InstrumentControlType.ARP_GATE].value = instrument.ArpGate;
         _instrumentControlOverrides[(int)InstrumentControlType.ARP_RATE].value = instrument.ArpRate;
         bool success =
             BarelyEngine_CreateInstrument(_handle, _instrumentControlOverrides,

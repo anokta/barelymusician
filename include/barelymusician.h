@@ -331,7 +331,7 @@ typedef enum BarelyInstrumentControlType {
   /// Arpeggiator mode.
   BarelyInstrumentControlType_kArpMode,
   /// Arpeggiator gate ratio.
-  BarelyInstrumentControlType_kArpGateRatio,
+  BarelyInstrumentControlType_kArpGate,
   /// Arpeggiator rate.
   BarelyInstrumentControlType_kArpRate,
   /// Number of instrument control types.
@@ -1053,7 +1053,7 @@ enum class InstrumentControlType {
   /// Arpeggiator mode.
   kArpMode = BarelyInstrumentControlType_kArpMode,
   /// Arpeggiator gate ratio.
-  kArpGateRatio = BarelyInstrumentControlType_kArpGateRatio,
+  kArpGate = BarelyInstrumentControlType_kArpGate,
   /// Arpeggiator rate.
   kArpRate = BarelyInstrumentControlType_kArpRate,
 };

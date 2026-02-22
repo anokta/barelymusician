@@ -51,7 +51,7 @@ export const InstrumentControlType = Object.freeze({
   REVERB_SEND: 24,
   SIDECHAIN_SEND: 25,
   ARP_MODE: 26,
-  ARP_GATE_RATIO: 27,
+  ARP_GATE: 27,
   ARP_RATE: 28,
   COUNT: 29,
 });
@@ -347,8 +347,8 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     name: 'Osc Skew',
     valueType: 'float',
     defaultValue: 0.0,
-    minValue: -0.25,
-    maxValue: 0.25,
+    minValue: -1.0,
+    maxValue: 1.0,
   },
   [InstrumentControlType.SLICE_MODE]: {
     name: 'Slice Mode',
@@ -434,8 +434,8 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     minValue: 0,
     maxValue: ArpMode.COUNT - 1,
   },
-  [InstrumentControlType.ARP_GATE_RATIO]: {
-    name: 'Arp Gate Ratio',
+  [InstrumentControlType.ARP_GATE]: {
+    name: 'Arp Gate',
     valueType: 'float',
     defaultValue: 0.5,
     minValue: 0.0,

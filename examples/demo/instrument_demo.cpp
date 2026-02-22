@@ -46,7 +46,7 @@ constexpr float kRelease = 0.125f;
 constexpr int kVoiceCount = 16;
 constexpr float kDelaySend = 0.1f;
 constexpr ArpMode kArpMode = ArpMode::kUp;
-constexpr float kArpGateRatio = 0.5f;
+constexpr float kArpGate = 0.5f;
 constexpr float kArpRate = 2.0f;
 
 // Note settings.
@@ -88,7 +88,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       {InstrumentControlType::kRelease, kRelease},
       {InstrumentControlType::kVoiceCount, kVoiceCount},
       {InstrumentControlType::kDelaySend, kDelaySend},
-      {InstrumentControlType::kArpGateRatio, kArpGateRatio},
+      {InstrumentControlType::kArpGate, kArpGate},
       {InstrumentControlType::kArpRate, kArpRate},
   }});
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
@@ -139,11 +139,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     if (upper_key == '0') {
-      instrument.SetControl<ArpMode>(
-          InstrumentControlType::kArpMode,
-          (instrument.GetControl<ArpMode>(InstrumentControlType::kArpMode) == ArpMode::kNone)
-              ? kArpMode
-              : ArpMode::kNone);
+      const bool should_enable =
+          (instrument.GetControl<ArpMode>(InstrumentControlType::kArpMode) == ArpMode::kNone);
+      instrument.SetControl(InstrumentControlType::kArpMode,
+                            should_enable ? kArpMode : ArpMode::kNone);
+      ConsoleLog() << "Arp " << (should_enable ? "enabled" : "disabled");
     }
 
     // Play note.

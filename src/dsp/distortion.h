@@ -20,4 +20,4 @@ inline constexpr float kDistortionDriveRange = 19.0f;
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_DSP_BIT_CRUSHER_H_
+#endif  // BARELYMUSICIAN_DSP_DISTORTION_H_

@@ -314,9 +314,9 @@ namespace Barely {
         // Oscillator skew.
         [InspectorName("Osc Skew")] OSC_SKEW,
         // Bit crusher depth.
-        [InspectorName("Bit Crusher Depth")] BIT_CRUSHER_DEPTH,
+        [InspectorName("Crush Depth")] CRUSH_DEPTH,
         // Bit crusher rate.
-        [InspectorName("Bit Crusher Rate")] BIT_CRUSHER_RATE,
+        [InspectorName("Crush Rate")] CRUSH_RATE,
         // Distortion mix.
         [InspectorName("Distortion Mix")] DISTORTION_MIX,
         // Distortion drive.
@@ -463,10 +463,10 @@ namespace Barely {
         _instrumentControlOverrides[(int)InstrumentControlType.OSC_SHAPE].value =
             instrument.OscShape;
         _instrumentControlOverrides[(int)InstrumentControlType.OSC_SKEW].value = instrument.OscSkew;
-        _instrumentControlOverrides[(int)InstrumentControlType.BIT_CRUSHER_DEPTH].value =
-            instrument.BitCrusherDepth;
-        _instrumentControlOverrides[(int)InstrumentControlType.BIT_CRUSHER_RATE].value =
-            instrument.BitCrusherRate;
+        _instrumentControlOverrides[(int)InstrumentControlType.CRUSH_DEPTH].value =
+            instrument.CrushDepth;
+        _instrumentControlOverrides[(int)InstrumentControlType.CRUSH_RATE].value =
+            instrument.CrushRate;
         _instrumentControlOverrides[(int)InstrumentControlType.DISTORTION_MIX].value =
             instrument.DistortionMix;
         _instrumentControlOverrides[(int)InstrumentControlType.DISTORTION_DRIVE].value =

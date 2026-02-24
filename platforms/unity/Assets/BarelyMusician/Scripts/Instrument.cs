@@ -174,11 +174,11 @@ namespace Barely {
 
     /// Bit crusher depth.
     [Range(0.0f, 1.0f)]
-    public float BitCrusherDepth = 1.0f;
+    public float CrushDepth = 0.0f;
 
     /// Bit crusher rate.
     [Range(0.0f, 1.0f)]
-    public float BitCrusherRate = 1.0f;
+    public float CrushRate = 0.0f;
 
     [Header("Distortion")]
 
@@ -361,8 +361,8 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.OSC_PITCH_SHIFT, OscPitchShift);
       SetControl(Engine.Internal.InstrumentControlType.OSC_SHAPE, OscShape);
       SetControl(Engine.Internal.InstrumentControlType.OSC_SKEW, OscSkew);
-      SetControl(Engine.Internal.InstrumentControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
-      SetControl(Engine.Internal.InstrumentControlType.BIT_CRUSHER_RATE, BitCrusherRate);
+      SetControl(Engine.Internal.InstrumentControlType.CRUSH_DEPTH, CrushDepth);
+      SetControl(Engine.Internal.InstrumentControlType.CRUSH_RATE, CrushRate);
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_MIX, DistortionMix);
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_DRIVE, DistortionDrive);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_TYPE, (float)FilterType);

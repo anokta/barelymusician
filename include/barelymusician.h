@@ -578,13 +578,6 @@ BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* 
 BARELY_API bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
                                         float* out_value);
 
-/// Gets the random number generator seed of an engine.
-///
-/// @param engine Pointer to engine.
-/// @param out_seed Output seed value.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetSeed(const BarelyEngine* engine, int32_t* out_seed);
-
 /// Gets the tempo of an engine.
 ///
 /// @param engine Pointer to engine.
@@ -611,6 +604,13 @@ BARELY_API bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples
                                      int32_t output_channel_count, int32_t output_frame_count,
                                      double timestamp);
 
+/// Resets the random number generator seed of an engine.
+///
+/// @param engine Pointer to engine.
+/// @param seed Seed value.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_ResetSeed(BarelyEngine* engine, int32_t seed);
+
 /// Sets a control value of an engine.
 ///
 /// @param engine Pointer to engine.
@@ -619,13 +619,6 @@ BARELY_API bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type,
                                         float value);
-
-/// Sets the random number generator seed of an engine.
-///
-/// @param engine Pointer to engine.
-/// @param seed Seed value.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_SetSeed(BarelyEngine* engine, int32_t seed);
 
 /// Sets the tempo of an engine.
 ///
@@ -1797,16 +1790,6 @@ class Engine {
     return static_cast<ValueType>(value);
   }
 
-  /// Returns the random number generator seed.
-  ///
-  /// @return Seed value.
-  [[nodiscard]] int GetSeed() const noexcept {
-    int32_t seed = 0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetSeed(engine_, &seed);
-    assert(success);
-    return static_cast<int>(seed);
-  }
-
   /// Returns the tempo.
   ///
   /// @return Tempo in beats per minute.
@@ -1841,6 +1824,13 @@ class Engine {
     assert(success);
   }
 
+  /// Resets the random number generator seed.
+  void ResetSeed(int seed) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyEngine_ResetSeed(engine_, static_cast<int32_t>(seed));
+    assert(success);
+  }
+
   /// Sets a control value.
   ///
   /// @param type Engine control type.
@@ -1851,12 +1841,6 @@ class Engine {
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyEngine_SetControl(
         engine_, static_cast<BarelyEngineControlType>(type), static_cast<float>(value));
-    assert(success);
-  }
-
-  /// Sets the random number generator seed.
-  void SetSeed(int seed) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_SetSeed(engine_, static_cast<int32_t>(seed));
     assert(success);
   }
 

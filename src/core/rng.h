@@ -11,7 +11,7 @@ class Rng {
  public:
   [[nodiscard]] int GetSeed() const noexcept { return seed_; }
 
-  void SetSeed(int seed) noexcept {
+  void ResetSeed(int seed) noexcept {
     assert(seed >= 0);
     seed_ = seed;
     engine_.seed(seed_);

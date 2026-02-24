@@ -183,14 +183,6 @@ bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType
   return true;
 }
 
-bool BarelyEngine_GetSeed(const BarelyEngine* engine, int32_t* out_seed) {
-  if (!engine) return false;
-  if (!out_seed) return false;
-
-  *out_seed = engine->state.main_rng.GetSeed();
-  return true;
-}
-
 bool BarelyEngine_GetTempo(const BarelyEngine* engine, double* out_tempo) {
   if (!engine) return false;
   if (!out_tempo) return false;
@@ -239,19 +231,18 @@ bool BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type,
   return true;
 }
 
-bool BarelyEngine_SetSeed(BarelyEngine* engine, int32_t seed) {
+bool BarelyEngine_ResetSeed(BarelyEngine* engine, int32_t seed) {
   if (!engine) return false;
 
-  engine->state.main_rng.SetSeed(seed);
+  engine->state.main_rng.ResetSeed(seed);
   engine->state.ScheduleMessage(barely::EngineSeedMessage{seed});
   return true;
 }
 
 bool BarelyEngine_SetTempo(BarelyEngine* engine, double tempo) {
   if (!engine) return false;
-  if (tempo < 0.0) return false;
 
-  engine->state.tempo = tempo;
+  engine->state.tempo = std::max(tempo, 0.0);
   return true;
 }
 

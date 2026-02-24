@@ -159,7 +159,7 @@ class EngineProcessor {
                          SetControl(engine_control_message.type, engine_control_message.value);
                        },
                        [this](EngineSeedMessage& engine_seed_message) noexcept {
-                         engine_.audio_rng.SetSeed(engine_seed_message.seed);
+                         engine_.audio_rng.ResetSeed(engine_seed_message.seed);
                        },
                        [this](InstrumentCreateMessage& instrument_create_message) noexcept {
                          instrument_processor_.Init(instrument_create_message.instrument_index);

@@ -143,12 +143,12 @@ TEST(EngineTest, GenerateRandomNumber) {
   }
 }
 
-TEST(EngineTest, SetSeed) {
+TEST(EngineTest, ResetSeed) {
   constexpr int kSeed = 1;
   constexpr int kValueCount = 10;
 
   Engine engine(1);
-  engine.SetSeed(kSeed);
+  engine.ResetSeed(kSeed);
 
   // Generate some random values.
   std::array<double, kValueCount> values;
@@ -157,7 +157,7 @@ TEST(EngineTest, SetSeed) {
   }
 
   // Reset the seed with the same value.
-  engine.SetSeed(kSeed);
+  engine.ResetSeed(kSeed);
   // Validate that the same numbers are generated for the next `kValueCount`.
   for (int i = 0; i < kValueCount; ++i) {
     EXPECT_DOUBLE_EQ(engine.GenerateRandomNumber(), values[i]);

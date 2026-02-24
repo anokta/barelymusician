@@ -67,6 +67,7 @@ struct InstrumentState {
     uint32_t note_index = kInvalidIndex;
     bool is_note_on = false;
     bool should_release_note = false;
+    bool should_update = false;
   } arp = {};
 
   uint32_t first_note_index = kInvalidIndex;
@@ -78,19 +79,20 @@ struct InstrumentState {
     if (first_note_index == kInvalidIndex || !IsArpEnabled()) {
       return std::numeric_limits<double>::max();
     }
-    const double rate = static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value);
     const double gate = static_cast<double>(controls[BarelyInstrumentControlType_kArpGate].value);
+    const double rate = static_cast<double>(controls[BarelyInstrumentControlType_kArpRate].value);
+    if (rate <= 0.0) {
+      return std::numeric_limits<double>::max();
+    }
     if (arp.is_note_on && gate > arp.phase) {
       return (gate - arp.phase) / rate;
     }
-    return (arp.phase > 0.0) ? ((1.0 - arp.phase) / rate) : 0.0;
+    return (arp.phase > 0.0 || arp.should_update) ? ((1.0 - arp.phase) / rate) : 0.0;
   }
 
   bool IsArpEnabled() const noexcept {
     return static_cast<BarelyArpMode>(controls[BarelyInstrumentControlType_kArpMode].value) !=
-               BarelyArpMode_kNone &&
-           controls[BarelyInstrumentControlType_kArpGate].value > 0.0f &&
-           controls[BarelyInstrumentControlType_kArpRate].value > 0.0f;
+           BarelyArpMode_kNone;
   }
 };
 

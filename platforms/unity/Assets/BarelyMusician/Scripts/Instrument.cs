@@ -230,11 +230,11 @@ namespace Barely {
     public ArpMode ArpMode = ArpMode.NONE;
 
     /// Arpeggiator gate ratio.
-    [Range(0.001f, 1.0f)]
+    [Range(0.0f, 1.0f)]
     public float ArpGate = 0.5f;
 
     /// Arpeggiator rate.
-    [Range(0.001f, 16.0f)]
+    [Range(0.0f, 16.0f)]
     public float ArpRate = 1.0f;
 
     /// Note off callback.

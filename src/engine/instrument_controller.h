@@ -52,6 +52,7 @@ class InstrumentController {
 
   void ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept;
   void ReleaseSampleData(InstrumentState& instrument) noexcept;
+  void UpdateArpNote(InstrumentState& instrument) noexcept;
 
   EngineState& engine_;
 };

@@ -234,7 +234,7 @@ typedef enum BarelyEngineControlType {
   BarelyEngineControlType_kCompAttack,
   /// Compressor release in seconds.
   BarelyEngineControlType_kCompRelease,
-  /// Compressor threshold.
+  /// Normalized compressor threshold in logarithmic scale.
   BarelyEngineControlType_kCompThreshold,
   /// Compressor ratio.
   BarelyEngineControlType_kCompRatio,
@@ -244,10 +244,10 @@ typedef enum BarelyEngineControlType {
   BarelyEngineControlType_kDelayTime,
   /// Delay feedback.
   BarelyEngineControlType_kDelayFeedback,
-  /// Delay low-pass cutoff.
-  BarelyEngineControlType_kDelayLowPassCutoff,
-  /// Delay high-pass cutoff.
-  BarelyEngineControlType_kDelayHighPassCutoff,
+  /// Delay low-pass filter cutoff.
+  BarelyEngineControlType_kDelayLpfCutoff,
+  /// Delay high-pass filter cutoff.
+  BarelyEngineControlType_kDelayHpfCutoff,
   /// Delay reverb send.
   BarelyEngineControlType_kDelayReverbSend,
   /// Reverb mix.
@@ -366,10 +366,10 @@ typedef enum BarelyArpMode {
 typedef enum BarelyFilterType {
   /// None.
   BarelyFilterType_kNone = 0,
-  /// Low pass.
-  BarelyFilterType_kLowPass,
-  /// High pass.
-  BarelyFilterType_kHighPass,
+  /// Low-pass filter.
+  BarelyFilterType_kLpf,
+  /// High-pass filter.
+  BarelyFilterType_kHpf,
   /// Number of filters.
   BarelyFilterType_kCount,
 } BarelyFilterType;
@@ -951,7 +951,7 @@ enum class EngineControlType {
   kCompAttack = BarelyEngineControlType_kCompAttack,
   /// Compressor release in seconds.
   kCompRelease = BarelyEngineControlType_kCompRelease,
-  /// Compressor threshold.
+  /// Normalized compressor threshold in logarithmic scale.
   kCompThreshold = BarelyEngineControlType_kCompThreshold,
   /// Compressor ratio.
   kCompRatio = BarelyEngineControlType_kCompRatio,
@@ -961,10 +961,10 @@ enum class EngineControlType {
   kDelayTime = BarelyEngineControlType_kDelayTime,
   /// Delay feedback.
   kDelayFeedback = BarelyEngineControlType_kDelayFeedback,
-  /// Delay low-pass cutoff.
-  kDelayLowPassCutoff = BarelyEngineControlType_kDelayLowPassCutoff,
-  /// Delay high-pass cutoff.
-  kDelayHighPassCutoff = BarelyEngineControlType_kDelayHighPassCutoff,
+  /// Delay low-pass filter cutoff.
+  kDelayLpfCutoff = BarelyEngineControlType_kDelayLpfCutoff,
+  /// Delay high-pass filter cutoff.
+  kDelayHpfCutoff = BarelyEngineControlType_kDelayHpfCutoff,
   /// Delay reverb send.
   kDelayReverbSend = BarelyEngineControlType_kDelayReverbSend,
   /// Reverb mix.
@@ -983,7 +983,7 @@ enum class EngineControlType {
   kSidechainAttack = BarelyEngineControlType_kSidechainAttack,
   /// Sidechain release in seconds.
   kSidechainRelease = BarelyEngineControlType_kSidechainRelease,
-  /// Sidechain threshold.
+  /// Normalized sidechain threshold in logarithmic scale.
   kSidechainThreshold = BarelyEngineControlType_kSidechainThreshold,
   /// Sidechain ratio.
   kSidechainRatio = BarelyEngineControlType_kSidechainRatio,
@@ -1021,7 +1021,7 @@ enum class InstrumentControlType {
   kOscShape = BarelyInstrumentControlType_kOscShape,
   /// Oscillator skew.
   kOscSkew = BarelyInstrumentControlType_kOscSkew,
-  /// Slice mode.
+  /// Slice playback mode.
   kSliceMode = BarelyInstrumentControlType_kSliceMode,
   /// Bit crusher depth.
   kBitCrusherDepth = BarelyInstrumentControlType_kBitCrusherDepth,
@@ -1075,10 +1075,10 @@ enum class ArpMode {
 enum class FilterType {
   /// None.
   kNone = BarelyFilterType_kNone,
-  /// Low pass.
-  kLowPass = BarelyFilterType_kLowPass,
-  /// High pass.
-  kHighPass = BarelyFilterType_kHighPass,
+  /// Low-pass filter.
+  kLpf = BarelyFilterType_kLpf,
+  /// High-pass filter.
+  kHpf = BarelyFilterType_kHpf,
 };
 
 /// Oscillator modes.

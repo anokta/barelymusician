@@ -16,35 +16,35 @@ constexpr float kInput[kInputLength] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
 constexpr float kCoefficient = 0.5f;
 
-TEST(OnePoleFilterTest, LowPass) {
+TEST(OnePoleFilterTest, Lpf) {
   OnePoleFilter filter;
   for (int i = 0; i < kInputLength; ++i) {
     const float expected_output =
         (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLowPass>(kInput[i], kCoefficient), expected_output);
+    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLpf>(kInput[i], kCoefficient), expected_output);
   }
 }
 
-TEST(OnePoleFilterTest, LowPassAllPass) {
+TEST(OnePoleFilterTest, LpfAllPass) {
   OnePoleFilter filter;
   for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLowPass>(input, 0.0f), input);
+    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLpf>(input, 0.0f), input);
   }
 }
 
-TEST(OnePoleFilterTest, HighPass) {
+TEST(OnePoleFilterTest, Hpf) {
   OnePoleFilter filter;
   for (int i = 0; i < kInputLength; ++i) {
     const float expected_output =
         kInput[i] - (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHighPass>(kInput[i], kCoefficient), expected_output);
+    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHpf>(kInput[i], kCoefficient), expected_output);
   }
 }
 
-TEST(OnePoleFilterTest, HighPassAllPass) {
+TEST(OnePoleFilterTest, HpfAllPass) {
   OnePoleFilter filter;
   for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHighPass>(input, 1.0f), input);
+    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHpf>(input, 1.0f), input);
   }
 }
 

@@ -126,7 +126,7 @@ void BM_BarelyInstrument_PlaySingleNoteWithLoopingSample(State& state) {
   }
 }
 BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithLoopingSample<FilterType::kNone>);
-BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithLoopingSample<FilterType::kLowPass>);
+BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithLoopingSample<FilterType::kLpf>);
 
 template <float kOscShape, FilterType kFilterType>
 void BM_BarelyInstrument_PlaySingleNoteWithOsc(State& state) {
@@ -147,9 +147,9 @@ void BM_BarelyInstrument_PlaySingleNoteWithOsc(State& state) {
   }
 }
 BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<0.0f, FilterType::kNone>);
-BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<0.0f, FilterType::kLowPass>);
+BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<0.0f, FilterType::kLpf>);
 BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<1.0f, FilterType::kNone>);
-BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<1.0f, FilterType::kLowPass>);
+BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<1.0f, FilterType::kLpf>);
 
 template <float kOscShape, FilterType kFilterType>
 void BM_BarelyInstrument_PlayMultipleNotesWithOsc(State& state) {
@@ -173,9 +173,9 @@ void BM_BarelyInstrument_PlayMultipleNotesWithOsc(State& state) {
   }
 }
 BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<0.0f, FilterType::kNone>);
-BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<0.0f, FilterType::kLowPass>);
+BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<0.0f, FilterType::kLpf>);
 BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<1.0f, FilterType::kNone>);
-BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<1.0f, FilterType::kLowPass>);
+BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<1.0f, FilterType::kLpf>);
 
 void BM_BarelyInstrument_SetMultipleControls(State& state) {
   Engine engine(kSampleRate);

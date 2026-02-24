@@ -39,8 +39,8 @@ using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
       Control(1.0f, 0.0f, 1.0f),  // kDelayMix
       Control(0.0f, 0.0f, 8.0f),  // kDelayTime
       Control(0.0f, 0.0f, 1.0f),  // kDelayFeedback
-      Control(1.0f, 0.0f, 1.0f),  // kDelayLowPassCutoff
-      Control(0.0f, 0.0f, 1.0f),  // kDelayHighPassCutoff
+      Control(1.0f, 0.0f, 1.0f),  // kDelayLpfCutoff
+      Control(0.0f, 0.0f, 1.0f),  // kDelayHpfCutoff
       Control(0.0f, 0.0f, 2.0f),  // kDelayReverbSend
       Control(1.0f, 0.0f, 1.0f),  // kReverbMix
       Control(0.0f, 0.0f, 1.0f),  // kReverbDamping

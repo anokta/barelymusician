@@ -19,7 +19,7 @@ class OnePoleFilter {
     assert(coefficient >= 0.0f);
     assert(coefficient <= 1.0f);
     output_ = coefficient * (output_ - input) + input;
-    if constexpr (kType == FilterType::kHighPass) {
+    if constexpr (kType == FilterType::kHpf) {
       return input - output_;
     } else {
       return output_;

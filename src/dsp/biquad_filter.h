@@ -63,7 +63,7 @@ inline BiquadFilter::Coeffs GetFilterCoefficients(float sample_rate, FilterType 
   const float a0 = 1.0f + alpha;
 
   switch (type) {
-    case FilterType::kLowPass: {
+    case FilterType::kLpf: {
       const float b0 = (1.0f - cosw0) / (2.0f * a0);
       return {
           .a1 = (-2.0f * cosw0) / a0,
@@ -73,7 +73,7 @@ inline BiquadFilter::Coeffs GetFilterCoefficients(float sample_rate, FilterType 
           .b2 = b0,
       };
     }
-    case FilterType::kHighPass: {
+    case FilterType::kHpf: {
       const float b0 = (1.0f + cosw0) / (2.0f * a0);
       return {
           .a1 = (-2.0f * cosw0) / a0,

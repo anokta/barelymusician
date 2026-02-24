@@ -20,10 +20,10 @@ namespace Barely {
   public enum FilterType {
     /// None.
     [InspectorName("None")] NONE = 0,
-    /// Low-pass.
-    [InspectorName("Low-pass")] LOW_PASS,
-    /// High-pass.
-    [InspectorName("High-pass")] HIGH_PASS,
+    /// Low-pass filter.
+    [InspectorName("Lpf")] LPF,
+    /// High-pass filter.
+    [InspectorName("Hpf")] HPF,
   }
 
   /// Oscillator modes.

@@ -105,12 +105,12 @@ class EngineProcessor {
       case BarelyEngineControlType_kDelayFeedback:
         engine_.target_params.delay_params.feedback = value * kMaxDelayFeedback;
         break;
-      case BarelyEngineControlType_kDelayLowPassCutoff:
-        engine_.target_params.delay_params.low_pass_coeff =
+      case BarelyEngineControlType_kDelayLpfCutoff:
+        engine_.target_params.delay_params.lpf_coeff =
             GetFilterCoefficient(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
         break;
-      case BarelyEngineControlType_kDelayHighPassCutoff:
-        engine_.target_params.delay_params.high_pass_coeff =
+      case BarelyEngineControlType_kDelayHpfCutoff:
+        engine_.target_params.delay_params.hpf_coeff =
             GetFilterCoefficient(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
         break;
       case BarelyEngineControlType_kDelayReverbSend:

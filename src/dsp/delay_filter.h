@@ -19,8 +19,8 @@ struct DelayParams {
   float frame_count = 1.0f;
   float feedback = 0.0f;
 
-  float low_pass_coeff = 0.0f;
-  float high_pass_coeff = 1.0f;
+  float lpf_coeff = 0.0f;
+  float hpf_coeff = 1.0f;
 
   float reverb_send = 0.0f;
 
@@ -28,8 +28,8 @@ struct DelayParams {
     ApproachValue(mix, params.mix);
     ApproachValue(frame_count, params.frame_count);
     ApproachValue(feedback, params.feedback);
-    ApproachValue(low_pass_coeff, params.low_pass_coeff);
-    ApproachValue(high_pass_coeff, params.high_pass_coeff);
+    ApproachValue(lpf_coeff, params.lpf_coeff);
+    ApproachValue(hpf_coeff, params.hpf_coeff);
     ApproachValue(reverb_send, params.reverb_send);
   }
 };
@@ -52,9 +52,8 @@ class DelayFilter {
           std::lerp(delay_samples_[kStereoChannelCount * read_frame_begin + channel],
                     delay_samples_[kStereoChannelCount * read_frame_end + channel],
                     params.frame_count - static_cast<float>(delay_frame_count));
-      output_sample = lpf_[channel].Next<FilterType::kLowPass>(
-          hpf_[channel].Next<FilterType::kHighPass>(output_sample, params.high_pass_coeff),
-          params.low_pass_coeff);
+      output_sample = lpf_[channel].Next<FilterType::kLpf>(
+          hpf_[channel].Next<FilterType::kHpf>(output_sample, params.hpf_coeff), params.lpf_coeff);
       delay_samples_[kStereoChannelCount * write_frame_ + channel] =
           input_frame[channel] + output_sample * params.feedback;
 

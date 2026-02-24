@@ -7,8 +7,8 @@ export const EngineControlType = Object.freeze({
   DELAY_MIX: 5,
   DELAY_TIME: 6,
   DELAY_FEEDBACK: 7,
-  DELAY_LOW_PASS_CUTOFF: 8,
-  DELAY_HIGH_PASS_CUTOFF: 9,
+  DELAY_LPF_CUTOFF: 8,
+  DELAY_HPF_CUTOFF: 9,
   DELAY_REVERB_SEND: 10,
   REVERB_MIX: 11,
   REVERB_DAMPING: 12,
@@ -72,8 +72,8 @@ export const ArpMode = Object.freeze({
 
 export const FilterType = Object.freeze({
   NONE: 0,
-  LOW_PASS: 1,
-  HIGH_PASS: 2,
+  LPF: 1,
+  HPF: 2,
   COUNT: 3,
 });
 
@@ -151,15 +151,15 @@ export const ENGINE_CONTROLS = Object.freeze({
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [EngineControlType.DELAY_LOW_PASS_CUTOFF]: {
-    name: 'Delay Low-Pass Cutoff',
+  [EngineControlType.DELAY_LPF_CUTOFF]: {
+    name: 'Delay Lpf Cutoff',
     valueType: 'float',
     defaultValue: 1.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [EngineControlType.DELAY_HIGH_PASS_CUTOFF]: {
-    name: 'Delay High-Pass Cutoff',
+  [EngineControlType.DELAY_HPF_CUTOFF]: {
+    name: 'Delay Hpf Cutoff',
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,

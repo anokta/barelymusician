@@ -44,7 +44,7 @@ namespace Barely {
     }
     private static float _compRelease = 0.0f;
 
-    /// Compressor threshold.
+    /// Normalized compressor threshold in logarithmic scale.
     public static float CompThreshold {
       get { return _compThreshold; }
       set {
@@ -104,31 +104,29 @@ namespace Barely {
     }
     private static float _delayFeedback = 0.0f;
 
-    /// Delay low-pass cutoff.
-    public static float DelayLowPassCutoff {
-      get { return _delayLowPassCutoff; }
+    /// Delay low-pass filter cutoff.
+    public static float DelayLpfCutoff {
+      get { return _delayLpfCutoff; }
       set {
-        if (_delayLowPassCutoff != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_LOW_PASS_CUTOFF, value);
-          _delayLowPassCutoff =
-              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_LOW_PASS_CUTOFF);
+        if (_delayLpfCutoff != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_LPF_CUTOFF, value);
+          _delayLpfCutoff = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_LPF_CUTOFF);
         }
       }
     }
-    private static float _delayLowPassCutoff = 1.0f;
+    private static float _delayLpfCutoff = 1.0f;
 
-    /// Delay high-pass cutoff.
-    public static float DelayHighPassCutoff {
-      get { return _delayHighPassCutoff; }
+    /// Delay high-pass filter cutoff.
+    public static float DelayHpfCutoff {
+      get { return _delayHpfCutoff; }
       set {
-        if (_delayHighPassCutoff != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_HIGH_PASS_CUTOFF, value);
-          _delayHighPassCutoff =
-              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_HIGH_PASS_CUTOFF);
+        if (_delayHpfCutoff != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_HPF_CUTOFF, value);
+          _delayHpfCutoff = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_HPF_CUTOFF);
         }
       }
     }
-    private static float _delayHighPassCutoff = 0.0f;
+    private static float _delayHpfCutoff = 0.0f;
 
     /// Delay reverb send.
     public static float DelayReverbSend {
@@ -354,7 +352,7 @@ namespace Barely {
         [InspectorName("Comp Attack")] COMP_ATTACK,
         // Compressor release in seconds.
         [InspectorName("Comp Release")] COMP_RELEASE,
-        // Compressor threshold.
+        // Normalized compressor threshold in logarithmic scale.
         [InspectorName("Comp Threshold")] COMP_THRESHOLD,
         // Compressor ratio.
         [InspectorName("Comp Ratio")] COMP_RATIO,
@@ -364,10 +362,10 @@ namespace Barely {
         [InspectorName("Delay Time")] DELAY_TIME,
         // Delay feedback.
         [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
-        // Delay low-pass cutoff.
-        [InspectorName("Delay Low-Pass Cutoff")] DELAY_LOW_PASS_CUTOFF,
-        // Delay high-pass cutoff.
-        [InspectorName("Delay High-Pass Cutoff")] DELAY_HIGH_PASS_CUTOFF,
+        // Delay low-pass filter cutoff.
+        [InspectorName("Delay LPF Cutoff")] DELAY_LPF_CUTOFF,
+        // Delay high-pass filter cutoff.
+        [InspectorName("Delay HPF Cutoff")] DELAY_HPF_CUTOFF,
         // Delay reverb send.
         [InspectorName("Delay Reverb Send")] DELAY_REVERB_SEND,
         // Reverb mix.
@@ -1020,10 +1018,8 @@ namespace Barely {
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_MIX, _delayMix);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_TIME, _delayTime);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_FEEDBACK, _delayFeedback);
-          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_LOW_PASS_CUTOFF,
-                                  _delayLowPassCutoff);
-          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_HIGH_PASS_CUTOFF,
-                                  _delayHighPassCutoff);
+          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_LPF_CUTOFF, _delayLpfCutoff);
+          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_HPF_CUTOFF, _delayHpfCutoff);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_REVERB_SEND, _delayReverbSend);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_MIX, _reverbMix);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_DAMPING, _reverbDamping);

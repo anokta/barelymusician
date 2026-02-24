@@ -24,19 +24,17 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
       Control(1.0f, 0.0f, 1.0f),                   // kGain
       Control(0.0f),                               // kPitchShift
       Control(0.0f, -1.0f, 1.0f),                  // kStereoPan
-      Control(false),                              // kRetrigger
-      Control(8, 1, 16),                           // kVoiceCount
       Control(0.0f, 0.0f, 8.0f),                   // kAttack
       Control(0.0f, 0.0f, 8.0f),                   // kDecay
       Control(1.0f, 0.0f, 1.0f),                   // kSustain
       Control(0.0f, 0.0f, 8.0f),                   // kRelease
+      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
       Control(0.0f, 0.0f, 1.0f),                   // kOscMix
       Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
       Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
       Control(0.0f),                               // kOscPitchShift
       Control(0.0f, 0.0f, 1.0f),                   // kOscShape
       Control(0.0f, -1.0f, 1.0f),                  // kOscSkew
-      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
       Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherDepth
       Control(1.0f, 0.0f, 1.0f),                   // kBitCrusherRate
       Control(0.0f, 0.0f, 1.0f),                   // kDistortionMix
@@ -50,6 +48,8 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
       Control(0, 0, BarelyArpMode_kCount - 1),     // kArpMode
       Control(0.5f, 0.0f, 1.0f),                   // kArpGate
       Control(1.0f, 0.0f, 16.0f),                  // kArpRate
+      Control(false),                              // kRetrigger
+      Control(8, 1, 16),                           // kVoiceCount
   };
   for (int i = 0; i < control_override_count; ++i) {
     control_array[control_overrides[i].type].SetValue(control_overrides[i].value);

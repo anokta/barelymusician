@@ -28,31 +28,6 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kStereoPan:
       params.voice_params.stereo_pan = value;
       break;
-    case BarelyInstrumentControlType_kRetrigger:
-      params.should_retrigger = static_cast<bool>(value);
-      break;
-    case BarelyInstrumentControlType_kVoiceCount: {
-      const uint32_t new_voice_count = static_cast<uint32_t>(value);
-      uint32_t active_voice_count = 0;
-      uint32_t active_voice_index = params.first_voice_index;
-      while (active_voice_index != kInvalidIndex && active_voice_count <= new_voice_count) {
-        active_voice_index = engine_.GetVoice(active_voice_index).next_voice_index;
-        ++active_voice_count;
-      }
-      // Release the previously active voices beyond the new voice count.
-      while (active_voice_index != kInvalidIndex) {
-        auto& voice = engine_.GetVoice(active_voice_index);
-        if (voice.prev_voice_index != kInvalidIndex) {
-          engine_.GetVoice(voice.prev_voice_index).next_voice_index = kInvalidIndex;
-          voice.prev_voice_index = kInvalidIndex;
-        }
-        const uint32_t next_voice_index = voice.next_voice_index;
-        voice.next_voice_index = kInvalidIndex;
-        engine_.voice_pool.Release(active_voice_index);
-        active_voice_index = next_voice_index;
-      }
-      params.voice_count = new_voice_count;
-    } break;
     case BarelyInstrumentControlType_kAttack:
       params.adsr.SetAttack(engine_.sample_rate, value);
       break;
@@ -64,6 +39,9 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       break;
     case BarelyInstrumentControlType_kRelease:
       params.adsr.SetRelease(engine_.sample_rate, value);
+      break;
+    case BarelyInstrumentControlType_kSliceMode:
+      params.slice_mode = static_cast<SliceMode>(value);
       break;
     case BarelyInstrumentControlType_kOscMix:
       params.voice_params.osc_mix = value;
@@ -84,9 +62,6 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       break;
     case BarelyInstrumentControlType_kOscSkew:
       params.voice_params.osc_skew = value * kOscSkewRange;
-      break;
-    case BarelyInstrumentControlType_kSliceMode:
-      params.slice_mode = static_cast<SliceMode>(value);
       break;
     case BarelyInstrumentControlType_kBitCrusherDepth:
       params.voice_params.bit_crusher_range = std::pow(2.0f, value * 15.0f);
@@ -131,6 +106,31 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       [[fallthrough]];
     case BarelyInstrumentControlType_kArpRate:
       break;
+    case BarelyInstrumentControlType_kRetrigger:
+      params.should_retrigger = static_cast<bool>(value);
+      break;
+    case BarelyInstrumentControlType_kVoiceCount: {
+      const uint32_t new_voice_count = static_cast<uint32_t>(value);
+      uint32_t active_voice_count = 0;
+      uint32_t active_voice_index = params.first_voice_index;
+      while (active_voice_index != kInvalidIndex && active_voice_count <= new_voice_count) {
+        active_voice_index = engine_.GetVoice(active_voice_index).next_voice_index;
+        ++active_voice_count;
+      }
+      // Release the previously active voices beyond the new voice count.
+      while (active_voice_index != kInvalidIndex) {
+        auto& voice = engine_.GetVoice(active_voice_index);
+        if (voice.prev_voice_index != kInvalidIndex) {
+          engine_.GetVoice(voice.prev_voice_index).next_voice_index = kInvalidIndex;
+          voice.prev_voice_index = kInvalidIndex;
+        }
+        const uint32_t next_voice_index = voice.next_voice_index;
+        voice.next_voice_index = kInvalidIndex;
+        engine_.voice_pool.Release(active_voice_index);
+        active_voice_index = next_voice_index;
+      }
+      params.voice_count = new_voice_count;
+    } break;
     default:
       assert(!"Invalid control type");
       return;

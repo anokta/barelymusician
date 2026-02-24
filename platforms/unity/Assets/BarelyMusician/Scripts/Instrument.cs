@@ -118,13 +118,6 @@ namespace Barely {
     [Range(-1.0f, 1.0f)]
     public float StereoPan = 0.0f;
 
-    /// Retrigger.
-    public bool Retrigger = false;
-
-    /// Number of voices.
-    [Range(1, 16)]
-    public int VoiceCount = 8;
-
     [Header("Envelope")]
 
     /// Envelope attack in seconds.
@@ -142,6 +135,15 @@ namespace Barely {
     /// Envelope release in seconds.
     [Range(0.0f, 8.0f)]
     public float Release = 0.25f;
+
+    [Header("Slice")]
+
+    /// Slice playback mode.
+    public SliceMode SliceMode = SliceMode.SUSTAIN;
+
+    /// List of slices.
+    public List<Slice> Slices = null;
+    private int _sliceCount = 0;
 
     [Header("Oscillator")]
 
@@ -167,15 +169,6 @@ namespace Barely {
     /// Oscillator skew.
     [Range(-1.0f, 1.0f)]
     public float OscSkew = 0.0f;
-
-    [Header("Slice")]
-
-    /// Slice mode.
-    public SliceMode SliceMode = SliceMode.SUSTAIN;
-
-    /// List of slices.
-    public List<Slice> Slices = null;
-    private int _sliceCount = 0;
 
     [Header("Bit Crusher")]
 
@@ -236,6 +229,15 @@ namespace Barely {
     /// Arpeggiator rate.
     [Range(0.0f, 16.0f)]
     public float ArpRate = 1.0f;
+
+    [Header("Polyphony")]
+
+    /// Retrigger.
+    public bool Retrigger = false;
+
+    /// Number of voices.
+    [Range(1, 16)]
+    public int VoiceCount = 8;
 
     /// Note off callback.
     ///
@@ -348,19 +350,17 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.GAIN, Gain);
       SetControl(Engine.Internal.InstrumentControlType.PITCH_SHIFT, PitchShift);
       SetControl(Engine.Internal.InstrumentControlType.STEREO_PAN, StereoPan);
-      SetControl(Engine.Internal.InstrumentControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
-      SetControl(Engine.Internal.InstrumentControlType.VOICE_COUNT, (float)VoiceCount);
       SetControl(Engine.Internal.InstrumentControlType.ATTACK, Attack);
       SetControl(Engine.Internal.InstrumentControlType.DECAY, Decay);
       SetControl(Engine.Internal.InstrumentControlType.SUSTAIN, Sustain);
       SetControl(Engine.Internal.InstrumentControlType.RELEASE, Release);
+      SetControl(Engine.Internal.InstrumentControlType.SLICE_MODE, (float)SliceMode);
       SetControl(Engine.Internal.InstrumentControlType.OSC_MIX, OscMix);
       SetControl(Engine.Internal.InstrumentControlType.OSC_MODE, (float)OscMode);
       SetControl(Engine.Internal.InstrumentControlType.OSC_NOISE_MIX, OscNoiseMix);
       SetControl(Engine.Internal.InstrumentControlType.OSC_PITCH_SHIFT, OscPitchShift);
       SetControl(Engine.Internal.InstrumentControlType.OSC_SHAPE, OscShape);
       SetControl(Engine.Internal.InstrumentControlType.OSC_SKEW, OscSkew);
-      SetControl(Engine.Internal.InstrumentControlType.SLICE_MODE, (float)SliceMode);
       SetControl(Engine.Internal.InstrumentControlType.BIT_CRUSHER_DEPTH, BitCrusherDepth);
       SetControl(Engine.Internal.InstrumentControlType.BIT_CRUSHER_RATE, BitCrusherRate);
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_MIX, DistortionMix);
@@ -374,6 +374,8 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.ARP_MODE, (float)ArpMode);
       SetControl(Engine.Internal.InstrumentControlType.ARP_GATE, ArpGate);
       SetControl(Engine.Internal.InstrumentControlType.ARP_RATE, ArpRate);
+      SetControl(Engine.Internal.InstrumentControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
+      SetControl(Engine.Internal.InstrumentControlType.VOICE_COUNT, (float)VoiceCount);
     }
 
     private void SetControl(Engine.Internal.InstrumentControlType type, float value) {

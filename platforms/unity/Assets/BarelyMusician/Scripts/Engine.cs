@@ -291,10 +291,6 @@ namespace Barely {
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
         // Stereo pan.
         [InspectorName("Stereo Pan")] STEREO_PAN,
-        // Retrigger.
-        [InspectorName("Retrigger")] RETRIGGER,
-        // Number of voices.
-        [InspectorName("Voice Count")] VOICE_COUNT,
         // Envelope attack in seconds.
         [InspectorName("Attack")] ATTACK,
         // Envelope decay in seconds.
@@ -303,6 +299,8 @@ namespace Barely {
         [InspectorName("Sustain")] SUSTAIN,
         // Envelope release in seconds.
         [InspectorName("Release")] RELEASE,
+        // Slice playback mode.
+        [InspectorName("Slice Mode")] SLICE_MODE,
         // Oscillator mix.
         [InspectorName("Osc Mix")] OSC_MIX,
         // Oscillator mode.
@@ -315,8 +313,6 @@ namespace Barely {
         [InspectorName("Osc Shape")] OSC_SHAPE,
         // Oscillator skew.
         [InspectorName("Osc Skew")] OSC_SKEW,
-        // Slice mode.
-        [InspectorName("Slice Mode")] SLICE_MODE,
         // Bit crusher depth.
         [InspectorName("Bit Crusher Depth")] BIT_CRUSHER_DEPTH,
         // Bit crusher rate.
@@ -343,6 +339,10 @@ namespace Barely {
         [InspectorName("Arp Gate")] ARP_GATE,
         // Arpeggiator rate.
         [InspectorName("Arp Rate")] ARP_RATE,
+        // Retrigger.
+        [InspectorName("Retrigger")] RETRIGGER,
+        // Number of voices.
+        [InspectorName("Voice Count")] VOICE_COUNT,
       }
 
       public enum EngineControlType {
@@ -447,14 +447,12 @@ namespace Barely {
             instrument.PitchShift;
         _instrumentControlOverrides[(int)InstrumentControlType.STEREO_PAN].value =
             (float)instrument.StereoPan;
-        _instrumentControlOverrides[(int)InstrumentControlType.RETRIGGER].value =
-            instrument.Retrigger ? 1.0f : 0.0f;
-        _instrumentControlOverrides[(int)InstrumentControlType.VOICE_COUNT].value =
-            (float)instrument.VoiceCount;
         _instrumentControlOverrides[(int)InstrumentControlType.ATTACK].value = instrument.Attack;
         _instrumentControlOverrides[(int)InstrumentControlType.DECAY].value = instrument.Decay;
         _instrumentControlOverrides[(int)InstrumentControlType.SUSTAIN].value = instrument.Sustain;
         _instrumentControlOverrides[(int)InstrumentControlType.RELEASE].value = instrument.Release;
+        _instrumentControlOverrides[(int)InstrumentControlType.SLICE_MODE].value =
+            (float)instrument.SliceMode;
         _instrumentControlOverrides[(int)InstrumentControlType.OSC_MIX].value = instrument.OscMix;
         _instrumentControlOverrides[(int)InstrumentControlType.OSC_MODE].value =
             (float)instrument.OscMode;
@@ -465,8 +463,6 @@ namespace Barely {
         _instrumentControlOverrides[(int)InstrumentControlType.OSC_SHAPE].value =
             instrument.OscShape;
         _instrumentControlOverrides[(int)InstrumentControlType.OSC_SKEW].value = instrument.OscSkew;
-        _instrumentControlOverrides[(int)InstrumentControlType.SLICE_MODE].value =
-            (float)instrument.SliceMode;
         _instrumentControlOverrides[(int)InstrumentControlType.BIT_CRUSHER_DEPTH].value =
             instrument.BitCrusherDepth;
         _instrumentControlOverrides[(int)InstrumentControlType.BIT_CRUSHER_RATE].value =
@@ -491,6 +487,10 @@ namespace Barely {
             (float)instrument.ArpMode;
         _instrumentControlOverrides[(int)InstrumentControlType.ARP_GATE].value = instrument.ArpGate;
         _instrumentControlOverrides[(int)InstrumentControlType.ARP_RATE].value = instrument.ArpRate;
+        _instrumentControlOverrides[(int)InstrumentControlType.RETRIGGER].value =
+            instrument.Retrigger ? 1.0f : 0.0f;
+        _instrumentControlOverrides[(int)InstrumentControlType.VOICE_COUNT].value =
+            (float)instrument.VoiceCount;
         bool success =
             BarelyEngine_CreateInstrument(_handle, _instrumentControlOverrides,
                                           _instrumentControlOverrides.Length, ref instrumentId);

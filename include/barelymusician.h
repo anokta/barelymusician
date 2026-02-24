@@ -282,10 +282,6 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kPitchShift,
   /// Stereo pan.
   BarelyInstrumentControlType_kStereoPan,
-  /// Retrigger.
-  BarelyInstrumentControlType_kRetrigger,
-  /// Number of voices.
-  BarelyInstrumentControlType_kVoiceCount,
   /// Envelope attack in seconds.
   BarelyInstrumentControlType_kAttack,
   /// Envelope decay in seconds.
@@ -294,6 +290,8 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kSustain,
   /// Envelope release in seconds.
   BarelyInstrumentControlType_kRelease,
+  /// Slice playback mode.
+  BarelyInstrumentControlType_kSliceMode,
   /// Oscillator mix.
   BarelyInstrumentControlType_kOscMix,
   /// Oscillator mode.
@@ -306,8 +304,6 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kOscShape,
   /// Oscillator skew.
   BarelyInstrumentControlType_kOscSkew,
-  /// Slice mode.
-  BarelyInstrumentControlType_kSliceMode,
   /// Bit crusher depth.
   BarelyInstrumentControlType_kBitCrusherDepth,
   /// Bit crusher rate.
@@ -334,6 +330,10 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kArpGate,
   /// Arpeggiator rate.
   BarelyInstrumentControlType_kArpRate,
+  /// Retrigger.
+  BarelyInstrumentControlType_kRetrigger,
+  /// Number of voices.
+  BarelyInstrumentControlType_kVoiceCount,
   /// Number of instrument control types.
   BarelyInstrumentControlType_kCount,
 } BarelyInstrumentControlType;
@@ -997,10 +997,6 @@ enum class InstrumentControlType {
   kPitchShift = BarelyInstrumentControlType_kPitchShift,
   /// Stereo pan.
   kStereoPan = BarelyInstrumentControlType_kStereoPan,
-  /// Retrigger.
-  kRetrigger = BarelyInstrumentControlType_kRetrigger,
-  /// Number of voices.
-  kVoiceCount = BarelyInstrumentControlType_kVoiceCount,
   /// Envelope attack in seconds.
   kAttack = BarelyInstrumentControlType_kAttack,
   /// Envelope decay in seconds.
@@ -1009,6 +1005,8 @@ enum class InstrumentControlType {
   kSustain = BarelyInstrumentControlType_kSustain,
   /// Envelope release in seconds.
   kRelease = BarelyInstrumentControlType_kRelease,
+  /// Slice playback mode.
+  kSliceMode = BarelyInstrumentControlType_kSliceMode,
   /// Oscillator mix.
   kOscMix = BarelyInstrumentControlType_kOscMix,
   /// Oscillator mode.
@@ -1021,8 +1019,6 @@ enum class InstrumentControlType {
   kOscShape = BarelyInstrumentControlType_kOscShape,
   /// Oscillator skew.
   kOscSkew = BarelyInstrumentControlType_kOscSkew,
-  /// Slice playback mode.
-  kSliceMode = BarelyInstrumentControlType_kSliceMode,
   /// Bit crusher depth.
   kBitCrusherDepth = BarelyInstrumentControlType_kBitCrusherDepth,
   /// Bit crusher rate.
@@ -1049,6 +1045,10 @@ enum class InstrumentControlType {
   kArpGate = BarelyInstrumentControlType_kArpGate,
   /// Arpeggiator rate.
   kArpRate = BarelyInstrumentControlType_kArpRate,
+  /// Retrigger.
+  kRetrigger = BarelyInstrumentControlType_kRetrigger,
+  /// Number of voices.
+  kVoiceCount = BarelyInstrumentControlType_kVoiceCount,
 };
 
 /// Note control types.

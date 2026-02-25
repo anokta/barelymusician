@@ -97,9 +97,12 @@ class InstrumentProcessor {
 
     const SliceState* slice = engine_.slice_pool.Get(voice.slice_index);
 
-    if (instrument_params.slice_mode == SliceMode::kOnce && slice != nullptr &&
-        static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
+    if (voice.stop_on_slice_end &&
+        (slice == nullptr || instrument_params.slice_mode != SliceMode::kOnce)) {
       voice.envelope.Stop();
+    } else if (instrument_params.slice_mode == SliceMode::kOnce && slice != nullptr &&
+               static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
+      voice.envelope.Reset();
     }
 
     const float skewed_osc_phase = std::min(1.0f, (1.0f + voice.params.osc_skew) * voice.osc_phase);

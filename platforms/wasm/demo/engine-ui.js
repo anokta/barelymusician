@@ -53,6 +53,8 @@ export class EngineUi {
         this.delayFeedback = 0.2;
         this.reverbDamping = 0.25;
         this.reverbRoomSize = 0.6;
+        this.container.querySelector('#createInstrumentBtn').click();
+        this.container.querySelector('#createPerformerBtn').click();
       }
 
       this._startUpdateLoop();

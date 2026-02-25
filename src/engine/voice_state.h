@@ -40,8 +40,9 @@ struct VoiceState {
   uint32_t prev_voice_index = kInvalidIndex;
   uint32_t next_voice_index = kInvalidIndex;
 
-  // Timestamp gets incremented in each voice start for round-robin voice stealing.
-  uint32_t timestamp = 0;
+  uint32_t timestamp = 0;  // incremented in each voice start for round-robin voice stealing.
+
+  bool stop_on_slice_end = false;
 
   [[nodiscard]] constexpr bool IsActive() const noexcept { return envelope.IsActive(); }
 
@@ -84,6 +85,7 @@ struct VoiceState {
     filter.Reset();
     osc_phase = 0.0f;
     slice_offset = 0.0f;
+    stop_on_slice_end = false;
     envelope.Start(instrument_params.adsr);
     timestamp = 0;
   }

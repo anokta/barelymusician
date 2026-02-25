@@ -169,6 +169,8 @@ void InstrumentProcessor::SetNoteOff(uint32_t note_index) noexcept {
       instrument_params.first_slice_index == kInvalidIndex ||
       instrument_params.slice_mode != SliceMode::kOnce) {
     voice.envelope.Stop();
+  } else {
+    voice.stop_on_slice_end = true;
   }
   voice.note_index = kInvalidIndex;
 }

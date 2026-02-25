@@ -12,7 +12,7 @@ TEST(DecibelsTest, AmplitudeDecibelsConversion) {
 
   constexpr int kValueCount = 4;
   constexpr std::array<float, kValueCount> kAmplitudes = {0.0f, 0.1f, 1.0f, 2.0f};
-  constexpr std::array<float, kValueCount> kDecibels = {-80.0f, -20.0f, 0.0f, 6.0f};
+  constexpr std::array<float, kValueCount> kDecibels = {-60.0f, -20.0f, 0.0f, 6.0f};
 
   for (int i = 0; i < kValueCount; ++i) {
     EXPECT_NEAR(AmplitudeToDecibels(kAmplitudes[i]), kDecibels[i], kEpsilon);

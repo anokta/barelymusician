@@ -51,7 +51,7 @@ export class EngineUi {
         this._tempo = 120.0;
         this.delayTime = 0.5;
         this.delayFeedback = 0.2;
-        this.reverbDamping = 0.1;
+        this.reverbDamping = 0.25;
         this.reverbRoomSize = 0.6;
       }
 
@@ -210,7 +210,7 @@ export class EngineUi {
 
         <div class="engine-reverb">
           <label for="reverbDampingSlider">Reverb Damping</label>
-          <input type="range" min="0.0" max="0.4" value="${this._reverbDamping}"
+          <input type="range" min="0.0" max="1.0" value="${this._reverbDamping}"
                  step="0.05" id="reverbDampingSlider">
           <span id="reverbDampingValue">${this._reverbDamping.toFixed(2)}</span>
 
@@ -303,7 +303,7 @@ export class EngineUi {
 
     this._reverbDamping = newReverbDamping;
     this.reverbDampingSlider.value = this._reverbDamping;
-    this.reverbDampingValue.textContent = this._reverbDamping.toFixed(1);
+    this.reverbDampingValue.textContent = this._reverbDamping.toFixed(2);
     this.engine.setControl(EngineControlType.REVERB_DAMPING, newReverbDamping);
   }
 

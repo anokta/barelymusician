@@ -5,7 +5,7 @@
 
 namespace barely {
 
-inline constexpr float kMinDecibels = -80.0f;
+inline constexpr float kMinDecibels = -60.0f;
 
 inline constexpr float AmplitudeToDecibels(float amplitude) noexcept {
   // decibels = 20 * log(amplitude).

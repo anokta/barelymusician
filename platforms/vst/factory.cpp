@@ -10,7 +10,7 @@ SMTG_CONSTEXPR Steinberg::Vst::CString kPluginUrl = "https://anokta.io";
 SMTG_CONSTEXPR Steinberg::Vst::CString kPluginEmail = "mailto:contact@anokta.io";
 
 SMTG_CONSTEXPR Steinberg::Vst::CString kPluginName = "barelymusician";
-SMTG_CONSTEXPR Steinberg::Vst::CString kPluginVersion = "0.7.2";
+SMTG_CONSTEXPR Steinberg::Vst::CString kPluginVersion = "0.7.3";
 SMTG_CONSTEXPR Steinberg::Vst::ComponentFlags kPluginFlags = {};
 
 }  // namespace

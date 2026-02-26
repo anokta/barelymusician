@@ -128,6 +128,18 @@ namespace Barely {
     }
     private static float _delayHpfCutoff = 0.0f;
 
+    /// Delay ping-pong.
+    public static float DelayPingPong {
+      get { return _delayPingPong; }
+      set {
+        if (_delayPingPong != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.DELAY_PING_PONG, value);
+          _delayPingPong = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_PING_PONG);
+        }
+      }
+    }
+    private static float _delayPingPong = 0.0f;
+
     /// Delay reverb send.
     public static float DelayReverbSend {
       get { return _delayReverbSend; }
@@ -366,6 +378,8 @@ namespace Barely {
         [InspectorName("Delay LPF Cutoff")] DELAY_LPF_CUTOFF,
         // Delay high-pass filter cutoff.
         [InspectorName("Delay HPF Cutoff")] DELAY_HPF_CUTOFF,
+        // Delay ping-pong.
+        [InspectorName("Delay Ping-Pong")] DELAY_PING_PONG,
         // Delay reverb send.
         [InspectorName("Delay Reverb Send")] DELAY_REVERB_SEND,
         // Reverb mix.
@@ -1020,6 +1034,7 @@ namespace Barely {
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_FEEDBACK, _delayFeedback);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_LPF_CUTOFF, _delayLpfCutoff);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_HPF_CUTOFF, _delayHpfCutoff);
+          BarelyEngine_SetControl(_handle, EngineControlType.DELAY_PING_PONG, _delayPingPong);
           BarelyEngine_SetControl(_handle, EngineControlType.DELAY_REVERB_SEND, _delayReverbSend);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_MIX, _reverbMix);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_DAMPING, _reverbDamping);

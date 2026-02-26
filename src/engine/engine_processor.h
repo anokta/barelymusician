@@ -113,6 +113,9 @@ class EngineProcessor {
         engine_.target_params.delay_params.hpf_coeff =
             GetFilterCoefficient(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
         break;
+      case BarelyEngineControlType_kDelayPingPong:
+        engine_.target_params.delay_params.ping_pong = value;
+        break;
       case BarelyEngineControlType_kDelayReverbSend:
         engine_.target_params.delay_params.reverb_send = value;
         break;

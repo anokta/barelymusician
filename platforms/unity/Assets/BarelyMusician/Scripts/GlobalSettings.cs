@@ -41,6 +41,9 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float DelayHpfCutoff = 0.0f;
 
+    [Range(0.0f, 1.0f)]
+    public float DelayPingPong = 0.0f;
+
     [Range(0.0f, 2.0f)]
     public float DelayReverbSend = 0.0f;
 
@@ -89,6 +92,7 @@ namespace Barely {
       Engine.DelayFeedback = DelayFeedback;
       Engine.DelayLpfCutoff = DelayLpfCutoff;
       Engine.DelayHpfCutoff = DelayHpfCutoff;
+      Engine.DelayPingPong = DelayPingPong;
       Engine.DelayReverbSend = DelayReverbSend;
       Engine.ReverbMix = ReverbMix;
       Engine.ReverbDamping = ReverbDamping;

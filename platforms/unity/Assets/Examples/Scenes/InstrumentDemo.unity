@@ -464,24 +464,22 @@ MonoBehaviour:
   Gain: 1
   PitchShift: 0
   StereoPan: 0
-  Retrigger: 0
-  VoiceCount: 8
   Attack: 0.05
   Decay: 0
   Sustain: 1
   Release: 0.25
+  SliceMode: 1
+  Slices:
+  - RootPitch: 0
+    Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
   OscMix: 0
   OscMode: 0
   OscNoiseMix: 0
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
-  SliceMode: 1
-  Slices:
-  - RootPitch: 0
-    Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  BitCrusherDepth: 1
-  BitCrusherRate: 1
+  CrushDepth: 0
+  CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 0.5
   FilterType: 0
@@ -491,8 +489,10 @@ MonoBehaviour:
   ReverbSend: 0.25
   SidechainSend: 0
   ArpMode: 0
-  ArpGateRatio: 0.5
+  ArpGate: 0.5
   ArpRate: 1
+  Retrigger: 0
+  VoiceCount: 8
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -547,8 +547,9 @@ MonoBehaviour:
   DelayMix: 1
   DelayTime: 0.5
   DelayFeedback: 0.2
-  DelayLowPassCutoff: 1
-  DelayHighPassCutoff: 0
+  DelayLpfCutoff: 1
+  DelayHpfCutoff: 0
+  DelayPingPong: 0.5
   DelayReverbSend: 0
   ReverbMix: 1
   ReverbDamping: 0.25

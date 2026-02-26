@@ -248,6 +248,8 @@ typedef enum BarelyEngineControlType {
   BarelyEngineControlType_kDelayLpfCutoff,
   /// Delay high-pass filter cutoff.
   BarelyEngineControlType_kDelayHpfCutoff,
+  /// Delay ping-pong.
+  BarelyEngineControlType_kDelayPingPong,
   /// Delay reverb send.
   BarelyEngineControlType_kDelayReverbSend,
   /// Reverb mix.
@@ -965,6 +967,8 @@ enum class EngineControlType {
   kDelayLpfCutoff = BarelyEngineControlType_kDelayLpfCutoff,
   /// Delay high-pass filter cutoff.
   kDelayHpfCutoff = BarelyEngineControlType_kDelayHpfCutoff,
+  /// Delay ping-pong.
+  kDelayPingPong = BarelyEngineControlType_kDelayPingPong,
   /// Delay reverb send.
   kDelayReverbSend = BarelyEngineControlType_kDelayReverbSend,
   /// Reverb mix.

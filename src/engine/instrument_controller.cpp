@@ -23,13 +23,7 @@ uint32_t InstrumentController::Acquire() noexcept {
   if (instrument_index != kInvalidIndex) {
     InstrumentState& instrument = engine_.GetInstrument(instrument_index);
     instrument = {};
-
     engine_.ScheduleMessage(InstrumentCreateMessage{instrument_index});
-    for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-      engine_.ScheduleMessage(InstrumentControlMessage{instrument_index,
-                                                       static_cast<BarelyInstrumentControlType>(i),
-                                                       instrument.controls[i].value});
-    }
   }
   return instrument_index;
 }

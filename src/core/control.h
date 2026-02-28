@@ -6,6 +6,8 @@
 #include <cmath>
 #include <limits>
 
+#include "core/constants.h"
+
 namespace barely {
 
 struct Control {
@@ -42,18 +44,17 @@ inline constexpr void ApproachValue(float& current_value, float target_value) no
   current_value += (target_value - current_value) * kSmoothingCoeff;
 }
 
-inline float GetFrequency(float sample_rate, float normalized_cutoff) noexcept {
-  static constexpr float kMinHz = 20.0f;
-  static constexpr float kMinHzInverse = 1.0f / kMinHz;
-  const float max_hz = 0.5f * sample_rate;
-  return std::min(kMinHz * std::pow(max_hz * kMinHzInverse, normalized_cutoff), max_hz);
+inline float GetFrequency(float sample_rate, float cutoff) noexcept {
+  static constexpr float kMinFreqInverse = 1.0f / kMinFilterFreq;
+  const float max_freq = 0.5f * sample_rate;
+  return std::min(kMinFilterFreq * std::pow(max_freq * kMinFreqInverse, cutoff), max_freq);
 }
 
-inline float GetFilterQ(float normalized_resonance) noexcept {
+inline float GetFilterQ(float resonance) noexcept {
   static constexpr float kMinQ = 0.05f;
   static constexpr float kMinQInverse = 1.0f / kMinQ;
   static constexpr float kMaxQ = 10.0f;
-  return std::min(kMinQ * std::pow(kMaxQ * kMinQInverse, normalized_resonance), kMaxQ);
+  return std::min(kMinQ * std::pow(kMaxQ * kMinQInverse, resonance), kMaxQ);
 }
 
 }  // namespace barely

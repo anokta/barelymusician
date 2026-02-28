@@ -33,7 +33,7 @@ class InstrumentProcessor {
   void Init(uint32_t instrument_index) noexcept {
     engine_.instrument_params[instrument_index] = {};
     engine_.instrument_params[instrument_index].osc_increment =
-        kReferenceFrequency / engine_.sample_rate;
+        kReferenceFreq / engine_.sample_rate;
     engine_.instrument_params[instrument_index].slice_increment = 1.0f / engine_.sample_rate;
   }
 

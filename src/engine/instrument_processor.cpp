@@ -21,7 +21,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kPitchShift:
       params.pitch_shift = value;
       params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
-                             kReferenceFrequency / engine_.sample_rate;
+                             kReferenceFreq / engine_.sample_rate;
       params.slice_increment = std::pow(2.0f, params.pitch_shift) / engine_.sample_rate;
       break;
     case BarelyInstrumentControlType_kStereoPan:
@@ -54,7 +54,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kOscPitchShift:
       params.osc_pitch_shift = value;
       params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
-                             kReferenceFrequency / engine_.sample_rate;
+                             kReferenceFreq / engine_.sample_rate;
       break;
     case BarelyInstrumentControlType_kOscShape:
       params.voice_params.osc_shape = value;

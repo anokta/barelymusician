@@ -20,7 +20,7 @@ struct InstrumentParams {
   SliceMode slice_mode = SliceMode::kSustain;
 
   FilterType filter_type = FilterType::kNone;
-  float filter_frequency = 0.0f;
+  float filter_frequency = kMinFilterFreq;
   float filter_q = std::sqrt(0.5f);
 
   float pitch_shift = 0.0f;

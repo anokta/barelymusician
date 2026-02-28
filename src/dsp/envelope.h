@@ -13,8 +13,10 @@ class Envelope {
   class Adsr {
    public:
     void SetAttack(float sample_rate, float attack) noexcept {
-      const float attack_samples = sample_rate * attack;
-      attack_increment_ = (attack_samples >= 1.0f) ? 1.0f / attack_samples : 0.0f;
+      static constexpr float kMinAttack = 0.001f;
+      const float attack_samples = sample_rate * std::max(attack, kMinAttack);
+      assert(attack_samples >= 1.0f);
+      attack_increment_ = 1.0f / attack_samples;
     }
 
     void SetDecay(float sample_rate, float decay) noexcept {
@@ -23,8 +25,10 @@ class Envelope {
     }
 
     void SetRelease(float sample_rate, float release) noexcept {
-      const float release_samples = sample_rate * release;
-      release_increment_ = (release_samples >= 1.0f) ? 1.0f / release_samples : 0.0f;
+      static constexpr float kMinRelease = 0.001f;
+      const float release_samples = sample_rate * std::max(release, kMinRelease);
+      assert(release_samples >= 1.0f);
+      release_increment_ = 1.0f / release_samples;
     }
 
     void SetSustain(float sustain) noexcept { sustain_ = std::clamp(sustain, 0.0f, 1.0f); }

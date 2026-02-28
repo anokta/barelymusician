@@ -13,7 +13,6 @@ class Controller : public Steinberg::Vst::EditController {
  public:
   static Steinberg::FUnknown* Create(void* context);
 
-  static std::span<InstrumentControlOverride> GetDefaultControls() noexcept;
   static float ToPlainControlValue(InstrumentControlType type, double normalized_value) noexcept;
 
   static const Steinberg::FUID kId;

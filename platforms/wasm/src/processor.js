@@ -2,12 +2,10 @@ import Module from './barelymusician.js';
 import {CommandType, EventCallbackType, MessageType} from './command.js'
 import {INSTRUMENT_CONTROLS, NoteControlType} from './control.js';
 
-const INSTRUMENT_CONTROL_OVERRIDE_SIZE = 8;  // sizeof(BarelyInstrumentControlOverride)
-const NOTE_CONTROL_OVERRIDE_SIZE = 8;        // sizeof(BarelyNoteControlOverride)
-const SLICE_SIZE = 24;                       // sizeof(BarelySlice)
-
 const RENDER_QUANTUM_SIZE = 128;
 const STEREO_CHANNEL_COUNT = 2;
+
+const SLICE_SIZE = 24;  // sizeof(BarelySlice)
 
 class Processor extends AudioWorkletProcessor {
   constructor() {
@@ -19,8 +17,6 @@ class Processor extends AudioWorkletProcessor {
     this._doublePtr = null;
     this._uint8Ptr = null;
     this._uint32Ptr = null;
-    this._instrumentControlOverridesPtr = null;
-    this._noteControlOverridesPtr = null;
     this._outputSamplesPtr = null;
 
     this._pendingEventCallbacks = [];
@@ -41,10 +37,6 @@ class Processor extends AudioWorkletProcessor {
       this._doublePtr = this._module._malloc(Float64Array.BYTES_PER_ELEMENT);
       this._uint8Ptr = this._module._malloc(Uint8Array.BYTES_PER_ELEMENT);
       this._uint32Ptr = this._module._malloc(Uint32Array.BYTES_PER_ELEMENT);
-      this._instrumentControlOverridesPtr = this._module._malloc(
-          Object.keys(INSTRUMENT_CONTROLS).length * INSTRUMENT_CONTROL_OVERRIDE_SIZE);
-      this._noteControlOverridesPtr =
-          this._module._malloc(NoteControlType.COUNT * NOTE_CONTROL_OVERRIDE_SIZE);
       this._outputSamplesPtr = this._module._malloc(
           STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float32Array.BYTES_PER_ELEMENT);
 
@@ -146,20 +138,15 @@ class Processor extends AudioWorkletProcessor {
         this._module._BarelyEngine_SetTempo(this._engine, command.tempo);
         break;
       case CommandType.INSTRUMENT_CREATE: {
-        let i = 0;
-        for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
-          const controlOffset =
-              (this._instrumentControlOverridesPtr + i * INSTRUMENT_CONTROL_OVERRIDE_SIZE) /
-              Uint32Array.BYTES_PER_ELEMENT;
-          this._module.HEAP32[controlOffset] = controlTypeIndex;
-          this._module.HEAPF32[controlOffset + 1] =
-              INSTRUMENT_CONTROLS[controlTypeIndex].defaultValue;
-          ++i;
-        }
-        this._module._BarelyEngine_CreateInstrument(
-            this._engine, this._instrumentControlOverridesPtr,
-            Object.keys(INSTRUMENT_CONTROLS).length, this._uint32Ptr);
+        this._module._BarelyEngine_CreateInstrument(this._engine, this._uint32Ptr);
         const instrumentId = this._module.getValue(this._uint32Ptr, 'i32');
+        if (!instrumentId) return;
+
+        for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
+          this._module._BarelyInstrument_SetControl(
+              this._engine, instrumentId, controlTypeIndex,
+              INSTRUMENT_CONTROLS[controlTypeIndex].defaultValue);
+        }
 
         const NoteEventType = {
           BEGIN: 0,
@@ -226,19 +213,15 @@ class Processor extends AudioWorkletProcessor {
       case CommandType.INSTRUMENT_SET_NOTE_ON: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
         if (!instrumentId) return;
-
-        const gainOffset = this._noteControlOverridesPtr / Uint32Array.BYTES_PER_ELEMENT;
-        this._module.HEAP32[gainOffset] = NoteControlType.GAIN;
-        this._module.HEAPF32[gainOffset + 1] = command.gain;
-
-        const pitchShiftOffset = (this._noteControlOverridesPtr + NOTE_CONTROL_OVERRIDE_SIZE) /
-            Uint32Array.BYTES_PER_ELEMENT;
-        this._module.HEAP32[pitchShiftOffset] = NoteControlType.PITCH_SHIFT;
-        this._module.HEAPF32[pitchShiftOffset + 1] = command.pitchShift;
-
-        this._module._BarelyInstrument_SetNoteOn(
-            this._engine, instrumentId, command.pitch, this._noteControlOverridesPtr,
-            NoteControlType.COUNT);
+        this._module._BarelyInstrument_SetNoteOn(this._engine, instrumentId, command.pitch);
+        if (command.gain != 1.0) {
+          this._module._BarelyInstrument_SetControl(
+              this._engine, instrumentId, NoteControlType.GAIN, command.gain);
+        }
+        if (command.pitchShift != 0.0) {
+          this._module._BarelyInstrument_SetControl(
+              this._engine, instrumentId, NoteControlType.PITCH_SHIFT, command.pitchShift);
+        }
       } break;
       case CommandType.INSTRUMENT_SET_SAMPLE_DATA: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;

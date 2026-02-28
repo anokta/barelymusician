@@ -44,10 +44,6 @@ struct VoiceState {
 
   bool stop_on_slice_end = false;
 
-  [[nodiscard]] constexpr bool IsActive() const noexcept { return envelope.IsActive(); }
-
-  [[nodiscard]] constexpr bool IsOn() const noexcept { return envelope.IsOn(); }
-
   void Approach(const VoiceParams& new_params) noexcept {
     ApproachValue(params.gain, note_params.gain * new_params.gain);
     ApproachValue(params.bit_crusher_increment, new_params.bit_crusher_increment);
@@ -71,15 +67,12 @@ struct VoiceState {
     ApproachValue(params.sidechain_send, new_params.sidechain_send);
   }
 
-  void Start(const InstrumentParams& instrument_params, const SliceState* slice, float note_pitch,
-             const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
-    const float note_gain = note_controls[BarelyNoteControlType_kGain];
-    const float note_pitch_shift = note_controls[BarelyNoteControlType_kPitchShift];
-    note_params.gain = note_gain;
+  void Start(const InstrumentParams& instrument_params, const SliceState* slice,
+             float note_pitch) noexcept {
     params = instrument_params.voice_params;
-    params.gain *= note_gain;
+    note_params.gain = 1.0f;
     pitch = note_pitch;
-    pitch_shift = note_pitch_shift;
+    pitch_shift = 0.0f;
     UpdatePitchIncrements(slice);
     bit_crusher.Reset();
     filter.Reset();

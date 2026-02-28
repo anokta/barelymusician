@@ -13,7 +13,7 @@ namespace barely {
 
 struct CompressorParams {
   float mix = 1.0f;
-  float threshold_db = 0.0f;
+  float threshold_db = GetGainDb(1.0f);
   float ratio = 1.0f;
 
   void Approach(const CompressorParams& params) noexcept {

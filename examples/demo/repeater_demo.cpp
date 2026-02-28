@@ -72,14 +72,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
-  auto instrument = engine.CreateInstrument({{
-      {InstrumentControlType::kGain, kGain},
-      {InstrumentControlType::kOscMix, 1.0f},
-      {InstrumentControlType::kOscShape, kOscShape},
-      {InstrumentControlType::kAttack, kAttack},
-      {InstrumentControlType::kRelease, kRelease},
-      {InstrumentControlType::kVoiceCount, kVoiceCount},
-  }});
+  auto instrument = engine.CreateInstrument();
+  instrument.SetControl(InstrumentControlType::kGain, kGain);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
+  instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   Repeater repeater(engine, instrument);
   repeater.SetRate(kInitialRate);

@@ -27,10 +27,27 @@
 
 namespace barely {
 
-using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
+struct EngineState {
+  // Performer pool.
+  Pool<PerformerState, BARELY_MAX_PERFORMER_COUNT> performer_pool = {};
+  std::array<uint32_t, BARELY_MAX_PERFORMER_COUNT> performer_generations = {};
 
-[[nodiscard]] inline EngineControlArray BuildEngineControlArray() noexcept {
-  return {
+  // Task pool.
+  Pool<TaskState, BARELY_MAX_TASK_COUNT> task_pool = {};
+  std::array<uint32_t, BARELY_MAX_TASK_COUNT> task_generations = {};
+
+  // Instrument pool.
+  Pool<InstrumentState, BARELY_MAX_INSTRUMENT_COUNT> instrument_pool = {};
+  std::array<uint32_t, BARELY_MAX_INSTRUMENT_COUNT> instrument_generations = {};
+
+  // Note pool.
+  Pool<NoteState, BARELY_MAX_NOTE_COUNT> note_pool = {};
+
+  // Slice pool.
+  SlicePool slice_pool = {};
+
+  // Array of engine controls.
+  std::array<Control, BarelyEngineControlType_kCount> controls = {
       Control(1.0f, 0.0f, 1.0f),  // CompMix
       Control(0.0f, 0.0f, 8.0f),  // CompAttack
       Control(0.0f, 0.0f, 8.0f),  // CompRelease
@@ -54,29 +71,6 @@ using EngineControlArray = std::array<Control, BarelyEngineControlType_kCount>;
       Control(1.0f, 0.0f, 1.0f),  // kSidechainThreshold
       Control(0.0f, 0.0f, 1.0f),  // kSidechainRatio
   };
-}
-
-struct EngineState {
-  // Performer pool.
-  Pool<PerformerState, BARELY_MAX_PERFORMER_COUNT> performer_pool = {};
-  std::array<uint32_t, BARELY_MAX_PERFORMER_COUNT> performer_generations = {};
-
-  // Task pool.
-  Pool<TaskState, BARELY_MAX_TASK_COUNT> task_pool = {};
-  std::array<uint32_t, BARELY_MAX_TASK_COUNT> task_generations = {};
-
-  // Instrument pool.
-  Pool<InstrumentState, BARELY_MAX_INSTRUMENT_COUNT> instrument_pool = {};
-  std::array<uint32_t, BARELY_MAX_INSTRUMENT_COUNT> instrument_generations = {};
-
-  // Note pool.
-  Pool<NoteState, BARELY_MAX_NOTE_COUNT> note_pool = {};
-
-  // Slice pool.
-  SlicePool slice_pool = {};
-
-  // Array of engine controls.
-  EngineControlArray controls = BuildEngineControlArray();
 
   // Random number generator for the main thread.
   MainRng main_rng = {};

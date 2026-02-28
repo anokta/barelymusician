@@ -3,6 +3,7 @@
 
 #include <barelymusician.h>
 
+#include <cmath>
 #include <cstdint>
 
 #include "core/constants.h"
@@ -20,7 +21,7 @@ struct InstrumentParams {
 
   FilterType filter_type = FilterType::kNone;
   float filter_frequency = 0.0f;
-  float filter_q = 0.0f;
+  float filter_q = std::sqrt(0.5f);
 
   float pitch_shift = 0.0f;
   float osc_pitch_shift = 0.0f;
@@ -32,7 +33,7 @@ struct InstrumentParams {
   uint32_t first_slice_index = kInvalidIndex;
   uint32_t first_voice_index = kInvalidIndex;
 
-  uint32_t voice_count = 0;
+  uint32_t voice_count = 8;
 
   bool should_retrigger = false;
 };

@@ -134,8 +134,7 @@
 ///   @code{.cpp}
 ///   // Create a new instrument.
 ///   uint32_t instrument_id = 0;
-///   BarelyEngine_CreateInstrument(engine, /*control_overrides=*/nullptr,
-///                                 /*control_override_count=*/0, &instrument_id);
+///   BarelyEngine_CreateInstrument(engine, &instrument_id);
 ///
 ///   // Set an instrument note on.
 ///   //
@@ -143,9 +142,7 @@
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
 ///   // pitch intervals within each octave.
 ///   float c3_pitch = -1.0f;
-///   BarelyInstrument_SetNoteOn(engine, instrument_id, c3_pitch,
-///                              /*note_control_overrides=*/nullptr,
-///                              /*note_control_override_count=*/0);
+///   BarelyInstrument_SetNoteOn(engine, instrument_id, c3_pitch);
 ///
 ///   // Check if the instrument note is on.
 ///   bool is_note_on = false;
@@ -342,7 +339,7 @@ typedef enum BarelyInstrumentControlType {
 
 /// Note control types.
 typedef enum BarelyNoteControlType {
-  /// Normalized gain in logarithmic scale.
+  /// Gain.
   BarelyNoteControlType_kGain = 0,
   /// Pitch shift.
   BarelyNoteControlType_kPitchShift,
@@ -429,24 +426,6 @@ typedef enum BarelyTaskEventType {
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
 
-/// Instrument control override.
-typedef struct BarelyInstrumentControlOverride {
-  /// Type.
-  BarelyInstrumentControlType type;
-
-  /// Value.
-  float value;
-} BarelyInstrumentControlOverride;
-
-/// Note control override.
-typedef struct BarelyNoteControlOverride {
-  /// Type.
-  BarelyNoteControlType type;
-
-  /// Value.
-  float value;
-} BarelyNoteControlOverride;
-
 /// Slice of sample data.
 typedef struct BarelySlice {
   /// Array of mono samples.
@@ -509,13 +488,9 @@ BARELY_API bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engi
 /// Creates a new instrument.
 ///
 /// @param engine Pointer to engine.
-/// @param control_overrides Array of instrument control overrides.
-/// @param control_override_count Number of instrument control overrides.
 /// @param out_instrument_id Output instrument identifier.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_CreateInstrument(
-    BarelyEngine* engine, const BarelyInstrumentControlOverride* control_overrides,
-    int32_t control_override_count, uint32_t* out_instrument_id);
+BARELY_API bool BarelyEngine_CreateInstrument(BarelyEngine* engine, uint32_t* out_instrument_id);
 
 /// Creates a new performer.
 ///
@@ -722,13 +697,9 @@ BARELY_API bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instr
 /// @param engine Pointer to engine.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
-/// @param note_control_overrides Array of note control overrides.
-/// @param note_control_override_count Number of note control overrides.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id,
-                                           float pitch,
-                                           const BarelyNoteControlOverride* note_control_overrides,
-                                           int32_t note_control_override_count);
+                                           float pitch);
 
 /// Sets instrument sample data.
 ///
@@ -1057,7 +1028,7 @@ enum class InstrumentControlType {
 
 /// Note control types.
 enum class NoteControlType {
-  /// Normalized gain in logarithmic scale.
+  /// Gain.
   kGain = BarelyNoteControlType_kGain,
   /// Pitch shift.
   kPitchShift = BarelyNoteControlType_kPitchShift,
@@ -1125,42 +1096,6 @@ enum class TaskEventType {
   kBegin = BarelyTaskEventType_kBegin,
   /// End.
   kEnd = BarelyTaskEventType_kEnd,
-};
-
-/// Instrument control override.
-struct InstrumentControlOverride : public BarelyInstrumentControlOverride {
-  /// Default constructor.
-  InstrumentControlOverride() noexcept = default;
-
-  /// Constructs a new `InstrumentControlOverride`.
-  ///
-  /// @param type Instrument control type.
-  /// @param value Instrument control value.
-  template <typename ValueType>
-  InstrumentControlOverride(InstrumentControlType type, ValueType value) noexcept
-      : BarelyInstrumentControlOverride{static_cast<BarelyInstrumentControlType>(type),
-                                        static_cast<float>(value)} {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-  }
-};
-
-/// Note control override.
-struct NoteControlOverride : public BarelyNoteControlOverride {
-  /// Default constructor.
-  NoteControlOverride() noexcept = default;
-
-  /// Constructs a new `NoteControlOverride`.
-  ///
-  /// @param type Note control type.
-  /// @param value Note control value.
-  template <typename ValueType>
-  NoteControlOverride(NoteControlType type, ValueType value) noexcept
-      : BarelyNoteControlOverride{static_cast<BarelyNoteControlType>(type),
-                                  static_cast<float>(value)} {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-                  "ValueType is not supported");
-  }
 };
 
 /// Slice of sample data.
@@ -1329,35 +1264,18 @@ class Instrument {
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
-  /// @param note_control_overrides Span of note control overrides.
-  void SetNoteOn(float pitch,
-                 std::span<const NoteControlOverride> note_control_overrides = {}) noexcept {
-    static_assert(sizeof(BarelyNoteControlOverride) == sizeof(NoteControlOverride));
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteOn(
-        engine_, instrument_id_, pitch,
-        reinterpret_cast<const BarelyNoteControlOverride*>(note_control_overrides.data()),
-        static_cast<int32_t>(note_control_overrides.size()));
-    assert(success);
-  }
-
-  /// Sets a note on.
-  ///
-  /// @param pitch Note pitch.
-  /// @param gain Note gain.
-  void SetNoteOn(float pitch, float gain) noexcept {
-    return SetNoteOn(pitch, {{{NoteControlType::kGain, gain}}});
-  }
-
-  /// Sets a note on.
-  ///
-  /// @param pitch Note pitch.
   /// @param gain Note gain.
   /// @param pitch_shift Note pitch shift.
-  void SetNoteOn(float pitch, float gain, float pitch_shift) noexcept {
-    return SetNoteOn(pitch, {{
-                                {NoteControlType::kGain, gain},
-                                {NoteControlType::kPitchShift, pitch_shift},
-                            }});
+  void SetNoteOn(float pitch, float gain = 1.0f, float pitch_shift = 0.0f) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_SetNoteOn(engine_, instrument_id_, pitch);
+    assert(success);
+    if (gain != 1.0f) {
+      SetNoteControl(pitch, NoteControlType::kGain, gain);
+    }
+    if (pitch_shift != 0.0f) {
+      SetNoteControl(pitch, NoteControlType::kPitchShift, pitch_shift);
+    }
   }
 
   /// Sets the sample data.
@@ -1680,14 +1598,10 @@ class Engine {
 
   /// Creates a new instrument.
   ///
-  /// @param control_overrides Span of instrument control overrides.
   /// @return Instrument.
-  Instrument CreateInstrument(
-      std::span<const InstrumentControlOverride> control_overrides = {}) noexcept {
+  Instrument CreateInstrument() noexcept {
     uint32_t instrument_id = 0;
-    [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(
-        engine_, reinterpret_cast<const BarelyInstrumentControlOverride*>(control_overrides.data()),
-        static_cast<int32_t>(control_overrides.size()), &instrument_id);
+    [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
     assert(success);
     NoteEventCallback& note_event_callback =
         note_event_callbacks_.get()[(instrument_id & ((1 << BARELY_ID_INDEX_BIT_COUNT) - 1)) - 1];

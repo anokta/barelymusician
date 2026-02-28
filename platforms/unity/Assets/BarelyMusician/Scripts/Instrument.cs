@@ -262,7 +262,7 @@ namespace Barely {
     /// Returns the gain of a note.
     ///
     /// @param pitch Note pitch.
-    /// @return Note gain in logarithmic scale.
+    /// @return Note gain.
     public float GetNoteGain(float pitch) {
       return Engine.Internal.Instrument_GetNoteControl(_id, pitch,
                                                        Engine.Internal.NoteControlType.GAIN);
@@ -293,7 +293,7 @@ namespace Barely {
     /// Sets the gain of a note.
     ///
     /// @param pitch Note pitch.
-    /// @param gain Gain in logarithmic scale.
+    /// @param gain Note gain.
     public void SetNoteGain(float pitch, float gain) {
       Engine.Internal.Instrument_SetNoteControl(_id, pitch, Engine.Internal.NoteControlType.GAIN,
                                                 gain);
@@ -321,7 +321,13 @@ namespace Barely {
     /// @param gain Note gain.
     /// @param pitchShift Note pitch shift.
     public void SetNoteOn(float pitch, float gain = 1.0f, float pitchShift = 0.0f) {
-      Engine.Internal.Instrument_SetNoteOn(_id, pitch, gain, pitchShift);
+      Engine.Internal.Instrument_SetNoteOn(_id, pitch);
+      if (gain != 1.0f) {
+        SetNoteGain(pitch, gain);
+      }
+      if (pitchShift != 0.0f) {
+        SetNotePitchShift(pitch, pitchShift);
+      }
     }
 
     public static class Internal {

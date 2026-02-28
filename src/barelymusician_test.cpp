@@ -32,12 +32,12 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
   ASSERT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
 
   // Failures.
-  EXPECT_FALSE(BarelyEngine_CreateInstrument(engine, nullptr, 0, nullptr));
+  EXPECT_FALSE(BarelyEngine_CreateInstrument(engine, nullptr));
   EXPECT_FALSE(BarelyEngine_DestroyInstrument(nullptr, {}));
 
   // Success.
   uint32_t instrument_id = 0;
-  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, nullptr, 0, &instrument_id));
+  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, &instrument_id));
 
   EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument_id));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
@@ -80,7 +80,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   float note_on_pitch = 0.0f;
 
   // Create an instrument.
-  Instrument instrument_ref = engine.CreateInstrument({});
+  Instrument instrument_ref = engine.CreateInstrument();
 
   // Set the note callbacks.
   instrument_ref.SetNoteEventCallback([&](NoteEventType type, float pitch) {
@@ -109,7 +109,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     // Create instruments with note off callbacks.
     std::vector<Instrument> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(engine.CreateInstrument({}));
+      instruments.push_back(engine.CreateInstrument());
       instruments[i].SetNoteEventCallback([&](NoteEventType type, float pitch) {
         if (type == NoteEventType::kEnd) {
           note_off_pitches.push_back(pitch);

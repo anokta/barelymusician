@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_VOICE_PARAMS_H_
 #define BARELYMUSICIAN_ENGINE_VOICE_PARAMS_H_
 
+#include "core/control.h"
 #include "dsp/biquad_filter.h"
 
 namespace barely {
@@ -14,7 +15,7 @@ struct VoiceParams {
   float distortion_amount = 0.0f;
   float distortion_drive = 1.0f;
 
-  float gain = 1.0f;
+  float gain = GetGain(1.0f);
 
   float osc_mix = 0.0f;
   float osc_noise_mix = 0.0f;

@@ -44,7 +44,6 @@ struct NoteOnMessage {
   uint32_t note_index = kInvalidIndex;
   uint32_t instrument_index = kInvalidIndex;
   float pitch = 0.0f;
-  std::array<float, BarelyNoteControlType_kCount> controls = {/*kGain=*/1.0f, /*kPitchShift=*/0.0f};
 };
 
 struct SampleDataMessage {

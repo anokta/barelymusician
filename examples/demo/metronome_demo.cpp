@@ -54,14 +54,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   engine.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  auto instrument = engine.CreateInstrument({{
-      {InstrumentControlType::kGain, kGain},
-      {InstrumentControlType::kOscMix, 1.0f},
-      {InstrumentControlType::kOscShape, kOscShape},
-      {InstrumentControlType::kAttack, kAttack},
-      {InstrumentControlType::kRelease, kRelease},
-      {InstrumentControlType::kVoiceCount, kVoiceCount},
-  }});
+  auto instrument = engine.CreateInstrument();
+  instrument.SetControl(InstrumentControlType::kGain, kGain);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
+  instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
   auto metronome = engine.CreatePerformer();

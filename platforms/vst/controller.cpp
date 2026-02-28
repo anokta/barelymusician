@@ -77,17 +77,6 @@ Steinberg::FUnknown* Controller::Create(void* /*context*/) {
   return static_cast<Steinberg::Vst::IEditController*>(new Controller());
 }
 
-std::span<InstrumentControlOverride> Controller::GetDefaultControls() noexcept {
-  static std::array<InstrumentControlOverride, BarelyInstrumentControlType_kCount> controls;
-  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    controls[i] = {
-        static_cast<InstrumentControlType>(i),
-        static_cast<float>(kParams[i].toPlain(kParams[i].getInfo().defaultNormalizedValue)),
-    };
-  }
-  return controls;
-}
-
 float Controller::ToPlainControlValue(InstrumentControlType type,
                                       double normalized_value) noexcept {
   assert(static_cast<int>(type) < BarelyInstrumentControlType_kCount && "Invalid control type");

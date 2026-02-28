@@ -38,12 +38,6 @@ class Envelope {
     float release_increment_ = 0.0f;
   };
 
-  [[nodiscard]] constexpr bool IsActive() const noexcept { return state_ != State::kIdle; }
-
-  [[nodiscard]] constexpr bool IsOn() const noexcept {
-    return static_cast<int>(state_) < static_cast<int>(State::kRelease);
-  }
-
   float Next() noexcept {
     if (state_ == State::kIdle) {
       return 0.0;
@@ -113,6 +107,12 @@ class Envelope {
       release_output_ = output_;
       state_ = State::kRelease;
     }
+  }
+
+  [[nodiscard]] constexpr bool IsActive() const noexcept { return state_ != State::kIdle; }
+
+  [[nodiscard]] constexpr bool IsStartFrame() const noexcept {
+    return state_ == State::kAttack && phase_ == 0.0f;
   }
 
  private:

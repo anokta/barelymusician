@@ -15,12 +15,8 @@
 
 namespace barely {
 
-using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_kCount>;
-
-[[nodiscard]] inline InstrumentControlArray BuildInstrumentControlArray(
-    const BarelyInstrumentControlOverride* control_overrides,
-    int32_t control_override_count) noexcept {
-  InstrumentControlArray control_array = {
+struct InstrumentState {
+  std::array<Control, BarelyInstrumentControlType_kCount> controls = {
       Control(1.0f, 0.0f, 1.0f),                   // kGain
       Control(0.0f),                               // kPitchShift
       Control(0.0f, -1.0f, 1.0f),                  // kStereoPan
@@ -51,14 +47,6 @@ using InstrumentControlArray = std::array<Control, BarelyInstrumentControlType_k
       Control(false),                              // kRetrigger
       Control(8, 1, 16),                           // kVoiceCount
   };
-  for (int i = 0; i < control_override_count; ++i) {
-    control_array[control_overrides[i].type].SetValue(control_overrides[i].value);
-  }
-  return control_array;
-}
-
-struct InstrumentState {
-  InstrumentControlArray controls = BuildInstrumentControlArray(nullptr, 0);
 
   Callback<BarelyNoteEventCallback> note_event_callback = {};
 

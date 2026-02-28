@@ -88,15 +88,13 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetControl(EngineControlType::kReverbDamping, kReverbDamping);
   engine.SetControl(EngineControlType::kReverbRoomSize, kReverbRoomSize);
 
-  auto instrument = engine.CreateInstrument({{
-      {InstrumentControlType::kGain, kGain},
-      {InstrumentControlType::kSliceMode, SliceMode::kLoop},
-      {InstrumentControlType::kAttack, kAttack},
-      {InstrumentControlType::kRelease, kRelease},
-      {InstrumentControlType::kVoiceCount, kVoiceCount},
-      {InstrumentControlType::kReverbSend, kReverbSend},
-  }});
-
+  auto instrument = engine.CreateInstrument();
+  instrument.SetControl(InstrumentControlType::kGain, kGain);
+  instrument.SetControl(InstrumentControlType::kSliceMode, SliceMode::kLoop);
+  instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
+  instrument.SetControl(InstrumentControlType::kReverbSend, kReverbSend);
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
     ConsoleLog() << "Note" << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";

@@ -18,8 +18,7 @@ class InstrumentController {
  public:
   InstrumentController(EngineState& engine) noexcept : engine_(engine) {}
 
-  [[nodiscard]] uint32_t Acquire(const BarelyInstrumentControlOverride* control_overrides,
-                                 int32_t control_override_count) noexcept;
+  [[nodiscard]] uint32_t Acquire() noexcept;
   void Release(uint32_t instrument_index) noexcept;
 
   void SetAllNotesOff() noexcept;
@@ -31,9 +30,7 @@ class InstrumentController {
   void SetNoteEventCallback(uint32_t instrument_index, BarelyNoteEventCallback callback,
                             void* user_data) noexcept;
   void SetNoteOff(uint32_t instrument_index, float pitch) noexcept;
-  void SetNoteOn(uint32_t instrument_index, float pitch,
-                 const BarelyNoteControlOverride* note_control_overrides,
-                 int32_t note_control_override_count) noexcept;
+  void SetNoteOn(uint32_t instrument_index, float pitch) noexcept;
   void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
                      int32_t slice_count) noexcept;
 

@@ -78,14 +78,11 @@ bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
   return true;
 }
 
-bool BarelyEngine_CreateInstrument(BarelyEngine* engine,
-                                   const BarelyInstrumentControlOverride* control_overrides,
-                                   int32_t control_override_count, uint32_t* out_instrument_id) {
+bool BarelyEngine_CreateInstrument(BarelyEngine* engine, uint32_t* out_instrument_id) {
   if (!engine) return false;
   if (!out_instrument_id) return false;
 
-  const uint32_t instrument_index =
-      engine->controller.instrument_controller().Acquire(control_overrides, control_override_count);
+  const uint32_t instrument_index = engine->controller.instrument_controller().Acquire();
   if (instrument_index != barely::kInvalidIndex) {
     *out_instrument_id =
         BuildId(instrument_index, engine->state.instrument_generations[instrument_index]);
@@ -337,14 +334,11 @@ bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id, f
   return true;
 }
 
-bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id, float pitch,
-                                const BarelyNoteControlOverride* note_control_overrides,
-                                int32_t note_control_override_count) {
+bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id, float pitch) {
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument_id)) return false;
 
-  engine->controller.instrument_controller().SetNoteOn(
-      GetIndex(instrument_id), pitch, note_control_overrides, note_control_override_count);
+  engine->controller.instrument_controller().SetNoteOn(GetIndex(instrument_id), pitch);
   return true;
 }
 

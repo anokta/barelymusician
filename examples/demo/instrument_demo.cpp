@@ -80,17 +80,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetControl(EngineControlType::kDelayLpfCutoff, kDelayLpfCutoff);
   engine.SetTempo(kTempo);
 
-  auto instrument = engine.CreateInstrument({{
-      {InstrumentControlType::kGain, kGain},
-      {InstrumentControlType::kOscMix, 1.0f},
-      {InstrumentControlType::kOscShape, kOscShape},
-      {InstrumentControlType::kAttack, kAttack},
-      {InstrumentControlType::kRelease, kRelease},
-      {InstrumentControlType::kVoiceCount, kVoiceCount},
-      {InstrumentControlType::kDelaySend, kDelaySend},
-      {InstrumentControlType::kArpGate, kArpGate},
-      {InstrumentControlType::kArpRate, kArpRate},
-  }});
+  auto instrument = engine.CreateInstrument();
+  instrument.SetControl(InstrumentControlType::kGain, kGain);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
+  instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
+  instrument.SetControl(InstrumentControlType::kDelaySend, kDelaySend);
+  instrument.SetControl(InstrumentControlType::kArpGate, kArpGate);
+  instrument.SetControl(InstrumentControlType::kArpRate, kArpRate);
   instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
     ConsoleLog() << "Note" << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
   });

@@ -122,7 +122,7 @@ Steinberg::tresult PLUGIN_API Processor::setProcessing(Steinberg::TBool /*state*
 
 Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::ProcessSetup& setup) {
   engine_ = Engine(static_cast<int>(setup.sampleRate));
-  instrument_ = engine_->CreateInstrument(Controller::GetDefaultControls());
+  instrument_ = engine_->CreateInstrument();
   output_samples_.resize(kStereoChannelCount * setup.maxSamplesPerBlock);
   return Steinberg::kResultTrue;
 }

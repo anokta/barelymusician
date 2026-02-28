@@ -21,7 +21,7 @@ namespace Barely.Examples {
           2.0f * Mathf.Clamp(Input.mousePosition.x / Screen.width, 0.0f, 1.0f) - 1.0f;
       instrument.Gain = Input.mousePosition.y / Screen.height;
       if (Input.GetMouseButtonDown(0)) {
-        instrument.SetNoteOn(0.0f, 1.0f);
+        instrument.SetNoteOn(0.0f);
       } else if (Input.GetMouseButtonUp(0)) {
         instrument.SetNoteOff(0.0f);
       }

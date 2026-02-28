@@ -35,11 +35,7 @@ TEST(EngineProcessorTest, PlaySingleNote) {
       engine->slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));
 
   EngineProcessor processor(*engine);
-  const auto controls = BuildInstrumentControlArray(nullptr, 0);
-  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    engine->ScheduleMessage(InstrumentControlMessage{
-        kInstrumentIndex, static_cast<BarelyInstrumentControlType>(i), controls[i].value});
-  }
+  engine->ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
   engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
 
   std::array<float, kStereoChannelCount * kFrameCount> samples;
@@ -52,7 +48,7 @@ TEST(EngineProcessorTest, PlaySingleNote) {
   }
 
   // Set a note on.
-  engine->ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, kPitch, {1.0f, 0.0f}});
+  engine->ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, kPitch});
 
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
@@ -88,11 +84,6 @@ TEST(EngineProcessorTest, PlayMultipleNotes) {
 
   EngineProcessor processor(*engine);
   engine->ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
-  const auto controls = BuildInstrumentControlArray(nullptr, 0);
-  for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    engine->ScheduleMessage(InstrumentControlMessage{
-        kInstrumentIndex, static_cast<BarelyInstrumentControlType>(i), controls[i].value});
-  }
   engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
 
   std::array<float, kStereoChannelCount * kSampleRate> samples;
@@ -106,8 +97,7 @@ TEST(EngineProcessorTest, PlayMultipleNotes) {
 
   // Start a new note per each i in the samples.
   for (int i = 0; i < kSampleRate; ++i) {
-    engine->ScheduleMessage(
-        NoteOnMessage{kNoteIndex, kInstrumentIndex, static_cast<float>(i), {1.0f, 0.0f}});
+    engine->ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, static_cast<float>(i)});
     engine->timestamp = static_cast<double>(i + 1) / static_cast<double>(kSampleRate);
     engine->ScheduleMessage(NoteOffMessage{kNoteIndex});
   }

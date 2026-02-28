@@ -17,7 +17,7 @@ TEST(InstrumentControllerTest, SetControl) {
   auto engine = std::make_unique<EngineState>();
   InstrumentController controller(*engine);
 
-  const uint32_t instrument_index = controller.Acquire(nullptr, 0);
+  const uint32_t instrument_index = controller.Acquire();
   EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 1.0f);
 
   controller.SetControl(instrument_index, BarelyInstrumentControlType_kGain, 0.5f);
@@ -44,7 +44,7 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   auto engine = std::make_unique<EngineState>();
   InstrumentController controller(*engine);
 
-  const uint32_t instrument_index = controller.Acquire(nullptr, 0);
+  const uint32_t instrument_index = controller.Acquire();
 
   // Trigger the note on callback.
   std::pair<float, float> note_pitch = {0.0f, 0.0f};
@@ -58,17 +58,17 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
       &note_pitch);
   EXPECT_FLOAT_EQ(note_pitch.first, 0.0f);
 
-  controller.SetNoteOn(instrument_index, kPitch, nullptr, 0);
+  controller.SetNoteOn(instrument_index, kPitch);
   EXPECT_FLOAT_EQ(note_pitch.first, kPitch);
 
   // This should not trigger the callback since the note is already on.
   note_pitch.first = 0.0f;
-  controller.SetNoteOn(instrument_index, kPitch, nullptr, 0);
+  controller.SetNoteOn(instrument_index, kPitch);
   EXPECT_FLOAT_EQ(note_pitch.first, 0.0f);
 
   // Trigger the note on callback again with another note.
   note_pitch.first = 0.0f;
-  controller.SetNoteOn(instrument_index, kPitch + 2.0f, nullptr, 0);
+  controller.SetNoteOn(instrument_index, kPitch + 2.0f);
   EXPECT_FLOAT_EQ(note_pitch.first, kPitch + 2.0f);
 
   // Trigger the note off callback.
@@ -91,14 +91,14 @@ TEST(InstrumentControllerTest, SetAllNotesOff) {
   auto engine = std::make_unique<EngineState>();
   InstrumentController controller(*engine);
 
-  const uint32_t instrument_index = controller.Acquire(nullptr, 0);
+  const uint32_t instrument_index = controller.Acquire();
   for (const float pitch : kPitches) {
     EXPECT_FALSE(controller.IsNoteOn(instrument_index, pitch));
   }
 
   // Start multiple notes.
   for (const float pitch : kPitches) {
-    controller.SetNoteOn(instrument_index, pitch, nullptr, 0);
+    controller.SetNoteOn(instrument_index, pitch);
     EXPECT_TRUE(controller.IsNoteOn(instrument_index, pitch));
   }
 

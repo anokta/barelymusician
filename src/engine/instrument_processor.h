@@ -4,7 +4,6 @@
 #include <barelymusician.h>
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstdint>
 
@@ -28,12 +27,14 @@ class InstrumentProcessor {
                   float value) noexcept;
   void SetNoteControl(uint32_t note_index, BarelyNoteControlType type, float value) noexcept;
   void SetNoteOff(uint32_t note_index) noexcept;
-  void SetNoteOn(uint32_t note_index, uint32_t instrument_index, float pitch,
-                 const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept;
+  void SetNoteOn(uint32_t note_index, uint32_t instrument_index, float pitch) noexcept;
   void SetSampleData(uint32_t instrument_index, uint32_t first_slice_index) noexcept;
 
   void Init(uint32_t instrument_index) noexcept {
     engine_.instrument_params[instrument_index] = {};
+    engine_.instrument_params[instrument_index].osc_increment =
+        kReferenceFrequency / engine_.sample_rate;
+    engine_.instrument_params[instrument_index].slice_increment = 1.0f / engine_.sample_rate;
   }
 
   template <bool kIsSidechainSend = false>
@@ -46,7 +47,7 @@ class InstrumentProcessor {
       VoiceState& voice = engine_.GetVoice(voice_index);
       InstrumentParams& params = engine_.instrument_params[voice.instrument_index];
       if constexpr (kIsSidechainSend) {
-        if (!voice.IsActive()) {
+        if (!voice.envelope.IsActive()) {
           ReleaseVoice(voice, params);
           engine_.voice_pool.Release(voice_index);
           continue;

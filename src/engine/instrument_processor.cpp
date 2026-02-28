@@ -2,7 +2,6 @@
 
 #include <barelymusician.h>
 
-#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -146,7 +145,10 @@ void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlT
   auto& voice = engine_.GetVoice(voice_index);
   switch (type) {
     case BarelyNoteControlType_kGain:
-      voice.note_params.gain = GetGain(value);
+      voice.note_params.gain = value;
+      if (voice.envelope.IsStartFrame()) {
+        voice.params.gain *= voice.note_params.gain;
+      }
       break;
     case BarelyNoteControlType_kPitchShift:
       voice.pitch_shift = value;
@@ -175,9 +177,8 @@ void InstrumentProcessor::SetNoteOff(uint32_t note_index) noexcept {
   voice.note_index = kInvalidIndex;
 }
 
-void InstrumentProcessor::SetNoteOn(
-    uint32_t note_index, uint32_t instrument_index, float pitch,
-    const std::array<float, BarelyNoteControlType_kCount>& note_controls) noexcept {
+void InstrumentProcessor::SetNoteOn(uint32_t note_index, uint32_t instrument_index,
+                                    float pitch) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
   if (const uint32_t voice_index = AcquireVoice(params, pitch); voice_index != kInvalidIndex) {
     engine_.note_to_voice[note_index] = voice_index;
@@ -186,7 +187,7 @@ void InstrumentProcessor::SetNoteOn(
     voice.note_index = note_index;
     voice.slice_index =
         engine_.slice_pool.Select(params.first_slice_index, pitch, engine_.audio_rng);
-    voice.Start(params, engine_.slice_pool.Get(voice.slice_index), pitch, note_controls);
+    voice.Start(params, engine_.slice_pool.Get(voice.slice_index), pitch);
   }
 }
 

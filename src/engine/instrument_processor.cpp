@@ -16,7 +16,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
   auto& params = engine_.instrument_params[instrument_index];
   switch (type) {
     case BarelyInstrumentControlType_kGain:
-      params.voice_params.gain = GetGain(value);
+      params.voice_params.gain = value * value;
       break;
     case BarelyInstrumentControlType_kPitchShift:
       params.pitch_shift = value;
@@ -145,7 +145,7 @@ void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlT
   auto& voice = engine_.GetVoice(voice_index);
   switch (type) {
     case BarelyNoteControlType_kGain:
-      voice.note_params.gain = value;
+      voice.note_params.gain = value * value;
       if (voice.envelope.IsStartFrame()) {
         voice.params.gain *= voice.note_params.gain;
       }

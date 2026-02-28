@@ -269,11 +269,11 @@ int main(int /*argc*/, char* argv[]) {
     ComposeChord(1.0, harmonic, scale, engine, instrument, performer, tasks);
   };
 
-  build_instrument_fn(0.0f, 0.8f, 0.125f, 0.125f);
+  build_instrument_fn(0.0f, 0.75f, 0.125f, 0.125f);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
-  build_instrument_fn(-1.0f, 0.6f, 0.5f, 0.025f);
+  build_instrument_fn(-1.0f, 0.4f, 0.5f, 0.025f);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
@@ -319,7 +319,7 @@ int main(int /*argc*/, char* argv[]) {
 
   instruments.emplace_back(engine.CreateInstrument());
   auto& percussion = instruments.back();
-  percussion.SetControl(InstrumentControlType::kGain, 0.9f);
+  percussion.SetControl(InstrumentControlType::kGain, 1.0f);
   percussion.SetControl(InstrumentControlType::kAttack, 0.0f);
   percussion.SetControl(InstrumentControlType::kRetrigger, true);
   percussion.SetControl(InstrumentControlType::kSliceMode, SliceMode::kOnce);

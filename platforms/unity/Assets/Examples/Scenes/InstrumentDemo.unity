@@ -461,7 +461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 1
+  Gain: 0.9
   PitchShift: 0
   StereoPan: 0
   Attack: 0.05

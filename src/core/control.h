@@ -6,8 +6,6 @@
 #include <cmath>
 #include <limits>
 
-#include "core/decibels.h"
-
 namespace barely {
 
 struct Control {
@@ -56,16 +54,6 @@ inline float GetFilterQ(float normalized_resonance) noexcept {
   static constexpr float kMinQInverse = 1.0f / kMinQ;
   static constexpr float kMaxQ = 10.0f;
   return std::min(kMinQ * std::pow(kMaxQ * kMinQInverse, normalized_resonance), kMaxQ);
-}
-
-inline float GetGainDb(float normalized_gain) noexcept {
-  static constexpr float kMaxDecibels = -6.0f;
-  static constexpr float kDecibelsRange = kMaxDecibels - kMinDecibels;
-  return kMinDecibels + kDecibelsRange * normalized_gain;
-}
-
-inline float GetGain(float normalized_gain) noexcept {
-  return DecibelsToAmplitude(GetGainDb(normalized_gain));
 }
 
 }  // namespace barely

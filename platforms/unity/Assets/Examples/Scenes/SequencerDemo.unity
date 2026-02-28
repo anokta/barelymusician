@@ -204,36 +204,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.85
+  Gain: 0.55
   PitchShift: 0
-  Retrigger: 0
   StereoPan: 0.25
-  VoiceCount: 8
   Attack: 0.05
   Decay: 0
   Sustain: 0.8
   Release: 0.5
-  OscMode: 0
+  SliceMode: 0
+  Slices: []
   OscMix: 1
+  OscMode: 0
   OscNoiseMix: 0
   OscPitchShift: 0
   OscShape: 0.67
   OscSkew: 0
-  SliceMode: 0
-  Slices: []
-  BitCrusherDepth: 1
-  BitCrusherRate: 1
+  CrushDepth: 0
+  CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
-  FilterQ: 0.71
+  FilterResonance: 0.5
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
   ArpMode: 0
-  ArpGateRatio: 0.5
+  ArpGate: 0.5
   ArpRate: 1
+  Retrigger: 0
+  VoiceCount: 8
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -424,11 +424,12 @@ MonoBehaviour:
   DelayMix: 1
   DelayTime: 0
   DelayFeedback: 0
-  DelayLowPassCutoff: 1
-  DelayHighPassCutoff: 0
+  DelayLpfCutoff: 1
+  DelayHpfCutoff: 0
+  DelayPingPong: 0
   DelayReverbSend: 0
   ReverbMix: 1
-  ReverbDampingRatio: 0
+  ReverbDamping: 0
   ReverbRoomSize: 0
   ReverbStereoWidth: 1
   ReverbFreeze: 0
@@ -670,21 +671,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.9
+  Gain: 0.85
   PitchShift: 0
-  Retrigger: 1
   StereoPan: 0
-  VoiceCount: 4
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0
-  OscMode: 0
-  OscMix: 0
-  OscNoiseMix: 0
-  OscPitchShift: 0
-  OscShape: 0
-  OscSkew: 0
   SliceMode: 2
   Slices:
   - RootPitch: 0
@@ -695,19 +688,27 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
-  BitCrusherDepth: 1
-  BitCrusherRate: 1
+  OscMix: 0
+  OscMode: 0
+  OscNoiseMix: 0
+  OscPitchShift: 0
+  OscShape: 0
+  OscSkew: 0
+  CrushDepth: 0
+  CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
-  FilterQ: 0.71
+  FilterResonance: 0.5
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
   ArpMode: 0
-  ArpGateRatio: 0.5
+  ArpGate: 0.5
   ArpRate: 1
+  Retrigger: 1
+  VoiceCount: 4
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -890,36 +891,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.85
+  Gain: 0.75
   PitchShift: 0
-  Retrigger: 0
   StereoPan: -0.25
-  VoiceCount: 8
   Attack: 0.1
   Decay: 0
   Sustain: 1
   Release: 0.5
-  OscMode: 0
+  SliceMode: 0
+  Slices: []
   OscMix: 1
+  OscMode: 0
   OscNoiseMix: 0
   OscPitchShift: 0
   OscShape: 0
   OscSkew: 0
-  SliceMode: 0
-  Slices: []
-  BitCrusherDepth: 1
-  BitCrusherRate: 1
+  CrushDepth: 0
+  CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
-  FilterQ: 0.71
+  FilterResonance: 0.5
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
   ArpMode: 0
-  ArpGateRatio: 0.5
+  ArpGate: 0.5
   ArpRate: 1
+  Retrigger: 0
+  VoiceCount: 8
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1152,36 +1153,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.8
+  Gain: 0.6
   PitchShift: 0
-  Retrigger: 0
   StereoPan: 0
-  VoiceCount: 8
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0.05
-  OscMode: 0
+  SliceMode: 0
+  Slices: []
   OscMix: 1
+  OscMode: 0
   OscNoiseMix: 0
   OscPitchShift: 0
   OscShape: 0.5
   OscSkew: -0.1
-  SliceMode: 0
-  Slices: []
-  BitCrusherDepth: 1
-  BitCrusherRate: 1
+  CrushDepth: 0
+  CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
-  FilterQ: 0.71
+  FilterResonance: 0.5
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
   ArpMode: 0
-  ArpGateRatio: 0.5
+  ArpGate: 0.5
   ArpRate: 1
+  Retrigger: 0
+  VoiceCount: 8
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1289,36 +1290,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 1
   PitchShift: 0
-  Retrigger: 0
   StereoPan: 0
-  VoiceCount: 8
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0.075
-  OscMode: 0
-  OscMix: 0
-  OscNoiseMix: 0
-  OscPitchShift: 0
-  OscShape: 0
-  OscSkew: 0
   SliceMode: 1
   Slices:
   - RootPitch: 9
     Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
-  BitCrusherDepth: 1
-  BitCrusherRate: 1
+  OscMix: 0
+  OscMode: 0
+  OscNoiseMix: 0
+  OscPitchShift: 0
+  OscShape: 0
+  OscSkew: 0
+  CrushDepth: 0
+  CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
   FilterType: 0
   FilterCutoff: 0
-  FilterQ: 0.71
+  FilterResonance: 0.5
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
   ArpMode: 0
-  ArpGateRatio: 0.5
+  ArpGate: 0.5
   ArpRate: 1
+  Retrigger: 0
+  VoiceCount: 8
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

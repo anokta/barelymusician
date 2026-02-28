@@ -90,7 +90,7 @@ class EngineProcessor {
         engine_.comp.SetRelease(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kCompThreshold:
-        engine_.target_params.comp_params.threshold_db = GetGainDb(value);
+        engine_.target_params.comp_params.threshold_db = AmplitudeToDecibels(value * value);
         break;
       case BarelyEngineControlType_kCompRatio:
         engine_.target_params.comp_params.SetRatio(value);
@@ -144,7 +144,7 @@ class EngineProcessor {
         engine_.sidechain.SetRelease(value, engine_.sample_rate);
         break;
       case BarelyEngineControlType_kSidechainThreshold:
-        engine_.target_params.sidechain_params.threshold_db = GetGainDb(value);
+        engine_.target_params.sidechain_params.threshold_db = AmplitudeToDecibels(value * value);
         break;
       case BarelyEngineControlType_kSidechainRatio:
         engine_.target_params.sidechain_params.SetRatio(value);

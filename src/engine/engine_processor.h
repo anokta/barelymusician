@@ -107,11 +107,11 @@ class EngineProcessor {
         break;
       case BarelyEngineControlType_kDelayLpfCutoff:
         engine_.target_params.delay_params.lpf_coeff =
-            GetFilterCoefficient(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
+            GetFilterCoeff(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
         break;
       case BarelyEngineControlType_kDelayHpfCutoff:
         engine_.target_params.delay_params.hpf_coeff =
-            GetFilterCoefficient(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
+            GetFilterCoeff(engine_.sample_rate, GetFrequency(engine_.sample_rate, value));
         break;
       case BarelyEngineControlType_kDelayPingPong:
         engine_.target_params.delay_params.ping_pong = value;

@@ -1,13 +1,13 @@
 #ifndef BARELYMUSICIAN_DSP_BIQUAD_FILTER_H_
 #define BARELYMUSICIAN_DSP_BIQUAD_FILTER_H_
 
-#include <barelymusician.h>
-
 #include <algorithm>
 #include <cmath>
 #include <numbers>
 #include <numeric>
 #include <utility>
+
+#include "dsp/one_pole_filter.h"
 
 namespace barely {
 
@@ -46,48 +46,37 @@ class BiquadFilter {
   State state_ = {};
 };
 
-inline BiquadFilter::Coeffs GetFilterCoefficients(float sample_rate, FilterType type,
-                                                  float cutoff_frequency, float q) noexcept {
-  if (type == FilterType::kNone) {
-    return {};
-  }
-
+template <FilterType kType>
+BiquadFilter::Coeffs GetFilterCoeffs(float sample_rate, float cutoff_freq, float q) noexcept {
   assert(sample_rate > 0.0f);
-  assert(cutoff_frequency >= 0.0f);
+  assert(cutoff_freq >= 0.0f);
+  assert(cutoff_freq <= 0.5f * sample_rate);
   assert(q > 0.0f);
 
-  const float w0 =
-      2.0f * std::numbers::pi_v<float> * std::min(0.5f, cutoff_frequency / sample_rate);
+  const float w0 = 2.0f * std::numbers::pi_v<float> * cutoff_freq / sample_rate;
   const float cosw0 = std::cos(w0);
   const float alpha = std::sin(w0) / (2.0f * q);
   const float a0 = 1.0f + alpha;
 
-  switch (type) {
-    case FilterType::kLpf: {
-      const float b0 = (1.0f - cosw0) / (2.0f * a0);
-      return {
-          .a1 = (-2.0f * cosw0) / a0,
-          .a2 = (1.0f - alpha) / a0,
-          .b0 = b0,
-          .b1 = (1.0f - cosw0) / a0,
-          .b2 = b0,
-      };
-    }
-    case FilterType::kHpf: {
-      const float b0 = (1.0f + cosw0) / (2.0f * a0);
-      return {
-          .a1 = (-2.0f * cosw0) / a0,
-          .a2 = (1.0f - alpha) / a0,
-          .b0 = b0,
-          .b1 = (-1.0f - cosw0) / a0,
-          .b2 = b0,
-      };
-    }
-    default:
-      assert(!"Invalid biquad filter type");
+  if constexpr (kType == FilterType::kLpf) {
+    const float b0 = (1.0f - cosw0) / (2.0f * a0);
+    return {
+        .a1 = (-2.0f * cosw0) / a0,
+        .a2 = (1.0f - alpha) / a0,
+        .b0 = b0,
+        .b1 = (1.0f - cosw0) / a0,
+        .b2 = b0,
+    };
+  } else {
+    const float b0 = (1.0f + cosw0) / (2.0f * a0);
+    return {
+        .a1 = (-2.0f * cosw0) / a0,
+        .a2 = (1.0f - alpha) / a0,
+        .b0 = b0,
+        .b1 = (-1.0f - cosw0) / a0,
+        .b2 = b0,
+    };
   }
-
-  return {};
 };
 
 }  // namespace barely

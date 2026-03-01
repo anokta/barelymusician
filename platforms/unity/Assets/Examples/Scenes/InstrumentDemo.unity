@@ -482,8 +482,7 @@ MonoBehaviour:
   CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 0.5
-  FilterType: 0
-  FilterCutoff: 0
+  FilterCutoff: 1
   FilterResonance: 0.5
   DelaySend: 0.1
   ReverbSend: 0.25

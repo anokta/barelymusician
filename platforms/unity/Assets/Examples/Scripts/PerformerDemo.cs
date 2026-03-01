@@ -17,7 +17,7 @@ namespace Barely.Examples {
     public void OnProcess(TaskEventType type) {
       if (type == TaskEventType.BEGIN) {
         if (_beat % 4 == 0) {
-          instrument.FilterType = (_beat % 8 == 0) ? FilterType.LPF : FilterType.HPF;
+          instrument.FilterCutoff = (_beat % 8 == 0) ? 0.5f : 0.75f;
         }
         _beat = (_beat + 1) % 8;
 

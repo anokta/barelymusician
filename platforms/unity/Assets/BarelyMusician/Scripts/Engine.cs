@@ -333,8 +333,6 @@ namespace Barely {
         [InspectorName("Distortion Mix")] DISTORTION_MIX,
         // Distortion drive.
         [InspectorName("Distortion Drive")] DISTORTION_DRIVE,
-        // Filter type.
-        [InspectorName("Filter Type")] FILTER_TYPE,
         // Filter cutoff.
         [InspectorName("Filter Cutoff")] FILTER_CUTOFF,
         // Filter resonance.

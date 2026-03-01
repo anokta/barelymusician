@@ -1,7 +1,5 @@
 #include "dsp/biquad_filter.h"
 
-#include <barelymusician.h>
-
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -12,15 +10,12 @@ constexpr int kInputLength = 4;
 constexpr float kInput[kInputLength] = {1.0f, -1.0f, 1.0f, 0.5f};
 
 constexpr float kSampleRate = 8000.0f;
-constexpr float kSampleInterval = 1.0f / kSampleRate;
 
 constexpr float kFilterQ = 1.0f;
 constexpr float kEpsilon = 1e-5f;
 
 TEST(BiquadFilterTest, LowPassAllPass) {
-  const auto coeffs =
-      // NOLINTNEXTLINE(readability-suspicious-call-argument)
-      GetFilterCoefficients(kSampleInterval, FilterType::kLpf, kSampleRate, kFilterQ);
+  const auto coeffs = GetFilterCoeffs<FilterType::kLpf>(kSampleRate, 0.5f * kSampleRate, kFilterQ);
 
   BiquadFilter filter;
   for (const float input : kInput) {
@@ -29,7 +24,7 @@ TEST(BiquadFilterTest, LowPassAllPass) {
 }
 
 TEST(BiquadFilterTest, HighPassAllPass) {
-  const auto coeffs = GetFilterCoefficients(kSampleInterval, FilterType::kHpf, 0.0f, kFilterQ);
+  const auto coeffs = GetFilterCoeffs<FilterType::kHpf>(kSampleRate, 0.0f, kFilterQ);
 
   BiquadFilter filter;
   for (const float input : kInput) {

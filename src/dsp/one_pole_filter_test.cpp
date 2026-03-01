@@ -1,7 +1,5 @@
 #include "dsp/one_pole_filter.h"
 
-#include <barelymusician.h>
-
 #include <array>
 #include <cmath>
 
@@ -48,7 +46,7 @@ TEST(OnePoleFilterTest, HpfAllPass) {
   }
 }
 
-TEST(OnePoleFilterTest, GetFilterCoefficient) {
+TEST(OnePoleFilterTest, GetFilterCoeff) {
   constexpr float kEpsilon = 1e-2f;
   constexpr int kSampleRate = 8000;
 
@@ -61,7 +59,7 @@ TEST(OnePoleFilterTest, GetFilterCoefficient) {
   };
 
   for (int i = 0; i < kCutoffCount; ++i) {
-    EXPECT_NEAR(GetFilterCoefficient(kSampleRate, kCutoffs[i]), kExpectedCoefficients[i], kEpsilon);
+    EXPECT_NEAR(GetFilterCoeff(kSampleRate, kCutoffs[i]), kExpectedCoefficients[i], kEpsilon) << i;
   }
 }
 

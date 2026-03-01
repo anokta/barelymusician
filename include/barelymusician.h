@@ -311,8 +311,6 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kDistortionMix,
   /// Distortion drive.
   BarelyInstrumentControlType_kDistortionDrive,
-  /// Filter type.
-  BarelyInstrumentControlType_kFilterType,
   /// Filter cutoff.
   BarelyInstrumentControlType_kFilterCutoff,
   /// Filter resonance.
@@ -360,18 +358,6 @@ typedef enum BarelyArpMode {
   /// Number of arpeggiator modes.
   BarelyArpMode_kCount,
 } BarelyArpMode;
-
-/// Filter types.
-typedef enum BarelyFilterType {
-  /// None.
-  BarelyFilterType_kNone = 0,
-  /// Low-pass filter.
-  BarelyFilterType_kLpf,
-  /// High-pass filter.
-  BarelyFilterType_kHpf,
-  /// Number of filters.
-  BarelyFilterType_kCount,
-} BarelyFilterType;
 
 /// Oscillator modes.
 typedef enum BarelyOscMode {
@@ -1002,8 +988,6 @@ enum class InstrumentControlType {
   kDistortionMix = BarelyInstrumentControlType_kDistortionMix,
   /// Distortion drive.
   kDistortionDrive = BarelyInstrumentControlType_kDistortionDrive,
-  /// Filter type.
-  kFilterType = BarelyInstrumentControlType_kFilterType,
   /// Filter cutoff.
   kFilterCutoff = BarelyInstrumentControlType_kFilterCutoff,
   /// Filter resonance.
@@ -1044,16 +1028,6 @@ enum class ArpMode {
   kDown = BarelyArpMode_kDown,
   /// Random.
   kRandom = BarelyArpMode_kRandom,
-};
-
-/// Filter types.
-enum class FilterType {
-  /// None.
-  kNone = BarelyFilterType_kNone,
-  /// Low-pass filter.
-  kLpf = BarelyFilterType_kLpf,
-  /// High-pass filter.
-  kHpf = BarelyFilterType_kHpf,
 };
 
 /// Oscillator modes.

@@ -84,20 +84,15 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kSidechainSend:
       params.voice_params.sidechain_send = value;
       break;
-    case BarelyInstrumentControlType_kFilterType:
-      params.filter_type = static_cast<FilterType>(value);
-      params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
-      break;
     case BarelyInstrumentControlType_kFilterCutoff:
       params.filter_frequency = GetFrequency(engine_.sample_rate, value);
-      params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
+      params.voice_params.filter_coeffs = GetFilterCoeffs<FilterType::kLpf>(
+          engine_.sample_rate, params.filter_frequency, params.filter_q);
       break;
     case BarelyInstrumentControlType_kFilterResonance:
       params.filter_q = GetFilterQ(value);
-      params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
+      params.voice_params.filter_coeffs = GetFilterCoeffs<FilterType::kLpf>(
+          engine_.sample_rate, params.filter_frequency, params.filter_q);
       break;
     case BarelyInstrumentControlType_kArpMode:
       [[fallthrough]];

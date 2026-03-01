@@ -17,35 +17,34 @@ namespace barely {
 
 struct InstrumentState {
   std::array<Control, BarelyInstrumentControlType_kCount> controls = {
-      Control(1.0f, 0.0f, 1.0f),                   // kGain
-      Control(0.0f),                               // kPitchShift
-      Control(0.0f, -1.0f, 1.0f),                  // kStereoPan
-      Control(0.0f, 0.0f, 8.0f),                   // kAttack
-      Control(0.0f, 0.0f, 8.0f),                   // kDecay
-      Control(1.0f, 0.0f, 1.0f),                   // kSustain
-      Control(0.0f, 0.0f, 8.0f),                   // kRelease
-      Control(0, 0, BarelySliceMode_kCount - 1),   // kSliceMode
-      Control(0.0f, 0.0f, 1.0f),                   // kOscMix
-      Control(0, 0, BarelyOscMode_kCount - 1),     // kOscMode
-      Control(0.0f, 0.0f, 1.0f),                   // kOscNoiseMix
-      Control(0.0f),                               // kOscPitchShift
-      Control(0.0f, 0.0f, 1.0f),                   // kOscShape
-      Control(0.0f, -1.0f, 1.0f),                  // kOscSkew
-      Control(0.0f, 0.0f, 1.0f),                   // kCrushDepth
-      Control(0.0f, 0.0f, 1.0f),                   // kCrushRate
-      Control(0.0f, 0.0f, 1.0f),                   // kDistortionMix
-      Control(0.0f, 0.0f, 1.0f),                   // kDistortionDrive
-      Control(0, 0, BarelyFilterType_kCount - 1),  // kFilterType
-      Control(0.0f, 0.0f, 1.0f),                   // kFilterCutoff
-      Control(0.5f, 0.0f, 1.0f),                   // kFilterResonance
-      Control(0.0f, 0.0f, 1.0f),                   // kDelaySend
-      Control(0.0f, 0.0f, 2.0f),                   // kReverbSend
-      Control(0.0f, -1.0f, 1.0f),                  // kSidechainSend
-      Control(0, 0, BarelyArpMode_kCount - 1),     // kArpMode
-      Control(0.5f, 0.0f, 1.0f),                   // kArpGate
-      Control(1.0f, 0.0f, 16.0f),                  // kArpRate
-      Control(false),                              // kRetrigger
-      Control(8, 1, 16),                           // kVoiceCount
+      Control(1.0f, 0.0f, 1.0f),                  // kGain
+      Control(0.0f),                              // kPitchShift
+      Control(0.0f, -1.0f, 1.0f),                 // kStereoPan
+      Control(0.0f, 0.0f, 8.0f),                  // kAttack
+      Control(0.0f, 0.0f, 8.0f),                  // kDecay
+      Control(1.0f, 0.0f, 1.0f),                  // kSustain
+      Control(0.0f, 0.0f, 8.0f),                  // kRelease
+      Control(0, 0, BarelySliceMode_kCount - 1),  // kSliceMode
+      Control(0.0f, 0.0f, 1.0f),                  // kOscMix
+      Control(0, 0, BarelyOscMode_kCount - 1),    // kOscMode
+      Control(0.0f, 0.0f, 1.0f),                  // kOscNoiseMix
+      Control(0.0f),                              // kOscPitchShift
+      Control(0.0f, 0.0f, 1.0f),                  // kOscShape
+      Control(0.0f, -1.0f, 1.0f),                 // kOscSkew
+      Control(0.0f, 0.0f, 1.0f),                  // kCrushDepth
+      Control(0.0f, 0.0f, 1.0f),                  // kCrushRate
+      Control(0.0f, 0.0f, 1.0f),                  // kDistortionMix
+      Control(0.0f, 0.0f, 1.0f),                  // kDistortionDrive
+      Control(1.0f, 0.0f, 1.0f),                  // kFilterCutoff
+      Control(0.5f, 0.0f, 1.0f),                  // kFilterResonance
+      Control(0.0f, 0.0f, 1.0f),                  // kDelaySend
+      Control(0.0f, 0.0f, 2.0f),                  // kReverbSend
+      Control(0.0f, -1.0f, 1.0f),                 // kSidechainSend
+      Control(0, 0, BarelyArpMode_kCount - 1),    // kArpMode
+      Control(0.5f, 0.0f, 1.0f),                  // kArpGate
+      Control(1.0f, 0.0f, 16.0f),                 // kArpRate
+      Control(false),                             // kRetrigger
+      Control(8, 1, 16),                          // kVoiceCount
   };
 
   Callback<BarelyNoteEventCallback> note_event_callback = {};

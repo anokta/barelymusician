@@ -19,7 +19,6 @@ struct InstrumentParams {
   OscMode osc_mode = OscMode::kCrossfade;
   SliceMode slice_mode = SliceMode::kSustain;
 
-  FilterType filter_type = FilterType::kNone;
   float filter_frequency = kMinFilterFreq;
   float filter_q = std::sqrt(0.5f);
 

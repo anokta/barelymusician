@@ -7,8 +7,9 @@
 namespace barely {
 
 struct VoiceParams {
-  BiquadFilter::Coeffs filter_coeffs = {};
-  BiquadFilter::Coeffs tone_filter_coeffs = {};
+  float filter_frequency = kMinFilterFreq;
+  float filter_q = std::sqrt(0.5f);
+  float tone_gain_db = 0.0f;
 
   float bit_crusher_range = 0.0f;
   float bit_crusher_increment = 1.0f;

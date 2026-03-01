@@ -57,16 +57,9 @@ struct VoiceState {
     ApproachValue(params.osc_skew, new_params.osc_skew);
     ApproachValue(params.stereo_pan, new_params.stereo_pan);
 
-    ApproachValue(params.filter_coeffs.a1, new_params.filter_coeffs.a1);
-    ApproachValue(params.filter_coeffs.a2, new_params.filter_coeffs.a2);
-    ApproachValue(params.filter_coeffs.b0, new_params.filter_coeffs.b0);
-    ApproachValue(params.filter_coeffs.b1, new_params.filter_coeffs.b1);
-    ApproachValue(params.filter_coeffs.b2, new_params.filter_coeffs.b2);
-    ApproachValue(params.tone_filter_coeffs.a1, new_params.tone_filter_coeffs.a1);
-    ApproachValue(params.tone_filter_coeffs.a2, new_params.tone_filter_coeffs.a2);
-    ApproachValue(params.tone_filter_coeffs.b0, new_params.tone_filter_coeffs.b0);
-    ApproachValue(params.tone_filter_coeffs.b1, new_params.tone_filter_coeffs.b1);
-    ApproachValue(params.tone_filter_coeffs.b2, new_params.tone_filter_coeffs.b2);
+    ApproachValue(params.filter_frequency, new_params.filter_frequency);
+    ApproachValue(params.filter_q, new_params.filter_q);
+    ApproachValue(params.tone_gain_db, new_params.tone_gain_db);
 
     ApproachValue(params.delay_send, new_params.delay_send);
     ApproachValue(params.reverb_send, new_params.reverb_send);

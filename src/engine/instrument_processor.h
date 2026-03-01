@@ -137,8 +137,14 @@ class InstrumentProcessor {
     output = voice.bit_crusher.Next(output, voice.params.bit_crusher_range,
                                     voice.params.bit_crusher_increment);
     output = Distortion(output, voice.params.distortion_amount, voice.params.distortion_drive);
-    output = voice.tone_filter.Next(voice.filter.Next(output, voice.params.filter_coeffs),
-                                    voice.params.tone_filter_coeffs);
+
+    static constexpr float kToneFilterFreq = 3000.0f;
+    static constexpr float kToneFilterQ = 1.0f;
+    const auto filter_coeffs = GetFilterCoeffs<FilterType::kLowPass>(
+        engine_.sample_rate, voice.params.filter_frequency, voice.params.filter_q);
+    const auto tone_filter_coeffs = GetFilterCoeffs<FilterType::kHighShelf>(
+        engine_.sample_rate, kToneFilterFreq, kToneFilterQ, voice.params.tone_gain_db);
+    output = voice.tone_filter.Next(voice.filter.Next(output, filter_coeffs), tone_filter_coeffs);
 
     output *= voice.params.gain;
 

@@ -190,6 +190,10 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float FilterResonance = 0.5f;
 
+    /// Filter tone.
+    [Range(-1.0f, 1.0f)]
+    public float FilterTone = 0.0f;
+
     [Header("Send Effects")]
 
     /// Delay send.
@@ -360,6 +364,7 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_DRIVE, DistortionDrive);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_CUTOFF, FilterCutoff);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_RESONANCE, FilterResonance);
+      SetControl(Engine.Internal.InstrumentControlType.FILTER_TONE, FilterTone);
       SetControl(Engine.Internal.InstrumentControlType.DELAY_SEND, DelaySend);
       SetControl(Engine.Internal.InstrumentControlType.REVERB_SEND, ReverbSend);
       SetControl(Engine.Internal.InstrumentControlType.SIDECHAIN_SEND, SidechainSend);

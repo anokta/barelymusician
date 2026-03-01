@@ -15,7 +15,8 @@ constexpr float kFilterQ = 1.0f;
 constexpr float kEpsilon = 1e-5f;
 
 TEST(BiquadFilterTest, LowPassAllPass) {
-  const auto coeffs = GetFilterCoeffs<FilterType::kLpf>(kSampleRate, 0.5f * kSampleRate, kFilterQ);
+  const auto coeffs =
+      GetFilterCoeffs<FilterType::kLowPass>(kSampleRate, 0.5f * kSampleRate, kFilterQ);
 
   BiquadFilter filter;
   for (const float input : kInput) {
@@ -24,7 +25,7 @@ TEST(BiquadFilterTest, LowPassAllPass) {
 }
 
 TEST(BiquadFilterTest, HighPassAllPass) {
-  const auto coeffs = GetFilterCoeffs<FilterType::kHpf>(kSampleRate, 0.0f, kFilterQ);
+  const auto coeffs = GetFilterCoeffs<FilterType::kHighPass>(kSampleRate, 0.0f, kFilterQ);
 
   BiquadFilter filter;
   for (const float input : kInput) {

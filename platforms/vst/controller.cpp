@@ -49,6 +49,8 @@ const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
                    0.0, 1.0, 0.0),
     RangeParameter(STR16("Filter Resonance"), BarelyInstrumentControlType_kFilterResonance,
                    STR16(""), 0.0, 1.0, 0.5),
+    RangeParameter(STR16("Filter Tone"), BarelyInstrumentControlType_kFilterTone, STR16(""), -1.0,
+                   1.0, 0.0),
     RangeParameter(STR16("Delay Send"), BarelyInstrumentControlType_kDelaySend, STR16(""), 0.0, 1.0,
                    0.0),
     RangeParameter(STR16("Reverb Send"), BarelyInstrumentControlType_kReverbSend, STR16(""), 0.0,

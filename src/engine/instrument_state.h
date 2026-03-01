@@ -37,6 +37,7 @@ struct InstrumentState {
       Control(0.0f, 0.0f, 1.0f),                  // kDistortionDrive
       Control(1.0f, 0.0f, 1.0f),                  // kFilterCutoff
       Control(0.5f, 0.0f, 1.0f),                  // kFilterResonance
+      Control(0.0f, -1.0f, 1.0f),                 // kFilterTone
       Control(0.0f, 0.0f, 1.0f),                  // kDelaySend
       Control(0.0f, 0.0f, 2.0f),                  // kReverbSend
       Control(0.0f, -1.0f, 1.0f),                 // kSidechainSend

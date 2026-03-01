@@ -137,7 +137,8 @@ class InstrumentProcessor {
     output = voice.bit_crusher.Next(output, voice.params.bit_crusher_range,
                                     voice.params.bit_crusher_increment);
     output = Distortion(output, voice.params.distortion_amount, voice.params.distortion_drive);
-    output = voice.filter.Next(output, voice.params.filter_coeffs);
+    output = voice.tone_filter.Next(voice.filter.Next(output, voice.params.filter_coeffs),
+                                    voice.params.tone_filter_coeffs);
 
     output *= voice.params.gain;
 

@@ -18,6 +18,7 @@ struct VoiceState {
   BitCrusher bit_crusher = {};
   Envelope envelope = {};
   BiquadFilter filter = {};
+  BiquadFilter tone_filter = {};
 
   VoiceParams params = {};
 
@@ -61,6 +62,11 @@ struct VoiceState {
     ApproachValue(params.filter_coeffs.b0, new_params.filter_coeffs.b0);
     ApproachValue(params.filter_coeffs.b1, new_params.filter_coeffs.b1);
     ApproachValue(params.filter_coeffs.b2, new_params.filter_coeffs.b2);
+    ApproachValue(params.tone_filter_coeffs.a1, new_params.tone_filter_coeffs.a1);
+    ApproachValue(params.tone_filter_coeffs.a2, new_params.tone_filter_coeffs.a2);
+    ApproachValue(params.tone_filter_coeffs.b0, new_params.tone_filter_coeffs.b0);
+    ApproachValue(params.tone_filter_coeffs.b1, new_params.tone_filter_coeffs.b1);
+    ApproachValue(params.tone_filter_coeffs.b2, new_params.tone_filter_coeffs.b2);
 
     ApproachValue(params.delay_send, new_params.delay_send);
     ApproachValue(params.reverb_send, new_params.reverb_send);

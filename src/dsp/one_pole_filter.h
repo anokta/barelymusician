@@ -10,9 +10,11 @@ namespace barely {
 // Filter types.
 enum class FilterType {
   // Low-pass filter.
-  kLpf = 0,
+  kLowPass = 0,
   // High-pass filter.
-  kHpf,
+  kHighPass,
+  // High-shelf filter.
+  kHighShelf,
 };
 
 // One-pole filter that processes basic low-pass and high-pass filtering.
@@ -20,10 +22,11 @@ class OnePoleFilter {
  public:
   template <FilterType kType>
   [[nodiscard]] float Next(float input, float coefficient) noexcept {
+    static_assert(kType != FilterType::kHighShelf);
     assert(coefficient >= 0.0f);
     assert(coefficient <= 1.0f);
     output_ = coefficient * (output_ - input) + input;
-    if constexpr (kType == FilterType::kHpf) {
+    if constexpr (kType == FilterType::kHighPass) {
       return input - output_;
     } else {
       return output_;

@@ -315,6 +315,8 @@ typedef enum BarelyInstrumentControlType {
   BarelyInstrumentControlType_kFilterCutoff,
   /// Filter resonance.
   BarelyInstrumentControlType_kFilterResonance,
+  /// Filter tone.
+  BarelyInstrumentControlType_kFilterTone,
   /// Delay send.
   BarelyInstrumentControlType_kDelaySend,
   /// Reverb send.
@@ -992,6 +994,8 @@ enum class InstrumentControlType {
   kFilterCutoff = BarelyInstrumentControlType_kFilterCutoff,
   /// Filter resonance.
   kFilterResonance = BarelyInstrumentControlType_kFilterResonance,
+  /// Filter tone.
+  kFilterTone = BarelyInstrumentControlType_kFilterTone,
   /// Delay send.
   kDelaySend = BarelyInstrumentControlType_kDelaySend,
   /// Reverb send.

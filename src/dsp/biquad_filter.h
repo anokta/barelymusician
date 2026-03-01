@@ -47,7 +47,8 @@ class BiquadFilter {
 };
 
 template <FilterType kType>
-BiquadFilter::Coeffs GetFilterCoeffs(float sample_rate, float cutoff_freq, float q) noexcept {
+BiquadFilter::Coeffs GetFilterCoeffs(float sample_rate, float cutoff_freq, float q,
+                                     [[maybe_unused]] float gain_db = 0.0f) noexcept {
   assert(sample_rate > 0.0f);
   assert(cutoff_freq >= 0.0f);
   assert(cutoff_freq <= 0.5f * sample_rate);
@@ -56,9 +57,9 @@ BiquadFilter::Coeffs GetFilterCoeffs(float sample_rate, float cutoff_freq, float
   const float w0 = 2.0f * std::numbers::pi_v<float> * cutoff_freq / sample_rate;
   const float cosw0 = std::cos(w0);
   const float alpha = std::sin(w0) / (2.0f * q);
-  const float a0 = 1.0f + alpha;
 
-  if constexpr (kType == FilterType::kLpf) {
+  if constexpr (kType == FilterType::kLowPass) {
+    const float a0 = 1.0f + alpha;
     const float b0 = (1.0f - cosw0) / (2.0f * a0);
     return {
         .a1 = (-2.0f * cosw0) / a0,
@@ -67,7 +68,8 @@ BiquadFilter::Coeffs GetFilterCoeffs(float sample_rate, float cutoff_freq, float
         .b1 = (1.0f - cosw0) / a0,
         .b2 = b0,
     };
-  } else {
+  } else if constexpr (kType == FilterType::kHighPass) {
+    const float a0 = 1.0f + alpha;
     const float b0 = (1.0f + cosw0) / (2.0f * a0);
     return {
         .a1 = (-2.0f * cosw0) / a0,
@@ -75,6 +77,24 @@ BiquadFilter::Coeffs GetFilterCoeffs(float sample_rate, float cutoff_freq, float
         .b0 = b0,
         .b1 = (-1.0f - cosw0) / a0,
         .b2 = b0,
+    };
+  } else {  // kHighShelf
+    const float A = std::pow(10.0f, gain_db / 40.0f);
+    const float two_sqrt_a_alpha = 2.0f * std::sqrt(A) * alpha;
+    const float a_plus_1 = A + 1.0f;
+    const float a_minus_1 = A - 1.0f;
+
+    const float b0 = A * (a_plus_1 + a_minus_1 * cosw0 + two_sqrt_a_alpha);
+    const float b1 = -2.0f * A * (a_minus_1 + a_plus_1 * cosw0);
+    const float b2 = A * (a_plus_1 + a_minus_1 * cosw0 - two_sqrt_a_alpha);
+    const float a0 = a_plus_1 - a_minus_1 * cosw0 + two_sqrt_a_alpha;
+
+    return {
+        .a1 = 2.0f * (a_minus_1 - a_plus_1 * cosw0) / a0,
+        .a2 = (a_plus_1 - a_minus_1 * cosw0 - two_sqrt_a_alpha) / a0,
+        .b0 = b0 / a0,
+        .b1 = b1 / a0,
+        .b2 = b2 / a0,
     };
   }
 };

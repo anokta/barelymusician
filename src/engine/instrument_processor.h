@@ -12,6 +12,7 @@
 #include "core/rng.h"
 #include "dsp/distortion.h"
 #include "dsp/sample_generators.h"
+#include "dsp/tone_filter.h"
 #include "engine/engine_state.h"
 #include "engine/instrument_params.h"
 #include "engine/slice_state.h"
@@ -31,10 +32,13 @@ class InstrumentProcessor {
   void SetSampleData(uint32_t instrument_index, uint32_t first_slice_index) noexcept;
 
   void Init(uint32_t instrument_index) noexcept {
-    engine_.instrument_params[instrument_index] = {};
-    engine_.instrument_params[instrument_index].osc_increment =
-        kReferenceFreq / engine_.sample_rate;
-    engine_.instrument_params[instrument_index].slice_increment = 1.0f / engine_.sample_rate;
+    InstrumentParams& instrument_params = engine_.instrument_params[instrument_index];
+    instrument_params = {};
+    instrument_params.adsr.SetAttack(engine_.sample_rate, 0.0f);
+    instrument_params.adsr.SetRelease(engine_.sample_rate, 0.0f);
+    instrument_params.osc_increment = kReferenceFreq / engine_.sample_rate;
+    instrument_params.slice_increment = 1.0f / engine_.sample_rate;
+    instrument_params.voice_params.filter_params.SetCutoff(engine_.sample_rate, 1.0f);
   }
 
   template <bool kIsSidechainSend = false>
@@ -133,11 +137,10 @@ class InstrumentProcessor {
       output *= osc_output * std::abs(slice_sample) + slice_output;
     }
 
-    // TODO(#146): These effects should ideally be bypassed completely when they are disabled.
     output = voice.bit_crusher.Next(output, voice.params.bit_crusher_range,
                                     voice.params.bit_crusher_increment);
     output = Distortion(output, voice.params.distortion_amount, voice.params.distortion_drive);
-    output = voice.filter.Next(output, voice.params.filter_coeffs);
+    output = voice.filter.Next(output, voice.params.filter_params);
 
     output *= voice.params.gain;
 

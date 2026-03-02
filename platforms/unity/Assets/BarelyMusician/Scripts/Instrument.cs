@@ -16,16 +16,6 @@ namespace Barely {
     [InspectorName("Random")] RANDOM,
   }
 
-  /// Filter types.
-  public enum FilterType {
-    /// None.
-    [InspectorName("None")] NONE = 0,
-    /// Low-pass filter.
-    [InspectorName("Lpf")] LPF,
-    /// High-pass filter.
-    [InspectorName("Hpf")] HPF,
-  }
-
   /// Oscillator modes.
   public enum OscMode {
     /// Linear crossfade between the slice and the oscillator.
@@ -192,16 +182,17 @@ namespace Barely {
 
     [Header("Filter")]
 
-    /// Filter type.
-    public FilterType FilterType = FilterType.NONE;
-
     /// Filter cutoff.
     [Range(0.0f, 1.0f)]
-    public float FilterCutoff = 0.0f;
+    public float FilterCutoff = 1.0f;
 
     /// Filter resonance.
     [Range(0.0f, 1.0f)]
     public float FilterResonance = 0.5f;
+
+    /// Filter tone.
+    [Range(-1.0f, 1.0f)]
+    public float FilterTone = 0.0f;
 
     [Header("Send Effects")]
 
@@ -371,9 +362,9 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.CRUSH_RATE, CrushRate);
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_MIX, DistortionMix);
       SetControl(Engine.Internal.InstrumentControlType.DISTORTION_DRIVE, DistortionDrive);
-      SetControl(Engine.Internal.InstrumentControlType.FILTER_TYPE, (float)FilterType);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_CUTOFF, FilterCutoff);
       SetControl(Engine.Internal.InstrumentControlType.FILTER_RESONANCE, FilterResonance);
+      SetControl(Engine.Internal.InstrumentControlType.FILTER_TONE, FilterTone);
       SetControl(Engine.Internal.InstrumentControlType.DELAY_SEND, DelaySend);
       SetControl(Engine.Internal.InstrumentControlType.REVERB_SEND, ReverbSend);
       SetControl(Engine.Internal.InstrumentControlType.SIDECHAIN_SEND, SidechainSend);

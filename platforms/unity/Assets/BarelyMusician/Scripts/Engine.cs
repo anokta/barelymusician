@@ -333,12 +333,12 @@ namespace Barely {
         [InspectorName("Distortion Mix")] DISTORTION_MIX,
         // Distortion drive.
         [InspectorName("Distortion Drive")] DISTORTION_DRIVE,
-        // Filter type.
-        [InspectorName("Filter Type")] FILTER_TYPE,
         // Filter cutoff.
         [InspectorName("Filter Cutoff")] FILTER_CUTOFF,
         // Filter resonance.
         [InspectorName("Filter Resonance")] FILTER_RESONANCE,
+        // Filter tone.
+        [InspectorName("Filter Tone")] FILTER_TONE,
         // Delay send.
         [InspectorName("Delay Send")] DELAY_SEND,
         // Reverb send.

@@ -6,9 +6,9 @@
 
 #include "core/constants.h"
 #include "core/control.h"
-#include "dsp/biquad_filter.h"
 #include "dsp/bit_crusher.h"
 #include "dsp/envelope.h"
+#include "dsp/tone_filter.h"
 #include "engine/instrument_params.h"
 #include "engine/voice_params.h"
 
@@ -17,7 +17,7 @@ namespace barely {
 struct VoiceState {
   BitCrusher bit_crusher = {};
   Envelope envelope = {};
-  BiquadFilter filter = {};
+  ToneFilter filter = {};
 
   VoiceParams params = {};
 
@@ -45,6 +45,7 @@ struct VoiceState {
   bool stop_on_slice_end = false;
 
   void Approach(const VoiceParams& new_params) noexcept {
+    params.filter_params.Approach(new_params.filter_params);
     ApproachValue(params.gain, note_params.gain * new_params.gain);
     ApproachValue(params.bit_crusher_increment, new_params.bit_crusher_increment);
     ApproachValue(params.bit_crusher_range, new_params.bit_crusher_range);
@@ -55,13 +56,6 @@ struct VoiceState {
     ApproachValue(params.osc_shape, new_params.osc_shape);
     ApproachValue(params.osc_skew, new_params.osc_skew);
     ApproachValue(params.stereo_pan, new_params.stereo_pan);
-
-    ApproachValue(params.filter_coeffs.a1, new_params.filter_coeffs.a1);
-    ApproachValue(params.filter_coeffs.a2, new_params.filter_coeffs.a2);
-    ApproachValue(params.filter_coeffs.b0, new_params.filter_coeffs.b0);
-    ApproachValue(params.filter_coeffs.b1, new_params.filter_coeffs.b1);
-    ApproachValue(params.filter_coeffs.b2, new_params.filter_coeffs.b2);
-
     ApproachValue(params.delay_send, new_params.delay_send);
     ApproachValue(params.reverb_send, new_params.reverb_send);
     ApproachValue(params.sidechain_send, new_params.sidechain_send);

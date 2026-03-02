@@ -1,7 +1,5 @@
 #include "dsp/one_pole_filter.h"
 
-#include <barelymusician.h>
-
 #include <array>
 #include <cmath>
 
@@ -21,14 +19,14 @@ TEST(OnePoleFilterTest, Lpf) {
   for (int i = 0; i < kInputLength; ++i) {
     const float expected_output =
         (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLpf>(kInput[i], kCoefficient), expected_output);
+    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLowPass>(kInput[i], kCoefficient), expected_output);
   }
 }
 
 TEST(OnePoleFilterTest, LpfAllPass) {
   OnePoleFilter filter;
   for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLpf>(input, 0.0f), input);
+    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLowPass>(input, 0.0f), input);
   }
 }
 
@@ -37,18 +35,18 @@ TEST(OnePoleFilterTest, Hpf) {
   for (int i = 0; i < kInputLength; ++i) {
     const float expected_output =
         kInput[i] - (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHpf>(kInput[i], kCoefficient), expected_output);
+    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHighPass>(kInput[i], kCoefficient), expected_output);
   }
 }
 
 TEST(OnePoleFilterTest, HpfAllPass) {
   OnePoleFilter filter;
   for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHpf>(input, 1.0f), input);
+    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHighPass>(input, 1.0f), input);
   }
 }
 
-TEST(OnePoleFilterTest, GetFilterCoefficient) {
+TEST(OnePoleFilterTest, GetFilterCoeff) {
   constexpr float kEpsilon = 1e-2f;
   constexpr int kSampleRate = 8000;
 
@@ -61,7 +59,7 @@ TEST(OnePoleFilterTest, GetFilterCoefficient) {
   };
 
   for (int i = 0; i < kCutoffCount; ++i) {
-    EXPECT_NEAR(GetFilterCoefficient(kSampleRate, kCutoffs[i]), kExpectedCoefficients[i], kEpsilon);
+    EXPECT_NEAR(GetFilterCoeff(kSampleRate, kCutoffs[i]), kExpectedCoefficients[i], kEpsilon) << i;
   }
 }
 

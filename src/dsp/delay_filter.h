@@ -51,8 +51,8 @@ class DelayFilter {
 
     float delay_frame[kStereoChannelCount];
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-      delay_frame[channel] = lpf_[channel].Next<FilterType::kLpf>(
-          hpf_[channel].Next<FilterType::kHpf>(
+      delay_frame[channel] = lpf_[channel].Next<FilterType::kLowPass>(
+          hpf_[channel].Next<FilterType::kHighPass>(
               std::lerp(delay_samples_[kStereoChannelCount * read_frame_begin + channel],
                         delay_samples_[kStereoChannelCount * read_frame_end + channel],
                         params.frame_count - static_cast<float>(delay_frame_count)),

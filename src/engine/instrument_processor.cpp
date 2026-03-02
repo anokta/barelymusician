@@ -7,7 +7,6 @@
 #include <cstdint>
 
 #include "core/constants.h"
-#include "dsp/biquad_filter.h"
 
 namespace barely {
 
@@ -67,14 +66,16 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       break;
     case BarelyInstrumentControlType_kCrushRate:
       params.voice_params.bit_crusher_increment = std::min(
-          2.0f * GetFrequency(engine_.sample_rate, 1.0f - value) / engine_.sample_rate, 1.0f);
+          2.0f * GetFrequency(1.0f - value, 0.5f * engine_.sample_rate) / engine_.sample_rate,
+          1.0f);
       break;
     case BarelyInstrumentControlType_kDistortionMix:
       params.voice_params.distortion_amount = value;
       break;
-    case BarelyInstrumentControlType_kDistortionDrive:
+    case BarelyInstrumentControlType_kDistortionDrive: {
+      static constexpr float kDistortionDriveRange = 19.0f;
       params.voice_params.distortion_drive = 1.0f + kDistortionDriveRange * value;
-      break;
+    } break;
     case BarelyInstrumentControlType_kDelaySend:
       params.voice_params.delay_send = value;
       break;
@@ -84,20 +85,14 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kSidechainSend:
       params.voice_params.sidechain_send = value;
       break;
-    case BarelyInstrumentControlType_kFilterType:
-      params.filter_type = static_cast<FilterType>(value);
-      params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
-      break;
     case BarelyInstrumentControlType_kFilterCutoff:
-      params.filter_frequency = GetFrequency(engine_.sample_rate, value);
-      params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
+      params.voice_params.filter_params.SetCutoff(engine_.sample_rate, value);
       break;
     case BarelyInstrumentControlType_kFilterResonance:
-      params.filter_q = GetFilterQ(value);
-      params.voice_params.filter_coeffs = GetFilterCoefficients(
-          engine_.sample_rate, params.filter_type, params.filter_frequency, params.filter_q);
+      params.voice_params.filter_params.SetResonance(value);
+      break;
+    case BarelyInstrumentControlType_kFilterTone:
+      params.voice_params.filter_params.SetTone(value);
       break;
     case BarelyInstrumentControlType_kArpMode:
       [[fallthrough]];

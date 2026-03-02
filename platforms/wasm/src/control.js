@@ -43,9 +43,9 @@ export const InstrumentControlType = Object.freeze({
   CRUSH_RATE: 15,
   DISTORTION_MIX: 16,
   DISTORTION_DRIVE: 17,
-  FILTER_TYPE: 18,
-  FILTER_CUTOFF: 19,
-  FILTER_RESONANCE: 20,
+  FILTER_CUTOFF: 18,
+  FILTER_RESONANCE: 19,
+  FILTER_TONE: 20,
   DELAY_SEND: 21,
   REVERB_SEND: 22,
   SIDECHAIN_SEND: 23,
@@ -69,13 +69,6 @@ export const ArpMode = Object.freeze({
   DOWN: 2,
   RANDOM: 3,
   COUNT: 4,
-});
-
-export const FilterType = Object.freeze({
-  NONE: 0,
-  LPF: 1,
-  HPF: 2,
-  COUNT: 3,
 });
 
 export const OscMode = Object.freeze({
@@ -379,17 +372,10 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     minValue: 0.0,
     maxValue: 1.0,
   },
-  [InstrumentControlType.FILTER_TYPE]: {
-    name: 'Filter Type',
-    valueType: FilterType,
-    defaultValue: FilterType.NONE,
-    minValue: 0,
-    maxValue: FilterType.COUNT - 1,
-  },
   [InstrumentControlType.FILTER_CUTOFF]: {
     name: 'Filter Cutoff',
     valueType: 'float',
-    defaultValue: 0.0,
+    defaultValue: 1.0,
     minValue: 0.0,
     maxValue: 1.0,
   },
@@ -398,6 +384,13 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     valueType: 'float',
     defaultValue: 0.5,
     minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [InstrumentControlType.FILTER_TONE]: {
+    name: 'Filter Tone',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: -1.0,
     maxValue: 1.0,
   },
   [InstrumentControlType.DELAY_SEND]: {

@@ -77,7 +77,7 @@ class Reverb {
   }
 
  private:
-  static constexpr int kMaxDelayFrameCount = 8192;
+  static constexpr int kMaxDelayFrameCount = 4096;
 
   static constexpr float kTuningSampleRate = 44100.0f;
 

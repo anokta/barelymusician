@@ -46,7 +46,7 @@ const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
     RangeParameter(STR16("Distortion Drive"), BarelyInstrumentControlType_kDistortionDrive,
                    STR16(""), 0.0, 1.0, 0.0),
     RangeParameter(STR16("Filter Cutoff"), BarelyInstrumentControlType_kFilterCutoff, STR16(""),
-                   0.0, 1.0, 0.0),
+                   0.0, 1.0, 1.0),
     RangeParameter(STR16("Filter Resonance"), BarelyInstrumentControlType_kFilterResonance,
                    STR16(""), 0.0, 1.0, 0.5),
     RangeParameter(STR16("Filter Tone"), BarelyInstrumentControlType_kFilterTone, STR16(""), -1.0,

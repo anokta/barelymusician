@@ -7,7 +7,6 @@
 #include <cstdint>
 
 #include "core/constants.h"
-#include "dsp/biquad_filter.h"
 
 namespace barely {
 
@@ -67,7 +66,8 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       break;
     case BarelyInstrumentControlType_kCrushRate:
       params.voice_params.bit_crusher_increment = std::min(
-          2.0f * GetFrequency(engine_.sample_rate, 1.0f - value) / engine_.sample_rate, 1.0f);
+          2.0f * GetFrequency(1.0f - value, 0.5f * engine_.sample_rate) / engine_.sample_rate,
+          1.0f);
       break;
     case BarelyInstrumentControlType_kDistortionMix:
       params.voice_params.distortion_amount = value;
@@ -86,15 +86,14 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.voice_params.sidechain_send = value;
       break;
     case BarelyInstrumentControlType_kFilterCutoff:
-      params.voice_params.filter_frequency = GetFrequency(engine_.sample_rate, value);
+      params.voice_params.filter_params.SetCutoff(engine_.sample_rate, value);
       break;
     case BarelyInstrumentControlType_kFilterResonance:
-      params.voice_params.filter_q = GetFilterQ(value);
+      params.voice_params.filter_params.SetResonance(value);
       break;
-    case BarelyInstrumentControlType_kFilterTone: {
-      static constexpr float kMaxGainDb = 6.0f;
-      params.voice_params.tone_gain_db = value * kMaxGainDb;
-    } break;
+    case BarelyInstrumentControlType_kFilterTone:
+      params.voice_params.filter_params.SetTone(value);
+      break;
     case BarelyInstrumentControlType_kArpMode:
       [[fallthrough]];
     case BarelyInstrumentControlType_kArpGate:

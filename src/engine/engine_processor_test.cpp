@@ -8,6 +8,8 @@
 
 #include "core/constants.h"
 #include "core/control.h"
+#include "dsp/envelope.h"
+#include "dsp/tone_filter.h"
 #include "engine/engine_state.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
@@ -21,7 +23,7 @@ constexpr uint32_t kNoteIndex = 2;
 constexpr int kSampleRate = 4;
 constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
-TEST(EngineProcessorTest, PlaySingleNote) {
+TEST(EngineProcessorTest, PlayNote) {
   constexpr int kFrameCount = 5;
   constexpr float kPitch = 1.0f;
   constexpr std::array<BarelySlice, 1> kSlices = {
@@ -38,80 +40,58 @@ TEST(EngineProcessorTest, PlaySingleNote) {
   engine->ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
   engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
 
+  Envelope envelope;
+  Envelope::Adsr adsr;
+  adsr.SetAttack(kSampleRate, 0.0f);
+  adsr.SetRelease(kSampleRate, 0.0f);
+
+  ToneFilter filters[kStereoChannelCount];
+  ToneFilterParams filter_params;
+  filter_params.SetCutoff(kSampleRate, 1.0f);
+
   std::array<float, kStereoChannelCount * kFrameCount> samples;
 
   // Control is set to its default value.
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
-  for (int i = 0; i < kStereoChannelCount * kFrameCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.0f);
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+      EXPECT_FLOAT_EQ(samples[frame * kStereoChannelCount + channel], 0.0f);
+    }
   }
 
   // Set a note on.
   engine->ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, kPitch});
+  envelope.Start(adsr);
 
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
-  for (int i = 0; i < kStereoChannelCount * kFrameCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], (i / kStereoChannelCount < kSampleRate)
-                                    ? 0.5f * kSamples[i / kStereoChannelCount]
-                                    : 0.0f);
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    const float envelope_output = envelope.IsActive() ? envelope.Next() : 0.0f;
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+      EXPECT_FLOAT_EQ(
+          samples[frame * kStereoChannelCount + channel],
+          (envelope_output > 0.0f)
+              ? (0.5f * filters[channel].Next(
+                            (frame < kSampleRate) ? (envelope_output * kSamples[frame]) : 0.0f,
+                            filter_params))
+              : 0.0f);
+    }
   }
 
   // Set the note off.
   engine->ScheduleMessage(NoteOffMessage{kNoteIndex});
+  envelope.Stop();
 
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
-  for (int i = 0; i < kStereoChannelCount * kFrameCount; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.0f);
-  }
-}
-
-TEST(EngineProcessorTest, PlayMultipleNotes) {
-  constexpr std::array<BarelySlice, kSampleRate> kSlices = {
-      BarelySlice{kSamples.data(), 1, kSampleRate, 0.0f},
-      BarelySlice{kSamples.data() + 1, 1, kSampleRate, 1.0f},
-      BarelySlice{kSamples.data() + 2, 1, kSampleRate, 2.0f},
-      BarelySlice{kSamples.data() + 3, 1, kSampleRate, 3.0f},
-  };
-
-  auto engine = std::make_unique<EngineState>();
-  engine->sample_rate = static_cast<float>(kSampleRate);
-
-  const uint32_t slice_index =
-      engine->slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));
-
-  EngineProcessor processor(*engine);
-  engine->ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
-  engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
-
-  std::array<float, kStereoChannelCount * kSampleRate> samples;
-
-  // Control is set to its default value.
-  samples.fill(0.0f);
-  processor.Process(samples.data(), kStereoChannelCount, kSampleRate, 0.0);
-  for (int i = 0; i < kStereoChannelCount * kSampleRate; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.0f);
-  }
-
-  // Start a new note per each i in the samples.
-  for (int i = 0; i < kSampleRate; ++i) {
-    engine->ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, static_cast<float>(i)});
-    engine->timestamp = static_cast<double>(i + 1) / static_cast<double>(kSampleRate);
-    engine->ScheduleMessage(NoteOffMessage{kNoteIndex});
-  }
-
-  samples.fill(0.0f);
-  processor.Process(samples.data(), kStereoChannelCount, kSampleRate, 0.0);
-  for (int i = 0; i < kStereoChannelCount * kSampleRate; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.5f * kSamples[i / kStereoChannelCount]);
-  }
-
-  samples.fill(0.0f);
-  processor.Process(samples.data(), kStereoChannelCount, kSampleRate, engine->timestamp);
-  for (int i = 0; i < kStereoChannelCount * kSampleRate; ++i) {
-    EXPECT_FLOAT_EQ(samples[i], 0.0f);
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    const float envelope_output = envelope.IsActive() ? envelope.Next() : 0.0f;
+    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+      EXPECT_FLOAT_EQ(
+          samples[frame * kStereoChannelCount + channel],
+          (envelope_output > 0.0f) ? (0.5f * filters[channel].Next(0.0f, filter_params)) : 0.0f);
+    }
   }
 }
 

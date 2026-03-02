@@ -1,11 +1,11 @@
 target_sources(
   barelymusician PRIVATE
-  biquad_filter.h
   bit_crusher.h
   compressor.h
   delay_filter.h
   distortion.h
   envelope.h
+  tone_filter.h
   one_pole_filter.h
   reverb.h
   sample_generators.h
@@ -15,7 +15,6 @@ target_sources(
 if(ENABLE_TESTS)
   target_sources(
     barelymusician_test PRIVATE
-    biquad_filter_test.cpp
     bit_crusher_test.cpp
     distortion_test.cpp
     envelope_test.cpp

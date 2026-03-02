@@ -2,14 +2,12 @@
 #define BARELYMUSICIAN_ENGINE_VOICE_PARAMS_H_
 
 #include "core/control.h"
-#include "dsp/biquad_filter.h"
+#include "dsp/tone_filter.h"
 
 namespace barely {
 
 struct VoiceParams {
-  float filter_frequency = kMinFilterFreq;
-  float filter_q = std::sqrt(0.5f);
-  float tone_gain_db = 0.0f;
+  ToneFilterParams filter_params = {};
 
   float bit_crusher_range = 0.0f;
   float bit_crusher_increment = 1.0f;

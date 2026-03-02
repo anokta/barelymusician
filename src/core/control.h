@@ -44,17 +44,9 @@ inline constexpr void ApproachValue(float& current_value, float target_value) no
   current_value += (target_value - current_value) * kSmoothingCoeff;
 }
 
-inline float GetFrequency(float sample_rate, float cutoff) noexcept {
+inline float GetFrequency(float cutoff, float max_freq) noexcept {
   static constexpr float kMinFreqInverse = 1.0f / kMinFilterFreq;
-  const float max_freq = 0.5f * sample_rate;
   return std::min(kMinFilterFreq * std::pow(max_freq * kMinFreqInverse, cutoff), max_freq);
-}
-
-inline float GetFilterQ(float resonance) noexcept {
-  static constexpr float kMinQ = 0.05f;
-  static constexpr float kMinQInverse = 1.0f / kMinQ;
-  static constexpr float kMaxQ = 10.0f;
-  return std::min(kMinQ * std::pow(kMaxQ * kMinQInverse, resonance), kMaxQ);
 }
 
 }  // namespace barely

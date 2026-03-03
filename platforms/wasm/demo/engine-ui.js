@@ -25,6 +25,9 @@ export class EngineUi {
     this._delayFeedback = 0.0;
 
     /** @private {number} */
+    this._delayPingPong = 0.0;
+
+    /** @private {number} */
     this._reverbDamping = 0.0;
 
     /** @private {number} */
@@ -51,6 +54,7 @@ export class EngineUi {
         this._tempo = 120.0;
         this.delayTime = 0.5;
         this.delayFeedback = 0.2;
+        this.delayPingPong = 0.5;
         this.reverbDamping = 0.25;
         this.reverbRoomSize = 0.6;
         this.container.querySelector('#createInstrumentBtn').click();
@@ -72,6 +76,7 @@ export class EngineUi {
       tempoJson,
       delayTimeJson,
       delayFeedbackJson,
+      delayPingPongJson,
       reverbDampingJson,
       reverbRoomSizeJson,
       instrumentsJson,
@@ -81,6 +86,7 @@ export class EngineUi {
     this.engine.setTempo(tempoJson);
     this.delayTime = delayTimeJson;
     this.delayFeedback = delayFeedbackJson;
+    this.delayPingPong = delayPingPongJson;
     this.reverbDamping = reverbDampingJson;
     this.reverbRoomSize = reverbRoomSizeJson;
 
@@ -134,6 +140,7 @@ export class EngineUi {
     const tempoJson = this._tempo;
     const delayTimeJson = this._delayTime;
     const delayFeedbackJson = this._delayFeedback;
+    const delayPingPongJson = this._delayPingPong;
     const reverbDampingJson = this._reverbDamping;
     const reverbRoomSizeJson = this._reverbRoomSize;
 
@@ -172,6 +179,7 @@ export class EngineUi {
       tempoJson,
       delayTimeJson,
       delayFeedbackJson,
+      delayPingPongJson,
       reverbDampingJson,
       reverbRoomSizeJson,
       instrumentsJson,
@@ -208,6 +216,11 @@ export class EngineUi {
           <input type="range" min="0.0" max="1.0" value="${this._delayFeedback}"
                  step="0.05" id="delayFeedbackSlider">
           <span id="delayFeedbackValue">${this._delayFeedback.toFixed(2)}</span>
+
+          <label for="delayPingPongSlider">Ping-Pong</label>
+          <input type="range" min="0.0" max="1.0" value="${this._delayPingPong}"
+                 step="0.1" id="delayPingPongSlider">
+          <span id="delayPingPongValue">${this._delayPingPong.toFixed(2)}</span>
         </div>
 
         <div class="engine-reverb">
@@ -300,6 +313,15 @@ export class EngineUi {
     this.engine.setControl(EngineControlType.DELAY_FEEDBACK, newDelayFeedback);
   }
 
+  set delayPingPong(newDelayPingPong) {
+    if (this._delayPingPong === newDelayPingPong) return;
+
+    this._delayPingPong = newDelayPingPong;
+    this.delayPingPongSlider.value = this._delayPingPong;
+    this.delayPingPongValue.textContent = this._delayPingPong.toFixed(2);
+    this.engine.setControl(EngineControlType.DELAY_PING_PONG, newDelayPingPong);
+  }
+
   set reverbDamping(newReverbDamping) {
     if (this._reverbDamping === newReverbDamping) return;
 
@@ -324,6 +346,10 @@ export class EngineUi {
 
   get delayFeedback() {
     return this._delayFeedback;
+  }
+
+  get delayPingPong() {
+    return this._delayPingPong;
   }
 
   get reverbDamping() {
@@ -354,6 +380,14 @@ export class EngineUi {
       const performerUi = this._createPerformer(performerContainer);
       performerUi.performer.setLooping(true);
       performerUi.performer.syncTo(this._metronome.performer);
+
+      if (this._instruments.size > 0) {
+        const firstInstrument = Array.from(this._instruments.values()).pop();
+        const instrumentSelect = performerContainer.querySelector('#instrumentSelect');
+        instrumentSelect.value = firstInstrument.instrument.handle;
+        performerUi.updateInstrumentSelect(this._instruments);
+      }
+
       if (this._metronome.isPlaying) {
         performerUi.start();
       }
@@ -403,6 +437,11 @@ export class EngineUi {
     this.delayFeedbackSlider.addEventListener('input', () => {
       this.delayFeedback = Number(this.delayFeedbackSlider.value);
     });
+    this.delayPingPongSlider = this.container.querySelector('#delayPingPongSlider');
+    this.delayPingPongValue = this.container.querySelector('#delayPingPongValue');
+    this.delayPingPongSlider.addEventListener('input', () => {
+      this.delayPingPong = Number(this.delayPingPongSlider.value);
+    });
     this.reverbDampingSlider = this.container.querySelector('#reverbDampingSlider');
     this.reverbDampingValue = this.container.querySelector('#reverbDampingValue');
     this.reverbDampingSlider.addEventListener('input', () => {
@@ -418,6 +457,8 @@ export class EngineUi {
     this.container.querySelector('#resetBtn').addEventListener('click', () => {
       stopButton.click();
       this._reset();
+      this.container.querySelector('#createInstrumentBtn').click();
+      this.container.querySelector('#createPerformerBtn').click();
     });
 
     // Save

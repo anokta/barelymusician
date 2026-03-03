@@ -332,14 +332,6 @@ class Processor extends AudioWorkletProcessor {
       case CommandType.TASK_SET_COMMANDS: {
         const task = this._tasks.get(command.handle);
         if (!task) return;
-        if (task.endCommands) {  // stop the current task
-          this._module._BarelyTask_IsActive(this._engine, task.taskId, this._uint8Ptr);
-          if (this._module.getValue(this._uint8Ptr) !== 0) {
-            for (const command of task.endCommands) {
-              this._processCommand(command);
-            }
-          }
-        }
         task.beginCommands = command.beginCommands;
         task.endCommands = command.endCommands;
       } break;

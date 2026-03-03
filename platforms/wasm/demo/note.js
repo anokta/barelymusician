@@ -55,11 +55,13 @@ export class Note {
   set pitch(newPitch) {
     if (this._pitch === newPitch) return;
 
-    this._performerui.selectedInstrument?.instrument.setNoteOff(this._semitoneToPitch(this._pitch));
+    const instrument = this._performerui.selectedInstrument?.instrument;
+    const oldPitch = this._pitch;
     this._pitch = newPitch;
+    this.updateInstrument(this._performerui.selectedInstrument?.instrument);
+    instrument?.setNoteOff(this._semitoneToPitch(oldPitch));
     if (this.isActive) {
-      this._performerui.selectedInstrument?.instrument.setNoteOn(
-          this._semitoneToPitch(this._pitch), this.gain);
+      instrument?.setNoteOn(this._semitoneToPitch(this._pitch), this.gain);
     }
   }
 

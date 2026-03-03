@@ -368,7 +368,7 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
   [InstrumentControlType.DISTORTION_DRIVE]: {
     name: 'Distortion Drive',
     valueType: 'float',
-    defaultValue: 0.0,
+    defaultValue: 0.5,
     minValue: 0.0,
     maxValue: 1.0,
   },

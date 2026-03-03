@@ -42,7 +42,6 @@ TEST(EngineProcessorTest, PlayNote) {
 
   Envelope envelope;
   Envelope::Adsr adsr;
-  adsr.SetAttack(kSampleRate, 0.0f);
   adsr.SetRelease(kSampleRate, 0.0f);
 
   ToneFilter filters[kStereoChannelCount];

@@ -13,10 +13,8 @@ class Envelope {
   class Adsr {
    public:
     void SetAttack(float sample_rate, float attack) noexcept {
-      static constexpr float kMinAttack = 0.001f;
-      const float attack_samples = sample_rate * std::max(attack, kMinAttack);
-      assert(attack_samples >= 1.0f);
-      attack_increment_ = 1.0f / attack_samples;
+      const float attack_samples = sample_rate * attack;
+      attack_increment_ = (attack_samples >= 1.0f) ? 1.0f / attack_samples : 0.0f;
     }
 
     void SetDecay(float sample_rate, float decay) noexcept {

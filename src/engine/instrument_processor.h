@@ -34,7 +34,6 @@ class InstrumentProcessor {
   void Init(uint32_t instrument_index) noexcept {
     InstrumentParams& instrument_params = engine_.instrument_params[instrument_index];
     instrument_params = {};
-    instrument_params.adsr.SetAttack(engine_.sample_rate, 0.0f);
     instrument_params.adsr.SetRelease(engine_.sample_rate, 0.0f);
     instrument_params.osc_increment = kReferenceFreq / engine_.sample_rate;
     instrument_params.slice_increment = 1.0f / engine_.sample_rate;

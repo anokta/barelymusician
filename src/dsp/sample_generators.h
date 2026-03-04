@@ -10,25 +10,44 @@ namespace barely {
 
 inline constexpr float kOscSkewRange = 0.25f;
 
+[[nodiscard]] inline float PolyBlep(float phase, float increment) noexcept {
+  if (phase < increment) {
+    const float t = phase / increment;
+    return t + t - t * t - 1.0f;
+  }
+  if (phase > 1.0f - increment) {
+    const float t = (phase - 1.0f) / increment;
+    return t * t + t + t + 1.0f;
+  }
+  return 0.0f;
+}
+
 [[nodiscard]] inline float GenerateSineSample(float phase) noexcept {
   return std::sin(phase * 2.0f * std::numbers::pi_v<float>);
 }
 
 [[nodiscard]] inline float GenerateTriangleSample(float phase) noexcept {
-  return 4.0f * std::abs(phase - std::floor(phase + 0.75f) + 0.25f) - 1.0f;
+  return 4.0f * std::abs(phase - static_cast<float>(phase + 0.75f >= 1.0f) + 0.25f) - 1.0f;
 }
 
-[[nodiscard]] inline float GenerateSquareSample(float phase) noexcept {
-  return (phase < 0.5f) ? 1.0f : -1.0f;
+[[nodiscard]] inline float GenerateSquareSample(float phase, float increment) noexcept {
+  const float shifted_phase = phase + 0.5f;
+  return ((phase < 0.5f) ? 1.0f : -1.0f) + PolyBlep(phase, increment) -
+         PolyBlep(shifted_phase - static_cast<float>(shifted_phase >= 1.0f), increment);
 }
 
-[[nodiscard]] inline float GenerateSawtoothSample(float phase) noexcept {
-  return 2.0f * (phase - std::floor(phase + 0.5f));
+[[nodiscard]] inline float GenerateSawtoothSample(float phase, float increment) noexcept {
+  const float shifted_phase = phase + 0.5f;
+  const float shifted_phase_floor = static_cast<float>(shifted_phase >= 1.0f);
+  return 2.0f * (phase - shifted_phase_floor) -
+         PolyBlep(shifted_phase - shifted_phase_floor, increment);
 }
 
-[[nodiscard]] inline float GenerateOscSample(float osc_phase, float osc_shape) noexcept {
-  assert(osc_phase >= 0.0f && osc_phase <= 1.0f && "GenerateOscSample");
+[[nodiscard]] inline float GenerateOscSample(float osc_shape, float osc_phase,
+                                             float osc_increment) noexcept {
   assert(osc_shape >= 0.0f && osc_shape <= 1.0f && "GenerateOscSample");
+  assert(osc_phase >= 0.0f && osc_phase <= 1.0f && "GenerateOscSample");
+  assert(osc_increment > 0.0f && osc_increment <= 0.5f && "GenerateOscSample");
   static constexpr float kShapeScale = 3.0f;
   static constexpr float kShapeTriangleOffset = 1.0f;
   static constexpr float kShapeSineToTriangle = kShapeTriangleOffset / kShapeScale;
@@ -39,10 +58,12 @@ inline constexpr float kOscSkewRange = 0.25f;
     return std::lerp(GenerateSineSample(osc_phase), GenerateTriangleSample(osc_phase),
                      scaled_shape);
   } else if (osc_shape < kShapeTriangleToSquare) {
-    return std::lerp(GenerateTriangleSample(osc_phase), GenerateSquareSample(osc_phase),
+    return std::lerp(GenerateTriangleSample(osc_phase),
+                     GenerateSquareSample(osc_phase, osc_increment),
                      scaled_shape - kShapeTriangleOffset);
   } else {
-    return std::lerp(GenerateSquareSample(osc_phase), GenerateSawtoothSample(osc_phase),
+    return std::lerp(GenerateSquareSample(osc_phase, osc_increment),
+                     GenerateSawtoothSample(osc_phase, osc_increment),
                      scaled_shape - kShapeSquareOffset);
   }
 }

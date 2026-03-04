@@ -109,17 +109,43 @@ class InstrumentProcessor {
       voice.envelope.Reset();
     }
 
-    const float skewed_osc_phase = std::min(1.0f, (1.0f + voice.params.osc_skew) * voice.osc_phase);
-    const float osc_sample = (1.0f - voice.params.osc_noise_mix) *
-                                 GenerateOscSample(skewed_osc_phase, voice.params.osc_shape) +
-                             voice.params.osc_noise_mix * engine_.audio_rng.Generate();
-    const float osc_output = voice.params.osc_mix * osc_sample;
-
     const float slice_sample =
         (slice != nullptr)
             ? GenerateSliceSample(slice->samples, slice->sample_count, voice.slice_offset)
             : 0.0f;
     const float slice_output = (1.0f - voice.params.osc_mix) * slice_sample;
+
+    float osc_increment = instrument_params.osc_increment * voice.note_params.osc_increment;
+    if (instrument_params.osc_mode == OscMode::kMf) {
+      osc_increment += slice_sample * osc_increment;
+    }
+    osc_increment = std::min(osc_increment, 0.5f);
+
+    const float skewed_osc_phase = std::min(1.0f, (1.0f + voice.params.osc_skew) * voice.osc_phase);
+    const float osc_sample =
+        (1.0f - voice.params.osc_noise_mix) *
+            GenerateOscSample(voice.params.osc_shape, skewed_osc_phase, osc_increment) +
+        voice.params.osc_noise_mix * engine_.audio_rng.Generate();
+    const float osc_output = voice.params.osc_mix * osc_sample;
+
+    voice.osc_phase += osc_increment;
+    if (voice.osc_phase >= 1.0f) {
+      voice.osc_phase -= 1.0f;
+    }
+
+    float slice_increment = instrument_params.slice_increment * voice.note_params.slice_increment;
+    if (slice_increment > 0) {
+      if (instrument_params.osc_mode == OscMode::kFm) {
+        slice_increment += osc_output * slice_increment;
+      }
+      voice.slice_offset += slice_increment;
+      if (instrument_params.slice_mode == SliceMode::kLoop) {
+        if (slice != nullptr && static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
+          voice.slice_offset =
+              std::fmod(voice.slice_offset, static_cast<float>(slice->sample_count));
+        }
+      }
+    }
 
     float output = voice.envelope.Next();
 
@@ -142,29 +168,6 @@ class InstrumentProcessor {
     output = voice.filter.Next(output, voice.params.filter_params);
 
     output *= voice.params.gain;
-
-    float osc_increment = instrument_params.osc_increment * voice.note_params.osc_increment;
-    if (instrument_params.osc_mode == OscMode::kMf) {
-      osc_increment += slice_sample * osc_increment;
-    }
-    voice.osc_phase += osc_increment;
-    if (voice.osc_phase >= 1.0f) {
-      voice.osc_phase -= 1.0f;
-    }
-
-    float slice_increment = instrument_params.slice_increment * voice.note_params.slice_increment;
-    if (slice_increment > 0) {
-      if (instrument_params.osc_mode == OscMode::kFm) {
-        slice_increment += osc_output * slice_increment;
-      }
-      voice.slice_offset += slice_increment;
-      if (instrument_params.slice_mode == SliceMode::kLoop) {
-        if (slice != nullptr && static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
-          voice.slice_offset =
-              std::fmod(voice.slice_offset, static_cast<float>(slice->sample_count));
-        }
-      }
-    }
 
     const float left_gain = 0.5f * (1.0f - voice.params.stereo_pan);
     const float right_gain = 1.0f - left_gain;

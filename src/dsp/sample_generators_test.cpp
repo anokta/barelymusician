@@ -1,6 +1,8 @@
 #include "dsp/sample_generators.h"
 
+#include <cmath>
 #include <cstdint>
+#include <numbers>
 
 #include "gtest/gtest.h"
 
@@ -8,11 +10,11 @@ namespace barely {
 namespace {
 
 TEST(SampleGeneratorsTest, GenerateOscSample) {
-  static constexpr float kShape = 1.0f;  // sawtooth
+  static constexpr float kShape = 0.0f;  // sine
 
   for (int i = 0; i < 4; ++i) {
-    EXPECT_FLOAT_EQ(GenerateOscSample(0.25f * i, kShape),
-                    (i < 2) ? static_cast<float>(i) * 0.5f : static_cast<float>(i - 4) * 0.5f);
+    EXPECT_FLOAT_EQ(GenerateOscSample(kShape, 0.25f * i, 0.25f * i),
+                    std::sin(std::numbers::pi_v<float> * 0.5f * i));
   }
 }
 

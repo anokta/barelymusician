@@ -149,7 +149,7 @@ namespace Barely {
     public float OscNoiseMix = 0.0f;
 
     /// Oscillator pitch shift.
-    [Range(-4.0f, 4.0f)]
+    [Range(-2.0f, 2.0f)]
     public float OscPitchShift = 0.0f;
 
     /// Oscillator shape.

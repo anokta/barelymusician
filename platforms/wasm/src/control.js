@@ -327,8 +327,8 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     name: 'Osc Pitch Shift',
     valueType: 'float',
     defaultValue: 0.0,
-    minValue: -4.0,
-    maxValue: 4.0,
+    minValue: -2.0,
+    maxValue: 2.0,
   },
   [InstrumentControlType.OSC_SHAPE]: {
     name: 'Osc Shape',

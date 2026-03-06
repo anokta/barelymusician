@@ -10,6 +10,11 @@ if(NOT DEFINED ENABLE_DAISY)
 endif()
 option(ENABLE_DAISY "Build Daisy platform" ${ENABLE_DAISY})
 
+if(NOT DEFINED ENABLE_GODOT)
+  set(ENABLE_GODOT OFF CACHE BOOL "Build Godot GDExtension platform" FORCE)
+endif()
+option(ENABLE_GODOT "Build Godot GDExtension platform" ${ENABLE_GODOT})
+
 if(NOT DEFINED ENABLE_UNITY)
   set(ENABLE_UNITY OFF CACHE BOOL "Build Unity platform" FORCE)
 endif()

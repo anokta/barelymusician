@@ -1,5 +1,5 @@
 [configuration]
-entry_symbol = "barelymusiciangodot_library_init"
+entry_symbol = "barelymusiciangodot_init"
 compatibility_minimum = 4.1
 
 [libraries]

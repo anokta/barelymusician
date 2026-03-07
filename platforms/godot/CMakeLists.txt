@@ -21,6 +21,7 @@ add_library(
 target_compile_definitions(
   barelymusiciangodot PUBLIC
   BARELY_EXPORT
+  BARELY_MAX_FRAME_COUNT=${MAX_FRAME_COUNT}
 )
 target_include_directories(
   barelymusiciangodot PUBLIC

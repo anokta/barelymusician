@@ -16,6 +16,8 @@ set(CMAKE_FOLDER platforms)
 
 add_library(
   barelymusiciangodot SHARED
+  engine.cpp
+  engine.h
   godot.cpp
 )
 target_compile_definitions(

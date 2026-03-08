@@ -1,5 +1,7 @@
 #include "gdextension_interface.h"
 #include "godot/engine.h"
+#include "godot_cpp/classes/engine.hpp"
+#include "godot_cpp/core/memory.hpp"
 
 using ::godot::ClassDB;
 using ::godot::GDExtensionBinding;
@@ -13,13 +15,14 @@ void initialize_barelymusiciangodot(ModuleInitializationLevel level) {
   ClassDB::register_internal_class<barely::godot::BarelyEngineNode>();
   ClassDB::register_class<barely::godot::BarelyAudioStream>();
   ClassDB::register_class<barely::godot::BarelyEngine>();
+  ::godot::Engine::get_singleton()->register_singleton("BarelyEngine",
+                                                       memnew(barely::godot::BarelyEngine));
 }
 
 void terminate_barelymusiciangodot(ModuleInitializationLevel level) {
   if (level != ModuleInitializationLevel::MODULE_INITIALIZATION_LEVEL_SCENE) {
     return;
   }
-  barely::godot::BarelyEngine::destroy();
 }
 
 extern "C" {

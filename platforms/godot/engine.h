@@ -62,21 +62,27 @@ class BarelyEngineNode : public ::godot::Node {
 
 class BarelyEngine : public ::godot::Object {
  public:
-  static void destroy();
-  static ::BarelyEngine* get();
+  static BarelyEngine* get_singleton() { return singleton_; }
 
-  static double get_tempo();
-  static double get_timestamp();
-  static void set_tempo(double tempo);
+  BarelyEngine();
+  ~BarelyEngine();
+
+  double get_tempo();
+  double get_timestamp();
+  void set_tempo(double tempo);
+
+  void init() { get(); }
+  void process(::godot::AudioFrame* buffer, int32_t frames, double timestamp);
+  void update();
 
  private:
   GDCLASS(BarelyEngine, ::godot::Object);
 
-  BarelyEngine() = default;
-  ~BarelyEngine() = default;
-
   static void _bind_methods();
-  static inline ::BarelyEngine* engine_ = nullptr;
+  static inline BarelyEngine* singleton_ = nullptr;
+
+  ::BarelyEngine* get();
+  ::BarelyEngine* engine_ = nullptr;
 };
 
 }  // namespace barely::godot

@@ -52,6 +52,7 @@ Ref<AudioStreamPlayback> BarelyAudioStream::_instantiate_playback() const {
         BarelyEngineNode* node = memnew(BarelyEngineNode);
         node->set_name(kNodeName);
         tree->get_root()->call_deferred("add_child", node);
+        node->set_owner(nullptr);
       }
       playback_.instantiate();
     }

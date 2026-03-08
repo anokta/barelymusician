@@ -15,6 +15,9 @@ class BarelyInstrument : public ::godot::Node {
   void set_note_off(float pitch);
   void set_note_on(float pitch);
 
+  void set_gain(float gain);
+  float get_gain() const { return gain_; }
+
   void _ready() override;
   void _process(double delta) override;
 
@@ -23,6 +26,8 @@ class BarelyInstrument : public ::godot::Node {
   static void _bind_methods();
 
   uint32_t instrument_id_ = 0;
+
+  float gain_ = 1.0f;
 };
 
 }  // namespace barely::godot

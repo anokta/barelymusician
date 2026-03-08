@@ -14,8 +14,10 @@ class BarelyInstrument : public ::godot::Node {
  public:
   ~BarelyInstrument();
 
+  void set_all_notes_off();
   void set_note_off(float pitch);
   void set_note_on(float pitch);
+  bool is_note_on(float pitch) const;
 
   void set_gain(float gain);
   float get_gain() const { return gain_; }

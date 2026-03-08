@@ -20,12 +20,23 @@ BarelyInstrument::~BarelyInstrument() {
   instrument_id_ = 0;
 }
 
+void BarelyInstrument::set_all_notes_off() {
+  BarelyInstrument_SetAllNotesOff(BarelyEngine::get_singleton()->get(), instrument_id_);
+}
+
 void BarelyInstrument::set_note_off(float pitch) {
   BarelyInstrument_SetNoteOff(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
 }
 
 void BarelyInstrument::set_note_on(float pitch) {
   BarelyInstrument_SetNoteOn(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
+}
+
+bool BarelyInstrument::is_note_on(float pitch) const {
+  bool is_note_on = false;
+  BarelyInstrument_IsNoteOn(BarelyEngine::get_singleton()->get(), instrument_id_, pitch,
+                            &is_note_on);
+  return is_note_on;
 }
 
 void BarelyInstrument::set_gain(float gain) {
@@ -241,8 +252,10 @@ void BarelyInstrument::_bind_methods() {
   ClassDB::bind_integer_constant(get_class_static(), StringName(), "SLICE_MODE_LOOP",
                                  BarelySliceMode_kLoop);
 
+  ClassDB::bind_method(D_METHOD("set_all_notes_off"), &BarelyInstrument::set_all_notes_off);
   ClassDB::bind_method(D_METHOD("set_note_off", "pitch"), &BarelyInstrument::set_note_off);
   ClassDB::bind_method(D_METHOD("set_note_on", "pitch"), &BarelyInstrument::set_note_on);
+  ClassDB::bind_method(D_METHOD("is_note_on", "pitch"), &BarelyInstrument::is_note_on);
 
   ClassDB::bind_method(D_METHOD("set_gain", "gain"), &BarelyInstrument::set_gain);
   ClassDB::bind_method(D_METHOD("get_gain"), &BarelyInstrument::get_gain);

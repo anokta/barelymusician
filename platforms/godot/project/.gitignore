@@ -1,0 +1,9 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# barelymusician native libraries
+addons/barelymusician/bin/**/*.a
+addons/barelymusician/bin/**/*.dylib
+addons/barelymusician/bin/**/*.dll
+addons/barelymusician/bin/**/*.so

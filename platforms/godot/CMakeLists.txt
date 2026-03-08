@@ -38,7 +38,7 @@ target_link_libraries(
 )
 
 function(package_barelymusiciangodot)
-  set(ADDON_BIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/addons/barelymusician/bin)
+  set(ADDON_BIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/project/addons/barelymusician/bin)
   if(ANDROID)
     set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/android/${ANDROID_ABI}/libbarelymusicianunity.so)
   elseif(APPLE)

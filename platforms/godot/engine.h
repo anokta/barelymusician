@@ -71,7 +71,7 @@ class BarelyEngine : public ::godot::Object {
   double get_timestamp();
   void set_tempo(double tempo);
 
-  void init() { get(); }
+  ::BarelyEngine* get();
   void process(::godot::AudioFrame* buffer, int32_t frames, double timestamp);
   void update();
 
@@ -81,7 +81,6 @@ class BarelyEngine : public ::godot::Object {
   static void _bind_methods();
   static inline BarelyEngine* singleton_ = nullptr;
 
-  ::BarelyEngine* get();
   ::BarelyEngine* engine_ = nullptr;
 };
 

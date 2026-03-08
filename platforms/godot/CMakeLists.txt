@@ -18,6 +18,8 @@ add_library(
   barelymusiciangodot SHARED
   engine.cpp
   engine.h
+  instrument.cpp
+  instrument.h
   godot.cpp
 )
 target_compile_definitions(

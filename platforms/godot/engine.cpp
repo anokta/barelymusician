@@ -46,7 +46,7 @@ int32_t BarelyAudioStreamPlayback::_mix_resampled(AudioFrame* buffer, int32_t fr
 Ref<AudioStreamPlayback> BarelyAudioStream::_instantiate_playback() const {
   if (!playback_.is_valid()) {
     if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {
-      BarelyEngine::get_singleton()->init();
+      BarelyEngine::get_singleton()->get();  // force initialize
       if (static constexpr const char* kNodeName = "BarelyEngineNode";
           !tree->get_root()->has_node(kNodeName)) {
         BarelyEngineNode* node = memnew(BarelyEngineNode);
@@ -89,6 +89,15 @@ double BarelyEngine::get_timestamp() {
 
 void BarelyEngine::set_tempo(double tempo) { BarelyEngine_SetTempo(get(), tempo); }
 
+::BarelyEngine* BarelyEngine::get() {
+  if (engine_ == nullptr) {
+    // TODO(#181): Support sample rate changes after initialization.
+    BarelyEngine_Create(static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()),
+                        &engine_);
+  }
+  return engine_;
+}
+
 void BarelyEngine::process(AudioFrame* buffer, int32_t frame_count, double timestamp) {
   static constexpr int32_t kStereoChannelCount = 2;
   float output[BARELY_MAX_FRAME_COUNT * kStereoChannelCount];
@@ -100,7 +109,7 @@ void BarelyEngine::process(AudioFrame* buffer, int32_t frame_count, double times
 }
 
 void BarelyEngine::update() {
-  static constexpr double kLatency = 0.2;
+  static constexpr double kLatency = 0.1;
   BarelyEngine_Update(get(), BarelyAudioStreamPlayback::get_audio_timestamp() + kLatency);
 }
 
@@ -108,20 +117,6 @@ void BarelyEngine::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_tempo"), &BarelyEngine::get_tempo);
   ClassDB::bind_method(D_METHOD("get_timestamp"), &BarelyEngine::get_timestamp);
   ClassDB::bind_method(D_METHOD("set_tempo", "tempo"), &BarelyEngine::set_tempo);
-}
-
-::BarelyEngine* BarelyEngine::get() {
-  if (engine_ == nullptr) {
-    // TODO(#181): Support sample rate changes after initialization.
-    BarelyEngine_Create(static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()),
-                        &engine_);
-    // TODO(#181): temp testing
-    uint32_t instrument_id = 0;
-    BarelyEngine_CreateInstrument(engine_, &instrument_id);
-    BarelyInstrument_SetNoteOn(engine_, instrument_id, 0.0f);
-    BarelyInstrument_SetControl(engine_, instrument_id, BarelyInstrumentControlType_kOscMix, 0.5f);
-  }
-  return engine_;
 }
 
 }  // namespace barely::godot

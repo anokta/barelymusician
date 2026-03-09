@@ -57,7 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: build
-        run: python build.py --examples --test --unity
+        run: python build.py --examples --unity --test
 
   unity:
     name: unity on ${{ matrix.os }}

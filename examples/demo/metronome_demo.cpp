@@ -13,8 +13,8 @@
 namespace {
 
 using ::barely::Engine;
+using ::barely::EventType;
 using ::barely::InstrumentControlType;
-using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -66,8 +66,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   auto metronome = engine.CreatePerformer();
   metronome.SetLooping(true);
   int beat = 0;
-  engine.CreateTask(metronome, 0.0, 1e-6, 0, [&](TaskEventType type) {
-    if (type != TaskEventType::kBegin) {
+  engine.CreateTask(metronome, 0.0, 1e-6, 0, [&](EventType type) {
+    if (type != EventType::kBegin) {
       return;
     }
     const int current_bar = (beat / kBeatCount) + 1;

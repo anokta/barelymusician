@@ -6,6 +6,16 @@ using System.Xml.Serialization;
 using UnityEngine;
 
 namespace Barely {
+  /// Event types.
+  public enum EventType {
+    /// Begin.
+    [InspectorName("Begin")] BEGIN = 0,
+    /// End.
+    [InspectorName("End")] END,
+    /// Update.
+    [InspectorName("Update")] UPDATE,
+  }
+
   /// A representation of an engine that governs all musical components.
   public static class Engine {
     /// Compressor mix.
@@ -782,14 +792,13 @@ namespace Barely {
         return pitch;
       }
 
-      private delegate void NoteEventCallback(NoteEventType type, float pitch, ref UInt32 userData);
+      private delegate void NoteEventCallback(EventType type, float pitch, ref UInt32 userData);
       [AOT.MonoPInvokeCallback(typeof(NoteEventCallback))]
-      private static void Instrument_OnNoteEvent(NoteEventType type, float pitch,
-                                                 ref UInt32 userData) {
+      private static void Instrument_OnNoteEvent(EventType type, float pitch, ref UInt32 userData) {
         if (_instruments.TryGetValue(userData, out var instrument)) {
-          if (type == NoteEventType.BEGIN) {
+          if (type == EventType.BEGIN) {
             Instrument.Internal.OnNoteOn(instrument, pitch);
-          } else if (type == NoteEventType.END) {
+          } else if (type == EventType.END) {
             Instrument.Internal.OnNoteOff(instrument, pitch);
           } else {
             Debug.LogError("Invalid note event type");
@@ -797,17 +806,12 @@ namespace Barely {
         }
       }
 
-      private delegate void TaskEventCallback(TaskEventType type, ref UInt32 userData);
+      private delegate void TaskEventCallback(EventType type, ref UInt32 userData);
       [AOT.MonoPInvokeCallback(typeof(TaskEventCallback))]
-      private static void Task_OnEvent(TaskEventType type, ref UInt32 userData) {
+      private static void Task_OnEvent(EventType type, ref UInt32 userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
           Task.Internal.OnProcess(task, type);
         }
-      }
-
-      private enum NoteEventType {
-        [InspectorName("BEGIN")] BEGIN = 0,
-        [InspectorName("END")] END,
       }
 
       [StructLayout(LayoutKind.Sequential)]

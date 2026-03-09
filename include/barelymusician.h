@@ -73,7 +73,7 @@
 ///
 ///   // Create a new task.
 ///   auto task = engine.CreateTask(performer, /*position=*/0.0, /*duration=*/1.0,
-///                                 [](barely::TaskEventType type) { /*populate this*/ });
+///                                 [](barely::EventType type) { /*populate this*/ });
 ///
 ///   // Set the performer to looping.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -391,25 +391,15 @@ typedef enum BarelySliceMode {
   BarelySliceMode_kCount,
 } BarelySliceMode;
 
-/// Note event types.
-typedef enum BarelyNoteEventType {
+/// Event types.
+typedef enum BarelyEventType {
   /// Begin.
-  BarelyNoteEventType_kBegin = 0,
+  BarelyEventType_kBegin = 0,
   /// End.
-  BarelyNoteEventType_kEnd,
-  /// Number of note event types.
-  BarelyNoteEventType_kCount,
-} BarelyNoteEventType;
-
-/// Task event types.
-typedef enum BarelyTaskEventType {
-  /// Begin.
-  BarelyTaskEventType_kBegin = 0,
-  /// End.
-  BarelyTaskEventType_kEnd,
-  /// Number of task event types.
-  BarelyTaskEventType_kCount,
-} BarelyTaskEventType;
+  BarelyEventType_kEnd,
+  /// Number of event types.
+  BarelyEventType_kCount,
+} BarelyEventType;
 
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
@@ -458,13 +448,13 @@ typedef struct BarelyScale {
 /// @param type Note event type.
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyNoteEventCallback)(BarelyNoteEventType type, float pitch, void* user_data);
+typedef void (*BarelyNoteEventCallback)(BarelyEventType type, float pitch, void* user_data);
 
 /// Task event callback.
 ///
 /// @param type Task event type.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_data);
+typedef void (*BarelyTaskEventCallback)(BarelyEventType type, void* user_data);
 
 /// Creates a new engine.
 ///
@@ -1060,20 +1050,12 @@ enum class SliceMode {
   kOnce = BarelySliceMode_kOnce,
 };
 
-/// Note event types.
-enum class NoteEventType {
+/// Event types.
+enum class EventType {
   /// Begin.
-  kBegin = BarelyNoteEventType_kBegin,
+  kBegin = BarelyEventType_kBegin,
   /// End.
-  kEnd = BarelyNoteEventType_kEnd,
-};
-
-/// Task event types.
-enum class TaskEventType {
-  /// Begin.
-  kBegin = BarelyTaskEventType_kBegin,
-  /// End.
-  kEnd = BarelyTaskEventType_kEnd,
+  kEnd = BarelyEventType_kEnd,
 };
 
 /// Slice of sample data.
@@ -1103,12 +1085,12 @@ struct Slice : public BarelySlice {
 ///
 /// @param type Note event type.
 /// @param pitch Note pitch.
-using NoteEventCallback = std::function<void(NoteEventType type, float pitch)>;
+using NoteEventCallback = std::function<void(EventType type, float pitch)>;
 
 /// Task event callback function.
 ///
 /// @param type Task event type.
-using TaskEventCallback = std::function<void(TaskEventType type)>;
+using TaskEventCallback = std::function<void(EventType type)>;
 
 /// Class that wraps an instrument.
 class Instrument {
@@ -1218,11 +1200,11 @@ class Instrument {
         (*note_event_callback_)
             ? BarelyInstrument_SetNoteEventCallback(
                   engine_, instrument_id_,
-                  [](BarelyNoteEventType type, float pitch, void* user_data) noexcept {
+                  [](BarelyEventType type, float pitch, void* user_data) noexcept {
                     assert(user_data != nullptr && "Invalid note event callback user data");
                     if (const auto& callback = *static_cast<NoteEventCallback*>(user_data);
                         callback) {
-                      callback(static_cast<NoteEventType>(type), pitch);
+                      callback(static_cast<EventType>(type), pitch);
                     }
                   },
                   note_event_callback_)
@@ -1354,11 +1336,11 @@ class Task {
         (*event_callback_)
             ? BarelyTask_SetEventCallback(
                   engine_, task_id_,
-                  [](BarelyTaskEventType type, void* user_data) noexcept {
+                  [](BarelyEventType type, void* user_data) noexcept {
                     assert(user_data != nullptr && "Invalid task event callback user data");
                     if (const auto& callback = *static_cast<TaskEventCallback*>(user_data);
                         callback) {
-                      callback(static_cast<TaskEventType>(type));
+                      callback(static_cast<EventType>(type));
                     }
                   },
                   event_callback_)
@@ -1616,9 +1598,9 @@ class Engine {
     task_event_callback = std::move(callback);
     success = BarelyTask_SetEventCallback(
         engine_, task_id,
-        [](BarelyTaskEventType type, void* user_data) noexcept {
+        [](BarelyEventType type, void* user_data) noexcept {
           if (user_data != nullptr) {
-            (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
+            (*static_cast<TaskEventCallback*>(user_data))(static_cast<EventType>(type));
           }
         },
         &task_event_callback);

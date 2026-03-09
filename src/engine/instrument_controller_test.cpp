@@ -50,8 +50,8 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   std::pair<float, float> note_pitch = {0.0f, 0.0f};
   controller.SetNoteEventCallback(
       instrument_index,
-      [](BarelyNoteEventType type, float pitch, void* user_data) {
-        (type == BarelyNoteEventType_kBegin
+      [](BarelyEventType type, float pitch, void* user_data) {
+        (type == BarelyEventType_kBegin
              ? static_cast<std::pair<float, float>*>(user_data)->first
              : static_cast<std::pair<float, float>*>(user_data)->second) = pitch;
       },

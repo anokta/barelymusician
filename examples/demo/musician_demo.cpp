@@ -24,16 +24,15 @@
 namespace {
 
 using ::barely::Engine;
+using ::barely::EventType;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
-using ::barely::NoteEventType;
 using ::barely::Performer;
 using ::barely::Quantization;
 using ::barely::Scale;
 using ::barely::Slice;
 using ::barely::SliceMode;
 using ::barely::Task;
-using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -128,16 +127,15 @@ std::pair<std::vector<Slice>, std::vector<std::vector<float>>> BuildPercussionSa
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, float pitch, float gain, Engine& engine,
                   Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
-  tasks.emplace_back(engine.CreateTask(performer,
-                                       quantization.GetPosition(performer.GetPosition() + position),
-                                       quantization.GetPosition(duration), 0,
-                                       [pitch, gain, &instrument](TaskEventType type) noexcept {
-                                         if (type == TaskEventType::kBegin) {
-                                           instrument.SetNoteOn(pitch, gain);
-                                         } else if (type == TaskEventType::kEnd) {
-                                           instrument.SetNoteOff(pitch);
-                                         }
-                                       }));
+  tasks.emplace_back(engine.CreateTask(
+      performer, quantization.GetPosition(performer.GetPosition() + position),
+      quantization.GetPosition(duration), 0, [pitch, gain, &instrument](EventType type) noexcept {
+        if (type == EventType::kBegin) {
+          instrument.SetNoteOn(pitch, gain);
+        } else if (type == EventType::kEnd) {
+          instrument.SetNoteOff(pitch);
+        }
+      }));
 }
 
 void ComposeChord(float gain, int harmonic, const Scale& scale, Engine& engine,
@@ -233,9 +231,9 @@ int main(int /*argc*/, char* argv[]) {
 
   // Note event callback.
   const auto set_note_event_callback_fn = [&](size_t index, Instrument& instrument) {
-    instrument.SetNoteEventCallback([index](NoteEventType type, float pitch) {
+    instrument.SetNoteEventCallback([index](EventType type, float pitch) {
       ConsoleLog() << "Instrument #" << index << ": Note"
-                   << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
+                   << (type == EventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
     });
   };
 
@@ -344,8 +342,8 @@ int main(int /*argc*/, char* argv[]) {
   metronome.SetLooping(true);
   int beat = 0;
   int harmonic = 0;
-  engine.CreateTask(metronome, 0.0, 1e-6, -1, [&](TaskEventType type) {
-    if (type != TaskEventType::kBegin) {
+  engine.CreateTask(metronome, 0.0, 1e-6, -1, [&](EventType type) {
+    if (type != EventType::kBegin) {
       return;
     }
     // Update transport.

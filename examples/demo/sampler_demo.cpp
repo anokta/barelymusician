@@ -21,8 +21,8 @@ namespace {
 
 using ::barely::Engine;
 using ::barely::EngineControlType;
+using ::barely::EventType;
 using ::barely::InstrumentControlType;
-using ::barely::NoteEventType;
 using ::barely::Slice;
 using ::barely::SliceMode;
 using ::barely::examples::AudioOutput;
@@ -96,8 +96,8 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   instrument.SetControl(InstrumentControlType::kReverbSend, kReverbSend);
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
-  instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
-    ConsoleLog() << "Note" << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
+  instrument.SetNoteEventCallback([](EventType type, float pitch) {
+    ConsoleLog() << "Note" << (type == EventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
   });
 
   // Audio process callback.

@@ -41,13 +41,14 @@ namespace Barely {
 
       bool isMouseInsidePiano = pianoRect.Contains(currentEvent.mousePosition);
       if (isMouseInsidePiano && currentEvent.button == 0 &&
-          (currentEvent.type == EventType.MouseDown || currentEvent.type == EventType.MouseDrag)) {
+          (currentEvent.type == UnityEngine.EventType.MouseDown ||
+           currentEvent.type == UnityEngine.EventType.MouseDrag)) {
         _isMouseHeld = true;
-      } else if (currentEvent.button == 0 && currentEvent.type == EventType.MouseUp) {
+      } else if (currentEvent.button == 0 && currentEvent.type == UnityEngine.EventType.MouseUp) {
         _isMouseHeld = false;
       }
 
-      if (currentEvent.type != EventType.Repaint) {
+      if (currentEvent.type != UnityEngine.EventType.Repaint) {
         return;
       }
 

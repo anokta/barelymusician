@@ -28,8 +28,17 @@ void BarelyInstrument::set_note_off(float pitch) {
   BarelyInstrument_SetNoteOff(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
 }
 
-void BarelyInstrument::set_note_on(float pitch) {
-  BarelyInstrument_SetNoteOn(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
+void BarelyInstrument::set_note_on(float pitch, float gain, float pitch_shift) {
+  ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
+  BarelyInstrument_SetNoteOn(engine, instrument_id_, pitch);
+  if (gain != 1.0f) {
+    BarelyInstrument_SetNoteControl(engine, instrument_id_, pitch, BarelyNoteControlType_kGain,
+                                    gain);
+  }
+  if (pitch_shift != 0.0f) {
+    BarelyInstrument_SetNoteControl(engine, instrument_id_, pitch,
+                                    BarelyNoteControlType_kPitchShift, pitch_shift);
+  }
 }
 
 bool BarelyInstrument::is_note_on(float pitch) const {
@@ -218,6 +227,7 @@ void BarelyInstrument::set_voice_count(int voice_count) {
 void BarelyInstrument::_ready() {
   ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
   BarelyEngine_CreateInstrument(engine, &instrument_id_);
+  set_osc_mix(osc_mix_);  // TODO(#181): ensure all values are updated after creation
 }
 
 void BarelyInstrument::_process([[maybe_unused]] double delta) {}
@@ -254,7 +264,8 @@ void BarelyInstrument::_bind_methods() {
 
   ClassDB::bind_method(D_METHOD("set_all_notes_off"), &BarelyInstrument::set_all_notes_off);
   ClassDB::bind_method(D_METHOD("set_note_off", "pitch"), &BarelyInstrument::set_note_off);
-  ClassDB::bind_method(D_METHOD("set_note_on", "pitch"), &BarelyInstrument::set_note_on);
+  ClassDB::bind_method(D_METHOD("set_note_on", "pitch", "gain", "pitch_shift"),
+                       &BarelyInstrument::set_note_on, DEFVAL(1.0f), DEFVAL(0.0f));
   ClassDB::bind_method(D_METHOD("is_note_on", "pitch"), &BarelyInstrument::is_note_on);
 
   ClassDB::bind_method(D_METHOD("set_gain", "gain"), &BarelyInstrument::set_gain);

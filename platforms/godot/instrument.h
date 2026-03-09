@@ -16,7 +16,7 @@ class BarelyInstrument : public ::godot::Node {
 
   void set_all_notes_off();
   void set_note_off(float pitch);
-  void set_note_on(float pitch);
+  void set_note_on(float pitch, float gain = 1.0f, float pitch_shift = 0.0f);
   bool is_note_on(float pitch) const;
 
   void set_gain(float gain);
@@ -123,7 +123,7 @@ class BarelyInstrument : public ::godot::Node {
   float sustain_ = 1.0f;
   float release_ = 0.0f;
   int slice_mode_ = BarelySliceMode_kSustain;
-  float osc_mix_ = 0.0f;
+  float osc_mix_ = 1.0f;
   int osc_mode_ = BarelyOscMode_kCrossfade;
   float osc_noise_mix_ = 0.0f;
   float osc_pitch_shift_ = 0.0f;

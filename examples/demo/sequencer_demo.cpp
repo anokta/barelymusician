@@ -14,10 +14,9 @@
 namespace {
 
 using ::barely::Engine;
+using ::barely::EventType;
 using ::barely::InstrumentControlType;
-using ::barely::NoteEventType;
 using ::barely::Task;
-using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -57,8 +56,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
-  instrument.SetNoteEventCallback([](NoteEventType type, float pitch) {
-    if (type == NoteEventType::kBegin) {
+  instrument.SetNoteEventCallback([](EventType type, float pitch) {
+    if (type == EventType::kBegin) {
       ConsoleLog() << "Note(" << pitch << ")";
     }
   });
@@ -87,10 +86,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Task> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {
     return engine.CreateTask(performer, note.position, note.duration, 0,
-                             [&instrument, pitch = note.pitch](TaskEventType type) {
-                               if (type == TaskEventType::kBegin) {
+                             [&instrument, pitch = note.pitch](EventType type) {
+                               if (type == EventType::kBegin) {
                                  instrument.SetNoteOn(pitch);
-                               } else if (type == TaskEventType::kEnd) {
+                               } else if (type == EventType::kEnd) {
                                  instrument.SetNoteOff(pitch);
                                }
                              });

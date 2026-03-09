@@ -7,6 +7,11 @@ const STEREO_CHANNEL_COUNT = 2;
 
 const SLICE_SIZE = 24;  // sizeof(BarelySlice)
 
+const EventType = Object.freeze({
+  BEGIN: 0,
+  END: 1,
+});
+
 class Processor extends AudioWorkletProcessor {
   constructor() {
     super();
@@ -148,15 +153,11 @@ class Processor extends AudioWorkletProcessor {
               INSTRUMENT_CONTROLS[controlTypeIndex].defaultValue);
         }
 
-        const NoteEventType = {
-          BEGIN: 0,
-          END: 1,
-        };
         const noteEventCallback = (eventType, pitch) => {
-          if (eventType === NoteEventType.BEGIN) {
+          if (eventType === EventType.BEGIN) {
             this._pendingEventCallbacks.push(
                 {type: EventCallbackType.INSTRUMENT_ON_NOTE_BEGIN, handle: command.handle, pitch});
-          } else if (eventType === NoteEventType.END) {
+          } else if (eventType === EventType.END) {
             this._pendingEventCallbacks.push(
                 {type: EventCallbackType.INSTRUMENT_ON_NOTE_END, handle: command.handle, pitch});
           } else {
@@ -285,12 +286,8 @@ class Processor extends AudioWorkletProcessor {
             command.position, command.duration, command.priority, null, null, this._uint32Ptr);
         const taskId = this._module.getValue(this._uint32Ptr, 'i32');
 
-        const TaskEventType = {
-          BEGIN: 0,
-          END: 1,
-        };
         const eventCallback = (task, eventType) => {
-          if (eventType === TaskEventType.BEGIN) {
+          if (eventType === EventType.BEGIN) {
             if (task.beginCommands) {
               for (const command of task.beginCommands) {
                 this._processCommand(command);
@@ -298,7 +295,7 @@ class Processor extends AudioWorkletProcessor {
             }
             this._pendingEventCallbacks.push(
                 {type: EventCallbackType.TASK_ON_BEGIN, handle: command.handle});
-          } else if (eventType === TaskEventType.END) {
+          } else if (eventType === EventType.END) {
             if (task.endCommands) {
               for (const command of task.endCommands) {
                 this._processCommand(command);

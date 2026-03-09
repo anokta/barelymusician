@@ -4,7 +4,7 @@
     {
       "label": "barelymusician: build all",
       "type": "shell",
-      "command": "python build.py --examples --unity",
+      "command": "python build.py --examples --godot --unity",
       "problemMatcher": [],
       "group": {
         "kind": "build",
@@ -54,7 +54,7 @@
     {
       "label": "barelymusician: test all",
       "type": "shell",
-      "command": "python build.py --examples --benchmark --test --unity",
+      "command": "python build.py --examples --godot --unity --benchmark --test",
       "problemMatcher": [],
       "group": {
         "kind": "test",

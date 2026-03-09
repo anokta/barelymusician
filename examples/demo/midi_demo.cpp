@@ -20,11 +20,10 @@
 namespace {
 
 using ::barely::Engine;
+using ::barely::EventType;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
-using ::barely::NoteEventType;
 using ::barely::Performer;
-using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -66,10 +65,10 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Engin
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float gain = static_cast<float>(midi_event.getVelocity()) / 127.0f;
       engine.CreateTask(performer, position, duration, 0,
-                        [&, pitch, gain](TaskEventType type) noexcept {
-                          if (type == TaskEventType::kBegin) {
+                        [&, pitch, gain](EventType type) noexcept {
+                          if (type == EventType::kBegin) {
                             instrument.SetNoteOn(pitch, gain);
-                          } else if (type == TaskEventType::kEnd) {
+                          } else if (type == EventType::kEnd) {
                             instrument.SetNoteOff(pitch);
                           }
                         });
@@ -116,9 +115,9 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Set the instrument settings.
-    instrument.SetNoteEventCallback([track_index](NoteEventType type, float pitch) {
+    instrument.SetNoteEventCallback([track_index](EventType type, float pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": Note"
-                   << (type == NoteEventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
+                   << (type == EventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
     });
     instrument.SetControl(InstrumentControlType::kGain, kInstrumentGain);
     instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);

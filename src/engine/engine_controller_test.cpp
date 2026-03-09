@@ -21,18 +21,17 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
   auto& performer = engine->GetPerformer(performer_index);
 
   // Create a task.
-  barely::TaskEventType task_event_type = barely::TaskEventType::kEnd;
+  EventType task_event_type = EventType::kEnd;
   double task_position = 0.0;
-  std::function<void(barely::TaskEventType)> process_callback = [&](barely::TaskEventType type) {
+  std::function<void(EventType)> process_callback = [&](EventType type) {
     task_event_type = type;
     task_position = performer.position;
   };
 
   const uint32_t task_index = controller.performer_controller().AcquireTask(
       performer_index, 1.0, 2.0, 0,
-      [](BarelyTaskEventType type, void* user_data) {
-        (*static_cast<std::function<void(barely::TaskEventType)>*>(user_data))(
-            static_cast<barely::TaskEventType>(type));
+      [](BarelyEventType type, void* user_data) {
+        (*static_cast<std::function<void(EventType)>*>(user_data))(static_cast<EventType>(type));
       },
       &process_callback);
   const auto& task = engine->GetTask(task_index);
@@ -63,7 +62,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
 
   EXPECT_DOUBLE_EQ(performer.position, 1.0);
   EXPECT_FALSE(task.is_active);
-  EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
+  EXPECT_EQ(task_event_type, EventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp inside the task, which should be triggered now.
@@ -83,7 +82,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
 
   EXPECT_DOUBLE_EQ(performer.position, 2.5);
   EXPECT_TRUE(task.is_active);
-  EXPECT_EQ(task_event_type, barely::TaskEventType::kBegin);
+  EXPECT_EQ(task_event_type, EventType::kBegin);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Update the timestamp just past the task, which should not be active anymore.
@@ -103,7 +102,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
 
   EXPECT_DOUBLE_EQ(performer.position, 3.0);
   EXPECT_FALSE(task.is_active);
-  EXPECT_EQ(task_event_type, barely::TaskEventType::kEnd);
+  EXPECT_EQ(task_event_type, EventType::kEnd);
   EXPECT_DOUBLE_EQ(task_position, 3.0);
 }
 

@@ -61,6 +61,7 @@
     "**/*.tga": true,
     "**/*.tif": true,
     "**/*.tiff": true,
+    "**/*.tmp": true,
     "**/*.unity": true,
     "**/*.unityproj": true,
     "**/*.user": true,

@@ -120,6 +120,11 @@ def parse_args():
         help="specify the daisy toolchain prefix for the daisy program",
     )
     parser.add_argument(
+        "--godot",
+        action="store_true",
+        help="build the godot gdextension plugin for the selected platforms",
+    )
+    parser.add_argument(
         "--unity",
         action="store_true",
         help="build the unity native plugins for the selected platforms",
@@ -199,6 +204,8 @@ def get_cmake_targets(args):
         targets.append(f"barelymusician_examples_demo_{args.run_demo}")
     if args.daisy:
         targets.append("barelymusiciandaisy")
+    if args.godot:
+        targets.append("barelymusiciangodot")
     if args.unity:
         targets.append("barelymusicianunity")
     if args.vst:
@@ -319,6 +326,8 @@ def build(args, source_dir, build_dir):
 
     if args.unity:
         common_cmake_options.append("-DENABLE_UNITY=ON")
+    if args.godot:
+        common_cmake_options.append("-DENABLE_GODOT=ON")
     if args.vst:
         common_cmake_options += [
             "-DENABLE_VST=ON",

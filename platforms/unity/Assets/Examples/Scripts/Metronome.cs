@@ -103,8 +103,8 @@ namespace Barely.Examples {
       _performer.PlayOnAwake = playOnAwake;
       _performer.Loop = true;
       _performer.LoopLength = 1.0;
-      _performer.Tasks.Add(new Task(0.0, 0.0, _priority, delegate(TaskEventType type) {
-        if (type != TaskEventType.BEGIN) {
+      _performer.Tasks.Add(new Task(0.0, 0.0, _priority, delegate(EventType type) {
+        if (type != EventType.BEGIN) {
           return;
         }
         int bar = _beat / beatCount;

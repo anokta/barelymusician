@@ -83,8 +83,8 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   Instrument instrument_ref = engine.CreateInstrument();
 
   // Set the note callbacks.
-  instrument_ref.SetNoteEventCallback([&](NoteEventType type, float pitch) {
-    (type == NoteEventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
+  instrument_ref.SetNoteEventCallback([&](EventType type, float pitch) {
+    (type == EventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
   });
   EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
   EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
@@ -110,8 +110,8 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     std::vector<Instrument> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(engine.CreateInstrument());
-      instruments[i].SetNoteEventCallback([&](NoteEventType type, float pitch) {
-        if (type == NoteEventType::kEnd) {
+      instruments[i].SetNoteEventCallback([&](EventType type, float pitch) {
+        if (type == EventType::kEnd) {
           note_off_pitches.push_back(pitch);
         }
       });

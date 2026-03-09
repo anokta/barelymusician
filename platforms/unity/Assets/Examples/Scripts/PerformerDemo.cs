@@ -14,8 +14,8 @@ namespace Barely.Examples {
 
     private float _pitch = 0.0f;
 
-    public void OnProcess(TaskEventType type) {
-      if (type == TaskEventType.BEGIN) {
+    public void OnProcess(EventType type) {
+      if (type == EventType.BEGIN) {
         if (_beat % 4 == 0) {
           instrument.FilterCutoff = (_beat % 8 == 0) ? 0.5f : 0.75f;
         }
@@ -28,7 +28,7 @@ namespace Barely.Examples {
         text.text = ((int)(12.0f * _pitch)).ToString();
         _h = Random.Range(0.0f, 1.0f);
         _v = 0.2f * (_pitch + 1.0f);
-      } else if (type == TaskEventType.END) {
+      } else if (type == EventType.END) {
         instrument.SetNoteOff(_pitch);
       }
     }

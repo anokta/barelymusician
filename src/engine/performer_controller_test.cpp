@@ -37,18 +37,18 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   // Create a task.
   int task_process_begin_count = 0;
   int task_process_end_count = 0;
-  std::function<void(BarelyTaskEventType)> process_callback = [&](BarelyTaskEventType type) {
-    if (type == BarelyTaskEventType_kBegin) {
+  std::function<void(BarelyEventType)> process_callback = [&](BarelyEventType type) {
+    if (type == BarelyEventType_kBegin) {
       ++task_process_begin_count;
-    } else if (type == BarelyTaskEventType_kEnd) {
+    } else if (type == BarelyEventType_kEnd) {
       ++task_process_end_count;
     }
   };
 
   const uint32_t task_index = controller.AcquireTask(
       performer_index, 0.25, 0.6, 0,
-      [](BarelyTaskEventType type, void* user_data) {
-        (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
+      [](BarelyEventType type, void* user_data) {
+        (*static_cast<std::function<void(BarelyEventType)>*>(user_data))(type);
       },
       &process_callback);
   const auto& task = engine->GetTask(task_index);
@@ -254,13 +254,13 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
   EXPECT_EQ(max_priority, INT32_MIN);
 
   // Create tasks.
-  std::array<std::pair<std::function<void(BarelyTaskEventType)>, bool>, kTaskCount> task_callbacks;
+  std::array<std::pair<std::function<void(BarelyEventType)>, bool>, kTaskCount> task_callbacks;
   for (int i = 0; i < kTaskCount; ++i) {
     task_callbacks[i] = {
-        [&, i](BarelyTaskEventType type) {
-          if (type == BarelyTaskEventType_kBegin) {
+        [&, i](BarelyEventType type) {
+          if (type == BarelyEventType_kBegin) {
             task_callbacks[i].second = true;
-          } else if (type == BarelyTaskEventType_kEnd) {
+          } else if (type == BarelyEventType_kEnd) {
             task_callbacks[i].second = false;
           }
         },
@@ -268,8 +268,8 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
     };
     [[maybe_unused]] const uint32_t task_index = controller.AcquireTask(
         performer_index, static_cast<double>(i + 1), 1.0, 0,
-        [](BarelyTaskEventType type, void* user_data) {
-          (*static_cast<std::function<void(BarelyTaskEventType)>*>(user_data))(type);
+        [](BarelyEventType type, void* user_data) {
+          (*static_cast<std::function<void(BarelyEventType)>*>(user_data))(type);
         },
         &task_callbacks[i].first);
   }

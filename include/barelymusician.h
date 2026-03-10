@@ -233,7 +233,7 @@
 #define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X) BARELY_CPP_ENUM(EnumType, X)
 #else  // __cplusplus
 #define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X)
-#endif
+#endif  // __cplusplus
 
 /// Arpeggiator modes.
 #define BARELY_ARP_MODES(ArpMode, X) \
@@ -244,13 +244,13 @@
 BARELY_ENUM(ArpMode, BARELY_ARP_MODES)
 
 /// Oscillator modes.
-#define BARELY_OSC_MODES(OscMode, X)                                             \
-  X(OscMode, Crossfade, "Linear crossfade between the slice and the oscillator") \
-  X(OscMode, Am, "Amplitude modulation applied to the slice by the oscillator")  \
-  X(OscMode, Fm, "Frequency modulation applied to the slice by the oscillator")  \
-  X(OscMode, Ma, "Amplitude modulation applied to the oscillator by the slice")  \
-  X(OscMode, Mf, "Frequency modulation applied to the oscillator by the slice")  \
-  X(OscMode, Ring, "Ring modulation")
+#define BARELY_OSC_MODES(OscMode, X)                               \
+  X(OscMode, Crossfade, "Linear Crossfade (slice <-> oscillator)") \
+  X(OscMode, Am, "Amplitude Modulation (oscillator -> slice)")     \
+  X(OscMode, Fm, "Frequency Modulation (oscillator -> slice)")     \
+  X(OscMode, Ma, "Amplitude Modulation (slice -> oscillator)")     \
+  X(OscMode, Mf, "Frequency Modulation (slice -> oscillator)")     \
+  X(OscMode, Ring, "Ring Modulation")
 BARELY_ENUM(OscMode, BARELY_OSC_MODES)
 
 /// Slice modes.
@@ -308,8 +308,8 @@ BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
   X(InstrumentControlType, OscPitchShift, 0.0f, 0.0f, 0.0f, "Oscillator Pitch Shift")   \
   X(InstrumentControlType, OscShape, 0.0f, 0.0f, 1.0f, "Oscillator Shape")              \
   X(InstrumentControlType, OscSkew, 0.0f, -1.0f, 1.0f, "Oscillator Skew")               \
-  X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Crush Depth")                 \
-  X(InstrumentControlType, CrushRate, 0.0f, 0.0f, 1.0f, "Crush Rate")                   \
+  X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Bit Crusher Depth")           \
+  X(InstrumentControlType, CrushRate, 0.0f, 0.0f, 1.0f, "Bit Crusher Rate")             \
   X(InstrumentControlType, DistortionMix, 0.0f, 0.0f, 1.0f, "Distortion Mix")           \
   X(InstrumentControlType, DistortionDrive, 0.0f, 0.0f, 1.0f, "Distortion Drive")       \
   X(InstrumentControlType, FilterCutoff, 1.0f, 0.0f, 1.0f, "Filter Cutoff")             \

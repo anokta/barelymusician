@@ -219,9 +219,56 @@
 #endif  // __GNUC__ >= 4
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
+#define BARELY_C_ENUM_VALUE(EnumType, Name, ...) Barely##EnumType##_k##Name,
+#define BARELY_C_ENUM(EnumType, X)                                \
+  typedef enum Barely##EnumType{                                  \
+      X(EnumType, BARELY_C_ENUM_VALUE) Barely##EnumType##_kCount, \
+  } Barely##EnumType;
 #ifdef __cplusplus
-extern "C" {
-#endif  // __cplusplus
+#define BARELY_CPP_ENUM_VALUE(EnumType, Name, ...) k##Name = Barely##EnumType##_k##Name,
+#define BARELY_CPP_ENUM(EnumType, X)                          \
+  namespace barely {                                          \
+  enum class EnumType { X(EnumType, BARELY_CPP_ENUM_VALUE) }; \
+  }
+#define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X) BARELY_CPP_ENUM(EnumType, X)
+#else  // __cplusplus
+#define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X)
+#endif
+
+/// Arpeggiator modes.
+#define BARELY_ARP_MODES(ArpMode, X) \
+  X(ArpMode, None, "None")           \
+  X(ArpMode, Up, "Up")               \
+  X(ArpMode, Down, "Down")           \
+  X(ArpMode, Random, "Random")
+
+BARELY_ENUM(ArpMode, BARELY_ARP_MODES)
+
+/// Oscillator modes.
+#define BARELY_OSC_MODES(OscMode, X)                                             \
+  X(OscMode, Crossfade, "Linear crossfade between the slice and the oscillator") \
+  X(OscMode, Am, "Amplitude modulation applied to the slice by the oscillator")  \
+  X(OscMode, Fm, "Frequency modulation applied to the slice by the oscillator")  \
+  X(OscMode, Ma, "Amplitude modulation applied to the oscillator by the slice")  \
+  X(OscMode, Mf, "Frequency modulation applied to the oscillator by the slice")  \
+  X(OscMode, Ring, "Ring modulation")
+
+BARELY_ENUM(OscMode, BARELY_OSC_MODES)
+
+/// Slice modes.
+#define BARELY_SLICE_MODES(SliceMode, X) \
+  X(SliceMode, Sustain, "Sustain")       \
+  X(SliceMode, Loop, "Loop")             \
+  X(SliceMode, Once, "Once")
+
+BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
+
+/// Event types.
+#define BARELY_EVENT_TYPES(EventType, X) \
+  X(EventType, Begin, "Begin")           \
+  X(EventType, End, "End")
+
+BARELY_ENUM(EventType, BARELY_EVENT_TYPES)
 
 /// Engine control types.
 typedef enum BarelyEngineControlType {
@@ -347,60 +394,6 @@ typedef enum BarelyNoteControlType {
   BarelyNoteControlType_kCount,
 } BarelyNoteControlType;
 
-/// Arpeggiator modes.
-typedef enum BarelyArpMode {
-  /// None.
-  BarelyArpMode_kNone = 0,
-  /// Up.
-  BarelyArpMode_kUp,
-  /// Down.
-  BarelyArpMode_kDown,
-  /// Random.
-  BarelyArpMode_kRandom,
-  /// Number of arpeggiator modes.
-  BarelyArpMode_kCount,
-} BarelyArpMode;
-
-/// Oscillator modes.
-typedef enum BarelyOscMode {
-  /// Linear crossfade between the slice and the oscillator.
-  BarelyOscMode_kCrossfade = 0,
-  /// Amplitude modulation applied to the slice by the oscillator.
-  BarelyOscMode_kAm,
-  /// Frequency modulation applied to the slice by the oscillator.
-  BarelyOscMode_kFm,
-  /// Amplitude modulation applied to the oscillator by the slice.
-  BarelyOscMode_kMa,
-  /// Frequency modulation applied to the oscillator by the slice.
-  BarelyOscMode_kMf,
-  /// Ring modulation.
-  BarelyOscMode_kRing,
-  /// Number of oscillator modes.
-  BarelyOscMode_kCount,
-} BarelyOscMode;
-
-/// Slice modes.
-typedef enum BarelySliceMode {
-  /// Sustain.
-  BarelySliceMode_kSustain = 0,
-  /// Loop.
-  BarelySliceMode_kLoop,
-  /// Once.
-  BarelySliceMode_kOnce,
-  /// Number of slice modes.
-  BarelySliceMode_kCount,
-} BarelySliceMode;
-
-/// Event types.
-typedef enum BarelyEventType {
-  /// Begin.
-  BarelyEventType_kBegin = 0,
-  /// End.
-  BarelyEventType_kEnd,
-  /// Number of event types.
-  BarelyEventType_kCount,
-} BarelyEventType;
-
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
 
@@ -442,6 +435,10 @@ typedef struct BarelyScale {
   /// Mode index.
   int32_t mode;
 } BarelyScale;
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
 
 /// Note event callback.
 ///
@@ -1010,52 +1007,6 @@ enum class NoteControlType {
   kGain = BarelyNoteControlType_kGain,
   /// Pitch shift.
   kPitchShift = BarelyNoteControlType_kPitchShift,
-};
-
-/// Arpeggiator modes.
-enum class ArpMode {
-  /// None.
-  kNone = BarelyArpMode_kNone,
-  /// Up.
-  kUp = BarelyArpMode_kUp,
-  /// Down.
-  kDown = BarelyArpMode_kDown,
-  /// Random.
-  kRandom = BarelyArpMode_kRandom,
-};
-
-/// Oscillator modes.
-enum class OscMode {
-  /// Linear crossfade between the slice and the oscillator.
-  kCrossfade = BarelyOscMode_kCrossfade,
-  /// Amplitude modulation applied to the slice by the oscillator.
-  kAm = BarelyOscMode_kAm,
-  /// Frequency modulation applied to the slice by the oscillator.
-  kFm = BarelyOscMode_kFm,
-  /// Amplitude modulation applied to the oscillator by the slice.
-  kMa = BarelyOscMode_kMa,
-  /// Frequency modulation applied to the oscillator by the slice.
-  kMf = BarelyOscMode_kMf,
-  /// Ring modulation.
-  kRing = BarelyOscMode_kRing,
-};
-
-/// Slice modes.
-enum class SliceMode {
-  /// Sustain.
-  kSustain = BarelySliceMode_kSustain,
-  /// Loop.
-  kLoop = BarelySliceMode_kLoop,
-  /// Once.
-  kOnce = BarelySliceMode_kOnce,
-};
-
-/// Event types.
-enum class EventType {
-  /// Begin.
-  kBegin = BarelyEventType_kBegin,
-  /// End.
-  kEnd = BarelyEventType_kEnd,
 };
 
 /// Slice of sample data.

@@ -48,29 +48,7 @@ struct EngineState {
 
   // Array of engine controls.
   std::array<Control, BarelyEngineControlType_kCount> controls = {
-      Control(1.0f, 0.0f, 1.0f),  // CompMix
-      Control(0.0f, 0.0f, 8.0f),  // CompAttack
-      Control(0.0f, 0.0f, 8.0f),  // CompRelease
-      Control(1.0f, 0.0f, 1.0f),  // CompThreshold
-      Control(0.0f, 0.0f, 1.0f),  // CompRatio
-      Control(1.0f, 0.0f, 1.0f),  // kDelayMix
-      Control(0.0f, 0.0f, 8.0f),  // kDelayTime
-      Control(0.0f, 0.0f, 1.0f),  // kDelayFeedback
-      Control(1.0f, 0.0f, 1.0f),  // kDelayLpfCutoff
-      Control(0.0f, 0.0f, 1.0f),  // kDelayHpfCutoff
-      Control(0.0f, 0.0f, 1.0f),  // kDelayPingPong
-      Control(0.0f, 0.0f, 2.0f),  // kDelayReverbSend
-      Control(1.0f, 0.0f, 1.0f),  // kReverbMix
-      Control(0.0f, 0.0f, 1.0f),  // kReverbDamping
-      Control(0.0f, 0.0f, 1.0f),  // kReverbRoomSize
-      Control(1.0f, 0.0f, 1.0f),  // kReverbStereoWidth
-      Control(false),             // kReverbFreeze
-      Control(1.0f, 0.0f, 1.0f),  // kSidechainMix
-      Control(0.0f, 0.0f, 8.0f),  // kSidechainAttack
-      Control(0.0f, 0.0f, 8.0f),  // kSidechainRelease
-      Control(1.0f, 0.0f, 1.0f),  // kSidechainThreshold
-      Control(0.0f, 0.0f, 1.0f),  // kSidechainRatio
-  };
+      BARELY_ENGINE_CONTROL_TYPES(EngineControlType, BARELY_DEFINE_CONTROL)};
 
   // Random number generator for the main thread.
   MainRng main_rng = {};

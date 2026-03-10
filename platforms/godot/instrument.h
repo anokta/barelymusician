@@ -5,10 +5,54 @@
 
 #include <cstdint>
 
+#include "godot/engine.h"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 
 namespace barely::godot {
+
+#define BARELY_GODOT_INSTRUMENT_CONTROLS(X)               \
+  X(Gain, gain, float, 1.0f)                              \
+  X(PitchShift, pitch_shift, float, 0.0f)                 \
+  X(StereoPan, stereo_pan, float, 0.0f)                   \
+  X(Attack, attack, float, 0.05f)                         \
+  X(Decay, decay, float, 0.0f)                            \
+  X(Sustain, sustain, float, 1.0f)                        \
+  X(Release, release, float, 0.1f)                        \
+  X(SliceMode, slice_mode, int, BarelySliceMode_kSustain) \
+  X(OscMix, osc_mix, float, 1.0f)                         \
+  X(OscMode, osc_mode, int, BarelyOscMode_kCrossfade)     \
+  X(OscNoiseMix, osc_noise_mix, float, 0.0f)              \
+  X(OscPitchShift, osc_pitch_shift, float, 0.0f)          \
+  X(OscShape, osc_shape, float, 0.0f)                     \
+  X(OscSkew, osc_skew, float, 0.0f)                       \
+  X(CrushDepth, crush_depth, float, 0.0f)                 \
+  X(CrushRate, crush_rate, float, 0.0f)                   \
+  X(DistortionMix, distortion_mix, float, 0.0f)           \
+  X(DistortionDrive, distortion_drive, float, 0.0f)       \
+  X(FilterCutoff, filter_cutoff, float, 1.0f)             \
+  X(FilterResonance, filter_resonance, float, 0.5f)       \
+  X(FilterTone, filter_tone, float, 0.0f)                 \
+  X(DelaySend, delay_send, float, 0.2f)                   \
+  X(ReverbSend, reverb_send, float, 0.2f)                 \
+  X(SidechainSend, sidechain_send, float, 0.0f)           \
+  X(ArpMode, arp_mode, int, BarelyArpMode_kNone)          \
+  X(ArpGate, arp_gate, float, 0.5f)                       \
+  X(ArpRate, arp_rate, float, 2.0f)                       \
+  X(Retrigger, retrigger, bool, false)                    \
+  X(VoiceCount, voice_count, int, 8)
+
+#define BARELY_DECLARE_GODOT_INSTRUMENT_CONTROL(Name, name, type, default)                         \
+ private:                                                                                          \
+  type name##_;                                                                                    \
+                                                                                                   \
+ public:                                                                                           \
+  void set_##name(type name) {                                                                     \
+    name##_ = name;                                                                                \
+    BarelyInstrument_SetControl(BarelyEngine::get_singleton()->get(), instrument_id_,              \
+                                BarelyInstrumentControlType_k##Name, static_cast<float>(name##_)); \
+  }                                                                                                \
+  type get_##name() const { return name##_; }
 
 class BarelyInstrument : public ::godot::Node {
  public:
@@ -19,93 +63,6 @@ class BarelyInstrument : public ::godot::Node {
   void set_note_on(float pitch, float gain = 1.0f, float pitch_shift = 0.0f);
   bool is_note_on(float pitch) const;
 
-  void set_gain(float gain);
-  float get_gain() const { return gain_; }
-
-  void set_pitch_shift(float pitch_shift);
-  float get_pitch_shift() const { return pitch_shift_; }
-
-  void set_stereo_pan(float stereo_pan);
-  float get_stereo_pan() const { return stereo_pan_; }
-
-  void set_attack(float attack);
-  float get_attack() const { return attack_; }
-
-  void set_decay(float decay);
-  float get_decay() const { return decay_; }
-
-  void set_sustain(float sustain);
-  float get_sustain() const { return sustain_; }
-
-  void set_release(float release);
-  float get_release() const { return release_; }
-
-  void set_slice_mode(int slice_mode);
-  int get_slice_mode() const { return slice_mode_; }
-
-  void set_osc_mix(float osc_mix);
-  float get_osc_mix() const { return osc_mix_; }
-
-  void set_osc_mode(int osc_mode);
-  int get_osc_mode() const { return osc_mode_; }
-
-  void set_osc_noise_mix(float osc_noise_mix);
-  float get_osc_noise_mix() const { return osc_noise_mix_; }
-
-  void set_osc_pitch_shift(float osc_pitch_shift);
-  float get_osc_pitch_shift() const { return osc_pitch_shift_; }
-
-  void set_osc_shape(float osc_shape);
-  float get_osc_shape() const { return osc_shape_; }
-
-  void set_osc_skew(float osc_skew);
-  float get_osc_skew() const { return osc_skew_; }
-
-  void set_crush_depth(float crush_depth);
-  float get_crush_depth() const { return crush_depth_; }
-
-  void set_crush_rate(float crush_rate);
-  float get_crush_rate() const { return crush_rate_; }
-
-  void set_distortion_mix(float distortion_mix);
-  float get_distortion_mix() const { return distortion_mix_; }
-
-  void set_distortion_drive(float distortion_drive);
-  float get_distortion_drive() const { return distortion_drive_; }
-
-  void set_filter_cutoff(float filter_cutoff);
-  float get_filter_cutoff() const { return filter_cutoff_; }
-
-  void set_filter_resonance(float filter_resonance);
-  float get_filter_resonance() const { return filter_resonance_; }
-
-  void set_filter_tone(float filter_tone);
-  float get_filter_tone() const { return filter_tone_; }
-
-  void set_delay_send(float delay_send);
-  float get_delay_send() const { return delay_send_; }
-
-  void set_reverb_send(float reverb_send);
-  float get_reverb_send() const { return reverb_send_; }
-
-  void set_sidechain_send(float sidechain_send);
-  float get_sidechain_send() const { return sidechain_send_; }
-
-  void set_arp_mode(int arp_mode);
-  int get_arp_mode() const { return arp_mode_; }
-
-  void set_arp_gate(float arp_gate);
-  float get_arp_gate() const { return arp_gate_; }
-
-  void set_arp_rate(float arp_rate);
-  float get_arp_rate() const { return arp_rate_; }
-
-  void set_retrigger(bool retrigger);
-  bool get_retrigger() const { return retrigger_; }
-
-  void set_voice_count(int voice_count);
-  int get_voice_count() const { return voice_count_; }
-
   void _ready() override;
   void _process(double delta) override;
 
@@ -115,35 +72,7 @@ class BarelyInstrument : public ::godot::Node {
 
   uint32_t instrument_id_ = 0;
 
-  float gain_ = 1.0f;
-  float pitch_shift_ = 0.0f;
-  float stereo_pan_ = 0.0f;
-  float attack_ = 0.0f;
-  float decay_ = 0.0f;
-  float sustain_ = 1.0f;
-  float release_ = 0.0f;
-  int slice_mode_ = BarelySliceMode_kSustain;
-  float osc_mix_ = 1.0f;
-  int osc_mode_ = BarelyOscMode_kCrossfade;
-  float osc_noise_mix_ = 0.0f;
-  float osc_pitch_shift_ = 0.0f;
-  float osc_shape_ = 0.0f;
-  float osc_skew_ = 0.0f;
-  float crush_depth_ = 0.0f;
-  float crush_rate_ = 0.0f;
-  float distortion_mix_ = 0.0f;
-  float distortion_drive_ = 0.0f;
-  float filter_cutoff_ = 1.0f;
-  float filter_resonance_ = 0.5f;
-  float filter_tone_ = 0.0f;
-  float delay_send_ = 0.0f;
-  float reverb_send_ = 0.0f;
-  float sidechain_send_ = 0.0f;
-  int arp_mode_ = BarelyArpMode_kNone;
-  float arp_gate_ = 0.5f;
-  float arp_rate_ = 1.0f;
-  bool retrigger_ = false;
-  int voice_count_ = 8;
+  BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_DECLARE_GODOT_INSTRUMENT_CONTROL)
 };
 
 }  // namespace barely::godot

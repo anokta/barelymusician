@@ -25,8 +25,16 @@ using ::godot::ClassDB;
 using ::godot::D_METHOD;
 using ::godot::Engine;
 using ::godot::Object;
+using ::godot::PropertyHint;
+using ::godot::PropertyInfo;
 using ::godot::Ref;
 using ::godot::SceneTree;
+using ::godot::Variant;
+
+#define BARELY_BIND_GODOT_ENGINE_CONTROL(Name, name, ...)                                   \
+  ClassDB::bind_method(D_METHOD(BARELY_STR(set_##name), #name), &BarelyEngine::set_##name); \
+  ClassDB::bind_method(D_METHOD(BARELY_STR(get_##name)), &BarelyEngine::get_##name);
+#define BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL(Name, name, type, default) set_##name(default);
 
 double BarelyAudioStreamPlayback::get_audio_timestamp() {
   return timestamp_.load(std::memory_order_relaxed);
@@ -95,6 +103,7 @@ void BarelyEngine::set_tempo(double tempo) { BarelyEngine_SetTempo(get(), tempo)
     // TODO(#181): Support sample rate changes after initialization.
     BarelyEngine_Create(static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()),
                         &engine_);
+    BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL);
   }
   return engine_;
 }
@@ -118,6 +127,77 @@ void BarelyEngine::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_tempo"), &BarelyEngine::get_tempo);
   ClassDB::bind_method(D_METHOD("get_timestamp"), &BarelyEngine::get_timestamp);
   ClassDB::bind_method(D_METHOD("set_tempo", "tempo"), &BarelyEngine::set_tempo);
+
+  BARELY_GODOT_ENGINE_CONTROLS(BARELY_BIND_GODOT_ENGINE_CONTROL);
+
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "comp_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      "set_comp_mix", "get_comp_mix");
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "comp_attack", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
+      "set_comp_attack", "get_comp_attack");
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "comp_release", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
+      "set_comp_release", "get_comp_release");
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "comp_threshold", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      "set_comp_threshold", "get_comp_threshold");
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "comp_ratio", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      "set_comp_ratio", "get_comp_ratio");
+
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "delay_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      "set_delay_mix", "get_delay_mix");
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "delay_time", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
+      "set_delay_time", "get_delay_time");
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "delay_feedback", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      "set_delay_feedback", "get_delay_feedback");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "delay_lpf_cutoff", PropertyHint::PROPERTY_HINT_RANGE,
+                            "0,1,0.01"),
+               "set_delay_lpf_cutoff", "get_delay_lpf_cutoff");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "delay_hpf_cutoff", PropertyHint::PROPERTY_HINT_RANGE,
+                            "0,1,0.01"),
+               "set_delay_hpf_cutoff", "get_delay_hpf_cutoff");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "delay_ping_pong", PropertyHint::PROPERTY_HINT_RANGE,
+                            "0,1,0.01"),
+               "set_delay_ping_pong", "get_delay_ping_pong");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "delay_reverb_send", PropertyHint::PROPERTY_HINT_RANGE,
+                            "0,2,0.01"),
+               "set_delay_reverb_send", "get_delay_reverb_send");
+
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "reverb_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      "set_reverb_mix", "get_reverb_mix");
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "reverb_damping", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      "set_reverb_damping", "get_reverb_damping");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "reverb_room_size", PropertyHint::PROPERTY_HINT_RANGE,
+                            "0,1,0.01"),
+               "set_reverb_room_size", "get_reverb_room_size");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "reverb_stereo_width",
+                            PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+               "set_reverb_stereo_width", "get_reverb_stereo_width");
+  ADD_PROPERTY(PropertyInfo(Variant::BOOL, "reverb_freeze"), "set_reverb_freeze",
+               "get_reverb_freeze");
+
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "sidechain_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      "set_sidechain_mix", "get_sidechain_mix");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_attack", PropertyHint::PROPERTY_HINT_RANGE,
+                            "0,8,0.01"),
+               "set_sidechain_attack", "get_sidechain_attack");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_release", PropertyHint::PROPERTY_HINT_RANGE,
+                            "0,8,0.01"),
+               "set_sidechain_release", "get_sidechain_release");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_threshold",
+                            PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+               "set_sidechain_threshold", "get_sidechain_threshold");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_ratio", PropertyHint::PROPERTY_HINT_RANGE,
+                            "0,1,0.01"),
+               "set_sidechain_ratio", "get_sidechain_ratio");
 }
 
 }  // namespace barely::godot

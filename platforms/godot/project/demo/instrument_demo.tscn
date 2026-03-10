@@ -8,6 +8,10 @@
 script = ExtResource("1")
 
 [node name="Instrument" type="BarelyInstrument" parent="." unique_id=1430736698]
+gain = 0.9
+osc_shape = 0.2
+delay_send = 0.1
+reverb_send = 0.5
 
 [node name="Label" type="Label" parent="." unique_id=1759105466]
 offset_right = 800.0

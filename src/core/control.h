@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <limits>
 
 #include "core/constants.h"
 
@@ -12,15 +11,13 @@ namespace barely {
 
 struct Control {
   float value = 0.0f;
-  float min_value = std::numeric_limits<float>::lowest();
-  float max_value = std::numeric_limits<float>::max();
+  float min_value = 0.0f;
+  float max_value = 0.0f;
 
   constexpr Control() noexcept = default;
 
   template <typename ValueType>
-  constexpr Control(ValueType default_value,
-                    ValueType min_value = std::numeric_limits<ValueType>::lowest(),
-                    ValueType max_value = std::numeric_limits<ValueType>::max()) noexcept
+  constexpr Control(ValueType default_value, ValueType min_value, ValueType max_value) noexcept
       : value(static_cast<float>(default_value)),
         min_value(static_cast<float>(min_value)),
         max_value(static_cast<float>(max_value)) {

@@ -18,6 +18,44 @@
 
 namespace barely::godot {
 
+#define BARELY_STR(x) #x
+
+#define BARELY_GODOT_ENGINE_CONTROLS(X)                   \
+  X(CompMix, comp_mix, float, 1.0f)                       \
+  X(CompAttack, comp_attack, float, 0.0f)                 \
+  X(CompRelease, comp_release, float, 0.0f)               \
+  X(CompThreshold, comp_threshold, float, 1.0f)           \
+  X(CompRatio, comp_ratio, float, 0.0f)                   \
+  X(DelayMix, delay_mix, float, 1.0f)                     \
+  X(DelayTime, delay_time, float, 0.0f)                   \
+  X(DelayFeedback, delay_feedback, float, 0.0f)           \
+  X(DelayLpfCutoff, delay_lpf_cutoff, float, 1.0f)        \
+  X(DelayHpfCutoff, delay_hpf_cutoff, float, 0.0f)        \
+  X(DelayPingPong, delay_ping_pong, float, 0.0f)          \
+  X(DelayReverbSend, delay_reverb_send, float, 0.0f)      \
+  X(ReverbMix, reverb_mix, float, 1.0f)                   \
+  X(ReverbDamping, reverb_damping, float, 0.0f)           \
+  X(ReverbRoomSize, reverb_room_size, float, 0.0f)        \
+  X(ReverbStereoWidth, reverb_stereo_width, float, 1.0f)  \
+  X(ReverbFreeze, reverb_freeze, bool, 0, 0, 1)           \
+  X(SidechainMix, sidechain_mix, float, 1.0f)             \
+  X(SidechainAttack, sidechain_attack, float, 0.0f)       \
+  X(SidechainRelease, sidechain_release, float, 0.0f)     \
+  X(SidechainThreshold, sidechain_threshold, float, 1.0f) \
+  X(SidechainRatio, sidechain_ratio, float, 0.0f)
+
+#define BARELY_DEFINE_GODOT_ENGINE_CONTROL(Name, name, type, default) \
+ private:                                                             \
+  type name##_;                                                       \
+                                                                      \
+ public:                                                              \
+  void set_##name(type name) {                                        \
+    name##_ = name;                                                   \
+    BarelyEngine_SetControl(engine_, BarelyEngineControlType_k##Name, \
+                            static_cast<float>(name##_));             \
+  }                                                                   \
+  type get_##name() const { return name##_; }
+
 class BarelyAudioStreamPlayback : public ::godot::AudioStreamPlaybackResampled {
  public:
   static double get_audio_timestamp();
@@ -82,6 +120,8 @@ class BarelyEngine : public ::godot::Object {
   static inline BarelyEngine* singleton_ = nullptr;
 
   ::BarelyEngine* engine_ = nullptr;
+
+  BARELY_GODOT_ENGINE_CONTROLS(BARELY_DEFINE_GODOT_ENGINE_CONTROL);
 };
 
 }  // namespace barely::godot

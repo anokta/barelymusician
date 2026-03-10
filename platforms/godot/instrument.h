@@ -33,8 +33,8 @@ namespace barely::godot {
   X(FilterCutoff, filter_cutoff, float, 1.0f)             \
   X(FilterResonance, filter_resonance, float, 0.5f)       \
   X(FilterTone, filter_tone, float, 0.0f)                 \
-  X(DelaySend, delay_send, float, 0.2f)                   \
-  X(ReverbSend, reverb_send, float, 0.2f)                 \
+  X(DelaySend, delay_send, float, 0.0f)                   \
+  X(ReverbSend, reverb_send, float, 0.0f)                 \
   X(SidechainSend, sidechain_send, float, 0.0f)           \
   X(ArpMode, arp_mode, int, BarelyArpMode_kNone)          \
   X(ArpGate, arp_gate, float, 0.5f)                       \
@@ -56,6 +56,7 @@ namespace barely::godot {
 
 class BarelyInstrument : public ::godot::Node {
  public:
+  BarelyInstrument();
   ~BarelyInstrument();
 
   void set_all_notes_off();
@@ -63,16 +64,13 @@ class BarelyInstrument : public ::godot::Node {
   void set_note_on(float pitch, float gain = 1.0f, float pitch_shift = 0.0f);
   bool is_note_on(float pitch) const;
 
-  void _ready() override;
-  void _process(double delta) override;
-
  private:
   GDCLASS(BarelyInstrument, ::godot::Node);
   static void _bind_methods();
 
   uint32_t instrument_id_ = 0;
 
-  BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_DECLARE_GODOT_INSTRUMENT_CONTROL)
+  BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_DECLARE_GODOT_INSTRUMENT_CONTROL);
 };
 
 }  // namespace barely::godot

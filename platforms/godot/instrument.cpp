@@ -15,14 +15,18 @@ using ::godot::PropertyInfo;
 using ::godot::StringName;
 using ::godot::Variant;
 
-#define BARELY_STRING(x) #x
 #define BARELY_BIND_GODOT_ENUM_VALUE(EnumType, Name, Value)                \
   ClassDB::bind_integer_constant(get_class_static(), StringName(), #Value, \
                                  Barely##EnumType##_k##Name);
-#define BARELY_BIND_GODOT_INSTRUMENT_CONTROL(Name, name, type, default)                            \
-  ClassDB::bind_method(D_METHOD(BARELY_STRING(set_##name), #name), &BarelyInstrument::set_##name); \
-  ClassDB::bind_method(D_METHOD(BARELY_STRING(get_##name)), &BarelyInstrument::get_##name);
+#define BARELY_BIND_GODOT_INSTRUMENT_CONTROL(Name, name, ...)                                   \
+  ClassDB::bind_method(D_METHOD(BARELY_STR(set_##name), #name), &BarelyInstrument::set_##name); \
+  ClassDB::bind_method(D_METHOD(BARELY_STR(get_##name)), &BarelyInstrument::get_##name);
 #define BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL(Name, name, type, default) set_##name(default);
+
+BarelyInstrument::BarelyInstrument() {
+  BarelyEngine_CreateInstrument(BarelyEngine::get_singleton()->get(), &instrument_id_);
+  BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL);
+}
 
 BarelyInstrument::~BarelyInstrument() {
   BarelyEngine_DestroyInstrument(BarelyEngine::get_singleton()->get(), instrument_id_);
@@ -56,14 +60,6 @@ bool BarelyInstrument::is_note_on(float pitch) const {
                             &is_note_on);
   return is_note_on;
 }
-
-void BarelyInstrument::_ready() {
-  ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
-  BarelyEngine_CreateInstrument(engine, &instrument_id_);
-  BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL)
-}
-
-void BarelyInstrument::_process([[maybe_unused]] double delta) {}
 
 void BarelyInstrument::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_all_notes_off"), &BarelyInstrument::set_all_notes_off);

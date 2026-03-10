@@ -13,6 +13,11 @@ var octave_shift = 0
 var active_notes = {}
 
 func _ready():
+	BarelyEngine.delay_time = 0.5
+	BarelyEngine.delay_feedback = 0.2
+	BarelyEngine.delay_ping_pong = 0.5
+	BarelyEngine.reverb_room_size = 0.4
+#	
 	audioStreamPlayer.stream = BarelyAudioStream.new()
 	audioStreamPlayer.play()
 
@@ -22,7 +27,7 @@ func _input(event):
 			get_tree().quit()
 			return
 
-		var key_string = char(event.keycode).to_upper()
+		var key_string = OS.get_keycode_string(event.keycode).to_upper()
 		if key_string == 'Z':
 			instrument.set_all_notes_off()
 			octave_shift = max(octave_shift - 1, -MAX_OCTAVE_SHIFT)
@@ -53,7 +58,7 @@ func _input(event):
 
 func _unhandled_input(event):
 	if event is InputEventKey and not event.pressed:
-		var key_string = char(event.keycode).to_upper()
+		var key_string = OS.get_keycode_string(event.keycode).to_upper()
 		if active_notes.has(key_string):
 			instrument.set_note_off(active_notes[key_string])
 			print("NoteOff(%.2f)\n" % active_notes[key_string])

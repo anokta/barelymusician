@@ -68,6 +68,9 @@ class BarelyInstrument : public ::godot::Node {
   GDCLASS(BarelyInstrument, ::godot::Node);
   static void _bind_methods();
 
+  static void _note_event_callback(BarelyEventType type, float pitch, void* user_data);
+  void _handle_note_event(BarelyEventType type, float pitch);
+
   uint32_t instrument_id_ = 0;
 
   BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_DECLARE_GODOT_INSTRUMENT_CONTROL);

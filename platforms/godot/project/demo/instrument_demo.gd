@@ -18,8 +18,12 @@ func _ready():
 	BarelyEngine.delay_ping_pong = 0.5
 	BarelyEngine.reverb_room_size = 0.4
 #	
+	instrument.note_on.connect(_on_note_on)
+	instrument.note_off.connect(_on_note_off)
+	
 	audioStreamPlayer.stream = BarelyAudioStream.new()
 	audioStreamPlayer.play()
+	
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
@@ -54,12 +58,16 @@ func _input(event):
 			if not active_notes.has(key_string):
 				instrument.set_note_on(pitch, gain)
 				active_notes[key_string] = pitch
-				print("NoteOn(%.2f)\n" % pitch)
 
 func _unhandled_input(event):
 	if event is InputEventKey and not event.pressed:
 		var key_string = OS.get_keycode_string(event.keycode).to_upper()
 		if active_notes.has(key_string):
 			instrument.set_note_off(active_notes[key_string])
-			print("NoteOff(%.2f)\n" % active_notes[key_string])
 			active_notes.erase(key_string)
+			
+func _on_note_on(pitch):
+	print("NoteOn(%.2f)\n" % pitch)
+			
+func _on_note_off(pitch):
+	print("NoteOff(%.2f)\n" % pitch)

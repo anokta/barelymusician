@@ -10,6 +10,7 @@ namespace barely::godot {
 
 using ::godot::ClassDB;
 using ::godot::D_METHOD;
+using ::godot::MethodInfo;
 using ::godot::PropertyHint;
 using ::godot::PropertyInfo;
 using ::godot::StringName;
@@ -24,7 +25,10 @@ using ::godot::Variant;
 #define BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL(Name, name, type, default) set_##name(default);
 
 BarelyInstrument::BarelyInstrument() {
-  BarelyEngine_CreateInstrument(BarelyEngine::get_singleton()->get(), &instrument_id_);
+  ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
+  BarelyEngine_CreateInstrument(engine, &instrument_id_);
+  BarelyInstrument_SetNoteEventCallback(engine, instrument_id_,
+                                        &BarelyInstrument::_note_event_callback, this);
   BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL);
 }
 
@@ -167,6 +171,23 @@ void BarelyInstrument::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::BOOL, "retrigger"), "set_retrigger", "get_retrigger");
   ADD_PROPERTY(PropertyInfo(Variant::INT, "voice_count", PropertyHint::PROPERTY_HINT_RANGE, "1,16"),
                "set_voice_count", "get_voice_count");
+
+  ADD_SIGNAL(MethodInfo("note_on", PropertyInfo(Variant::FLOAT, "pitch")));
+  ADD_SIGNAL(MethodInfo("note_off", PropertyInfo(Variant::FLOAT, "pitch")));
+}
+
+void BarelyInstrument::_note_event_callback(BarelyEventType type, float pitch, void* user_data) {
+  if (BarelyInstrument* instrument = static_cast<BarelyInstrument*>(user_data)) {
+    instrument->_handle_note_event(type, pitch);
+  }
+}
+
+void BarelyInstrument::_handle_note_event(BarelyEventType type, float pitch) {
+  if (type == BarelyEventType_kBegin) {
+    emit_signal("note_on", pitch);
+  } else if (type == BarelyEventType_kEnd) {
+    emit_signal("note_off", pitch);
+  }
 }
 
 }  // namespace barely::godot

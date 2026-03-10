@@ -12,9 +12,7 @@ namespace barely {
 
 struct NoteState {
   std::array<Control, BarelyNoteControlType_kCount> controls = {
-      Control(1.0f, 0.0f, 1.0f),  // kGain
-      Control(0.0f),              // kPitchShift
-  };
+      BARELY_NOTE_CONTROL_TYPES(NoteControlType, BARELY_DEFINE_CONTROL)};
 
   float pitch = 0.0;
 

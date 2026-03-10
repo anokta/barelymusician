@@ -49,6 +49,8 @@ inline float GetFrequency(float cutoff, float max_freq) noexcept {
   return std::min(kMinFilterFreq * std::pow(max_freq * kMinFreqInverse, cutoff), max_freq);
 }
 
+#define BARELY_DEFINE_CONTROL(EnumType, Name, Default, Min, Max, Label) Control(Default, Min, Max),
+
 }  // namespace barely
 
 #endif  // BARELYMUSICIAN_CORE_CONTROL_H_

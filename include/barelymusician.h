@@ -219,187 +219,117 @@
 #endif  // __GNUC__ >= 4
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
+#define BARELY_C_ENUM_VALUE(EnumType, Name, ...) Barely##EnumType##_k##Name,
+#define BARELY_C_ENUM(EnumType, X)                                \
+  typedef enum Barely##EnumType{                                  \
+      X(EnumType, BARELY_C_ENUM_VALUE) Barely##EnumType##_kCount, \
+  } Barely##EnumType;
 #ifdef __cplusplus
-extern "C" {
-#endif  // __cplusplus
-
-/// Engine control types.
-typedef enum BarelyEngineControlType {
-  /// Compressor mix.
-  BarelyEngineControlType_kCompMix = 0,
-  /// Compressor attack in seconds.
-  BarelyEngineControlType_kCompAttack,
-  /// Compressor release in seconds.
-  BarelyEngineControlType_kCompRelease,
-  /// Normalized compressor threshold in logarithmic scale.
-  BarelyEngineControlType_kCompThreshold,
-  /// Compressor ratio.
-  BarelyEngineControlType_kCompRatio,
-  /// Delay mix.
-  BarelyEngineControlType_kDelayMix,
-  /// Delay time in seconds.
-  BarelyEngineControlType_kDelayTime,
-  /// Delay feedback.
-  BarelyEngineControlType_kDelayFeedback,
-  /// Delay low-pass filter cutoff.
-  BarelyEngineControlType_kDelayLpfCutoff,
-  /// Delay high-pass filter cutoff.
-  BarelyEngineControlType_kDelayHpfCutoff,
-  /// Delay ping-pong.
-  BarelyEngineControlType_kDelayPingPong,
-  /// Delay reverb send.
-  BarelyEngineControlType_kDelayReverbSend,
-  /// Reverb mix.
-  BarelyEngineControlType_kReverbMix,
-  /// Reverb damping ratio.
-  BarelyEngineControlType_kReverbDamping,
-  /// Reverb room size.
-  BarelyEngineControlType_kReverbRoomSize,
-  /// Reverb stereo width.
-  BarelyEngineControlType_kReverbStereoWidth,
-  /// Reverb freeze.
-  BarelyEngineControlType_kReverbFreeze,
-  /// Sidechain mix.
-  BarelyEngineControlType_kSidechainMix,
-  /// Sidechain attack in seconds.
-  BarelyEngineControlType_kSidechainAttack,
-  /// Sidechain release in seconds.
-  BarelyEngineControlType_kSidechainRelease,
-  /// Sidechain threshold.
-  BarelyEngineControlType_kSidechainThreshold,
-  /// Sidechain ratio.
-  BarelyEngineControlType_kSidechainRatio,
-  // Number of engine control types.
-  BarelyEngineControlType_kCount,
-} BarelyEngineControlType;
-
-/// Instrument control types.
-typedef enum BarelyInstrumentControlType {
-  /// Normalized gain in logarithmic scale.
-  BarelyInstrumentControlType_kGain = 0,
-  /// Pitch shift.
-  BarelyInstrumentControlType_kPitchShift,
-  /// Stereo pan.
-  BarelyInstrumentControlType_kStereoPan,
-  /// Envelope attack in seconds.
-  BarelyInstrumentControlType_kAttack,
-  /// Envelope decay in seconds.
-  BarelyInstrumentControlType_kDecay,
-  /// Envelope sustain.
-  BarelyInstrumentControlType_kSustain,
-  /// Envelope release in seconds.
-  BarelyInstrumentControlType_kRelease,
-  /// Slice playback mode.
-  BarelyInstrumentControlType_kSliceMode,
-  /// Oscillator mix.
-  BarelyInstrumentControlType_kOscMix,
-  /// Oscillator mode.
-  BarelyInstrumentControlType_kOscMode,
-  /// Oscillator noise mix.
-  BarelyInstrumentControlType_kOscNoiseMix,
-  /// Oscillator pitch shift.
-  BarelyInstrumentControlType_kOscPitchShift,
-  /// Oscillator shape.
-  BarelyInstrumentControlType_kOscShape,
-  /// Oscillator skew.
-  BarelyInstrumentControlType_kOscSkew,
-  /// Bit crusher depth.
-  BarelyInstrumentControlType_kCrushDepth,
-  /// Bit crusher rate.
-  BarelyInstrumentControlType_kCrushRate,
-  /// Distortion mix.
-  BarelyInstrumentControlType_kDistortionMix,
-  /// Distortion drive.
-  BarelyInstrumentControlType_kDistortionDrive,
-  /// Filter cutoff.
-  BarelyInstrumentControlType_kFilterCutoff,
-  /// Filter resonance.
-  BarelyInstrumentControlType_kFilterResonance,
-  /// Filter tone.
-  BarelyInstrumentControlType_kFilterTone,
-  /// Delay send.
-  BarelyInstrumentControlType_kDelaySend,
-  /// Reverb send.
-  BarelyInstrumentControlType_kReverbSend,
-  /// Sidechain send.
-  BarelyInstrumentControlType_kSidechainSend,
-  /// Arpeggiator mode.
-  BarelyInstrumentControlType_kArpMode,
-  /// Arpeggiator gate ratio.
-  BarelyInstrumentControlType_kArpGate,
-  /// Arpeggiator rate.
-  BarelyInstrumentControlType_kArpRate,
-  /// Retrigger.
-  BarelyInstrumentControlType_kRetrigger,
-  /// Number of voices.
-  BarelyInstrumentControlType_kVoiceCount,
-  /// Number of instrument control types.
-  BarelyInstrumentControlType_kCount,
-} BarelyInstrumentControlType;
-
-/// Note control types.
-typedef enum BarelyNoteControlType {
-  /// Gain.
-  BarelyNoteControlType_kGain = 0,
-  /// Pitch shift.
-  BarelyNoteControlType_kPitchShift,
-  /// Number of note control types.
-  BarelyNoteControlType_kCount,
-} BarelyNoteControlType;
+#define BARELY_CPP_ENUM_VALUE(EnumType, Name, ...) k##Name = Barely##EnumType##_k##Name,
+#define BARELY_CPP_ENUM(EnumType, X)                          \
+  namespace barely {                                          \
+  enum class EnumType { X(EnumType, BARELY_CPP_ENUM_VALUE) }; \
+  }
+#define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X) BARELY_CPP_ENUM(EnumType, X)
+#else  // __cplusplus
+#define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X)
+#endif
 
 /// Arpeggiator modes.
-typedef enum BarelyArpMode {
-  /// None.
-  BarelyArpMode_kNone = 0,
-  /// Up.
-  BarelyArpMode_kUp,
-  /// Down.
-  BarelyArpMode_kDown,
-  /// Random.
-  BarelyArpMode_kRandom,
-  /// Number of arpeggiator modes.
-  BarelyArpMode_kCount,
-} BarelyArpMode;
+#define BARELY_ARP_MODES(ArpMode, X) \
+  X(ArpMode, None, "None")           \
+  X(ArpMode, Up, "Up")               \
+  X(ArpMode, Down, "Down")           \
+  X(ArpMode, Random, "Random")
+BARELY_ENUM(ArpMode, BARELY_ARP_MODES)
 
 /// Oscillator modes.
-typedef enum BarelyOscMode {
-  /// Linear crossfade between the slice and the oscillator.
-  BarelyOscMode_kCrossfade = 0,
-  /// Amplitude modulation applied to the slice by the oscillator.
-  BarelyOscMode_kAm,
-  /// Frequency modulation applied to the slice by the oscillator.
-  BarelyOscMode_kFm,
-  /// Amplitude modulation applied to the oscillator by the slice.
-  BarelyOscMode_kMa,
-  /// Frequency modulation applied to the oscillator by the slice.
-  BarelyOscMode_kMf,
-  /// Ring modulation.
-  BarelyOscMode_kRing,
-  /// Number of oscillator modes.
-  BarelyOscMode_kCount,
-} BarelyOscMode;
+#define BARELY_OSC_MODES(OscMode, X)                                             \
+  X(OscMode, Crossfade, "Linear crossfade between the slice and the oscillator") \
+  X(OscMode, Am, "Amplitude modulation applied to the slice by the oscillator")  \
+  X(OscMode, Fm, "Frequency modulation applied to the slice by the oscillator")  \
+  X(OscMode, Ma, "Amplitude modulation applied to the oscillator by the slice")  \
+  X(OscMode, Mf, "Frequency modulation applied to the oscillator by the slice")  \
+  X(OscMode, Ring, "Ring modulation")
+BARELY_ENUM(OscMode, BARELY_OSC_MODES)
 
 /// Slice modes.
-typedef enum BarelySliceMode {
-  /// Sustain.
-  BarelySliceMode_kSustain = 0,
-  /// Loop.
-  BarelySliceMode_kLoop,
-  /// Once.
-  BarelySliceMode_kOnce,
-  /// Number of slice modes.
-  BarelySliceMode_kCount,
-} BarelySliceMode;
+#define BARELY_SLICE_MODES(SliceMode, X) \
+  X(SliceMode, Sustain, "Sustain")       \
+  X(SliceMode, Loop, "Loop")             \
+  X(SliceMode, Once, "Once")
+BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
 
 /// Event types.
-typedef enum BarelyEventType {
-  /// Begin.
-  BarelyEventType_kBegin = 0,
-  /// End.
-  BarelyEventType_kEnd,
-  /// Number of event types.
-  BarelyEventType_kCount,
-} BarelyEventType;
+#define BARELY_EVENT_TYPES(EventType, X) \
+  X(EventType, Begin, "Begin")           \
+  X(EventType, End, "End")
+BARELY_ENUM(EventType, BARELY_EVENT_TYPES)
+
+/// Engine control types.
+#define BARELY_ENGINE_CONTROL_TYPES(EngineControlType, X)                           \
+  X(EngineControlType, CompMix, 1.0f, 0.0f, 1.0f, "Compressor Mix")                 \
+  X(EngineControlType, CompAttack, 0.0f, 0.0f, 8.0f, "Compressor Attack")           \
+  X(EngineControlType, CompRelease, 0.0f, 0.0f, 8.0f, "Compressor Release")         \
+  X(EngineControlType, CompThreshold, 1.0f, 0.0f, 1.0f, "Compressor Threshold")     \
+  X(EngineControlType, CompRatio, 0.0f, 0.0f, 1.0f, "Compressor Ratio")             \
+  X(EngineControlType, DelayMix, 1.0f, 0.0f, 1.0f, "Delay Mix")                     \
+  X(EngineControlType, DelayTime, 0.0f, 0.0f, 8.0f, "Delay Time")                   \
+  X(EngineControlType, DelayFeedback, 0.0f, 0.0f, 1.0f, "Delay Feedback")           \
+  X(EngineControlType, DelayLpfCutoff, 1.0f, 0.0f, 1.0f, "Delay LPF Cutoff")        \
+  X(EngineControlType, DelayHpfCutoff, 0.0f, 0.0f, 1.0f, "Delay HPF Cutoff")        \
+  X(EngineControlType, DelayPingPong, 0.0f, 0.0f, 1.0f, "Delay Ping-Pong")          \
+  X(EngineControlType, DelayReverbSend, 0.0f, 0.0f, 2.0f, "Delay Reverb Send")      \
+  X(EngineControlType, ReverbMix, 1.0f, 0.0f, 1.0f, "Reverb Mix")                   \
+  X(EngineControlType, ReverbDamping, 0.0f, 0.0f, 1.0f, "Reverb Damping")           \
+  X(EngineControlType, ReverbRoomSize, 0.0f, 0.0f, 1.0f, "Reverb Room Size")        \
+  X(EngineControlType, ReverbStereoWidth, 1.0f, 0.0f, 1.0f, "Reverb Stereo Width")  \
+  X(EngineControlType, ReverbFreeze, 0, 0, 1, "Reverb Freeze")                      \
+  X(EngineControlType, SidechainMix, 1.0f, 0.0f, 1.0f, "Sidechain Mix")             \
+  X(EngineControlType, SidechainAttack, 0.0f, 0.0f, 8.0f, "Sidechain Attack")       \
+  X(EngineControlType, SidechainRelease, 0.0f, 0.0f, 8.0f, "Sidechain Release")     \
+  X(EngineControlType, SidechainThreshold, 1.0f, 0.0f, 1.0f, "Sidechain Threshold") \
+  X(EngineControlType, SidechainRatio, 0.0f, 0.0f, 1.0f, "Sidechain Ratio")
+BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
+
+/// Instrument control types.
+#define BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, X)                       \
+  X(InstrumentControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                              \
+  X(InstrumentControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")                \
+  X(InstrumentControlType, StereoPan, 0.0f, -1.0f, 1.0f, "Stereo Pan")                  \
+  X(InstrumentControlType, Attack, 0.0f, 0.0f, 8.0f, "Envelope Attack")                 \
+  X(InstrumentControlType, Decay, 0.0f, 0.0f, 8.0f, "Envelope Decay")                   \
+  X(InstrumentControlType, Sustain, 1.0f, 0.0f, 1.0f, "Envelope Sustain")               \
+  X(InstrumentControlType, Release, 0.0f, 0.0f, 8.0f, "Envelope Release")               \
+  X(InstrumentControlType, SliceMode, 0, 0, BarelySliceMode_kCount - 1, "Slice Mode")   \
+  X(InstrumentControlType, OscMix, 0.0f, 0.0f, 1.0f, "Oscillator Mix")                  \
+  X(InstrumentControlType, OscMode, 0, 0, BarelyOscMode_kCount - 1, "Oscillator Mode")  \
+  X(InstrumentControlType, OscNoiseMix, 0.0f, 0.0f, 1.0f, "Oscillator Noise Mix")       \
+  X(InstrumentControlType, OscPitchShift, 0.0f, 0.0f, 0.0f, "Oscillator Pitch Shift")   \
+  X(InstrumentControlType, OscShape, 0.0f, 0.0f, 1.0f, "Oscillator Shape")              \
+  X(InstrumentControlType, OscSkew, 0.0f, -1.0f, 1.0f, "Oscillator Skew")               \
+  X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Crush Depth")                 \
+  X(InstrumentControlType, CrushRate, 0.0f, 0.0f, 1.0f, "Crush Rate")                   \
+  X(InstrumentControlType, DistortionMix, 0.0f, 0.0f, 1.0f, "Distortion Mix")           \
+  X(InstrumentControlType, DistortionDrive, 0.0f, 0.0f, 1.0f, "Distortion Drive")       \
+  X(InstrumentControlType, FilterCutoff, 1.0f, 0.0f, 1.0f, "Filter Cutoff")             \
+  X(InstrumentControlType, FilterResonance, 0.5f, 0.0f, 1.0f, "Filter Resonance")       \
+  X(InstrumentControlType, FilterTone, 0.0f, -1.0f, 1.0f, "Filter Tone")                \
+  X(InstrumentControlType, DelaySend, 0.0f, 0.0f, 1.0f, "Delay Send")                   \
+  X(InstrumentControlType, ReverbSend, 0.0f, 0.0f, 2.0f, "Reverb Send")                 \
+  X(InstrumentControlType, SidechainSend, 0.0f, -1.0f, 1.0f, "Sidechain Send")          \
+  X(InstrumentControlType, ArpMode, 0, 0, BarelyArpMode_kCount - 1, "Arpeggiator Mode") \
+  X(InstrumentControlType, ArpGate, 0.5f, 0.0f, 1.0f, "Arpeggiator Gate")               \
+  X(InstrumentControlType, ArpRate, 1.0f, 0.0f, 16.0f, "Arpeggiator Rate")              \
+  X(InstrumentControlType, Retrigger, 0, 0, 1, "Retrigger")                             \
+  X(InstrumentControlType, VoiceCount, 8, 1, 16, "Voice Count")
+BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
+
+/// Note control types.
+#define BARELY_NOTE_CONTROL_TYPES(NoteControlType, X) \
+  X(NoteControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")  \
+  X(NoteControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")
+BARELY_ENUM(NoteControlType, BARELY_NOTE_CONTROL_TYPES)
 
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
@@ -442,6 +372,10 @@ typedef struct BarelyScale {
   /// Mode index.
   int32_t mode;
 } BarelyScale;
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
 
 /// Note event callback.
 ///
@@ -893,170 +827,6 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 #include <utility>
 
 namespace barely {
-
-/// Engine control types.
-enum class EngineControlType {
-  /// Compressor mix.
-  kCompMix = BarelyEngineControlType_kCompMix,
-  /// Compressor attack in seconds.
-  kCompAttack = BarelyEngineControlType_kCompAttack,
-  /// Compressor release in seconds.
-  kCompRelease = BarelyEngineControlType_kCompRelease,
-  /// Normalized compressor threshold in logarithmic scale.
-  kCompThreshold = BarelyEngineControlType_kCompThreshold,
-  /// Compressor ratio.
-  kCompRatio = BarelyEngineControlType_kCompRatio,
-  /// Delay mix.
-  kDelayMix = BarelyEngineControlType_kDelayMix,
-  /// Delay time in seconds.
-  kDelayTime = BarelyEngineControlType_kDelayTime,
-  /// Delay feedback.
-  kDelayFeedback = BarelyEngineControlType_kDelayFeedback,
-  /// Delay low-pass filter cutoff.
-  kDelayLpfCutoff = BarelyEngineControlType_kDelayLpfCutoff,
-  /// Delay high-pass filter cutoff.
-  kDelayHpfCutoff = BarelyEngineControlType_kDelayHpfCutoff,
-  /// Delay ping-pong.
-  kDelayPingPong = BarelyEngineControlType_kDelayPingPong,
-  /// Delay reverb send.
-  kDelayReverbSend = BarelyEngineControlType_kDelayReverbSend,
-  /// Reverb mix.
-  kReverbMix = BarelyEngineControlType_kReverbMix,
-  /// Reverb damping ratio.
-  kReverbDamping = BarelyEngineControlType_kReverbDamping,
-  /// Reverb room size.
-  kReverbRoomSize = BarelyEngineControlType_kReverbRoomSize,
-  /// Reverb stereo width.
-  kReverbStereoWidth = BarelyEngineControlType_kReverbStereoWidth,
-  /// Reverb freeze.
-  kReverbFreeze = BarelyEngineControlType_kReverbFreeze,
-  /// Sidechain mix.
-  kSidechainMix = BarelyEngineControlType_kSidechainMix,
-  /// Sidechain attack in seconds.
-  kSidechainAttack = BarelyEngineControlType_kSidechainAttack,
-  /// Sidechain release in seconds.
-  kSidechainRelease = BarelyEngineControlType_kSidechainRelease,
-  /// Normalized sidechain threshold in logarithmic scale.
-  kSidechainThreshold = BarelyEngineControlType_kSidechainThreshold,
-  /// Sidechain ratio.
-  kSidechainRatio = BarelyEngineControlType_kSidechainRatio,
-};
-
-/// Instrument control types.
-enum class InstrumentControlType {
-  /// Normalized gain in logarithmic scale.
-  kGain = BarelyInstrumentControlType_kGain,
-  /// Pitch shift.
-  kPitchShift = BarelyInstrumentControlType_kPitchShift,
-  /// Stereo pan.
-  kStereoPan = BarelyInstrumentControlType_kStereoPan,
-  /// Envelope attack in seconds.
-  kAttack = BarelyInstrumentControlType_kAttack,
-  /// Envelope decay in seconds.
-  kDecay = BarelyInstrumentControlType_kDecay,
-  /// Envelope sustain.
-  kSustain = BarelyInstrumentControlType_kSustain,
-  /// Envelope release in seconds.
-  kRelease = BarelyInstrumentControlType_kRelease,
-  /// Slice playback mode.
-  kSliceMode = BarelyInstrumentControlType_kSliceMode,
-  /// Oscillator mix.
-  kOscMix = BarelyInstrumentControlType_kOscMix,
-  /// Oscillator mode.
-  kOscMode = BarelyInstrumentControlType_kOscMode,
-  /// Oscillator noise mix.
-  kOscNoiseMix = BarelyInstrumentControlType_kOscNoiseMix,
-  /// Oscillator pitch shift.
-  kOscPitchShift = BarelyInstrumentControlType_kOscPitchShift,
-  /// Oscillator shape.
-  kOscShape = BarelyInstrumentControlType_kOscShape,
-  /// Oscillator skew.
-  kOscSkew = BarelyInstrumentControlType_kOscSkew,
-  /// Bit crusher depth.
-  kCrushDepth = BarelyInstrumentControlType_kCrushDepth,
-  /// Bit crusher rate.
-  kCrushRate = BarelyInstrumentControlType_kCrushRate,
-  /// Distortion mix.
-  kDistortionMix = BarelyInstrumentControlType_kDistortionMix,
-  /// Distortion drive.
-  kDistortionDrive = BarelyInstrumentControlType_kDistortionDrive,
-  /// Filter cutoff.
-  kFilterCutoff = BarelyInstrumentControlType_kFilterCutoff,
-  /// Filter resonance.
-  kFilterResonance = BarelyInstrumentControlType_kFilterResonance,
-  /// Filter tone.
-  kFilterTone = BarelyInstrumentControlType_kFilterTone,
-  /// Delay send.
-  kDelaySend = BarelyInstrumentControlType_kDelaySend,
-  /// Reverb send.
-  kReverbSend = BarelyInstrumentControlType_kReverbSend,
-  /// Sidechain send.
-  kSidechainSend = BarelyInstrumentControlType_kSidechainSend,
-  /// Arpeggiator mode.
-  kArpMode = BarelyInstrumentControlType_kArpMode,
-  /// Arpeggiator gate ratio.
-  kArpGate = BarelyInstrumentControlType_kArpGate,
-  /// Arpeggiator rate.
-  kArpRate = BarelyInstrumentControlType_kArpRate,
-  /// Retrigger.
-  kRetrigger = BarelyInstrumentControlType_kRetrigger,
-  /// Number of voices.
-  kVoiceCount = BarelyInstrumentControlType_kVoiceCount,
-};
-
-/// Note control types.
-enum class NoteControlType {
-  /// Gain.
-  kGain = BarelyNoteControlType_kGain,
-  /// Pitch shift.
-  kPitchShift = BarelyNoteControlType_kPitchShift,
-};
-
-/// Arpeggiator modes.
-enum class ArpMode {
-  /// None.
-  kNone = BarelyArpMode_kNone,
-  /// Up.
-  kUp = BarelyArpMode_kUp,
-  /// Down.
-  kDown = BarelyArpMode_kDown,
-  /// Random.
-  kRandom = BarelyArpMode_kRandom,
-};
-
-/// Oscillator modes.
-enum class OscMode {
-  /// Linear crossfade between the slice and the oscillator.
-  kCrossfade = BarelyOscMode_kCrossfade,
-  /// Amplitude modulation applied to the slice by the oscillator.
-  kAm = BarelyOscMode_kAm,
-  /// Frequency modulation applied to the slice by the oscillator.
-  kFm = BarelyOscMode_kFm,
-  /// Amplitude modulation applied to the oscillator by the slice.
-  kMa = BarelyOscMode_kMa,
-  /// Frequency modulation applied to the oscillator by the slice.
-  kMf = BarelyOscMode_kMf,
-  /// Ring modulation.
-  kRing = BarelyOscMode_kRing,
-};
-
-/// Slice modes.
-enum class SliceMode {
-  /// Sustain.
-  kSustain = BarelySliceMode_kSustain,
-  /// Loop.
-  kLoop = BarelySliceMode_kLoop,
-  /// Once.
-  kOnce = BarelySliceMode_kOnce,
-};
-
-/// Event types.
-enum class EventType {
-  /// Begin.
-  kBegin = BarelyEventType_kBegin,
-  /// End.
-  kEnd = BarelyEventType_kEnd,
-};
 
 /// Slice of sample data.
 struct Slice : public BarelySlice {

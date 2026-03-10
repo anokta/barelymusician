@@ -16,10 +16,6 @@ func _ready():
 	audioStreamPlayer.stream = BarelyAudioStream.new()
 	audioStreamPlayer.play()
 
-	instrument.attack = 0.05
-	instrument.release = 0.1
-	instrument.arp_rate = 2
-
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_ESCAPE:

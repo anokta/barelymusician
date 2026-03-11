@@ -1,6 +1,10 @@
 [gd_scene format=3 uid="uid://fm3yw7k5t227"]
 
 [ext_resource type="Script" uid="uid://cx2ediq5nfg22" path="res://demo/instrument_demo.gd" id="1"]
+[ext_resource type="AudioStream" uid="uid://vvwdk6lors0g" path="res://demo/data/sample.wav" id="2_sv68r"]
+
+[sub_resource type="BarelySliceResource" id="BarelySliceResource_sv68r"]
+stream = ExtResource("2_sv68r")
 
 [sub_resource type="LabelSettings" id="LabelSettings_8q8q8"]
 
@@ -9,6 +13,8 @@ script = ExtResource("1")
 
 [node name="Instrument" type="BarelyInstrument" parent="." unique_id=1430736698]
 gain = 0.9
+slice_mode = 1
+slice = SubResource("BarelySliceResource_sv68r")
 osc_shape = 0.2
 delay_send = 0.1
 reverb_send = 0.5

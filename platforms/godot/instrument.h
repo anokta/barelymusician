@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include "godot/engine.h"
+#include "godot_cpp/classes/audio_stream_wav.hpp"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 
@@ -54,6 +55,22 @@ namespace barely::godot {
   }                                                                                                \
   type get_##name() const { return name##_; }
 
+class BarelySliceResource : public ::godot::Resource {
+ public:
+  void set_stream(const ::godot::Ref<::godot::AudioStreamWAV>& stream);
+  void set_root_pitch(float root_pitch);
+
+  ::godot::Ref<::godot::AudioStreamWAV> get_stream() const { return stream_; }
+  float get_root_pitch() const { return root_pitch_; }
+
+ private:
+  GDCLASS(BarelySliceResource, ::godot::Resource);
+  static void _bind_methods();
+
+  ::godot::Ref<::godot::AudioStreamWAV> stream_;
+  float root_pitch_ = 0.0f;
+};
+
 class BarelyInstrument : public ::godot::Node {
  public:
   BarelyInstrument();
@@ -64,14 +81,20 @@ class BarelyInstrument : public ::godot::Node {
   void set_note_on(float pitch, float gain = 1.0f, float pitch_shift = 0.0f);
   bool is_note_on(float pitch) const;
 
+  void set_slice(const ::godot::Ref<BarelySliceResource>& slice);
+  ::godot::Ref<BarelySliceResource> get_slice() const { return slice_; }
+
  private:
   GDCLASS(BarelyInstrument, ::godot::Node);
   static void _bind_methods();
 
   static void _note_event_callback(BarelyEventType type, float pitch, void* user_data);
   void _handle_note_event(BarelyEventType type, float pitch);
+  void _on_slice_changed();
 
   uint32_t instrument_id_ = 0;
+  ::godot::Ref<BarelySliceResource> slice_;
+  std::vector<float> slice_buffer_;  // TODO(#181): Remove heap allocation.
 
   BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_DECLARE_GODOT_INSTRUMENT_CONTROL);
 };

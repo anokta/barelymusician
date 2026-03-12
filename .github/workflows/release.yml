@@ -48,7 +48,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: godot-${{ matrix.os }}
-          path: platforms/godot/addons/bin
+          path: platforms/godot/project/addons/barelymusician/bin
 
   unity:
     name: unity on ${{ matrix.os }}

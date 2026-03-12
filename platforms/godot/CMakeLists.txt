@@ -20,6 +20,8 @@ add_library(
   engine.h
   instrument.cpp
   instrument.h
+  performer.cpp
+  performer.h
   godot.cpp
 )
 target_compile_definitions(

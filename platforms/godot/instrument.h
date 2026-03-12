@@ -8,6 +8,7 @@
 #include "godot/engine.h"
 #include "godot_cpp/classes/audio_stream_wav.hpp"
 #include "godot_cpp/classes/node.hpp"
+#include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 
 namespace barely::godot {

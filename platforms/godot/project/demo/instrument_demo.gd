@@ -2,7 +2,6 @@ extends Node
 
 @onready var audioStreamPlayer: AudioStreamPlayer = $AudioStreamPlayer
 @onready var instrument: BarelyInstrument = $Instrument
-@onready var label: Label = $Label
 
 const OCTAVE_KEYS = ['A', 'W', 'S', 'E', 'D', 'F', 'T', 'G', 'Y', 'H', 'U', 'J', 'K']
 const ROOT_PITCH = 0.0

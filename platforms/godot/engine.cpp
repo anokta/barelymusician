@@ -130,6 +130,8 @@ void BarelyEngine::_bind_methods() {
 
   BARELY_GODOT_ENGINE_CONTROLS(BARELY_BIND_GODOT_ENGINE_CONTROL);
 
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tempo"), "set_tempo", "get_tempo");
+
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "comp_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_mix", "get_comp_mix");

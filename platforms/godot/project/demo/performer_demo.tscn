@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://jfomfoutisyt"]
+
+[ext_resource type="Script" uid="uid://cdoataneyqijw" path="res://demo/performer_demo.gd" id="1_gg4gh"]
+
+[sub_resource type="BarelyTaskResource" id="BarelyTaskResource_gg4gh"]
+duration = 1e-06
+
+[sub_resource type="LabelSettings" id="LabelSettings_8q8q8"]
+line_spacing = 0.0
+font_size = 60
+
+[node name="PerformerDemo" type="Node" unique_id=854538286]
+script = ExtResource("1_gg4gh")
+tempo = 124.0
+
+[node name="Metronome" type="BarelyPerformer" parent="." unique_id=1519134621]
+looping = true
+tasks = Array[BarelyTaskResource]([SubResource("BarelyTaskResource_gg4gh")])
+
+[node name="Instrument" type="BarelyInstrument" parent="." unique_id=1430736698]
+gain = 0.9
+attack = 0.0
+osc_shape = 0.75
+delay_send = 0.1
+reverb_send = 0.5
+
+[node name="Label" type="Label" parent="." unique_id=1759105466]
+offset_right = 800.0
+offset_bottom = 600.0
+text = "0"
+label_settings = SubResource("LabelSettings_8q8q8")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=575044476]

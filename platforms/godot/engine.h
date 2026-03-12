@@ -37,7 +37,7 @@ namespace barely::godot {
   X(ReverbDamping, reverb_damping, float, 0.0f)           \
   X(ReverbRoomSize, reverb_room_size, float, 0.0f)        \
   X(ReverbStereoWidth, reverb_stereo_width, float, 1.0f)  \
-  X(ReverbFreeze, reverb_freeze, bool, 0, 0, 1)           \
+  X(ReverbFreeze, reverb_freeze, bool, 0)                 \
   X(SidechainMix, sidechain_mix, float, 1.0f)             \
   X(SidechainAttack, sidechain_attack, float, 0.0f)       \
   X(SidechainRelease, sidechain_release, float, 0.0f)     \

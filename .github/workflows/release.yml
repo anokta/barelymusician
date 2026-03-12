@@ -25,6 +25,31 @@ jobs:
           name: examples-${{ matrix.os }}
           path: build/**/bin/examples/**/*_demo*
 
+  godot:
+    name: godot on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26d
+      - uses: seanmiddleditch/gha-setup-ninja@master
+      - name: build
+        shell: bash
+        run: python build.py --android --godot
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: godot-${{ matrix.os }}
+          path: platforms/godot/addons/bin
+
   unity:
     name: unity on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -76,6 +101,7 @@ jobs:
         run: |
           cd artifacts
           zip -r examples.zip examples
+      # TODO(181): Package godot artifacts.
       - name: unity
         shell: bash
         run: |

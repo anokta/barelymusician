@@ -313,8 +313,8 @@ void BarelyInstrument::_on_slice_changed() {
     return;  // TODO(#181): Support all formats.
   }
 
-  const BarelySlice sample_data{slice_buffer_.data(), slice_buffer_.size(), sample_rate,
-                                slice_->get_root_pitch()};
+  const BarelySlice sample_data{slice_buffer_.data(), static_cast<int32_t>(slice_buffer_.size()),
+                                sample_rate, slice_->get_root_pitch()};
   BarelyInstrument_SetSampleData(BarelyEngine::get_singleton()->get(), instrument_id_, &sample_data,
                                  1);
 }

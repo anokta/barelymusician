@@ -39,7 +39,7 @@ jobs:
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r26d
+          ndk-version: r27d
       - uses: seanmiddleditch/gha-setup-ninja@master
       - name: build
         shell: bash
@@ -64,7 +64,7 @@ jobs:
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r26d
+          ndk-version: r27d
       - uses: seanmiddleditch/gha-setup-ninja@master
       - name: build
         shell: bash

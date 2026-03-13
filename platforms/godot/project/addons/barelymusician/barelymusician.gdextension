@@ -6,7 +6,7 @@ compatibility_minimum = 4.1
 windows.x86_64 = "res://addons/barelymusician/bin/windows/barelymusiciangodot.dll"
 linux.x86_64 = "res://addons/barelymusician/bin/linux/libbarelymusiciangodot.so"
 macos.x86_64 = "res://addons/barelymusician/bin/macos/libbarelymusiciangodot.dylib"
-android.x86_64 = "res://addons/barelymusician/bin/android/armeabi-v7a/libbarelymusiciangodot.so"
+android.x86_64 = "res://addons/barelymusician/bin/android/x86_64/libbarelymusiciangodot.so"
 android.arm64 = "res://addons/barelymusician/bin/android/arm64-v8a/libbarelymusiciangodot.so"
 
 [dependencies]

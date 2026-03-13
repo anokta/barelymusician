@@ -98,16 +98,16 @@ def parse_args():
     )
     parser.add_argument(
         "--android_abis",
-        choices=["armeabi-v7a", "arm64-v8a", "x86", "x86_64"],
+        choices=["arm64-v8a", "x86_64"],
         nargs="+",
-        default=["armeabi-v7a", "arm64-v8a", "x86", "x86_64"],
+        default=["arm64-v8a", "x86_64"],
         help="specify the abis for the android targets (defaults to all)",
     )
     parser.add_argument(
         "--android_min_api",
         type=int,
-        default=21,
-        help="specify the minimum api level for the android targets (defaults to 21)",
+        default=35,
+        help="specify the minimum api level for the android targets (defaults to 35)",
     )
     parser.add_argument(
         "--daisy",

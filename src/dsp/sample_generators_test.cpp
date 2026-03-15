@@ -13,7 +13,7 @@ TEST(SampleGeneratorsTest, GenerateOscSample) {
   static constexpr float kShape = 0.0f;  // sine
 
   for (int i = 0; i < 4; ++i) {
-    EXPECT_FLOAT_EQ(GenerateOscSample(kShape, 0.25f * i, 0.25f * i),
+    EXPECT_FLOAT_EQ(GenerateOscSample(kShape, 0.25f * i, 0.25f),
                     std::sin(std::numbers::pi_v<float> * 0.5f * i));
   }
 }

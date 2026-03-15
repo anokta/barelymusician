@@ -5,9 +5,6 @@
 
 namespace barely {
 
-// Envelope epsilon error which is set to -60 decibels.
-inline constexpr float kEnvelopeEpsilon = 1e-3f;
-
 // Invalid pool index.
 inline constexpr uint32_t kInvalidIndex = UINT32_MAX;
 

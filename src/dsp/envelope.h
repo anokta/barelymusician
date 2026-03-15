@@ -4,8 +4,6 @@
 #include <algorithm>
 #include <cassert>
 
-#include "core/control.h"
-
 namespace barely {
 
 // Envelope that generates output samples according to its current state.
@@ -15,16 +13,20 @@ class Envelope {
   class Adsr {
    public:
     void SetAttack(float sample_rate, float attack) noexcept {
-      attack_coeff_ = GetEnvelopeCoefficient(sample_rate, attack);
+      const float attack_samples = sample_rate * attack;
+      attack_increment_ = (attack_samples >= 1.0f) ? 1.0f / attack_samples : 0.0f;
     }
 
     void SetDecay(float sample_rate, float decay) noexcept {
-      decay_coeff_ = GetEnvelopeCoefficient(sample_rate, decay);
+      const float decay_samples = sample_rate * decay;
+      decay_increment_ = (decay_samples >= 1.0f) ? 1.0f / decay_samples : 0.0f;
     }
 
     void SetRelease(float sample_rate, float release) noexcept {
-      static constexpr float kMinRelease = 5e-3f;  // 5ms
-      release_coeff_ = GetEnvelopeCoefficient(sample_rate, std::max(release, kMinRelease));
+      static constexpr float kMinRelease = 0.001f;
+      const float release_samples = sample_rate * std::max(release, kMinRelease);
+      assert(release_samples >= 1.0f);
+      release_increment_ = 1.0f / release_samples;
     }
 
     void SetSustain(float sustain) noexcept { sustain_ = std::clamp(sustain, 0.0f, 1.0f); }
@@ -32,82 +34,87 @@ class Envelope {
    private:
     friend class Envelope;
 
-    float attack_coeff_ = 0.0f;
-    float decay_coeff_ = 0.0f;
-    float release_coeff_ = 0.0f;
+    float attack_increment_ = 0.0f;
+    float decay_increment_ = 0.0f;
     float sustain_ = 1.0f;
+    float release_increment_ = 0.0f;
   };
 
   float Next() noexcept {
-    assert(adsr_ != nullptr);
-
-    switch (state_) {
-      case State::kAttack:
-        target_ = (adsr_->decay_coeff_ > 0.0f) ? 1.0f : adsr_->sustain_;
-        if (coeff_ == 0.0f || (current_ + kEnvelopeEpsilon) >= target_) {
-          current_ = target_;
-          target_ = adsr_->sustain_;
-          if (adsr_->decay_coeff_ > 0.0f) {
-            state_ = State::kDecay;
-            coeff_ = adsr_->decay_coeff_;
-          } else {
-            state_ = State::kSustain;
-            coeff_ = 0.0f;
-          }
-        }
-        break;
-      case State::kDecay:
-        if (coeff_ == 0.0f || current_ <= (target_ + kEnvelopeEpsilon)) {
-          current_ = target_;
-          state_ = State::kSustain;
-          coeff_ = 0.0f;
-        }
-        break;
-      case State::kRelease:
-        if (current_ <= kEnvelopeEpsilon) {
-          current_ = 0.0f;
-          state_ = State::kIdle;
-          coeff_ = 0.0f;
-        }
-        break;
-      case State::kIdle:
-        return 0.0f;
-      default:
-        break;
+    if (state_ == State::kIdle) {
+      return 0.0;
     }
-
-    const float output = current_;
-    current_ = target_ + coeff_ * (current_ - target_);
-    return output;
+    assert(adsr_ != nullptr);
+    if (state_ == State::kAttack) {
+      if (adsr_->attack_increment_ > 0.0f) {
+        output_ = phase_;
+        phase_ += adsr_->attack_increment_;
+        if (phase_ >= 1.0f) {
+          phase_ = 0.0f;
+          state_ = State::kDecay;
+        }
+        return output_;
+      }
+      phase_ = 0.0f;
+      state_ = State::kDecay;
+    }
+    if (state_ == State::kDecay) {
+      if (adsr_->decay_increment_ > 0.0f) {
+        output_ = 1.0f - phase_ * (1.0f - adsr_->sustain_);
+        phase_ += adsr_->decay_increment_;
+        if (phase_ >= 1.0f) {
+          phase_ = 0.0f;
+          state_ = State::kSustain;
+        }
+        return output_;
+      }
+      state_ = State::kSustain;
+    }
+    if (state_ == State::kSustain) {
+      output_ = adsr_->sustain_;
+      return output_;
+    }
+    if (state_ == State::kRelease) {
+      if (adsr_->release_increment_ > 0.0f) {
+        output_ = phase_ * release_output_;
+        phase_ -= adsr_->release_increment_;
+        if (phase_ <= 0.0f) {
+          phase_ = 0.0f;
+          state_ = State::kIdle;
+        }
+        return output_;
+      }
+      state_ = State::kIdle;
+    }
+    return 0.0f;
   }
 
-  void Reset() noexcept {
-    current_ = 0.0f;
-    target_ = 0.0f;
-    state_ = State::kIdle;
-  }
+  void Reset() noexcept { state_ = State::kIdle; }
 
   void Start(const Adsr& adsr) noexcept {
     adsr_ = &adsr;
+    output_ = adsr_->sustain_;
+    phase_ = 0.0f;
     state_ = State::kAttack;
-    current_ = 0.0f;
-    target_ = 1.0f;
-    coeff_ = adsr_->attack_coeff_;
   }
 
   void Stop() noexcept {
     if (state_ == State::kIdle || state_ == State::kRelease) {
       return;
     }
-    state_ = State::kRelease;
-    target_ = 0.0f;
-    coeff_ = adsr_->release_coeff_;
+    if (state_ == State::kAttack && phase_ == 0.0f && adsr_->attack_increment_ > 0.0f) {
+      state_ = State::kIdle;
+    } else {
+      phase_ = 1.0f;
+      release_output_ = output_;
+      state_ = State::kRelease;
+    }
   }
 
   [[nodiscard]] constexpr bool IsActive() const noexcept { return state_ != State::kIdle; }
 
   [[nodiscard]] constexpr bool IsStartFrame() const noexcept {
-    return state_ == State::kAttack && current_ == 0.0f;
+    return state_ == State::kAttack && phase_ == 0.0f;
   }
 
  private:
@@ -117,9 +124,10 @@ class Envelope {
 
   State state_ = State::kIdle;
 
-  float current_ = 0.0f;
-  float target_ = 0.0f;
-  float coeff_ = 0.0f;
+  float output_ = 0.0f;
+  float release_output_ = 0.0f;
+
+  float phase_ = 0.0f;
 };
 
 }  // namespace barely

@@ -25,7 +25,6 @@ class Envelope {
     void SetRelease(float sample_rate, float release) noexcept {
       static constexpr float kMinRelease = 0.001f;
       const float release_samples = sample_rate * std::max(release, kMinRelease);
-      assert(release_samples >= 1.0f);
       release_increment_ = 1.0f / release_samples;
     }
 

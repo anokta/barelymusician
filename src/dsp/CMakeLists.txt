@@ -1,5 +1,4 @@
-target_sources(
-  barelymusician PRIVATE
+barelymusician_target_sources(
   bit_crusher.h
   compressor.h
   delay_filter.h

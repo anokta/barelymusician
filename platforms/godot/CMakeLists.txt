@@ -35,8 +35,8 @@ target_include_directories(
 )
 target_link_libraries(
   barelymusiciangodot PUBLIC
-  barelymusician
-  godot::cpp
+  barelymusician_mt
+  godot-cpp
 )
 
 function(package_barelymusiciangodot)

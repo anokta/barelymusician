@@ -1,5 +1,4 @@
-target_sources(
-  barelymusician PRIVATE
+barelymusician_target_sources(
   callback.h
   constants.h
   control.h

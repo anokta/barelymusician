@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 
+if(MSVC AND ENABLE_STATIC_MSVC_RUNTIME)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+option(ENABLE_STATIC_MSVC_RUNTIME "Use static MSVC runtime (/MT)" OFF)
+
 if(NOT DEFINED ENABLE_EXAMPLES)
   set(ENABLE_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
 endif()

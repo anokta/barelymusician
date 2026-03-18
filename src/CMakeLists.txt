@@ -2,39 +2,50 @@ set(CMAKE_FOLDER src)
 
 include_directories(.)
 
-add_library(
-  barelymusician STATIC
-  barelymusician.cpp
-  ${CMAKE_SOURCE_DIR}/include/barelymusician.h
-)
-set_target_properties(
-  barelymusician PROPERTIES
-  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-)
-target_compile_definitions(
-  barelymusician PUBLIC
-  BARELY_EXPORT
-  BARELY_ID_INDEX_BIT_COUNT=20
-  BARELY_MAX_FRAME_COUNT=${MAX_FRAME_COUNT}
-  BARELY_MAX_INSTRUMENT_COUNT=${MAX_INSTRUMENT_COUNT}
-  BARELY_MAX_NOTE_COUNT=${MAX_NOTE_COUNT}
-  BARELY_MAX_PERFORMER_COUNT=${MAX_PERFORMER_COUNT}
-  BARELY_MAX_SLICE_COUNT=${MAX_SLICE_COUNT}
-  BARELY_MAX_TASK_COUNT=${MAX_TASK_COUNT}
-  BARELY_MAX_VOICE_COUNT=${MAX_VOICE_COUNT}
-)
-if(MSVC)
-  target_compile_options(
-    barelymusician PUBLIC
-    /fp:fast
-    $<$<CONFIG:RELEASE>: /O2 /Ob2 /Oi /Ot /Oy>
+function(add_barelymusician_target target_name)
+  add_library(${target_name} STATIC
+    barelymusician.cpp
+    ${CMAKE_SOURCE_DIR}/include/barelymusician.h
   )
-else()
-  target_compile_options(
-    barelymusician PUBLIC
-    -ffast-math -fno-math-errno
-    $<$<CONFIG:RELEASE>: -O3 -finline-functions -fomit-frame-pointer>
+  target_compile_definitions(
+    ${target_name} PUBLIC
+    BARELY_EXPORT
+    BARELY_ID_INDEX_BIT_COUNT=20
+    BARELY_MAX_FRAME_COUNT=${MAX_FRAME_COUNT}
+    BARELY_MAX_INSTRUMENT_COUNT=${MAX_INSTRUMENT_COUNT}
+    BARELY_MAX_NOTE_COUNT=${MAX_NOTE_COUNT}
+    BARELY_MAX_PERFORMER_COUNT=${MAX_PERFORMER_COUNT}
+    BARELY_MAX_SLICE_COUNT=${MAX_SLICE_COUNT}
+    BARELY_MAX_TASK_COUNT=${MAX_TASK_COUNT}
+    BARELY_MAX_VOICE_COUNT=${MAX_VOICE_COUNT}
   )
+  if(MSVC)
+    target_compile_options(
+      ${target_name} PUBLIC
+      /fp:fast
+      $<$<CONFIG:RELEASE>: /O2 /Ob2 /Oi /Ot /Oy>
+    )
+  else()
+    target_compile_options(
+      ${target_name} PUBLIC
+      -ffast-math -fno-math-errno
+      $<$<CONFIG:RELEASE>: -O3 -finline-functions -fomit-frame-pointer>
+    )
+  endif()
+  set_target_properties(
+    ${target_name} PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+  )
+  if("${target_name}" MATCHES "_mt$")
+    set_target_properties(
+      ${target_name} PROPERTIES
+      MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+    )
+  endif()
+endfunction()
+add_barelymusician_target(barelymusician)
+if(ENABLE_GODOT)
+  add_barelymusician_target(barelymusician_mt)
 endif()
 
 if(ENABLE_BENCHMARKS)
@@ -63,6 +74,14 @@ if(ENABLE_TESTS)
   gtest_discover_tests(barelymusician_test)
 endif()
 
+function(barelymusician_target_sources)
+  target_sources(barelymusician PRIVATE ${ARGN})
+  if(ENABLE_GODOT)
+    target_sources(barelymusician_mt PRIVATE ${ARGN})
+  endif()
+endfunction()
+
 add_subdirectory(core)
 add_subdirectory(dsp)
 add_subdirectory(engine)
+

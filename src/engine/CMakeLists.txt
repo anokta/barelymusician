@@ -1,5 +1,4 @@
-target_sources(
-  barelymusician PRIVATE
+barelymusician_target_sources(
   effect_params.h
   engine_controller.h
   engine_processor.h

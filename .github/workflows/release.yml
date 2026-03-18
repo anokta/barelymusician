@@ -16,11 +16,11 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: build
         shell: bash
         run: python build.py --examples
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: examples-${{ matrix.os }}
           path: build/**/bin/examples/**/*_demo*
@@ -34,18 +34,17 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
           ndk-version: r27d
-      - uses: seanmiddleditch/gha-setup-ninja@master
       - name: build
         shell: bash
         run: python build.py --android --godot
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: godot-${{ matrix.os }}
           path: platforms/godot/project/addons/barelymusician/bin
@@ -59,65 +58,71 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
           ndk-version: r27d
-      - uses: seanmiddleditch/gha-setup-ninja@master
       - name: build
         shell: bash
         run: python build.py --android --unity
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: unity-${{ matrix.os }}
           path: platforms/unity/Assets/BarelyMusician/Plugins
 
   deploy:
     name: artifacts
-    needs: [examples, unity]
+    needs: [examples, godot, unity]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v4
         with:
           path: temp
       - name: examples
         shell: bash
         run: |
-          mkdir -p artifacts/examples
+          mkdir -p temp/examples
           for dir in temp/examples-*/; do
             for platform_dir in "${dir}"*/; do
               platform=$(basename "${platform_dir}")
-              mkdir -p artifacts/examples/${platform}
+              mkdir -p temp/examples/${platform}
               find "${platform_dir}"* -type f -name '*_demo*' \
-                -exec cp {} "artifacts/examples/${platform}/" \;
+                -exec cp {} "temp/examples/${platform}/" \;
             done
           done
-      - if: startsWith(github.ref, 'refs/tags/v')
+          mkdir -p artifacts
+          cd temp/examples
+          zip -r ${{ github.workspace }}/artifacts/examples.zip *
+      - name: godot
         shell: bash
         run: |
-          cd artifacts
-          zip -r examples.zip examples
-      # TODO(181): Package godot artifacts.
+          mkdir -p platforms/godot/project/addons/barelymusician/bin
+          for dir in temp/godot-*/; do
+            cp -rf "${dir}"* platforms/godot/project/addons/barelymusician/bin/
+          done
+          mkdir -p artifacts
+          cd platforms/godot/project
+          zip -r ${{ github.workspace }}/artifacts/barelymusiciangodot.zip *
       - name: unity
         shell: bash
         run: |
-          mkdir -p artifacts/unity
           for dir in temp/unity-*/; do
             cp -rf "${dir}"* platforms/unity/Assets/BarelyMusician/Plugins/
           done
+          mkdir -p artifacts
           cd platforms/unity
           find Assets/ -name \*.meta >> meta
       - uses: pCYSl5EDgo/create-unitypackage@master
         with:
-          package-path: ${{ github.workspace }}/artifacts/unity/barelymusician.unitypackage
+          package-path: ${{ github.workspace }}/artifacts/barelymusician.unitypackage
           include-files: platforms/unity/meta
           project-folder: platforms/unity
           working-folder: ${{ github.workspace }}
-      - uses: actions/upload-artifact@master
+      - uses: actions/upload-artifact@v6
         with:
           name: artifacts-${{ github.sha }}
           path: artifacts
@@ -129,5 +134,6 @@ jobs:
           generate_release_notes: true
           name: barelymusician ${{ github.ref_name }}
           files: |
+            artifacts/barelymusician.unitypackage
+            artifacts/barelymusiciangodot.zip
             artifacts/examples.zip
-            artifacts/unity/barelymusician.unitypackage

@@ -838,8 +838,7 @@ struct Slice : public BarelySlice {
   /// @param samples Span of mono samples.
   /// @param sample_rate Sampling rate in hertz.
   /// @param root_pitch Root pitch.
-  explicit constexpr Slice(std::span<const float> samples, int sample_rate,
-                           float root_pitch) noexcept
+  constexpr Slice(std::span<const float> samples, int sample_rate, float root_pitch) noexcept
       : Slice({samples.data(), static_cast<int32_t>(samples.size()), sample_rate, root_pitch}) {
     assert(sample_rate >= 0);
   }
@@ -880,6 +879,7 @@ class Instrument {
   /// Returns the identifier.
   ///
   /// @return Identifier.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return instrument_id_; }
 
   /// Returns a control value.
@@ -888,7 +888,7 @@ class Instrument {
   /// @return Instrument control value.
   template <typename ValueType>
   [[nodiscard]] ValueType GetControl(InstrumentControlType type) const noexcept {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     float value = 0.0f;
     [[maybe_unused]] const bool success = BarelyInstrument_GetControl(
@@ -904,7 +904,7 @@ class Instrument {
   /// @return Note control value.
   template <typename ValueType>
   [[nodiscard]] ValueType GetNoteControl(float pitch, NoteControlType type) const noexcept {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     float value = 0.0f;
     [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControl(
@@ -937,7 +937,7 @@ class Instrument {
   /// @param value Instrument control value.
   template <typename ValueType>
   void SetControl(InstrumentControlType type, ValueType value) noexcept {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
         engine_, instrument_id_, static_cast<BarelyInstrumentControlType>(type),
@@ -952,7 +952,7 @@ class Instrument {
   /// @param value Note control value.
   template <typename ValueType>
   void SetNoteControl(float pitch, NoteControlType type, ValueType value) noexcept {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
         engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type),
@@ -1046,6 +1046,7 @@ class Task {
   /// Returns the identifier.
   ///
   /// @return Identifier.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return task_id_; }
 
   /// Returns the duration.
@@ -1162,6 +1163,7 @@ class Performer {
   /// Returns the identifier.
   ///
   /// @return Identifier.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return performer_id_; }
 
   /// Returns the loop begin position.
@@ -1324,6 +1326,7 @@ class Engine {
   /// Returns the pointer to raw engine.
   ///
   /// @return Pointer to raw engine.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator BarelyEngine*() const noexcept { return engine_; }
 
   /// Creates a new instrument.
@@ -1336,7 +1339,7 @@ class Engine {
     NoteEventCallback& note_event_callback =
         note_event_callbacks_.get()[(instrument_id & ((1 << BARELY_ID_INDEX_BIT_COUNT) - 1)) - 1];
     note_event_callback = {};
-    return Instrument(engine_, instrument_id, &note_event_callback);
+    return {engine_, instrument_id, &note_event_callback};
   }
 
   /// Creates a new performer.
@@ -1346,7 +1349,7 @@ class Engine {
     uint32_t performer_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer_id);
     assert(success);
-    return Performer(engine_, performer_id);
+    return {engine_, performer_id};
   }
 
   /// Creates a new task.
@@ -1375,7 +1378,7 @@ class Engine {
         },
         &task_event_callback);
     assert(success);
-    return Task(engine_, task_id, &task_event_callback);
+    return {engine_, task_id, &task_event_callback};
   }
 
   /// Destroys an instrument.
@@ -1419,7 +1422,7 @@ class Engine {
   /// @return Random number.
   template <typename NumberType>
   [[nodiscard]] NumberType GenerateRandomNumber(NumberType min, NumberType max) noexcept {
-    static_assert(std::is_arithmetic<NumberType>::value, "NumberType is not supported");
+    static_assert(std::is_arithmetic_v<NumberType>, "NumberType is not supported");
     return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
   }
 
@@ -1429,7 +1432,7 @@ class Engine {
   /// @return Engine control value.
   template <typename ValueType>
   [[nodiscard]] ValueType GetControl(EngineControlType type) const noexcept {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     float value = 0.0f;
     [[maybe_unused]] const bool success =
@@ -1485,7 +1488,7 @@ class Engine {
   /// @param value Engine control value.
   template <typename ValueType>
   void SetControl(EngineControlType type, ValueType value) noexcept {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     [[maybe_unused]] const bool success = BarelyEngine_SetControl(
         engine_, static_cast<BarelyEngineControlType>(type), static_cast<float>(value));
@@ -1531,6 +1534,7 @@ struct Quantization : public BarelyQuantization {
   ///
   /// @param subdivision Subdivision of a beat.
   /// @param amount Amount.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr Quantization(int subdivision, float amount = 1.0f) noexcept
       : Quantization(BarelyQuantization{static_cast<int32_t>(subdivision), amount}) {}
 
@@ -1568,6 +1572,7 @@ struct Scale : public BarelyScale {
   /// @param pitches Span of pitches.
   /// @param root_pitch Root pitch.
   /// @param mode Mode.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr Scale(std::span<const float> pitches, float root_pitch = 0.0f, int mode = 0) noexcept
       : Scale(BarelyScale{pitches.data(), static_cast<int32_t>(pitches.size()), root_pitch,
                           static_cast<int32_t>(mode)}) {}

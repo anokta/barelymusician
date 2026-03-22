@@ -9,7 +9,7 @@
 
 namespace barely::examples {
 
-enum class RepeaterMode {
+enum class RepeaterMode : uint8_t {
   kForward = 0,
   kBackward,
   kRandom,
@@ -31,7 +31,7 @@ struct Repeater {
   void SetRate(double rate) noexcept;
   void SetStyle(RepeaterMode style) noexcept;
 
-  bool IsPlaying() const noexcept { return performer_.IsPlaying(); }
+  [[nodiscard]] bool IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
  private:
   void OnBeat() noexcept;

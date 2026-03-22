@@ -21,7 +21,7 @@ struct Control {
       : value(static_cast<float>(default_value)),
         min_value(static_cast<float>(min_value)),
         max_value(static_cast<float>(max_value)) {
-    static_assert(std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     assert(default_value >= min_value && default_value <= max_value);
   }

@@ -223,9 +223,9 @@ MonoBehaviour:
   CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
-  FilterType: 0
-  FilterCutoff: 0
+  FilterCutoff: 1
   FilterResonance: 0.5
+  FilterTone: 0
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
@@ -698,9 +698,9 @@ MonoBehaviour:
   CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
-  FilterType: 0
-  FilterCutoff: 0
+  FilterCutoff: 1
   FilterResonance: 0.5
+  FilterTone: 0
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
@@ -910,9 +910,9 @@ MonoBehaviour:
   CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
-  FilterType: 0
-  FilterCutoff: 0
+  FilterCutoff: 1
   FilterResonance: 0.5
+  FilterTone: 0
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
@@ -1172,9 +1172,9 @@ MonoBehaviour:
   CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
-  FilterType: 0
-  FilterCutoff: 0
+  FilterCutoff: 1
   FilterResonance: 0.5
+  FilterTone: 0
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
@@ -1309,9 +1309,9 @@ MonoBehaviour:
   CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
-  FilterType: 0
-  FilterCutoff: 0
+  FilterCutoff: 1
   FilterResonance: 0.5
+  FilterTone: 0
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0

@@ -456,19 +456,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gain: 1
   PitchShift: 0
-  Retrigger: 1
   StereoPan: 0
-  VoiceCount: 4
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0
-  OscMode: 0
-  OscMix: 0
-  OscNoiseMix: 0
-  OscPitchShift: 0
-  OscShape: 0
-  OscSkew: 0
   SliceMode: 2
   Slices:
   - RootPitch: 0
@@ -479,19 +471,27 @@ MonoBehaviour:
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
   - RootPitch: 5
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
-  BitCrusherDepth: 1
-  BitCrusherRate: 1
+  OscMix: 0
+  OscMode: 0
+  OscNoiseMix: 0
+  OscPitchShift: 0
+  OscShape: 0
+  OscSkew: 0
+  CrushDepth: 0
+  CrushRate: 0
   DistortionMix: 0
   DistortionDrive: 1
-  FilterType: 0
-  FilterCutoff: 0
-  FilterQ: 0.71
+  FilterCutoff: 1
+  FilterResonance: 0.5
+  FilterTone: 0
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
   ArpMode: 0
-  ArpGateRatio: 0.5
+  ArpGate: 0.5
   ArpRate: 1
+  Retrigger: 1
+  VoiceCount: 4
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

@@ -55,7 +55,6 @@ class EngineController {
         engine_.timestamp = timestamp;
       }
     }
-    engine_.slice_pool.CleanUpSafeToRelease();
   }
 
   InstrumentController& instrument_controller() noexcept { return instrument_controller_; }

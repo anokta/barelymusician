@@ -147,7 +147,7 @@ void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlT
       break;
     case BarelyNoteControlType_kPitchShift:
       voice.pitch_shift = value;
-      voice.UpdatePitchIncrements(engine_.slice_pool.Get(voice.slice_index));
+      voice.UpdatePitchIncrements(engine_.GetSlice(voice.instrument_index, voice.slice_index));
       break;
     default:
       assert(!"Invalid note control type");
@@ -180,9 +180,8 @@ void InstrumentProcessor::SetNoteOn(uint32_t note_index, uint32_t instrument_ind
     auto& voice = engine_.GetVoice(voice_index);
     voice.instrument_index = instrument_index;
     voice.note_index = note_index;
-    voice.slice_index =
-        engine_.slice_pool.Select(params.first_slice_index, pitch, engine_.audio_rng);
-    voice.Start(params, engine_.slice_pool.Get(voice.slice_index), pitch);
+    voice.slice_index = engine_.SelectSlice(instrument_index, params.first_slice_index, pitch);
+    voice.Start(params, engine_.GetSlice(instrument_index, voice.slice_index), pitch);
   }
 }
 
@@ -240,14 +239,15 @@ uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch
 
 void InstrumentProcessor::SetSampleData(uint32_t instrument_index,
                                         uint32_t first_slice_index) noexcept {
+  engine_.queued_sample_data_counts[instrument_index].fetch_sub(1, std::memory_order_acq_rel);
   auto& params = engine_.instrument_params[instrument_index];
   params.first_slice_index = first_slice_index;
   uint32_t active_voice_index = params.first_voice_index;
   while (active_voice_index != kInvalidIndex) {
     auto& voice = engine_.GetVoice(active_voice_index);
     voice.slice_index =
-        engine_.slice_pool.Select(params.first_slice_index, voice.pitch, engine_.audio_rng);
-    voice.UpdatePitchIncrements(engine_.slice_pool.Get(voice.slice_index));
+        engine_.SelectSlice(instrument_index, params.first_slice_index, voice.pitch);
+    voice.UpdatePitchIncrements(engine_.GetSlice(instrument_index, voice.slice_index));
     active_voice_index = voice.next_voice_index;
   }
 }

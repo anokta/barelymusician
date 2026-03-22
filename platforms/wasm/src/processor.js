@@ -27,13 +27,9 @@ class Processor extends AudioWorkletProcessor {
     this._pendingEventCallbacks = [];
 
     this._instruments = new Map();
+    this._slices = new Map();
     this._performers = new Map();
     this._tasks = new Map();
-
-    this._slices = {};
-    this._slicesToRemove = [];
-
-    this._timestamp = 0;
 
     Module().then(module => {
       this._module = module;
@@ -71,8 +67,7 @@ class Processor extends AudioWorkletProcessor {
 
       const deltaFrameTime = 1.0 / 60.0;
       const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
-      this._timestamp = currentTime + latency;
-      this._module._BarelyEngine_Update(this._engine, this._timestamp);
+      this._module._BarelyEngine_Update(this._engine, currentTime + latency);
 
       const performer_properties = [];
       for (const [handle, value] of this._performers) {
@@ -118,7 +113,6 @@ class Processor extends AudioWorkletProcessor {
 
     this._module._BarelyEngine_Process(
         this._engine, this._outputSamplesPtr, outputChannelCount, outputFrameCount, currentTime);
-    this._cleanUpInstrumentSampleData(currentTime);
 
     for (let frame = 0; frame < outputFrameCount; ++frame) {
       for (let channel = 0; channel < outputChannelCount; ++channel) {
@@ -179,15 +173,9 @@ class Processor extends AudioWorkletProcessor {
         const {instrumentId, noteEventCallbackPtr} = this._instruments.get(command.handle);
         if (!instrumentId) return;
         this._module._BarelyEngine_DestroyInstrument(this._engine, instrumentId);
-        if (this._slices[instrumentId]) {
-          this._slicesToRemove.push({
-            ...this._slices[instrumentId],
-            timestamp: this._timestamp,
-          });
-          delete this._slices[instrumentId];
-        }
         this._module.removeFunction(noteEventCallbackPtr);
         this._instruments.delete(command.handle);
+        this._cleanUpInstrumentSampleData(instrumentId);
       } break;
       case CommandType.INSTRUMENT_SET_ALL_NOTES_OFF: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
@@ -359,13 +347,6 @@ class Processor extends AudioWorkletProcessor {
    * @private
    */
   _setInstrumentSampleData(instrumentId, slices) {
-    if (this._slices[instrumentId]) {
-      this._slicesToRemove.push({
-        ...this._slices[instrumentId],
-        timestamp: this._timestamp,
-      });
-    }
-
     const sliceCount = slices.length;
     const slicesPtr = this._module._malloc(sliceCount * SLICE_SIZE);
     const samplePtrs = [];
@@ -387,33 +368,22 @@ class Processor extends AudioWorkletProcessor {
 
     this._module._BarelyInstrument_SetSampleData(this._engine, instrumentId, slicesPtr, sliceCount);
 
-    this._slices[instrumentId] = {
-      slicesPtr: slicesPtr,
-      samplePtrs: samplePtrs,
-    };
+    this._cleanUpInstrumentSampleData(instrumentId);
+    this._slices.set(instrumentId, {slicesPtr, samplePtrs});
   }
 
   /**
    * Cleans up instrument sample data.
-   * @param {number} timestamp
+   * @param {number} instrumentId
    * @private
    */
-  _cleanUpInstrumentSampleData(timestamp) {
-    let keepIndex = 0;
-    for (let i = 0; i < this._slicesToRemove.length; ++i) {
-      const slice = this._slicesToRemove[i];
-      if (timestamp > slice.timestamp) {
-        for (const ptr of slice.samplePtrs) {
-          this._module._free(ptr);
-        }
-        this._module._free(slice.slicesPtr);
-        keepIndex = i + 1;
-      } else {
-        break;  // timestamps are guaranteed to be sorted.
+  _cleanUpInstrumentSampleData(instrumentId) {
+    const slice = this._slices.get(instrumentId);
+    if (slice) {
+      for (const ptr of slice.samplePtrs) {
+        this._module._free(ptr);
       }
-    }
-    if (keepIndex > 0) {
-      this._slicesToRemove = this._slicesToRemove.slice(keepIndex);
+      this._module._free(slice.slicesPtr);
     }
   }
 }

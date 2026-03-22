@@ -30,7 +30,7 @@ uint32_t InstrumentController::Acquire() noexcept {
 
 void InstrumentController::Release(uint32_t instrument_index) noexcept {
   SetAllNotesOff(instrument_index);
-  ReleaseSampleData(engine_.GetInstrument(instrument_index));
+  SetSampleData(instrument_index, nullptr, 0);
   engine_.instrument_pool.Release(instrument_index);
 }
 
@@ -210,8 +210,10 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch) noe
 
 void InstrumentController::SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
                                          int32_t slice_count) noexcept {
+  engine_.queued_sample_data_counts[instrument_index].fetch_add(1, std::memory_order_acq_rel);
+  while (engine_.process_fence.test());  // busy wait until the next processing is done.
   auto& instrument = engine_.GetInstrument(instrument_index);
-  ReleaseSampleData(instrument);
+  engine_.slice_pool.Release(instrument.first_slice_index);
   instrument.first_slice_index =
       engine_.slice_pool.Acquire(slices, static_cast<uint32_t>(slice_count));
   engine_.ScheduleMessage(SampleDataMessage{instrument_index, instrument.first_slice_index});
@@ -338,13 +340,6 @@ void InstrumentController::ReleaseNote(InstrumentState& instrument, uint32_t not
 
   engine_.note_pool.Release(note_index);
   --instrument.note_count;
-}
-
-void InstrumentController::ReleaseSampleData(InstrumentState& instrument) noexcept {
-  if (instrument.first_slice_index != kInvalidIndex) {
-    engine_.slice_pool.ReleaseAt(instrument.first_slice_index,
-                                 SecondsToFrames(engine_.sample_rate, engine_.timestamp));
-  }
 }
 
 void InstrumentController::UpdateArpNote(InstrumentState& instrument) noexcept {

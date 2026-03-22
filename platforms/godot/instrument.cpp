@@ -255,7 +255,7 @@ void BarelyInstrument::_on_slice_changed() {
   if (!slice_buffer_.empty()) {
     BarelyInstrument_SetSampleData(BarelyEngine::get_singleton()->get(), instrument_id_, nullptr,
                                    0);
-    slice_buffer_.clear();  // TODO(#181): This is not thread safe although should be ok for now.
+    slice_buffer_.clear();
   }
 
   if (slice_.is_null()) {

@@ -4,10 +4,8 @@
 #include <barelymusician.h>
 
 #include <array>
-#include <atomic>
 #include <cassert>
 #include <cstdint>
-#include <utility>
 
 #include "core/constants.h"
 #include "core/rng.h"
@@ -23,11 +21,41 @@ class SlicePool {
     }
   }
 
-  [[nodiscard]] uint32_t Acquire(const BarelySlice* slices, uint32_t slice_count) noexcept;
-  void ReleaseAt(uint32_t first_slice_index, int64_t frame) noexcept;
+  [[nodiscard]] uint32_t Acquire(const BarelySlice* slices, uint32_t slice_count) noexcept {
+    if (slice_count == 0 || free_count_ < slice_count) {
+      return kInvalidIndex;
+    }
+    assert(slices != nullptr);
 
-  void CleanUpSafeToRelease() noexcept;
-  void MarkSafeToRelease(int64_t end_frame) noexcept;
+    const uint32_t first_slice_index = free_[free_read_index_];
+
+    uint32_t slice_index = first_slice_index;
+    for (uint32_t i = 0; i < slice_count; ++i) {
+      free_read_index_ = (free_read_index_ + 1) % kCount;
+
+      const BarelySlice& slice = slices[i];
+      const uint32_t next_slice_index =
+          (i + 1 < slice_count) ? free_[free_read_index_] : kInvalidIndex;
+      slices_[slice_index] = {
+          slice.samples, slice.sample_count, slice.sample_rate, slice.root_pitch, next_slice_index,
+      };
+      slice_index = next_slice_index;
+    }
+
+    free_count_ -= slice_count;
+
+    return first_slice_index;
+  }
+
+  void Release(uint32_t first_slice_index) noexcept {
+    uint32_t slice_index = first_slice_index;
+    while (slice_index != kInvalidIndex) {
+      free_[free_write_index_] = slice_index;
+      free_write_index_ = (free_write_index_ + 1) % kCount;
+      slice_index = slices_[slice_index].next_slice_index;
+      ++free_count_;
+    }
+  }
 
   [[nodiscard]] const SliceState* Get(uint32_t slice_index) const noexcept {
     if (slice_index < kCount) {
@@ -88,20 +116,10 @@ class SlicePool {
 
   std::array<SliceState, kCount> slices_;
 
-  // Seqlock to workaround 64-bit atomic on platforms lacking hardware support.
-  int64_t end_frame_ = 0;
-  std::atomic<uint32_t> end_frame_seq_ = 0;
-
-  // Free queue.
   std::array<uint32_t, kCount> free_;
   uint32_t free_read_index_ = 0;
   uint32_t free_write_index_ = 0;
   uint32_t free_count_ = kCount;
-
-  // Release queue.
-  std::array<std::pair<uint32_t, int64_t>, kCount> to_release_;
-  uint32_t to_release_read_index_ = 0;
-  uint32_t to_release_write_index_ = 0;
 };
 
 }  // namespace barely

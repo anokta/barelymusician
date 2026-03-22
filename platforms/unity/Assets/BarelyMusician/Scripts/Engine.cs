@@ -484,10 +484,7 @@ namespace Barely {
           Debug.LogError("Failed to destroy instrument");
         }
         _instruments.Remove(instrumentId);
-        if (_instrumentSlices.TryGetValue(instrumentId, out List<float[]> slices)) {
-          _instrumentSlicesToRemove.Enqueue((slices, Timestamp));
-          _instrumentSlices.Remove(instrumentId);
-        }
+        _slices.Remove(instrumentId);
         instrumentId = 0;
       }
 
@@ -559,15 +556,13 @@ namespace Barely {
 
       public static void Instrument_SetSampleData(UInt32 instrumentId,
                                                   List<Instrument.Slice> instrumentSlices) {
-        if (_instrumentSlices.TryGetValue(instrumentId, out List<float[]> existingSlices)) {
-          _instrumentSlicesToRemove.Enqueue((existingSlices, Timestamp));
-        }
         Slice[] slices = null;
-        _instrumentSlices[instrumentId] = new List<float[]>();
         if (instrumentSlices.Count > 0) {
           slices = new Slice[instrumentSlices.Count];
           for (int i = 0; i < slices.Length; ++i) {
-            instrumentSlices[i].Sample.LoadAudioData();
+            if (instrumentSlices[i].Sample != null) {
+              instrumentSlices[i].Sample.LoadAudioData();
+            }
             slices[i] = new Slice() {
               samples = instrumentSlices[i].Data,
               sampleCount =
@@ -576,12 +571,19 @@ namespace Barely {
                   (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.frequency : 0,
               rootPitch = instrumentSlices[i].RootPitch / 12.0f,
             };
-            _instrumentSlices[instrumentId].Add(slices[i].samples);
           }
         }
         if (!BarelyInstrument_SetSampleData(Handle, instrumentId, slices, instrumentSlices.Count) &&
             _handle != IntPtr.Zero && instrumentId > 0) {
           Debug.LogError("Failed to set instrument sample data");
+        }
+        if (_slices != null) {
+          _slices[instrumentId] = new List<float[]>();
+          for (int i = 0; i < slices.Length; ++i) {
+            _slices[instrumentId].Add(slices[i].samples);
+          }
+        } else {
+          _slices.Remove(instrumentId);
         }
       }
 
@@ -859,11 +861,9 @@ namespace Barely {
       private static bool _isShuttingDown = false;
 
       private static Dictionary<UInt32, Instrument> _instruments = null;
+      private static Dictionary<UInt32, List<float[]>> _slices = null;
       private static Dictionary<UInt32, Performer> _performers = null;
       private static Dictionary<UInt32, Task> _tasks = null;
-
-      private static Dictionary<UInt32, List<float[]>> _instrumentSlices = null;
-      private static Queue<(List<float[]>, double)> _instrumentSlicesToRemove = null;
 
       private static Scale _scale = new Scale {
         pitches = null,
@@ -946,7 +946,6 @@ namespace Barely {
 
         private void LateUpdate() {
           BarelyEngine_Update(_handle, GetNextTimestamp());
-          CleanUpInstrumentSampleData(AudioSettings.dspTime);
         }
 
         private void Initialize() {
@@ -984,8 +983,7 @@ namespace Barely {
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_RATIO, _sidechainRatio);
           _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
           _instruments = new Dictionary<UInt32, Instrument>();
-          _instrumentSlices = new Dictionary<UInt32, List<float[]>>();
-          _instrumentSlicesToRemove = new Queue<(List<float[]>, double)>();
+          _slices = new Dictionary<UInt32, List<float[]>>();
           _performers = new Dictionary<UInt32, Performer>();
           _tasks = new Dictionary<UInt32, Task>();
           BarelyEngine_Update(_handle, GetNextTimestamp());
@@ -995,17 +993,6 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyEngine_Destroy(_handle);
           _handle = IntPtr.Zero;
-        }
-
-        private void CleanUpInstrumentSampleData(double dspTime) {
-          while (_instrumentSlicesToRemove.Count > 0) {
-            var (slice, timestamp) = _instrumentSlicesToRemove.Peek();
-            if (dspTime > timestamp) {
-              _instrumentSlicesToRemove.Dequeue();
-            } else {
-              break;
-            }
-          }
         }
 
         private double GetNextTimestamp() {

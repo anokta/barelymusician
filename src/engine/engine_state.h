@@ -4,6 +4,7 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <atomic>
 #include <cstdint>
 
 #include "core/control.h"
@@ -56,8 +57,14 @@ struct EngineState {
   // Message queue.
   MessageQueue message_queue = {};
 
+  // Process fence.
+  std::atomic_flag process_fence = {};
+
   // Array of instrument parameters.
   std::array<InstrumentParams, BARELY_MAX_INSTRUMENT_COUNT> instrument_params = {};
+
+  // Number of queued sample data messages per instrument.
+  std::array<std::atomic<int32_t>, BARELY_MAX_INSTRUMENT_COUNT> queued_sample_data_counts = {};
 
   // Maps note indices to voice indices.
   std::array<uint32_t, BARELY_MAX_NOTE_COUNT> note_to_voice = {};
@@ -104,6 +111,24 @@ struct EngineState {
 
   void ScheduleMessage(Message message) noexcept {
     message_queue.Add(SecondsToFrames(sample_rate, timestamp), std::move(message));
+  }
+
+  [[nodiscard]] uint32_t SelectSlice(uint32_t instrument_index, uint32_t first_slice_index,
+                                     float pitch) noexcept {
+    if (instrument_index == kInvalidIndex ||
+        queued_sample_data_counts[instrument_index].load(std::memory_order_acquire) > 0) {
+      return kInvalidIndex;
+    }
+    return slice_pool.Select(first_slice_index, pitch, audio_rng);
+  }
+
+  [[nodiscard]] const SliceState* GetSlice(uint32_t instrument_index,
+                                           uint32_t slice_index) const noexcept {
+    if (instrument_index == kInvalidIndex ||
+        queued_sample_data_counts[instrument_index].load(std::memory_order_acquire) > 0) {
+      return nullptr;
+    }
+    return slice_pool.Get(slice_index);
   }
 
   [[nodiscard]] InstrumentState& GetInstrument(uint32_t instrument_index) noexcept {

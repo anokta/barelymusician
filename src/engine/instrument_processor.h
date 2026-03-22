@@ -99,7 +99,7 @@ class InstrumentProcessor {
       }
     }
 
-    const SliceState* slice = engine_.slice_pool.Get(voice.slice_index);
+    const SliceState* slice = engine_.GetSlice(voice.instrument_index, voice.slice_index);
 
     if (voice.stop_on_slice_end &&
         (slice == nullptr || instrument_params.slice_mode != SliceMode::kOnce)) {

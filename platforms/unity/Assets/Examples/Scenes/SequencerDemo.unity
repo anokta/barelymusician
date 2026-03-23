@@ -207,10 +207,10 @@ MonoBehaviour:
   Gain: 0.55
   PitchShift: 0
   StereoPan: 0.25
-  Attack: 0.05
+  Attack: 0.25
   Decay: 0
   Sustain: 0.8
-  Release: 0.5
+  Release: 1
   SliceMode: 0
   Slices: []
   OscMix: 1
@@ -416,11 +416,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 121
-  CompMix: 1
-  CompAttack: 0
-  CompRelease: 0
-  CompThreshold: 1
-  CompRatio: 0
+  CompMix: 0.25
+  CompAttack: 0.1
+  CompRelease: 0.2
+  CompThreshold: 0.25
+  CompRatio: 1
   DelayMix: 1
   DelayTime: 0
   DelayFeedback: 0
@@ -894,10 +894,10 @@ MonoBehaviour:
   Gain: 0.75
   PitchShift: 0
   StereoPan: -0.25
-  Attack: 0.1
-  Decay: 0
-  Sustain: 1
-  Release: 0.5
+  Attack: 0.5
+  Decay: 0.25
+  Sustain: 0.4
+  Release: 2
   SliceMode: 0
   Slices: []
   OscMix: 1
@@ -1159,7 +1159,7 @@ MonoBehaviour:
   Attack: 0
   Decay: 0
   Sustain: 1
-  Release: 0.05
+  Release: 0.15
   SliceMode: 0
   Slices: []
   OscMix: 1
@@ -1294,7 +1294,7 @@ MonoBehaviour:
   Attack: 0
   Decay: 0
   Sustain: 1
-  Release: 0.075
+  Release: 0.15
   SliceMode: 1
   Slices:
   - RootPitch: 9

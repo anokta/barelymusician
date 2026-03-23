@@ -41,9 +41,10 @@ constexpr double kLookahead = 0.1;
 // Instrument settings.
 constexpr float kInstrumentOscShape = 0.5f;
 constexpr float kInstrumentEnvelopeAttack = 0.0f;
-constexpr float kInstrumentEnvelopeRelease = 0.2f;
-constexpr int kInstrumentVoiceCount = 16;
+constexpr float kInstrumentEnvelopeRelease = 0.4f;
 constexpr float kInstrumentGain = 0.85f;
+constexpr float kInstrumentReverbSend = 0.25f;
+constexpr int kInstrumentVoiceCount = 16;
 
 // Midi file name.
 constexpr char kMidiFileName[] = "midi/sample.mid";
@@ -124,6 +125,7 @@ int main(int /*argc*/, char* argv[]) {
     instrument.SetControl(InstrumentControlType::kOscShape, kInstrumentOscShape);
     instrument.SetControl(InstrumentControlType::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetControl(InstrumentControlType::kRelease, kInstrumentEnvelopeRelease);
+    instrument.SetControl(InstrumentControlType::kReverbSend, kInstrumentReverbSend);
     instrument.SetControl(InstrumentControlType::kVoiceCount, kInstrumentVoiceCount);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();

@@ -272,14 +272,14 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     valueType: 'float',
     defaultValue: 0.05,
     minValue: 0.0,
-    maxValue: 5.0,
+    maxValue: 8.0,
   },
   [InstrumentControlType.DECAY]: {
     name: 'Decay (sec)',
     valueType: 'float',
-    defaultValue: 0.05,
+    defaultValue: 0.0,
     minValue: 0.0,
-    maxValue: 5.0,
+    maxValue: 8.0,
   },
   [InstrumentControlType.SUSTAIN]: {
     name: 'Sustain',
@@ -291,9 +291,9 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
   [InstrumentControlType.RELEASE]: {
     name: 'Release (sec)',
     valueType: 'float',
-    defaultValue: 0.1,
+    defaultValue: 0.2,
     minValue: 0.0,
-    maxValue: 5.0,
+    maxValue: 8.0,
   },
   [InstrumentControlType.SLICE_MODE]: {
     name: 'Slice Mode',

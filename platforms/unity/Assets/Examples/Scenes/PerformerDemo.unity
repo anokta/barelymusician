@@ -420,10 +420,10 @@ MonoBehaviour:
   Gain: 1
   PitchShift: 0
   StereoPan: 0
-  Attack: 0.02
-  Decay: 0.05
+  Attack: 0.05
+  Decay: 0.1
   Sustain: 0.25
-  Release: 0.025
+  Release: 0.1
   SliceMode: 0
   Slices: []
   OscMix: 1
@@ -438,6 +438,7 @@ MonoBehaviour:
   DistortionDrive: 1
   FilterCutoff: 0.5
   FilterResonance: 0.6
+  FilterTone: 0
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0

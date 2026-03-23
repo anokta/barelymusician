@@ -626,9 +626,9 @@ MonoBehaviour:
   PitchShift: 0
   StereoPan: 0
   Attack: 0
-  Decay: 0.1
+  Decay: 0.2
   Sustain: 0.9
-  Release: 0.2
+  Release: 0.4
   SliceMode: 0
   Slices: []
   OscMix: 1

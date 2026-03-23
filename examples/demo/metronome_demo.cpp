@@ -31,7 +31,7 @@ constexpr double kLookahead = 0.1;
 constexpr float kOscShape = 0.75f;
 constexpr float kGain = 1.0f;
 constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.05f;
+constexpr float kRelease = 0.15f;
 constexpr int kVoiceCount = 1;
 
 constexpr float kBarPitch = 1.0f;

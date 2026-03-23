@@ -98,7 +98,7 @@ namespace Barely.Examples {
       instrument.OscShape = 0.75f;
       instrument.Gain = 0.9f;
       instrument.Attack = 0.0f;
-      instrument.Release = 0.05f;
+      instrument.Release = 0.2f;
       _performer = tempGameObject.AddComponent<Performer>();
       _performer.PlayOnAwake = playOnAwake;
       _performer.Loop = true;

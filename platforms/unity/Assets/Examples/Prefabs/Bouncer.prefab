@@ -157,7 +157,7 @@ MonoBehaviour:
   Attack: 0.005
   Decay: 0
   Sustain: 1
-  Release: 0.5
+  Release: 1
   SliceMode: 0
   Slices: []
   OscMix: 1

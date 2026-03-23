@@ -44,6 +44,9 @@ TEST(EngineProcessorTest, PlayNote) {
   Envelope::Adsr adsr;
   adsr.SetRelease(kSampleRate, 0.0f);
 
+  engine->ScheduleMessage(
+      InstrumentControlMessage{kInstrumentIndex, BarelyInstrumentControlType_kRelease, 0.0f});
+
   ToneFilter filters[kStereoChannelCount];
   ToneFilterParams filter_params;
   filter_params.SetCutoff(kSampleRate, 1.0f);
@@ -66,7 +69,7 @@ TEST(EngineProcessorTest, PlayNote) {
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
-    const float envelope_output = envelope.IsActive() ? envelope.Next() : 0.0f;
+    const float envelope_output = envelope.Next();
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(
           samples[frame * kStereoChannelCount + channel],
@@ -85,11 +88,14 @@ TEST(EngineProcessorTest, PlayNote) {
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
-    const float envelope_output = envelope.IsActive() ? envelope.Next() : 0.0f;
+    const bool is_envelope_active = envelope.IsActive();
+    if (is_envelope_active) {
+      envelope.Next();
+    }
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_FLOAT_EQ(
           samples[frame * kStereoChannelCount + channel],
-          (envelope_output > 0.0f) ? (0.5f * filters[channel].Next(0.0f, filter_params)) : 0.0f);
+          is_envelope_active ? 0.5f * filters[channel].Next(0.0f, filter_params) : 0.0f);
     }
   }
 }

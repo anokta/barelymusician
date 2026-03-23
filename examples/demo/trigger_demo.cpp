@@ -37,7 +37,7 @@ constexpr std::array<float, 7> kMajor = {
 constexpr float kGain = 0.9f;
 constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.1f;
+constexpr float kRelease = 0.15f;
 
 constexpr double kInitialTempo = 120.0;
 

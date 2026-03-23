@@ -20,7 +20,7 @@ namespace barely::godot {
   X(Attack, attack, float, 0.05f)                         \
   X(Decay, decay, float, 0.0f)                            \
   X(Sustain, sustain, float, 1.0f)                        \
-  X(Release, release, float, 0.1f)                        \
+  X(Release, release, float, 0.2f)                        \
   X(SliceMode, slice_mode, int, BarelySliceMode_kSustain) \
   X(OscMix, osc_mix, float, 1.0f)                         \
   X(OscMode, osc_mode, int, BarelyOscMode_kCrossfade)     \

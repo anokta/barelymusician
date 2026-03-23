@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "core/constants.h"
+#include "core/control.h"
 #include "core/decibels.h"
 #include "dsp/compressor.h"
 
@@ -24,10 +25,10 @@ class Sidechain {
         sidechain_db = 0.0f;  // no gain reduction
       }
 
-      // TODO(#174): Merge this with the envelope implementation.
       const float coeff =
           (sidechain_db < sidechain_db_frame_[channel]) ? attack_coeff_ : release_coeff_;
-      sidechain_db_frame_[channel] = std::lerp(sidechain_db, sidechain_db_frame_[channel], coeff);
+      sidechain_db_frame_[channel] =
+          sidechain_db + coeff * (sidechain_db_frame_[channel] - sidechain_db);
 
       sidechain_frame[channel] =
           std::lerp(1.0f, DecibelsToAmplitude(sidechain_db_frame_[channel]), params.mix);
@@ -35,11 +36,11 @@ class Sidechain {
   }
 
   void SetAttack(float attack, float sample_rate) noexcept {
-    attack_coeff_ = (attack > 0.0f) ? std::exp(-1.0f / (attack * sample_rate)) : 0.0f;
+    attack_coeff_ = GetEnvelopeCoefficient(sample_rate, attack);
   }
 
   void SetRelease(float release, float sample_rate) noexcept {
-    release_coeff_ = (release > 0.0f) ? std::exp(-1.0f / (release * sample_rate)) : 0.0f;
+    release_coeff_ = GetEnvelopeCoefficient(sample_rate, release);
   }
 
  private:

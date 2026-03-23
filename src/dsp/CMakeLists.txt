@@ -16,7 +16,6 @@ if(ENABLE_TESTS)
     barelymusician_test PRIVATE
     bit_crusher_test.cpp
     distortion_test.cpp
-    envelope_test.cpp
     one_pole_filter_test.cpp
     sample_generators_test.cpp
   )

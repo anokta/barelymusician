@@ -37,7 +37,7 @@ constexpr double kLookahead = 0.1;
 constexpr float kGain = 0.9f;
 constexpr float kOscShape = 0.75f;
 constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.05f;
+constexpr float kRelease = 0.1f;
 constexpr int kVoiceCount = 16;
 
 constexpr double kInitialRate = 2.0;

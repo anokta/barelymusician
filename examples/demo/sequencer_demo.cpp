@@ -33,7 +33,7 @@ constexpr double kLookahead = 0.1;
 constexpr float kGain = 0.9f;
 constexpr float kOscShape = 1.0f;
 constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.1f;
+constexpr float kRelease = 0.15f;
 
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;

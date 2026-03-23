@@ -44,7 +44,7 @@ constexpr float kReverbRoomSize = 0.65f;
 constexpr float kGain = 1.0f;
 constexpr bool kLoop = true;
 constexpr float kAttack = 0.0125f;
-constexpr float kRelease = 0.125f;
+constexpr float kRelease = 0.2f;
 constexpr int kVoiceCount = 16;
 constexpr float kReverbSend = 0.5f;
 

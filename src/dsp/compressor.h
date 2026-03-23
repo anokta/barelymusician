@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_DSP_COMPRESSOR_H_
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 
 #include "core/constants.h"
@@ -34,9 +33,8 @@ class Compressor {
     const float input_peak_db =
         AmplitudeToDecibels(std::max(std::abs(frame[0]), std::abs(frame[1])));
 
-    // TODO(#174): Merge this with the envelope implementation.
     const float coeff = (input_peak_db > peak_db_) ? attack_coeff_ : release_coeff_;
-    peak_db_ = std::lerp(input_peak_db, peak_db_, coeff);
+    peak_db_ = input_peak_db + coeff * (peak_db_ - input_peak_db);
 
     if (peak_db_ > params.threshold_db) {
       const float gain = DecibelsToAmplitude(
@@ -48,11 +46,11 @@ class Compressor {
   }
 
   void SetAttack(float attack, float sample_rate) noexcept {
-    attack_coeff_ = (attack > 0.0f) ? std::exp(-1.0f / (attack * sample_rate)) : 0.0f;
+    attack_coeff_ = GetEnvelopeCoefficient(sample_rate, attack);
   }
 
   void SetRelease(float release, float sample_rate) noexcept {
-    release_coeff_ = (release > 0.0f) ? std::exp(-1.0f / (release * sample_rate)) : 0.0f;
+    release_coeff_ = GetEnvelopeCoefficient(sample_rate, release);
   }
 
  private:

@@ -17,11 +17,11 @@ struct ToneFilterParams {
 
   ToneFilterParams() noexcept { SetResonance(0.5f); }
 
-  void Approach(const ToneFilterParams& params) noexcept {
-    ApproachValue(g, params.g);
-    ApproachValue(k, params.k);
-    ApproachValue(tilt_amount, params.tilt_amount);
-    ApproachValue(tilt_coeff, params.tilt_coeff);
+  void Approach(const ToneFilterParams& params, float coeff) noexcept {
+    ApproachValue(g, params.g, coeff);
+    ApproachValue(k, params.k, coeff);
+    ApproachValue(tilt_amount, params.tilt_amount, coeff);
+    ApproachValue(tilt_coeff, params.tilt_coeff, coeff);
   }
 
   void SetCutoff(float sample_rate, float cutoff) noexcept {

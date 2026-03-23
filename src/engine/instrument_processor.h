@@ -198,7 +198,7 @@ class InstrumentProcessor {
     output_frame[0] += dry_scale * left_output;
     output_frame[1] += dry_scale * right_output;
 
-    voice.Approach(instrument_params.voice_params);
+    voice.Approach(instrument_params.voice_params, engine_.smoothing_coeff);
   }
 
   EngineState& engine_;

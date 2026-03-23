@@ -44,21 +44,21 @@ struct VoiceState {
 
   bool stop_on_slice_end = false;
 
-  void Approach(const VoiceParams& new_params) noexcept {
-    params.filter_params.Approach(new_params.filter_params);
-    ApproachValue(params.gain, note_params.gain * new_params.gain);
-    ApproachValue(params.bit_crusher_increment, new_params.bit_crusher_increment);
-    ApproachValue(params.bit_crusher_range, new_params.bit_crusher_range);
-    ApproachValue(params.distortion_amount, new_params.distortion_amount);
-    ApproachValue(params.distortion_drive, new_params.distortion_drive);
-    ApproachValue(params.osc_mix, new_params.osc_mix);
-    ApproachValue(params.osc_noise_mix, new_params.osc_noise_mix);
-    ApproachValue(params.osc_shape, new_params.osc_shape);
-    ApproachValue(params.osc_skew, new_params.osc_skew);
-    ApproachValue(params.stereo_pan, new_params.stereo_pan);
-    ApproachValue(params.delay_send, new_params.delay_send);
-    ApproachValue(params.reverb_send, new_params.reverb_send);
-    ApproachValue(params.sidechain_send, new_params.sidechain_send);
+  void Approach(const VoiceParams& new_params, float coeff) noexcept {
+    params.filter_params.Approach(new_params.filter_params, coeff);
+    ApproachValue(params.gain, note_params.gain * new_params.gain, coeff);
+    ApproachValue(params.bit_crusher_increment, new_params.bit_crusher_increment, coeff);
+    ApproachValue(params.bit_crusher_range, new_params.bit_crusher_range, coeff);
+    ApproachValue(params.distortion_amount, new_params.distortion_amount, coeff);
+    ApproachValue(params.distortion_drive, new_params.distortion_drive, coeff);
+    ApproachValue(params.osc_mix, new_params.osc_mix, coeff);
+    ApproachValue(params.osc_noise_mix, new_params.osc_noise_mix, coeff);
+    ApproachValue(params.osc_shape, new_params.osc_shape, coeff);
+    ApproachValue(params.osc_skew, new_params.osc_skew, coeff);
+    ApproachValue(params.stereo_pan, new_params.stereo_pan, coeff);
+    ApproachValue(params.delay_send, new_params.delay_send, coeff);
+    ApproachValue(params.reverb_send, new_params.reverb_send, coeff);
+    ApproachValue(params.sidechain_send, new_params.sidechain_send, coeff);
   }
 
   void Start(const InstrumentParams& instrument_params, const SliceState* slice,

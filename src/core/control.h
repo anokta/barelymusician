@@ -36,12 +36,11 @@ struct Control {
   }
 };
 
-inline constexpr void ApproachValue(float& current_value, float target_value) noexcept {
-  constexpr float kSmoothingCoeff = 0.002f;
-  current_value += (target_value - current_value) * kSmoothingCoeff;
+inline void ApproachValue(float& current_value, float target_value, float coeff) noexcept {
+  current_value = target_value + coeff * (current_value - target_value);
 }
 
-[[nodiscard]] inline float GetEnvelopeCoefficient(float sample_rate, float seconds) noexcept {
+[[nodiscard]] inline float GetCoefficient(float sample_rate, float seconds) noexcept {
   const float samples = sample_rate * seconds;
   static const float kLogEpsilon = std::log(kEnvelopeEpsilon);
   return (samples > 0.0f) ? std::exp(kLogEpsilon / samples) : 0.0f;

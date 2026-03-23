@@ -20,11 +20,11 @@ struct ReverbParams {
   float width = 1.0f;
   bool freeze = false;
 
-  void Approach(const ReverbParams& params) noexcept {
-    ApproachValue(mix, params.mix);
-    ApproachValue(feedback, params.feedback);
-    ApproachValue(damping_ratio, params.damping_ratio);
-    ApproachValue(width, params.width);
+  void Approach(const ReverbParams& params, float coeff) noexcept {
+    ApproachValue(mix, params.mix, coeff);
+    ApproachValue(feedback, params.feedback, coeff);
+    ApproachValue(damping_ratio, params.damping_ratio, coeff);
+    ApproachValue(width, params.width, coeff);
     freeze = params.freeze;
   }
 

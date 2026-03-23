@@ -306,7 +306,7 @@ BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
   X(InstrumentControlType, OscMix, 0.0f, 0.0f, 1.0f, "Oscillator Mix")                  \
   X(InstrumentControlType, OscMode, 0, 0, BarelyOscMode_kCount - 1, "Oscillator Mode")  \
   X(InstrumentControlType, OscNoiseMix, 0.0f, 0.0f, 1.0f, "Oscillator Noise Mix")       \
-  X(InstrumentControlType, OscPitchShift, 0.0f, 0.0f, 0.0f, "Oscillator Pitch Shift")   \
+  X(InstrumentControlType, OscPitchShift, 0.0f, -2.0f, 2.0f, "Oscillator Pitch Shift")  \
   X(InstrumentControlType, OscShape, 0.0f, 0.0f, 1.0f, "Oscillator Shape")              \
   X(InstrumentControlType, OscSkew, 0.0f, -1.0f, 1.0f, "Oscillator Skew")               \
   X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Bit Crusher Depth")           \

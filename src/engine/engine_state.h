@@ -102,12 +102,15 @@ struct EngineState {
   // Sampling rate in hertz.
   float sample_rate = 0.0f;
 
+  // Smoothing coefficient.
+  float smoothing_coeff = 0.0f;
+
   void Approach() noexcept {
-    current_params.comp_params.Approach(target_params.comp_params);
-    current_params.sidechain_params.Approach(target_params.sidechain_params);
-    current_params.delay_params.Approach(target_params.delay_params);
-    current_params.reverb_params.Approach(target_params.reverb_params);
-    ApproachValue(current_params.gain, target_params.gain);
+    current_params.comp_params.Approach(target_params.comp_params, smoothing_coeff);
+    current_params.sidechain_params.Approach(target_params.sidechain_params, smoothing_coeff);
+    current_params.delay_params.Approach(target_params.delay_params, smoothing_coeff);
+    current_params.reverb_params.Approach(target_params.reverb_params, smoothing_coeff);
+    ApproachValue(current_params.gain, target_params.gain, smoothing_coeff);
   }
 
   void ScheduleMessage(Message message) noexcept {

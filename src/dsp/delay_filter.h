@@ -25,14 +25,14 @@ struct DelayParams {
   float ping_pong = 0.0f;
   float reverb_send = 0.0f;
 
-  void Approach(const DelayParams& params) noexcept {
-    ApproachValue(mix, params.mix);
-    ApproachValue(frame_count, params.frame_count);
-    ApproachValue(feedback, params.feedback);
-    ApproachValue(lpf_coeff, params.lpf_coeff);
-    ApproachValue(hpf_coeff, params.hpf_coeff);
-    ApproachValue(ping_pong, params.ping_pong);
-    ApproachValue(reverb_send, params.reverb_send);
+  void Approach(const DelayParams& params, float coeff) noexcept {
+    ApproachValue(mix, params.mix, coeff);
+    ApproachValue(frame_count, params.frame_count, coeff);
+    ApproachValue(feedback, params.feedback, coeff);
+    ApproachValue(lpf_coeff, params.lpf_coeff, coeff);
+    ApproachValue(hpf_coeff, params.hpf_coeff, coeff);
+    ApproachValue(ping_pong, params.ping_pong, coeff);
+    ApproachValue(reverb_send, params.reverb_send, coeff);
   }
 };
 

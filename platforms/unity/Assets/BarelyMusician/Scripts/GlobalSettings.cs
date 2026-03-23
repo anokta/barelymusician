@@ -83,7 +83,7 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float SidechainRatio = 0.0f;
 
-    private void Update() {
+    private void LateUpdate() {
       Engine.Tempo = (double)Bpm;
       Engine.Gain = Gain;
       Engine.CompMix = CompMix;

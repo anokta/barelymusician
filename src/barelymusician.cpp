@@ -5,6 +5,7 @@
 #include <cstdint>
 
 #include "core/constants.h"
+#include "core/control.h"
 #include "core/time.h"
 #include "engine/engine_controller.h"
 #include "engine/engine_processor.h"
@@ -49,6 +50,8 @@ struct BarelyEngine {
   explicit BarelyEngine(int sample_rate) noexcept : controller(state), processor(state) {
     state.sample_rate = static_cast<float>(sample_rate);
     state.reverb.SetSampleRate(state.sample_rate);
+    static constexpr float kSmoothingSeconds = 0.05f;  // 50ms
+    state.smoothing_coeff = barely::GetCoefficient(state.sample_rate, kSmoothingSeconds);
   }
 
   [[nodiscard]] bool IsValidInstrument(uint32_t instrument_id) const noexcept {

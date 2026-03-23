@@ -15,16 +15,16 @@ class Envelope {
   class Adsr {
    public:
     void SetAttack(float sample_rate, float attack) noexcept {
-      attack_coeff_ = GetEnvelopeCoefficient(sample_rate, attack);
+      attack_coeff_ = GetCoefficient(sample_rate, attack);
     }
 
     void SetDecay(float sample_rate, float decay) noexcept {
-      decay_coeff_ = GetEnvelopeCoefficient(sample_rate, decay);
+      decay_coeff_ = GetCoefficient(sample_rate, decay);
     }
 
     void SetRelease(float sample_rate, float release) noexcept {
       static constexpr float kMinRelease = 5e-3f;  // 5ms
-      release_coeff_ = GetEnvelopeCoefficient(sample_rate, std::max(release, kMinRelease));
+      release_coeff_ = GetCoefficient(sample_rate, std::max(release, kMinRelease));
     }
 
     void SetSustain(float sustain) noexcept { sustain_ = std::clamp(sustain, 0.0f, 1.0f); }

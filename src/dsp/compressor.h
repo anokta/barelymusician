@@ -15,10 +15,10 @@ struct CompressorParams {
   float threshold_db = 0.0f;
   float ratio = 1.0f;
 
-  void Approach(const CompressorParams& params) noexcept {
-    ApproachValue(mix, params.mix);
-    ApproachValue(threshold_db, params.threshold_db);
-    ApproachValue(ratio, params.ratio);
+  void Approach(const CompressorParams& params, float coeff) noexcept {
+    ApproachValue(mix, params.mix, coeff);
+    ApproachValue(threshold_db, params.threshold_db, coeff);
+    ApproachValue(ratio, params.ratio, coeff);
   }
 
   void SetRatio(float normalized_ratio) noexcept {
@@ -46,11 +46,11 @@ class Compressor {
   }
 
   void SetAttack(float attack, float sample_rate) noexcept {
-    attack_coeff_ = GetEnvelopeCoefficient(sample_rate, attack);
+    attack_coeff_ = GetCoefficient(sample_rate, attack);
   }
 
   void SetRelease(float release, float sample_rate) noexcept {
-    release_coeff_ = GetEnvelopeCoefficient(sample_rate, release);
+    release_coeff_ = GetCoefficient(sample_rate, release);
   }
 
  private:

@@ -18,6 +18,18 @@ namespace Barely {
 
   /// A representation of an engine that governs all musical components.
   public static class Engine {
+    /// Gain.
+    public static float Gain {
+      get { return _gain; }
+      set {
+        if (_gain != value) {
+          Internal.Engine_SetControl(Internal.EngineControlType.GAIN, value);
+          _gain = Internal.Engine_GetControl(Internal.EngineControlType.GAIN);
+        }
+      }
+    }
+    private static float _gain = 1.0f;
+
     /// Compressor mix.
     public static float CompMix {
       get { return _compMix; }
@@ -368,8 +380,10 @@ namespace Barely {
       }
 
       public enum EngineControlType {
+        // Gain.
+        [InspectorName("Gain")] GAIN = 0,
         // Compressor mix.
-        [InspectorName("Comp Mix")] COMP_MIX = 0,
+        [InspectorName("Comp Mix")] COMP_MIX,
         // Compressor attack in seconds.
         [InspectorName("Comp Attack")] COMP_ATTACK,
         // Compressor release in seconds.

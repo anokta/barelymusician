@@ -107,6 +107,7 @@ struct EngineState {
     current_params.sidechain_params.Approach(target_params.sidechain_params);
     current_params.delay_params.Approach(target_params.delay_params);
     current_params.reverb_params.Approach(target_params.reverb_params);
+    ApproachValue(current_params.gain, target_params.gain);
   }
 
   void ScheduleMessage(Message message) noexcept {

@@ -12,6 +12,7 @@ struct EffectParams {
   CompressorParams sidechain_params = {};
   DelayParams delay_params = {};
   ReverbParams reverb_params = {};
+  float gain = 1.0f;
 };
 
 }  // namespace barely

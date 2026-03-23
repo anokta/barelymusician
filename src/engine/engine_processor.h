@@ -83,6 +83,9 @@ class EngineProcessor {
 
   void SetControl(BarelyEngineControlType type, float value) noexcept {
     switch (type) {
+      case BarelyEngineControlType_kGain:
+        engine_.target_params.gain = value;
+        break;
       case BarelyEngineControlType_kCompMix:
         engine_.target_params.comp_params.mix = value;
         break;
@@ -213,6 +216,9 @@ class EngineProcessor {
       engine_.reverb.Process(reverb_frame, output_frame, engine_.current_params.reverb_params);
 
       engine_.comp.Process(output_frame, engine_.current_params.comp_params);
+
+      output_frame[0] *= engine_.current_params.gain;
+      output_frame[1] *= engine_.current_params.gain;
 
       engine_.Approach();
     }

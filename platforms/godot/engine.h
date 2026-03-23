@@ -21,6 +21,7 @@ namespace barely::godot {
 #define BARELY_STR(x) #x
 
 #define BARELY_GODOT_ENGINE_CONTROLS(X)                   \
+  X(Gain, gain, float, 1.0f)                              \
   X(CompMix, comp_mix, float, 1.0f)                       \
   X(CompAttack, comp_attack, float, 0.0f)                 \
   X(CompRelease, comp_release, float, 0.0f)               \

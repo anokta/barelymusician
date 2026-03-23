@@ -268,6 +268,7 @@ BARELY_ENUM(EventType, BARELY_EVENT_TYPES)
 
 /// Engine control types.
 #define BARELY_ENGINE_CONTROL_TYPES(EngineControlType, X)                           \
+  X(EngineControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                              \
   X(EngineControlType, CompMix, 1.0f, 0.0f, 1.0f, "Compressor Mix")                 \
   X(EngineControlType, CompAttack, 0.0f, 0.0f, 8.0f, "Compressor Attack")           \
   X(EngineControlType, CompRelease, 0.0f, 0.0f, 8.0f, "Compressor Release")         \

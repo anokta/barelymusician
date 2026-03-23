@@ -7,6 +7,9 @@ namespace Barely {
     [Range(30.0f, 960.0f)]
     public float Bpm = 120.0f;
 
+    [Range(0.0f, 1.0f)]
+    public float Gain = 1.0f;
+
     [Header("Compressor")]
 
     [Range(0.0f, 1.0f)]
@@ -82,6 +85,7 @@ namespace Barely {
 
     private void Update() {
       Engine.Tempo = (double)Bpm;
+      Engine.Gain = Gain;
       Engine.CompMix = CompMix;
       Engine.CompAttack = CompAttack;
       Engine.CompRelease = CompRelease;

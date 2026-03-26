@@ -40,10 +40,17 @@ func _input(event):
 		elif key_string == 'V':
 			gain = min(gain + 0.25, 1.0)
 			return
+		elif key_string == '1':
+			instrument.osc_mix = 1.0
+			return
+		elif key_string == '2':
+			instrument.osc_mix = 0.0
+			return
+		elif key_string == '3':
+			instrument.osc_mix = 0.5
+			return
 		elif key_string == '0':
-			var current_arp_mode = instrument.get_arp_mode()
-			var new_arp_mode = instrument.ARP_MODE_UP if current_arp_mode == instrument.ARP_MODE_NONE else instrument.ARP_MODE_NONE
-			instrument.set_arp_mode(new_arp_mode)
+			instrument.arp_mode = instrument.ARP_MODE_UP if instrument.arp_mode == instrument.ARP_MODE_NONE else instrument.ARP_MODE_NONE
 			return
 
 		var key_index = OCTAVE_KEYS.find(key_string)

@@ -31,5 +31,3 @@ text = "BarelyMusician Instrument Demo
 * Use 0 key to toggle arpeggiator on and off"
 label_settings = SubResource("LabelSettings_8q8q8")
 autowrap_mode = 2
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=575044476]

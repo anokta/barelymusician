@@ -1,6 +1,5 @@
 extends Node
 
-@onready var audioStreamPlayer: AudioStreamPlayer = $AudioStreamPlayer
 @onready var instrument: BarelyInstrument = $Instrument
 
 const OCTAVE_KEYS = ['A', 'W', 'S', 'E', 'D', 'F', 'T', 'G', 'Y', 'H', 'U', 'J', 'K']
@@ -16,12 +15,9 @@ func _ready():
 	BarelyEngine.delay_feedback = 0.2
 	BarelyEngine.delay_ping_pong = 0.5
 	BarelyEngine.reverb_room_size = 0.4
-#
+
 	instrument.note_on.connect(_on_note_on)
 	instrument.note_off.connect(_on_note_off)
-
-	audioStreamPlayer.stream = BarelyAudioStream.new()
-	audioStreamPlayer.play()
 
 func _input(event):
 	if event is InputEventKey and event.pressed:

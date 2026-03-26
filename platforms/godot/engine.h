@@ -11,6 +11,7 @@
 #include "godot_cpp/classes/audio_stream.hpp"
 #include "godot_cpp/classes/audio_stream_playback.hpp"
 #include "godot_cpp/classes/audio_stream_playback_resampled.hpp"
+#include "godot_cpp/classes/audio_stream_player.hpp"
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/object.hpp"
 #include "godot_cpp/classes/ref.hpp"
@@ -121,6 +122,7 @@ class BarelyEngine : public ::godot::Object {
   static inline BarelyEngine* singleton_ = nullptr;
 
   ::BarelyEngine* engine_ = nullptr;
+  ::godot::AudioStreamPlayer* audio_player_ = nullptr;
 
   BARELY_GODOT_ENGINE_CONTROLS(BARELY_DEFINE_GODOT_ENGINE_CONTROL);
 };

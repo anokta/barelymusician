@@ -8,6 +8,7 @@
 #include "godot_cpp/classes/audio_frame.hpp"
 #include "godot_cpp/classes/audio_server.hpp"
 #include "godot_cpp/classes/audio_stream_playback.hpp"
+#include "godot_cpp/classes/audio_stream_player.hpp"
 #include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/classes/object.hpp"
 #include "godot_cpp/classes/ref.hpp"
@@ -21,6 +22,7 @@ namespace barely::godot {
 using ::godot::AudioFrame;
 using ::godot::AudioServer;
 using ::godot::AudioStreamPlayback;
+using ::godot::AudioStreamPlayer;
 using ::godot::ClassDB;
 using ::godot::D_METHOD;
 using ::godot::Engine;
@@ -54,7 +56,6 @@ int32_t BarelyAudioStreamPlayback::_mix_resampled(AudioFrame* buffer, int32_t fr
 Ref<AudioStreamPlayback> BarelyAudioStream::_instantiate_playback() const {
   if (!playback_.is_valid()) {
     if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {
-      BarelyEngine::get_singleton()->get();  // force initialize
       if (static constexpr const char* kNodeName = "BarelyEngineNode";
           !tree->get_root()->has_node(kNodeName)) {
         BarelyEngineNode* node = memnew(BarelyEngineNode);
@@ -80,6 +81,10 @@ BarelyEngine::BarelyEngine() {
 BarelyEngine::~BarelyEngine() {
   ERR_FAIL_COND(singleton_ != this);
   singleton_ = nullptr;
+  if (audio_player_ != nullptr) {
+    memdelete(audio_player_);
+    audio_player_ = nullptr;
+  }
   BarelyEngine_Destroy(engine_);
   engine_ = nullptr;
 }
@@ -104,6 +109,16 @@ void BarelyEngine::set_tempo(double tempo) { BarelyEngine_SetTempo(get(), tempo)
     BarelyEngine_Create(static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()),
                         &engine_);
     BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL);
+    if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {
+      if (audio_player_ == nullptr) {  // start audio processing
+        audio_player_ = memnew(AudioStreamPlayer);
+        audio_player_->set_name("BarelyAudioPlayer");
+        audio_player_->set_stream(memnew(BarelyAudioStream));
+        tree->get_root()->call_deferred("add_child", audio_player_);
+        audio_player_->set_owner(nullptr);
+        audio_player_->call_deferred("play");
+      }
+    }
   }
   return engine_;
 }

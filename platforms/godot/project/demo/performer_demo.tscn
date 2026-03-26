@@ -31,5 +31,3 @@ text = "0"
 label_settings = SubResource("LabelSettings_8q8q8")
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=575044476]

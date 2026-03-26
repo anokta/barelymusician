@@ -1,6 +1,5 @@
 extends Node
 
-@onready var audioStreamPlayer: AudioStreamPlayer = $AudioStreamPlayer
 @onready var instrument: BarelyInstrument = $Instrument
 @onready var metronome: BarelyPerformer = $Metronome
 @onready var label: Label = $Label
@@ -11,9 +10,6 @@ extends Node
 var _beat = -1
 
 func _ready() -> void:
-	audioStreamPlayer.stream = BarelyAudioStream.new()
-	audioStreamPlayer.play()
-
 	var metronome_task = metronome.tasks[0]
 	metronome_task.connect("task_begin", Callable(self, "_on_task_begin"))
 	metronome_task.connect("task_end", Callable(self, "_on_task_end"))

@@ -1,6 +1,6 @@
 {
   "name": "barelymusician",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "private": true,
   "scripts": {
     "build:bundle": "esbuild demo/main.js --minify --bundle --outfile=build/bundle.js --format=esm",

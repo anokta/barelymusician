@@ -8,7 +8,6 @@
 
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/resource.hpp"
-#include "godot_cpp/variant/callable.hpp"
 #include "godot_cpp/variant/typed_array.hpp"
 
 namespace barely::godot {
@@ -18,14 +17,10 @@ class BarelyTaskResource : public ::godot::Resource {
   void set_position(double position);
   void set_duration(double duration);
   void set_priority(int32_t priority);
-  void set_begin_callback(const ::godot::Callable& callback);
-  void set_end_callback(const ::godot::Callable& callback);
 
   double get_position() const { return position_; }
   double get_duration() const { return duration_; }
   int32_t get_priority() const { return priority_; }
-  const ::godot::Callable& get_begin_callback() const { return begin_callback_; }
-  const ::godot::Callable& get_end_callback() const { return end_callback_; }
 
  private:
   GDCLASS(BarelyTaskResource, ::godot::Resource);
@@ -34,9 +29,6 @@ class BarelyTaskResource : public ::godot::Resource {
   double position_ = 0.0;
   double duration_ = 1.0;
   int32_t priority_ = 0;
-
-  ::godot::Callable begin_callback_;
-  ::godot::Callable end_callback_;
 };
 
 class BarelyPerformer : public ::godot::Node {

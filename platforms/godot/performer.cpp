@@ -4,12 +4,14 @@
 
 #include "godot/engine.h"
 #include "godot_cpp/core/class_db.hpp"
+#include "godot_cpp/variant/callable.hpp"
 
 namespace barely::godot {
 
 using ::godot::Callable;
 using ::godot::ClassDB;
 using ::godot::D_METHOD;
+using ::godot::MethodInfo;
 using ::godot::PropertyHint;
 using ::godot::PropertyInfo;
 using ::godot::Ref;
@@ -32,16 +34,6 @@ void BarelyTaskResource::set_priority(int32_t priority) {
   emit_changed();
 }
 
-void BarelyTaskResource::set_begin_callback(const Callable& callback) {
-  begin_callback_ = callback;
-  emit_changed();
-}
-
-void BarelyTaskResource::set_end_callback(const Callable& callback) {
-  end_callback_ = callback;
-  emit_changed();
-}
-
 void BarelyTaskResource::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_position", "position"), &BarelyTaskResource::set_position);
   ClassDB::bind_method(D_METHOD("get_position"), &BarelyTaskResource::get_position);
@@ -52,22 +44,12 @@ void BarelyTaskResource::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_priority", "priority"), &BarelyTaskResource::set_priority);
   ClassDB::bind_method(D_METHOD("get_priority"), &BarelyTaskResource::get_priority);
 
-  ClassDB::bind_method(D_METHOD("set_begin_callback", "callback"),
-                       &BarelyTaskResource::set_begin_callback);
-  ClassDB::bind_method(D_METHOD("get_begin_callback"), &BarelyTaskResource::get_begin_callback);
-
-  ClassDB::bind_method(D_METHOD("set_end_callback", "callback"),
-                       &BarelyTaskResource::set_end_callback);
-  ClassDB::bind_method(D_METHOD("get_end_callback"), &BarelyTaskResource::get_end_callback);
-
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "position"), "set_position", "get_position");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "duration"), "set_duration", "get_duration");
   ADD_PROPERTY(PropertyInfo(Variant::INT, "priority"), "set_priority", "get_priority");
 
-  ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "begin_callback"), "set_begin_callback",
-               "get_begin_callback");
-  ADD_PROPERTY(PropertyInfo(Variant::CALLABLE, "end_callback"), "set_end_callback",
-               "get_end_callback");
+  ADD_SIGNAL(MethodInfo("task_begin"));
+  ADD_SIGNAL(MethodInfo("task_end"));
 }
 
 BarelyPerformer::BarelyPerformer() {
@@ -199,11 +181,9 @@ void BarelyPerformer::_on_task_changed() {
           if (!task) return;
 
           if (type == BarelyEventType_kBegin) {
-            const auto& cb = task->get_begin_callback();
-            if (cb.is_valid()) cb.call();
+            task->emit_signal("task_begin");
           } else if (type == BarelyEventType_kEnd) {
-            const auto& cb = task->get_end_callback();
-            if (cb.is_valid()) cb.call();
+            task->emit_signal("task_end");
           }
         },
         task.ptr(), &task_id);

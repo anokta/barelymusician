@@ -15,8 +15,8 @@ func _ready() -> void:
 	audioStreamPlayer.play()
 
 	var metronome_task = metronome.tasks[0]
-	metronome_task.begin_callback = Callable(self , "_on_task_begin")
-	metronome_task.end_callback = Callable(self , "_on_task_end")
+	metronome_task.connect("task_begin", Callable(self, "_on_task_begin"))
+	metronome_task.connect("task_end", Callable(self, "_on_task_end"))
 	metronome.start()
 
 func _input(event):

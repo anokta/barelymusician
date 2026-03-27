@@ -106,7 +106,7 @@ jobs:
           done
           mkdir -p artifacts
           cd platforms/godot/project
-          zip -r ${{ github.workspace }}/artifacts/barelymusiciangodot.zip *
+          zip -r ${{ github.workspace }}/artifacts/barelymusiciangodot.zip addons
       - name: unity
         shell: bash
         run: |

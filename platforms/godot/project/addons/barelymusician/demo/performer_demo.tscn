@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://jfomfoutisyt"]
 
-[ext_resource type="Script" uid="uid://cdoataneyqijw" path="res://demo/performer_demo.gd" id="1_gg4gh"]
+[ext_resource type="Script" uid="uid://cdoataneyqijw" path="res://addons/barelymusician/demo/performer_demo.gd" id="1_gg4gh"]
 
 [sub_resource type="BarelyTaskResource" id="BarelyTaskResource_gg4gh"]
 duration = 1e-06

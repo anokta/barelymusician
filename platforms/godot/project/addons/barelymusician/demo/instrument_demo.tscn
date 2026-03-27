@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://fm3yw7k5t227"]
 
-[ext_resource type="Script" uid="uid://cx2ediq5nfg22" path="res://demo/instrument_demo.gd" id="1"]
-[ext_resource type="AudioStream" uid="uid://vvwdk6lors0g" path="res://demo/data/sample.wav" id="2_sv68r"]
+[ext_resource type="Script" uid="uid://cx2ediq5nfg22" path="res://addons/barelymusician/demo/instrument_demo.gd" id="1"]
+[ext_resource type="AudioStream" uid="uid://7ue1c0xuhwr" path="res://addons/barelymusician/demo/data/sample.wav" id="2_sv68r"]
 
 [sub_resource type="BarelySliceResource" id="BarelySliceResource_sv68r"]
 stream = ExtResource("2_sv68r")

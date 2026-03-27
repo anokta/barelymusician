@@ -13,7 +13,6 @@ config_version=5
 config/name="BarelyMusicianGodot"
 run/main_scene="uid://fm3yw7k5t227"
 config/features=PackedStringArray("4.6", "GL Compatibility")
-config/icon="res://icon.svg"
 
 [editor_plugins]
 
@@ -31,4 +30,4 @@ renderer/rendering_method.mobile="gl_compatibility"
 
 [run]
 
-main_scene="res://demo/instrument_demo.tscn"
+main_scene="res://addons/barelymusician/demo/instrument_demo.tscn"

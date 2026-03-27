@@ -8,9 +8,8 @@ barelymusician is a real-time music engine for interactive systems.
 It provides a modern C/C++ API to generate and perform musical sounds from scratch with sample
 accurate timing.
 
-[godot]: ## "WIP"
 This repository includes build targets for Windows, macOS, Linux, Android, WebAssembly, and Daisy,
-as well as a Godot GDExtension[*][godot], a native Unity plugin, and a VST instrument plugin.
+as well as a Godot GDExtension, a native Unity plugin, and a VST instrument plugin.
 
 To use in a project, simply include [barelymusician.h](include/barelymusician.h).
 

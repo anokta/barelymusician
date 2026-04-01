@@ -155,15 +155,16 @@ void BarelyInstrument::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "stereo_pan", PropertyHint::PROPERTY_HINT_RANGE, "-1,1,0.01"),
       "set_stereo_pan", "get_stereo_pan");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "attack", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
+      PropertyInfo(Variant::FLOAT, "attack", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
       "set_attack", "get_attack");
-  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "decay", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
-               "set_decay", "get_decay");
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "decay", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
+      "set_decay", "get_decay");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "sustain", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_sustain", "get_sustain");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "release", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
+      PropertyInfo(Variant::FLOAT, "release", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
       "set_release", "get_release");
 
   ADD_PROPERTY(PropertyInfo(Variant::INT, "slice_mode", PropertyHint::PROPERTY_HINT_ENUM,

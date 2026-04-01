@@ -11,6 +11,7 @@ var octave_shift = 0
 var active_notes = {}
 
 func _ready():
+	BarelyEngine.lookahead = 0.0
 	BarelyEngine.delay_time = 0.5
 	BarelyEngine.delay_feedback = 0.2
 	BarelyEngine.delay_ping_pong = 0.5

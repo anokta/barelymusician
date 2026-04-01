@@ -134,16 +134,22 @@ void BarelyEngine::process(AudioFrame* buffer, int32_t frame_count, double times
 }
 
 void BarelyEngine::update() {
-  static constexpr double kLatency = 0.1;
-  BarelyEngine_Update(get(), BarelyAudioStreamPlayback::get_audio_timestamp() + kLatency);
+  BarelyEngine_Update(get(), BarelyAudioStreamPlayback::get_audio_timestamp() + lookahead_);
 }
 
 void BarelyEngine::_bind_methods() {
+  ClassDB::bind_method(D_METHOD("get_lookahead"), &BarelyEngine::get_lookahead);
+  ClassDB::bind_method(D_METHOD("set_lookahead", "lookahead"), &BarelyEngine::set_lookahead);
+
   ClassDB::bind_method(D_METHOD("get_tempo"), &BarelyEngine::get_tempo);
   ClassDB::bind_method(D_METHOD("get_timestamp"), &BarelyEngine::get_timestamp);
   ClassDB::bind_method(D_METHOD("set_tempo", "tempo"), &BarelyEngine::set_tempo);
 
   BARELY_GODOT_ENGINE_CONTROLS(BARELY_BIND_GODOT_ENGINE_CONTROL);
+
+  ADD_PROPERTY(
+      PropertyInfo(Variant::FLOAT, "lookahead", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.001"),
+      "set_lookahead", "get_lookahead");
 
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tempo"), "set_tempo", "get_tempo");
 
@@ -151,10 +157,10 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "comp_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_mix", "get_comp_mix");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "comp_attack", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
+      PropertyInfo(Variant::FLOAT, "comp_attack", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
       "set_comp_attack", "get_comp_attack");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "comp_release", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
+      PropertyInfo(Variant::FLOAT, "comp_release", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
       "set_comp_release", "get_comp_release");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "comp_threshold", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
@@ -167,7 +173,7 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "delay_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_delay_mix", "get_delay_mix");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "delay_time", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
+      PropertyInfo(Variant::FLOAT, "delay_time", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
       "set_delay_time", "get_delay_time");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "delay_feedback", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
@@ -204,16 +210,16 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "sidechain_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_sidechain_mix", "get_sidechain_mix");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_attack", PropertyHint::PROPERTY_HINT_RANGE,
-                            "0,8,0.01"),
+                            "0,8,0.001"),
                "set_sidechain_attack", "get_sidechain_attack");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_release", PropertyHint::PROPERTY_HINT_RANGE,
-                            "0,8,0.01"),
+                            "0,8,0.001"),
                "set_sidechain_release", "get_sidechain_release");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_threshold",
                             PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
                "set_sidechain_threshold", "get_sidechain_threshold");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_ratio", PropertyHint::PROPERTY_HINT_RANGE,
-                            "0,1,0.01"),
+                            "0,1,0.001"),
                "set_sidechain_ratio", "get_sidechain_ratio");
 }
 

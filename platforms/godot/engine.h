@@ -115,6 +115,9 @@ class BarelyEngine : public ::godot::Object {
   void process(::godot::AudioFrame* buffer, int32_t frames, double timestamp);
   void update();
 
+  double get_lookahead() const { return lookahead_; }
+  void set_lookahead(double lookahead) { lookahead_ = lookahead; }
+
  private:
   GDCLASS(BarelyEngine, ::godot::Object);
 
@@ -123,6 +126,7 @@ class BarelyEngine : public ::godot::Object {
 
   ::BarelyEngine* engine_ = nullptr;
   ::godot::AudioStreamPlayer* audio_player_ = nullptr;
+  double lookahead_ = 0.02;
 
   BARELY_GODOT_ENGINE_CONTROLS(BARELY_DEFINE_GODOT_ENGINE_CONTROL);
 };

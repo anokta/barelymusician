@@ -36,7 +36,7 @@ using ::godot::Variant;
 #define BARELY_BIND_GODOT_ENGINE_CONTROL(Name, name, ...)                                   \
   ClassDB::bind_method(D_METHOD(BARELY_STR(set_##name), #name), &BarelyEngine::set_##name); \
   ClassDB::bind_method(D_METHOD(BARELY_STR(get_##name)), &BarelyEngine::get_##name);
-#define BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL(Name, name, type, default) set_##name(default);
+#define BARELY_SET_GODOT_ENGINE_CONTROL(Name, name, type, default) set_##name(name##_);
 
 double BarelyAudioStreamPlayback::get_audio_timestamp() {
   return timestamp_.load(std::memory_order_relaxed);
@@ -108,7 +108,7 @@ void BarelyEngine::set_tempo(double tempo) { BarelyEngine_SetTempo(get(), tempo)
     // TODO(#181): Support sample rate changes after initialization.
     BarelyEngine_Create(static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()),
                         &engine_);
-    BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL);
+    BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_GODOT_ENGINE_CONTROL);
     if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {
       if (audio_player_ == nullptr) {  // start audio processing
         audio_player_ = memnew(AudioStreamPlayer);
@@ -153,6 +153,8 @@ void BarelyEngine::_bind_methods() {
 
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tempo"), "set_tempo", "get_tempo");
 
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+               "set_gain", "get_gain");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "comp_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_mix", "get_comp_mix");

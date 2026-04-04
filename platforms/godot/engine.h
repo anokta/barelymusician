@@ -48,7 +48,7 @@ namespace barely::godot {
 
 #define BARELY_DEFINE_GODOT_ENGINE_CONTROL(Name, name, type, default) \
  private:                                                             \
-  type name##_;                                                       \
+  type name##_ = default;                                             \
                                                                       \
  public:                                                              \
   void set_##name(type name) {                                        \

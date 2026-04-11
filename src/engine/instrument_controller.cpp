@@ -67,7 +67,7 @@ void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumen
   if (auto& control = instrument.controls[type]; control.SetValue(value)) {
     switch (type) {
       case BarelyInstrumentControlType_kArpMode:
-        if (static_cast<BarelyArpMode>(value) == BarelyArpMode_kNone) {
+        if (static_cast<BarelyArpMode>(control.value) == BarelyArpMode_kNone) {
           if (instrument.arp.note_index != kInvalidIndex) {
             if (instrument.arp.is_note_on) {
               const float pitch = engine_.note_pool.Get(instrument.arp.note_index).pitch;
@@ -102,7 +102,7 @@ void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumen
       case BarelyInstrumentControlType_kArpRate:
         break;
       default:
-        engine_.ScheduleMessage(InstrumentControlMessage{instrument_index, type, value});
+        engine_.ScheduleMessage(InstrumentControlMessage{instrument_index, type, control.value});
         break;
     }
   }

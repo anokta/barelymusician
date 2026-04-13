@@ -36,8 +36,7 @@ class EngineProcessor {
     assert(output_frame_count > 0);
     assert(output_frame_count <= BARELY_MAX_FRAME_COUNT);
 
-    float temp_samples[kStereoChannelCount * BARELY_MAX_FRAME_COUNT];
-    std::fill_n(temp_samples, kStereoChannelCount * output_frame_count, 0.0f);
+    std::fill_n(engine_.temp_samples, kStereoChannelCount * output_frame_count, 0.0f);
 
     const int64_t process_frame = SecondsToFrames(engine_.sample_rate, timestamp);
     const int64_t end_frame = process_frame + output_frame_count;
@@ -50,7 +49,7 @@ class EngineProcessor {
          message = engine_.message_queue.GetNext(end_frame)) {
       if (const int message_frame = static_cast<int>(message->first - process_frame);
           current_frame < message_frame) {
-        ProcessSamples(&temp_samples[kStereoChannelCount * current_frame],
+        ProcessSamples(&engine_.temp_samples[kStereoChannelCount * current_frame],
                        message_frame - current_frame);
         current_frame = message_frame;
       }
@@ -59,7 +58,7 @@ class EngineProcessor {
 
     // Process the rest of the samples.
     if (current_frame < output_frame_count) {
-      ProcessSamples(&temp_samples[kStereoChannelCount * current_frame],
+      ProcessSamples(&engine_.temp_samples[kStereoChannelCount * current_frame],
                      output_frame_count - current_frame);
     }
 
@@ -69,14 +68,15 @@ class EngineProcessor {
     if (output_channel_count > 1) {
       std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
       for (int frame = 0; frame < output_frame_count; ++frame) {
-        output_samples[output_channel_count * frame] = temp_samples[kStereoChannelCount * frame];
+        output_samples[output_channel_count * frame] =
+            engine_.temp_samples[kStereoChannelCount * frame];
         output_samples[output_channel_count * frame + 1] =
-            temp_samples[kStereoChannelCount * frame + 1];
+            engine_.temp_samples[kStereoChannelCount * frame + 1];
       }
     } else {  // downmix to mono.
       for (int frame = 0; frame < output_frame_count; ++frame) {
-        output_samples[frame] = temp_samples[kStereoChannelCount * frame] +
-                                temp_samples[kStereoChannelCount * frame + 1];
+        output_samples[frame] = engine_.temp_samples[kStereoChannelCount * frame] +
+                                engine_.temp_samples[kStereoChannelCount * frame + 1];
       }
     }
   }

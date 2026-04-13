@@ -31,7 +31,12 @@
 namespace barely {
 
 struct EngineState {
-  EngineState(Arena& arena) noexcept : voice_pool(arena, BARELY_MAX_VOICE_COUNT) {}
+  EngineState(Arena& arena) noexcept
+      : temp_samples(arena.AllocArray<float>(kStereoChannelCount * BARELY_MAX_FRAME_COUNT)),
+        voice_pool(arena, BARELY_MAX_VOICE_COUNT) {}
+
+  // Temp output samples.
+  float* temp_samples = nullptr;
 
   // Performer pool.
   Pool<PerformerState, BARELY_MAX_PERFORMER_COUNT> performer_pool = {};
@@ -170,8 +175,9 @@ struct EngineState {
 
 inline constexpr size_t GetEngineSize() noexcept {
   return sizeof(EngineState) + alignof(EngineState) +
-         BARELY_MAX_VOICE_COUNT * (sizeof(VoiceState) + alignof(VoiceState) +
-                                   3 * (sizeof(uint32_t) + alignof(uint32_t)));
+         kStereoChannelCount * BARELY_MAX_FRAME_COUNT * sizeof(float) + alignof(float) +
+         BARELY_MAX_VOICE_COUNT * (sizeof(VoiceState) + 3 * sizeof(uint32_t)) +
+         alignof(VoiceState) + 3 * alignof(uint32_t);
 }
 
 }  // namespace barely

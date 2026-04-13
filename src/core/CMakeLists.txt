@@ -1,4 +1,5 @@
 barelymusician_target_sources(
+  arena.h
   callback.h
   constants.h
   control.h

@@ -2,8 +2,10 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 
+#include "core/arena.h"
 #include "core/constants.h"
 #include "core/control.h"
 #include "core/time.h"
@@ -77,7 +79,10 @@ bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
   if (sample_rate <= 0) return false;
   if (!out_engine) return false;
 
-  *out_engine = new BarelyEngine(sample_rate);
+  const size_t size = sizeof(BarelyEngine) + alignof(BarelyEngine);
+  std::byte* data = new std::byte[size];
+  barely::Arena arena(data, size);
+  *out_engine = new (arena.Alloc<BarelyEngine>()) BarelyEngine(sample_rate);
   return true;
 }
 

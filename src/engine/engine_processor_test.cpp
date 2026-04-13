@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "core/arena.h"
 #include "core/constants.h"
 #include "core/control.h"
 #include "dsp/envelope.h"
@@ -30,7 +31,10 @@ TEST(EngineProcessorTest, PlayNote) {
       BarelySlice{kSamples.data(), kSampleRate, kSampleRate, kPitch},
   };
 
-  auto engine = std::make_unique<EngineState>();
+  const size_t size = GetEngineSize();
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  auto engine = std::make_unique<EngineState>(arena);
   engine->sample_rate = static_cast<float>(kSampleRate);
 
   const uint32_t slice_index =

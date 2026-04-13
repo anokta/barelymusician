@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_CORE_ARENA_H_
 #define BARELYMUSICIAN_CORE_ARENA_H_
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 
@@ -17,19 +18,18 @@ class Arena {
     const size_t unaligned_address = reinterpret_cast<size_t>(data);
     const size_t aligned_address = AlignUp(unaligned_address, alignof(std::max_align_t));
     const size_t adjustment = aligned_address - unaligned_address;
-    capacity_ = (size > adjustment) ? (size - adjustment) : 0;
-    head_ = (capacity_ > 0) ? reinterpret_cast<std::byte*>(aligned_address) : nullptr;
+
+    assert(adjustment <= size);
+    capacity_ = size - adjustment;
+    head_ = reinterpret_cast<std::byte*>(aligned_address);
+    assert(head_ != nullptr);
   }
 
   void* Alloc(size_t size, size_t alignment) noexcept {
-    if (head_ == nullptr) {
-      return nullptr;
-    }
     const size_t aligned_offset = AlignUp(offset_, alignment);
     const size_t next_offset = aligned_offset + size;
-    if (next_offset > capacity_) {
-      return nullptr;
-    }
+    assert(next_offset <= capacity_);
+
     offset_ = next_offset;
     return head_ + aligned_offset;
   }

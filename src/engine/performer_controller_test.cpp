@@ -8,6 +8,7 @@
 #include <memory>
 #include <utility>
 
+#include "core/arena.h"
 #include "engine/engine_state.h"
 #include "engine/performer_state.h"
 #include "engine/task_state.h"
@@ -17,7 +18,10 @@ namespace barely {
 namespace {
 
 TEST(PerformerControllerTest, ProcessSingleTask) {
-  auto engine = std::make_unique<EngineState>();
+  const size_t size = GetEngineSize();
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  auto engine = std::make_unique<EngineState>(arena);
   PerformerController controller(*engine);
 
   // Create a performer.
@@ -236,7 +240,10 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
 TEST(PerformerControllerTest, ProcessMultipleTasks) {
   constexpr int kTaskCount = 4;
 
-  auto engine = std::make_unique<EngineState>();
+  const size_t size = GetEngineSize();
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  auto engine = std::make_unique<EngineState>(arena);
   PerformerController controller(*engine);
 
   // Create a performer.

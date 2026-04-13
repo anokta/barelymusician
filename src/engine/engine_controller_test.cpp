@@ -13,7 +13,10 @@ namespace barely {
 namespace {
 
 TEST(EngineControllerTest, AcquireReleasePerformer) {
-  auto engine = std::make_unique<EngineState>();
+  const size_t size = GetEngineSize();
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  auto engine = std::make_unique<EngineState>(arena);
   EngineController controller(*engine);
 
   // Create a performer.

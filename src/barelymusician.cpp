@@ -49,7 +49,8 @@ struct BarelyEngine {
   barely::EngineController controller;
   barely::EngineProcessor processor;
 
-  explicit BarelyEngine(int sample_rate) noexcept : controller(state), processor(state) {
+  explicit BarelyEngine(int sample_rate, barely::Arena& arena) noexcept
+      : state(arena), controller(state), processor(state) {
     state.sample_rate = static_cast<float>(sample_rate);
     state.reverb.SetSampleRate(state.sample_rate);
     static constexpr float kSmoothingSeconds = 0.05f;  // 50ms
@@ -79,10 +80,10 @@ bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
   if (sample_rate <= 0) return false;
   if (!out_engine) return false;
 
-  const size_t size = sizeof(BarelyEngine) + alignof(BarelyEngine);
+  const size_t size = sizeof(BarelyEngine) + alignof(BarelyEngine) + barely::GetEngineSize();
   std::byte* data = new std::byte[size];
   barely::Arena arena(data, size);
-  *out_engine = new (arena.Alloc<BarelyEngine>()) BarelyEngine(sample_rate);
+  *out_engine = new (arena.Alloc<BarelyEngine>()) BarelyEngine(sample_rate, arena);
   return true;
 }
 

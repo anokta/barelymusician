@@ -33,6 +33,7 @@ namespace barely {
 struct EngineState {
   EngineState(Arena& arena) noexcept
       : temp_samples(arena.AllocArray<float>(kStereoChannelCount * BARELY_MAX_FRAME_COUNT)),
+        message_queue(arena),
         voice_pool(arena, BARELY_MAX_VOICE_COUNT) {}
 
   // Temp output samples.
@@ -64,7 +65,7 @@ struct EngineState {
   MainRng main_rng = {};
 
   // Message queue.
-  MessageQueue message_queue = {};
+  MessageQueue message_queue;
 
   // Process fence.
   std::atomic_flag process_fence = {};
@@ -176,6 +177,7 @@ struct EngineState {
 inline constexpr size_t GetEngineSize() noexcept {
   return sizeof(EngineState) + alignof(EngineState) +
          kStereoChannelCount * BARELY_MAX_FRAME_COUNT * sizeof(float) + alignof(float) +
+         GetMessageQueueSize() +
          BARELY_MAX_VOICE_COUNT * (sizeof(VoiceState) + 3 * sizeof(uint32_t)) +
          alignof(VoiceState) + 3 * alignof(uint32_t);
 }

@@ -6,13 +6,19 @@
 #include <cstdint>
 #include <utility>
 
+#include "core/arena.h"
 #include "engine/message.h"
 
 namespace barely {
 
+inline constexpr size_t kMaxMessageCount = 8192;
+
 // Single-consumer single-producer message queue.
 class MessageQueue {
  public:
+  explicit MessageQueue(Arena& arena) noexcept
+      : messages_(arena.AllocArray<std::pair<int64_t, Message>>(kMaxMessageCount)) {}
+
   bool Add(int64_t message_frame, Message message) noexcept {
     const int index = write_index_.load(std::memory_order_relaxed);
     const int next_index = (index + 1) % kMaxMessageCount;
@@ -35,14 +41,17 @@ class MessageQueue {
   }
 
  private:
-  static constexpr int kMaxMessageCount = 8192;
-
   // Array of messages with their timestamps in frames.
-  std::array<std::pair<int64_t, Message>, kMaxMessageCount> messages_;
+  std::pair<int64_t, Message>* messages_ = nullptr;
 
   std::atomic<int> read_index_ = 0;
   std::atomic<int> write_index_ = 0;
 };
+
+inline constexpr size_t GetMessageQueueSize() noexcept {
+  return kMaxMessageCount * sizeof(std::pair<int64_t, Message>) +
+         alignof(std::pair<int64_t, Message>);
+}
 
 }  // namespace barely
 

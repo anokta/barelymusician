@@ -31,10 +31,11 @@
 namespace barely {
 
 struct EngineState {
-  EngineState(Arena& arena) noexcept
-      : temp_samples(arena.AllocArray<float>(kStereoChannelCount * BARELY_MAX_FRAME_COUNT)),
-        message_queue(arena),
-        voice_pool(arena, BARELY_MAX_VOICE_COUNT) {}
+  void Init(Arena& arena) noexcept {
+    temp_samples = arena.AllocArray<float>(kStereoChannelCount * BARELY_MAX_FRAME_COUNT);
+    message_queue.Init(arena);
+    voice_pool.Init(arena, BARELY_MAX_VOICE_COUNT);
+  }
 
   // Temp output samples.
   float* temp_samples = nullptr;
@@ -65,7 +66,7 @@ struct EngineState {
   MainRng main_rng = {};
 
   // Message queue.
-  MessageQueue message_queue;
+  MessageQueue message_queue = {};
 
   // Process fence.
   std::atomic_flag process_fence = {};
@@ -80,7 +81,7 @@ struct EngineState {
   std::array<uint32_t, BARELY_MAX_NOTE_COUNT> note_to_voice = {};
 
   // Voice pool.
-  Pool2<VoiceState> voice_pool;
+  Pool2<VoiceState> voice_pool = {};
 
   // Random number generator for the audio thread.
   AudioRng audio_rng = {};
@@ -173,14 +174,6 @@ struct EngineState {
     return voice_pool.Get(voice_index);
   }
 };
-
-inline constexpr size_t GetEngineSize() noexcept {
-  return sizeof(EngineState) + alignof(EngineState) +
-         kStereoChannelCount * BARELY_MAX_FRAME_COUNT * sizeof(float) + alignof(float) +
-         GetMessageQueueSize() +
-         BARELY_MAX_VOICE_COUNT * (sizeof(VoiceState) + 3 * sizeof(uint32_t)) +
-         alignof(VoiceState) + 3 * alignof(uint32_t);
-}
 
 }  // namespace barely
 

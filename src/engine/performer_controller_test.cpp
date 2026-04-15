@@ -17,11 +17,19 @@
 namespace barely {
 namespace {
 
+[[nodiscard]] size_t GetEngineSize() noexcept {
+  Arena arena;  // sizing arena
+  arena.Alloc<EngineState>();
+  std::make_unique<barely::EngineState>()->Init(arena);
+  return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
+}
+
 TEST(PerformerControllerTest, ProcessSingleTask) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>(arena);
+  auto engine = std::make_unique<EngineState>();
+  engine->Init(arena);
   PerformerController controller(*engine);
 
   // Create a performer.
@@ -243,7 +251,8 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>(arena);
+  auto engine = std::make_unique<EngineState>();
+  engine->Init(arena);
   PerformerController controller(*engine);
 
   // Create a performer.

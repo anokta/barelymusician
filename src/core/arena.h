@@ -13,7 +13,7 @@ inline constexpr size_t AlignUp(size_t value, size_t alignment) noexcept {
 
 class Arena {
  public:
-  Arena() noexcept = default;
+  Arena() noexcept = default;  // null arena for fetching size.
   Arena(void* data, size_t size) noexcept {
     const size_t unaligned_address = reinterpret_cast<size_t>(data);
     const size_t aligned_address = AlignUp(unaligned_address, alignof(std::max_align_t));
@@ -25,13 +25,13 @@ class Arena {
     assert(head_ != nullptr);
   }
 
-  void* Alloc(size_t size, size_t alignment) noexcept {
+  [[nodiscard]] void* Alloc(size_t size, size_t alignment) noexcept {
     const size_t aligned_offset = AlignUp(offset_, alignment);
     const size_t next_offset = aligned_offset + size;
-    assert(next_offset <= capacity_);
+    assert(head_ == nullptr || next_offset <= capacity_);
 
     offset_ = next_offset;
-    return head_ + aligned_offset;
+    return (head_ != nullptr) ? head_ + aligned_offset : nullptr;
   }
 
   template <typename T>
@@ -43,6 +43,9 @@ class Arena {
   T* AllocArray(size_t count) noexcept {
     return static_cast<T*>(Alloc(sizeof(T) * count, alignof(T)));
   }
+
+  [[nodiscard]] bool is_null() const noexcept { return head_ == nullptr; }
+  [[nodiscard]] size_t offset() const noexcept { return offset_; }
 
  private:
   std::byte* head_ = nullptr;

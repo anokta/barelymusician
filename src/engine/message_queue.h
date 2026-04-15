@@ -16,8 +16,9 @@ inline constexpr size_t kMaxMessageCount = 8192;
 // Single-consumer single-producer message queue.
 class MessageQueue {
  public:
-  explicit MessageQueue(Arena& arena) noexcept
-      : messages_(arena.AllocArray<std::pair<int64_t, Message>>(kMaxMessageCount)) {}
+  void Init(Arena& arena) noexcept {
+    messages_ = arena.AllocArray<std::pair<int64_t, Message>>(kMaxMessageCount);
+  }
 
   bool Add(int64_t message_frame, Message message) noexcept {
     const int index = write_index_.load(std::memory_order_relaxed);

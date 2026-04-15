@@ -24,6 +24,13 @@ constexpr uint32_t kNoteIndex = 2;
 constexpr int kSampleRate = 4;
 constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
+[[nodiscard]] size_t GetEngineSize() noexcept {
+  Arena arena;  // sizing arena
+  arena.Alloc<EngineState>();
+  std::make_unique<barely::EngineState>()->Init(arena);
+  return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
+}
+
 TEST(EngineProcessorTest, PlayNote) {
   constexpr int kFrameCount = 5;
   constexpr float kPitch = 1.0f;
@@ -34,7 +41,8 @@ TEST(EngineProcessorTest, PlayNote) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>(arena);
+  auto engine = std::make_unique<EngineState>();
+  engine->Init(arena);
   engine->sample_rate = static_cast<float>(kSampleRate);
 
   const uint32_t slice_index =

@@ -15,7 +15,7 @@ namespace barely {
 template <typename ItemType>
 class Pool2 {
  public:
-  Pool2(Arena& arena, uint32_t count) noexcept : count_(count) {
+  void Init(Arena& arena, uint32_t count) noexcept {
     assert(count > 0);
     assert(count != kInvalidIndex);
 
@@ -23,7 +23,11 @@ class Pool2 {
     to_active_ = arena.AllocArray<uint32_t>(count);
     active_ = arena.AllocArray<uint32_t>(count);
     free_ = arena.AllocArray<uint32_t>(count);
+    if (arena.is_null()) {
+      return;
+    }
 
+    count_ = count;
     std::fill_n(to_active_, count_, kInvalidIndex);
     for (uint32_t i = 0; i < count; ++i) {
       free_[i] = i;

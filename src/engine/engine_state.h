@@ -34,6 +34,7 @@ struct EngineState {
   void Init(Arena& arena) noexcept {
     temp_samples = arena.AllocArray<float>(kStereoChannelCount * BARELY_MAX_FRAME_COUNT);
     message_queue.Init(arena);
+    slice_pool.Init(arena, BARELY_MAX_SLICE_COUNT);
     voice_pool.Init(arena, BARELY_MAX_VOICE_COUNT);
   }
 

@@ -5,7 +5,6 @@ barelymusician_target_sources(
   control.h
   decibels.h
   pool.h
-  pool2.h
   rng.h
   time.h
 )

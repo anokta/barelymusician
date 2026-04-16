@@ -10,7 +10,6 @@
 #include "core/arena.h"
 #include "core/control.h"
 #include "core/pool.h"
-#include "core/pool2.h"
 #include "core/rng.h"
 #include "core/time.h"
 #include "dsp/compressor.h"
@@ -34,7 +33,17 @@ struct EngineState {
   void Init(Arena& arena) noexcept {
     temp_samples = arena.AllocArray<float>(kStereoChannelCount * BARELY_MAX_FRAME_COUNT);
     message_queue.Init(arena);
+    performer_pool.Init(arena, BARELY_MAX_PERFORMER_COUNT);
+    performer_generations = arena.AllocArray<uint32_t>(BARELY_MAX_PERFORMER_COUNT);
+    task_generations = arena.AllocArray<uint32_t>(BARELY_MAX_TASK_COUNT);
+    instrument_generations = arena.AllocArray<uint32_t>(BARELY_MAX_INSTRUMENT_COUNT);
+    task_pool.Init(arena, BARELY_MAX_TASK_COUNT);
+    instrument_pool.Init(arena, BARELY_MAX_INSTRUMENT_COUNT);
+    note_pool.Init(arena, BARELY_MAX_NOTE_COUNT);
     slice_pool.Init(arena, BARELY_MAX_SLICE_COUNT);
+    instrument_params = arena.AllocArray<InstrumentParams>(BARELY_MAX_INSTRUMENT_COUNT);
+    queued_sample_data_counts = arena.AllocArray<std::atomic<int32_t>>(BARELY_MAX_INSTRUMENT_COUNT);
+    note_to_voice = arena.AllocArray<uint32_t>(BARELY_MAX_NOTE_COUNT);
     voice_pool.Init(arena, BARELY_MAX_VOICE_COUNT);
   }
 
@@ -42,19 +51,19 @@ struct EngineState {
   float* temp_samples = nullptr;
 
   // Performer pool.
-  Pool<PerformerState, BARELY_MAX_PERFORMER_COUNT> performer_pool = {};
-  std::array<uint32_t, BARELY_MAX_PERFORMER_COUNT> performer_generations = {};
+  Pool<PerformerState> performer_pool = {};
+  uint32_t* performer_generations = nullptr;
 
   // Task pool.
-  Pool<TaskState, BARELY_MAX_TASK_COUNT> task_pool = {};
-  std::array<uint32_t, BARELY_MAX_TASK_COUNT> task_generations = {};
+  Pool<TaskState> task_pool = {};
+  uint32_t* task_generations = nullptr;
 
   // Instrument pool.
-  Pool<InstrumentState, BARELY_MAX_INSTRUMENT_COUNT> instrument_pool = {};
-  std::array<uint32_t, BARELY_MAX_INSTRUMENT_COUNT> instrument_generations = {};
+  Pool<InstrumentState> instrument_pool = {};
+  uint32_t* instrument_generations = nullptr;
 
   // Note pool.
-  Pool<NoteState, BARELY_MAX_NOTE_COUNT> note_pool = {};
+  Pool<NoteState> note_pool = {};
 
   // Slice pool.
   SlicePool slice_pool = {};
@@ -73,16 +82,16 @@ struct EngineState {
   std::atomic_flag process_fence = {};
 
   // Array of instrument parameters.
-  std::array<InstrumentParams, BARELY_MAX_INSTRUMENT_COUNT> instrument_params = {};
+  InstrumentParams* instrument_params = nullptr;
 
   // Number of queued sample data messages per instrument.
-  std::array<std::atomic<int32_t>, BARELY_MAX_INSTRUMENT_COUNT> queued_sample_data_counts = {};
+  std::atomic<int32_t>* queued_sample_data_counts = nullptr;
 
   // Maps note indices to voice indices.
-  std::array<uint32_t, BARELY_MAX_NOTE_COUNT> note_to_voice = {};
+  uint32_t* note_to_voice = nullptr;
 
   // Voice pool.
-  Pool2<VoiceState> voice_pool = {};
+  Pool<VoiceState> voice_pool = {};
 
   // Random number generator for the audio thread.
   AudioRng audio_rng = {};

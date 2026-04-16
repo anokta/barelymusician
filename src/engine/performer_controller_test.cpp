@@ -17,10 +17,11 @@
 namespace barely {
 namespace {
 
+constexpr int kSampleRate = 48000;
+
 [[nodiscard]] size_t GetEngineSize() noexcept {
   Arena arena;  // sizing arena
-  arena.Alloc<EngineState>();
-  std::make_unique<barely::EngineState>()->Init(arena);
+  EngineState().Init(arena, kSampleRate);
   return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
 }
 
@@ -28,13 +29,13 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>();
-  engine->Init(arena);
-  PerformerController controller(*engine);
+  EngineState engine;
+  engine.Init(arena, kSampleRate);
+  PerformerController controller(engine);
 
   // Create a performer.
   const uint32_t performer_index = controller.Acquire();
-  auto& performer = engine->GetPerformer(performer_index);
+  auto& performer = engine.GetPerformer(performer_index);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -63,7 +64,7 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
         (*static_cast<std::function<void(BarelyEventType)>*>(user_data))(type);
       },
       &process_callback);
-  const auto& task = engine->GetTask(task_index);
+  const auto& task = engine.GetTask(task_index);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -251,13 +252,13 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>();
-  engine->Init(arena);
-  PerformerController controller(*engine);
+  EngineState engine;
+  engine.Init(arena, kSampleRate);
+  PerformerController controller(engine);
 
   // Create a performer.
   const uint32_t performer_index = controller.Acquire();
-  auto& performer = engine->GetPerformer(performer_index);
+  auto& performer = engine.GetPerformer(performer_index);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);

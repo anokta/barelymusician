@@ -14,10 +14,11 @@
 namespace barely {
 namespace {
 
+constexpr int kSampleRate = 48000;
+
 [[nodiscard]] size_t GetEngineSize() noexcept {
   Arena arena;  // sizing arena
-  arena.Alloc<EngineState>();
-  std::make_unique<barely::EngineState>()->Init(arena);
+  EngineState().Init(arena, kSampleRate);
   return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
 }
 
@@ -25,9 +26,9 @@ TEST(InstrumentControllerTest, SetControl) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>();
-  engine->Init(arena);
-  InstrumentController controller(*engine);
+  EngineState engine;
+  engine.Init(arena, kSampleRate);
+  InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();
   EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 1.0f);
@@ -56,9 +57,9 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>();
-  engine->Init(arena);
-  InstrumentController controller(*engine);
+  EngineState engine;
+  engine.Init(arena, kSampleRate);
+  InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();
 
@@ -107,9 +108,9 @@ TEST(InstrumentControllerTest, SetAllNotesOff) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>();
-  engine->Init(arena);
-  InstrumentController controller(*engine);
+  EngineState engine;
+  engine.Init(arena, kSampleRate);
+  InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();
   for (const float pitch : kPitches) {

@@ -105,8 +105,8 @@ class EngineProcessor {
         engine_.target_params.delay_params.mix = value;
         break;
       case BarelyEngineControlType_kDelayTime:
-        engine_.target_params.delay_params.frame_count = std::min(
-            std::max(value * engine_.sample_rate, 1.0f), static_cast<float>(kMaxDelayFrameCount));
+        engine_.target_params.delay_params.frame_count =
+            std::max(value * engine_.sample_rate, 1.0f);
         break;
       case BarelyEngineControlType_kDelayFeedback:
         engine_.target_params.delay_params.feedback = value * kMaxDelayFeedback;

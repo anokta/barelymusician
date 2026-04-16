@@ -26,8 +26,7 @@ constexpr std::array<float, kSampleRate> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
 [[nodiscard]] size_t GetEngineSize() noexcept {
   Arena arena;  // sizing arena
-  arena.Alloc<EngineState>();
-  std::make_unique<barely::EngineState>()->Init(arena);
+  EngineState().Init(arena, kSampleRate);
   return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
 }
 
@@ -41,22 +40,21 @@ TEST(EngineProcessorTest, PlayNote) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>();
-  engine->Init(arena);
-  engine->sample_rate = static_cast<float>(kSampleRate);
+  EngineState engine;
+  engine.Init(arena, kSampleRate);
 
   const uint32_t slice_index =
-      engine->slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));
+      engine.slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));
 
-  EngineProcessor processor(*engine);
-  engine->ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
-  engine->ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
+  EngineProcessor processor(engine);
+  engine.ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
+  engine.ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
 
   Envelope envelope;
   Envelope::Adsr adsr;
   adsr.SetRelease(kSampleRate, 0.0f);
 
-  engine->ScheduleMessage(
+  engine.ScheduleMessage(
       InstrumentControlMessage{kInstrumentIndex, BarelyInstrumentControlType_kRelease, 0.0f});
 
   ToneFilter filters[kStereoChannelCount];
@@ -75,7 +73,7 @@ TEST(EngineProcessorTest, PlayNote) {
   }
 
   // Set a note on.
-  engine->ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, kPitch});
+  engine.ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, kPitch});
   envelope.Start(adsr);
 
   samples.fill(0.0f);
@@ -94,7 +92,7 @@ TEST(EngineProcessorTest, PlayNote) {
   }
 
   // Set the note off.
-  engine->ScheduleMessage(NoteOffMessage{kNoteIndex});
+  engine.ScheduleMessage(NoteOffMessage{kNoteIndex});
   envelope.Stop();
 
   samples.fill(0.0f);

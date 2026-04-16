@@ -49,23 +49,16 @@ struct BarelyEngine {
   barely::EngineController controller;
   barely::EngineProcessor processor;
 
-  [[nodiscard]] static size_t GetSize() noexcept {
+  [[nodiscard]] static size_t GetSize(int sample_rate) noexcept {
     barely::Arena arena;  // sizing arena
     arena.Alloc<BarelyEngine>();
-    std::make_unique<barely::EngineState>()->Init(arena);  // heap shouldn't be necessary here
+    barely::EngineState().Init(arena, sample_rate);
     return barely::AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
   }
 
   explicit BarelyEngine(int sample_rate, barely::Arena& arena) noexcept
       : controller(state), processor(state) {
-    state.Init(arena);
-    if (arena.is_null()) {
-      return;
-    }
-    state.sample_rate = static_cast<float>(sample_rate);
-    state.reverb.SetSampleRate(state.sample_rate);
-    static constexpr float kSmoothingSeconds = 0.05f;  // 50ms
-    state.smoothing_coeff = barely::GetCoefficient(state.sample_rate, kSmoothingSeconds);
+    state.Init(arena, sample_rate);
   }
 
   [[nodiscard]] bool IsValidInstrument(uint32_t instrument_id) const noexcept {
@@ -91,7 +84,8 @@ bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
   if (sample_rate <= 0) return false;
   if (!out_engine) return false;
 
-  const size_t size = BarelyEngine::GetSize();
+  static constexpr int ss = sizeof(barely::EngineState);
+  const size_t size = BarelyEngine::GetSize(sample_rate);
   std::byte* data = new std::byte[size];
   barely::Arena arena(data, size);
   *out_engine = new (arena.Alloc<BarelyEngine>()) BarelyEngine(sample_rate, arena);

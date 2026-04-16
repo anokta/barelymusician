@@ -12,10 +12,12 @@
 namespace barely {
 namespace {
 
+constexpr int kSampleRate = 48000;
+
 [[nodiscard]] size_t GetEngineSize() noexcept {
   Arena arena;  // sizing arena
   arena.Alloc<EngineState>();
-  std::make_unique<barely::EngineState>()->Init(arena);
+  EngineState().Init(arena, kSampleRate);
   return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
 }
 
@@ -24,7 +26,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   auto engine = std::make_unique<EngineState>();
-  engine->Init(arena);
+  engine->Init(arena, kSampleRate);
   EngineController controller(*engine);
 
   // Create a performer.

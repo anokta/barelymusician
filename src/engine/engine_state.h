@@ -30,7 +30,7 @@
 namespace barely {
 
 struct EngineState {
-  void Init(Arena& arena) noexcept {
+  void Init(Arena& arena, int sample_rate_int) noexcept {
     temp_samples = arena.AllocArray<float>(kStereoChannelCount * BARELY_MAX_FRAME_COUNT);
     message_queue.Init(arena);
     performer_pool.Init(arena, BARELY_MAX_PERFORMER_COUNT);
@@ -45,6 +45,11 @@ struct EngineState {
     queued_sample_data_counts = arena.AllocArray<std::atomic<int32_t>>(BARELY_MAX_INSTRUMENT_COUNT);
     note_to_voice = arena.AllocArray<uint32_t>(BARELY_MAX_NOTE_COUNT);
     voice_pool.Init(arena, BARELY_MAX_VOICE_COUNT);
+    delay_filter.Init(arena, sample_rate_int);
+    reverb.Init(arena, sample_rate_int);
+    sample_rate = static_cast<float>(sample_rate_int);
+    static constexpr float kSmoothingSeconds = 0.05f;  // 50ms
+    smoothing_coeff = GetCoefficient(sample_rate, kSmoothingSeconds);
   }
 
   // Temp output samples.

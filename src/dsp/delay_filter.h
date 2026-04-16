@@ -7,6 +7,7 @@
 #include <cmath>
 #include <vector>
 
+#include "core/arena.h"
 #include "core/constants.h"
 #include "core/control.h"
 #include "dsp/one_pole_filter.h"
@@ -39,15 +40,20 @@ struct DelayParams {
 // Delay filter with smooth interpolation.
 class DelayFilter {
  public:
+  void Init(Arena& arena, int sample_rate) noexcept {
+    max_frame_count_ = sample_rate * kMaxDelaySeconds;
+    delay_samples_ = arena.AllocArray<float>(max_frame_count_ * kStereoChannelCount);
+  }
+
   void Process(float input_frame[kStereoChannelCount], float reverb_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount], const DelayParams& params) noexcept {
     assert(params.frame_count > 0);
-    assert(static_cast<int>(params.frame_count) <= kMaxDelayFrameCount);
+    assert(static_cast<int>(params.frame_count) <= max_frame_count_);
 
     const int delay_frame_count = static_cast<int>(params.frame_count);
     const int read_frame_begin =
-        (write_frame_ - delay_frame_count + kMaxDelayFrameCount) % kMaxDelayFrameCount;
-    const int read_frame_end = (read_frame_begin - 1 + kMaxDelayFrameCount) % kMaxDelayFrameCount;
+        (write_frame_ - delay_frame_count + max_frame_count_) % max_frame_count_;
+    const int read_frame_end = (read_frame_begin - 1 + max_frame_count_) % max_frame_count_;
 
     float delay_frame[kStereoChannelCount];
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
@@ -77,7 +83,7 @@ class DelayFilter {
           ((params.reverb_send <= 1.0f) ? 1.0f : (2.0f - params.reverb_send)) * output_sample;
     }
 
-    write_frame_ = (write_frame_ + 1) % kMaxDelayFrameCount;
+    write_frame_ = (write_frame_ + 1) % max_frame_count_;
   }
 
  private:
@@ -85,7 +91,8 @@ class DelayFilter {
   std::array<OnePoleFilter, kStereoChannelCount> hpf_ = {};
 
   // Array of interleaved delay samples.
-  std::array<float, kStereoChannelCount * kMaxDelayFrameCount> delay_samples_ = {};
+  float* delay_samples_ = nullptr;
+  int max_frame_count_ = 0;
   int write_frame_ = 0;
 };
 

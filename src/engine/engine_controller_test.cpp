@@ -17,7 +17,7 @@ constexpr int kSampleRate = 48000;
 [[nodiscard]] size_t GetEngineSize() noexcept {
   Arena arena;  // sizing arena
   arena.Alloc<EngineState>();
-  EngineState().Init(arena, kSampleRate);
+  EngineState().Init(arena, EngineConfig(kSampleRate));
   return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
 }
 
@@ -25,13 +25,13 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
   const size_t size = GetEngineSize();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  auto engine = std::make_unique<EngineState>();
-  engine->Init(arena, kSampleRate);
-  EngineController controller(*engine);
+  EngineState engine;
+  engine.Init(arena, EngineConfig(kSampleRate));
+  EngineController controller(engine);
 
   // Create a performer.
   const uint32_t performer_index = controller.performer_controller().Acquire();
-  auto& performer = engine->GetPerformer(performer_index);
+  auto& performer = engine.GetPerformer(performer_index);
 
   // Create a task.
   EventType task_event_type = EventType::kEnd;
@@ -47,10 +47,10 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
         (*static_cast<std::function<void(EventType)>*>(user_data))(static_cast<EventType>(type));
       },
       &process_callback);
-  const auto& task = engine->GetTask(task_index);
+  const auto& task = engine.GetTask(task_index);
 
   // Start the performer with a tempo of one beat per second.
-  engine->tempo = 60.0;
+  engine.tempo = 60.0;
   EXPECT_FALSE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
   controller.performer_controller().Start(performer_index);

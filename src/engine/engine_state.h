@@ -30,24 +30,28 @@
 namespace barely {
 
 struct EngineState {
-  void Init(Arena& arena, int sample_rate_int) noexcept {
-    temp_samples = arena.AllocArray<float>(kStereoChannelCount * BARELY_MAX_FRAME_COUNT);
+  void Init(Arena& arena, const BarelyEngineConfig& config) noexcept {
+    const uint32_t max_instrument_count = static_cast<uint32_t>(config.max_instrument_count);
+    const uint32_t max_performer_count = static_cast<uint32_t>(config.max_performer_count);
+    const uint32_t max_task_count = static_cast<uint32_t>(config.max_task_count);
+    const uint32_t max_note_count = static_cast<uint32_t>(config.max_note_count);
+    sample_rate = static_cast<float>(config.sample_rate);
+    temp_samples = arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count);
     message_queue.Init(arena);
-    performer_pool.Init(arena, BARELY_MAX_PERFORMER_COUNT);
-    performer_generations = arena.AllocArray<uint32_t>(BARELY_MAX_PERFORMER_COUNT);
-    task_generations = arena.AllocArray<uint32_t>(BARELY_MAX_TASK_COUNT);
-    instrument_generations = arena.AllocArray<uint32_t>(BARELY_MAX_INSTRUMENT_COUNT);
-    task_pool.Init(arena, BARELY_MAX_TASK_COUNT);
-    instrument_pool.Init(arena, BARELY_MAX_INSTRUMENT_COUNT);
-    note_pool.Init(arena, BARELY_MAX_NOTE_COUNT);
-    slice_pool.Init(arena, BARELY_MAX_SLICE_COUNT);
-    instrument_params = arena.AllocArray<InstrumentParams>(BARELY_MAX_INSTRUMENT_COUNT);
-    queued_sample_data_counts = arena.AllocArray<std::atomic<int32_t>>(BARELY_MAX_INSTRUMENT_COUNT);
-    note_to_voice = arena.AllocArray<uint32_t>(BARELY_MAX_NOTE_COUNT);
-    voice_pool.Init(arena, BARELY_MAX_VOICE_COUNT);
-    delay_filter.Init(arena, sample_rate_int);
-    reverb.Init(arena, sample_rate_int);
-    sample_rate = static_cast<float>(sample_rate_int);
+    performer_pool.Init(arena, max_performer_count);
+    performer_generations = arena.AllocArray<uint32_t>(max_performer_count);
+    task_generations = arena.AllocArray<uint32_t>(max_task_count);
+    instrument_generations = arena.AllocArray<uint32_t>(max_instrument_count);
+    task_pool.Init(arena, max_task_count);
+    instrument_pool.Init(arena, max_instrument_count);
+    note_pool.Init(arena, max_note_count);
+    slice_pool.Init(arena, static_cast<uint32_t>(config.max_slice_count));
+    instrument_params = arena.AllocArray<InstrumentParams>(max_instrument_count);
+    queued_sample_data_counts = arena.AllocArray<std::atomic<int32_t>>(max_instrument_count);
+    note_to_voice = arena.AllocArray<uint32_t>(max_note_count);
+    voice_pool.Init(arena, static_cast<uint32_t>(config.max_voice_count));
+    delay_filter.Init(arena, config.sample_rate);
+    reverb.Init(arena, config.sample_rate);
     static constexpr float kSmoothingSeconds = 0.05f;  // 50ms
     smoothing_coeff = GetCoefficient(sample_rate, kSmoothingSeconds);
   }

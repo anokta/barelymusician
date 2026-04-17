@@ -18,7 +18,7 @@ constexpr int kSampleRate = 48000;
 
 [[nodiscard]] size_t GetEngineSize() noexcept {
   Arena arena;  // sizing arena
-  EngineState().Init(arena, kSampleRate);
+  EngineState().Init(arena, EngineConfig(kSampleRate));
   return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
 }
 
@@ -27,7 +27,7 @@ TEST(InstrumentControllerTest, SetControl) {
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine;
-  engine.Init(arena, kSampleRate);
+  engine.Init(arena, EngineConfig(kSampleRate));
   InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();
@@ -58,7 +58,7 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine;
-  engine.Init(arena, kSampleRate);
+  engine.Init(arena, EngineConfig(kSampleRate));
   InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();
@@ -109,7 +109,7 @@ TEST(InstrumentControllerTest, SetAllNotesOff) {
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine;
-  engine.Init(arena, kSampleRate);
+  engine.Init(arena, EngineConfig(kSampleRate));
   InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();

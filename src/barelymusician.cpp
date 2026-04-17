@@ -16,25 +16,17 @@
 
 namespace {
 
-static_assert(BARELY_ID_INDEX_BIT_COUNT > 0 && BARELY_ID_INDEX_BIT_COUNT < 32);
-static_assert(BARELY_MAX_FRAME_COUNT > 0);
-
-constexpr uint32_t kMaxIdIndex = ((1 << BARELY_ID_INDEX_BIT_COUNT) - 1);
-constexpr uint32_t kMaxIdGeneration = ((1 << (32 - BARELY_ID_INDEX_BIT_COUNT)) - 1);
-
-static_assert(BARELY_MAX_INSTRUMENT_COUNT > 0 && BARELY_MAX_INSTRUMENT_COUNT <= kMaxIdIndex);
-static_assert(BARELY_MAX_PERFORMER_COUNT > 0 && BARELY_MAX_PERFORMER_COUNT <= kMaxIdIndex);
-static_assert(BARELY_MAX_TASK_COUNT > 0 && BARELY_MAX_TASK_COUNT <= kMaxIdIndex);
+constexpr uint32_t kIdIndexBitCount = 20;
+constexpr uint32_t kMaxIdIndex = ((1 << kIdIndexBitCount) - 1);
+constexpr uint32_t kMaxIdGeneration = ((1 << (32 - kIdIndexBitCount)) - 1);
 
 static_assert((barely::kInvalidIndex + 1) == 0);
 
 [[nodiscard]] uint32_t BuildId(uint32_t index, uint32_t generation) noexcept {
-  return (generation << BARELY_ID_INDEX_BIT_COUNT) | (index + 1);
+  return (generation << kIdIndexBitCount) | (index + 1);
 }
 
-[[nodiscard]] uint32_t GetGeneration(uint32_t id) noexcept {
-  return id >> BARELY_ID_INDEX_BIT_COUNT;
-}
+[[nodiscard]] uint32_t GetGeneration(uint32_t id) noexcept { return id >> kIdIndexBitCount; }
 
 [[nodiscard]] uint32_t GetIndex(uint32_t id) noexcept { return (id & kMaxIdIndex) - 1; }
 
@@ -49,16 +41,16 @@ struct BarelyEngine {
   barely::EngineController controller;
   barely::EngineProcessor processor;
 
-  [[nodiscard]] static size_t GetSize(int sample_rate) noexcept {
+  [[nodiscard]] static size_t GetSize(const BarelyEngineConfig& config) noexcept {
     barely::Arena arena;  // sizing arena
     arena.Alloc<BarelyEngine>();
-    barely::EngineState().Init(arena, sample_rate);
+    barely::EngineState().Init(arena, config);
     return barely::AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
   }
 
-  explicit BarelyEngine(int sample_rate, barely::Arena& arena) noexcept
+  BarelyEngine(barely::Arena& arena, const BarelyEngineConfig& config) noexcept
       : controller(state), processor(state) {
-    state.Init(arena, sample_rate);
+    state.Init(arena, config);
   }
 
   [[nodiscard]] bool IsValidInstrument(uint32_t instrument_id) const noexcept {
@@ -80,15 +72,20 @@ struct BarelyEngine {
   }
 };
 
-bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine) {
-  if (sample_rate <= 0) return false;
+bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_engine) {
   if (!out_engine) return false;
+  if (!config) return false;
+  if (config->sample_rate <= 0 || config->max_frame_count <= 0 ||
+      config->max_instrument_count <= 0 || config->max_performer_count <= 0 ||
+      config->max_task_count <= 0 || config->max_note_count <= 0 || config->max_slice_count <= 0 ||
+      config->max_voice_count <= 0) {
+    return false;
+  }
 
-  static constexpr int ss = sizeof(barely::EngineState);
-  const size_t size = BarelyEngine::GetSize(sample_rate);
+  const size_t size = BarelyEngine::GetSize(*config);
   std::byte* data = new std::byte[size];
   barely::Arena arena(data, size);
-  *out_engine = new (arena.Alloc<BarelyEngine>()) BarelyEngine(sample_rate, arena);
+  *out_engine = new (arena.Alloc<BarelyEngine>()) BarelyEngine(arena, *config);
   return true;
 }
 
@@ -216,17 +213,7 @@ bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples, int32_t o
   if (!output_samples) return false;
   if (output_channel_count <= 0 || output_frame_count <= 0) return false;
 
-  if (output_frame_count > BARELY_MAX_FRAME_COUNT) {
-    const int32_t extra_process_count = output_frame_count / BARELY_MAX_FRAME_COUNT - 1;
-    for (int32_t i = 0; i < extra_process_count; ++i) {
-      engine->processor.Process(output_samples, output_channel_count, BARELY_MAX_FRAME_COUNT,
-                                timestamp);
-      timestamp += barely::FramesToSeconds(engine->state.sample_rate, BARELY_MAX_FRAME_COUNT);
-    }
-    output_frame_count -= extra_process_count * BARELY_MAX_FRAME_COUNT;
-  }
   engine->processor.Process(output_samples, output_channel_count, output_frame_count, timestamp);
-
   for (int32_t i = 0; i < output_channel_count * output_frame_count; ++i) {
     output_samples[i] = std::tanh(output_samples[i] * 0.5f);  // soft-clip with -6dB headroom
   }

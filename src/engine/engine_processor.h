@@ -34,7 +34,7 @@ class EngineProcessor {
     assert(output_samples != nullptr);
     assert(output_channel_count > 0);
     assert(output_frame_count > 0);
-    assert(output_frame_count <= BARELY_MAX_FRAME_COUNT);
+    assert(output_frame_count <= engine_.max_frame_count);
 
     std::fill_n(engine_.temp_samples, kStereoChannelCount * output_frame_count, 0.0f);
 

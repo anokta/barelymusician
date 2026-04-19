@@ -32,48 +32,6 @@ def parse_args():
         help="specify the build configuration (defaults to release)",
     )
     parser.add_argument(
-        "--max_frames",
-        type=count_type,
-        default=None,
-        help="specify the maximum number of frames per process block",
-    )
-    parser.add_argument(
-        "--max_instruments",
-        type=count_type,
-        default=None,
-        help="specify the maximum number of instruments",
-    )
-    parser.add_argument(
-        "--max_notes",
-        type=count_type,
-        default=None,
-        help="specify the maximum number of notes",
-    )
-    parser.add_argument(
-        "--max_performers",
-        type=count_type,
-        default=None,
-        help="specify the maximum number of performers",
-    )
-    parser.add_argument(
-        "--max_slices",
-        type=count_type,
-        default=None,
-        help="specify the maximum number of sample slices",
-    )
-    parser.add_argument(
-        "--max_tasks",
-        type=count_type,
-        default=None,
-        help="specify the maximum number of tasks",
-    )
-    parser.add_argument(
-        "--max_voices",
-        type=count_type,
-        default=None,
-        help="specify the maximum number of voices",
-    )
-    parser.add_argument(
         "--linux",
         action="store_true",
         default=sys.platform.startswith("linux"),
@@ -221,48 +179,6 @@ def get_cmake_targets(args):
     return f'--target {" ".join(targets)}'
 
 
-def get_daisy_cmake_options(args):
-    options = [
-        '-G "Unix Makefiles"',
-        f'-DCMAKE_TOOLCHAIN_FILE="{DAISY_TOOLCHAIN_FILE}"',
-        f'-DTOOLCHAIN_PREFIX="{args.daisy_toolchain_prefix}"',
-        "-DENABLE_DAISY=ON",
-    ]
-    if not args.max_frames:
-        options.append(f"-DMAX_FRAME_COUNT=16")
-    if not args.max_instruments:
-        options.append(f"-DMAX_INSTRUMENT_COUNT=1")
-    if not args.max_performers:
-        options.append(f"-DMAX_PERFORMER_COUNT=1")
-    if not args.max_slices:
-        options.append(f"-DMAX_SLICE_COUNT=1")
-    if not args.max_tasks:
-        options.append(f"-DMAX_TASK_COUNT=1")
-    if not args.max_voices:
-        options.append(f"-DMAX_VOICE_COUNT=32")
-    return options
-
-
-def get_wasm_cmake_options(args, config):
-    options = [
-        "-DENABLE_WASM=ON",
-        f'-DCMAKE_BUILD_TYPE="{config}"',
-    ]
-    if not args.max_frames:
-        options.append(f"-DMAX_FRAME_COUNT=128")
-    if not args.max_instruments:
-        options.append(f"-DMAX_INSTRUMENT_COUNT=32")
-    if not args.max_performers:
-        options.append(f"-DMAX_PERFORMER_COUNT=32")
-    if not args.max_slices:
-        options.append(f"-DMAX_SLICE_COUNT=8")
-    if not args.max_tasks:
-        options.append(f"-DMAX_TASK_COUNT=512")
-    if not args.max_voices:
-        options.append(f"-DMAX_VOICE_COUNT=128")
-    return options
-
-
 def run_command(command, cwd):
     print(command)
     subprocess.run(command, check=True, cwd=cwd, shell=True)
@@ -299,30 +215,26 @@ def build(args, source_dir, build_dir):
 
     config = get_build_config(args)
 
-    common_cmake_options = []
-    if args.max_frames:
-        common_cmake_options.append(f"-DMAX_FRAME_COUNT={args.max_frames}")
-    if args.max_instruments:
-        common_cmake_options.append(f"-DMAX_INSTRUMENT_COUNT={args.max_instruments}")
-    if args.max_performers:
-        common_cmake_options.append(f"-DMAX_PERFORMER_COUNT={args.max_performers}")
-    if args.max_slices:
-        common_cmake_options.append(f"-DMAX_SLICE_COUNT={args.max_slices}")
-    if args.max_tasks:
-        common_cmake_options.append(f"-DMAX_TASK_COUNT={args.max_tasks}")
-    if args.max_voices:
-        common_cmake_options.append(f"-DMAX_VOICE_COUNT={args.max_voices}")
-
     if args.wasm:
         wasm_build_dir = os.path.join(build_dir, "WebAssembly")
-        wasm_cmake_options = common_cmake_options + get_wasm_cmake_options(args, config)
+        wasm_cmake_options = [
+            "-DENABLE_WASM=ON",
+            f'-DCMAKE_BUILD_TYPE="{config}"',
+        ]
         build_platform(args, config, source_dir, wasm_build_dir, wasm_cmake_options)
         args.wasm = False
 
     if args.daisy:
         daisy_build_dir = os.path.join(build_dir, "Daisy")
-        daisy_cmake_options = common_cmake_options + get_daisy_cmake_options(args)
+        daisy_cmake_options = [
+            '-G "Unix Makefiles"',
+            f'-DCMAKE_TOOLCHAIN_FILE="{DAISY_TOOLCHAIN_FILE}"',
+            f'-DTOOLCHAIN_PREFIX="{args.daisy_toolchain_prefix}"',
+            "-DENABLE_DAISY=ON",
+        ]
         build_platform(args, config, source_dir, daisy_build_dir, daisy_cmake_options)
+
+    common_cmake_options = []
 
     if args.unity:
         common_cmake_options.append("-DENABLE_UNITY=ON")

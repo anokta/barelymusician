@@ -9,6 +9,7 @@
 namespace {
 
 using ::barely::Engine;
+using ::barely::EngineConfig;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
 using ::daisy::AudioHandle;
@@ -35,7 +36,7 @@ constexpr int kVoiceCount = 16;
 DaisyPod g_hw;  // target the Daisy Pod hardware.
 MidiUsbHandler g_midi;
 
-Engine g_engine{kSampleRate};
+Engine g_engine{EngineConfig(kSampleRate, kFrameCount, 1, 1, 1, 1000, 1, 32)};
 Instrument g_instrument = {};
 float g_osc_shape = 0.0f;
 std::array<float, kChannelCount * kFrameCount> g_output_samples;

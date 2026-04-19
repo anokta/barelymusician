@@ -41,6 +41,7 @@ class Processor extends AudioWorkletProcessor {
       this._outputSamplesPtr = this._module._malloc(
           STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float32Array.BYTES_PER_ELEMENT);
 
+      // TODO: Set custom config
       this._module._BarelyEngine_Create(sampleRate, this._uint32Ptr);
       this._engine = this._module.getValue(this._uint32Ptr, 'i32');
 

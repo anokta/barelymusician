@@ -14,19 +14,11 @@ namespace {
 
 constexpr int kSampleRate = 48000;
 
-[[nodiscard]] size_t GetEngineSize() noexcept {
-  Arena arena;  // sizing arena
-  arena.Alloc<EngineState>();
-  EngineState().Init(arena, EngineConfig(kSampleRate));
-  return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
-}
-
 TEST(EngineControllerTest, AcquireReleasePerformer) {
-  const size_t size = GetEngineSize();
+  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  EngineState engine;
-  engine.Init(arena, EngineConfig(kSampleRate));
+  EngineState engine(arena, EngineConfig(kSampleRate));
   EngineController controller(engine);
 
   // Create a performer.

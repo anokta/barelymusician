@@ -33,112 +33,77 @@ namespace barely {
 static_assert((kInvalidIndex + 1) == 0);
 
 struct EngineState {
-  void Init(Arena& arena, const BarelyEngineConfig& config) noexcept {
-    const uint32_t max_instrument_count = static_cast<uint32_t>(config.max_instrument_count);
-    const uint32_t max_performer_count = static_cast<uint32_t>(config.max_performer_count);
-    const uint32_t max_task_count = static_cast<uint32_t>(config.max_task_count);
-    const uint32_t max_note_count = static_cast<uint32_t>(config.max_note_count);
+  EngineState(Arena& arena, const BarelyEngineConfig& config) noexcept
+      : instrument_pool(arena, config.max_instrument_count),
+        note_pool(arena, config.max_note_count),
+        performer_pool(arena, config.max_performer_count),
+        task_pool(arena, config.max_task_count),
+        voice_pool(arena, config.max_voice_count),
+        slice_pool(arena, config.max_slice_count),
+        message_queue(arena),
 
-    id_index_bit_count = std::bit_width(
-        std::bit_ceil(std::max({max_instrument_count, max_performer_count, max_task_count})));
+        instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
+        performer_generations(arena.AllocArray<uint32_t>(config.max_performer_count)),
+        task_generations(arena.AllocArray<uint32_t>(config.max_task_count)),
+
+        instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
+        note_to_voice(arena.AllocArray<uint32_t>(config.max_note_count)),
+        queued_sample_data_counts(
+            arena.AllocArray<std::atomic<int32_t>>(config.max_instrument_count)),
+        temp_samples(arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count)),
+
+        id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
+            {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
+        max_id_index((1 << id_index_bit_count) - 1),
+        max_id_generation((1 << (32 - id_index_bit_count)) - 1),
+
+        max_frame_count(static_cast<uint32_t>(config.max_frame_count)),
+        sample_rate(static_cast<float>(config.sample_rate)),
+        smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05f)) {
     assert(id_index_bit_count < 32);
-
-    max_id_index = (1 << id_index_bit_count) - 1;
-    max_id_generation = (1 << (32 - id_index_bit_count)) - 1;
-
-    max_frame_count = static_cast<uint32_t>(config.max_frame_count);
-    sample_rate = static_cast<float>(config.sample_rate);
-
-    temp_samples = arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count);
-    message_queue.Init(arena);
-    performer_pool.Init(arena, max_performer_count);
-    performer_generations = arena.AllocArray<uint32_t>(max_performer_count);
-    task_generations = arena.AllocArray<uint32_t>(max_task_count);
-    instrument_generations = arena.AllocArray<uint32_t>(max_instrument_count);
-    task_pool.Init(arena, max_task_count);
-    instrument_pool.Init(arena, max_instrument_count);
-    note_pool.Init(arena, max_note_count);
-    slice_pool.Init(arena, static_cast<uint32_t>(config.max_slice_count));
-    instrument_params = arena.AllocArray<InstrumentParams>(max_instrument_count);
-    queued_sample_data_counts = arena.AllocArray<std::atomic<int32_t>>(max_instrument_count);
-    note_to_voice = arena.AllocArray<uint32_t>(max_note_count);
-    voice_pool.Init(arena, static_cast<uint32_t>(config.max_voice_count));
-
+    assert(sample_rate > 0.0f);
     delay_filter.Init(
         arena, static_cast<int>(std::ceil(static_cast<float>(config.sample_rate) *
                                           controls[BarelyEngineControlType_kDelayTime].max_value)));
     reverb.Init(arena, config.sample_rate);
-
-    static constexpr float kSmoothingSeconds = 0.05f;  // 50ms
-    smoothing_coeff = GetCoefficient(sample_rate, kSmoothingSeconds);
   }
-
-  // Temp output samples.
-  float* temp_samples = nullptr;
-
-  // Performer pool.
-  Pool<PerformerState> performer_pool = {};
-  uint32_t* performer_generations = nullptr;
-
-  // Task pool.
-  Pool<TaskState> task_pool = {};
-  uint32_t* task_generations = nullptr;
-
-  // Instrument pool.
-  Pool<InstrumentState> instrument_pool = {};
-  uint32_t* instrument_generations = nullptr;
-
-  // Note pool.
-  Pool<NoteState> note_pool = {};
-
-  // Slice pool.
-  SlicePool slice_pool = {};
 
   // Array of engine controls.
   std::array<Control, BarelyEngineControlType_kCount> controls = {
       BARELY_ENGINE_CONTROL_TYPES(EngineControlType, BARELY_DEFINE_CONTROL)};
 
-  // Random number generator for the main thread.
   MainRng main_rng = {};
+  AudioRng audio_rng = {};
 
-  // Message queue.
-  MessageQueue message_queue = {};
+  EffectParams current_params = {};
+  EffectParams target_params = {};
 
-  // Process fence.
-  std::atomic_flag process_fence = {};
+  Compressor comp = {};
+  DelayFilter delay_filter = {};
+  Reverb reverb = {};
+  Sidechain sidechain = {};
 
-  // Array of instrument parameters.
+  Pool<InstrumentState> instrument_pool;
+  Pool<NoteState> note_pool;
+  Pool<PerformerState> performer_pool;
+  Pool<TaskState> task_pool;
+  Pool<VoiceState> voice_pool;
+
+  SlicePool slice_pool;
+
+  MessageQueue message_queue;
+
+  uint32_t* instrument_generations = nullptr;
+  uint32_t* performer_generations = nullptr;
+  uint32_t* task_generations = nullptr;
+
   InstrumentParams* instrument_params = nullptr;
+  uint32_t* note_to_voice = nullptr;
 
   // Number of queued sample data messages per instrument.
   std::atomic<int32_t>* queued_sample_data_counts = nullptr;
 
-  // Maps note indices to voice indices.
-  uint32_t* note_to_voice = nullptr;
-
-  // Voice pool.
-  Pool<VoiceState> voice_pool = {};
-
-  // Random number generator for the audio thread.
-  AudioRng audio_rng = {};
-
-  // Current parameters.
-  EffectParams current_params = {};
-
-  // Target parameters.
-  EffectParams target_params = {};
-
-  // Compressor.
-  Compressor comp = {};
-
-  // Delay filter.
-  DelayFilter delay_filter = {};
-
-  // Reverb.
-  Reverb reverb = {};
-
-  // Sidechain.
-  Sidechain sidechain = {};
+  float* temp_samples = nullptr;
 
   // Tempo in beats per minute.
   double tempo = 120.0;
@@ -157,6 +122,8 @@ struct EngineState {
   uint32_t max_id_generation = 0;
 
   uint32_t max_frame_count = 0;
+
+  std::atomic_flag process_fence = {};
 
   void Approach() noexcept {
     current_params.comp_params.Approach(target_params.comp_params, smoothing_coeff);

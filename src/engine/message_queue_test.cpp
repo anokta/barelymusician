@@ -19,11 +19,10 @@ namespace barely {
 namespace {
 
 TEST(MessageQueueTest, AddSingleMessage) {
-  const size_t size = GetMessageQueueSize();
+  const size_t size = GetAllocSize<MessageQueue>();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  MessageQueue messages;
-  messages.Init(arena);
+  MessageQueue messages(arena);
   EXPECT_THAT(messages.GetNext(0), IsNull());
   EXPECT_THAT(messages.GetNext(1), IsNull());
   EXPECT_THAT(messages.GetNext(10), IsNull());
@@ -41,11 +40,10 @@ TEST(MessageQueueTest, AddSingleMessage) {
 }
 
 TEST(MessageQueueTest, AddMultipleMessages) {
-  const size_t size = GetMessageQueueSize();
+  const size_t size = GetAllocSize<MessageQueue>();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  MessageQueue messages;
-  messages.Init(arena);
+  MessageQueue messages(arena);
   EXPECT_THAT(messages.GetNext(10), IsNull());
 
   for (uint32_t i = 0; i < 10; ++i) {

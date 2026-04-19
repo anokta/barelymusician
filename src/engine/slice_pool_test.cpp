@@ -18,12 +18,6 @@ namespace {
 using ::testing::Field;
 using ::testing::Pointee;
 
-[[nodiscard]] size_t GetPoolSize(int count) noexcept {
-  Arena arena;  // sizing arena
-  SlicePool().Init(arena, count);
-  return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
-}
-
 TEST(SlicePoolTest, Select) {
   constexpr int kSampleRate = 1;
   constexpr std::array<float, 1> kSamples = {1.0f};
@@ -34,13 +28,12 @@ TEST(SlicePoolTest, Select) {
   };
   constexpr uint32_t kCount = 100;
 
-  const size_t size = GetPoolSize(kCount);
+  const size_t size = GetAllocSize<SlicePool>(kCount);
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
 
   AudioRng rng;
-  SlicePool slice_pool;
-  slice_pool.Init(arena, kCount);
+  SlicePool slice_pool(arena, kCount);
 
   const uint32_t first_slice_index =
       slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));

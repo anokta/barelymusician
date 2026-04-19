@@ -53,6 +53,14 @@ class Arena {
   size_t offset_ = 0;
 };
 
+template <typename T, typename... Args>
+[[nodiscard]] constexpr size_t GetAllocSize(Args&&... args) noexcept {
+  Arena arena;  // sizing arena
+  arena.Alloc<T>();
+  T(arena, args...);
+  return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
+}
+
 }  // namespace barely
 
 #endif  // BARELYMUSICIAN_CORE_ARENA_H_

@@ -19,17 +19,8 @@ struct BarelyEngine {
   barely::EngineController controller;
   barely::EngineProcessor processor;
 
-  [[nodiscard]] static size_t GetSize(const BarelyEngineConfig& config) noexcept {
-    barely::Arena arena;  // sizing arena
-    arena.Alloc<BarelyEngine>();
-    barely::EngineState().Init(arena, config);
-    return barely::AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
-  }
-
   BarelyEngine(barely::Arena& arena, const BarelyEngineConfig& config) noexcept
-      : controller(state), processor(state) {
-    state.Init(arena, config);
-  }
+      : state(arena, config), controller(state), processor(state) {}
 
   [[nodiscard]] bool IsValidInstrument(uint32_t instrument_id) const noexcept {
     const uint32_t instrument_index = state.GetIdIndex(instrument_id);
@@ -60,7 +51,7 @@ bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_en
     return false;
   }
 
-  const size_t size = BarelyEngine::GetSize(*config);
+  const size_t size = barely::GetAllocSize<BarelyEngine>(*config);
   std::byte* data = new std::byte[size];
   barely::Arena arena(data, size);
   *out_engine = new (arena.Alloc<BarelyEngine>()) BarelyEngine(arena, *config);

@@ -15,18 +15,16 @@ namespace barely {
 template <typename ItemType>
 class Pool {
  public:
-  void Init(Arena& arena, uint32_t count) noexcept {
-    assert(count > 0);
-    assert(count != kInvalidIndex);
-
-    items_ = arena.AllocArray<ItemType>(count);
-    to_active_ = arena.AllocArray<uint32_t>(count);
-    active_ = arena.AllocArray<uint32_t>(count);
-    free_ = arena.AllocArray<uint32_t>(count);
+  Pool(Arena& arena, uint32_t count) noexcept
+      : items_(arena.AllocArray<ItemType>(count)),
+        to_active_(arena.AllocArray<uint32_t>(count)),
+        active_(arena.AllocArray<uint32_t>(count)),
+        free_(arena.AllocArray<uint32_t>(count)) {
     if (arena.is_null()) {
       return;
     }
-
+    assert(count > 0);
+    assert(count != kInvalidIndex);
     count_ = count;
     std::fill_n(to_active_, count_, kInvalidIndex);
     for (uint32_t i = 0; i < count; ++i) {

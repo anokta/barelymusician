@@ -9,23 +9,16 @@
 namespace barely {
 namespace {
 
-struct TestData {};
-
-[[nodiscard]] size_t GetPoolSize(int count) noexcept {
-  Arena arena;  // sizing arena
-  Pool<TestData>().Init(arena, count);
-  return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
-}
-
 TEST(PoolTest, AcquireMax) {
   constexpr uint32_t kCount = 10;
 
-  const size_t size = GetPoolSize(kCount);
+  struct TestData {};
+
+  const size_t size = GetAllocSize<Pool<TestData>>(kCount);
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
 
-  Pool<TestData> pool;
-  pool.Init(arena, kCount);
+  Pool<TestData> pool(arena, kCount);
 
   // Acquire up to maximum capacity.
   for (uint32_t i = 0; i < kCount; ++i) {

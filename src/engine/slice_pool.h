@@ -16,13 +16,13 @@ namespace barely {
 
 class SlicePool {
  public:
-  void Init(Arena& arena, uint32_t count) noexcept {
-    slices_ = arena.AllocArray<SliceState>(count);
-    free_ = arena.AllocArray<uint32_t>(count);
+  SlicePool(Arena& arena, uint32_t count) noexcept
+      : slices_(arena.AllocArray<SliceState>(count)), free_(arena.AllocArray<uint32_t>(count)) {
     if (arena.is_null()) {
       return;
     }
-
+    assert(count > 0);
+    assert(count != kInvalidIndex);
     count_ = count;
     free_count_ = count;
     for (uint32_t i = 0; i < count_; ++i) {

@@ -19,18 +19,11 @@ namespace {
 
 constexpr int kSampleRate = 48000;
 
-[[nodiscard]] size_t GetEngineSize() noexcept {
-  Arena arena;  // sizing arena
-  EngineState().Init(arena, EngineConfig(kSampleRate));
-  return AlignUp(arena.offset(), alignof(std::max_align_t)) + alignof(std::max_align_t);
-}
-
 TEST(PerformerControllerTest, ProcessSingleTask) {
-  const size_t size = GetEngineSize();
+  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  EngineState engine;
-  engine.Init(arena, EngineConfig(kSampleRate));
+  EngineState engine(arena, EngineConfig(kSampleRate));
   PerformerController controller(engine);
 
   // Create a performer.
@@ -249,11 +242,10 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
 TEST(PerformerControllerTest, ProcessMultipleTasks) {
   constexpr int kTaskCount = 4;
 
-  const size_t size = GetEngineSize();
+  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
-  EngineState engine;
-  engine.Init(arena, EngineConfig(kSampleRate));
+  EngineState engine(arena, EngineConfig(kSampleRate));
   PerformerController controller(engine);
 
   // Create a performer.

@@ -496,6 +496,13 @@ BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* 
 BARELY_API bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
                                         float* out_value);
 
+/// Gets the maximum identifier index of an engine.
+///
+/// @param engine Pointer to engine.
+/// @param out_max_id_index Output maximum identifier index.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_GetMaxIdIndex(const BarelyEngine* engine, uint32_t* out_max_id_index);
+
 /// Gets the tempo of an engine.
 ///
 /// @param engine Pointer to engine.
@@ -1402,11 +1409,12 @@ class Engine {
   /// @return Instrument.
   Instrument CreateInstrument() noexcept {
     uint32_t instrument_id = 0;
-    [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
+    [[maybe_unused]] bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
     assert(success);
-    // TODO: Add BarelyEngine_GetMaxIdIndex()
-    NoteEventCallback& note_event_callback =
-        note_event_callbacks_.get()[(instrument_id & ((1 << 20) - 1)) - 1];
+    uint32_t max_id_index = 0;
+    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
+    assert(success);
+    auto& note_event_callback = note_event_callbacks_.get()[(instrument_id & max_id_index) - 1];
     note_event_callback = {};
     return {engine_, instrument_id, &note_event_callback};
   }
@@ -1435,9 +1443,10 @@ class Engine {
     [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
                                                             priority, nullptr, nullptr, &task_id);
     assert(success);
-    // TODO: Add BarelyEngine_GetMaxIdIndex()
-    TaskEventCallback& task_event_callback =
-        task_event_callbacks_.get()[(task_id & ((1 << 20) - 1)) - 1];
+    uint32_t max_id_index = 0;
+    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
+    assert(success);
+    auto& task_event_callback = task_event_callbacks_.get()[(task_id & max_id_index) - 1];
     task_event_callback = std::move(callback);
     success = BarelyTask_SetEventCallback(
         engine_, task_id,

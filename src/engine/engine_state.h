@@ -5,6 +5,7 @@
 
 #include <array>
 #include <atomic>
+#include <bit>
 #include <cstdint>
 
 #include "core/arena.h"
@@ -29,13 +30,26 @@
 
 namespace barely {
 
+static_assert((kInvalidIndex + 1) == 0);
+
 struct EngineState {
   void Init(Arena& arena, const BarelyEngineConfig& config) noexcept {
     const uint32_t max_instrument_count = static_cast<uint32_t>(config.max_instrument_count);
     const uint32_t max_performer_count = static_cast<uint32_t>(config.max_performer_count);
     const uint32_t max_task_count = static_cast<uint32_t>(config.max_task_count);
     const uint32_t max_note_count = static_cast<uint32_t>(config.max_note_count);
+
+    id_index_bit_count = std::bit_width(
+        std::bit_ceil(std::max({max_instrument_count, max_performer_count, max_task_count})));
+    assert(id_index_bit_count < 32);
+
+    max_id_index = (1 << id_index_bit_count) - 1;
+    max_id_generation = (1 << (32 - id_index_bit_count)) - 1;
+
+    max_frame_count = static_cast<uint32_t>(config.max_frame_count);
+
     sample_rate = static_cast<float>(config.sample_rate);
+
     temp_samples = arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count);
     message_queue.Init(arena);
     performer_pool.Init(arena, max_performer_count);
@@ -50,6 +64,7 @@ struct EngineState {
     queued_sample_data_counts = arena.AllocArray<std::atomic<int32_t>>(max_instrument_count);
     note_to_voice = arena.AllocArray<uint32_t>(max_note_count);
     voice_pool.Init(arena, static_cast<uint32_t>(config.max_voice_count));
+
     delay_filter.Init(arena, config.sample_rate);
     reverb.Init(arena, config.sample_rate);
     static constexpr float kSmoothingSeconds = 0.05f;  // 50ms
@@ -135,6 +150,12 @@ struct EngineState {
   // Smoothing coefficient.
   float smoothing_coeff = 0.0f;
 
+  uint32_t id_index_bit_count = 0;
+  uint32_t max_id_index = 0;
+  uint32_t max_id_generation = 0;
+
+  uint32_t max_frame_count = 0;
+
   void Approach() noexcept {
     current_params.comp_params.Approach(target_params.comp_params, smoothing_coeff);
     current_params.sidechain_params.Approach(target_params.sidechain_params, smoothing_coeff);
@@ -155,6 +176,22 @@ struct EngineState {
     }
     return slice_pool.Select(first_slice_index, pitch, audio_rng);
   }
+
+  [[nodiscard]] uint32_t BuildId(uint32_t index, uint32_t generation) const noexcept {
+    return (generation << id_index_bit_count) | (index + 1);
+  }
+
+  [[nodiscard]] uint32_t GetIdGeneration(uint32_t id) const noexcept {
+    return id >> id_index_bit_count;
+  }
+
+  [[nodiscard]] uint32_t GetIdIndex(uint32_t id) const noexcept { return (id & max_id_index) - 1; }
+
+  [[nodiscard]] uint32_t GetNextIdGeneration(uint32_t generation) const noexcept {
+    return (generation + 1) & max_id_generation;
+  }
+
+  [[nodiscard]] uint32_t GetMaxIdIndex() const noexcept { return max_id_index; }
 
   [[nodiscard]] const SliceState* GetSlice(uint32_t instrument_index,
                                            uint32_t slice_index) const noexcept {

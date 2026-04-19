@@ -40,8 +40,8 @@ struct DelayParams {
 // Delay filter with smooth interpolation.
 class DelayFilter {
  public:
-  void Init(Arena& arena, int sample_rate) noexcept {
-    max_frame_count_ = sample_rate * kMaxDelaySeconds;
+  void Init(Arena& arena, int max_frame_count) noexcept {
+    max_frame_count_ = max_frame_count;
     delay_samples_ = arena.AllocArray<float>(max_frame_count_ * kStereoChannelCount);
   }
 

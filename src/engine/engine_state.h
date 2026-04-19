@@ -47,7 +47,6 @@ struct EngineState {
     max_id_generation = (1 << (32 - id_index_bit_count)) - 1;
 
     max_frame_count = static_cast<uint32_t>(config.max_frame_count);
-
     sample_rate = static_cast<float>(config.sample_rate);
 
     temp_samples = arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count);
@@ -65,8 +64,11 @@ struct EngineState {
     note_to_voice = arena.AllocArray<uint32_t>(max_note_count);
     voice_pool.Init(arena, static_cast<uint32_t>(config.max_voice_count));
 
-    delay_filter.Init(arena, config.sample_rate);
+    delay_filter.Init(
+        arena, static_cast<int>(std::ceil(static_cast<float>(config.sample_rate) *
+                                          controls[BarelyEngineControlType_kDelayTime].max_value)));
     reverb.Init(arena, config.sample_rate);
+
     static constexpr float kSmoothingSeconds = 0.05f;  // 50ms
     smoothing_coeff = GetCoefficient(sample_rate, kSmoothingSeconds);
   }

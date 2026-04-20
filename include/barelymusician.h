@@ -101,7 +101,7 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create a new engine.
-///   BarelyEngine* engine = nullptr;
+///   BarelyEngine* engine = NULL;
 ///   BarelyEngineConfig config = { /*populate this*/ };
 ///   BarelyEngine_Create(&config, &engine);
 ///
@@ -115,7 +115,7 @@
 ///   // address this, `Update` should typically be called from the main thread update callback
 ///   // using a lookahead to prevent potential thread synchronization issues in real-time audio
 ///   // applications.
-///   double lookahead = 0.1;
+///   const double lookahead = 0.1;
 ///   double timestamp = 0.0;
 ///   BarelyEngine_Update(engine, timestamp + lookahead);
 ///
@@ -142,7 +142,7 @@
 ///   // The note pitch is expressed in octaves relative to middle C as the center frequency.
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
 ///   // pitch intervals within each octave.
-///   float c3_pitch = -1.0f;
+///   const float c3_pitch = -1.0f;
 ///   BarelyInstrument_SetNoteOn(engine, instrument_id, c3_pitch);
 ///
 ///   // Check if the instrument note is on.

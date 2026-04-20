@@ -82,14 +82,13 @@ int main(void) {
   g_midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  g_instrument = g_engine.CreateInstrument({{
-      {InstrumentControlType::kGain, kGain},
-      {InstrumentControlType::kOscMix, 1.0f},
-      {InstrumentControlType::kOscShape, g_osc_shape},
-      {InstrumentControlType::kAttack, kAttack},
-      {InstrumentControlType::kRelease, kRelease},
-      {InstrumentControlType::kVoiceCount, kVoiceCount},
-  }});
+  g_instrument = g_engine.CreateInstrument();
+  g_instrument.SetControl(InstrumentControlType::kGain, kGain);
+  g_instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  g_instrument.SetControl(InstrumentControlType::kOscShape, g_osc_shape);
+  g_instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  g_instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  g_instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   // Start processing.
   g_hw.StartAdc();

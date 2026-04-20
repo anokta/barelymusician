@@ -124,7 +124,7 @@ struct EngineState {
 
   uint32_t max_frame_count = 0;
 
-  std::atomic_flag process_fence = {};
+  std::atomic_bool process_fence = {};
 
   void Approach() noexcept {
     current_params.comp_params.Approach(target_params.comp_params, smoothing_coeff);

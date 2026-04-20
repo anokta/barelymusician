@@ -42,7 +42,7 @@ class EngineProcessor {
     const int64_t end_frame = process_frame + output_frame_count;
     int current_frame = 0;
 
-    engine_.process_fence.test_and_set(std::memory_order_release);
+    engine_.process_fence.store(true, std::memory_order_release);
 
     // Process *all* messages before the end sample.
     for (auto* message = engine_.message_queue.GetNext(end_frame); message;
@@ -62,7 +62,7 @@ class EngineProcessor {
                      output_frame_count - current_frame);
     }
 
-    engine_.process_fence.clear(std::memory_order_release);
+    engine_.process_fence.store(false, std::memory_order_release);
 
     // Fill the output samples.
     if (output_channel_count > 1) {

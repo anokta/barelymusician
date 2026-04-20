@@ -36,7 +36,16 @@ constexpr int kVoiceCount = 16;
 DaisyPod g_hw;  // target the Daisy Pod hardware.
 MidiUsbHandler g_midi;
 
-Engine g_engine{EngineConfig(kSampleRate, kFrameCount, 1, 1, 1, 1000, 1, 32)};
+Engine g_engine{EngineConfig{
+    .sample_rate = kSampleRate,
+    .max_frame_count = kFrameCount,
+    .max_instrument_count = 1,
+    .max_performer_count = 1,
+    .max_task_count = 1,
+    .max_note_count = 1000,
+    .max_slice_count = 1,
+    .max_voice_count = 32,
+}};
 Instrument g_instrument = {};
 float g_osc_shape = 0.0f;
 std::array<float, kChannelCount * kFrameCount> g_output_samples;

@@ -77,16 +77,8 @@ static void TaskEventCallback(BarelyEventType type, void* user_data) {
 int main() {
   // Initialize the engine.
   BarelyEngine* engine = NULL;
-  BarelyEngineConfig config = {
-      .sample_rate = kSampleRate,
-      .max_frame_count = kFrameCount,
-      .max_instrument_count = 1,
-      .max_performer_count = 1,
-      .max_task_count = kMelodyNoteCount,
-      .max_slice_count = 1,
-      .max_note_count = 100,
-      .max_voice_count = 100,
-  };
+  BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
+  config.max_frame_count = kFrameCount;
   BarelyEngine_Create(&config, &engine);
   BarelyEngine_SetTempo(engine, kTempo);
 

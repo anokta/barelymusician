@@ -52,14 +52,15 @@ struct EngineState {
             arena.AllocArray<std::atomic<int32_t>>(config.max_instrument_count)),
         temp_samples(arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count)),
 
+        sample_rate(static_cast<float>(config.sample_rate)),
+        smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05f)),
+
         id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
             {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
         max_id_index((1 << id_index_bit_count) - 1),
         max_id_generation((1 << (32 - id_index_bit_count)) - 1),
 
-        max_frame_count(static_cast<uint32_t>(config.max_frame_count)),
-        sample_rate(static_cast<float>(config.sample_rate)),
-        smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05f)) {
+        max_frame_count(static_cast<uint32_t>(config.max_frame_count)) {
     assert(id_index_bit_count < 32);
     assert(sample_rate > 0.0f);
     delay_filter.Init(

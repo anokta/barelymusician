@@ -101,8 +101,8 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create a new engine.
+///   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(/*sample_rate=*/48000);
 ///   BarelyEngine* engine = NULL;
-///   BarelyEngineConfig config = { /*populate this*/ };
 ///   BarelyEngine_Create(&config, &engine);
 ///
 ///   // Set the tempo.
@@ -332,6 +332,19 @@ BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
   X(NoteControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")  \
   X(NoteControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")
 BARELY_ENUM(NoteControlType, BARELY_NOTE_CONTROL_TYPES)
+
+/// Default engine configuration.
+#define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate) \
+  {                                               \
+      .sample_##rate = sample_rate,               \
+      .max_frame_count = 2048,                    \
+      .max_instrument_count = 100,                \
+      .max_performer_count = 100,                 \
+      .max_task_count = 5000,                     \
+      .max_note_count = 1000,                     \
+      .max_slice_count = 1000,                    \
+      .max_voice_count = 200,                     \
+  }
 
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
@@ -873,22 +886,8 @@ struct EngineConfig : public BarelyEngineConfig {
   /// Constructs a new `EngineConfig`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  /// @param max_frame_count Maximum number of frames to process per call.
-  /// @param max_instrument_count Maximum number of instruments.
-  /// @param max_performer_count Maximum number of performers.
-  /// @param max_task_count Maximum number of tasks.
-  /// @param max_note_count Maximum number of active notes.
-  /// @param max_slice_count Maximum number of active slices.
-  /// @param max_voice_count Maximum number of active voices.
-  constexpr explicit EngineConfig(int sample_rate, int max_frame_count = 2048,
-                                  int max_instrument_count = 100, int max_performer_count = 100,
-                                  int max_task_count = 5000, int max_note_count = 1000,
-                                  int max_slice_count = 1000, int max_voice_count = 200)
-      : EngineConfig(
-            {static_cast<int32_t>(sample_rate), static_cast<int32_t>(max_frame_count),
-             static_cast<int32_t>(max_instrument_count), static_cast<int32_t>(max_performer_count),
-             static_cast<int32_t>(max_task_count), static_cast<int32_t>(max_note_count),
-             static_cast<int32_t>(max_slice_count), static_cast<int32_t>(max_voice_count)}) {}
+  constexpr explicit EngineConfig(int sample_rate)
+      : EngineConfig(BARELY_ENGINE_CONFIG_DEFAULT(sample_rate)) {}
 
   /// Constructs a new `EngineConfig` from a raw type.
   ///

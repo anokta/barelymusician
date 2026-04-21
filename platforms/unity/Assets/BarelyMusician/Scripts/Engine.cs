@@ -839,6 +839,18 @@ namespace Barely {
       }
 
       [StructLayout(LayoutKind.Sequential)]
+      public struct BarelyEngineConfig {
+        public Int32 sampleRate;
+        public Int32 maxFrameCount;
+        public Int32 maxInstrumentCount;
+        public Int32 maxPerformerCount;
+        public Int32 maxTaskCount;
+        public Int32 maxNoteCount;
+        public Int32 maxSliceCount;
+        public Int32 maxVoiceCount;
+      }
+
+      [StructLayout(LayoutKind.Sequential)]
       private struct Scale {
         public float[] pitches;
         public Int32 pitchCount;
@@ -965,7 +977,17 @@ namespace Barely {
         private void Initialize() {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
-          if (!BarelyEngine_Create(config.sampleRate, ref _handle)) {
+          var engineConfig = new BarelyEngineConfig {
+            sampleRate = config.sampleRate,
+            maxFrameCount = config.dspBufferSize,
+            maxInstrumentCount = 100,
+            maxPerformerCount = 100,
+            maxTaskCount = 5000,
+            maxNoteCount = 1000,
+            maxSliceCount = 1000,
+            maxVoiceCount = 200,
+          };
+          if (!BarelyEngine_Create(ref engineConfig, ref _handle)) {
             Debug.LogError("Failed to initialize BarelyEngine");
             return;
           }
@@ -1026,7 +1048,8 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(Int32 sampleRate, ref IntPtr outEngine);
+      private static extern bool BarelyEngine_Create(ref BarelyEngineConfig config,
+                                                     ref IntPtr outEngine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreateInstrument")]
       private static extern bool BarelyEngine_CreateInstrument(IntPtr engine,

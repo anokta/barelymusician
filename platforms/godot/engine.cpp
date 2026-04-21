@@ -106,16 +106,8 @@ void BarelyEngine::set_tempo(double tempo) { BarelyEngine_SetTempo(get(), tempo)
 ::BarelyEngine* BarelyEngine::get() {
   if (engine_ == nullptr) {
     // TODO(#181): Support sample rate changes after initialization.
-    const BarelyEngineConfig config = {
-        .sample_rate = static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()),
-        .max_frame_count = 2048,
-        .max_instrument_count = 100,
-        .max_performer_count = 100,
-        .max_task_count = 5000,
-        .max_note_count = 1000,
-        .max_slice_count = 1000,
-        .max_voice_count = 200,
-    };
+    const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(
+        static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()));
     BarelyEngine_Create(&config, &engine_);
     BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_GODOT_ENGINE_CONTROL);
     if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {

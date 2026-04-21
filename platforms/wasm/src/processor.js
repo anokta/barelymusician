@@ -5,7 +5,8 @@ import {INSTRUMENT_CONTROLS, NoteControlType} from './control.js';
 const RENDER_QUANTUM_SIZE = 128;
 const STEREO_CHANNEL_COUNT = 2;
 
-const SLICE_SIZE = 24;  // sizeof(BarelySlice)
+const ENGINE_CONFIG_SIZE = 32;  // sizeof(BarelyEngineConfig)
+const SLICE_SIZE = 24;          // sizeof(BarelySlice)
 
 const EventType = Object.freeze({
   BEGIN: 0,
@@ -41,9 +42,21 @@ class Processor extends AudioWorkletProcessor {
       this._outputSamplesPtr = this._module._malloc(
           STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float32Array.BYTES_PER_ELEMENT);
 
-      // TODO: Set custom config
-      this._module._BarelyEngine_Create(sampleRate, this._uint32Ptr);
+      const configPtr = this._module._malloc(ENGINE_CONFIG_SIZE);
+      const configView = new Int32Array(this._module.HEAP32.buffer, configPtr, 8);
+      configView[0] = sampleRate;           // sample_rate
+      configView[1] = RENDER_QUANTUM_SIZE;  // max_frame_count
+      configView[2] = 32;                   // max_instrument_count
+      configView[3] = 32;                   // max_performer_count
+      configView[4] = 512;                  // max_task_count
+      configView[5] = 512;                  // max_note_count
+      configView[6] = 128;                  // max_slice_count
+      configView[7] = 128;                  // max_voice_count
+
+      this._module._BarelyEngine_Create(configPtr, this._uint32Ptr);
       this._engine = this._module.getValue(this._uint32Ptr, 'i32');
+
+      this._module._free(configPtr);
 
       this.port.postMessage({type: MessageType.INIT_SUCCESS});
     });

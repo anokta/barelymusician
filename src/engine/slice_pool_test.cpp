@@ -3,7 +3,9 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include "core/arena.h"
 #include "core/constants.h"
@@ -28,7 +30,7 @@ TEST(SlicePoolTest, Select) {
   };
   constexpr uint32_t kCount = 100;
 
-  const size_t size = GetAllocSize<SlicePool>(kCount);
+  const auto size = GetAllocSize<SlicePool>(kCount);
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
 

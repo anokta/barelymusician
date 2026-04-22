@@ -57,24 +57,24 @@ struct EngineState {
 
         id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
             {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
-        max_id_index((1 << id_index_bit_count) - 1),
-        max_id_generation((1 << (32 - id_index_bit_count)) - 1),
+        max_id_index((1l << id_index_bit_count) - 1l),
+        max_id_generation((1l << (32l - id_index_bit_count)) - 1l),
 
         max_frame_count(static_cast<uint32_t>(config.max_frame_count)) {
     assert(id_index_bit_count < 32);
     assert(sample_rate > 0.0f);
     delay_filter.Init(
-        arena, static_cast<int>(std::ceil(static_cast<float>(config.sample_rate) *
+        arena, static_cast<int>(std::ceil(sample_rate *
                                           controls[BarelyEngineControlType_kDelayTime].max_value)));
-    reverb.Init(arena, config.sample_rate);
+    reverb.Init(arena, sample_rate);
   }
 
   // Array of engine controls.
   std::array<Control, BarelyEngineControlType_kCount> controls = {
       BARELY_ENGINE_CONTROL_TYPES(EngineControlType, BARELY_DEFINE_CONTROL)};
 
-  MainRng main_rng = {};
-  AudioRng audio_rng = {};
+  MainRng main_rng;
+  AudioRng audio_rng;
 
   EffectParams current_params = {};
   EffectParams target_params = {};
@@ -124,7 +124,7 @@ struct EngineState {
 
   uint32_t max_frame_count = 0;
 
-  std::atomic_bool process_fence = {};
+  std::atomic_bool process_fence;
 
   void Approach() noexcept {
     current_params.comp_params.Approach(target_params.comp_params, smoothing_coeff);
@@ -135,7 +135,7 @@ struct EngineState {
   }
 
   void ScheduleMessage(Message message) noexcept {
-    message_queue.Add(SecondsToFrames(sample_rate, timestamp), std::move(message));
+    message_queue.Add(SecondsToFrames(sample_rate, timestamp), message);
   }
 
   [[nodiscard]] uint32_t SelectSlice(uint32_t instrument_index, uint32_t first_slice_index,

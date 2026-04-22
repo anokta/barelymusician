@@ -46,7 +46,8 @@ class SlicePool {
       const uint32_t next_slice_index =
           (i + 1 < slice_count) ? free_[free_read_index_] : kInvalidIndex;
       slices_[slice_index] = {
-          slice.samples, slice.sample_count, slice.sample_rate, slice.root_pitch, next_slice_index,
+          slice.samples,    slice.sample_count, static_cast<float>(slice.sample_rate),
+          slice.root_pitch, next_slice_index,
       };
       slice_index = next_slice_index;
     }

@@ -12,7 +12,7 @@ struct SliceState {
   const float* samples = nullptr;
   int32_t sample_count = 0;
 
-  int32_t sample_rate = 0;
+  float sample_rate = 0.0f;
 
   float root_pitch = 0.0f;
 

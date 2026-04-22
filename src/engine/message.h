@@ -56,7 +56,7 @@ using Message = std::variant<EngineControlMessage, EngineSeedMessage, Instrument
                              NoteOnMessage, SampleDataMessage>;
 
 template <typename... MessageTypes>
-struct MessageVisitor : MessageTypes... {
+struct MessageVisitor : MessageTypes... {  // NOLINT(misc-multiple-inheritance)
   using MessageTypes::operator()...;
 };
 template <typename... MessageTypes>

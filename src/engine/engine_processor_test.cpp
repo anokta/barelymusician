@@ -3,16 +3,15 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 
 #include "core/arena.h"
 #include "core/constants.h"
-#include "core/control.h"
 #include "dsp/envelope.h"
 #include "dsp/tone_filter.h"
 #include "engine/engine_state.h"
-#include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "gtest/gtest.h"
 
@@ -31,7 +30,7 @@ TEST(EngineProcessorTest, PlayNote) {
       BarelySlice{kSamples.data(), kSampleRate, kSampleRate, kPitch},
   };
 
-  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
+  const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine(arena, EngineConfig(kSampleRate));

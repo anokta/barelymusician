@@ -3,6 +3,7 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -17,7 +18,7 @@ namespace {
 constexpr int kSampleRate = 48000;
 
 TEST(InstrumentControllerTest, SetControl) {
-  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
+  const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine(arena, EngineConfig(kSampleRate));

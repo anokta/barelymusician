@@ -31,7 +31,7 @@ class InstrumentProcessor {
   void SetNoteOn(uint32_t note_index, uint32_t instrument_index, float pitch) noexcept;
   void SetSampleData(uint32_t instrument_index, uint32_t first_slice_index) noexcept;
 
-  void Init(uint32_t instrument_index) noexcept {
+  void Init(uint32_t instrument_index) const noexcept {
     InstrumentParams& instrument_params = engine_.instrument_params[instrument_index];
     instrument_params = {};
     instrument_params.adsr.SetRelease(engine_.sample_rate, 0.0f);
@@ -48,16 +48,15 @@ class InstrumentProcessor {
     for (uint32_t i = 0; i < engine_.voice_pool.ActiveCount();) {
       const uint32_t voice_index = engine_.voice_pool.GetActive(i);
       VoiceState& voice = engine_.GetVoice(voice_index);
-      InstrumentParams& params = engine_.instrument_params[voice.instrument_index];
       if constexpr (kIsSidechainSend) {
         if (!voice.envelope.IsActive()) {
-          ReleaseVoice(voice, params);
+          ReleaseVoice(voice, engine_.instrument_params[voice.instrument_index]);
           engine_.voice_pool.Release(voice_index);
           continue;
         }
       }
-      ProcessVoice<kIsSidechainSend>(voice, params, delay_frame, reverb_frame, sidechain_frame,
-                                     output_frame);
+      ProcessVoice<kIsSidechainSend>(voice, engine_.instrument_params[voice.instrument_index],
+                                     delay_frame, reverb_frame, sidechain_frame, output_frame);
       ++i;
     }
   }
@@ -172,8 +171,8 @@ class InstrumentProcessor {
     const float left_gain = 0.5f * (1.0f - voice.params.stereo_pan);
     const float right_gain = 1.0f - left_gain;
 
-    float left_output = left_gain * output;
-    float right_output = right_gain * output;
+    float left_output = left_gain * output;    // NOLINT(misc-const-correctness)
+    float right_output = right_gain * output;  // NOLINT(misc-const-correctness)
 
     if constexpr (kIsSidechainSend) {
       sidechain_frame[0] += voice.params.sidechain_send * left_output;

@@ -34,7 +34,7 @@ struct InstrumentState {
 
   uint32_t first_slice_index = kInvalidIndex;
 
-  double GetNextArpDuration() const noexcept {
+  [[nodiscard]] double GetNextArpDuration() const noexcept {
     if (first_note_index == kInvalidIndex || !IsArpEnabled()) {
       return std::numeric_limits<double>::max();
     }
@@ -49,7 +49,7 @@ struct InstrumentState {
     return (arp.phase > 0.0 || arp.should_update) ? ((1.0 - arp.phase) / rate) : 0.0;
   }
 
-  bool IsArpEnabled() const noexcept {
+  [[nodiscard]] bool IsArpEnabled() const noexcept {
     return static_cast<BarelyArpMode>(controls[BarelyInstrumentControlType_kArpMode].value) !=
            BarelyArpMode_kNone;
   }

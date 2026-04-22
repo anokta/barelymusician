@@ -8,6 +8,7 @@ struct Callback {
   CallbackType callback = nullptr;
   void* user_data = nullptr;
 
+  // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr operator bool() const noexcept { return callback; }
 
   template <typename... CallbackArgs>

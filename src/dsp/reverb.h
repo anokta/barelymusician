@@ -36,7 +36,7 @@ struct ReverbParams {
 // Simple stereo reverb implementation based on freeverb.
 class Reverb {
  public:
-  void Init(Arena& arena, int sample_rate) noexcept {
+  void Init(Arena& arena, float sample_rate) noexcept {
     const float sample_rate_scale = sample_rate / kTuningSampleRate;
     const uint32_t max_delay_frame_count = std::bit_ceil(static_cast<uint32_t>(
         GetScaledTuning(kCombFilterTunings[kCombFilterCount - 1], 1, sample_rate_scale)));
@@ -64,8 +64,8 @@ class Reverb {
     }
   }
 
-  void Process(float input_frame[kStereoChannelCount], float output_frame[kStereoChannelCount],
-               const ReverbParams& params) noexcept {
+  void Process(const float input_frame[kStereoChannelCount],
+               float output_frame[kStereoChannelCount], const ReverbParams& params) noexcept {
     float damping_ratio = 0.0f;
     float feedback = kMaxDelayFeedback;
     float input_sample = 0.0f;
@@ -121,7 +121,7 @@ class Reverb {
 
   class CombFilter {
    public:
-    void Init(Arena& arena, int max_delay_frame_count) noexcept {
+    void Init(Arena& arena, uint32_t max_delay_frame_count) noexcept {
       delay_samples_ = arena.AllocArray<float>(max_delay_frame_count);
     }
 
@@ -144,7 +144,7 @@ class Reverb {
 
   class AllPassFilter {
    public:
-    void Init(Arena& arena, int max_delay_frame_count) noexcept {
+    void Init(Arena& arena, uint32_t max_delay_frame_count) noexcept {
       delay_samples_ = arena.AllocArray<float>(max_delay_frame_count);
     }
 

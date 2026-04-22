@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #include <assert.h>
 #include <barelymusician.h>
 #include <stdio.h>
@@ -48,7 +49,7 @@ static void AudioProcessCallback(ma_device* device, void* output, const void* in
   assert(device != NULL);
   assert(device->pUserData != NULL);
   BarelyEngine_Process((BarelyEngine*)device->pUserData, (float*)output,
-                       (int32_t)device->playback.channels, (int32_t)(frame_count), g_timestamp);
+                       (int32_t)device->playback.channels, (int32_t)frame_count, g_timestamp);
   g_timestamp += (double)frame_count / (double)kSampleRate;
 }
 
@@ -146,3 +147,4 @@ int main() {
 
   return 0;
 }
+// NOLINTEND

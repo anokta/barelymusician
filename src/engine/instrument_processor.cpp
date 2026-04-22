@@ -2,11 +2,15 @@
 
 #include <barelymusician.h>
 
+#include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
 
 #include "core/constants.h"
+#include "core/control.h"
+#include "dsp/sample_generators.h"
 
 namespace barely {
 

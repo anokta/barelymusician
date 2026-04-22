@@ -1,6 +1,8 @@
 #include "engine/message_queue.h"
 
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include "core/arena.h"
 #include "engine/message.h"
@@ -19,7 +21,7 @@ namespace barely {
 namespace {
 
 TEST(MessageQueueTest, AddSingleMessage) {
-  const size_t size = GetAllocSize<MessageQueue>();
+  const auto size = GetAllocSize<MessageQueue>();
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   MessageQueue messages(arena);

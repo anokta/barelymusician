@@ -57,13 +57,19 @@ class EngineController {
     }
   }
 
-  InstrumentController& instrument_controller() noexcept { return instrument_controller_; }
-  const InstrumentController& instrument_controller() const noexcept {
+  [[nodiscard]] InstrumentController& instrument_controller() noexcept {
+    return instrument_controller_;
+  }
+  [[nodiscard]] const InstrumentController& instrument_controller() const noexcept {
     return instrument_controller_;
   }
 
-  PerformerController& performer_controller() noexcept { return performer_controller_; }
-  const PerformerController& performer_controller() const noexcept { return performer_controller_; }
+  [[nodiscard]] PerformerController& performer_controller() noexcept {
+    return performer_controller_;
+  }
+  [[nodiscard]] const PerformerController& performer_controller() const noexcept {
+    return performer_controller_;
+  }
 
  private:
   EngineState& engine_;

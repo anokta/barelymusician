@@ -7,7 +7,7 @@
 
 namespace barely {
 
-inline constexpr size_t AlignUp(size_t value, size_t alignment) noexcept {
+constexpr size_t AlignUp(size_t value, size_t alignment) noexcept {
   return (value + alignment - 1) & ~(alignment - 1);
 }
 
@@ -21,7 +21,7 @@ class Arena {
 
     assert(adjustment <= size);
     capacity_ = size - adjustment;
-    head_ = reinterpret_cast<std::byte*>(aligned_address);
+    head_ = reinterpret_cast<std::byte*>(aligned_address);  // NOLINT(performance-no-int-to-ptr)
     assert(head_ != nullptr);
   }
 

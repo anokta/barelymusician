@@ -1,6 +1,8 @@
 #include "core/pool.h"
 
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include "core/arena.h"
 #include "core/constants.h"
@@ -14,7 +16,7 @@ TEST(PoolTest, AcquireMax) {
 
   struct TestData {};
 
-  const size_t size = GetAllocSize<Pool<TestData>>(kCount);
+  const auto size = GetAllocSize<Pool<TestData>>(kCount);
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
 

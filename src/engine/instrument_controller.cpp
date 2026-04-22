@@ -4,14 +4,15 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <limits>
 
 #include "core/constants.h"
 #include "core/control.h"
 #include "core/rng.h"
-#include "core/time.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "engine/note_state.h"

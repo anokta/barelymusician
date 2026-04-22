@@ -21,14 +21,14 @@ TEST(BarelyEngineTest, CreateDestroyEngine) {
   EXPECT_FALSE(BarelyEngine_Destroy(nullptr));
 
   // Success.
-  BarelyEngineConfig config = EngineConfig(kSampleRate);
+  const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   BarelyEngine* engine = nullptr;
   EXPECT_TRUE(BarelyEngine_Create(&config, &engine));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
-  BarelyEngineConfig config = EngineConfig(kSampleRate);
+  const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   BarelyEngine* engine = nullptr;
   ASSERT_TRUE(BarelyEngine_Create(&config, &engine));
 
@@ -45,7 +45,7 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 }
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
-  BarelyEngineConfig config = EngineConfig(kSampleRate);
+  const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   BarelyEngine* engine = nullptr;
   ASSERT_TRUE(BarelyEngine_Create(&config, &engine));
 

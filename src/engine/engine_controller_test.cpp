@@ -2,10 +2,12 @@
 
 #include <barelymusician.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
 
+#include "core/arena.h"
 #include "engine/engine_state.h"
 #include "gtest/gtest.h"
 
@@ -15,7 +17,7 @@ namespace {
 constexpr int kSampleRate = 48000;
 
 TEST(EngineControllerTest, AcquireReleasePerformer) {
-  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
+  const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
   auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine(arena, EngineConfig(kSampleRate));

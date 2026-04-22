@@ -182,6 +182,7 @@ void InstrumentProcessor::SetNoteOn(uint32_t note_index, uint32_t instrument_ind
   if (const uint32_t voice_index = AcquireVoice(params, pitch); voice_index != kInvalidIndex) {
     engine_.note_to_voice[note_index] = voice_index;
     auto& voice = engine_.GetVoice(voice_index);
+    voice = {};
     voice.instrument_index = instrument_index;
     voice.note_index = note_index;
     voice.slice_index = engine_.SelectSlice(instrument_index, params.first_slice_index, pitch);

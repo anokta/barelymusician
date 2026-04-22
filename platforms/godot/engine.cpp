@@ -2,6 +2,7 @@
 
 #include <barelymusician.h>
 
+#include <algorithm>
 #include <atomic>
 #include <cstdint>
 
@@ -108,6 +109,7 @@ void BarelyEngine::set_tempo(double tempo) { BarelyEngine_SetTempo(get(), tempo)
     // TODO(#181): Support sample rate changes after initialization.
     const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(
         static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()));
+    temp_samples_.resize(config.max_frame_count);
     BarelyEngine_Create(&config, &engine_);
     BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_GODOT_ENGINE_CONTROL);
     if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {
@@ -126,11 +128,13 @@ void BarelyEngine::set_tempo(double tempo) { BarelyEngine_SetTempo(get(), tempo)
 
 void BarelyEngine::process(AudioFrame* buffer, int32_t frame_count, double timestamp) {
   static constexpr int32_t kStereoChannelCount = 2;
-  float output[BARELY_MAX_FRAME_COUNT * kStereoChannelCount];
-  BarelyEngine_Process(engine_, output, kStereoChannelCount, frame_count, timestamp);
-  for (int32_t frame = 0; frame < frame_count; ++frame) {
-    buffer[frame].left = output[frame * kStereoChannelCount];
-    buffer[frame].right = output[frame * kStereoChannelCount + 1];
+  const int32_t process_frame_count =
+      std::min(static_cast<int32_t>(temp_samples_.size()), frame_count);
+  BarelyEngine_Process(engine_, temp_samples_.data(), kStereoChannelCount, process_frame_count,
+                       timestamp);
+  for (int32_t frame = 0; frame < process_frame_count; ++frame) {
+    buffer[frame].left = temp_samples_[frame * kStereoChannelCount];
+    buffer[frame].right = temp_samples_[frame * kStereoChannelCount + 1];
   }
 }
 

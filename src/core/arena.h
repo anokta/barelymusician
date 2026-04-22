@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <new>
 
 namespace barely {
 
@@ -41,7 +42,13 @@ class Arena {
 
   template <typename T>
   T* AllocArray(size_t count) noexcept {
-    return static_cast<T*>(Alloc(sizeof(T) * count, alignof(T)));
+    T* array = static_cast<T*>(Alloc(sizeof(T) * count, alignof(T)));
+    if (array != nullptr) {
+      for (size_t i = 0; i < count; ++i) {
+        ::new (&array[i]) T();
+      }
+    }
+    return array;
   }
 
   [[nodiscard]] bool is_null() const noexcept { return head_ == nullptr; }

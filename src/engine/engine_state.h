@@ -34,7 +34,12 @@ static_assert((kInvalidIndex + 1) == 0);
 
 struct EngineState {
   EngineState(Arena& arena, const BarelyEngineConfig& config) noexcept
-      : instrument_pool(arena, config.max_instrument_count),
+      : delay_filter(arena, static_cast<int>(
+                                std::ceil(static_cast<float>(config.sample_rate) *
+                                          controls[BarelyEngineControlType_kDelayTime].max_value))),
+        reverb(arena, static_cast<float>(config.sample_rate)),
+
+        instrument_pool(arena, config.max_instrument_count),
         note_pool(arena, config.max_note_count),
         performer_pool(arena, config.max_performer_count),
         task_pool(arena, config.max_task_count),
@@ -57,16 +62,12 @@ struct EngineState {
 
         id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
             {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
-        max_id_index((1l << id_index_bit_count) - 1l),
-        max_id_generation((1l << (32l - id_index_bit_count)) - 1l),
+        max_id_index((1u << id_index_bit_count) - 1u),
+        max_id_generation((1u << (32u - id_index_bit_count)) - 1u),
 
         max_frame_count(static_cast<uint32_t>(config.max_frame_count)) {
     assert(id_index_bit_count < 32);
     assert(sample_rate > 0.0f);
-    delay_filter.Init(
-        arena, static_cast<int>(std::ceil(sample_rate *
-                                          controls[BarelyEngineControlType_kDelayTime].max_value)));
-    reverb.Init(arena, sample_rate);
   }
 
   // Array of engine controls.
@@ -80,9 +81,10 @@ struct EngineState {
   EffectParams target_params = {};
 
   Compressor comp = {};
-  DelayFilter delay_filter = {};
-  Reverb reverb = {};
   Sidechain sidechain = {};
+
+  DelayFilter delay_filter;
+  Reverb reverb;
 
   Pool<InstrumentState> instrument_pool;
   Pool<NoteState> note_pool;
@@ -101,21 +103,14 @@ struct EngineState {
   InstrumentParams* instrument_params = nullptr;
   uint32_t* note_to_voice = nullptr;
 
-  // Number of queued sample data messages per instrument.
-  std::atomic<int32_t>* queued_sample_data_counts = nullptr;
+  std::atomic<int32_t>* queued_sample_data_counts = nullptr;  // queued messages per instrument
 
   float* temp_samples = nullptr;
 
-  // Tempo in beats per minute.
-  double tempo = 120.0;
+  double tempo = 120.0;      // beats per minute
+  double timestamp = 0.0;    // seconds
+  float sample_rate = 0.0f;  // hertz
 
-  // Timestamp in seconds.
-  double timestamp = 0.0;
-
-  // Sampling rate in hertz.
-  float sample_rate = 0.0f;
-
-  // Smoothing coefficient.
   float smoothing_coeff = 0.0f;
 
   uint32_t id_index_bit_count = 0;

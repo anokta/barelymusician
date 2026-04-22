@@ -64,17 +64,11 @@ struct VoiceState {
   void Start(const InstrumentParams& instrument_params, const SliceState* slice,
              float note_pitch) noexcept {
     params = instrument_params.voice_params;
-    note_params.gain = 1.0f;
     pitch = note_pitch;
-    pitch_shift = 0.0f;
     UpdatePitchIncrements(slice);
     bit_crusher.Reset();
     filter.Reset();
-    osc_phase = 0.0f;
-    slice_offset = 0.0f;
-    stop_on_slice_end = false;
     envelope.Start(instrument_params.adsr);
-    timestamp = 0;
   }
 
   void UpdatePitchIncrements(const SliceState* slice) noexcept {

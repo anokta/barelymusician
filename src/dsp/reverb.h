@@ -36,7 +36,7 @@ struct ReverbParams {
 // Simple stereo reverb implementation based on freeverb.
 class Reverb {
  public:
-  void Init(Arena& arena, float sample_rate) noexcept {
+  Reverb(Arena& arena, float sample_rate) noexcept {
     const float sample_rate_scale = sample_rate / kTuningSampleRate;
     const uint32_t max_delay_frame_count = std::bit_ceil(static_cast<uint32_t>(
         GetScaledTuning(kCombFilterTunings[kCombFilterCount - 1], 1, sample_rate_scale)));

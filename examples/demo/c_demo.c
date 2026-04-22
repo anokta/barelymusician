@@ -10,8 +10,13 @@
 #include <windows.h>
 #define BarelySleep(seconds) Sleep((DWORD)(seconds * 1000.0))
 #else  // #ifdef _WIN32
-#include <unistd.h>
-#define BarelySleep(seconds) usleep((useconds_t)(seconds * 1000000.0))
+#include <time.h>
+#define BarelySleep(seconds)                                                                \
+  do {                                                                                      \
+    struct timespec ts = {.tv_sec = (time_t)(seconds),                                      \
+                          .tv_nsec = (long)(((seconds) - (double)seconds) * 1000000000.0)}; \
+    nanosleep(&ts, NULL);                                                                   \
+  } while (0)
 #endif  // #ifdef _WIN32
 
 // System audio settings.
@@ -45,7 +50,7 @@ static volatile double g_timestamp = 0.0;
 
 static void AudioProcessCallback(ma_device* device, void* output, const void* input,
                                  ma_uint32 frame_count) {
-  input;  // unused
+  (void)input;  // unused
   assert(device != NULL);
   assert(device->pUserData != NULL);
   BarelyEngine_Process((BarelyEngine*)device->pUserData, (float*)output,
@@ -54,7 +59,7 @@ static void AudioProcessCallback(ma_device* device, void* output, const void* in
 }
 
 static void NoteEventCallback(BarelyEventType type, float pitch, void* user_data) {
-  user_data;
+  (void)user_data;  // unused
   printf("Note%s(%.1f)\n", (type == BarelyEventType_kBegin) ? "On" : "Off", pitch);
 }
 

@@ -3,12 +3,13 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <numbers>
 
 namespace barely {
 
 // Filter types.
-enum class FilterType {
+enum class FilterType : uint8_t {
   // Low-pass filter.
   kLowPass = 0,
   // High-pass filter.

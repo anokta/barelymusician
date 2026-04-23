@@ -9,6 +9,8 @@ namespace barely {
 template <typename EngineType, typename RealType>
 class Rng {
  public:
+  Rng() noexcept : seed_(static_cast<int>(std::random_device()())), engine_(seed_) {}
+
   [[nodiscard]] int GetSeed() const noexcept { return seed_; }
 
   void ResetSeed(int seed) noexcept {
@@ -31,8 +33,8 @@ class Rng {
   std::uniform_real_distribution<RealType> distribution_;
 
   // Random number generator engine.
+  int seed_ = 0;
   EngineType engine_;
-  int seed_ = static_cast<int>(EngineType::default_seed);
 };
 
 using AudioRng = Rng<std::minstd_rand, float>;

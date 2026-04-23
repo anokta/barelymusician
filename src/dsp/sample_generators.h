@@ -57,15 +57,15 @@ inline constexpr float kOscSkewRange = 0.25f;
   if (osc_shape < kShapeSineToTriangle) {
     return std::lerp(GenerateSineSample(osc_phase), GenerateTriangleSample(osc_phase),
                      scaled_shape);
-  } else if (osc_shape < kShapeTriangleToSquare) {
+  }
+  if (osc_shape < kShapeTriangleToSquare) {
     return std::lerp(GenerateTriangleSample(osc_phase),
                      GenerateSquareSample(osc_phase, osc_increment),
                      scaled_shape - kShapeTriangleOffset);
-  } else {
-    return std::lerp(GenerateSquareSample(osc_phase, osc_increment),
-                     GenerateSawtoothSample(osc_phase, osc_increment),
-                     scaled_shape - kShapeSquareOffset);
   }
+  return std::lerp(GenerateSquareSample(osc_phase, osc_increment),
+                   GenerateSawtoothSample(osc_phase, osc_increment),
+                   scaled_shape - kShapeSquareOffset);
 }
 
 [[nodiscard]] inline float GenerateSliceSample(const float* samples, int32_t sample_count,

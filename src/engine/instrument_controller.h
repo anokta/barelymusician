@@ -16,7 +16,7 @@ namespace barely {
 
 class InstrumentController {
  public:
-  InstrumentController(EngineState& engine) noexcept : engine_(engine) {}
+  explicit InstrumentController(EngineState& engine) noexcept : engine_(engine) {}
 
   [[nodiscard]] uint32_t Acquire() noexcept;
   void Release(uint32_t instrument_index) noexcept;

@@ -4,14 +4,15 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <limits>
 
 #include "core/constants.h"
 #include "core/control.h"
 #include "core/rng.h"
-#include "core/time.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "engine/note_state.h"
@@ -211,7 +212,7 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch) noe
 void InstrumentController::SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
                                          int32_t slice_count) noexcept {
   engine_.queued_sample_data_counts[instrument_index].fetch_add(1, std::memory_order_acq_rel);
-  while (engine_.process_fence.test());  // busy wait until the next processing is done.
+  while (engine_.process_fence.load(std::memory_order_acquire));  // busy wait during next process.
   auto& instrument = engine_.GetInstrument(instrument_index);
   engine_.slice_pool.Release(instrument.first_slice_index);
   instrument.first_slice_index =

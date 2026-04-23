@@ -2,23 +2,30 @@
 
 #include <barelymusician.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
 
+#include "core/arena.h"
 #include "engine/engine_state.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
+constexpr int kSampleRate = 48000;
+
 TEST(EngineControllerTest, AcquireReleasePerformer) {
-  auto engine = std::make_unique<EngineState>();
-  EngineController controller(*engine);
+  const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  EngineState engine(arena, EngineConfig(kSampleRate));
+  EngineController controller(engine);
 
   // Create a performer.
   const uint32_t performer_index = controller.performer_controller().Acquire();
-  auto& performer = engine->GetPerformer(performer_index);
+  auto& performer = engine.GetPerformer(performer_index);
 
   // Create a task.
   EventType task_event_type = EventType::kEnd;
@@ -34,10 +41,10 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
         (*static_cast<std::function<void(EventType)>*>(user_data))(static_cast<EventType>(type));
       },
       &process_callback);
-  const auto& task = engine->GetTask(task_index);
+  const auto& task = engine.GetTask(task_index);
 
   // Start the performer with a tempo of one beat per second.
-  engine->tempo = 60.0;
+  engine.tempo = 60.0;
   EXPECT_FALSE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
   controller.performer_controller().Start(performer_index);

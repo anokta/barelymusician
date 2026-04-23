@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstdint>
 
+#include "core/arena.h"
 #include "core/constants.h"
 #include "core/rng.h"
 #include "engine/slice_state.h"
@@ -15,8 +16,16 @@ namespace barely {
 
 class SlicePool {
  public:
-  SlicePool() noexcept {
-    for (uint32_t i = 0; i < kCount; ++i) {
+  SlicePool(Arena& arena, uint32_t count) noexcept
+      : slices_(arena.AllocArray<SliceState>(count)), free_(arena.AllocArray<uint32_t>(count)) {
+    if (arena.is_null()) {
+      return;
+    }
+    assert(count > 0);
+    assert(count != kInvalidIndex);
+    count_ = count;
+    free_count_ = count;
+    for (uint32_t i = 0; i < count_; ++i) {
       free_[i] = i;
     }
   }
@@ -31,13 +40,14 @@ class SlicePool {
 
     uint32_t slice_index = first_slice_index;
     for (uint32_t i = 0; i < slice_count; ++i) {
-      free_read_index_ = (free_read_index_ + 1) % kCount;
+      free_read_index_ = (free_read_index_ + 1) % count_;
 
       const BarelySlice& slice = slices[i];
       const uint32_t next_slice_index =
           (i + 1 < slice_count) ? free_[free_read_index_] : kInvalidIndex;
       slices_[slice_index] = {
-          slice.samples, slice.sample_count, slice.sample_rate, slice.root_pitch, next_slice_index,
+          slice.samples,    slice.sample_count, static_cast<float>(slice.sample_rate),
+          slice.root_pitch, next_slice_index,
       };
       slice_index = next_slice_index;
     }
@@ -51,14 +61,14 @@ class SlicePool {
     uint32_t slice_index = first_slice_index;
     while (slice_index != kInvalidIndex) {
       free_[free_write_index_] = slice_index;
-      free_write_index_ = (free_write_index_ + 1) % kCount;
+      free_write_index_ = (free_write_index_ + 1) % count_;
       slice_index = slices_[slice_index].next_slice_index;
       ++free_count_;
     }
   }
 
   [[nodiscard]] const SliceState* Get(uint32_t slice_index) const noexcept {
-    if (slice_index < kCount) {
+    if (slice_index < count_) {
       return &slices_[slice_index];
     }
     return nullptr;
@@ -112,14 +122,13 @@ class SlicePool {
   }
 
  private:
-  static constexpr uint32_t kCount = BARELY_MAX_SLICE_COUNT;
+  SliceState* slices_ = nullptr;
+  uint32_t* free_ = nullptr;
 
-  std::array<SliceState, kCount> slices_;
-
-  std::array<uint32_t, kCount> free_;
+  uint32_t count_ = 0;
   uint32_t free_read_index_ = 0;
   uint32_t free_write_index_ = 0;
-  uint32_t free_count_ = kCount;
+  uint32_t free_count_ = 0;
 };
 
 }  // namespace barely

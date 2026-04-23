@@ -17,19 +17,20 @@ constexpr int kSampleRate = 48000;
 
 TEST(BarelyEngineTest, CreateDestroyEngine) {
   // Failures.
-  EXPECT_FALSE(BarelyEngine_Create(0, nullptr));
-  EXPECT_FALSE(BarelyEngine_Create(kSampleRate, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(nullptr, nullptr));
   EXPECT_FALSE(BarelyEngine_Destroy(nullptr));
 
   // Success.
+  const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   BarelyEngine* engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
+  EXPECT_TRUE(BarelyEngine_Create(&config, &engine));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
+  const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   BarelyEngine* engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
+  ASSERT_TRUE(BarelyEngine_Create(&config, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyEngine_CreateInstrument(engine, nullptr));
@@ -44,8 +45,9 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 }
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
+  const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   BarelyEngine* engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(kSampleRate, &engine));
+  ASSERT_TRUE(BarelyEngine_Create(&config, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyEngine_CreatePerformer(engine, nullptr));

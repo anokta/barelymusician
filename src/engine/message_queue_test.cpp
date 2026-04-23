@@ -1,7 +1,10 @@
 #include "engine/message_queue.h"
 
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 
+#include "core/arena.h"
 #include "engine/message.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -18,7 +21,10 @@ namespace barely {
 namespace {
 
 TEST(MessageQueueTest, AddSingleMessage) {
-  MessageQueue messages;
+  const auto size = GetAllocSize<MessageQueue>();
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  MessageQueue messages(arena);
   EXPECT_THAT(messages.GetNext(0), IsNull());
   EXPECT_THAT(messages.GetNext(1), IsNull());
   EXPECT_THAT(messages.GetNext(10), IsNull());
@@ -36,7 +42,10 @@ TEST(MessageQueueTest, AddSingleMessage) {
 }
 
 TEST(MessageQueueTest, AddMultipleMessages) {
-  MessageQueue messages;
+  const size_t size = GetAllocSize<MessageQueue>();
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  MessageQueue messages(arena);
   EXPECT_THAT(messages.GetNext(10), IsNull());
 
   for (uint32_t i = 0; i < 10; ++i) {

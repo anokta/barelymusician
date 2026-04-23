@@ -40,7 +40,7 @@ CheckOptions:
   - key: readability-identifier-length.IgnoredParameterNames
     value: '[abint]|i[dt]'
   - key: readability-identifier-length.IgnoredVariableNames
-    value: '_|[abint]|i[dt]'
+    value: '_|[abint]|i[dt]|[sv][0-9]'
 
 FormatStyle: 'file'
 ...

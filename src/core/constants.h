@@ -14,9 +14,6 @@ inline constexpr uint32_t kInvalidIndex = UINT32_MAX;
 // Maximum delay feedback to keep the output stable.
 inline constexpr float kMaxDelayFeedback = 0.9995f;
 
-// Maximum number of delay frames.
-inline constexpr int kMaxDelayFrameCount = 10 * 48000;
-
 // Minimum filter frequency in hertz.
 static constexpr float kMinFilterFreq = 20.0f;
 

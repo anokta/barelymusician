@@ -11,7 +11,7 @@ namespace barely::examples {
 class ConsoleLog {
  public:
   ConsoleLog() = default;
-  ~ConsoleLog() noexcept { std::cout << stream_.str() << std::endl; }
+  ~ConsoleLog() noexcept { std::cout << stream_.str() << "\n"; }
 
   /// Non-copyable and non-movable.
   ConsoleLog(const ConsoleLog& other) noexcept = delete;

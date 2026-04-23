@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdint>
 
 #include "core/control.h"
 
@@ -113,15 +114,15 @@ class Envelope {
   }
 
  private:
-  enum class State { kAttack = 0, kDecay, kSustain, kRelease, kIdle };
+  enum class State : uint8_t { kAttack = 0, kDecay, kSustain, kRelease, kIdle };
 
   const Adsr* adsr_ = nullptr;
-
-  State state_ = State::kIdle;
 
   float current_ = 0.0f;
   float target_ = 0.0f;
   float coeff_ = 0.0f;
+
+  State state_ = State::kIdle;
 };
 
 }  // namespace barely

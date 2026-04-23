@@ -3,19 +3,26 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <utility>
 
+#include "core/arena.h"
 #include "engine/engine_state.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
+constexpr int kSampleRate = 48000;
+
 TEST(InstrumentControllerTest, SetControl) {
-  auto engine = std::make_unique<EngineState>();
-  InstrumentController controller(*engine);
+  const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  EngineState engine(arena, EngineConfig(kSampleRate));
+  InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();
   EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 1.0f);
@@ -41,8 +48,11 @@ TEST(InstrumentControllerTest, SetControl) {
 TEST(InstrumentControllerTest, SetNoteCallbacks) {
   constexpr float kPitch = 3.3f;
 
-  auto engine = std::make_unique<EngineState>();
-  InstrumentController controller(*engine);
+  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  EngineState engine(arena, EngineConfig(kSampleRate));
+  InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();
 
@@ -88,8 +98,11 @@ TEST(InstrumentControllerTest, SetNoteCallbacks) {
 TEST(InstrumentControllerTest, SetAllNotesOff) {
   constexpr std::array<float, 3> kPitches = {1.0f, 2.0f, 3.0f};
 
-  auto engine = std::make_unique<EngineState>();
-  InstrumentController controller(*engine);
+  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  EngineState engine(arena, EngineConfig(kSampleRate));
+  InstrumentController controller(engine);
 
   const uint32_t instrument_index = controller.Acquire();
   for (const float pitch : kPitches) {

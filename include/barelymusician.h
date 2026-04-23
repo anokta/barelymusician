@@ -101,8 +101,9 @@
 ///   #include <barelymusician.h>
 ///
 ///   // Create a new engine.
-///   BarelyEngine* engine = nullptr;
-///   BarelyEngine_Create(/*sample_rate=*/48000, &engine);
+///   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(/*sample_rate=*/48000);
+///   BarelyEngine* engine = NULL;
+///   BarelyEngine_Create(&config, &engine);
 ///
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
@@ -114,7 +115,7 @@
 ///   // address this, `Update` should typically be called from the main thread update callback
 ///   // using a lookahead to prevent potential thread synchronization issues in real-time audio
 ///   // applications.
-///   double lookahead = 0.1;
+///   const double lookahead = 0.1;
 ///   double timestamp = 0.0;
 ///   BarelyEngine_Update(engine, timestamp + lookahead);
 ///
@@ -141,7 +142,7 @@
 ///   // The note pitch is expressed in octaves relative to middle C as the center frequency.
 ///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
 ///   // pitch intervals within each octave.
-///   float c3_pitch = -1.0f;
+///   const float c3_pitch = -1.0f;
 ///   BarelyInstrument_SetNoteOn(engine, instrument_id, c3_pitch);
 ///
 ///   // Check if the instrument note is on.
@@ -332,8 +333,48 @@ BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
   X(NoteControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")
 BARELY_ENUM(NoteControlType, BARELY_NOTE_CONTROL_TYPES)
 
+/// Default engine configuration.
+#define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate) \
+  {                                               \
+      .sample_##rate = sample_rate,               \
+      .max_frame_count = 2048,                    \
+      .max_instrument_count = 100,                \
+      .max_performer_count = 100,                 \
+      .max_task_count = 5000,                     \
+      .max_note_count = 1000,                     \
+      .max_slice_count = 1000,                    \
+      .max_voice_count = 200,                     \
+  }
+
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
+
+/// Engine configuration.
+typedef struct BarelyEngineConfig {
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
+
+  /// Maximum number of frames to process per call.
+  int32_t max_frame_count;
+
+  /// Maximum number of instruments.
+  int32_t max_instrument_count;
+
+  /// Maximum number of performers.
+  int32_t max_performer_count;
+
+  /// Maximum number of tasks.
+  int32_t max_task_count;
+
+  /// Maximum number of active notes.
+  int32_t max_note_count;
+
+  /// Maximum number of active slices.
+  int32_t max_slice_count;
+
+  /// Maximum number of active voices.
+  int32_t max_voice_count;
+} BarelyEngineConfig;
 
 /// Slice of sample data.
 typedef struct BarelySlice {
@@ -393,10 +434,10 @@ typedef void (*BarelyTaskEventCallback)(BarelyEventType type, void* user_data);
 
 /// Creates a new engine.
 ///
-/// @param sample_rate Sampling rate in hertz.
+/// @param config Pointer to engine configuration.
 /// @param out_engine Output pointer to engine.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(int32_t sample_rate, BarelyEngine** out_engine);
+BARELY_API bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_engine);
 
 /// Creates a new instrument.
 ///
@@ -467,6 +508,13 @@ BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* 
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
                                         float* out_value);
+
+/// Gets the maximum identifier index of an engine.
+///
+/// @param engine Pointer to engine.
+/// @param out_max_id_index Output maximum identifier index.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_GetMaxIdIndex(const BarelyEngine* engine, uint32_t* out_max_id_index);
 
 /// Gets the tempo of an engine.
 ///
@@ -828,6 +876,25 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 #include <utility>
 
 namespace barely {
+
+/// Engine configuration.
+struct EngineConfig : public BarelyEngineConfig {
+ public:
+  /// Default constructor.
+  EngineConfig() noexcept = default;
+
+  /// Constructs a new `EngineConfig`.
+  ///
+  /// @param sample_rate Sampling rate in hertz.
+  constexpr explicit EngineConfig(int sample_rate)
+      : EngineConfig(BARELY_ENGINE_CONFIG_DEFAULT(sample_rate)) {}
+
+  /// Constructs a new `EngineConfig` from a raw type.
+  ///
+  /// @param config Raw engine configuration.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr EngineConfig(BarelyEngineConfig config) noexcept : BarelyEngineConfig{config} {}
+};
 
 /// Slice of sample data.
 struct Slice : public BarelySlice {
@@ -1284,9 +1351,15 @@ class Engine {
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  explicit Engine(int sample_rate) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyEngine_Create(static_cast<int32_t>(sample_rate), &engine_);
+  explicit Engine(int sample_rate) noexcept : Engine(EngineConfig(sample_rate)) {}
+
+  /// Constructs a new `Engine`.
+  ///
+  /// @param config Engine configuration.
+  explicit Engine(const EngineConfig& config) noexcept {
+    note_event_callbacks_ = std::make_unique<NoteEventCallback[]>(config.max_instrument_count);
+    task_event_callbacks_ = std::make_unique<TaskEventCallback[]>(config.max_task_count);
+    [[maybe_unused]] const bool success = BarelyEngine_Create(&config, &engine_);
     assert(success);
   }
 
@@ -1335,10 +1408,12 @@ class Engine {
   /// @return Instrument.
   Instrument CreateInstrument() noexcept {
     uint32_t instrument_id = 0;
-    [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
+    [[maybe_unused]] bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
     assert(success);
-    NoteEventCallback& note_event_callback =
-        note_event_callbacks_.get()[(instrument_id & ((1 << BARELY_ID_INDEX_BIT_COUNT) - 1)) - 1];
+    uint32_t max_id_index = 0;
+    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
+    assert(success);
+    auto& note_event_callback = note_event_callbacks_.get()[(instrument_id & max_id_index) - 1];
     note_event_callback = {};
     return {engine_, instrument_id, &note_event_callback};
   }
@@ -1367,8 +1442,10 @@ class Engine {
     [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
                                                             priority, nullptr, nullptr, &task_id);
     assert(success);
-    TaskEventCallback& task_event_callback =
-        task_event_callbacks_.get()[(task_id & ((1 << BARELY_ID_INDEX_BIT_COUNT) - 1)) - 1];
+    uint32_t max_id_index = 0;
+    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
+    assert(success);
+    auto& task_event_callback = task_event_callbacks_.get()[(task_id & max_id_index) - 1];
     task_event_callback = std::move(callback);
     success = BarelyTask_SetEventCallback(
         engine_, task_id,
@@ -1517,12 +1594,10 @@ class Engine {
   BarelyEngine* engine_ = nullptr;
 
   // Heap allocated array of note event callbacks (for pointer stability on move).
-  std::unique_ptr<NoteEventCallback[]> note_event_callbacks_ =
-      std::make_unique<NoteEventCallback[]>(BARELY_MAX_INSTRUMENT_COUNT);
+  std::unique_ptr<NoteEventCallback[]> note_event_callbacks_ = nullptr;
 
   // Heap allocated array of task event callbacks (for pointer stability on move).
-  std::unique_ptr<TaskEventCallback[]> task_event_callbacks_ =
-      std::make_unique<TaskEventCallback[]>(BARELY_MAX_TASK_COUNT);
+  std::unique_ptr<TaskEventCallback[]> task_event_callbacks_ = nullptr;
 };
 
 /// A musical quantization.

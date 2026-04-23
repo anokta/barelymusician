@@ -9,6 +9,7 @@
 namespace {
 
 using ::barely::Engine;
+using ::barely::EngineConfig;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
 using ::daisy::AudioHandle;
@@ -23,8 +24,6 @@ constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 16;
 
-static_assert(kFrameCount <= BARELY_MAX_FRAME_COUNT);
-
 // Instrument settings.
 constexpr float kGain = 1.0f;
 constexpr float kAttack = 0.05f;
@@ -35,7 +34,16 @@ constexpr int kVoiceCount = 16;
 DaisyPod g_hw;  // target the Daisy Pod hardware.
 MidiUsbHandler g_midi;
 
-Engine g_engine{kSampleRate};
+Engine g_engine{EngineConfig{
+    .sample_rate = kSampleRate,
+    .max_frame_count = kFrameCount,
+    .max_instrument_count = 1,
+    .max_performer_count = 1,
+    .max_task_count = 1,
+    .max_note_count = 1000,
+    .max_slice_count = 1,
+    .max_voice_count = 32,
+}};
 Instrument g_instrument = {};
 float g_osc_shape = 0.0f;
 std::array<float, kChannelCount * kFrameCount> g_output_samples;
@@ -72,14 +80,13 @@ int main(void) {
   g_midi.Init(midi_cfg);
 
   // Initialize the instrument.
-  g_instrument = g_engine.CreateInstrument({{
-      {InstrumentControlType::kGain, kGain},
-      {InstrumentControlType::kOscMix, 1.0f},
-      {InstrumentControlType::kOscShape, g_osc_shape},
-      {InstrumentControlType::kAttack, kAttack},
-      {InstrumentControlType::kRelease, kRelease},
-      {InstrumentControlType::kVoiceCount, kVoiceCount},
-  }});
+  g_instrument = g_engine.CreateInstrument();
+  g_instrument.SetControl(InstrumentControlType::kGain, kGain);
+  g_instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  g_instrument.SetControl(InstrumentControlType::kOscShape, g_osc_shape);
+  g_instrument.SetControl(InstrumentControlType::kAttack, kAttack);
+  g_instrument.SetControl(InstrumentControlType::kRelease, kRelease);
+  g_instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   // Start processing.
   g_hw.StartAdc();

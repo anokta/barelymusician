@@ -3,8 +3,11 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 
+#include "core/arena.h"
 #include "core/constants.h"
 #include "core/rng.h"
 #include "engine/slice_state.h"
@@ -25,9 +28,14 @@ TEST(SlicePoolTest, Select) {
       BarelySlice{kSamples.data(), 1, kSampleRate, 15.0f},
       BarelySlice{kSamples.data(), 1, kSampleRate, 35.0f},
   };
+  constexpr uint32_t kCount = 100;
+
+  const auto size = GetAllocSize<SlicePool>(kCount);
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
 
   AudioRng rng;
-  SlicePool slice_pool;
+  SlicePool slice_pool(arena, kCount);
 
   const uint32_t first_slice_index =
       slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));

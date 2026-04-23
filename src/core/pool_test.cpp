@@ -1,7 +1,10 @@
 #include "core/pool.h"
 
+#include <cstddef>
 #include <cstdint>
+#include <memory>
 
+#include "core/arena.h"
 #include "core/constants.h"
 #include "gtest/gtest.h"
 
@@ -12,7 +15,12 @@ TEST(PoolTest, AcquireMax) {
   constexpr uint32_t kCount = 10;
 
   struct TestData {};
-  Pool<TestData, kCount> pool;
+
+  const auto size = GetAllocSize<Pool<TestData>>(kCount);
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+
+  Pool<TestData> pool(arena, kCount);
 
   // Acquire up to maximum capacity.
   for (uint32_t i = 0; i < kCount; ++i) {

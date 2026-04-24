@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cassert>
 #include <cmath>
 #include <vector>
@@ -40,22 +41,26 @@ struct DelayParams {
 // Delay filter with smooth interpolation.
 class DelayFilter {
  public:
-  DelayFilter(Arena& arena, int max_frame_count) noexcept
-      : delay_samples_(arena.AllocArray<float>(max_frame_count * kStereoChannelCount)),
-        max_frame_count_(max_frame_count) {}
+  DelayFilter(Arena& arena, uint32_t max_frame_count) noexcept
+      : delay_samples_(
+            arena.AllocArray<float>(max_frame_count * static_cast<uint32_t>(kStereoChannelCount))),
+        bit_mask_(max_frame_count - 1) {
+    assert(max_frame_count > 0);
+    assert(std::has_single_bit(max_frame_count));
+  }
 
   void Process(float input_frame[kStereoChannelCount], float reverb_frame[kStereoChannelCount],
                float output_frame[kStereoChannelCount], const DelayParams& params) noexcept {
     assert(params.frame_count > 0);
-    assert(static_cast<int>(params.frame_count) <= max_frame_count_);
+    assert(static_cast<uint32_t>(params.frame_count) <= bit_mask_ + 1);
 
-    const int delay_frame_count = static_cast<int>(params.frame_count);
-    const int read_frame_begin =
-        (write_frame_ - delay_frame_count + max_frame_count_) % max_frame_count_;
-    const int read_frame_end = (read_frame_begin - 1 + max_frame_count_) % max_frame_count_;
+    const uint32_t delay_frame_count = static_cast<uint32_t>(params.frame_count);
+    const uint32_t read_frame_begin =
+        (write_frame_ + bit_mask_ + 1 - delay_frame_count) & bit_mask_;
+    const uint32_t read_frame_end = (read_frame_begin + bit_mask_) & bit_mask_;
 
     float delay_frame[kStereoChannelCount];
-    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+    for (uint32_t channel = 0; channel < kStereoChannelCount; ++channel) {
       delay_frame[channel] = lpf_[channel].Next<FilterType::kLowPass>(
           hpf_[channel].Next<FilterType::kHighPass>(
               std::lerp(delay_samples_[kStereoChannelCount * read_frame_begin + channel],
@@ -71,7 +76,7 @@ class DelayFilter {
         delay_frame[0] * params.feedback,
     };
 
-    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
+    for (uint32_t channel = 0; channel < kStereoChannelCount; ++channel) {
       delay_samples_[kStereoChannelCount * write_frame_ + channel] =
           std::lerp(input_frame[channel] + delay_frame[channel] * params.feedback,
                     ping_pong_frame[channel], params.ping_pong);
@@ -82,7 +87,7 @@ class DelayFilter {
           ((params.reverb_send <= 1.0f) ? 1.0f : (2.0f - params.reverb_send)) * output_sample;
     }
 
-    write_frame_ = (write_frame_ + 1) % max_frame_count_;
+    write_frame_ = (write_frame_ + 1) & bit_mask_;
   }
 
  private:
@@ -90,8 +95,8 @@ class DelayFilter {
   std::array<OnePoleFilter, kStereoChannelCount> hpf_ = {};
 
   float* delay_samples_ = nullptr;  // interleaved
-  int max_frame_count_ = 0;
-  int write_frame_ = 0;
+  uint32_t bit_mask_ = 0;
+  uint32_t write_frame_ = 0;
 };
 
 }  // namespace barely

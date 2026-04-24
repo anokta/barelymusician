@@ -11,7 +11,8 @@
 
 namespace barely {
 
-inline constexpr size_t kMaxMessageCount = 8192;
+inline constexpr uint32_t kMaxMessageCount = 8192;
+inline constexpr uint32_t kMessageBitMask = kMaxMessageCount - 1;
 
 // Single-consumer single-producer message queue.
 class MessageQueue {
@@ -20,8 +21,8 @@ class MessageQueue {
       : messages_(arena.AllocArray<std::pair<int64_t, Message>>(kMaxMessageCount)) {}
 
   bool Add(int64_t message_frame, Message message) noexcept {
-    const int index = write_index_.load(std::memory_order_relaxed);
-    const int next_index = (index + 1) % static_cast<int>(kMaxMessageCount);
+    const uint32_t index = write_index_.load(std::memory_order_relaxed);
+    const uint32_t next_index = (index + 1) & kMessageBitMask;
     if (next_index == read_index_.load(std::memory_order_acquire)) {
       return false;
     }
@@ -31,12 +32,12 @@ class MessageQueue {
   }
 
   std::pair<int64_t, Message>* GetNext(int64_t end_frame) noexcept {
-    const int index = read_index_.load(std::memory_order_relaxed);
+    const uint32_t index = read_index_.load(std::memory_order_relaxed);
     if (index == write_index_.load(std::memory_order_acquire) ||
         messages_[index].first >= end_frame) {
       return nullptr;
     }
-    read_index_.store((index + 1) % static_cast<int>(kMaxMessageCount), std::memory_order_release);
+    read_index_.store((index + 1) & kMessageBitMask, std::memory_order_release);
     return &messages_[index];
   }
 
@@ -44,8 +45,8 @@ class MessageQueue {
   // Array of messages with their timestamps in frames.
   std::pair<int64_t, Message>* messages_ = nullptr;
 
-  std::atomic<int> read_index_ = 0;
-  std::atomic<int> write_index_ = 0;
+  std::atomic<uint32_t> read_index_ = 0;
+  std::atomic<uint32_t> write_index_ = 0;
 };
 
 }  // namespace barely

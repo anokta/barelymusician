@@ -40,7 +40,9 @@ class SlicePool {
 
     uint32_t slice_index = first_slice_index;
     for (uint32_t i = 0; i < slice_count; ++i) {
-      free_read_index_ = (free_read_index_ + 1) % count_;
+      if (++free_read_index_ == count_) {
+        free_read_index_ = 0;
+      }
 
       const BarelySlice& slice = slices[i];
       const uint32_t next_slice_index =
@@ -61,7 +63,9 @@ class SlicePool {
     uint32_t slice_index = first_slice_index;
     while (slice_index != kInvalidIndex) {
       free_[free_write_index_] = slice_index;
-      free_write_index_ = (free_write_index_ + 1) % count_;
+      if (++free_write_index_ == count_) {
+        free_write_index_ = 0;
+      }
       slice_index = slices_[slice_index].next_slice_index;
       ++free_count_;
     }

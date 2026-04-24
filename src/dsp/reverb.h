@@ -129,7 +129,9 @@ class Reverb {
       const float output_sample = delay_samples_[write_frame_];
       damped_sample_ = std::lerp(output_sample, damped_sample_, damping_ratio);
       delay_samples_[write_frame_] = input_sample + damped_sample_ * feedback;
-      write_frame_ = (write_frame_ + 1) % frame_count_;
+      if (++write_frame_ == frame_count_) {
+        write_frame_ = 0;
+      }
       return output_sample;
     }
 
@@ -152,7 +154,9 @@ class Reverb {
       const float delayed_sample = delay_samples_[write_frame_];
       const float output_sample = delayed_sample - input_sample;
       delay_samples_[write_frame_] = input_sample + delayed_sample * kAllPassFeedback;
-      write_frame_ = (write_frame_ + 1) % frame_count_;
+      if (++write_frame_ == frame_count_) {
+        write_frame_ = 0;
+      }
       return output_sample;
     }
 

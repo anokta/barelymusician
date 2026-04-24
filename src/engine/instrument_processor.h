@@ -108,10 +108,11 @@ class InstrumentProcessor {
       voice.envelope.Reset();
     }
 
-    const float slice_sample =
-        (slice != nullptr)
-            ? GenerateSliceSample(slice->samples, slice->sample_count, voice.slice_offset)
-            : 0.0f;
+    const bool is_slice_looping = instrument_params.slice_mode == SliceMode::kLoop;
+    const float slice_sample = (slice != nullptr)
+                                   ? GenerateSliceSample(slice->samples, slice->sample_count,
+                                                         voice.slice_offset, is_slice_looping)
+                                   : 0.0f;
     const float slice_output = (1.0f - voice.params.osc_mix) * slice_sample;
 
     float osc_increment = instrument_params.osc_increment * voice.note_params.osc_increment;
@@ -138,11 +139,9 @@ class InstrumentProcessor {
         slice_increment += osc_output * slice_increment;
       }
       voice.slice_offset += slice_increment;
-      if (instrument_params.slice_mode == SliceMode::kLoop) {
-        if (slice != nullptr && static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
-          voice.slice_offset =
-              std::fmod(voice.slice_offset, static_cast<float>(slice->sample_count));
-        }
+      if (is_slice_looping && slice != nullptr &&
+          static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
+        voice.slice_offset = std::fmod(voice.slice_offset, static_cast<float>(slice->sample_count));
       }
     }
 

@@ -36,7 +36,9 @@ class Pool {
   [[nodiscard]] uint32_t Acquire() noexcept {
     if (active_count_ < count_) {
       const uint32_t index = free_[free_read_index_];
-      free_read_index_ = (free_read_index_ + 1) % count_;
+      if (++free_read_index_ == count_) {
+        free_read_index_ = 0;
+      }
 
       assert(index < count_);
       assert(to_active_[index] == kInvalidIndex);
@@ -59,7 +61,9 @@ class Pool {
     to_active_[index] = kInvalidIndex;
 
     free_[free_write_index_] = index;
-    free_write_index_ = (free_write_index_ + 1) % count_;
+    if (++free_write_index_ == count_) {
+      free_write_index_ = 0;
+    }
   }
 
   [[nodiscard]] uint32_t ActiveCount() const noexcept { return active_count_; }

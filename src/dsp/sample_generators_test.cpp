@@ -23,13 +23,22 @@ TEST(SampleGeneratorsTest, GenerateSliceSample) {
   static constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
   for (uint32_t i = 0; i < kDataLength; ++i) {
-    EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i)), kData[i]);
+    EXPECT_FLOAT_EQ(
+        GenerateSliceSample(kData, kDataLength, static_cast<float>(i), /*is_looping=*/false),
+        kData[i]);
     if (i < kDataLength - 1) {
-      EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i) + 0.5f),
+      EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i) + 0.5f,
+                                          /*is_looping=*/false),
                       0.5f * (kData[i] + kData[i + 1]));
+    } else {
+      EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i) + 0.5f,
+                                          /*is_looping=*/true),
+                      0.5f * (kData[i] + kData[0]));
     }
   }
-  EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(kDataLength)), 0.0f);
+  EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(kDataLength),
+                                      /*is_looping=*/false),
+                  0.0f);
 }
 
 }  // namespace

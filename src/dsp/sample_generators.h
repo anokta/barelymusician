@@ -69,13 +69,16 @@ inline constexpr float kOscSkewRange = 0.25f;
 }
 
 [[nodiscard]] inline float GenerateSliceSample(const float* samples, int32_t sample_count,
-                                               float offset) noexcept {
+                                               float offset, bool is_looping) noexcept {
   assert((samples != nullptr || sample_count == 0) && "GenerateSliceSample");
   assert(offset >= 0.0f && "GenerateSliceSample");
   const int32_t index = static_cast<int32_t>(offset);
-  return (index < sample_count) ? std::lerp(samples[index], samples[(index + 1) % sample_count],
-                                            offset - static_cast<float>(index))
-                                : 0.0f;
+  return (index < sample_count)
+             ? std::lerp(samples[index],
+                         (index + 1 < sample_count) ? samples[index + 1]
+                                                    : (is_looping ? samples[0] : 0.0f),
+                         offset - static_cast<float>(index))
+             : 0.0f;
 }
 
 }  // namespace barely

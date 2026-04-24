@@ -34,9 +34,9 @@ static_assert((kInvalidIndex + 1) == 0);
 
 struct EngineState {
   EngineState(Arena& arena, const BarelyEngineConfig& config) noexcept
-      : delay_filter(arena, static_cast<int>(
-                                std::ceil(static_cast<float>(config.sample_rate) *
-                                          controls[BarelyEngineControlType_kDelayTime].max_value))),
+      : delay_filter(arena, std::bit_ceil(static_cast<uint32_t>(std::ceil(
+                                static_cast<float>(config.sample_rate) *
+                                controls[BarelyEngineControlType_kDelayTime].max_value)))),
         reverb(arena, static_cast<float>(config.sample_rate)),
 
         instrument_pool(arena, config.max_instrument_count),

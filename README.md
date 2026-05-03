@@ -31,16 +31,12 @@ Example usage
 ```cpp
 #include <barelymusician.h>
 
-// Create the engine.
+// Create the engine with a tempo of 124 beats per minute.
 barely::Engine engine(/*sample_rate=*/48000);
-
-// Set the global tempo.
 engine.SetTempo(/*tempo=*/124.0);
 
-// Create a new instrument.
+// Create a new instrument with full oscillator mix.
 auto instrument = engine.CreateInstrument();
-
-// Set the instrument to use full oscillator mix.
 instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 
 // Set an instrument note on.
@@ -54,25 +50,14 @@ instrument.SetNoteOn(kC4Pitch);
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
 
-// Create a new performer.
-auto performer = engine.CreatePerformer();
-
-// Set the performer to looping.
-performer.SetLooping(/*is_looping=*/true);
-
-// Create a new task that plays an instrument note every beat.
-auto task = engine.CreateTask(performer, /*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
-                              [&](barely::EventType type) {
-                                constexpr float kC3Pitch = -1.0f;
-                                if (type == barely::EventType::kBegin) {
-                                  instrument.SetNoteOn(kC3Pitch);
-                                } else if (type == barely::EventType::kEnd) {
-                                  instrument.SetNoteOff(kC3Pitch);
-                                }
-                              });
-
-// Start the performer playback.
-performer.Start();
+// Create a new trigger that plays an instrument note every beat.
+auto trigger = engine.CreateTrigger();
+trigger.SetCallback([&]() {
+  constexpr float kC3Pitch = -1.0f;
+  instrument.SetNoteOn(kC3Pitch);
+  instrument.SetNoteOff(kC3Pitch, /*offset=*/1.0f);
+});
+trigger.Start(/*interval=*/1.0f);
 
 // Update the engine timestamp.
 //

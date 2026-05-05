@@ -63,20 +63,11 @@ static void NoteEventCallback(BarelyEventType type, float pitch, void* user_data
   printf("Note%s(%.1f)\n", (type == BarelyEventType_kBegin) ? "On" : "Off", pitch);
 }
 
-static void TaskEventCallback(BarelyEventType type, void* user_data) {
-  static int note_index = 0;
-  if (type == BarelyEventType_kBegin) {
-    assert(note_index < kMelodyNoteCount);
-    BarelyInstrument_SetNoteOn((BarelyEngine*)user_data, g_instrument_id,
-                               kMelodyPitches[note_index++]);
-  } else if (type == BarelyEventType_kEnd) {
-    assert(note_index > 0);
-    assert(note_index <= kMelodyNoteCount);
-    BarelyInstrument_SetNoteOff((BarelyEngine*)user_data, g_instrument_id,
-                                kMelodyPitches[note_index - 1]);
-    if (note_index == kMelodyNoteCount) {
-      g_is_playing = false;
-    }
+static void TriggerEventCallback(void* user_data) {
+  for (int i = 0; i < kMelodyNoteCount; ++i) {
+    BarelyInstrument_ScheduleNote((BarelyEngine*)user_data, g_instrument_id, kMelodyPitches[i],
+                                  kMelodyPositions[i],
+                                  kMelodyPositions[i + 1] - kMelodyPositions[i]);
   }
 }
 
@@ -100,14 +91,9 @@ int main() {
 
   BarelyInstrument_SetNoteEventCallback(engine, g_instrument_id, NoteEventCallback, NULL);
 
-  uint32_t performer_id = 0;
-  BarelyEngine_CreatePerformer(engine, &performer_id);
-  uint32_t task_ids[kMelodyNoteCount];
-  for (int i = 0; i < kMelodyNoteCount; ++i) {
-    BarelyEngine_CreateTask(engine, performer_id, kMelodyPositions[i],
-                            kMelodyPositions[i + 1] - kMelodyPositions[i], 0, TaskEventCallback,
-                            engine, &task_ids[i]);
-  }
+  uint32_t trigger_id = 0;
+  BarelyEngine_CreateTrigger(engine, &trigger_id);
+  BarelyTrigger_SetCallback(engine, trigger_id, TriggerEventCallback, engine);
 
   // Initialize the audio device.
   ma_device device;
@@ -129,7 +115,7 @@ int main() {
   printf("Playback started\n");
 
   BarelyEngine_Update(engine, g_timestamp + kLookahead);
-  BarelyPerformer_Start(engine, performer_id);
+  BarelyTrigger_Start(engine, trigger_id, 0.0f, kMelodyPositions[kMelodyNoteCount]);
 
   while (g_is_playing) {
     BarelyEngine_Update(engine, g_timestamp + kLookahead);
@@ -143,10 +129,7 @@ int main() {
   ma_device_uninit(&device);
 
   // Shutdown the engine.
-  for (int i = 0; i < kMelodyNoteCount; ++i) {
-    BarelyEngine_DestroyTask(engine, task_ids[i]);
-  }
-  BarelyEngine_DestroyPerformer(engine, performer_id);
+  BarelyEngine_DestroyTrigger(engine, trigger_id);
   BarelyEngine_DestroyInstrument(engine, g_instrument_id);
   BarelyEngine_Destroy(engine);
 

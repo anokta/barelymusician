@@ -40,8 +40,7 @@ constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 constexpr int kVoiceCount = 16;
 
-constexpr double kInitialRate = 2.0;
-constexpr double kInitialTempo = 135.0;
+constexpr double kInitialTempo = 230.0;
 constexpr RepeaterMode kInitialStyle = RepeaterMode::kForward;
 
 // Note settings.
@@ -81,7 +80,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   Repeater repeater(engine, instrument);
-  repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);
 
   instrument.SetNoteEventCallback([&repeater](EventType type, float pitch) {

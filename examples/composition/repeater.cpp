@@ -10,16 +10,8 @@ namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Engine& engine, Instrument instrument) noexcept
-    : engine_(engine),
-      instrument_(instrument),
-      performer_(engine_.CreatePerformer()),
-      task_(engine_.CreateTask(performer_, 0.0, 1.0, 0, [this](EventType type) noexcept {
-        if (type == EventType::kBegin) {
-          OnBeat();
-        }
-      })) {
-  performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
+    : engine_(engine), instrument_(instrument), trigger_(engine_.CreateTrigger()) {
+  trigger_.SetCallback([this]() noexcept { OnBeat(); });
 }
 
 void Repeater::Clear() noexcept {
@@ -52,7 +44,7 @@ void Repeater::Start(float pitch_offset) noexcept {
     return;
   }
   pitch_offset_ = pitch_offset;
-  performer_.Start();
+  trigger_.Start(0.0, 1.0);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -60,17 +52,10 @@ void Repeater::Stop() noexcept {
   if (!IsPlaying()) {
     return;
   }
-  performer_.Stop();
-  performer_.SetPosition(0.0);
+  trigger_.Stop();
   instrument_.SetAllNotesOff();
   index_ = -1;
   remaining_length_ = 0;
-}
-
-void Repeater::SetRate(double rate) noexcept {
-  const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
-  performer_.SetLoopLength(length);
-  task_.SetDuration(length);
 }
 
 void Repeater::SetStyle(RepeaterMode style) noexcept { mode_ = style; }

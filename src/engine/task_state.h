@@ -10,6 +10,8 @@
 
 namespace barely {
 
+typedef void (*BarelyTaskEventCallback)(BarelyEventType type, void* user_data);
+
 struct TaskState {
   Callback<BarelyTaskEventCallback> callback = {};
 

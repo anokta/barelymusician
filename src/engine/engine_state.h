@@ -41,15 +41,17 @@ struct EngineState {
 
         instrument_pool(arena, config.max_instrument_count),
         note_pool(arena, config.max_note_count),
-        performer_pool(arena, config.max_performer_count),
-        task_pool(arena, config.max_task_count),
+        performer_pool(arena, config.max_instrument_count),  // TODO(schedule): stub
+        task_pool(arena, config.max_trigger_count),          // TODO(schedule): stub
         voice_pool(arena, config.max_voice_count),
         slice_pool(arena, config.max_slice_count),
         message_queue(arena),
 
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
-        performer_generations(arena.AllocArray<uint32_t>(config.max_performer_count)),
-        task_generations(arena.AllocArray<uint32_t>(config.max_task_count)),
+        performer_generations(
+            arena.AllocArray<uint32_t>(config.max_instrument_count)),  // TODO(schedule): stub
+        task_generations(
+            arena.AllocArray<uint32_t>(config.max_trigger_count)),  // TODO(schedule): stub
 
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
         note_to_voice(arena.AllocArray<uint32_t>(config.max_note_count)),
@@ -60,8 +62,8 @@ struct EngineState {
         sample_rate(static_cast<float>(config.sample_rate)),
         smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05f)),
 
-        id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
-            {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
+        id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(
+            std::max({config.max_instrument_count, config.max_trigger_count}))))),
         max_id_index((1u << id_index_bit_count) - 1u),
         max_id_generation((1u << (32u - id_index_bit_count)) - 1u),
 

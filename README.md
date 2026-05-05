@@ -44,7 +44,7 @@ instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 // The note pitch is expressed in octaves relative to middle C as the center frequency. Fractional
 // note values adjust the frequency logarithmically to ensure equally perceived pitch intervals
 // within each octave.
-constexpr float kC4Pitch = 0.0f;
+constexpr float kC3Pitch = -1.0f;
 instrument.SetNoteOn(kC4Pitch);
 
 // Check if the instrument note is on.
@@ -53,11 +53,9 @@ const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
 // Create a new trigger that plays an instrument note every beat.
 auto trigger = engine.CreateTrigger();
 trigger.SetCallback([&]() {
-  constexpr float kC3Pitch = -1.0f;
-  instrument.SetNoteOn(kC3Pitch);
-  instrument.SetNoteOff(kC3Pitch, /*offset=*/1.0f);
+  instrument.ScheduleNote(/*pitch=*/-1.0f, /*offset=*/0.0, /*duration=*/1.0);
 });
-trigger.Start(/*interval=*/1.0f);
+trigger.Start(/*offset=*/0.0, /*interval=*/1.0f);
 
 // Update the engine timestamp.
 //

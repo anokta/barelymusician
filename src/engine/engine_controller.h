@@ -7,14 +7,14 @@
 #include "core/time.h"
 #include "engine/engine_state.h"
 #include "engine/instrument_controller.h"
-#include "engine/performer_controller.h"
+#include "engine/trigger_controller.h"
 
 namespace barely {
 
 class EngineController {
  public:
   explicit EngineController(EngineState& engine) noexcept
-      : engine_(engine), instrument_controller_(engine_), performer_controller_(engine_) {}
+      : engine_(engine), instrument_controller_(engine_), trigger_controller_(engine_) {}
 
   void SetControl(BarelyEngineControlType type, float value) noexcept {
     if (auto& control = engine_.controls[type]; control.SetValue(value)) {
@@ -27,29 +27,20 @@ class EngineController {
       if (engine_.tempo > 0.0) {
         const double max_update_duration =
             SecondsToBeats(engine_.tempo, timestamp - engine_.timestamp);
-
-        double update_duration = max_update_duration;
-        int32_t max_priority = INT32_MIN;
-
-        performer_controller_.GetNextTaskEvent(update_duration, max_priority);
-        if (const double next_duration = instrument_controller_.GetNextDuration();
-            next_duration < update_duration) {
-          update_duration = next_duration;
-          max_priority = INT32_MAX;
-        }
+        const double update_duration = std::min(std::min(trigger_controller_.GetNextDuration(),
+                                                         instrument_controller_.GetNextDuration()),
+                                                max_update_duration);
 
         if (update_duration > 0) {
-          performer_controller_.Update(update_duration);
+          trigger_controller_.Update(update_duration);
           instrument_controller_.Update(update_duration);
 
           engine_.timestamp += BeatsToSeconds(engine_.tempo, update_duration);
         }
 
         if (update_duration < max_update_duration) {
-          performer_controller_.ProcessAllTasksAtPosition(max_priority);
-          if (max_priority == INT32_MAX) {
-            instrument_controller_.ProcessArp();
-          }
+          trigger_controller_.ProcessAllTriggersAtPosition();
+          instrument_controller_.ProcessArp();
         }
       } else if (engine_.timestamp < timestamp) {
         engine_.timestamp = timestamp;
@@ -64,17 +55,15 @@ class EngineController {
     return instrument_controller_;
   }
 
-  [[nodiscard]] PerformerController& performer_controller() noexcept {
-    return performer_controller_;
-  }
-  [[nodiscard]] const PerformerController& performer_controller() const noexcept {
-    return performer_controller_;
+  [[nodiscard]] TriggerController& trigger_controller() noexcept { return trigger_controller_; }
+  [[nodiscard]] const TriggerController& trigger_controller() const noexcept {
+    return trigger_controller_;
   }
 
  private:
   EngineState& engine_;
   InstrumentController instrument_controller_;
-  PerformerController performer_controller_;
+  TriggerController trigger_controller_;
 };
 
 }  // namespace barely

@@ -23,9 +23,8 @@
 #include "engine/message.h"
 #include "engine/message_queue.h"
 #include "engine/note_state.h"
-#include "engine/performer_state.h"
 #include "engine/slice_pool.h"
-#include "engine/task_state.h"
+#include "engine/trigger_state.h"
 #include "engine/voice_state.h"
 
 namespace barely {
@@ -41,17 +40,13 @@ struct EngineState {
 
         instrument_pool(arena, config.max_instrument_count),
         note_pool(arena, config.max_note_count),
-        performer_pool(arena, config.max_instrument_count),  // TODO(schedule): stub
-        task_pool(arena, config.max_trigger_count),          // TODO(schedule): stub
+        trigger_pool(arena, config.max_trigger_count),
         voice_pool(arena, config.max_voice_count),
         slice_pool(arena, config.max_slice_count),
         message_queue(arena),
 
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
-        performer_generations(
-            arena.AllocArray<uint32_t>(config.max_instrument_count)),  // TODO(schedule): stub
-        task_generations(
-            arena.AllocArray<uint32_t>(config.max_trigger_count)),  // TODO(schedule): stub
+        trigger_generations(arena.AllocArray<uint32_t>(config.max_trigger_count)),
 
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
         note_to_voice(arena.AllocArray<uint32_t>(config.max_note_count)),
@@ -90,8 +85,7 @@ struct EngineState {
 
   Pool<InstrumentState> instrument_pool;
   Pool<NoteState> note_pool;
-  Pool<PerformerState> performer_pool;
-  Pool<TaskState> task_pool;
+  Pool<TriggerState> trigger_pool;
   Pool<VoiceState> voice_pool;
 
   SlicePool slice_pool;
@@ -99,8 +93,7 @@ struct EngineState {
   MessageQueue message_queue;
 
   uint32_t* instrument_generations = nullptr;
-  uint32_t* performer_generations = nullptr;
-  uint32_t* task_generations = nullptr;
+  uint32_t* trigger_generations = nullptr;
 
   InstrumentParams* instrument_params = nullptr;
   uint32_t* note_to_voice = nullptr;
@@ -176,18 +169,11 @@ struct EngineState {
     return instrument_pool.Get(instrument_index);
   }
 
-  [[nodiscard]] PerformerState& GetPerformer(uint32_t performer_index) noexcept {
-    return performer_pool.Get(performer_index);
+  [[nodiscard]] TriggerState& GetTrigger(uint32_t trigger_state) noexcept {
+    return trigger_pool.Get(trigger_state);
   }
-  [[nodiscard]] const PerformerState& GetPerformer(uint32_t performer_index) const noexcept {
-    return performer_pool.Get(performer_index);
-  }
-
-  [[nodiscard]] TaskState& GetTask(uint32_t task_index) noexcept {
-    return task_pool.Get(task_index);
-  }
-  [[nodiscard]] const TaskState& GetTask(uint32_t task_index) const noexcept {
-    return task_pool.Get(task_index);
+  [[nodiscard]] const TriggerState& GetTrigger(uint32_t trigger_state) const noexcept {
+    return trigger_pool.Get(trigger_state);
   }
 
   [[nodiscard]] VoiceState& GetVoice(uint32_t voice_index) noexcept {

@@ -63,13 +63,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  auto metronome = engine.CreatePerformer();
-  metronome.SetLooping(true);
+  auto metronome = engine.CreateTrigger();
   int beat = 0;
-  engine.CreateTask(metronome, 0.0, 1e-6, 0, [&](EventType type) {
-    if (type != EventType::kBegin) {
-      return;
-    }
+  metronome.SetCallback([&]() {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ++beat;
@@ -103,13 +99,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
           metronome.Stop();
           ConsoleLog() << "Metronome stopped";
         } else {
-          metronome.Start();
+          metronome.Start(0.0, 1.0);
           ConsoleLog() << "Metronome started";
         }
         return;
       case '\r':
         metronome.Stop();
-        metronome.SetPosition(0.0);
+        metronome.Start(0.0, 1.0);
         ConsoleLog() << "Metronome reset";
         return;
       case 'O':
@@ -140,7 +136,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
   engine.Update(kLookahead);
-  metronome.Start();
+  metronome.Start(0.0, 1.0);
 
   ConsoleLog() << "Play the metronome using the keyboard keys:";
   ConsoleLog() << "  * Use space key to start or stop the metronome";

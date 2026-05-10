@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 
 #include "engine/engine_state.h"
 #include "engine/trigger_state.h"
@@ -30,50 +31,37 @@ class TriggerController {
     engine_.GetTrigger(trigger_index).callback = {callback, user_data};
   }
 
-  void Start(uint32_t trigger_index, double offset, double interval) noexcept {
+  void Start(uint32_t trigger_index, double next_position, double interval) noexcept {
     TriggerState& trigger = engine_.GetTrigger(trigger_index);
-    trigger.offset = offset;
+    trigger.next_position = next_position;
     trigger.interval = interval;
-    trigger.is_playing = true;  // TODO(schedule): this should be false with positive offset
   }
 
   void Stop(uint32_t trigger_index) noexcept {
-    engine_.GetTrigger(trigger_index).is_playing = false;
+    engine_.GetTrigger(trigger_index).next_position = 0.0;
   }
 
-  void ProcessAllTriggersAtPosition() noexcept {
+  void ProcessAllTriggersAtPosition(double position) noexcept {
     for (uint32_t i = 0; i < engine_.trigger_pool.ActiveCount(); ++i) {
-      TriggerState& trigger = engine_.GetTrigger(engine_.trigger_pool.GetActive(i));
-      if (trigger.is_playing && trigger.offset == 0.0) {
+      if (TriggerState& trigger = engine_.GetTrigger(engine_.trigger_pool.GetActive(i));
+          trigger.IsPlaying() && trigger.next_position <= position) {
+        trigger.next_position =
+            (trigger.interval > 0.0) ? (trigger.next_position + trigger.interval) : 0.0;
         trigger.callback();
-        if (trigger.interval > 0.0) {
-          trigger.offset = trigger.interval;
-        } else {
-          trigger.is_playing = false;
-        }
       }
     }
   }
 
-  void Update(double duration) noexcept {
+  [[nodiscard]] double GetNextDuration(double position) const noexcept {
+    double next_position = std::numeric_limits<double>::max();
     for (uint32_t i = 0; i < engine_.trigger_pool.ActiveCount(); ++i) {
-      TriggerState& trigger = engine_.GetTrigger(engine_.trigger_pool.GetActive(i));
-      if (trigger.is_playing) {
-        assert(trigger.offset >= duration);
-        trigger.offset -= duration;
+      if (const TriggerState& trigger = engine_.GetTrigger(engine_.trigger_pool.GetActive(i));
+          trigger.IsPlaying()) {
+        next_position = std::min(trigger.next_position, next_position);
       }
     }
-  }
-
-  [[nodiscard]] double GetNextDuration() const noexcept {
-    double next_duration = std::numeric_limits<double>::max();
-    for (uint32_t i = 0; i < engine_.trigger_pool.ActiveCount(); ++i) {
-      const TriggerState& trigger = engine_.GetTrigger(engine_.trigger_pool.GetActive(i));
-      if (trigger.is_playing) {
-        next_duration = std::min(trigger.offset, next_duration);
-      }
-    }
-    return next_duration;
+    assert(next_position >= position);
+    return next_position - position;
   }
 
  private:

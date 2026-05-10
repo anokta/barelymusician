@@ -368,7 +368,7 @@ bool BarelyTrigger_IsPlaying(const BarelyEngine* engine, uint32_t trigger_id,
   if (!engine->IsValidTrigger(trigger_id)) return false;
   if (!out_is_playing) return false;
 
-  *out_is_playing = engine->state.GetTrigger((engine->state.GetIdIndex(trigger_id))).is_playing;
+  *out_is_playing = engine->state.GetTrigger((engine->state.GetIdIndex(trigger_id))).IsPlaying();
   return true;
 }
 
@@ -387,8 +387,8 @@ bool BarelyTrigger_Start(BarelyEngine* engine, uint32_t trigger_id, double offse
   if (!engine) return false;
   if (!engine->IsValidTrigger(trigger_id)) return false;
 
-  engine->controller.trigger_controller().Start(engine->state.GetIdIndex(trigger_id), offset,
-                                                duration);
+  engine->controller.trigger_controller().Start(engine->state.GetIdIndex(trigger_id),
+                                                engine->state.position + offset, duration);
   return true;
 }
 

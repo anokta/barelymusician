@@ -27,19 +27,19 @@ class EngineController {
       if (engine_.tempo > 0.0) {
         const double max_update_duration =
             SecondsToBeats(engine_.tempo, timestamp - engine_.timestamp);
-        const double update_duration = std::min(std::min(trigger_controller_.GetNextDuration(),
-                                                         instrument_controller_.GetNextDuration()),
-                                                max_update_duration);
+        const double update_duration =
+            std::min(std::min(trigger_controller_.GetNextDuration(engine_.position),
+                              instrument_controller_.GetNextDuration()),
+                     max_update_duration);
 
         if (update_duration > 0) {
-          trigger_controller_.Update(update_duration);
           instrument_controller_.Update(update_duration);
-
           engine_.timestamp += BeatsToSeconds(engine_.tempo, update_duration);
+          engine_.position += update_duration;
         }
 
         if (update_duration < max_update_duration) {
-          trigger_controller_.ProcessAllTriggersAtPosition();
+          trigger_controller_.ProcessAllTriggersAtPosition(engine_.position);
           instrument_controller_.ProcessArp();
         }
       } else if (engine_.timestamp < timestamp) {

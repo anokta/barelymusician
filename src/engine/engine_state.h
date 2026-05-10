@@ -104,6 +104,7 @@ struct EngineState {
   float* temp_samples = nullptr;
 
   double tempo = 120.0;      // beats per minute
+  double position = 0.0;     // beats
   double timestamp = 0.0;    // seconds
   float sample_rate = 0.0f;  // hertz
 

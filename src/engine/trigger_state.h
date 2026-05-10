@@ -3,6 +3,8 @@
 
 #include <barelymusician.h>
 
+#include <limits>
+
 #include "core/callback.h"
 
 namespace barely {
@@ -10,10 +12,10 @@ namespace barely {
 struct TriggerState {
   Callback<BarelyTriggerCallback> callback = {};
 
-  double offset = 0.0;
+  double next_position = 0.0;
   double interval = 0.0;
 
-  bool is_playing = false;
+  [[nodiscard]] bool IsPlaying() const noexcept { return next_position > 0.0; }
 };
 
 }  // namespace barely

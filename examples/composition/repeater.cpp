@@ -10,9 +10,9 @@ namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Engine& engine, Instrument instrument) noexcept
-    : engine_(engine), instrument_(instrument), trigger_(engine_.CreateTrigger()) {
-  trigger_.SetCallback([this]() noexcept { OnBeat(); });
-}
+    : engine_(engine),
+      instrument_(instrument),
+      trigger_(engine_.CreateTrigger([this]() noexcept { OnBeat(); })) {}
 
 void Repeater::Clear() noexcept {
   if (IsPlaying()) {

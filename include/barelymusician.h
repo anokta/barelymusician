@@ -1217,8 +1217,9 @@ class Engine {
 
   /// Creates a new trigger.
   ///
+  /// @param callback Callback.
   /// @return Trigger.
-  Trigger CreateTrigger() noexcept {
+  Trigger CreateTrigger(TriggerCallback callback = nullptr) noexcept {
     uint32_t trigger_id = 0;
     [[maybe_unused]] bool success = BarelyEngine_CreateTrigger(engine_, &trigger_id);
     assert(success);
@@ -1226,8 +1227,12 @@ class Engine {
     success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
     assert(success);
     auto& trigger_callback = trigger_callbacks_.get()[(trigger_id & max_id_index) - 1];
-    trigger_callback = {};
-    return {engine_, trigger_id, &trigger_callback};
+    trigger_callback = callback;
+    Trigger trigger{engine_, trigger_id, &trigger_callback};
+    if (trigger_callback != nullptr) {
+      trigger.SetCallback(trigger_callback);
+    }
+    return trigger;
   }
 
   /// Destroys an instrument.

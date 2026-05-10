@@ -62,9 +62,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  auto metronome = engine.CreateTrigger();
   int beat = 0;
-  metronome.SetCallback([&]() {
+  auto metronome = engine.CreateTrigger([&]() {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;
     ++beat;

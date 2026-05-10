@@ -30,9 +30,47 @@ uint32_t InstrumentController::Acquire() noexcept {
 }
 
 void InstrumentController::Release(uint32_t instrument_index) noexcept {
+  CancelAllScheduledEvents(instrument_index);
   SetAllNotesOff(instrument_index);
   SetSampleData(instrument_index, nullptr, 0);
   engine_.instrument_pool.Release(instrument_index);
+}
+
+void InstrumentController::CancelAllScheduledEvents(uint32_t instrument_index) noexcept {
+  // TODO(schedule): implement
+  instrument_index;
+}
+
+void InstrumentController::ScheduleControl(uint32_t instrument_index,
+                                           BarelyInstrumentControlType type, float value,
+                                           double offset, double duration) noexcept {
+  // TODO(schedule): implement
+  instrument_index;
+  type;
+  value;
+  offset;
+  duration;
+}
+
+void InstrumentController::ScheduleNote(uint32_t instrument_index, float pitch, double offset,
+                                        double duration) noexcept {
+  // TODO(schedule): implement
+  instrument_index;
+  pitch;
+  offset;
+  duration;
+}
+
+void InstrumentController::ScheduleNoteControl(uint32_t instrument_index, float pitch,
+                                               BarelyNoteControlType type, float value,
+                                               double offset, double duration) noexcept {
+  // TODO(schedule): implement
+  instrument_index;
+  pitch;
+  type;
+  value;
+  offset;
+  duration;
 }
 
 void InstrumentController::SetAllNotesOff() noexcept {

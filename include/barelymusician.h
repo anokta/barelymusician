@@ -324,7 +324,8 @@ BARELY_ENUM(NoteControlType, BARELY_NOTE_CONTROL_TYPES)
       .sample_##rate = sample_rate,               \
       .max_frame_count = 2048,                    \
       .max_instrument_count = 100,                \
-      .max_trigger_count = 5000,                  \
+      .max_trigger_count = 1000,                  \
+      .max_event_count = 5000,                    \
       .max_note_count = 1000,                     \
       .max_slice_count = 1000,                    \
       .max_voice_count = 200,                     \
@@ -346,6 +347,9 @@ typedef struct BarelyEngineConfig {
 
   /// Maximum number of triggers.
   int32_t max_trigger_count;
+
+  /// Maximum number of scheduled events.
+  int32_t max_event_count;
 
   /// Maximum number of active notes.
   int32_t max_note_count;
@@ -536,7 +540,8 @@ BARELY_API bool BarelyEngine_Update(BarelyEngine* engine, double timestamp);
 /// @param engine Pointer to engine.
 /// @param instrument_id Instrument identifier.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_CancelAllScheduled(BarelyEngine* engine, uint32_t instrument_id);
+BARELY_API bool BarelyInstrument_CancelAllScheduledEvents(BarelyEngine* engine,
+                                                          uint32_t instrument_id);
 
 /// Gets an instrument control value.
 ///
@@ -822,9 +827,9 @@ class Instrument {
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return instrument_id_; }
 
   /// Cancels all scheduled notes and controls.
-  void CancelAllScheduled() noexcept {
+  void CancelAllScheduledEvents() noexcept {
     [[maybe_unused]] const bool success =
-        BarelyInstrument_CancelAllScheduled(engine_, instrument_id_);
+        BarelyInstrument_CancelAllScheduledEvents(engine_, instrument_id_);
     assert(success);
   }
 

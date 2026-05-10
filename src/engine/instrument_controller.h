@@ -21,6 +21,14 @@ class InstrumentController {
   [[nodiscard]] uint32_t Acquire() noexcept;
   void Release(uint32_t instrument_index) noexcept;
 
+  void CancelAllScheduledEvents(uint32_t instrument_index) noexcept;
+  void ScheduleControl(uint32_t instrument_index, BarelyInstrumentControlType type, float value,
+                       double offset, double duration) noexcept;
+  void ScheduleNote(uint32_t instrument_index, float pitch, double offset,
+                    double duration) noexcept;
+  void ScheduleNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
+                           float value, double offset, double duration) noexcept;
+
   void SetAllNotesOff() noexcept;
   void SetAllNotesOff(uint32_t instrument_index) noexcept;
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,

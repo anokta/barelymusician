@@ -43,6 +43,7 @@ struct EngineState {
         trigger_pool(arena, config.max_trigger_count),
         voice_pool(arena, config.max_voice_count),
         slice_pool(arena, config.max_slice_count),
+        // event_pool(arena, config.max_event_count), // TODO: implement
         message_queue(arena),
 
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),

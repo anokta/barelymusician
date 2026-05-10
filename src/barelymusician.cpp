@@ -41,7 +41,8 @@ bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_en
   if (!config) return false;
   if (config->sample_rate <= 0 || config->max_frame_count <= 0 ||
       config->max_instrument_count <= 0 || config->max_trigger_count <= 0 ||
-      config->max_note_count <= 0 || config->max_slice_count <= 0 || config->max_voice_count <= 0) {
+      config->max_event_count <= 0 || config->max_note_count <= 0 || config->max_slice_count <= 0 ||
+      config->max_voice_count <= 0) {
     return false;
   }
 
@@ -194,12 +195,13 @@ bool BarelyEngine_Update(BarelyEngine* engine, double timestamp) {
   return true;
 }
 
-bool BarelyInstrument_CancelAllScheduled(BarelyEngine* engine, uint32_t instrument_id) {
+bool BarelyInstrument_CancelAllScheduledEvents(BarelyEngine* engine, uint32_t instrument_id) {
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument_id)) return false;
 
-  // TODO(schedule): Implement
-  return false;
+  engine->controller.instrument_controller().CancelAllScheduledEvents(
+      engine->state.GetIdIndex(instrument_id));
+  return true;
 }
 
 bool BarelyInstrument_GetControl(const BarelyEngine* engine, uint32_t instrument_id,
@@ -249,9 +251,9 @@ bool BarelyInstrument_ScheduleControl(BarelyEngine* engine, uint32_t instrument_
   if (offset < 0.0) return false;
   if (duration < 0.0) return false;
 
-  // TODO(schedule): Implement
-  value;
-  return false;
+  engine->controller.instrument_controller().ScheduleControl(
+      engine->state.GetIdIndex(instrument_id), type, value, offset, duration);
+  return true;
 }
 
 bool BarelyInstrument_ScheduleNote(BarelyEngine* engine, uint32_t instrument_id, float pitch,
@@ -261,9 +263,9 @@ bool BarelyInstrument_ScheduleNote(BarelyEngine* engine, uint32_t instrument_id,
   if (offset < 0.0) return false;
   if (duration <= 0.0) return false;
 
-  // TODO(schedule): Implement
-  pitch;
-  return false;
+  engine->controller.instrument_controller().ScheduleNote(engine->state.GetIdIndex(instrument_id),
+                                                          pitch, offset, duration);
+  return true;
 }
 
 bool BarelyInstrument_ScheduleNoteControl(BarelyEngine* engine, uint32_t instrument_id, float pitch,
@@ -275,10 +277,9 @@ bool BarelyInstrument_ScheduleNoteControl(BarelyEngine* engine, uint32_t instrum
   if (offset < 0.0) return false;
   if (duration < 0.0) return false;
 
-  // TODO(schedule): Implement
-  pitch;
-  value;
-  return false;
+  engine->controller.instrument_controller().ScheduleNoteControl(
+      engine->state.GetIdIndex(instrument_id), pitch, type, value, offset, duration);
+  return true;
 }
 
 bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, uint32_t instrument_id) {

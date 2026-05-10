@@ -252,7 +252,8 @@ bool BarelyInstrument_ScheduleControl(BarelyEngine* engine, uint32_t instrument_
   if (duration < 0.0) return false;
 
   engine->controller.instrument_controller().ScheduleControl(
-      engine->state.GetIdIndex(instrument_id), type, value, offset, duration);
+      engine->state.GetIdIndex(instrument_id), type, value, engine->state.position + offset,
+      duration);
   return true;
 }
 
@@ -263,8 +264,8 @@ bool BarelyInstrument_ScheduleNote(BarelyEngine* engine, uint32_t instrument_id,
   if (offset < 0.0) return false;
   if (duration <= 0.0) return false;
 
-  engine->controller.instrument_controller().ScheduleNote(engine->state.GetIdIndex(instrument_id),
-                                                          pitch, offset, duration);
+  engine->controller.instrument_controller().ScheduleNote(
+      engine->state.GetIdIndex(instrument_id), pitch, engine->state.position + offset, duration);
   return true;
 }
 
@@ -278,7 +279,8 @@ bool BarelyInstrument_ScheduleNoteControl(BarelyEngine* engine, uint32_t instrum
   if (duration < 0.0) return false;
 
   engine->controller.instrument_controller().ScheduleNoteControl(
-      engine->state.GetIdIndex(instrument_id), pitch, type, value, offset, duration);
+      engine->state.GetIdIndex(instrument_id), pitch, type, value, engine->state.position + offset,
+      duration);
   return true;
 }
 

@@ -30,6 +30,9 @@ struct InstrumentState {
     bool should_update = false;
   } arp = {};
 
+  uint32_t first_event_index = kInvalidIndex;
+  uint32_t first_note_off_event_index = kInvalidIndex;
+
   uint32_t first_note_index = kInvalidIndex;
   uint32_t note_count = 0;
 

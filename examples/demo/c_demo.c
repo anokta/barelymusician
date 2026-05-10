@@ -35,6 +35,7 @@ static const float kRelease = 0.2f;
 
 // Playback settings.
 static const double kTempo = 99.0;
+static const int kLoopCount = 2;
 
 enum {
   kMelodyNoteCount = 7,
@@ -44,7 +45,7 @@ static const double kMelodyPositions[kMelodyNoteCount + 1] = {
     0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0,
 };
 
-static bool g_is_playing = true;
+static int g_loop_count = 0;
 static uint32_t g_instrument_id = 0;
 static volatile double g_timestamp = 0.0;
 
@@ -69,10 +70,12 @@ static void NoteOnCallback(float pitch, void* user_data) {
 }
 
 static void TriggerCallback(void* user_data) {
-  for (int i = 0; i < kMelodyNoteCount; ++i) {
-    BarelyInstrument_ScheduleNote((BarelyEngine*)user_data, g_instrument_id, kMelodyPitches[i],
-                                  kMelodyPositions[i],
-                                  kMelodyPositions[i + 1] - kMelodyPositions[i]);
+  if (g_loop_count++ < kLoopCount) {
+    for (int i = 0; i < kMelodyNoteCount; ++i) {
+      BarelyInstrument_ScheduleNote((BarelyEngine*)user_data, g_instrument_id, kMelodyPitches[i],
+                                    kMelodyPositions[i],
+                                    kMelodyPositions[i + 1] - kMelodyPositions[i]);
+    }
   }
 }
 
@@ -123,7 +126,7 @@ int main() {
   BarelyEngine_Update(engine, g_timestamp + kLookahead);
   BarelyTrigger_Start(engine, trigger_id, 0.0f, kMelodyPositions[kMelodyNoteCount]);
 
-  while (g_is_playing) {
+  while (g_loop_count <= kLoopCount) {
     BarelyEngine_Update(engine, g_timestamp + kLookahead);
     BarelySleep(kUpdateInterval);
   }

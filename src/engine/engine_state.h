@@ -18,6 +18,7 @@
 #include "dsp/reverb.h"
 #include "dsp/sidechain.h"
 #include "engine/effect_params.h"
+#include "engine/event_state.h"
 #include "engine/instrument_params.h"
 #include "engine/instrument_state.h"
 #include "engine/message.h"
@@ -39,11 +40,12 @@ struct EngineState {
         reverb(arena, static_cast<float>(config.sample_rate)),
 
         instrument_pool(arena, config.max_instrument_count),
-        note_pool(arena, config.max_note_count),
         trigger_pool(arena, config.max_trigger_count),
+
+        event_pool(arena, config.max_event_count),
+        note_pool(arena, config.max_note_count),
         voice_pool(arena, config.max_voice_count),
         slice_pool(arena, config.max_slice_count),
-        // event_pool(arena, config.max_event_count), // TODO: implement
         message_queue(arena),
 
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
@@ -85,8 +87,10 @@ struct EngineState {
   Reverb reverb;
 
   Pool<InstrumentState> instrument_pool;
-  Pool<NoteState> note_pool;
   Pool<TriggerState> trigger_pool;
+
+  Pool<EventState> event_pool;
+  Pool<NoteState> note_pool;
   Pool<VoiceState> voice_pool;
 
   SlicePool slice_pool;
@@ -162,6 +166,13 @@ struct EngineState {
       return nullptr;
     }
     return slice_pool.Get(slice_index);
+  }
+
+  [[nodiscard]] EventState& GetEvent(uint32_t event_index) noexcept {
+    return event_pool.Get(event_index);
+  }
+  [[nodiscard]] const EventState& GetEvent(uint32_t event_index) const noexcept {
+    return event_pool.Get(event_index);
   }
 
   [[nodiscard]] InstrumentState& GetInstrument(uint32_t instrument_index) noexcept {

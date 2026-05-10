@@ -23,11 +23,11 @@ class InstrumentController {
 
   void CancelAllScheduledEvents(uint32_t instrument_index) noexcept;
   void ScheduleControl(uint32_t instrument_index, BarelyInstrumentControlType type, float value,
-                       double offset, double duration) noexcept;
-  void ScheduleNote(uint32_t instrument_index, float pitch, double offset,
+                       double position, double duration) noexcept;
+  void ScheduleNote(uint32_t instrument_index, float pitch, double position,
                     double duration) noexcept;
   void ScheduleNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
-                           float value, double offset, double duration) noexcept;
+                           float value, double position, double duration) noexcept;
 
   void SetAllNotesOff() noexcept;
   void SetAllNotesOff(uint32_t instrument_index) noexcept;
@@ -50,9 +50,9 @@ class InstrumentController {
                                             BarelyNoteControlType type) const noexcept;
   [[nodiscard]] bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
 
-  void ProcessArp() noexcept;
+  void ProcessAllEventsAtPosition(double position) noexcept;
   void Update(double duration) noexcept;
-  [[nodiscard]] double GetNextDuration() const noexcept;
+  [[nodiscard]] double GetNextDuration(double position) const noexcept;
 
  private:
   [[nodiscard]] uint32_t GetNote(const InstrumentState& instrument, float pitch) const noexcept;

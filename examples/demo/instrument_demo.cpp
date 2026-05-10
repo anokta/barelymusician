@@ -18,7 +18,6 @@ namespace {
 using ::barely::ArpMode;
 using ::barely::Engine;
 using ::barely::EngineControlType;
-using ::barely::EventType;
 using ::barely::InstrumentControlType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -90,9 +89,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kDelaySend, kDelaySend);
   instrument.SetControl(InstrumentControlType::kArpGate, kArpGate);
   instrument.SetControl(InstrumentControlType::kArpRate, kArpRate);
-  instrument.SetNoteEventCallback([](EventType type, float pitch) {
-    ConsoleLog() << "Note" << (type == EventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
-  });
+  instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ")"; });
+  instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
 
   // Audio process callback.
   audio_output.SetProcessCallback(

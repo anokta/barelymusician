@@ -25,7 +25,7 @@ class TriggerController {
 
   void Release(uint32_t trigger_index) noexcept { engine_.trigger_pool.Release(trigger_index); }
 
-  void SetCallback(uint32_t trigger_index, BarelyTriggerEventCallback callback,
+  void SetCallback(uint32_t trigger_index, BarelyTriggerCallback callback,
                    void* user_data) noexcept {
     engine_.GetTrigger(trigger_index).callback = {callback, user_data};
   }

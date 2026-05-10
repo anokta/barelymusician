@@ -8,7 +8,7 @@
 namespace barely {
 
 struct TriggerState {
-  Callback<BarelyTriggerEventCallback> callback = {};
+  Callback<BarelyTriggerCallback> callback = {};
 
   double offset = 0.0;
   double interval = 0.0;

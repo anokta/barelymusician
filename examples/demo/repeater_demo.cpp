@@ -17,7 +17,6 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EventType;
 using ::barely::InstrumentControlType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -82,8 +81,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Repeater repeater(engine, instrument);
   repeater.SetStyle(kInitialStyle);
 
-  instrument.SetNoteEventCallback([&repeater](EventType type, float pitch) {
-    if (type == EventType::kBegin && repeater.IsPlaying()) {
+  instrument.SetNoteOnCallback([&repeater](float pitch) {
+    if (repeater.IsPlaying()) {
       ConsoleLog() << "Note(" << pitch << ")";
     }
   });

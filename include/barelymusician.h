@@ -72,7 +72,7 @@
 ///   auto trigger = engine.CreateTrigger();
 ///
 ///   // Set the callback.
-///   trigger.SetCallback([](barely::EventType type) { /*populate this*/ });
+///   trigger.SetCallback([]() { /*populate this*/ });
 ///
 ///   // Start the trigger playback with a loop.
 ///   trigger.Start(/*offset=*/0.0, /*interval=*/1.0);
@@ -158,7 +158,7 @@
 ///   BarelyEngine_CreateTrigger(engine, &trigger_id);
 ///
 ///   // Set the callback.
-///   BarelyTriggerEventCallback callback{ /*populate this*/ };
+///   BarelyTriggerCallback callback{ /*populate this*/ };
 ///   BarelyTrigger_SetCallback(engine, trigger_id, callback, nullptr);
 ///
 ///   // Start the trigger playback with a loop.
@@ -245,12 +245,6 @@ BARELY_ENUM(OscMode, BARELY_OSC_MODES)
   X(SliceMode, Loop, "Loop")             \
   X(SliceMode, Once, "Once")
 BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
-
-/// Event types.
-#define BARELY_EVENT_TYPES(EventType, X) \
-  X(EventType, Begin, "Begin")           \
-  X(EventType, End, "End")
-BARELY_ENUM(EventType, BARELY_EVENT_TYPES)
 
 /// Engine control types.
 #define BARELY_ENGINE_CONTROL_TYPES(EngineControlType, X)                           \
@@ -404,17 +398,16 @@ typedef struct BarelyScale {
 extern "C" {
 #endif  // __cplusplus
 
-/// Note event callback.
+/// Note callback.
 ///
-/// @param type Note event type.
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyNoteEventCallback)(BarelyEventType type, float pitch, void* user_data);
+typedef void (*BarelyNoteCallback)(float pitch, void* user_data);
 
-/// Trigger event callback.
+/// Trigger callback.
 ///
 /// @param user_data Pointer to user data.
-typedef void (*BarelyTriggerEventCallback)(void* user_data);
+typedef void (*BarelyTriggerCallback)(void* user_data);
 
 /// Creates a new engine.
 ///
@@ -642,17 +635,6 @@ BARELY_API bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t i
                                                 float pitch, BarelyNoteControlType type,
                                                 float value);
 
-/// Sets the note event callback of an instrument.
-///
-/// @param engine Pointer to engine.
-/// @param instrument_id Instrument identifier.
-/// @param callback Note event callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, uint32_t instrument_id,
-                                                      BarelyNoteEventCallback callback,
-                                                      void* user_data);
-
 /// Sets an instrument note off.
 ///
 /// @param engine Pointer to engine.
@@ -662,6 +644,15 @@ BARELY_API bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, uint
 BARELY_API bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id,
                                             float pitch);
 
+/// Sets the note off callback of an instrument.
+///
+/// @param engine Pointer to engine.
+/// @param instrument_id Instrument identifier.
+/// @param user_data Pointer to user data.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyInstrument_SetNoteOffCallback(BarelyEngine* engine, uint32_t instrument_id,
+                                                    BarelyNoteCallback callback, void* user_data);
+
 /// Sets an instrument note on.
 ///
 /// @param engine Pointer to engine.
@@ -670,6 +661,15 @@ BARELY_API bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instr
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id,
                                            float pitch);
+
+/// Sets the note on callback of an instrument.
+///
+/// @param engine Pointer to engine.
+/// @param instrument_id Instrument identifier.
+/// @param user_data Pointer to user data.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyInstrument_SetNoteOnCallback(BarelyEngine* engine, uint32_t instrument_id,
+                                                   BarelyNoteCallback callback, void* user_data);
 
 /// Sets instrument sample data.
 ///
@@ -697,7 +697,7 @@ BARELY_API bool BarelyTrigger_IsPlaying(const BarelyEngine* engine, uint32_t tri
 /// @param callback Trigger event callback.
 /// @param user_data Pointer to user data.
 BARELY_API bool BarelyTrigger_SetCallback(BarelyEngine* engine, uint32_t trigger_id,
-                                          BarelyTriggerEventCallback callback, void* user_data);
+                                          BarelyTriggerCallback callback, void* user_data);
 
 /// Starts the playback of a trigger.
 ///
@@ -796,14 +796,13 @@ struct Slice : public BarelySlice {
   constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
 };
 
-/// Note event callback function.
+/// Note callback function.
 ///
-/// @param type Note event type.
 /// @param pitch Note pitch.
-using NoteEventCallback = std::function<void(EventType type, float pitch)>;
+using NoteCallback = std::function<void(float pitch)>;
 
-/// Trigger event callback function.
-using TriggerEventCallback = std::function<void()>;
+/// Trigger callback function.
+using TriggerCallback = std::function<void()>;
 
 /// Class that wraps an instrument.
 class Instrument {
@@ -815,10 +814,14 @@ class Instrument {
   ///
   /// @param engine Pointer to raw engine.
   /// @param instrument_id Instrument identifier.
-  /// @param note_event_callback Pointer to note event callback.
-  Instrument(BarelyEngine* engine, uint32_t instrument_id,
-             NoteEventCallback* note_event_callback) noexcept
-      : engine_(engine), instrument_id_(instrument_id), note_event_callback_(note_event_callback) {}
+  /// @param note_off_callback Pointer to note off callback.
+  /// @param note_on_callback Pointer to note on callback.
+  Instrument(BarelyEngine* engine, uint32_t instrument_id, NoteCallback* note_off_callback,
+             NoteCallback* note_on_callback) noexcept
+      : engine_(engine),
+        instrument_id_(instrument_id),
+        note_off_callback_(note_off_callback),
+        note_on_callback_(note_on_callback) {}
 
   /// Returns the identifier.
   ///
@@ -966,34 +969,33 @@ class Instrument {
     assert(success);
   }
 
-  /// Sets the note event callback.
-  ///
-  /// @param callback Note event callback.
-  void SetNoteEventCallback(NoteEventCallback callback) noexcept {
-    assert(note_event_callback_ != nullptr);
-    *note_event_callback_ = std::move(callback);
-    [[maybe_unused]] const bool success =
-        (*note_event_callback_)
-            ? BarelyInstrument_SetNoteEventCallback(
-                  engine_, instrument_id_,
-                  [](BarelyEventType type, float pitch, void* user_data) noexcept {
-                    assert(user_data != nullptr && "Invalid note event callback user data");
-                    if (const auto& callback = *static_cast<NoteEventCallback*>(user_data);
-                        callback) {
-                      callback(static_cast<EventType>(type), pitch);
-                    }
-                  },
-                  note_event_callback_)
-            : BarelyInstrument_SetNoteEventCallback(engine_, instrument_id_, nullptr, nullptr);
-    assert(success);
-  }
-
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
   void SetNoteOff(float pitch) noexcept {
     [[maybe_unused]] const bool success =
         BarelyInstrument_SetNoteOff(engine_, instrument_id_, pitch);
+    assert(success);
+  }
+
+  /// Sets the note off callback.
+  ///
+  /// @param callback Note callback.
+  void SetNoteOffCallback(NoteCallback callback) noexcept {
+    assert(note_off_callback_ != nullptr);
+    *note_off_callback_ = std::move(callback);
+    [[maybe_unused]] const bool success =
+        (*note_off_callback_)
+            ? BarelyInstrument_SetNoteOffCallback(
+                  engine_, instrument_id_,
+                  [](float pitch, void* user_data) noexcept {
+                    assert(user_data != nullptr && "Invalid note off callback user data");
+                    if (const auto& callback = *static_cast<NoteCallback*>(user_data); callback) {
+                      callback(pitch);
+                    }
+                  },
+                  note_off_callback_)
+            : BarelyInstrument_SetNoteOffCallback(engine_, instrument_id_, nullptr, nullptr);
     assert(success);
   }
 
@@ -1014,6 +1016,27 @@ class Instrument {
     }
   }
 
+  /// Sets the note on callback.
+  ///
+  /// @param callback Note callback.
+  void SetNoteOnCallback(NoteCallback callback) noexcept {
+    assert(note_on_callback_ != nullptr);
+    *note_on_callback_ = std::move(callback);
+    [[maybe_unused]] const bool success =
+        (*note_on_callback_)
+            ? BarelyInstrument_SetNoteOnCallback(
+                  engine_, instrument_id_,
+                  [](float pitch, void* user_data) noexcept {
+                    assert(user_data != nullptr && "Invalid note on callback user data");
+                    if (const auto& callback = *static_cast<NoteCallback*>(user_data); callback) {
+                      callback(pitch);
+                    }
+                  },
+                  note_on_callback_)
+            : BarelyInstrument_SetNoteOnCallback(engine_, instrument_id_, nullptr, nullptr);
+    assert(success);
+  }
+
   /// Sets the sample data.
   ///
   /// @param slices Span of slices.
@@ -1031,8 +1054,11 @@ class Instrument {
   // Instrument identifier.
   uint32_t instrument_id_ = 0;
 
-  // Pointer to note event callback.
-  NoteEventCallback* note_event_callback_ = nullptr;
+  // Pointer to note off callback.
+  NoteCallback* note_off_callback_ = nullptr;
+
+  // Pointer to note on callback.
+  NoteCallback* note_on_callback_ = nullptr;
 };
 
 /// Class that wraps a trigger.
@@ -1045,9 +1071,9 @@ class Trigger {
   ///
   /// @param engine Pointer to raw engine.
   /// @param trigger_id Trigger identifier.
-  /// @param event_callback Pointer to trigger event callback.
-  Trigger(BarelyEngine* engine, uint32_t trigger_id, TriggerEventCallback* event_callback) noexcept
-      : engine_(engine), trigger_id_(trigger_id), event_callback_(event_callback) {}
+  /// @param callback Pointer to trigger callback.
+  Trigger(BarelyEngine* engine, uint32_t trigger_id, TriggerCallback* callback) noexcept
+      : engine_(engine), trigger_id_(trigger_id), callback_(callback) {}
 
   /// Returns the identifier.
   ///
@@ -1066,25 +1092,24 @@ class Trigger {
     return is_playing;
   }
 
-  /// Sets the event callback.
+  /// Sets the callback.
   ///
-  /// @param callback Event callback.
-  void SetCallback(TriggerEventCallback callback) noexcept {
-    assert(event_callback_ != nullptr);
-    *event_callback_ = std::move(callback);
+  /// @param callback Callback.
+  void SetCallback(TriggerCallback callback) noexcept {
+    assert(callback_ != nullptr);
+    *callback_ = std::move(callback);
     [[maybe_unused]] const bool success =
-        (*event_callback_)
-            ? BarelyTrigger_SetCallback(
-                  engine_, trigger_id_,
-                  [](void* user_data) noexcept {
-                    assert(user_data != nullptr && "Invalid trigger event callback user data");
-                    if (const auto& callback = *static_cast<TriggerEventCallback*>(user_data);
-                        callback) {
-                      callback();
-                    }
-                  },
-                  event_callback_)
-            : BarelyTrigger_SetCallback(engine_, trigger_id_, nullptr, nullptr);
+        (*callback_) ? BarelyTrigger_SetCallback(
+                           engine_, trigger_id_,
+                           [](void* user_data) noexcept {
+                             assert(user_data != nullptr && "Invalid trigger callback user data");
+                             if (const auto& callback = *static_cast<TriggerCallback*>(user_data);
+                                 callback) {
+                               callback();
+                             }
+                           },
+                           callback_)
+                     : BarelyTrigger_SetCallback(engine_, trigger_id_, nullptr, nullptr);
     assert(success);
   }
 
@@ -1108,8 +1133,8 @@ class Trigger {
   // Trigger identifier.
   uint32_t trigger_id_;
 
-  // Pointer to event callback.
-  TriggerEventCallback* event_callback_ = nullptr;
+  // Pointer to callback.
+  TriggerCallback* callback_ = nullptr;
 };
 
 /// A class that wraps an engine.
@@ -1124,8 +1149,9 @@ class Engine {
   ///
   /// @param config Engine configuration.
   explicit Engine(const EngineConfig& config) noexcept {
-    note_event_callbacks_ = std::make_unique<NoteEventCallback[]>(config.max_instrument_count);
-    trigger_event_callbacks_ = std::make_unique<TriggerEventCallback[]>(config.max_trigger_count);
+    note_off_callbacks_ = std::make_unique<NoteCallback[]>(config.max_instrument_count);
+    note_on_callbacks_ = std::make_unique<NoteCallback[]>(config.max_instrument_count);
+    trigger_callbacks_ = std::make_unique<TriggerCallback[]>(config.max_trigger_count);
     [[maybe_unused]] const bool success = BarelyEngine_Create(&config, &engine_);
     assert(success);
   }
@@ -1147,8 +1173,9 @@ class Engine {
   /// @param other Other engine.
   Engine(Engine&& other) noexcept
       : engine_(std::exchange(other.engine_, nullptr)),
-        note_event_callbacks_(std::exchange(other.note_event_callbacks_, {})),
-        trigger_event_callbacks_(std::exchange(other.trigger_event_callbacks_, {})) {}
+        note_off_callbacks_(std::exchange(other.note_off_callbacks_, {})),
+        note_on_callbacks_(std::exchange(other.note_on_callbacks_, {})),
+        trigger_callbacks_(std::exchange(other.trigger_callbacks_, {})) {}
 
   /// Assigns `Engine` via move.
   ///
@@ -1158,8 +1185,9 @@ class Engine {
     if (this != &other) {
       BarelyEngine_Destroy(engine_);
       engine_ = std::exchange(other.engine_, nullptr);
-      note_event_callbacks_ = std::exchange(other.note_event_callbacks_, {});
-      trigger_event_callbacks_ = std::exchange(other.trigger_event_callbacks_, {});
+      note_off_callbacks_ = std::exchange(other.note_off_callbacks_, {});
+      note_on_callbacks_ = std::exchange(other.note_on_callbacks_, {});
+      trigger_callbacks_ = std::exchange(other.trigger_callbacks_, {});
     }
     return *this;
   }
@@ -1180,9 +1208,11 @@ class Engine {
     uint32_t max_id_index = 0;
     success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
     assert(success);
-    auto& note_event_callback = note_event_callbacks_.get()[(instrument_id & max_id_index) - 1];
-    note_event_callback = {};
-    return {engine_, instrument_id, &note_event_callback};
+    auto& note_off_callback = note_off_callbacks_.get()[(instrument_id & max_id_index) - 1];
+    note_off_callback = {};
+    auto& note_on_callback = note_on_callbacks_.get()[(instrument_id & max_id_index) - 1];
+    note_on_callback = {};
+    return {engine_, instrument_id, &note_off_callback, &note_on_callback};
   }
 
   /// Creates a new trigger.
@@ -1195,9 +1225,9 @@ class Engine {
     uint32_t max_id_index = 0;
     success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
     assert(success);
-    auto& trigger_event_callback = trigger_event_callbacks_.get()[(trigger_id & max_id_index) - 1];
-    trigger_event_callback = {};
-    return {engine_, trigger_id, &trigger_event_callback};
+    auto& trigger_callback = trigger_callbacks_.get()[(trigger_id & max_id_index) - 1];
+    trigger_callback = {};
+    return {engine_, trigger_id, &trigger_callback};
   }
 
   /// Destroys an instrument.
@@ -1326,11 +1356,14 @@ class Engine {
   // Pointer to raw engine.
   BarelyEngine* engine_ = nullptr;
 
-  // Heap allocated array of note event callbacks (for pointer stability on move).
-  std::unique_ptr<NoteEventCallback[]> note_event_callbacks_ = nullptr;
+  // Heap allocated array of note off callbacks (for pointer stability on move).
+  std::unique_ptr<NoteCallback[]> note_off_callbacks_ = nullptr;
 
-  // Heap allocated array of trigger event callbacks (for pointer stability on move).
-  std::unique_ptr<TriggerEventCallback[]> trigger_event_callbacks_ = nullptr;
+  // Heap allocated array of note on callbacks (for pointer stability on move).
+  std::unique_ptr<NoteCallback[]> note_on_callbacks_ = nullptr;
+
+  // Heap allocated array of trigger callbacks (for pointer stability on move).
+  std::unique_ptr<TriggerCallback[]> trigger_callbacks_ = nullptr;
 };
 
 /// A musical quantization.

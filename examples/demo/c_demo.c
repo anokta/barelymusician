@@ -58,12 +58,17 @@ static void AudioProcessCallback(ma_device* device, void* output, const void* in
   g_timestamp += (double)frame_count / (double)kSampleRate;
 }
 
-static void NoteEventCallback(BarelyEventType type, float pitch, void* user_data) {
+static void NoteOffCallback(float pitch, void* user_data) {
   (void)user_data;  // unused
-  printf("Note%s(%.1f)\n", (type == BarelyEventType_kBegin) ? "On" : "Off", pitch);
+  printf("NoteOff(%.1f)\n", pitch);
 }
 
-static void TriggerEventCallback(void* user_data) {
+static void NoteOnCallback(float pitch, void* user_data) {
+  (void)user_data;  // unused
+  printf("NoteOn(%.1f)\n", pitch);
+}
+
+static void TriggerCallback(void* user_data) {
   for (int i = 0; i < kMelodyNoteCount; ++i) {
     BarelyInstrument_ScheduleNote((BarelyEngine*)user_data, g_instrument_id, kMelodyPitches[i],
                                   kMelodyPositions[i],
@@ -89,11 +94,12 @@ int main() {
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kRelease,
                               kRelease);
 
-  BarelyInstrument_SetNoteEventCallback(engine, g_instrument_id, NoteEventCallback, NULL);
+  BarelyInstrument_SetNoteOffCallback(engine, g_instrument_id, NoteOffCallback, NULL);
+  BarelyInstrument_SetNoteOnCallback(engine, g_instrument_id, NoteOnCallback, NULL);
 
   uint32_t trigger_id = 0;
   BarelyEngine_CreateTrigger(engine, &trigger_id);
-  BarelyTrigger_SetCallback(engine, trigger_id, TriggerEventCallback, engine);
+  BarelyTrigger_SetCallback(engine, trigger_id, TriggerCallback, engine);
 
   // Initialize the audio device.
   ma_device device;

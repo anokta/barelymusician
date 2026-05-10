@@ -19,7 +19,8 @@ struct InstrumentState {
   std::array<Control, BarelyInstrumentControlType_kCount> controls = {
       BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, BARELY_DEFINE_CONTROL)};
 
-  Callback<BarelyNoteEventCallback> note_event_callback = {};
+  Callback<BarelyNoteCallback> note_off_callback = {};
+  Callback<BarelyNoteCallback> note_on_callback = {};
 
   struct {
     double phase = 0.0;

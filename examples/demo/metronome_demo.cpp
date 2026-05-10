@@ -13,7 +13,6 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EventType;
 using ::barely::InstrumentControlType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;

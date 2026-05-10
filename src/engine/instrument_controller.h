@@ -35,10 +35,12 @@ class InstrumentController {
                   float value) noexcept;
   void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
                       float value) noexcept;
-  void SetNoteEventCallback(uint32_t instrument_index, BarelyNoteEventCallback callback,
-                            void* user_data) noexcept;
   void SetNoteOff(uint32_t instrument_index, float pitch) noexcept;
+  void SetNoteOffCallback(uint32_t instrument_index, BarelyNoteCallback callback,
+                          void* user_data) noexcept;
   void SetNoteOn(uint32_t instrument_index, float pitch) noexcept;
+  void SetNoteOnCallback(uint32_t instrument_index, BarelyNoteCallback callback,
+                         void* user_data) noexcept;
   void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
                      int32_t slice_count) noexcept;
 

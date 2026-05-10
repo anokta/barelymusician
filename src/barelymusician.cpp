@@ -313,16 +313,6 @@ bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_i
   return true;
 }
 
-bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, uint32_t instrument_id,
-                                           BarelyNoteEventCallback callback, void* user_data) {
-  if (!engine) return false;
-  if (!engine->IsValidInstrument(instrument_id)) return false;
-
-  engine->controller.instrument_controller().SetNoteEventCallback(
-      engine->state.GetIdIndex(instrument_id), callback, user_data);
-  return true;
-}
-
 bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id, float pitch) {
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument_id)) return false;
@@ -332,12 +322,32 @@ bool BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id, f
   return true;
 }
 
+bool BarelyInstrument_SetNoteOffCallback(BarelyEngine* engine, uint32_t instrument_id,
+                                         BarelyNoteCallback callback, void* user_data) {
+  if (!engine) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
+
+  engine->controller.instrument_controller().SetNoteOffCallback(
+      engine->state.GetIdIndex(instrument_id), callback, user_data);
+  return true;
+}
+
 bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id, float pitch) {
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument_id)) return false;
 
   engine->controller.instrument_controller().SetNoteOn(engine->state.GetIdIndex(instrument_id),
                                                        pitch);
+  return true;
+}
+
+bool BarelyInstrument_SetNoteOnCallback(BarelyEngine* engine, uint32_t instrument_id,
+                                        BarelyNoteCallback callback, void* user_data) {
+  if (!engine) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
+
+  engine->controller.instrument_controller().SetNoteOnCallback(
+      engine->state.GetIdIndex(instrument_id), callback, user_data);
   return true;
 }
 
@@ -363,7 +373,7 @@ bool BarelyTrigger_IsPlaying(const BarelyEngine* engine, uint32_t trigger_id,
 }
 
 bool BarelyTrigger_SetCallback(BarelyEngine* engine, uint32_t trigger_id,
-                               BarelyTriggerEventCallback callback, void* user_data) {
+                               BarelyTriggerCallback callback, void* user_data) {
   if (!engine) return false;
   if (!engine->IsValidTrigger(trigger_id)) return false;
 

@@ -98,12 +98,6 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
     case BarelyInstrumentControlType_kFilterTone:
       params.voice_params.filter_params.SetTone(value);
       break;
-    case BarelyInstrumentControlType_kArpMode:
-      [[fallthrough]];
-    case BarelyInstrumentControlType_kArpGate:
-      [[fallthrough]];
-    case BarelyInstrumentControlType_kArpRate:
-      break;
     case BarelyInstrumentControlType_kRetrigger:
       params.should_retrigger = static_cast<bool>(value);
       break;

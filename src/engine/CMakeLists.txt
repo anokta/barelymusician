@@ -15,8 +15,6 @@ barelymusician_target_sources(
   note_state.h
   slice_pool.h
   slice_state.h
-  trigger_controller.h
-  trigger_state.h
   voice_params.h
   voice_state.h
 )

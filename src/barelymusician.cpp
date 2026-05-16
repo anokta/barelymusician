@@ -29,20 +29,35 @@ struct BarelyEngine {
            state.GetIdGeneration(instrument_id) == state.instrument_generations[instrument_index];
   }
 
-  [[nodiscard]] bool IsValidTrigger(uint32_t trigger_id) const noexcept {
-    const uint32_t trigger_index = state.GetIdIndex(trigger_id);
-    return state.trigger_pool.IsActive(trigger_index) &&
-           state.GetIdGeneration(trigger_index) == state.trigger_generations[trigger_index];
+  [[nodiscard]] bool IsValidEvent(uint32_t event_id) const noexcept {
+    const uint32_t event_index = state.GetIdIndex(event_id);
+    return state.event_pool.IsActive(event_index) &&
+           state.GetIdGeneration(event_index) == state.event_generations[event_index];
   }
 };
+
+bool BarelyEngine_CancelAllEvents(BarelyEngine* engine) {
+  if (!engine) return false;
+
+  // TODO(schedule): Implement
+  return false;
+}
+
+bool BarelyEngine_CancelEvent(BarelyEngine* engine, uint32_t event_id) {
+  if (!engine) return false;
+  if (!engine->IsValidEvent(event_id)) return false;
+
+  // TODO(schedule): Implement
+  event_id;
+  return false;
+}
 
 bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_engine) {
   if (!out_engine) return false;
   if (!config) return false;
-  if (config->sample_rate <= 0 || config->max_frame_count <= 0 ||
-      config->max_instrument_count <= 0 || config->max_trigger_count <= 0 ||
-      config->max_event_count <= 0 || config->max_note_count <= 0 || config->max_slice_count <= 0 ||
-      config->max_voice_count <= 0) {
+  if (config->sample_rate <= 0 || config->max_frame_count <= 0 || config->max_event_count <= 0 ||
+      config->max_instrument_count <= 0 || config->max_note_count <= 0 ||
+      config->max_slice_count <= 0 || config->max_voice_count <= 0) {
     return false;
   }
 
@@ -61,19 +76,6 @@ bool BarelyEngine_CreateInstrument(BarelyEngine* engine, uint32_t* out_instrumen
   if (instrument_index != barely::kInvalidIndex) {
     *out_instrument_id = engine->state.BuildId(
         instrument_index, engine->state.instrument_generations[instrument_index]);
-    return true;
-  }
-  return false;
-}
-
-bool BarelyEngine_CreateTrigger(BarelyEngine* engine, uint32_t* out_trigger_id) {
-  if (!engine) return false;
-  if (!out_trigger_id) return false;
-
-  const uint32_t trigger_index = engine->controller.trigger_controller().Acquire();
-  if (trigger_index != barely::kInvalidIndex) {
-    *out_trigger_id =
-        engine->state.BuildId(trigger_index, engine->state.trigger_generations[trigger_index]);
     return true;
   }
   return false;
@@ -98,17 +100,6 @@ bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, uint32_t instrument_id
   return true;
 }
 
-bool BarelyEngine_DestroyTrigger(BarelyEngine* engine, uint32_t trigger_id) {
-  if (!engine) return false;
-  if (!engine->IsValidTrigger(trigger_id)) return false;
-
-  const uint32_t trigger_index = engine->state.GetIdIndex(trigger_id);
-  engine->controller.trigger_controller().Release(trigger_index);
-  engine->state.trigger_generations[trigger_index] =
-      engine->state.GetNextIdGeneration(engine->state.trigger_generations[trigger_index]);
-  return true;
-}
-
 bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* out_number) {
   if (!engine) return false;
   if (!out_number) return false;
@@ -124,14 +115,6 @@ bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType
   if (!out_value) return false;
 
   *out_value = engine->state.controls[type].value;
-  return true;
-}
-
-bool BarelyEngine_GetMaxIdIndex(const BarelyEngine* engine, uint32_t* out_max_id_index) {
-  if (!engine) return false;
-  if (!out_max_id_index) return false;
-
-  *out_max_id_index = engine->state.GetMaxIdIndex();
   return true;
 }
 
@@ -165,6 +148,33 @@ bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples, int32_t o
   return true;
 }
 
+bool BarelyEngine_ScheduleControl(BarelyEngine* engine, BarelyEngineControlType type, float value,
+                                  double ramp_duration, double offset, uint32_t* out_event_id) {
+  if (!engine) return false;
+  if (type >= BarelyEngineControlType_kCount) return false;
+  if (ramp_duration < 0.0) return false;
+  if (offset < 0.0) return false;
+  if (!out_event_id) return false;
+
+  // TOD(schedule): Implement
+  value;
+  return false;
+}
+
+bool BarelyEngine_ScheduleTrigger(BarelyEngine* engine, BarelyTriggerCallback callback,
+                                  void* user_data, double interval, double offset,
+                                  uint32_t* out_event_id) {
+  if (!engine) return false;
+  if (offset < 0.0) return false;
+  if (interval < 0.0) return false;
+  if (!out_event_id) return false;
+
+  // TOD(schedule): Implement
+  callback;
+  user_data;
+  return false;
+}
+
 bool BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type, float value) {
   if (!engine) return false;
   if (type >= BarelyEngineControlType_kCount) return false;
@@ -192,15 +202,6 @@ bool BarelyEngine_Update(BarelyEngine* engine, double timestamp) {
   if (!engine) return false;
 
   engine->controller.Update(timestamp);
-  return true;
-}
-
-bool BarelyInstrument_CancelAllScheduledEvents(BarelyEngine* engine, uint32_t instrument_id) {
-  if (!engine) return false;
-  if (!engine->IsValidInstrument(instrument_id)) return false;
-
-  engine->controller.instrument_controller().CancelAllScheduledEvents(
-      engine->state.GetIdIndex(instrument_id));
   return true;
 }
 
@@ -243,26 +244,28 @@ bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, uint32_t instrument_i
 }
 
 bool BarelyInstrument_ScheduleControl(BarelyEngine* engine, uint32_t instrument_id,
-                                      BarelyInstrumentControlType type, float value, double offset,
-                                      double duration) {
+                                      BarelyInstrumentControlType type, float value,
+                                      double ramp_duration, double offset, uint32_t* out_event_id) {
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument_id)) return false;
   if (type >= BarelyInstrumentControlType_kCount) return false;
+  if (ramp_duration < 0.0) return false;
   if (offset < 0.0) return false;
-  if (duration < 0.0) return false;
+  if (!out_event_id) return false;
 
   engine->controller.instrument_controller().ScheduleControl(
       engine->state.GetIdIndex(instrument_id), type, value, engine->state.position + offset,
-      duration);
+      ramp_duration);
   return true;
 }
 
 bool BarelyInstrument_ScheduleNote(BarelyEngine* engine, uint32_t instrument_id, float pitch,
-                                   double offset, double duration) {
+                                   double duration, double offset, uint32_t* out_event_id) {
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument_id)) return false;
-  if (offset < 0.0) return false;
   if (duration <= 0.0) return false;
+  if (offset < 0.0) return false;
+  if (!out_event_id) return false;
 
   engine->controller.instrument_controller().ScheduleNote(
       engine->state.GetIdIndex(instrument_id), pitch, engine->state.position + offset, duration);
@@ -270,17 +273,19 @@ bool BarelyInstrument_ScheduleNote(BarelyEngine* engine, uint32_t instrument_id,
 }
 
 bool BarelyInstrument_ScheduleNoteControl(BarelyEngine* engine, uint32_t instrument_id, float pitch,
-                                          BarelyNoteControlType type, float value, double offset,
-                                          double duration) {
+                                          BarelyNoteControlType type, float value,
+                                          double ramp_duration, double offset,
+                                          uint32_t* out_event_id) {
   if (!engine) return false;
   if (!engine->IsValidInstrument(instrument_id)) return false;
   if (type >= BarelyNoteControlType_kCount) return false;
+  if (ramp_duration < 0.0) return false;
   if (offset < 0.0) return false;
-  if (duration < 0.0) return false;
+  if (!out_event_id) return false;
 
   engine->controller.instrument_controller().ScheduleNoteControl(
       engine->state.GetIdIndex(instrument_id), pitch, type, value, engine->state.position + offset,
-      duration);
+      ramp_duration);
   return true;
 }
 
@@ -361,44 +366,6 @@ bool BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t instrument_id
 
   engine->controller.instrument_controller().SetSampleData(engine->state.GetIdIndex(instrument_id),
                                                            slices, slice_count);
-  return true;
-}
-
-bool BarelyTrigger_IsPlaying(const BarelyEngine* engine, uint32_t trigger_id,
-                             bool* out_is_playing) {
-  if (!engine) return false;
-  if (!engine->IsValidTrigger(trigger_id)) return false;
-  if (!out_is_playing) return false;
-
-  *out_is_playing = engine->state.GetTrigger((engine->state.GetIdIndex(trigger_id))).IsPlaying();
-  return true;
-}
-
-bool BarelyTrigger_SetCallback(BarelyEngine* engine, uint32_t trigger_id,
-                               BarelyTriggerCallback callback, void* user_data) {
-  if (!engine) return false;
-  if (!engine->IsValidTrigger(trigger_id)) return false;
-
-  engine->controller.trigger_controller().SetCallback(engine->state.GetIdIndex(trigger_id),
-                                                      callback, user_data);
-  return true;
-}
-
-bool BarelyTrigger_Start(BarelyEngine* engine, uint32_t trigger_id, double offset,
-                         double duration) {
-  if (!engine) return false;
-  if (!engine->IsValidTrigger(trigger_id)) return false;
-
-  engine->controller.trigger_controller().Start(engine->state.GetIdIndex(trigger_id),
-                                                engine->state.position + offset, duration);
-  return true;
-}
-
-bool BarelyTrigger_Stop(BarelyEngine* engine, uint32_t trigger_id) {
-  if (!engine) return false;
-  if (!engine->IsValidTrigger(trigger_id)) return false;
-
-  engine->controller.trigger_controller().Stop(engine->state.GetIdIndex(trigger_id));
   return true;
 }
 

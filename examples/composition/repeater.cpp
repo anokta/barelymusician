@@ -10,9 +10,7 @@ namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Engine& engine, Instrument instrument) noexcept
-    : engine_(engine),
-      instrument_(instrument),
-      trigger_(engine_.CreateTrigger([this]() noexcept { OnBeat(); })) {}
+    : engine_(engine), instrument_(instrument) {}
 
 void Repeater::Clear() noexcept {
   if (IsPlaying()) {
@@ -44,7 +42,7 @@ void Repeater::Start(float pitch_offset) noexcept {
     return;
   }
   pitch_offset_ = pitch_offset;
-  trigger_.Start(0.0, 1.0);
+  event_ = engine_.ScheduleTrigger([this]() noexcept { OnBeat(); }, 1.0);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -52,7 +50,7 @@ void Repeater::Stop() noexcept {
   if (!IsPlaying()) {
     return;
   }
-  trigger_.Stop();
+  engine_.CancelEvent(event_);
   instrument_.SetAllNotesOff();
   index_ = -1;
   remaining_length_ = 0;

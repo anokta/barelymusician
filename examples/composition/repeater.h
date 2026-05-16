@@ -19,7 +19,7 @@ enum class RepeaterMode : uint8_t {
 struct Repeater {
  public:
   Repeater(Engine& engine, Instrument instrument) noexcept;
-  ~Repeater() noexcept { engine_.DestroyTrigger(trigger_); }
+  ~Repeater() noexcept { engine_.CancelEvent(event_); }
 
   void Clear() noexcept;
   void Pop() noexcept;
@@ -31,15 +31,15 @@ struct Repeater {
   void SetRate(double rate) noexcept;
   void SetStyle(RepeaterMode style) noexcept;
 
-  [[nodiscard]] bool IsPlaying() const noexcept { return trigger_.IsPlaying(); }
+  [[nodiscard]] bool IsPlaying() const noexcept { return index_ != -1; }
 
  private:
   void OnBeat() noexcept;
   [[nodiscard]] bool Update() noexcept;
 
   Engine& engine_;
+  Event event_;
   Instrument instrument_;
-  Trigger trigger_;
 
   std::vector<std::pair<std::optional<float>, int>> pitches_;
 

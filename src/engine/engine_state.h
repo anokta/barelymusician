@@ -25,7 +25,6 @@
 #include "engine/message_queue.h"
 #include "engine/note_state.h"
 #include "engine/slice_pool.h"
-#include "engine/trigger_state.h"
 #include "engine/voice_state.h"
 
 namespace barely {
@@ -39,17 +38,16 @@ struct EngineState {
                                 controls[BarelyEngineControlType_kDelayTime].max_value)))),
         reverb(arena, static_cast<float>(config.sample_rate)),
 
-        instrument_pool(arena, config.max_instrument_count),
-        trigger_pool(arena, config.max_trigger_count),
-
         event_pool(arena, config.max_event_count),
+        instrument_pool(arena, config.max_instrument_count),
+
         note_pool(arena, config.max_note_count),
         voice_pool(arena, config.max_voice_count),
         slice_pool(arena, config.max_slice_count),
         message_queue(arena),
 
+        event_generations(arena.AllocArray<uint32_t>(config.max_event_count)),
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
-        trigger_generations(arena.AllocArray<uint32_t>(config.max_trigger_count)),
 
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
         note_to_voice(arena.AllocArray<uint32_t>(config.max_note_count)),
@@ -60,10 +58,10 @@ struct EngineState {
         sample_rate(static_cast<float>(config.sample_rate)),
         smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05f)),
 
-        id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(
-            std::max({config.max_instrument_count, config.max_trigger_count}))))),
-        max_id_index((1u << id_index_bit_count) - 1u),
-        max_id_generation((1u << (32u - id_index_bit_count)) - 1u),
+        id_index_bit_count(std::bit_width(std::bit_ceil(
+            static_cast<uint32_t>(std::max(config.max_event_count, config.max_instrument_count))))),
+        id_index_mask((1u << id_index_bit_count) - 1u),
+        id_generation_mask((1u << (32u - id_index_bit_count)) - 1u),
 
         max_frame_count(static_cast<uint32_t>(config.max_frame_count)) {
     assert(id_index_bit_count < 32);
@@ -87,7 +85,6 @@ struct EngineState {
   Reverb reverb;
 
   Pool<InstrumentState> instrument_pool;
-  Pool<TriggerState> trigger_pool;
 
   Pool<EventState> event_pool;
   Pool<NoteState> note_pool;
@@ -97,8 +94,8 @@ struct EngineState {
 
   MessageQueue message_queue;
 
+  uint32_t* event_generations = nullptr;
   uint32_t* instrument_generations = nullptr;
-  uint32_t* trigger_generations = nullptr;
 
   InstrumentParams* instrument_params = nullptr;
   uint32_t* note_to_voice = nullptr;
@@ -115,8 +112,8 @@ struct EngineState {
   float smoothing_coeff = 0.0f;
 
   uint32_t id_index_bit_count = 0;
-  uint32_t max_id_index = 0;
-  uint32_t max_id_generation = 0;
+  uint32_t id_index_mask = 0;
+  uint32_t id_generation_mask = 0;
 
   uint32_t max_frame_count = 0;
 
@@ -151,13 +148,13 @@ struct EngineState {
     return id >> id_index_bit_count;
   }
 
-  [[nodiscard]] uint32_t GetIdIndex(uint32_t id) const noexcept { return (id & max_id_index) - 1; }
+  [[nodiscard]] uint32_t GetIdIndex(uint32_t id) const noexcept { return (id & id_index_mask) - 1; }
+
+  [[nodiscard]] uint32_t GetIdIndexMask() const noexcept { return id_index_mask; }
 
   [[nodiscard]] uint32_t GetNextIdGeneration(uint32_t generation) const noexcept {
-    return (generation + 1) & max_id_generation;
+    return (generation + 1) & id_generation_mask;
   }
-
-  [[nodiscard]] uint32_t GetMaxIdIndex() const noexcept { return max_id_index; }
 
   [[nodiscard]] const SliceState* GetSlice(uint32_t instrument_index,
                                            uint32_t slice_index) const noexcept {
@@ -180,13 +177,6 @@ struct EngineState {
   }
   [[nodiscard]] const InstrumentState& GetInstrument(uint32_t instrument_index) const noexcept {
     return instrument_pool.Get(instrument_index);
-  }
-
-  [[nodiscard]] TriggerState& GetTrigger(uint32_t trigger_state) noexcept {
-    return trigger_pool.Get(trigger_state);
-  }
-  [[nodiscard]] const TriggerState& GetTrigger(uint32_t trigger_state) const noexcept {
-    return trigger_pool.Get(trigger_state);
   }
 
   [[nodiscard]] VoiceState& GetVoice(uint32_t voice_index) noexcept {

@@ -15,7 +15,6 @@
 
 namespace {
 
-using ::barely::ArpMode;
 using ::barely::Engine;
 using ::barely::EngineControlType;
 using ::barely::InstrumentControlType;
@@ -44,9 +43,6 @@ constexpr float kAttack = 0.005f;
 constexpr float kRelease = 0.2f;
 constexpr int kVoiceCount = 16;
 constexpr float kDelaySend = 0.2f;
-constexpr ArpMode kArpMode = ArpMode::kUp;
-constexpr float kArpGate = 0.5f;
-constexpr float kArpRate = 2.0f;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
@@ -87,8 +83,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   instrument.SetControl(InstrumentControlType::kDelaySend, kDelaySend);
-  instrument.SetControl(InstrumentControlType::kArpGate, kArpGate);
-  instrument.SetControl(InstrumentControlType::kArpRate, kArpRate);
   instrument.SetNoteOffCallback([](float pitch) { ConsoleLog() << "NoteOff(" << pitch << ")"; });
   instrument.SetNoteOnCallback([](float pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
 
@@ -135,13 +129,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
       ConsoleLog() << "Note gain set to " << gain;
       return;
     }
-    if (upper_key == '0') {
-      const bool should_enable =
-          (instrument.GetControl<ArpMode>(InstrumentControlType::kArpMode) == ArpMode::kNone);
-      instrument.SetControl(InstrumentControlType::kArpMode,
-                            should_enable ? kArpMode : ArpMode::kNone);
-      ConsoleLog() << "Arp " << (should_enable ? "enabled" : "disabled");
-    }
 
     // Play note.
     if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
@@ -169,7 +156,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   ConsoleLog() << "  * Use WETYU keys to play the black notes in an octave";
   ConsoleLog() << "  * Use ZX keys to set the octave up and down";
   ConsoleLog() << "  * Use CV keys to set the note gain up and down";
-  ConsoleLog() << "  * Use 0 key to toggle the arpeggiator on and off";
 
   while (!quit) {
     input_manager.Update();

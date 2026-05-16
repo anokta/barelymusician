@@ -65,25 +65,6 @@
 ///   engine.DestroyInstrument(instrument);
 ///   @endcode
 ///
-/// - Trigger:
-///
-///   @code{.cpp}
-///   // Create a new trigger.
-///   auto trigger = engine.CreateTrigger();
-///
-///   // Set the callback.
-///   trigger.SetCallback([]() { /*populate this*/ });
-///
-///   // Start the trigger playback with a loop.
-///   trigger.Start(/*offset=*/0.0, /*interval=*/1.0);
-///
-///   // Check if the trigger started playing.
-///   const bool is_playing = trigger.IsPlaying();
-///
-///   // Destroy the trigger.
-///   engine.DestroyTrigger(trigger);
-///   @endcode
-///
 /// ------------------------------------------------------------------------------------------------
 /// Example C Usage
 /// ------------------------------------------------------------------------------------------------
@@ -149,28 +130,6 @@
 ///   // Destroy the instrument.
 ///   BarelyEngine_DestroyInstrument(engine, instrument_id);
 ///   @endcode
-///
-/// - Trigger:
-///
-///   @code{.cpp}
-///   // Create a new trigger.
-///   uint32_t trigger_id = 0;
-///   BarelyEngine_CreateTrigger(engine, &trigger_id);
-///
-///   // Set the callback.
-///   BarelyTriggerCallback callback{ /*populate this*/ };
-///   BarelyTrigger_SetCallback(engine, trigger_id, callback, nullptr);
-///
-///   // Start the trigger playback with a loop.
-///   BarelyTrigger_Start(engine, trigger_id);
-///
-///   // Check if the trigger started playing.
-///   bool is_playing = false;
-///   BarelyTrigger_IsPlaying(engine, trigger_id, &is_playing);
-///
-///   // Destroy the trigger.
-///   BarelyEngine_DestroyTrigger(engine, trigger_id);
-///   @endcode
 
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
 #define BARELYMUSICIAN_BARELYMUSICIAN_H_
@@ -221,30 +180,17 @@
 #define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X)
 #endif  // __cplusplus
 
-/// Arpeggiator modes.
-#define BARELY_ARP_MODES(ArpMode, X) \
-  X(ArpMode, None, "None")           \
-  X(ArpMode, Up, "Up")               \
-  X(ArpMode, Down, "Down")           \
-  X(ArpMode, Random, "Random")
-BARELY_ENUM(ArpMode, BARELY_ARP_MODES)
-
-/// Oscillator modes.
-#define BARELY_OSC_MODES(OscMode, X)                               \
-  X(OscMode, Crossfade, "Linear Crossfade (slice <-> oscillator)") \
-  X(OscMode, Am, "Amplitude Modulation (oscillator -> slice)")     \
-  X(OscMode, Fm, "Frequency Modulation (oscillator -> slice)")     \
-  X(OscMode, Ma, "Amplitude Modulation (slice -> oscillator)")     \
-  X(OscMode, Mf, "Frequency Modulation (slice -> oscillator)")     \
-  X(OscMode, Ring, "Ring Modulation")
-BARELY_ENUM(OscMode, BARELY_OSC_MODES)
-
-/// Slice modes.
-#define BARELY_SLICE_MODES(SliceMode, X) \
-  X(SliceMode, Sustain, "Sustain")       \
-  X(SliceMode, Loop, "Loop")             \
-  X(SliceMode, Once, "Once")
-BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
+/// Default engine configuration.
+#define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate) \
+  {                                               \
+      .sample_##rate = sample_rate,               \
+      .max_frame_count = 2048,                    \
+      .max_event_count = 8192,                    \
+      .max_instrument_count = 128,                \
+      .max_note_count = 1024,                     \
+      .max_slice_count = 512,                     \
+      .max_voice_count = 256,                     \
+  }
 
 /// Engine control types.
 #define BARELY_ENGINE_CONTROL_TYPES(EngineControlType, X)                           \
@@ -274,35 +220,32 @@ BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
 BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
 
 /// Instrument control types.
-#define BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, X)                       \
-  X(InstrumentControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                              \
-  X(InstrumentControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")                \
-  X(InstrumentControlType, StereoPan, 0.0f, -1.0f, 1.0f, "Stereo Pan")                  \
-  X(InstrumentControlType, Attack, 0.0f, 0.0f, 8.0f, "Envelope Attack")                 \
-  X(InstrumentControlType, Decay, 0.0f, 0.0f, 8.0f, "Envelope Decay")                   \
-  X(InstrumentControlType, Sustain, 1.0f, 0.0f, 1.0f, "Envelope Sustain")               \
-  X(InstrumentControlType, Release, 0.0f, 0.0f, 8.0f, "Envelope Release")               \
-  X(InstrumentControlType, SliceMode, 0, 0, BarelySliceMode_kCount - 1, "Slice Mode")   \
-  X(InstrumentControlType, OscMix, 0.0f, 0.0f, 1.0f, "Oscillator Mix")                  \
-  X(InstrumentControlType, OscMode, 0, 0, BarelyOscMode_kCount - 1, "Oscillator Mode")  \
-  X(InstrumentControlType, OscNoiseMix, 0.0f, 0.0f, 1.0f, "Oscillator Noise Mix")       \
-  X(InstrumentControlType, OscPitchShift, 0.0f, -2.0f, 2.0f, "Oscillator Pitch Shift")  \
-  X(InstrumentControlType, OscShape, 0.0f, 0.0f, 1.0f, "Oscillator Shape")              \
-  X(InstrumentControlType, OscSkew, 0.0f, -1.0f, 1.0f, "Oscillator Skew")               \
-  X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Bit Crusher Depth")           \
-  X(InstrumentControlType, CrushRate, 0.0f, 0.0f, 1.0f, "Bit Crusher Rate")             \
-  X(InstrumentControlType, DistortionMix, 0.0f, 0.0f, 1.0f, "Distortion Mix")           \
-  X(InstrumentControlType, DistortionDrive, 0.0f, 0.0f, 1.0f, "Distortion Drive")       \
-  X(InstrumentControlType, FilterCutoff, 1.0f, 0.0f, 1.0f, "Filter Cutoff")             \
-  X(InstrumentControlType, FilterResonance, 0.5f, 0.0f, 1.0f, "Filter Resonance")       \
-  X(InstrumentControlType, FilterTone, 0.0f, -1.0f, 1.0f, "Filter Tone")                \
-  X(InstrumentControlType, DelaySend, 0.0f, 0.0f, 1.0f, "Delay Send")                   \
-  X(InstrumentControlType, ReverbSend, 0.0f, 0.0f, 2.0f, "Reverb Send")                 \
-  X(InstrumentControlType, SidechainSend, 0.0f, -1.0f, 1.0f, "Sidechain Send")          \
-  X(InstrumentControlType, ArpMode, 0, 0, BarelyArpMode_kCount - 1, "Arpeggiator Mode") \
-  X(InstrumentControlType, ArpGate, 0.5f, 0.0f, 1.0f, "Arpeggiator Gate")               \
-  X(InstrumentControlType, ArpRate, 1.0f, 0.0f, 16.0f, "Arpeggiator Rate")              \
-  X(InstrumentControlType, Retrigger, 0, 0, 1, "Retrigger")                             \
+#define BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, X)                      \
+  X(InstrumentControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                             \
+  X(InstrumentControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")               \
+  X(InstrumentControlType, StereoPan, 0.0f, -1.0f, 1.0f, "Stereo Pan")                 \
+  X(InstrumentControlType, Attack, 0.0f, 0.0f, 8.0f, "Envelope Attack")                \
+  X(InstrumentControlType, Decay, 0.0f, 0.0f, 8.0f, "Envelope Decay")                  \
+  X(InstrumentControlType, Sustain, 1.0f, 0.0f, 1.0f, "Envelope Sustain")              \
+  X(InstrumentControlType, Release, 0.0f, 0.0f, 8.0f, "Envelope Release")              \
+  X(InstrumentControlType, SliceMode, 0, 0, BarelySliceMode_kCount - 1, "Slice Mode")  \
+  X(InstrumentControlType, OscMix, 0.0f, 0.0f, 1.0f, "Oscillator Mix")                 \
+  X(InstrumentControlType, OscMode, 0, 0, BarelyOscMode_kCount - 1, "Oscillator Mode") \
+  X(InstrumentControlType, OscNoiseMix, 0.0f, 0.0f, 1.0f, "Oscillator Noise Mix")      \
+  X(InstrumentControlType, OscPitchShift, 0.0f, -2.0f, 2.0f, "Oscillator Pitch Shift") \
+  X(InstrumentControlType, OscShape, 0.0f, 0.0f, 1.0f, "Oscillator Shape")             \
+  X(InstrumentControlType, OscSkew, 0.0f, -1.0f, 1.0f, "Oscillator Skew")              \
+  X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Bit Crusher Depth")          \
+  X(InstrumentControlType, CrushRate, 0.0f, 0.0f, 1.0f, "Bit Crusher Rate")            \
+  X(InstrumentControlType, DistortionMix, 0.0f, 0.0f, 1.0f, "Distortion Mix")          \
+  X(InstrumentControlType, DistortionDrive, 0.0f, 0.0f, 1.0f, "Distortion Drive")      \
+  X(InstrumentControlType, FilterCutoff, 1.0f, 0.0f, 1.0f, "Filter Cutoff")            \
+  X(InstrumentControlType, FilterResonance, 0.5f, 0.0f, 1.0f, "Filter Resonance")      \
+  X(InstrumentControlType, FilterTone, 0.0f, -1.0f, 1.0f, "Filter Tone")               \
+  X(InstrumentControlType, DelaySend, 0.0f, 0.0f, 1.0f, "Delay Send")                  \
+  X(InstrumentControlType, ReverbSend, 0.0f, 0.0f, 2.0f, "Reverb Send")                \
+  X(InstrumentControlType, SidechainSend, 0.0f, -1.0f, 1.0f, "Sidechain Send")         \
+  X(InstrumentControlType, Retrigger, 0, 0, 1, "Retrigger")                            \
   X(InstrumentControlType, VoiceCount, 8, 1, 16, "Voice Count")
 BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
 
@@ -312,18 +255,22 @@ BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
   X(NoteControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")
 BARELY_ENUM(NoteControlType, BARELY_NOTE_CONTROL_TYPES)
 
-/// Default engine configuration.
-#define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate) \
-  {                                               \
-      .sample_##rate = sample_rate,               \
-      .max_frame_count = 2048,                    \
-      .max_instrument_count = 100,                \
-      .max_trigger_count = 1000,                  \
-      .max_event_count = 5000,                    \
-      .max_note_count = 1000,                     \
-      .max_slice_count = 1000,                    \
-      .max_voice_count = 200,                     \
-  }
+/// Oscillator modes.
+#define BARELY_OSC_MODES(OscMode, X)                               \
+  X(OscMode, Crossfade, "Linear Crossfade (slice <-> oscillator)") \
+  X(OscMode, Am, "Amplitude Modulation (oscillator -> slice)")     \
+  X(OscMode, Fm, "Frequency Modulation (oscillator -> slice)")     \
+  X(OscMode, Ma, "Amplitude Modulation (slice -> oscillator)")     \
+  X(OscMode, Mf, "Frequency Modulation (slice -> oscillator)")     \
+  X(OscMode, Ring, "Ring Modulation")
+BARELY_ENUM(OscMode, BARELY_OSC_MODES)
+
+/// Slice modes.
+#define BARELY_SLICE_MODES(SliceMode, X) \
+  X(SliceMode, Sustain, "Sustain")       \
+  X(SliceMode, Loop, "Loop")             \
+  X(SliceMode, Once, "Once")
+BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
 
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
@@ -336,14 +283,11 @@ typedef struct BarelyEngineConfig {
   /// Maximum number of frames to process per call.
   int32_t max_frame_count;
 
-  /// Maximum number of instruments.
-  int32_t max_instrument_count;
-
-  /// Maximum number of triggers.
-  int32_t max_trigger_count;
-
   /// Maximum number of scheduled events.
   int32_t max_event_count;
+
+  /// Maximum number of instruments.
+  int32_t max_instrument_count;
 
   /// Maximum number of active notes.
   int32_t max_note_count;
@@ -354,21 +298,6 @@ typedef struct BarelyEngineConfig {
   /// Maximum number of active voices.
   int32_t max_voice_count;
 } BarelyEngineConfig;
-
-/// Slice of sample data.
-typedef struct BarelySlice {
-  /// Array of mono samples.
-  const float* samples;
-
-  /// Number of mono samples.
-  int32_t sample_count;
-
-  /// Sampling rate in hertz.
-  int32_t sample_rate;
-
-  /// Root note pitch.
-  float root_pitch;
-} BarelySlice;
 
 /// A musical quantization.
 typedef struct BarelyQuantization {
@@ -394,6 +323,21 @@ typedef struct BarelyScale {
   int32_t mode;
 } BarelyScale;
 
+/// Slice of sample data.
+typedef struct BarelySlice {
+  /// Array of mono samples.
+  const float* samples;
+
+  /// Number of mono samples.
+  int32_t sample_count;
+
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
+
+  /// Root note pitch.
+  float root_pitch;
+} BarelySlice;
+
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
@@ -409,6 +353,19 @@ typedef void (*BarelyNoteCallback)(float pitch, void* user_data);
 /// @param user_data Pointer to user data.
 typedef void (*BarelyTriggerCallback)(void* user_data);
 
+/// Cancels all scheduled events of an engine.
+///
+/// @param engine Pointer to engine.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_CancelAllEvents(BarelyEngine* engine);
+
+/// Cancels a scheduled event of an engine.
+///
+/// @param engine Pointer to engine.
+/// @param event_id Event identifier.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_CancelEvent(BarelyEngine* engine, uint32_t event_id);
+
 /// Creates a new engine.
 ///
 /// @param config Pointer to engine configuration.
@@ -423,13 +380,6 @@ BARELY_API bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngi
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_CreateInstrument(BarelyEngine* engine, uint32_t* out_instrument_id);
 
-/// Creates a new trigger.
-///
-/// @param engine Pointer to engine.
-/// @param out_trigger_id Output trigger identifier.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_CreateTrigger(BarelyEngine* engine, uint32_t* out_trigger_id);
-
 /// Destroys an engine.
 ///
 /// @param engine Pointer to engine.
@@ -442,12 +392,6 @@ BARELY_API bool BarelyEngine_Destroy(BarelyEngine* engine);
 /// @param instrument_id Instrument identifier.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, uint32_t instrument_id);
-
-/// Destroys a trigger.
-///
-/// @param trigger_id Trigger identifier.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_DestroyTrigger(BarelyEngine* engine, uint32_t trigger_id);
 
 /// Generates a new random number with uniform distribution in the normalized range [0, 1).
 ///
@@ -464,13 +408,6 @@ BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* 
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
                                         float* out_value);
-
-/// Gets the maximum identifier index of an engine.
-///
-/// @param engine Pointer to engine.
-/// @param out_max_id_index Output maximum identifier index.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetMaxIdIndex(const BarelyEngine* engine, uint32_t* out_max_id_index);
 
 /// Gets the tempo of an engine.
 ///
@@ -505,6 +442,32 @@ BARELY_API bool BarelyEngine_Process(BarelyEngine* engine, float* output_samples
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_ResetSeed(BarelyEngine* engine, int32_t seed);
 
+/// Schedules an engine control event.
+///
+/// @param engine Pointer to engine.
+/// @param type Engine control type.
+/// @param value Control value.
+/// @param ramp_duration Ramp duration in beats.
+/// @param offset Time offset in beats.
+/// @param out_event_id Output event identifier.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_ScheduleControl(BarelyEngine* engine, BarelyEngineControlType type,
+                                             float value, double ramp_duration, double offset,
+                                             uint32_t* out_event_id);
+
+/// Schedules an engine trigger event.
+///
+/// @param engine Pointer to engine.
+/// @param callback Trigger callback.
+/// @param user_data Pointer to user data.
+/// @param interval Repeat interval in beats.
+/// @param offset Time offset in beats.
+/// @param out_event_id Output event identifier.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngine_ScheduleTrigger(BarelyEngine* engine, BarelyTriggerCallback callback,
+                                             void* user_data, double interval, double offset,
+                                             uint32_t* out_event_id);
+
 /// Sets a control value of an engine.
 ///
 /// @param engine Pointer to engine.
@@ -527,14 +490,6 @@ BARELY_API bool BarelyEngine_SetTempo(BarelyEngine* engine, double tempo);
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_Update(BarelyEngine* engine, double timestamp);
-
-/// Cancels all scheduled instrument notes and controls.
-///
-/// @param engine Pointer to engine.
-/// @param instrument_id Instrument identifier.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_CancelAllScheduledEvents(BarelyEngine* engine,
-                                                          uint32_t instrument_id);
 
 /// Gets an instrument control value.
 ///
@@ -568,43 +523,49 @@ BARELY_API bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, uint
 BARELY_API bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, uint32_t instrument_id,
                                           float pitch, bool* out_is_note_on);
 
-/// Schedules an instrument control value.
+/// Schedules an instrument control event.
 ///
 /// @param engine Pointer to engine.
 /// @param instrument_id Instrument identifier.
 /// @param type Instrument control type.
-/// @param value Instrument control value.
+/// @param value Control value.
+/// @param ramp_duration Ramp duration in beats.
 /// @param offset Time offset in beats.
-/// @param duration Ramp duration in beats.
+/// @param out_event_id Output event identifier.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_ScheduleControl(BarelyEngine* engine, uint32_t instrument_id,
                                                  BarelyInstrumentControlType type, float value,
-                                                 double offset, double duration);
+                                                 double ramp_duration, double offset,
+                                                 uint32_t* out_event_id);
 
-/// Schedules an instrument note.
+/// Schedules a note event for an instrument.
 ///
 /// @param engine Pointer to engine.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
-/// @param offset Time offset in beats.
 /// @param duration Note duration in beats.
+/// @param offset Time offset in beats.
+/// @param out_event_id Output event identifier.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_ScheduleNote(BarelyEngine* engine, uint32_t instrument_id,
-                                              float pitch, double offset, double duration);
+                                              float pitch, double duration, double offset,
+                                              uint32_t* out_event_id);
 
-/// Schedules an instrument note control value.
+/// Schedules a note control event for an instrument.
 ///
 /// @param engine Pointer to engine.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
 /// @param type Note control type.
 /// @param value Note control value.
+/// @param ramp_duration Ramp duration in beats.
 /// @param offset Time offset in beats.
-/// @param duration Ramp duration in beats.
+/// @param out_event_id Output event identifier.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_ScheduleNoteControl(BarelyEngine* engine, uint32_t instrument_id,
                                                      float pitch, BarelyNoteControlType type,
-                                                     float value, double offset, double duration);
+                                                     float value, double ramp_duration,
+                                                     double offset, uint32_t* out_event_id);
 
 /// Sets all instrument notes off.
 ///
@@ -681,40 +642,6 @@ BARELY_API bool BarelyInstrument_SetNoteOnCallback(BarelyEngine* engine, uint32_
 BARELY_API bool BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t instrument_id,
                                                const BarelySlice* slices, int32_t slice_count);
 
-/// Returns whether a trigger is currently playing or not.
-///
-/// @param engine Pointer to engine.
-/// @param trigger_id Trigger identifier.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTrigger_IsPlaying(const BarelyEngine* engine, uint32_t trigger_id,
-                                        bool* out_is_playing);
-
-/// Sets the event callback of a trigger.
-///
-/// @param engine Pointer to engine.
-/// @param trigger_id Trigger identifier.
-/// @param callback Trigger event callback.
-/// @param user_data Pointer to user data.
-BARELY_API bool BarelyTrigger_SetCallback(BarelyEngine* engine, uint32_t trigger_id,
-                                          BarelyTriggerCallback callback, void* user_data);
-
-/// Starts the playback of a trigger.
-///
-/// @param engine Pointer to engine.
-/// @param trigger_id Trigger identifier.
-/// @param offset Time offset in beats before the first trigger event.
-/// @param interval Time interval in beats to loop back the trigger event.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTrigger_Start(BarelyEngine* engine, uint32_t trigger_id, double offset,
-                                    double interval);
-
-/// Stops the playback of a trigger.
-///
-/// @param engine Pointer to engine.
-/// @param trigger_id Trigger identifier.
-BARELY_API bool BarelyTrigger_Stop(BarelyEngine* engine, uint32_t trigger_id);
-
 /// Gets a quantized position.
 ///
 /// @param quantization Pointer to quantization.
@@ -750,6 +677,7 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 #include <optional>
 #include <random>
 #include <span>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -772,603 +700,6 @@ struct EngineConfig : public BarelyEngineConfig {
   /// @param config Raw engine configuration.
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr EngineConfig(BarelyEngineConfig config) noexcept : BarelyEngineConfig{config} {}
-};
-
-/// Slice of sample data.
-struct Slice : public BarelySlice {
-  /// Default constructor.
-  Slice() noexcept = default;
-
-  /// Constructs a new `Slice`.
-  ///
-  /// @param samples Span of mono samples.
-  /// @param sample_rate Sampling rate in hertz.
-  /// @param root_pitch Root pitch.
-  constexpr Slice(std::span<const float> samples, int sample_rate, float root_pitch) noexcept
-      : Slice({samples.data(), static_cast<int32_t>(samples.size()), sample_rate, root_pitch}) {
-    assert(sample_rate >= 0);
-  }
-
-  /// Constructs a new `Slice` from a raw type.
-  ///
-  /// @param slice Raw slice.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
-};
-
-/// Note callback function.
-///
-/// @param pitch Note pitch.
-using NoteCallback = std::function<void(float pitch)>;
-
-/// Trigger callback function.
-using TriggerCallback = std::function<void()>;
-
-/// Class that wraps an instrument.
-class Instrument {
- public:
-  /// Default constructor.
-  Instrument() noexcept = default;
-
-  /// Constructs a new `Instrument`.
-  ///
-  /// @param engine Pointer to raw engine.
-  /// @param instrument_id Instrument identifier.
-  /// @param note_off_callback Pointer to note off callback.
-  /// @param note_on_callback Pointer to note on callback.
-  Instrument(BarelyEngine* engine, uint32_t instrument_id, NoteCallback* note_off_callback,
-             NoteCallback* note_on_callback) noexcept
-      : engine_(engine),
-        instrument_id_(instrument_id),
-        note_off_callback_(note_off_callback),
-        note_on_callback_(note_on_callback) {}
-
-  /// Returns the identifier.
-  ///
-  /// @return Identifier.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  [[nodiscard]] constexpr operator uint32_t() const noexcept { return instrument_id_; }
-
-  /// Cancels all scheduled notes and controls.
-  void CancelAllScheduledEvents() noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_CancelAllScheduledEvents(engine_, instrument_id_);
-    assert(success);
-  }
-
-  /// Returns a control value.
-  ///
-  /// @param type Instrument control type.
-  /// @return Instrument control value.
-  template <typename ValueType>
-  [[nodiscard]] ValueType GetControl(InstrumentControlType type) const noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    float value = 0.0f;
-    [[maybe_unused]] const bool success = BarelyInstrument_GetControl(
-        engine_, instrument_id_, static_cast<BarelyInstrumentControlType>(type), &value);
-    assert(success);
-    return static_cast<ValueType>(value);
-  }
-
-  /// Returns a control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param type Note control type.
-  /// @return Note control value.
-  template <typename ValueType>
-  [[nodiscard]] ValueType GetNoteControl(float pitch, NoteControlType type) const noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    float value = 0.0f;
-    [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControl(
-        engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type), &value);
-    assert(success);
-    return static_cast<ValueType>(value);
-  }
-
-  /// Returns whether a note is on or not.
-  ///
-  /// @param pitch Note pitch.
-  /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept {
-    bool is_note_on = false;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_IsNoteOn(engine_, instrument_id_, pitch, &is_note_on);
-    assert(success);
-    return is_note_on;
-  }
-
-  /// Schedules a control value.
-  ///
-  /// @param type Instrument control type.
-  /// @param value Instrument control value.
-  /// @param offset Time offset in beats.
-  /// @param duration Ramp duration in beats.
-  template <typename ValueType>
-  void ScheduleControl(InstrumentControlType type, ValueType value, double offset,
-                       double duration = 0.0) noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_ScheduleControl(
-        engine_, instrument_id_, static_cast<BarelyInstrumentControlType>(type),
-        static_cast<float>(value), offset, duration);
-    assert(success);
-  }
-
-  /// Schedules a note.
-  ///
-  /// @param pitch Note pitch.
-  /// @param offset Time offset in beats.
-  /// @param duration Note duration in beats.
-  /// @param gain Note gain.
-  /// @param pitch_shift Note pitch shift.
-  void ScheduleNote(float pitch, double offset, double duration, float gain = 1.0f,
-                    float pitch_shift = 0.0f) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_ScheduleNote(engine_, instrument_id_, pitch, offset, duration);
-    assert(success);
-    if (gain != 1.0f) {
-      ScheduleNoteControl(pitch, NoteControlType::kGain, gain, offset);
-    }
-    if (pitch_shift != 0.0f) {
-      ScheduleNoteControl(pitch, NoteControlType::kPitchShift, pitch_shift, offset);
-    }
-  }
-
-  /// Schedules a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param type Note control type.
-  /// @param value Note control value.
-  /// @param offset Time offset in beats.
-  /// @param duration Ramp duration in beats.
-  template <typename ValueType>
-  void ScheduleNoteControl(float pitch, NoteControlType type, ValueType value, double offset,
-                           double duration = 0.0) noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_ScheduleNoteControl(
-        engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type),
-        static_cast<float>(value), offset, duration);
-    assert(success);
-  }
-
-  /// Sets all notes off.
-  void SetAllNotesOff() noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetAllNotesOff(engine_, instrument_id_);
-    assert(success);
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param type Instrument control type.
-  /// @param value Instrument control value.
-  template <typename ValueType>
-  void SetControl(InstrumentControlType type, ValueType value) noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
-        engine_, instrument_id_, static_cast<BarelyInstrumentControlType>(type),
-        static_cast<float>(value));
-    assert(success);
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param type Note control type.
-  /// @param value Note control value.
-  template <typename ValueType>
-  void SetNoteControl(float pitch, NoteControlType type, ValueType value) noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
-        engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type),
-        static_cast<float>(value));
-    assert(success);
-  }
-
-  /// Sets a note off.
-  ///
-  /// @param pitch Note pitch.
-  void SetNoteOff(float pitch) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOff(engine_, instrument_id_, pitch);
-    assert(success);
-  }
-
-  /// Sets the note off callback.
-  ///
-  /// @param callback Note callback.
-  void SetNoteOffCallback(NoteCallback callback) noexcept {
-    assert(note_off_callback_ != nullptr);
-    *note_off_callback_ = std::move(callback);
-    [[maybe_unused]] const bool success =
-        (*note_off_callback_)
-            ? BarelyInstrument_SetNoteOffCallback(
-                  engine_, instrument_id_,
-                  [](float pitch, void* user_data) noexcept {
-                    assert(user_data != nullptr && "Invalid note off callback user data");
-                    if (const auto& callback = *static_cast<NoteCallback*>(user_data); callback) {
-                      callback(pitch);
-                    }
-                  },
-                  note_off_callback_)
-            : BarelyInstrument_SetNoteOffCallback(engine_, instrument_id_, nullptr, nullptr);
-    assert(success);
-  }
-
-  /// Sets a note on.
-  ///
-  /// @param pitch Note pitch.
-  /// @param gain Note gain.
-  /// @param pitch_shift Note pitch shift.
-  void SetNoteOn(float pitch, float gain = 1.0f, float pitch_shift = 0.0f) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_SetNoteOn(engine_, instrument_id_, pitch);
-    assert(success);
-    if (gain != 1.0f) {
-      SetNoteControl(pitch, NoteControlType::kGain, gain);
-    }
-    if (pitch_shift != 0.0f) {
-      SetNoteControl(pitch, NoteControlType::kPitchShift, pitch_shift);
-    }
-  }
-
-  /// Sets the note on callback.
-  ///
-  /// @param callback Note callback.
-  void SetNoteOnCallback(NoteCallback callback) noexcept {
-    assert(note_on_callback_ != nullptr);
-    *note_on_callback_ = std::move(callback);
-    [[maybe_unused]] const bool success =
-        (*note_on_callback_)
-            ? BarelyInstrument_SetNoteOnCallback(
-                  engine_, instrument_id_,
-                  [](float pitch, void* user_data) noexcept {
-                    assert(user_data != nullptr && "Invalid note on callback user data");
-                    if (const auto& callback = *static_cast<NoteCallback*>(user_data); callback) {
-                      callback(pitch);
-                    }
-                  },
-                  note_on_callback_)
-            : BarelyInstrument_SetNoteOnCallback(engine_, instrument_id_, nullptr, nullptr);
-    assert(success);
-  }
-
-  /// Sets the sample data.
-  ///
-  /// @param slices Span of slices.
-  void SetSampleData(std::span<const Slice> slices) noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetSampleData(
-        engine_, instrument_id_, reinterpret_cast<const BarelySlice*>(slices.data()),
-        static_cast<int32_t>(slices.size()));
-    assert(success);
-  }
-
- private:
-  // Pointer to raw engine.
-  BarelyEngine* engine_ = nullptr;
-
-  // Instrument identifier.
-  uint32_t instrument_id_ = 0;
-
-  // Pointer to note off callback.
-  NoteCallback* note_off_callback_ = nullptr;
-
-  // Pointer to note on callback.
-  NoteCallback* note_on_callback_ = nullptr;
-};
-
-/// Class that wraps a trigger.
-class Trigger {
- public:
-  /// Default constructor.
-  Trigger() noexcept = default;
-
-  /// Constructs a new `Trigger`.
-  ///
-  /// @param engine Pointer to raw engine.
-  /// @param trigger_id Trigger identifier.
-  /// @param callback Pointer to trigger callback.
-  Trigger(BarelyEngine* engine, uint32_t trigger_id, TriggerCallback* callback) noexcept
-      : engine_(engine), trigger_id_(trigger_id), callback_(callback) {}
-
-  /// Returns the identifier.
-  ///
-  /// @return Identifier.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  [[nodiscard]] constexpr operator uint32_t() const noexcept { return trigger_id_; }
-
-  /// Returns whether the trigger is playing or not.
-  ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept {
-    bool is_playing = false;
-    [[maybe_unused]] const bool success =
-        BarelyTrigger_IsPlaying(engine_, trigger_id_, &is_playing);
-    assert(success);
-    return is_playing;
-  }
-
-  /// Sets the callback.
-  ///
-  /// @param callback Callback.
-  void SetCallback(TriggerCallback callback) noexcept {
-    assert(callback_ != nullptr);
-    *callback_ = std::move(callback);
-    [[maybe_unused]] const bool success =
-        (*callback_) ? BarelyTrigger_SetCallback(
-                           engine_, trigger_id_,
-                           [](void* user_data) noexcept {
-                             assert(user_data != nullptr && "Invalid trigger callback user data");
-                             if (const auto& callback = *static_cast<TriggerCallback*>(user_data);
-                                 callback) {
-                               callback();
-                             }
-                           },
-                           callback_)
-                     : BarelyTrigger_SetCallback(engine_, trigger_id_, nullptr, nullptr);
-    assert(success);
-  }
-
-  /// Starts the playback.
-  void Start(double offset = 0.0, double interval = 0.0) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyTrigger_Start(engine_, trigger_id_, offset, interval);
-    assert(success);
-  }
-
-  /// Stops the playback.
-  void Stop() noexcept {
-    [[maybe_unused]] const bool success = BarelyTrigger_Stop(engine_, trigger_id_);
-    assert(success);
-  }
-
- private:
-  // Pointer to raw engine.
-  BarelyEngine* engine_;
-
-  // Trigger identifier.
-  uint32_t trigger_id_;
-
-  // Pointer to callback.
-  TriggerCallback* callback_ = nullptr;
-};
-
-/// A class that wraps an engine.
-class Engine {
- public:
-  /// Constructs a new `Engine`.
-  ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit Engine(int sample_rate) noexcept : Engine(EngineConfig(sample_rate)) {}
-
-  /// Constructs a new `Engine`.
-  ///
-  /// @param config Engine configuration.
-  explicit Engine(const EngineConfig& config) noexcept {
-    note_off_callbacks_ = std::make_unique<NoteCallback[]>(config.max_instrument_count);
-    note_on_callbacks_ = std::make_unique<NoteCallback[]>(config.max_instrument_count);
-    trigger_callbacks_ = std::make_unique<TriggerCallback[]>(config.max_trigger_count);
-    [[maybe_unused]] const bool success = BarelyEngine_Create(&config, &engine_);
-    assert(success);
-  }
-
-  /// Constructs a new `Engine`.
-  ///
-  /// @param engine Pointer to raw engine.
-  explicit Engine(BarelyEngine* engine) noexcept : engine_(engine) { assert(engine != nullptr); }
-
-  /// Destroys `Engine`.
-  ~Engine() noexcept { BarelyEngine_Destroy(engine_); }
-
-  /// Non-copyable.
-  Engine(const Engine& other) noexcept = delete;
-  Engine& operator=(const Engine& other) noexcept = delete;
-
-  /// Constructs a new `Engine` via move.
-  ///
-  /// @param other Other engine.
-  Engine(Engine&& other) noexcept
-      : engine_(std::exchange(other.engine_, nullptr)),
-        note_off_callbacks_(std::exchange(other.note_off_callbacks_, {})),
-        note_on_callbacks_(std::exchange(other.note_on_callbacks_, {})),
-        trigger_callbacks_(std::exchange(other.trigger_callbacks_, {})) {}
-
-  /// Assigns `Engine` via move.
-  ///
-  /// @param other Other engine.
-  /// @return Engine.
-  Engine& operator=(Engine&& other) noexcept {
-    if (this != &other) {
-      BarelyEngine_Destroy(engine_);
-      engine_ = std::exchange(other.engine_, nullptr);
-      note_off_callbacks_ = std::exchange(other.note_off_callbacks_, {});
-      note_on_callbacks_ = std::exchange(other.note_on_callbacks_, {});
-      trigger_callbacks_ = std::exchange(other.trigger_callbacks_, {});
-    }
-    return *this;
-  }
-
-  /// Returns the pointer to raw engine.
-  ///
-  /// @return Pointer to raw engine.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  [[nodiscard]] constexpr operator BarelyEngine*() const noexcept { return engine_; }
-
-  /// Creates a new instrument.
-  ///
-  /// @return Instrument.
-  Instrument CreateInstrument() noexcept {
-    uint32_t instrument_id = 0;
-    [[maybe_unused]] bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
-    assert(success);
-    uint32_t max_id_index = 0;
-    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
-    assert(success);
-    auto& note_off_callback = note_off_callbacks_.get()[(instrument_id & max_id_index) - 1];
-    note_off_callback = {};
-    auto& note_on_callback = note_on_callbacks_.get()[(instrument_id & max_id_index) - 1];
-    note_on_callback = {};
-    return {engine_, instrument_id, &note_off_callback, &note_on_callback};
-  }
-
-  /// Creates a new trigger.
-  ///
-  /// @param callback Callback.
-  /// @return Trigger.
-  Trigger CreateTrigger(TriggerCallback callback = nullptr) noexcept {
-    uint32_t trigger_id = 0;
-    [[maybe_unused]] bool success = BarelyEngine_CreateTrigger(engine_, &trigger_id);
-    assert(success);
-    uint32_t max_id_index = 0;
-    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
-    assert(success);
-    auto& trigger_callback = trigger_callbacks_.get()[(trigger_id & max_id_index) - 1];
-    trigger_callback = callback;
-    Trigger trigger{engine_, trigger_id, &trigger_callback};
-    if (trigger_callback != nullptr) {
-      trigger.SetCallback(trigger_callback);
-    }
-    return trigger;
-  }
-
-  /// Destroys an instrument.
-  ///
-  /// @param instrument Instrument.
-  void DestroyInstrument(Instrument instrument) {
-    [[maybe_unused]] const bool success = BarelyEngine_DestroyInstrument(engine_, instrument);
-    assert(success);
-  }
-
-  /// Destroys a trigger.
-  ///
-  /// @param trigger Trigger.
-  void DestroyTrigger(Trigger trigger) {
-    [[maybe_unused]] const bool success = BarelyEngine_DestroyTrigger(engine_, trigger);
-    assert(success);
-  }
-
-  /// Generates a random number with uniform distribution in the normalized range [0, 1).
-  ///
-  /// @return Random number.
-  [[nodiscard]] double GenerateRandomNumber() noexcept {
-    double number = 0.0;
-    [[maybe_unused]] const bool success = BarelyEngine_GenerateRandomNumber(engine_, &number);
-    assert(success);
-    return number;
-  }
-
-  /// Generates a random number with uniform distribution in the range [min, max).
-  ///
-  /// @param min Minimum value (inclusive).
-  /// @param max Maximum value (exclusive).
-  /// @return Random number.
-  template <typename NumberType>
-  [[nodiscard]] NumberType GenerateRandomNumber(NumberType min, NumberType max) noexcept {
-    static_assert(std::is_arithmetic_v<NumberType>, "NumberType is not supported");
-    return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
-  }
-
-  /// Returns a control value.
-  ///
-  /// @param type Engine control type.
-  /// @return Engine control value.
-  template <typename ValueType>
-  [[nodiscard]] ValueType GetControl(EngineControlType type) const noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    float value = 0.0f;
-    [[maybe_unused]] const bool success =
-        BarelyEngine_GetControl(engine_, static_cast<BarelyEngineControlType>(type), &value);
-    assert(success);
-    return static_cast<ValueType>(value);
-  }
-
-  /// Returns the tempo.
-  ///
-  /// @return Tempo in beats per minute.
-  [[nodiscard]] double GetTempo() const noexcept {
-    double tempo = 0.0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetTempo(engine_, &tempo);
-    assert(success);
-    return tempo;
-  }
-
-  /// Returns the timestamp.
-  ///
-  /// @return Timestamp in seconds.
-  [[nodiscard]] double GetTimestamp() const noexcept {
-    double timestamp = 0.0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetTimestamp(engine_, &timestamp);
-    assert(success);
-    return timestamp;
-  }
-
-  /// Processes the next output samples at timestamp.
-  ///
-  /// @param output_samples Array of interleaved output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
-  void Process(float* output_samples, int output_channel_count, int output_frame_count,
-               double timestamp) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyEngine_Process(engine_, output_samples, static_cast<int32_t>(output_channel_count),
-                             static_cast<int32_t>(output_frame_count), timestamp);
-    assert(success);
-  }
-
-  /// Resets the random number generator seed.
-  void ResetSeed(int seed) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyEngine_ResetSeed(engine_, static_cast<int32_t>(seed));
-    assert(success);
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param type Engine control type.
-  /// @param value Engine control value.
-  template <typename ValueType>
-  void SetControl(EngineControlType type, ValueType value) noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    [[maybe_unused]] const bool success = BarelyEngine_SetControl(
-        engine_, static_cast<BarelyEngineControlType>(type), static_cast<float>(value));
-    assert(success);
-  }
-
-  /// Sets the tempo.
-  ///
-  /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_SetTempo(engine_, tempo);
-    assert(success);
-  }
-
-  /// Updates the engine at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept {
-    [[maybe_unused]] const bool success = BarelyEngine_Update(engine_, timestamp);
-    assert(success);
-  }
-
- private:
-  // Pointer to raw engine.
-  BarelyEngine* engine_ = nullptr;
-
-  // Heap allocated array of note off callbacks (for pointer stability on move).
-  std::unique_ptr<NoteCallback[]> note_off_callbacks_ = nullptr;
-
-  // Heap allocated array of note on callbacks (for pointer stability on move).
-  std::unique_ptr<NoteCallback[]> note_on_callbacks_ = nullptr;
-
-  // Heap allocated array of trigger callbacks (for pointer stability on move).
-  std::unique_ptr<TriggerCallback[]> trigger_callbacks_ = nullptr;
 };
 
 /// A musical quantization.
@@ -1451,6 +782,589 @@ struct Scale : public BarelyScale {
   [[nodiscard]] constexpr int GetPitchCount() const noexcept {
     return static_cast<int>(pitch_count);
   }
+};
+
+/// Slice of sample data.
+struct Slice : public BarelySlice {
+  /// Default constructor.
+  Slice() noexcept = default;
+
+  /// Constructs a new `Slice`.
+  ///
+  /// @param samples Span of mono samples.
+  /// @param sample_rate Sampling rate in hertz.
+  /// @param root_pitch Root pitch.
+  constexpr Slice(std::span<const float> samples, int sample_rate, float root_pitch) noexcept
+      : Slice({samples.data(), static_cast<int32_t>(samples.size()), sample_rate, root_pitch}) {
+    assert(sample_rate >= 0);
+  }
+
+  /// Constructs a new `Slice` from a raw type.
+  ///
+  /// @param slice Raw slice.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
+};
+
+/// Event callback function.
+using TriggerCallback = std::function<void()>;
+
+/// Note callback function.
+///
+/// @param pitch Note pitch.
+using NoteCallback = std::function<void(float pitch)>;
+
+/// Class that wraps an event.
+class Event {
+ public:
+  /// Default constructor.
+  Event() noexcept = default;
+
+  /// Constructs a new `Event`.
+  ///
+  /// @param event_id Event identifier.
+  /// @param trigger_callback Pointer to trigger callback.
+  Event(uint32_t event_id, void* trigger_callback) noexcept
+      : event_id_(event_id), trigger_callback_(trigger_callback) {}
+
+  /// Returns the identifier.
+  ///
+  /// @return Identifier.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  [[nodiscard]] constexpr operator uint32_t() const noexcept { return event_id_; }
+
+ private:
+  friend class Engine;
+
+  // Event identifier.
+  uint32_t event_id_ = 0;
+
+  // Pointer to trigger callback.
+  void* trigger_callback_ = nullptr;
+};
+
+/// Class that wraps an instrument.
+class Instrument {
+ public:
+  /// Default constructor.
+  Instrument() noexcept = default;
+
+  /// Constructs a new `Instrument`.
+  ///
+  /// @param engine Pointer to raw engine.
+  /// @param instrument_id Instrument identifier.
+  /// @param note_callback Pointer to note callback.
+  Instrument(BarelyEngine* engine, uint32_t instrument_id,
+             std::pair<NoteCallback, NoteCallback>* note_callback) noexcept
+      : engine_(engine), instrument_id_(instrument_id), note_callback_(note_callback) {}
+
+  /// Returns the identifier.
+  ///
+  /// @return Identifier.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  [[nodiscard]] constexpr operator uint32_t() const noexcept { return instrument_id_; }
+
+  /// Returns a control value.
+  ///
+  /// @param type Instrument control type.
+  /// @return Instrument control value.
+  template <typename ValueType>
+  [[nodiscard]] ValueType GetControl(InstrumentControlType type) const noexcept {
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
+                  "ValueType is not supported");
+    float value = 0.0f;
+    [[maybe_unused]] const bool success = BarelyInstrument_GetControl(
+        engine_, instrument_id_, static_cast<BarelyInstrumentControlType>(type), &value);
+    assert(success);
+    return static_cast<ValueType>(value);
+  }
+
+  /// Returns a control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param type Note control type.
+  /// @return Note control value.
+  template <typename ValueType>
+  [[nodiscard]] ValueType GetNoteControl(float pitch, NoteControlType type) const noexcept {
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
+                  "ValueType is not supported");
+    float value = 0.0f;
+    [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControl(
+        engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type), &value);
+    assert(success);
+    return static_cast<ValueType>(value);
+  }
+
+  /// Returns whether a note is on or not.
+  ///
+  /// @param pitch Note pitch.
+  /// @return True if on, false otherwise.
+  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept {
+    bool is_note_on = false;
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_IsNoteOn(engine_, instrument_id_, pitch, &is_note_on);
+    assert(success);
+    return is_note_on;
+  }
+
+  /// Schedules a control event.
+  ///
+  /// @param type Instrument control type.
+  /// @param value Instrument control value.
+  /// @param ramp_duration Ramp duration in beats.
+  /// @param offset Time offset in beats.
+  /// @return Event.
+  Event ScheduleControl(InstrumentControlType type, float value, double ramp_duration,
+                        double offset) noexcept {
+    uint32_t event_id = 0;
+    [[maybe_unused]] const bool success = BarelyInstrument_ScheduleControl(
+        engine_, instrument_id_, static_cast<BarelyInstrumentControlType>(type), value,
+        ramp_duration, offset, &event_id);
+    assert(success);
+    return {event_id, nullptr};
+  }
+
+  /// Schedules a note event.
+  ///
+  /// @param pitch Note pitch.
+  /// @param duration Note duration in beats.
+  /// @param offset Time offset in beats.
+  /// @return Event.
+  Event ScheduleNote(float pitch, double duration, double offset = 0.0) noexcept {
+    uint32_t event_id = 0;
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_ScheduleNote(engine_, instrument_id_, pitch, duration, offset, &event_id);
+    assert(success);
+    return {event_id, nullptr};
+  }
+
+  /// Schedules a control event.
+  ///
+  /// @param pitch Note pitch.
+  /// @param type Note control type.
+  /// @param value Note control value.
+  /// @param ramp_duration Ramp duration in beats.
+  /// @param offset Time offset in beats.
+  /// @return Event.
+  Event ScheduleNoteControl(float pitch, NoteControlType type, float value,
+                            double ramp_duration = 0.0, double offset = 0.0) noexcept {
+    uint32_t event_id = 0;
+    [[maybe_unused]] const bool success = BarelyInstrument_ScheduleNoteControl(
+        engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type), value,
+        ramp_duration, offset, &event_id);
+    assert(success);
+    return {event_id, nullptr};
+  }
+
+  /// Sets all notes off.
+  void SetAllNotesOff() noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetAllNotesOff(engine_, instrument_id_);
+    assert(success);
+  }
+
+  /// Sets a control value.
+  ///
+  /// @param type Instrument control type.
+  /// @param value Instrument control value.
+  template <typename ValueType>
+  void SetControl(InstrumentControlType type, ValueType value) noexcept {
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
+                  "ValueType is not supported");
+    [[maybe_unused]] const bool success = BarelyInstrument_SetControl(
+        engine_, instrument_id_, static_cast<BarelyInstrumentControlType>(type),
+        static_cast<float>(value));
+    assert(success);
+  }
+
+  /// Sets a control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param type Note control type.
+  /// @param value Note control value.
+  template <typename ValueType>
+  void SetNoteControl(float pitch, NoteControlType type, ValueType value) noexcept {
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
+                  "ValueType is not supported");
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
+        engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type),
+        static_cast<float>(value));
+    assert(success);
+  }
+
+  /// Sets a note off.
+  ///
+  /// @param pitch Note pitch.
+  void SetNoteOff(float pitch) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_SetNoteOff(engine_, instrument_id_, pitch);
+    assert(success);
+  }
+
+  /// Sets the note off callback.
+  ///
+  /// @param callback Note callback.
+  void SetNoteOffCallback(NoteCallback callback) noexcept {
+    assert(note_callback_ != nullptr);
+    note_callback_->first = std::move(callback);
+    [[maybe_unused]] const bool success =
+        (note_callback_->first)
+            ? BarelyInstrument_SetNoteOffCallback(
+                  engine_, instrument_id_,
+                  [](float pitch, void* user_data) noexcept {
+                    assert(user_data != nullptr && "Invalid note off callback user data");
+                    if (const auto& callback = *static_cast<NoteCallback*>(user_data); callback) {
+                      callback(pitch);
+                    }
+                  },
+                  &note_callback_->first)
+            : BarelyInstrument_SetNoteOffCallback(engine_, instrument_id_, nullptr, nullptr);
+    assert(success);
+  }
+
+  /// Sets a note on.
+  ///
+  /// @param pitch Note pitch.
+  /// @param gain Note gain.
+  /// @param pitch_shift Note pitch shift.
+  void SetNoteOn(float pitch, float gain = 1.0f, float pitch_shift = 0.0f) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_SetNoteOn(engine_, instrument_id_, pitch);
+    assert(success);
+    if (gain != 1.0f) {
+      SetNoteControl(pitch, NoteControlType::kGain, gain);
+    }
+    if (pitch_shift != 0.0f) {
+      SetNoteControl(pitch, NoteControlType::kPitchShift, pitch_shift);
+    }
+  }
+
+  /// Sets the note on callback.
+  ///
+  /// @param callback Note callback.
+  void SetNoteOnCallback(NoteCallback callback) noexcept {
+    assert(note_callback_ != nullptr);
+    note_callback_->second = std::move(callback);
+    [[maybe_unused]] const bool success =
+        (note_callback_->second)
+            ? BarelyInstrument_SetNoteOnCallback(
+                  engine_, instrument_id_,
+                  [](float pitch, void* user_data) noexcept {
+                    assert(user_data != nullptr && "Invalid note on callback user data");
+                    if (const auto& callback = *static_cast<NoteCallback*>(user_data); callback) {
+                      callback(pitch);
+                    }
+                  },
+                  &note_callback_->second)
+            : BarelyInstrument_SetNoteOnCallback(engine_, instrument_id_, nullptr, nullptr);
+    assert(success);
+  }
+
+  /// Sets the sample data.
+  ///
+  /// @param slices Span of slices.
+  void SetSampleData(std::span<const Slice> slices) noexcept {
+    [[maybe_unused]] const bool success = BarelyInstrument_SetSampleData(
+        engine_, instrument_id_, reinterpret_cast<const BarelySlice*>(slices.data()),
+        static_cast<int32_t>(slices.size()));
+    assert(success);
+  }
+
+ private:
+  friend class Engine;
+
+  // Pointer to raw engine.
+  BarelyEngine* engine_ = nullptr;
+
+  // Instrument identifier.
+  uint32_t instrument_id_ = 0;
+
+  // Pointer to note callback.
+  std::pair<NoteCallback, NoteCallback>* note_callback_ = nullptr;
+};
+
+/// A class that wraps an engine.
+class Engine {
+ public:
+  /// Constructs a new `Engine`.
+  ///
+  /// @param sample_rate Sampling rate in hertz.
+  explicit Engine(int sample_rate) noexcept : Engine(EngineConfig(sample_rate)) {}
+
+  /// Constructs a new `Engine`.
+  ///
+  /// @param config Engine configuration.
+  explicit Engine(const EngineConfig& config) noexcept
+      : note_callbacks_(std::make_unique<CallbackPool<std::pair<NoteCallback, NoteCallback>>>(
+            config.max_instrument_count)),
+        trigger_callbacks_(
+            std::make_unique<CallbackPool<TriggerCallbackData>>(config.max_event_count)) {
+    [[maybe_unused]] const bool success = BarelyEngine_Create(&config, &engine_);
+    assert(success);
+  }
+
+  /// Destroys `Engine`.
+  ~Engine() noexcept { BarelyEngine_Destroy(engine_); }
+
+  /// Non-copyable.
+  Engine(const Engine& other) noexcept = delete;
+  Engine& operator=(const Engine& other) noexcept = delete;
+
+  /// Constructs a new `Engine` via move.
+  ///
+  /// @param other Other engine.
+  Engine(Engine&& other) noexcept
+      : engine_(std::exchange(other.engine_, nullptr)),
+        note_callbacks_(std::exchange(other.note_callbacks_, {})),
+        trigger_callbacks_(std::exchange(other.trigger_callbacks_, {})) {}
+
+  /// Assigns `Engine` via move.
+  ///
+  /// @param other Other engine.
+  /// @return Engine.
+  Engine& operator=(Engine&& other) noexcept {
+    if (this != &other) {
+      BarelyEngine_Destroy(engine_);
+      engine_ = std::exchange(other.engine_, nullptr);
+      note_callbacks_ = std::exchange(other.note_callbacks_, {});
+      trigger_callbacks_ = std::exchange(other.trigger_callbacks_, {});
+    }
+    return *this;
+  }
+
+  /// Returns the pointer to raw engine.
+  ///
+  /// @return Pointer to raw engine.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  [[nodiscard]] constexpr operator BarelyEngine*() const noexcept { return engine_; }
+
+  /// Cancels all scheduled events.
+  void CancelAllEvents() {
+    [[maybe_unused]] const bool success = BarelyEngine_CancelAllEvents(engine_);
+    trigger_callbacks_->free_callbacks.resize(trigger_callbacks_->callbacks.size());
+    for (int32_t i = 0; i < trigger_callbacks_->callbacks.size(); ++i) {
+      trigger_callbacks_->free_callbacks[i] = &trigger_callbacks_->callbacks[i];
+    }
+    assert(success);
+  }
+
+  /// Cancels a scheduled event.
+  ///
+  /// @param event Event.
+  void CancelEvent(Event event) {
+    if (BarelyEngine_CancelEvent(engine_, event) && event.trigger_callback_ != nullptr) {
+      auto* trigger_callback = static_cast<TriggerCallbackData*>(event.trigger_callback_);
+      assert(trigger_callback->pool->free_callbacks.size() <
+             trigger_callback->pool->callbacks.size());
+      trigger_callbacks_->free_callbacks.push_back(trigger_callback);
+    }
+  }
+
+  /// Creates a new instrument.
+  ///
+  /// @return Instrument.
+  Instrument CreateInstrument() noexcept {
+    uint32_t instrument_id = 0;
+    [[maybe_unused]] bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
+    assert(success);
+    assert(!note_callbacks_->free_callbacks.empty());
+    auto* note_callbacks = note_callbacks_->free_callbacks.back();
+    note_callbacks_->free_callbacks.pop_back();
+    *note_callbacks = {};
+    return {engine_, instrument_id, note_callbacks};
+  }
+
+  /// Destroys an instrument.
+  ///
+  /// @param instrument Instrument.
+  void DestroyInstrument(Instrument instrument) {
+    const bool success = BarelyEngine_DestroyInstrument(engine_, instrument);
+    if (success) {
+      assert(note_callbacks_->free_callbacks.size() < note_callbacks_->callbacks.size());
+      note_callbacks_->free_callbacks.push_back(instrument.note_callback_);
+    }
+    assert(success);
+  }
+
+  /// Generates a random number with uniform distribution in the normalized range [0, 1).
+  ///
+  /// @return Random number.
+  [[nodiscard]] double GenerateRandomNumber() noexcept {
+    double number = 0.0;
+    [[maybe_unused]] const bool success = BarelyEngine_GenerateRandomNumber(engine_, &number);
+    assert(success);
+    return number;
+  }
+
+  /// Generates a random number with uniform distribution in the range [min, max).
+  ///
+  /// @param min Minimum value (inclusive).
+  /// @param max Maximum value (exclusive).
+  /// @return Random number.
+  template <typename NumberType>
+  [[nodiscard]] NumberType GenerateRandomNumber(NumberType min, NumberType max) noexcept {
+    static_assert(std::is_arithmetic_v<NumberType>, "NumberType is not supported");
+    return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
+  }
+
+  /// Returns a control value.
+  ///
+  /// @param type Engine control type.
+  /// @return Engine control value.
+  template <typename ValueType>
+  [[nodiscard]] ValueType GetControl(EngineControlType type) const noexcept {
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
+                  "ValueType is not supported");
+    float value = 0.0f;
+    [[maybe_unused]] const bool success =
+        BarelyEngine_GetControl(engine_, static_cast<BarelyEngineControlType>(type), &value);
+    assert(success);
+    return static_cast<ValueType>(value);
+  }
+
+  /// Returns the tempo.
+  ///
+  /// @return Tempo in beats per minute.
+  [[nodiscard]] double GetTempo() const noexcept {
+    double tempo = 0.0;
+    [[maybe_unused]] const bool success = BarelyEngine_GetTempo(engine_, &tempo);
+    assert(success);
+    return tempo;
+  }
+
+  /// Returns the timestamp.
+  ///
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestamp() const noexcept {
+    double timestamp = 0.0;
+    [[maybe_unused]] const bool success = BarelyEngine_GetTimestamp(engine_, &timestamp);
+    assert(success);
+    return timestamp;
+  }
+
+  /// Processes the next output samples at timestamp.
+  ///
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
+  /// @param timestamp Timestamp in seconds.
+  void Process(float* output_samples, int output_channel_count, int output_frame_count,
+               double timestamp) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyEngine_Process(engine_, output_samples, static_cast<int32_t>(output_channel_count),
+                             static_cast<int32_t>(output_frame_count), timestamp);
+    assert(success);
+  }
+
+  /// Resets the random number generator seed.
+  void ResetSeed(int seed) noexcept {
+    [[maybe_unused]] const bool success =
+        BarelyEngine_ResetSeed(engine_, static_cast<int32_t>(seed));
+    assert(success);
+  }
+
+  /// Schedules a control event.
+  ///
+  /// @param type Engine control type.
+  /// @param value Engine control value.
+  /// @param ramp_duration Ramp duration in beats.
+  /// @param offset Time offset in beats.
+  /// @return Event.
+  Event ScheduleControl(EngineControlType type, float value, double ramp_duration = 0.0,
+                        double offset = 0.0) noexcept {
+    uint32_t event_id = 0;
+    [[maybe_unused]] const bool success =
+        BarelyEngine_ScheduleControl(engine_, static_cast<BarelyEngineControlType>(type), value,
+                                     ramp_duration, offset, &event_id);
+    assert(success);
+    return {event_id, nullptr};
+  }
+
+  /// Schedules a trigger event.
+  ///
+  /// @param callback Trigger callback.
+  /// @param offset Time offset in beats.
+  /// @param interval Repeat interval in beats.
+  /// @return Event.
+  Event ScheduleTrigger(TriggerCallback callback, double interval = 0.0,
+                        double offset = 0.0) noexcept {
+    uint32_t event_id = 0;
+    assert(!trigger_callbacks_->free_callbacks.empty());
+    auto* trigger_callback = trigger_callbacks_->free_callbacks.back();
+    trigger_callbacks_->free_callbacks.pop_back();
+    *trigger_callback = {std::move(callback), trigger_callbacks_.get(), interval > 0.0};
+    [[maybe_unused]] const bool success = BarelyEngine_ScheduleTrigger(
+        engine_,
+        [](void* user_data) noexcept {
+          assert(user_data != nullptr && "Invalid trigger callback user data");
+          auto* trigger_callback = static_cast<TriggerCallbackData*>(user_data);
+          const uint32_t event_id = trigger_callback->event_id;
+          if (const auto& callback = trigger_callback->callback; callback) {
+            callback();
+          }
+          if (trigger_callback->event_id == event_id && !trigger_callback->repeat) {
+            assert(trigger_callback->pool->free_callbacks.size() <
+                   trigger_callback->pool->callbacks.size());
+            trigger_callback->pool->free_callbacks.push_back(trigger_callback);
+          }
+        },
+        trigger_callback, interval, offset, &event_id);
+    assert(success);
+    return {event_id, trigger_callback};
+  }
+
+  /// Sets a control value.
+  ///
+  /// @param type Engine control type.
+  /// @param value Engine control value.
+  template <typename ValueType>
+  void SetControl(EngineControlType type, ValueType value) noexcept {
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
+                  "ValueType is not supported");
+    [[maybe_unused]] const bool success = BarelyEngine_SetControl(
+        engine_, static_cast<BarelyEngineControlType>(type), static_cast<float>(value));
+    assert(success);
+  }
+
+  /// Sets the tempo.
+  ///
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_SetTempo(engine_, tempo);
+    assert(success);
+  }
+
+  /// Updates the engine at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void Update(double timestamp) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_Update(engine_, timestamp);
+    assert(success);
+  }
+
+ private:
+  // Heap allocated callback pools for pointer stability on move.
+  template <typename T>
+  struct CallbackPool {
+    explicit CallbackPool(int32_t capacity) noexcept
+        : callbacks(capacity), free_callbacks(capacity) {
+      for (int32_t i = 0; i < capacity; ++i) {
+        free_callbacks[i] = &callbacks[i];
+      }
+    }
+    std::vector<T> callbacks;
+    std::vector<T*> free_callbacks;
+  };
+  struct TriggerCallbackData {
+    TriggerCallback callback;
+    CallbackPool<TriggerCallbackData>* pool = nullptr;
+    uint32_t event_id = 0;
+    bool repeat = false;
+  };
+  std::unique_ptr<CallbackPool<std::pair<NoteCallback, NoteCallback>>> note_callbacks_ = nullptr;
+  std::unique_ptr<CallbackPool<TriggerCallbackData>> trigger_callbacks_ = nullptr;
+
+  // Pointer to raw engine.
+  BarelyEngine* engine_ = nullptr;
 };
 
 }  // namespace barely

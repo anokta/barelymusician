@@ -51,14 +51,12 @@ class InstrumentController {
   [[nodiscard]] bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
 
   void ProcessAllEventsAtPosition(double position) noexcept;
-  void Update(double duration) noexcept;
   [[nodiscard]] double GetNextDuration(double position) const noexcept;
 
  private:
   [[nodiscard]] uint32_t GetNote(const InstrumentState& instrument, float pitch) const noexcept;
 
   void ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept;
-  void UpdateArpNote(InstrumentState& instrument) noexcept;
 
   EngineState& engine_;
 };

@@ -50,10 +50,9 @@ instrument.SetNoteOn(kC3Pitch);
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(kC3Pitch);  // will return true.
 
-// Create a new trigger that plays an instrument note every beat.
-auto trigger = engine.CreateTrigger(
-    [&]() { instrument.ScheduleNote(/*pitch=*/1.0f, /*offset=*/0.0, /*duration=*/1.0); });
-trigger.Start(/*offset=*/0.0, /*interval=*/1.0f);
+// Schedule a new trigger that plays an instrument note every beat.
+engine.ScheduleTrigger([&]() { instrument.ScheduleNote(/*pitch=*/1.0f, /*duration=*/1.0); },
+                       /*interval=*/1.0f);
 
 // Update the engine timestamp.
 //

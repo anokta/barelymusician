@@ -49,7 +49,6 @@ class Processor extends AudioWorkletProcessor {
       configView[2] = 32;                   // max_instrument_count
       configView[3] = 32;                   // max_performer_count
       configView[4] = 512;                  // max_task_count
-      configView[5] = 512;                  // max_note_count
       configView[6] = 128;                  // max_slice_count
       configView[7] = 128;                  // max_voice_count
 

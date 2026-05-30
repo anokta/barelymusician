@@ -40,7 +40,6 @@ Engine g_engine{EngineConfig{{
     .max_instrument_count = 1,
     .max_performer_count = 1,
     .max_task_count = 1,
-    .max_note_count = 1000,
     .max_slice_count = 1,
     .max_voice_count = 32,
 }}};

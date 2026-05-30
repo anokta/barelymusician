@@ -269,7 +269,6 @@ BARELY_ENUM(EventType, BARELY_EVENT_TYPES)
       .max_instrument_count = 100,                \
       .max_performer_count = 100,                 \
       .max_task_count = 5000,                     \
-      .max_note_count = 1000,                     \
       .max_slice_count = 1000,                    \
       .max_voice_count = 200,                     \
   }
@@ -359,9 +358,6 @@ typedef struct BarelyEngineConfig {
 
   /// Maximum number of tasks.
   int32_t max_task_count;
-
-  /// Maximum number of active notes.
-  int32_t max_note_count;
 
   /// Maximum number of active slices.
   int32_t max_slice_count;

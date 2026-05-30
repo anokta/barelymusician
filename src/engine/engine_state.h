@@ -40,7 +40,7 @@ struct EngineState {
         reverb(arena, static_cast<float>(config.sample_rate)),
 
         instrument_pool(arena, config.max_instrument_count),
-        note_pool(arena, config.max_note_count),
+        note_pool(arena, config.max_voice_count),
         performer_pool(arena, config.max_performer_count),
         task_pool(arena, config.max_task_count),
         voice_pool(arena, config.max_voice_count),
@@ -52,7 +52,7 @@ struct EngineState {
         task_generations(arena.AllocArray<uint32_t>(config.max_task_count)),
 
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
-        note_to_voice(arena.AllocArray<uint32_t>(config.max_note_count)),
+        note_to_voice(arena.AllocArray<uint32_t>(config.max_voice_count)),
         queued_sample_data_counts(
             arena.AllocArray<std::atomic<int32_t>>(config.max_instrument_count)),
         temp_samples(arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count)),

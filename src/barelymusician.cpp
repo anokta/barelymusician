@@ -47,8 +47,7 @@ bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_en
   if (!config) return false;
   if (config->sample_rate <= 0 || config->max_frame_count <= 0 ||
       config->max_instrument_count <= 0 || config->max_performer_count <= 0 ||
-      config->max_task_count <= 0 || config->max_note_count <= 0 || config->max_slice_count <= 0 ||
-      config->max_voice_count <= 0) {
+      config->max_task_count <= 0 || config->max_slice_count <= 0 || config->max_voice_count <= 0) {
     return false;
   }
 

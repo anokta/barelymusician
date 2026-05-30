@@ -34,13 +34,13 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 
   // Failures.
   EXPECT_FALSE(BarelyEngine_CreateInstrument(engine, nullptr));
-  EXPECT_FALSE(BarelyEngine_DestroyInstrument(nullptr, {}));
+  EXPECT_FALSE(BarelyInstrument_Destroy(nullptr, {}));
 
   // Success.
   uint32_t instrument_id = 0;
   EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, &instrument_id));
 
-  EXPECT_TRUE(BarelyEngine_DestroyInstrument(engine, instrument_id));
+  EXPECT_TRUE(BarelyInstrument_Destroy(engine, instrument_id));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
@@ -51,13 +51,13 @@ TEST(BarelyEngineTest, CreateDestroyPerformer) {
 
   // Failures.
   EXPECT_FALSE(BarelyEngine_CreatePerformer(engine, nullptr));
-  EXPECT_FALSE(BarelyEngine_DestroyPerformer(nullptr, {}));
+  EXPECT_FALSE(BarelyPerformer_Destroy(nullptr, {}));
 
   // Success.
   uint32_t performer_id = 0;
   EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer_id));
 
-  EXPECT_TRUE(BarelyEngine_DestroyPerformer(engine, performer_id));
+  EXPECT_TRUE(BarelyPerformer_Destroy(engine, performer_id));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
@@ -70,7 +70,7 @@ TEST(EngineTest, CreateDestroyInstrument) {
 
 TEST(EngineTest, CreateDestroyPerformer) {
   Engine engine(kSampleRate);
-  engine.DestroyPerformer(engine.CreatePerformer());
+  engine.CreatePerformer().Destroy();
 }
 
 TEST(EngineTest, CreateDestroySingleInstrument) {
@@ -82,21 +82,21 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   float note_on_pitch = 0.0f;
 
   // Create an instrument.
-  Instrument instrument_ref = engine.CreateInstrument();
+  Instrument instrument = engine.CreateInstrument();
 
   // Set the note callbacks.
-  instrument_ref.SetNoteEventCallback([&](EventType type, float pitch) {
+  instrument.SetNoteEventCallback([&](EventType type, float pitch) {
     (type == EventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
   });
   EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
   EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
 
   // Set a note on.
-  instrument_ref.SetNoteOn(kPitch);
-  EXPECT_TRUE(instrument_ref.IsNoteOn(kPitch));
+  instrument.SetNoteOn(kPitch);
+  EXPECT_TRUE(instrument.IsNoteOn(kPitch));
   EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
 
-  engine.DestroyInstrument(instrument_ref);
+  instrument.Destroy();
 
   // Note should be stopped once the instrument goes out of scope.
   EXPECT_FLOAT_EQ(note_off_pitch, kPitch);

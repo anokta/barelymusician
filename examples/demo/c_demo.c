@@ -104,9 +104,9 @@ int main() {
   BarelyEngine_CreatePerformer(engine, &performer_id);
   uint32_t task_ids[kMelodyNoteCount];
   for (int i = 0; i < kMelodyNoteCount; ++i) {
-    BarelyEngine_CreateTask(engine, performer_id, kMelodyPositions[i],
-                            kMelodyPositions[i + 1] - kMelodyPositions[i], 0, TaskEventCallback,
-                            engine, &task_ids[i]);
+    BarelyPerformer_CreateTask(engine, performer_id, kMelodyPositions[i],
+                               kMelodyPositions[i + 1] - kMelodyPositions[i], 0, TaskEventCallback,
+                               engine, &task_ids[i]);
   }
 
   // Initialize the audio device.
@@ -143,11 +143,6 @@ int main() {
   ma_device_uninit(&device);
 
   // Shutdown the engine.
-  for (int i = 0; i < kMelodyNoteCount; ++i) {
-    BarelyEngine_DestroyTask(engine, task_ids[i]);
-  }
-  BarelyEngine_DestroyPerformer(engine, performer_id);
-  BarelyEngine_DestroyInstrument(engine, g_instrument_id);
   BarelyEngine_Destroy(engine);
 
   return 0;

@@ -3,11 +3,7 @@ VERS_1.0 {
     BarelyEngine_Create;
     BarelyEngine_CreateInstrument;
     BarelyEngine_CreatePerformer;
-    BarelyEngine_CreateTask;
     BarelyEngine_Destroy;
-    BarelyEngine_DestroyInstrument;
-    BarelyEngine_DestroyPerformer;
-    BarelyEngine_DestroyTask;
     BarelyEngine_GetControl;
     BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
@@ -15,6 +11,7 @@ VERS_1.0 {
     BarelyEngine_SetControl;
     BarelyEngine_SetTempo;
     BarelyEngine_Update;
+    BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;
     BarelyInstrument_GetNoteControl;
     BarelyInstrument_IsNoteOn;
@@ -25,6 +22,8 @@ VERS_1.0 {
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOn;
     BarelyInstrument_SetSampleData;
+    BarelyPerformer_CreateTask;
+    BarelyPerformer_Destroy;
     BarelyPerformer_GetLoopBeginPosition;
     BarelyPerformer_GetLoopLength;
     BarelyPerformer_GetPosition;
@@ -37,6 +36,7 @@ VERS_1.0 {
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
     BarelyScale_GetPitch;
+    BarelyTask_Destroy;
     BarelyTask_GetDuration;
     BarelyTask_GetPosition;
     BarelyTask_GetPriority;

@@ -13,7 +13,7 @@ Repeater::Repeater(Engine& engine, Instrument instrument) noexcept
     : engine_(engine),
       instrument_(instrument),
       performer_(engine_.CreatePerformer()),
-      task_(engine_.CreateTask(performer_, 0.0, 1.0, 0, [this](EventType type) noexcept {
+      task_(performer_.CreateTask(0.0, 1.0, 0, [this](EventType type) noexcept {
         if (type == EventType::kBegin) {
           OnBeat();
         }

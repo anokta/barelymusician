@@ -494,7 +494,7 @@ namespace Barely {
           instrumentId = 0;
           return;
         }
-        if (!BarelyEngine_DestroyInstrument(_handle, instrumentId)) {
+        if (!BarelyInstrument_Destroy(_handle, instrumentId)) {
           Debug.LogError("Failed to destroy instrument");
         }
         _instruments.Remove(instrumentId);
@@ -617,7 +617,7 @@ namespace Barely {
           performerId = 0;
           return;
         }
-        if (!BarelyEngine_DestroyPerformer(_handle, performerId)) {
+        if (!BarelyPerformer_Destroy(_handle, performerId)) {
           Debug.LogError("Failed to destroy performer");
         }
         _performers.Remove(performerId);
@@ -717,9 +717,9 @@ namespace Barely {
         if (Handle == IntPtr.Zero || _handle != IntPtr.Zero && taskId > 0) {
           return;
         }
-        if (!BarelyEngine_CreateTask(_handle, performerId, position,
-                                     Math.Max(duration, _minTaskDuration), priority, Task_OnEvent,
-                                     ref taskId, ref taskId)) {
+        if (!BarelyPerformer_CreateTask(_handle, performerId, position,
+                                        Math.Max(duration, _minTaskDuration), priority,
+                                        Task_OnEvent, ref taskId, ref taskId)) {
           Debug.LogError("Failed to create task '" + task + "'");
           return;
         }
@@ -732,7 +732,7 @@ namespace Barely {
           taskId = 0;
           return;
         }
-        if (!BarelyEngine_DestroyTask(_handle, taskId)) {
+        if (!BarelyTask_Destroy(_handle, taskId)) {
           Debug.LogError("Failed to destroy performer task");
         }
         _tasks.Remove(taskId);
@@ -1059,23 +1059,8 @@ namespace Barely {
       private static extern bool BarelyEngine_CreatePerformer(IntPtr engine,
                                                               ref UInt32 outPerformerId);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreateTask")]
-      private static extern bool BarelyEngine_CreateTask(IntPtr engine, UInt32 performerId,
-                                                         double position, double duration,
-                                                         Int32 priority, TaskEventCallback callback,
-                                                         ref UInt32 userData, ref UInt32 outTaskId);
-
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
       private static extern bool BarelyEngine_Destroy(IntPtr engine);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_DestroyInstrument")]
-      private static extern bool BarelyEngine_DestroyInstrument(IntPtr engine, UInt32 instrumentId);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_DestroyPerformer")]
-      private static extern bool BarelyEngine_DestroyPerformer(IntPtr engine, UInt32 performerId);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_DestroyTask")]
-      private static extern bool BarelyEngine_DestroyTask(IntPtr engine, UInt32 taskId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetControl")]
       private static extern bool BarelyEngine_GetControl(IntPtr engine, EngineControlType type,
@@ -1102,6 +1087,9 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Update")]
       private static extern bool BarelyEngine_Update(IntPtr engine, double timestamp);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
+      private static extern bool BarelyInstrument_Destroy(IntPtr engine, UInt32 instrumentId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetControl")]
       private static extern bool BarelyInstrument_GetControl(IntPtr engine, UInt32 instrumentId,
@@ -1150,6 +1138,14 @@ namespace Barely {
                                                                 [In] Slice[] slices,
                                                                 Int32 sliceCount);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_CreateTask")]
+      private static extern bool BarelyPerformer_CreateTask(
+          IntPtr engine, UInt32 performerId, double position, double duration, Int32 priority,
+          TaskEventCallback callback, ref UInt32 userData, ref UInt32 outTaskId);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Destroy")]
+      private static extern bool BarelyPerformer_Destroy(IntPtr engine, UInt32 performerId);
+
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
       private static extern bool BarelyPerformer_GetLoopBeginPosition(
           IntPtr engine, UInt32 performerId, ref double outLoopBeginPosition);
@@ -1196,6 +1192,9 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
       private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
                                                       ref float outPitch);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
+      private static extern bool BarelyTask_Destroy(IntPtr engine, UInt32 taskId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_GetDuration")]
       private static extern bool BarelyTask_GetDuration(IntPtr engine, UInt32 taskId,

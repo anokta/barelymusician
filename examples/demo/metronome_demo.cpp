@@ -66,7 +66,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   auto metronome = engine.CreatePerformer();
   metronome.SetLooping(true);
   int beat = 0;
-  engine.CreateTask(metronome, 0.0, 1e-6, 0, [&](EventType type) {
+  metronome.CreateTask(0.0, 1e-6, 0, [&](EventType type) {
     if (type != EventType::kBegin) {
       return;
     }

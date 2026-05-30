@@ -85,14 +85,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   std::unordered_map<int, Task> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {
-    return engine.CreateTask(performer, note.position, note.duration, 0,
-                             [&instrument, pitch = note.pitch](EventType type) {
-                               if (type == EventType::kBegin) {
-                                 instrument.SetNoteOn(pitch);
-                               } else if (type == EventType::kEnd) {
-                                 instrument.SetNoteOff(pitch);
-                               }
-                             });
+    return performer.CreateTask(note.position, note.duration, 0,
+                                [&instrument, pitch = note.pitch](EventType type) {
+                                  if (type == EventType::kBegin) {
+                                    instrument.SetNoteOn(pitch);
+                                  } else if (type == EventType::kEnd) {
+                                    instrument.SetNoteOff(pitch);
+                                  }
+                                });
   };
   for (int i = 0; i < static_cast<int>(score.size()); ++i) {
     tasks.emplace(i, build_note_fn(score[i]));
@@ -117,7 +117,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
       if (const auto it = tasks.find(index - 1); it != tasks.end()) {
-        engine.DestroyTask(it->second);
+        it->second.Destroy();
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {

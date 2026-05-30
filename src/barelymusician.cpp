@@ -85,61 +85,11 @@ bool BarelyEngine_CreatePerformer(BarelyEngine* engine, uint32_t* out_performer_
   return false;
 }
 
-bool BarelyEngine_CreateTask(BarelyEngine* engine, uint32_t performer_id, double position,
-                             double duration, int32_t priority, BarelyTaskEventCallback callback,
-                             void* user_data, uint32_t* out_task_id) {
-  if (!engine) return false;
-  if (!engine->IsValidPerformer(performer_id)) return false;
-  if (duration <= 0.0) return false;
-  if (!out_task_id) return false;
-
-  const uint32_t task_index = engine->controller.performer_controller().AcquireTask(
-      engine->state.GetIdIndex(performer_id), position, duration, priority, callback, user_data);
-  if (task_index != barely::kInvalidIndex) {
-    *out_task_id = engine->state.BuildId(task_index, engine->state.task_generations[task_index]);
-    return true;
-  }
-  return false;
-}
-
 bool BarelyEngine_Destroy(BarelyEngine* engine) {
   if (!engine) return false;
 
   engine->controller.instrument_controller().SetAllNotesOff();
   delete engine;
-  return true;
-}
-
-bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, uint32_t instrument_id) {
-  if (!engine) return false;
-  if (!engine->IsValidInstrument(instrument_id)) return false;
-
-  const uint32_t instrument_index = engine->state.GetIdIndex(instrument_id);
-  engine->controller.instrument_controller().Release(instrument_index);
-  engine->state.instrument_generations[instrument_index] =
-      engine->state.GetNextIdGeneration(engine->state.instrument_generations[instrument_index]);
-  return true;
-}
-
-bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, uint32_t performer_id) {
-  if (!engine) return false;
-  if (!engine->IsValidPerformer(performer_id)) return false;
-
-  const uint32_t performer_index = engine->state.GetIdIndex(performer_id);
-  engine->controller.performer_controller().Release(performer_index);
-  engine->state.performer_generations[performer_index] =
-      engine->state.GetNextIdGeneration(engine->state.performer_generations[performer_index]);
-  return true;
-}
-
-bool BarelyEngine_DestroyTask(BarelyEngine* engine, uint32_t task_id) {
-  if (!engine) return false;
-  if (!engine->IsValidTask(task_id)) return false;
-
-  const uint32_t task_index = engine->state.GetIdIndex(task_id);
-  engine->controller.performer_controller().ReleaseTask(task_index);
-  engine->state.task_generations[task_index] =
-      engine->state.GetNextIdGeneration(engine->state.task_generations[task_index]);
   return true;
 }
 
@@ -226,6 +176,17 @@ bool BarelyEngine_Update(BarelyEngine* engine, double timestamp) {
   if (!engine) return false;
 
   engine->controller.Update(timestamp);
+  return true;
+}
+
+bool BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrument_id) {
+  if (!engine) return false;
+  if (!engine->IsValidInstrument(instrument_id)) return false;
+
+  const uint32_t instrument_index = engine->state.GetIdIndex(instrument_id);
+  engine->controller.instrument_controller().Release(instrument_index);
+  engine->state.instrument_generations[instrument_index] =
+      engine->state.GetNextIdGeneration(engine->state.instrument_generations[instrument_index]);
   return true;
 }
 
@@ -337,6 +298,34 @@ bool BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t instrument_id
   return true;
 }
 
+bool BarelyPerformer_CreateTask(BarelyEngine* engine, uint32_t performer_id, double position,
+                                double duration, int32_t priority, BarelyTaskEventCallback callback,
+                                void* user_data, uint32_t* out_task_id) {
+  if (!engine) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
+  if (duration <= 0.0) return false;
+  if (!out_task_id) return false;
+
+  const uint32_t task_index = engine->controller.performer_controller().AcquireTask(
+      engine->state.GetIdIndex(performer_id), position, duration, priority, callback, user_data);
+  if (task_index != barely::kInvalidIndex) {
+    *out_task_id = engine->state.BuildId(task_index, engine->state.task_generations[task_index]);
+    return true;
+  }
+  return false;
+}
+
+bool BarelyPerformer_Destroy(BarelyEngine* engine, uint32_t performer_id) {
+  if (!engine) return false;
+  if (!engine->IsValidPerformer(performer_id)) return false;
+
+  const uint32_t performer_index = engine->state.GetIdIndex(performer_id);
+  engine->controller.performer_controller().Release(performer_index);
+  engine->state.performer_generations[performer_index] =
+      engine->state.GetNextIdGeneration(engine->state.performer_generations[performer_index]);
+  return true;
+}
+
 bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine, uint32_t performer_id,
                                           double* out_loop_begin_position) {
   if (!engine) return false;
@@ -439,6 +428,17 @@ bool BarelyPerformer_Stop(BarelyEngine* engine, uint32_t performer_id) {
   if (!engine->IsValidPerformer(performer_id)) return false;
 
   engine->controller.performer_controller().Stop(engine->state.GetIdIndex(performer_id));
+  return true;
+}
+
+bool BarelyTask_Destroy(BarelyEngine* engine, uint32_t task_id) {
+  if (!engine) return false;
+  if (!engine->IsValidTask(task_id)) return false;
+
+  const uint32_t task_index = engine->state.GetIdIndex(task_id);
+  engine->controller.performer_controller().ReleaseTask(task_index);
+  engine->state.task_generations[task_index] =
+      engine->state.GetNextIdGeneration(engine->state.task_generations[task_index]);
   return true;
 }
 

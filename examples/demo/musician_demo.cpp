@@ -126,8 +126,8 @@ std::pair<std::vector<Slice>, std::vector<std::vector<float>>> BuildPercussionSa
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, float pitch, float gain, Engine& engine,
                   Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
-  tasks.emplace_back(engine.CreateTask(
-      performer, quantization.GetPosition(performer.GetPosition() + position),
+  tasks.emplace_back(performer.CreateTask(
+      quantization.GetPosition(performer.GetPosition() + position),
       quantization.GetPosition(duration), 0, [pitch, gain, &instrument](EventType type) noexcept {
         if (type == EventType::kBegin) {
           instrument.SetNoteOn(pitch, gain);
@@ -341,7 +341,7 @@ int main(int /*argc*/, char* argv[]) {
   metronome.SetLooping(true);
   int beat = 0;
   int harmonic = 0;
-  engine.CreateTask(metronome, 0.0, 1e-6, -1, [&](EventType type) {
+  metronome.CreateTask(0.0, 1e-6, -1, [&](EventType type) {
     if (type != EventType::kBegin) {
       return;
     }
@@ -356,7 +356,7 @@ int main(int /*argc*/, char* argv[]) {
     // Update members.
     for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
       for (auto& task : tasks) {
-        engine.DestroyTask(task);
+        task.Destroy();
       }
       tasks.clear();
       // Compose next beat notes.

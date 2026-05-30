@@ -65,14 +65,13 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Engin
       const double duration = get_position_fn(midi_event.getTickDuration());
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float gain = static_cast<float>(midi_event.getVelocity()) / 127.0f;
-      engine.CreateTask(performer, position, duration, 0,
-                        [&, pitch, gain](EventType type) noexcept {
-                          if (type == EventType::kBegin) {
-                            instrument.SetNoteOn(pitch, gain);
-                          } else if (type == EventType::kEnd) {
-                            instrument.SetNoteOff(pitch);
-                          }
-                        });
+      performer.CreateTask(position, duration, 0, [&, pitch, gain](EventType type) noexcept {
+        if (type == EventType::kBegin) {
+          instrument.SetNoteOn(pitch, gain);
+        } else if (type == EventType::kEnd) {
+          instrument.SetNoteOff(pitch);
+        }
+      });
       has_notes = true;
     }
   }
@@ -110,8 +109,8 @@ int main(int /*argc*/, char* argv[]) {
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, engine, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
-      engine.DestroyInstrument(instrument);
-      engine.DestroyPerformer(performer);
+      performer.Destroy();
+      instrument.Destroy();
       tracks.pop_back();
       continue;
     }

@@ -62,7 +62,7 @@
 ///   instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 ///
 ///   // Destroy the instrument.
-///   engine.DestroyInstrument(instrument);
+///   instrument.Destroy();
 ///   @endcode
 ///
 /// - Performer:
@@ -72,8 +72,8 @@
 ///   auto performer = engine.CreatePerformer();
 ///
 ///   // Create a new task.
-///   auto task = engine.CreateTask(performer, /*position=*/0.0, /*duration=*/1.0,
-///                                 [](barely::EventType type) { /*populate this*/ });
+///   auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0,
+///                                    [](barely::EventType type) { /*populate this*/ });
 ///
 ///   // Set the performer to looping.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -84,11 +84,8 @@
 ///   // Check if the performer started playing.
 ///   const bool is_playing = performer.IsPlaying();
 ///
-///   // Destroy the task.
-///   engine.DestroyTask(task);
-///
 ///   // Destroy the performer.
-///   engine.DestroyPerformer(performer);
+///   performer.Destroy();
 ///   @endcode
 ///
 /// ------------------------------------------------------------------------------------------------
@@ -154,7 +151,7 @@
 ///                               /*value=*/1.0f);
 ///
 ///   // Destroy the instrument.
-///   BarelyEngine_DestroyInstrument(engine, instrument_id);
+///   BarelyInstrument_Destroy(engine, instrument_id);
 ///   @endcode
 ///
 /// - Performer:
@@ -167,8 +164,8 @@
 ///   // Create a new task.
 ///   uint32_t task_id = 0;
 ///   BarelyTaskEventCallback callback{ /*populate this*/ };
-///   BarelyEngine_CreateTask(engine, performer_id, /*position=*/0.0, /*duration=*/1.0,
-///                           /*priority=*/0, callback, &task_id);
+///   BarelyPerformer_CreateTask(engine, performer_id, /*position=*/0.0, /*duration=*/1.0,
+///                              /*priority=*/0, callback, &task_id);
 ///
 ///   // Set the performer to looping.
 ///   BarelyPerformer_SetLooping(engine, performer_id, /*is_looping=*/true);
@@ -180,11 +177,8 @@
 ///   bool is_playing = false;
 ///   BarelyPerformer_IsPlaying(engine, performer_id, &is_playing);
 ///
-///   // Destroy the task.
-///   BarelyEngine_DestroyTask(engine, task_id);
-///
 ///   // Destroy the performer.
-///   BarelyEngine_DestroyPerformer(engine, performer_id);
+///   BarelyPerformer_Destroy(engine, performer_id);
 ///   @endcode
 
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
@@ -267,6 +261,19 @@ BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
   X(EventType, End, "End")
 BARELY_ENUM(EventType, BARELY_EVENT_TYPES)
 
+/// Default engine configuration.
+#define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate) \
+  {                                               \
+      .sample_##rate = sample_rate,               \
+      .max_frame_count = 2048,                    \
+      .max_instrument_count = 100,                \
+      .max_performer_count = 100,                 \
+      .max_task_count = 5000,                     \
+      .max_note_count = 1000,                     \
+      .max_slice_count = 1000,                    \
+      .max_voice_count = 200,                     \
+  }
+
 /// Engine control types.
 #define BARELY_ENGINE_CONTROL_TYPES(EngineControlType, X)                           \
   X(EngineControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                              \
@@ -332,19 +339,6 @@ BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
   X(NoteControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")  \
   X(NoteControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")
 BARELY_ENUM(NoteControlType, BARELY_NOTE_CONTROL_TYPES)
-
-/// Default engine configuration.
-#define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate) \
-  {                                               \
-      .sample_##rate = sample_rate,               \
-      .max_frame_count = 2048,                    \
-      .max_instrument_count = 100,                \
-      .max_performer_count = 100,                 \
-      .max_task_count = 5000,                     \
-      .max_note_count = 1000,                     \
-      .max_slice_count = 1000,                    \
-      .max_voice_count = 200,                     \
-  }
 
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
@@ -453,45 +447,11 @@ BARELY_API bool BarelyEngine_CreateInstrument(BarelyEngine* engine, uint32_t* ou
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_CreatePerformer(BarelyEngine* engine, uint32_t* out_performer_id);
 
-/// Creates a new task.
-///
-/// @param performer_id Performer identifier.
-/// @param position Task position in beats.
-/// @param duration Task duration in beats.
-/// @param priority Task priority.
-/// @param callback Task event callback.
-/// @param user_data Pointer to user data.
-/// @param out_task_id Output task identifier.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_CreateTask(BarelyEngine* engine, uint32_t performer_id,
-                                        double position, double duration, int32_t priority,
-                                        BarelyTaskEventCallback callback, void* user_data,
-                                        uint32_t* out_task_id);
-
 /// Destroys an engine.
 ///
 /// @param engine Pointer to engine.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_Destroy(BarelyEngine* engine);
-
-/// Destroys an instrument.
-///
-/// @param engine Pointer to engine.
-/// @param instrument_id Instrument identifier.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_DestroyInstrument(BarelyEngine* engine, uint32_t instrument_id);
-
-/// Destroys a performer.
-///
-/// @param performer_id Performer identifier.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_DestroyPerformer(BarelyEngine* engine, uint32_t performer_id);
-
-/// Destroys a task.
-///
-/// @param task_id Task identifier.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_DestroyTask(BarelyEngine* engine, uint32_t task_id);
 
 /// Generates a new random number with uniform distribution in the normalized range [0, 1).
 ///
@@ -571,6 +531,13 @@ BARELY_API bool BarelyEngine_SetTempo(BarelyEngine* engine, double tempo);
 /// @param timestamp Timestamp in seconds.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_Update(BarelyEngine* engine, double timestamp);
+
+/// Destroys an instrument.
+///
+/// @param engine Pointer to engine.
+/// @param instrument_id Instrument identifier.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrument_id);
 
 /// Gets an instrument control value.
 ///
@@ -672,6 +639,28 @@ BARELY_API bool BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instru
 BARELY_API bool BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t instrument_id,
                                                const BarelySlice* slices, int32_t slice_count);
 
+/// Creates a new performer task.
+///
+/// @param performer_id Performer identifier.
+/// @param position Task position in beats.
+/// @param duration Task duration in beats.
+/// @param priority Task priority.
+/// @param callback Task event callback.
+/// @param user_data Pointer to user data.
+/// @param out_task_id Output task identifier.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyPerformer_CreateTask(BarelyEngine* engine, uint32_t performer_id,
+                                           double position, double duration, int32_t priority,
+                                           BarelyTaskEventCallback callback, void* user_data,
+                                           uint32_t* out_task_id);
+
+/// Destroys a performer.
+///
+/// @param engine Pointer to engine.
+/// @param performer_id Performer identifier.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyPerformer_Destroy(BarelyEngine* engine, uint32_t performer_id);
+
 /// Gets the loop begin position of a performer.
 ///
 /// @param engine Pointer to engine.
@@ -767,6 +756,13 @@ BARELY_API bool BarelyPerformer_Start(BarelyEngine* engine, uint32_t performer_i
 /// @param performer_id Performer identifier.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_Stop(BarelyEngine* engine, uint32_t performer_id);
+
+/// Destroys a task.
+///
+/// @param engine Pointer to engine.
+/// @param task_id Task identifier.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyTask_Destroy(BarelyEngine* engine, uint32_t task_id);
 
 /// Gets the duration of a task.
 ///
@@ -944,6 +940,11 @@ class Instrument {
              NoteEventCallback* note_event_callback) noexcept
       : engine_(engine), instrument_id_(instrument_id), note_event_callback_(note_event_callback) {}
 
+  /// Destroys the instrument.
+  void Destroy() noexcept {
+    BarelyInstrument_Destroy(std::exchange(engine_, nullptr), std::exchange(instrument_id_, 0));
+  }
+
   /// Returns the identifier.
   ///
   /// @return Identifier.
@@ -1117,6 +1118,11 @@ class Task {
   // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return task_id_; }
 
+  /// Destroys the task.
+  void Destroy() noexcept {
+    BarelyTask_Destroy(std::exchange(engine_, nullptr), std::exchange(task_id_, 0));
+  }
+
   /// Returns the duration.
   ///
   /// @return Duration in beats.
@@ -1225,14 +1231,50 @@ class Performer {
   ///
   /// @param engine Pointer to raw engine.
   /// @param performer_id Performer identifier.
-  Performer(BarelyEngine* engine, uint32_t performer_id) noexcept
-      : engine_(engine), performer_id_(performer_id) {}
+  Performer(BarelyEngine* engine, uint32_t performer_id,
+            TaskEventCallback* task_event_callbacks) noexcept
+      : engine_(engine), performer_id_(performer_id), task_event_callbacks_(task_event_callbacks) {}
 
   /// Returns the identifier.
   ///
   /// @return Identifier.
   // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return performer_id_; }
+
+  /// Creates a new task.
+  ///
+  /// @param position Task position in beats.
+  /// @param duration Task duration in beats.
+  /// @param priority Task priority.
+  /// @param callback Task event callback.
+  /// @return Task.
+  Task CreateTask(double position, double duration, int priority,
+                  TaskEventCallback callback) noexcept {
+    uint32_t task_id = 0;
+    [[maybe_unused]] bool success = BarelyPerformer_CreateTask(
+        engine_, performer_id_, position, duration, priority, nullptr, nullptr, &task_id);
+    assert(success);
+    uint32_t max_id_index = 0;
+    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
+    assert(success);
+    auto& task_event_callback = task_event_callbacks_[(task_id & max_id_index) - 1];
+    task_event_callback = std::move(callback);
+    success = BarelyTask_SetEventCallback(
+        engine_, task_id,
+        [](BarelyEventType type, void* user_data) noexcept {
+          if (user_data != nullptr) {
+            (*static_cast<TaskEventCallback*>(user_data))(static_cast<EventType>(type));
+          }
+        },
+        &task_event_callback);
+    assert(success);
+    return {engine_, task_id, &task_event_callback};
+  }
+
+  /// Destroys the performer.
+  void Destroy() noexcept {
+    BarelyPerformer_Destroy(std::exchange(engine_, nullptr), std::exchange(performer_id_, 0));
+  }
 
   /// Returns the loop begin position.
   ///
@@ -1339,10 +1381,13 @@ class Performer {
 
  private:
   // Pointer to raw engine.
-  BarelyEngine* engine_;
+  BarelyEngine* engine_ = nullptr;
 
   // Performer identifier.
-  uint32_t performer_id_;
+  uint32_t performer_id_ = 0;
+
+  // Pointer to task event callbacks.
+  TaskEventCallback* task_event_callbacks_ = nullptr;
 };
 
 /// A class that wraps an engine.
@@ -1425,62 +1470,7 @@ class Engine {
     uint32_t performer_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer_id);
     assert(success);
-    return {engine_, performer_id};
-  }
-
-  /// Creates a new task.
-  ///
-  /// @param performer_id Performer identifier.
-  /// @param position Task position in beats.
-  /// @param duration Task duration in beats.
-  /// @param priority Task priority.
-  /// @param callback Task event callback.
-  /// @return Task.
-  Task CreateTask(Performer performer, double position, double duration, int priority,
-                  TaskEventCallback callback) noexcept {
-    uint32_t task_id = 0;
-    [[maybe_unused]] bool success = BarelyEngine_CreateTask(engine_, performer, position, duration,
-                                                            priority, nullptr, nullptr, &task_id);
-    assert(success);
-    uint32_t max_id_index = 0;
-    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
-    assert(success);
-    auto& task_event_callback = task_event_callbacks_.get()[(task_id & max_id_index) - 1];
-    task_event_callback = std::move(callback);
-    success = BarelyTask_SetEventCallback(
-        engine_, task_id,
-        [](BarelyEventType type, void* user_data) noexcept {
-          if (user_data != nullptr) {
-            (*static_cast<TaskEventCallback*>(user_data))(static_cast<EventType>(type));
-          }
-        },
-        &task_event_callback);
-    assert(success);
-    return {engine_, task_id, &task_event_callback};
-  }
-
-  /// Destroys an instrument.
-  ///
-  /// @param instrument Instrument.
-  void DestroyInstrument(Instrument instrument) {
-    [[maybe_unused]] const bool success = BarelyEngine_DestroyInstrument(engine_, instrument);
-    assert(success);
-  }
-
-  /// Destroys a performer.
-  ///
-  /// @param performer Performer.
-  void DestroyPerformer(Performer performer) {
-    [[maybe_unused]] const bool success = BarelyEngine_DestroyPerformer(engine_, performer);
-    assert(success);
-  }
-
-  /// Destroys a task.
-  ///
-  /// @param task Task.
-  void DestroyTask(Task task) {
-    [[maybe_unused]] const bool success = BarelyEngine_DestroyTask(engine_, task);
-    assert(success);
+    return {engine_, performer_id, task_event_callbacks_.get()};
   }
 
   /// Generates a random number with uniform distribution in the normalized range [0, 1).

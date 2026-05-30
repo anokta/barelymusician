@@ -19,7 +19,7 @@ enum class RepeaterMode : uint8_t {
 struct Repeater {
  public:
   Repeater(Engine& engine, Instrument instrument) noexcept;
-  ~Repeater() noexcept { engine_.DestroyPerformer(performer_); }
+  ~Repeater() noexcept { performer_.Destroy(); }
 
   void Clear() noexcept;
   void Pop() noexcept;

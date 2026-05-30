@@ -59,7 +59,7 @@ BarelyPerformer::BarelyPerformer() {
 
 BarelyPerformer::~BarelyPerformer() {
   _clear_tasks();
-  BarelyEngine_DestroyPerformer(BarelyEngine::get_singleton()->get(), performer_id_);
+  BarelyPerformer_Destroy(BarelyEngine::get_singleton()->get(), performer_id_);
 }
 
 void BarelyPerformer::start() {
@@ -157,7 +157,7 @@ void BarelyPerformer::_bind_methods() {
 
 void BarelyPerformer::_clear_tasks() {
   for (uint32_t task_id : task_ids_) {
-    BarelyEngine_DestroyTask(BarelyEngine::get_singleton()->get(), task_id);
+    BarelyTask_Destroy(BarelyEngine::get_singleton()->get(), task_id);
   }
   task_ids_.clear();
 }
@@ -172,7 +172,7 @@ void BarelyPerformer::_on_task_changed() {
     }
 
     uint32_t task_id = 0;
-    BarelyEngine_CreateTask(
+    BarelyPerformer_CreateTask(
         BarelyEngine::get_singleton()->get(), performer_id_, task->get_position(),
         task->get_duration(), task->get_priority(),
         [](BarelyEventType type, void* user_data) {

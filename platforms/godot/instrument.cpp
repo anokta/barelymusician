@@ -74,7 +74,7 @@ BarelyInstrument::BarelyInstrument() {
 }
 
 BarelyInstrument::~BarelyInstrument() {
-  BarelyEngine_DestroyInstrument(BarelyEngine::get_singleton()->get(), instrument_id_);
+  BarelyInstrument_Destroy(BarelyEngine::get_singleton()->get(), instrument_id_);
   instrument_id_ = 0;
 }
 

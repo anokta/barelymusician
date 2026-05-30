@@ -186,7 +186,7 @@ class Processor extends AudioWorkletProcessor {
       case CommandType.INSTRUMENT_DESTROY: {
         const {instrumentId, noteEventCallbackPtr} = this._instruments.get(command.handle);
         if (!instrumentId) return;
-        this._module._BarelyEngine_DestroyInstrument(this._engine, instrumentId);
+        this._module._BarelyInstrument_Destroy(this._engine, instrumentId);
         this._module.removeFunction(noteEventCallbackPtr);
         this._instruments.delete(command.handle);
         this._cleanUpInstrumentSampleData(instrumentId);
@@ -239,7 +239,7 @@ class Processor extends AudioWorkletProcessor {
       case CommandType.PERFORMER_DESTROY: {
         const performerId = this._performers.get(command.handle)?.performerId;
         if (!performerId) return;
-        this._module._BarelyEngine_DestroyPerformer(this._engine, performerId);
+        this._module._BarelyPerformer_Destroy(this._engine, performerId);
         this._performers.delete(command.handle);
       } break;
       case CommandType.PERFORMER_SET_LOOP_BEGIN_POSITION: {
@@ -283,7 +283,7 @@ class Processor extends AudioWorkletProcessor {
             this._engine, performerId, this._module.getValue(this._doublePtr, 'double'));
       } break;
       case CommandType.TASK_CREATE: {
-        this._module._BarelyEngine_CreateTask(
+        this._module._BarelyPerformer_CreateTask(
             this._engine, this._performers.get(command.performerHandle)?.performerId ?? 0,
             command.position, command.duration, command.priority, null, null, this._uint32Ptr);
         const taskId = this._module.getValue(this._uint32Ptr, 'i32');
@@ -324,7 +324,7 @@ class Processor extends AudioWorkletProcessor {
       case CommandType.TASK_DESTROY: {
         const {taskId, eventCallbackPtr} = this._tasks.get(command.handle);
         if (!taskId) return;
-        this._module._BarelyEngine_DestroyTask(this._engine, taskId);
+        this._module._BarelyTask_Destroy(this._engine, taskId);
         this._module.removeFunction(eventCallbackPtr);
         this._tasks.delete(command.handle);
       } break;

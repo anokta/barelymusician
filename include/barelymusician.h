@@ -465,12 +465,13 @@ BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* 
 BARELY_API bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
                                         float* out_value);
 
-/// Gets the maximum identifier index of an engine.
+/// Gets the identifier index mask of an engine.
 ///
 /// @param engine Pointer to engine.
-/// @param out_max_id_index Output maximum identifier index.
+/// @param out_id_index_mask Output identifier index mask.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetMaxIdIndex(const BarelyEngine* engine, uint32_t* out_max_id_index);
+BARELY_API bool BarelyEngine_GetIdIndexMask(const BarelyEngine* engine,
+                                            uint32_t* out_id_index_mask);
 
 /// Gets the tempo of an engine.
 ///
@@ -1227,9 +1228,14 @@ class Performer {
   ///
   /// @param engine Pointer to raw engine.
   /// @param performer_id Performer identifier.
-  Performer(BarelyEngine* engine, uint32_t performer_id,
+  /// @param id_index_mask Identifier index mask.
+  /// @param task_event_callbacks Pointer to task event callbacks.
+  Performer(BarelyEngine* engine, uint32_t performer_id, uint32_t id_index_mask,
             TaskEventCallback* task_event_callbacks) noexcept
-      : engine_(engine), performer_id_(performer_id), task_event_callbacks_(task_event_callbacks) {}
+      : engine_(engine),
+        performer_id_(performer_id),
+        id_index_mask_(id_index_mask),
+        task_event_callbacks_(task_event_callbacks) {}
 
   /// Returns the identifier.
   ///
@@ -1250,10 +1256,7 @@ class Performer {
     [[maybe_unused]] bool success = BarelyPerformer_CreateTask(
         engine_, performer_id_, position, duration, priority, nullptr, nullptr, &task_id);
     assert(success);
-    uint32_t max_id_index = 0;
-    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
-    assert(success);
-    auto& task_event_callback = task_event_callbacks_[(task_id & max_id_index) - 1];
+    auto& task_event_callback = task_event_callbacks_[(task_id & id_index_mask_) - 1];
     task_event_callback = std::move(callback);
     success = BarelyTask_SetEventCallback(
         engine_, task_id,
@@ -1382,6 +1385,9 @@ class Performer {
   // Performer identifier.
   uint32_t performer_id_ = 0;
 
+  // Identifier index mask.
+  uint32_t id_index_mask_ = 0;
+
   // Pointer to task event callbacks.
   TaskEventCallback* task_event_callbacks_ = nullptr;
 };
@@ -1449,12 +1455,9 @@ class Engine {
   /// @return Instrument.
   Instrument CreateInstrument() noexcept {
     uint32_t instrument_id = 0;
-    [[maybe_unused]] bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
+    [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
     assert(success);
-    uint32_t max_id_index = 0;
-    success = BarelyEngine_GetMaxIdIndex(engine_, &max_id_index);
-    assert(success);
-    auto& note_event_callback = note_event_callbacks_.get()[(instrument_id & max_id_index) - 1];
+    auto& note_event_callback = note_event_callbacks_.get()[(instrument_id & GetIdIndexMask()) - 1];
     note_event_callback = {};
     return {engine_, instrument_id, &note_event_callback};
   }
@@ -1466,7 +1469,7 @@ class Engine {
     uint32_t performer_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer_id);
     assert(success);
-    return {engine_, performer_id, task_event_callbacks_.get()};
+    return {engine_, performer_id, GetIdIndexMask(), task_event_callbacks_.get()};
   }
 
   /// Generates a random number with uniform distribution in the normalized range [0, 1).
@@ -1503,6 +1506,16 @@ class Engine {
         BarelyEngine_GetControl(engine_, static_cast<BarelyEngineControlType>(type), &value);
     assert(success);
     return static_cast<ValueType>(value);
+  }
+
+  /// Returns the identifier index mask.
+  ///
+  /// @return Identifier index mask.
+  [[nodiscard]] uint32_t GetIdIndexMask() const noexcept {
+    uint32_t id_index_mask = 0;
+    [[maybe_unused]] const bool success = BarelyEngine_GetIdIndexMask(engine_, &id_index_mask);
+    assert(success);
+    return id_index_mask;
   }
 
   /// Returns the tempo.

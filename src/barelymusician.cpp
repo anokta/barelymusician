@@ -110,11 +110,11 @@ bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType
   return true;
 }
 
-bool BarelyEngine_GetMaxIdIndex(const BarelyEngine* engine, uint32_t* out_max_id_index) {
+bool BarelyEngine_GetIdIndexMask(const BarelyEngine* engine, uint32_t* out_id_index_mask) {
   if (!engine) return false;
-  if (!out_max_id_index) return false;
+  if (!out_id_index_mask) return false;
 
-  *out_max_id_index = engine->state.GetMaxIdIndex();
+  *out_id_index_mask = engine->state.id_index_mask;
   return true;
 }
 

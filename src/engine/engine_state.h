@@ -62,15 +62,14 @@ struct EngineState {
 
         id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
             {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
-        max_id_index((1u << id_index_bit_count) - 1u),
-        max_id_generation((1u << (32u - id_index_bit_count)) - 1u),
+        id_index_mask((1u << id_index_bit_count) - 1u),
+        id_generation_mask((1u << (32u - id_index_bit_count)) - 1u),
 
         max_frame_count(static_cast<uint32_t>(config.max_frame_count)) {
     assert(id_index_bit_count < 32);
     assert(sample_rate > 0.0f);
   }
 
-  // Array of engine controls.
   std::array<Control, BarelyEngineControlType_kCount> controls = {
       BARELY_ENGINE_CONTROL_TYPES(EngineControlType, BARELY_DEFINE_CONTROL)};
 
@@ -114,8 +113,8 @@ struct EngineState {
   float smoothing_coeff = 0.0f;
 
   uint32_t id_index_bit_count = 0;
-  uint32_t max_id_index = 0;
-  uint32_t max_id_generation = 0;
+  uint32_t id_index_mask = 0;
+  uint32_t id_generation_mask = 0;
 
   uint32_t max_frame_count = 0;
 
@@ -150,13 +149,11 @@ struct EngineState {
     return id >> id_index_bit_count;
   }
 
-  [[nodiscard]] uint32_t GetIdIndex(uint32_t id) const noexcept { return (id & max_id_index) - 1; }
+  [[nodiscard]] uint32_t GetIdIndex(uint32_t id) const noexcept { return (id & id_index_mask) - 1; }
 
   [[nodiscard]] uint32_t GetNextIdGeneration(uint32_t generation) const noexcept {
-    return (generation + 1) & max_id_generation;
+    return (generation + 1) & id_generation_mask;
   }
-
-  [[nodiscard]] uint32_t GetMaxIdIndex() const noexcept { return max_id_index; }
 
   [[nodiscard]] const SliceState* GetSlice(uint32_t instrument_index,
                                            uint32_t slice_index) const noexcept {

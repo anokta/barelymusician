@@ -5,7 +5,7 @@ import {INSTRUMENT_CONTROLS, NoteControlType} from './control.js';
 const RENDER_QUANTUM_SIZE = 128;
 const STEREO_CHANNEL_COUNT = 2;
 
-const ENGINE_CONFIG_SIZE = 32;  // sizeof(BarelyEngineConfig)
+const ENGINE_CONFIG_SIZE = 28;  // sizeof(BarelyEngineConfig)
 const SLICE_SIZE = 24;          // sizeof(BarelySlice)
 
 const EventType = Object.freeze({
@@ -50,8 +50,8 @@ class Processor extends AudioWorkletProcessor {
       configView[2] = 32;                   // max_instrument_count
       configView[3] = 32;                   // max_performer_count
       configView[4] = 512;                  // max_task_count
-      configView[6] = 128;                  // max_slice_count
-      configView[7] = 128;                  // max_voice_count
+      configView[5] = 128;                  // max_slice_count
+      configView[6] = 128;                  // max_voice_count
 
       this._module._BarelyEngineConfig_GetRequiredAllocationSize(configPtr, this._uint32Ptr);
       const allocationSize = this._module.getValue(this._uint32Ptr, 'i32');

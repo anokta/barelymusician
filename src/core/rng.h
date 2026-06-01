@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_CORE_RNG_H_
 
 #include <cassert>
+#include <ctime>
 #include <random>
 
 namespace barely {
@@ -9,7 +10,7 @@ namespace barely {
 template <typename EngineType, typename RealType>
 class Rng {
  public:
-  Rng() noexcept : seed_(static_cast<int>(std::random_device()())), engine_(seed_) {}
+  Rng() noexcept : seed_(static_cast<int>(std::time(nullptr) & INT_MAX)), engine_(seed_) {}
 
   [[nodiscard]] int GetSeed() const noexcept { return seed_; }
 

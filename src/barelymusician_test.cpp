@@ -1,6 +1,7 @@
 #include <barelymusician.h>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -17,20 +18,26 @@ constexpr int kSampleRate = 48000;
 
 TEST(BarelyEngineTest, CreateDestroyEngine) {
   // Failures.
-  EXPECT_FALSE(BarelyEngine_Create(nullptr, nullptr));
+  EXPECT_FALSE(BarelyEngine_Create(nullptr, nullptr, 0, nullptr));
   EXPECT_FALSE(BarelyEngine_Destroy(nullptr));
 
   // Success.
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
+  int32_t allocation_size = 0;
+  BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  std::vector<std::byte> allocation(allocation_size);
   BarelyEngine* engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(&config, &engine));
+  EXPECT_TRUE(BarelyEngine_Create(&config, allocation.data(), allocation_size, &engine));
   EXPECT_TRUE(BarelyEngine_Destroy(engine));
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
+  int32_t allocation_size = 0;
+  BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  std::vector<std::byte> allocation(allocation_size);
   BarelyEngine* engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(&config, &engine));
+  EXPECT_TRUE(BarelyEngine_Create(&config, allocation.data(), allocation_size, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyEngine_CreateInstrument(engine, nullptr));
@@ -46,8 +53,11 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
+  int32_t allocation_size = 0;
+  BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  std::vector<std::byte> allocation(allocation_size);
   BarelyEngine* engine = nullptr;
-  ASSERT_TRUE(BarelyEngine_Create(&config, &engine));
+  EXPECT_TRUE(BarelyEngine_Create(&config, allocation.data(), allocation_size, &engine));
 
   // Failures.
   EXPECT_FALSE(BarelyEngine_CreatePerformer(engine, nullptr));

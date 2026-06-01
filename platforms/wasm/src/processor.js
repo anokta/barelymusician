@@ -20,6 +20,7 @@ class Processor extends AudioWorkletProcessor {
     this._module = null;
     this._engine = null;
 
+    this._allocationPtr = null;
     this._doublePtr = null;
     this._uint8Ptr = null;
     this._uint32Ptr = null;
@@ -52,7 +53,11 @@ class Processor extends AudioWorkletProcessor {
       configView[6] = 128;                  // max_slice_count
       configView[7] = 128;                  // max_voice_count
 
-      this._module._BarelyEngine_Create(configPtr, this._uint32Ptr);
+      this._module._BarelyEngineConfig_GetRequiredAllocationSize(configPtr, this._uint32Ptr);
+      const allocationSize = this._module.getValue(this._uint32Ptr, 'i32');
+      this._allocationPtr = this._module._malloc(allocationSize * Uint8Array.BYTES_PER_ELEMENT);
+      this._module._BarelyEngine_Create(
+          configPtr, this._allocationPtr, allocationSize, this._uint32Ptr);
       this._engine = this._module.getValue(this._uint32Ptr, 'i32');
 
       this._module._free(configPtr);

@@ -42,7 +42,17 @@ struct BarelyEngine {
   }
 };
 
-bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_engine) {
+bool BarelyEngineConfig_GetRequiredAllocationSize(const BarelyEngineConfig* config,
+                                                  int32_t* out_allocation_size) {
+  if (!config) return false;
+  if (!out_allocation_size) return false;
+
+  *out_allocation_size = static_cast<int32_t>(barely::GetAllocSize<BarelyEngine>(*config));
+  return true;
+}
+
+bool BarelyEngine_Create(const BarelyEngineConfig* config, void* allocation,
+                         int32_t allocation_size, BarelyEngine** out_engine) {
   if (!out_engine) return false;
   if (!config) return false;
   if (config->sample_rate <= 0 || config->max_frame_count <= 0 ||
@@ -52,9 +62,12 @@ bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_en
   }
 
   const size_t size = barely::GetAllocSize<BarelyEngine>(*config);
-  std::byte* data = new std::byte[size];
-  barely::Arena arena(data, size);
-  *out_engine = new (arena.Alloc<BarelyEngine>()) BarelyEngine(arena, *config);
+  if (allocation == nullptr || static_cast<size_t>(allocation_size) < size) {
+    return false;
+  }
+
+  barely::Arena arena(allocation, size);
+  *out_engine = ::new (arena.Alloc<BarelyEngine>()) BarelyEngine(arena, *config);
   return true;
 }
 
@@ -88,7 +101,7 @@ bool BarelyEngine_Destroy(BarelyEngine* engine) {
   if (!engine) return false;
 
   engine->controller.instrument_controller().SetAllNotesOff();
-  delete engine;
+  std::destroy_at(engine);
   return true;
 }
 

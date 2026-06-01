@@ -886,6 +886,9 @@ namespace Barely {
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
 
+      // Memory allocation for the engine.
+      private static IntPtr _allocation = IntPtr.Zero;
+
       private static Dictionary<UInt32, Instrument> _instruments = null;
       private static Dictionary<UInt32, List<float[]>> _slices = null;
       private static Dictionary<UInt32, Performer> _performers = null;
@@ -987,8 +990,13 @@ namespace Barely {
             maxSliceCount = 1000,
             maxVoiceCount = 200,
           };
-          if (!BarelyEngine_Create(ref engineConfig, ref _handle)) {
+          Int32 allocationSize = 0;
+          BarelyEngineConfig_GetRequiredAllocationSize(ref engineConfig, ref allocationSize);
+          _allocation = Marshal.AllocHGlobal(allocationSize);
+          if (!BarelyEngine_Create(ref engineConfig, _allocation, allocationSize, ref _handle)) {
             Debug.LogError("Failed to initialize BarelyEngine");
+            Marshal.FreeHGlobal(_allocation);
+            _allocation = IntPtr.Zero;
             return;
           }
           BarelyEngine_SetTempo(_handle, _tempo);
@@ -1029,6 +1037,8 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyEngine_Destroy(_handle);
           _handle = IntPtr.Zero;
+          Marshal.FreeHGlobal(_allocation);
+          _allocation = IntPtr.Zero;
         }
 
         private double GetNextTimestamp() {
@@ -1047,8 +1057,13 @@ namespace Barely {
       private const string _pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
+      [DllImport(_pluginName, EntryPoint = "BarelyEngineConfig_GetRequiredAllocationSize")]
+      private static extern bool BarelyEngineConfig_GetRequiredAllocationSize(
+          ref BarelyEngineConfig config, ref Int32 outAllocationSize);
+
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
       private static extern bool BarelyEngine_Create(ref BarelyEngineConfig config,
+                                                     IntPtr allocation, Int32 allocationSize,
                                                      ref IntPtr outEngine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreateInstrument")]

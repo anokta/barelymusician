@@ -82,10 +82,14 @@ static void TaskEventCallback(BarelyEventType type, void* user_data) {
 
 int main() {
   // Initialize the engine.
-  BarelyEngine* engine = NULL;
   BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   config.max_frame_count = kFrameCount;
-  BarelyEngine_Create(&config, &engine);
+  int32_t allocation_size = 0;
+  BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  void* allocation = malloc(allocation_size);
+
+  BarelyEngine* engine = NULL;
+  BarelyEngine_Create(&config, allocation, allocation_size, &engine);
   BarelyEngine_SetTempo(engine, kTempo);
 
   BarelyEngine_CreateInstrument(engine, &g_instrument_id);
@@ -144,6 +148,7 @@ int main() {
 
   // Shutdown the engine.
   BarelyEngine_Destroy(engine);
+  free(allocation);
 
   return 0;
 }

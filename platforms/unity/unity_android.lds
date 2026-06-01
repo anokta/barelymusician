@@ -1,5 +1,6 @@
 VERS_1.0 {
   global:
+    BarelyEngineConfig_GetRequiredAllocationSize;
     BarelyEngine_Create;
     BarelyEngine_CreateInstrument;
     BarelyEngine_CreatePerformer;

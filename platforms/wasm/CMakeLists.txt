@@ -1,6 +1,7 @@
 set(CMAKE_FOLDER platforms)
 
 set(BARELY_EXPORTED_FUNCTIONS "['_malloc','_free',
+  '_BarelyEngineConfig_GetRequiredAllocationSize',
   '_BarelyEngine_Create',
   '_BarelyEngine_CreateInstrument',
   '_BarelyEngine_CreatePerformer',

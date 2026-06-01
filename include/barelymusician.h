@@ -99,8 +99,11 @@
 ///
 ///   // Create a new engine.
 ///   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(/*sample_rate=*/48000);
+///   int32_t allocation_size = 0;
+///   BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+///   void* allocation = malloc(allocation_size);
 ///   BarelyEngine* engine = NULL;
-///   BarelyEngine_Create(&config, &engine);
+///   BarelyEngine_Create(&config, allocation, allocationSize, &engine);
 ///
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
@@ -125,6 +128,7 @@
 ///
 ///   // Destroy the engine.
 ///   BarelyEngine_Destroy(engine);
+///   free(allocation);
 ///   @endcode
 ///
 /// - Instrument:
@@ -422,12 +426,23 @@ typedef void (*BarelyNoteEventCallback)(BarelyEventType type, float pitch, void*
 /// @param user_data Pointer to user data.
 typedef void (*BarelyTaskEventCallback)(BarelyEventType type, void* user_data);
 
+/// Gets the required memory allocation size for an engine configuration.
+///
+/// @param config Pointer to engine configuration.
+/// @param out_allocation_size Output required memory allocation size.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyEngineConfig_GetRequiredAllocationSize(const BarelyEngineConfig* config,
+                                                             int32_t* out_allocation_size);
+
 /// Creates a new engine.
 ///
 /// @param config Pointer to engine configuration.
+/// @param allocation Pointer to memory allocation.
+/// @param allocation_size Memory allocation size.
 /// @param out_engine Output pointer to engine.
 /// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_Create(const BarelyEngineConfig* config, BarelyEngine** out_engine);
+BARELY_API bool BarelyEngine_Create(const BarelyEngineConfig* config, void* allocation,
+                                    int32_t allocation_size, BarelyEngine** out_engine);
 
 /// Creates a new instrument.
 ///
@@ -859,6 +874,7 @@ BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, f
 #ifdef __cplusplus
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -887,6 +903,17 @@ struct EngineConfig : public BarelyEngineConfig {
   /// @param config Raw engine configuration.
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr EngineConfig(BarelyEngineConfig config) noexcept : BarelyEngineConfig{config} {}
+
+  /// Returns the required memory allocation size.
+  ///
+  /// @return Required memory allocation size.
+  [[nodiscard]] int32_t GetRequiredAllocationSize() const noexcept {
+    int32_t allocation_size = 0;
+    [[maybe_unused]] const bool success =
+        BarelyEngineConfig_GetRequiredAllocationSize(this, &allocation_size);
+    assert(success);
+    return allocation_size;
+  }
 };
 
 /// Slice of sample data.
@@ -1403,10 +1430,12 @@ class Engine {
   /// Constructs a new `Engine`.
   ///
   /// @param config Engine configuration.
-  explicit Engine(const EngineConfig& config) noexcept {
-    note_event_callbacks_ = std::make_unique<NoteEventCallback[]>(config.max_instrument_count);
-    task_event_callbacks_ = std::make_unique<TaskEventCallback[]>(config.max_task_count);
-    [[maybe_unused]] const bool success = BarelyEngine_Create(&config, &engine_);
+  explicit Engine(const EngineConfig& config) noexcept
+      : allocation_(config.GetRequiredAllocationSize()),
+        note_event_callbacks_(config.max_instrument_count),
+        task_event_callbacks_(config.max_task_count) {
+    [[maybe_unused]] const bool success = BarelyEngine_Create(
+        &config, allocation_.data(), static_cast<int32_t>(allocation_.size()), &engine_);
     assert(success);
   }
 
@@ -1427,6 +1456,7 @@ class Engine {
   /// @param other Other engine.
   Engine(Engine&& other) noexcept
       : engine_(std::exchange(other.engine_, nullptr)),
+        allocation_(std::exchange(other.allocation_, {})),
         note_event_callbacks_(std::exchange(other.note_event_callbacks_, {})),
         task_event_callbacks_(std::exchange(other.task_event_callbacks_, {})) {}
 
@@ -1438,6 +1468,7 @@ class Engine {
     if (this != &other) {
       BarelyEngine_Destroy(engine_);
       engine_ = std::exchange(other.engine_, nullptr);
+      allocation_ = std::exchange(other.allocation_, {});
       note_event_callbacks_ = std::exchange(other.note_event_callbacks_, {});
       task_event_callbacks_ = std::exchange(other.task_event_callbacks_, {});
     }
@@ -1457,7 +1488,7 @@ class Engine {
     uint32_t instrument_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
     assert(success);
-    auto& note_event_callback = note_event_callbacks_.get()[(instrument_id & GetIdIndexMask()) - 1];
+    auto& note_event_callback = note_event_callbacks_[(instrument_id & GetIdIndexMask()) - 1];
     note_event_callback = {};
     return {engine_, instrument_id, &note_event_callback};
   }
@@ -1469,7 +1500,7 @@ class Engine {
     uint32_t performer_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer_id);
     assert(success);
-    return {engine_, performer_id, GetIdIndexMask(), task_event_callbacks_.get()};
+    return {engine_, performer_id, GetIdIndexMask(), task_event_callbacks_.data()};
   }
 
   /// Generates a random number with uniform distribution in the normalized range [0, 1).
@@ -1592,11 +1623,14 @@ class Engine {
   // Pointer to raw engine.
   BarelyEngine* engine_ = nullptr;
 
-  // Heap allocated array of note event callbacks (for pointer stability on move).
-  std::unique_ptr<NoteEventCallback[]> note_event_callbacks_ = nullptr;
+  // Heap allocated memory for the engine.
+  std::vector<std::byte> allocation_;
 
-  // Heap allocated array of task event callbacks (for pointer stability on move).
-  std::unique_ptr<TaskEventCallback[]> task_event_callbacks_ = nullptr;
+  // Heap allocated array of note event callbacks.
+  std::vector<NoteEventCallback> note_event_callbacks_;
+
+  // Heap allocated array of task event callbacks.
+  std::vector<TaskEventCallback> task_event_callbacks_;
 };
 
 /// A musical quantization.

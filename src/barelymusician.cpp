@@ -123,14 +123,6 @@ bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType
   return true;
 }
 
-bool BarelyEngine_GetIdIndexMask(const BarelyEngine* engine, uint32_t* out_id_index_mask) {
-  if (!engine) return false;
-  if (!out_id_index_mask) return false;
-
-  *out_id_index_mask = engine->state.id_index_mask;
-  return true;
-}
-
 bool BarelyEngine_GetTempo(const BarelyEngine* engine, double* out_tempo) {
   if (!engine) return false;
   if (!out_tempo) return false;

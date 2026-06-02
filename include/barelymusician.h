@@ -480,14 +480,6 @@ BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* 
 BARELY_API bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
                                         float* out_value);
 
-/// Gets the identifier index mask of an engine.
-///
-/// @param engine Pointer to engine.
-/// @param out_id_index_mask Output identifier index mask.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetIdIndexMask(const BarelyEngine* engine,
-                                            uint32_t* out_id_index_mask);
-
 /// Gets the tempo of an engine.
 ///
 /// @param engine Pointer to engine.
@@ -955,18 +947,13 @@ class Instrument {
   /// Default constructor.
   Instrument() noexcept = default;
 
-  /// Constructs a new `Instrument`.
-  ///
-  /// @param engine Pointer to raw engine.
-  /// @param instrument_id Instrument identifier.
-  /// @param note_event_callback Pointer to note event callback.
-  Instrument(BarelyEngine* engine, uint32_t instrument_id,
-             NoteEventCallback* note_event_callback) noexcept
-      : engine_(engine), instrument_id_(instrument_id), note_event_callback_(note_event_callback) {}
-
   /// Destroys the instrument.
   void Destroy() noexcept {
-    BarelyInstrument_Destroy(std::exchange(engine_, nullptr), std::exchange(instrument_id_, 0));
+    if (BarelyInstrument_Destroy(std::exchange(engine_, nullptr),
+                                 std::exchange(instrument_id_, 0))) {
+      assert(free_note_event_callbacks_->size() < free_note_event_callbacks_->capacity());
+      free_note_event_callbacks_->push_back(note_event_callback_);
+    }
   }
 
   /// Returns the identifier.
@@ -1112,14 +1099,21 @@ class Instrument {
   }
 
  private:
-  // Pointer to raw engine.
-  BarelyEngine* engine_ = nullptr;
-
-  // Instrument identifier.
-  uint32_t instrument_id_ = 0;
-
-  // Pointer to note event callback.
+  friend class Engine;
+  Instrument(std::vector<NoteEventCallback*>* free_note_event_callbacks, BarelyEngine* engine,
+             uint32_t instrument_id) noexcept
+      : free_note_event_callbacks_(free_note_event_callbacks),
+        engine_(engine),
+        instrument_id_(instrument_id) {
+    assert(free_note_event_callbacks_ != nullptr && !free_note_event_callbacks_->empty());
+    note_event_callback_ = free_note_event_callbacks_->back();
+    *note_event_callback_ = {};
+    free_note_event_callbacks_->pop_back();
+  }
+  std::vector<NoteEventCallback*>* free_note_event_callbacks_ = nullptr;
   NoteEventCallback* note_event_callback_ = nullptr;
+  BarelyEngine* engine_ = nullptr;
+  uint32_t instrument_id_ = 0;
 };
 
 /// Class that wraps a task.
@@ -1127,14 +1121,6 @@ class Task {
  public:
   /// Default constructor.
   Task() noexcept = default;
-
-  /// Constructs a new `Task`.
-  ///
-  /// @param engine Pointer to raw engine.
-  /// @param task_id Task identifier.
-  /// @param event_callback Pointer to task event callback.
-  Task(BarelyEngine* engine, uint32_t task_id, TaskEventCallback* event_callback) noexcept
-      : engine_(engine), task_id_(task_id), event_callback_(event_callback) {}
 
   /// Returns the identifier.
   ///
@@ -1144,7 +1130,12 @@ class Task {
 
   /// Destroys the task.
   void Destroy() noexcept {
-    BarelyTask_Destroy(std::exchange(engine_, nullptr), std::exchange(task_id_, 0));
+    if (BarelyTask_Destroy(std::exchange(engine_, nullptr), std::exchange(task_id_, 0))) {
+      if (task_event_callback_ == *first_task_event_callback_) {
+        *first_task_event_callback_ = task_event_callback_->next;
+      }
+      ReleaseTaskEventCallback(free_task_event_callbacks_, task_event_callback_);
+    }
   }
 
   /// Returns the duration.
@@ -1199,10 +1190,10 @@ class Task {
   ///
   /// @param callback Event callback.
   void SetEventCallback(TaskEventCallback callback) noexcept {
-    assert(event_callback_ != nullptr);
-    *event_callback_ = std::move(callback);
+    assert(task_event_callback_ != nullptr);
+    task_event_callback_->callback = std::move(callback);
     [[maybe_unused]] const bool success =
-        (*event_callback_)
+        (task_event_callback_->callback)
             ? BarelyTask_SetEventCallback(
                   engine_, task_id_,
                   [](BarelyEventType type, void* user_data) noexcept {
@@ -1212,7 +1203,7 @@ class Task {
                       callback(static_cast<EventType>(type));
                     }
                   },
-                  event_callback_)
+                  &task_event_callback_->callback)
             : BarelyTask_SetEventCallback(engine_, task_id_, nullptr, nullptr);
     assert(success);
   }
@@ -1235,14 +1226,37 @@ class Task {
   }
 
  private:
-  // Pointer to engine.
+  friend class Engine;
+  friend class Performer;
+  struct EventCallbackNode {
+    TaskEventCallback callback = nullptr;
+    EventCallbackNode* prev = nullptr;
+    EventCallbackNode* next = nullptr;
+  };
+  static void ReleaseTaskEventCallback(std::vector<EventCallbackNode*>* free_task_event_callbacks,
+                                       EventCallbackNode* task_event_callback) noexcept {
+    if (task_event_callback->prev != nullptr) {
+      task_event_callback->prev->next = task_event_callback->next;
+    }
+    if (task_event_callback->next != nullptr) {
+      task_event_callback->next->prev = task_event_callback->prev;
+    }
+    assert(free_task_event_callbacks->size() < free_task_event_callbacks->capacity());
+    free_task_event_callbacks->push_back(task_event_callback);
+  }
+  Task(std::vector<EventCallbackNode*>* free_task_event_callbacks,
+       EventCallbackNode** first_task_event_callback, EventCallbackNode* task_event_callback,
+       BarelyEngine* engine, uint32_t task_id) noexcept
+      : free_task_event_callbacks_(free_task_event_callbacks),
+        first_task_event_callback_(first_task_event_callback),
+        task_event_callback_(task_event_callback),
+        engine_(engine),
+        task_id_(task_id) {}
+  std::vector<EventCallbackNode*>* free_task_event_callbacks_ = nullptr;
+  EventCallbackNode** first_task_event_callback_ = nullptr;
+  EventCallbackNode* task_event_callback_ = nullptr;
   BarelyEngine* engine_ = nullptr;
-
-  // Task identifier.
   uint32_t task_id_ = 0;
-
-  // Pointer to event callback.
-  TaskEventCallback* event_callback_ = nullptr;
 };
 
 /// Class that wraps a performer.
@@ -1250,19 +1264,6 @@ class Performer {
  public:
   /// Default constructor.
   Performer() noexcept = default;
-
-  /// Constructs a new `Performer`.
-  ///
-  /// @param engine Pointer to raw engine.
-  /// @param performer_id Performer identifier.
-  /// @param id_index_mask Identifier index mask.
-  /// @param task_event_callbacks Pointer to task event callbacks.
-  Performer(BarelyEngine* engine, uint32_t performer_id, uint32_t id_index_mask,
-            TaskEventCallback* task_event_callbacks) noexcept
-      : engine_(engine),
-        performer_id_(performer_id),
-        id_index_mask_(id_index_mask),
-        task_event_callbacks_(task_event_callbacks) {}
 
   /// Returns the identifier.
   ///
@@ -1283,8 +1284,23 @@ class Performer {
     [[maybe_unused]] bool success = BarelyPerformer_CreateTask(
         engine_, performer_id_, position, duration, priority, nullptr, nullptr, &task_id);
     assert(success);
-    auto& task_event_callback = task_event_callbacks_[(task_id & id_index_mask_) - 1];
-    task_event_callback = std::move(callback);
+
+    assert(free_task_event_callbacks_ != nullptr && !free_task_event_callbacks_->empty());
+    Task::EventCallbackNode* task_event_callback = free_task_event_callbacks_->back();
+    *task_event_callback = {.callback = std::move(callback)};
+    free_task_event_callbacks_->pop_back();
+
+    if (*first_task_event_callback_ != nullptr) {
+      Task::EventCallbackNode* current_task_event_callback = *first_task_event_callback_;
+      while (current_task_event_callback->next != nullptr) {
+        current_task_event_callback = current_task_event_callback->next;
+      }
+      current_task_event_callback->next = task_event_callback;
+      task_event_callback->prev = current_task_event_callback;
+    } else {
+      *first_task_event_callback_ = task_event_callback;
+    }
+
     success = BarelyTask_SetEventCallback(
         engine_, task_id,
         [](BarelyEventType type, void* user_data) noexcept {
@@ -1292,14 +1308,24 @@ class Performer {
             (*static_cast<TaskEventCallback*>(user_data))(static_cast<EventType>(type));
           }
         },
-        &task_event_callback);
+        &task_event_callback->callback);
     assert(success);
-    return {engine_, task_id, &task_event_callback};
+    return {free_task_event_callbacks_, first_task_event_callback_, task_event_callback, engine_,
+            task_id};
   }
 
   /// Destroys the performer.
   void Destroy() noexcept {
-    BarelyPerformer_Destroy(std::exchange(engine_, nullptr), std::exchange(performer_id_, 0));
+    if (BarelyPerformer_Destroy(std::exchange(engine_, nullptr), std::exchange(performer_id_, 0))) {
+      Task::EventCallbackNode* task_event_callback = *first_task_event_callback_;
+      while (task_event_callback != nullptr) {
+        Task::ReleaseTaskEventCallback(free_task_event_callbacks_, task_event_callback);
+        task_event_callback = task_event_callback->next;
+      }
+      assert(free_first_task_event_callbacks_->size() <
+             free_first_task_event_callbacks_->capacity());
+      free_first_task_event_callbacks_->push_back(first_task_event_callback_);
+    }
   }
 
   /// Returns the loop begin position.
@@ -1406,17 +1432,25 @@ class Performer {
   }
 
  private:
-  // Pointer to raw engine.
+  friend class Engine;
+  Performer(std::vector<Task::EventCallbackNode*>* free_task_event_callbacks,
+            std::vector<Task::EventCallbackNode**>* free_first_task_event_callbacks,
+            BarelyEngine* engine, uint32_t performer_id) noexcept
+      : free_task_event_callbacks_(free_task_event_callbacks),
+        free_first_task_event_callbacks_(free_first_task_event_callbacks),
+        engine_(engine),
+        performer_id_(performer_id) {
+    assert(free_first_task_event_callbacks_ != nullptr &&
+           !free_first_task_event_callbacks_->empty());
+    first_task_event_callback_ = free_first_task_event_callbacks->back();
+    *first_task_event_callback_ = nullptr;
+    free_first_task_event_callbacks_->pop_back();
+  }
+  std::vector<Task::EventCallbackNode*>* free_task_event_callbacks_ = nullptr;
+  std::vector<Task::EventCallbackNode**>* free_first_task_event_callbacks_ = nullptr;
+  Task::EventCallbackNode** first_task_event_callback_ = nullptr;
   BarelyEngine* engine_ = nullptr;
-
-  // Performer identifier.
   uint32_t performer_id_ = 0;
-
-  // Identifier index mask.
-  uint32_t id_index_mask_ = 0;
-
-  // Pointer to task event callbacks.
-  TaskEventCallback* task_event_callbacks_ = nullptr;
 };
 
 /// A class that wraps an engine.
@@ -1431,18 +1465,14 @@ class Engine {
   ///
   /// @param config Engine configuration.
   explicit Engine(const EngineConfig& config) noexcept
-      : allocation_(config.GetRequiredAllocationSize()),
-        note_event_callbacks_(config.max_instrument_count),
-        task_event_callbacks_(config.max_task_count) {
+      : note_event_callbacks_(config.max_instrument_count),
+        task_event_callbacks_(config.max_task_count),
+        first_task_event_callbacks_(config.max_performer_count),
+        allocation_(config.GetRequiredAllocationSize()) {
     [[maybe_unused]] const bool success = BarelyEngine_Create(
         &config, allocation_.data(), static_cast<int32_t>(allocation_.size()), &engine_);
     assert(success);
   }
-
-  /// Constructs a new `Engine`.
-  ///
-  /// @param engine Pointer to raw engine.
-  explicit Engine(BarelyEngine* engine) noexcept : engine_(engine) { assert(engine != nullptr); }
 
   /// Destroys `Engine`.
   ~Engine() noexcept { BarelyEngine_Destroy(engine_); }
@@ -1455,10 +1485,11 @@ class Engine {
   ///
   /// @param other Other engine.
   Engine(Engine&& other) noexcept
-      : engine_(std::exchange(other.engine_, nullptr)),
+      : note_event_callbacks_(std::exchange(other.note_event_callbacks_, {})),
+        task_event_callbacks_(std::exchange(other.task_event_callbacks_, {})),
+        first_task_event_callbacks_(std::exchange(other.first_task_event_callbacks_, {})),
         allocation_(std::exchange(other.allocation_, {})),
-        note_event_callbacks_(std::exchange(other.note_event_callbacks_, {})),
-        task_event_callbacks_(std::exchange(other.task_event_callbacks_, {})) {}
+        engine_(std::exchange(other.engine_, nullptr)) {}
 
   /// Assigns `Engine` via move.
   ///
@@ -1467,10 +1498,11 @@ class Engine {
   Engine& operator=(Engine&& other) noexcept {
     if (this != &other) {
       BarelyEngine_Destroy(engine_);
-      engine_ = std::exchange(other.engine_, nullptr);
-      allocation_ = std::exchange(other.allocation_, {});
       note_event_callbacks_ = std::exchange(other.note_event_callbacks_, {});
       task_event_callbacks_ = std::exchange(other.task_event_callbacks_, {});
+      first_task_event_callbacks_ = std::exchange(other.first_task_event_callbacks_, {});
+      allocation_ = std::exchange(other.allocation_, {});
+      engine_ = std::exchange(other.engine_, nullptr);
     }
     return *this;
   }
@@ -1488,9 +1520,7 @@ class Engine {
     uint32_t instrument_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
     assert(success);
-    auto& note_event_callback = note_event_callbacks_[(instrument_id & GetIdIndexMask()) - 1];
-    note_event_callback = {};
-    return {engine_, instrument_id, &note_event_callback};
+    return {&note_event_callbacks_.free, engine_, instrument_id};
   }
 
   /// Creates a new performer.
@@ -1500,7 +1530,7 @@ class Engine {
     uint32_t performer_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer_id);
     assert(success);
-    return {engine_, performer_id, GetIdIndexMask(), task_event_callbacks_.data()};
+    return {&task_event_callbacks_.free, &first_task_event_callbacks_.free, engine_, performer_id};
   }
 
   /// Generates a random number with uniform distribution in the normalized range [0, 1).
@@ -1537,16 +1567,6 @@ class Engine {
         BarelyEngine_GetControl(engine_, static_cast<BarelyEngineControlType>(type), &value);
     assert(success);
     return static_cast<ValueType>(value);
-  }
-
-  /// Returns the identifier index mask.
-  ///
-  /// @return Identifier index mask.
-  [[nodiscard]] uint32_t GetIdIndexMask() const noexcept {
-    uint32_t id_index_mask = 0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetIdIndexMask(engine_, &id_index_mask);
-    assert(success);
-    return id_index_mask;
   }
 
   /// Returns the tempo.
@@ -1620,17 +1640,23 @@ class Engine {
   }
 
  private:
-  // Pointer to raw engine.
-  BarelyEngine* engine_ = nullptr;
-
-  // Heap allocated memory for the engine.
+  // Heap allocated fixed size buffers below (for pointer stability on move).
+  template <typename T>
+  struct Pool {
+    Pool() noexcept = default;
+    explicit Pool(int32_t capacity) noexcept : items(capacity), free(capacity) {
+      for (int32_t i = 0; i < capacity; ++i) {
+        free[i] = &items[i];
+      }
+    }
+    std::vector<T> items;
+    std::vector<T*> free;
+  };
+  Pool<NoteEventCallback> note_event_callbacks_;
+  Pool<Task::EventCallbackNode> task_event_callbacks_;
+  Pool<Task::EventCallbackNode*> first_task_event_callbacks_;
   std::vector<std::byte> allocation_;
-
-  // Heap allocated array of note event callbacks.
-  std::vector<NoteEventCallback> note_event_callbacks_;
-
-  // Heap allocated array of task event callbacks.
-  std::vector<TaskEventCallback> task_event_callbacks_;
+  BarelyEngine* engine_ = nullptr;
 };
 
 /// A musical quantization.

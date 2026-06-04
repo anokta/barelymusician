@@ -124,8 +124,8 @@ std::pair<std::vector<Slice>, std::vector<std::vector<float>>> BuildPercussionSa
 }
 
 // Schedules performer to play an instrument note.
-void ScheduleNote(double position, double duration, float pitch, float gain, Engine& engine,
-                  Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
+void ScheduleNote(double position, double duration, float pitch, float gain, Instrument& instrument,
+                  Performer& performer, std::vector<Task>& tasks) {
   tasks.emplace_back(performer.CreateTask(
       quantization.GetPosition(performer.GetPosition() + position),
       quantization.GetPosition(duration), 0, [pitch, gain, &instrument](EventType type) noexcept {
@@ -137,10 +137,10 @@ void ScheduleNote(double position, double duration, float pitch, float gain, Eng
       }));
 }
 
-void ComposeChord(float gain, int harmonic, const Scale& scale, Engine& engine,
-                  Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
+void ComposeChord(float gain, int harmonic, const Scale& scale, Instrument& instrument,
+                  Performer& performer, std::vector<Task>& tasks) {
   const auto add_chord_note = [&](int degree) {
-    ScheduleNote(0.0, 1.0, scale.GetPitch(degree), gain, engine, instrument, performer, tasks);
+    ScheduleNote(0.0, 1.0, scale.GetPitch(degree), gain, instrument, performer, tasks);
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -148,13 +148,13 @@ void ComposeChord(float gain, int harmonic, const Scale& scale, Engine& engine,
 }
 
 void ComposeLine(int octave_offset, float gain, int bar, int beat, int beat_count, int harmonic,
-                 const Scale& scale, Engine& engine, Instrument& instrument, Performer& performer,
+                 const Scale& scale, Instrument& instrument, Performer& performer,
                  std::vector<Task>& tasks) {
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position, int degree) {
     ScheduleNote(begin_position, end_position - begin_position,
-                 scale.GetPitch(octave_offset * scale.GetPitchCount() + degree), gain, engine,
-                 instrument, performer, tasks);
+                 scale.GetPitch(octave_offset * scale.GetPitchCount() + degree), gain, instrument,
+                 performer, tasks);
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.33, harmonic);
@@ -178,8 +178,8 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, Instrument&
                   Performer& performer, std::vector<Task>& tasks) {
   const auto get_beat = [](int step) { return static_cast<double>(step) / kSixteenthNotesPerBeat; };
   const auto add_note = [&](double begin_position, double end_position, float pitch, float gain) {
-    ScheduleNote(begin_position, end_position - begin_position, pitch, gain, engine, instrument,
-                 performer, tasks);
+    ScheduleNote(begin_position, end_position - begin_position, pitch, gain, instrument, performer,
+                 tasks);
   };
 
   // Kick.
@@ -263,7 +263,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto chords_beat_composer_callback = [&](int /*bar*/, int /*beat*/, int /*beat_count*/,
                                                  int harmonic, Instrument& instrument,
                                                  Performer& performer, std::vector<Task>& tasks) {
-    ComposeChord(1.0, harmonic, scale, engine, instrument, performer, tasks);
+    ComposeChord(1.0, harmonic, scale, instrument, performer, tasks);
   };
 
   build_instrument_fn(0.0f, 0.65f, 0.5f, 0.2f);
@@ -277,8 +277,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto line_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                Instrument& instrument, Performer& performer,
                                                std::vector<Task>& tasks) {
-    ComposeLine(-1, 1.0f, bar, beat, beat_count, harmonic, scale, engine, instrument, performer,
-                tasks);
+    ComposeLine(-1, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer, tasks);
   };
 
   build_instrument_fn(1.0f, 0.9f, 0.01f, 0.4f);
@@ -288,8 +287,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                  Instrument& instrument, Performer& performer,
                                                  std::vector<Task>& tasks) {
-    ComposeLine(0, 1.0f, bar, beat, beat_count, harmonic, scale, engine, instrument, performer,
-                tasks);
+    ComposeLine(0, 1.0f, bar, beat, beat_count, harmonic, scale, instrument, performer, tasks);
   };
 
   build_instrument_fn(0.5f, 0.9f, 0.1f, 0.4f);

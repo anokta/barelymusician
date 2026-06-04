@@ -52,8 +52,8 @@ constexpr char kMidiFileName[] = "midi/sample.mid";
 constexpr double kTempo = 132.0;
 
 // Builds the score for the given `midi_events`.
-bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Engine& engine,
-                Instrument& instrument, Performer& performer) {
+bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instrument& instrument,
+                Performer& performer) {
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
@@ -107,7 +107,7 @@ int main(int /*argc*/, char* argv[]) {
     tracks.emplace_back(engine.CreateInstrument(), engine.CreatePerformer(), tracks.size() + 1);
     auto& [instrument, performer, track_index] = tracks.back();
     // Build the score to perform.
-    if (!BuildScore(midi_file[i], ticks_per_quarter, engine, instrument, performer)) {
+    if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
       performer.Destroy();
       instrument.Destroy();

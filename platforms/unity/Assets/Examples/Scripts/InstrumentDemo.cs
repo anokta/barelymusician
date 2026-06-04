@@ -12,7 +12,6 @@ namespace Barely.Examples {
     public float oscShape = 0.0f;
     public OscMode oscMode = OscMode.CROSSFADE;
     public SliceMode sliceMode = SliceMode.LOOP;
-    public ArpMode arpMode = ArpMode.UP;
 
     private const int N = 4;
     private Dictionary<float, Vector2> _activeNotes = null;
@@ -74,9 +73,6 @@ namespace Barely.Examples {
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
         controller.instrument.SliceMode = sliceMode;
-      } else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)) {
-        controller.instrument.ArpMode =
-            (controller.instrument.ArpMode == arpMode) ? ArpMode.NONE : arpMode;
       }
     }
 

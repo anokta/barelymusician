@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
 #include "core/arena.h"
 #include "core/constants.h"

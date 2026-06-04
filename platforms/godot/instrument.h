@@ -38,9 +38,6 @@ namespace barely::godot {
   X(DelaySend, delay_send, float, 0.0f)                   \
   X(ReverbSend, reverb_send, float, 0.0f)                 \
   X(SidechainSend, sidechain_send, float, 0.0f)           \
-  X(ArpMode, arp_mode, int, BarelyArpMode_kNone)          \
-  X(ArpGate, arp_gate, float, 0.5f)                       \
-  X(ArpRate, arp_rate, float, 2.0f)                       \
   X(Retrigger, retrigger, bool, false)                    \
   X(VoiceCount, voice_count, int, 8)
 

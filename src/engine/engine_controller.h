@@ -30,26 +30,14 @@ class EngineController {
 
         double update_duration = max_update_duration;
         int32_t max_priority = INT32_MIN;
-
         performer_controller_.GetNextTaskEvent(update_duration, max_priority);
-        if (const double next_duration = instrument_controller_.GetNextDuration();
-            next_duration < update_duration) {
-          update_duration = next_duration;
-          max_priority = INT32_MAX;
-        }
 
         if (update_duration > 0) {
           performer_controller_.Update(update_duration);
-          instrument_controller_.Update(update_duration);
-
           engine_.timestamp += BeatsToSeconds(engine_.tempo, update_duration);
         }
-
         if (update_duration < max_update_duration) {
           performer_controller_.ProcessAllTasksAtPosition(max_priority);
-          if (max_priority == INT32_MAX) {
-            instrument_controller_.ProcessArp();
-          }
         }
       } else if (engine_.timestamp < timestamp) {
         engine_.timestamp = timestamp;

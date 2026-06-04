@@ -24,7 +24,6 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::Repeater;
-using ::barely::examples::RepeaterMode;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -33,16 +32,16 @@ constexpr int kFrameCount = 256;
 
 constexpr double kLookahead = 0.1;
 
-// Arpeggiator settings.
+// Repeater settings.
 constexpr float kGain = 0.9f;
 constexpr float kOscShape = 0.75f;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 constexpr int kVoiceCount = 16;
 
+constexpr Repeater::Mode kInitialMode = Repeater::Mode::kForward;
 constexpr double kInitialRate = 2.0;
 constexpr double kInitialTempo = 135.0;
-constexpr RepeaterMode kInitialStyle = RepeaterMode::kForward;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
@@ -81,8 +80,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
 
   Repeater repeater(engine, instrument);
+  repeater.SetMode(kInitialMode);
   repeater.SetRate(kInitialRate);
-  repeater.SetStyle(kInitialStyle);
 
   instrument.SetNoteEventCallback([&repeater](EventType type, float pitch) {
     if (type == EventType::kBegin && repeater.IsPlaying()) {

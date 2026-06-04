@@ -7,7 +7,7 @@
 namespace barely {
 
 struct VoiceParams {
-  ToneFilterParams filter_params = {};
+  ToneFilterParams filter_params;
 
   float bit_crusher_range = 0.0f;
   float bit_crusher_increment = 1.0f;

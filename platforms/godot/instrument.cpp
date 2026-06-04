@@ -128,11 +128,6 @@ void BarelyInstrument::_bind_methods() {
 
   ClassDB::bind_method(D_METHOD("_on_slice_changed"), &BarelyInstrument::_on_slice_changed);
 
-  BARELY_BIND_GODOT_ENUM_VALUE(ArpMode, None, ARP_MODE_NONE);
-  BARELY_BIND_GODOT_ENUM_VALUE(ArpMode, Up, ARP_MODE_UP);
-  BARELY_BIND_GODOT_ENUM_VALUE(ArpMode, Down, ARP_MODE_DOWN);
-  BARELY_BIND_GODOT_ENUM_VALUE(ArpMode, Random, ARP_MODE_RANDOM);
-
   BARELY_BIND_GODOT_ENUM_VALUE(OscMode, Crossfade, OSC_MODE_CROSSFADE);
   BARELY_BIND_GODOT_ENUM_VALUE(OscMode, Am, OSC_MODE_AM);
   BARELY_BIND_GODOT_ENUM_VALUE(OscMode, Fm, OSC_MODE_FM);
@@ -221,15 +216,6 @@ void BarelyInstrument::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_send", PropertyHint::PROPERTY_HINT_RANGE,
                             "-1,1,0.01"),
                "set_sidechain_send", "get_sidechain_send");
-  ADD_PROPERTY(PropertyInfo(Variant::INT, "arp_mode", PropertyHint::PROPERTY_HINT_ENUM,
-                            "None,Up,Down,Random"),
-               "set_arp_mode", "get_arp_mode");
-  ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "arp_gate", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
-      "set_arp_gate", "get_arp_gate");
-  ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "arp_rate", PropertyHint::PROPERTY_HINT_RANGE, "0,16,0.01"),
-      "set_arp_rate", "get_arp_rate");
   ADD_PROPERTY(PropertyInfo(Variant::BOOL, "retrigger"), "set_retrigger", "get_retrigger");
   ADD_PROPERTY(PropertyInfo(Variant::INT, "voice_count", PropertyHint::PROPERTY_HINT_RANGE, "1,16"),
                "set_voice_count", "get_voice_count");

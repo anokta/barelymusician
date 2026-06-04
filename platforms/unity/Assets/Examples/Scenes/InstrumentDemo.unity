@@ -232,7 +232,6 @@ MonoBehaviour:
   oscShape: 0
   oscMode: 0
   sliceMode: 1
-  arpMode: 1
 --- !u!114 &675413002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,9 +337,7 @@ TextMesh:
 
 
     123
-    to switch the mode (osc/sample/mix)
-
-    0 to toggle the arpeggiator'
+    to switch the mode (osc/sample/mix)'
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1
@@ -484,12 +481,10 @@ MonoBehaviour:
   DistortionDrive: 0.5
   FilterCutoff: 1
   FilterResonance: 0.5
+  FilterTone: 0
   DelaySend: 0.1
   ReverbSend: 0.25
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:
@@ -538,6 +533,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 120
+  Gain: 1
   CompMix: 1
   CompAttack: 0
   CompRelease: 0

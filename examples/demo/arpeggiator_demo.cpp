@@ -12,6 +12,7 @@
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
+#include "composition/arpeggiator.h"
 
 namespace {
 
@@ -19,6 +20,7 @@ using ::barely::Engine;
 using ::barely::EngineControlType;
 using ::barely::EventType;
 using ::barely::InstrumentControlType;
+using ::barely::examples::Arpeggiator;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -44,6 +46,11 @@ constexpr float kAttack = 0.005f;
 constexpr float kRelease = 0.2f;
 constexpr int kVoiceCount = 16;
 constexpr float kDelaySend = 0.2f;
+
+// Arpeggiator settings.
+constexpr Arpeggiator::Mode kArpMode = Arpeggiator::Mode::kUp;
+constexpr float kArpGate = 0.5f;
+constexpr float kArpRate = 2.0f;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
@@ -88,6 +95,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     ConsoleLog() << "Note" << (type == EventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
   });
 
+  Arpeggiator arp(engine, instrument);
+  arp.SetGateRatio(kArpGate);
+  arp.SetMode(kArpMode);
+  arp.SetRate(kArpRate);
+
   // Audio process callback.
   audio_output.SetProcessCallback(
       [&](float* output_samples, int output_channel_count, int output_frame_count) {
@@ -97,7 +109,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
       });
 
   // Key down callback.
-  float gain = 1.0f;
   int octave_shift = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -110,7 +121,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Shift octaves.
-      instrument.SetAllNotesOff();
+      arp.SetAllNotesOff();
       if (upper_key == 'Z') {
         --octave_shift;
       } else {
@@ -120,21 +131,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
       ConsoleLog() << "Octave shift set to " << octave_shift;
       return;
     }
-    if (upper_key == 'C' || upper_key == 'V') {
-      // Change gain.
-      if (upper_key == 'C') {
-        gain -= 0.25f;
-      } else {
-        gain += 0.25f;
-      }
-      gain = std::clamp(gain, 0.0f, 1.0f);
-      ConsoleLog() << "Note gain set to " << gain;
-      return;
-    }
-
     // Play note.
     if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
-      instrument.SetNoteOn(*pitch_or, gain);
+      arp.SetNoteOn(*pitch_or);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -143,7 +142,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
-      instrument.SetNoteOff(*pitch_or);
+      arp.SetNoteOff(*pitch_or);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);
@@ -157,7 +156,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   ConsoleLog() << "  * Use ASDFFGHJK keys to play the white notes in an octave";
   ConsoleLog() << "  * Use WETYU keys to play the black notes in an octave";
   ConsoleLog() << "  * Use ZX keys to set the octave up and down";
-  ConsoleLog() << "  * Use CV keys to set the note gain up and down";
 
   while (!quit) {
     input_manager.Update();

@@ -44,9 +44,7 @@ tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {
         i == BarelyInstrumentControlType_kSliceMode ||
         i == BarelyInstrumentControlType_kDelaySend ||
         i == BarelyInstrumentControlType_kReverbSend ||
-        i == BarelyInstrumentControlType_kSidechainSend ||
-        i == BarelyInstrumentControlType_kArpMode || i == BarelyInstrumentControlType_kArpGate ||
-        i == BarelyInstrumentControlType_kArpRate) {
+        i == BarelyInstrumentControlType_kSidechainSend) {
       // TODO(#162): Support sampling features.
       continue;
     }

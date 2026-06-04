@@ -9,15 +9,15 @@
 
 namespace barely::examples {
 
-enum class RepeaterMode : uint8_t {
-  kForward = 0,
-  kBackward,
-  kRandom,
-};
-
 // Class that plays a repeating sequence of instrument notes.
-struct Repeater {
+class Repeater {
  public:
+  enum class Mode : uint8_t {
+    kForward = 0,
+    kBackward,
+    kRandom,
+  };
+
   Repeater(Engine& engine, Instrument instrument) noexcept;
   ~Repeater() noexcept { performer_.Destroy(); }
 
@@ -28,8 +28,8 @@ struct Repeater {
   void Start(float pitch_offset = 0.0) noexcept;
   void Stop() noexcept;
 
+  void SetMode(Mode mode) noexcept { mode_ = mode; }
   void SetRate(double rate) noexcept;
-  void SetStyle(RepeaterMode style) noexcept;
 
   [[nodiscard]] bool IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
@@ -44,7 +44,7 @@ struct Repeater {
 
   std::vector<std::pair<std::optional<float>, int>> pitches_;
 
-  RepeaterMode mode_ = RepeaterMode::kForward;
+  Mode mode_ = Mode::kForward;
   int index_ = -1;
   float pitch_offset_ = 0.0;
   int remaining_length_ = 0;

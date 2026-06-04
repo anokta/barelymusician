@@ -367,12 +367,6 @@ namespace Barely {
         [InspectorName("Reverb Send")] REVERB_SEND,
         // Sidechain send.
         [InspectorName("Sidechain Send")] SIDECHAIN_SEND,
-        // Arpeggiator mode.
-        [InspectorName("Arp Mode")] ARP_MODE,
-        // Arpeggiator gate ratio.
-        [InspectorName("Arp Gate")] ARP_GATE,
-        // Arpeggiator rate.
-        [InspectorName("Arp Rate")] ARP_RATE,
         // Retrigger.
         [InspectorName("Retrigger")] RETRIGGER,
         // Number of voices.

@@ -73,8 +73,6 @@ void Repeater::SetRate(double rate) noexcept {
   task_.SetDuration(length);
 }
 
-void Repeater::SetStyle(RepeaterMode style) noexcept { mode_ = style; }
-
 void Repeater::OnBeat() noexcept {
   if (pitches_.empty()) {
     return;
@@ -97,13 +95,13 @@ bool Repeater::Update() noexcept {
   }
   const int size = static_cast<int>(pitches_.size());
   switch (mode_) {
-    case RepeaterMode::kForward:
+    case Mode::kForward:
       index_ = (index_ + 1) % size;
       break;
-    case RepeaterMode::kBackward:
+    case Mode::kBackward:
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
-    case RepeaterMode::kRandom:
+    case Mode::kRandom:
       index_ = engine_.GenerateRandomNumber(0, size);
       break;
     default:

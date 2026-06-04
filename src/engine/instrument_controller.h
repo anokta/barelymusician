@@ -40,15 +40,9 @@ class InstrumentController {
                                             BarelyNoteControlType type) const noexcept;
   [[nodiscard]] bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
 
-  void ProcessArp() noexcept;
-  void Update(double duration) noexcept;
-  [[nodiscard]] double GetNextDuration() const noexcept;
-
  private:
   [[nodiscard]] uint32_t GetNote(const InstrumentState& instrument, float pitch) const noexcept;
-
   void ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept;
-  void UpdateArpNote(InstrumentState& instrument) noexcept;
 
   EngineState& engine_;
 };

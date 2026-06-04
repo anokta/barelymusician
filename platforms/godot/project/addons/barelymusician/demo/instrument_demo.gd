@@ -50,9 +50,6 @@ func _input(event):
 		elif key_string == '3':
 			instrument.osc_mix = 0.5
 			return
-		elif key_string == '0':
-			instrument.arp_mode = instrument.ARP_MODE_UP if instrument.arp_mode == instrument.ARP_MODE_NONE else instrument.ARP_MODE_NONE
-			return
 
 		var key_index = OCTAVE_KEYS.find(key_string)
 		if key_index != -1:

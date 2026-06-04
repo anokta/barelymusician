@@ -4,18 +4,6 @@ using System.Linq;
 using UnityEngine;
 
 namespace Barely {
-  /// Arpeggiator modes.
-  public enum ArpMode {
-    /// None.
-    [InspectorName("None")] NONE = 0,
-    /// Up.
-    [InspectorName("Up")] UP,
-    /// Down.
-    [InspectorName("Down")] DOWN,
-    /// Random.
-    [InspectorName("Random")] RANDOM,
-  }
-
   /// Oscillator modes.
   public enum OscMode {
     /// Linear crossfade between the slice and the oscillator.
@@ -208,19 +196,6 @@ namespace Barely {
     [Range(-1.0f, 1.0f)]
     public float SidechainSend = 0.0f;
 
-    [Header("Arpeggiator")]
-
-    /// Arpeggiator mode.
-    public ArpMode ArpMode = ArpMode.NONE;
-
-    /// Arpeggiator gate ratio.
-    [Range(0.0f, 1.0f)]
-    public float ArpGate = 0.5f;
-
-    /// Arpeggiator rate.
-    [Range(0.0f, 16.0f)]
-    public float ArpRate = 1.0f;
-
     [Header("Polyphony")]
 
     /// Retrigger.
@@ -368,9 +343,6 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.DELAY_SEND, DelaySend);
       SetControl(Engine.Internal.InstrumentControlType.REVERB_SEND, ReverbSend);
       SetControl(Engine.Internal.InstrumentControlType.SIDECHAIN_SEND, SidechainSend);
-      SetControl(Engine.Internal.InstrumentControlType.ARP_MODE, (float)ArpMode);
-      SetControl(Engine.Internal.InstrumentControlType.ARP_GATE, ArpGate);
-      SetControl(Engine.Internal.InstrumentControlType.ARP_RATE, ArpRate);
       SetControl(Engine.Internal.InstrumentControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
       SetControl(Engine.Internal.InstrumentControlType.VOICE_COUNT, (float)VoiceCount);
     }

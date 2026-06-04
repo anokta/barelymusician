@@ -234,14 +234,6 @@
 #define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X)
 #endif  // __cplusplus
 
-/// Arpeggiator modes.
-#define BARELY_ARP_MODES(ArpMode, X) \
-  X(ArpMode, None, "None")           \
-  X(ArpMode, Up, "Up")               \
-  X(ArpMode, Down, "Down")           \
-  X(ArpMode, Random, "Random")
-BARELY_ENUM(ArpMode, BARELY_ARP_MODES)
-
 /// Oscillator modes.
 #define BARELY_OSC_MODES(OscMode, X)                               \
   X(OscMode, Crossfade, "Linear Crossfade (slice <-> oscillator)") \
@@ -305,35 +297,32 @@ BARELY_ENUM(EventType, BARELY_EVENT_TYPES)
 BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
 
 /// Instrument control types.
-#define BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, X)                       \
-  X(InstrumentControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                              \
-  X(InstrumentControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")                \
-  X(InstrumentControlType, StereoPan, 0.0f, -1.0f, 1.0f, "Stereo Pan")                  \
-  X(InstrumentControlType, Attack, 0.0f, 0.0f, 8.0f, "Envelope Attack")                 \
-  X(InstrumentControlType, Decay, 0.0f, 0.0f, 8.0f, "Envelope Decay")                   \
-  X(InstrumentControlType, Sustain, 1.0f, 0.0f, 1.0f, "Envelope Sustain")               \
-  X(InstrumentControlType, Release, 0.0f, 0.0f, 8.0f, "Envelope Release")               \
-  X(InstrumentControlType, SliceMode, 0, 0, BarelySliceMode_kCount - 1, "Slice Mode")   \
-  X(InstrumentControlType, OscMix, 0.0f, 0.0f, 1.0f, "Oscillator Mix")                  \
-  X(InstrumentControlType, OscMode, 0, 0, BarelyOscMode_kCount - 1, "Oscillator Mode")  \
-  X(InstrumentControlType, OscNoiseMix, 0.0f, 0.0f, 1.0f, "Oscillator Noise Mix")       \
-  X(InstrumentControlType, OscPitchShift, 0.0f, -2.0f, 2.0f, "Oscillator Pitch Shift")  \
-  X(InstrumentControlType, OscShape, 0.0f, 0.0f, 1.0f, "Oscillator Shape")              \
-  X(InstrumentControlType, OscSkew, 0.0f, -1.0f, 1.0f, "Oscillator Skew")               \
-  X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Bit Crusher Depth")           \
-  X(InstrumentControlType, CrushRate, 0.0f, 0.0f, 1.0f, "Bit Crusher Rate")             \
-  X(InstrumentControlType, DistortionMix, 0.0f, 0.0f, 1.0f, "Distortion Mix")           \
-  X(InstrumentControlType, DistortionDrive, 0.0f, 0.0f, 1.0f, "Distortion Drive")       \
-  X(InstrumentControlType, FilterCutoff, 1.0f, 0.0f, 1.0f, "Filter Cutoff")             \
-  X(InstrumentControlType, FilterResonance, 0.5f, 0.0f, 1.0f, "Filter Resonance")       \
-  X(InstrumentControlType, FilterTone, 0.0f, -1.0f, 1.0f, "Filter Tone")                \
-  X(InstrumentControlType, DelaySend, 0.0f, 0.0f, 1.0f, "Delay Send")                   \
-  X(InstrumentControlType, ReverbSend, 0.0f, 0.0f, 2.0f, "Reverb Send")                 \
-  X(InstrumentControlType, SidechainSend, 0.0f, -1.0f, 1.0f, "Sidechain Send")          \
-  X(InstrumentControlType, ArpMode, 0, 0, BarelyArpMode_kCount - 1, "Arpeggiator Mode") \
-  X(InstrumentControlType, ArpGate, 0.5f, 0.0f, 1.0f, "Arpeggiator Gate")               \
-  X(InstrumentControlType, ArpRate, 1.0f, 0.0f, 16.0f, "Arpeggiator Rate")              \
-  X(InstrumentControlType, Retrigger, 0, 0, 1, "Retrigger")                             \
+#define BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, X)                      \
+  X(InstrumentControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                             \
+  X(InstrumentControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")               \
+  X(InstrumentControlType, StereoPan, 0.0f, -1.0f, 1.0f, "Stereo Pan")                 \
+  X(InstrumentControlType, Attack, 0.0f, 0.0f, 8.0f, "Envelope Attack")                \
+  X(InstrumentControlType, Decay, 0.0f, 0.0f, 8.0f, "Envelope Decay")                  \
+  X(InstrumentControlType, Sustain, 1.0f, 0.0f, 1.0f, "Envelope Sustain")              \
+  X(InstrumentControlType, Release, 0.0f, 0.0f, 8.0f, "Envelope Release")              \
+  X(InstrumentControlType, SliceMode, 0, 0, BarelySliceMode_kCount - 1, "Slice Mode")  \
+  X(InstrumentControlType, OscMix, 0.0f, 0.0f, 1.0f, "Oscillator Mix")                 \
+  X(InstrumentControlType, OscMode, 0, 0, BarelyOscMode_kCount - 1, "Oscillator Mode") \
+  X(InstrumentControlType, OscNoiseMix, 0.0f, 0.0f, 1.0f, "Oscillator Noise Mix")      \
+  X(InstrumentControlType, OscPitchShift, 0.0f, -2.0f, 2.0f, "Oscillator Pitch Shift") \
+  X(InstrumentControlType, OscShape, 0.0f, 0.0f, 1.0f, "Oscillator Shape")             \
+  X(InstrumentControlType, OscSkew, 0.0f, -1.0f, 1.0f, "Oscillator Skew")              \
+  X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Bit Crusher Depth")          \
+  X(InstrumentControlType, CrushRate, 0.0f, 0.0f, 1.0f, "Bit Crusher Rate")            \
+  X(InstrumentControlType, DistortionMix, 0.0f, 0.0f, 1.0f, "Distortion Mix")          \
+  X(InstrumentControlType, DistortionDrive, 0.0f, 0.0f, 1.0f, "Distortion Drive")      \
+  X(InstrumentControlType, FilterCutoff, 1.0f, 0.0f, 1.0f, "Filter Cutoff")            \
+  X(InstrumentControlType, FilterResonance, 0.5f, 0.0f, 1.0f, "Filter Resonance")      \
+  X(InstrumentControlType, FilterTone, 0.0f, -1.0f, 1.0f, "Filter Tone")               \
+  X(InstrumentControlType, DelaySend, 0.0f, 0.0f, 1.0f, "Delay Send")                  \
+  X(InstrumentControlType, ReverbSend, 0.0f, 0.0f, 2.0f, "Reverb Send")                \
+  X(InstrumentControlType, SidechainSend, 0.0f, -1.0f, 1.0f, "Sidechain Send")         \
+  X(InstrumentControlType, Retrigger, 0, 0, 1, "Retrigger")                            \
   X(InstrumentControlType, VoiceCount, 8, 1, 16, "Voice Count")
 BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
 
@@ -1319,8 +1308,9 @@ class Performer {
     if (BarelyPerformer_Destroy(std::exchange(engine_, nullptr), std::exchange(performer_id_, 0))) {
       Task::EventCallbackNode* task_event_callback = *first_task_event_callback_;
       while (task_event_callback != nullptr) {
+        Task::EventCallbackNode* next_task_event_callback =  task_event_callback->next;
         Task::ReleaseTaskEventCallback(free_task_event_callbacks_, task_event_callback);
-        task_event_callback = task_event_callback->next;
+        task_event_callback = next_task_event_callback;
       }
       assert(free_first_task_event_callbacks_->size() <
              free_first_task_event_callbacks_->capacity());

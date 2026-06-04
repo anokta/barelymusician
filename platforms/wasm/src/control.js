@@ -50,26 +50,15 @@ export const InstrumentControlType = Object.freeze({
   DELAY_SEND: 21,
   REVERB_SEND: 22,
   SIDECHAIN_SEND: 23,
-  ARP_MODE: 24,
-  ARP_GATE: 25,
-  ARP_RATE: 26,
-  RETRIGGER: 27,
-  VOICE_COUNT: 28,
-  COUNT: 29,
+  RETRIGGER: 24,
+  VOICE_COUNT: 25,
+  COUNT: 26,
 });
 
 export const NoteControlType = Object.freeze({
   GAIN: 0,
   PITCH_SHIFT: 1,
   COUNT: 2,
-});
-
-export const ArpMode = Object.freeze({
-  NONE: 0,
-  UP: 1,
-  DOWN: 2,
-  RANDOM: 3,
-  COUNT: 4,
 });
 
 export const OscMode = Object.freeze({
@@ -421,27 +410,6 @@ export const INSTRUMENT_CONTROLS = Object.freeze({
     defaultValue: 0.0,
     minValue: -1.0,
     maxValue: 1.0,
-  },
-  [InstrumentControlType.ARP_MODE]: {
-    name: 'Arp Mode',
-    valueType: ArpMode,
-    defaultValue: ArpMode.NONE,
-    minValue: 0,
-    maxValue: ArpMode.COUNT - 1,
-  },
-  [InstrumentControlType.ARP_GATE]: {
-    name: 'Arp Gate',
-    valueType: 'float',
-    defaultValue: 0.5,
-    minValue: 0.0,
-    maxValue: 1.0,
-  },
-  [InstrumentControlType.ARP_RATE]: {
-    name: 'Arp Rate',
-    valueType: 'int',
-    defaultValue: 2,
-    minValue: 1,
-    maxValue: 16,
   },
   [InstrumentControlType.RETRIGGER]: {
     name: 'Retrigger',

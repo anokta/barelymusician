@@ -410,33 +410,6 @@ bool BarelyTask_Destroy(BarelyEngine* engine, uint32_t task_id) {
   return true;
 }
 
-bool BarelyTask_GetDuration(const BarelyEngine* engine, uint32_t task_id, double* out_duration) {
-  if (!engine) return false;
-  if (!engine->IsValidTask(task_id)) return false;
-  if (!out_duration) return false;
-
-  *out_duration = engine->state.GetTask(engine->state.GetIdIndex(task_id)).duration;
-  return true;
-}
-
-bool BarelyTask_GetPosition(const BarelyEngine* engine, uint32_t task_id, double* out_position) {
-  if (!engine) return false;
-  if (!engine->IsValidTask(task_id)) return false;
-  if (!out_position) return false;
-
-  *out_position = engine->state.GetTask(engine->state.GetIdIndex(task_id)).position;
-  return true;
-}
-
-bool BarelyTask_GetPriority(const BarelyEngine* engine, uint32_t task_id, int32_t* out_priority) {
-  if (!engine) return false;
-  if (!engine->IsValidTask(task_id)) return false;
-  if (!out_priority) return false;
-
-  *out_priority = engine->state.GetTask(engine->state.GetIdIndex(task_id)).priority;
-  return true;
-}
-
 bool BarelyTask_IsActive(const BarelyEngine* engine, uint32_t task_id, bool* out_is_active) {
   if (!engine) return false;
   if (!engine->IsValidTask(task_id)) return false;

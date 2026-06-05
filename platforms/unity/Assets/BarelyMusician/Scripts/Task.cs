@@ -14,7 +14,7 @@ namespace Barely {
           return;
         }
         Engine.Internal.Task_SetPosition(_id, value);
-        _position = Engine.Internal.Task_GetPosition(_id);
+        _position = value;
       }
     }
     [SerializeField]
@@ -29,7 +29,7 @@ namespace Barely {
           return;
         }
         Engine.Internal.Task_SetDuration(_id, value);
-        _duration = Engine.Internal.Task_GetDuration(_id);
+        _duration = value;
       }
     }
     [SerializeField]
@@ -45,7 +45,7 @@ namespace Barely {
           return;
         }
         Engine.Internal.Task_SetPriority(_id, value);
-        _priority = Engine.Internal.Task_GetPriority(_id);
+        _priority = value;
       }
     }
     [SerializeField]

@@ -35,9 +35,6 @@ VERS_1.0 {
     BarelyPerformer_Stop;
     BarelyScale_GetPitch;
     BarelyTask_Destroy;
-    BarelyTask_GetDuration;
-    BarelyTask_GetPosition;
-    BarelyTask_GetPriority;
     BarelyTask_IsActive;
     BarelyTask_SetDuration;
     BarelyTask_SetEventCallback;

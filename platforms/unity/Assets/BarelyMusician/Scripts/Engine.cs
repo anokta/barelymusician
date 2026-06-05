@@ -700,33 +700,6 @@ namespace Barely {
         taskId = 0;
       }
 
-      public static double Task_GetDuration(UInt32 taskId) {
-        double duration = 0.0;
-        if (!BarelyTask_GetDuration(_handle, taskId, ref duration) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to get performer task duration");
-        }
-        return (duration > _minTaskDuration) ? duration : 0.0;
-      }
-
-      public static double Task_GetPosition(UInt32 taskId) {
-        double position = 0.0;
-        if (!BarelyTask_GetPosition(_handle, taskId, ref position) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to get performer task position");
-        }
-        return position;
-      }
-
-      public static int Task_GetPriority(UInt32 taskId) {
-        int priority = 0;
-        if (!BarelyTask_GetPriority(_handle, taskId, ref priority) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to get performer task priority");
-        }
-        return priority;
-      }
-
       public static bool Task_IsActive(UInt32 taskId) {
         bool isActive = false;
         if (!BarelyTask_IsActive(_handle, taskId, ref isActive) && _handle != IntPtr.Zero &&
@@ -1157,18 +1130,6 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
       private static extern bool BarelyTask_Destroy(IntPtr engine, UInt32 taskId);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetDuration")]
-      private static extern bool BarelyTask_GetDuration(IntPtr engine, UInt32 taskId,
-                                                        ref double outDuration);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPosition")]
-      private static extern bool BarelyTask_GetPosition(IntPtr engine, UInt32 taskId,
-                                                        ref double outPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPriority")]
-      private static extern bool BarelyTask_GetPriority(IntPtr engine, UInt32 taskId,
-                                                        ref Int32 outPriority);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_IsActive")]
       private static extern bool BarelyTask_IsActive(IntPtr engine, UInt32 taskId,

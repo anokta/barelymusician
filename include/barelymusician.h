@@ -726,33 +726,6 @@ BARELY_API bool BarelyPerformer_Stop(BarelyEngine* engine, uint32_t performer_id
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_Destroy(BarelyEngine* engine, uint32_t task_id);
 
-/// Gets the duration of a task.
-///
-/// @param engine Pointer to engine.
-/// @param task_id Task identifier.
-/// @param out_duration Output duration in beats.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetDuration(const BarelyEngine* engine, uint32_t task_id,
-                                       double* out_duration);
-
-/// Gets the position of a task.
-///
-/// @param engine Pointer to engine.
-/// @param task_id Task identifier.
-/// @param out_position Output position in beats.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetPosition(const BarelyEngine* engine, uint32_t task_id,
-                                       double* out_position);
-
-/// Gets the priority of a task.
-///
-/// @param engine Pointer to engine.
-/// @param task_id Task identifier.
-/// @param out_priority Output priority.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_GetPriority(const BarelyEngine* engine, uint32_t task_id,
-                                       int32_t* out_priority);
-
 /// Gets whether the task is active or not.
 ///
 /// @param engine Pointer to engine.
@@ -1063,36 +1036,6 @@ class Task {
       }
       ReleaseTaskEventCallback(free_task_event_callbacks_, task_event_callback_);
     }
-  }
-
-  /// Returns the duration.
-  ///
-  /// @return Duration in beats.
-  [[nodiscard]] double GetDuration() const noexcept {
-    double duration = 0.0;
-    [[maybe_unused]] const bool success = BarelyTask_GetDuration(engine_, task_id_, &duration);
-    assert(success);
-    return duration;
-  }
-
-  /// Returns the position.
-  ///
-  /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept {
-    double position = 0.0;
-    [[maybe_unused]] const bool success = BarelyTask_GetPosition(engine_, task_id_, &position);
-    assert(success);
-    return position;
-  }
-
-  /// Returns the priority.
-  ///
-  /// @return Priority.
-  [[nodiscard]] int GetPriority() const noexcept {
-    int32_t priority = 0;
-    [[maybe_unused]] const bool success = BarelyTask_GetPriority(engine_, task_id_, &priority);
-    assert(success);
-    return static_cast<int>(priority);
   }
 
   /// Returns whether the task is active or not.

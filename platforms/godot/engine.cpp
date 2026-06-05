@@ -90,19 +90,18 @@ BarelyEngine::~BarelyEngine() {
   engine_ = nullptr;
 }
 
-double BarelyEngine::get_tempo() {
-  double tempo = 0.0;
-  BarelyEngine_GetTempo(get(), &tempo);
-  return tempo;
-}
-
 double BarelyEngine::get_timestamp() {
   double timestamp = 0.0;
   BarelyEngine_GetTimestamp(get(), &timestamp);
   return timestamp;
 }
 
-void BarelyEngine::set_tempo(double tempo) { BarelyEngine_SetTempo(get(), tempo); }
+void BarelyEngine::set_tempo(double tempo) {
+  if (tempo_ != tempo) {
+    BarelyEngine_SetTempo(get(), tempo_);
+    tempo_ = tempo;
+  }
+}
 
 ::BarelyEngine* BarelyEngine::get() {
   if (engine_ == nullptr) {

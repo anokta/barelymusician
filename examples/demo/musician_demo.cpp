@@ -225,8 +225,10 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
+  double tempo = kTempo;
+
   Engine engine(kSampleRate);
-  engine.SetTempo(kTempo);
+  engine.SetTempo(tempo);
 
   // Note event callback.
   const auto set_note_event_callback_fn = [&](size_t index, Instrument& instrument) {
@@ -401,15 +403,18 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        engine.SetTempo(engine.GenerateRandomNumber(0.5, 0.75) * engine.GetTempo());
-        ConsoleLog() << "Tempo changed to " << engine.GetTempo();
+        tempo *= engine.GenerateRandomNumber(0.5, 0.75);
+        engine.SetTempo(tempo);
+        ConsoleLog() << "Tempo changed to " << tempo;
         break;
       case '2':
-        engine.SetTempo(engine.GenerateRandomNumber(1.5, 2.0) * engine.GetTempo());
-        ConsoleLog() << "Tempo changed to " << engine.GetTempo();
+        tempo *= engine.GenerateRandomNumber(1.5, 2.0);
+        engine.SetTempo(tempo);
+        ConsoleLog() << "Tempo changed to " << tempo;
         break;
       case 'R':
-        engine.SetTempo(kTempo);
+        tempo = kTempo;
+        engine.SetTempo(tempo);
         ConsoleLog() << "Tempo reset to " << kTempo;
         break;
       case 'D':

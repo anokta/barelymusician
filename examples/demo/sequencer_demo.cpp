@@ -47,8 +47,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
+  bool is_looping = true;
+  double tempo = kInitialTempo;
+
   Engine engine(kSampleRate);
-  engine.SetTempo(kInitialTempo);
+  engine.SetTempo(tempo);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
@@ -127,7 +130,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (performer.IsPlaying()) {
@@ -139,7 +141,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'L':
-        if (performer.IsLooping()) {
+        if (is_looping) {
           performer.SetLooping(false);
           ConsoleLog() << "Loop turned off";
         } else {
@@ -164,7 +166,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
     }
     engine.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
+    ConsoleLog() << "Tempo set to " << tempo << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

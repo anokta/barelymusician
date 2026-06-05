@@ -114,14 +114,6 @@ bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* out_number)
   return true;
 }
 
-bool BarelyEngine_GetTempo(const BarelyEngine* engine, double* out_tempo) {
-  if (!engine) return false;
-  if (!out_tempo) return false;
-
-  *out_tempo = engine->state.tempo;
-  return true;
-}
-
 bool BarelyEngine_GetTimestamp(const BarelyEngine* engine, double* out_timestamp) {
   if (!engine) return false;
   if (!out_timestamp) return false;
@@ -322,16 +314,6 @@ bool BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performer_
   if (!out_position) return false;
 
   *out_position = engine->state.GetPerformer(engine->state.GetIdIndex(performer_id)).position;
-  return true;
-}
-
-bool BarelyPerformer_IsLooping(const BarelyEngine* engine, uint32_t performer_id,
-                               bool* out_is_looping) {
-  if (!engine) return false;
-  if (!engine->IsValidPerformer(performer_id)) return false;
-  if (!out_is_looping) return false;
-
-  *out_is_looping = engine->state.GetPerformer(engine->state.GetIdIndex(performer_id)).is_looping;
   return true;
 }
 

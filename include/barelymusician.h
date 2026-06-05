@@ -460,13 +460,6 @@ BARELY_API bool BarelyEngine_Destroy(BarelyEngine* engine);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* out_number);
 
-/// Gets the tempo of an engine.
-///
-/// @param engine Pointer to engine.
-/// @param out_tempo Output tempo in beats per minute.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetTempo(const BarelyEngine* engine, double* out_tempo);
-
 /// Gets the timestamp of an engine.
 ///
 /// @param engine Pointer to engine.
@@ -650,15 +643,6 @@ BARELY_API bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, uint32
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performer_id,
                                             double* out_position);
-
-/// Gets whether a performer is looping or not.
-///
-/// @param engine Pointer to engine.
-/// @param performer_id Performer identifier.
-/// @param out_is_looping Output true if looping, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_IsLooping(const BarelyEngine* engine, uint32_t performer_id,
-                                          bool* out_is_looping);
 
 /// Gets whether a performer is playing or not.
 ///
@@ -1232,17 +1216,6 @@ class Performer {
     return position;
   }
 
-  /// Returns whether the performer is looping or not.
-  ///
-  /// @return True if looping, false otherwise.
-  [[nodiscard]] bool IsLooping() const noexcept {
-    bool is_looping = false;
-    [[maybe_unused]] const bool success =
-        BarelyPerformer_IsLooping(engine_, performer_id_, &is_looping);
-    assert(success);
-    return is_looping;
-  }
-
   /// Returns whether the performer is playing or not.
   ///
   /// @return True if playing, false otherwise.
@@ -1423,16 +1396,6 @@ class Engine {
   [[nodiscard]] NumberType GenerateRandomNumber(NumberType min, NumberType max) noexcept {
     static_assert(std::is_arithmetic_v<NumberType>, "NumberType is not supported");
     return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
-  }
-
-  /// Returns the tempo.
-  ///
-  /// @return Tempo in beats per minute.
-  [[nodiscard]] double GetTempo() const noexcept {
-    double tempo = 0.0;
-    [[maybe_unused]] const bool success = BarelyEngine_GetTempo(engine_, &tempo);
-    assert(success);
-    return tempo;
   }
 
   /// Returns the timestamp.

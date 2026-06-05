@@ -18,7 +18,7 @@ namespace Barely {
           return;
         }
         Engine.Internal.Performer_SetLooping(_id, value);
-        _loop = Engine.Internal.Performer_IsLooping(_id);
+        _loop = value;
       }
     }
     [SerializeField]

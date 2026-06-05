@@ -108,7 +108,7 @@ class BarelyEngine : public ::godot::Object {
   BarelyEngine();
   ~BarelyEngine();
 
-  double get_tempo();
+  double get_tempo() { return tempo_; }
   double get_timestamp();
   void set_tempo(double tempo);
 
@@ -131,6 +131,7 @@ class BarelyEngine : public ::godot::Object {
   std::vector<std::byte> engine_allocation_;
   std::vector<float> temp_samples_;
   double lookahead_ = 0.02;
+  double tempo_ = 120.0;
 
   BARELY_GODOT_ENGINE_CONTROLS(BARELY_DEFINE_GODOT_ENGINE_CONTROL);
 };

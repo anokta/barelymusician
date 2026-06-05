@@ -5,7 +5,6 @@ VERS_1.0 {
     BarelyEngine_CreateInstrument;
     BarelyEngine_CreatePerformer;
     BarelyEngine_Destroy;
-    BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
     BarelyEngine_Process;
     BarelyEngine_SetControl;
@@ -25,7 +24,6 @@ VERS_1.0 {
     BarelyPerformer_GetLoopBeginPosition;
     BarelyPerformer_GetLoopLength;
     BarelyPerformer_GetPosition;
-    BarelyPerformer_IsLooping;
     BarelyPerformer_IsPlaying;
     BarelyPerformer_SetLoopBeginPosition;
     BarelyPerformer_SetLoopLength;

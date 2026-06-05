@@ -50,6 +50,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
+  double tempo = kInitialTempo;
+
   Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
@@ -96,7 +98,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (metronome.IsPlaying()) {
@@ -132,7 +133,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     }
     tempo = std::clamp(tempo, 0.0, static_cast<double>(kSampleRate));
     engine.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
+    ConsoleLog() << "Tempo set to " << tempo << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

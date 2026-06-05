@@ -168,7 +168,7 @@ namespace Barely {
       set {
         if (_delayReverbSend != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_REVERB_SEND, value);
-          _delayReverbSend =value;
+          _delayReverbSend = value;
         }
       }
     }
@@ -216,7 +216,7 @@ namespace Barely {
       set {
         if (_reverbStereoWidth != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_STEREO_WIDTH, value);
-          _reverbStereoWidth =value;
+          _reverbStereoWidth = value;
         }
       }
     }
@@ -228,7 +228,7 @@ namespace Barely {
       set {
         if (_reverbFreeze != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_FREEZE, value ? 1.0f : 0.0f);
-          _reverbFreeze =value;
+          _reverbFreeze = value;
         }
       }
     }
@@ -252,7 +252,7 @@ namespace Barely {
       set {
         if (_sidechainAttack != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_ATTACK, value);
-          _sidechainAttack =value;
+          _sidechainAttack = value;
         }
       }
     }
@@ -264,7 +264,7 @@ namespace Barely {
       set {
         if (_sidechainRelease != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_RELEASE, value);
-          _sidechainRelease =value;
+          _sidechainRelease = value;
         }
       }
     }
@@ -276,7 +276,7 @@ namespace Barely {
       set {
         if (_sidechainThreshold != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_THRESHOLD, value);
-          _sidechainThreshold =value;
+          _sidechainThreshold = value;
         }
       }
     }
@@ -300,7 +300,7 @@ namespace Barely {
       set {
         if (_tempo != value) {
           Internal.Engine_SetTempo(value);
-          _tempo = Internal.Engine_GetTempo();
+          _tempo = value;
         }
       }
     }
@@ -421,14 +421,6 @@ namespace Barely {
         [InspectorName("Gain")] GAIN = 0,
         // Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
-      }
-
-      public static double Engine_GetTempo() {
-        double tempo = 0.0;
-        if (!BarelyEngine_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get engine tempo");
-        }
-        return tempo;
       }
 
       public static double Engine_GetTimestamp() {
@@ -610,15 +602,6 @@ namespace Barely {
           Debug.LogError("Failed to get performer position");
         }
         return position;
-      }
-
-      public static bool Performer_IsLooping(UInt32 performerId) {
-        bool isLooping = false;
-        if (!BarelyPerformer_IsLooping(_handle, performerId, ref isLooping) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get if performer is looping");
-        }
-        return isLooping;
       }
 
       public static bool Performer_IsPlaying(UInt32 performerId) {
@@ -1011,9 +994,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
       private static extern bool BarelyEngine_Destroy(IntPtr engine);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
-      private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
-
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTimestamp")]
       private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
 
@@ -1092,10 +1072,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
       private static extern bool BarelyPerformer_GetPosition(IntPtr engine, UInt32 performerId,
                                                              ref double outPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsLooping")]
-      private static extern bool BarelyPerformer_IsLooping(IntPtr engine, UInt32 performerId,
-                                                           ref bool outIsLooping);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
       private static extern bool BarelyPerformer_IsPlaying(IntPtr engine, UInt32 performerId,

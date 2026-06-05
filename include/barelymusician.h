@@ -460,15 +460,6 @@ BARELY_API bool BarelyEngine_Destroy(BarelyEngine* engine);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* out_number);
 
-/// Gets a control value of an engine.
-///
-/// @param engine Pointer to engine.
-/// @param type Engine control type.
-/// @param out_value Output engine control value.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
-                                        float* out_value);
-
 /// Gets the tempo of an engine.
 ///
 /// @param engine Pointer to engine.
@@ -531,28 +522,6 @@ BARELY_API bool BarelyEngine_Update(BarelyEngine* engine, double timestamp);
 /// @param instrument_id Instrument identifier.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrument_id);
-
-/// Gets an instrument control value.
-///
-/// @param engine Pointer to engine.
-/// @param instrument_id Instrument identifier.
-/// @param type Instrument control type.
-/// @param out_value Output instrument control value.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_GetControl(const BarelyEngine* engine, uint32_t instrument_id,
-                                            BarelyInstrumentControlType type, float* out_value);
-
-/// Gets an instrument note control value.
-///
-/// @param engine Pointer to engine.
-/// @param instrument_id Instrument identifier.
-/// @param pitch Note pitch.
-/// @param type Note control type.
-/// @param out_value Output note control value.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, uint32_t instrument_id,
-                                                float pitch, BarelyNoteControlType type,
-                                                float* out_value);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -951,37 +920,6 @@ class Instrument {
   // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return instrument_id_; }
 
-  /// Returns a control value.
-  ///
-  /// @param type Instrument control type.
-  /// @return Instrument control value.
-  template <typename ValueType>
-  [[nodiscard]] ValueType GetControl(InstrumentControlType type) const noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    float value = 0.0f;
-    [[maybe_unused]] const bool success = BarelyInstrument_GetControl(
-        engine_, instrument_id_, static_cast<BarelyInstrumentControlType>(type), &value);
-    assert(success);
-    return static_cast<ValueType>(value);
-  }
-
-  /// Returns a control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param type Note control type.
-  /// @return Note control value.
-  template <typename ValueType>
-  [[nodiscard]] ValueType GetNoteControl(float pitch, NoteControlType type) const noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    float value = 0.0f;
-    [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControl(
-        engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type), &value);
-    assert(success);
-    return static_cast<ValueType>(value);
-  }
-
   /// Returns whether a note is on or not.
   ///
   /// @param pitch Note pitch.
@@ -1308,7 +1246,7 @@ class Performer {
     if (BarelyPerformer_Destroy(std::exchange(engine_, nullptr), std::exchange(performer_id_, 0))) {
       Task::EventCallbackNode* task_event_callback = *first_task_event_callback_;
       while (task_event_callback != nullptr) {
-        Task::EventCallbackNode* next_task_event_callback =  task_event_callback->next;
+        Task::EventCallbackNode* next_task_event_callback = task_event_callback->next;
         Task::ReleaseTaskEventCallback(free_task_event_callbacks_, task_event_callback);
         task_event_callback = next_task_event_callback;
       }
@@ -1542,21 +1480,6 @@ class Engine {
   [[nodiscard]] NumberType GenerateRandomNumber(NumberType min, NumberType max) noexcept {
     static_assert(std::is_arithmetic_v<NumberType>, "NumberType is not supported");
     return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
-  }
-
-  /// Returns a control value.
-  ///
-  /// @param type Engine control type.
-  /// @return Engine control value.
-  template <typename ValueType>
-  [[nodiscard]] ValueType GetControl(EngineControlType type) const noexcept {
-    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
-                  "ValueType is not supported");
-    float value = 0.0f;
-    [[maybe_unused]] const bool success =
-        BarelyEngine_GetControl(engine_, static_cast<BarelyEngineControlType>(type), &value);
-    assert(success);
-    return static_cast<ValueType>(value);
   }
 
   /// Returns the tempo.

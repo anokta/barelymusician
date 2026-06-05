@@ -34,10 +34,6 @@ class InstrumentController {
   void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
                      int32_t slice_count) noexcept;
 
-  [[nodiscard]] float GetControl(uint32_t instrument_index,
-                                 BarelyInstrumentControlType type) const noexcept;
-  [[nodiscard]] const float* GetNoteControl(uint32_t instrument_index, float pitch,
-                                            BarelyNoteControlType type) const noexcept;
   [[nodiscard]] bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
 
  private:

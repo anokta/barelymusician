@@ -17,34 +17,6 @@ namespace {
 
 constexpr int kSampleRate = 48000;
 
-TEST(InstrumentControllerTest, SetControl) {
-  const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
-  auto data = std::make_unique<std::byte[]>(size);
-  Arena arena(data.get(), size);
-  EngineState engine(arena, EngineConfig(kSampleRate));
-  InstrumentController controller(engine);
-
-  const uint32_t instrument_index = controller.Acquire();
-  EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 1.0f);
-
-  controller.SetControl(instrument_index, BarelyInstrumentControlType_kGain, 0.5f);
-  EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 0.5f);
-
-  // Verify that the control value is clamped at the minimum value.
-  controller.SetControl(instrument_index, BarelyInstrumentControlType_kGain, -1.0f);
-  EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 0.0f);
-
-  controller.SetControl(instrument_index, BarelyInstrumentControlType_kGain, 0.0f);
-  EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 0.0f);
-
-  // Verify that the control value is clamped at the maximum value.
-  controller.SetControl(instrument_index, BarelyInstrumentControlType_kGain, 10.0f);
-  EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 1.0f);
-
-  controller.SetControl(instrument_index, BarelyInstrumentControlType_kGain, 1.0f);
-  EXPECT_FLOAT_EQ(controller.GetControl(instrument_index, BarelyInstrumentControlType_kGain), 1.0f);
-}
-
 TEST(InstrumentControllerTest, SetNoteCallbacks) {
   constexpr float kPitch = 3.3f;
 

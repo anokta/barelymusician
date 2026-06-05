@@ -150,20 +150,6 @@ void InstrumentController::SetSampleData(uint32_t instrument_index, const Barely
   engine_.ScheduleMessage(SampleDataMessage{instrument_index, instrument.first_slice_index});
 }
 
-float InstrumentController::GetControl(uint32_t instrument_index,
-                                       BarelyInstrumentControlType type) const noexcept {
-  return engine_.GetInstrument(instrument_index).controls[type].value;
-}
-
-const float* InstrumentController::GetNoteControl(uint32_t instrument_index, float pitch,
-                                                  BarelyNoteControlType type) const noexcept {
-  const auto& instrument = engine_.GetInstrument(instrument_index);
-  if (const uint32_t note_index = GetNote(instrument, pitch); note_index != kInvalidIndex) {
-    return &engine_.note_pool.Get(note_index).controls[type].value;
-  }
-  return nullptr;
-}
-
 bool InstrumentController::IsNoteOn(uint32_t instrument_index, float pitch) const noexcept {
   return GetNote(engine_.GetInstrument(instrument_index), pitch) != kInvalidIndex;
 }

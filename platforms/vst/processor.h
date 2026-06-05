@@ -3,6 +3,7 @@
 
 #include <barelymusician.h>
 
+#include <array>
 #include <optional>
 #include <vector>
 
@@ -34,6 +35,7 @@ class Processor : public Steinberg::Vst::AudioEffect {
  private:
   std::optional<Engine> engine_;
   Instrument instrument_;
+  std::array<float, BarelyInstrumentControlType_kCount> controls_;
   std::vector<float> output_samples_;
 };
 

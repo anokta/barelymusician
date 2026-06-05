@@ -5,7 +5,6 @@ VERS_1.0 {
     BarelyEngine_CreateInstrument;
     BarelyEngine_CreatePerformer;
     BarelyEngine_Destroy;
-    BarelyEngine_GetControl;
     BarelyEngine_GetTempo;
     BarelyEngine_GetTimestamp;
     BarelyEngine_Process;
@@ -13,8 +12,6 @@ VERS_1.0 {
     BarelyEngine_SetTempo;
     BarelyEngine_Update;
     BarelyInstrument_Destroy;
-    BarelyInstrument_GetControl;
-    BarelyInstrument_GetNoteControl;
     BarelyInstrument_IsNoteOn;
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;

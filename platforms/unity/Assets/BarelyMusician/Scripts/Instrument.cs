@@ -225,24 +225,6 @@ namespace Barely {
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<float> {}
     public NoteOnEvent OnNoteOnEvent;
 
-    /// Returns the gain of a note.
-    ///
-    /// @param pitch Note pitch.
-    /// @return Note gain.
-    public float GetNoteGain(float pitch) {
-      return Engine.Internal.Instrument_GetNoteControl(_id, pitch,
-                                                       Engine.Internal.NoteControlType.GAIN);
-    }
-
-    /// Returns the pitch shift of a note.
-    ///
-    /// @param pitch Note pitch.
-    /// @return Pitch shift.
-    public float GetNotePitchShift(float pitch) {
-      return Engine.Internal.Instrument_GetNoteControl(_id, pitch,
-                                                       Engine.Internal.NoteControlType.PITCH_SHIFT);
-    }
-
     /// Returns whether a note is on or not.
     ///
     /// @param pitch Note pitch

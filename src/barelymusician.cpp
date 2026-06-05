@@ -114,16 +114,6 @@ bool BarelyEngine_GenerateRandomNumber(BarelyEngine* engine, double* out_number)
   return true;
 }
 
-bool BarelyEngine_GetControl(const BarelyEngine* engine, BarelyEngineControlType type,
-                             float* out_value) {
-  if (!engine) return false;
-  if (type >= BarelyEngineControlType_kCount) return false;
-  if (!out_value) return false;
-
-  *out_value = engine->state.controls[type].value;
-  return true;
-}
-
 bool BarelyEngine_GetTempo(const BarelyEngine* engine, double* out_tempo) {
   if (!engine) return false;
   if (!out_tempo) return false;
@@ -193,33 +183,6 @@ bool BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrument_id) {
   engine->state.instrument_generations[instrument_index] =
       engine->state.GetNextIdGeneration(engine->state.instrument_generations[instrument_index]);
   return true;
-}
-
-bool BarelyInstrument_GetControl(const BarelyEngine* engine, uint32_t instrument_id,
-                                 BarelyInstrumentControlType type, float* out_value) {
-  if (!engine) return false;
-  if (!engine->IsValidInstrument(instrument_id)) return false;
-  if (type >= BarelyInstrumentControlType_kCount) return false;
-  if (!out_value) return false;
-
-  *out_value = engine->controller.instrument_controller().GetControl(
-      engine->state.GetIdIndex(instrument_id), type);
-  return true;
-}
-
-bool BarelyInstrument_GetNoteControl(const BarelyEngine* engine, uint32_t instrument_id,
-                                     float pitch, BarelyNoteControlType type, float* out_value) {
-  if (!engine) return false;
-  if (!engine->IsValidInstrument(instrument_id)) return false;
-  if (type >= BarelyNoteControlType_kCount) return false;
-  if (!out_value) return false;
-
-  if (const float* value = engine->controller.instrument_controller().GetNoteControl(
-          engine->state.GetIdIndex(instrument_id), pitch, type)) {
-    *out_value = *value;
-    return true;
-  }
-  return false;
 }
 
 bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, uint32_t instrument_id, float pitch,

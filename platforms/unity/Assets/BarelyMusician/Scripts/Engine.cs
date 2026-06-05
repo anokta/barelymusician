@@ -24,7 +24,7 @@ namespace Barely {
       set {
         if (_gain != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.GAIN, value);
-          _gain = Internal.Engine_GetControl(Internal.EngineControlType.GAIN);
+          gain_ = value;
         }
       }
     }
@@ -36,7 +36,7 @@ namespace Barely {
       set {
         if (_compMix != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_MIX, value);
-          _compMix = Internal.Engine_GetControl(Internal.EngineControlType.COMP_MIX);
+          _compMix = value;
         }
       }
     }
@@ -48,7 +48,7 @@ namespace Barely {
       set {
         if (_compAttack != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_ATTACK, value);
-          _compAttack = Internal.Engine_GetControl(Internal.EngineControlType.COMP_ATTACK);
+          _compAttack = value;
         }
       }
     }
@@ -60,7 +60,7 @@ namespace Barely {
       set {
         if (_compRelease != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_RELEASE, value);
-          _compRelease = Internal.Engine_GetControl(Internal.EngineControlType.COMP_RELEASE);
+          _compRelease = value;
         }
       }
     }
@@ -72,7 +72,7 @@ namespace Barely {
       set {
         if (_compThreshold != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_THRESHOLD, value);
-          _compThreshold = Internal.Engine_GetControl(Internal.EngineControlType.COMP_THRESHOLD);
+          _compThreshold = value;
         }
       }
     }
@@ -84,7 +84,7 @@ namespace Barely {
       set {
         if (_compRatio != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_RATIO, value);
-          _compRatio = Internal.Engine_GetControl(Internal.EngineControlType.COMP_RATIO);
+          _compRatio = value;
         }
       }
     }
@@ -96,7 +96,7 @@ namespace Barely {
       set {
         if (_delayMix != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_MIX, value);
-          _delayMix = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_MIX);
+          _delayMix = value;
         }
       }
     }
@@ -108,7 +108,7 @@ namespace Barely {
       set {
         if (_delayTime != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_TIME, value);
-          _delayTime = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_TIME);
+          _delayTime = value;
         }
       }
     }
@@ -120,7 +120,7 @@ namespace Barely {
       set {
         if (_delayFeedback != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_FEEDBACK, value);
-          _delayFeedback = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_FEEDBACK);
+          _delayFeedback = value;
         }
       }
     }
@@ -132,7 +132,7 @@ namespace Barely {
       set {
         if (_delayLpfCutoff != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_LPF_CUTOFF, value);
-          _delayLpfCutoff = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_LPF_CUTOFF);
+          _delayLpfCutoff = value;
         }
       }
     }
@@ -144,7 +144,7 @@ namespace Barely {
       set {
         if (_delayHpfCutoff != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_HPF_CUTOFF, value);
-          _delayHpfCutoff = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_HPF_CUTOFF);
+          _delayHpfCutoff = value;
         }
       }
     }
@@ -156,7 +156,7 @@ namespace Barely {
       set {
         if (_delayPingPong != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_PING_PONG, value);
-          _delayPingPong = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_PING_PONG);
+          _delayPingPong = value;
         }
       }
     }
@@ -168,8 +168,7 @@ namespace Barely {
       set {
         if (_delayReverbSend != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_REVERB_SEND, value);
-          _delayReverbSend =
-              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_REVERB_SEND);
+          _delayReverbSend =value;
         }
       }
     }
@@ -181,7 +180,7 @@ namespace Barely {
       set {
         if (_reverbMix != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_MIX, value);
-          _reverbMix = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_MIX);
+          _reverbMix = value;
         }
       }
     }
@@ -193,7 +192,7 @@ namespace Barely {
       set {
         if (_reverbDamping != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_DAMPING, value);
-          _reverbDamping = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_DAMPING);
+          _reverbDamping = value;
         }
       }
     }
@@ -205,7 +204,7 @@ namespace Barely {
       set {
         if (_reverbRoomSize != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_ROOM_SIZE, value);
-          _reverbRoomSize = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_ROOM_SIZE);
+          _reverbRoomSize = value;
         }
       }
     }
@@ -217,8 +216,7 @@ namespace Barely {
       set {
         if (_reverbStereoWidth != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_STEREO_WIDTH, value);
-          _reverbStereoWidth =
-              Internal.Engine_GetControl(Internal.EngineControlType.REVERB_STEREO_WIDTH);
+          _reverbStereoWidth =value;
         }
       }
     }
@@ -230,8 +228,7 @@ namespace Barely {
       set {
         if (_reverbFreeze != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_FREEZE, value ? 1.0f : 0.0f);
-          _reverbFreeze =
-              Internal.Engine_GetControl(Internal.EngineControlType.REVERB_FREEZE) > 0.0f;
+          _reverbFreeze =value;
         }
       }
     }
@@ -243,7 +240,7 @@ namespace Barely {
       set {
         if (_sidechainMix != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_MIX, value);
-          _sidechainMix = Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_MIX);
+          _sidechainMix = value;
         }
       }
     }
@@ -255,8 +252,7 @@ namespace Barely {
       set {
         if (_sidechainAttack != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_ATTACK, value);
-          _sidechainAttack =
-              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_ATTACK);
+          _sidechainAttack =value;
         }
       }
     }
@@ -268,8 +264,7 @@ namespace Barely {
       set {
         if (_sidechainRelease != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_RELEASE, value);
-          _sidechainRelease =
-              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_RELEASE);
+          _sidechainRelease =value;
         }
       }
     }
@@ -281,8 +276,7 @@ namespace Barely {
       set {
         if (_sidechainThreshold != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_THRESHOLD, value);
-          _sidechainThreshold =
-              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_THRESHOLD);
+          _sidechainThreshold =value;
         }
       }
     }
@@ -294,7 +288,7 @@ namespace Barely {
       set {
         if (_sidechainRatio != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_RATIO, value);
-          _sidechainRatio = Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_RATIO);
+          _sidechainRatio = value;
         }
       }
     }
@@ -429,14 +423,6 @@ namespace Barely {
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
       }
 
-      public static float Engine_GetControl(EngineControlType type) {
-        float value = 0.0f;
-        if (!BarelyEngine_GetControl(Handle, type, ref value) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get engine engine control");
-        }
-        return value;
-      }
-
       public static double Engine_GetTempo() {
         double tempo = 0.0;
         if (!BarelyEngine_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
@@ -494,25 +480,6 @@ namespace Barely {
         _instruments.Remove(instrumentId);
         _slices.Remove(instrumentId);
         instrumentId = 0;
-      }
-
-      public static float Instrument_GetControl(UInt32 instrumentId, InstrumentControlType type) {
-        float value = 0.0f;
-        if (!BarelyInstrument_GetControl(Handle, instrumentId, type, ref value) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to get instrument control " + type);
-        }
-        return value;
-      }
-
-      public static float Instrument_GetNoteControl(UInt32 instrumentId, float pitch,
-                                                    NoteControlType type) {
-        float value = 0.0f;
-        if (!BarelyInstrument_GetNoteControl(Handle, instrumentId, pitch, type, ref value) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to get instrument note " + pitch + " control " + type + " value");
-        }
-        return value;
       }
 
       public static bool Instrument_IsNoteOn(UInt32 instrumentId, float pitch) {
@@ -1071,10 +1038,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
       private static extern bool BarelyEngine_Destroy(IntPtr engine);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetControl")]
-      private static extern bool BarelyEngine_GetControl(IntPtr engine, EngineControlType type,
-                                                         ref float value);
-
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
       private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
 
@@ -1099,16 +1062,6 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr engine, UInt32 instrumentId);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetControl")]
-      private static extern bool BarelyInstrument_GetControl(IntPtr engine, UInt32 instrumentId,
-                                                             InstrumentControlType type,
-                                                             ref float outValue);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
-      private static extern bool BarelyInstrument_GetNoteControl(IntPtr engine, UInt32 instrumentId,
-                                                                 float pitch, NoteControlType type,
-                                                                 ref float outValue);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern bool BarelyInstrument_IsNoteOn(IntPtr engine, UInt32 instrumentId,

@@ -90,6 +90,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       });
 
   // Key down callback.
+  bool is_playing = true;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -100,13 +101,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     // Adjust tempo.
     switch (std::toupper(key)) {
       case ' ':
-        if (metronome.IsPlaying()) {
+        if (is_playing) {
           metronome.Stop();
           ConsoleLog() << "Metronome stopped";
         } else {
           metronome.Start();
           ConsoleLog() << "Metronome started";
         }
+        is_playing = !is_playing;
         return;
       case '\r':
         metronome.Stop();

@@ -47,11 +47,11 @@ class BarelyPerformer : public ::godot::Node {
   void set_tasks(const ::godot::TypedArray<::godot::Ref<BarelyTaskResource>>& tasks);
 
   double get_position() const;
-  bool is_playing() const;
 
   double get_loop_begin_position() const { return loop_begin_position_; }
   double get_loop_length() const { return loop_length_; }
   bool is_looping() const { return looping_; }
+  bool is_playing() const { return playing_; }
 
   ::godot::TypedArray<::godot::Ref<BarelyTaskResource>> get_tasks() const { return tasks_; }
 
@@ -65,6 +65,7 @@ class BarelyPerformer : public ::godot::Node {
   double loop_begin_position_ = 0.0;
   double loop_length_ = 1.0;
   bool looping_ = false;
+  bool playing_ = false;
 
   ::godot::TypedArray<::godot::Ref<BarelyTaskResource>> tasks_;
   std::vector<uint32_t> task_ids_;

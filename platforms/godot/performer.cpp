@@ -63,10 +63,12 @@ BarelyPerformer::~BarelyPerformer() {
 }
 
 void BarelyPerformer::start() {
+  playing_ = true;
   BarelyPerformer_Start(BarelyEngine::get_singleton()->get(), performer_id_);
 }
 
 void BarelyPerformer::stop() {
+  playing_ = false;
   BarelyPerformer_Stop(BarelyEngine::get_singleton()->get(), performer_id_);
 }
 
@@ -114,12 +116,6 @@ double BarelyPerformer::get_position() const {
   double position = 0.0;
   BarelyPerformer_GetPosition(BarelyEngine::get_singleton()->get(), performer_id_, &position);
   return position;
-}
-
-bool BarelyPerformer::is_playing() const {
-  bool playing = false;
-  BarelyPerformer_IsPlaying(BarelyEngine::get_singleton()->get(), performer_id_, &playing);
-  return playing;
 }
 
 void BarelyPerformer::_bind_methods() {

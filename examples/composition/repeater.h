@@ -31,7 +31,7 @@ class Repeater {
   void SetMode(Mode mode) noexcept { mode_ = mode; }
   void SetRate(double rate) noexcept;
 
-  [[nodiscard]] bool IsPlaying() const noexcept { return performer_.IsPlaying(); }
+  [[nodiscard]] bool IsPlaying() const noexcept { return index_ != -1; }
 
  private:
   void OnBeat() noexcept;

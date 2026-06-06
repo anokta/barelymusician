@@ -21,7 +21,7 @@ Arpeggiator::Arpeggiator(Engine& engine, Instrument instrument) noexcept
         }
       })) {
   performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
+  performer_.SetLoopLength(loop_length_);
 }
 
 void Arpeggiator::SetAllNotesOff() noexcept {
@@ -54,9 +54,9 @@ void Arpeggiator::SetNoteOn(float pitch) noexcept {
 }
 
 void Arpeggiator::SetRate(double rate) noexcept {
-  const double length = (rate > 0.0) ? 1.0 / rate : 0.0;
-  performer_.SetLoopLength(length);
-  task_.SetDuration(length * gate_ratio_);
+  loop_length_ = (rate > 0.0) ? 1.0 / rate : 0.0;
+  performer_.SetLoopLength(loop_length_);
+  task_.SetDuration(loop_length_ * gate_ratio_);
 }
 
 void Arpeggiator::Stop() noexcept {

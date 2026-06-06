@@ -110,6 +110,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       });
 
   // Key down callback.
+  bool is_playing = true;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -132,13 +133,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Adjust tempo.
     switch (std::toupper(key)) {
       case ' ':
-        if (performer.IsPlaying()) {
+        if (is_playing) {
           performer.Stop();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();
           ConsoleLog() << "Started playback";
         }
+        is_playing = !is_playing;
         return;
       case 'L':
         if (is_looping) {

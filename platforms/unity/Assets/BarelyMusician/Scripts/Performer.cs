@@ -33,7 +33,7 @@ namespace Barely {
           return;
         }
         Engine.Internal.Performer_SetLoopBeginPosition(_id, value);
-        _loopBeginPosition = Engine.Internal.Performer_GetLoopBeginPosition(_id);
+        _loopBeginPosition = value;
       }
     }
     [SerializeField]
@@ -48,7 +48,7 @@ namespace Barely {
           return;
         }
         Engine.Internal.Performer_SetLoopLength(_id, value);
-        _loopLength = Engine.Internal.Performer_GetLoopLength(_id);
+        _loopLength = value;
       }
     }
     [SerializeField]
@@ -59,9 +59,7 @@ namespace Barely {
     public List<Task> Tasks = new List<Task>();
 
     /// True if playing, false otherwise.
-    public bool IsPlaying {
-      get { return Engine.Internal.Performer_IsPlaying(_id); }
-    }
+    public bool IsPlaying { get; private set; } = false;
 
     /// Position in beats.
     public double Position {
@@ -71,12 +69,14 @@ namespace Barely {
 
     /// Starts the performer.
     public void Play() {
+      IsPlaying = true;
       _playOnEnable = (_id == 0);
       Engine.Internal.Performer_Start(_id);
     }
 
     /// Stops the performer.
     public void Stop() {
+      IsPlaying = false;
       _playOnEnable = false;
       Engine.Internal.Performer_Stop(_id);
     }

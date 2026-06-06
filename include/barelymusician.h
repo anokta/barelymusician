@@ -81,9 +81,6 @@
 ///   // Start the performer playback.
 ///   performer.Start();
 ///
-///   // Check if the performer started playing.
-///   const bool is_playing = performer.IsPlaying();
-///
 ///   // Destroy the performer.
 ///   performer.Destroy();
 ///   @endcode
@@ -176,10 +173,6 @@
 ///
 ///   // Start the performer playback.
 ///   BarelyPerformer_Start(engine, performer_id);
-///
-///   // Check if the performer started playing.
-///   bool is_playing = false;
-///   BarelyPerformer_IsPlaying(engine, performer_id, &is_playing);
 ///
 ///   // Destroy the performer.
 ///   BarelyPerformer_Destroy(engine, performer_id);
@@ -616,25 +609,6 @@ BARELY_API bool BarelyPerformer_CreateTask(BarelyEngine* engine, uint32_t perfor
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_Destroy(BarelyEngine* engine, uint32_t performer_id);
 
-/// Gets the loop begin position of a performer.
-///
-/// @param engine Pointer to engine.
-/// @param performer_id Performer identifier.
-/// @param out_loop_begin_position Output loop begin position in beats.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine,
-                                                     uint32_t performer_id,
-                                                     double* out_loop_begin_position);
-
-/// Gets the loop length of a performer.
-///
-/// @param engine Pointer to engine.
-/// @param performer_id Performer identifier.
-/// @param out_loop_length Output loop length.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, uint32_t performer_id,
-                                              double* out_loop_length);
-
 /// Gets the position of a performer.
 ///
 /// @param engine Pointer to engine.
@@ -643,15 +617,6 @@ BARELY_API bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, uint32
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performer_id,
                                             double* out_position);
-
-/// Gets whether a performer is playing or not.
-///
-/// @param engine Pointer to engine.
-/// @param performer_id Performer identifier.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, uint32_t performer_id,
-                                          bool* out_is_playing);
 
 /// Sets the loop begin position of a performer.
 ///
@@ -1183,28 +1148,6 @@ class Performer {
     }
   }
 
-  /// Returns the loop begin position.
-  ///
-  /// @return Loop begin position in beats.
-  [[nodiscard]] double GetLoopBeginPosition() const noexcept {
-    double loop_begin_position = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyPerformer_GetLoopBeginPosition(engine_, performer_id_, &loop_begin_position);
-    assert(success);
-    return loop_begin_position;
-  }
-
-  /// Returns the loop length.
-  ///
-  /// @return Loop length in beats.
-  [[nodiscard]] double GetLoopLength() const noexcept {
-    double loop_length = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyPerformer_GetLoopLength(engine_, performer_id_, &loop_length);
-    assert(success);
-    return loop_length;
-  }
-
   /// Returns the position.
   ///
   /// @return Position in beats.
@@ -1214,17 +1157,6 @@ class Performer {
         BarelyPerformer_GetPosition(engine_, performer_id_, &position);
     assert(success);
     return position;
-  }
-
-  /// Returns whether the performer is playing or not.
-  ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept {
-    bool is_playing = false;
-    [[maybe_unused]] const bool success =
-        BarelyPerformer_IsPlaying(engine_, performer_id_, &is_playing);
-    assert(success);
-    return is_playing;
   }
 
   /// Sets the loop begin position.

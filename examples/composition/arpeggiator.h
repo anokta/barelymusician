@@ -26,11 +26,9 @@ class Arpeggiator {
   void SetNoteOn(float pitch) noexcept;
   void SetRate(double rate) noexcept;
 
-  void SetGateRatio(double gate_ratio) noexcept {
-    task_.SetDuration(performer_.GetLoopLength() * gate_ratio);
-  }
+  void SetGateRatio(double gate_ratio) noexcept { task_.SetDuration(loop_length_ * gate_ratio); }
   void SetMode(Mode mode) noexcept { mode_ = mode; }
-  [[nodiscard]] bool IsPlaying() const noexcept { return performer_.IsPlaying(); }
+  [[nodiscard]] bool IsPlaying() const noexcept { return index_ != -1; }
 
  private:
   void Stop() noexcept;
@@ -43,10 +41,11 @@ class Arpeggiator {
 
   std::vector<float> pitches_;
 
-  Mode mode_ = Mode::kUp;
+  double loop_length_ = 1.0;
   float gate_ratio_ = 0.5f;
   float pitch_ = 0.0f;
   int index_ = -1;
+  Mode mode_ = Mode::kUp;
 };
 
 }  // namespace barely::examples

@@ -577,24 +577,6 @@ namespace Barely {
         performerId = 0;
       }
 
-      public static double Performer_GetLoopBeginPosition(UInt32 performerId) {
-        double loopBeginPosition = 0.0;
-        if (!BarelyPerformer_GetLoopBeginPosition(_handle, performerId, ref loopBeginPosition) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get performer loop begin position");
-        }
-        return loopBeginPosition;
-      }
-
-      public static double Performer_GetLoopLength(UInt32 performerId) {
-        double loopLength = 0.0;
-        if (!BarelyPerformer_GetLoopLength(_handle, performerId, ref loopLength) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get performer loop length");
-        }
-        return loopLength;
-      }
-
       public static double Performer_GetPosition(UInt32 performerId) {
         double position = 0.0;
         if (!BarelyPerformer_GetPosition(_handle, performerId, ref position) &&
@@ -602,15 +584,6 @@ namespace Barely {
           Debug.LogError("Failed to get performer position");
         }
         return position;
-      }
-
-      public static bool Performer_IsPlaying(UInt32 performerId) {
-        bool isPlaying = false;
-        if (!BarelyPerformer_IsPlaying(_handle, performerId, ref isPlaying) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get if performer is playing");
-        }
-        return isPlaying;
       }
 
       public static void Performer_SetLoopBeginPosition(UInt32 performerId,
@@ -1061,21 +1034,9 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Destroy")]
       private static extern bool BarelyPerformer_Destroy(IntPtr engine, UInt32 performerId);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
-      private static extern bool BarelyPerformer_GetLoopBeginPosition(
-          IntPtr engine, UInt32 performerId, ref double outLoopBeginPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopLength")]
-      private static extern bool BarelyPerformer_GetLoopLength(IntPtr engine, UInt32 performerId,
-                                                               ref double outLoopLength);
-
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
       private static extern bool BarelyPerformer_GetPosition(IntPtr engine, UInt32 performerId,
                                                              ref double outPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
-      private static extern bool BarelyPerformer_IsPlaying(IntPtr engine, UInt32 performerId,
-                                                           ref bool outIsPlaying);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
       private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr engine,

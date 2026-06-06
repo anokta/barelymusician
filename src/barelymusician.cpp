@@ -286,27 +286,6 @@ bool BarelyPerformer_Destroy(BarelyEngine* engine, uint32_t performer_id) {
   return true;
 }
 
-bool BarelyPerformer_GetLoopBeginPosition(const BarelyEngine* engine, uint32_t performer_id,
-                                          double* out_loop_begin_position) {
-  if (!engine) return false;
-  if (!engine->IsValidPerformer(performer_id)) return false;
-  if (!out_loop_begin_position) return false;
-
-  *out_loop_begin_position =
-      engine->state.GetPerformer(engine->state.GetIdIndex(performer_id)).loop_begin_position;
-  return true;
-}
-
-bool BarelyPerformer_GetLoopLength(const BarelyEngine* engine, uint32_t performer_id,
-                                   double* out_loop_length) {
-  if (!engine) return false;
-  if (!engine->IsValidPerformer(performer_id)) return false;
-  if (!out_loop_length) return false;
-
-  *out_loop_length = engine->state.GetPerformer(engine->state.GetIdIndex(performer_id)).loop_length;
-  return true;
-}
-
 bool BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performer_id,
                                  double* out_position) {
   if (!engine) return false;
@@ -314,16 +293,6 @@ bool BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performer_
   if (!out_position) return false;
 
   *out_position = engine->state.GetPerformer(engine->state.GetIdIndex(performer_id)).position;
-  return true;
-}
-
-bool BarelyPerformer_IsPlaying(const BarelyEngine* engine, uint32_t performer_id,
-                               bool* out_is_playing) {
-  if (!engine) return false;
-  if (!engine->IsValidPerformer(performer_id)) return false;
-  if (!out_is_playing) return false;
-
-  *out_is_playing = engine->state.GetPerformer(engine->state.GetIdIndex(performer_id)).is_playing;
   return true;
 }
 

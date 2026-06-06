@@ -21,10 +21,7 @@ VERS_1.0 {
     BarelyInstrument_SetSampleData;
     BarelyPerformer_CreateTask;
     BarelyPerformer_Destroy;
-    BarelyPerformer_GetLoopBeginPosition;
-    BarelyPerformer_GetLoopLength;
     BarelyPerformer_GetPosition;
-    BarelyPerformer_IsPlaying;
     BarelyPerformer_SetLoopBeginPosition;
     BarelyPerformer_SetLoopLength;
     BarelyPerformer_SetLooping;

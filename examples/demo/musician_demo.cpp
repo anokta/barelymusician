@@ -376,6 +376,7 @@ int main(int /*argc*/, char* argv[]) {
       });
 
   // Key down callback.
+  bool is_playing = true;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -385,7 +386,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     switch (std::toupper(key)) {
       case ' ':
-        if (metronome.IsPlaying()) {
+        if (is_playing) {
           metronome.Stop();
           for (auto& [performer, tasks, beat_composer_callback, index] : performers) {
             performer.Stop();
@@ -401,6 +402,7 @@ int main(int /*argc*/, char* argv[]) {
           metronome.Start();
           ConsoleLog() << "Started playback";
         }
+        is_playing = !is_playing;
         break;
       case '1':
         tempo *= engine.GenerateRandomNumber(0.5, 0.75);

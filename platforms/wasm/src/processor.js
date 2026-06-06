@@ -158,47 +158,25 @@ class Processor extends AudioWorkletProcessor {
         this._module._BarelyEngine_CreateInstrument(this._engine, this._uint32Ptr);
         const instrumentId = this._module.getValue(this._uint32Ptr, 'i32');
         if (!instrumentId) return;
-
         for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
           this._module._BarelyInstrument_SetControl(
               this._engine, instrumentId, controlTypeIndex,
               INSTRUMENT_CONTROLS[controlTypeIndex].defaultValue);
         }
-
-        const noteEventCallback = (eventType, pitch) => {
-          if (eventType === EventType.BEGIN) {
-            this._pendingEventCallbacks.push(
-                {type: EventCallbackType.INSTRUMENT_ON_NOTE_BEGIN, handle: command.handle, pitch});
-          } else if (eventType === EventType.END) {
-            this._pendingEventCallbacks.push(
-                {type: EventCallbackType.INSTRUMENT_ON_NOTE_END, handle: command.handle, pitch});
-          } else {
-            console.error(`Invalid note event: ${eventType}`);
-          }
-        };
-        const noteEventCallbackPtr = this._module.addFunction((eventType, pitch, userData) => {
-          const callback = this._instruments.get(userData)?.noteEventCallback;
-          if (callback) {
-            callback(eventType, pitch);
-          }
-        }, 'vifi');
-        this._module._BarelyInstrument_SetNoteEventCallback(
-            this._engine, instrumentId, noteEventCallbackPtr, command.handle);
-        this._instruments.set(
-            command.handle, {instrumentId, noteEventCallback, noteEventCallbackPtr});
+        this._instruments.set(command.handle, {instrumentId});
       } break;
       case CommandType.INSTRUMENT_DESTROY: {
-        const {instrumentId, noteEventCallbackPtr} = this._instruments.get(command.handle);
+        const instrumentId = this._instruments.get(command.handle);
         if (!instrumentId) return;
         this._module._BarelyInstrument_Destroy(this._engine, instrumentId);
-        this._module.removeFunction(noteEventCallbackPtr);
         this._instruments.delete(command.handle);
         this._cleanUpInstrumentSampleData(instrumentId);
       } break;
       case CommandType.INSTRUMENT_SET_ALL_NOTES_OFF: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
         if (!instrumentId) return;
-        this._module._BarelyInstrument_SetAllNotesOff(this._engine, instrumentId);
+        this._pendingEventCallbacks.push(
+            {type: EventCallbackType.INSTRUMENT_ON_ALL_NOTES_OFF, handle: command.handle});
       } break;
       case CommandType.INSTRUMENT_SET_CONTROL: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
@@ -216,6 +194,11 @@ class Processor extends AudioWorkletProcessor {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
         if (!instrumentId) return;
         this._module._BarelyInstrument_SetNoteOff(this._engine, instrumentId, command.pitch);
+        this._pendingEventCallbacks.push({
+          type: EventCallbackType.INSTRUMENT_ON_NOTE_OFF,
+          handle: command.handle,
+          pitch: command.pitch,
+        });
       } break;
       case CommandType.INSTRUMENT_SET_NOTE_ON: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
@@ -229,6 +212,11 @@ class Processor extends AudioWorkletProcessor {
           this._module._BarelyInstrument_SetControl(
               this._engine, instrumentId, NoteControlType.PITCH_SHIFT, command.pitchShift);
         }
+        this._pendingEventCallbacks.push({
+          type: EventCallbackType.INSTRUMENT_ON_NOTE_ON,
+          handle: command.handle,
+          pitch: command.pitch,
+        });
       } break;
       case CommandType.INSTRUMENT_SET_SAMPLE_DATA: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;

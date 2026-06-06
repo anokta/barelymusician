@@ -21,20 +21,14 @@ class InstrumentController {
   [[nodiscard]] uint32_t Acquire() noexcept;
   void Release(uint32_t instrument_index) noexcept;
 
-  void SetAllNotesOff() noexcept;
-  void SetAllNotesOff(uint32_t instrument_index) noexcept;
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
                   float value) noexcept;
   void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
                       float value) noexcept;
-  void SetNoteEventCallback(uint32_t instrument_index, BarelyNoteEventCallback callback,
-                            void* user_data) noexcept;
   void SetNoteOff(uint32_t instrument_index, float pitch) noexcept;
   void SetNoteOn(uint32_t instrument_index, float pitch) noexcept;
   void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
                      int32_t slice_count) noexcept;
-
-  [[nodiscard]] bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
 
  private:
   [[nodiscard]] uint32_t GetNote(const InstrumentState& instrument, float pitch) const noexcept;

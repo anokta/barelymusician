@@ -33,34 +33,21 @@ Example usage
 
 // Create the engine.
 barely::Engine engine(/*sample_rate=*/48000);
-
-// Set the global tempo.
 engine.SetTempo(/*tempo=*/124.0);
 
-// Create a new instrument.
+// Create a new instrument with full oscillator mix.
 auto instrument = engine.CreateInstrument();
-
-// Set the instrument to use full oscillator mix.
 instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 
-// Set an instrument note on.
-//
-// The note pitch is expressed in octaves relative to middle C as the center frequency. Fractional
-// note values adjust the frequency logarithmically to ensure equally perceived pitch intervals
-// within each octave.
-constexpr float kC4Pitch = 0.0f;
-instrument.SetNoteOn(kC4Pitch);
-
-// Check if the instrument note is on.
-const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
-
-// Create a new performer.
+// Create a new looping performer.
 auto performer = engine.CreatePerformer();
-
-// Set the performer to looping.
 performer.SetLooping(/*is_looping=*/true);
 
 // Create a new task that plays an instrument note every beat.
+//
+// Notes are expressed in octaves relative to middle C as the center frequency. Fractional note
+// values adjust the frequency logarithmically to ensure equally perceived pitch intervals within
+// each octave.
 auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
                                  [&](barely::EventType type) {
                                    constexpr float kC3Pitch = -1.0f;

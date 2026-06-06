@@ -38,10 +38,11 @@ export const CommandType = Object.freeze({
  * @enum {int}
  */
 export const EventCallbackType = Object.freeze({
-  INSTRUMENT_ON_NOTE_BEGIN: 0,
-  INSTRUMENT_ON_NOTE_END: 1,
-  TASK_ON_BEGIN: 2,
-  TASK_ON_END: 3,
+  INSTRUMENT_ON_ALL_NOTES_OFF: 0,
+  INSTRUMENT_ON_NOTE_OFF: 1,
+  INSTRUMENT_ON_NOTE_ON: 2,
+  TASK_ON_BEGIN: 3,
+  TASK_ON_END: 4,
 });
 
 /**

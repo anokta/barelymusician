@@ -11,11 +11,8 @@ VERS_1.0 {
     BarelyEngine_SetTempo;
     BarelyEngine_Update;
     BarelyInstrument_Destroy;
-    BarelyInstrument_IsNoteOn;
-    BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
     BarelyInstrument_SetNoteControl;
-    BarelyInstrument_SetNoteEventCallback;
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOn;
     BarelyInstrument_SetSampleData;

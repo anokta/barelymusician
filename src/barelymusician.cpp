@@ -9,7 +9,6 @@
 
 #include "core/arena.h"
 #include "core/constants.h"
-#include "core/control.h"
 #include "core/time.h"
 #include "engine/engine_controller.h"
 #include "engine/engine_processor.h"
@@ -101,7 +100,6 @@ bool BarelyEngine_CreatePerformer(BarelyEngine* engine, uint32_t* out_performer_
 bool BarelyEngine_Destroy(BarelyEngine* engine) {
   if (!engine) return false;
 
-  engine->controller.instrument_controller().SetAllNotesOff();
   std::destroy_at(engine);
   return true;
 }
@@ -177,26 +175,6 @@ bool BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrument_id) {
   return true;
 }
 
-bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, uint32_t instrument_id, float pitch,
-                               bool* out_is_note_on) {
-  if (!engine) return false;
-  if (!engine->IsValidInstrument(instrument_id)) return false;
-  if (!out_is_note_on) return false;
-
-  *out_is_note_on = engine->controller.instrument_controller().IsNoteOn(
-      engine->state.GetIdIndex(instrument_id), pitch);
-  return true;
-}
-
-bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, uint32_t instrument_id) {
-  if (!engine) return false;
-  if (!engine->IsValidInstrument(instrument_id)) return false;
-
-  engine->controller.instrument_controller().SetAllNotesOff(
-      engine->state.GetIdIndex(instrument_id));
-  return true;
-}
-
 bool BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instrument_id,
                                  BarelyInstrumentControlType type, float value) {
   if (!engine) return false;
@@ -216,16 +194,6 @@ bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_i
 
   engine->controller.instrument_controller().SetNoteControl(engine->state.GetIdIndex(instrument_id),
                                                             pitch, type, value);
-  return true;
-}
-
-bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, uint32_t instrument_id,
-                                           BarelyNoteEventCallback callback, void* user_data) {
-  if (!engine) return false;
-  if (!engine->IsValidInstrument(instrument_id)) return false;
-
-  engine->controller.instrument_controller().SetNoteEventCallback(
-      engine->state.GetIdIndex(instrument_id), callback, user_data);
   return true;
 }
 

@@ -21,8 +21,7 @@ namespace Barely.Examples {
     }
 
     private void OnNoteOn(float pitch) {
-      Debug.Log(instrument.name + ": NoteOn(" + pitch.ToString("F1") + ", " +
-                instrument.GetNoteGain(pitch).ToString("F1") + ")");
+      Debug.Log(instrument.name + ": NoteOn(" + pitch.ToString("F1") + ")");
     }
   }
 }  // namespace Barely.Examples

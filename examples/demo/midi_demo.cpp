@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <chrono>
-#include <cstddef>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -52,8 +51,8 @@ constexpr char kMidiFileName[] = "midi/sample.mid";
 constexpr double kTempo = 132.0;
 
 // Builds the score for the given `midi_events`.
-bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instrument& instrument,
-                Performer& performer) {
+bool BuildScore(const smf::MidiEventList& midi_events, int track_index, int ticks_per_beat,
+                Instrument& instrument, Performer& performer) {
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
@@ -68,8 +67,10 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat, Instr
       performer.CreateTask(position, duration, 0, [&, pitch, gain](EventType type) noexcept {
         if (type == EventType::kBegin) {
           instrument.SetNoteOn(pitch, gain);
+          ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(" << pitch << ")";
         } else if (type == EventType::kEnd) {
           instrument.SetNoteOff(pitch);
+          ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
         }
       });
       has_notes = true;
@@ -101,13 +102,14 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate);
   engine.SetTempo(kTempo);
 
-  std::vector<std::tuple<Instrument, Performer, size_t>> tracks;
+  std::vector<std::tuple<Instrument, Performer, int>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(engine.CreateInstrument(), engine.CreatePerformer(), tracks.size() + 1);
+    tracks.emplace_back(engine.CreateInstrument(), engine.CreatePerformer(),
+                        static_cast<int>(tracks.size() + 1));
     auto& [instrument, performer, track_index] = tracks.back();
     // Build the score to perform.
-    if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {
+    if (!BuildScore(midi_file[i], track_index, ticks_per_quarter, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
       performer.Destroy();
       instrument.Destroy();
@@ -115,10 +117,6 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Set the instrument settings.
-    instrument.SetNoteEventCallback([track_index](EventType type, float pitch) {
-      ConsoleLog() << "MIDI track #" << track_index << ": Note"
-                   << (type == EventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
-    });
     instrument.SetControl(InstrumentControlType::kGain, kInstrumentGain);
     instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
     instrument.SetControl(InstrumentControlType::kOscShape, kInstrumentOscShape);

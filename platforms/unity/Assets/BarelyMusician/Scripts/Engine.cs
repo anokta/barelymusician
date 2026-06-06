@@ -24,7 +24,7 @@ namespace Barely {
       set {
         if (_gain != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.GAIN, value);
-          gain_ = value;
+          _gain = value;
         }
       }
     }
@@ -457,8 +457,6 @@ namespace Barely {
           return;
         }
         _instruments.Add(instrumentId, instrument);
-        BarelyInstrument_SetNoteEventCallback(_handle, instrumentId, Instrument_OnNoteEvent,
-                                              ref instrumentId);
       }
 
       public static void Instrument_Destroy(ref UInt32 instrumentId) {
@@ -472,22 +470,6 @@ namespace Barely {
         _instruments.Remove(instrumentId);
         _slices.Remove(instrumentId);
         instrumentId = 0;
-      }
-
-      public static bool Instrument_IsNoteOn(UInt32 instrumentId, float pitch) {
-        bool isNoteOn = false;
-        if (!BarelyInstrument_IsNoteOn(Handle, instrumentId, pitch, ref isNoteOn) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to get if instrument note " + pitch + " is on");
-        }
-        return isNoteOn;
-      }
-
-      public static void Instrument_SetAllNotesOff(UInt32 instrumentId) {
-        if (!BarelyInstrument_SetAllNotesOff(Handle, instrumentId) && _handle != IntPtr.Zero &&
-            instrumentId > 0) {
-          Debug.LogError("Failed to stop all instrument notes");
-        }
       }
 
       public static void Instrument_SetControl(UInt32 instrumentId, InstrumentControlType type,
@@ -696,20 +678,6 @@ namespace Barely {
           Debug.LogError("Failed to get scale " + scale + " note pitch with a degree " + degree);
         }
         return pitch;
-      }
-
-      private delegate void NoteEventCallback(EventType type, float pitch, ref UInt32 userData);
-      [AOT.MonoPInvokeCallback(typeof(NoteEventCallback))]
-      private static void Instrument_OnNoteEvent(EventType type, float pitch, ref UInt32 userData) {
-        if (_instruments.TryGetValue(userData, out var instrument)) {
-          if (type == EventType.BEGIN) {
-            Instrument.Internal.OnNoteOn(instrument, pitch);
-          } else if (type == EventType.END) {
-            Instrument.Internal.OnNoteOff(instrument, pitch);
-          } else {
-            Debug.LogError("Invalid note event type");
-          }
-        }
       }
 
       private delegate void TaskEventCallback(EventType type, ref UInt32 userData);
@@ -989,14 +957,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr engine, UInt32 instrumentId);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
-      private static extern bool BarelyInstrument_IsNoteOn(IntPtr engine, UInt32 instrumentId,
-                                                           float pitch, ref bool outIsNoteOn);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
-      private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr engine,
-                                                                 UInt32 instrumentId);
-
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetControl")]
       private static extern bool BarelyInstrument_SetControl(IntPtr engine, UInt32 instrumentId,
                                                              InstrumentControlType type,
@@ -1006,12 +966,6 @@ namespace Barely {
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr engine, UInt32 instrumentId,
                                                                  float pitch, NoteControlType type,
                                                                  float value);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteEventCallback")]
-      private static extern bool BarelyInstrument_SetNoteEventCallback(IntPtr engine,
-                                                                       UInt32 instrumentId,
-                                                                       NoteEventCallback callback,
-                                                                       ref UInt32 userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr engine, UInt32 instrumentId,

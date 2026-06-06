@@ -18,7 +18,6 @@ namespace {
 
 using ::barely::Engine;
 using ::barely::EngineControlType;
-using ::barely::EventType;
 using ::barely::InstrumentControlType;
 using ::barely::examples::Arpeggiator;
 using ::barely::examples::AudioClock;
@@ -37,7 +36,7 @@ constexpr double kLookahead = 0.05;
 constexpr float kDelayTime = 0.5f;
 constexpr float kDelayFeedback = 0.2;
 constexpr float kDelayLpfCutoff = 0.2f;
-constexpr double kTempo = 128.0;
+constexpr double kTempo = 140.0;
 
 // Instrument settings.
 constexpr float kGain = 1.0f;
@@ -91,14 +90,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   instrument.SetControl(InstrumentControlType::kDelaySend, kDelaySend);
-  instrument.SetNoteEventCallback([](EventType type, float pitch) {
-    ConsoleLog() << "Note" << (type == EventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
-  });
 
   Arpeggiator arp(engine, instrument);
   arp.SetGateRatio(kArpGate);
   arp.SetMode(kArpMode);
   arp.SetRate(kArpRate);
+  arp.SetNoteCallback([](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   // Audio process callback.
   audio_output.SetProcessCallback(

@@ -25,29 +25,20 @@ uint32_t InstrumentController::Acquire() noexcept {
 }
 
 void InstrumentController::Release(uint32_t instrument_index) noexcept {
-  SetAllNotesOff(instrument_index);
-  SetSampleData(instrument_index, nullptr, 0);
-  engine_.instrument_pool.Release(instrument_index);
-}
-
-void InstrumentController::SetAllNotesOff() noexcept {
-  for (uint32_t i = 0; i < engine_.instrument_pool.ActiveCount(); ++i) {
-    SetAllNotesOff(engine_.instrument_pool.GetActive(i));
-  }
-}
-
-void InstrumentController::SetAllNotesOff(uint32_t instrument_index) noexcept {
+  // TODO(note): this shouldn't be necessary.
   auto& instrument = engine_.GetInstrument(instrument_index);
   uint32_t note_index = instrument.first_note_index;
   while (note_index != kInvalidIndex) {
     const auto& note = engine_.note_pool.Get(note_index);
-    instrument.note_event_callback(BarelyEventType_kEnd, note.pitch);
     engine_.ScheduleMessage(NoteOffMessage{note_index});
     const uint32_t next_note_index = note.next_note_index;
     engine_.note_pool.Release(note_index);
     note_index = next_note_index;
   }
   instrument.first_note_index = kInvalidIndex;
+
+  SetSampleData(instrument_index, nullptr, 0);
+  engine_.instrument_pool.Release(instrument_index);
 }
 
 void InstrumentController::SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
@@ -69,12 +60,6 @@ void InstrumentController::SetNoteControl(uint32_t instrument_index, float pitch
   }
 }
 
-void InstrumentController::SetNoteEventCallback(uint32_t instrument_index,
-                                                BarelyNoteEventCallback callback,
-                                                void* user_data) noexcept {
-  engine_.GetInstrument(instrument_index).note_event_callback = {callback, user_data};
-}
-
 void InstrumentController::SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
   auto& instrument = engine_.GetInstrument(instrument_index);
 
@@ -82,7 +67,6 @@ void InstrumentController::SetNoteOff(uint32_t instrument_index, float pitch) no
   if (note_index == kInvalidIndex) {
     return;
   }
-  instrument.note_event_callback(BarelyEventType_kEnd, pitch);
   engine_.ScheduleMessage(NoteOffMessage{note_index});
   ReleaseNote(instrument, note_index);
 }
@@ -135,7 +119,6 @@ void InstrumentController::SetNoteOn(uint32_t instrument_index, float pitch) noe
     }
   }
 
-  instrument.note_event_callback(BarelyEventType_kBegin, pitch);
   engine_.ScheduleMessage(NoteOnMessage{new_note_index, instrument_index, pitch});
 }
 
@@ -148,10 +131,6 @@ void InstrumentController::SetSampleData(uint32_t instrument_index, const Barely
   instrument.first_slice_index =
       engine_.slice_pool.Acquire(slices, static_cast<uint32_t>(slice_count));
   engine_.ScheduleMessage(SampleDataMessage{instrument_index, instrument.first_slice_index});
-}
-
-bool InstrumentController::IsNoteOn(uint32_t instrument_index, float pitch) const noexcept {
-  return GetNote(engine_.GetInstrument(instrument_index), pitch) != kInvalidIndex;
 }
 
 uint32_t InstrumentController::GetNote(const InstrumentState& instrument,

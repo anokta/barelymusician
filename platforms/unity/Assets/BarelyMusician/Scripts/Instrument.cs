@@ -225,17 +225,26 @@ namespace Barely {
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<float> {}
     public NoteOnEvent OnNoteOnEvent;
 
+    /// Set of active note pitches.
+    public HashSet<float> Pitches { get; private set; } = new HashSet<float>();
+
     /// Returns whether a note is on or not.
     ///
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
     public bool IsNoteOn(float pitch) {
-      return Engine.Internal.Instrument_IsNoteOn(_id, pitch);
+      return Pitches.Contains(pitch);
     }
 
     /// Sets all notes off.
     public void SetAllNotesOff() {
-      Engine.Internal.Instrument_SetAllNotesOff(_id);
+      HashSet<float> pitches = Pitches;
+      Pitches = new HashSet<float>();
+      foreach (float pitch in pitches) {
+        Engine.Internal.Instrument_SetNoteOff(_id, pitch);
+        OnNoteOff?.Invoke(pitch);
+        OnNoteOffEvent?.Invoke(pitch);
+      }
     }
 
     /// Sets the gain of a note.
@@ -251,7 +260,11 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     public void SetNoteOff(float pitch) {
-      Engine.Internal.Instrument_SetNoteOff(_id, pitch);
+      if (Pitches.Remove(pitch)) {
+        Engine.Internal.Instrument_SetNoteOff(_id, pitch);
+        OnNoteOff?.Invoke(pitch);
+        OnNoteOffEvent?.Invoke(pitch);
+      }
     }
 
     /// Sets the pitch shift of a note.
@@ -269,23 +282,16 @@ namespace Barely {
     /// @param gain Note gain.
     /// @param pitchShift Note pitch shift.
     public void SetNoteOn(float pitch, float gain = 1.0f, float pitchShift = 0.0f) {
-      Engine.Internal.Instrument_SetNoteOn(_id, pitch);
-      if (gain != 1.0f) {
-        SetNoteGain(pitch, gain);
-      }
-      if (pitchShift != 0.0f) {
-        SetNotePitchShift(pitch, pitchShift);
-      }
-    }
-
-    public static class Internal {
-      public static void OnNoteOff(Instrument instrument, float pitch) {
-        instrument.OnNoteOff?.Invoke(pitch);
-        instrument.OnNoteOffEvent?.Invoke(pitch);
-      }
-      public static void OnNoteOn(Instrument instrument, float pitch) {
-        instrument.OnNoteOn?.Invoke(pitch);
-        instrument.OnNoteOnEvent?.Invoke(pitch);
+      if (Pitches.Add(pitch)) {
+        Engine.Internal.Instrument_SetNoteOn(_id, pitch);
+        if (gain != 1.0f) {
+          SetNoteGain(pitch, gain);
+        }
+        if (pitchShift != 0.0f) {
+          SetNotePitchShift(pitch, pitchShift);
+        }
+        OnNoteOn?.Invoke(pitch);
+        OnNoteOnEvent?.Invoke(pitch);
       }
     }
 

@@ -58,22 +58,19 @@ static void AudioProcessCallback(ma_device* device, void* output, const void* in
   g_timestamp += (double)frame_count / (double)kSampleRate;
 }
 
-static void NoteEventCallback(BarelyEventType type, float pitch, void* user_data) {
-  (void)user_data;  // unused
-  printf("Note%s(%.1f)\n", (type == BarelyEventType_kBegin) ? "On" : "Off", pitch);
-}
-
 static void TaskEventCallback(BarelyEventType type, void* user_data) {
   static int note_index = 0;
   if (type == BarelyEventType_kBegin) {
     assert(note_index < kMelodyNoteCount);
-    BarelyInstrument_SetNoteOn((BarelyEngine*)user_data, g_instrument_id,
-                               kMelodyPitches[note_index++]);
+    const float pitch = kMelodyPitches[note_index++];
+    BarelyInstrument_SetNoteOn((BarelyEngine*)user_data, g_instrument_id, pitch);
+    printf("NoteOn(%.1f)\n", pitch);
   } else if (type == BarelyEventType_kEnd) {
     assert(note_index > 0);
     assert(note_index <= kMelodyNoteCount);
-    BarelyInstrument_SetNoteOff((BarelyEngine*)user_data, g_instrument_id,
-                                kMelodyPitches[note_index - 1]);
+    const float pitch = kMelodyPitches[note_index - 1];
+    BarelyInstrument_SetNoteOff((BarelyEngine*)user_data, g_instrument_id, pitch);
+    printf("NoteOff(%.1f)\n", pitch);
     if (note_index == kMelodyNoteCount) {
       g_is_playing = false;
     }
@@ -101,8 +98,6 @@ int main() {
                               kAttack);
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kRelease,
                               kRelease);
-
-  BarelyInstrument_SetNoteEventCallback(engine, g_instrument_id, NoteEventCallback, NULL);
 
   uint32_t performer_id = 0;
   BarelyEngine_CreatePerformer(engine, &performer_id);

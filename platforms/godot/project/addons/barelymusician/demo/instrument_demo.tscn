@@ -28,6 +28,6 @@ text = "BarelyMusician Instrument Demo
 * Use WETYU keys to play the black notes in an octave
 * Use ZX keys to shift octave up and down
 * Use CV keys to adjust note gain up and down
-* Use 123 keys to switch the mode (osc/sample/mix)
+* Use 123 keys to switch the mode (osc/sample/mix)"
 label_settings = SubResource("LabelSettings_8q8q8")
 autowrap_mode = 2

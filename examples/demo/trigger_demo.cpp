@@ -59,11 +59,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
-  instrument.SetNoteEventCallback([](EventType type, float pitch) {
-    if (type == EventType::kBegin) {
-      ConsoleLog() << "Note(" << pitch << ")";
-    }
-  });
 
   std::vector<std::pair<double, double>> triggers;
 
@@ -74,6 +69,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     return [&, pitch = Scale(kMajor).GetPitch(degree)](EventType type) {
       if (type == EventType::kBegin) {
         instrument.SetNoteOn(pitch);
+        ConsoleLog() << "Note(" << pitch << ")";
       } else if (type == EventType::kEnd) {
         instrument.SetNoteOff(pitch);
         if (stop_position == performer.GetPosition()) {

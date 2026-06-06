@@ -16,6 +16,9 @@ Arpeggiator::Arpeggiator(Engine& engine, Instrument instrument) noexcept
         if (type == EventType::kBegin) {
           Update();
           instrument_.SetNoteOn(pitch_);
+          if (note_callback_) {
+            note_callback_(pitch_);
+          }
         } else if (type == EventType::kEnd) {
           instrument_.SetNoteOff(pitch_);
         }

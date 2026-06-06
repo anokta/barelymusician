@@ -3,6 +3,7 @@
 
 #include <barelymusician.h>
 
+#include <functional>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -28,6 +29,9 @@ class Arpeggiator {
 
   void SetGateRatio(double gate_ratio) noexcept { task_.SetDuration(loop_length_ * gate_ratio); }
   void SetMode(Mode mode) noexcept { mode_ = mode; }
+  void SetNoteCallback(std::function<void(float)> note_callback) noexcept {
+    note_callback_ = std::move(note_callback);
+  }
   [[nodiscard]] bool IsPlaying() const noexcept { return index_ != -1; }
 
  private:
@@ -39,6 +43,7 @@ class Arpeggiator {
   Performer performer_;
   Task task_;
 
+  std::function<void(float)> note_callback_;
   std::vector<float> pitches_;
 
   double loop_length_ = 1.0;

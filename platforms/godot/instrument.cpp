@@ -68,8 +68,6 @@ void BarelySliceResource::_bind_methods() {
 BarelyInstrument::BarelyInstrument() {
   ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
   BarelyEngine_CreateInstrument(engine, &instrument_id_);
-  BarelyInstrument_SetNoteEventCallback(engine, instrument_id_,
-                                        &BarelyInstrument::_note_event_callback, this);
   BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL);
 }
 
@@ -79,31 +77,33 @@ BarelyInstrument::~BarelyInstrument() {
 }
 
 void BarelyInstrument::set_all_notes_off() {
-  BarelyInstrument_SetAllNotesOff(BarelyEngine::get_singleton()->get(), instrument_id_);
+  for (const float pitch : std::exchange(pitches_, {})) {
+    BarelyInstrument_SetNoteOff(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
+    emit_signal("note_off", pitch);
+  }
 }
 
 void BarelyInstrument::set_note_off(float pitch) {
-  BarelyInstrument_SetNoteOff(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
+  if (pitches_.erase(pitch) > 0) {
+    BarelyInstrument_SetNoteOff(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
+    emit_signal("note_off", pitch);
+  }
 }
 
 void BarelyInstrument::set_note_on(float pitch, float gain, float pitch_shift) {
-  ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
-  BarelyInstrument_SetNoteOn(engine, instrument_id_, pitch);
-  if (gain != 1.0f) {
-    BarelyInstrument_SetNoteControl(engine, instrument_id_, pitch, BarelyNoteControlType_kGain,
-                                    gain);
+  if (pitches_.insert(pitch).second) {
+    ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
+    BarelyInstrument_SetNoteOn(engine, instrument_id_, pitch);
+    if (gain != 1.0f) {
+      BarelyInstrument_SetNoteControl(engine, instrument_id_, pitch, BarelyNoteControlType_kGain,
+                                      gain);
+    }
+    if (pitch_shift != 0.0f) {
+      BarelyInstrument_SetNoteControl(engine, instrument_id_, pitch,
+                                      BarelyNoteControlType_kPitchShift, pitch_shift);
+    }
+    emit_signal("note_on", pitch);
   }
-  if (pitch_shift != 0.0f) {
-    BarelyInstrument_SetNoteControl(engine, instrument_id_, pitch,
-                                    BarelyNoteControlType_kPitchShift, pitch_shift);
-  }
-}
-
-bool BarelyInstrument::is_note_on(float pitch) const {
-  bool is_note_on = false;
-  BarelyInstrument_IsNoteOn(BarelyEngine::get_singleton()->get(), instrument_id_, pitch,
-                            &is_note_on);
-  return is_note_on;
 }
 
 void BarelyInstrument::set_slice(const Ref<BarelySliceResource>& slice) {
@@ -222,20 +222,6 @@ void BarelyInstrument::_bind_methods() {
 
   ADD_SIGNAL(MethodInfo("note_on", PropertyInfo(Variant::FLOAT, "pitch")));
   ADD_SIGNAL(MethodInfo("note_off", PropertyInfo(Variant::FLOAT, "pitch")));
-}
-
-void BarelyInstrument::_note_event_callback(BarelyEventType type, float pitch, void* user_data) {
-  if (BarelyInstrument* instrument = static_cast<BarelyInstrument*>(user_data)) {
-    instrument->_handle_note_event(type, pitch);
-  }
-}
-
-void BarelyInstrument::_handle_note_event(BarelyEventType type, float pitch) {
-  if (type == BarelyEventType_kBegin) {
-    emit_signal("note_on", pitch);
-  } else if (type == BarelyEventType_kEnd) {
-    emit_signal("note_off", pitch);
-  }
 }
 
 void BarelyInstrument::_on_slice_changed() {

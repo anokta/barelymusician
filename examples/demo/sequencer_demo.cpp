@@ -59,11 +59,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
-  instrument.SetNoteEventCallback([](EventType type, float pitch) {
-    if (type == EventType::kBegin) {
-      ConsoleLog() << "Note(" << pitch << ")";
-    }
-  });
 
   auto performer = engine.CreatePerformer();
   performer.SetLooping(true);
@@ -92,6 +87,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                 [&instrument, pitch = note.pitch](EventType type) {
                                   if (type == EventType::kBegin) {
                                     instrument.SetNoteOn(pitch);
+                                    ConsoleLog() << "Note(" << pitch << ")";
                                   } else if (type == EventType::kEnd) {
                                     instrument.SetNoteOff(pitch);
                                   }
@@ -152,7 +148,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'P':
-        instrument.SetAllNotesOff();
         performer.SetPosition(0.0);
         return;
       case '-':

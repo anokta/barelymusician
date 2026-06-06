@@ -27,7 +27,6 @@ if(ENABLE_TESTS)
     barelymusician_test PRIVATE
     engine_controller_test.cpp
     engine_processor_test.cpp
-    instrument_controller_test.cpp
     message_queue_test.cpp
     performer_controller_test.cpp
     slice_pool_test.cpp

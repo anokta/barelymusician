@@ -55,9 +55,6 @@
 ///   constexpr float kC3Pitch = -1.0f;
 ///   instrument.SetNoteOn(kC3Pitch);
 ///
-///   // Check if the instrument note is on.
-///   const bool is_note_on = instrument.IsNoteOn(kC3Pitch);
-///
 ///   // Set the instrument to use full oscillator mix.
 ///   instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 ///
@@ -142,10 +139,6 @@
 ///   // pitch intervals within each octave.
 ///   const float c3_pitch = -1.0f;
 ///   BarelyInstrument_SetNoteOn(engine, instrument_id, c3_pitch);
-///
-///   // Check if the instrument note is on.
-///   bool is_note_on = false;
-///   BarelyInstrument_IsNoteOn(engine, instrument_id, c3_pitch, &is_note_on);
 ///
 ///   // Set the instrument to use full oscillator mix.
 ///   BarelyInstrument_SetControl(engine, instrument_id, BarelyInstrumentControlType_kOscMix,
@@ -395,13 +388,6 @@ typedef struct BarelyScale {
 extern "C" {
 #endif  // __cplusplus
 
-/// Note event callback.
-///
-/// @param type Note event type.
-/// @param pitch Note pitch.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyNoteEventCallback)(BarelyEventType type, float pitch, void* user_data);
-
 /// Task event callback.
 ///
 /// @param type Task event type.
@@ -509,23 +495,6 @@ BARELY_API bool BarelyEngine_Update(BarelyEngine* engine, double timestamp);
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrument_id);
 
-/// Gets whether an instrument note is on or not.
-///
-/// @param engine Pointer to engine.
-/// @param instrument_id Instrument identifier.
-/// @param pitch Note pitch.
-/// @param out_is_note_on Output true if on, false otherwise.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_IsNoteOn(const BarelyEngine* engine, uint32_t instrument_id,
-                                          float pitch, bool* out_is_note_on);
-
-/// Sets all instrument notes off.
-///
-/// @param engine Pointer to engine.
-/// @param instrument_id Instrument identifier.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetAllNotesOff(BarelyEngine* engine, uint32_t instrument_id);
-
 /// Sets an instrument control value.
 ///
 /// @param engine Pointer to engine.
@@ -547,17 +516,6 @@ BARELY_API bool BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instr
 BARELY_API bool BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_id,
                                                 float pitch, BarelyNoteControlType type,
                                                 float value);
-
-/// Sets the note event callback of an instrument.
-///
-/// @param engine Pointer to engine.
-/// @param instrument_id Instrument identifier.
-/// @param callback Note event callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyInstrument_SetNoteEventCallback(BarelyEngine* engine, uint32_t instrument_id,
-                                                      BarelyNoteEventCallback callback,
-                                                      void* user_data);
 
 /// Sets an instrument note off.
 ///
@@ -810,12 +768,6 @@ struct Slice : public BarelySlice {
   constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
 };
 
-/// Note event callback function.
-///
-/// @param type Note event type.
-/// @param pitch Note pitch.
-using NoteEventCallback = std::function<void(EventType type, float pitch)>;
-
 /// Task event callback function.
 ///
 /// @param type Task event type.
@@ -829,11 +781,7 @@ class Instrument {
 
   /// Destroys the instrument.
   void Destroy() noexcept {
-    if (BarelyInstrument_Destroy(std::exchange(engine_, nullptr),
-                                 std::exchange(instrument_id_, 0))) {
-      assert(free_note_event_callbacks_->size() < free_note_event_callbacks_->capacity());
-      free_note_event_callbacks_->push_back(note_event_callback_);
-    }
+    BarelyInstrument_Destroy(std::exchange(engine_, nullptr), std::exchange(instrument_id_, 0));
   }
 
   /// Returns the identifier.
@@ -841,24 +789,6 @@ class Instrument {
   /// @return Identifier.
   // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return instrument_id_; }
-
-  /// Returns whether a note is on or not.
-  ///
-  /// @param pitch Note pitch.
-  /// @return True if on, false otherwise.
-  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept {
-    bool is_note_on = false;
-    [[maybe_unused]] const bool success =
-        BarelyInstrument_IsNoteOn(engine_, instrument_id_, pitch, &is_note_on);
-    assert(success);
-    return is_note_on;
-  }
-
-  /// Sets all notes off.
-  void SetAllNotesOff() noexcept {
-    [[maybe_unused]] const bool success = BarelyInstrument_SetAllNotesOff(engine_, instrument_id_);
-    assert(success);
-  }
 
   /// Sets a control value.
   ///
@@ -886,28 +816,6 @@ class Instrument {
     [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
         engine_, instrument_id_, pitch, static_cast<BarelyNoteControlType>(type),
         static_cast<float>(value));
-    assert(success);
-  }
-
-  /// Sets the note event callback.
-  ///
-  /// @param callback Note event callback.
-  void SetNoteEventCallback(NoteEventCallback callback) noexcept {
-    assert(note_event_callback_ != nullptr);
-    *note_event_callback_ = std::move(callback);
-    [[maybe_unused]] const bool success =
-        (*note_event_callback_)
-            ? BarelyInstrument_SetNoteEventCallback(
-                  engine_, instrument_id_,
-                  [](BarelyEventType type, float pitch, void* user_data) noexcept {
-                    assert(user_data != nullptr && "Invalid note event callback user data");
-                    if (const auto& callback = *static_cast<NoteEventCallback*>(user_data);
-                        callback) {
-                      callback(static_cast<EventType>(type), pitch);
-                    }
-                  },
-                  note_event_callback_)
-            : BarelyInstrument_SetNoteEventCallback(engine_, instrument_id_, nullptr, nullptr);
     assert(success);
   }
 
@@ -949,18 +857,8 @@ class Instrument {
 
  private:
   friend class Engine;
-  Instrument(std::vector<NoteEventCallback*>* free_note_event_callbacks, BarelyEngine* engine,
-             uint32_t instrument_id) noexcept
-      : free_note_event_callbacks_(free_note_event_callbacks),
-        engine_(engine),
-        instrument_id_(instrument_id) {
-    assert(free_note_event_callbacks_ != nullptr && !free_note_event_callbacks_->empty());
-    note_event_callback_ = free_note_event_callbacks_->back();
-    *note_event_callback_ = {};
-    free_note_event_callbacks_->pop_back();
-  }
-  std::vector<NoteEventCallback*>* free_note_event_callbacks_ = nullptr;
-  NoteEventCallback* note_event_callback_ = nullptr;
+  Instrument(BarelyEngine* engine, uint32_t instrument_id) noexcept
+      : engine_(engine), instrument_id_(instrument_id) {}
   BarelyEngine* engine_ = nullptr;
   uint32_t instrument_id_ = 0;
 };
@@ -1241,8 +1139,7 @@ class Engine {
   ///
   /// @param config Engine configuration.
   explicit Engine(const EngineConfig& config) noexcept
-      : note_event_callbacks_(config.max_instrument_count),
-        task_event_callbacks_(config.max_task_count),
+      : task_event_callbacks_(config.max_task_count),
         first_task_event_callbacks_(config.max_performer_count),
         allocation_(config.GetRequiredAllocationSize()) {
     [[maybe_unused]] const bool success = BarelyEngine_Create(
@@ -1261,8 +1158,7 @@ class Engine {
   ///
   /// @param other Other engine.
   Engine(Engine&& other) noexcept
-      : note_event_callbacks_(std::exchange(other.note_event_callbacks_, {})),
-        task_event_callbacks_(std::exchange(other.task_event_callbacks_, {})),
+      : task_event_callbacks_(std::exchange(other.task_event_callbacks_, {})),
         first_task_event_callbacks_(std::exchange(other.first_task_event_callbacks_, {})),
         allocation_(std::exchange(other.allocation_, {})),
         engine_(std::exchange(other.engine_, nullptr)) {}
@@ -1274,7 +1170,6 @@ class Engine {
   Engine& operator=(Engine&& other) noexcept {
     if (this != &other) {
       BarelyEngine_Destroy(engine_);
-      note_event_callbacks_ = std::exchange(other.note_event_callbacks_, {});
       task_event_callbacks_ = std::exchange(other.task_event_callbacks_, {});
       first_task_event_callbacks_ = std::exchange(other.first_task_event_callbacks_, {});
       allocation_ = std::exchange(other.allocation_, {});
@@ -1296,7 +1191,7 @@ class Engine {
     uint32_t instrument_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreateInstrument(engine_, &instrument_id);
     assert(success);
-    return {&note_event_callbacks_.free, engine_, instrument_id};
+    return {engine_, instrument_id};
   }
 
   /// Creates a new performer.
@@ -1403,7 +1298,6 @@ class Engine {
     std::vector<T> items;
     std::vector<T*> free;
   };
-  Pool<NoteEventCallback> note_event_callbacks_;
   Pool<Task::EventCallbackNode> task_event_callbacks_;
   Pool<Task::EventCallbackNode*> first_task_event_callbacks_;
   std::vector<std::byte> allocation_;

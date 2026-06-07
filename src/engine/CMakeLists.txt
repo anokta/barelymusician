@@ -11,7 +11,6 @@ barelymusician_target_sources(
   instrument_state.h
   message.h
   message_queue.h
-  note_state.h
   performer_controller.cpp
   performer_controller.h
   performer_state.h

@@ -19,7 +19,6 @@ namespace barely {
 namespace {
 
 constexpr uint32_t kInstrumentIndex = 1;
-constexpr uint32_t kNoteIndex = 2;
 constexpr int kSampleRate = 1000;
 constexpr int kSampleCount = 4;
 constexpr std::array<float, kSampleCount> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
@@ -68,7 +67,7 @@ TEST(EngineProcessorTest, PlayNote) {
   }
 
   // Set a note on.
-  engine.ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, kPitch});
+  engine.ScheduleMessage(NoteOnMessage{kInstrumentIndex, kPitch});
   envelope.Start(adsr);
 
   samples.fill(0.0f);
@@ -88,7 +87,7 @@ TEST(EngineProcessorTest, PlayNote) {
   }
 
   // Set the note off.
-  engine.ScheduleMessage(NoteOffMessage{kNoteIndex});
+  engine.ScheduleMessage(NoteOffMessage{kInstrumentIndex, kPitch});
   envelope.Stop();
 
   samples.fill(0.0f);

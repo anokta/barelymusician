@@ -129,10 +129,18 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
   }
 }
 
-void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlType type,
-                                         float value) noexcept {
-  const uint32_t voice_index = engine_.note_to_voice[note_index];
-  if (!engine_.voice_pool.IsActive(voice_index)) {
+void InstrumentProcessor::SetNoteControl(uint32_t instrument_index, float pitch,
+                                         BarelyNoteControlType type, float value) noexcept {
+  auto& params = engine_.instrument_params[instrument_index];
+  uint32_t voice_index = params.first_voice_index;
+  while (voice_index != kInvalidIndex) {
+    const auto& voice = engine_.GetVoice(voice_index);
+    if (voice.pitch == pitch) {
+      break;
+    }
+    voice_index = voice.next_voice_index;
+  }
+  if (voice_index == kInvalidIndex) {
     return;
   }
   auto& voice = engine_.GetVoice(voice_index);
@@ -153,31 +161,32 @@ void InstrumentProcessor::SetNoteControl(uint32_t note_index, BarelyNoteControlT
   }
 }
 
-void InstrumentProcessor::SetNoteOff(uint32_t note_index) noexcept {
-  const uint32_t voice_index = engine_.note_to_voice[note_index];
-  engine_.note_to_voice[note_index] = kInvalidIndex;
-  if (!engine_.voice_pool.IsActive(voice_index)) {
+void InstrumentProcessor::SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
+  auto& params = engine_.instrument_params[instrument_index];
+  uint32_t voice_index = params.first_voice_index;
+  while (voice_index != kInvalidIndex) {
+    const auto& voice = engine_.GetVoice(voice_index);
+    if (voice.pitch == pitch) {
+      break;
+    }
+    voice_index = voice.next_voice_index;
+  }
+  if (voice_index == kInvalidIndex) {
     return;
   }
   auto& voice = engine_.GetVoice(voice_index);
-  if (const auto& instrument_params = engine_.instrument_params[voice.instrument_index];
-      instrument_params.first_slice_index == kInvalidIndex ||
-      instrument_params.slice_mode != SliceMode::kOnce) {
+  if (params.first_slice_index == kInvalidIndex || params.slice_mode != SliceMode::kOnce) {
     voice.envelope.Stop();
   } else {
     voice.stop_on_slice_end = true;
   }
-  voice.note_index = kInvalidIndex;
 }
 
-void InstrumentProcessor::SetNoteOn(uint32_t note_index, uint32_t instrument_index,
-                                    float pitch) noexcept {
+void InstrumentProcessor::SetNoteOn(uint32_t instrument_index, float pitch) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
   if (const uint32_t voice_index = AcquireVoice(params, pitch); voice_index != kInvalidIndex) {
-    engine_.note_to_voice[note_index] = voice_index;
     auto& voice = engine_.GetVoice(voice_index);
     voice.instrument_index = instrument_index;
-    voice.note_index = note_index;
     voice.slice_index = engine_.SelectSlice(instrument_index, params.first_slice_index, pitch);
     voice.Start(params, engine_.GetSlice(instrument_index, voice.slice_index), pitch);
   }

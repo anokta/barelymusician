@@ -24,6 +24,10 @@ struct InstrumentCreateMessage {
   uint32_t instrument_index = kInvalidIndex;
 };
 
+struct InstrumentDestroyMessage {
+  uint32_t instrument_index = kInvalidIndex;
+};
+
 struct InstrumentControlMessage {
   uint32_t instrument_index = kInvalidIndex;
   BarelyInstrumentControlType type = BarelyInstrumentControlType_kCount;
@@ -31,17 +35,18 @@ struct InstrumentControlMessage {
 };
 
 struct NoteControlMessage {
-  uint32_t note_index = kInvalidIndex;
+  uint32_t instrument_index = kInvalidIndex;
+  float pitch = 0.0f;
   BarelyNoteControlType type = BarelyNoteControlType_kCount;
   float value = 0.0f;
 };
 
 struct NoteOffMessage {
-  uint32_t note_index = kInvalidIndex;
+  uint32_t instrument_index = kInvalidIndex;
+  float pitch = 0.0f;
 };
 
 struct NoteOnMessage {
-  uint32_t note_index = kInvalidIndex;
   uint32_t instrument_index = kInvalidIndex;
   float pitch = 0.0f;
 };
@@ -52,8 +57,8 @@ struct SampleDataMessage {
 };
 
 using Message = std::variant<EngineControlMessage, EngineSeedMessage, InstrumentCreateMessage,
-                             InstrumentControlMessage, NoteControlMessage, NoteOffMessage,
-                             NoteOnMessage, SampleDataMessage>;
+                             InstrumentDestroyMessage, InstrumentControlMessage, NoteControlMessage,
+                             NoteOffMessage, NoteOnMessage, SampleDataMessage>;
 
 template <typename... MessageTypes>
 struct MessageVisitor : MessageTypes... {  // NOLINT(misc-multiple-inheritance)

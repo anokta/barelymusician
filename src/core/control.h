@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_CORE_CONTROL_H_
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 
@@ -26,8 +27,12 @@ struct Control {
     assert(default_value >= min_value && default_value <= max_value);
   }
 
+  [[nodiscard]] constexpr float Sanitize(float new_value) const noexcept {
+    return std::clamp(new_value, min_value, max_value);
+  }
+
   constexpr bool SetValue(float new_value) noexcept {
-    new_value = std::clamp(new_value, min_value, max_value);
+    new_value = Sanitize(new_value);
     if (value != new_value) {
       value = new_value;
       return true;
@@ -50,6 +55,15 @@ inline void ApproachValue(float& current_value, float target_value, float coeff)
   static constexpr float kMinFreqInverse = 1.0f / kMinFilterFreq;
   return std::min(kMinFilterFreq * std::pow(max_freq * kMinFreqInverse, cutoff), max_freq);
 }
+
+#define BARELY_DEFINE_CONTROL(EnumType, Name, Default, Min, Max, Label) Control(Default, Min, Max),
+inline constexpr std::array<Control, BarelyEngineControlType_kCount> kEngineControls = {
+    BARELY_ENGINE_CONTROL_TYPES(EngineControlType, BARELY_DEFINE_CONTROL)};
+inline constexpr std::array<Control, BarelyInstrumentControlType_kCount> kInstrumentControls = {
+    BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, BARELY_DEFINE_CONTROL)};
+inline constexpr std::array<Control, BarelyNoteControlType_kCount> kNoteControls = {
+    BARELY_NOTE_CONTROL_TYPES(NoteControlType, BARELY_DEFINE_CONTROL)};
+#undef BARELY_DEFINE_CONTROL
 
 #define BARELY_DEFINE_CONTROL(EnumType, Name, Default, Min, Max, Label) Control(Default, Min, Max),
 

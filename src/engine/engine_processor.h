@@ -163,39 +163,42 @@ class EngineProcessor {
 
  private:
   void ProcessMessage(Message& message) noexcept {
-    std::visit(
-        MessageVisitor{[this](EngineControlMessage& engine_control_message) noexcept {
-                         SetControl(engine_control_message.type, engine_control_message.value);
-                       },
-                       [this](EngineSeedMessage& engine_seed_message) noexcept {
-                         engine_.audio_rng.ResetSeed(engine_seed_message.seed);
-                       },
-                       [this](InstrumentCreateMessage& instrument_create_message) noexcept {
-                         instrument_processor_.Init(instrument_create_message.instrument_index);
-                       },
-                       [this](InstrumentControlMessage& instrument_control_message) noexcept {
-                         instrument_processor_.SetControl(
-                             instrument_control_message.instrument_index,
-                             instrument_control_message.type, instrument_control_message.value);
-                       },
-                       [this](NoteControlMessage& note_control_message) noexcept {
-                         instrument_processor_.SetNoteControl(note_control_message.note_index,
-                                                              note_control_message.type,
-                                                              note_control_message.value);
-                       },
-                       [this](NoteOffMessage& note_off_message) noexcept {
-                         instrument_processor_.SetNoteOff(note_off_message.note_index);
-                       },
-                       [this](NoteOnMessage& note_on_message) noexcept {
-                         instrument_processor_.SetNoteOn(note_on_message.note_index,
-                                                         note_on_message.instrument_index,
-                                                         note_on_message.pitch);
-                       },
-                       [this](SampleDataMessage& sample_data_message) noexcept {
-                         instrument_processor_.SetSampleData(sample_data_message.instrument_index,
-                                                             sample_data_message.first_slice_index);
-                       }},
-        message);
+    std::visit(MessageVisitor{
+                   [this](EngineControlMessage& engine_control_message) noexcept {
+                     SetControl(engine_control_message.type, engine_control_message.value);
+                   },
+                   [this](EngineSeedMessage& engine_seed_message) noexcept {
+                     engine_.audio_rng.ResetSeed(engine_seed_message.seed);
+                   },
+                   [this](InstrumentCreateMessage& instrument_create_message) noexcept {
+                     instrument_processor_.Init(instrument_create_message.instrument_index);
+                   },
+                   [this](InstrumentDestroyMessage& instrument_destroy_message) noexcept {
+                     instrument_processor_.Shutdown(instrument_destroy_message.instrument_index);
+                   },
+                   [this](InstrumentControlMessage& instrument_control_message) noexcept {
+                     instrument_processor_.SetControl(instrument_control_message.instrument_index,
+                                                      instrument_control_message.type,
+                                                      instrument_control_message.value);
+                   },
+                   [this](NoteControlMessage& note_control_message) noexcept {
+                     instrument_processor_.SetNoteControl(
+                         note_control_message.instrument_index, note_control_message.pitch,
+                         note_control_message.type, note_control_message.value);
+                   },
+                   [this](NoteOffMessage& note_off_message) noexcept {
+                     instrument_processor_.SetNoteOff(note_off_message.instrument_index,
+                                                      note_off_message.pitch);
+                   },
+                   [this](NoteOnMessage& note_on_message) noexcept {
+                     instrument_processor_.SetNoteOn(note_on_message.instrument_index,
+                                                     note_on_message.pitch);
+                   },
+                   [this](SampleDataMessage& sample_data_message) noexcept {
+                     instrument_processor_.SetSampleData(sample_data_message.instrument_index,
+                                                         sample_data_message.first_slice_index);
+                   }},
+               message);
   }
 
   void ProcessSamples(float* output_samples, int output_frame_count) noexcept {

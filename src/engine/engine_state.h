@@ -22,7 +22,6 @@
 #include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "engine/message_queue.h"
-#include "engine/note_state.h"
 #include "engine/performer_state.h"
 #include "engine/slice_pool.h"
 #include "engine/task_state.h"
@@ -40,7 +39,6 @@ struct EngineState {
         reverb(arena, static_cast<float>(config.sample_rate)),
 
         instrument_pool(arena, config.max_instrument_count),
-        note_pool(arena, config.max_voice_count),
         performer_pool(arena, config.max_performer_count),
         task_pool(arena, config.max_task_count),
         voice_pool(arena, config.max_voice_count),
@@ -52,7 +50,6 @@ struct EngineState {
         task_generations(arena.AllocArray<uint32_t>(config.max_task_count)),
 
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
-        note_to_voice(arena.AllocArray<uint32_t>(config.max_voice_count)),
         queued_sample_data_counts(
             arena.AllocArray<std::atomic<int32_t>>(config.max_instrument_count)),
         temp_samples(arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count)),
@@ -86,7 +83,6 @@ struct EngineState {
   Reverb reverb;
 
   Pool<InstrumentState> instrument_pool;
-  Pool<NoteState> note_pool;
   Pool<PerformerState> performer_pool;
   Pool<TaskState> task_pool;
   Pool<VoiceState> voice_pool;
@@ -100,7 +96,6 @@ struct EngineState {
   uint32_t* task_generations = nullptr;
 
   InstrumentParams* instrument_params = nullptr;
-  uint32_t* note_to_voice = nullptr;
 
   std::atomic<int32_t>* queued_sample_data_counts = nullptr;  // queued messages per instrument
 

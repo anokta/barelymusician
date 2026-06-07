@@ -3,6 +3,7 @@
 
 #include <barelymusician.h>
 
+#include <cassert>
 #include <cstdint>
 
 #include "core/pool.h"
@@ -24,16 +25,21 @@ class InstrumentController {
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
                   float value) noexcept;
   void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
-                      float value) noexcept;
-  void SetNoteOff(uint32_t instrument_index, float pitch) noexcept;
-  void SetNoteOn(uint32_t instrument_index, float pitch) noexcept;
+                      float value) noexcept {
+    assert(type <= BarelyNoteControlType_kCount);
+    engine_.ScheduleMessage(
+        NoteControlMessage{instrument_index, pitch, type, kNoteControls[type].Sanitize(value)});
+  }
+  void SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
+    engine_.ScheduleMessage(NoteOffMessage{instrument_index, pitch});
+  }
+  void SetNoteOn(uint32_t instrument_index, float pitch) noexcept {
+    engine_.ScheduleMessage(NoteOnMessage{instrument_index, pitch});
+  }
   void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
                      int32_t slice_count) noexcept;
 
  private:
-  [[nodiscard]] uint32_t GetNote(const InstrumentState& instrument, float pitch) const noexcept;
-  void ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept;
-
   EngineState& engine_;
 };
 

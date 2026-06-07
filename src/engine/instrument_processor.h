@@ -26,9 +26,10 @@ class InstrumentProcessor {
 
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
                   float value) noexcept;
-  void SetNoteControl(uint32_t note_index, BarelyNoteControlType type, float value) noexcept;
-  void SetNoteOff(uint32_t note_index) noexcept;
-  void SetNoteOn(uint32_t note_index, uint32_t instrument_index, float pitch) noexcept;
+  void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
+                      float value) noexcept;
+  void SetNoteOff(uint32_t instrument_index, float pitch) noexcept;
+  void SetNoteOn(uint32_t instrument_index, float pitch) noexcept;
   void SetSampleData(uint32_t instrument_index, uint32_t first_slice_index) noexcept;
 
   void Init(uint32_t instrument_index) const noexcept {
@@ -38,6 +39,16 @@ class InstrumentProcessor {
     instrument_params.osc_increment = kReferenceFreq / engine_.sample_rate;
     instrument_params.slice_increment = 1.0f / engine_.sample_rate;
     instrument_params.voice_params.filter_params.SetCutoff(engine_.sample_rate, 1.0f);
+  }
+
+  void Shutdown(uint32_t instrument_index) const noexcept {
+    InstrumentParams& instrument_params = engine_.instrument_params[instrument_index];
+    uint32_t voice_index = instrument_params.first_voice_index;
+    while (voice_index != kInvalidIndex) {
+      auto& voice = engine_.GetVoice(voice_index);
+      voice.envelope.Stop();
+      voice_index = voice.next_voice_index;
+    }
   }
 
   template <bool kIsSidechainSend = false>
@@ -78,9 +89,6 @@ class InstrumentProcessor {
       }
     }
     voice.next_voice_index = kInvalidIndex;
-    if (voice.note_index != kInvalidIndex) {
-      engine_.note_to_voice[voice.note_index] = kInvalidIndex;
-    }
   }
 
   template <bool kIsSidechainSend = false>

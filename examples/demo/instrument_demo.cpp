@@ -72,6 +72,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
+  ConsoleLog() << static_cast<float>(
+                      barely::EngineConfig(kSampleRate).GetRequiredAllocationSize()) /
+                      1024.0f;
+
   Engine engine(kSampleRate);
   engine.SetControl(EngineControlType::kDelayTime, kDelayTime);
   engine.SetControl(EngineControlType::kDelayFeedback, kDelayFeedback);

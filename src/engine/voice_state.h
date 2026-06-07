@@ -34,7 +34,6 @@ struct VoiceState {
   float slice_offset = 0.0f;
 
   uint32_t instrument_index = kInvalidIndex;
-  uint32_t note_index = kInvalidIndex;
   uint32_t slice_index = kInvalidIndex;
 
   uint32_t prev_voice_index = kInvalidIndex;

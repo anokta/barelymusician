@@ -83,6 +83,7 @@ int main() {
   config.max_frame_count = kFrameCount;
   int32_t allocation_size = 0;
   BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  printf("Allocating %.2fKB...\n", (float)allocation_size / 1024.0f);
   void* allocation = malloc(allocation_size);
 
   BarelyEngine* engine = NULL;

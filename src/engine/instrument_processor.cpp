@@ -193,30 +193,25 @@ void InstrumentProcessor::SetNoteOn(uint32_t instrument_index, float pitch) noex
 }
 
 uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch) noexcept {
-  if (params.should_retrigger) {
-    uint32_t current_voice_index = params.first_voice_index;
-    while (current_voice_index != kInvalidIndex) {
-      auto& voice = engine_.GetVoice(current_voice_index);
-      if (voice.pitch == pitch) {
-        const uint32_t retrigger_voice_index = current_voice_index;
-        current_voice_index = params.first_voice_index;
-        do {
-          VoiceState& timestamp_voice = engine_.GetVoice(current_voice_index);
-          ++timestamp_voice.timestamp;
-          current_voice_index = timestamp_voice.next_voice_index;
-        } while (current_voice_index != kInvalidIndex);
-        return retrigger_voice_index;
-      }
-      current_voice_index = voice.next_voice_index;
-    }
-  }
-
   uint32_t current_voice_index = params.first_voice_index;
   uint32_t last_voice_index = current_voice_index;
   uint32_t oldest_active_voice_index = current_voice_index;
   uint32_t active_voice_count = 0;
   while (current_voice_index != kInvalidIndex) {
     auto& voice = engine_.GetVoice(current_voice_index);
+    if (voice.pitch == pitch) {
+      if (params.should_retrigger || !voice.envelope.IsOn()) {
+        const uint32_t retrigger_voice_index = current_voice_index;
+        current_voice_index = params.first_voice_index;
+        do {
+          auto& timestamp_voice = engine_.GetVoice(current_voice_index);
+          ++timestamp_voice.timestamp;
+          current_voice_index = timestamp_voice.next_voice_index;
+        } while (current_voice_index != kInvalidIndex);
+        return retrigger_voice_index;
+      }
+      return kInvalidIndex;  // already on.
+    }
     if (voice.timestamp > engine_.GetVoice(oldest_active_voice_index).timestamp) {
       oldest_active_voice_index = current_voice_index;
     }

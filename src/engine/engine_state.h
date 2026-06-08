@@ -17,19 +17,20 @@
 #include "dsp/delay_filter.h"
 #include "dsp/reverb.h"
 #include "dsp/sidechain.h"
-#include "engine/effect_params.h"
-#include "engine/instrument_params.h"
-#include "engine/instrument_state.h"
 #include "engine/message.h"
 #include "engine/message_queue.h"
+#include "engine/params.h"
 #include "engine/performer_state.h"
 #include "engine/slice_pool.h"
-#include "engine/task_state.h"
 #include "engine/voice_state.h"
 
 namespace barely {
 
 static_assert((kInvalidIndex + 1) == 0);
+
+struct InstrumentState {
+  uint32_t first_slice_index = kInvalidIndex;
+};
 
 struct EngineState {
   EngineState(Arena& arena, const BarelyEngineConfig& config) noexcept

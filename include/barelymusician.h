@@ -1008,12 +1008,8 @@ class Performer {
     free_task_event_callbacks_->pop_back();
 
     if (*first_task_event_callback_ != nullptr) {
-      Task::EventCallbackNode* current_task_event_callback = *first_task_event_callback_;
-      while (current_task_event_callback->next != nullptr) {
-        current_task_event_callback = current_task_event_callback->next;
-      }
-      current_task_event_callback->next = task_event_callback;
-      task_event_callback->prev = current_task_event_callback;
+      (*first_task_event_callback_)->prev = task_event_callback;
+      task_event_callback->next = *first_task_event_callback_;
     } else {
       *first_task_event_callback_ = task_event_callback;
     }

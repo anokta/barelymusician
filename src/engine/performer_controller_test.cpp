@@ -12,7 +12,6 @@
 #include "core/arena.h"
 #include "engine/engine_state.h"
 #include "engine/performer_state.h"
-#include "engine/task_state.h"
 #include "gtest/gtest.h"
 
 namespace barely {

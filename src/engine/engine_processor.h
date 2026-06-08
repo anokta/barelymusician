@@ -17,7 +17,6 @@
 #include "dsp/delay_filter.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/sidechain.h"
-#include "engine/effect_params.h"
 #include "engine/engine_state.h"
 #include "engine/instrument_processor.h"
 #include "engine/message.h"

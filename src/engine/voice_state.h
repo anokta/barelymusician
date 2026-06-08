@@ -9,8 +9,7 @@
 #include "dsp/bit_crusher.h"
 #include "dsp/envelope.h"
 #include "dsp/tone_filter.h"
-#include "engine/instrument_params.h"
-#include "engine/voice_params.h"
+#include "engine/params.h"
 
 namespace barely {
 

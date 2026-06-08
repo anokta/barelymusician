@@ -14,7 +14,7 @@
 #include "dsp/sample_generators.h"
 #include "dsp/tone_filter.h"
 #include "engine/engine_state.h"
-#include "engine/instrument_params.h"
+#include "engine/params.h"
 #include "engine/slice_state.h"
 #include "engine/voice_state.h"
 
@@ -42,10 +42,12 @@ class InstrumentProcessor {
   }
 
   void Shutdown(uint32_t instrument_index) const noexcept {
+    engine_.queued_sample_data_counts[instrument_index].fetch_sub(1, std::memory_order_acq_rel);
     InstrumentParams& instrument_params = engine_.instrument_params[instrument_index];
     uint32_t voice_index = instrument_params.first_voice_index;
     while (voice_index != kInvalidIndex) {
       auto& voice = engine_.GetVoice(voice_index);
+      voice.slice_index = kInvalidIndex;
       voice.envelope.Stop();
       voice_index = voice.next_voice_index;
     }

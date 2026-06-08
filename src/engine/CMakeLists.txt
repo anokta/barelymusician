@@ -1,22 +1,17 @@
 barelymusician_target_sources(
-  effect_params.h
   engine_controller.h
   engine_processor.h
   engine_state.h
   instrument_controller.h
-  instrument_params.h
   instrument_processor.cpp
   instrument_processor.h
-  instrument_state.h
   message.h
   message_queue.h
+  params.h
   performer_controller.cpp
   performer_controller.h
   performer_state.h
   slice_pool.h
-  slice_state.h
-  task_state.h
-  voice_params.h
   voice_state.h
 )
 

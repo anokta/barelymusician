@@ -2,6 +2,14 @@ using System;
 using UnityEngine;
 
 namespace Barely {
+  /// Task event types.
+  public enum TaskEventType {
+    /// Begin.
+    [InspectorName("Begin")] BEGIN = 0,
+    /// End.
+    [InspectorName("End")] END,
+  }
+
   /// A representation of a recurring task that can performed by a musical performer in real-time.
   [Serializable]
   public class Task {
@@ -52,11 +60,11 @@ namespace Barely {
     private int _priority = 0;
 
     /// Process callback.
-    public delegate void ProcessCallback(EventType type);
+    public delegate void ProcessCallback(TaskEventType type);
     public event ProcessCallback OnProcess;
 
     [Serializable]
-    public class ProcessEvent : UnityEngine.Events.UnityEvent<EventType> {}
+    public class ProcessEvent : UnityEngine.Events.UnityEvent<TaskEventType> {}
     public ProcessEvent OnProcessEvent;
 
     /// Constructs a new `Task`.
@@ -98,7 +106,7 @@ namespace Barely {
     }
 
     public static class Internal {
-      public static void OnProcess(Task task, EventType type) {
+      public static void OnProcess(Task task, TaskEventType type) {
         task.OnProcess?.Invoke(type);
         task.OnProcessEvent?.Invoke(type);
       }

@@ -8,11 +8,6 @@ const STEREO_CHANNEL_COUNT = 2;
 const ENGINE_CONFIG_SIZE = 28;  // sizeof(BarelyEngineConfig)
 const SLICE_SIZE = 24;          // sizeof(BarelySlice)
 
-const EventType = Object.freeze({
-  BEGIN: 0,
-  END: 1,
-});
-
 class Processor extends AudioWorkletProcessor {
   constructor() {
     super();
@@ -280,8 +275,12 @@ class Processor extends AudioWorkletProcessor {
             command.position, command.duration, command.priority, null, null, this._uint32Ptr);
         const taskId = this._module.getValue(this._uint32Ptr, 'i32');
 
+        const TaskEventType = Object.freeze({
+          BEGIN: 0,
+          END: 1,
+        });
         const eventCallback = (task, eventType) => {
-          if (eventType === EventType.BEGIN) {
+          if (eventType === TaskEventType.BEGIN) {
             if (task.beginCommands) {
               for (const command of task.beginCommands) {
                 this._processCommand(command);
@@ -289,7 +288,7 @@ class Processor extends AudioWorkletProcessor {
             }
             this._pendingEventCallbacks.push(
                 {type: EventCallbackType.TASK_ON_BEGIN, handle: command.handle});
-          } else if (eventType === EventType.END) {
+          } else if (eventType === TaskEventType.END) {
             if (task.endCommands) {
               for (const command of task.endCommands) {
                 this._processCommand(command);

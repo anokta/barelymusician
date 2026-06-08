@@ -6,16 +6,6 @@ using System.Xml.Serialization;
 using UnityEngine;
 
 namespace Barely {
-  /// Event types.
-  public enum EventType {
-    /// Begin.
-    [InspectorName("Begin")] BEGIN = 0,
-    /// End.
-    [InspectorName("End")] END,
-    /// Update.
-    [InspectorName("Update")] UPDATE,
-  }
-
   /// A representation of an engine that governs all musical components.
   public static class Engine {
     /// Gain.
@@ -680,9 +670,9 @@ namespace Barely {
         return pitch;
       }
 
-      private delegate void TaskEventCallback(EventType type, ref UInt32 userData);
+      private delegate void TaskEventCallback(TaskEventType type, ref UInt32 userData);
       [AOT.MonoPInvokeCallback(typeof(TaskEventCallback))]
-      private static void Task_OnEvent(EventType type, ref UInt32 userData) {
+      private static void Task_OnEvent(TaskEventType type, ref UInt32 userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
           Task.Internal.OnProcess(task, type);
         }

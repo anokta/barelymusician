@@ -19,10 +19,10 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EventType;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
 using ::barely::Performer;
+using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -64,11 +64,11 @@ bool BuildScore(const smf::MidiEventList& midi_events, int track_index, int tick
       const double duration = get_position_fn(midi_event.getTickDuration());
       const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
       const float gain = static_cast<float>(midi_event.getVelocity()) / 127.0f;
-      performer.CreateTask(position, duration, 0, [&, pitch, gain](EventType type) noexcept {
-        if (type == EventType::kBegin) {
+      performer.CreateTask(position, duration, 0, [&, pitch, gain](TaskEventType type) noexcept {
+        if (type == TaskEventType::kBegin) {
           instrument.SetNoteOn(pitch, gain);
           ConsoleLog() << "MIDI track #" << track_index << ": NoteOn(" << pitch << ")";
-        } else if (type == EventType::kEnd) {
+        } else if (type == TaskEventType::kEnd) {
           instrument.SetNoteOff(pitch);
           ConsoleLog() << "MIDI track #" << track_index << ": NoteOff(" << pitch << ")";
         }

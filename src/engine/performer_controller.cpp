@@ -27,7 +27,7 @@ void PerformerController::Release(uint32_t performer_index) noexcept {
   while (task_index != kInvalidIndex) {
     auto& task = engine_.GetTask(task_index);
     task.is_active = false;
-    task.callback(BarelyEventType_kEnd);
+    task.callback(BarelyTaskEventType_kEnd);
     const uint32_t next_task_index = task.next_task_index;
     engine_.task_pool.Release(task_index);
     task_index = next_task_index;
@@ -63,7 +63,7 @@ void PerformerController::ReleaseTask(uint32_t task_index) noexcept {
   RemoveTask(engine_.GetPerformer(task.performer_index), task_index);
   if (task.is_active) {
     task.is_active = false;
-    task.callback(BarelyEventType_kEnd);
+    task.callback(BarelyTaskEventType_kEnd);
   }
   engine_.task_pool.Release(task_index);
 }
@@ -312,10 +312,10 @@ void PerformerController::SetTaskActive(PerformerState& performer, uint32_t task
 
   if (is_active) {
     InsertActiveTask(performer, task_index);
-    task.callback(BarelyEventType_kBegin);
+    task.callback(BarelyTaskEventType_kBegin);
   } else {
     InsertInactiveTask(performer, task_index);
-    task.callback(BarelyEventType_kEnd);
+    task.callback(BarelyTaskEventType_kEnd);
   }
 }
 

@@ -58,14 +58,14 @@ static void AudioProcessCallback(ma_device* device, void* output, const void* in
   g_timestamp += (double)frame_count / (double)kSampleRate;
 }
 
-static void TaskEventCallback(BarelyEventType type, void* user_data) {
+static void TaskEventCallback(BarelyTaskEventType type, void* user_data) {
   static int note_index = 0;
-  if (type == BarelyEventType_kBegin) {
+  if (type == BarelyTaskEventType_kBegin) {
     assert(note_index < kMelodyNoteCount);
     const float pitch = kMelodyPitches[note_index++];
     BarelyInstrument_SetNoteOn((BarelyEngine*)user_data, g_instrument_id, pitch);
     printf("NoteOn(%.1f)\n", pitch);
-  } else if (type == BarelyEventType_kEnd) {
+  } else if (type == BarelyTaskEventType_kEnd) {
     assert(note_index > 0);
     assert(note_index <= kMelodyNoteCount);
     const float pitch = kMelodyPitches[note_index - 1];

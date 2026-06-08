@@ -12,14 +12,14 @@ Arpeggiator::Arpeggiator(Engine& engine, Instrument instrument) noexcept
     : engine_(engine),
       instrument_(instrument),
       performer_(engine_.CreatePerformer()),
-      task_(performer_.CreateTask(0.0, 1.0, 0, [this](EventType type) noexcept {
-        if (type == EventType::kBegin) {
+      task_(performer_.CreateTask(0.0, 1.0, 0, [this](TaskEventType type) noexcept {
+        if (type == TaskEventType::kBegin) {
           Update();
           instrument_.SetNoteOn(pitch_);
           if (note_callback_) {
             note_callback_(pitch_);
           }
-        } else if (type == EventType::kEnd) {
+        } else if (type == TaskEventType::kEnd) {
           instrument_.SetNoteOff(pitch_);
         }
       })) {

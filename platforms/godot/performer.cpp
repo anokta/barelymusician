@@ -171,14 +171,14 @@ void BarelyPerformer::_on_task_changed() {
     BarelyPerformer_CreateTask(
         BarelyEngine::get_singleton()->get(), performer_id_, task->get_position(),
         task->get_duration(), task->get_priority(),
-        [](BarelyEventType type, void* user_data) {
+        [](BarelyTaskEventType type, void* user_data) {
           BarelyTaskResource* task = static_cast<BarelyTaskResource*>(user_data);
 
           if (!task) return;
 
-          if (type == BarelyEventType_kBegin) {
+          if (type == BarelyTaskEventType_kBegin) {
             task->emit_signal("task_begin");
-          } else if (type == BarelyEventType_kEnd) {
+          } else if (type == BarelyTaskEventType_kEnd) {
             task->emit_signal("task_end");
           }
         },

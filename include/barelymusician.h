@@ -70,7 +70,7 @@
 ///
 ///   // Create a new task.
 ///   auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0,
-///                                    [](barely::EventType type) { /*populate this*/ });
+///                                    [](barely::TaskEventType type) { /*populate this*/ });
 ///
 ///   // Set the performer to looping.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -220,29 +220,6 @@
 #define BARELY_ENUM(EnumType, X) BARELY_C_ENUM(EnumType, X)
 #endif  // __cplusplus
 
-/// Oscillator modes.
-#define BARELY_OSC_MODES(OscMode, X)                               \
-  X(OscMode, Crossfade, "Linear Crossfade (slice <-> oscillator)") \
-  X(OscMode, Am, "Amplitude Modulation (oscillator -> slice)")     \
-  X(OscMode, Fm, "Frequency Modulation (oscillator -> slice)")     \
-  X(OscMode, Ma, "Amplitude Modulation (slice -> oscillator)")     \
-  X(OscMode, Mf, "Frequency Modulation (slice -> oscillator)")     \
-  X(OscMode, Ring, "Ring Modulation")
-BARELY_ENUM(OscMode, BARELY_OSC_MODES)
-
-/// Slice modes.
-#define BARELY_SLICE_MODES(SliceMode, X) \
-  X(SliceMode, Sustain, "Sustain")       \
-  X(SliceMode, Loop, "Loop")             \
-  X(SliceMode, Once, "Once")
-BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
-
-/// Event types.
-#define BARELY_EVENT_TYPES(EventType, X) \
-  X(EventType, Begin, "Begin")           \
-  X(EventType, End, "End")
-BARELY_ENUM(EventType, BARELY_EVENT_TYPES)
-
 /// Default engine configuration.
 #define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate) \
   {                                               \
@@ -318,6 +295,29 @@ BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
   X(NoteControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")
 BARELY_ENUM(NoteControlType, BARELY_NOTE_CONTROL_TYPES)
 
+/// Oscillator modes.
+#define BARELY_OSC_MODES(OscMode, X)                               \
+  X(OscMode, Crossfade, "Linear Crossfade (slice <-> oscillator)") \
+  X(OscMode, Am, "Amplitude Modulation (oscillator -> slice)")     \
+  X(OscMode, Fm, "Frequency Modulation (oscillator -> slice)")     \
+  X(OscMode, Ma, "Amplitude Modulation (slice -> oscillator)")     \
+  X(OscMode, Mf, "Frequency Modulation (slice -> oscillator)")     \
+  X(OscMode, Ring, "Ring Modulation")
+BARELY_ENUM(OscMode, BARELY_OSC_MODES)
+
+/// Slice modes.
+#define BARELY_SLICE_MODES(SliceMode, X) \
+  X(SliceMode, Sustain, "Sustain")       \
+  X(SliceMode, Loop, "Loop")             \
+  X(SliceMode, Once, "Once")
+BARELY_ENUM(SliceMode, BARELY_SLICE_MODES)
+
+/// Task event types.
+#define BARELY_TASK_EVENT_TYPES(TaskEventType, X) \
+  X(TaskEventType, Begin, "Begin")                \
+  X(TaskEventType, End, "End")
+BARELY_ENUM(TaskEventType, BARELY_TASK_EVENT_TYPES)
+
 /// Engine handle.
 typedef struct BarelyEngine BarelyEngine;
 
@@ -392,7 +392,7 @@ extern "C" {
 ///
 /// @param type Task event type.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyTaskEventCallback)(BarelyEventType type, void* user_data);
+typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_data);
 
 /// Gets the required memory allocation size for an engine configuration.
 ///
@@ -771,7 +771,7 @@ struct Slice : public BarelySlice {
 /// Task event callback function.
 ///
 /// @param type Task event type.
-using TaskEventCallback = std::function<void(EventType type)>;
+using TaskEventCallback = std::function<void(TaskEventType type)>;
 
 /// Class that wraps an instrument.
 class Instrument {
@@ -913,11 +913,11 @@ class Task {
         (task_event_callback_->callback)
             ? BarelyTask_SetEventCallback(
                   engine_, task_id_,
-                  [](BarelyEventType type, void* user_data) noexcept {
+                  [](BarelyTaskEventType type, void* user_data) noexcept {
                     assert(user_data != nullptr && "Invalid task event callback user data");
                     if (const auto& callback = *static_cast<TaskEventCallback*>(user_data);
                         callback) {
-                      callback(static_cast<EventType>(type));
+                      callback(static_cast<TaskEventType>(type));
                     }
                   },
                   &task_event_callback_->callback)
@@ -1016,9 +1016,9 @@ class Performer {
 
     success = BarelyTask_SetEventCallback(
         engine_, task_id,
-        [](BarelyEventType type, void* user_data) noexcept {
+        [](BarelyTaskEventType type, void* user_data) noexcept {
           if (user_data != nullptr) {
-            (*static_cast<TaskEventCallback*>(user_data))(static_cast<EventType>(type));
+            (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
           }
         },
         &task_event_callback->callback);

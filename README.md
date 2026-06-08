@@ -49,11 +49,11 @@ performer.SetLooping(/*is_looping=*/true);
 // values adjust the frequency logarithmically to ensure equally perceived pitch intervals within
 // each octave.
 auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
-                                 [&](barely::EventType type) {
+                                 [&](barely::TaskEventType type) {
                                    constexpr float kC3Pitch = -1.0f;
-                                   if (type == barely::EventType::kBegin) {
+                                   if (type == barely::TaskEventType::kBegin) {
                                      instrument.SetNoteOn(kC3Pitch);
-                                   } else if (type == barely::EventType::kEnd) {
+                                   } else if (type == barely::TaskEventType::kEnd) {
                                      instrument.SetNoteOff(kC3Pitch);
                                    }
                                  });

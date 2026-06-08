@@ -23,7 +23,6 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EventType;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
 using ::barely::Performer;
@@ -32,6 +31,7 @@ using ::barely::Scale;
 using ::barely::Slice;
 using ::barely::SliceMode;
 using ::barely::Task;
+using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -130,11 +130,11 @@ void ScheduleNote(double position, double duration, float pitch, float gain, int
   tasks.emplace_back(performer.CreateTask(
       quantization.GetPosition(performer.GetPosition() + position),
       quantization.GetPosition(duration), 0,
-      [pitch, gain, index, &instrument](EventType type) noexcept {
-        if (type == EventType::kBegin) {
+      [pitch, gain, index, &instrument](TaskEventType type) noexcept {
+        if (type == TaskEventType::kBegin) {
           instrument.SetNoteOn(pitch, gain);
           ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ")";
-        } else if (type == EventType::kEnd) {
+        } else if (type == TaskEventType::kEnd) {
           instrument.SetNoteOff(pitch);
           ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
         }
@@ -337,8 +337,8 @@ int main(int /*argc*/, char* argv[]) {
   metronome.SetLooping(true);
   int beat = 0;
   int harmonic = 0;
-  metronome.CreateTask(0.0, 1e-6, -1, [&](EventType type) {
-    if (type != EventType::kBegin) {
+  metronome.CreateTask(0.0, 1e-6, -1, [&](TaskEventType type) {
+    if (type != TaskEventType::kBegin) {
       return;
     }
     // Update transport.

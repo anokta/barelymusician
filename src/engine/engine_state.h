@@ -35,7 +35,7 @@ struct EngineState {
   EngineState(Arena& arena, const BarelyEngineConfig& config) noexcept
       : delay_filter(arena, std::bit_ceil(static_cast<uint32_t>(std::ceil(
                                 static_cast<float>(config.sample_rate) *
-                                controls[BarelyEngineControlType_kDelayTime].max_value)))),
+                                kEngineControls[BarelyEngineControlType_kDelayTime].max_value)))),
         reverb(arena, static_cast<float>(config.sample_rate)),
 
         instrument_pool(arena, config.max_instrument_count),
@@ -66,9 +66,6 @@ struct EngineState {
     assert(id_index_bit_count < 32);
     assert(sample_rate > 0.0f);
   }
-
-  std::array<Control, BarelyEngineControlType_kCount> controls = {
-      BARELY_ENGINE_CONTROL_TYPES(EngineControlType, BARELY_DEFINE_CONTROL)};
 
   MainRng main_rng;
   AudioRng audio_rng;

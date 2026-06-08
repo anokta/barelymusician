@@ -14,8 +14,6 @@
 namespace barely {
 
 struct InstrumentState {
-  std::array<Control, BarelyInstrumentControlType_kCount> controls = {
-      BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, BARELY_DEFINE_CONTROL)};
   uint32_t first_slice_index = kInvalidIndex;
 };
 

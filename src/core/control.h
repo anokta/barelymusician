@@ -11,33 +11,19 @@
 namespace barely {
 
 struct Control {
-  float value = 0.0f;
   float min_value = 0.0f;
   float max_value = 0.0f;
 
   constexpr Control() noexcept = default;
-
   template <typename ValueType>
-  constexpr Control(ValueType default_value, ValueType min_value, ValueType max_value) noexcept
-      : value(static_cast<float>(default_value)),
-        min_value(static_cast<float>(min_value)),
-        max_value(static_cast<float>(max_value)) {
+  constexpr Control(ValueType min_value, ValueType max_value) noexcept
+      : min_value(static_cast<float>(min_value)), max_value(static_cast<float>(max_value)) {
     static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
-    assert(default_value >= min_value && default_value <= max_value);
   }
 
-  [[nodiscard]] constexpr float Sanitize(float new_value) const noexcept {
-    return std::clamp(new_value, min_value, max_value);
-  }
-
-  constexpr bool SetValue(float new_value) noexcept {
-    new_value = Sanitize(new_value);
-    if (value != new_value) {
-      value = new_value;
-      return true;
-    }
-    return false;
+  [[nodiscard]] constexpr float Clamp(float value) const noexcept {
+    return std::clamp(value, min_value, max_value);
   }
 };
 
@@ -56,7 +42,7 @@ inline void ApproachValue(float& current_value, float target_value, float coeff)
   return std::min(kMinFilterFreq * std::pow(max_freq * kMinFreqInverse, cutoff), max_freq);
 }
 
-#define BARELY_DEFINE_CONTROL(EnumType, Name, Default, Min, Max, Label) Control(Default, Min, Max),
+#define BARELY_DEFINE_CONTROL(EnumType, Name, Default, Min, Max, Label) Control(Min, Max),
 inline constexpr std::array<Control, BarelyEngineControlType_kCount> kEngineControls = {
     BARELY_ENGINE_CONTROL_TYPES(EngineControlType, BARELY_DEFINE_CONTROL)};
 inline constexpr std::array<Control, BarelyInstrumentControlType_kCount> kInstrumentControls = {
@@ -64,8 +50,6 @@ inline constexpr std::array<Control, BarelyInstrumentControlType_kCount> kInstru
 inline constexpr std::array<Control, BarelyNoteControlType_kCount> kNoteControls = {
     BARELY_NOTE_CONTROL_TYPES(NoteControlType, BARELY_DEFINE_CONTROL)};
 #undef BARELY_DEFINE_CONTROL
-
-#define BARELY_DEFINE_CONTROL(EnumType, Name, Default, Min, Max, Label) Control(Default, Min, Max),
 
 }  // namespace barely
 

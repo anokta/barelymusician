@@ -689,11 +689,11 @@ namespace Barely {
       [StructLayout(LayoutKind.Sequential)]
       public struct BarelyEngineConfig {
         public Int32 sampleRate;
-        public Int32 maxFrameCount;
         public Int32 maxInstrumentCount;
         public Int32 maxPerformerCount;
         public Int32 maxTaskCount;
-        public Int32 maxNoteCount;
+        public Int32 maxCommandCount;
+        public Int32 maxFrameCount;
         public Int32 maxSliceCount;
         public Int32 maxVoiceCount;
       }
@@ -830,11 +830,11 @@ namespace Barely {
           var config = AudioSettings.GetConfiguration();
           var engineConfig = new BarelyEngineConfig {
             sampleRate = config.sampleRate,
-            maxFrameCount = config.dspBufferSize,
             maxInstrumentCount = 100,
             maxPerformerCount = 100,
             maxTaskCount = 5000,
-            maxNoteCount = 1000,
+            maxCommandCount = 8192,
+            maxFrameCount = config.dspBufferSize,
             maxSliceCount = 1000,
             maxVoiceCount = 200,
           };

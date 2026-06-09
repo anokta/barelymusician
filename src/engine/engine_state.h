@@ -45,11 +45,11 @@ struct EngineState {
         voice_pool(arena, config.max_voice_count),
         slice_pool(arena, config.max_slice_count),
 
+        cmd_queue(arena, std::bit_ceil(static_cast<uint32_t>(config.max_command_count))),
+
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
         performer_generations(arena.AllocArray<uint32_t>(config.max_performer_count)),
         task_generations(arena.AllocArray<uint32_t>(config.max_task_count)),
-
-        cmd_queue(arena),
 
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
         queued_sample_data_counts(
@@ -88,11 +88,11 @@ struct EngineState {
 
   SlicePool slice_pool;
 
+  CmdQueue cmd_queue;
+
   uint32_t* instrument_generations = nullptr;
   uint32_t* performer_generations = nullptr;
   uint32_t* task_generations = nullptr;
-
-  CmdQueue cmd_queue;
 
   InstrumentParams* instrument_params = nullptr;
 

@@ -613,7 +613,7 @@ namespace Barely {
           return;
         }
         _tasks.Add(taskId, task);
-        BarelyTask_SetEventCallback(_handle, taskId, Task_OnEvent, ref taskId);
+        BarelyTask_SetCallback(_handle, taskId, Task_OnEvent, ref taskId);
       }
 
       public static void Task_Destroy(UInt32 performerId, ref UInt32 taskId) {
@@ -670,8 +670,8 @@ namespace Barely {
         return pitch;
       }
 
-      private delegate void TaskEventCallback(TaskEventType type, ref UInt32 userData);
-      [AOT.MonoPInvokeCallback(typeof(TaskEventCallback))]
+      private delegate void TaskCallback(TaskEventType type, ref UInt32 userData);
+      [AOT.MonoPInvokeCallback(typeof(TaskCallback))]
       private static void Task_OnEvent(TaskEventType type, ref UInt32 userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
           Task.Internal.OnProcess(task, type);
@@ -971,9 +971,11 @@ namespace Barely {
                                                                 Int32 sliceCount);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_CreateTask")]
-      private static extern bool BarelyPerformer_CreateTask(
-          IntPtr engine, UInt32 performerId, double position, double duration, Int32 priority,
-          TaskEventCallback callback, ref UInt32 userData, ref UInt32 outTaskId);
+      private static extern bool BarelyPerformer_CreateTask(IntPtr engine, UInt32 performerId,
+                                                            double position, double duration,
+                                                            Int32 priority, TaskCallback callback,
+                                                            ref UInt32 userData,
+                                                            ref UInt32 outTaskId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Destroy")]
       private static extern bool BarelyPerformer_Destroy(IntPtr engine, UInt32 performerId);
@@ -1016,6 +1018,10 @@ namespace Barely {
       private static extern bool BarelyTask_IsActive(IntPtr engine, UInt32 taskId,
                                                      ref bool outIsActive);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetCallback")]
+      private static extern bool BarelyTask_SetCallback(IntPtr engine, UInt32 taskId,
+                                                        TaskCallback callback, ref UInt32 userData);
+
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetDuration")]
       private static extern bool BarelyTask_SetDuration(IntPtr engine, UInt32 taskId,
                                                         double duration);
@@ -1027,11 +1033,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPriority")]
       private static extern bool BarelyTask_SetPriority(IntPtr engine, UInt32 taskId,
                                                         Int32 priority);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetEventCallback")]
-      private static extern bool BarelyTask_SetEventCallback(IntPtr engine, UInt32 taskId,
-                                                             TaskEventCallback callback,
-                                                             ref UInt32 userData);
     }
   }
 }  // namespace Barely

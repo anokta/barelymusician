@@ -97,7 +97,7 @@
 ///   BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
 ///   void* allocation = malloc(allocation_size);
 ///   BarelyEngine* engine = NULL;
-///   BarelyEngine_Create(&config, allocation, allocationSize, &engine);
+///   BarelyEngine_Create(&config, allocation, allocation_size, &engine);
 ///
 ///   // Set the tempo.
 ///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
@@ -157,7 +157,7 @@
 ///
 ///   // Create a new task.
 ///   uint32_t task_id = 0;
-///   BarelyTaskEventCallback callback{ /*populate this*/ };
+///   BarelyTaskCallback callback{ /*populate this*/ };
 ///   BarelyPerformer_CreateTask(engine, performer_id, /*position=*/0.0, /*duration=*/1.0,
 ///                              /*priority=*/0, callback, &task_id);
 ///
@@ -388,11 +388,11 @@ typedef struct BarelyScale {
 extern "C" {
 #endif  // __cplusplus
 
-/// Task event callback.
+/// Task callback.
 ///
 /// @param type Task event type.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyTaskEventCallback)(BarelyTaskEventType type, void* user_data);
+typedef void (*BarelyTaskCallback)(BarelyTaskEventType type, void* user_data);
 
 /// Gets the required memory allocation size for an engine configuration.
 ///
@@ -552,13 +552,13 @@ BARELY_API bool BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t in
 /// @param position Task position in beats.
 /// @param duration Task duration in beats.
 /// @param priority Task priority.
-/// @param callback Task event callback.
+/// @param callback Task callback.
 /// @param user_data Pointer to user data.
 /// @param out_task_id Output task identifier.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyPerformer_CreateTask(BarelyEngine* engine, uint32_t performer_id,
                                            double position, double duration, int32_t priority,
-                                           BarelyTaskEventCallback callback, void* user_data,
+                                           BarelyTaskCallback callback, void* user_data,
                                            uint32_t* out_task_id);
 
 /// Destroys a performer.
@@ -642,29 +642,29 @@ BARELY_API bool BarelyTask_Destroy(BarelyEngine* engine, uint32_t task_id);
 BARELY_API bool BarelyTask_IsActive(const BarelyEngine* engine, uint32_t task_id,
                                     bool* out_is_active);
 
+/// Sets the callback of a task.
+///
+/// @param engine Pointer to engine.
+/// @param task_id Task identifier.
+/// @param callback Task callback.
+/// @param user_data Pointer to user data.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyTask_SetCallback(BarelyEngine* engine, uint32_t task_id,
+                                       BarelyTaskCallback callback, void* user_data);
+
 /// Sets the duration of a task.
 ///
 /// @param engine Pointer to engine.
 /// @param task_id Task identifier.
-/// @param duration Duration in beats.
+/// @param duration Task duration in beats.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetDuration(BarelyEngine* engine, uint32_t task_id, double duration);
-
-/// Sets the event callback of a task.
-///
-/// @param engine Pointer to engine.
-/// @param task_id Task identifier.
-/// @param callback Event callback.
-/// @param user_data Pointer to user data.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyTask_SetEventCallback(BarelyEngine* engine, uint32_t task_id,
-                                            BarelyTaskEventCallback callback, void* user_data);
 
 /// Sets the position of a task.
 ///
 /// @param engine Pointer to engine.
 /// @param task_id Task identifier.
-/// @param position Position in beats.
+/// @param position Task position in beats.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPosition(BarelyEngine* engine, uint32_t task_id, double position);
 
@@ -672,7 +672,7 @@ BARELY_API bool BarelyTask_SetPosition(BarelyEngine* engine, uint32_t task_id, d
 ///
 /// @param engine Pointer to engine.
 /// @param task_id Task identifier.
-/// @param priority Priority.
+/// @param priority Task priority.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPriority(BarelyEngine* engine, uint32_t task_id, int32_t priority);
 
@@ -851,10 +851,10 @@ struct Scale : public BarelyScale {
   }
 };
 
-/// Task event callback function.
+/// Task callback function.
 ///
 /// @param type Task event type.
-using TaskEventCallback = std::function<void(TaskEventType type)>;
+using TaskCallback = std::function<void(TaskEventType type)>;
 
 /// Class that wraps an instrument.
 class Instrument {
@@ -961,10 +961,10 @@ class Task {
   /// Destroys the task.
   void Destroy() noexcept {
     if (BarelyTask_Destroy(std::exchange(engine_, nullptr), std::exchange(task_id_, 0))) {
-      if (task_event_callback_ == *first_task_event_callback_) {
-        *first_task_event_callback_ = task_event_callback_->next;
+      if (task_callback_ == *first_task_callback_) {
+        *first_task_callback_ = task_callback_->next;
       }
-      ReleaseTaskEventCallback(task_event_callbacks_, task_event_callback_);
+      ReleaseTaskCallback(task_callbacks_, task_callback_);
     }
   }
 
@@ -986,25 +986,24 @@ class Task {
     assert(success);
   }
 
-  /// Sets the event callback.
+  /// Sets the callback.
   ///
-  /// @param callback Event callback.
-  void SetEventCallback(TaskEventCallback callback) noexcept {
-    assert(task_event_callback_ != nullptr);
-    task_event_callback_->callback = std::move(callback);
+  /// @param callback Callback.
+  void SetCallback(TaskCallback callback) noexcept {
+    assert(task_callback_ != nullptr);
+    task_callback_->callback = std::move(callback);
     [[maybe_unused]] const bool success =
-        (task_event_callback_->callback)
-            ? BarelyTask_SetEventCallback(
+        (task_callback_->callback)
+            ? BarelyTask_SetCallback(
                   engine_, task_id_,
                   [](BarelyTaskEventType type, void* user_data) noexcept {
-                    assert(user_data != nullptr && "Invalid task event callback user data");
-                    if (const auto& callback = *static_cast<TaskEventCallback*>(user_data);
-                        callback) {
+                    assert(user_data != nullptr && "Invalid task callback user data");
+                    if (const auto& callback = *static_cast<TaskCallback*>(user_data); callback) {
                       callback(static_cast<TaskEventType>(type));
                     }
                   },
-                  &task_event_callback_->callback)
-            : BarelyTask_SetEventCallback(engine_, task_id_, nullptr, nullptr);
+                  &task_callback_->callback)
+            : BarelyTask_SetCallback(engine_, task_id_, nullptr, nullptr);
     assert(success);
   }
 
@@ -1028,49 +1027,48 @@ class Task {
  private:
   friend class Engine;
   friend class Performer;
-  struct EventCallbackNode {
-    TaskEventCallback callback = nullptr;
-    EventCallbackNode* prev = nullptr;
-    EventCallbackNode* next = nullptr;
+  struct CallbackNode {
+    TaskCallback callback = nullptr;
+    CallbackNode* prev = nullptr;
+    CallbackNode* next = nullptr;
   };
   template <typename T>
-  class Pool {
-   public:
+  struct Pool {
     Pool() noexcept = default;
     explicit Pool(int32_t capacity) noexcept
-        : items_(new T[capacity]), free_(new T*[capacity]), free_count_(capacity) {
+        : items_(std::make_unique<T[]>(capacity)),
+          free_(std::make_unique<T*[]>(capacity)),
+          free_count_(capacity) {
       for (int32_t i = 0; i < capacity; ++i) {
         free_[i] = &items_[i];
       }
     }
     [[nodiscard]] T* Acquire() noexcept { return free_[--free_count_]; }
     void Release(T* item) noexcept { free_[free_count_++] = item; }
-
-   private:
     std::unique_ptr<T[]> items_;
     std::unique_ptr<T*[]> free_;
     int32_t free_count_ = 0;
   };
-  static void ReleaseTaskEventCallback(Pool<EventCallbackNode>* task_event_callbacks,
-                                       EventCallbackNode* task_event_callback) noexcept {
-    if (task_event_callback->prev != nullptr) {
-      task_event_callback->prev->next = task_event_callback->next;
+  static void ReleaseTaskCallback(Pool<CallbackNode>* task_callbacks,
+                                  CallbackNode* task_callback) noexcept {
+    if (task_callback->prev != nullptr) {
+      task_callback->prev->next = task_callback->next;
     }
-    if (task_event_callback->next != nullptr) {
-      task_event_callback->next->prev = task_event_callback->prev;
+    if (task_callback->next != nullptr) {
+      task_callback->next->prev = task_callback->prev;
     }
-    task_event_callbacks->Release(task_event_callback);
+    task_callbacks->Release(task_callback);
   }
-  Task(Pool<EventCallbackNode>* task_event_callbacks, EventCallbackNode** first_task_event_callback,
-       EventCallbackNode* task_event_callback, BarelyEngine* engine, uint32_t task_id) noexcept
-      : task_event_callbacks_(task_event_callbacks),
-        first_task_event_callback_(first_task_event_callback),
-        task_event_callback_(task_event_callback),
+  Task(Pool<CallbackNode>* task_callbacks, CallbackNode** first_task_callback,
+       CallbackNode* task_callback, BarelyEngine* engine, uint32_t task_id) noexcept
+      : task_callbacks_(task_callbacks),
+        first_task_callback_(first_task_callback),
+        task_callback_(task_callback),
         engine_(engine),
         task_id_(task_id) {}
-  Pool<EventCallbackNode>* task_event_callbacks_ = nullptr;
-  EventCallbackNode** first_task_event_callback_ = nullptr;
-  EventCallbackNode* task_event_callback_ = nullptr;
+  Pool<CallbackNode>* task_callbacks_ = nullptr;
+  CallbackNode** first_task_callback_ = nullptr;
+  CallbackNode* task_callback_ = nullptr;
   BarelyEngine* engine_ = nullptr;
   uint32_t task_id_ = 0;
 };
@@ -1092,47 +1090,45 @@ class Performer {
   /// @param position Task position in beats.
   /// @param duration Task duration in beats.
   /// @param priority Task priority.
-  /// @param callback Task event callback.
+  /// @param callback Task callback.
   /// @return Task.
-  Task CreateTask(double position, double duration, int priority,
-                  TaskEventCallback callback) noexcept {
+  Task CreateTask(double position, double duration, int priority, TaskCallback callback) noexcept {
     uint32_t task_id = 0;
     [[maybe_unused]] bool success = BarelyPerformer_CreateTask(
         engine_, performer_id_, position, duration, priority, nullptr, nullptr, &task_id);
     assert(success);
 
-    Task::EventCallbackNode* task_event_callback = task_event_callbacks_->Acquire();
-    *task_event_callback = {.callback = std::move(callback)};
+    Task::CallbackNode* task_callback = task_callbacks_->Acquire();
+    *task_callback = {.callback = std::move(callback)};
 
-    if (*first_task_event_callback_ != nullptr) {
-      (*first_task_event_callback_)->prev = task_event_callback;
-      task_event_callback->next = *first_task_event_callback_;
+    if (*first_task_callback_ != nullptr) {
+      (*first_task_callback_)->prev = task_callback;
+      task_callback->next = *first_task_callback_;
     }
-    *first_task_event_callback_ = task_event_callback;
+    *first_task_callback_ = task_callback;
 
-    success = BarelyTask_SetEventCallback(
+    success = BarelyTask_SetCallback(
         engine_, task_id,
         [](BarelyTaskEventType type, void* user_data) noexcept {
           if (user_data != nullptr) {
-            (*static_cast<TaskEventCallback*>(user_data))(static_cast<TaskEventType>(type));
+            (*static_cast<TaskCallback*>(user_data))(static_cast<TaskEventType>(type));
           }
         },
-        &task_event_callback->callback);
+        &task_callback->callback);
     assert(success);
-    return {task_event_callbacks_, first_task_event_callback_, task_event_callback, engine_,
-            task_id};
+    return {task_callbacks_, first_task_callback_, task_callback, engine_, task_id};
   }
 
   /// Destroys the performer.
   void Destroy() noexcept {
     if (BarelyPerformer_Destroy(std::exchange(engine_, nullptr), std::exchange(performer_id_, 0))) {
-      Task::EventCallbackNode* task_event_callback = *first_task_event_callback_;
-      while (task_event_callback != nullptr) {
-        Task::EventCallbackNode* next_task_event_callback = task_event_callback->next;
-        Task::ReleaseTaskEventCallback(task_event_callbacks_, task_event_callback);
-        task_event_callback = next_task_event_callback;
+      Task::CallbackNode* task_callback = *first_task_callback_;
+      while (task_callback != nullptr) {
+        Task::CallbackNode* next_task_callback = task_callback->next;
+        Task::ReleaseTaskCallback(task_callbacks_, task_callback);
+        task_callback = next_task_callback;
       }
-      first_task_event_callbacks_->Release(first_task_event_callback_);
+      first_task_callbacks_->Release(first_task_callback_);
     }
   }
 
@@ -1197,19 +1193,19 @@ class Performer {
 
  private:
   friend class Engine;
-  Performer(Task::Pool<Task::EventCallbackNode>* task_event_callbacks,
-            Task::Pool<Task::EventCallbackNode*>* first_task_event_callbacks, BarelyEngine* engine,
+  Performer(Task::Pool<Task::CallbackNode>* task_callbacks,
+            Task::Pool<Task::CallbackNode*>* first_task_callbacks, BarelyEngine* engine,
             uint32_t performer_id) noexcept
-      : task_event_callbacks_(task_event_callbacks),
-        first_task_event_callbacks_(first_task_event_callbacks),
+      : task_callbacks_(task_callbacks),
+        first_task_callbacks_(first_task_callbacks),
         engine_(engine),
         performer_id_(performer_id) {
-    first_task_event_callback_ = first_task_event_callbacks->Acquire();
-    *first_task_event_callback_ = nullptr;
+    first_task_callback_ = first_task_callbacks->Acquire();
+    *first_task_callback_ = nullptr;
   }
-  Task::Pool<Task::EventCallbackNode>* task_event_callbacks_ = nullptr;
-  Task::Pool<Task::EventCallbackNode*>* first_task_event_callbacks_ = nullptr;
-  Task::EventCallbackNode** first_task_event_callback_ = nullptr;
+  Task::Pool<Task::CallbackNode>* task_callbacks_ = nullptr;
+  Task::Pool<Task::CallbackNode*>* first_task_callbacks_ = nullptr;
+  Task::CallbackNode** first_task_callback_ = nullptr;
   BarelyEngine* engine_ = nullptr;
   uint32_t performer_id_ = 0;
 };
@@ -1226,9 +1222,9 @@ class Engine {
   ///
   /// @param config Engine configuration.
   explicit Engine(const EngineConfig& config) noexcept
-      : task_event_callbacks_(new Task::Pool<Task::EventCallbackNode>(config.max_task_count)),
-        first_task_event_callbacks_(
-            new Task::Pool<Task::EventCallbackNode*>(config.max_performer_count)),
+      : task_callbacks_(std::make_unique<Task::Pool<Task::CallbackNode>>(config.max_task_count)),
+        first_task_callbacks_(
+            std::make_unique<Task::Pool<Task::CallbackNode*>>(config.max_performer_count)),
         allocation_(config.GetRequiredAllocationSize()) {
     [[maybe_unused]] const bool success = BarelyEngine_Create(
         &config, allocation_.data(), static_cast<int32_t>(allocation_.size()), &engine_);
@@ -1246,8 +1242,8 @@ class Engine {
   ///
   /// @param other Other engine.
   Engine(Engine&& other) noexcept
-      : task_event_callbacks_(std::exchange(other.task_event_callbacks_, {})),
-        first_task_event_callbacks_(std::exchange(other.first_task_event_callbacks_, {})),
+      : task_callbacks_(std::exchange(other.task_callbacks_, {})),
+        first_task_callbacks_(std::exchange(other.first_task_callbacks_, {})),
         allocation_(std::exchange(other.allocation_, {})),
         engine_(std::exchange(other.engine_, nullptr)) {}
 
@@ -1258,8 +1254,8 @@ class Engine {
   Engine& operator=(Engine&& other) noexcept {
     if (this != &other) {
       BarelyEngine_Destroy(engine_);
-      task_event_callbacks_ = std::exchange(other.task_event_callbacks_, {});
-      first_task_event_callbacks_ = std::exchange(other.first_task_event_callbacks_, {});
+      task_callbacks_ = std::exchange(other.task_callbacks_, {});
+      first_task_callbacks_ = std::exchange(other.first_task_callbacks_, {});
       allocation_ = std::exchange(other.allocation_, {});
       engine_ = std::exchange(other.engine_, nullptr);
     }
@@ -1289,7 +1285,7 @@ class Engine {
     uint32_t performer_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer_id);
     assert(success);
-    return {task_event_callbacks_.get(), first_task_event_callbacks_.get(), engine_, performer_id};
+    return {task_callbacks_.get(), first_task_callbacks_.get(), engine_, performer_id};
   }
 
   /// Generates a random number with uniform distribution in the normalized range [0, 1).
@@ -1375,8 +1371,8 @@ class Engine {
 
  private:
   // Heap allocated fixed size buffers below (for pointer stability on move).
-  std::unique_ptr<Task::Pool<Task::EventCallbackNode>> task_event_callbacks_;
-  std::unique_ptr<Task::Pool<Task::EventCallbackNode*>> first_task_event_callbacks_;
+  std::unique_ptr<Task::Pool<Task::CallbackNode>> task_callbacks_;
+  std::unique_ptr<Task::Pool<Task::CallbackNode*>> first_task_callbacks_;
   std::vector<std::byte> allocation_;
   BarelyEngine* engine_ = nullptr;
 };

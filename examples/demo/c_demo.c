@@ -58,7 +58,7 @@ static void AudioProcessCallback(ma_device* device, void* output, const void* in
   g_timestamp += (double)frame_count / (double)kSampleRate;
 }
 
-static void TaskEventCallback(BarelyTaskEventType type, void* user_data) {
+static void TaskCallback(BarelyTaskEventType type, void* user_data) {
   static int note_index = 0;
   if (type == BarelyTaskEventType_kBegin) {
     assert(note_index < kMelodyNoteCount);
@@ -105,7 +105,7 @@ int main() {
   uint32_t task_ids[kMelodyNoteCount];
   for (int i = 0; i < kMelodyNoteCount; ++i) {
     BarelyPerformer_CreateTask(engine, performer_id, kMelodyPositions[i],
-                               kMelodyPositions[i + 1] - kMelodyPositions[i], 0, TaskEventCallback,
+                               kMelodyPositions[i + 1] - kMelodyPositions[i], 0, TaskCallback,
                                engine, &task_ids[i]);
   }
 

@@ -18,7 +18,7 @@ class PerformerController {
   void Release(uint32_t performer_index) noexcept;
 
   [[nodiscard]] uint32_t AcquireTask(uint32_t performer_index, double position, double duration,
-                                     int32_t priority, BarelyTaskEventCallback callback,
+                                     int32_t priority, BarelyTaskCallback callback,
                                      void* user_data) noexcept;
   void ReleaseTask(uint32_t task_index) noexcept;
 
@@ -30,8 +30,7 @@ class PerformerController {
   void Stop(uint32_t performer_index) noexcept;
 
   void SetTaskDuration(uint32_t task_index, double duration) noexcept;
-  void SetTaskEventCallback(uint32_t task_index, BarelyTaskEventCallback callback,
-                            void* user_data) noexcept;
+  void SetTaskCallback(uint32_t task_index, BarelyTaskCallback callback, void* user_data) noexcept;
   void SetTaskPosition(uint32_t task_index, double position) noexcept;
   void SetTaskPriority(uint32_t task_index, int32_t priority) noexcept;
 

@@ -28,8 +28,8 @@ VERS_1.0 {
     BarelyScale_GetPitch;
     BarelyTask_Destroy;
     BarelyTask_IsActive;
+    BarelyTask_SetCallback;
     BarelyTask_SetDuration;
-    BarelyTask_SetEventCallback;
     BarelyTask_SetPosition;
     BarelyTask_SetPriority;
   local:

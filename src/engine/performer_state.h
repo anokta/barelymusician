@@ -35,7 +35,7 @@ struct PerformerState {
 };
 
 struct TaskState {
-  Callback<BarelyTaskEventCallback> callback = {};
+  Callback<BarelyTaskCallback> callback = {};
 
   double position = 0.0;
   double duration = 0.0;

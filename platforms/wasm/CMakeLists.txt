@@ -27,8 +27,8 @@ set(BARELY_EXPORTED_FUNCTIONS "['_malloc','_free',
   '_BarelyPerformer_Stop',
   '_BarelyTask_Destroy',
   '_BarelyTask_IsActive',
+  '_BarelyTask_SetCallback',
   '_BarelyTask_SetDuration',
-  '_BarelyTask_SetEventCallback',
   '_BarelyTask_SetPosition',
   '_BarelyTask_SetPriority'
   ]"

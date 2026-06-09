@@ -279,7 +279,7 @@ class Processor extends AudioWorkletProcessor {
           BEGIN: 0,
           END: 1,
         });
-        const eventCallback = (task, eventType) => {
+        const callback = (task, eventType) => {
           if (eventType === TaskEventType.BEGIN) {
             if (task.beginCommands) {
               for (const command of task.beginCommands) {
@@ -300,23 +300,22 @@ class Processor extends AudioWorkletProcessor {
             console.error(`Invalid task event: ${eventType}`);
           }
         };
-        const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
+        const callbackPtr = this._module.addFunction((eventType, userData) => {
           const task = this._tasks.get(userData);
           if (!task) return;
-          if (task.eventCallback) {
-            task.eventCallback(task, eventType);
+          if (task.callback) {
+            task.callback(task, eventType);
           }
         }, 'vii');
-        this._module._BarelyTask_SetEventCallback(
-            this._engine, taskId, eventCallbackPtr, command.handle);
+        this._module._BarelyTask_SetCallback(this._engine, taskId, callbackPtr, command.handle);
 
-        this._tasks.set(command.handle, {taskId, eventCallback, eventCallbackPtr});
+        this._tasks.set(command.handle, {taskId, callback, callbackPtr});
       } break;
       case CommandType.TASK_DESTROY: {
-        const {taskId, eventCallbackPtr} = this._tasks.get(command.handle);
+        const {taskId, callbackPtr} = this._tasks.get(command.handle);
         if (!taskId) return;
         this._module._BarelyTask_Destroy(this._engine, taskId);
-        this._module.removeFunction(eventCallbackPtr);
+        this._module.removeFunction(callbackPtr);
         this._tasks.delete(command.handle);
       } break;
       case CommandType.TASK_SET_COMMANDS: {

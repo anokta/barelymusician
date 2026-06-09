@@ -60,7 +60,7 @@ std::optional<int> KeyToIndex(const InputManager::Key& key) {
 }
 
 float IndexToPitch(int octave_shift, int index) {
-  return kRootPitch + static_cast<float>(octave_shift + index) / 12.0f;
+  return kRootPitch + static_cast<float>(octave_shift) + static_cast<float>(index) / 12.0f;
 }
 
 }  // namespace

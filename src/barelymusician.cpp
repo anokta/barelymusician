@@ -10,10 +10,10 @@
 #include "core/arena.h"
 #include "core/constants.h"
 #include "core/time.h"
+#include "engine/cmd.h"
 #include "engine/engine_controller.h"
 #include "engine/engine_processor.h"
 #include "engine/engine_state.h"
-#include "engine/message.h"
 
 struct BarelyEngine {
   barely::EngineState state;
@@ -146,7 +146,7 @@ bool BarelyEngine_ResetSeed(BarelyEngine* engine, int32_t seed) {
   if (!engine) return false;
 
   engine->state.main_rng.ResetSeed(seed);
-  engine->state.ScheduleMessage(barely::EngineSeedMessage{seed});
+  engine->state.ScheduleCmd(barely::EngineSeedCmd{seed});
   return true;
 }
 

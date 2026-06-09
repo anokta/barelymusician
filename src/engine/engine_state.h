@@ -17,8 +17,8 @@
 #include "dsp/delay_filter.h"
 #include "dsp/reverb.h"
 #include "dsp/sidechain.h"
-#include "engine/message.h"
-#include "engine/message_queue.h"
+#include "engine/cmd.h"
+#include "engine/cmd_queue.h"
 #include "engine/params.h"
 #include "engine/performer_state.h"
 #include "engine/slice_pool.h"
@@ -44,11 +44,12 @@ struct EngineState {
         task_pool(arena, config.max_task_count),
         voice_pool(arena, config.max_voice_count),
         slice_pool(arena, config.max_slice_count),
-        message_queue(arena),
 
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
         performer_generations(arena.AllocArray<uint32_t>(config.max_performer_count)),
         task_generations(arena.AllocArray<uint32_t>(config.max_task_count)),
+
+        cmd_queue(arena),
 
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
         queued_sample_data_counts(
@@ -87,15 +88,15 @@ struct EngineState {
 
   SlicePool slice_pool;
 
-  MessageQueue message_queue;
-
   uint32_t* instrument_generations = nullptr;
   uint32_t* performer_generations = nullptr;
   uint32_t* task_generations = nullptr;
 
+  CmdQueue cmd_queue;
+
   InstrumentParams* instrument_params = nullptr;
 
-  std::atomic<int32_t>* queued_sample_data_counts = nullptr;  // queued messages per instrument
+  std::atomic<int32_t>* queued_sample_data_counts = nullptr;  // queued commands per instrument
 
   float* temp_samples = nullptr;
 
@@ -121,8 +122,8 @@ struct EngineState {
     ApproachValue(current_params.gain, target_params.gain, smoothing_coeff);
   }
 
-  void ScheduleMessage(Message message) noexcept {
-    message_queue.Add(SecondsToFrames(sample_rate, timestamp), message);
+  void ScheduleCmd(Cmd cmd) noexcept {
+    cmd_queue.Add(SecondsToFrames(sample_rate, timestamp), cmd);
   }
 
   [[nodiscard]] uint32_t SelectSlice(uint32_t instrument_index, uint32_t first_slice_index,

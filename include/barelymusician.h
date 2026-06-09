@@ -360,7 +360,7 @@ typedef struct BarelySlice {
   float root_pitch;
 } BarelySlice;
 
-/// A musical quantization.
+/// Musical quantization.
 typedef struct BarelyQuantization {
   /// Subdivision of a beat.
   int32_t subdivision;
@@ -369,7 +369,7 @@ typedef struct BarelyQuantization {
   float amount;
 } BarelyQuantization;
 
-/// A musical scale.
+/// Musical scale.
 typedef struct BarelyScale {
   /// Array of note pitches relative to the root note pitch.
   const float* pitches;
@@ -766,6 +766,88 @@ struct Slice : public BarelySlice {
   /// @param slice Raw slice.
   // NOLINTNEXTLINE(google-explicit-constructor)
   constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
+};
+
+/// Musical quantization.
+struct Quantization : public BarelyQuantization {
+ public:
+  /// Default constructor.
+  constexpr Quantization() noexcept = default;
+
+  /// Constructs a new `Quantization`.
+  ///
+  /// @param subdivision Subdivision of a beat.
+  /// @param amount Amount.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr Quantization(int subdivision, float amount = 1.0f) noexcept
+      : Quantization(BarelyQuantization{static_cast<int32_t>(subdivision), amount}) {}
+
+  /// Constructs a new `Quantization` from a raw type.
+  ///
+  /// @param quantization Raw quantization.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr Quantization(BarelyQuantization quantization) noexcept
+      : BarelyQuantization{quantization} {
+    assert(subdivision > 0);
+    assert(amount >= 0.0 && amount <= 1.0);
+  }
+
+  /// Returns the quantized position.
+  ///
+  /// @param position Position.
+  /// @return Quantized position.
+  [[nodiscard]] double GetPosition(double position) const noexcept {
+    double quantized_position = 0.0;
+    [[maybe_unused]] const bool success =
+        BarelyQuantization_GetPosition(this, position, &quantized_position);
+    assert(success);
+    return quantized_position;
+  }
+};
+
+/// Musical scale.
+struct Scale : public BarelyScale {
+ public:
+  /// Default constructor.
+  constexpr Scale() noexcept = default;
+
+  /// Constructs a new `Scale`.
+  ///
+  /// @param pitches Span of pitches.
+  /// @param root_pitch Root pitch.
+  /// @param mode Mode.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr Scale(std::span<const float> pitches, float root_pitch = 0.0f, int mode = 0) noexcept
+      : Scale(BarelyScale{pitches.data(), static_cast<int32_t>(pitches.size()), root_pitch,
+                          static_cast<int32_t>(mode)}) {}
+
+  /// Constructs a new `Scale` from a raw type.
+  ///
+  /// @param scale Raw scale.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr Scale(BarelyScale scale) noexcept : BarelyScale{scale} {
+    assert(pitches != nullptr);
+    assert(pitch_count > 0);
+    assert(mode >= 0 && mode < pitch_count);
+  }
+
+  /// Returns the pitch for a given degree.
+  ///
+  /// @param degree Degree.
+  /// @return Pitch.
+  [[nodiscard]] float GetPitch(int degree) const noexcept {
+    float pitch = 0.0f;
+    [[maybe_unused]] const bool success = BarelyScale_GetPitch(this, degree, &pitch);
+    assert(success);
+    return pitch;
+  }
+
+  /// Returns the number of pitches in the scale.
+  ///
+  /// @return Number of pitches.
+  [[nodiscard]] constexpr int GetPitchCount() const noexcept {
+    return static_cast<int>(pitch_count);
+  }
 };
 
 /// Task event callback function.
@@ -1298,88 +1380,6 @@ class Engine {
   Pool<Task::EventCallbackNode*> first_task_event_callbacks_;
   std::vector<std::byte> allocation_;
   BarelyEngine* engine_ = nullptr;
-};
-
-/// A musical quantization.
-struct Quantization : public BarelyQuantization {
- public:
-  /// Default constructor.
-  constexpr Quantization() noexcept = default;
-
-  /// Constructs a new `Quantization`.
-  ///
-  /// @param subdivision Subdivision of a beat.
-  /// @param amount Amount.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Quantization(int subdivision, float amount = 1.0f) noexcept
-      : Quantization(BarelyQuantization{static_cast<int32_t>(subdivision), amount}) {}
-
-  /// Constructs a new `Quantization` from a raw type.
-  ///
-  /// @param quantization Raw quantization.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Quantization(BarelyQuantization quantization) noexcept
-      : BarelyQuantization{quantization} {
-    assert(subdivision > 0);
-    assert(amount >= 0.0 && amount <= 1.0);
-  }
-
-  /// Returns the quantized position.
-  ///
-  /// @param position Position.
-  /// @return Quantized position.
-  [[nodiscard]] double GetPosition(double position) const noexcept {
-    double quantized_position = 0.0;
-    [[maybe_unused]] const bool success =
-        BarelyQuantization_GetPosition(this, position, &quantized_position);
-    assert(success);
-    return quantized_position;
-  }
-};
-
-/// A musical scale.
-struct Scale : public BarelyScale {
- public:
-  /// Default constructor.
-  constexpr Scale() noexcept = default;
-
-  /// Constructs a new `Scale`.
-  ///
-  /// @param pitches Span of pitches.
-  /// @param root_pitch Root pitch.
-  /// @param mode Mode.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Scale(std::span<const float> pitches, float root_pitch = 0.0f, int mode = 0) noexcept
-      : Scale(BarelyScale{pitches.data(), static_cast<int32_t>(pitches.size()), root_pitch,
-                          static_cast<int32_t>(mode)}) {}
-
-  /// Constructs a new `Scale` from a raw type.
-  ///
-  /// @param scale Raw scale.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Scale(BarelyScale scale) noexcept : BarelyScale{scale} {
-    assert(pitches != nullptr);
-    assert(pitch_count > 0);
-    assert(mode >= 0 && mode < pitch_count);
-  }
-
-  /// Returns the pitch for a given degree.
-  ///
-  /// @param degree Degree.
-  /// @return Pitch.
-  [[nodiscard]] float GetPitch(int degree) const noexcept {
-    float pitch = 0.0f;
-    [[maybe_unused]] const bool success = BarelyScale_GetPitch(this, degree, &pitch);
-    assert(success);
-    return pitch;
-  }
-
-  /// Returns the number of pitches in the scale.
-  ///
-  /// @return Number of pitches.
-  [[nodiscard]] constexpr int GetPitchCount() const noexcept {
-    return static_cast<int>(pitch_count);
-  }
 };
 
 }  // namespace barely

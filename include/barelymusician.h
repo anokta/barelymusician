@@ -547,6 +547,7 @@ BARELY_API bool BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t in
 
 /// Creates a new performer task.
 ///
+/// @param engine Pointer to engine.
 /// @param performer_id Performer identifier.
 /// @param position Task position in beats.
 /// @param duration Task duration in beats.
@@ -963,7 +964,7 @@ class Task {
       if (task_event_callback_ == *first_task_event_callback_) {
         *first_task_event_callback_ = task_event_callback_->next;
       }
-      ReleaseTaskEventCallback(free_task_event_callbacks_, task_event_callback_);
+      ReleaseTaskEventCallback(task_event_callbacks_, task_event_callback_);
     }
   }
 
@@ -1032,7 +1033,25 @@ class Task {
     EventCallbackNode* prev = nullptr;
     EventCallbackNode* next = nullptr;
   };
-  static void ReleaseTaskEventCallback(std::vector<EventCallbackNode*>* free_task_event_callbacks,
+  template <typename T>
+  class Pool {
+   public:
+    Pool() noexcept = default;
+    explicit Pool(int32_t capacity) noexcept
+        : items_(new T[capacity]), free_(new T*[capacity]), free_count_(capacity) {
+      for (int32_t i = 0; i < capacity; ++i) {
+        free_[i] = &items_[i];
+      }
+    }
+    [[nodiscard]] T* Acquire() noexcept { return free_[--free_count_]; }
+    void Release(T* item) noexcept { free_[free_count_++] = item; }
+
+   private:
+    std::unique_ptr<T[]> items_;
+    std::unique_ptr<T*[]> free_;
+    int32_t free_count_ = 0;
+  };
+  static void ReleaseTaskEventCallback(Pool<EventCallbackNode>* task_event_callbacks,
                                        EventCallbackNode* task_event_callback) noexcept {
     if (task_event_callback->prev != nullptr) {
       task_event_callback->prev->next = task_event_callback->next;
@@ -1040,18 +1059,16 @@ class Task {
     if (task_event_callback->next != nullptr) {
       task_event_callback->next->prev = task_event_callback->prev;
     }
-    assert(free_task_event_callbacks->size() < free_task_event_callbacks->capacity());
-    free_task_event_callbacks->push_back(task_event_callback);
+    task_event_callbacks->Release(task_event_callback);
   }
-  Task(std::vector<EventCallbackNode*>* free_task_event_callbacks,
-       EventCallbackNode** first_task_event_callback, EventCallbackNode* task_event_callback,
-       BarelyEngine* engine, uint32_t task_id) noexcept
-      : free_task_event_callbacks_(free_task_event_callbacks),
+  Task(Pool<EventCallbackNode>* task_event_callbacks, EventCallbackNode** first_task_event_callback,
+       EventCallbackNode* task_event_callback, BarelyEngine* engine, uint32_t task_id) noexcept
+      : task_event_callbacks_(task_event_callbacks),
         first_task_event_callback_(first_task_event_callback),
         task_event_callback_(task_event_callback),
         engine_(engine),
         task_id_(task_id) {}
-  std::vector<EventCallbackNode*>* free_task_event_callbacks_ = nullptr;
+  Pool<EventCallbackNode>* task_event_callbacks_ = nullptr;
   EventCallbackNode** first_task_event_callback_ = nullptr;
   EventCallbackNode* task_event_callback_ = nullptr;
   BarelyEngine* engine_ = nullptr;
@@ -1084,17 +1101,14 @@ class Performer {
         engine_, performer_id_, position, duration, priority, nullptr, nullptr, &task_id);
     assert(success);
 
-    assert(free_task_event_callbacks_ != nullptr && !free_task_event_callbacks_->empty());
-    Task::EventCallbackNode* task_event_callback = free_task_event_callbacks_->back();
+    Task::EventCallbackNode* task_event_callback = task_event_callbacks_->Acquire();
     *task_event_callback = {.callback = std::move(callback)};
-    free_task_event_callbacks_->pop_back();
 
     if (*first_task_event_callback_ != nullptr) {
       (*first_task_event_callback_)->prev = task_event_callback;
       task_event_callback->next = *first_task_event_callback_;
-    } else {
-      *first_task_event_callback_ = task_event_callback;
     }
+    *first_task_event_callback_ = task_event_callback;
 
     success = BarelyTask_SetEventCallback(
         engine_, task_id,
@@ -1105,7 +1119,7 @@ class Performer {
         },
         &task_event_callback->callback);
     assert(success);
-    return {free_task_event_callbacks_, first_task_event_callback_, task_event_callback, engine_,
+    return {task_event_callbacks_, first_task_event_callback_, task_event_callback, engine_,
             task_id};
   }
 
@@ -1115,12 +1129,10 @@ class Performer {
       Task::EventCallbackNode* task_event_callback = *first_task_event_callback_;
       while (task_event_callback != nullptr) {
         Task::EventCallbackNode* next_task_event_callback = task_event_callback->next;
-        Task::ReleaseTaskEventCallback(free_task_event_callbacks_, task_event_callback);
+        Task::ReleaseTaskEventCallback(task_event_callbacks_, task_event_callback);
         task_event_callback = next_task_event_callback;
       }
-      assert(free_first_task_event_callbacks_->size() <
-             free_first_task_event_callbacks_->capacity());
-      free_first_task_event_callbacks_->push_back(first_task_event_callback_);
+      first_task_event_callbacks_->Release(first_task_event_callback_);
     }
   }
 
@@ -1185,21 +1197,18 @@ class Performer {
 
  private:
   friend class Engine;
-  Performer(std::vector<Task::EventCallbackNode*>* free_task_event_callbacks,
-            std::vector<Task::EventCallbackNode**>* free_first_task_event_callbacks,
-            BarelyEngine* engine, uint32_t performer_id) noexcept
-      : free_task_event_callbacks_(free_task_event_callbacks),
-        free_first_task_event_callbacks_(free_first_task_event_callbacks),
+  Performer(Task::Pool<Task::EventCallbackNode>* task_event_callbacks,
+            Task::Pool<Task::EventCallbackNode*>* first_task_event_callbacks, BarelyEngine* engine,
+            uint32_t performer_id) noexcept
+      : task_event_callbacks_(task_event_callbacks),
+        first_task_event_callbacks_(first_task_event_callbacks),
         engine_(engine),
         performer_id_(performer_id) {
-    assert(free_first_task_event_callbacks_ != nullptr &&
-           !free_first_task_event_callbacks_->empty());
-    first_task_event_callback_ = free_first_task_event_callbacks->back();
+    first_task_event_callback_ = first_task_event_callbacks->Acquire();
     *first_task_event_callback_ = nullptr;
-    free_first_task_event_callbacks_->pop_back();
   }
-  std::vector<Task::EventCallbackNode*>* free_task_event_callbacks_ = nullptr;
-  std::vector<Task::EventCallbackNode**>* free_first_task_event_callbacks_ = nullptr;
+  Task::Pool<Task::EventCallbackNode>* task_event_callbacks_ = nullptr;
+  Task::Pool<Task::EventCallbackNode*>* first_task_event_callbacks_ = nullptr;
   Task::EventCallbackNode** first_task_event_callback_ = nullptr;
   BarelyEngine* engine_ = nullptr;
   uint32_t performer_id_ = 0;
@@ -1217,8 +1226,9 @@ class Engine {
   ///
   /// @param config Engine configuration.
   explicit Engine(const EngineConfig& config) noexcept
-      : task_event_callbacks_(config.max_task_count),
-        first_task_event_callbacks_(config.max_performer_count),
+      : task_event_callbacks_(new Task::Pool<Task::EventCallbackNode>(config.max_task_count)),
+        first_task_event_callbacks_(
+            new Task::Pool<Task::EventCallbackNode*>(config.max_performer_count)),
         allocation_(config.GetRequiredAllocationSize()) {
     [[maybe_unused]] const bool success = BarelyEngine_Create(
         &config, allocation_.data(), static_cast<int32_t>(allocation_.size()), &engine_);
@@ -1279,7 +1289,7 @@ class Engine {
     uint32_t performer_id = 0;
     [[maybe_unused]] const bool success = BarelyEngine_CreatePerformer(engine_, &performer_id);
     assert(success);
-    return {&task_event_callbacks_.free, &first_task_event_callbacks_.free, engine_, performer_id};
+    return {task_event_callbacks_.get(), first_task_event_callbacks_.get(), engine_, performer_id};
   }
 
   /// Generates a random number with uniform distribution in the normalized range [0, 1).
@@ -1365,19 +1375,8 @@ class Engine {
 
  private:
   // Heap allocated fixed size buffers below (for pointer stability on move).
-  template <typename T>
-  struct Pool {
-    Pool() noexcept = default;
-    explicit Pool(int32_t capacity) noexcept : items(capacity), free(capacity) {
-      for (int32_t i = 0; i < capacity; ++i) {
-        free[i] = &items[i];
-      }
-    }
-    std::vector<T> items;
-    std::vector<T*> free;
-  };
-  Pool<Task::EventCallbackNode> task_event_callbacks_;
-  Pool<Task::EventCallbackNode*> first_task_event_callbacks_;
+  std::unique_ptr<Task::Pool<Task::EventCallbackNode>> task_event_callbacks_;
+  std::unique_ptr<Task::Pool<Task::EventCallbackNode*>> first_task_event_callbacks_;
   std::vector<std::byte> allocation_;
   BarelyEngine* engine_ = nullptr;
 };

@@ -28,7 +28,8 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
   return seconds * kSecondsToMinutes * tempo;
 }
 
-[[nodiscard]] constexpr double Quantize(double position, int subdivision, float amount) noexcept {
+[[nodiscard]] constexpr double Quantize(double position, int32_t subdivision,
+                                        float amount) noexcept {
   assert(subdivision > 0);
   assert(amount >= 0.0f && amount <= 1.0f);
   return std::lerp(

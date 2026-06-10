@@ -17,9 +17,7 @@ class EngineController {
       : engine_(engine), instrument_controller_(engine_), performer_controller_(engine_) {}
 
   void SetControl(BarelyEngineControlType type, float value) noexcept {
-    if (auto& control = engine_.controls[type]; control.SetValue(value)) {
-      engine_.ScheduleMessage(EngineControlMessage{type, control.value});
-    }
+    engine_.ScheduleCmd(EngineControlCmd{type, kEngineControls[type].Clamp(value)});
   }
 
   void Update(double timestamp) noexcept {

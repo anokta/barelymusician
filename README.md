@@ -45,14 +45,11 @@ instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 
 // Set an instrument note on.
 //
-// The note pitch is expressed in octaves relative to middle C as the center frequency. Fractional
-// note values adjust the frequency logarithmically to ensure equally perceived pitch intervals
-// within each octave.
+// Notes are expressed in octaves relative to middle C as the center frequency. Fractional note
+// values adjust the frequency logarithmically to ensure equally perceived pitch intervals within
+// each octave.
 constexpr float kC4Pitch = 0.0f;
 instrument.SetNoteOn(kC4Pitch);
-
-// Check if the instrument note is on.
-const bool is_note_on = instrument.IsNoteOn(kC4Pitch);  // will return true.
 
 // Create a new performer.
 auto performer = engine.CreatePerformer();
@@ -62,11 +59,11 @@ performer.SetLooping(/*is_looping=*/true);
 
 // Create a new task that plays an instrument note every beat.
 auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
-                                 [&](barely::EventType type) {
+                                 [&](barely::TaskEventType type) {
                                    constexpr float kC3Pitch = -1.0f;
-                                   if (type == barely::EventType::kBegin) {
+                                   if (type == barely::TaskEventType::kBegin) {
                                      instrument.SetNoteOn(kC3Pitch);
-                                   } else if (type == barely::EventType::kEnd) {
+                                   } else if (type == barely::TaskEventType::kEnd) {
                                      instrument.SetNoteOff(kC3Pitch);
                                    }
                                  });

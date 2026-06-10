@@ -14,9 +14,9 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EventType;
 using ::barely::InstrumentControlType;
 using ::barely::Task;
+using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -47,8 +47,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
+  bool is_looping = true;
+  double tempo = kInitialTempo;
+
   Engine engine(kSampleRate);
-  engine.SetTempo(kInitialTempo);
+  engine.SetTempo(tempo);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
@@ -56,11 +59,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
-  instrument.SetNoteEventCallback([](EventType type, float pitch) {
-    if (type == EventType::kBegin) {
-      ConsoleLog() << "Note(" << pitch << ")";
-    }
-  });
 
   auto performer = engine.CreatePerformer();
   performer.SetLooping(true);
@@ -86,10 +84,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Task> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {
     return performer.CreateTask(note.position, note.duration, 0,
-                                [&instrument, pitch = note.pitch](EventType type) {
-                                  if (type == EventType::kBegin) {
+                                [&instrument, pitch = note.pitch](TaskEventType type) {
+                                  if (type == TaskEventType::kBegin) {
                                     instrument.SetNoteOn(pitch);
-                                  } else if (type == EventType::kEnd) {
+                                    ConsoleLog() << "Note(" << pitch << ")";
+                                  } else if (type == TaskEventType::kEnd) {
                                     instrument.SetNoteOff(pitch);
                                   }
                                 });
@@ -107,6 +106,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       });
 
   // Key down callback.
+  bool is_playing = true;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -127,19 +127,19 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (performer.IsPlaying()) {
+        if (is_playing) {
           performer.Stop();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();
           ConsoleLog() << "Started playback";
         }
+        is_playing = !is_playing;
         return;
       case 'L':
-        if (performer.IsLooping()) {
+        if (is_looping) {
           performer.SetLooping(false);
           ConsoleLog() << "Loop turned off";
         } else {
@@ -148,7 +148,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'P':
-        instrument.SetAllNotesOff();
         performer.SetPosition(0.0);
         return;
       case '-':
@@ -164,7 +163,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
     }
     engine.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
+    ConsoleLog() << "Tempo set to " << tempo << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

@@ -109,6 +109,8 @@ class Envelope {
 
   [[nodiscard]] constexpr bool IsActive() const noexcept { return state_ != State::kIdle; }
 
+  [[nodiscard]] constexpr bool IsOn() const noexcept { return state_ < State::kRelease; }
+
   [[nodiscard]] constexpr bool IsStartFrame() const noexcept {
     return state_ == State::kAttack && current_ == 0.0f;
   }

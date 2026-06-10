@@ -45,15 +45,15 @@ TEST(TimeTest, FramesSecondsConversion) {
 }
 
 // Common subdivisions of a beat in relation to quarter note beat duration.
-constexpr int kQuarterNotesPerBeat = 1;
-constexpr int kEighthNotesPerBeat = 2;
-constexpr int kEighthTripletNotesPerBeat = 3;
-constexpr int kSixteenthNotesPerBeat = 4;
-constexpr int kSixteenthTripletNotesPerBeat = 6;
-constexpr int kThirtySecondNotesPerBeat = 8;
-constexpr int kThirtySecondTripletNotesPerBeat = 12;
+constexpr int32_t kQuarterNotesPerBeat = 1;
+constexpr int32_t kEighthNotesPerBeat = 2;
+constexpr int32_t kEighthTripletNotesPerBeat = 3;
+constexpr int32_t kSixteenthNotesPerBeat = 4;
+constexpr int32_t kSixteenthTripletNotesPerBeat = 6;
+constexpr int32_t kThirtySecondNotesPerBeat = 8;
+constexpr int32_t kThirtySecondTripletNotesPerBeat = 12;
 
-class QuantizationTestWithParam : public testing::TestWithParam<int> {};
+class QuantizationTestWithParam : public testing::TestWithParam<int32_t> {};
 
 TEST_P(QuantizationTestWithParam, Quantize) {
   constexpr double kPosition = 0.99;

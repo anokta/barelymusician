@@ -3,14 +3,17 @@
 
 #include <barelymusician.h>
 
+#include <atomic>
+#include <cassert>
 #include <cstdint>
 
+#include "core/constants.h"
+#include "core/control.h"
 #include "core/pool.h"
 #include "core/rng.h"
+#include "engine/cmd.h"
+#include "engine/cmd_queue.h"
 #include "engine/engine_state.h"
-#include "engine/instrument_state.h"
-#include "engine/message.h"
-#include "engine/message_queue.h"
 
 namespace barely {
 
@@ -18,32 +21,59 @@ class InstrumentController {
  public:
   explicit InstrumentController(EngineState& engine) noexcept : engine_(engine) {}
 
-  [[nodiscard]] uint32_t Acquire() noexcept;
-  void Release(uint32_t instrument_index) noexcept;
+  [[nodiscard]] uint32_t Acquire() noexcept {
+    const uint32_t instrument_index = engine_.instrument_pool.Acquire();
+    if (instrument_index != kInvalidIndex) {
+      auto& instrument = engine_.GetInstrument(instrument_index);
+      instrument = {};
+      engine_.ScheduleCmd(InstrumentCreateCmd{instrument_index});
+    }
+    return instrument_index;
+  }
 
-  void SetAllNotesOff() noexcept;
-  void SetAllNotesOff(uint32_t instrument_index) noexcept;
+  void Release(uint32_t instrument_index) noexcept {
+    engine_.queued_sample_data_counts[instrument_index].fetch_add(1, std::memory_order_acq_rel);
+    while (engine_.process_fence.load(std::memory_order_acquire));  // busy wait until next process.
+    auto& instrument = engine_.GetInstrument(instrument_index);
+    engine_.slice_pool.Release(instrument.first_slice_index);
+    engine_.ScheduleCmd(InstrumentDestroyCmd{instrument_index});
+    engine_.instrument_pool.Release(instrument_index);
+  }
+
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
-                  float value) noexcept;
-  void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
-                      float value) noexcept;
-  void SetNoteEventCallback(uint32_t instrument_index, BarelyNoteEventCallback callback,
-                            void* user_data) noexcept;
-  void SetNoteOff(uint32_t instrument_index, float pitch) noexcept;
-  void SetNoteOn(uint32_t instrument_index, float pitch) noexcept;
-  void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
-                     int32_t slice_count) noexcept;
+                  float value) noexcept {
+    assert(type <= BarelyInstrumentControlType_kCount);
+    engine_.ScheduleCmd(
+        InstrumentControlCmd{instrument_index, type, kInstrumentControls[type].Clamp(value)});
+  }
 
-  [[nodiscard]] float GetControl(uint32_t instrument_index,
-                                 BarelyInstrumentControlType type) const noexcept;
-  [[nodiscard]] const float* GetNoteControl(uint32_t instrument_index, float pitch,
-                                            BarelyNoteControlType type) const noexcept;
-  [[nodiscard]] bool IsNoteOn(uint32_t instrument_index, float pitch) const noexcept;
+  void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
+                      float value) noexcept {
+    assert(type <= BarelyNoteControlType_kCount);
+    engine_.ScheduleCmd(
+        NoteControlCmd{instrument_index, pitch, type, kNoteControls[type].Clamp(value)});
+  }
+
+  void SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
+    engine_.ScheduleCmd(NoteOffCmd{instrument_index, pitch});
+  }
+
+  void SetNoteOn(uint32_t instrument_index, float pitch) noexcept {
+    engine_.ScheduleCmd(NoteOnCmd{instrument_index, pitch});
+  }
+
+  void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,
+                     int32_t slice_count) noexcept {
+    engine_.queued_sample_data_counts[instrument_index].fetch_add(1, std::memory_order_acq_rel);
+    while (engine_.process_fence.load(std::memory_order_acquire));  // busy wait until next process.
+    auto& instrument = engine_.GetInstrument(instrument_index);
+    engine_.slice_pool.Release(instrument.first_slice_index);
+    instrument.first_slice_index =
+        engine_.slice_pool.Acquire(slices, static_cast<uint32_t>(slice_count));
+    engine_.ScheduleCmd(SampleDataCmd{instrument_index, instrument.first_slice_index});
+  }
 
  private:
-  [[nodiscard]] uint32_t GetNote(const InstrumentState& instrument, float pitch) const noexcept;
-  void ReleaseNote(InstrumentState& instrument, uint32_t note_index) noexcept;
-
   EngineState& engine_;
 };
 

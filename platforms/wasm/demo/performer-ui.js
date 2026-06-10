@@ -23,9 +23,6 @@ export class PerformerUi {
     this._notes = [];
     this._selectedInstrument = null;
 
-    /** @private {boolean} */
-    this._isPlaying = false;
-
     /** @private {number} */
     this._loopLength = 1.0;
 
@@ -87,17 +84,15 @@ export class PerformerUi {
   }
 
   start() {
-    this._isPlaying = true;
     this.performer.start();
   }
 
   stop() {
-    this._isPlaying = false;
     this.performer.stop();
   }
 
   get isPlaying() {
-    return this._isPlaying;
+    return this.performer.isPlaying;
   }
 
   _renderClip() {

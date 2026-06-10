@@ -13,8 +13,8 @@ Repeater::Repeater(Engine& engine, Instrument instrument) noexcept
     : engine_(engine),
       instrument_(instrument),
       performer_(engine_.CreatePerformer()),
-      task_(performer_.CreateTask(0.0, 1.0, 0, [this](EventType type) noexcept {
-        if (type == EventType::kBegin) {
+      task_(performer_.CreateTask(0.0, 1.0, 0, [this](TaskEventType type) noexcept {
+        if (type == TaskEventType::kBegin) {
           OnBeat();
         }
       })) {
@@ -24,7 +24,11 @@ Repeater::Repeater(Engine& engine, Instrument instrument) noexcept
 
 void Repeater::Clear() noexcept {
   if (IsPlaying()) {
-    instrument_.SetAllNotesOff();
+    for (const auto& [pitch_or, length] : pitches_) {
+      if (pitch_or.has_value()) {
+        instrument_.SetNoteOff(*pitch_or);
+      }
+    }
   }
   pitches_.clear();
 }
@@ -62,7 +66,11 @@ void Repeater::Stop() noexcept {
   }
   performer_.Stop();
   performer_.SetPosition(0.0);
-  instrument_.SetAllNotesOff();
+  for (const auto& [pitch_or, length] : pitches_) {
+    if (pitch_or.has_value()) {
+      instrument_.SetNoteOff(*pitch_or);
+    }
+  }
   index_ = -1;
   remaining_length_ = 0;
 }
@@ -86,7 +94,11 @@ void Repeater::OnBeat() noexcept {
   if (!pitches_[index_].first.has_value()) {
     return;
   }
-  instrument_.SetNoteOn(*pitches_[index_].first + pitch_offset_);
+  const float pitch = *pitches_[index_].first + pitch_offset_;
+  instrument_.SetNoteOn(pitch);
+  if (note_callback_) {
+    note_callback_(pitch);
+  }
 }
 
 bool Repeater::Update() noexcept {

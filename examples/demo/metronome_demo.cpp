@@ -13,8 +13,8 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EventType;
 using ::barely::InstrumentControlType;
+using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -50,6 +50,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
+  double tempo = kInitialTempo;
+
   Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
@@ -66,8 +68,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   auto metronome = engine.CreatePerformer();
   metronome.SetLooping(true);
   int beat = 0;
-  metronome.CreateTask(0.0, 1e-6, 0, [&](EventType type) {
-    if (type != EventType::kBegin) {
+  metronome.CreateTask(0.0, 1e-6, 0, [&](TaskEventType type) {
+    if (type != TaskEventType::kBegin) {
       return;
     }
     const int current_bar = (beat / kBeatCount) + 1;
@@ -88,6 +90,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       });
 
   // Key down callback.
+  bool is_playing = true;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -96,16 +99,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (metronome.IsPlaying()) {
+        if (is_playing) {
           metronome.Stop();
           ConsoleLog() << "Metronome stopped";
         } else {
           metronome.Start();
           ConsoleLog() << "Metronome started";
         }
+        is_playing = !is_playing;
         return;
       case '\r':
         metronome.Stop();
@@ -132,7 +135,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     }
     tempo = std::clamp(tempo, 0.0, static_cast<double>(kSampleRate));
     engine.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
+    ConsoleLog() << "Tempo set to " << tempo << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

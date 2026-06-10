@@ -40,7 +40,7 @@ namespace Barely.Examples {
     }
 
     private void OnNoteOn(float pitch) {
-      targetColor = Color.Lerp(noteOffColor, noteOnColor, targetInstrument.GetNoteGain(pitch));
+      targetColor = noteOnColor;
       _renderer.material.color = targetColor;
     }
   }

@@ -13,6 +13,12 @@ constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
+constexpr float kInstrumentControlDefaults[] = {
+#define BARELY_FETCH_DEFAULT(EnumType, Name, Default, ...) Default,
+    BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, BARELY_FETCH_DEFAULT)
+#undef BARELY_FETCH_DEFAULT
+};
+
 void BM_BarelyEngine_AddRemoveInstrument(State& state) {
   Engine engine(kSampleRate);
 
@@ -87,7 +93,8 @@ void BM_BarelyEngine_ProcessMultipleInstruments(State& state) {
     auto instrument = engine.CreateInstrument();
     instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kCrossfade);
     instrument.SetControl(InstrumentControlType::kOscShape, 0.0f);
-    const int voice_count = instrument.GetControl<int>(InstrumentControlType::kVoiceCount);
+    const int voice_count =
+        static_cast<int>(kInstrumentControlDefaults[BarelyInstrumentControlType_kVoiceCount]);
     for (int voice_index = 0; voice_index < voice_count; ++voice_index) {
       instrument.SetNoteOn(static_cast<float>(i * voice_index) / 12.0f);
     }
@@ -153,7 +160,8 @@ void BM_BarelyInstrument_PlayMultipleNotesWithOsc(State& state) {
   instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kCrossfade);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kFilterCutoff, 0.5f);
-  const int voice_count = instrument.GetControl<int>(InstrumentControlType::kVoiceCount);
+  const int voice_count =
+      static_cast<int>(kInstrumentControlDefaults[BarelyInstrumentControlType_kVoiceCount]);
   for (int i = 0; i < voice_count; ++i) {
     instrument.SetNoteOn(static_cast<float>(i));
   }

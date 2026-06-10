@@ -5,13 +5,8 @@ import {INSTRUMENT_CONTROLS, NoteControlType} from './control.js';
 const RENDER_QUANTUM_SIZE = 128;
 const STEREO_CHANNEL_COUNT = 2;
 
-const ENGINE_CONFIG_SIZE = 28;  // sizeof(BarelyEngineConfig)
+const ENGINE_CONFIG_SIZE = 32;  // sizeof(BarelyEngineConfig)
 const SLICE_SIZE = 24;          // sizeof(BarelySlice)
-
-const EventType = Object.freeze({
-  BEGIN: 0,
-  END: 1,
-});
 
 class Processor extends AudioWorkletProcessor {
   constructor() {
@@ -46,12 +41,13 @@ class Processor extends AudioWorkletProcessor {
       const configPtr = this._module._malloc(ENGINE_CONFIG_SIZE);
       const configView = new Int32Array(this._module.HEAP32.buffer, configPtr, 8);
       configView[0] = sampleRate;           // sample_rate
-      configView[1] = RENDER_QUANTUM_SIZE;  // max_frame_count
-      configView[2] = 32;                   // max_instrument_count
-      configView[3] = 32;                   // max_performer_count
-      configView[4] = 512;                  // max_task_count
-      configView[5] = 128;                  // max_slice_count
-      configView[6] = 128;                  // max_voice_count
+      configView[1] = 32;                   // max_instrument_count
+      configView[2] = 32;                   // max_performer_count
+      configView[3] = 512;                  // max_task_count
+      configView[4] = 4096;                 // max_command_count
+      configView[5] = RENDER_QUANTUM_SIZE;  // max_frame_count
+      configView[6] = 128;                  // max_slice_count
+      configView[7] = 128;                  // max_voice_count
 
       this._module._BarelyEngineConfig_GetRequiredAllocationSize(configPtr, this._uint32Ptr);
       const allocationSize = this._module.getValue(this._uint32Ptr, 'i32');
@@ -158,47 +154,25 @@ class Processor extends AudioWorkletProcessor {
         this._module._BarelyEngine_CreateInstrument(this._engine, this._uint32Ptr);
         const instrumentId = this._module.getValue(this._uint32Ptr, 'i32');
         if (!instrumentId) return;
-
         for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
           this._module._BarelyInstrument_SetControl(
               this._engine, instrumentId, controlTypeIndex,
               INSTRUMENT_CONTROLS[controlTypeIndex].defaultValue);
         }
-
-        const noteEventCallback = (eventType, pitch) => {
-          if (eventType === EventType.BEGIN) {
-            this._pendingEventCallbacks.push(
-                {type: EventCallbackType.INSTRUMENT_ON_NOTE_BEGIN, handle: command.handle, pitch});
-          } else if (eventType === EventType.END) {
-            this._pendingEventCallbacks.push(
-                {type: EventCallbackType.INSTRUMENT_ON_NOTE_END, handle: command.handle, pitch});
-          } else {
-            console.error(`Invalid note event: ${eventType}`);
-          }
-        };
-        const noteEventCallbackPtr = this._module.addFunction((eventType, pitch, userData) => {
-          const callback = this._instruments.get(userData)?.noteEventCallback;
-          if (callback) {
-            callback(eventType, pitch);
-          }
-        }, 'vifi');
-        this._module._BarelyInstrument_SetNoteEventCallback(
-            this._engine, instrumentId, noteEventCallbackPtr, command.handle);
-        this._instruments.set(
-            command.handle, {instrumentId, noteEventCallback, noteEventCallbackPtr});
+        this._instruments.set(command.handle, {instrumentId});
       } break;
       case CommandType.INSTRUMENT_DESTROY: {
-        const {instrumentId, noteEventCallbackPtr} = this._instruments.get(command.handle);
+        const instrumentId = this._instruments.get(command.handle);
         if (!instrumentId) return;
         this._module._BarelyInstrument_Destroy(this._engine, instrumentId);
-        this._module.removeFunction(noteEventCallbackPtr);
         this._instruments.delete(command.handle);
         this._cleanUpInstrumentSampleData(instrumentId);
       } break;
       case CommandType.INSTRUMENT_SET_ALL_NOTES_OFF: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
         if (!instrumentId) return;
-        this._module._BarelyInstrument_SetAllNotesOff(this._engine, instrumentId);
+        this._pendingEventCallbacks.push(
+            {type: EventCallbackType.INSTRUMENT_ON_ALL_NOTES_OFF, handle: command.handle});
       } break;
       case CommandType.INSTRUMENT_SET_CONTROL: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
@@ -216,6 +190,11 @@ class Processor extends AudioWorkletProcessor {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
         if (!instrumentId) return;
         this._module._BarelyInstrument_SetNoteOff(this._engine, instrumentId, command.pitch);
+        this._pendingEventCallbacks.push({
+          type: EventCallbackType.INSTRUMENT_ON_NOTE_OFF,
+          handle: command.handle,
+          pitch: command.pitch,
+        });
       } break;
       case CommandType.INSTRUMENT_SET_NOTE_ON: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
@@ -229,6 +208,11 @@ class Processor extends AudioWorkletProcessor {
           this._module._BarelyInstrument_SetControl(
               this._engine, instrumentId, NoteControlType.PITCH_SHIFT, command.pitchShift);
         }
+        this._pendingEventCallbacks.push({
+          type: EventCallbackType.INSTRUMENT_ON_NOTE_ON,
+          handle: command.handle,
+          pitch: command.pitch,
+        });
       } break;
       case CommandType.INSTRUMENT_SET_SAMPLE_DATA: {
         const instrumentId = this._instruments.get(command.handle)?.instrumentId;
@@ -292,8 +276,12 @@ class Processor extends AudioWorkletProcessor {
             command.position, command.duration, command.priority, null, null, this._uint32Ptr);
         const taskId = this._module.getValue(this._uint32Ptr, 'i32');
 
-        const eventCallback = (task, eventType) => {
-          if (eventType === EventType.BEGIN) {
+        const TaskEventType = Object.freeze({
+          BEGIN: 0,
+          END: 1,
+        });
+        const callback = (task, eventType) => {
+          if (eventType === TaskEventType.BEGIN) {
             if (task.beginCommands) {
               for (const command of task.beginCommands) {
                 this._processCommand(command);
@@ -301,7 +289,7 @@ class Processor extends AudioWorkletProcessor {
             }
             this._pendingEventCallbacks.push(
                 {type: EventCallbackType.TASK_ON_BEGIN, handle: command.handle});
-          } else if (eventType === EventType.END) {
+          } else if (eventType === TaskEventType.END) {
             if (task.endCommands) {
               for (const command of task.endCommands) {
                 this._processCommand(command);
@@ -313,23 +301,22 @@ class Processor extends AudioWorkletProcessor {
             console.error(`Invalid task event: ${eventType}`);
           }
         };
-        const eventCallbackPtr = this._module.addFunction((eventType, userData) => {
+        const callbackPtr = this._module.addFunction((eventType, userData) => {
           const task = this._tasks.get(userData);
           if (!task) return;
-          if (task.eventCallback) {
-            task.eventCallback(task, eventType);
+          if (task.callback) {
+            task.callback(task, eventType);
           }
         }, 'vii');
-        this._module._BarelyTask_SetEventCallback(
-            this._engine, taskId, eventCallbackPtr, command.handle);
+        this._module._BarelyTask_SetCallback(this._engine, taskId, callbackPtr, command.handle);
 
-        this._tasks.set(command.handle, {taskId, eventCallback, eventCallbackPtr});
+        this._tasks.set(command.handle, {taskId, callback, callbackPtr});
       } break;
       case CommandType.TASK_DESTROY: {
-        const {taskId, eventCallbackPtr} = this._tasks.get(command.handle);
+        const {taskId, callbackPtr} = this._tasks.get(command.handle);
         if (!taskId) return;
         this._module._BarelyTask_Destroy(this._engine, taskId);
-        this._module.removeFunction(eventCallbackPtr);
+        this._module.removeFunction(callbackPtr);
         this._tasks.delete(command.handle);
       } break;
       case CommandType.TASK_SET_COMMANDS: {

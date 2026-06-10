@@ -6,16 +6,6 @@ using System.Xml.Serialization;
 using UnityEngine;
 
 namespace Barely {
-  /// Event types.
-  public enum EventType {
-    /// Begin.
-    [InspectorName("Begin")] BEGIN = 0,
-    /// End.
-    [InspectorName("End")] END,
-    /// Update.
-    [InspectorName("Update")] UPDATE,
-  }
-
   /// A representation of an engine that governs all musical components.
   public static class Engine {
     /// Gain.
@@ -24,7 +14,7 @@ namespace Barely {
       set {
         if (_gain != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.GAIN, value);
-          _gain = Internal.Engine_GetControl(Internal.EngineControlType.GAIN);
+          _gain = value;
         }
       }
     }
@@ -36,7 +26,7 @@ namespace Barely {
       set {
         if (_compMix != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_MIX, value);
-          _compMix = Internal.Engine_GetControl(Internal.EngineControlType.COMP_MIX);
+          _compMix = value;
         }
       }
     }
@@ -48,7 +38,7 @@ namespace Barely {
       set {
         if (_compAttack != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_ATTACK, value);
-          _compAttack = Internal.Engine_GetControl(Internal.EngineControlType.COMP_ATTACK);
+          _compAttack = value;
         }
       }
     }
@@ -60,7 +50,7 @@ namespace Barely {
       set {
         if (_compRelease != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_RELEASE, value);
-          _compRelease = Internal.Engine_GetControl(Internal.EngineControlType.COMP_RELEASE);
+          _compRelease = value;
         }
       }
     }
@@ -72,7 +62,7 @@ namespace Barely {
       set {
         if (_compThreshold != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_THRESHOLD, value);
-          _compThreshold = Internal.Engine_GetControl(Internal.EngineControlType.COMP_THRESHOLD);
+          _compThreshold = value;
         }
       }
     }
@@ -84,7 +74,7 @@ namespace Barely {
       set {
         if (_compRatio != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.COMP_RATIO, value);
-          _compRatio = Internal.Engine_GetControl(Internal.EngineControlType.COMP_RATIO);
+          _compRatio = value;
         }
       }
     }
@@ -96,7 +86,7 @@ namespace Barely {
       set {
         if (_delayMix != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_MIX, value);
-          _delayMix = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_MIX);
+          _delayMix = value;
         }
       }
     }
@@ -108,7 +98,7 @@ namespace Barely {
       set {
         if (_delayTime != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_TIME, value);
-          _delayTime = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_TIME);
+          _delayTime = value;
         }
       }
     }
@@ -120,7 +110,7 @@ namespace Barely {
       set {
         if (_delayFeedback != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_FEEDBACK, value);
-          _delayFeedback = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_FEEDBACK);
+          _delayFeedback = value;
         }
       }
     }
@@ -132,7 +122,7 @@ namespace Barely {
       set {
         if (_delayLpfCutoff != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_LPF_CUTOFF, value);
-          _delayLpfCutoff = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_LPF_CUTOFF);
+          _delayLpfCutoff = value;
         }
       }
     }
@@ -144,7 +134,7 @@ namespace Barely {
       set {
         if (_delayHpfCutoff != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_HPF_CUTOFF, value);
-          _delayHpfCutoff = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_HPF_CUTOFF);
+          _delayHpfCutoff = value;
         }
       }
     }
@@ -156,7 +146,7 @@ namespace Barely {
       set {
         if (_delayPingPong != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_PING_PONG, value);
-          _delayPingPong = Internal.Engine_GetControl(Internal.EngineControlType.DELAY_PING_PONG);
+          _delayPingPong = value;
         }
       }
     }
@@ -168,8 +158,7 @@ namespace Barely {
       set {
         if (_delayReverbSend != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.DELAY_REVERB_SEND, value);
-          _delayReverbSend =
-              Internal.Engine_GetControl(Internal.EngineControlType.DELAY_REVERB_SEND);
+          _delayReverbSend = value;
         }
       }
     }
@@ -181,7 +170,7 @@ namespace Barely {
       set {
         if (_reverbMix != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_MIX, value);
-          _reverbMix = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_MIX);
+          _reverbMix = value;
         }
       }
     }
@@ -193,7 +182,7 @@ namespace Barely {
       set {
         if (_reverbDamping != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_DAMPING, value);
-          _reverbDamping = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_DAMPING);
+          _reverbDamping = value;
         }
       }
     }
@@ -205,7 +194,7 @@ namespace Barely {
       set {
         if (_reverbRoomSize != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_ROOM_SIZE, value);
-          _reverbRoomSize = Internal.Engine_GetControl(Internal.EngineControlType.REVERB_ROOM_SIZE);
+          _reverbRoomSize = value;
         }
       }
     }
@@ -217,8 +206,7 @@ namespace Barely {
       set {
         if (_reverbStereoWidth != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_STEREO_WIDTH, value);
-          _reverbStereoWidth =
-              Internal.Engine_GetControl(Internal.EngineControlType.REVERB_STEREO_WIDTH);
+          _reverbStereoWidth = value;
         }
       }
     }
@@ -230,8 +218,7 @@ namespace Barely {
       set {
         if (_reverbFreeze != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.REVERB_FREEZE, value ? 1.0f : 0.0f);
-          _reverbFreeze =
-              Internal.Engine_GetControl(Internal.EngineControlType.REVERB_FREEZE) > 0.0f;
+          _reverbFreeze = value;
         }
       }
     }
@@ -243,7 +230,7 @@ namespace Barely {
       set {
         if (_sidechainMix != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_MIX, value);
-          _sidechainMix = Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_MIX);
+          _sidechainMix = value;
         }
       }
     }
@@ -255,8 +242,7 @@ namespace Barely {
       set {
         if (_sidechainAttack != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_ATTACK, value);
-          _sidechainAttack =
-              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_ATTACK);
+          _sidechainAttack = value;
         }
       }
     }
@@ -268,8 +254,7 @@ namespace Barely {
       set {
         if (_sidechainRelease != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_RELEASE, value);
-          _sidechainRelease =
-              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_RELEASE);
+          _sidechainRelease = value;
         }
       }
     }
@@ -281,8 +266,7 @@ namespace Barely {
       set {
         if (_sidechainThreshold != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_THRESHOLD, value);
-          _sidechainThreshold =
-              Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_THRESHOLD);
+          _sidechainThreshold = value;
         }
       }
     }
@@ -294,7 +278,7 @@ namespace Barely {
       set {
         if (_sidechainRatio != value) {
           Internal.Engine_SetControl(Internal.EngineControlType.SIDECHAIN_RATIO, value);
-          _sidechainRatio = Internal.Engine_GetControl(Internal.EngineControlType.SIDECHAIN_RATIO);
+          _sidechainRatio = value;
         }
       }
     }
@@ -306,7 +290,7 @@ namespace Barely {
       set {
         if (_tempo != value) {
           Internal.Engine_SetTempo(value);
-          _tempo = Internal.Engine_GetTempo();
+          _tempo = value;
         }
       }
     }
@@ -318,6 +302,55 @@ namespace Barely {
     }
 
     public static class Internal {
+      public enum EngineControlType {
+        // Gain.
+        [InspectorName("Gain")] GAIN = 0,
+        // Compressor mix.
+        [InspectorName("Comp Mix")] COMP_MIX,
+        // Compressor attack in seconds.
+        [InspectorName("Comp Attack")] COMP_ATTACK,
+        // Compressor release in seconds.
+        [InspectorName("Comp Release")] COMP_RELEASE,
+        // Normalized compressor threshold in logarithmic scale.
+        [InspectorName("Comp Threshold")] COMP_THRESHOLD,
+        // Compressor ratio.
+        [InspectorName("Comp Ratio")] COMP_RATIO,
+        // Delay mix.
+        [InspectorName("Delay Mix")] DELAY_MIX,
+        // Delay time in seconds.
+        [InspectorName("Delay Time")] DELAY_TIME,
+        // Delay feedback.
+        [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
+        // Delay low-pass filter cutoff.
+        [InspectorName("Delay LPF Cutoff")] DELAY_LPF_CUTOFF,
+        // Delay high-pass filter cutoff.
+        [InspectorName("Delay HPF Cutoff")] DELAY_HPF_CUTOFF,
+        // Delay ping-pong.
+        [InspectorName("Delay Ping-Pong")] DELAY_PING_PONG,
+        // Delay reverb send.
+        [InspectorName("Delay Reverb Send")] DELAY_REVERB_SEND,
+        // Reverb mix.
+        [InspectorName("Reverb Mix")] REVERB_MIX,
+        // Reverb damping ratio.
+        [InspectorName("Reverb Damping")] REVERB_DAMPING,
+        // Reverb room size.
+        [InspectorName("Reverb Room Size")] REVERB_ROOM_SIZE,
+        // Reverb stereo width.
+        [InspectorName("Reverb Stereo Width")] REVERB_STEREO_WIDTH,
+        // Reverb freeze.
+        [InspectorName("Reverb Freeze")] REVERB_FREEZE,
+        // Sidechain mix.
+        [InspectorName("Sidechain Mix")] SIDECHAIN_MIX,
+        // Sidechain attack in seconds.
+        [InspectorName("Sidechain Attack")] SIDECHAIN_ATTACK,
+        // Sidechain release in seconds.
+        [InspectorName("Sidechain Release")] SIDECHAIN_RELEASE,
+        // Sidechain threshold.
+        [InspectorName("Sidechain Threshold")] SIDECHAIN_THRESHOLD,
+        // Sidechain ratio.
+        [InspectorName("Sidechain Ratio")] SIDECHAIN_RATIO,
+      }
+
       public enum InstrumentControlType {
         // Normalized gain in logarithmic scale.
         [InspectorName("Gain")] GAIN = 0,
@@ -371,55 +404,8 @@ namespace Barely {
         [InspectorName("Retrigger")] RETRIGGER,
         // Number of voices.
         [InspectorName("Voice Count")] VOICE_COUNT,
-      }
-
-      public enum EngineControlType {
-        // Gain.
-        [InspectorName("Gain")] GAIN = 0,
-        // Compressor mix.
-        [InspectorName("Comp Mix")] COMP_MIX,
-        // Compressor attack in seconds.
-        [InspectorName("Comp Attack")] COMP_ATTACK,
-        // Compressor release in seconds.
-        [InspectorName("Comp Release")] COMP_RELEASE,
-        // Normalized compressor threshold in logarithmic scale.
-        [InspectorName("Comp Threshold")] COMP_THRESHOLD,
-        // Compressor ratio.
-        [InspectorName("Comp Ratio")] COMP_RATIO,
-        // Delay mix.
-        [InspectorName("Delay Mix")] DELAY_MIX,
-        // Delay time in seconds.
-        [InspectorName("Delay Time")] DELAY_TIME,
-        // Delay feedback.
-        [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
-        // Delay low-pass filter cutoff.
-        [InspectorName("Delay LPF Cutoff")] DELAY_LPF_CUTOFF,
-        // Delay high-pass filter cutoff.
-        [InspectorName("Delay HPF Cutoff")] DELAY_HPF_CUTOFF,
-        // Delay ping-pong.
-        [InspectorName("Delay Ping-Pong")] DELAY_PING_PONG,
-        // Delay reverb send.
-        [InspectorName("Delay Reverb Send")] DELAY_REVERB_SEND,
-        // Reverb mix.
-        [InspectorName("Reverb Mix")] REVERB_MIX,
-        // Reverb damping ratio.
-        [InspectorName("Reverb Damping")] REVERB_DAMPING,
-        // Reverb room size.
-        [InspectorName("Reverb Room Size")] REVERB_ROOM_SIZE,
-        // Reverb stereo width.
-        [InspectorName("Reverb Stereo Width")] REVERB_STEREO_WIDTH,
-        // Reverb freeze.
-        [InspectorName("Reverb Freeze")] REVERB_FREEZE,
-        // Sidechain mix.
-        [InspectorName("Sidechain Mix")] SIDECHAIN_MIX,
-        // Sidechain attack in seconds.
-        [InspectorName("Sidechain Attack")] SIDECHAIN_ATTACK,
-        // Sidechain release in seconds.
-        [InspectorName("Sidechain Release")] SIDECHAIN_RELEASE,
-        // Sidechain threshold.
-        [InspectorName("Sidechain Threshold")] SIDECHAIN_THRESHOLD,
-        // Sidechain ratio.
-        [InspectorName("Sidechain Ratio")] SIDECHAIN_RATIO,
+        // Number of instrument control types.
+        COUNT,
       }
 
       public enum NoteControlType {
@@ -427,22 +413,6 @@ namespace Barely {
         [InspectorName("Gain")] GAIN = 0,
         // Pitch shift.
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
-      }
-
-      public static float Engine_GetControl(EngineControlType type) {
-        float value = 0.0f;
-        if (!BarelyEngine_GetControl(Handle, type, ref value) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get engine engine control");
-        }
-        return value;
-      }
-
-      public static double Engine_GetTempo() {
-        double tempo = 0.0;
-        if (!BarelyEngine_GetTempo(Handle, ref tempo) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get engine tempo");
-        }
-        return tempo;
       }
 
       public static double Engine_GetTimestamp() {
@@ -479,8 +449,6 @@ namespace Barely {
           return;
         }
         _instruments.Add(instrumentId, instrument);
-        BarelyInstrument_SetNoteEventCallback(_handle, instrumentId, Instrument_OnNoteEvent,
-                                              ref instrumentId);
       }
 
       public static void Instrument_Destroy(ref UInt32 instrumentId) {
@@ -494,41 +462,6 @@ namespace Barely {
         _instruments.Remove(instrumentId);
         _slices.Remove(instrumentId);
         instrumentId = 0;
-      }
-
-      public static float Instrument_GetControl(UInt32 instrumentId, InstrumentControlType type) {
-        float value = 0.0f;
-        if (!BarelyInstrument_GetControl(Handle, instrumentId, type, ref value) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to get instrument control " + type);
-        }
-        return value;
-      }
-
-      public static float Instrument_GetNoteControl(UInt32 instrumentId, float pitch,
-                                                    NoteControlType type) {
-        float value = 0.0f;
-        if (!BarelyInstrument_GetNoteControl(Handle, instrumentId, pitch, type, ref value) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to get instrument note " + pitch + " control " + type + " value");
-        }
-        return value;
-      }
-
-      public static bool Instrument_IsNoteOn(UInt32 instrumentId, float pitch) {
-        bool isNoteOn = false;
-        if (!BarelyInstrument_IsNoteOn(Handle, instrumentId, pitch, ref isNoteOn) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to get if instrument note " + pitch + " is on");
-        }
-        return isNoteOn;
-      }
-
-      public static void Instrument_SetAllNotesOff(UInt32 instrumentId) {
-        if (!BarelyInstrument_SetAllNotesOff(Handle, instrumentId) && _handle != IntPtr.Zero &&
-            instrumentId > 0) {
-          Debug.LogError("Failed to stop all instrument notes");
-        }
       }
 
       public static void Instrument_SetControl(UInt32 instrumentId, InstrumentControlType type,
@@ -618,24 +551,6 @@ namespace Barely {
         performerId = 0;
       }
 
-      public static double Performer_GetLoopBeginPosition(UInt32 performerId) {
-        double loopBeginPosition = 0.0;
-        if (!BarelyPerformer_GetLoopBeginPosition(_handle, performerId, ref loopBeginPosition) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get performer loop begin position");
-        }
-        return loopBeginPosition;
-      }
-
-      public static double Performer_GetLoopLength(UInt32 performerId) {
-        double loopLength = 0.0;
-        if (!BarelyPerformer_GetLoopLength(_handle, performerId, ref loopLength) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get performer loop length");
-        }
-        return loopLength;
-      }
-
       public static double Performer_GetPosition(UInt32 performerId) {
         double position = 0.0;
         if (!BarelyPerformer_GetPosition(_handle, performerId, ref position) &&
@@ -643,24 +558,6 @@ namespace Barely {
           Debug.LogError("Failed to get performer position");
         }
         return position;
-      }
-
-      public static bool Performer_IsLooping(UInt32 performerId) {
-        bool isLooping = false;
-        if (!BarelyPerformer_IsLooping(_handle, performerId, ref isLooping) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get if performer is looping");
-        }
-        return isLooping;
-      }
-
-      public static bool Performer_IsPlaying(UInt32 performerId) {
-        bool isPlaying = false;
-        if (!BarelyPerformer_IsPlaying(_handle, performerId, ref isPlaying) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get if performer is playing");
-        }
-        return isPlaying;
       }
 
       public static void Performer_SetLoopBeginPosition(UInt32 performerId,
@@ -718,7 +615,7 @@ namespace Barely {
           return;
         }
         _tasks.Add(taskId, task);
-        BarelyTask_SetEventCallback(_handle, taskId, Task_OnEvent, ref taskId);
+        BarelyTask_SetCallback(_handle, taskId, Task_OnEvent, ref taskId);
       }
 
       public static void Task_Destroy(UInt32 performerId, ref UInt32 taskId) {
@@ -731,33 +628,6 @@ namespace Barely {
         }
         _tasks.Remove(taskId);
         taskId = 0;
-      }
-
-      public static double Task_GetDuration(UInt32 taskId) {
-        double duration = 0.0;
-        if (!BarelyTask_GetDuration(_handle, taskId, ref duration) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to get performer task duration");
-        }
-        return (duration > _minTaskDuration) ? duration : 0.0;
-      }
-
-      public static double Task_GetPosition(UInt32 taskId) {
-        double position = 0.0;
-        if (!BarelyTask_GetPosition(_handle, taskId, ref position) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to get performer task position");
-        }
-        return position;
-      }
-
-      public static int Task_GetPriority(UInt32 taskId) {
-        int priority = 0;
-        if (!BarelyTask_GetPriority(_handle, taskId, ref priority) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to get performer task priority");
-        }
-        return priority;
       }
 
       public static bool Task_IsActive(UInt32 taskId) {
@@ -802,23 +672,9 @@ namespace Barely {
         return pitch;
       }
 
-      private delegate void NoteEventCallback(EventType type, float pitch, ref UInt32 userData);
-      [AOT.MonoPInvokeCallback(typeof(NoteEventCallback))]
-      private static void Instrument_OnNoteEvent(EventType type, float pitch, ref UInt32 userData) {
-        if (_instruments.TryGetValue(userData, out var instrument)) {
-          if (type == EventType.BEGIN) {
-            Instrument.Internal.OnNoteOn(instrument, pitch);
-          } else if (type == EventType.END) {
-            Instrument.Internal.OnNoteOff(instrument, pitch);
-          } else {
-            Debug.LogError("Invalid note event type");
-          }
-        }
-      }
-
-      private delegate void TaskEventCallback(EventType type, ref UInt32 userData);
-      [AOT.MonoPInvokeCallback(typeof(TaskEventCallback))]
-      private static void Task_OnEvent(EventType type, ref UInt32 userData) {
+      private delegate void TaskCallback(TaskEventType type, ref UInt32 userData);
+      [AOT.MonoPInvokeCallback(typeof(TaskCallback))]
+      private static void Task_OnEvent(TaskEventType type, ref UInt32 userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
           Task.Internal.OnProcess(task, type);
         }
@@ -835,11 +691,11 @@ namespace Barely {
       [StructLayout(LayoutKind.Sequential)]
       public struct BarelyEngineConfig {
         public Int32 sampleRate;
-        public Int32 maxFrameCount;
         public Int32 maxInstrumentCount;
         public Int32 maxPerformerCount;
         public Int32 maxTaskCount;
-        public Int32 maxNoteCount;
+        public Int32 maxCommandCount;
+        public Int32 maxFrameCount;
         public Int32 maxSliceCount;
         public Int32 maxVoiceCount;
       }
@@ -975,14 +831,10 @@ namespace Barely {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
           var engineConfig = new BarelyEngineConfig {
-            sampleRate = config.sampleRate,
-            maxFrameCount = config.dspBufferSize,
-            maxInstrumentCount = 100,
-            maxPerformerCount = 100,
-            maxTaskCount = 5000,
-            maxNoteCount = 1000,
-            maxSliceCount = 1000,
-            maxVoiceCount = 200,
+            sampleRate = config.sampleRate, maxInstrumentCount = 100,
+            maxPerformerCount = 100,        maxTaskCount = 5000,
+            maxCommandCount = 8192,         maxFrameCount = config.dspBufferSize,
+            maxSliceCount = 1000,           maxVoiceCount = 200,
           };
           Int32 allocationSize = 0;
           BarelyEngineConfig_GetRequiredAllocationSize(ref engineConfig, ref allocationSize);
@@ -1071,13 +923,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
       private static extern bool BarelyEngine_Destroy(IntPtr engine);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetControl")]
-      private static extern bool BarelyEngine_GetControl(IntPtr engine, EngineControlType type,
-                                                         ref float value);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTempo")]
-      private static extern bool BarelyEngine_GetTempo(IntPtr engine, ref double outTempo);
-
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTimestamp")]
       private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
 
@@ -1100,24 +945,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern bool BarelyInstrument_Destroy(IntPtr engine, UInt32 instrumentId);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetControl")]
-      private static extern bool BarelyInstrument_GetControl(IntPtr engine, UInt32 instrumentId,
-                                                             InstrumentControlType type,
-                                                             ref float outValue);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_GetNoteControl")]
-      private static extern bool BarelyInstrument_GetNoteControl(IntPtr engine, UInt32 instrumentId,
-                                                                 float pitch, NoteControlType type,
-                                                                 ref float outValue);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
-      private static extern bool BarelyInstrument_IsNoteOn(IntPtr engine, UInt32 instrumentId,
-                                                           float pitch, ref bool outIsNoteOn);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
-      private static extern bool BarelyInstrument_SetAllNotesOff(IntPtr engine,
-                                                                 UInt32 instrumentId);
-
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetControl")]
       private static extern bool BarelyInstrument_SetControl(IntPtr engine, UInt32 instrumentId,
                                                              InstrumentControlType type,
@@ -1127,12 +954,6 @@ namespace Barely {
       private static extern bool BarelyInstrument_SetNoteControl(IntPtr engine, UInt32 instrumentId,
                                                                  float pitch, NoteControlType type,
                                                                  float value);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteEventCallback")]
-      private static extern bool BarelyInstrument_SetNoteEventCallback(IntPtr engine,
-                                                                       UInt32 instrumentId,
-                                                                       NoteEventCallback callback,
-                                                                       ref UInt32 userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern bool BarelyInstrument_SetNoteOff(IntPtr engine, UInt32 instrumentId,
@@ -1148,32 +969,18 @@ namespace Barely {
                                                                 Int32 sliceCount);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_CreateTask")]
-      private static extern bool BarelyPerformer_CreateTask(
-          IntPtr engine, UInt32 performerId, double position, double duration, Int32 priority,
-          TaskEventCallback callback, ref UInt32 userData, ref UInt32 outTaskId);
+      private static extern bool BarelyPerformer_CreateTask(IntPtr engine, UInt32 performerId,
+                                                            double position, double duration,
+                                                            Int32 priority, TaskCallback callback,
+                                                            ref UInt32 userData,
+                                                            ref UInt32 outTaskId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Destroy")]
       private static extern bool BarelyPerformer_Destroy(IntPtr engine, UInt32 performerId);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
-      private static extern bool BarelyPerformer_GetLoopBeginPosition(
-          IntPtr engine, UInt32 performerId, ref double outLoopBeginPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetLoopLength")]
-      private static extern bool BarelyPerformer_GetLoopLength(IntPtr engine, UInt32 performerId,
-                                                               ref double outLoopLength);
-
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
       private static extern bool BarelyPerformer_GetPosition(IntPtr engine, UInt32 performerId,
                                                              ref double outPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsLooping")]
-      private static extern bool BarelyPerformer_IsLooping(IntPtr engine, UInt32 performerId,
-                                                           ref bool outIsLooping);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
-      private static extern bool BarelyPerformer_IsPlaying(IntPtr engine, UInt32 performerId,
-                                                           ref bool outIsPlaying);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
       private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr engine,
@@ -1205,21 +1012,13 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
       private static extern bool BarelyTask_Destroy(IntPtr engine, UInt32 taskId);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetDuration")]
-      private static extern bool BarelyTask_GetDuration(IntPtr engine, UInt32 taskId,
-                                                        ref double outDuration);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPosition")]
-      private static extern bool BarelyTask_GetPosition(IntPtr engine, UInt32 taskId,
-                                                        ref double outPosition);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_GetPriority")]
-      private static extern bool BarelyTask_GetPriority(IntPtr engine, UInt32 taskId,
-                                                        ref Int32 outPriority);
-
       [DllImport(_pluginName, EntryPoint = "BarelyTask_IsActive")]
       private static extern bool BarelyTask_IsActive(IntPtr engine, UInt32 taskId,
                                                      ref bool outIsActive);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetCallback")]
+      private static extern bool BarelyTask_SetCallback(IntPtr engine, UInt32 taskId,
+                                                        TaskCallback callback, ref UInt32 userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetDuration")]
       private static extern bool BarelyTask_SetDuration(IntPtr engine, UInt32 taskId,
@@ -1232,11 +1031,6 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPriority")]
       private static extern bool BarelyTask_SetPriority(IntPtr engine, UInt32 taskId,
                                                         Int32 priority);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyTask_SetEventCallback")]
-      private static extern bool BarelyTask_SetEventCallback(IntPtr engine, UInt32 taskId,
-                                                             TaskEventCallback callback,
-                                                             ref UInt32 userData);
     }
   }
 }  // namespace Barely

@@ -17,6 +17,9 @@ export class Instrument {
     /** @private @const {number} */
     this._handle = handle;
 
+    /** @private @const */
+    this._pitches = new Set();
+
     /** @public */
     this.onNoteBegin = onNoteBegin;
 
@@ -28,6 +31,37 @@ export class Instrument {
   destroy() {
     this._engine._instruments.delete(this._handle);
     this._engine._pushCommand({type: CommandType.INSTRUMENT_DESTROY, handle: this._handle});
+  }
+
+  /** Handles all notes off callback. */
+  handleAllNotesOff() {
+    const pitches = this._pitches;
+    this._pitches = new Set();
+    for (const pitch of pitches) {
+      this.onNoteEnd(pitch);
+    }
+  }
+
+  /**
+   * Handles note off callback.
+   * @param {number} pitch
+   */
+  handleNoteOff(pitch) {
+    if (this._pitches.has(pitch)) {
+      this._pitches.delete(pitch);
+      this.onNoteEnd(pitch);
+    }
+  }
+
+  /**
+   * Handles note on callback.
+   * @param {number} pitch
+   */
+  handleNoteOn(pitch) {
+    if (!this._pitches.has(pitch)) {
+      this._pitches.add(pitch);
+      this.onNoteBegin(pitch);
+    }
   }
 
   /** Sets all notes off. */

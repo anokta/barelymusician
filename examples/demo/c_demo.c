@@ -58,22 +58,19 @@ static void AudioProcessCallback(ma_device* device, void* output, const void* in
   g_timestamp += (double)frame_count / (double)kSampleRate;
 }
 
-static void NoteEventCallback(BarelyEventType type, float pitch, void* user_data) {
-  (void)user_data;  // unused
-  printf("Note%s(%.1f)\n", (type == BarelyEventType_kBegin) ? "On" : "Off", pitch);
-}
-
-static void TaskEventCallback(BarelyEventType type, void* user_data) {
+static void TaskCallback(BarelyTaskEventType type, void* user_data) {
   static int note_index = 0;
-  if (type == BarelyEventType_kBegin) {
+  if (type == BarelyTaskEventType_kBegin) {
     assert(note_index < kMelodyNoteCount);
-    BarelyInstrument_SetNoteOn((BarelyEngine*)user_data, g_instrument_id,
-                               kMelodyPitches[note_index++]);
-  } else if (type == BarelyEventType_kEnd) {
+    const float pitch = kMelodyPitches[note_index++];
+    BarelyInstrument_SetNoteOn((BarelyEngine*)user_data, g_instrument_id, pitch);
+    printf("NoteOn(%.1f)\n", pitch);
+  } else if (type == BarelyTaskEventType_kEnd) {
     assert(note_index > 0);
     assert(note_index <= kMelodyNoteCount);
-    BarelyInstrument_SetNoteOff((BarelyEngine*)user_data, g_instrument_id,
-                                kMelodyPitches[note_index - 1]);
+    const float pitch = kMelodyPitches[note_index - 1];
+    BarelyInstrument_SetNoteOff((BarelyEngine*)user_data, g_instrument_id, pitch);
+    printf("NoteOff(%.1f)\n", pitch);
     if (note_index == kMelodyNoteCount) {
       g_is_playing = false;
     }
@@ -86,6 +83,7 @@ int main() {
   config.max_frame_count = kFrameCount;
   int32_t allocation_size = 0;
   BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  printf("Allocating %.2f KB...\n", (float)allocation_size / 1024.0f);
   void* allocation = malloc(allocation_size);
 
   BarelyEngine* engine = NULL;
@@ -102,14 +100,12 @@ int main() {
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kRelease,
                               kRelease);
 
-  BarelyInstrument_SetNoteEventCallback(engine, g_instrument_id, NoteEventCallback, NULL);
-
   uint32_t performer_id = 0;
   BarelyEngine_CreatePerformer(engine, &performer_id);
   uint32_t task_ids[kMelodyNoteCount];
   for (int i = 0; i < kMelodyNoteCount; ++i) {
     BarelyPerformer_CreateTask(engine, performer_id, kMelodyPositions[i],
-                               kMelodyPositions[i + 1] - kMelodyPositions[i], 0, TaskEventCallback,
+                               kMelodyPositions[i + 1] - kMelodyPositions[i], 0, TaskCallback,
                                engine, &task_ids[i]);
   }
 

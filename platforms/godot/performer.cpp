@@ -63,10 +63,12 @@ BarelyPerformer::~BarelyPerformer() {
 }
 
 void BarelyPerformer::start() {
+  playing_ = true;
   BarelyPerformer_Start(BarelyEngine::get_singleton()->get(), performer_id_);
 }
 
 void BarelyPerformer::stop() {
+  playing_ = false;
   BarelyPerformer_Stop(BarelyEngine::get_singleton()->get(), performer_id_);
 }
 
@@ -114,12 +116,6 @@ double BarelyPerformer::get_position() const {
   double position = 0.0;
   BarelyPerformer_GetPosition(BarelyEngine::get_singleton()->get(), performer_id_, &position);
   return position;
-}
-
-bool BarelyPerformer::is_playing() const {
-  bool playing = false;
-  BarelyPerformer_IsPlaying(BarelyEngine::get_singleton()->get(), performer_id_, &playing);
-  return playing;
 }
 
 void BarelyPerformer::_bind_methods() {
@@ -175,14 +171,14 @@ void BarelyPerformer::_on_task_changed() {
     BarelyPerformer_CreateTask(
         BarelyEngine::get_singleton()->get(), performer_id_, task->get_position(),
         task->get_duration(), task->get_priority(),
-        [](BarelyEventType type, void* user_data) {
+        [](BarelyTaskEventType type, void* user_data) {
           BarelyTaskResource* task = static_cast<BarelyTaskResource*>(user_data);
 
           if (!task) return;
 
-          if (type == BarelyEventType_kBegin) {
+          if (type == BarelyTaskEventType_kBegin) {
             task->emit_signal("task_begin");
-          } else if (type == BarelyEventType_kEnd) {
+          } else if (type == BarelyTaskEventType_kEnd) {
             task->emit_signal("task_end");
           }
         },

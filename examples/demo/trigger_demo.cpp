@@ -14,9 +14,9 @@
 namespace {
 
 using ::barely::Engine;
-using ::barely::EventType;
 using ::barely::InstrumentControlType;
 using ::barely::Scale;
+using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -59,11 +59,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
-  instrument.SetNoteEventCallback([](EventType type, float pitch) {
-    if (type == EventType::kBegin) {
-      ConsoleLog() << "Note(" << pitch << ")";
-    }
-  });
 
   std::vector<std::pair<double, double>> triggers;
 
@@ -71,10 +66,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   double stop_position = 0.0;
 
   const auto play_note_fn = [&](int degree) {
-    return [&, pitch = Scale(kMajor).GetPitch(degree)](EventType type) {
-      if (type == EventType::kBegin) {
+    return [&, pitch = Scale(kMajor).GetPitch(degree)](TaskEventType type) {
+      if (type == TaskEventType::kBegin) {
         instrument.SetNoteOn(pitch);
-      } else if (type == EventType::kEnd) {
+        ConsoleLog() << "Note(" << pitch << ")";
+      } else if (type == TaskEventType::kEnd) {
         instrument.SetNoteOff(pitch);
         if (stop_position == performer.GetPosition()) {
           performer.Stop();

@@ -5,14 +5,10 @@
 #include <cstdint>
 #include <vector>
 
-#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
-
-using ::testing::ElementsAre;
-using ::testing::UnorderedElementsAre;
 
 constexpr int kSampleRate = 48000;
 
@@ -83,63 +79,9 @@ TEST(EngineTest, CreateDestroyPerformer) {
   engine.CreatePerformer().Destroy();
 }
 
-TEST(EngineTest, CreateDestroySingleInstrument) {
-  constexpr float kPitch = 0.5;
-
+TEST(EngineTest, CreateDestroynstrument) {
   Engine engine(kSampleRate);
-
-  float note_off_pitch = 0.0f;
-  float note_on_pitch = 0.0f;
-
-  // Create an instrument.
-  Instrument instrument = engine.CreateInstrument();
-
-  // Set the note callbacks.
-  instrument.SetNoteEventCallback([&](EventType type, float pitch) {
-    (type == EventType::kBegin ? note_on_pitch : note_off_pitch) = pitch;
-  });
-  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
-  EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
-
-  // Set a note on.
-  instrument.SetNoteOn(kPitch);
-  EXPECT_TRUE(instrument.IsNoteOn(kPitch));
-  EXPECT_FLOAT_EQ(note_on_pitch, kPitch);
-
-  instrument.Destroy();
-
-  // Note should be stopped once the instrument goes out of scope.
-  EXPECT_FLOAT_EQ(note_off_pitch, kPitch);
-}
-
-TEST(EngineTest, CreateDestroyMultipleInstruments) {
-  std::vector<float> note_off_pitches;
-
-  {
-    Engine engine(kSampleRate);
-
-    // Create instruments with note off callbacks.
-    std::vector<Instrument> instruments;
-    for (int i = 0; i < 3; ++i) {
-      instruments.push_back(engine.CreateInstrument());
-      instruments[i].SetNoteEventCallback([&](EventType type, float pitch) {
-        if (type == EventType::kEnd) {
-          note_off_pitches.push_back(pitch);
-        }
-      });
-    }
-
-    // Start multiple notes, then immediately stop some of them.
-    for (int i = 0; i < 3; ++i) {
-      instruments[i].SetNoteOn(static_cast<float>(i + 1));
-      instruments[i].SetNoteOn(static_cast<float>(-i - 1));
-      instruments[i].SetNoteOff(static_cast<float>(i + 1));
-    }
-    EXPECT_THAT(note_off_pitches, ElementsAre(1, 2, 3));
-  }
-
-  // Remaining active notes should be stopped once the engine goes out of scope.
-  EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0f, -2.0f, -1.0f, 1.0f, 2.0f, 3.0f));
+  engine.CreateInstrument().Destroy();
 }
 
 TEST(EngineTest, GenerateRandomNumber) {

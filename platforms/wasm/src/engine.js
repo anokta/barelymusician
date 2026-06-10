@@ -178,11 +178,14 @@ export class Engine {
    */
   _processEventCallback(eventCallback) {
     switch (eventCallback.type) {
-      case EventCallbackType.INSTRUMENT_ON_NOTE_BEGIN:
-        this._instruments.get(eventCallback.handle)?.onNoteBegin(eventCallback.pitch);
+      case EventCallbackType.INSTRUMENT_ON_ALL_NOTES_OFF:
+        this._instruments.get(eventCallback.handle)?.handleAllNotesOff();
         break;
-      case EventCallbackType.INSTRUMENT_ON_NOTE_END:
-        this._instruments.get(eventCallback.handle)?.onNoteEnd(eventCallback.pitch);
+      case EventCallbackType.INSTRUMENT_ON_NOTE_OFF:
+        this._instruments.get(eventCallback.handle)?.handleNoteOff(eventCallback.pitch);
+        break;
+      case EventCallbackType.INSTRUMENT_ON_NOTE_ON:
+        this._instruments.get(eventCallback.handle)?.handleNoteOn(eventCallback.pitch);
         break;
       case EventCallbackType.TASK_ON_BEGIN:
         this._tasks.get(eventCallback.handle)?.onBegin();

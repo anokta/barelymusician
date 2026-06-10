@@ -11,15 +11,14 @@
 #include "core/constants.h"
 #include "dsp/envelope.h"
 #include "dsp/tone_filter.h"
+#include "engine/cmd.h"
 #include "engine/engine_state.h"
-#include "engine/message.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
 constexpr uint32_t kInstrumentIndex = 1;
-constexpr uint32_t kNoteIndex = 2;
 constexpr int kSampleRate = 1000;
 constexpr int kSampleCount = 4;
 constexpr std::array<float, kSampleCount> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
@@ -42,15 +41,15 @@ TEST(EngineProcessorTest, PlayNote) {
       engine.slice_pool.Acquire(kSlices.data(), static_cast<uint32_t>(kSlices.size()));
 
   EngineProcessor processor(engine);
-  engine.ScheduleMessage(InstrumentCreateMessage{kInstrumentIndex});
-  engine.ScheduleMessage(SampleDataMessage{kInstrumentIndex, slice_index});
+  engine.ScheduleCmd(InstrumentCreateCmd{kInstrumentIndex});
+  engine.ScheduleCmd(SampleDataCmd{kInstrumentIndex, slice_index});
 
   Envelope envelope;
   Envelope::Adsr adsr;
   adsr.SetRelease(kSampleRate, 0.0f);
 
-  engine.ScheduleMessage(
-      InstrumentControlMessage{kInstrumentIndex, BarelyInstrumentControlType_kRelease, 0.0f});
+  engine.ScheduleCmd(
+      InstrumentControlCmd{kInstrumentIndex, BarelyInstrumentControlType_kRelease, 0.0f});
 
   ToneFilter filters[kStereoChannelCount];
   ToneFilterParams filter_params;
@@ -68,7 +67,7 @@ TEST(EngineProcessorTest, PlayNote) {
   }
 
   // Set a note on.
-  engine.ScheduleMessage(NoteOnMessage{kNoteIndex, kInstrumentIndex, kPitch});
+  engine.ScheduleCmd(NoteOnCmd{kInstrumentIndex, kPitch});
   envelope.Start(adsr);
 
   samples.fill(0.0f);
@@ -88,7 +87,7 @@ TEST(EngineProcessorTest, PlayNote) {
   }
 
   // Set the note off.
-  engine.ScheduleMessage(NoteOffMessage{kNoteIndex});
+  engine.ScheduleCmd(NoteOffCmd{kInstrumentIndex, kPitch});
   envelope.Stop();
 
   samples.fill(0.0f);

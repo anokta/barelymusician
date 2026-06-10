@@ -21,7 +21,6 @@ namespace {
 
 using ::barely::Engine;
 using ::barely::EngineControlType;
-using ::barely::EventType;
 using ::barely::InstrumentControlType;
 using ::barely::Slice;
 using ::barely::SliceMode;
@@ -51,8 +50,9 @@ constexpr float kReverbSend = 0.5f;
 constexpr char kSamplePath[] = "audio/sample.wav";
 
 // Note settings.
-constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
-                                              'G', 'Y', 'H', 'U', 'J', 'K'};
+constexpr int kKeyCount = 13;
+constexpr std::array<char, kKeyCount> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
+                                                     'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
 
@@ -66,14 +66,16 @@ std::vector<Slice> GetSampleData(const std::string& file_path) {
   return {Slice(samples, sample_file.GetSampleRate(), kRootPitch)};
 }
 
-// Returns the pitch for a given `key`.
-std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) {
+std::optional<int> KeyToIndex(const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return kRootPitch + static_cast<float>(octave_shift) +
-         static_cast<float>(std::distance(kOctaveKeys.begin(), it)) / 12.0f;
+  return static_cast<int>(std::distance(kOctaveKeys.begin(), it));
+}
+
+float IndexToPitch(int octave_shift, int index) {
+  return kRootPitch + static_cast<float>(octave_shift) + static_cast<float>(index) / 12.0f;
 }
 
 }  // namespace
@@ -96,9 +98,6 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   instrument.SetControl(InstrumentControlType::kReverbSend, kReverbSend);
   instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
-  instrument.SetNoteEventCallback([](EventType type, float pitch) {
-    ConsoleLog() << "Note" << (type == EventType::kBegin ? "On" : "Off") << "(" << pitch << ")";
-  });
 
   // Audio process callback.
   audio_output.SetProcessCallback(
@@ -107,6 +106,7 @@ int main(int /*argc*/, char* argv[]) {
       });
 
   // Key down callback.
+  std::array<bool, kKeyCount> keys = {};
   float gain = 1.0f;
   int octave_shift = 0;
   bool quit = false;
@@ -120,7 +120,14 @@ int main(int /*argc*/, char* argv[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Shift octaves.
-      instrument.SetAllNotesOff();
+      for (int i = 0; i < kKeyCount; ++i) {
+        if (keys[i]) {
+          const float pitch = IndexToPitch(octave_shift, i);
+          instrument.SetNoteOff(pitch);
+          ConsoleLog() << "NoteOff(" << pitch << ")";
+          keys[i] = false;
+        }
+      }
       if (upper_key == 'Z') {
         --octave_shift;
       } else {
@@ -143,8 +150,11 @@ int main(int /*argc*/, char* argv[]) {
     }
 
     // Play note.
-    if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
-      instrument.SetNoteOn(*pitch_or, gain);
+    if (const auto index_or = KeyToIndex(key)) {
+      const float pitch = IndexToPitch(octave_shift, *index_or);
+      instrument.SetNoteOn(pitch, gain);
+      keys[*index_or] = true;
+      ConsoleLog() << "NoteOn(" << pitch << ")";
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -152,8 +162,11 @@ int main(int /*argc*/, char* argv[]) {
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    if (const auto pitch_or = KeyToPitch(octave_shift, key)) {
-      instrument.SetNoteOff(*pitch_or);
+    if (const auto index_or = KeyToIndex(key)) {
+      const float pitch = IndexToPitch(octave_shift, *index_or);
+      instrument.SetNoteOff(pitch);
+      keys[*index_or] = false;
+      ConsoleLog() << "NoteOff(" << pitch << ")";
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

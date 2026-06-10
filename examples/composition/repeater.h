@@ -3,6 +3,7 @@
 
 #include <barelymusician.h>
 
+#include <functional>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -25,13 +26,16 @@ class Repeater {
   void Pop() noexcept;
   void Push(std::optional<float> pitch_or, int length = 1) noexcept;
 
+  void SetRate(double rate) noexcept;
   void Start(float pitch_offset = 0.0) noexcept;
   void Stop() noexcept;
 
   void SetMode(Mode mode) noexcept { mode_ = mode; }
-  void SetRate(double rate) noexcept;
+  void SetNoteCallback(std::function<void(float)> note_callback) noexcept {
+    note_callback_ = std::move(note_callback);
+  }
 
-  [[nodiscard]] bool IsPlaying() const noexcept { return performer_.IsPlaying(); }
+  [[nodiscard]] bool IsPlaying() const noexcept { return index_ != -1; }
 
  private:
   void OnBeat() noexcept;
@@ -42,6 +46,7 @@ class Repeater {
   Performer performer_;
   Task task_;
 
+  std::function<void(float)> note_callback_;
   std::vector<std::pair<std::optional<float>, int>> pitches_;
 
   Mode mode_ = Mode::kForward;

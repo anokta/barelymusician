@@ -15,6 +15,9 @@ export class Performer {
     /** @private @const {number} */
     this._handle = handle;
 
+    /** @private {boolean} */
+    this._isPlaying = false;
+
     /** @private {number} */
     this._position = 0.0;
   }
@@ -55,11 +58,13 @@ export class Performer {
 
   /** Starts the playback. */
   start() {
+    this._isPlaying = true;
     this._engine._pushCommand({type: CommandType.PERFORMER_START, handle: this._handle});
   }
 
   /** Stops the playback. */
   stop() {
+    this._isPlaying = false;
     this._engine._pushCommand({type: CommandType.PERFORMER_STOP, handle: this._handle});
   }
 
@@ -80,6 +85,11 @@ export class Performer {
   /** @return {number} */
   get handle() {
     return this._handle;
+  }
+
+  /** @return {boolean} */
+  get isPlaying() {
+    return this._isPlaying;
   }
 
   /** @return {number} */

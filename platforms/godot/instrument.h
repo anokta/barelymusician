@@ -4,6 +4,8 @@
 #include <barelymusician.h>
 
 #include <cstdint>
+#include <unordered_set>
+#include <vector>
 
 #include "godot/engine.h"
 #include "godot_cpp/classes/audio_stream_wav.hpp"
@@ -47,6 +49,7 @@ namespace barely::godot {
                                                                                                    \
  public:                                                                                           \
   void set_##name(type name) {                                                                     \
+    if (name##_ == name) return;                                                                   \
     name##_ = name;                                                                                \
     BarelyInstrument_SetControl(BarelyEngine::get_singleton()->get(), instrument_id_,              \
                                 BarelyInstrumentControlType_k##Name, static_cast<float>(name##_)); \
@@ -77,7 +80,7 @@ class BarelyInstrument : public ::godot::Node {
   void set_all_notes_off();
   void set_note_off(float pitch);
   void set_note_on(float pitch, float gain = 1.0f, float pitch_shift = 0.0f);
-  bool is_note_on(float pitch) const;
+  bool is_note_on(float pitch) const { return pitches_.contains(pitch); }
 
   void set_slice(const ::godot::Ref<BarelySliceResource>& slice);
   ::godot::Ref<BarelySliceResource> get_slice() const { return slice_; }
@@ -85,14 +88,13 @@ class BarelyInstrument : public ::godot::Node {
  private:
   GDCLASS(BarelyInstrument, ::godot::Node);
   static void _bind_methods();
-
-  static void _note_event_callback(BarelyEventType type, float pitch, void* user_data);
-  void _handle_note_event(BarelyEventType type, float pitch);
   void _on_slice_changed();
 
   uint32_t instrument_id_ = 0;
   ::godot::Ref<BarelySliceResource> slice_;
-  std::vector<float> slice_buffer_;  // TODO(#181): Remove heap allocation.
+  // TODO(#181): Remove heap allocations.
+  std::unordered_set<float> pitches_;
+  std::vector<float> slice_buffer_;
 
   BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_DECLARE_GODOT_INSTRUMENT_CONTROL);
 };

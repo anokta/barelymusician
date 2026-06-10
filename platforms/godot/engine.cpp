@@ -37,7 +37,8 @@ using ::godot::Variant;
 #define BARELY_BIND_GODOT_ENGINE_CONTROL(Name, name, ...)                                   \
   ClassDB::bind_method(D_METHOD(BARELY_STR(set_##name), #name), &BarelyEngine::set_##name); \
   ClassDB::bind_method(D_METHOD(BARELY_STR(get_##name)), &BarelyEngine::get_##name);
-#define BARELY_SET_GODOT_ENGINE_CONTROL(Name, name, type, default) set_##name(name##_);
+#define BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL(Name, name, type, default) \
+  BarelyEngine_SetControl(engine_, BarelyEngineControlType_k##Name, static_cast<float>(name##_));
 
 double BarelyAudioStreamPlayback::get_audio_timestamp() {
   return timestamp_.load(std::memory_order_relaxed);
@@ -113,7 +114,7 @@ void BarelyEngine::set_tempo(double tempo) {
     engine_allocation_.resize(allocation_size);
     temp_samples_.resize(config.max_frame_count);
     BarelyEngine_Create(&config, engine_allocation_.data(), allocation_size, &engine_);
-    BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_GODOT_ENGINE_CONTROL);
+    BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL);
     if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {
       if (audio_player_ == nullptr) {  // start audio processing
         audio_player_ = memnew(AudioStreamPlayer);

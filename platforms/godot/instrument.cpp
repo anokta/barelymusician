@@ -31,7 +31,10 @@ using ::godot::Variant;
 #define BARELY_BIND_GODOT_INSTRUMENT_CONTROL(Name, name, ...)                                   \
   ClassDB::bind_method(D_METHOD(BARELY_STR(set_##name), #name), &BarelyInstrument::set_##name); \
   ClassDB::bind_method(D_METHOD(BARELY_STR(get_##name)), &BarelyInstrument::get_##name);
-#define BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL(Name, name, type, default) set_##name(default);
+#define BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL(Name, name, type, default)                   \
+  BarelyInstrument_SetControl(BarelyEngine::get_singleton()->get(), instrument_id_,              \
+                              BarelyInstrumentControlType_k##Name, static_cast<float>(name##_)); \
+  ;
 
 void BarelySliceResource::set_root_pitch(float root_pitch) {
   if (root_pitch_ != root_pitch) {

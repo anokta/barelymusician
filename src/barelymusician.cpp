@@ -63,9 +63,7 @@ bool BarelyEngine_Create(const BarelyEngineConfig* config, void* allocation,
   }
 
   const size_t size = barely::GetAllocSize<BarelyEngine>(*config);
-  if (allocation == nullptr || static_cast<size_t>(allocation_size) < size) {
-    return false;
-  }
+  if (allocation == nullptr || static_cast<size_t>(allocation_size) < size) return false;
 
   barely::Arena arena(allocation, size);
   *out_engine = ::new (arena.Alloc<BarelyEngine>()) BarelyEngine(arena, *config);

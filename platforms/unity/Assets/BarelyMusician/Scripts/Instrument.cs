@@ -296,6 +296,7 @@ namespace Barely {
     }
 
     private void OnEnable() {
+      Array.Fill(_controls, float.NaN);
       Engine.Internal.Instrument_Create(this, ref _id);
       Update();
     }
@@ -336,7 +337,10 @@ namespace Barely {
     }
 
     private void SetControl(Engine.Internal.InstrumentControlType type, float value) {
-      Engine.Internal.Instrument_SetControl(_id, type, value);
+      if (_controls[(int)type] != value) {
+        Engine.Internal.Instrument_SetControl(_id, type, value);
+        _controls[(int)type] = value;
+      }
     }
 
     private void UpdateSampleData() {
@@ -347,6 +351,7 @@ namespace Barely {
       }
     }
 
+    private float[] _controls = new float[(int)Engine.Internal.InstrumentControlType.COUNT];
     private UInt32 _id = 0;
   }
 }  // namespace Barely

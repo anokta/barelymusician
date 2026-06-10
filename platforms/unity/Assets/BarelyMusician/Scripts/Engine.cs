@@ -302,6 +302,55 @@ namespace Barely {
     }
 
     public static class Internal {
+      public enum EngineControlType {
+        // Gain.
+        [InspectorName("Gain")] GAIN = 0,
+        // Compressor mix.
+        [InspectorName("Comp Mix")] COMP_MIX,
+        // Compressor attack in seconds.
+        [InspectorName("Comp Attack")] COMP_ATTACK,
+        // Compressor release in seconds.
+        [InspectorName("Comp Release")] COMP_RELEASE,
+        // Normalized compressor threshold in logarithmic scale.
+        [InspectorName("Comp Threshold")] COMP_THRESHOLD,
+        // Compressor ratio.
+        [InspectorName("Comp Ratio")] COMP_RATIO,
+        // Delay mix.
+        [InspectorName("Delay Mix")] DELAY_MIX,
+        // Delay time in seconds.
+        [InspectorName("Delay Time")] DELAY_TIME,
+        // Delay feedback.
+        [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
+        // Delay low-pass filter cutoff.
+        [InspectorName("Delay LPF Cutoff")] DELAY_LPF_CUTOFF,
+        // Delay high-pass filter cutoff.
+        [InspectorName("Delay HPF Cutoff")] DELAY_HPF_CUTOFF,
+        // Delay ping-pong.
+        [InspectorName("Delay Ping-Pong")] DELAY_PING_PONG,
+        // Delay reverb send.
+        [InspectorName("Delay Reverb Send")] DELAY_REVERB_SEND,
+        // Reverb mix.
+        [InspectorName("Reverb Mix")] REVERB_MIX,
+        // Reverb damping ratio.
+        [InspectorName("Reverb Damping")] REVERB_DAMPING,
+        // Reverb room size.
+        [InspectorName("Reverb Room Size")] REVERB_ROOM_SIZE,
+        // Reverb stereo width.
+        [InspectorName("Reverb Stereo Width")] REVERB_STEREO_WIDTH,
+        // Reverb freeze.
+        [InspectorName("Reverb Freeze")] REVERB_FREEZE,
+        // Sidechain mix.
+        [InspectorName("Sidechain Mix")] SIDECHAIN_MIX,
+        // Sidechain attack in seconds.
+        [InspectorName("Sidechain Attack")] SIDECHAIN_ATTACK,
+        // Sidechain release in seconds.
+        [InspectorName("Sidechain Release")] SIDECHAIN_RELEASE,
+        // Sidechain threshold.
+        [InspectorName("Sidechain Threshold")] SIDECHAIN_THRESHOLD,
+        // Sidechain ratio.
+        [InspectorName("Sidechain Ratio")] SIDECHAIN_RATIO,
+      }
+
       public enum InstrumentControlType {
         // Normalized gain in logarithmic scale.
         [InspectorName("Gain")] GAIN = 0,
@@ -355,55 +404,8 @@ namespace Barely {
         [InspectorName("Retrigger")] RETRIGGER,
         // Number of voices.
         [InspectorName("Voice Count")] VOICE_COUNT,
-      }
-
-      public enum EngineControlType {
-        // Gain.
-        [InspectorName("Gain")] GAIN = 0,
-        // Compressor mix.
-        [InspectorName("Comp Mix")] COMP_MIX,
-        // Compressor attack in seconds.
-        [InspectorName("Comp Attack")] COMP_ATTACK,
-        // Compressor release in seconds.
-        [InspectorName("Comp Release")] COMP_RELEASE,
-        // Normalized compressor threshold in logarithmic scale.
-        [InspectorName("Comp Threshold")] COMP_THRESHOLD,
-        // Compressor ratio.
-        [InspectorName("Comp Ratio")] COMP_RATIO,
-        // Delay mix.
-        [InspectorName("Delay Mix")] DELAY_MIX,
-        // Delay time in seconds.
-        [InspectorName("Delay Time")] DELAY_TIME,
-        // Delay feedback.
-        [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
-        // Delay low-pass filter cutoff.
-        [InspectorName("Delay LPF Cutoff")] DELAY_LPF_CUTOFF,
-        // Delay high-pass filter cutoff.
-        [InspectorName("Delay HPF Cutoff")] DELAY_HPF_CUTOFF,
-        // Delay ping-pong.
-        [InspectorName("Delay Ping-Pong")] DELAY_PING_PONG,
-        // Delay reverb send.
-        [InspectorName("Delay Reverb Send")] DELAY_REVERB_SEND,
-        // Reverb mix.
-        [InspectorName("Reverb Mix")] REVERB_MIX,
-        // Reverb damping ratio.
-        [InspectorName("Reverb Damping")] REVERB_DAMPING,
-        // Reverb room size.
-        [InspectorName("Reverb Room Size")] REVERB_ROOM_SIZE,
-        // Reverb stereo width.
-        [InspectorName("Reverb Stereo Width")] REVERB_STEREO_WIDTH,
-        // Reverb freeze.
-        [InspectorName("Reverb Freeze")] REVERB_FREEZE,
-        // Sidechain mix.
-        [InspectorName("Sidechain Mix")] SIDECHAIN_MIX,
-        // Sidechain attack in seconds.
-        [InspectorName("Sidechain Attack")] SIDECHAIN_ATTACK,
-        // Sidechain release in seconds.
-        [InspectorName("Sidechain Release")] SIDECHAIN_RELEASE,
-        // Sidechain threshold.
-        [InspectorName("Sidechain Threshold")] SIDECHAIN_THRESHOLD,
-        // Sidechain ratio.
-        [InspectorName("Sidechain Ratio")] SIDECHAIN_RATIO,
+        // Number of instrument control types.
+        COUNT,
       }
 
       public enum NoteControlType {
@@ -829,14 +831,10 @@ namespace Barely {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
           var engineConfig = new BarelyEngineConfig {
-            sampleRate = config.sampleRate,
-            maxInstrumentCount = 100,
-            maxPerformerCount = 100,
-            maxTaskCount = 5000,
-            maxCommandCount = 8192,
-            maxFrameCount = config.dspBufferSize,
-            maxSliceCount = 1000,
-            maxVoiceCount = 200,
+            sampleRate = config.sampleRate, maxInstrumentCount = 100,
+            maxPerformerCount = 100,        maxTaskCount = 5000,
+            maxCommandCount = 8192,         maxFrameCount = config.dspBufferSize,
+            maxSliceCount = 1000,           maxVoiceCount = 200,
           };
           Int32 allocationSize = 0;
           BarelyEngineConfig_GetRequiredAllocationSize(ref engineConfig, ref allocationSize);

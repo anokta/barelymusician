@@ -53,6 +53,7 @@ namespace barely::godot {
                                                                       \
  public:                                                              \
   void set_##name(type name) {                                        \
+    if (name##_ == name) return;                                      \
     name##_ = name;                                                   \
     BarelyEngine_SetControl(engine_, BarelyEngineControlType_k##Name, \
                             static_cast<float>(name##_));             \

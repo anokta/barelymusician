@@ -128,11 +128,11 @@ class BarelyEngine : public ::godot::Object {
 
   ::BarelyEngine* engine_ = nullptr;
   ::godot::AudioStreamPlayer* audio_player_ = nullptr;
-  // TODO(#181): Remove heap allocations.
   std::vector<std::byte> engine_allocation_;
   std::vector<float> temp_samples_;
   double lookahead_ = 0.02;
   double tempo_ = 120.0;
+  int32_t sample_rate_ = 0;
 
   BARELY_GODOT_ENGINE_CONTROLS(BARELY_DEFINE_GODOT_ENGINE_CONTROL);
 };

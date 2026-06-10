@@ -106,9 +106,8 @@ void BarelyEngine::set_tempo(double tempo) {
 
 ::BarelyEngine* BarelyEngine::get() {
   if (engine_ == nullptr) {
-    // TODO(#181): Support sample rate changes after initialization.
-    const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(
-        static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate()));
+    sample_rate_ = static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate());
+    const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(sample_rate_);
     int32_t allocation_size = 0;
     BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
     engine_allocation_.resize(allocation_size);
@@ -143,6 +142,12 @@ void BarelyEngine::process(AudioFrame* buffer, int32_t frame_count, double times
 
 void BarelyEngine::update() {
   BarelyEngine_Update(get(), BarelyAudioStreamPlayback::get_audio_timestamp() + lookahead_);
+  if (const int32_t sample_rate =
+          static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate());
+      sample_rate_ != sample_rate && audio_player_ != nullptr) {
+    sample_rate_ = sample_rate;
+    audio_player_->call_deferred("play");
+  }
 }
 
 void BarelyEngine::_bind_methods() {

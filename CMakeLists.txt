@@ -82,7 +82,7 @@ endif()
 
 project(
   barelymusician
-  VERSION 0.7.7
+  VERSION 0.8.0
   DESCRIPTION "a real-time music engine for interactive systems"
   HOMEPAGE_URL "https://github.com/anokta/barelymusician"
 )

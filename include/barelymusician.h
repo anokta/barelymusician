@@ -49,9 +49,9 @@
 ///
 ///   // Set an instrument note on.
 ///   //
-///   // The note pitch is expressed in octaves relative to middle C as the center frequency.
-///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
-///   // pitch intervals within each octave.
+///   // Notes are expressed in octaves relative to middle C as the center frequency. Fractional
+///   // note values adjust the frequency logarithmically to ensure equally perceived pitch
+///   // intervals within each octave.
 ///   constexpr float kC3Pitch = -1.0f;
 ///   instrument.SetNoteOn(kC3Pitch);
 ///

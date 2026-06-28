@@ -8,3 +8,4 @@ addons/barelymusician/bin/**/*.a
 addons/barelymusician/bin/**/*.dylib
 addons/barelymusician/bin/**/*.dll
 addons/barelymusician/bin/**/*.so
+addons/barelymusician/bin/**/*.wasm

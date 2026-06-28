@@ -215,9 +215,15 @@ def build(args, source_dir, build_dir):
 
     config = get_build_config(args)
 
+    common_cmake_options = []
+    if args.unity:
+        common_cmake_options.append("-DENABLE_UNITY=ON")
+    if args.godot:
+        common_cmake_options.append("-DENABLE_GODOT=ON")
+
     if args.wasm:
         wasm_build_dir = os.path.join(build_dir, "WebAssembly")
-        wasm_cmake_options = [
+        wasm_cmake_options = common_cmake_options + [
             "-DENABLE_WASM=ON",
             f'-DCMAKE_BUILD_TYPE="{config}"',
         ]
@@ -234,12 +240,6 @@ def build(args, source_dir, build_dir):
         ]
         build_platform(args, config, source_dir, daisy_build_dir, daisy_cmake_options)
 
-    common_cmake_options = []
-
-    if args.unity:
-        common_cmake_options.append("-DENABLE_UNITY=ON")
-    if args.godot:
-        common_cmake_options.append("-DENABLE_GODOT=ON")
     if args.vst:
         common_cmake_options += [
             "-DENABLE_VST=ON",

@@ -51,8 +51,8 @@ struct InstrumentParams {
   VoiceParams voice_params = {};
   Envelope::Adsr adsr = {};
 
-  OscMode osc_mode = OscMode::kCrossfade;
-  SliceMode slice_mode = SliceMode::kSustain;
+  BarelyOscMode osc_mode = BarelyOscMode_kCrossfade;
+  BarelySliceMode slice_mode = BarelySliceMode_kSustain;
 
   float pitch_shift = 0.0f;
   float osc_pitch_shift = 0.0f;

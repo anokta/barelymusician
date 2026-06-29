@@ -43,13 +43,13 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.adsr.SetRelease(engine_.sample_rate, value);
       break;
     case BarelyInstrumentControlType_kSliceMode:
-      params.slice_mode = static_cast<SliceMode>(value);
+      params.slice_mode = static_cast<BarelySliceMode>(value);
       break;
     case BarelyInstrumentControlType_kOscMix:
       params.voice_params.osc_mix = value;
       break;
     case BarelyInstrumentControlType_kOscMode:
-      params.osc_mode = static_cast<OscMode>(value);
+      params.osc_mode = static_cast<BarelyOscMode>(value);
       break;
     case BarelyInstrumentControlType_kOscNoiseMix:
       params.voice_params.osc_noise_mix = value;
@@ -175,7 +175,7 @@ void InstrumentProcessor::SetNoteOff(uint32_t instrument_index, float pitch) noe
     return;
   }
   auto& voice = engine_.GetVoice(voice_index);
-  if (params.first_slice_index == kInvalidIndex || params.slice_mode != SliceMode::kOnce) {
+  if (params.first_slice_index == kInvalidIndex || params.slice_mode != BarelySliceMode_kOnce) {
     voice.envelope.Stop();
   } else {
     voice.stop_on_slice_end = true;

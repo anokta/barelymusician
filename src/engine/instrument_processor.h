@@ -110,14 +110,14 @@ class InstrumentProcessor {
     const SliceState* slice = engine_.GetSlice(voice.instrument_index, voice.slice_index);
 
     if (voice.stop_on_slice_end &&
-        (slice == nullptr || instrument_params.slice_mode != SliceMode::kOnce)) {
+        (slice == nullptr || instrument_params.slice_mode != BarelySliceMode_kOnce)) {
       voice.envelope.Stop();
-    } else if (instrument_params.slice_mode == SliceMode::kOnce && slice != nullptr &&
+    } else if (instrument_params.slice_mode == BarelySliceMode_kOnce && slice != nullptr &&
                static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
       voice.envelope.Reset();
     }
 
-    const bool is_slice_looping = instrument_params.slice_mode == SliceMode::kLoop;
+    const bool is_slice_looping = instrument_params.slice_mode == BarelySliceMode_kLoop;
     const float slice_sample = (slice != nullptr)
                                    ? GenerateSliceSample(slice->samples, slice->sample_count,
                                                          voice.slice_offset, is_slice_looping)
@@ -125,7 +125,7 @@ class InstrumentProcessor {
     const float slice_output = (1.0f - voice.params.osc_mix) * slice_sample;
 
     float osc_increment = instrument_params.osc_increment * voice.note_params.osc_increment;
-    if (instrument_params.osc_mode == OscMode::kMf) {
+    if (instrument_params.osc_mode == BarelyOscMode_kMf) {
       osc_increment += slice_sample * osc_increment;
     }
     osc_increment = std::min(osc_increment, 0.5f);
@@ -144,7 +144,7 @@ class InstrumentProcessor {
 
     float slice_increment = instrument_params.slice_increment * voice.note_params.slice_increment;
     if (slice_increment > 0) {
-      if (instrument_params.osc_mode == OscMode::kFm) {
+      if (instrument_params.osc_mode == BarelyOscMode_kFm) {
         slice_increment += osc_output * slice_increment;
       }
       voice.slice_offset += slice_increment;
@@ -156,16 +156,16 @@ class InstrumentProcessor {
 
     float output = voice.envelope.Next();
 
-    if (instrument_params.osc_mode == OscMode::kCrossfade ||
-        instrument_params.osc_mode == OscMode::kMf) {
+    if (instrument_params.osc_mode == BarelyOscMode_kCrossfade ||
+        instrument_params.osc_mode == BarelyOscMode_kMf) {
       output *= osc_output + slice_output;
-    } else if (instrument_params.osc_mode == OscMode::kFm) {
+    } else if (instrument_params.osc_mode == BarelyOscMode_kFm) {
       output *= slice_sample;
-    } else if (instrument_params.osc_mode == OscMode::kRing) {
+    } else if (instrument_params.osc_mode == BarelyOscMode_kRing) {
       output *= osc_output * slice_sample + slice_output;
-    } else if (instrument_params.osc_mode == OscMode::kAm) {
+    } else if (instrument_params.osc_mode == BarelyOscMode_kAm) {
       output *= std::abs(osc_output) * slice_sample + slice_output;
-    } else if (instrument_params.osc_mode == OscMode::kMa) {
+    } else if (instrument_params.osc_mode == BarelyOscMode_kMa) {
       output *= osc_output * std::abs(slice_sample) + slice_output;
     }
 

@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="BarelyMusicianGodot"
+config/name="BarelyMusician"
 run/main_scene="uid://fm3yw7k5t227"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 

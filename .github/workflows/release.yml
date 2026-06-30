@@ -23,7 +23,9 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: examples-${{ matrix.os }}
-          path: build/**/bin/examples/**/*_demo*
+          path: |
+            build/**/bin/examples/**/*_demo*
+            build/**/bin/examples/**/data/**
 
   godot:
     name: godot on ${{ matrix.os }}
@@ -89,9 +91,17 @@ jobs:
           for dir in temp/examples-*/; do
             for platform_dir in "${dir}"*/; do
               platform=$(basename "${platform_dir}")
-              mkdir -p temp/examples/${platform}
+              examples_platform_dir="$(pwd)/temp/examples/${platform}"
+              mkdir -p "${examples_platform_dir}"
               find "${platform_dir}"* -type f -name '*_demo*' \
-                -exec cp {} "temp/examples/${platform}/" \;
+                -exec cp {} "${examples_platform_dir}" \;
+              find "${platform_dir}" -type d -name "data" | while read -r data_path; do
+                parent_dir=$(dirname "${data_path}")
+                (
+                  cd "${parent_dir}" || exit
+                  rsync -ra "data" "${examples_platform_dir}/"
+                )
+              done
             done
           done
           mkdir -p artifacts

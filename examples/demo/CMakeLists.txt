@@ -28,10 +28,15 @@ function(add_demo source_file)
       barelymusician
       barelymusician_examples_common
       barelymusician_examples_composition
-      barelymusician_examples_data
       ${ARGN}
     )
   endif()
+  add_custom_command(
+    TARGET ${DEMO_TARGET_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${DEMO_TARGET_NAME}>/data"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/examples/data"
+    "$<TARGET_FILE_DIR:${DEMO_TARGET_NAME}>/data"
+  )
   add_dependencies(barelymusician_examples ${DEMO_TARGET_NAME})
 endfunction()
 add_custom_target(barelymusician_examples)

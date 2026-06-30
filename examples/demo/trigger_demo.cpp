@@ -44,7 +44,7 @@ constexpr double kInitialTempo = 120.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(int /*argc*/, char* /*argv*/[]) {
+int main(void) {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);

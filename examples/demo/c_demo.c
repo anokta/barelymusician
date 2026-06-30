@@ -77,7 +77,7 @@ static void TaskCallback(BarelyTaskEventType type, void* user_data) {
   }
 }
 
-int main() {
+int main(void) {
   // Initialize the engine.
   BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   config.max_frame_count = kFrameCount;

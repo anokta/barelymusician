@@ -66,7 +66,7 @@ float IndexToPitch(int octave_shift, int index) {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(int /*argc*/, char* /*argv*/[]) {
+int main(void) {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);

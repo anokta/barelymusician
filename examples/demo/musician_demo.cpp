@@ -18,7 +18,6 @@
 #include "common/console_log.h"
 #include "common/input_manager.h"
 #include "common/wav_file.h"
-#include "data/data.h"
 
 namespace {
 
@@ -35,7 +34,6 @@ using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
-using ::barely::examples::GetDataFilePath;
 using ::barely::examples::InputManager;
 using ::barely::examples::WavFile;
 
@@ -94,7 +92,7 @@ constexpr float kPitchSnare = 1.0f;
 constexpr float kPitchHihatClosed = 2.0f;
 constexpr float kPitchHihatOpen = 3.0f;
 
-constexpr char kDrumsDir[] = "audio/drums/";
+constexpr char kDrumsDir[] = "data/audio/drums/";
 
 constexpr int kQuantizationSubdivision = 960;
 constexpr Quantization quantization = Quantization(kQuantizationSubdivision);
@@ -112,14 +110,13 @@ void InsertPadData(float pitch, const std::string& file_path, std::vector<float>
 
 // Builds percussion sample data from a given `percussion_map`.
 std::pair<std::vector<Slice>, std::vector<std::vector<float>>> BuildPercussionSampleData(
-    const std::vector<std::pair<float, std::string>>& percussion_map, char* argv[]) {
+    const std::vector<std::pair<float, std::string>>& percussion_map) {
   std::pair<std::vector<Slice>, std::vector<std::vector<float>>> res;
   res.first.reserve(percussion_map.size());
   res.second.reserve(percussion_map.size());
   for (const auto& [pitch, file_path] : percussion_map) {
     res.second.emplace_back();
-    InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), res.second.back(),
-                  res.first);
+    InsertPadData(pitch, std::string(kDrumsDir).append(file_path), res.second.back(), res.first);
   }
   return res;
 }
@@ -223,7 +220,7 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, int index,
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(int /*argc*/, char* argv[]) {
+int main(void) {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);
@@ -294,22 +291,18 @@ int main(int /*argc*/, char* argv[]) {
                           line_2_beat_composer_callback, instruments.size() - 1);
 
   // Add percussion instrument.
-  const auto default_percussion_sample_data = BuildPercussionSampleData(
-      {
-          {kPitchKick, "basic_kick.wav"},
-          {kPitchSnare, "basic_snare.wav"},
-          {kPitchHihatClosed, "basic_hihat_closed.wav"},
-          {kPitchHihatOpen, "basic_hihat_open.wav"},
-      },
-      argv);
-  const auto hihat_only_percussion_sample_data = BuildPercussionSampleData(
-      {
-          {kPitchKick, "basic_hihat_closed.wav"},
-          {kPitchSnare, "basic_hihat_open.wav"},
-          {kPitchHihatClosed, "basic_hihat_closed.wav"},
-          {kPitchHihatOpen, "basic_hihat_open.wav"},
-      },
-      argv);
+  const auto default_percussion_sample_data = BuildPercussionSampleData({
+      {kPitchKick, "basic_kick.wav"},
+      {kPitchSnare, "basic_snare.wav"},
+      {kPitchHihatClosed, "basic_hihat_closed.wav"},
+      {kPitchHihatOpen, "basic_hihat_open.wav"},
+  });
+  const auto hihat_only_percussion_sample_data = BuildPercussionSampleData({
+      {kPitchKick, "basic_hihat_closed.wav"},
+      {kPitchSnare, "basic_hihat_open.wav"},
+      {kPitchHihatClosed, "basic_hihat_closed.wav"},
+      {kPitchHihatOpen, "basic_hihat_open.wav"},
+  });
 
   instruments.emplace_back(engine.CreateInstrument());
   auto& percussion = instruments.back();

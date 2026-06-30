@@ -44,7 +44,7 @@ constexpr double kTempoIncrement = 10.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
+int main(void) {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);

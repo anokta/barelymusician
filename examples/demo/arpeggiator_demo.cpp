@@ -70,7 +70,7 @@ std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) 
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(int /*argc*/, char* /*argv*/[]) {
+int main(void) {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);

@@ -14,7 +14,6 @@
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
-#include "data/data.h"
 
 namespace {
 
@@ -26,7 +25,6 @@ using ::barely::TaskEventType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
-using ::barely::examples::GetDataFilePath;
 using ::barely::examples::InputManager;
 using ::smf::MidiFile;
 
@@ -46,7 +44,7 @@ constexpr float kInstrumentReverbSend = 0.25f;
 constexpr int kInstrumentVoiceCount = 16;
 
 // Midi file name.
-constexpr char kMidiFileName[] = "midi/sample.mid";
+constexpr char kMidiFileName[] = "data/midi/sample.mid";
 
 constexpr double kTempo = 132.0;
 
@@ -82,12 +80,11 @@ bool BuildScore(const smf::MidiEventList& midi_events, int track_index, int tick
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(int /*argc*/, char* argv[]) {
+int main(void) {
   InputManager input_manager;
 
   MidiFile midi_file;
-  const std::string midi_file_path = GetDataFilePath(kMidiFileName, argv);
-  [[maybe_unused]] const bool success = midi_file.read(midi_file_path);
+  [[maybe_unused]] const bool success = midi_file.read(kMidiFileName);
   assert(success && midi_file.isAbsoluteTicks());
   midi_file.linkNotePairs();
 

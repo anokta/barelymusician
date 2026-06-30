@@ -15,7 +15,6 @@
 #include "common/console_log.h"
 #include "common/input_manager.h"
 #include "common/wav_file.h"
-#include "data/data.h"
 
 namespace {
 
@@ -26,7 +25,6 @@ using ::barely::Slice;
 using ::barely::SliceMode;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
-using ::barely::examples::GetDataFilePath;
 using ::barely::examples::InputManager;
 using ::barely::examples::WavFile;
 
@@ -47,7 +45,7 @@ constexpr float kRelease = 0.2f;
 constexpr int kVoiceCount = 16;
 constexpr float kReverbSend = 0.5f;
 
-constexpr char kSamplePath[] = "audio/sample.wav";
+constexpr char kSamplePath[] = "data/audio/sample.wav";
 
 // Note settings.
 constexpr int kKeyCount = 13;
@@ -81,7 +79,7 @@ float IndexToPitch(int octave_shift, int index) {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(int /*argc*/, char* argv[]) {
+int main(void) {
   InputManager input_manager;
 
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
@@ -97,7 +95,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   instrument.SetControl(InstrumentControlType::kReverbSend, kReverbSend);
-  instrument.SetSampleData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
+  instrument.SetSampleData(GetSampleData(kSamplePath));
 
   // Audio process callback.
   audio_output.SetProcessCallback(

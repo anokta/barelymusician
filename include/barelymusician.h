@@ -35,8 +35,8 @@
 ///   //
 ///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
 ///   // called from an audio thread process callback in real-time audio applications.
-///   constexpr int kChannelCount = 2;
-///   constexpr int kFrameCount = 512;
+///   constexpr int32_t kChannelCount = 2;
+///   constexpr int32_t kFrameCount = 512;
 ///   float output_samples[kChannelCount * kFrameCount];
 ///   engine.Process(output_samples, kChannelCount, kFrameCount, timestamp);
 ///   @endcode
@@ -221,16 +221,11 @@
 #endif  // __cplusplus
 
 /// Default engine configuration.
-#define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate) \
-  {                                               \
-      .sample_##rate = sample_rate,               \
-      .max_instrument_count = 100,                \
-      .max_performer_count = 100,                 \
-      .max_task_count = 5000,                     \
-      .max_command_count = 8192,                  \
-      .max_frame_count = 2048,                    \
-      .max_slice_count = 1000,                    \
-      .max_voice_count = 200,                     \
+#define BARELY_ENGINE_CONFIG_DEFAULT(sample_rate)                                          \
+  {                                                                                        \
+    .sample_##rate = sample_rate, .max_instrument_count = 100, .max_performer_count = 100, \
+    .max_task_count = 5000, .max_command_count = 8192, .max_frame_count = 2048,            \
+    .max_slice_count = 1000, .max_voice_count = 200,                                       \
   }
 
 /// Engine control types.
@@ -349,21 +344,6 @@ typedef struct BarelyEngineConfig {
   int32_t max_voice_count;
 } BarelyEngineConfig;
 
-/// Slice of sample data.
-typedef struct BarelySlice {
-  /// Array of mono samples.
-  const float* samples;
-
-  /// Number of mono samples.
-  int32_t sample_count;
-
-  /// Sampling rate in hertz.
-  int32_t sample_rate;
-
-  /// Root note pitch.
-  float root_pitch;
-} BarelySlice;
-
 /// Musical quantization.
 typedef struct BarelyQuantization {
   /// Subdivision of a beat.
@@ -387,6 +367,21 @@ typedef struct BarelyScale {
   /// Mode index.
   int32_t mode;
 } BarelyScale;
+
+/// Slice of sample data.
+typedef struct BarelySlice {
+  /// Array of mono samples.
+  const float* samples;
+
+  /// Number of mono samples.
+  int32_t sample_count;
+
+  /// Sampling rate in hertz.
+  int32_t sample_rate;
+
+  /// Root note pitch.
+  float root_pitch;
+} BarelySlice;
 
 #ifdef __cplusplus
 extern "C" {
@@ -730,7 +725,7 @@ struct EngineConfig : public BarelyEngineConfig {
   /// Constructs a new `EngineConfig`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  constexpr explicit EngineConfig(int sample_rate)
+  constexpr explicit EngineConfig(int32_t sample_rate)
       : EngineConfig(BARELY_ENGINE_CONFIG_DEFAULT(sample_rate)) {}
 
   /// Constructs a new `EngineConfig` from a raw type.
@@ -751,28 +746,6 @@ struct EngineConfig : public BarelyEngineConfig {
   }
 };
 
-/// Slice of sample data.
-struct Slice : public BarelySlice {
-  /// Default constructor.
-  Slice() noexcept = default;
-
-  /// Constructs a new `Slice`.
-  ///
-  /// @param samples Span of mono samples.
-  /// @param sample_rate Sampling rate in hertz.
-  /// @param root_pitch Root pitch.
-  constexpr Slice(std::span<const float> samples, int sample_rate, float root_pitch) noexcept
-      : Slice({samples.data(), static_cast<int32_t>(samples.size()), sample_rate, root_pitch}) {
-    assert(sample_rate >= 0);
-  }
-
-  /// Constructs a new `Slice` from a raw type.
-  ///
-  /// @param slice Raw slice.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
-};
-
 /// Musical quantization.
 struct Quantization : public BarelyQuantization {
  public:
@@ -784,8 +757,8 @@ struct Quantization : public BarelyQuantization {
   /// @param subdivision Subdivision of a beat.
   /// @param amount Amount.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Quantization(int subdivision, float amount = 1.0f) noexcept
-      : Quantization(BarelyQuantization{static_cast<int32_t>(subdivision), amount}) {}
+  constexpr Quantization(int32_t subdivision, float amount = 1.0f) noexcept
+      : Quantization(BarelyQuantization{subdivision, amount}) {}
 
   /// Constructs a new `Quantization` from a raw type.
   ///
@@ -822,9 +795,10 @@ struct Scale : public BarelyScale {
   /// @param root_pitch Root pitch.
   /// @param mode Mode.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Scale(std::span<const float> pitches, float root_pitch = 0.0f, int mode = 0) noexcept
-      : Scale(BarelyScale{pitches.data(), static_cast<int32_t>(pitches.size()), root_pitch,
-                          static_cast<int32_t>(mode)}) {}
+  constexpr Scale(std::span<const float> pitches, float root_pitch = 0.0f,
+                  int32_t mode = 0) noexcept
+      : Scale(BarelyScale{pitches.data(), static_cast<int32_t>(pitches.size()), root_pitch, mode}) {
+  }
 
   /// Constructs a new `Scale` from a raw type.
   ///
@@ -840,19 +814,34 @@ struct Scale : public BarelyScale {
   ///
   /// @param degree Degree.
   /// @return Pitch.
-  [[nodiscard]] float GetPitch(int degree) const noexcept {
+  [[nodiscard]] float GetPitch(int32_t degree) const noexcept {
     float pitch = 0.0f;
     [[maybe_unused]] const bool success = BarelyScale_GetPitch(this, degree, &pitch);
     assert(success);
     return pitch;
   }
+};
 
-  /// Returns the number of pitches in the scale.
+/// Slice of sample data.
+struct Slice : public BarelySlice {
+  /// Default constructor.
+  Slice() noexcept = default;
+
+  /// Constructs a new `Slice`.
   ///
-  /// @return Number of pitches.
-  [[nodiscard]] constexpr int GetPitchCount() const noexcept {
-    return static_cast<int>(pitch_count);
+  /// @param samples Span of mono samples.
+  /// @param sample_rate Sampling rate in hertz.
+  /// @param root_pitch Root pitch.
+  constexpr Slice(std::span<const float> samples, int32_t sample_rate, float root_pitch) noexcept
+      : Slice({samples.data(), static_cast<int32_t>(samples.size()), sample_rate, root_pitch}) {
+    assert(sample_rate >= 0);
   }
+
+  /// Constructs a new `Slice` from a raw type.
+  ///
+  /// @param slice Raw slice.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
 };
 
 /// Task callback function.
@@ -1022,9 +1011,8 @@ class Task {
   /// Sets the priority.
   ///
   /// @param priority Priority.
-  void SetPriority(int priority) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyTask_SetPriority(engine_, task_id_, static_cast<int32_t>(priority));
+  void SetPriority(int32_t priority) noexcept {
+    [[maybe_unused]] const bool success = BarelyTask_SetPriority(engine_, task_id_, priority);
     assert(success);
   }
 
@@ -1096,7 +1084,8 @@ class Performer {
   /// @param priority Task priority.
   /// @param callback Task callback.
   /// @return Task.
-  Task CreateTask(double position, double duration, int priority, TaskCallback callback) noexcept {
+  Task CreateTask(double position, double duration, int32_t priority,
+                  TaskCallback callback) noexcept {
     uint32_t task_id = 0;
     [[maybe_unused]] bool success = BarelyPerformer_CreateTask(
         engine_, performer_id_, position, duration, priority, nullptr, nullptr, &task_id);
@@ -1220,7 +1209,7 @@ class Engine {
   /// Constructs a new `Engine`.
   ///
   /// @param sample_rate Sampling rate in hertz.
-  explicit Engine(int sample_rate) noexcept : Engine(EngineConfig(sample_rate)) {}
+  explicit Engine(int32_t sample_rate) noexcept : Engine(EngineConfig(sample_rate)) {}
 
   /// Constructs a new `Engine`.
   ///
@@ -1329,18 +1318,16 @@ class Engine {
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  void Process(float* output_samples, int output_channel_count, int output_frame_count,
+  void Process(float* output_samples, int32_t output_channel_count, int32_t output_frame_count,
                double timestamp) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyEngine_Process(engine_, output_samples, static_cast<int32_t>(output_channel_count),
-                             static_cast<int32_t>(output_frame_count), timestamp);
+    [[maybe_unused]] const bool success = BarelyEngine_Process(
+        engine_, output_samples, output_channel_count, output_frame_count, timestamp);
     assert(success);
   }
 
   /// Resets the random number generator seed.
-  void ResetSeed(int seed) noexcept {
-    [[maybe_unused]] const bool success =
-        BarelyEngine_ResetSeed(engine_, static_cast<int32_t>(seed));
+  void ResetSeed(int32_t seed) noexcept {
+    [[maybe_unused]] const bool success = BarelyEngine_ResetSeed(engine_, seed);
     assert(success);
   }
 

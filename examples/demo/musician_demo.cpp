@@ -154,7 +154,7 @@ void ComposeLine(int octave_offset, float gain, int bar, int beat, int beat_coun
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position, int degree) {
     ScheduleNote(begin_position, end_position - begin_position,
-                 scale.GetPitch(octave_offset * scale.GetPitchCount() + degree), gain, index,
+                 scale.GetPitch(octave_offset * scale.pitch_count + degree), gain, index,
                  instrument, performer, tasks);
   };
   if (beat % 2 == 1) {
@@ -412,7 +412,7 @@ int main(void) {
         percussion.SetSampleData(hihat_only_percussion_sample_data.first);
         break;
       case 'Q':
-        scale.mode = (scale.mode - 1 + scale.GetPitchCount()) % scale.GetPitchCount();
+        scale.mode = (scale.mode - 1 + scale.pitch_count) % scale.pitch_count;
         ConsoleLog() << "Scale mode set to " << scale.mode;
         break;
       case 'W':
@@ -420,7 +420,7 @@ int main(void) {
         ConsoleLog() << "Scale mode reset to " << scale.mode;
         break;
       case 'E':
-        scale.mode = (scale.mode + 1) % scale.GetPitchCount();
+        scale.mode = (scale.mode + 1) % scale.pitch_count;
         ConsoleLog() << "Scale mode set to " << scale.mode;
         break;
       default:

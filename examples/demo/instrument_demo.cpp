@@ -2,33 +2,35 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cctype>
 #include <chrono>
 #include <iterator>
 #include <optional>
+#include <string>
 #include <thread>
+#include <vector>
 
-#include "common/audio_clock.h"
 #include "common/audio_output.h"
 #include "common/console_log.h"
 #include "common/input_manager.h"
+#include "common/wav_file.h"
 
 namespace {
 
 using ::barely::Engine;
 using ::barely::EngineControlType;
 using ::barely::InstrumentControlType;
-using ::barely::examples::AudioClock;
+using ::barely::Slice;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
+using ::barely::examples::WavFile;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
-
-constexpr double kLookahead = 0.05;
 
 // Engine settings.
 constexpr float kDelayTime = 0.5f;
@@ -43,6 +45,10 @@ constexpr float kAttack = 0.005f;
 constexpr float kRelease = 0.2f;
 constexpr int kVoiceCount = 16;
 constexpr float kDelaySend = 0.2f;
+constexpr float kReverbSend = 0.5f;
+constexpr bool kLoop = true;
+
+constexpr char kSamplePath[] = "data/audio/sample.wav";
 
 // Note settings.
 constexpr int kKeyCount = 13;
@@ -50,6 +56,15 @@ constexpr std::array<char, kKeyCount> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F
                                                      'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
+
+std::vector<Slice> GetSampleData(const std::string& file_path) {
+  WavFile sample_file;
+  [[maybe_unused]] const bool success = sample_file.Load(file_path);
+  assert(success);
+
+  const static std::vector<float> samples = sample_file.GetData();
+  return {Slice(samples, sample_file.GetSampleRate(), kRootPitch)};
+}
 
 std::optional<int> KeyToIndex(const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
@@ -69,7 +84,6 @@ float IndexToPitch(int octave_shift, int index) {
 int main(void) {
   InputManager input_manager;
 
-  AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
@@ -81,18 +95,18 @@ int main(void) {
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
   instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kSliceMode, barely::SliceMode::kLoop);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   instrument.SetControl(InstrumentControlType::kDelaySend, kDelaySend);
+  instrument.SetSampleData(GetSampleData(kSamplePath));
 
   // Audio process callback.
   audio_output.SetProcessCallback(
       [&](float* output_samples, int output_channel_count, int output_frame_count) {
-        engine.Process(output_samples, output_channel_count, output_frame_count,
-                       audio_clock.GetTimestamp());
-        audio_clock.Update(output_frame_count);
+        engine.Process(output_samples, output_channel_count, output_frame_count, /*timestamp=*/0.0);
       });
 
   // Key down callback.
@@ -139,6 +153,20 @@ int main(void) {
       return;
     }
 
+    if (upper_key == '1') {
+      instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+      ConsoleLog() << "Switched to oscillator mode";
+      return;
+    } else if (upper_key == '2') {
+      instrument.SetControl(InstrumentControlType::kOscMix, 0.0f);
+      ConsoleLog() << "Switched to sample mode";
+      return;
+    } else if (upper_key == '3') {
+      instrument.SetControl(InstrumentControlType::kOscMix, 0.5f);
+      ConsoleLog() << "Switched to mix mode";
+      return;
+    }
+
     // Play note.
     if (const auto index_or = KeyToIndex(key)) {
       const float pitch = IndexToPitch(octave_shift, *index_or);
@@ -164,17 +192,16 @@ int main(void) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start();
-  engine.Update(kLookahead);
 
   ConsoleLog() << "Play the instrument using the keyboard keys:";
   ConsoleLog() << "  * Use ASDFFGHJK keys to play the white notes in an octave";
   ConsoleLog() << "  * Use WETYU keys to play the black notes in an octave";
   ConsoleLog() << "  * Use ZX keys to set the octave up and down";
   ConsoleLog() << "  * Use CV keys to set the note gain up and down";
+  ConsoleLog() << "  * Use 123 keys to switch the mode (osc/sample/mix)";
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }
 

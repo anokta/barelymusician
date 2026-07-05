@@ -415,6 +415,18 @@ namespace Barely {
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
       }
 
+      public static float Scale_GetPitch(Barely.Scale scale, int degree) {
+        float pitch = 0.0f;
+        _scale.pitches = scale.Pitches;
+        _scale.pitchCount = scale.PitchCount;
+        _scale.rootPitch = scale.RootPitch;
+        _scale.mode = scale.Mode;
+        if (!BarelyScale_GetPitch(ref _scale, degree, ref pitch)) {
+          Debug.LogError("Failed to get scale " + scale + " note pitch with a degree " + degree);
+        }
+        return pitch;
+      }
+
       public static double Engine_GetTimestamp() {
         double timestamp = 0.0;
         if (!BarelyEngine_GetTimestamp(Handle, ref timestamp) && _handle != IntPtr.Zero) {
@@ -660,32 +672,12 @@ namespace Barely {
         }
       }
 
-      public static float Scale_GetPitch(Barely.Scale scale, int degree) {
-        float pitch = 0.0f;
-        _scale.pitches = scale.Pitches;
-        _scale.pitchCount = scale.PitchCount;
-        _scale.rootPitch = scale.RootPitch;
-        _scale.mode = scale.Mode;
-        if (!BarelyScale_GetPitch(ref _scale, degree, ref pitch)) {
-          Debug.LogError("Failed to get scale " + scale + " note pitch with a degree " + degree);
-        }
-        return pitch;
-      }
-
       private delegate void TaskCallback(TaskEventType type, ref UInt32 userData);
       [AOT.MonoPInvokeCallback(typeof(TaskCallback))]
       private static void Task_OnEvent(TaskEventType type, ref UInt32 userData) {
         if (_tasks.TryGetValue(userData, out var task)) {
           Task.Internal.OnProcess(task, type);
         }
-      }
-
-      [StructLayout(LayoutKind.Sequential)]
-      private struct Slice {
-        public float[] samples;
-        public Int32 sampleCount;
-        public Int32 sampleRate;
-        public float rootPitch;
       }
 
       [StructLayout(LayoutKind.Sequential)]
@@ -706,6 +698,14 @@ namespace Barely {
         public Int32 pitchCount;
         public float rootPitch;
         public Int32 mode;
+      }
+
+      [StructLayout(LayoutKind.Sequential)]
+      private struct Slice {
+        public float[] samples;
+        public Int32 sampleCount;
+        public Int32 sampleRate;
+        public float rootPitch;
       }
 
       // Singleton engine handle.
@@ -907,6 +907,10 @@ namespace Barely {
       private static extern bool BarelyEngineConfig_GetRequiredAllocationSize(
           ref BarelyEngineConfig config, ref Int32 outAllocationSize);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
+      private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
+                                                      ref float outPitch);
+
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
       private static extern bool BarelyEngine_Create(ref BarelyEngineConfig config,
                                                      IntPtr allocation, Int32 allocationSize,
@@ -1004,10 +1008,6 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Stop")]
       private static extern bool BarelyPerformer_Stop(IntPtr engine, UInt32 performerId);
-
-      [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
-      private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
-                                                      ref float outPitch);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
       private static extern bool BarelyTask_Destroy(IntPtr engine, UInt32 taskId);

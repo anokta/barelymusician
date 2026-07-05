@@ -1,6 +1,7 @@
 VERS_1.0 {
   global:
     BarelyEngineConfig_GetRequiredAllocationSize;
+    BarelyScale_GetPitch;
     BarelyEngine_Create;
     BarelyEngine_CreateInstrument;
     BarelyEngine_CreatePerformer;
@@ -25,7 +26,6 @@ VERS_1.0 {
     BarelyPerformer_SetPosition;
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
-    BarelyScale_GetPitch;
     BarelyTask_Destroy;
     BarelyTask_IsActive;
     BarelyTask_SetCallback;

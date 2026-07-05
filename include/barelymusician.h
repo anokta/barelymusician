@@ -401,6 +401,23 @@ typedef void (*BarelyTaskCallback)(BarelyTaskEventType type, void* user_data);
 BARELY_API bool BarelyEngineConfig_GetRequiredAllocationSize(const BarelyEngineConfig* config,
                                                              int32_t* out_allocation_size);
 
+/// Gets the quantized position for a given position.
+///
+/// @param quantization Pointer to quantization.
+/// @param position Position.
+/// @param out_position Output position.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
+                                               double position, double* out_position);
+
+/// Gets the scale note pitch for a given degree.
+///
+/// @param scale Pointer to scale.
+/// @param degree Scale degree.
+/// @param out_pitch Output note pitch.
+/// @return True if successful, false otherwise.
+BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch);
+
 /// Creates a new engine.
 ///
 /// @param config Pointer to engine configuration.
@@ -674,23 +691,6 @@ BARELY_API bool BarelyTask_SetPosition(BarelyEngine* engine, uint32_t task_id, d
 /// @param priority Task priority.
 /// @return True if successful, false otherwise.
 BARELY_API bool BarelyTask_SetPriority(BarelyEngine* engine, uint32_t task_id, int32_t priority);
-
-/// Gets a quantized position.
-///
-/// @param quantization Pointer to quantization.
-/// @param position Position.
-/// @param out_position Output position.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization,
-                                               double position, double* out_position);
-
-/// Gets a scale note pitch for a given degree.
-///
-/// @param scale Pointer to scale.
-/// @param degree Scale degree.
-/// @param out_pitch Output note pitch.
-/// @return True if successful, false otherwise.
-BARELY_API bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch);
 
 #ifdef __cplusplus
 }  // extern "C"

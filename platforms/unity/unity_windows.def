@@ -2,6 +2,7 @@ LIBRARY "barelymusicianunity"
 
 EXPORTS
   BarelyEngineConfig_GetRequiredAllocationSize
+  BarelyScale_GetPitch
   BarelyEngine_Create
   BarelyEngine_CreateInstrument
   BarelyEngine_CreatePerformer
@@ -26,7 +27,6 @@ EXPORTS
   BarelyPerformer_SetPosition
   BarelyPerformer_Start
   BarelyPerformer_Stop
-  BarelyScale_GetPitch
   BarelyTask_Destroy
   BarelyTask_IsActive
   BarelyTask_SetCallback

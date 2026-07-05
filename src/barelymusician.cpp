@@ -51,6 +51,31 @@ bool BarelyEngineConfig_GetRequiredAllocationSize(const BarelyEngineConfig* conf
   return true;
 }
 
+bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization, double position,
+                                    double* out_position) {
+  if (!quantization) return false;
+  if (!out_position) return false;
+
+  *out_position = barely::Quantize(position, std::max(quantization->subdivision, 1),
+                                   std::clamp(quantization->amount, 0.0f, 1.0f));
+  return true;
+}
+
+bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch) {
+  if (scale == nullptr) return false;
+  if (scale->pitches == nullptr || scale->pitch_count == 0) return false;
+  if (out_pitch == nullptr) return false;
+
+  const int32_t scale_degree = degree + std::clamp(scale->mode, 0, scale->pitch_count);
+  const int octave = static_cast<int>(
+      std::floor(static_cast<float>(scale_degree) / static_cast<float>(scale->pitch_count)));
+  const int32_t index = scale_degree - octave * scale->pitch_count;
+  assert(index >= 0 && index < scale->pitch_count);
+  *out_pitch = scale->root_pitch + static_cast<float>(octave) + scale->pitches[index] -
+               scale->pitches[scale->mode];
+  return true;
+}
+
 bool BarelyEngine_Create(const BarelyEngineConfig* config, void* allocation,
                          int32_t allocation_size, BarelyEngine** out_engine) {
   if (!out_engine) return false;
@@ -372,30 +397,5 @@ bool BarelyTask_SetPriority(BarelyEngine* engine, uint32_t task_id, int32_t prio
 
   engine->controller.performer_controller().SetTaskPriority(engine->state.GetIdIndex(task_id),
                                                             priority);
-  return true;
-}
-
-bool BarelyQuantization_GetPosition(const BarelyQuantization* quantization, double position,
-                                    double* out_position) {
-  if (!quantization) return false;
-  if (!out_position) return false;
-
-  *out_position = barely::Quantize(position, std::max(quantization->subdivision, 1),
-                                   std::clamp(quantization->amount, 0.0f, 1.0f));
-  return true;
-}
-
-bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_pitch) {
-  if (scale == nullptr) return false;
-  if (scale->pitches == nullptr || scale->pitch_count == 0) return false;
-  if (out_pitch == nullptr) return false;
-
-  const int32_t scale_degree = degree + std::clamp(scale->mode, 0, scale->pitch_count);
-  const int octave = static_cast<int>(
-      std::floor(static_cast<float>(scale_degree) / static_cast<float>(scale->pitch_count)));
-  const int32_t index = scale_degree - octave * scale->pitch_count;
-  assert(index >= 0 && index < scale->pitch_count);
-  *out_pitch = scale->root_pitch + static_cast<float>(octave) + scale->pitches[index] -
-               scale->pitches[scale->mode];
   return true;
 }

@@ -118,28 +118,5 @@ TEST(EngineTest, ResetSeed) {
   }
 }
 
-TEST(ScaleTest, GetPitch) {
-  constexpr float kEpsilon = 1e-5f;
-
-  constexpr int kPitchCount = 5;
-  const std::array<float, kPitchCount> kPitches = {0.0f, 0.2f, 0.35f, 0.5f, 0.95f};
-  constexpr float kRootPitch = 1.75f;
-  constexpr int kMode = 1;
-
-  const Scale scale = {kPitches, kRootPitch, kMode};
-
-  constexpr int kOctaveRange = 2;
-  for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
-    for (int i = 0; i < kPitchCount; ++i) {
-      const int degree = octave * kPitchCount + i;
-      const float expected_pitch = kRootPitch +
-                                   // NOLINTNEXTLINE(bugprone-integer-division)
-                                   static_cast<float>(octave + (i + kMode) / kPitchCount) +
-                                   kPitches[(i + kMode) % kPitchCount] - kPitches[kMode];
-      EXPECT_NEAR(scale.GetPitch(degree), expected_pitch, kEpsilon) << degree;
-    }
-  }
-}
-
 }  // namespace
 }  // namespace barely

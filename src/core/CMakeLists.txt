@@ -6,6 +6,7 @@ barelymusician_target_sources(
   decibels.h
   pool.h
   rng.h
+  scale.h
   time.h
 )
 
@@ -14,6 +15,7 @@ if(ENABLE_TESTS)
     barelymusician_test PRIVATE
     decibels_test.cpp
     pool_test.cpp
+    scale_test.cpp
     time_test.cpp
   )
 endif()

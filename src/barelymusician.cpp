@@ -9,6 +9,7 @@
 
 #include "core/arena.h"
 #include "core/constants.h"
+#include "core/scale.h"
 #include "core/time.h"
 #include "engine/cmd.h"
 #include "engine/engine_controller.h"
@@ -66,13 +67,7 @@ bool BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree, float* out_p
   if (scale->pitches == nullptr || scale->pitch_count == 0) return false;
   if (out_pitch == nullptr) return false;
 
-  const int32_t scale_degree = degree + std::clamp(scale->mode, 0, scale->pitch_count);
-  const int octave = static_cast<int>(
-      std::floor(static_cast<float>(scale_degree) / static_cast<float>(scale->pitch_count)));
-  const int32_t index = scale_degree - octave * scale->pitch_count;
-  assert(index >= 0 && index < scale->pitch_count);
-  *out_pitch = scale->root_pitch + static_cast<float>(octave) + scale->pitches[index] -
-               scale->pitches[scale->mode];
+  *out_pitch = barely::GetPitch(*scale, degree);
   return true;
 }
 

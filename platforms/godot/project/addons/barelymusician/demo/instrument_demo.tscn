@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://fm3yw7k5t227"]
 
 [ext_resource type="Script" uid="uid://cx2ediq5nfg22" path="res://addons/barelymusician/demo/instrument_demo.gd" id="1"]
+[ext_resource type="BarelyScaleResource" uid="uid://b5mvfsn4cck8r" path="res://addons/barelymusician/demo/scales/c4_chromatic.tres" id="2_73stq"]
 [ext_resource type="AudioStream" uid="uid://7ue1c0xuhwr" path="res://addons/barelymusician/demo/data/sample.wav" id="2_sv68r"]
 
 [sub_resource type="BarelySliceResource" id="BarelySliceResource_sv68r"]
@@ -10,6 +11,7 @@ stream = ExtResource("2_sv68r")
 
 [node name="InstrumentDemo" type="Node" unique_id=854538286]
 script = ExtResource("1")
+scale = ExtResource("2_73stq")
 
 [node name="Instrument" type="BarelyInstrument" parent="." unique_id=1430736698]
 gain = 0.9

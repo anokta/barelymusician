@@ -1,0 +1,4 @@
+[gd_resource type="BarelyScaleResource" format=3 uid="uid://bqqtcr1wgbutq"]
+
+[resource]
+pitches = PackedFloat32Array(0, 0.167, 0.25, 0.417, 0.583, 0.667, 0.833)

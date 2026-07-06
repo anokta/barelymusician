@@ -2,6 +2,7 @@
 #include "godot/engine.h"
 #include "godot/instrument.h"
 #include "godot/performer.h"
+#include "godot/resources.h"
 #include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/core/memory.hpp"
 
@@ -21,6 +22,8 @@ void initialize_barelymusiciangodot(ModuleInitializationLevel level) {
   ClassDB::register_class<barely::godot::BarelyInstrument>();
   ClassDB::register_class<barely::godot::BarelyTaskResource>();
   ClassDB::register_class<barely::godot::BarelyPerformer>();
+  ClassDB::register_class<barely::godot::BarelyQuantizationResource>();
+  ClassDB::register_class<barely::godot::BarelyScaleResource>();
   ::godot::Engine::get_singleton()->register_singleton("BarelyEngine",
                                                        memnew(barely::godot::BarelyEngine));
 }

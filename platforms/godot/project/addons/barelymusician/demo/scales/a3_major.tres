@@ -1,0 +1,5 @@
+[gd_resource type="BarelyScaleResource" format=3 uid="uid://dtgwj14ygmfei"]
+
+[resource]
+pitches = PackedFloat32Array(0, 0.167, 0.333, 0.417, 0.583, 0.75, 0.917)
+root_pitch = -0.25

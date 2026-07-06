@@ -2,8 +2,9 @@ extends Node
 
 @onready var instrument: BarelyInstrument = $Instrument
 
+@export var scale: BarelyScaleResource
+
 const OCTAVE_KEYS = ['A', 'W', 'S', 'E', 'D', 'F', 'T', 'G', 'Y', 'H', 'U', 'J', 'K']
-const ROOT_PITCH = 0.0
 const MAX_OCTAVE_SHIFT = 4
 
 var gain = 1.0
@@ -53,7 +54,7 @@ func _input(event):
 
 		var key_index = OCTAVE_KEYS.find(key_string)
 		if key_index != -1:
-			var pitch = ROOT_PITCH + octave_shift + (key_index / 12.0)
+			var pitch = scale.get_pitch(scale.get_pitch_count() * octave_shift + key_index)
 			if not active_notes.has(key_string):
 				instrument.set_note_on(pitch, gain)
 				active_notes[key_string] = pitch

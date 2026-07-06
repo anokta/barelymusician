@@ -22,6 +22,8 @@ add_library(
   instrument.h
   performer.cpp
   performer.h
+  resources.cpp
+  resources.h
   godot.cpp
 )
 target_compile_definitions(

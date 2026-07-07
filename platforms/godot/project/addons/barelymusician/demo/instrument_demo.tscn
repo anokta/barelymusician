@@ -4,7 +4,7 @@
 [ext_resource type="BarelyScaleResource" uid="uid://b5mvfsn4cck8r" path="res://addons/barelymusician/demo/scales/c4_chromatic.tres" id="2_73stq"]
 [ext_resource type="AudioStream" uid="uid://7ue1c0xuhwr" path="res://addons/barelymusician/demo/data/sample.wav" id="2_sv68r"]
 
-[sub_resource type="BarelySliceResource" id="BarelySliceResource_sv68r"]
+[sub_resource type="BarelySliceResource" id="BarelySliceResource_73stq"]
 stream = ExtResource("2_sv68r")
 
 [sub_resource type="LabelSettings" id="LabelSettings_8q8q8"]
@@ -16,7 +16,7 @@ scale = ExtResource("2_73stq")
 [node name="Instrument" type="BarelyInstrument" parent="." unique_id=1430736698]
 gain = 0.9
 slice_mode = 1
-slice = SubResource("BarelySliceResource_sv68r")
+slices = Array[BarelySliceResource]([SubResource("BarelySliceResource_73stq")])
 osc_shape = 0.2
 delay_send = 0.1
 reverb_send = 0.5

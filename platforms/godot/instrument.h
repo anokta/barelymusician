@@ -12,6 +12,7 @@
 #include "godot_cpp/classes/node.hpp"
 #include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
+#include "godot_cpp/variant/typed_array.hpp"
 
 namespace barely::godot {
 
@@ -82,8 +83,8 @@ class BarelyInstrument : public ::godot::Node {
   void set_note_on(float pitch, float gain = 1.0f, float pitch_shift = 0.0f);
   bool is_note_on(float pitch) const { return pitches_.contains(pitch); }
 
-  void set_slice(const ::godot::Ref<BarelySliceResource>& slice);
-  ::godot::Ref<BarelySliceResource> get_slice() const { return slice_; }
+  void set_slices(const ::godot::TypedArray<::godot::Ref<BarelySliceResource>>& slices);
+  ::godot::TypedArray<::godot::Ref<BarelySliceResource>> get_slices() const { return slices_; };
 
  private:
   GDCLASS(BarelyInstrument, ::godot::Node);
@@ -91,10 +92,10 @@ class BarelyInstrument : public ::godot::Node {
   void _on_slice_changed();
 
   uint32_t instrument_id_ = 0;
-  ::godot::Ref<BarelySliceResource> slice_;
+  ::godot::TypedArray<::godot::Ref<BarelySliceResource>> slices_;
   // TODO(#181): Remove heap allocations.
+  std::vector<std::vector<float>> slice_buffers_;
   std::unordered_set<float> pitches_;
-  std::vector<float> slice_buffer_;
 
   BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_DECLARE_GODOT_INSTRUMENT_CONTROL);
 };

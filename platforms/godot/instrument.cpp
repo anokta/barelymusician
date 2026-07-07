@@ -23,6 +23,7 @@ using ::godot::PropertyHint;
 using ::godot::PropertyInfo;
 using ::godot::Ref;
 using ::godot::StringName;
+using ::godot::TypedArray;
 using ::godot::Variant;
 
 #define BARELY_BIND_GODOT_ENUM_VALUE(EnumType, Name, Value)                \
@@ -109,13 +110,20 @@ void BarelyInstrument::set_note_on(float pitch, float gain, float pitch_shift) {
   }
 }
 
-void BarelyInstrument::set_slice(const Ref<BarelySliceResource>& slice) {
-  if (slice_.is_valid()) {
-    slice_->disconnect("slice_changed", Callable(this, "_on_slice_changed"));
+void BarelyInstrument::set_slices(const TypedArray<Ref<BarelySliceResource>>& slices) {
+  for (int i = 0; i < slices_.size(); ++i) {
+    Ref<BarelySliceResource> slice = slices_[i];
+    if (slice.is_valid()) {
+      slice->disconnect("slice_changed", Callable(this, "_on_slice_changed"));
+    }
   }
-  slice_ = slice;
-  if (slice_.is_valid()) {
-    slice_->connect("slice_changed", Callable(this, "_on_slice_changed"), Object::CONNECT_DEFERRED);
+  slices_ = slices;
+  for (int i = 0; i < slices_.size(); ++i) {
+    Ref<BarelySliceResource> slice = slices_[i];
+    if (slice.is_valid()) {
+      slice->connect("slice_changed", Callable(this, "_on_slice_changed"),
+                     Object::CONNECT_DEFERRED);
+    }
   }
   _on_slice_changed();
 }
@@ -126,8 +134,8 @@ void BarelyInstrument::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_note_on", "pitch", "gain", "pitch_shift"),
                        &BarelyInstrument::set_note_on, DEFVAL(1.0f), DEFVAL(0.0f));
   ClassDB::bind_method(D_METHOD("is_note_on", "pitch"), &BarelyInstrument::is_note_on);
-  ClassDB::bind_method(D_METHOD("set_slice", "slice"), &BarelyInstrument::set_slice);
-  ClassDB::bind_method(D_METHOD("get_slice"), &BarelyInstrument::get_slice);
+  ClassDB::bind_method(D_METHOD("set_slices", "slices"), &BarelyInstrument::set_slices);
+  ClassDB::bind_method(D_METHOD("get_slices"), &BarelyInstrument::get_slices);
 
   ClassDB::bind_method(D_METHOD("_on_slice_changed"), &BarelyInstrument::_on_slice_changed);
 
@@ -168,9 +176,9 @@ void BarelyInstrument::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::INT, "slice_mode", PropertyHint::PROPERTY_HINT_ENUM,
                             "Sustain,Loop,Once"),
                "set_slice_mode", "get_slice_mode");
-  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "slice", PropertyHint::PROPERTY_HINT_RESOURCE_TYPE,
+  ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "slices", PropertyHint::PROPERTY_HINT_ARRAY_TYPE,
                             "BarelySliceResource"),
-               "set_slice", "get_slice");
+               "set_slices", "get_slices");
 
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "osc_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
@@ -228,71 +236,83 @@ void BarelyInstrument::_bind_methods() {
 }
 
 void BarelyInstrument::_on_slice_changed() {
-  if (!slice_buffer_.empty()) {
+  if (!slice_buffers_.empty()) {
     BarelyInstrument_SetSampleData(BarelyEngine::get_singleton()->get(), instrument_id_, nullptr,
                                    0);
-    slice_buffer_.clear();
+    slice_buffers_.clear();
   }
 
-  if (slice_.is_null()) {
+  if (slices_.is_empty()) {
     return;
   }
 
-  Ref<AudioStreamWAV> stream = slice_->get_stream();
-  if (stream.is_null()) {
-    return;
+  std::vector<BarelySlice> sample_data(slices_.size(), BarelySlice{nullptr, 0, 0, 0.0f});
+  slice_buffers_.resize(slices_.size());
+
+  for (int i = 0; i < slices_.size(); ++i) {
+    const Ref<BarelySliceResource>& slice = slices_[i];
+    if (slice.is_null()) {
+      continue;
+    }
+
+    Ref<AudioStreamWAV> stream = slice->get_stream();
+    if (stream.is_null()) {
+      continue;
+    }
+
+    const auto& data = stream->get_data();
+    const uint8_t* bytes = data.ptr();
+    const int byte_count = data.size();
+
+    const auto format = stream->get_format();
+    const int32_t sample_rate = stream->get_mix_rate();
+
+    auto& samples = slice_buffers_[i];
+    if (format == AudioStreamWAV::FORMAT_16_BITS) {
+      const int16_t* pcm_bytes = reinterpret_cast<const int16_t*>(bytes);
+      const int count = byte_count / sizeof(int16_t);
+      samples.resize(count);
+      for (int i = 0; i < count; ++i) {
+        static constexpr float kMaxSample = 32768.0f;
+        samples[i] = pcm_bytes[i] / kMaxSample;
+      }
+    } else if (format == AudioStreamWAV::FORMAT_8_BITS) {
+      samples.resize(byte_count);
+      for (int i = 0; i < byte_count; ++i) {
+        static constexpr float kMaxSample = 128.0f;
+        samples[i] = (bytes[i] - 128) / kMaxSample;
+      }
+    } else if (format == AudioStreamWAV::FORMAT_QOA) {
+      Ref<AudioStreamPlayback> playback = stream->instantiate_playback();
+      if (!playback.is_valid()) {
+        continue;
+      }
+      playback->start(0.0);
+
+      const float length = stream->get_length();
+      samples.reserve(static_cast<int32_t>(length * static_cast<float>(sample_rate)));
+
+      static constexpr int kQoaFrameCount = 512;
+      while (playback->is_playing()) {
+        const auto frames = playback->mix_audio(1.0f, kQoaFrameCount);
+        if (frames.size() == 0) {
+          break;
+        }
+        for (int i = 0; i < static_cast<int>(frames.size()); ++i) {
+          const auto& frame = frames.ptr()[i];
+          samples.push_back(0.5f * (frame.x + frame.y));
+        }
+      }
+    } else {
+      continue;  // TODO(#181): Support all formats.
+    }
+
+    sample_data[i] = {samples.data(), static_cast<int32_t>(samples.size()), sample_rate,
+                      slice->get_root_pitch()};
   }
 
-  const auto& data = stream->get_data();
-  const uint8_t* bytes = data.ptr();
-  const int byte_count = data.size();
-
-  const auto format = stream->get_format();
-  const int32_t sample_rate = stream->get_mix_rate();
-
-  if (format == AudioStreamWAV::FORMAT_16_BITS) {
-    const int16_t* pcm_bytes = (int16_t*)bytes;
-    const int count = byte_count / sizeof(int16_t);
-    slice_buffer_.resize(count);
-    for (int i = 0; i < count; ++i) {
-      static constexpr float kMaxSample = 32768.0f;
-      slice_buffer_[i] = pcm_bytes[i] / kMaxSample;
-    }
-  } else if (format == AudioStreamWAV::FORMAT_8_BITS) {
-    slice_buffer_.resize(byte_count);
-    for (int i = 0; i < byte_count; ++i) {
-      static constexpr float kMaxSample = 128.0f;
-      slice_buffer_[i] = (bytes[i] - 128) / kMaxSample;
-    }
-  } else if (format == AudioStreamWAV::FORMAT_QOA) {
-    Ref<AudioStreamPlayback> playback = stream->instantiate_playback();
-    if (!playback.is_valid()) {
-      return;
-    }
-    playback->start(0.0);
-
-    const float length = stream->get_length();
-    slice_buffer_.reserve(static_cast<int32_t>(length * static_cast<float>(sample_rate)));
-
-    static constexpr int kQoaFrameCount = 512;
-    while (playback->is_playing()) {
-      const auto frames = playback->mix_audio(1.0f, kQoaFrameCount);
-      if (frames.size() == 0) {
-        break;
-      }
-      for (int i = 0; i < static_cast<int>(frames.size()); ++i) {
-        const auto& frame = frames.ptr()[i];
-        slice_buffer_.push_back(0.5f * (frame.x + frame.y));
-      }
-    }
-  } else {
-    return;  // TODO(#181): Support all formats.
-  }
-
-  const BarelySlice sample_data{slice_buffer_.data(), static_cast<int32_t>(slice_buffer_.size()),
-                                sample_rate, slice_->get_root_pitch()};
-  BarelyInstrument_SetSampleData(BarelyEngine::get_singleton()->get(), instrument_id_, &sample_data,
-                                 1);
+  BarelyInstrument_SetSampleData(BarelyEngine::get_singleton()->get(), instrument_id_,
+                                 sample_data.data(), static_cast<int32_t>(sample_data.size()));
 }
 
 }  // namespace barely::godot

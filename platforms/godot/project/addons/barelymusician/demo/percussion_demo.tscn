@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://b1qemp0dvpk6y"]
+
+[ext_resource type="Script" uid="uid://cx2ediq5nfg22" path="res://addons/barelymusician/demo/instrument_demo.gd" id="1_gh3bu"]
+[ext_resource type="BarelyScaleResource" uid="uid://b5mvfsn4cck8r" path="res://addons/barelymusician/demo/scales/c4_chromatic.tres" id="2_wp1ff"]
+[ext_resource type="AudioStream" uid="uid://ckwfallmnbmj1" path="res://addons/barelymusician/demo/data/basic_kick.wav" id="3_irfnd"]
+[ext_resource type="AudioStream" uid="uid://dflgt3eeqb7s1" path="res://addons/barelymusician/demo/data/basic_snare.wav" id="4_duuls"]
+[ext_resource type="AudioStream" uid="uid://b77ymswijvykk" path="res://addons/barelymusician/demo/data/basic_hihat_closed.wav" id="5_wc5bb"]
+[ext_resource type="AudioStream" uid="uid://cxe0id7oco4je" path="res://addons/barelymusician/demo/data/basic_hihat_open.wav" id="6_s828t"]
+
+[sub_resource type="BarelySliceResource" id="BarelySliceResource_73stq"]
+stream = ExtResource("3_irfnd")
+
+[sub_resource type="BarelySliceResource" id="BarelySliceResource_gh3bu"]
+stream = ExtResource("4_duuls")
+root_pitch = 0.17
+
+[sub_resource type="BarelySliceResource" id="BarelySliceResource_wp1ff"]
+stream = ExtResource("5_wc5bb")
+root_pitch = 0.33
+
+[sub_resource type="BarelySliceResource" id="BarelySliceResource_37j0x"]
+stream = ExtResource("6_s828t")
+root_pitch = 0.42
+
+[sub_resource type="LabelSettings" id="LabelSettings_8q8q8"]
+
+[node name="PercussionDemo" type="Node" unique_id=854538286]
+script = ExtResource("1_gh3bu")
+scale = ExtResource("2_wp1ff")
+
+[node name="Instrument" type="BarelyInstrument" parent="." unique_id=1430736698]
+gain = 0.9
+attack = 0.0
+release = 0.0
+slice_mode = 2
+slices = Array[BarelySliceResource]([SubResource("BarelySliceResource_73stq"), SubResource("BarelySliceResource_gh3bu"), SubResource("BarelySliceResource_wp1ff"), SubResource("BarelySliceResource_37j0x")])
+osc_mix = 0.0
+delay_send = 0.15
+reverb_send = 0.75
+retrigger = true
+
+[node name="Label" type="Label" parent="." unique_id=1759105466]
+offset_right = 800.0
+offset_bottom = 600.0
+text = "BarelyMusician Percussion Demo
+
+* Use ASDFFGHJK keys to play the white notes in an octave
+* Use WETYU keys to play the black notes in an octave
+* Use ZX keys to shift octave up and down
+* Use CV keys to adjust note gain up and down"
+label_settings = SubResource("LabelSettings_8q8q8")
+autowrap_mode = 2

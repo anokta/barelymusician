@@ -81,16 +81,14 @@ int main(void) {
   // Initialize the engine.
   BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   config.max_frame_count = kFrameCount;
-  int32_t allocation_size = 0;
-  BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
   printf("Allocating %.2f KB...\n", (float)allocation_size / 1024.0f);
   void* allocation = malloc(allocation_size);
 
-  BarelyEngine* engine = NULL;
-  BarelyEngine_Create(&config, allocation, allocation_size, &engine);
+  BarelyEngine* engine = BarelyEngine_Create(&config, allocation, allocation_size);
   BarelyEngine_SetTempo(engine, kTempo);
 
-  BarelyEngine_CreateInstrument(engine, &g_instrument_id);
+  g_instrument_id = BarelyEngine_CreateInstrument(engine);
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kGain, kGain);
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kOscMix, 1.0f);
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kOscShape,
@@ -100,13 +98,11 @@ int main(void) {
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kRelease,
                               kRelease);
 
-  uint32_t performer_id = 0;
-  BarelyEngine_CreatePerformer(engine, &performer_id);
-  uint32_t task_ids[kMelodyNoteCount];
+  const uint32_t performer_id = BarelyEngine_CreatePerformer(engine);
   for (int i = 0; i < kMelodyNoteCount; ++i) {
     BarelyPerformer_CreateTask(engine, performer_id, kMelodyPositions[i],
                                kMelodyPositions[i + 1] - kMelodyPositions[i], 0, TaskCallback,
-                               engine, &task_ids[i]);
+                               engine);
   }
 
   // Initialize the audio device.

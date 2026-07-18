@@ -16,9 +16,6 @@ class Processor extends AudioWorkletProcessor {
     this._engine = null;
 
     this._allocationPtr = null;
-    this._doublePtr = null;
-    this._uint8Ptr = null;
-    this._uint32Ptr = null;
     this._outputSamplesPtr = null;
 
     this._pendingEventCallbacks = [];
@@ -31,10 +28,7 @@ class Processor extends AudioWorkletProcessor {
     Module().then(module => {
       this._module = module;
 
-      // No need to call `_free` as these will be freed as part of the module teardown.
-      this._doublePtr = this._module._malloc(Float64Array.BYTES_PER_ELEMENT);
-      this._uint8Ptr = this._module._malloc(Uint8Array.BYTES_PER_ELEMENT);
-      this._uint32Ptr = this._module._malloc(Uint32Array.BYTES_PER_ELEMENT);
+      // No need to call `_free` as this will be freed as part of the module teardown.
       this._outputSamplesPtr = this._module._malloc(
           STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float32Array.BYTES_PER_ELEMENT);
 
@@ -49,12 +43,10 @@ class Processor extends AudioWorkletProcessor {
       configView[6] = 128;                  // max_slice_count
       configView[7] = 128;                  // max_voice_count
 
-      this._module._BarelyEngineConfig_GetRequiredAllocationSize(configPtr, this._uint32Ptr);
-      const allocationSize = this._module.getValue(this._uint32Ptr, 'i32');
+      const allocationSize = this._module._BarelyEngineConfig_GetRequiredAllocationSize(configPtr);
       this._allocationPtr = this._module._malloc(allocationSize * Uint8Array.BYTES_PER_ELEMENT);
-      this._module._BarelyEngine_Create(
-          configPtr, this._allocationPtr, allocationSize, this._uint32Ptr);
-      this._engine = this._module.getValue(this._uint32Ptr, 'i32');
+      this._engine =
+          this._module._BarelyEngine_Create(configPtr, this._allocationPtr, allocationSize);
 
       this._module._free(configPtr);
 
@@ -85,14 +77,17 @@ class Processor extends AudioWorkletProcessor {
 
       const performer_properties = [];
       for (const [handle, value] of this._performers) {
-        this._module._BarelyPerformer_GetPosition(this._engine, value.performerId, this._doublePtr);
-        performer_properties.push(
-            {handle, position: this._module.getValue(this._doublePtr, 'double')});
+        performer_properties.push({
+          handle,
+          position: this._module._BarelyPerformer_GetPosition(this._engine, value.performerId),
+        });
       }
       const task_properties = [];
       for (const [handle, value] of this._tasks) {
-        this._module._BarelyTask_IsActive(this._engine, value.taskId, this._uint8Ptr);
-        task_properties.push({handle, isActive: (this._module.getValue(this._uint8Ptr) !== 0)});
+        task_properties.push({
+          handle,
+          isActive: this._module._BarelyTask_IsActive(this._engine, value.taskId),
+        });
       }
 
       if (performer_properties.length > 0 || task_properties.length > 0 ||
@@ -151,8 +146,7 @@ class Processor extends AudioWorkletProcessor {
         this._module._BarelyEngine_SetTempo(this._engine, command.tempo);
         break;
       case CommandType.INSTRUMENT_CREATE: {
-        this._module._BarelyEngine_CreateInstrument(this._engine, this._uint32Ptr);
-        const instrumentId = this._module.getValue(this._uint32Ptr, 'i32');
+        const instrumentId = this._module._BarelyEngine_CreateInstrument(this._engine);
         if (!instrumentId) return;
         for (const controlTypeIndex in INSTRUMENT_CONTROLS) {
           this._module._BarelyInstrument_SetControl(
@@ -220,8 +214,7 @@ class Processor extends AudioWorkletProcessor {
         this._setInstrumentSampleData(instrumentId, command.slices);
       } break;
       case CommandType.PERFORMER_CREATE: {
-        this._module._BarelyEngine_CreatePerformer(this._engine, this._uint32Ptr);
-        const performerId = this._module.getValue(this._uint32Ptr, 'i32');
+        const performerId = this._module._BarelyEngine_CreatePerformer(this._engine);
         this._performers.set(command.handle, {performerId});
       } break;
       case CommandType.PERFORMER_DESTROY: {
@@ -266,15 +259,14 @@ class Processor extends AudioWorkletProcessor {
         if (!performerId) return;
         const otherPerformerId = this._performers.get(command.otherHandle)?.performerId;
         if (!otherPerformerId) return;
-        this._module._BarelyPerformer_GetPosition(this._engine, otherPerformerId, this._doublePtr);
         this._module._BarelyPerformer_SetPosition(
-            this._engine, performerId, this._module.getValue(this._doublePtr, 'double'));
+            this._engine, performerId,
+            this._module._BarelyPerformer_GetPosition(this._engine, otherPerformerId));
       } break;
       case CommandType.TASK_CREATE: {
-        this._module._BarelyPerformer_CreateTask(
+        const taskId = this._module._BarelyPerformer_CreateTask(
             this._engine, this._performers.get(command.performerHandle)?.performerId ?? 0,
-            command.position, command.duration, command.priority, null, null, this._uint32Ptr);
-        const taskId = this._module.getValue(this._uint32Ptr, 'i32');
+            command.position, command.duration, command.priority, null, null);
 
         const TaskEventType = Object.freeze({
           BEGIN: 0,

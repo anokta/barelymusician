@@ -25,11 +25,7 @@ void BarelyQuantizationResource::set_amount(float amount) {
 }
 
 double BarelyQuantizationResource::get_position(double position) const {
-  double quantized_position = 0.0;
-  if (!BarelyQuantization_GetPosition(&quantization_, position, &quantized_position)) {
-    return position;
-  }
-  return quantized_position;
+  return BarelyQuantization_GetPosition(&quantization_, position);
 }
 
 void BarelyQuantizationResource::_bind_methods() {
@@ -68,11 +64,7 @@ void BarelyScaleResource::set_mode(int32_t mode) {
 }
 
 float BarelyScaleResource::get_pitch(int32_t degree) const {
-  float pitch = 0.0f;
-  if (!BarelyScale_GetPitch(&scale_, degree, &pitch)) {
-    return 0.0f;
-  }
-  return pitch;
+  return BarelyScale_GetPitch(&scale_, degree);
 }
 
 void BarelyScaleResource::_bind_methods() {

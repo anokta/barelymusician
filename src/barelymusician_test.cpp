@@ -14,57 +14,44 @@ constexpr int kSampleRate = 48000;
 
 TEST(BarelyEngineTest, CreateDestroyEngine) {
   // Failures.
-  EXPECT_FALSE(BarelyEngine_Create(nullptr, nullptr, 0, nullptr));
-  EXPECT_FALSE(BarelyEngine_Destroy(nullptr));
+  EXPECT_TRUE(BarelyEngine_Create(nullptr, nullptr, 0) == nullptr);
 
   // Success.
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
-  int32_t allocation_size = 0;
-  BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
   std::vector<std::byte> allocation(allocation_size);
-  BarelyEngine* engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(&config, allocation.data(), allocation_size, &engine));
-  EXPECT_TRUE(BarelyEngine_Destroy(engine));
+  BarelyEngine* engine = BarelyEngine_Create(&config, allocation.data(), allocation_size);
+  EXPECT_TRUE(engine != nullptr);
+
+  BarelyEngine_Destroy(engine);
 }
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
-  int32_t allocation_size = 0;
-  BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
   std::vector<std::byte> allocation(allocation_size);
-  BarelyEngine* engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(&config, allocation.data(), allocation_size, &engine));
+  BarelyEngine* engine = BarelyEngine_Create(&config, allocation.data(), allocation_size);
+  EXPECT_TRUE(engine != nullptr);
 
-  // Failures.
-  EXPECT_FALSE(BarelyEngine_CreateInstrument(engine, nullptr));
-  EXPECT_FALSE(BarelyInstrument_Destroy(nullptr, {}));
+  const uint32_t instrument_id = BarelyEngine_CreateInstrument(engine);
+  EXPECT_NE(instrument_id, 0);
 
-  // Success.
-  uint32_t instrument_id = 0;
-  EXPECT_TRUE(BarelyEngine_CreateInstrument(engine, &instrument_id));
-
-  EXPECT_TRUE(BarelyInstrument_Destroy(engine, instrument_id));
-  EXPECT_TRUE(BarelyEngine_Destroy(engine));
+  BarelyInstrument_Destroy(engine, instrument_id);
+  BarelyEngine_Destroy(engine);
 }
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
-  int32_t allocation_size = 0;
-  BarelyEngineConfig_GetRequiredAllocationSize(&config, &allocation_size);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
   std::vector<std::byte> allocation(allocation_size);
-  BarelyEngine* engine = nullptr;
-  EXPECT_TRUE(BarelyEngine_Create(&config, allocation.data(), allocation_size, &engine));
+  BarelyEngine* engine = BarelyEngine_Create(&config, allocation.data(), allocation_size);
+  EXPECT_TRUE(engine != nullptr);
 
-  // Failures.
-  EXPECT_FALSE(BarelyEngine_CreatePerformer(engine, nullptr));
-  EXPECT_FALSE(BarelyPerformer_Destroy(nullptr, {}));
+  const uint32_t performer_id = BarelyEngine_CreatePerformer(engine);
+  EXPECT_NE(performer_id, 0);
 
-  // Success.
-  uint32_t performer_id = 0;
-  EXPECT_TRUE(BarelyEngine_CreatePerformer(engine, &performer_id));
-
-  EXPECT_TRUE(BarelyPerformer_Destroy(engine, performer_id));
-  EXPECT_TRUE(BarelyEngine_Destroy(engine));
+  BarelyPerformer_Destroy(engine, performer_id);
+  BarelyEngine_Destroy(engine);
 }
 
 TEST(EngineTest, CreateDestroyEngine) { [[maybe_unused]] const Engine engine(kSampleRate); }

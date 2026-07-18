@@ -11,7 +11,7 @@
 namespace barely {
 
 [[nodiscard]] inline float GetPitch(const BarelyScale& scale, int32_t degree) noexcept {
-  assert(scale.pitches != nullptr && scale.pitch_count > 0);
+  if (scale.pitches == nullptr || scale.pitch_count <= 0) return 0.0f;
   const int32_t scale_degree = degree + std::clamp(scale.mode, 0, scale.pitch_count);
   const int octave = static_cast<int>(
       std::floor(static_cast<float>(scale_degree) / static_cast<float>(scale.pitch_count)));

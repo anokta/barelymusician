@@ -71,7 +71,7 @@ void BarelySliceResource::_bind_methods() {
 
 BarelyInstrument::BarelyInstrument() {
   ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
-  BarelyEngine_CreateInstrument(engine, &instrument_id_);
+  instrument_id_ = BarelyEngine_CreateInstrument(engine);
   BARELY_GODOT_INSTRUMENT_CONTROLS(BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL);
 }
 

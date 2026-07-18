@@ -68,7 +68,6 @@ namespace Barely {
     public ProcessEvent OnProcessEvent;
 
     /// Constructs a new `Task`.
-    ///
     /// @param position Task position in beats.
     /// @param duration Task duration in beats.
     /// @param priority Task priority.
@@ -84,11 +83,10 @@ namespace Barely {
     }
 
     ~Task() {
-      Engine.Internal.Task_Destroy(Performer.Internal.GetId(_performer), ref _id);
+      Engine.Internal.Task_Destroy(ref _id);
     }
 
     /// Updates the task.
-    ///
     /// @param performer Performer.
     public void Update(Performer performer) {
       if (_performer == performer && _id > 0) {
@@ -97,7 +95,7 @@ namespace Barely {
         Priority = _priority;
         return;
       }
-      Engine.Internal.Task_Destroy(Performer.Internal.GetId(_performer), ref _id);
+      Engine.Internal.Task_Destroy(ref _id);
       _performer = performer;
       if (_performer != null) {
         Engine.Internal.Task_Create(this, Performer.Internal.GetId(_performer), _position,

@@ -206,7 +206,6 @@ namespace Barely {
     public int VoiceCount = 8;
 
     /// Note off callback.
-    ///
     /// @param pitch Note pitch.
     public delegate void NoteOffCallback(float pitch);
     public event NoteOffCallback OnNoteOff;
@@ -216,7 +215,6 @@ namespace Barely {
     public NoteOffEvent OnNoteOffEvent;
 
     /// Note on callback.
-    ///
     /// @param pitch Note pitch.
     public delegate void NoteOnCallback(float pitch);
     public event NoteOnCallback OnNoteOn;
@@ -229,7 +227,6 @@ namespace Barely {
     public HashSet<float> Pitches { get; private set; } = new HashSet<float>();
 
     /// Returns whether a note is on or not.
-    ///
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
     public bool IsNoteOn(float pitch) {
@@ -248,7 +245,6 @@ namespace Barely {
     }
 
     /// Sets the gain of a note.
-    ///
     /// @param pitch Note pitch.
     /// @param gain Note gain.
     public void SetNoteGain(float pitch, float gain) {
@@ -257,7 +253,6 @@ namespace Barely {
     }
 
     /// Sets a note off.
-    ///
     /// @param pitch Note pitch.
     public void SetNoteOff(float pitch) {
       if (Pitches.Remove(pitch)) {
@@ -268,7 +263,6 @@ namespace Barely {
     }
 
     /// Sets the pitch shift of a note.
-    ///
     /// @param pitch Note pitch.
     /// @param pitchShift Note pitch shift.
     public void SetNotePitchShift(float pitch, float pitchShift) {
@@ -277,7 +271,6 @@ namespace Barely {
     }
 
     /// Sets a note on.
-    ///
     /// @param pitch Note pitch.
     /// @param gain Note gain.
     /// @param pitchShift Note pitch shift.

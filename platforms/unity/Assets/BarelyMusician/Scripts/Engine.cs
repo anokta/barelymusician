@@ -416,35 +416,23 @@ namespace Barely {
       }
 
       public static float Scale_GetPitch(Barely.Scale scale, int degree) {
-        float pitch = 0.0f;
         _scale.pitches = scale.Pitches;
         _scale.pitchCount = scale.PitchCount;
         _scale.rootPitch = scale.RootPitch;
         _scale.mode = scale.Mode;
-        if (!BarelyScale_GetPitch(ref _scale, degree, ref pitch)) {
-          Debug.LogError("Failed to get scale " + scale + " note pitch with a degree " + degree);
-        }
-        return pitch;
+        return BarelyScale_GetPitch(ref _scale, degree);
       }
 
       public static double Engine_GetTimestamp() {
-        double timestamp = 0.0;
-        if (!BarelyEngine_GetTimestamp(Handle, ref timestamp) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get engine timestamp");
-        }
-        return timestamp;
+        return BarelyEngine_GetTimestamp(Handle);
       }
 
       public static void Engine_SetControl(EngineControlType type, float value) {
-        if (!BarelyEngine_SetControl(Handle, type, value) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set engine engine control");
-        }
+        BarelyEngine_SetControl(Handle, type, value);
       }
 
       public static void Engine_SetTempo(double tempo) {
-        if (!BarelyEngine_SetTempo(Handle, tempo) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set engine tempo");
-        }
+        BarelyEngine_SetTempo(Handle, tempo);
       }
 
       public static void Instrument_Create(Instrument instrument, ref UInt32 instrumentId) {
@@ -453,10 +441,11 @@ namespace Barely {
           _isShuttingDown = false;
         }
 #endif  // UNITY_EDITOR
-        if (Handle == IntPtr.Zero || _handle != IntPtr.Zero && instrumentId > 0) {
+        if (instrumentId > 0 || Handle == IntPtr.Zero) {
           return;
         }
-        if (!BarelyEngine_CreateInstrument(_handle, ref instrumentId)) {
+        instrumentId = BarelyEngine_CreateInstrument(_handle);
+        if (instrumentId == 0) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "'");
           return;
         }
@@ -464,13 +453,10 @@ namespace Barely {
       }
 
       public static void Instrument_Destroy(ref UInt32 instrumentId) {
-        if (Handle == IntPtr.Zero || instrumentId == 0) {
-          instrumentId = 0;
+        if (instrumentId == 0) {
           return;
         }
-        if (!BarelyInstrument_Destroy(_handle, instrumentId)) {
-          Debug.LogError("Failed to destroy instrument");
-        }
+        BarelyInstrument_Destroy(_handle, instrumentId);
         _instruments.Remove(instrumentId);
         _slices.Remove(instrumentId);
         instrumentId = 0;
@@ -478,33 +464,20 @@ namespace Barely {
 
       public static void Instrument_SetControl(UInt32 instrumentId, InstrumentControlType type,
                                                float value) {
-        if (!BarelyInstrument_SetControl(Handle, instrumentId, type, value) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to set instrument control " + type + " value to " + value);
-        }
+        BarelyInstrument_SetControl(_handle, instrumentId, type, value);
       }
 
       public static void Instrument_SetNoteControl(UInt32 instrumentId, float pitch,
                                                    NoteControlType type, float value) {
-        if (!BarelyInstrument_SetNoteControl(Handle, instrumentId, pitch, type, value) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to set instrument note " + pitch + " control " + type +
-                         " value to " + value);
-        }
+        BarelyInstrument_SetNoteControl(_handle, instrumentId, pitch, type, value);
       }
 
       public static void Instrument_SetNoteOff(UInt32 instrumentId, float pitch) {
-        if (!BarelyInstrument_SetNoteOff(Handle, instrumentId, pitch) && _handle != IntPtr.Zero &&
-            instrumentId > 0) {
-          Debug.LogError("Failed to stop instrument note " + pitch + "");
-        }
+        BarelyInstrument_SetNoteOff(_handle, instrumentId, pitch);
       }
 
       public static void Instrument_SetNoteOn(UInt32 instrumentId, float pitch) {
-        if (!BarelyInstrument_SetNoteOn(Handle, instrumentId, pitch) && _handle != IntPtr.Zero &&
-            instrumentId > 0) {
-          Debug.LogError("Failed to start instrument note " + pitch);
-        }
+        BarelyInstrument_SetNoteOn(_handle, instrumentId, pitch);
       }
 
       public static void Instrument_SetSampleData(UInt32 instrumentId,
@@ -526,10 +499,7 @@ namespace Barely {
             };
           }
         }
-        if (!BarelyInstrument_SetSampleData(Handle, instrumentId, slices, instrumentSlices.Count) &&
-            _handle != IntPtr.Zero && instrumentId > 0) {
-          Debug.LogError("Failed to set instrument sample data");
-        }
+        BarelyInstrument_SetSampleData(_handle, instrumentId, slices, instrumentSlices.Count);
         if (_slices != null) {
           _slices[instrumentId] = new List<float[]>();
           for (int i = 0; i < slices.Length; ++i) {
@@ -541,10 +511,11 @@ namespace Barely {
       }
 
       public static void Performer_Create(Performer performer, ref UInt32 performerId) {
-        if (Handle == IntPtr.Zero || _handle != IntPtr.Zero && performerId > 0) {
+        if (performerId > 0 || Handle == IntPtr.Zero) {
           return;
         }
-        if (!BarelyEngine_CreatePerformer(_handle, ref performerId)) {
+        performerId = BarelyEngine_CreatePerformer(_handle);
+        if (performerId == 0) {
           Debug.LogError("Failed to create performer '" + performer.name + "'");
           return;
         }
@@ -552,77 +523,52 @@ namespace Barely {
       }
 
       public static void Performer_Destroy(ref UInt32 performerId) {
-        if (Handle == IntPtr.Zero || performerId == 0) {
-          performerId = 0;
+        if (performerId == 0) {
           return;
         }
-        if (!BarelyPerformer_Destroy(_handle, performerId)) {
-          Debug.LogError("Failed to destroy performer");
-        }
+        BarelyPerformer_Destroy(_handle, performerId);
         _performers.Remove(performerId);
         performerId = 0;
       }
 
       public static double Performer_GetPosition(UInt32 performerId) {
-        double position = 0.0;
-        if (!BarelyPerformer_GetPosition(_handle, performerId, ref position) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to get performer position");
-        }
-        return position;
+        return BarelyPerformer_GetPosition(_handle, performerId);
       }
 
       public static void Performer_SetLoopBeginPosition(UInt32 performerId,
                                                         double loopBeginPosition) {
-        if (!BarelyPerformer_SetLoopBeginPosition(_handle, performerId, loopBeginPosition) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to set performer loop begin position");
-        }
+        BarelyPerformer_SetLoopBeginPosition(_handle, performerId, loopBeginPosition);
       }
 
       public static void Performer_SetLoopLength(UInt32 performerId, double loopLength) {
-        if (!BarelyPerformer_SetLoopLength(_handle, performerId, loopLength) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to set performer loop length");
-        }
+        BarelyPerformer_SetLoopLength(_handle, performerId, loopLength);
       }
 
       public static void Performer_SetLooping(UInt32 performerId, bool isLooping) {
-        if (!BarelyPerformer_SetLooping(_handle, performerId, isLooping) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to set performer looping");
-        }
+        BarelyPerformer_SetLooping(_handle, performerId, isLooping);
       }
 
       public static void Performer_SetPosition(UInt32 performerId, double position) {
-        if (!BarelyPerformer_SetPosition(_handle, performerId, position) &&
-            _handle != IntPtr.Zero && performerId > 0) {
-          Debug.LogError("Failed to set performer position");
-        }
+        BarelyPerformer_SetPosition(_handle, performerId, position);
       }
 
       public static void Performer_Start(UInt32 performerId) {
-        if (!BarelyPerformer_Start(_handle, performerId) && _handle != IntPtr.Zero &&
-            performerId > 0) {
-          Debug.LogError("Failed to start performer");
-        }
+        BarelyPerformer_Start(_handle, performerId);
       }
 
       public static void Performer_Stop(UInt32 performerId) {
-        if (!BarelyPerformer_Stop(_handle, performerId) && _handle != IntPtr.Zero &&
-            performerId > 0) {
-          Debug.LogError("Failed to stop performer");
-        }
+        BarelyPerformer_Stop(_handle, performerId);
       }
 
       public static void Task_Create(Task task, UInt32 performerId, double position,
                                      double duration, int priority, ref UInt32 taskId) {
-        if (Handle == IntPtr.Zero || _handle != IntPtr.Zero && taskId > 0) {
+        if (taskId > 0 || Handle == IntPtr.Zero) {
           return;
         }
-        if (!BarelyPerformer_CreateTask(_handle, performerId, position,
-                                        Math.Max(duration, _minTaskDuration), priority,
-                                        Task_OnEvent, ref taskId, ref taskId)) {
+        taskId = BarelyPerformer_CreateTask(_handle, performerId, position,
+                                            Math.Max(duration, _minTaskDuration), priority,
+                                            Task_OnEvent, ref taskId);
+        if (taskId == 0) {
           Debug.LogError("Failed to create task '" + task + "'");
           return;
         }
@@ -630,46 +576,29 @@ namespace Barely {
         BarelyTask_SetCallback(_handle, taskId, Task_OnEvent, ref taskId);
       }
 
-      public static void Task_Destroy(UInt32 performerId, ref UInt32 taskId) {
-        if (Handle == IntPtr.Zero || performerId == 0 || taskId == 0) {
-          taskId = 0;
+      public static void Task_Destroy(ref UInt32 taskId) {
+        if (taskId == 0) {
           return;
         }
-        if (!BarelyTask_Destroy(_handle, taskId)) {
-          Debug.LogError("Failed to destroy performer task");
-        }
+        BarelyTask_Destroy(_handle, taskId);
         _tasks.Remove(taskId);
         taskId = 0;
       }
 
       public static bool Task_IsActive(UInt32 taskId) {
-        bool isActive = false;
-        if (!BarelyTask_IsActive(_handle, taskId, ref isActive) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to get if performer task is active");
-        }
-        return isActive;
+        return BarelyTask_IsActive(_handle, taskId);
       }
 
       public static void Task_SetDuration(UInt32 taskId, double duration) {
-        if (!BarelyTask_SetDuration(_handle, taskId, Math.Max(duration, _minTaskDuration)) &&
-            _handle != IntPtr.Zero && taskId > 0) {
-          Debug.LogError("Failed to set performer task duration");
-        }
+        BarelyTask_SetDuration(_handle, taskId, Math.Max(duration, _minTaskDuration));
       }
 
       public static void Task_SetPosition(UInt32 taskId, double position) {
-        if (!BarelyTask_SetPosition(_handle, taskId, position) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to set performer task position");
-        }
+        BarelyTask_SetPosition(_handle, taskId, position);
       }
 
       public static void Task_SetPriority(UInt32 taskId, int priority) {
-        if (!BarelyTask_SetPriority(_handle, taskId, priority) && _handle != IntPtr.Zero &&
-            taskId > 0) {
-          Debug.LogError("Failed to set performer task priority");
-        }
+        BarelyTask_SetPriority(_handle, taskId, priority);
       }
 
       private delegate void TaskCallback(TaskEventType type, ref UInt32 userData);
@@ -836,10 +765,10 @@ namespace Barely {
             maxCommandCount = 8192,         maxFrameCount = config.dspBufferSize,
             maxSliceCount = 1000,           maxVoiceCount = 200,
           };
-          Int32 allocationSize = 0;
-          BarelyEngineConfig_GetRequiredAllocationSize(ref engineConfig, ref allocationSize);
+          Int32 allocationSize = BarelyEngineConfig_GetRequiredAllocationSize(ref engineConfig);
           _allocation = Marshal.AllocHGlobal(allocationSize);
-          if (!BarelyEngine_Create(ref engineConfig, _allocation, allocationSize, ref _handle)) {
+          _handle = BarelyEngine_Create(ref engineConfig, _allocation, allocationSize);
+          if (_handle == IntPtr.Zero) {
             Debug.LogError("Failed to initialize BarelyEngine");
             Marshal.FreeHGlobal(_allocation);
             _allocation = IntPtr.Zero;
@@ -904,132 +833,125 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngineConfig_GetRequiredAllocationSize")]
-      private static extern bool BarelyEngineConfig_GetRequiredAllocationSize(
-          ref BarelyEngineConfig config, ref Int32 outAllocationSize);
+      private static extern Int32 BarelyEngineConfig_GetRequiredAllocationSize(
+          ref BarelyEngineConfig config);
 
       [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
-      private static extern bool BarelyScale_GetPitch([In] ref Scale scale, Int32 degree,
-                                                      ref float outPitch);
+      private static extern float BarelyScale_GetPitch([In] ref Scale scale, Int32 degree);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
-      private static extern bool BarelyEngine_Create(ref BarelyEngineConfig config,
-                                                     IntPtr allocation, Int32 allocationSize,
-                                                     ref IntPtr outEngine);
+      private static extern IntPtr BarelyEngine_Create(ref BarelyEngineConfig config,
+                                                       IntPtr allocation, Int32 allocationSize);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreateInstrument")]
-      private static extern bool BarelyEngine_CreateInstrument(IntPtr engine,
-                                                               ref UInt32 outInstrumentId);
+      private static extern UInt32 BarelyEngine_CreateInstrument(IntPtr engine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreatePerformer")]
-      private static extern bool BarelyEngine_CreatePerformer(IntPtr engine,
-                                                              ref UInt32 outPerformerId);
+      private static extern UInt32 BarelyEngine_CreatePerformer(IntPtr engine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Destroy")]
-      private static extern bool BarelyEngine_Destroy(IntPtr engine);
+      private static extern void BarelyEngine_Destroy(IntPtr engine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_GetTimestamp")]
-      private static extern bool BarelyEngine_GetTimestamp(IntPtr engine, ref double outTimestamp);
+      private static extern double BarelyEngine_GetTimestamp(IntPtr engine);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
-      private static extern bool BarelyEngine_Process(IntPtr engine,
+      private static extern void BarelyEngine_Process(IntPtr engine,
                                                       [In, Out] float[] outputSamples,
                                                       Int32 outputChannelCount,
                                                       Int32 outputFrameCount, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetControl")]
-      private static extern bool BarelyEngine_SetControl(IntPtr engine, EngineControlType type,
+      private static extern void BarelyEngine_SetControl(IntPtr engine, EngineControlType type,
                                                          float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
-      private static extern bool BarelyEngine_SetTempo(IntPtr engine, double tempo);
+      private static extern void BarelyEngine_SetTempo(IntPtr engine, double tempo);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Update")]
-      private static extern bool BarelyEngine_Update(IntPtr engine, double timestamp);
+      private static extern void BarelyEngine_Update(IntPtr engine, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_Destroy")]
-      private static extern bool BarelyInstrument_Destroy(IntPtr engine, UInt32 instrumentId);
+      private static extern void BarelyInstrument_Destroy(IntPtr engine, UInt32 instrumentId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetControl")]
-      private static extern bool BarelyInstrument_SetControl(IntPtr engine, UInt32 instrumentId,
+      private static extern void BarelyInstrument_SetControl(IntPtr engine, UInt32 instrumentId,
                                                              InstrumentControlType type,
                                                              float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
-      private static extern bool BarelyInstrument_SetNoteControl(IntPtr engine, UInt32 instrumentId,
+      private static extern void BarelyInstrument_SetNoteControl(IntPtr engine, UInt32 instrumentId,
                                                                  float pitch, NoteControlType type,
                                                                  float value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
-      private static extern bool BarelyInstrument_SetNoteOff(IntPtr engine, UInt32 instrumentId,
+      private static extern void BarelyInstrument_SetNoteOff(IntPtr engine, UInt32 instrumentId,
                                                              float pitch);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
-      private static extern bool BarelyInstrument_SetNoteOn(IntPtr engine, UInt32 instrumentId,
+      private static extern void BarelyInstrument_SetNoteOn(IntPtr engine, UInt32 instrumentId,
                                                             float pitch);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
-      private static extern bool BarelyInstrument_SetSampleData(IntPtr engine, UInt32 instrumentId,
+      private static extern void BarelyInstrument_SetSampleData(IntPtr engine, UInt32 instrumentId,
                                                                 [In] Slice[] slices,
                                                                 Int32 sliceCount);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_CreateTask")]
-      private static extern bool BarelyPerformer_CreateTask(IntPtr engine, UInt32 performerId,
-                                                            double position, double duration,
-                                                            Int32 priority, TaskCallback callback,
-                                                            ref UInt32 userData,
-                                                            ref UInt32 outTaskId);
+      private static extern UInt32 BarelyPerformer_CreateTask(IntPtr engine, UInt32 performerId,
+                                                              double position, double duration,
+                                                              Int32 priority, TaskCallback callback,
+                                                              ref UInt32 userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Destroy")]
-      private static extern bool BarelyPerformer_Destroy(IntPtr engine, UInt32 performerId);
+      private static extern void BarelyPerformer_Destroy(IntPtr engine, UInt32 performerId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
-      private static extern bool BarelyPerformer_GetPosition(IntPtr engine, UInt32 performerId,
-                                                             ref double outPosition);
+      private static extern double BarelyPerformer_GetPosition(IntPtr engine, UInt32 performerId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
-      private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr engine,
+      private static extern void BarelyPerformer_SetLoopBeginPosition(IntPtr engine,
                                                                       UInt32 performerId,
                                                                       double loopBeginPosition);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLoopLength")]
-      private static extern bool BarelyPerformer_SetLoopLength(IntPtr engine, UInt32 performerId,
+      private static extern void BarelyPerformer_SetLoopLength(IntPtr engine, UInt32 performerId,
                                                                double loopLength);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetLooping")]
-      private static extern bool BarelyPerformer_SetLooping(IntPtr engine, UInt32 performerId,
+      private static extern void BarelyPerformer_SetLooping(IntPtr engine, UInt32 performerId,
                                                             bool isLooping);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetPosition")]
-      private static extern bool BarelyPerformer_SetPosition(IntPtr engine, UInt32 performerId,
+      private static extern void BarelyPerformer_SetPosition(IntPtr engine, UInt32 performerId,
                                                              double position);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Start")]
-      private static extern bool BarelyPerformer_Start(IntPtr engine, UInt32 performerId);
+      private static extern void BarelyPerformer_Start(IntPtr engine, UInt32 performerId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Stop")]
-      private static extern bool BarelyPerformer_Stop(IntPtr engine, UInt32 performerId);
+      private static extern void BarelyPerformer_Stop(IntPtr engine, UInt32 performerId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_Destroy")]
-      private static extern bool BarelyTask_Destroy(IntPtr engine, UInt32 taskId);
+      private static extern void BarelyTask_Destroy(IntPtr engine, UInt32 taskId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_IsActive")]
-      private static extern bool BarelyTask_IsActive(IntPtr engine, UInt32 taskId,
-                                                     ref bool outIsActive);
+      private static extern bool BarelyTask_IsActive(IntPtr engine, UInt32 taskId);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetCallback")]
-      private static extern bool BarelyTask_SetCallback(IntPtr engine, UInt32 taskId,
+      private static extern void BarelyTask_SetCallback(IntPtr engine, UInt32 taskId,
                                                         TaskCallback callback, ref UInt32 userData);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetDuration")]
-      private static extern bool BarelyTask_SetDuration(IntPtr engine, UInt32 taskId,
+      private static extern void BarelyTask_SetDuration(IntPtr engine, UInt32 taskId,
                                                         double duration);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPosition")]
-      private static extern bool BarelyTask_SetPosition(IntPtr engine, UInt32 taskId,
+      private static extern void BarelyTask_SetPosition(IntPtr engine, UInt32 taskId,
                                                         double position);
 
       [DllImport(_pluginName, EntryPoint = "BarelyTask_SetPriority")]
-      private static extern bool BarelyTask_SetPriority(IntPtr engine, UInt32 taskId,
+      private static extern void BarelyTask_SetPriority(IntPtr engine, UInt32 taskId,
                                                         Int32 priority);
     }
   }

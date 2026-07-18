@@ -53,7 +53,7 @@ void BarelyTaskResource::_bind_methods() {
 }
 
 BarelyPerformer::BarelyPerformer() {
-  BarelyEngine_CreatePerformer(BarelyEngine::get_singleton()->get(), &performer_id_);
+  performer_id_ = BarelyEngine_CreatePerformer(BarelyEngine::get_singleton()->get());
   tasks_ = TypedArray<Ref<BarelyTaskResource>>();
 }
 
@@ -113,9 +113,7 @@ void BarelyPerformer::set_tasks(const TypedArray<Ref<BarelyTaskResource>>& tasks
 }
 
 double BarelyPerformer::get_position() const {
-  double position = 0.0;
-  BarelyPerformer_GetPosition(BarelyEngine::get_singleton()->get(), performer_id_, &position);
-  return position;
+  return BarelyPerformer_GetPosition(BarelyEngine::get_singleton()->get(), performer_id_);
 }
 
 void BarelyPerformer::_bind_methods() {
@@ -166,24 +164,19 @@ void BarelyPerformer::_on_task_changed() {
     if (task.is_null()) {
       continue;
     }
-
-    uint32_t task_id = 0;
-    BarelyPerformer_CreateTask(
+    task_ids_.push_back(BarelyPerformer_CreateTask(
         BarelyEngine::get_singleton()->get(), performer_id_, task->get_position(),
         task->get_duration(), task->get_priority(),
         [](BarelyTaskEventType type, void* user_data) {
           BarelyTaskResource* task = static_cast<BarelyTaskResource*>(user_data);
-
           if (!task) return;
-
           if (type == BarelyTaskEventType_kBegin) {
             task->emit_signal("task_begin");
           } else if (type == BarelyTaskEventType_kEnd) {
             task->emit_signal("task_end");
           }
         },
-        task.ptr(), &task_id);
-    task_ids_.push_back(task_id);
+        task.ptr()));
   }
 }
 

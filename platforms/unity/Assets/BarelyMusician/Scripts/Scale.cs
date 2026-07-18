@@ -20,7 +20,6 @@ namespace Barely {
     }
 
     /// Returns the pitch for a given scale degree.
-    ///
     /// @param degree Scale degree.
     /// @return Note pitch.
     public float GetPitch(int degree) {

@@ -156,7 +156,7 @@ class Processor extends AudioWorkletProcessor {
         this._instruments.set(command.handle, {instrumentId});
       } break;
       case CommandType.INSTRUMENT_DESTROY: {
-        const instrumentId = this._instruments.get(command.handle);
+        const instrumentId = this._instruments.get(command.handle)?.instrumentId;
         if (!instrumentId) return;
         this._module._BarelyInstrument_Destroy(this._engine, instrumentId);
         this._instruments.delete(command.handle);

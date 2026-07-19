@@ -199,7 +199,7 @@ void BarelyInstrument_SetSampleData(BarelyEngine* engine, uint32_t instrument_id
 uint32_t BarelyPerformer_CreateTask(BarelyEngine* engine, uint32_t performer_id, double position,
                                     double duration, int32_t priority, BarelyTaskCallback callback,
                                     void* user_data) {
-  if (engine != nullptr && engine->IsValidPerformer(performer_id) && duration > 0.0) {
+  if (engine != nullptr && engine->IsValidPerformer(performer_id)) {
     const uint32_t task_index = engine->controller.performer_controller().AcquireTask(
         engine->state.GetIdIndex(performer_id), position, duration, priority, callback, user_data);
     if (task_index != barely::kInvalidIndex) {
@@ -291,7 +291,7 @@ void BarelyTask_SetCallback(BarelyEngine* engine, uint32_t task_id, BarelyTaskCa
 }
 
 void BarelyTask_SetDuration(BarelyEngine* engine, uint32_t task_id, double duration) {
-  if (engine != nullptr && engine->IsValidTask(task_id) && duration > 0.0) {
+  if (engine != nullptr && engine->IsValidTask(task_id)) {
     engine->controller.performer_controller().SetTaskDuration(engine->state.GetIdIndex(task_id),
                                                               duration);
   }

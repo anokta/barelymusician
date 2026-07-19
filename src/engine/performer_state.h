@@ -3,6 +3,7 @@
 
 #include <barelymusician.h>
 
+#include <cfloat>
 #include <cmath>
 #include <cstdint>
 
@@ -10,6 +11,8 @@
 #include "core/constants.h"
 
 namespace barely {
+
+inline constexpr double kMinTaskDuration = DBL_EPSILON;
 
 struct PerformerState {
  public:
@@ -38,7 +41,7 @@ struct TaskState {
   Callback<BarelyTaskCallback> callback = {};
 
   double position = 0.0;
-  double duration = 0.0;
+  double duration = kMinTaskDuration;
   int32_t priority = 0;
 
   uint32_t performer_index = kInvalidIndex;

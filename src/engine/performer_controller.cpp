@@ -51,7 +51,10 @@ uint32_t PerformerController::AcquireTask(uint32_t performer_index, double posit
   const uint32_t task_index = engine_.task_pool.Acquire();
   if (task_index != kInvalidIndex) {
     TaskState& task = engine_.GetTask(task_index);
-    task = {{callback, user_data}, position, duration, priority, performer_index};
+    task = {
+        {callback, user_data}, position, std::max(duration, kMinTaskDuration), priority,
+        performer_index,
+    };
     InsertInactiveTask(engine_.GetPerformer(performer_index), task_index);
   }
   return task_index;
@@ -140,9 +143,9 @@ void PerformerController::Stop(uint32_t performer_index) noexcept {
 }
 
 void PerformerController::SetTaskDuration(uint32_t task_index, double duration) noexcept {
-  assert(duration > 0.0 && "Invalid task duration");
   auto& task = engine_.GetTask(task_index);
   auto& performer = engine_.GetPerformer(task.performer_index);
+  duration = std::max(duration, kMinTaskDuration);
   if (task.duration == duration) return;
   task.duration = duration;
   if (task.is_active) {

@@ -565,8 +565,7 @@ namespace Barely {
         if (taskId > 0 || Handle == IntPtr.Zero) {
           return;
         }
-        taskId = BarelyPerformer_CreateTask(_handle, performerId, position,
-                                            Math.Max(duration, _minTaskDuration), priority,
+        taskId = BarelyPerformer_CreateTask(_handle, performerId, position, duration, priority,
                                             Task_OnEvent, ref taskId);
         if (taskId == 0) {
           Debug.LogError("Failed to create task '" + task + "'");
@@ -590,7 +589,7 @@ namespace Barely {
       }
 
       public static void Task_SetDuration(UInt32 taskId, double duration) {
-        BarelyTask_SetDuration(_handle, taskId, Math.Max(duration, _minTaskDuration));
+        BarelyTask_SetDuration(_handle, taskId, duration);
       }
 
       public static void Task_SetPosition(UInt32 taskId, double position) {
@@ -658,9 +657,6 @@ namespace Barely {
         }
       }
       private static IntPtr _handle = IntPtr.Zero;
-
-      // Minimum task duration to avoid zero duration tasks.
-      private const double _minTaskDuration = 1e-6;
 
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;

@@ -24,8 +24,7 @@ void BarelyTaskResource::set_position(double position) {
 }
 
 void BarelyTaskResource::set_duration(double duration) {
-  static constexpr double kMinTaskDuration = 1e-6;
-  duration_ = std::max(duration, kMinTaskDuration);
+  duration_ = duration;
   emit_changed();
 }
 

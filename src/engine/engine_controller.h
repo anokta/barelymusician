@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <optional>
 
 #include "core/time.h"
 #include "engine/engine_state.h"
@@ -21,6 +22,7 @@ class EngineController {
   }
 
   void Update(double timestamp) noexcept {
+    std::optional<int32_t> min_priority = std::nullopt;
     while (engine_.timestamp < timestamp) {
       if (engine_.tempo > 0.0) {
         const double max_update_duration =
@@ -28,14 +30,16 @@ class EngineController {
 
         double update_duration = max_update_duration;
         int32_t max_priority = INT32_MIN;
-        performer_controller_.GetNextTaskEvent(update_duration, max_priority);
+        performer_controller_.GetNextTaskEvent(min_priority, update_duration, max_priority);
 
-        if (update_duration > 0) {
-          performer_controller_.Update(update_duration);
+        if (update_duration > 0.0) {
+          performer_controller_.UpdatePosition(update_duration);
           engine_.timestamp += BeatsToSeconds(engine_.tempo, update_duration);
+          min_priority = std::nullopt;
         }
         if (update_duration < max_update_duration) {
-          performer_controller_.ProcessAllTasksAtPosition(max_priority);
+          performer_controller_.ProcessAllTasksAtPosition(min_priority, max_priority);
+          min_priority = max_priority;
         }
       } else if (engine_.timestamp < timestamp) {
         engine_.timestamp = timestamp;

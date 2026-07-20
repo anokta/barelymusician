@@ -12,8 +12,6 @@
 
 namespace barely {
 
-inline constexpr double kMinTaskDuration = DBL_EPSILON;
-
 struct PerformerState {
  public:
   double loop_begin_position = 0.0;
@@ -41,7 +39,7 @@ struct TaskState {
   Callback<BarelyTaskCallback> callback = {};
 
   double position = 0.0;
-  double duration = kMinTaskDuration;
+  double duration = 0.0;
   int32_t priority = 0;
 
   uint32_t performer_index = kInvalidIndex;

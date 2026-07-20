@@ -68,7 +68,7 @@ int main(void) {
   auto metronome = engine.CreatePerformer();
   metronome.SetLooping(true);
   int beat = 0;
-  metronome.CreateTask(0.0, 1e-6, 0, [&](TaskEventType type) {
+  metronome.CreateTask(0.0, 0.0, 0, [&](TaskEventType type) {
     if (type != TaskEventType::kBegin) {
       return;
     }

@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://b8yex7y13hi8p"]
+
+[ext_resource type="Script" uid="uid://cdoataneyqijw" path="res://addons/barelymusician/demo/metronome_demo.gd" id="1_ddtwr"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_8q8q8"]
+line_spacing = 18.0
+font_size = 256
+font_color = Color(1, 1, 0.7294118, 1)
+outline_size = 64
+outline_color = Color(1, 0.7019608, 0.7294118, 1)
+shadow_size = 0
+
+[sub_resource type="BarelyTaskResource" id="BarelyTaskResource_gg4gh"]
+duration = 1e-06
+
+[node name="MetronomeDemo" type="Control" unique_id=124867860 node_paths=PackedStringArray("instrument", "metronome", "label")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ddtwr")
+instrument = NodePath("Instrument")
+metronome = NodePath("Metronome")
+label = NodePath("Label")
+
+[node name="BackgroundColor" type="ColorRect" parent="." unique_id=666560166]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.7294118, 0.88235295, 1, 1)
+
+[node name="Label" type="Label" parent="." unique_id=1759105466]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_8q8q8")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Metronome" type="BarelyPerformer" parent="." unique_id=840468759]
+looping = true
+tasks = Array[BarelyTaskResource]([SubResource("BarelyTaskResource_gg4gh")])
+
+[node name="Instrument" type="BarelyInstrument" parent="." unique_id=1084526400]
+gain = 0.9
+attack = 0.0
+osc_shape = 0.75
+delay_send = 0.1
+reverb_send = 0.5

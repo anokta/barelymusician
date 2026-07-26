@@ -14,6 +14,11 @@ config/name="BarelyMusician"
 run/main_scene="uid://fm3yw7k5t227"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
+[display]
+
+window/size/viewport_width=1024
+window/size/viewport_height=1024
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/barelymusician/plugin.cfg")

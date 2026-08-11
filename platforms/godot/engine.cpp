@@ -94,10 +94,9 @@ BarelyEngine::~BarelyEngine() {
 double BarelyEngine::get_timestamp() { return BarelyEngine_GetTimestamp(get()); }
 
 void BarelyEngine::set_tempo(double tempo) {
-  if (tempo_ != tempo) {
-    BarelyEngine_SetTempo(get(), tempo_);
-    tempo_ = tempo;
-  }
+  if (tempo_ == tempo) return;
+  tempo_ = tempo;
+  BarelyEngine_SetTempo(engine_, tempo_);
 }
 
 ::BarelyEngine* BarelyEngine::get() {
@@ -108,6 +107,7 @@ void BarelyEngine::set_tempo(double tempo) {
     engine_allocation_.resize(allocation_size);
     temp_samples_.resize(config.max_frame_count);
     engine_ = BarelyEngine_Create(&config, engine_allocation_.data(), allocation_size);
+    BarelyEngine_SetTempo(engine_, tempo_);
     BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL);
     if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {
       if (audio_player_ == nullptr) {  // start audio processing

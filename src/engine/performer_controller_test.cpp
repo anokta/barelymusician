@@ -33,11 +33,10 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
 
-  std::optional<int32_t> min_priority = std::nullopt;
   double duration = 1.0;
   int32_t max_priority = INT32_MIN;
 
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 1.0);
   EXPECT_EQ(max_priority, INT32_MIN);
 
@@ -63,7 +62,7 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
 
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 1.0);
   EXPECT_EQ(max_priority, INT32_MIN);
 
@@ -76,7 +75,7 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
 
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.25);
   EXPECT_EQ(max_priority, 0);
 
@@ -85,13 +84,13 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 0);
 
   // Process the task.
-  controller.UpdatePosition(0.25);
+  controller.Update(0.25);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.0);
   EXPECT_EQ(max_priority, 0);
 
@@ -99,13 +98,13 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_begin_count, 0);
   EXPECT_EQ(task_process_end_count, 0);
 
-  controller.ProcessAllTasksAtPosition(min_priority, 0);
+  controller.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.6);
   EXPECT_EQ(max_priority, 0);
 
@@ -113,13 +112,13 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 0);
 
-  controller.UpdatePosition(0.6);
+  controller.Update(0.6);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.85);
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 1.0);
   EXPECT_EQ(max_priority, INT32_MIN);
 
@@ -132,18 +131,18 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.4);
   EXPECT_EQ(max_priority, 0);
 
   // Process the next task with a loop back.
-  controller.UpdatePosition(0.4);
+  controller.Update(0.4);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.0);
   EXPECT_EQ(max_priority, 0);
 
@@ -151,13 +150,13 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_begin_count, 1);
   EXPECT_EQ(task_process_end_count, 1);
 
-  controller.ProcessAllTasksAtPosition(min_priority, 0);
+  controller.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.25);
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.6);
   EXPECT_EQ(max_priority, 0);
 
@@ -172,7 +171,7 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.5);
   EXPECT_EQ(max_priority, 0);
 
@@ -181,13 +180,13 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 2);
 
   // Process the task with the updated position.
-  controller.UpdatePosition(0.5);
+  controller.Update(0.5);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.75);
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.0);
   EXPECT_EQ(max_priority, 0);
 
@@ -195,13 +194,13 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_begin_count, 2);
   EXPECT_EQ(task_process_end_count, 2);
 
-  controller.ProcessAllTasksAtPosition(min_priority, 0);
+  controller.ProcessAllTasksAtPosition(0);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.75);
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.25);
   EXPECT_EQ(max_priority, 0);
 
@@ -210,13 +209,13 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_end_count, 2);
 
   // Update the position while task is still active.
-  controller.UpdatePosition(0.05);
+  controller.Update(0.05);
   EXPECT_TRUE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.8);
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.2);
   EXPECT_EQ(max_priority, 0);
 
@@ -231,7 +230,7 @@ TEST(PerformerControllerTest, ProcessSingleTask) {
 
   duration = 1.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 1.0);
   EXPECT_EQ(max_priority, INT32_MIN);
 
@@ -256,11 +255,10 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
 
-  std::optional<int32_t> min_priority = std::nullopt;
   double duration = 5.0;
   int32_t max_priority = INT32_MIN;
 
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 5.0);
   EXPECT_EQ(max_priority, INT32_MIN);
 
@@ -290,7 +288,7 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
 
   duration = 5.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 5.0);
   EXPECT_EQ(max_priority, INT32_MIN);
 
@@ -305,7 +303,7 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
 
   duration = 5.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 1.0);
   EXPECT_EQ(max_priority, 0);
 
@@ -317,15 +315,15 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
   for (int i = 1; i <= kTaskCount + 1; ++i) {
     duration = 5.0;
     max_priority = INT32_MIN;
-    controller.GetNextTaskEvent(min_priority, duration, max_priority);
+    controller.GetNextTaskEvent(duration, max_priority);
     ASSERT_DOUBLE_EQ(duration, 1.0);
     ASSERT_EQ(max_priority, 0);
 
-    controller.UpdatePosition(duration);
+    controller.Update(duration);
     EXPECT_DOUBLE_EQ(performer.position, static_cast<double>(i));
 
-    controller.ProcessAllTasksAtPosition(min_priority, 0);  // beat callback
-    controller.ProcessAllTasksAtPosition(min_priority, 0);
+    controller.ProcessAllTasksAtPosition(0);  // beat callback
+    controller.ProcessAllTasksAtPosition(0);
     for (int j = 1; j <= kTaskCount; ++j) {
       EXPECT_EQ(task_callbacks[j - 1].second, i == j);
     }
@@ -336,7 +334,7 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
 
   duration = 5.0;
   max_priority = INT32_MIN;
-  controller.GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 5.0);
   EXPECT_EQ(max_priority, INT32_MIN);
 

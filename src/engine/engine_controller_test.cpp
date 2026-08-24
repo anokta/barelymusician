@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <optional>
 
 #include "core/arena.h"
 #include "engine/engine_state.h"
@@ -53,12 +52,11 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
   EXPECT_TRUE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
 
-  std::optional<int32_t> min_priority = std::nullopt;
   double duration = 10.0;
   int32_t max_priority = INT32_MIN;
 
   // Update the timestamp just before the task, which should not be triggered.
-  controller.performer_controller().GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 1.0);
   EXPECT_EQ(max_priority, 0);
 
@@ -66,7 +64,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
 
   duration = 10.0;
   max_priority = INT32_MIN;
-  controller.performer_controller().GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.0);
   EXPECT_EQ(max_priority, 0);
 
@@ -78,7 +76,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
   // Update the timestamp inside the task, which should be triggered now.
   duration = 10.0;
   max_priority = INT32_MIN;
-  controller.performer_controller().GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.0);
   EXPECT_EQ(max_priority, 0);
 
@@ -86,7 +84,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
 
   duration = 10.0;
   max_priority = INT32_MIN;
-  controller.performer_controller().GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.5);
   EXPECT_EQ(max_priority, 0);
 
@@ -98,7 +96,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
   // Update the timestamp just past the task, which should not be active anymore.
   duration = 10.0;
   max_priority = INT32_MIN;
-  controller.performer_controller().GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 0.5);
   EXPECT_EQ(max_priority, 0);
 
@@ -106,7 +104,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
 
   duration = 10.0;
   max_priority = INT32_MIN;
-  controller.performer_controller().GetNextTaskEvent(min_priority, duration, max_priority);
+  controller.performer_controller().GetNextTaskEvent(duration, max_priority);
   EXPECT_DOUBLE_EQ(duration, 10.0);
   EXPECT_EQ(max_priority, INT32_MIN);
 

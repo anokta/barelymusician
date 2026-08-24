@@ -4,7 +4,6 @@
 #include <barelymusician.h>
 
 #include <cstdint>
-#include <optional>
 
 #include "engine/engine_state.h"
 #include "engine/performer_state.h"
@@ -35,23 +34,13 @@ class PerformerController {
   void SetTaskPosition(uint32_t task_index, double position) noexcept;
   void SetTaskPriority(uint32_t task_index, int32_t priority) noexcept;
 
-  void ProcessAllTasksAtPosition(const std::optional<int32_t>& min_priority,
-                                 int32_t max_priority) noexcept;
+  void ProcessAllTasksAtPosition(int32_t max_priority) noexcept;
+  void Update(double duration) noexcept;
 
-  void UpdatePosition(double duration) noexcept {
+  void GetNextTaskEvent(double& duration, int32_t& priority) const noexcept {
     for (uint32_t i = 0; i < engine_.performer_pool.ActiveCount(); ++i) {
-      const uint32_t performer_index = engine_.performer_pool.GetActive(i);
-      if (const auto& performer = engine_.GetPerformer(performer_index); performer.is_playing) {
-        SetPosition(performer_index, performer.position + duration);
-      }
-    }
-  }
-
-  void GetNextTaskEvent(const std::optional<int32_t>& min_priority, double& duration,
-                        int32_t& priority) const noexcept {
-    for (uint32_t i = 0; i < engine_.performer_pool.ActiveCount(); ++i) {
-      GetNextTaskEvent(engine_.GetPerformer(engine_.performer_pool.GetActive(i)), min_priority,
-                       duration, priority);
+      GetNextTaskEvent(engine_.GetPerformer(engine_.performer_pool.GetActive(i)), duration,
+                       priority);
     }
   }
 
@@ -60,11 +49,10 @@ class PerformerController {
   void InsertInactiveTask(PerformerState& performer, uint32_t task_index) noexcept;
   void RemoveTask(PerformerState& performer, uint32_t task_index) noexcept;
   void SetTaskActive(PerformerState& performer, uint32_t task_index, bool is_active) noexcept;
-  void UpdateActiveTasks(PerformerState& performer) noexcept;
 
   [[nodiscard]] uint32_t GetNextInactiveTask(const PerformerState& performer) const noexcept;
-  void GetNextTaskEvent(const PerformerState& performer, const std::optional<int32_t>& min_priority,
-                        double& duration, int32_t& priority) const noexcept;
+  void GetNextTaskEvent(const PerformerState& performer, double& duration,
+                        int32_t& priority) const noexcept;
 
   EngineState& engine_;
 };

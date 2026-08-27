@@ -552,6 +552,10 @@ namespace Barely {
         BarelyPerformer_SetPosition(_handle, performerId, position);
       }
 
+      public static void Performer_SetSpeed(UInt32 performerId, double speed) {
+        BarelyPerformer_SetSpeed(_handle, performerId, speed);
+      }
+
       public static void Performer_Start(UInt32 performerId) {
         BarelyPerformer_Start(_handle, performerId);
       }
@@ -921,6 +925,10 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetPosition")]
       private static extern void BarelyPerformer_SetPosition(IntPtr engine, UInt32 performerId,
                                                              double position);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyPerformer_SetSpeed")]
+      private static extern void BarelyPerformer_SetSpeed(IntPtr engine, UInt32 performerId,
+                                                          double speed);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_Start")]
       private static extern void BarelyPerformer_Start(IntPtr engine, UInt32 performerId);

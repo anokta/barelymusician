@@ -21,16 +21,17 @@ export const CommandType = Object.freeze({
   PERFORMER_SET_LOOP_LENGTH: 13,
   PERFORMER_SET_LOOPING: 14,
   PERFORMER_SET_POSITION: 15,
-  PERFORMER_START: 16,
-  PERFORMER_STOP: 17,
-  PERFORMER_SYNC_TO: 18,
+  PERFORMER_SET_SPEED: 16,
+  PERFORMER_START: 17,
+  PERFORMER_STOP: 18,
+  PERFORMER_SYNC_TO: 19,
 
-  TASK_CREATE: 19,
-  TASK_DESTROY: 20,
-  TASK_SET_COMMANDS: 21,
-  TASK_SET_DURATION: 22,
-  TASK_SET_POSITION: 23,
-  TASK_SET_PRIORITY: 24,
+  TASK_CREATE: 20,
+  TASK_DESTROY: 21,
+  TASK_SET_COMMANDS: 22,
+  TASK_SET_DURATION: 23,
+  TASK_SET_POSITION: 24,
+  TASK_SET_PRIORITY: 25,
 });
 
 /**
@@ -87,6 +88,7 @@ class CommandFactory {
           ({type: CommandType.PERFORMER_SET_LOOP_LENGTH, handle, loopLength}),
       setLooping: (isLooping) => ({type: CommandType.PERFORMER_SET_LOOPING, handle, isLooping}),
       setPosition: (position) => ({type: CommandType.PERFORMER_SET_POSITION, handle, position}),
+      setSpeed: (speed) => ({type: CommandType.PERFORMER_SET_SPEED, handle, speed}),
       start: () => ({type: CommandType.PERFORMER_START, handle}),
       stop: () => ({type: CommandType.PERFORMER_STOP, handle}),
       syncTo: (otherHandle, offset = 0.0) =>

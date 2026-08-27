@@ -55,6 +55,22 @@ namespace Barely {
     [Min(0.0f)]
     private double _loopLength = 1.0;
 
+    /// Speed.
+    public double Speed {
+      get { return _speed; }
+      set {
+        if (_id == 0) {
+          _speed = value;
+          return;
+        }
+        Engine.Internal.Performer_SetSpeed(_id, value);
+        _speed = value;
+      }
+    }
+    [SerializeField]
+    [Min(0.0f)]
+    private double _speed = 1.0;
+
     /// List of recurring tasks.
     public List<Task> Tasks = new List<Task>();
 
@@ -112,6 +128,7 @@ namespace Barely {
       Loop = _loop;
       LoopBeginPosition = _loopBeginPosition;
       LoopLength = _loopLength;
+      Speed = _speed;
       for (int i = 0; i < Tasks.Count; ++i) {
         Tasks[i].Update(this);
       }

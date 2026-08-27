@@ -132,6 +132,10 @@ void PerformerController::SetPosition(uint32_t performer_index, double position)
   }
 }
 
+void PerformerController::SetSpeed(uint32_t performer_index, double speed) noexcept {
+  engine_.GetPerformer(performer_index).speed = std::max(speed, 0.0);
+}
+
 void PerformerController::Start(uint32_t performer_index) noexcept {
   engine_.GetPerformer(performer_index).is_playing = true;
 }
@@ -220,8 +224,9 @@ void PerformerController::Update(double duration) noexcept {
   assert(duration > 0.0);
   for (uint32_t i = 0; i < engine_.performer_pool.ActiveCount(); ++i) {
     const uint32_t performer_index = engine_.performer_pool.GetActive(i);
-    if (const auto& performer = engine_.GetPerformer(performer_index); performer.is_playing) {
-      SetPosition(performer_index, performer.position + duration);
+    if (const auto& performer = engine_.GetPerformer(performer_index);
+        performer.is_playing && performer.speed > 0.0) {
+      SetPosition(performer_index, performer.position + duration * performer.speed);
     }
   }
 }
@@ -339,11 +344,14 @@ uint32_t PerformerController::GetNextInactiveTask(const PerformerState& performe
 
 void PerformerController::GetNextTaskEvent(const PerformerState& performer, double& duration,
                                            int32_t& priority) const noexcept {
-  if (!performer.is_playing) {
+  if (!performer.is_playing || performer.speed <= 0.0) {
     return;
   }
 
   const double loop_end_position = performer.GetLoopEndPosition();
+  const double max_duration = duration;
+
+  duration *= performer.speed;  // convert to local duration
 
   // Check inactive tasks.
   uint32_t task_index = performer.first_inactive_task_index;
@@ -394,6 +402,8 @@ void PerformerController::GetNextTaskEvent(const PerformerState& performer, doub
       }
     }
   }
+
+  duration = std::min(duration / performer.speed, max_duration);  // convert back to global duration
 }
 
 }  // namespace barely

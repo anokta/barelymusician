@@ -19,6 +19,7 @@ struct PerformerState {
   double loop_begin_position = 0.0;
   double loop_length = 1.0;
   double position = 0.0;
+  double speed = 1.0;
 
   uint32_t first_active_task_index = kInvalidIndex;
   uint32_t first_inactive_task_index = kInvalidIndex;

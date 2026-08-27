@@ -36,20 +36,22 @@ class BarelyPerformer : public ::godot::Node {
   BarelyPerformer();
   ~BarelyPerformer();
 
-  void start();
-  void stop();
-
-  void set_position(double position);
   void set_loop_begin_position(double position);
   void set_loop_length(double length);
   void set_looping(bool looping);
+  void set_position(double position);
+  void set_speed(double speed);
 
   void set_tasks(const ::godot::TypedArray<::godot::Ref<BarelyTaskResource>>& tasks);
+
+  void start();
+  void stop();
 
   double get_position() const;
 
   double get_loop_begin_position() const { return loop_begin_position_; }
   double get_loop_length() const { return loop_length_; }
+  double get_speed() const { return speed_; }
   bool is_looping() const { return looping_; }
   bool is_playing() const { return playing_; }
 
@@ -64,6 +66,7 @@ class BarelyPerformer : public ::godot::Node {
 
   double loop_begin_position_ = 0.0;
   double loop_length_ = 1.0;
+  double speed_ = 1.0;
   bool looping_ = false;
   bool playing_ = false;
 

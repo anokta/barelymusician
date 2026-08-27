@@ -24,6 +24,7 @@ VERS_1.0 {
     BarelyPerformer_SetLoopLength;
     BarelyPerformer_SetLooping;
     BarelyPerformer_SetPosition;
+    BarelyPerformer_SetSpeed;
     BarelyPerformer_Start;
     BarelyPerformer_Stop;
     BarelyTask_Destroy;

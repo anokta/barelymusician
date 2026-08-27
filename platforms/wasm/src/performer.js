@@ -56,6 +56,11 @@ export class Performer {
         {type: CommandType.PERFORMER_SET_POSITION, handle: this._handle, position});
   }
 
+  /** @param {number} speed */
+  setSpeed(speed) {
+    this._engine._pushCommand({type: CommandType.PERFORMER_SET_SPEED, handle: this._handle, speed});
+  }
+
   /** Starts the playback. */
   start() {
     this._isPlaying = true;

@@ -224,6 +224,13 @@ double BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performe
              : 0.0;
 }
 
+void BarelyPerformer_SetSpeed(BarelyEngine* engine, uint32_t performer_id, double speed) {
+  if (engine != nullptr && engine->IsValidPerformer(performer_id)) {
+    engine->controller.performer_controller().SetSpeed(engine->state.GetIdIndex(performer_id),
+                                                       speed);
+  }
+}
+
 void BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine, uint32_t performer_id,
                                           double loop_begin_position) {
   if (engine != nullptr && engine->IsValidPerformer(performer_id)) {

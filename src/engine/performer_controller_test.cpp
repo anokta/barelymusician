@@ -343,5 +343,29 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
   }
 }
 
+TEST(PerformerControllerTest, SetSpeed) {
+  const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
+  auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  EngineState engine(arena, EngineConfig(kSampleRate));
+  PerformerController controller(engine);
+
+  const uint32_t performer_index = controller.Acquire();
+  auto& performer = engine.GetPerformer(performer_index);
+  [[maybe_unused]] const uint32_t task_index =
+      controller.AcquireTask(performer_index, 1.0, 1.0, 0, nullptr, nullptr);
+
+  controller.SetSpeed(performer_index, 4.0);
+  controller.Start(performer_index);
+
+  double duration = 5.0;
+  int32_t priority = INT32_MIN;
+  controller.GetNextTaskEvent(duration, priority);
+  EXPECT_DOUBLE_EQ(duration, 0.25);
+
+  controller.Update(duration);
+  EXPECT_DOUBLE_EQ(performer.position, 1.0);
+}
+
 }  // namespace
 }  // namespace barely

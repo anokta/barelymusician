@@ -544,6 +544,12 @@ BARELY_API void BarelyPerformer_Destroy(BarelyEngine* engine, uint32_t performer
 /// @return Position in beats.
 BARELY_API double BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performer_id);
 
+/// Sets the playback speed of a performer.
+/// @param engine Pointer to engine.
+/// @param performer_id Performer identifier.
+/// @param speed Playback speed.
+BARELY_API void BarelyPerformer_SetSpeed(BarelyEngine* engine, uint32_t performer_id, double speed);
+
 /// Sets the loop begin position of a performer.
 /// @param engine Pointer to engine.
 /// @param performer_id Performer identifier.
@@ -1002,6 +1008,10 @@ class Performer {
   [[nodiscard]] double GetPosition() const noexcept {
     return BarelyPerformer_GetPosition(engine_, performer_id_);
   }
+
+  /// Sets the playback speed.
+  /// @param speed Playback speed.
+  void SetSpeed(double speed) noexcept { BarelyPerformer_SetSpeed(engine_, performer_id_, speed); }
 
   /// Sets the loop begin position.
   /// @param loop_begin_position Loop begin position in beats.

@@ -61,37 +61,29 @@ BarelyPerformer::~BarelyPerformer() {
   BarelyPerformer_Destroy(BarelyEngine::get_singleton()->get(), performer_id_);
 }
 
-void BarelyPerformer::start() {
-  playing_ = true;
-  BarelyPerformer_Start(BarelyEngine::get_singleton()->get(), performer_id_);
-}
-
-void BarelyPerformer::stop() {
-  playing_ = false;
-  BarelyPerformer_Stop(BarelyEngine::get_singleton()->get(), performer_id_);
-}
-
-void BarelyPerformer::set_position(double position) {
-  BarelyPerformer_SetPosition(BarelyEngine::get_singleton()->get(), performer_id_, position);
-}
-
 void BarelyPerformer::set_loop_begin_position(double loop_begin_position) {
   loop_begin_position_ = loop_begin_position;
-
   BarelyPerformer_SetLoopBeginPosition(BarelyEngine::get_singleton()->get(), performer_id_,
                                        loop_begin_position_);
 }
 
 void BarelyPerformer::set_loop_length(double loop_length) {
   loop_length_ = loop_length;
-
   BarelyPerformer_SetLoopLength(BarelyEngine::get_singleton()->get(), performer_id_, loop_length_);
 }
 
 void BarelyPerformer::set_looping(bool looping) {
   looping_ = looping;
-
   BarelyPerformer_SetLooping(BarelyEngine::get_singleton()->get(), performer_id_, looping_);
+}
+
+void BarelyPerformer::set_position(double position) {
+  BarelyPerformer_SetPosition(BarelyEngine::get_singleton()->get(), performer_id_, position);
+}
+
+void BarelyPerformer::set_speed(double speed) {
+  speed_ = speed;
+  BarelyPerformer_SetSpeed(BarelyEngine::get_singleton()->get(), performer_id_, speed_);
 }
 
 void BarelyPerformer::set_tasks(const TypedArray<Ref<BarelyTaskResource>>& tasks) {
@@ -109,6 +101,16 @@ void BarelyPerformer::set_tasks(const TypedArray<Ref<BarelyTaskResource>>& tasks
     }
   }
   _on_task_changed();
+}
+
+void BarelyPerformer::start() {
+  playing_ = true;
+  BarelyPerformer_Start(BarelyEngine::get_singleton()->get(), performer_id_);
+}
+
+void BarelyPerformer::stop() {
+  playing_ = false;
+  BarelyPerformer_Stop(BarelyEngine::get_singleton()->get(), performer_id_);
 }
 
 double BarelyPerformer::get_position() const {
@@ -132,6 +134,8 @@ void BarelyPerformer::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_loop_length"), &BarelyPerformer::get_loop_length);
   ClassDB::bind_method(D_METHOD("set_looping", "looping"), &BarelyPerformer::set_looping);
   ClassDB::bind_method(D_METHOD("is_looping"), &BarelyPerformer::is_looping);
+  ClassDB::bind_method(D_METHOD("set_speed", "speed"), &BarelyPerformer::set_speed);
+  ClassDB::bind_method(D_METHOD("get_speed"), &BarelyPerformer::get_speed);
 
   ClassDB::bind_method(D_METHOD("set_tasks", "tasks"), &BarelyPerformer::set_tasks);
   ClassDB::bind_method(D_METHOD("get_tasks"), &BarelyPerformer::get_tasks);
@@ -141,6 +145,7 @@ void BarelyPerformer::_bind_methods() {
                "get_loop_begin_position");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "loop_length"), "set_loop_length", "get_loop_length");
   ADD_PROPERTY(PropertyInfo(Variant::BOOL, "looping"), "set_looping", "is_looping");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed"), "set_speed", "get_speed");
 
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "position"), "set_position", "get_position");
   ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "tasks", PropertyHint::PROPERTY_HINT_ARRAY_TYPE,

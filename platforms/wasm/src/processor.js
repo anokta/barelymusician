@@ -244,6 +244,11 @@ class Processor extends AudioWorkletProcessor {
         if (!performerId) return;
         this._module._BarelyPerformer_SetPosition(this._engine, performerId, command.position);
       } break;
+      case CommandType.PERFORMER_SET_SPEED: {
+        const performerId = this._performers.get(command.handle)?.performerId;
+        if (!performerId) return;
+        this._module._BarelyPerformer_SetSpeed(this._engine, performerId, command.speed);
+      } break;
       case CommandType.PERFORMER_START: {
         const performerId = this._performers.get(command.handle)?.performerId;
         if (!performerId) return;

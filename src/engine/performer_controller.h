@@ -26,6 +26,7 @@ class PerformerController {
   void SetLoopLength(uint32_t performer_index, double loop_length) noexcept;
   void SetLooping(uint32_t performer_index, bool is_looping) noexcept;
   void SetPosition(uint32_t performer_index, double position) noexcept;
+  void SetSpeed(uint32_t performer_index, double speed) noexcept;
   void Start(uint32_t performer_index) noexcept;
   void Stop(uint32_t performer_index) noexcept;
 

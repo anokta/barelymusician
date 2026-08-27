@@ -142,8 +142,8 @@ class Processor extends AudioWorkletProcessor {
       case CommandType.ENGINE_SET_CONTROL:
         this._module._BarelyEngine_SetControl(this._engine, command.typeIndex, command.value);
         break;
-      case CommandType.ENGINE_SET_TEMPO:
-        this._module._BarelyEngine_SetTempo(this._engine, command.tempo);
+      case CommandType.ENGINE_SET_SPEED:
+        this._module._BarelyEngine_SetSpeed(this._engine, command.speed);
         break;
       case CommandType.INSTRUMENT_CREATE: {
         const instrumentId = this._module._BarelyEngine_CreateInstrument(this._engine);

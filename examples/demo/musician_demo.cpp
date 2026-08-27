@@ -58,7 +58,7 @@ constexpr int kFrameCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Performer settings.
-constexpr double kTempo = 124.0;
+constexpr double kSpeed = 124.0 / 60.0;
 constexpr int kBeatCount = 3;
 
 // Number of semitones in an octave.
@@ -220,16 +220,16 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, int index,
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(void) {
+int main() {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
-  double tempo = kTempo;
+  double speed = kSpeed;
 
   Engine engine(kSampleRate);
-  engine.SetTempo(tempo);
+  engine.SetSpeed(speed);
 
   const std::vector<int> progression = {0, 3, 4, 0};
 
@@ -391,19 +391,19 @@ int main(void) {
         is_playing = !is_playing;
         break;
       case '1':
-        tempo *= engine.GenerateRandomNumber(0.5, 0.75);
-        engine.SetTempo(tempo);
-        ConsoleLog() << "Tempo changed to " << tempo;
+        speed *= engine.GenerateRandomNumber(0.5, 0.75);
+        engine.SetSpeed(speed);
+        ConsoleLog() << "Speed changed to " << speed;
         break;
       case '2':
-        tempo *= engine.GenerateRandomNumber(1.5, 2.0);
-        engine.SetTempo(tempo);
-        ConsoleLog() << "Tempo changed to " << tempo;
+        speed *= engine.GenerateRandomNumber(1.5, 2.0);
+        engine.SetSpeed(speed);
+        ConsoleLog() << "Speed changed to " << speed;
         break;
       case 'R':
-        tempo = kTempo;
-        engine.SetTempo(tempo);
-        ConsoleLog() << "Tempo reset to " << kTempo;
+        speed = kSpeed;
+        engine.SetSpeed(speed);
+        ConsoleLog() << "Speed reset to " << speed;
         break;
       case 'D':
         percussion.SetSampleData(default_percussion_sample_data.first);

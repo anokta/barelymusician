@@ -93,10 +93,10 @@ BarelyEngine::~BarelyEngine() {
 
 double BarelyEngine::get_timestamp() { return BarelyEngine_GetTimestamp(get()); }
 
-void BarelyEngine::set_tempo(double tempo) {
-  if (tempo_ == tempo) return;
-  tempo_ = tempo;
-  BarelyEngine_SetTempo(engine_, tempo_);
+void BarelyEngine::set_speed(double speed) {
+  if (speed_ == speed) return;
+  speed_ = speed;
+  BarelyEngine_SetSpeed(engine_, speed_);
 }
 
 ::BarelyEngine* BarelyEngine::get() {
@@ -107,7 +107,7 @@ void BarelyEngine::set_tempo(double tempo) {
     engine_allocation_.resize(allocation_size);
     temp_samples_.resize(config.max_frame_count);
     engine_ = BarelyEngine_Create(&config, engine_allocation_.data(), allocation_size);
-    BarelyEngine_SetTempo(engine_, tempo_);
+    BarelyEngine_SetSpeed(engine_, speed_);
     BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL);
     if (SceneTree* tree = Object::cast_to<SceneTree>(Engine::get_singleton()->get_main_loop())) {
       if (audio_player_ == nullptr) {  // start audio processing
@@ -149,9 +149,9 @@ void BarelyEngine::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_lookahead"), &BarelyEngine::get_lookahead);
   ClassDB::bind_method(D_METHOD("set_lookahead", "lookahead"), &BarelyEngine::set_lookahead);
 
-  ClassDB::bind_method(D_METHOD("get_tempo"), &BarelyEngine::get_tempo);
+  ClassDB::bind_method(D_METHOD("get_speed"), &BarelyEngine::get_speed);
   ClassDB::bind_method(D_METHOD("get_timestamp"), &BarelyEngine::get_timestamp);
-  ClassDB::bind_method(D_METHOD("set_tempo", "tempo"), &BarelyEngine::set_tempo);
+  ClassDB::bind_method(D_METHOD("set_speed", "speed"), &BarelyEngine::set_speed);
 
   BARELY_GODOT_ENGINE_CONTROLS(BARELY_BIND_GODOT_ENGINE_CONTROL);
 
@@ -159,7 +159,7 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "lookahead", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.001"),
       "set_lookahead", "get_lookahead");
 
-  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tempo"), "set_tempo", "get_tempo");
+  ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed"), "set_speed", "get_speed");
 
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
                "set_gain", "get_gain");

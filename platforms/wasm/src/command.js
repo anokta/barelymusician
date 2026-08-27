@@ -4,7 +4,7 @@
  */
 export const CommandType = Object.freeze({
   ENGINE_SET_CONTROL: 0,
-  ENGINE_SET_TEMPO: 1,
+  ENGINE_SET_SPEED: 1,
 
   INSTRUMENT_CREATE: 2,
   INSTRUMENT_DESTROY: 3,
@@ -61,7 +61,7 @@ class CommandFactory {
   engine() {
     return {
       setControl: (typeIndex, value) => ({type: CommandType.ENGINE_SET_CONTROL, typeIndex, value}),
-      setTempo: (tempo) => ({type: CommandType.ENGINE_SET_TEMPO, tempo}),
+      setSpeed: (speed) => ({type: CommandType.ENGINE_SET_SPEED, speed}),
     };
   }
 

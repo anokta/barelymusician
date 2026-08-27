@@ -41,7 +41,7 @@ constexpr double kTempoIncrement = 10.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(void) {
+int main() {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);
@@ -51,7 +51,7 @@ int main(void) {
   double tempo = kInitialTempo;
 
   Engine engine(kSampleRate);
-  engine.SetTempo(tempo);
+  engine.SetSpeed(tempo / 60.0);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
@@ -162,7 +162,7 @@ int main(void) {
       default:
         return;
     }
-    engine.SetTempo(tempo);
+    engine.SetSpeed(tempo / 60.0);
     ConsoleLog() << "Tempo set to " << tempo << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);

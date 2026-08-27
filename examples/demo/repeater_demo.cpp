@@ -40,7 +40,7 @@ constexpr int kVoiceCount = 16;
 
 constexpr Repeater::Mode kInitialMode = Repeater::Mode::kForward;
 constexpr double kInitialRate = 2.0;
-constexpr double kInitialTempo = 135.0;
+constexpr double kSpeed = 135.0 / 60.0;
 
 // Note settings.
 constexpr int kKeyCount = 13;
@@ -64,14 +64,14 @@ float IndexToPitch(int octave_shift, int index) {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(void) {
+int main() {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
-  engine.SetTempo(kInitialTempo);
+  engine.SetSpeed(kSpeed);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);

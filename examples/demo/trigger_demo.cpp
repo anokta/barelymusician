@@ -44,14 +44,14 @@ constexpr double kInitialTempo = 120.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(void) {
+int main() {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
-  engine.SetTempo(kInitialTempo);
+  engine.SetSpeed(kInitialTempo / 60.0);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);

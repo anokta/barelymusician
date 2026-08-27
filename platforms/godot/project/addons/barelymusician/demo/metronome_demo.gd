@@ -5,7 +5,7 @@ extends Control
 @export var label: Label
 
 @export var lookahead : float = 0.2
-@export_range(30.0, 960.0, 1) var tempo: float = 120.0
+@export_range(30.0, 960.0, 1) var bpm: float = 120.0
 @export_range(1.0, 16.0, 1) var beat_count: float = 4
 
 var _beat = -1
@@ -21,9 +21,9 @@ func _ready() -> void:
 
 
 func _process(_delta):
-	BarelyEngine.tempo = tempo
+	BarelyEngine.speed = bpm / 60.0
 
-	
+
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_ESCAPE:

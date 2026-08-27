@@ -7,9 +7,6 @@
 
 namespace barely {
 
-inline constexpr double kMinutesToSeconds = 60.0;
-inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
-
 [[nodiscard]] constexpr double FramesToSeconds(float sample_rate, int64_t frames) noexcept {
   assert(sample_rate > 0);
   return static_cast<double>(frames) / static_cast<double>(sample_rate);
@@ -17,15 +14,6 @@ inline constexpr double kSecondsToMinutes = 1.0 / kMinutesToSeconds;
 
 [[nodiscard]] constexpr int64_t SecondsToFrames(float sample_rate, double seconds) noexcept {
   return static_cast<int64_t>(seconds * static_cast<double>(sample_rate));
-}
-
-[[nodiscard]] constexpr double BeatsToSeconds(double tempo, double beats) noexcept {
-  assert(tempo > 0.0);
-  return beats * kMinutesToSeconds / tempo;
-}
-
-[[nodiscard]] constexpr double SecondsToBeats(double tempo, double seconds) noexcept {
-  return seconds * kSecondsToMinutes * tempo;
 }
 
 [[nodiscard]] constexpr double Quantize(double position, int32_t subdivision,

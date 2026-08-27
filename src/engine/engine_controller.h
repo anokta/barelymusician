@@ -22,9 +22,8 @@ class EngineController {
 
   void Update(double timestamp) noexcept {
     while (engine_.timestamp < timestamp) {
-      if (engine_.tempo > 0.0) {
-        const double max_update_duration =
-            SecondsToBeats(engine_.tempo, timestamp - engine_.timestamp);
+      if (engine_.speed > 0.0) {
+        const double max_update_duration = (timestamp - engine_.timestamp) * engine_.speed;
 
         double update_duration = max_update_duration;
         int32_t max_priority = INT32_MIN;
@@ -32,7 +31,7 @@ class EngineController {
 
         if (update_duration > 0.0) {
           performer_controller_.Update(update_duration);
-          engine_.timestamp += BeatsToSeconds(engine_.tempo, update_duration);
+          engine_.timestamp += update_duration / engine_.speed;
         }
         if (update_duration < max_update_duration) {
           performer_controller_.ProcessAllTasksAtPosition(max_priority);

@@ -46,7 +46,7 @@ constexpr int kInstrumentVoiceCount = 16;
 // Midi file name.
 constexpr char kMidiFileName[] = "data/midi/sample.mid";
 
-constexpr double kTempo = 132.0;
+constexpr double kSpeed = 132.0 / 60.0;
 
 // Builds the score for the given `midi_events`.
 bool BuildScore(const smf::MidiEventList& midi_events, int track_index, int ticks_per_beat,
@@ -80,7 +80,7 @@ bool BuildScore(const smf::MidiEventList& midi_events, int track_index, int tick
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(void) {
+int main() {
   InputManager input_manager;
 
   MidiFile midi_file;
@@ -97,7 +97,7 @@ int main(void) {
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
 
   Engine engine(kSampleRate);
-  engine.SetTempo(kTempo);
+  engine.SetSpeed(kSpeed);
 
   std::vector<std::tuple<Instrument, Performer, int>> tracks;
   tracks.reserve(track_count);

@@ -284,17 +284,17 @@ namespace Barely {
     }
     private static float _sidechainRatio = 0.0f;
 
-    /// Tempo in beats per minute.
-    public static double Tempo {
-      get { return _tempo; }
+    /// Speed in beats per second.
+    public static double Speed {
+      get { return _speed; }
       set {
-        if (_tempo != value) {
-          Internal.Engine_SetTempo(value);
-          _tempo = value;
+        if (_speed != value) {
+          Internal.Engine_SetSpeed(value);
+          _speed = value;
         }
       }
     }
-    private static double _tempo = 120.0;
+    private static double _speed = 1.0;
 
     /// Timestamp in seconds.
     public static double Timestamp {
@@ -431,8 +431,8 @@ namespace Barely {
         BarelyEngine_SetControl(Handle, type, value);
       }
 
-      public static void Engine_SetTempo(double tempo) {
-        BarelyEngine_SetTempo(Handle, tempo);
+      public static void Engine_SetSpeed(double speed) {
+        BarelyEngine_SetSpeed(Handle, speed);
       }
 
       public static void Instrument_Create(Instrument instrument, ref UInt32 instrumentId) {
@@ -774,7 +774,7 @@ namespace Barely {
             _allocation = IntPtr.Zero;
             return;
           }
-          BarelyEngine_SetTempo(_handle, _tempo);
+          BarelyEngine_SetSpeed(_handle, _speed);
           BarelyEngine_SetControl(_handle, EngineControlType.COMP_MIX, _compMix);
           BarelyEngine_SetControl(_handle, EngineControlType.COMP_THRESHOLD, _compThreshold);
           BarelyEngine_SetControl(_handle, EngineControlType.COMP_ATTACK, _compAttack);
@@ -865,8 +865,8 @@ namespace Barely {
       private static extern void BarelyEngine_SetControl(IntPtr engine, EngineControlType type,
                                                          float value);
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetTempo")]
-      private static extern void BarelyEngine_SetTempo(IntPtr engine, double tempo);
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetSpeed")]
+      private static extern void BarelyEngine_SetSpeed(IntPtr engine, double speed);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Update")]
       private static extern void BarelyEngine_Update(IntPtr engine, double timestamp);

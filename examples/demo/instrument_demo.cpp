@@ -36,7 +36,6 @@ constexpr int kFrameCount = 256;
 constexpr float kDelayTime = 0.5f;
 constexpr float kDelayFeedback = 0.2;
 constexpr float kDelayLpfCutoff = 0.2f;
-constexpr double kTempo = 128.0;
 
 // Instrument settings.
 constexpr float kGain = 1.0f;
@@ -81,7 +80,7 @@ float IndexToPitch(int octave_shift, int index) {
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(void) {
+int main() {
   InputManager input_manager;
 
   AudioOutput audio_output(kSampleRate, kChannelCount, kFrameCount);
@@ -90,7 +89,6 @@ int main(void) {
   engine.SetControl(EngineControlType::kDelayTime, kDelayTime);
   engine.SetControl(EngineControlType::kDelayFeedback, kDelayFeedback);
   engine.SetControl(EngineControlType::kDelayLpfCutoff, kDelayLpfCutoff);
-  engine.SetTempo(kTempo);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
@@ -157,11 +155,13 @@ int main(void) {
       instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
       ConsoleLog() << "Switched to oscillator mode";
       return;
-    } else if (upper_key == '2') {
+    }
+    if (upper_key == '2') {
       instrument.SetControl(InstrumentControlType::kOscMix, 0.0f);
       ConsoleLog() << "Switched to sample mode";
       return;
-    } else if (upper_key == '3') {
+    }
+    if (upper_key == '3') {
       instrument.SetControl(InstrumentControlType::kOscMix, 0.5f);
       ConsoleLog() << "Switched to mix mode";
       return;

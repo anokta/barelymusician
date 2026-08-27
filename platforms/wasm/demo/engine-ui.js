@@ -16,7 +16,7 @@ export class EngineUi {
     this.container = container;
 
     /** @private {number} */
-    this._tempo = 120.0;
+    this._tempo = 0.0;
 
     /** @private {number} */
     this._delayTime = 0.0;
@@ -51,7 +51,7 @@ export class EngineUi {
       if (state) {
         this.loadState(state);
       } else {
-        this._tempo = 120.0;
+        this.tempo = 120.0;
         this.delayTime = 0.5;
         this.delayFeedback = 0.2;
         this.delayPingPong = 0.5;
@@ -292,7 +292,7 @@ export class EngineUi {
     this.tempoSlider.value = newTempo;
     this.tempoValue.textContent = newTempo;
     this._tempo = newTempo;
-    this.engine.setTempo(this._tempo);
+    this.engine.setSpeed(this._tempo / 60.0);
   }
 
   set delayTime(newDelayTime) {

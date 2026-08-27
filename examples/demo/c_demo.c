@@ -27,14 +27,13 @@ static const int kFrameCount = 256;
 static const double kUpdateInterval = 1.0 / 60.0;
 static const double kLookahead = 0.05;
 
+static const double kSpeed = 0.99;
+
 // Instrument settings.
 static const float kGain = 0.9f;
 static const float kOscShape = 0.75f;
 static const float kAttack = 0.005f;
 static const float kRelease = 0.2f;
-
-// Playback settings.
-static const double kTempo = 99.0;
 
 enum {
   kMelodyNoteCount = 7,
@@ -86,7 +85,7 @@ int main(void) {
   void* allocation = malloc(allocation_size);
 
   BarelyEngine* engine = BarelyEngine_Create(&config, allocation, allocation_size);
-  BarelyEngine_SetTempo(engine, kTempo);
+  BarelyEngine_SetSpeed(engine, kSpeed);
 
   g_instrument_id = BarelyEngine_CreateInstrument(engine);
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kGain, kGain);

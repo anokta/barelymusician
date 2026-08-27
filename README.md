@@ -34,9 +34,6 @@ Example usage
 // Create the engine.
 barely::Engine engine(/*sample_rate=*/48000);
 
-// Set the global tempo.
-engine.SetTempo(/*tempo=*/124.0);
-
 // Create a new instrument.
 auto instrument = engine.CreateInstrument();
 

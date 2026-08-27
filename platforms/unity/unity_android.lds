@@ -9,7 +9,7 @@ VERS_1.0 {
     BarelyEngine_GetTimestamp;
     BarelyEngine_Process;
     BarelyEngine_SetControl;
-    BarelyEngine_SetTempo;
+    BarelyEngine_SetSpeed;
     BarelyEngine_Update;
     BarelyInstrument_Destroy;
     BarelyInstrument_SetControl;

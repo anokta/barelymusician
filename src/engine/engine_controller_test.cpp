@@ -44,8 +44,7 @@ TEST(EngineControllerTest, AcquireReleasePerformer) {
       &process_callback);
   const auto& task = engine.GetTask(task_index);
 
-  // Start the performer with a tempo of one beat per second.
-  engine.tempo = 60.0;
+  // Start the performer.
   EXPECT_FALSE(performer.is_playing);
   EXPECT_FALSE(task.is_active);
   controller.performer_controller().Start(performer_index);

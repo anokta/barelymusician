@@ -36,7 +36,7 @@ constexpr double kLookahead = 0.05;
 constexpr float kDelayTime = 0.5f;
 constexpr float kDelayFeedback = 0.2;
 constexpr float kDelayLpfCutoff = 0.2f;
-constexpr double kTempo = 140.0;
+constexpr double kSpeed = 140.0 / 60.0;
 
 // Instrument settings.
 constexpr float kGain = 1.0f;
@@ -70,7 +70,7 @@ std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) 
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(void) {
+int main() {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);
@@ -80,7 +80,7 @@ int main(void) {
   engine.SetControl(EngineControlType::kDelayTime, kDelayTime);
   engine.SetControl(EngineControlType::kDelayFeedback, kDelayFeedback);
   engine.SetControl(EngineControlType::kDelayLpfCutoff, kDelayLpfCutoff);
-  engine.SetTempo(kTempo);
+  engine.SetSpeed(kSpeed);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);

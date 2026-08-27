@@ -17,9 +17,6 @@
 ///   // Create a new engine.
 ///   barely::Engine engine(/*sample_rate=*/48000);
 ///
-///   // Set the tempo.
-///   engine.SetTempo(/*tempo=*/124.0);
-///
 ///   // Update the timestamp.
 ///   //
 ///   // Timestamp updates must occur before processing the engine with the respective timestamps.
@@ -96,9 +93,6 @@
 ///   const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
 ///   void* allocation = malloc(allocation_size);
 ///   BarelyEngine* engine = BarelyEngine_Create(&config, allocation, allocation_size);
-///
-///   // Set the tempo.
-///   BarelyEngine_SetTempo(engine, /*tempo=*/124.0);
 ///
 ///   // Update the timestamp.
 ///   //
@@ -465,10 +459,10 @@ BARELY_API void BarelyEngine_ResetSeed(BarelyEngine* engine, int32_t seed);
 BARELY_API void BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type,
                                         float value);
 
-/// Sets the tempo of an engine.
+/// Sets the speed of an engine.
 /// @param engine Pointer to engine.
-/// @param tempo Tempo in beats per minute.
-BARELY_API void BarelyEngine_SetTempo(BarelyEngine* engine, double tempo);
+/// @param speed Speed in beats per second.
+BARELY_API void BarelyEngine_SetSpeed(BarelyEngine* engine, double speed);
 
 /// Updates an engine at timestamp.
 /// @param engine Pointer to engine.
@@ -957,6 +951,7 @@ class Performer {
 
   /// Returns the identifier.
   /// @return Identifier.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return performer_id_; }
 
   /// Creates a new task.
@@ -1172,9 +1167,9 @@ class Engine {
                             static_cast<float>(value));
   }
 
-  /// Sets the tempo.
-  /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept { BarelyEngine_SetTempo(engine_, tempo); }
+  /// Sets the speed.
+  /// @param speed Speed in beats per second.
+  void SetSpeed(double speed = 1.0) noexcept { BarelyEngine_SetSpeed(engine_, speed); }
 
   /// Updates the engine at timestamp.
   /// @param timestamp Timestamp in seconds.

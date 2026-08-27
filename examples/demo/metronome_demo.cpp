@@ -44,7 +44,7 @@ constexpr double kTempoIncrement = 10.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(void) {
+int main() {
   InputManager input_manager;
 
   AudioClock audio_clock(kSampleRate);
@@ -53,7 +53,7 @@ int main(void) {
   double tempo = kInitialTempo;
 
   Engine engine(kSampleRate);
-  engine.SetTempo(kInitialTempo);
+  engine.SetSpeed(kInitialTempo / 60.0);
 
   // Create the metronome instrument.
   auto instrument = engine.CreateInstrument();
@@ -134,7 +134,7 @@ int main(void) {
         return;
     }
     tempo = std::clamp(tempo, 0.0, static_cast<double>(kSampleRate));
-    engine.SetTempo(tempo);
+    engine.SetSpeed(tempo / 60.0);
     ConsoleLog() << "Tempo set to " << tempo << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);

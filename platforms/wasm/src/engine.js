@@ -141,9 +141,9 @@ export class Engine {
     this._pendingCommands = [];
   }
 
-  /** @param {number} tempo */
-  setTempo(tempo) {
-    this._pushCommand({type: CommandType.ENGINE_SET_TEMPO, tempo});
+  /** @param {number} speed */
+  setSpeed(speed) {
+    this._pushCommand({type: CommandType.ENGINE_SET_SPEED, speed});
   }
 
   /** @return {!AudioWorkletNode} */

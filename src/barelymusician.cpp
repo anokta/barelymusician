@@ -134,9 +134,9 @@ void BarelyEngine_ResetSeed(BarelyEngine* engine, int32_t seed) {
   }
 }
 
-void BarelyEngine_SetTempo(BarelyEngine* engine, double tempo) {
+void BarelyEngine_SetSpeed(BarelyEngine* engine, double speed) {
   if (engine != nullptr) {
-    engine->state.tempo = std::max(tempo, 0.0);
+    engine->state.speed = std::max(speed, 0.0);
   }
 }
 

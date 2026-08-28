@@ -17,21 +17,18 @@
 ///   // Create a new engine.
 ///   barely::Engine engine(/*sample_rate=*/48000);
 ///
-///   // Update the timestamp.
-///   //
-///   // Timestamp updates must occur before processing the engine with the respective timestamps.
-///   // Otherwise, `Process` calls may be *late* in receiving relevant changes to the engine. To
-///   // address this, `Update` should typically be called from the main thread update callback
-///   // using a lookahead to prevent potential thread synchronization issues in real-time audio
-///   // applications.
+///   // Update the engine timestamp.
+///   // Timestamp updates must occur before processing the engine at the respective timestamp.
+///   // Otherwise, process calls may receive relevant engine changes too late. To avoid this, the
+///   // engine must be updated from the main thread with a lookahead to prevent potential thread
+///   // synchronization issues in real-time audio applications.
 ///   constexpr double kLookahead = 0.1;
 ///   double timestamp = 1.0;
 ///   engine.Update(timestamp + kLookahead);
 ///
-///   // Process the next output samples.
-///   //
-///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
-///   // called from an audio thread process callback in real-time audio applications.
+///   // Process the next output samples of the engine.
+///   // The engine processes output samples synchronously. Therefore, process must be called from
+///   // the audio thread in real-time audio applications.
 ///   constexpr int32_t kChannelCount = 2;
 ///   constexpr int32_t kFrameCount = 512;
 ///   float output_samples[kChannelCount * kFrameCount];
@@ -44,16 +41,14 @@
 ///   // Create a new instrument.
 ///   auto instrument = engine.CreateInstrument();
 ///
-///   // Set an instrument note on.
-///   //
-///   // Notes are expressed in octaves relative to middle C as the center frequency. Fractional
-///   // note values adjust the frequency logarithmically to ensure equally perceived pitch
-///   // intervals within each octave.
-///   constexpr float kC3Pitch = -1.0f;
-///   instrument.SetNoteOn(kC3Pitch);
-///
 ///   // Set the instrument to use full oscillator mix.
 ///   instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
+///
+///   // Set an instrument note on.
+///   // Notes are expressed as octaves relative to middle C. Fractional values adjust the frequency
+///   // logarithmically for equal-tempered pitch intervals within each octave.
+///   constexpr float kC3Pitch = -1.0f;
+///   instrument.SetNoteOn(kC3Pitch);
 ///
 ///   // Destroy the instrument.
 ///   instrument.Destroy();
@@ -94,21 +89,18 @@
 ///   void* allocation = malloc(allocation_size);
 ///   BarelyEngine* engine = BarelyEngine_Create(&config, allocation, allocation_size);
 ///
-///   // Update the timestamp.
-///   //
-///   // Timestamp updates must occur before processing the engine with the respective timestamps.
-///   // Otherwise, `Process` calls may be *late* in receiving relevant changes to the engine. To
-///   // address this, `Update` should typically be called from the main thread update callback
-///   // using a lookahead to prevent potential thread synchronization issues in real-time audio
-///   // applications.
+///   // Update the engine timestamp.
+///   // Timestamp updates must occur before processing the engine at the respective timestamp.
+///   // Otherwise, process calls may receive relevant engine changes too late. To avoid this, the
+///   // engine must be updated from the main thread with a lookahead to prevent potential thread
+///   // synchronization issues in real-time audio applications.
 ///   const double lookahead = 0.1;
 ///   double timestamp = 0.0;
 ///   BarelyEngine_Update(engine, timestamp + lookahead);
 ///
-///   // Process the next output samples.
-///   //
-///   // The engine processes output samples synchronously. Therefore, `Process` should typically be
-///   // called from an audio thread process callback in real-time audio applications.
+///   // Process the next output samples of the engine.
+///   // The engine processes output samples synchronously. Therefore, process must be called from
+///   // the audio thread in real-time audio applications.
 ///   float output_samples[2 * 512];
 ///   BarelyEngine_Process(engine, output_samples, 2, 512, timestamp);
 ///
@@ -123,17 +115,15 @@
 ///   // Create a new instrument.
 ///   const uint32_t instrument_id = BarelyEngine_CreateInstrument(engine);
 ///
-///   // Set an instrument note on.
-///   //
-///   // The note pitch is expressed in octaves relative to middle C as the center frequency.
-///   // Fractional note values adjust the frequency logarithmically to ensure equally perceived
-///   // pitch intervals within each octave.
-///   const float c3_pitch = -1.0f;
-///   BarelyInstrument_SetNoteOn(engine, instrument_id, c3_pitch);
-///
 ///   // Set the instrument to use full oscillator mix.
 ///   BarelyInstrument_SetControl(engine, instrument_id, BarelyInstrumentControlType_kOscMix,
 ///                               /*value=*/1.0f);
+///
+///   // Set an instrument note on.
+///   // Notes are expressed as octaves relative to middle C. Fractional values adjust the frequency
+///   // logarithmically for equal-tempered pitch intervals within each octave.
+///   const float c3_pitch = -1.0f;
+///   BarelyInstrument_SetNoteOn(engine, instrument_id, c3_pitch);
 ///
 ///   // Destroy the instrument.
 ///   BarelyInstrument_Destroy(engine, instrument_id);

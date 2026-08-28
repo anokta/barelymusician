@@ -34,27 +34,21 @@ Example usage
 // Create the engine.
 barely::Engine engine(/*sample_rate=*/48000);
 
-// Create a new instrument.
+// Create an oscillator instrument.
 auto instrument = engine.CreateInstrument();
-
-// Set the instrument to use full oscillator mix.
 instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
 
 // Set an instrument note on.
-//
-// Notes are expressed in octaves relative to middle C as the center frequency. Fractional note
-// values adjust the frequency logarithmically to ensure equally perceived pitch intervals within
-// each octave.
+// Notes are expressed as octaves relative to middle C. Fractional values adjust the frequency
+// logarithmically for equal-tempered pitch intervals within each octave.
 constexpr float kC4Pitch = 0.0f;
 instrument.SetNoteOn(kC4Pitch);
 
-// Create a new performer.
-auto performer = engine.CreatePerformer();
-
-// Set the performer to looping.
+// Create a looping performer.
+auto performer = engine.CreatePerformer()
 performer.SetLooping(/*is_looping=*/true);
 
-// Create a new task that plays an instrument note every beat.
+// Create a task that plays an instrument note every beat.
 auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
                                  [&](barely::TaskEventType type) {
                                    constexpr float kC3Pitch = -1.0f;
@@ -69,19 +63,17 @@ auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, /*priority=
 performer.Start();
 
 // Update the engine timestamp.
-//
-// Timestamp updates must occur before processing the engine with the respective timestamps.
-// Otherwise, `Process` calls may be *late* in receiving relevant changes to the engine. To address
-// this, `Update` should typically be called from the main thread update callback using a lookahead
-// to prevent potential thread synchronization issues in real-time audio applications.
+// Timestamp updates must occur before processing the engine at the respective timestamp. Otherwise,
+// process calls may receive relevant engine changes too late. To avoid this, the engine must be
+// updated from the main thread with a lookahead to prevent potential thread synchronization issues
+// in real-time audio applications.
 constexpr double kLookahead = 0.1;
 double timestamp = 0.0;
 engine.Update(timestamp + kLookahead);
 
 // Process the next output samples of the engine.
-//
-// The engine processes output samples synchronously. Therefore, `Process` should typically be
-// called from an audio thread process callback in real-time audio applications.
+// The engine processes output samples synchronously. Therefore, process must be called from the
+// audio thread in real-time audio applications.
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 float output_samples[kChannelCount * kFrameCount];

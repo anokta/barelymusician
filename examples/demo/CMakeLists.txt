@@ -9,6 +9,7 @@ function(add_demo source_file)
     ${DEMO_TARGET_NAME} PROPERTIES
     OUTPUT_NAME ${name}
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/examples
+    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${DEMO_TARGET_NAME}>"
   )
   get_filename_component(ext ${source_file} EXT)
   if(ext STREQUAL ".c")

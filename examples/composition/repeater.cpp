@@ -26,7 +26,7 @@ void Repeater::Clear() noexcept {
   if (IsPlaying()) {
     for (const auto& [pitch_or, length] : pitches_) {
       if (pitch_or.has_value()) {
-        instrument_.SetNoteOff(*pitch_or);
+        instrument_.SetNoteOff(*pitch_or + pitch_offset_);
       }
     }
   }
@@ -68,7 +68,7 @@ void Repeater::Stop() noexcept {
   performer_.SetPosition(0.0);
   for (const auto& [pitch_or, length] : pitches_) {
     if (pitch_or.has_value()) {
-      instrument_.SetNoteOff(*pitch_or);
+      instrument_.SetNoteOff(*pitch_or + pitch_offset_);
     }
   }
   index_ = -1;

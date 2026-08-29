@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_CORE_RNG_H_
 
 #include <cassert>
+#include <climits>
 #include <ctime>
 #include <random>
 
@@ -20,20 +21,14 @@ class Rng {
     engine_.seed(seed_);
   }
 
-  // Generates a new random number with uniform distribution in the normalized range [0, 1).
   [[nodiscard]] RealType Generate() noexcept { return distribution_(engine_); }
 
-  // Generates a new random number with uniform distribution in the range [min, max).
-  [[nodiscard]] uint32_t Generate(uint32_t min, uint32_t max) noexcept {
-    assert(min <= max);
-    return min + static_cast<uint32_t>(Generate() * static_cast<RealType>(max - min));
+  [[nodiscard]] uint32_t Generate(uint32_t max) noexcept {
+    return static_cast<uint32_t>(Generate() * static_cast<RealType>(max));
   }
 
  private:
-  // Normalized uniform distribution in the range [0, 1).
   std::uniform_real_distribution<RealType> distribution_;
-
-  // Random number generator engine.
   int seed_ = 0;
   EngineType engine_;
 };

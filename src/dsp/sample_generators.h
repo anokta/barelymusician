@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <numbers>
 
+#include "core/rng.h"
+
 namespace barely {
 
 inline constexpr float kOscSkewRange = 0.25f;
@@ -79,6 +81,11 @@ inline constexpr float kOscSkewRange = 0.25f;
                                                     : (is_looping ? samples[0] : 0.0f),
                          offset - static_cast<float>(index))
              : 0.0f;
+}
+
+template <typename RngType>
+[[nodiscard]] float GenerateNoiseSample(RngType& rng) noexcept {
+  return (2.0f * static_cast<float>(rng.Generate())) - 1.0f;
 }
 
 }  // namespace barely

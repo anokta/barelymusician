@@ -132,9 +132,8 @@ class InstrumentProcessor {
 
     const float skewed_osc_phase = std::min(1.0f, (1.0f + voice.params.osc_skew) * voice.osc_phase);
     const float osc_sample =
-        (1.0f - voice.params.osc_noise_mix) *
-            GenerateOscSample(voice.params.osc_shape, skewed_osc_phase, osc_increment) +
-        voice.params.osc_noise_mix * engine_.audio_rng.Generate();
+        std::lerp(GenerateOscSample(voice.params.osc_shape, skewed_osc_phase, osc_increment),
+                  GenerateNoiseSample(engine_.audio_rng), voice.params.osc_noise_mix);
     const float osc_output = voice.params.osc_mix * osc_sample;
 
     voice.osc_phase += osc_increment;

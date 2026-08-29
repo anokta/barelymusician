@@ -47,6 +47,8 @@ inline constexpr std::array<Control, BarelyEngineControlType_kCount> kEngineCont
     BARELY_ENGINE_CONTROL_TYPES(EngineControlType, BARELY_DEFINE_CONTROL)};
 inline constexpr std::array<Control, BarelyInstrumentControlType_kCount> kInstrumentControls = {
     BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, BARELY_DEFINE_CONTROL)};
+inline constexpr std::array<Control, BarelyLfoControlType_kCount> kLfoControls = {
+    BARELY_LFO_CONTROL_TYPES(LfoControlType, BARELY_DEFINE_CONTROL)};
 inline constexpr std::array<Control, BarelyNoteControlType_kCount> kNoteControls = {
     BARELY_NOTE_CONTROL_TYPES(NoteControlType, BARELY_DEFINE_CONTROL)};
 #undef BARELY_DEFINE_CONTROL

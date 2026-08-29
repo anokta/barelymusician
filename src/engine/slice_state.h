@@ -8,8 +8,7 @@
 namespace barely {
 
 struct SliceState {
-  // Mono samples.
-  const float* samples = nullptr;
+  const float* samples = nullptr;  // mono
   int32_t sample_count = 0;
 
   float sample_rate = 0.0f;

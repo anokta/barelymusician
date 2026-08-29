@@ -7,6 +7,7 @@
 #include "core/time.h"
 #include "engine/engine_state.h"
 #include "engine/instrument_controller.h"
+#include "engine/lfo_controller.h"
 #include "engine/performer_controller.h"
 
 namespace barely {
@@ -14,7 +15,10 @@ namespace barely {
 class EngineController {
  public:
   explicit EngineController(EngineState& engine) noexcept
-      : engine_(engine), instrument_controller_(engine_), performer_controller_(engine_) {}
+      : engine_(engine),
+        instrument_controller_(engine_),
+        lfo_controller_(engine_),
+        performer_controller_(engine_) {}
 
   void SetControl(BarelyEngineControlType type, float value) noexcept {
     engine_.ScheduleCmd(EngineControlCmd{type, kEngineControls[type].Clamp(value)});
@@ -30,6 +34,7 @@ class EngineController {
         performer_controller_.GetNextTaskEvent(update_duration, max_priority);
 
         if (update_duration > 0.0) {
+          lfo_controller_.Update(update_duration);
           performer_controller_.Update(update_duration);
           engine_.timestamp += update_duration / engine_.speed;
         }
@@ -49,6 +54,9 @@ class EngineController {
     return instrument_controller_;
   }
 
+  [[nodiscard]] LfoController& lfo_controller() noexcept { return lfo_controller_; }
+  [[nodiscard]] const LfoController& lfo_controller() const noexcept { return lfo_controller_; }
+
   [[nodiscard]] PerformerController& performer_controller() noexcept {
     return performer_controller_;
   }
@@ -59,6 +67,7 @@ class EngineController {
  private:
   EngineState& engine_;
   InstrumentController instrument_controller_;
+  LfoController lfo_controller_;
   PerformerController performer_controller_;
 };
 

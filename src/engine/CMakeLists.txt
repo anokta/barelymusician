@@ -4,6 +4,7 @@ barelymusician_target_sources(
   engine_controller.h
   engine_processor.h
   engine_state.h
+  lfo_controller.h
   instrument_controller.h
   instrument_processor.cpp
   instrument_processor.h

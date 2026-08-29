@@ -32,6 +32,15 @@ struct InstrumentState {
   uint32_t first_slice_index = kInvalidIndex;
 };
 
+struct LfoState {
+  double phase = 0.0f;
+  double speed = 1.0f;
+  float noise_mix = 0.0f;
+  float shape = 0.0f;
+  float skew = 0.0f;
+  float value = 0.0f;
+};
+
 struct EngineState {
   EngineState(Arena& arena, const BarelyEngineConfig& config) noexcept
       : delay_filter(arena, std::bit_ceil(static_cast<uint32_t>(std::ceil(
@@ -40,6 +49,7 @@ struct EngineState {
         reverb(arena, static_cast<float>(config.sample_rate)),
 
         instrument_pool(arena, config.max_instrument_count),
+        lfo_pool(arena, config.max_lfo_count),
         performer_pool(arena, config.max_performer_count),
         task_pool(arena, config.max_task_count),
         voice_pool(arena, config.max_voice_count),
@@ -48,6 +58,7 @@ struct EngineState {
         cmd_queue(arena, std::bit_ceil(static_cast<uint32_t>(config.max_command_count))),
 
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
+        lfo_generations(arena.AllocArray<uint32_t>(config.max_lfo_count)),
         performer_generations(arena.AllocArray<uint32_t>(config.max_performer_count)),
         task_generations(arena.AllocArray<uint32_t>(config.max_task_count)),
 
@@ -59,8 +70,9 @@ struct EngineState {
         sample_rate(static_cast<float>(config.sample_rate)),
         smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05f)),
 
-        id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
-            {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
+        id_index_bit_count(std::bit_width(std::bit_ceil(
+            static_cast<uint32_t>(std::max({config.max_instrument_count, config.max_lfo_count,
+                                            config.max_performer_count, config.max_task_count}))))),
         id_index_mask((1u << id_index_bit_count) - 1u),
         id_generation_mask((1u << (32u - id_index_bit_count)) - 1u),
 
@@ -82,6 +94,7 @@ struct EngineState {
   Reverb reverb;
 
   Pool<InstrumentState> instrument_pool;
+  Pool<LfoState> lfo_pool;
   Pool<PerformerState> performer_pool;
   Pool<TaskState> task_pool;
   Pool<VoiceState> voice_pool;
@@ -91,6 +104,7 @@ struct EngineState {
   CmdQueue cmd_queue;
 
   uint32_t* instrument_generations = nullptr;
+  uint32_t* lfo_generations = nullptr;
   uint32_t* performer_generations = nullptr;
   uint32_t* task_generations = nullptr;
 
@@ -163,6 +177,11 @@ struct EngineState {
   }
   [[nodiscard]] const InstrumentState& GetInstrument(uint32_t instrument_index) const noexcept {
     return instrument_pool.Get(instrument_index);
+  }
+
+  [[nodiscard]] LfoState& GetLfo(uint32_t lfo_index) noexcept { return lfo_pool.Get(lfo_index); }
+  [[nodiscard]] const LfoState& GetLfo(uint32_t lfo_index) const noexcept {
+    return lfo_pool.Get(lfo_index);
   }
 
   [[nodiscard]] PerformerState& GetPerformer(uint32_t performer_index) noexcept {

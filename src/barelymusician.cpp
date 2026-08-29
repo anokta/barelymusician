@@ -30,6 +30,12 @@ struct BarelyEngine {
            state.GetIdGeneration(instrument_id) == state.instrument_generations[instrument_index];
   }
 
+  [[nodiscard]] bool IsValidLfo(uint32_t lfo_id) const noexcept {
+    const uint32_t lfo_index = state.GetIdIndex(lfo_id);
+    return state.lfo_pool.IsActive(lfo_index) &&
+           state.GetIdGeneration(lfo_id) == state.lfo_generations[lfo_index];
+  }
+
   [[nodiscard]] bool IsValidPerformer(uint32_t performer_id) const noexcept {
     const uint32_t performer_index = state.GetIdIndex(performer_id);
     return state.performer_pool.IsActive(performer_index) &&
@@ -81,6 +87,16 @@ uint32_t BarelyEngine_CreateInstrument(BarelyEngine* engine) {
     if (instrument_index != barely::kInvalidIndex) {
       return engine->state.BuildId(instrument_index,
                                    engine->state.instrument_generations[instrument_index]);
+    }
+  }
+  return 0;
+}
+
+uint32_t BarelyEngine_CreateLfo(BarelyEngine* engine) {
+  if (engine != nullptr) {
+    const uint32_t lfo_index = engine->controller.lfo_controller().Acquire();
+    if (lfo_index != barely::kInvalidIndex) {
+      return engine->state.BuildId(lfo_index, engine->state.lfo_generations[lfo_index]);
     }
   }
   return 0;
@@ -143,6 +159,40 @@ void BarelyEngine_SetSpeed(BarelyEngine* engine, double speed) {
 void BarelyEngine_Update(BarelyEngine* engine, double timestamp) {
   if (engine != nullptr) {
     engine->controller.Update(timestamp);
+  }
+}
+
+void BarelyLfo_Destroy(BarelyEngine* engine, uint32_t lfo_id) {
+  if (engine != nullptr && engine->IsValidLfo(lfo_id)) {
+    const uint32_t lfo_index = engine->state.GetIdIndex(lfo_id);
+    engine->controller.lfo_controller().Release(lfo_index);
+    engine->state.lfo_generations[lfo_index] =
+        engine->state.GetNextIdGeneration(engine->state.lfo_generations[lfo_index]);
+  }
+}
+
+double BarelyLfo_GetValue(const BarelyEngine* engine, uint32_t lfo_id) {
+  return (engine != nullptr && engine->IsValidLfo(lfo_id))
+             ? engine->state.GetLfo(engine->state.GetIdIndex(lfo_id)).value
+             : 0.0;
+}
+
+void BarelyLfo_Reset(BarelyEngine* engine, uint32_t lfo_id) {
+  if (engine != nullptr && engine->IsValidLfo(lfo_id)) {
+    engine->controller.lfo_controller().Reset(engine->state.GetIdIndex(lfo_id));
+  }
+}
+
+void BarelyLfo_SetControl(BarelyEngine* engine, uint32_t lfo_id, BarelyLfoControlType type,
+                          float value) {
+  if (engine != nullptr && engine->IsValidLfo(lfo_id) && type < BarelyLfoControlType_kCount) {
+    engine->controller.lfo_controller().SetControl(engine->state.GetIdIndex(lfo_id), type, value);
+  }
+}
+
+void BarelyLfo_SetSpeed(BarelyEngine* engine, uint32_t lfo_id, double speed) {
+  if (engine != nullptr && engine->IsValidLfo(lfo_id)) {
+    engine->controller.lfo_controller().SetSpeed(engine->state.GetIdIndex(lfo_id), speed);
   }
 }
 

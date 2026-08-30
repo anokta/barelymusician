@@ -275,7 +275,9 @@ BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
 #define BARELY_LFO_CONTROL_TYPES(LfoControlType, X)          \
   X(LfoControlType, NoiseMix, 0.0f, 0.0f, 1.0f, "Noise Mix") \
   X(LfoControlType, Shape, 0.0f, 0.0f, 1.0f, "Shape")        \
-  X(LfoControlType, Skew, 0.0f, -1.0f, 1.0f, "Skew")
+  X(LfoControlType, Skew, 0.0f, -1.0f, 1.0f, "Skew")         \
+  X(LfoControlType, Depth, 1.0f, 0.0f, 1.0f, "Depth")        \
+  X(LfoControlType, PhaseOffset, 0.0f, 0.0f, 1.0f, "Phase Offset")
 BARELY_ENUM(LfoControlType, BARELY_LFO_CONTROL_TYPES)
 
 /// Note control types.

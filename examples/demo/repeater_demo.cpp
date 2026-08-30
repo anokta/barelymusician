@@ -86,6 +86,10 @@ int main() {
   repeater.SetRate(kInitialRate);
   repeater.SetNoteCallback([&repeater](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
 
+  auto lfo = engine.CreateLfo();
+  lfo.SetSpeed(0.25);
+  lfo.SetControl(barely::LfoControlType::kDepth, 0.5f);
+
   // Audio process callback.
   audio_output.SetProcessCallback(
       [&](float* output_samples, int output_channel_count, int output_frame_count) {
@@ -214,6 +218,7 @@ int main() {
   while (!quit) {
     input_manager.Update();
     engine.Update(audio_clock.GetTimestamp() + kLookahead);
+    instrument.SetControl(InstrumentControlType::kGain, 0.5 + lfo.GetValue());
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

@@ -27,7 +27,7 @@ class LfoController {
   void Reset(uint32_t lfo_index) noexcept {
     LfoState& lfo = engine_.lfo_pool.Get(lfo_index);
     lfo.phase = 0.0;
-    lfo.value = static_cast<float>(engine_.main_rng.Generate()) * lfo.noise_mix;
+    UpdateValue(lfo);
   }
 
   void SetControl(uint32_t lfo_index, BarelyLfoControlType type, float value) noexcept {
@@ -43,6 +43,15 @@ class LfoController {
       case BarelyLfoControlType_kSkew:
         lfo.skew = kInstrumentControls[type].Clamp(value);
         break;
+      case BarelyLfoControlType_kDepth:
+        lfo.depth = kInstrumentControls[type].Clamp(value);
+        break;
+      case BarelyLfoControlType_kPhaseOffset:
+        lfo.phase_offset = kInstrumentControls[type].Clamp(value);
+        break;
+      default:
+        assert(!"Invalid lfo control type");
+        return;
     }
   }
 
@@ -55,13 +64,18 @@ class LfoController {
       LfoState& lfo = engine_.GetLfo(engine_.lfo_pool.GetActive(i));
       if (lfo.speed > 0.0) {
         lfo.phase = std::fmod(lfo.phase + lfo.speed * duration, 1.0);
-        lfo.value = std::lerp(GenerateOscSample(lfo.shape, static_cast<float>(lfo.phase), 0.0f),
-                              static_cast<float>(engine_.main_rng.Generate()), lfo.noise_mix);
+        UpdateValue(lfo);
       }
     }
   }
 
  private:
+  void UpdateValue(LfoState& lfo) noexcept {
+    const float phase = static_cast<float>(lfo.phase) + lfo.phase_offset;
+    lfo.value = lfo.depth * std::lerp(GenerateOscSample(lfo.shape, phase, 0.0f),
+                                      GenerateNoiseSample(engine_.main_rng), lfo.noise_mix);
+  }
+
   EngineState& engine_;
 };
 

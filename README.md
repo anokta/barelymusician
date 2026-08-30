@@ -11,7 +11,7 @@ accurate timing.
 This repository includes build targets for Windows, macOS, Linux, Android, WebAssembly, and Daisy,
 as well as a Godot GDExtension, a native Unity plugin, and a VST instrument plugin.
 
-To use in a project, simply include [barelymusician.h](include/barelymusician.h).
+To use in a C/C++ project, include [barelymusician.h](include/barelymusician.h).
 
 To use in Godot, download the latest version of
 [barelymusiciangodot.zip](https://github.com/anokta/barelymusician/releases/latest/download/barelymusiciangodot.zip).

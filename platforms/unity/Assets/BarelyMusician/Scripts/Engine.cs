@@ -322,9 +322,9 @@ namespace Barely {
         // Delay feedback.
         [InspectorName("Delay Feedback")] DELAY_FEEDBACK,
         // Delay low-pass filter cutoff.
-        [InspectorName("Delay LPF Cutoff")] DELAY_LPF_CUTOFF,
+        [InspectorName("Delay Lpf Cutoff")] DELAY_LPF_CUTOFF,
         // Delay high-pass filter cutoff.
-        [InspectorName("Delay HPF Cutoff")] DELAY_HPF_CUTOFF,
+        [InspectorName("Delay Hpf Cutoff")] DELAY_HPF_CUTOFF,
         // Delay ping-pong.
         [InspectorName("Delay Ping-Pong")] DELAY_PING_PONG,
         // Delay reverb send.

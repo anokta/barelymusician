@@ -224,8 +224,8 @@
   X(EngineControlType, DelayMix, 1.0f, 0.0f, 1.0f, "Delay Mix")                     \
   X(EngineControlType, DelayTime, 0.0f, 0.0f, 8.0f, "Delay Time")                   \
   X(EngineControlType, DelayFeedback, 0.0f, 0.0f, 1.0f, "Delay Feedback")           \
-  X(EngineControlType, DelayLpfCutoff, 1.0f, 0.0f, 1.0f, "Delay LPF Cutoff")        \
-  X(EngineControlType, DelayHpfCutoff, 0.0f, 0.0f, 1.0f, "Delay HPF Cutoff")        \
+  X(EngineControlType, DelayLpfCutoff, 1.0f, 0.0f, 1.0f, "Delay Lpf Cutoff")        \
+  X(EngineControlType, DelayHpfCutoff, 0.0f, 0.0f, 1.0f, "Delay Hpf Cutoff")        \
   X(EngineControlType, DelayPingPong, 0.0f, 0.0f, 1.0f, "Delay Ping-Pong")          \
   X(EngineControlType, DelayReverbSend, 0.0f, 0.0f, 2.0f, "Delay Reverb Send")      \
   X(EngineControlType, ReverbMix, 1.0f, 0.0f, 1.0f, "Reverb Mix")                   \
@@ -270,6 +270,14 @@ BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
   X(InstrumentControlType, VoiceCount, 8, 1, 16, "Voice Count")
 BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
 
+/// Lfo control types.
+#define BARELY_LFO_CONTROL_TYPES(LfoControlType, X)          \
+  X(LfoControlType, NoiseMix, 0.0f, 0.0f, 1.0f, "Noise Mix") \
+  X(LfoControlType, Shape, 0.0f, 0.0f, 1.0f, "Shape")        \
+  X(LfoControlType, Skew, 0.0f, -1.0f, 1.0f, "Skew")         \
+  X(LfoControlType, Depth, 1.0f, 0.0f, 1.0f, "Depth")
+BARELY_ENUM(LfoControlType, BARELY_LFO_CONTROL_TYPES)
+
 /// Note control types.
 #define BARELY_NOTE_CONTROL_TYPES(NoteControlType, X) \
   X(NoteControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")  \
@@ -309,6 +317,9 @@ typedef struct BarelyEngineConfig {
 
   /// Maximum number of instruments.
   int32_t max_instrument_count;
+
+  /// Maximum number of lfos.
+  int32_t max_lfo_count;
 
   /// Maximum number of performers.
   int32_t max_performer_count;
@@ -408,6 +419,11 @@ BARELY_API BarelyEngine* BarelyEngine_Create(const BarelyEngineConfig* config, v
 /// @return Instrument identifier.
 BARELY_API uint32_t BarelyEngine_CreateInstrument(BarelyEngine* engine);
 
+/// Creates a new lfo.
+/// @param engine Pointer to engine.
+/// @return lfo identifier.
+BARELY_API uint32_t BarelyEngine_CreateLfo(BarelyEngine* engine);
+
 /// Creates a new performer.
 /// @param engine Pointer to engine.
 /// @return Performer identifier.
@@ -458,6 +474,43 @@ BARELY_API void BarelyEngine_SetSpeed(BarelyEngine* engine, double speed);
 /// @param engine Pointer to engine.
 /// @param timestamp Timestamp in seconds.
 BARELY_API void BarelyEngine_Update(BarelyEngine* engine, double timestamp);
+
+/// Destroys an lfo.
+/// @param engine Pointer to engine.
+/// @param lfo_id Lfo identifier.
+BARELY_API void BarelyLfo_Destroy(BarelyEngine* engine, uint32_t lfo_id);
+
+/// Evaluates the value of an lfo.
+/// @param engine Pointer to engine.
+/// @param lfo_id Lfo identifier.
+/// @return Value.
+BARELY_API float BarelyLfo_Evaluate(BarelyEngine* engine, uint32_t lfo_id);
+
+/// Returns the phase of an lfo.
+/// @param engine Pointer to engine.
+/// @param lfo_id Lfo identifier.
+/// @return Phase.
+BARELY_API double BarelyLfo_GetPhase(BarelyEngine* engine, uint32_t performer_id);
+
+/// Sets an lfo control value.
+/// @param engine Pointer to engine.
+/// @param lfo_id Lfo identifier.
+/// @param type Lfo control type.
+/// @param value Lfo control value.
+BARELY_API void BarelyLfo_SetControl(BarelyEngine* engine, uint32_t lfo_id,
+                                     BarelyLfoControlType type, float value);
+
+/// Sets the phase of an lfo.
+/// @param engine Pointer to engine.
+/// @param lfo_id Lfo identifier.
+/// @param phase Phase.
+BARELY_API void BarelyLfo_SetPhase(BarelyEngine* engine, uint32_t performer_id, double phase);
+
+/// Sets the playback speed of an lfo.
+/// @param engine Pointer to engine.
+/// @param lfo_id Lfo identifier.
+/// @param speed Playback speed.
+BARELY_API void BarelyLfo_SetSpeed(BarelyEngine* engine, uint32_t lfo_id, double speed);
 
 /// Destroys an instrument.
 /// @param engine Pointer to engine.
@@ -820,6 +873,56 @@ class Instrument {
   uint32_t instrument_id_ = 0;
 };
 
+/// Class that wraps an lfo.
+class Lfo {
+ public:
+  /// Default constructor.
+  Lfo() noexcept = default;
+
+  /// Destroys the lfo.
+  void Destroy() noexcept {
+    BarelyLfo_Destroy(std::exchange(engine_, nullptr), std::exchange(lfo_id_, 0));
+  }
+
+  /// Returns the identifier.
+  /// @return Identifier.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  [[nodiscard]] constexpr operator uint32_t() const noexcept { return lfo_id_; }
+
+  /// Evaluates the lfo value.
+  /// @return Value.
+  [[nodiscard]] float Evaluate() noexcept { BarelyLfo_Evaluate(engine_, lfo_id_); }
+
+  /// Returns the phase.
+  /// @return Phase.
+  [[nodiscard]] double GetPhase() const noexcept { return BarelyLfo_GetPhase(engine_, lfo_id_); }
+
+  /// Sets a control value.
+  /// @param type Lfo control type.
+  /// @param value Lfo control value.
+  template <typename ValueType>
+  void SetControl(LfoControlType type, ValueType value) noexcept {
+    static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
+                  "ValueType is not supported");
+    BarelyLfo_SetControl(engine_, lfo_id_, static_cast<BarelyLfoControlType>(type),
+                         static_cast<float>(value));
+  }
+
+  /// Set the phase.
+  /// @param phase Phase.
+  void SetPhase(double phase) noexcept { BarelyLfo_SetPhase(engine_, lfo_id_, phase); }
+
+  /// Sets the playback speed.
+  /// @param speed Playback speed.
+  void SetSpeed(double speed) noexcept { BarelyLfo_SetSpeed(engine_, lfo_id_, speed); }
+
+ private:
+  friend class Engine;
+  Lfo(BarelyEngine* engine, uint32_t lfo_id) noexcept : engine_(engine), lfo_id_(lfo_id) {}
+  BarelyEngine* engine_ = nullptr;
+  uint32_t lfo_id_ = 0;
+};
+
 /// Class that wraps a task.
 class Task {
  public:
@@ -1104,6 +1207,10 @@ class Engine {
   Instrument CreateInstrument() noexcept {
     return {engine_, BarelyEngine_CreateInstrument(engine_)};
   }
+
+  /// Creates a new lfo.
+  /// @return Lfo.
+  Lfo CreateLfo() noexcept { return {engine_, BarelyEngine_CreateLfo(engine_)}; }
 
   /// Creates a new performer.
   /// @return Performer.

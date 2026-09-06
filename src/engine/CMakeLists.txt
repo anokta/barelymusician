@@ -7,6 +7,7 @@ barelymusician_target_sources(
   instrument_controller.h
   instrument_processor.cpp
   instrument_processor.h
+  lfo_controller.h
   params.h
   performer_controller.cpp
   performer_controller.h

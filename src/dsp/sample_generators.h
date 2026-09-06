@@ -13,13 +13,15 @@ namespace barely {
 inline constexpr float kOscSkewRange = 0.25f;
 
 [[nodiscard]] inline float PolyBlep(float phase, float increment) noexcept {
-  if (phase < increment) {
-    const float t = phase / increment;
-    return t + t - t * t - 1.0f;
-  }
-  if (phase > 1.0f - increment) {
-    const float t = (phase - 1.0f) / increment;
-    return t * t + t + t + 1.0f;
+  if (increment > 0.0f) {
+    if (phase < increment) {
+      const float t = phase / increment;
+      return t + t - t * t - 1.0f;
+    }
+    if (phase > 1.0f - increment) {
+      const float t = (phase - 1.0f) / increment;
+      return t * t + t + t + 1.0f;
+    }
   }
   return 0.0f;
 }

@@ -25,6 +25,14 @@ export const EngineControlType = Object.freeze({
   COUNT: 23,
 });
 
+export const LfoControlType = Object.freeze({
+  NOISE_MIX: 0,
+  SHAPE: 1,
+  SKEW: 2,
+  DEPTH: 3,
+  COUNT: 4,
+});
+
 export const InstrumentControlType = Object.freeze({
   GAIN: 0,
   PITCH_SHIFT: 1,

@@ -1,5 +1,6 @@
 import {CommandType, EventCallbackType, MessageType} from './command.js';
 import {Instrument} from './instrument.js';
+import {Lfo} from './lfo.js';
 import {Performer} from './performer.js';
 import {Task} from './task.js';
 
@@ -17,6 +18,9 @@ export class Engine {
 
     /** @private {!Map<number, !Instrument>} */
     this._instruments = new Map();
+
+    /** @private {!Map<number, !Lfo>} */
+    this._lfos = new Map();
 
     /** @private {!Map<number, !Performer>} */
     this._performers = new Map();
@@ -40,6 +44,13 @@ export class Engine {
           initCallback();
           break;
         case MessageType.UPDATE_SUCCESS:
+          for (const {handle, phase, value} of event.data.lfo_properties) {
+            const lfo = this._lfos.get(handle);
+            if (lfo) {
+              lfo._phase = phase;
+              lfo._value = value;
+            }
+          }
           for (const {handle, position} of event.data.performer_properties) {
             const performer = this._performers.get(handle);
             if (performer) {
@@ -76,6 +87,18 @@ export class Engine {
     this._instruments.set(handle, instrument);
     this._pushCommand({type: CommandType.INSTRUMENT_CREATE, handle});
     return instrument;
+  }
+
+  /**
+   * Creates a new lfo.
+   * @return {!Lfo}
+   */
+  createLfo() {
+    const handle = this._nextHandle++;
+    const lfo = new Lfo(this, handle);
+    this._lfos.set(handle, lfo);
+    this._pushCommand({type: CommandType.LFO_CREATE, handle});
+    return lfo;
   }
 
   /**

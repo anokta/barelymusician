@@ -22,6 +22,7 @@ class Processor extends AudioWorkletProcessor {
 
     this._instruments = new Map();
     this._slices = new Map();
+    this._lfos = new Map();
     this._performers = new Map();
     this._tasks = new Map();
 
@@ -33,15 +34,16 @@ class Processor extends AudioWorkletProcessor {
           STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float32Array.BYTES_PER_ELEMENT);
 
       const configPtr = this._module._malloc(ENGINE_CONFIG_SIZE);
-      const configView = new Int32Array(this._module.HEAP32.buffer, configPtr, 8);
+      const configView = new Int32Array(this._module.HEAP32.buffer, configPtr, 9);
       configView[0] = sampleRate;           // sample_rate
       configView[1] = 32;                   // max_instrument_count
-      configView[2] = 32;                   // max_performer_count
-      configView[3] = 512;                  // max_task_count
-      configView[4] = 4096;                 // max_command_count
-      configView[5] = RENDER_QUANTUM_SIZE;  // max_frame_count
-      configView[6] = 128;                  // max_slice_count
-      configView[7] = 128;                  // max_voice_count
+      configView[2] = 128;                  // max_lfo_count
+      configView[3] = 32;                   // max_performer_count
+      configView[4] = 512;                  // max_task_count
+      configView[5] = 4096;                 // max_command_count
+      configView[6] = RENDER_QUANTUM_SIZE;  // max_frame_count
+      configView[7] = 128;                  // max_slice_count
+      configView[8] = 128;                  // max_voice_count
 
       const allocationSize = this._module._BarelyEngineConfig_GetRequiredAllocationSize(configPtr);
       this._allocationPtr = this._module._malloc(allocationSize * Uint8Array.BYTES_PER_ELEMENT);
@@ -75,6 +77,14 @@ class Processor extends AudioWorkletProcessor {
       const latency = Math.max(deltaFrameTime, RENDER_QUANTUM_SIZE / sampleRate);
       this._module._BarelyEngine_Update(this._engine, currentTime + latency);
 
+      const lfo_properties = [];
+      for (const [handle, value] of this._lfos) {
+        lfo_properties.push({
+          handle,
+          phase: this._module._BarelyLfo_GetPhase(this._engine, value.lfoId),
+          value: this._module._BarelyLfo_Evaluate(this._engine, value.lfoId),
+        });
+      }
       const performer_properties = [];
       for (const [handle, value] of this._performers) {
         performer_properties.push({
@@ -90,11 +100,12 @@ class Processor extends AudioWorkletProcessor {
         });
       }
 
-      if (performer_properties.length > 0 || task_properties.length > 0 ||
-          this._pendingEventCallbacks.length > 0) {
+      if (lfo_properties.length > 0 || performer_properties.length > 0 ||
+          task_properties.length > 0 || this._pendingEventCallbacks.length > 0) {
         this.port.postMessage({
           type: MessageType.UPDATE_SUCCESS,
           eventCallbacks: this._pendingEventCallbacks,
+          lfo_properties,
           performer_properties,
           task_properties,
         });
@@ -213,8 +224,35 @@ class Processor extends AudioWorkletProcessor {
         if (!instrumentId) return;
         this._setInstrumentSampleData(instrumentId, command.slices);
       } break;
+      case CommandType.LFO_CREATE: {
+        const lfoId = this._module._BarelyEngine_CreateLfo(this._engine);
+        if (!lfoId) return;
+        this._lfos.set(command.handle, {lfoId});
+      } break;
+      case CommandType.LFO_DESTROY: {
+        const lfoId = this._lfos.get(command.handle)?.lfoId;
+        if (!lfoId) return;
+        this._module._BarelyLfo_Destroy(this._engine, lfoId);
+        this._lfos.delete(command.handle);
+      } break;
+      case CommandType.LFO_SET_CONTROL: {
+        const lfoId = this._lfos.get(command.handle)?.lfoId;
+        if (!lfoId) return;
+        this._module._BarelyLfo_SetControl(this._engine, lfoId, command.typeIndex, command.value);
+      } break;
+      case CommandType.LFO_SET_PHASE: {
+        const lfoId = this._lfos.get(command.handle)?.lfoId;
+        if (!lfoId) return;
+        this._module._BarelyLfo_SetPhase(this._engine, lfoId, command.phase);
+      } break;
+      case CommandType.LFO_SET_SPEED: {
+        const lfoId = this._lfos.get(command.handle)?.lfoId;
+        if (!lfoId) return;
+        this._module._BarelyLfo_SetSpeed(this._engine, lfoId, command.speed);
+      } break;
       case CommandType.PERFORMER_CREATE: {
         const performerId = this._module._BarelyEngine_CreatePerformer(this._engine);
+        if (!performerId) return;
         this._performers.set(command.handle, {performerId});
       } break;
       case CommandType.PERFORMER_DESTROY: {

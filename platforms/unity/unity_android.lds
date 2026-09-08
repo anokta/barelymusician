@@ -4,6 +4,7 @@ VERS_1.0 {
     BarelyScale_GetPitch;
     BarelyEngine_Create;
     BarelyEngine_CreateInstrument;
+    BarelyEngine_CreateLfo;
     BarelyEngine_CreatePerformer;
     BarelyEngine_Destroy;
     BarelyEngine_GetTimestamp;
@@ -17,6 +18,12 @@ VERS_1.0 {
     BarelyInstrument_SetNoteOff;
     BarelyInstrument_SetNoteOn;
     BarelyInstrument_SetSampleData;
+    BarelyLfo_Destroy;
+    BarelyLfo_Evaluate;
+    BarelyLfo_GetPhase;
+    BarelyLfo_SetControl;
+    BarelyLfo_SetPhase;
+    BarelyLfo_SetSpeed;
     BarelyPerformer_CreateTask;
     BarelyPerformer_Destroy;
     BarelyPerformer_GetPosition;

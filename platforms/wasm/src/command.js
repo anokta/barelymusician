@@ -15,23 +15,29 @@ export const CommandType = Object.freeze({
   INSTRUMENT_SET_NOTE_OFF: 8,
   INSTRUMENT_SET_SAMPLE_DATA: 9,
 
-  PERFORMER_CREATE: 10,
-  PERFORMER_DESTROY: 11,
-  PERFORMER_SET_LOOP_BEGIN_POSITION: 12,
-  PERFORMER_SET_LOOP_LENGTH: 13,
-  PERFORMER_SET_LOOPING: 14,
-  PERFORMER_SET_POSITION: 15,
-  PERFORMER_SET_SPEED: 16,
-  PERFORMER_START: 17,
-  PERFORMER_STOP: 18,
-  PERFORMER_SYNC_TO: 19,
+  LFO_CREATE: 10,
+  LFO_DESTROY: 11,
+  LFO_SET_CONTROL: 12,
+  LFO_SET_PHASE: 13,
+  LFO_SET_SPEED: 14,
 
-  TASK_CREATE: 20,
-  TASK_DESTROY: 21,
-  TASK_SET_COMMANDS: 22,
-  TASK_SET_DURATION: 23,
-  TASK_SET_POSITION: 24,
-  TASK_SET_PRIORITY: 25,
+  PERFORMER_CREATE: 15,
+  PERFORMER_DESTROY: 16,
+  PERFORMER_SET_LOOP_BEGIN_POSITION: 17,
+  PERFORMER_SET_LOOP_LENGTH: 18,
+  PERFORMER_SET_LOOPING: 19,
+  PERFORMER_SET_POSITION: 20,
+  PERFORMER_SET_SPEED: 21,
+  PERFORMER_START: 22,
+  PERFORMER_STOP: 23,
+  PERFORMER_SYNC_TO: 24,
+
+  TASK_CREATE: 25,
+  TASK_DESTROY: 26,
+  TASK_SET_COMMANDS: 27,
+  TASK_SET_DURATION: 28,
+  TASK_SET_POSITION: 29,
+  TASK_SET_PRIORITY: 30,
 });
 
 /**
@@ -76,6 +82,16 @@ class CommandFactory {
       setNoteOff: (pitch) => ({type: CommandType.INSTRUMENT_SET_NOTE_OFF, handle, pitch}),
       setNoteOn: (pitch, gain = 1.0, pitchShift = 0.0) =>
           ({type: CommandType.INSTRUMENT_SET_NOTE_ON, handle, pitch, gain, pitchShift}),
+    };
+  }
+
+  /** @param {number} handle */
+  lfo(handle) {
+    return {
+      setControl: (typeIndex, value) =>
+          ({type: CommandType.LFO_SET_CONTROL, handle, typeIndex, value}),
+      setPhase: (phase) => ({type: CommandType.LFO_SET_PHASE, handle, phase}),
+      setSpeed: (speed) => ({type: CommandType.LFO_SET_SPEED, handle, speed}),
     };
   }
 

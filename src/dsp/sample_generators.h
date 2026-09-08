@@ -51,7 +51,7 @@ inline constexpr float kOscSkewRange = 0.25f;
                                              float osc_increment) noexcept {
   assert(osc_shape >= 0.0f && osc_shape <= 1.0f && "GenerateOscSample");
   assert(osc_phase >= 0.0f && osc_phase <= 1.0f && "GenerateOscSample");
-  assert(osc_increment > 0.0f && osc_increment <= 0.5f && "GenerateOscSample");
+  assert(osc_increment >= 0.0f && osc_increment <= 0.5f && "GenerateOscSample");
   static constexpr float kShapeScale = 3.0f;
   static constexpr float kShapeTriangleOffset = 1.0f;
   static constexpr float kShapeSineToTriangle = kShapeTriangleOffset / kShapeScale;

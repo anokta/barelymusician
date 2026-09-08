@@ -22,6 +22,7 @@ if(ENABLE_TESTS)
     cmd_queue_test.cpp
     engine_controller_test.cpp
     engine_processor_test.cpp
+    lfo_controller_test.cpp
     performer_controller_test.cpp
     slice_pool_test.cpp
   )

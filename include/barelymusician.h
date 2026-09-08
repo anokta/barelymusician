@@ -54,6 +54,22 @@
 ///   instrument.Destroy();
 ///   @endcode
 ///
+/// - Lfo:
+///
+///   @code{.cpp}
+///   // Create a new lfo.
+///   auto lfo = engine.CreateLfo();
+///
+///   // Set the lfo speed.
+///   lfo.SetSpeed(2.0);
+///
+///   // Evaluate the lfo value.
+///   const float value = lfo.Evaluate();
+///
+///   // Destroy the lfo.
+///   lfo.Destroy();
+///   @endcode
+///
 /// - Performer:
 ///
 ///   @code{.cpp}
@@ -127,6 +143,22 @@
 ///
 ///   // Destroy the instrument.
 ///   BarelyInstrument_Destroy(engine, instrument_id);
+///   @endcode
+///
+/// - Lfo:
+///
+///   @code{.cpp}
+///   // Create a new lfo.
+///   const uint32_t lfo_id = BarelyEngine_CreateLfo(engine);
+///
+///   // Set the lfo speed.
+///   BarelyLfo_SetSpeed(engine, lfo_id, 2.0);
+///
+///   // Evaluate the lfo value.
+///   const float value = BarelyLfo_Evaluate(engine, lfo_id);
+///
+///   // Destroy the lfo.
+///   BarelyLfo_Destroy(engine, lfo_id);
 ///   @endcode
 ///
 /// - Performer:
@@ -205,6 +237,7 @@
   {                                               \
       .sample_##rate = sample_rate,               \
       .max_instrument_count = 100,                \
+      .max_lfo_count = 1000,                      \
       .max_performer_count = 100,                 \
       .max_task_count = 5000,                     \
       .max_command_count = 8192,                  \
@@ -490,7 +523,7 @@ BARELY_API float BarelyLfo_Evaluate(BarelyEngine* engine, uint32_t lfo_id);
 /// @param engine Pointer to engine.
 /// @param lfo_id Lfo identifier.
 /// @return Phase.
-BARELY_API double BarelyLfo_GetPhase(BarelyEngine* engine, uint32_t performer_id);
+BARELY_API double BarelyLfo_GetPhase(const BarelyEngine* engine, uint32_t lfo_id);
 
 /// Sets an lfo control value.
 /// @param engine Pointer to engine.
@@ -504,7 +537,7 @@ BARELY_API void BarelyLfo_SetControl(BarelyEngine* engine, uint32_t lfo_id,
 /// @param engine Pointer to engine.
 /// @param lfo_id Lfo identifier.
 /// @param phase Phase.
-BARELY_API void BarelyLfo_SetPhase(BarelyEngine* engine, uint32_t performer_id, double phase);
+BARELY_API void BarelyLfo_SetPhase(BarelyEngine* engine, uint32_t lfo_id, double phase);
 
 /// Sets the playback speed of an lfo.
 /// @param engine Pointer to engine.
@@ -891,7 +924,7 @@ class Lfo {
 
   /// Evaluates the lfo value.
   /// @return Value.
-  [[nodiscard]] float Evaluate() noexcept { BarelyLfo_Evaluate(engine_, lfo_id_); }
+  [[nodiscard]] float Evaluate() noexcept { return BarelyLfo_Evaluate(engine_, lfo_id_); }
 
   /// Returns the phase.
   /// @return Phase.

@@ -40,6 +40,20 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
   BarelyEngine_Destroy(engine);
 }
 
+TEST(BarelyEngineTest, CreateDestroyLfo) {
+  const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
+  std::vector<std::byte> allocation(allocation_size);
+  BarelyEngine* engine = BarelyEngine_Create(&config, allocation.data(), allocation_size);
+  EXPECT_TRUE(engine != nullptr);
+
+  const uint32_t lfo_id = BarelyEngine_CreateLfo(engine);
+  EXPECT_NE(lfo_id, 0);
+
+  BarelyLfo_Destroy(engine, lfo_id);
+  BarelyEngine_Destroy(engine);
+}
+
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
@@ -61,14 +75,19 @@ TEST(EngineTest, CreateDestroyInstrument) {
   [[maybe_unused]] const auto instrument = engine.CreateInstrument();
 }
 
-TEST(EngineTest, CreateDestroyPerformer) {
-  Engine engine(kSampleRate);
-  engine.CreatePerformer().Destroy();
-}
-
 TEST(EngineTest, CreateDestroynstrument) {
   Engine engine(kSampleRate);
   engine.CreateInstrument().Destroy();
+}
+
+TEST(EngineTest, CreateDestroyLfo) {
+  Engine engine(kSampleRate);
+  engine.CreateLfo().Destroy();
+}
+
+TEST(EngineTest, CreateDestroyPerformer) {
+  Engine engine(kSampleRate);
+  engine.CreatePerformer().Destroy();
 }
 
 TEST(EngineTest, GenerateRandomNumber) {

@@ -408,6 +408,15 @@ namespace Barely {
         COUNT,
       }
 
+      public enum LfoControlType {
+        // Noise mix.
+        [InspectorName("Noise Mix")] NOISE_MIX,
+        // Shape.
+        [InspectorName("Shape")] SHAPE,
+        // Skew.
+        [InspectorName("Skew")] SKEW,
+      }
+
       public enum NoteControlType {
         // Gain.
         [InspectorName("Gain")] GAIN = 0,
@@ -508,6 +517,47 @@ namespace Barely {
         } else {
           _slices.Remove(instrumentId);
         }
+      }
+
+      public static void Lfo_Create(Lfo lfo, ref UInt32 lfoId) {
+        if (lfoId > 0 || Handle == IntPtr.Zero) {
+          return;
+        }
+        lfoId = BarelyEngine_CreateLfo(_handle);
+        if (lfoId == 0) {
+          Debug.LogError("Failed to create lfo");
+          return;
+        }
+        _lfos.Add(lfoId, new WeakReference(lfo));
+      }
+
+      public static void Lfo_Destroy(ref UInt32 lfoId) {
+        if (lfoId == 0) {
+          return;
+        }
+        BarelyLfo_Destroy(_handle, lfoId);
+        _lfos?.Remove(lfoId);
+        lfoId = 0;
+      }
+
+      public static float Lfo_Evaluate(UInt32 lfoId) {
+        return BarelyLfo_Evaluate(_handle, lfoId);
+      }
+
+      public static double Lfo_GetPhase(UInt32 lfoId) {
+        return BarelyLfo_GetPhase(_handle, lfoId);
+      }
+
+      public static void Lfo_SetControl(UInt32 lfoId, LfoControlType type, float value) {
+        BarelyLfo_SetControl(_handle, lfoId, type, value);
+      }
+
+      public static void Lfo_SetPhase(UInt32 lfoId, double phase) {
+        BarelyLfo_SetPhase(_handle, lfoId, phase);
+      }
+
+      public static void Lfo_SetSpeed(UInt32 lfoId, double speed) {
+        BarelyLfo_SetSpeed(_handle, lfoId, speed);
       }
 
       public static void Performer_Create(Performer performer, ref UInt32 performerId) {
@@ -616,6 +666,7 @@ namespace Barely {
       public struct BarelyEngineConfig {
         public Int32 sampleRate;
         public Int32 maxInstrumentCount;
+        public Int32 maxLfoCount;
         public Int32 maxPerformerCount;
         public Int32 maxTaskCount;
         public Int32 maxCommandCount;
@@ -670,6 +721,7 @@ namespace Barely {
 
       private static Dictionary<UInt32, Instrument> _instruments = null;
       private static Dictionary<UInt32, List<float[]>> _slices = null;
+      private static Dictionary<UInt32, WeakReference> _lfos = null;
       private static Dictionary<UInt32, Performer> _performers = null;
       private static Dictionary<UInt32, Task> _tasks = null;
 
@@ -734,6 +786,12 @@ namespace Barely {
           for (int i = 0; i < instruments.Count; ++i) {
             instruments[i].enabled = false;
           }
+          var lfos = new List<Lfo>();
+          foreach (var pair in _lfos) {
+            if (pair.Value.IsAlive) {
+              lfos.Add((Lfo)pair.Value.Target);
+            }
+          }
           var performers = new List<Performer>(_performers.Values);
           for (int i = 0; i < performers.Count; ++i) {
             performers[i].enabled = false;
@@ -741,6 +799,9 @@ namespace Barely {
           Initialize();
           for (int i = 0; i < instruments.Count; ++i) {
             instruments[i].enabled = true;
+          }
+          for (int i = 0; i < lfos.Count; ++i) {
+            lfos[i].Reset();
           }
           for (int i = 0; i < performers.Count; ++i) {
             performers[i].enabled = true;
@@ -760,10 +821,15 @@ namespace Barely {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
           var engineConfig = new BarelyEngineConfig {
-            sampleRate = config.sampleRate, maxInstrumentCount = 100,
-            maxPerformerCount = 100,        maxTaskCount = 5000,
-            maxCommandCount = 8192,         maxFrameCount = config.dspBufferSize,
-            maxSliceCount = 1000,           maxVoiceCount = 200,
+            sampleRate = config.sampleRate,
+            maxInstrumentCount = 100,
+            maxLfoCount = 1000,
+            maxPerformerCount = 100,
+            maxTaskCount = 5000,
+            maxCommandCount = 8192,
+            maxFrameCount = config.dspBufferSize,
+            maxSliceCount = 1000,
+            maxVoiceCount = 200,
           };
           Int32 allocationSize = BarelyEngineConfig_GetRequiredAllocationSize(ref engineConfig);
           _allocation = Marshal.AllocHGlobal(allocationSize);
@@ -846,6 +912,9 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreateInstrument")]
       private static extern UInt32 BarelyEngine_CreateInstrument(IntPtr engine);
 
+      [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreateLfo")]
+      private static extern UInt32 BarelyEngine_CreateLfo(IntPtr engine);
+
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_CreatePerformer")]
       private static extern UInt32 BarelyEngine_CreatePerformer(IntPtr engine);
 
@@ -896,6 +965,25 @@ namespace Barely {
       private static extern void BarelyInstrument_SetSampleData(IntPtr engine, UInt32 instrumentId,
                                                                 [In] Slice[] slices,
                                                                 Int32 sliceCount);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyLfo_Destroy")]
+      private static extern void BarelyLfo_Destroy(IntPtr engine, UInt32 lfoId);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyLfo_Evaluate")]
+      private static extern float BarelyLfo_Evaluate(IntPtr engine, UInt32 lfoId);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyLfo_GetPhase")]
+      private static extern double BarelyLfo_GetPhase(IntPtr engine, UInt32 lfoId);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyLfo_SetControl")]
+      private static extern void BarelyLfo_SetControl(IntPtr engine, UInt32 lfoId,
+                                                      LfoControlType type, float value);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyLfo_SetPhase")]
+      private static extern void BarelyLfo_SetPhase(IntPtr engine, UInt32 lfoId, double phase);
+
+      [DllImport(_pluginName, EntryPoint = "BarelyLfo_SetSpeed")]
+      private static extern void BarelyLfo_SetSpeed(IntPtr engine, UInt32 lfoId, double speed);
 
       [DllImport(_pluginName, EntryPoint = "BarelyPerformer_CreateTask")]
       private static extern UInt32 BarelyPerformer_CreateTask(IntPtr engine, UInt32 performerId,

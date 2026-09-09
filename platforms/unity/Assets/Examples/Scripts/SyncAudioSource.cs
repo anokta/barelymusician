@@ -7,7 +7,12 @@ namespace Barely.Examples {
     public Performer performer;
     public AudioSource source;
 
-    private float _pitch = 0.0f;
+    private Lfo _lfo = new Lfo();
+
+    void Awake() {
+      Engine.Speed = 2.0;
+      _lfo.Speed = 0.125;
+    }
 
     void Update() {
       if (((Application.platform == RuntimePlatform.Android ||
@@ -19,19 +24,20 @@ namespace Barely.Examples {
           performer.Stop();
           performer.Position = 0.0;
           performer.Play();
+          _lfo.Phase = 0.0;
         } else {
           performer.Stop();
           source.SetScheduledEndTime(Engine.Timestamp);
         }
       }
       transform.rotation = Quaternion.AngleAxis((float)performer.Position * 90.0f, Vector3.forward);
-      _pitch = Mathf.PingPong(0.5f * Time.time, 2.0f);
     }
 
     public void PlayNote(TaskEventType type) {
       if (type == TaskEventType.BEGIN) {
-        instrument.SetNoteOn(_pitch);
-        instrument.SetNoteOff(_pitch);
+        float pitch = _lfo.Evaluate();
+        instrument.SetNoteOn(pitch);
+        instrument.SetNoteOff(pitch);
       }
     }
   }

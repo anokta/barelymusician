@@ -36,10 +36,8 @@ TEST(LfoControllerTest, Evaluate) {
   EXPECT_DOUBLE_EQ(controller.Evaluate(lfo_index), 0.0);
 
   controller.SetSpeed(lfo_index, 2.0);
-  lfo.depth = 0.5f;
-
   controller.Update(0.25);
-  EXPECT_DOUBLE_EQ(controller.Evaluate(lfo_index), -0.5);
+  EXPECT_DOUBLE_EQ(controller.Evaluate(lfo_index), -1.0);
 }
 
 }  // namespace

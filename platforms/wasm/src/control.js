@@ -29,8 +29,7 @@ export const LfoControlType = Object.freeze({
   NOISE_MIX: 0,
   SHAPE: 1,
   SKEW: 2,
-  DEPTH: 3,
-  COUNT: 4,
+  COUNT: 3,
 });
 
 export const InstrumentControlType = Object.freeze({
@@ -246,6 +245,30 @@ export const ENGINE_CONTROLS = Object.freeze({
     valueType: 'float',
     defaultValue: 0.0,
     minValue: 0.0,
+    maxValue: 1.0,
+  },
+});
+
+export const LFO_CONTROLS = Object.freeze({
+  [LfoControlType.NOISE_MIX]: {
+    name: 'Noise Mix',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [LfoControlType.SHAPE]: {
+    name: 'Shape',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: 0.0,
+    maxValue: 1.0,
+  },
+  [LfoControlType.SKEW]: {
+    name: 'Skew',
+    valueType: 'float',
+    defaultValue: 0.0,
+    minValue: -1.0,
     maxValue: 1.0,
   },
 });

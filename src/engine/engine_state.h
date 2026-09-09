@@ -39,7 +39,6 @@ struct LfoState {
   float noise_mix = 0.0f;
   float shape = 0.0f;
   float skew = 0.0f;
-  float depth = 1.0f;
 };
 
 struct EngineState {

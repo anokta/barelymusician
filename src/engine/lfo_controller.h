@@ -26,8 +26,8 @@ class LfoController {
 
   [[nodiscard]] float Evaluate(uint32_t lfo_index) noexcept {
     LfoState& lfo = engine_.lfo_pool.Get(lfo_index);
-    return lfo.depth * std::lerp(GenerateOscSample(lfo.shape, static_cast<float>(lfo.phase), 0.0f),
-                                 GenerateNoiseSample(engine_.main_rng), lfo.noise_mix);
+    return std::lerp(GenerateOscSample(lfo.shape, static_cast<float>(lfo.phase), 0.0f),
+                     GenerateNoiseSample(engine_.main_rng), lfo.noise_mix);
   }
 
   void SetControl(uint32_t lfo_index, BarelyLfoControlType type, float value) noexcept {
@@ -42,9 +42,6 @@ class LfoController {
         break;
       case BarelyLfoControlType_kSkew:
         lfo.skew = kInstrumentControls[type].Clamp(value);
-        break;
-      case BarelyLfoControlType_kDepth:
-        lfo.depth = kInstrumentControls[type].Clamp(value);
         break;
       default:
         assert(!"Invalid lfo control type");

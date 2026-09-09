@@ -45,6 +45,7 @@ class Repeater {
   Instrument instrument_;
   Performer performer_;
   Task task_;
+  Lfo rng_;
 
   std::function<void(float)> note_callback_;
   std::vector<std::pair<std::optional<float>, int>> pitches_;

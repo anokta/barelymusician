@@ -25,6 +25,7 @@ Arpeggiator::Arpeggiator(Engine& engine, Instrument instrument) noexcept
       })) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(loop_length_);
+  rng_.SetControl(LfoControlType::kNoiseMix, 1.0f);
 }
 
 void Arpeggiator::SetAllNotesOff() noexcept {
@@ -78,7 +79,7 @@ void Arpeggiator::Update() noexcept {
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
     case Mode::kRandom:
-      index_ = engine_.GenerateRandomNumber(0, size);
+      index_ = static_cast<int>(0.5f * (rng_.Evaluate() + 1.0f) * static_cast<float>(size));
       break;
     default:
       assert(!"Invalid arpeggiator mode");

@@ -465,11 +465,6 @@ BARELY_API uint32_t BarelyEngine_CreatePerformer(BarelyEngine* engine);
 /// @param engine Pointer to engine.
 BARELY_API void BarelyEngine_Destroy(BarelyEngine* engine);
 
-/// Generates a new random number with uniform distribution in the normalized range [0, 1).
-/// @param engine Pointer to engine.
-/// @return Random number.
-BARELY_API double BarelyEngine_GenerateRandomNumber(BarelyEngine* engine);
-
 /// Returns the timestamp of an engine.
 /// @param engine Pointer to engine.
 /// @return Timestamp in seconds.
@@ -1249,22 +1244,6 @@ class Engine {
   Performer CreatePerformer() noexcept {
     return {task_callbacks_.get(), first_task_callbacks_.get(), engine_,
             BarelyEngine_CreatePerformer(engine_)};
-  }
-
-  /// Generates a random number with uniform distribution in the normalized range [0, 1).
-  /// @return Random number.
-  [[nodiscard]] double GenerateRandomNumber() noexcept {
-    return BarelyEngine_GenerateRandomNumber(engine_);
-  }
-
-  /// Generates a random number with uniform distribution in the range [min, max).
-  /// @param min Minimum value (inclusive).
-  /// @param max Maximum value (exclusive).
-  /// @return Random number.
-  template <typename NumberType>
-  [[nodiscard]] NumberType GenerateRandomNumber(NumberType min, NumberType max) noexcept {
-    static_assert(std::is_arithmetic_v<NumberType>, "NumberType is not supported");
-    return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
   }
 
   /// Returns the timestamp.

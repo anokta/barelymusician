@@ -21,10 +21,9 @@ class Rng {
     engine_.seed(seed_);
   }
 
-  [[nodiscard]] RealType Generate() noexcept { return distribution_(engine_); }
-
-  [[nodiscard]] uint32_t Generate(uint32_t max) noexcept {
-    return static_cast<uint32_t>(Generate() * static_cast<RealType>(max));
+  template <typename T>
+  [[nodiscard]] T Generate(T max) noexcept {
+    return static_cast<T>(distribution_(engine_) * static_cast<RealType>(max));
   }
 
  private:

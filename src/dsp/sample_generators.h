@@ -87,7 +87,7 @@ inline constexpr float kOscSkewRange = 0.25f;
 
 template <typename RngType>
 [[nodiscard]] float GenerateNoiseSample(RngType& rng) noexcept {
-  return (2.0f * static_cast<float>(rng.Generate())) - 1.0f;
+  return rng.Generate(2.0f) - 1.0f;
 }
 
 }  // namespace barely

@@ -90,39 +90,5 @@ TEST(EngineTest, CreateDestroyPerformer) {
   engine.CreatePerformer().Destroy();
 }
 
-TEST(EngineTest, GenerateRandomNumber) {
-  constexpr int kValueCount = 1000;
-  constexpr int kMin = -7;
-  constexpr int kMax = 35;
-
-  Engine engine(1);
-  for (int i = 0; i < kValueCount; ++i) {
-    const int value = engine.GenerateRandomNumber(kMin, kMax);
-    EXPECT_GE(value, kMin);
-    EXPECT_LT(value, kMax);
-  }
-}
-
-TEST(EngineTest, ResetSeed) {
-  constexpr int kSeed = 1;
-  constexpr int kValueCount = 10;
-
-  Engine engine(1);
-  engine.ResetSeed(kSeed);
-
-  // Generate some random values.
-  std::array<double, kValueCount> values;
-  for (int i = 0; i < kValueCount; ++i) {
-    values[i] = engine.GenerateRandomNumber();
-  }
-
-  // Reset the seed with the same value.
-  engine.ResetSeed(kSeed);
-  // Validate that the same numbers are generated for the next `kValueCount`.
-  for (int i = 0; i < kValueCount; ++i) {
-    EXPECT_DOUBLE_EQ(engine.GenerateRandomNumber(), values[i]);
-  }
-}
-
 }  // namespace
 }  // namespace barely

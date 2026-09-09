@@ -35,13 +35,13 @@ class LfoController {
     LfoState& lfo = engine_.lfo_pool.Get(lfo_index);
     switch (type) {
       case BarelyLfoControlType_kNoiseMix:
-        lfo.noise_mix = kInstrumentControls[type].Clamp(value);
+        lfo.noise_mix = kLfoControls[type].Clamp(value);
         break;
       case BarelyLfoControlType_kShape:
-        lfo.shape = kInstrumentControls[type].Clamp(value);
+        lfo.shape = kLfoControls[type].Clamp(value);
         break;
       case BarelyLfoControlType_kSkew:
-        lfo.skew = kInstrumentControls[type].Clamp(value);
+        lfo.skew = kLfoControls[type].Clamp(value);
         break;
       default:
         assert(!"Invalid lfo control type");

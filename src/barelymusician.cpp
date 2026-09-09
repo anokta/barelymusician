@@ -119,10 +119,6 @@ void BarelyEngine_Destroy(BarelyEngine* engine) {
   }
 }
 
-double BarelyEngine_GenerateRandomNumber(BarelyEngine* engine) {
-  return (engine != nullptr) ? engine->state.main_rng.Generate() : 0.0;
-}
-
 double BarelyEngine_GetTimestamp(const BarelyEngine* engine) {
   return (engine != nullptr) ? engine->state.timestamp : 0.0;
 }

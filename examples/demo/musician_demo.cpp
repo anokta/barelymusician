@@ -24,6 +24,8 @@ namespace {
 using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::InstrumentControlType;
+using ::barely::Lfo;
+using ::barely::LfoControlType;
 using ::barely::Performer;
 using ::barely::Quantization;
 using ::barely::Scale;
@@ -138,6 +140,11 @@ void ScheduleNote(double position, double duration, float pitch, float gain, int
       }));
 }
 
+template <typename T>
+[[nodiscard]] T Random(Lfo& rng, T offset, T depth) {
+  return offset + depth * static_cast<T>(rng.Evaluate());
+}
+
 void ComposeChord(float gain, int harmonic, const Scale& scale, int index, Instrument& instrument,
                   Performer& performer, std::vector<Task>& tasks) {
   const auto add_chord_note = [&](int degree) {
@@ -175,7 +182,7 @@ void ComposeLine(int octave_offset, float gain, int bar, int beat, int beat_coun
   }
 }
 
-void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, int index,
+void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, int index, Lfo& rng,
                   Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
   const auto get_beat = [](int step) { return static_cast<double>(step) / kSixteenthNotesPerBeat; };
   const auto add_note = [&](double begin_position, double end_position, float pitch, float gain) {
@@ -202,8 +209,8 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, int index,
     }
   }
   // Hihat Closed.
-  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, engine.GenerateRandomNumber(0.75f, 0.95f));
-  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, engine.GenerateRandomNumber(0.5f, 0.95f));
+  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, Random(rng, 0.75f, 0.2f));
+  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, Random(rng, 0.5f, 0.4f));
   // Hihat Open.
   if (beat + 1 == beat_count) {
     if (bar % 4 == 3) {
@@ -232,6 +239,9 @@ int main() {
   engine.SetSpeed(speed);
 
   const std::vector<int> progression = {0, 3, 4, 0};
+
+  auto rng = engine.CreateLfo();
+  rng.SetControl(LfoControlType::kNoiseMix, 1.0f);
 
   // Initialize performers.
   std::vector<std::tuple<Performer, std::vector<Task>, BeatComposerCallback, size_t>> performers;
@@ -314,7 +324,7 @@ int main() {
   const auto percussion_beat_composer_callback =
       [&](int bar, int beat, int beat_count, int /*harmonic*/, int index, Instrument& instrument,
           Performer& performer, std::vector<Task>& tasks) {
-        ComposeDrums(bar, beat, beat_count, engine, index, instrument, performer, tasks);
+        ComposeDrums(bar, beat, beat_count, engine, index, rng, instrument, performer, tasks);
       };
 
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
@@ -391,12 +401,12 @@ int main() {
         is_playing = !is_playing;
         break;
       case '1':
-        speed *= engine.GenerateRandomNumber(0.5, 0.75);
+        speed *= Random(rng, 0.5, 0.25);
         engine.SetSpeed(speed);
         ConsoleLog() << "Speed changed to " << speed;
         break;
       case '2':
-        speed *= engine.GenerateRandomNumber(1.5, 2.0);
+        speed *= Random(rng, 1.5, 0.5);
         engine.SetSpeed(speed);
         ConsoleLog() << "Speed changed to " << speed;
         break;

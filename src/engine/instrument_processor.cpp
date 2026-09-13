@@ -104,7 +104,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       const uint32_t new_voice_count = static_cast<uint32_t>(value);
       uint32_t active_voice_count = 0;
       uint32_t active_voice_index = params.first_voice_index;
-      while (active_voice_index != kInvalidIndex && active_voice_count <= new_voice_count) {
+      while (active_voice_index != kInvalidIndex && active_voice_count < new_voice_count) {
         active_voice_index = engine_.GetVoice(active_voice_index).next_voice_index;
         ++active_voice_count;
       }

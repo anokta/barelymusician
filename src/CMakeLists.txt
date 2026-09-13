@@ -36,9 +36,7 @@ function(add_barelymusician_target target_name)
   endif()
 endfunction()
 add_barelymusician_target(barelymusician)
-if(ENABLE_GODOT)
-  add_barelymusician_target(barelymusician_mt)
-endif()
+add_barelymusician_target(barelymusician_mt)
 
 if(ENABLE_BENCHMARKS)
   add_executable(
@@ -68,9 +66,7 @@ endif()
 
 function(barelymusician_target_sources)
   target_sources(barelymusician PRIVATE ${ARGN})
-  if(ENABLE_GODOT)
-    target_sources(barelymusician_mt PRIVATE ${ARGN})
-  endif()
+  target_sources(barelymusician_mt PRIVATE ${ARGN})
 endfunction()
 
 add_subdirectory(core)

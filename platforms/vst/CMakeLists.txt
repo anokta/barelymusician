@@ -48,6 +48,6 @@ target_include_directories(
 )
 target_link_libraries(
   barelymusicianvst PRIVATE
-  barelymusician
+  barelymusician_mt
   sdk
 )

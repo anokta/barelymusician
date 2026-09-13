@@ -248,6 +248,7 @@ def build(args, source_dir, build_dir):
             "-DSMTG_ENABLE_VST3_PLUGIN_EXAMPLES=OFF",
             "-DSMTG_ENABLE_VSTGUI_SUPPORT=OFF",
             "-DSMTG_RUN_VST_VALIDATOR=OFF",
+            "-DSMTG_USE_STATIC_CRT=ON",
         ]
 
     if args.android:

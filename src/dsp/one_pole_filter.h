@@ -20,9 +20,9 @@ enum class FilterType : uint8_t {
 class OnePoleFilter {
  public:
   template <FilterType kType>
-  [[nodiscard]] float Next(float input, float coefficient) noexcept {
-    assert(coefficient >= 0.0f);
-    assert(coefficient <= 1.0f);
+  [[nodiscard]] double Next(double input, double coefficient) noexcept {
+    assert(coefficient >= 0.0);
+    assert(coefficient <= 1.0);
     output_ = coefficient * (output_ - input) + input;
     if constexpr (kType == FilterType::kHighPass) {
       return input - output_;
@@ -31,17 +31,17 @@ class OnePoleFilter {
     }
   }
 
-  void Reset() noexcept { output_ = 0.0f; }
+  void Reset() noexcept { output_ = 0.0; }
 
  private:
-  float output_ = 0.0f;
+  double output_ = 0.0;
 };
 
-inline float GetFilterCoeff(float sample_rate, float cutoff_freq) noexcept {
-  assert(sample_rate > 0.0f);
-  assert(cutoff_freq >= 0.0f);
+inline double GetFilterCoeff(double sample_rate, double cutoff_freq) noexcept {
+  assert(sample_rate > 0.0);
+  assert(cutoff_freq >= 0.0);
   assert(cutoff_freq <= sample_rate);
-  return std::exp(-2.0f * std::numbers::pi_v<float> * cutoff_freq / sample_rate);
+  return std::exp(-2.0 * std::numbers::pi_v<double> * cutoff_freq / sample_rate);
 }
 
 }  // namespace barely

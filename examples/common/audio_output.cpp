@@ -26,11 +26,15 @@ AudioOutput::AudioOutput(int sample_rate, int channel_count, int frame_count) no
     assert(device->pUserData != nullptr);
     if (auto& audio_output = *static_cast<AudioOutput*>(device->pUserData);
         audio_output.process_callback_) {
-      audio_output.process_callback_(static_cast<float*>(output),
+      audio_output.process_callback_(audio_output.samples_.data(),
                                      static_cast<int>(device->playback.channels),
                                      static_cast<int>(frame_count));
+      for (int i = 0; i < static_cast<int>(device->playback.channels * frame_count); ++i) {
+        static_cast<float*>(output)[i] = audio_output.samples_[i];
+      }
     }
   };
+  samples_.resize(channel_count * frame_count);
   // Initialize the device.
   [[maybe_unused]] const auto result = ma_device_init(nullptr, &device_config, &device_);
   assert(result == MA_SUCCESS);

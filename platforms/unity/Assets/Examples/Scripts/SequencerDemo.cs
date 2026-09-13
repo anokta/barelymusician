@@ -7,12 +7,12 @@ namespace Barely.Examples {
 
     public void Randomize() {
       randomSequencer.notes[0].pitch =
-          Mathf.RoundToInt(12.0f * (float)scale.GetPitch(Random.Range(0, scale.PitchCount)));
-      randomSequencer.notes[0].gain = 0.5f * Random.Range(0, 3);
+          (int)System.Math.Round(12.0 * (double)scale.GetPitch(Random.Range(0, scale.PitchCount)));
+      randomSequencer.notes[0].gain = 0.5 * Random.Range(0, 3);
       randomSequencer.notes[0].position = 0.0;
       randomSequencer.notes[0].duration = 0.125 * Random.Range(2, 4);
-      if (randomSequencer.notes[0].gain > 0.0f) {
-        randomSequencer.instrument.StereoPan = Random.Range(-0.5f, 0.5f);
+      if (randomSequencer.notes[0].gain > 0.0) {
+        randomSequencer.instrument.StereoPan = (double)Random.Range(-0.5f, 0.5f);
       }
     }
 

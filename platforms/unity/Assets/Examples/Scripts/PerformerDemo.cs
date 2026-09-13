@@ -12,12 +12,12 @@ namespace Barely.Examples {
     private float _h = 0.0f;
     private float _v = 0.0f;
 
-    private float _pitch = 0.0f;
+    private double _pitch = 0.0;
 
     public void OnProcess(TaskEventType type) {
       if (type == TaskEventType.BEGIN) {
         if (_beat % 4 == 0) {
-          instrument.FilterCutoff = (_beat % 8 == 0) ? 0.5f : 0.75f;
+          instrument.FilterCutoff = (_beat % 8 == 0) ? 0.5 : 0.75;
         }
         _beat = (_beat + 1) % 8;
 
@@ -25,9 +25,9 @@ namespace Barely.Examples {
         _pitch = scale.GetPitch(degree);
         instrument.SetNoteOn(_pitch);
 
-        text.text = ((int)(12.0f * _pitch)).ToString();
+        text.text = ((int)(12.0 * _pitch)).ToString();
         _h = Random.Range(0.0f, 1.0f);
-        _v = 0.2f * (_pitch + 1.0f);
+        _v = 0.2f * (float)(_pitch + 1.0);
       } else if (type == TaskEventType.END) {
         instrument.SetNoteOff(_pitch);
       }

@@ -31,7 +31,7 @@
 ///   // the audio thread in real-time audio applications.
 ///   constexpr int32_t kChannelCount = 2;
 ///   constexpr int32_t kFrameCount = 512;
-///   float output_samples[kChannelCount * kFrameCount];
+///   double output_samples[kChannelCount * kFrameCount];
 ///   engine.Process(output_samples, kChannelCount, kFrameCount, timestamp);
 ///   @endcode
 ///
@@ -42,12 +42,12 @@
 ///   auto instrument = engine.CreateInstrument();
 ///
 ///   // Set the instrument to use full oscillator mix.
-///   instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
+///   instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0);
 ///
 ///   // Set an instrument note on.
 ///   // Notes are expressed as octaves relative to middle C. Fractional values adjust the frequency
 ///   // logarithmically for equal-tempered pitch intervals within each octave.
-///   constexpr float kC3Pitch = -1.0f;
+///   constexpr double kC3Pitch = -1.0;
 ///   instrument.SetNoteOn(kC3Pitch);
 ///
 ///   // Destroy the instrument.
@@ -101,7 +101,7 @@
 ///   // Process the next output samples of the engine.
 ///   // The engine processes output samples synchronously. Therefore, process must be called from
 ///   // the audio thread in real-time audio applications.
-///   float output_samples[2 * 512];
+///   double output_samples[2 * 512];
 ///   BarelyEngine_Process(engine, output_samples, 2, 512, timestamp);
 ///
 ///   // Destroy the engine.
@@ -117,12 +117,12 @@
 ///
 ///   // Set the instrument to use full oscillator mix.
 ///   BarelyInstrument_SetControl(engine, instrument_id, BarelyInstrumentControlType_kOscMix,
-///                               /*value=*/1.0f);
+///                               /*value=*/1.0);
 ///
 ///   // Set an instrument note on.
 ///   // Notes are expressed as octaves relative to middle C. Fractional values adjust the frequency
 ///   // logarithmically for equal-tempered pitch intervals within each octave.
-///   const float c3_pitch = -1.0f;
+///   const double c3_pitch = -1.0;
 ///   BarelyInstrument_SetNoteOn(engine, instrument_id, c3_pitch);
 ///
 ///   // Destroy the instrument.
@@ -206,74 +206,74 @@
       .sample_##rate = sample_rate,               \
       .max_instrument_count = 100,                \
       .max_performer_count = 100,                 \
-      .max_task_count = 5000,                     \
+      .max_task_count = 4096,                     \
       .max_command_count = 8192,                  \
       .max_frame_count = 2048,                    \
-      .max_slice_count = 1000,                    \
+      .max_slice_count = 512,                     \
       .max_voice_count = 200,                     \
   }
 
 /// Engine control types.
-#define BARELY_ENGINE_CONTROL_TYPES(EngineControlType, X)                           \
-  X(EngineControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                              \
-  X(EngineControlType, CompMix, 1.0f, 0.0f, 1.0f, "Compressor Mix")                 \
-  X(EngineControlType, CompAttack, 0.0f, 0.0f, 8.0f, "Compressor Attack")           \
-  X(EngineControlType, CompRelease, 0.0f, 0.0f, 8.0f, "Compressor Release")         \
-  X(EngineControlType, CompThreshold, 1.0f, 0.0f, 1.0f, "Compressor Threshold")     \
-  X(EngineControlType, CompRatio, 0.0f, 0.0f, 1.0f, "Compressor Ratio")             \
-  X(EngineControlType, DelayMix, 1.0f, 0.0f, 1.0f, "Delay Mix")                     \
-  X(EngineControlType, DelayTime, 0.0f, 0.0f, 8.0f, "Delay Time")                   \
-  X(EngineControlType, DelayFeedback, 0.0f, 0.0f, 1.0f, "Delay Feedback")           \
-  X(EngineControlType, DelayLpfCutoff, 1.0f, 0.0f, 1.0f, "Delay LPF Cutoff")        \
-  X(EngineControlType, DelayHpfCutoff, 0.0f, 0.0f, 1.0f, "Delay HPF Cutoff")        \
-  X(EngineControlType, DelayPingPong, 0.0f, 0.0f, 1.0f, "Delay Ping-Pong")          \
-  X(EngineControlType, DelayReverbSend, 0.0f, 0.0f, 2.0f, "Delay Reverb Send")      \
-  X(EngineControlType, ReverbMix, 1.0f, 0.0f, 1.0f, "Reverb Mix")                   \
-  X(EngineControlType, ReverbDamping, 0.0f, 0.0f, 1.0f, "Reverb Damping")           \
-  X(EngineControlType, ReverbRoomSize, 0.0f, 0.0f, 1.0f, "Reverb Room Size")        \
-  X(EngineControlType, ReverbStereoWidth, 1.0f, 0.0f, 1.0f, "Reverb Stereo Width")  \
-  X(EngineControlType, ReverbFreeze, 0, 0, 1, "Reverb Freeze")                      \
-  X(EngineControlType, SidechainMix, 1.0f, 0.0f, 1.0f, "Sidechain Mix")             \
-  X(EngineControlType, SidechainAttack, 0.0f, 0.0f, 8.0f, "Sidechain Attack")       \
-  X(EngineControlType, SidechainRelease, 0.0f, 0.0f, 8.0f, "Sidechain Release")     \
-  X(EngineControlType, SidechainThreshold, 1.0f, 0.0f, 1.0f, "Sidechain Threshold") \
-  X(EngineControlType, SidechainRatio, 0.0f, 0.0f, 1.0f, "Sidechain Ratio")
+#define BARELY_ENGINE_CONTROL_TYPES(EngineControlType, X)                        \
+  X(EngineControlType, Gain, 1.0, 0.0, 1.0, "Gain")                              \
+  X(EngineControlType, CompMix, 1.0, 0.0, 1.0, "Compressor Mix")                 \
+  X(EngineControlType, CompAttack, 0.0, 0.0, 8.0, "Compressor Attack")           \
+  X(EngineControlType, CompRelease, 0.0, 0.0, 8.0, "Compressor Release")         \
+  X(EngineControlType, CompThreshold, 1.0, 0.0, 1.0, "Compressor Threshold")     \
+  X(EngineControlType, CompRatio, 0.0, 0.0, 1.0, "Compressor Ratio")             \
+  X(EngineControlType, DelayMix, 1.0, 0.0, 1.0, "Delay Mix")                     \
+  X(EngineControlType, DelayTime, 0.0, 0.0, 8.0, "Delay Time")                   \
+  X(EngineControlType, DelayFeedback, 0.0, 0.0, 1.0, "Delay Feedback")           \
+  X(EngineControlType, DelayLpfCutoff, 1.0, 0.0, 1.0, "Delay LPF Cutoff")        \
+  X(EngineControlType, DelayHpfCutoff, 0.0, 0.0, 1.0, "Delay HPF Cutoff")        \
+  X(EngineControlType, DelayPingPong, 0.0, 0.0, 1.0, "Delay Ping-Pong")          \
+  X(EngineControlType, DelayReverbSend, 0.0, 0.0, 2.0, "Delay Reverb Send")      \
+  X(EngineControlType, ReverbMix, 1.0, 0.0, 1.0, "Reverb Mix")                   \
+  X(EngineControlType, ReverbDamping, 0.0, 0.0, 1.0, "Reverb Damping")           \
+  X(EngineControlType, ReverbRoomSize, 0.0, 0.0, 1.0, "Reverb Room Size")        \
+  X(EngineControlType, ReverbStereoWidth, 1.0, 0.0, 1.0, "Reverb Stereo Width")  \
+  X(EngineControlType, ReverbFreeze, 0, 0, 1, "Reverb Freeze")                   \
+  X(EngineControlType, SidechainMix, 1.0, 0.0, 1.0, "Sidechain Mix")             \
+  X(EngineControlType, SidechainAttack, 0.0, 0.0, 8.0, "Sidechain Attack")       \
+  X(EngineControlType, SidechainRelease, 0.0, 0.0, 8.0, "Sidechain Release")     \
+  X(EngineControlType, SidechainThreshold, 1.0, 0.0, 1.0, "Sidechain Threshold") \
+  X(EngineControlType, SidechainRatio, 0.0, 0.0, 1.0, "Sidechain Ratio")
 BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
 
 /// Instrument control types.
 #define BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, X)                      \
-  X(InstrumentControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                             \
-  X(InstrumentControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")               \
-  X(InstrumentControlType, StereoPan, 0.0f, -1.0f, 1.0f, "Stereo Pan")                 \
-  X(InstrumentControlType, Attack, 0.0f, 0.0f, 8.0f, "Envelope Attack")                \
-  X(InstrumentControlType, Decay, 0.0f, 0.0f, 8.0f, "Envelope Decay")                  \
-  X(InstrumentControlType, Sustain, 1.0f, 0.0f, 1.0f, "Envelope Sustain")              \
-  X(InstrumentControlType, Release, 0.0f, 0.0f, 8.0f, "Envelope Release")              \
+  X(InstrumentControlType, Gain, 1.0, 0.0, 1.0, "Gain")                                \
+  X(InstrumentControlType, PitchShift, 0.0, -2.0, 2.0, "Pitch Shift")                  \
+  X(InstrumentControlType, StereoPan, 0.0, -1.0, 1.0, "Stereo Pan")                    \
+  X(InstrumentControlType, Attack, 0.0, 0.0, 8.0, "Envelope Attack")                   \
+  X(InstrumentControlType, Decay, 0.0, 0.0, 8.0, "Envelope Decay")                     \
+  X(InstrumentControlType, Sustain, 1.0, 0.0, 1.0, "Envelope Sustain")                 \
+  X(InstrumentControlType, Release, 0.0, 0.0, 8.0, "Envelope Release")                 \
   X(InstrumentControlType, SliceMode, 0, 0, BarelySliceMode_kCount - 1, "Slice Mode")  \
-  X(InstrumentControlType, OscMix, 0.0f, 0.0f, 1.0f, "Oscillator Mix")                 \
+  X(InstrumentControlType, OscMix, 0.0, 0.0, 1.0, "Oscillator Mix")                    \
   X(InstrumentControlType, OscMode, 0, 0, BarelyOscMode_kCount - 1, "Oscillator Mode") \
-  X(InstrumentControlType, OscNoiseMix, 0.0f, 0.0f, 1.0f, "Oscillator Noise Mix")      \
-  X(InstrumentControlType, OscPitchShift, 0.0f, -2.0f, 2.0f, "Oscillator Pitch Shift") \
-  X(InstrumentControlType, OscShape, 0.0f, 0.0f, 1.0f, "Oscillator Shape")             \
-  X(InstrumentControlType, OscSkew, 0.0f, -1.0f, 1.0f, "Oscillator Skew")              \
-  X(InstrumentControlType, CrushDepth, 0.0f, 0.0f, 1.0f, "Bit Crusher Depth")          \
-  X(InstrumentControlType, CrushRate, 0.0f, 0.0f, 1.0f, "Bit Crusher Rate")            \
-  X(InstrumentControlType, DistortionMix, 0.0f, 0.0f, 1.0f, "Distortion Mix")          \
-  X(InstrumentControlType, DistortionDrive, 0.0f, 0.0f, 1.0f, "Distortion Drive")      \
-  X(InstrumentControlType, FilterCutoff, 1.0f, 0.0f, 1.0f, "Filter Cutoff")            \
-  X(InstrumentControlType, FilterResonance, 0.5f, 0.0f, 1.0f, "Filter Resonance")      \
-  X(InstrumentControlType, FilterTone, 0.0f, -1.0f, 1.0f, "Filter Tone")               \
-  X(InstrumentControlType, DelaySend, 0.0f, 0.0f, 1.0f, "Delay Send")                  \
-  X(InstrumentControlType, ReverbSend, 0.0f, 0.0f, 2.0f, "Reverb Send")                \
-  X(InstrumentControlType, SidechainSend, 0.0f, -1.0f, 1.0f, "Sidechain Send")         \
+  X(InstrumentControlType, OscNoiseMix, 0.0, 0.0, 1.0, "Oscillator Noise Mix")         \
+  X(InstrumentControlType, OscPitchShift, 0.0, -2.0, 2.0, "Oscillator Pitch Shift")    \
+  X(InstrumentControlType, OscShape, 0.0, 0.0, 1.0, "Oscillator Shape")                \
+  X(InstrumentControlType, OscSkew, 0.0, -1.0, 1.0, "Oscillator Skew")                 \
+  X(InstrumentControlType, CrushDepth, 0.0, 0.0, 1.0, "Bit Crusher Depth")             \
+  X(InstrumentControlType, CrushRate, 0.0, 0.0, 1.0, "Bit Crusher Rate")               \
+  X(InstrumentControlType, DistortionMix, 0.0, 0.0, 1.0, "Distortion Mix")             \
+  X(InstrumentControlType, DistortionDrive, 0.0, 0.0, 1.0, "Distortion Drive")         \
+  X(InstrumentControlType, FilterCutoff, 1.0, 0.0, 1.0, "Filter Cutoff")               \
+  X(InstrumentControlType, FilterResonance, 0.5, 0.0, 1.0, "Filter Resonance")         \
+  X(InstrumentControlType, FilterTone, 0.0, -1.0, 1.0, "Filter Tone")                  \
+  X(InstrumentControlType, DelaySend, 0.0, 0.0, 1.0, "Delay Send")                     \
+  X(InstrumentControlType, ReverbSend, 0.0, 0.0, 2.0, "Reverb Send")                   \
+  X(InstrumentControlType, SidechainSend, 0.0, -1.0, 1.0, "Sidechain Send")            \
   X(InstrumentControlType, Retrigger, 0, 0, 1, "Retrigger")                            \
   X(InstrumentControlType, VoiceCount, 8, 1, 16, "Voice Count")
 BARELY_ENUM(InstrumentControlType, BARELY_INSTRUMENT_CONTROL_TYPES)
 
 /// Note control types.
 #define BARELY_NOTE_CONTROL_TYPES(NoteControlType, X) \
-  X(NoteControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")  \
-  X(NoteControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")
+  X(NoteControlType, Gain, 1.0, 0.0, 1.0, "Gain")     \
+  X(NoteControlType, PitchShift, 0.0, -2.0, 2.0, "Pitch Shift")
 BARELY_ENUM(NoteControlType, BARELY_NOTE_CONTROL_TYPES)
 
 /// Oscillator modes.
@@ -335,19 +335,19 @@ typedef struct BarelyQuantization {
   int32_t subdivision;
 
   /// Amount.
-  float amount;
+  double amount;
 } BarelyQuantization;
 
 /// Musical scale.
 typedef struct BarelyScale {
+  /// Root note pitch.
+  double root_pitch;
+
   /// Array of note pitches relative to the root note pitch.
-  const float* pitches;
+  const double* pitches;
 
   /// Number of note pitches.
   int32_t pitch_count;
-
-  /// Root note pitch of the scale.
-  float root_pitch;
 
   /// Mode index.
   int32_t mode;
@@ -355,17 +355,17 @@ typedef struct BarelyScale {
 
 /// Slice of sample data.
 typedef struct BarelySlice {
+  /// Root note pitch.
+  double root_pitch;
+
   /// Array of mono samples.
-  const float* samples;
+  const double* samples;
 
   /// Number of mono samples.
   int32_t sample_count;
 
   /// Sampling rate in hertz.
   int32_t sample_rate;
-
-  /// Root note pitch.
-  float root_pitch;
 } BarelySlice;
 
 #ifdef __cplusplus
@@ -393,7 +393,7 @@ BARELY_API double BarelyQuantization_GetPosition(const BarelyQuantization* quant
 /// @param scale Pointer to scale.
 /// @param degree Scale degree.
 /// @return Note pitch.
-BARELY_API float BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree);
+BARELY_API double BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree);
 
 /// Creates a new engine.
 /// @param config Pointer to engine configuration.
@@ -433,7 +433,7 @@ BARELY_API double BarelyEngine_GetTimestamp(const BarelyEngine* engine);
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
 /// @param timestamp Timestamp in seconds.
-BARELY_API void BarelyEngine_Process(BarelyEngine* engine, float* output_samples,
+BARELY_API void BarelyEngine_Process(BarelyEngine* engine, double* output_samples,
                                      int32_t output_channel_count, int32_t output_frame_count,
                                      double timestamp);
 
@@ -447,7 +447,7 @@ BARELY_API void BarelyEngine_ResetSeed(BarelyEngine* engine, int32_t seed);
 /// @param type Engine control type.
 /// @param value Engine control value.
 BARELY_API void BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type,
-                                        float value);
+                                        double value);
 
 /// Sets the speed of an engine.
 /// @param engine Pointer to engine.
@@ -470,7 +470,7 @@ BARELY_API void BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrume
 /// @param type Instrument control type.
 /// @param value Instrument control value.
 BARELY_API void BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instrument_id,
-                                            BarelyInstrumentControlType type, float value);
+                                            BarelyInstrumentControlType type, double value);
 
 /// Sets an instrument note control value.
 /// @param engine Pointer to engine.
@@ -479,22 +479,22 @@ BARELY_API void BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instr
 /// @param type Note control type.
 /// @param value Note control value.
 BARELY_API void BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_id,
-                                                float pitch, BarelyNoteControlType type,
-                                                float value);
+                                                double pitch, BarelyNoteControlType type,
+                                                double value);
 
 /// Sets an instrument note off.
 /// @param engine Pointer to engine.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
 BARELY_API void BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id,
-                                            float pitch);
+                                            double pitch);
 
 /// Sets an instrument note on.
 /// @param engine Pointer to engine.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
 BARELY_API void BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id,
-                                           float pitch);
+                                           double pitch);
 
 /// Sets instrument sample data.
 /// @param engine Pointer to engine.
@@ -666,7 +666,7 @@ struct Quantization : public BarelyQuantization {
   /// @param subdivision Subdivision of a beat.
   /// @param amount Amount.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Quantization(int32_t subdivision, float amount = 1.0f) noexcept
+  constexpr Quantization(int32_t subdivision, double amount = 1.0) noexcept
       : Quantization(BarelyQuantization{subdivision, amount}) {}
 
   /// Constructs a new `Quantization` from a raw type.
@@ -693,13 +693,12 @@ struct Scale : public BarelyScale {
   constexpr Scale() noexcept = default;
 
   /// Constructs a new `Scale`.
-  /// @param pitches Span of pitches.
   /// @param root_pitch Root pitch.
+  /// @param pitches Span of pitches.
   /// @param mode Mode.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  constexpr Scale(std::span<const float> pitches, float root_pitch = 0.0f,
-                  int32_t mode = 0) noexcept
-      : Scale(BarelyScale{pitches.data(), static_cast<int32_t>(pitches.size()), root_pitch, mode}) {
+  constexpr Scale(double root_pitch, std::span<const double> pitches, int32_t mode = 0) noexcept
+      : Scale(BarelyScale{root_pitch, pitches.data(), static_cast<int32_t>(pitches.size()), mode}) {
   }
 
   /// Constructs a new `Scale` from a raw type.
@@ -714,7 +713,7 @@ struct Scale : public BarelyScale {
   /// Returns the pitch for a given degree.
   /// @param degree Degree.
   /// @return Pitch.
-  [[nodiscard]] float GetPitch(int32_t degree) const noexcept {
+  [[nodiscard]] double GetPitch(int32_t degree) const noexcept {
     return BarelyScale_GetPitch(this, degree);
   }
 };
@@ -725,11 +724,11 @@ struct Slice : public BarelySlice {
   Slice() noexcept = default;
 
   /// Constructs a new `Slice`.
+  /// @param root_pitch Root pitch.
   /// @param samples Span of mono samples.
   /// @param sample_rate Sampling rate in hertz.
-  /// @param root_pitch Root pitch.
-  constexpr Slice(std::span<const float> samples, int32_t sample_rate, float root_pitch) noexcept
-      : Slice({samples.data(), static_cast<int32_t>(samples.size()), sample_rate, root_pitch}) {
+  constexpr Slice(double root_pitch, std::span<const double> samples, int32_t sample_rate) noexcept
+      : Slice({root_pitch, samples.data(), static_cast<int32_t>(samples.size()), sample_rate}) {
     assert(sample_rate >= 0);
   }
 
@@ -768,7 +767,7 @@ class Instrument {
                   "ValueType is not supported");
     BarelyInstrument_SetControl(engine_, instrument_id_,
                                 static_cast<BarelyInstrumentControlType>(type),
-                                static_cast<float>(value));
+                                static_cast<double>(value));
   }
 
   /// Sets a control value.
@@ -776,17 +775,17 @@ class Instrument {
   /// @param type Note control type.
   /// @param value Note control value.
   template <typename ValueType>
-  void SetNoteControl(float pitch, NoteControlType type, ValueType value) noexcept {
+  void SetNoteControl(double pitch, NoteControlType type, ValueType value) noexcept {
     static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     BarelyInstrument_SetNoteControl(engine_, instrument_id_, pitch,
                                     static_cast<BarelyNoteControlType>(type),
-                                    static_cast<float>(value));
+                                    static_cast<double>(value));
   }
 
   /// Sets a note off.
   /// @param pitch Note pitch.
-  void SetNoteOff(float pitch) noexcept {
+  void SetNoteOff(double pitch) noexcept {
     BarelyInstrument_SetNoteOff(engine_, instrument_id_, pitch);
   }
 
@@ -794,12 +793,12 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param gain Note gain.
   /// @param pitch_shift Note pitch shift.
-  void SetNoteOn(float pitch, float gain = 1.0f, float pitch_shift = 0.0f) noexcept {
+  void SetNoteOn(double pitch, double gain = 1.0, double pitch_shift = 0.0) noexcept {
     BarelyInstrument_SetNoteOn(engine_, instrument_id_, pitch);
-    if (gain != 1.0f) {
+    if (gain != 1.0) {
       SetNoteControl(pitch, NoteControlType::kGain, gain);
     }
-    if (pitch_shift != 0.0f) {
+    if (pitch_shift != 0.0) {
       SetNoteControl(pitch, NoteControlType::kPitchShift, pitch_shift);
     }
   }
@@ -1137,7 +1136,7 @@ class Engine {
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  void Process(float* output_samples, int32_t output_channel_count, int32_t output_frame_count,
+  void Process(double* output_samples, int32_t output_channel_count, int32_t output_frame_count,
                double timestamp) noexcept {
     BarelyEngine_Process(engine_, output_samples, output_channel_count, output_frame_count,
                          timestamp);
@@ -1154,7 +1153,7 @@ class Engine {
     static_assert(std::is_arithmetic_v<ValueType> || std::is_enum_v<ValueType>,
                   "ValueType is not supported");
     BarelyEngine_SetControl(engine_, static_cast<BarelyEngineControlType>(type),
-                            static_cast<float>(value));
+                            static_cast<double>(value));
   }
 
   /// Sets the speed.

@@ -9,7 +9,7 @@ namespace Barely {
   /// A representation of an engine that governs all musical components.
   public static class Engine {
     /// Gain.
-    public static float Gain {
+    public static double Gain {
       get { return _gain; }
       set {
         if (_gain != value) {
@@ -18,10 +18,10 @@ namespace Barely {
         }
       }
     }
-    private static float _gain = 1.0f;
+    private static double _gain = 1.0;
 
     /// Compressor mix.
-    public static float CompMix {
+    public static double CompMix {
       get { return _compMix; }
       set {
         if (_compMix != value) {
@@ -30,10 +30,10 @@ namespace Barely {
         }
       }
     }
-    private static float _compMix = 1.0f;
+    private static double _compMix = 1.0;
 
     /// Compressor attack.
-    public static float CompAttack {
+    public static double CompAttack {
       get { return _compAttack; }
       set {
         if (_compAttack != value) {
@@ -42,10 +42,10 @@ namespace Barely {
         }
       }
     }
-    private static float _compAttack = 0.0f;
+    private static double _compAttack = 0.0;
 
     /// Compressor release.
-    public static float CompRelease {
+    public static double CompRelease {
       get { return _compRelease; }
       set {
         if (_compRelease != value) {
@@ -54,10 +54,10 @@ namespace Barely {
         }
       }
     }
-    private static float _compRelease = 0.0f;
+    private static double _compRelease = 0.0;
 
     /// Normalized compressor threshold in logarithmic scale.
-    public static float CompThreshold {
+    public static double CompThreshold {
       get { return _compThreshold; }
       set {
         if (_compThreshold != value) {
@@ -66,10 +66,10 @@ namespace Barely {
         }
       }
     }
-    private static float _compThreshold = 1.0f;
+    private static double _compThreshold = 1.0;
 
     /// Compressor ratio.
-    public static float CompRatio {
+    public static double CompRatio {
       get { return _compRatio; }
       set {
         if (_compRatio != value) {
@@ -78,10 +78,10 @@ namespace Barely {
         }
       }
     }
-    private static float _compRatio = 0.0f;
+    private static double _compRatio = 0.0;
 
     /// Delay mix.
-    public static float DelayMix {
+    public static double DelayMix {
       get { return _delayMix; }
       set {
         if (_delayMix != value) {
@@ -90,10 +90,10 @@ namespace Barely {
         }
       }
     }
-    private static float _delayMix = 1.0f;
+    private static double _delayMix = 1.0;
 
     /// Delay time in seconds.
-    public static float DelayTime {
+    public static double DelayTime {
       get { return _delayTime; }
       set {
         if (_delayTime != value) {
@@ -102,10 +102,10 @@ namespace Barely {
         }
       }
     }
-    private static float _delayTime = 0.0f;
+    private static double _delayTime = 0.0;
 
     /// Delay feedback.
-    public static float DelayFeedback {
+    public static double DelayFeedback {
       get { return _delayFeedback; }
       set {
         if (_delayFeedback != value) {
@@ -114,10 +114,10 @@ namespace Barely {
         }
       }
     }
-    private static float _delayFeedback = 0.0f;
+    private static double _delayFeedback = 0.0;
 
     /// Delay low-pass filter cutoff.
-    public static float DelayLpfCutoff {
+    public static double DelayLpfCutoff {
       get { return _delayLpfCutoff; }
       set {
         if (_delayLpfCutoff != value) {
@@ -126,10 +126,10 @@ namespace Barely {
         }
       }
     }
-    private static float _delayLpfCutoff = 1.0f;
+    private static double _delayLpfCutoff = 1.0;
 
     /// Delay high-pass filter cutoff.
-    public static float DelayHpfCutoff {
+    public static double DelayHpfCutoff {
       get { return _delayHpfCutoff; }
       set {
         if (_delayHpfCutoff != value) {
@@ -138,10 +138,10 @@ namespace Barely {
         }
       }
     }
-    private static float _delayHpfCutoff = 0.0f;
+    private static double _delayHpfCutoff = 0.0;
 
     /// Delay ping-pong.
-    public static float DelayPingPong {
+    public static double DelayPingPong {
       get { return _delayPingPong; }
       set {
         if (_delayPingPong != value) {
@@ -150,10 +150,10 @@ namespace Barely {
         }
       }
     }
-    private static float _delayPingPong = 0.0f;
+    private static double _delayPingPong = 0.0;
 
     /// Delay reverb send.
-    public static float DelayReverbSend {
+    public static double DelayReverbSend {
       get { return _delayReverbSend; }
       set {
         if (_delayReverbSend != value) {
@@ -162,10 +162,10 @@ namespace Barely {
         }
       }
     }
-    private static float _delayReverbSend = 0.0f;
+    private static double _delayReverbSend = 0.0;
 
     /// Reverb mix.
-    public static float ReverbMix {
+    public static double ReverbMix {
       get { return _reverbMix; }
       set {
         if (_reverbMix != value) {
@@ -174,10 +174,10 @@ namespace Barely {
         }
       }
     }
-    private static float _reverbMix = 1.0f;
+    private static double _reverbMix = 1.0;
 
     /// Reverb damping ratio.
-    public static float ReverbDamping {
+    public static double ReverbDamping {
       get { return _reverbDamping; }
       set {
         if (_reverbDamping != value) {
@@ -186,10 +186,10 @@ namespace Barely {
         }
       }
     }
-    private static float _reverbDamping = 0.0f;
+    private static double _reverbDamping = 0.0;
 
     /// Reverb room size.
-    public static float ReverbRoomSize {
+    public static double ReverbRoomSize {
       get { return _reverbRoomSize; }
       set {
         if (_reverbRoomSize != value) {
@@ -198,10 +198,10 @@ namespace Barely {
         }
       }
     }
-    private static float _reverbRoomSize = 0.0f;
+    private static double _reverbRoomSize = 0.0;
 
     /// Reverb stereo width.
-    public static float ReverbStereoWidth {
+    public static double ReverbStereoWidth {
       get { return _reverbStereoWidth; }
       set {
         if (_reverbStereoWidth != value) {
@@ -210,14 +210,14 @@ namespace Barely {
         }
       }
     }
-    private static float _reverbStereoWidth = 1.0f;
+    private static double _reverbStereoWidth = 1.0;
 
     /// Reverb freeze.
     public static bool ReverbFreeze {
       get { return _reverbFreeze; }
       set {
         if (_reverbFreeze != value) {
-          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_FREEZE, value ? 1.0f : 0.0f);
+          Internal.Engine_SetControl(Internal.EngineControlType.REVERB_FREEZE, value ? 1.0 : 0.0);
           _reverbFreeze = value;
         }
       }
@@ -225,7 +225,7 @@ namespace Barely {
     private static bool _reverbFreeze = false;
 
     /// Sidechain mix.
-    public static float SidechainMix {
+    public static double SidechainMix {
       get { return _sidechainMix; }
       set {
         if (_sidechainMix != value) {
@@ -234,10 +234,10 @@ namespace Barely {
         }
       }
     }
-    private static float _sidechainMix = 1.0f;
+    private static double _sidechainMix = 1.0;
 
     /// Sidechain attack.
-    public static float SidechainAttack {
+    public static double SidechainAttack {
       get { return _sidechainAttack; }
       set {
         if (_sidechainAttack != value) {
@@ -246,10 +246,10 @@ namespace Barely {
         }
       }
     }
-    private static float _sidechainAttack = 0.0f;
+    private static double _sidechainAttack = 0.0;
 
     /// Sidechain release.
-    public static float SidechainRelease {
+    public static double SidechainRelease {
       get { return _sidechainRelease; }
       set {
         if (_sidechainRelease != value) {
@@ -258,10 +258,10 @@ namespace Barely {
         }
       }
     }
-    private static float _sidechainRelease = 0.0f;
+    private static double _sidechainRelease = 0.0;
 
     /// Sidechain threshold.
-    public static float SidechainThreshold {
+    public static double SidechainThreshold {
       get { return _sidechainThreshold; }
       set {
         if (_sidechainThreshold != value) {
@@ -270,10 +270,10 @@ namespace Barely {
         }
       }
     }
-    private static float _sidechainThreshold = 1.0f;
+    private static double _sidechainThreshold = 1.0;
 
     /// Sidechain ratio.
-    public static float SidechainRatio {
+    public static double SidechainRatio {
       get { return _sidechainRatio; }
       set {
         if (_sidechainRatio != value) {
@@ -282,7 +282,7 @@ namespace Barely {
         }
       }
     }
-    private static float _sidechainRatio = 0.0f;
+    private static double _sidechainRatio = 0.0;
 
     /// Speed in beats per second.
     public static double Speed {
@@ -415,10 +415,10 @@ namespace Barely {
         [InspectorName("Pitch Shift")] PITCH_SHIFT,
       }
 
-      public static float Scale_GetPitch(Barely.Scale scale, int degree) {
+      public static double Scale_GetPitch(Barely.Scale scale, int degree) {
+        _scale.rootPitch = scale.RootPitch;
         _scale.pitches = scale.Pitches;
         _scale.pitchCount = scale.PitchCount;
-        _scale.rootPitch = scale.RootPitch;
         _scale.mode = scale.Mode;
         return BarelyScale_GetPitch(ref _scale, degree);
       }
@@ -427,7 +427,7 @@ namespace Barely {
         return BarelyEngine_GetTimestamp(Handle);
       }
 
-      public static void Engine_SetControl(EngineControlType type, float value) {
+      public static void Engine_SetControl(EngineControlType type, double value) {
         BarelyEngine_SetControl(Handle, type, value);
       }
 
@@ -463,20 +463,20 @@ namespace Barely {
       }
 
       public static void Instrument_SetControl(UInt32 instrumentId, InstrumentControlType type,
-                                               float value) {
+                                               double value) {
         BarelyInstrument_SetControl(_handle, instrumentId, type, value);
       }
 
-      public static void Instrument_SetNoteControl(UInt32 instrumentId, float pitch,
-                                                   NoteControlType type, float value) {
+      public static void Instrument_SetNoteControl(UInt32 instrumentId, double pitch,
+                                                   NoteControlType type, double value) {
         BarelyInstrument_SetNoteControl(_handle, instrumentId, pitch, type, value);
       }
 
-      public static void Instrument_SetNoteOff(UInt32 instrumentId, float pitch) {
+      public static void Instrument_SetNoteOff(UInt32 instrumentId, double pitch) {
         BarelyInstrument_SetNoteOff(_handle, instrumentId, pitch);
       }
 
-      public static void Instrument_SetNoteOn(UInt32 instrumentId, float pitch) {
+      public static void Instrument_SetNoteOn(UInt32 instrumentId, double pitch) {
         BarelyInstrument_SetNoteOn(_handle, instrumentId, pitch);
       }
 
@@ -490,18 +490,18 @@ namespace Barely {
               instrumentSlices[i].Sample.LoadAudioData();
             }
             slices[i] = new Slice() {
+              rootPitch = instrumentSlices[i].RootPitch / 12.0,
               samples = instrumentSlices[i].Data,
               sampleCount =
                   (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.samples : 0,
               sampleRate =
                   (instrumentSlices[i].Data != null) ? instrumentSlices[i].Sample.frequency : 0,
-              rootPitch = instrumentSlices[i].RootPitch / 12.0f,
             };
           }
         }
         BarelyInstrument_SetSampleData(_handle, instrumentId, slices, instrumentSlices.Count);
         if (_slices != null) {
-          _slices[instrumentId] = new List<float[]>();
+          _slices[instrumentId] = new List<double[]>();
           for (int i = 0; i < slices.Length; ++i) {
             _slices[instrumentId].Add(slices[i].samples);
           }
@@ -626,18 +626,18 @@ namespace Barely {
 
       [StructLayout(LayoutKind.Sequential)]
       private struct Scale {
-        public float[] pitches;
+        public double rootPitch;
+        public double[] pitches;
         public Int32 pitchCount;
-        public float rootPitch;
         public Int32 mode;
       }
 
       [StructLayout(LayoutKind.Sequential)]
       private struct Slice {
-        public float[] samples;
+        public double rootPitch;
+        public double[] samples;
         public Int32 sampleCount;
         public Int32 sampleRate;
-        public float rootPitch;
       }
 
       // Singleton engine handle.
@@ -669,14 +669,14 @@ namespace Barely {
       private static IntPtr _allocation = IntPtr.Zero;
 
       private static Dictionary<UInt32, Instrument> _instruments = null;
-      private static Dictionary<UInt32, List<float[]>> _slices = null;
+      private static Dictionary<UInt32, List<double[]>> _slices = null;
       private static Dictionary<UInt32, Performer> _performers = null;
       private static Dictionary<UInt32, Task> _tasks = null;
 
       private static Scale _scale = new Scale {
+        rootPitch = 0.0,
         pitches = null,
         pitchCount = 0,
-        rootPitch = 0.0f,
         mode = 0,
       };
 
@@ -748,8 +748,11 @@ namespace Barely {
         }
 
         private void OnAudioFilterRead(float[] data, int channels) {
-          BarelyEngine_Process(_handle, data, channels, data.Length / channels,
+          BarelyEngine_Process(_handle, _outputSamples, channels, data.Length / channels,
                                AudioSettings.dspTime);
+          for (int i = 0; i < data.Length; ++i) {
+            data[i] = (float)_outputSamples[i];
+          }
         }
 
         private void LateUpdate() {
@@ -760,10 +763,14 @@ namespace Barely {
           _isShuttingDown = false;
           var config = AudioSettings.GetConfiguration();
           var engineConfig = new BarelyEngineConfig {
-            sampleRate = config.sampleRate, maxInstrumentCount = 100,
-            maxPerformerCount = 100,        maxTaskCount = 5000,
-            maxCommandCount = 8192,         maxFrameCount = config.dspBufferSize,
-            maxSliceCount = 1000,           maxVoiceCount = 200,
+            sampleRate = config.sampleRate,
+            maxInstrumentCount = 100,
+            maxPerformerCount = 100,
+            maxTaskCount = 4096,
+            maxCommandCount = 8192,
+            maxFrameCount = config.dspBufferSize,
+            maxSliceCount = 512,
+            maxVoiceCount = 200,
           };
           Int32 allocationSize = BarelyEngineConfig_GetRequiredAllocationSize(ref engineConfig);
           _allocation = Marshal.AllocHGlobal(allocationSize);
@@ -793,16 +800,17 @@ namespace Barely {
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_STEREO_WIDTH,
                                   _reverbStereoWidth);
           BarelyEngine_SetControl(_handle, EngineControlType.REVERB_FREEZE,
-                                  _reverbFreeze ? 1.0f : 0.0f);
+                                  _reverbFreeze ? 1.0 : 0.0);
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_MIX, _sidechainMix);
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_THRESHOLD,
                                   _sidechainThreshold);
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_ATTACK, _sidechainAttack);
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_RELEASE, _sidechainRelease);
           BarelyEngine_SetControl(_handle, EngineControlType.SIDECHAIN_RATIO, _sidechainRatio);
-          _dspLatency = (float)(config.dspBufferSize + 1) / config.sampleRate;
+          _dspLatency = (double)(config.dspBufferSize + 1) / config.sampleRate;
+          _outputSamples = new double[config.dspBufferSize * Mathf.Max((int)config.speakerMode, 2)];
           _instruments = new Dictionary<UInt32, Instrument>();
-          _slices = new Dictionary<UInt32, List<float[]>>();
+          _slices = new Dictionary<UInt32, List<double[]>>();
           _performers = new Dictionary<UInt32, Performer>();
           _tasks = new Dictionary<UInt32, Task>();
           BarelyEngine_Update(_handle, GetNextTimestamp());
@@ -824,6 +832,7 @@ namespace Barely {
         // Minimum lookahead time, set to an empirical value that can be adjusted as needed.
         private const double _minLookahead = 0.025;
         private double _dspLatency = 0.0;
+        private double[] _outputSamples = null;
       }
 
 #if !UNITY_EDITOR && UNITY_IOS
@@ -837,7 +846,7 @@ namespace Barely {
           ref BarelyEngineConfig config);
 
       [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
-      private static extern float BarelyScale_GetPitch([In] ref Scale scale, Int32 degree);
+      private static extern double BarelyScale_GetPitch([In] ref Scale scale, Int32 degree);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Create")]
       private static extern IntPtr BarelyEngine_Create(ref BarelyEngineConfig config,
@@ -857,13 +866,13 @@ namespace Barely {
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_Process")]
       private static extern void BarelyEngine_Process(IntPtr engine,
-                                                      [In, Out] float[] outputSamples,
+                                                      [In, Out] double[] outputSamples,
                                                       Int32 outputChannelCount,
                                                       Int32 outputFrameCount, double timestamp);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetControl")]
       private static extern void BarelyEngine_SetControl(IntPtr engine, EngineControlType type,
-                                                         float value);
+                                                         double value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyEngine_SetSpeed")]
       private static extern void BarelyEngine_SetSpeed(IntPtr engine, double speed);
@@ -877,20 +886,20 @@ namespace Barely {
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetControl")]
       private static extern void BarelyInstrument_SetControl(IntPtr engine, UInt32 instrumentId,
                                                              InstrumentControlType type,
-                                                             float value);
+                                                             double value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern void BarelyInstrument_SetNoteControl(IntPtr engine, UInt32 instrumentId,
-                                                                 float pitch, NoteControlType type,
-                                                                 float value);
+                                                                 double pitch, NoteControlType type,
+                                                                 double value);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern void BarelyInstrument_SetNoteOff(IntPtr engine, UInt32 instrumentId,
-                                                             float pitch);
+                                                             double pitch);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
       private static extern void BarelyInstrument_SetNoteOn(IntPtr engine, UInt32 instrumentId,
-                                                            float pitch);
+                                                            double pitch);
 
       [DllImport(_pluginName, EntryPoint = "BarelyInstrument_SetSampleData")]
       private static extern void BarelyInstrument_SetSampleData(IntPtr engine, UInt32 instrumentId,

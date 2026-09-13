@@ -30,10 +30,10 @@ constexpr int kFrameCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr float kGain = 0.9f;
-constexpr float kOscShape = 1.0f;
-constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.15f;
+constexpr double kGain = 0.9;
+constexpr double kOscShape = 1.0;
+constexpr double kAttack = 0.0;
+constexpr double kRelease = 0.15;
 
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
@@ -55,7 +55,7 @@ int main() {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
-  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
@@ -68,18 +68,18 @@ int main() {
   struct SequencerNote {
     double position;
     double duration;
-    float pitch;
+    double pitch;
   };
   std::vector<SequencerNote> score;
-  score.push_back({0.0, 1.0, 0.0f});
-  score.push_back({1.0, 1.0, 2.0f / 12.0f});
-  score.push_back({2.0, 1.0, 4.0f / 12.0f});
-  score.push_back({3.0, 1.0, 5.0f / 12.0f});
-  score.push_back({4.0, 1.0, 7.0f / 12.0f});
-  score.push_back({5.0, 1.0 / 3.0, 7.0f / 12.0f});
-  score.push_back({5 + 1.0 / 3.0, 1.0 / 3.0, 9.0f / 12.0f});
-  score.push_back({5 + 2.0 / 3.0, 1.0 / 3.0, 11.0f / 12.0f});
-  score.push_back({6.0, 2.0, 1.0f});
+  score.push_back({0.0, 1.0, 0.0});
+  score.push_back({1.0, 1.0, 2.0 / 12.0});
+  score.push_back({2.0, 1.0, 4.0 / 12.0});
+  score.push_back({3.0, 1.0, 5.0 / 12.0});
+  score.push_back({4.0, 1.0, 7.0 / 12.0});
+  score.push_back({5.0, 1.0 / 3.0, 7.0 / 12.0});
+  score.push_back({5 + 1.0 / 3.0, 1.0 / 3.0, 9.0 / 12.0});
+  score.push_back({5 + 2.0 / 3.0, 1.0 / 3.0, 11.0 / 12.0});
+  score.push_back({6.0, 2.0, 1.0});
 
   std::unordered_map<int, Task> tasks;
   const auto build_note_fn = [&](const SequencerNote& note) {
@@ -99,7 +99,7 @@ int main() {
 
   // Audio process callback.
   audio_output.SetProcessCallback(
-      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+      [&](double* output_samples, int output_channel_count, int output_frame_count) {
         engine.Process(output_samples, output_channel_count, output_frame_count,
                        audio_clock.GetTimestamp());
         audio_clock.Update(output_frame_count);

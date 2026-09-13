@@ -21,15 +21,15 @@ namespace {
 constexpr uint32_t kInstrumentIndex = 1;
 constexpr int kSampleRate = 1000;
 constexpr int kSampleCount = 4;
-constexpr std::array<float, kSampleCount> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
+constexpr std::array<double, kSampleCount> kSamples = {1.0, 2.0, 3.0, 4.0};
 
-constexpr float kEpsilon = 1e-5f;
+constexpr double kEpsilon = 1e-5;
 
 TEST(EngineProcessorTest, PlayNote) {
   constexpr int kFrameCount = 5;
-  constexpr float kPitch = 1.0f;
+  constexpr double kPitch = 1.0;
   constexpr std::array<BarelySlice, 1> kSlices = {
-      BarelySlice{kSamples.data(), kSampleCount, kSampleRate, kPitch},
+      BarelySlice{kPitch, kSamples.data(), kSampleCount, kSampleRate},
   };
 
   const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
@@ -46,51 +46,51 @@ TEST(EngineProcessorTest, PlayNote) {
 
   Envelope envelope;
   Envelope::Adsr adsr;
-  adsr.SetRelease(kSampleRate, 0.0f);
+  adsr.SetRelease(kSampleRate, 0.0);
 
   engine.ScheduleCmd(
-      InstrumentControlCmd{kInstrumentIndex, BarelyInstrumentControlType_kRelease, 0.0f});
+      InstrumentControlCmd{0.0, kInstrumentIndex, BarelyInstrumentControlType_kRelease});
 
   ToneFilter filters[kStereoChannelCount];
   ToneFilterParams filter_params;
-  filter_params.SetCutoff(kSampleRate, 1.0f);
+  filter_params.SetCutoff(kSampleRate, 1.0);
 
-  std::array<float, kStereoChannelCount * kFrameCount> samples;
+  std::array<double, kStereoChannelCount * kFrameCount> samples;
 
   // Control is set to its default value.
-  samples.fill(0.0f);
+  samples.fill(0.0);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-      EXPECT_FLOAT_EQ(samples[frame * kStereoChannelCount + channel], 0.0f);
+      EXPECT_DOUBLE_EQ(samples[frame * kStereoChannelCount + channel], 0.0);
     }
   }
 
   // Set a note on.
-  engine.ScheduleCmd(NoteOnCmd{kInstrumentIndex, kPitch});
+  engine.ScheduleCmd(NoteOnCmd{kPitch, kInstrumentIndex});
   envelope.Start(adsr);
 
-  samples.fill(0.0f);
+  samples.fill(0.0);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
-    const float envelope_output = envelope.Next();
+    const double envelope_output = envelope.Next();
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_NEAR(
           samples[frame * kStereoChannelCount + channel],
-          (envelope_output > 0.0f)
-              ? (0.5f * filters[channel].Next(
-                            (frame < kSampleCount) ? (envelope_output * kSamples[frame]) : 0.0f,
-                            filter_params))
-              : 0.0f,
+          (envelope_output > 0.0)
+              ? (0.5 * filters[channel].Next(
+                           (frame < kSampleCount) ? (envelope_output * kSamples[frame]) : 0.0,
+                           filter_params))
+              : 0.0,
           kEpsilon);
     }
   }
 
   // Set the note off.
-  engine.ScheduleCmd(NoteOffCmd{kInstrumentIndex, kPitch});
+  engine.ScheduleCmd(NoteOffCmd{kPitch, kInstrumentIndex});
   envelope.Stop();
 
-  samples.fill(0.0f);
+  samples.fill(0.0);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     const bool is_envelope_active = envelope.IsActive();
@@ -99,7 +99,7 @@ TEST(EngineProcessorTest, PlayNote) {
     }
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_NEAR(samples[frame * kStereoChannelCount + channel],
-                  is_envelope_active ? 0.5f * filters[channel].Next(0.0f, filter_params) : 0.0f,
+                  is_envelope_active ? 0.5 * filters[channel].Next(0.0, filter_params) : 0.0,
                   kEpsilon);
     }
   }

@@ -29,15 +29,15 @@ constexpr int kFrameCount = 512;
 
 constexpr double kLookahead = 0.05;
 
-constexpr std::array<float, 7> kMajor = {
-    0.0f, 2.0f / 12.0f, 4.0f / 12.0f, 5.0f / 12.0f, 7.0f / 12.0f, 9.0f / 12.0f, 11.0f / 12.0f,
+constexpr std::array<double, 7> kMajor = {
+    0.0, 2.0 / 12.0, 4.0 / 12.0, 5.0 / 12.0, 7.0 / 12.0, 9.0 / 12.0, 11.0 / 12.0,
 };
 
 // Instrument settings.
-constexpr float kGain = 0.9f;
-constexpr float kOscShape = 1.0f;
-constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.15f;
+constexpr double kGain = 0.9;
+constexpr double kOscShape = 1.0;
+constexpr double kAttack = 0.0;
+constexpr double kRelease = 0.15;
 
 constexpr double kInitialTempo = 120.0;
 
@@ -55,7 +55,7 @@ int main() {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
-  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
@@ -66,7 +66,7 @@ int main() {
   double stop_position = 0.0;
 
   const auto play_note_fn = [&](int degree) {
-    return [&, pitch = Scale(kMajor).GetPitch(degree)](TaskEventType type) {
+    return [&, pitch = Scale(0.0, kMajor).GetPitch(degree)](TaskEventType type) {
       if (type == TaskEventType::kBegin) {
         instrument.SetNoteOn(pitch);
         ConsoleLog() << "Note(" << pitch << ")";
@@ -103,7 +103,7 @@ int main() {
 
   // Audio process callback.
   audio_output.SetProcessCallback(
-      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+      [&](double* output_samples, int output_channel_count, int output_frame_count) {
         engine.Process(output_samples, output_channel_count, output_frame_count,
                        audio_clock.GetTimestamp());
         audio_clock.Update(output_frame_count);

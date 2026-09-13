@@ -35,9 +35,9 @@ struct InstrumentState {
 struct EngineState {
   EngineState(Arena& arena, const BarelyEngineConfig& config) noexcept
       : delay_filter(arena, std::bit_ceil(static_cast<uint32_t>(std::ceil(
-                                static_cast<float>(config.sample_rate) *
+                                static_cast<double>(config.sample_rate) *
                                 kEngineControls[BarelyEngineControlType_kDelayTime].max_value)))),
-        reverb(arena, static_cast<float>(config.sample_rate)),
+        reverb(arena, static_cast<double>(config.sample_rate)),
 
         instrument_pool(arena, config.max_instrument_count),
         performer_pool(arena, config.max_performer_count),
@@ -54,10 +54,10 @@ struct EngineState {
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
         queued_sample_data_counts(
             arena.AllocArray<std::atomic<int32_t>>(config.max_instrument_count)),
-        temp_samples(arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count)),
+        temp_samples(arena.AllocArray<double>(kStereoChannelCount * config.max_frame_count)),
 
-        sample_rate(static_cast<float>(config.sample_rate)),
-        smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05f)),
+        sample_rate(static_cast<double>(config.sample_rate)),
+        smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05)),
 
         id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
             {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
@@ -66,7 +66,7 @@ struct EngineState {
 
         max_frame_count(static_cast<uint32_t>(config.max_frame_count)) {
     assert(id_index_bit_count < 32);
-    assert(sample_rate > 0.0f);
+    assert(sample_rate > 0.0);
   }
 
   MainRng main_rng;
@@ -98,13 +98,13 @@ struct EngineState {
 
   std::atomic<int32_t>* queued_sample_data_counts = nullptr;  // queued commands per instrument
 
-  float* temp_samples = nullptr;
+  double* temp_samples = nullptr;
 
   double speed = 1.0;        // beats per second
   double timestamp = 0.0;    // seconds
-  float sample_rate = 0.0f;  // hertz
+  double sample_rate = 0.0;  // hertz
 
-  float smoothing_coeff = 0.0f;
+  double smoothing_coeff = 0.0;
 
   uint32_t id_index_bit_count = 0;
   uint32_t id_index_mask = 0;
@@ -127,7 +127,7 @@ struct EngineState {
   }
 
   [[nodiscard]] uint32_t SelectSlice(uint32_t instrument_index, uint32_t first_slice_index,
-                                     float pitch) noexcept {
+                                     double pitch) noexcept {
     if (instrument_index == kInvalidIndex ||
         queued_sample_data_counts[instrument_index].load(std::memory_order_acquire) > 0) {
       return kInvalidIndex;

@@ -13,12 +13,12 @@ class WavFile {
 
   [[nodiscard]] int GetChannelCount() const noexcept { return channel_count_; }
   [[nodiscard]] int GetSampleRate() const noexcept { return sample_rate_; }
-  [[nodiscard]] const std::vector<float>& GetData() const noexcept { return data_; }
+  [[nodiscard]] const std::vector<double>& GetData() const noexcept { return data_; }
 
  private:
   int channel_count_ = 0;
   int sample_rate_ = 0;
-  std::vector<float> data_;
+  std::vector<double> data_;
 };
 
 }  // namespace barely::examples

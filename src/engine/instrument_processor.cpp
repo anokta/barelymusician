@@ -15,7 +15,7 @@
 namespace barely {
 
 void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
-                                     float value) noexcept {
+                                     double value) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
   switch (type) {
     case BarelyInstrumentControlType_kGain:
@@ -23,9 +23,9 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       break;
     case BarelyInstrumentControlType_kPitchShift:
       params.pitch_shift = value;
-      params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
+      params.osc_increment = std::pow(2.0, params.osc_pitch_shift + params.pitch_shift) *
                              kReferenceFreq / engine_.sample_rate;
-      params.slice_increment = std::pow(2.0f, params.pitch_shift) / engine_.sample_rate;
+      params.slice_increment = std::pow(2.0, params.pitch_shift) / engine_.sample_rate;
       break;
     case BarelyInstrumentControlType_kStereoPan:
       params.voice_params.stereo_pan = value;
@@ -56,7 +56,7 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       break;
     case BarelyInstrumentControlType_kOscPitchShift:
       params.osc_pitch_shift = value;
-      params.osc_increment = std::pow(2.0f, params.osc_pitch_shift + params.pitch_shift) *
+      params.osc_increment = std::pow(2.0, params.osc_pitch_shift + params.pitch_shift) *
                              kReferenceFreq / engine_.sample_rate;
       break;
     case BarelyInstrumentControlType_kOscShape:
@@ -66,19 +66,18 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
       params.voice_params.osc_skew = value * kOscSkewRange;
       break;
     case BarelyInstrumentControlType_kCrushDepth:
-      params.voice_params.bit_crusher_range = std::pow(2.0f, (1.0f - value) * 15.0f);
+      params.voice_params.bit_crusher_range = std::pow(2.0, (1.0 - value) * 15.0);
       break;
     case BarelyInstrumentControlType_kCrushRate:
       params.voice_params.bit_crusher_increment = std::min(
-          2.0f * GetFrequency(1.0f - value, 0.5f * engine_.sample_rate) / engine_.sample_rate,
-          1.0f);
+          2.0 * GetFrequency(1.0 - value, 0.5 * engine_.sample_rate) / engine_.sample_rate, 1.0);
       break;
     case BarelyInstrumentControlType_kDistortionMix:
       params.voice_params.distortion_amount = value;
       break;
     case BarelyInstrumentControlType_kDistortionDrive: {
-      static constexpr float kDistortionDriveRange = 19.0f;
-      params.voice_params.distortion_drive = 1.0f + kDistortionDriveRange * value;
+      static constexpr double kDistortionDriveRange = 19.0;
+      params.voice_params.distortion_drive = 1.0 + kDistortionDriveRange * value;
     } break;
     case BarelyInstrumentControlType_kDelaySend:
       params.voice_params.delay_send = value;
@@ -129,8 +128,8 @@ void InstrumentProcessor::SetControl(uint32_t instrument_index, BarelyInstrument
   }
 }
 
-void InstrumentProcessor::SetNoteControl(uint32_t instrument_index, float pitch,
-                                         BarelyNoteControlType type, float value) noexcept {
+void InstrumentProcessor::SetNoteControl(uint32_t instrument_index, double pitch,
+                                         BarelyNoteControlType type, double value) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
   uint32_t voice_index = params.first_voice_index;
   while (voice_index != kInvalidIndex) {
@@ -161,7 +160,7 @@ void InstrumentProcessor::SetNoteControl(uint32_t instrument_index, float pitch,
   }
 }
 
-void InstrumentProcessor::SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
+void InstrumentProcessor::SetNoteOff(uint32_t instrument_index, double pitch) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
   uint32_t voice_index = params.first_voice_index;
   while (voice_index != kInvalidIndex) {
@@ -182,7 +181,7 @@ void InstrumentProcessor::SetNoteOff(uint32_t instrument_index, float pitch) noe
   }
 }
 
-void InstrumentProcessor::SetNoteOn(uint32_t instrument_index, float pitch) noexcept {
+void InstrumentProcessor::SetNoteOn(uint32_t instrument_index, double pitch) noexcept {
   auto& params = engine_.instrument_params[instrument_index];
   if (const uint32_t voice_index = AcquireVoice(params, pitch); voice_index != kInvalidIndex) {
     auto& voice = engine_.GetVoice(voice_index);
@@ -207,7 +206,7 @@ void InstrumentProcessor::SetSampleData(uint32_t instrument_index,
   }
 }
 
-uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, float pitch) noexcept {
+uint32_t InstrumentProcessor::AcquireVoice(InstrumentParams& params, double pitch) noexcept {
   uint32_t current_voice_index = params.first_voice_index;
   uint32_t last_voice_index = current_voice_index;
   uint32_t oldest_active_voice_index = current_voice_index;

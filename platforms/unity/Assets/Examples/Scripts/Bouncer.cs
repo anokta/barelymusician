@@ -7,7 +7,7 @@ namespace Barely.Examples {
     public Sparkler sparkler;
 
     private int _lastIndex = 0;
-    private float _lastPitch = 0.0f;
+    private double _lastPitch = 0.0;
 
     private void Awake() {
       Color.RGBToHSV(sparkler.noteOnColor, out float h, out float s, out float v);
@@ -16,14 +16,14 @@ namespace Barely.Examples {
     }
 
     private void Update() {
-      if (transform.position.y < -100.0f) {
+      if (transform.position.y < -100.0) {
         GameObject.Destroy(gameObject);
       }
     }
 
     private void OnCollisionEnter(Collision collision) {
       _lastPitch = scale.GetPitch(_lastIndex);
-      float gain = Mathf.Min(1.0f, 0.1f * collision.relativeVelocity.sqrMagnitude);
+      double gain = System.Math.Min(1.0, 0.1 * collision.relativeVelocity.sqrMagnitude);
       instrument.SetNoteOn(_lastPitch, gain);
     }
 

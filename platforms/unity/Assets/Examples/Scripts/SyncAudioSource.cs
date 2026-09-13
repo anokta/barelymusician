@@ -7,7 +7,7 @@ namespace Barely.Examples {
     public Performer performer;
     public AudioSource source;
 
-    private float _pitch = 0.0f;
+    private double _pitch = 0.0;
 
     void Update() {
       if (((Application.platform == RuntimePlatform.Android ||
@@ -24,8 +24,9 @@ namespace Barely.Examples {
           source.SetScheduledEndTime(Engine.Timestamp);
         }
       }
-      transform.rotation = Quaternion.AngleAxis((float)performer.Position * 90.0f, Vector3.forward);
-      _pitch = Mathf.PingPong(0.5f * Time.time, 2.0f);
+      transform.rotation =
+          Quaternion.AngleAxis((float)(performer.Position * 90.0), Vector3.forward);
+      _pitch = (double)Mathf.PingPong(0.5f * Time.time, 2.0f);
     }
 
     public void PlayNote(TaskEventType type) {

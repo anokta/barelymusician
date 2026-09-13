@@ -16,8 +16,8 @@ namespace {
 
 constexpr int kStereoChannelCount = 2;
 
-float MidiNoteToPitch(Steinberg::int16 midi_note) noexcept {
-  return (static_cast<float>(midi_note) - 60.0f) / 12.0f;
+double MidiNoteToPitch(Steinberg::int16 midi_note) noexcept {
+  return (static_cast<double>(midi_note) - 60.0) / 12.0;
 }
 
 }  // namespace
@@ -31,10 +31,7 @@ Steinberg::FUnknown* Processor::Create(void* /*context*/) {
 Processor::Processor() noexcept { setControllerClass(Controller::kId); }
 
 Steinberg::tresult PLUGIN_API Processor::canProcessSampleSize(Steinberg::int32 sample_size) {
-  if (sample_size == Steinberg::Vst::kSample32) {
-    return Steinberg::kResultTrue;
-  }
-  return Steinberg::kResultFalse;
+  return Steinberg::kResultTrue;
 }
 
 Steinberg::tresult PLUGIN_API Processor::initialize(FUnknown* context) {
@@ -72,7 +69,7 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
         Steinberg::int32 sample_offset = 0;
         double value = 0.0;
         if (param_queue->getPoint(queue_index, sample_offset, value) == Steinberg::kResultTrue) {
-          const float plainValue = Controller::ToPlainControlValue(type, value);
+          const double plainValue = Controller::ToPlainControlValue(type, value);
           instrument_.SetControl(type, plainValue);
           controls_[param_queue->getParameterId()] = plainValue;
         }
@@ -98,9 +95,18 @@ Steinberg::tresult PLUGIN_API Processor::process(Steinberg::Vst::ProcessData& da
   // Process instrument.
   const int frame_count = static_cast<int>(data.numSamples);
   engine_->Process(output_samples_.data(), kStereoChannelCount, frame_count, /*timestamp=*/0.0);
-  for (int frame = 0; frame < frame_count; ++frame) {
-    data.outputs[0].channelBuffers32[0][frame] = output_samples_[frame * kStereoChannelCount];
-    data.outputs[0].channelBuffers32[1][frame] = output_samples_[frame * kStereoChannelCount + 1];
+  if (data.symbolicSampleSize == Steinberg::Vst::kSample64) {
+    auto* output = data.outputs[0].channelBuffers64;
+    for (int frame = 0; frame < frame_count; ++frame) {
+      output[0][frame] = output_samples_[frame * kStereoChannelCount];
+      output[1][frame] = output_samples_[frame * kStereoChannelCount + 1];
+    }
+  } else {
+    for (int frame = 0; frame < frame_count; ++frame) {
+      auto* output = data.outputs[0].channelBuffers32;
+      output[0][frame] = static_cast<float>(output_samples_[frame * kStereoChannelCount]);
+      output[1][frame] = static_cast<float>(output_samples_[frame * kStereoChannelCount + 1]);
+    }
   }
 
   return Steinberg::kResultTrue;
@@ -130,6 +136,8 @@ Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::Process
       BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, BARELY_FETCH_DEFAULT)
 #undef BARELY_FETCH_DEFAULT
   };
+  controls_[BarelyInstrumentControlType_kOscMix] = 1.0;
+  instrument_.SetControl(InstrumentControlType::kOscMix, 1.0);
   output_samples_.resize(kStereoChannelCount * setup.maxSamplesPerBlock);
   return Steinberg::kResultTrue;
 }
@@ -142,7 +150,7 @@ Steinberg::tresult PLUGIN_API Processor::getState(Steinberg::IBStream* state) {
   }
 
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    if (!stream.writeFloat(controls_[i])) {
+    if (!stream.writeDouble(controls_[i])) {
       return Steinberg::kResultFalse;
     }
   }
@@ -166,11 +174,11 @@ Steinberg::tresult PLUGIN_API Processor::setState(Steinberg::IBStream* state) {
   }
 
   for (int i = 0; i < BarelyInstrumentControlType_kCount; ++i) {
-    float value = 0.0f;
-    if (!stream.readFloat(value)) {
+    double value = 0.0;
+    if (!stream.readDouble(value)) {
       return Steinberg::kResultFalse;
     }
-    instrument_.SetControl<float>(static_cast<InstrumentControlType>(i), value);
+    instrument_.SetControl(static_cast<InstrumentControlType>(i), value);
     controls_[i] = value;
   }
 

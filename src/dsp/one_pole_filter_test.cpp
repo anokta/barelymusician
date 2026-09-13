@@ -10,52 +10,52 @@ namespace {
 
 // Test input (single impulse).
 constexpr int kInputLength = 5;
-constexpr float kInput[kInputLength] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+constexpr double kInput[kInputLength] = {1.0, 0.0, 0.0, 0.0, 0.0};
 
-constexpr float kCoefficient = 0.5f;
+constexpr double kCoefficient = 0.5;
 
 TEST(OnePoleFilterTest, Lpf) {
   OnePoleFilter filter;
   for (int i = 0; i < kInputLength; ++i) {
-    const float expected_output =
-        (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLowPass>(kInput[i], kCoefficient), expected_output);
+    const double expected_output =
+        (1.0 - kCoefficient) * std::pow(kCoefficient, static_cast<double>(i));
+    EXPECT_DOUBLE_EQ(filter.Next<FilterType::kLowPass>(kInput[i], kCoefficient), expected_output);
   }
 }
 
 TEST(OnePoleFilterTest, LpfAllPass) {
   OnePoleFilter filter;
-  for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kLowPass>(input, 0.0f), input);
+  for (const double input : kInput) {
+    EXPECT_DOUBLE_EQ(filter.Next<FilterType::kLowPass>(input, 0.0), input);
   }
 }
 
 TEST(OnePoleFilterTest, Hpf) {
   OnePoleFilter filter;
   for (int i = 0; i < kInputLength; ++i) {
-    const float expected_output =
-        kInput[i] - (1.0f - kCoefficient) * std::pow(kCoefficient, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHighPass>(kInput[i], kCoefficient), expected_output);
+    const double expected_output =
+        kInput[i] - (1.0 - kCoefficient) * std::pow(kCoefficient, static_cast<double>(i));
+    EXPECT_DOUBLE_EQ(filter.Next<FilterType::kHighPass>(kInput[i], kCoefficient), expected_output);
   }
 }
 
 TEST(OnePoleFilterTest, HpfAllPass) {
   OnePoleFilter filter;
-  for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(filter.Next<FilterType::kHighPass>(input, 1.0f), input);
+  for (const double input : kInput) {
+    EXPECT_DOUBLE_EQ(filter.Next<FilterType::kHighPass>(input, 1.0), input);
   }
 }
 
 TEST(OnePoleFilterTest, GetFilterCoeff) {
-  constexpr float kEpsilon = 1e-2f;
+  constexpr double kEpsilon = 1e-2;
   constexpr int kSampleRate = 8000;
 
   constexpr int kCutoffCount = 5;
-  constexpr std::array<float, kCutoffCount> kCutoffs = {
-      0.0f, 100.0f, 500.0f, 1000.0f, 8000.0f,
+  constexpr std::array<double, kCutoffCount> kCutoffs = {
+      0.0, 100.0, 500.0, 1000.0, 8000.0,
   };
-  constexpr std::array<float, kCutoffCount> kExpectedCoefficients = {
-      1.00f, 0.92f, 0.68f, 0.46f, 0.00f,
+  constexpr std::array<double, kCutoffCount> kExpectedCoefficients = {
+      1.00, 0.92, 0.68, 0.46, 0.00,
   };
 
   for (int i = 0; i < kCutoffCount; ++i) {

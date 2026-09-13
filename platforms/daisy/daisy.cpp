@@ -25,10 +25,10 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 16;
 
 // Instrument settings.
-constexpr float kGain = 1.0f;
-constexpr float kAttack = 0.05f;
-constexpr float kRelease = 0.125f;
-constexpr float kOscShapeIncrement = 0.1f;
+constexpr double kGain = 1.0;
+constexpr double kAttack = 0.05;
+constexpr double kRelease = 0.125;
+constexpr double kOscShapeIncrement = 0.1;
 constexpr int kVoiceCount = 16;
 
 DaisyPod g_hw;  // target the Daisy Pod hardware.
@@ -45,15 +45,15 @@ Engine g_engine{EngineConfig{{
     .max_voice_count = 32,
 }}};
 Instrument g_instrument = {};
-float g_osc_shape = 0.0f;
-std::array<float, kChannelCount * kFrameCount> g_output_samples;
+double g_osc_shape = 0.0;
+std::array<double, kChannelCount * kFrameCount> g_output_samples;
 
 void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, size_t size) {
   // Update controls.
   g_hw.ProcessAllControls();
   if (const auto increment = g_hw.encoder.Increment(); increment != 0) {
-    g_osc_shape =
-        std::clamp(g_osc_shape + kOscShapeIncrement * static_cast<float>(increment), 0.0f, 1.0f);
+    g_osc_shape = std::min(
+        std::max(g_osc_shape + kOscShapeIncrement * static_cast<double>(increment), 0.0), 1.0);
     g_instrument.SetControl(InstrumentControlType::kOscShape, g_osc_shape);
   }
   // Process the output samples.
@@ -61,7 +61,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   g_engine.Process(g_output_samples.data(), kChannelCount, frame_count, /*timestamp=*/0.0);
   for (int frame = 0; frame < frame_count; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      out[channel][frame] = g_output_samples[frame * kChannelCount + channel];
+      out[channel][frame] = static_cast<float>(g_output_samples[frame * kChannelCount + channel]);
     }
   }
 }
@@ -82,7 +82,7 @@ int main(void) {
   // Initialize the instrument.
   g_instrument = g_engine.CreateInstrument();
   g_instrument.SetControl(InstrumentControlType::kGain, kGain);
-  g_instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  g_instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
   g_instrument.SetControl(InstrumentControlType::kOscShape, g_osc_shape);
   g_instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   g_instrument.SetControl(InstrumentControlType::kRelease, kRelease);

@@ -10,52 +10,52 @@
 
 namespace barely {
 
-inline constexpr float kOscSkewRange = 0.25f;
+inline constexpr double kOscSkewRange = 0.25;
 
-[[nodiscard]] inline float PolyBlep(float phase, float increment) noexcept {
+[[nodiscard]] inline double PolyBlep(double phase, double increment) noexcept {
   if (phase < increment) {
-    const float t = phase / increment;
-    return t + t - t * t - 1.0f;
+    const double t = phase / increment;
+    return t + t - t * t - 1.0;
   }
-  if (phase > 1.0f - increment) {
-    const float t = (phase - 1.0f) / increment;
-    return t * t + t + t + 1.0f;
+  if (phase > 1.0 - increment) {
+    const double t = (phase - 1.0) / increment;
+    return t * t + t + t + 1.0;
   }
-  return 0.0f;
+  return 0.0;
 }
 
-[[nodiscard]] inline float GenerateSineSample(float phase) noexcept {
-  return std::sin(phase * 2.0f * std::numbers::pi_v<float>);
+[[nodiscard]] inline double GenerateSineSample(double phase) noexcept {
+  return std::sin(phase * 2.0 * std::numbers::pi_v<double>);
 }
 
-[[nodiscard]] inline float GenerateTriangleSample(float phase) noexcept {
-  return 4.0f * std::abs(phase - static_cast<float>(phase + 0.75f >= 1.0f) + 0.25f) - 1.0f;
+[[nodiscard]] inline double GenerateTriangleSample(double phase) noexcept {
+  return 4.0 * std::abs(phase - static_cast<double>(phase + 0.75 >= 1.0) + 0.25) - 1.0;
 }
 
-[[nodiscard]] inline float GenerateSquareSample(float phase, float increment) noexcept {
-  const float shifted_phase = phase + 0.5f;
-  return ((phase < 0.5f) ? 1.0f : -1.0f) + PolyBlep(phase, increment) -
-         PolyBlep(shifted_phase - static_cast<float>(shifted_phase >= 1.0f), increment);
+[[nodiscard]] inline double GenerateSquareSample(double phase, double increment) noexcept {
+  const double shifted_phase = phase + 0.5;
+  return ((phase < 0.5) ? 1.0 : -1.0) + PolyBlep(phase, increment) -
+         PolyBlep(shifted_phase - static_cast<double>(shifted_phase >= 1.0), increment);
 }
 
-[[nodiscard]] inline float GenerateSawtoothSample(float phase, float increment) noexcept {
-  const float shifted_phase = phase + 0.5f;
-  const float shifted_phase_floor = static_cast<float>(shifted_phase >= 1.0f);
-  return 2.0f * (phase - shifted_phase_floor) -
+[[nodiscard]] inline double GenerateSawtoothSample(double phase, double increment) noexcept {
+  const double shifted_phase = phase + 0.5;
+  const double shifted_phase_floor = static_cast<double>(shifted_phase >= 1.0);
+  return 2.0 * (phase - shifted_phase_floor) -
          PolyBlep(shifted_phase - shifted_phase_floor, increment);
 }
 
-[[nodiscard]] inline float GenerateOscSample(float osc_shape, float osc_phase,
-                                             float osc_increment) noexcept {
-  assert(osc_shape >= 0.0f && osc_shape <= 1.0f && "GenerateOscSample");
-  assert(osc_phase >= 0.0f && osc_phase <= 1.0f && "GenerateOscSample");
-  assert(osc_increment > 0.0f && osc_increment <= 0.5f && "GenerateOscSample");
-  static constexpr float kShapeScale = 3.0f;
-  static constexpr float kShapeTriangleOffset = 1.0f;
-  static constexpr float kShapeSineToTriangle = kShapeTriangleOffset / kShapeScale;
-  static constexpr float kShapeSquareOffset = 2.0f;
-  static constexpr float kShapeTriangleToSquare = kShapeSquareOffset / kShapeScale;
-  const float scaled_shape = osc_shape * kShapeScale;
+[[nodiscard]] inline double GenerateOscSample(double osc_shape, double osc_phase,
+                                              double osc_increment) noexcept {
+  assert(osc_shape >= 0.0 && osc_shape <= 1.0 && "GenerateOscSample");
+  assert(osc_phase >= 0.0 && osc_phase <= 1.0 && "GenerateOscSample");
+  assert(osc_increment > 0.0 && osc_increment <= 0.5 && "GenerateOscSample");
+  static constexpr double kShapeScale = 3.0;
+  static constexpr double kShapeTriangleOffset = 1.0;
+  static constexpr double kShapeSineToTriangle = kShapeTriangleOffset / kShapeScale;
+  static constexpr double kShapeSquareOffset = 2.0;
+  static constexpr double kShapeTriangleToSquare = kShapeSquareOffset / kShapeScale;
+  const double scaled_shape = osc_shape * kShapeScale;
   if (osc_shape < kShapeSineToTriangle) {
     return std::lerp(GenerateSineSample(osc_phase), GenerateTriangleSample(osc_phase),
                      scaled_shape);
@@ -70,22 +70,22 @@ inline constexpr float kOscSkewRange = 0.25f;
                    scaled_shape - kShapeSquareOffset);
 }
 
-[[nodiscard]] inline float GenerateSliceSample(const float* samples, int32_t sample_count,
-                                               float offset, bool is_looping) noexcept {
+[[nodiscard]] inline double GenerateSliceSample(const double* samples, int32_t sample_count,
+                                                double offset, bool is_looping) noexcept {
   assert((samples != nullptr || sample_count == 0) && "GenerateSliceSample");
-  assert(offset >= 0.0f && "GenerateSliceSample");
+  assert(offset >= 0.0 && "GenerateSliceSample");
   const int32_t index = static_cast<int32_t>(offset);
   return (index < sample_count)
              ? std::lerp(samples[index],
                          (index + 1 < sample_count) ? samples[index + 1]
-                                                    : (is_looping ? samples[0] : 0.0f),
-                         offset - static_cast<float>(index))
-             : 0.0f;
+                                                    : (is_looping ? samples[0] : 0.0),
+                         offset - static_cast<double>(index))
+             : 0.0;
 }
 
 template <typename RngType>
-[[nodiscard]] float GenerateNoiseSample(RngType& rng) noexcept {
-  return (2.0f * static_cast<float>(rng.Generate())) - 1.0f;
+[[nodiscard]] double GenerateNoiseSample(RngType& rng) noexcept {
+  return (2.0 * static_cast<double>(rng.Generate())) - 1.0;
 }
 
 }  // namespace barely

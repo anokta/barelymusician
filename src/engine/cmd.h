@@ -12,8 +12,8 @@
 namespace barely {
 
 struct EngineControlCmd {
+  double value = 0.0;
   BarelyEngineControlType type = BarelyEngineControlType_kCount;
-  float value = 0.0f;
 };
 
 struct EngineSeedCmd {
@@ -29,26 +29,26 @@ struct InstrumentDestroyCmd {
 };
 
 struct InstrumentControlCmd {
+  double value = 0.0;
   uint32_t instrument_index = kInvalidIndex;
   BarelyInstrumentControlType type = BarelyInstrumentControlType_kCount;
-  float value;
 };
 
 struct NoteControlCmd {
+  double pitch = 0.0;
+  double value = 0.0;
   uint32_t instrument_index = kInvalidIndex;
-  float pitch = 0.0f;
   BarelyNoteControlType type = BarelyNoteControlType_kCount;
-  float value = 0.0f;
 };
 
 struct NoteOffCmd {
+  double pitch = 0.0;
   uint32_t instrument_index = kInvalidIndex;
-  float pitch = 0.0f;
 };
 
 struct NoteOnCmd {
+  double pitch = 0.0;
   uint32_t instrument_index = kInvalidIndex;
-  float pitch = 0.0f;
 };
 
 struct SampleDataCmd {

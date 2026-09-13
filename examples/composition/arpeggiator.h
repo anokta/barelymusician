@@ -23,13 +23,13 @@ class Arpeggiator {
   ~Arpeggiator() noexcept { performer_.Destroy(); }
 
   void SetAllNotesOff() noexcept;
-  void SetNoteOff(float pitch) noexcept;
-  void SetNoteOn(float pitch) noexcept;
+  void SetNoteOff(double pitch) noexcept;
+  void SetNoteOn(double pitch) noexcept;
   void SetRate(double rate) noexcept;
 
   void SetGateRatio(double gate_ratio) noexcept { task_.SetDuration(loop_length_ * gate_ratio); }
   void SetMode(Mode mode) noexcept { mode_ = mode; }
-  void SetNoteCallback(std::function<void(float)> note_callback) noexcept {
+  void SetNoteCallback(std::function<void(double)> note_callback) noexcept {
     note_callback_ = std::move(note_callback);
   }
   [[nodiscard]] bool IsPlaying() const noexcept { return index_ != -1; }
@@ -43,12 +43,12 @@ class Arpeggiator {
   Performer performer_;
   Task task_;
 
-  std::function<void(float)> note_callback_;
-  std::vector<float> pitches_;
+  std::function<void(double)> note_callback_;
+  std::vector<double> pitches_;
 
   double loop_length_ = 1.0;
-  float gate_ratio_ = 0.5f;
-  float pitch_ = 0.0f;
+  double gate_ratio_ = 0.5;
+  double pitch_ = 0.0;
   int index_ = -1;
   Mode mode_ = Mode::kUp;
 };

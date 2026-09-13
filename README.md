@@ -36,12 +36,12 @@ barely::Engine engine(/*sample_rate=*/48000);
 
 // Create an oscillator instrument.
 auto instrument = engine.CreateInstrument();
-instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0f);
+instrument.SetControl(barely::InstrumentControlType::kOscMix, /*value=*/1.0);
 
 // Set an instrument note on.
 // Notes are expressed as octaves relative to middle C. Fractional values adjust the frequency
 // logarithmically for equal-tempered pitch intervals within each octave.
-constexpr float kC4Pitch = 0.0f;
+constexpr double kC4Pitch = 0.0;
 instrument.SetNoteOn(kC4Pitch);
 
 // Create a looping performer.
@@ -51,7 +51,7 @@ performer.SetLooping(/*is_looping=*/true);
 // Create a task that plays an instrument note every beat.
 auto task = performer.CreateTask(/*position=*/0.0, /*duration=*/1.0, /*priority=*/0,
                                  [&](barely::TaskEventType type) {
-                                   constexpr float kC3Pitch = -1.0f;
+                                   constexpr double kC3Pitch = -1.0;
                                    if (type == barely::TaskEventType::kBegin) {
                                      instrument.SetNoteOn(kC3Pitch);
                                    } else if (type == barely::TaskEventType::kEnd) {
@@ -76,7 +76,7 @@ engine.Update(timestamp + kLookahead);
 // audio thread in real-time audio applications.
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
-float output_samples[kChannelCount * kFrameCount];
+double output_samples[kChannelCount * kFrameCount];
 engine.Process(output_samples, kChannelCount, kFrameCount, timestamp);
 ```
 

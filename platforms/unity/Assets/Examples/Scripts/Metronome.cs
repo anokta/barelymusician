@@ -10,15 +10,15 @@ namespace Barely.Examples {
 
     /// Bar note pitch.
     [Range(-1.0f, 1.0f)]
-    public float barPitch = 1.0f;
+    public double barPitch = 1.0;
 
     /// Beat note pitch.
     [Range(-1.0f, 1.0f)]
-    public float beatPitch = 0.0f;
+    public double beatPitch = 0.0;
 
     /// Note gain.
     [Range(0.0f, 1.0f)]
-    public float gain = 1.0f;
+    public double gain = 1.0;
 
     /// True if logging to console, false otherwise.
     public bool isLoggingToConsole = false;
@@ -94,11 +94,11 @@ namespace Barely.Examples {
     private void OnEnable() {
       var tempGameObject = new GameObject() { hideFlags = HideFlags.HideAndDontSave };
       var instrument = tempGameObject.AddComponent<Instrument>();
-      instrument.OscMix = 1.0f;
-      instrument.OscShape = 0.75f;
-      instrument.Gain = 0.9f;
-      instrument.Attack = 0.0f;
-      instrument.Release = 0.2f;
+      instrument.OscMix = 1.0;
+      instrument.OscShape = 0.75;
+      instrument.Gain = 0.9;
+      instrument.Attack = 0.0;
+      instrument.Release = 0.2;
       _performer = tempGameObject.AddComponent<Performer>();
       _performer.PlayOnAwake = playOnAwake;
       _performer.Loop = true;
@@ -109,7 +109,7 @@ namespace Barely.Examples {
         }
         int bar = _beat / beatCount;
         int beat = _beat % beatCount;
-        float pitch = (beat == 0) ? barPitch : beatPitch;
+        double pitch = (beat == 0) ? barPitch : beatPitch;
         if (isTicking) {
           instrument.SetNoteOn(pitch, gain);
           instrument.SetNoteOff(pitch);

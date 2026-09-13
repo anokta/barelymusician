@@ -21,7 +21,7 @@ namespace Barely.Examples {
       [Range(-64, 64)]
       public int pitch;
       [Range(0.0f, 1.0f)]
-      public float gain;
+      public double gain;
       [Min(0.0f)]
       public double position;
       [Min(0.0f)]
@@ -82,9 +82,9 @@ namespace Barely.Examples {
         var note = _notes[i];
         _performer.Tasks.Add(
             new Task(note.position, note.duration, priority, delegate(TaskEventType type) {
-              float pitch = note.pitch / 12.0f;
+              double pitch = note.pitch / 12.0;
               if (type == TaskEventType.BEGIN) {
-                instrument?.SetNoteOn(pitch, note.muted ? 0.0f : note.gain);
+                instrument?.SetNoteOn(pitch, note.muted ? 0.0 : note.gain);
               } else if (type == TaskEventType.END) {
                 instrument?.SetNoteOff(pitch);
               }

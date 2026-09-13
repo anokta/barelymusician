@@ -25,20 +25,20 @@ class InstrumentProcessor {
   explicit InstrumentProcessor(EngineState& engine) noexcept : engine_(engine) {}
 
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
-                  float value) noexcept;
-  void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
-                      float value) noexcept;
-  void SetNoteOff(uint32_t instrument_index, float pitch) noexcept;
-  void SetNoteOn(uint32_t instrument_index, float pitch) noexcept;
+                  double value) noexcept;
+  void SetNoteControl(uint32_t instrument_index, double pitch, BarelyNoteControlType type,
+                      double value) noexcept;
+  void SetNoteOff(uint32_t instrument_index, double pitch) noexcept;
+  void SetNoteOn(uint32_t instrument_index, double pitch) noexcept;
   void SetSampleData(uint32_t instrument_index, uint32_t first_slice_index) noexcept;
 
   void Init(uint32_t instrument_index) const noexcept {
     InstrumentParams& instrument_params = engine_.instrument_params[instrument_index];
     instrument_params = {};
-    instrument_params.adsr.SetRelease(engine_.sample_rate, 0.0f);
+    instrument_params.adsr.SetRelease(engine_.sample_rate, 0.0);
     instrument_params.osc_increment = kReferenceFreq / engine_.sample_rate;
-    instrument_params.slice_increment = 1.0f / engine_.sample_rate;
-    instrument_params.voice_params.filter_params.SetCutoff(engine_.sample_rate, 1.0f);
+    instrument_params.slice_increment = 1.0 / engine_.sample_rate;
+    instrument_params.voice_params.filter_params.SetCutoff(engine_.sample_rate, 1.0);
   }
 
   void Shutdown(uint32_t instrument_index) const noexcept {
@@ -53,10 +53,10 @@ class InstrumentProcessor {
   }
 
   template <bool kIsSidechainSend = false>
-  void ProcessAllVoices(float delay_frame[kStereoChannelCount],
-                        float reverb_frame[kStereoChannelCount],
-                        float sidechain_frame[kStereoChannelCount],
-                        float output_frame[kStereoChannelCount]) noexcept {
+  void ProcessAllVoices(double delay_frame[kStereoChannelCount],
+                        double reverb_frame[kStereoChannelCount],
+                        double sidechain_frame[kStereoChannelCount],
+                        double output_frame[kStereoChannelCount]) noexcept {
     for (uint32_t i = 0; i < engine_.voice_pool.ActiveCount();) {
       const uint32_t voice_index = engine_.voice_pool.GetActive(i);
       VoiceState& voice = engine_.GetVoice(voice_index);
@@ -74,7 +74,7 @@ class InstrumentProcessor {
   }
 
  private:
-  [[nodiscard]] uint32_t AcquireVoice(InstrumentParams& params, float pitch) noexcept;
+  [[nodiscard]] uint32_t AcquireVoice(InstrumentParams& params, double pitch) noexcept;
 
   void ReleaseVoice(VoiceState& voice, InstrumentParams& params) noexcept {
     if (voice.prev_voice_index != kInvalidIndex) {
@@ -94,15 +94,16 @@ class InstrumentProcessor {
 
   template <bool kIsSidechainSend = false>
   void ProcessVoice(VoiceState& voice, const InstrumentParams& instrument_params,
-                    float delay_frame[kStereoChannelCount], float reverb_frame[kStereoChannelCount],
-                    float sidechain_frame[kStereoChannelCount],
-                    float output_frame[kStereoChannelCount]) noexcept {
+                    double delay_frame[kStereoChannelCount],
+                    double reverb_frame[kStereoChannelCount],
+                    double sidechain_frame[kStereoChannelCount],
+                    double output_frame[kStereoChannelCount]) noexcept {
     if constexpr (kIsSidechainSend) {
-      if (voice.params.sidechain_send <= 0.0f) {
+      if (voice.params.sidechain_send <= 0.0) {
         return;
       }
     } else {
-      if (voice.params.sidechain_send > 0.0f) {
+      if (voice.params.sidechain_send > 0.0) {
         return;
       }
     }
@@ -118,30 +119,30 @@ class InstrumentProcessor {
     }
 
     const bool is_slice_looping = instrument_params.slice_mode == BarelySliceMode_kLoop;
-    const float slice_sample = (slice != nullptr)
-                                   ? GenerateSliceSample(slice->samples, slice->sample_count,
-                                                         voice.slice_offset, is_slice_looping)
-                                   : 0.0f;
-    const float slice_output = (1.0f - voice.params.osc_mix) * slice_sample;
+    const double slice_sample = (slice != nullptr)
+                                    ? GenerateSliceSample(slice->samples, slice->sample_count,
+                                                          voice.slice_offset, is_slice_looping)
+                                    : 0.0;
+    const double slice_output = (1.0 - voice.params.osc_mix) * slice_sample;
 
-    float osc_increment = instrument_params.osc_increment * voice.note_params.osc_increment;
+    double osc_increment = instrument_params.osc_increment * voice.note_params.osc_increment;
     if (instrument_params.osc_mode == BarelyOscMode_kMf) {
       osc_increment += slice_sample * osc_increment;
     }
-    osc_increment = std::min(osc_increment, 0.5f);
+    osc_increment = std::min(osc_increment, 0.5);
 
-    const float skewed_osc_phase = std::min(1.0f, (1.0f + voice.params.osc_skew) * voice.osc_phase);
-    const float osc_sample =
+    const double skewed_osc_phase = std::min(1.0, (1.0 + voice.params.osc_skew) * voice.osc_phase);
+    const double osc_sample =
         std::lerp(GenerateOscSample(voice.params.osc_shape, skewed_osc_phase, osc_increment),
                   GenerateNoiseSample(engine_.audio_rng), voice.params.osc_noise_mix);
-    const float osc_output = voice.params.osc_mix * osc_sample;
+    const double osc_output = voice.params.osc_mix * osc_sample;
 
     voice.osc_phase += osc_increment;
-    if (voice.osc_phase >= 1.0f) {
-      voice.osc_phase -= 1.0f;
+    if (voice.osc_phase >= 1.0) {
+      voice.osc_phase -= 1.0;
     }
 
-    float slice_increment = instrument_params.slice_increment * voice.note_params.slice_increment;
+    double slice_increment = instrument_params.slice_increment * voice.note_params.slice_increment;
     if (slice_increment > 0) {
       if (instrument_params.osc_mode == BarelyOscMode_kFm) {
         slice_increment += osc_output * slice_increment;
@@ -149,11 +150,12 @@ class InstrumentProcessor {
       voice.slice_offset += slice_increment;
       if (is_slice_looping && slice != nullptr &&
           static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
-        voice.slice_offset = std::fmod(voice.slice_offset, static_cast<float>(slice->sample_count));
+        voice.slice_offset =
+            std::fmod(voice.slice_offset, static_cast<double>(slice->sample_count));
       }
     }
 
-    float output = voice.envelope.Next();
+    double output = voice.envelope.Next();
 
     if (instrument_params.osc_mode == BarelyOscMode_kCrossfade ||
         instrument_params.osc_mode == BarelyOscMode_kMf) {
@@ -175,18 +177,18 @@ class InstrumentProcessor {
 
     output *= voice.params.gain;
 
-    const float left_gain = 0.5f * (1.0f - voice.params.stereo_pan);
-    const float right_gain = 1.0f - left_gain;
+    const double left_gain = 0.5 * (1.0 - voice.params.stereo_pan);
+    const double right_gain = 1.0 - left_gain;
 
-    float left_output = left_gain * output;    // NOLINT(misc-const-correctness)
-    float right_output = right_gain * output;  // NOLINT(misc-const-correctness)
+    double left_output = left_gain * output;    // NOLINT(misc-const-correctness)
+    double right_output = right_gain * output;  // NOLINT(misc-const-correctness)
 
     if constexpr (kIsSidechainSend) {
       sidechain_frame[0] += voice.params.sidechain_send * left_output;
       sidechain_frame[1] += voice.params.sidechain_send * right_output;
     } else {
-      if (voice.params.sidechain_send < 0.0f) {
-        const float sidechain_send = -voice.params.sidechain_send;
+      if (voice.params.sidechain_send < 0.0) {
+        const double sidechain_send = -voice.params.sidechain_send;
         left_output = std::lerp(left_output, sidechain_frame[0] * left_output, sidechain_send);
         right_output = std::lerp(right_output, sidechain_frame[1] * right_output, sidechain_send);
       }
@@ -195,12 +197,12 @@ class InstrumentProcessor {
     delay_frame[0] += voice.params.delay_send * left_output;
     delay_frame[1] += voice.params.delay_send * right_output;
 
-    const float wet_scale = std::min(voice.params.reverb_send, 1.0f);
+    const double wet_scale = std::min(voice.params.reverb_send, 1.0);
     reverb_frame[0] += wet_scale * left_output;
     reverb_frame[1] += wet_scale * right_output;
 
-    const float dry_scale =
-        (voice.params.reverb_send <= 1.0f) ? 1.0f : (2.0f - voice.params.reverb_send);
+    const double dry_scale =
+        (voice.params.reverb_send <= 1.0) ? 1.0 : (2.0 - voice.params.reverb_send);
     output_frame[0] += dry_scale * left_output;
     output_frame[1] += dry_scale * right_output;
 

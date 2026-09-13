@@ -35,8 +35,8 @@ class Processor : public Steinberg::Vst::AudioEffect {
  private:
   std::optional<Engine> engine_;
   Instrument instrument_;
-  std::array<float, BarelyInstrumentControlType_kCount> controls_;
-  std::vector<float> output_samples_;
+  std::array<double, BarelyInstrumentControlType_kCount> controls_;
+  std::vector<double> output_samples_;
 };
 
 }  // namespace barely::vst

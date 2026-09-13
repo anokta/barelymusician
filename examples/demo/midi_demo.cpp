@@ -36,11 +36,11 @@ constexpr int kFrameCount = 512;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr float kInstrumentOscShape = 0.5f;
-constexpr float kInstrumentEnvelopeAttack = 0.0f;
-constexpr float kInstrumentEnvelopeRelease = 0.4f;
-constexpr float kInstrumentGain = 0.85f;
-constexpr float kInstrumentReverbSend = 0.25f;
+constexpr double kInstrumentOscShape = 0.5;
+constexpr double kInstrumentEnvelopeAttack = 0.0;
+constexpr double kInstrumentEnvelopeRelease = 0.4;
+constexpr double kInstrumentGain = 0.85;
+constexpr double kInstrumentReverbSend = 0.25;
 constexpr int kInstrumentVoiceCount = 16;
 
 // Midi file name.
@@ -60,8 +60,8 @@ bool BuildScore(const smf::MidiEventList& midi_events, int track_index, int tick
     if (midi_event.isNoteOn()) {
       const double position = get_position_fn(midi_event.tick);
       const double duration = get_position_fn(midi_event.getTickDuration());
-      const float pitch = static_cast<float>(midi_event.getKeyNumber() - 60) / 12.0f;
-      const float gain = static_cast<float>(midi_event.getVelocity()) / 127.0f;
+      const double pitch = static_cast<double>(midi_event.getKeyNumber() - 60) / 12.0;
+      const double gain = static_cast<double>(midi_event.getVelocity()) / 127.0;
       performer.CreateTask(position, duration, 0, [&, pitch, gain](TaskEventType type) noexcept {
         if (type == TaskEventType::kBegin) {
           instrument.SetNoteOn(pitch, gain);
@@ -115,7 +115,7 @@ int main() {
     }
     // Set the instrument settings.
     instrument.SetControl(InstrumentControlType::kGain, kInstrumentGain);
-    instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+    instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
     instrument.SetControl(InstrumentControlType::kOscShape, kInstrumentOscShape);
     instrument.SetControl(InstrumentControlType::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetControl(InstrumentControlType::kRelease, kInstrumentEnvelopeRelease);
@@ -126,7 +126,7 @@ int main() {
 
   // Audio process callback.
   audio_output.SetProcessCallback(
-      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+      [&](double* output_samples, int output_channel_count, int output_frame_count) {
         engine.Process(output_samples, output_channel_count, output_frame_count,
                        audio_clock.GetTimestamp());
         audio_clock.Update(output_frame_count);

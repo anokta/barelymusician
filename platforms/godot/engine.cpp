@@ -38,7 +38,7 @@ using ::godot::Variant;
   ClassDB::bind_method(D_METHOD(BARELY_STR(set_##name), #name), &BarelyEngine::set_##name); \
   ClassDB::bind_method(D_METHOD(BARELY_STR(get_##name)), &BarelyEngine::get_##name);
 #define BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL(Name, name, type, default) \
-  BarelyEngine_SetControl(engine_, BarelyEngineControlType_k##Name, static_cast<float>(name##_));
+  BarelyEngine_SetControl(engine_, BarelyEngineControlType_k##Name, static_cast<double>(name##_));
 
 double BarelyAudioStreamPlayback::get_audio_timestamp() {
   return timestamp_.load(std::memory_order_relaxed);
@@ -130,8 +130,8 @@ void BarelyEngine::process(AudioFrame* buffer, int32_t frame_count, double times
   BarelyEngine_Process(engine_, temp_samples_.data(), kStereoChannelCount, process_frame_count,
                        timestamp);
   for (int32_t frame = 0; frame < process_frame_count; ++frame) {
-    buffer[frame].left = temp_samples_[frame * kStereoChannelCount];
-    buffer[frame].right = temp_samples_[frame * kStereoChannelCount + 1];
+    buffer[frame].left = static_cast<float>(temp_samples_[frame * kStereoChannelCount]);
+    buffer[frame].right = static_cast<float>(temp_samples_[frame * kStereoChannelCount + 1]);
   }
 }
 

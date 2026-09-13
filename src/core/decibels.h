@@ -5,16 +5,16 @@
 
 namespace barely {
 
-inline constexpr float kMinDecibels = -60.0f;
+inline constexpr double kMinDecibels = -60.0;
 
-constexpr float AmplitudeToDecibels(float amplitude) noexcept {
+constexpr double AmplitudeToDecibels(double amplitude) noexcept {
   // decibels = 20 * log(amplitude).
-  return (amplitude > 0.0) ? 20.0f * std::log10(amplitude) : kMinDecibels;
+  return (amplitude > 0.0) ? 20.0 * std::log10(amplitude) : kMinDecibels;
 }
 
-constexpr float DecibelsToAmplitude(float decibels) noexcept {
+constexpr double DecibelsToAmplitude(double decibels) noexcept {
   // amplitude = 10 ^ (decibels / 20).
-  return (decibels > kMinDecibels) ? std::pow(10.0f, 0.05f * decibels) : 0.0f;
+  return (decibels > kMinDecibels) ? std::pow(10.0, 0.05 * decibels) : 0.0;
 }
 
 }  // namespace barely

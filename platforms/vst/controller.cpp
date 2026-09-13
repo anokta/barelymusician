@@ -6,16 +6,31 @@
 
 namespace barely::vst {
 
+namespace {
+
 using ::Steinberg::tresult;
 using ::Steinberg::Vst::RangeParameter;
 
-namespace {
-
 #define BARELY_DEFINE_VST_PARAM(EnumType, Name, Default, Min, Max, Label) \
-  RangeParameter(STR16(#Label), Barely##EnumType##_k##Name, STR16(""), Min, Max, Default),
+  RangeParameter(STR16(Label), Barely##EnumType##_k##Name, STR16(""), Min, Max, Default),
 
 const std::array<RangeParameter, BarelyInstrumentControlType_kCount> kParams = {
     BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, BARELY_DEFINE_VST_PARAM)};
+
+[[nodiscard]] Steinberg::int32 GetPrecision(BarelyInstrumentControlType type) noexcept {
+  switch (type) {
+    case BarelyInstrumentControlType_kOscMode:
+      [[fallthrough]];
+    case BarelyInstrumentControlType_kSliceMode:
+      [[fallthrough]];
+    case BarelyInstrumentControlType_kRetrigger:
+      [[fallthrough]];
+    case BarelyInstrumentControlType_kVoiceCount:
+      return 0;
+    default:
+      return 2;
+  }
+}
 
 }  // namespace
 
@@ -25,10 +40,10 @@ Steinberg::FUnknown* Controller::Create(void* /*context*/) {
   return static_cast<Steinberg::Vst::IEditController*>(new Controller());
 }
 
-float Controller::ToPlainControlValue(InstrumentControlType type,
-                                      double normalized_value) noexcept {
+double Controller::ToPlainControlValue(InstrumentControlType type,
+                                       double normalized_value) noexcept {
   assert(static_cast<int>(type) < BarelyInstrumentControlType_kCount && "Invalid control type");
-  return static_cast<float>(kParams[static_cast<int>(type)].toPlain(normalized_value));
+  return static_cast<double>(kParams[static_cast<int>(type)].toPlain(normalized_value));
 }
 
 tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {
@@ -49,7 +64,7 @@ tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {
       continue;
     }
     auto* param = new Steinberg::Vst::RangeParameter(kParams[i]);
-    param->setPrecision((param->getInfo().stepCount == 0) ? 2 : 0);
+    param->setPrecision(GetPrecision(static_cast<BarelyInstrumentControlType>(i)));
     parameters.addParameter(param);
   }
 

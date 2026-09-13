@@ -459,6 +459,7 @@ MonoBehaviour:
   _loop: 1
   _loopBeginPosition: 0
   _loopLength: 1
+  _speed: 2
   Tasks:
   - _position: 0
     _duration: 0
@@ -647,9 +648,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 4
   OnNoteOffEvent:

@@ -23,7 +23,9 @@ bool WavFile::Load(const std::string& file_path) {
   channel_count_ = static_cast<int>(wav_channel_count);
   sample_rate_ = static_cast<int>(wav_sample_rate);
   data_.resize(wav_channel_count * wav_frame_count);
-  std::copy_n(wav_data, data_.size(), data_.begin());
+  for (int i = 0; i < static_cast<int>(data_.size()); ++i) {
+    data_[i] = static_cast<double>(wav_data[i]);
+  }
 
   // Free the original file.
   drwav_free(wav_data, nullptr);

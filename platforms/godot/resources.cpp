@@ -3,13 +3,13 @@
 #include <algorithm>
 
 #include "godot_cpp/core/class_db.hpp"
-#include "godot_cpp/variant/packed_float32_array.hpp"
+#include "godot_cpp/variant/packed_float64_array.hpp"
 
 namespace barely::godot {
 
 using ::godot::ClassDB;
 using ::godot::D_METHOD;
-using ::godot::PackedFloat32Array;
+using ::godot::PackedFloat64Array;
 using ::godot::PropertyHint;
 using ::godot::PropertyInfo;
 using ::godot::Variant;
@@ -19,8 +19,8 @@ void BarelyQuantizationResource::set_subdivision(int32_t subdivision) {
   emit_changed();
 }
 
-void BarelyQuantizationResource::set_amount(float amount) {
-  quantization_.amount = std::clamp(amount, 0.0f, 1.0f);
+void BarelyQuantizationResource::set_amount(double amount) {
+  quantization_.amount = std::clamp(amount, 0.0, 1.0);
   emit_changed();
 }
 
@@ -46,14 +46,14 @@ void BarelyQuantizationResource::_bind_methods() {
       "set_amount", "get_amount");
 }
 
-void BarelyScaleResource::set_pitches(const PackedFloat32Array& pitches) {
+void BarelyScaleResource::set_pitches(const PackedFloat64Array& pitches) {
   pitches_ = pitches;
   scale_.pitches = pitches_.ptr();
   scale_.pitch_count = static_cast<int32_t>(pitches_.size());
   emit_changed();
 }
 
-void BarelyScaleResource::set_root_pitch(float root_pitch) {
+void BarelyScaleResource::set_root_pitch(double root_pitch) {
   scale_.root_pitch = root_pitch;
   emit_changed();
 }
@@ -63,7 +63,7 @@ void BarelyScaleResource::set_mode(int32_t mode) {
   emit_changed();
 }
 
-float BarelyScaleResource::get_pitch(int32_t degree) const {
+double BarelyScaleResource::get_pitch(int32_t degree) const {
   return BarelyScale_GetPitch(&scale_, degree);
 }
 
@@ -81,7 +81,7 @@ void BarelyScaleResource::_bind_methods() {
   ClassDB::bind_method(D_METHOD("get_pitch_count"), &BarelyScaleResource::get_pitch_count);
   ClassDB::bind_method(D_METHOD("get_pitch", "degree"), &BarelyScaleResource::get_pitch);
 
-  ADD_PROPERTY(PropertyInfo(Variant::PACKED_FLOAT32_ARRAY, "pitches"), "set_pitches",
+  ADD_PROPERTY(PropertyInfo(Variant::PACKED_FLOAT64_ARRAY, "pitches"), "set_pitches",
                "get_pitches");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "root_pitch", PropertyHint::PROPERTY_HINT_RANGE, "-4,4,0.01"),

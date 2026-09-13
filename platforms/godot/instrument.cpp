@@ -34,9 +34,9 @@ using ::godot::Variant;
   ClassDB::bind_method(D_METHOD(BARELY_STR(get_##name)), &BarelyInstrument::get_##name);
 #define BARELY_SET_DEFAULT_GODOT_INSTRUMENT_CONTROL(Name, name, type, default)      \
   BarelyInstrument_SetControl(BarelyEngine::get_singleton()->get(), instrument_id_, \
-                              BarelyInstrumentControlType_k##Name, static_cast<float>(name##_));
+                              BarelyInstrumentControlType_k##Name, static_cast<double>(name##_));
 
-void BarelySliceResource::set_root_pitch(float root_pitch) {
+void BarelySliceResource::set_root_pitch(double root_pitch) {
   if (root_pitch_ != root_pitch) {
     root_pitch_ = root_pitch;
     emit_signal("slice_changed");
@@ -80,28 +80,28 @@ BarelyInstrument::~BarelyInstrument() {
 }
 
 void BarelyInstrument::set_all_notes_off() {
-  for (const float pitch : std::exchange(pitches_, {})) {
+  for (const double pitch : std::exchange(pitches_, {})) {
     BarelyInstrument_SetNoteOff(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
     emit_signal("note_off", pitch);
   }
 }
 
-void BarelyInstrument::set_note_off(float pitch) {
+void BarelyInstrument::set_note_off(double pitch) {
   if (pitches_.erase(pitch) > 0) {
     BarelyInstrument_SetNoteOff(BarelyEngine::get_singleton()->get(), instrument_id_, pitch);
     emit_signal("note_off", pitch);
   }
 }
 
-void BarelyInstrument::set_note_on(float pitch, float gain, float pitch_shift) {
+void BarelyInstrument::set_note_on(double pitch, double gain, double pitch_shift) {
   if (pitches_.insert(pitch).second) {
     ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
     BarelyInstrument_SetNoteOn(engine, instrument_id_, pitch);
-    if (gain != 1.0f) {
+    if (gain != 1.0) {
       BarelyInstrument_SetNoteControl(engine, instrument_id_, pitch, BarelyNoteControlType_kGain,
                                       gain);
     }
-    if (pitch_shift != 0.0f) {
+    if (pitch_shift != 0.0) {
       BarelyInstrument_SetNoteControl(engine, instrument_id_, pitch,
                                       BarelyNoteControlType_kPitchShift, pitch_shift);
     }
@@ -131,7 +131,7 @@ void BarelyInstrument::_bind_methods() {
   ClassDB::bind_method(D_METHOD("set_all_notes_off"), &BarelyInstrument::set_all_notes_off);
   ClassDB::bind_method(D_METHOD("set_note_off", "pitch"), &BarelyInstrument::set_note_off);
   ClassDB::bind_method(D_METHOD("set_note_on", "pitch", "gain", "pitch_shift"),
-                       &BarelyInstrument::set_note_on, DEFVAL(1.0f), DEFVAL(0.0f));
+                       &BarelyInstrument::set_note_on, DEFVAL(1.0), DEFVAL(0.0));
   ClassDB::bind_method(D_METHOD("is_note_on", "pitch"), &BarelyInstrument::is_note_on);
   ClassDB::bind_method(D_METHOD("set_slices", "slices"), &BarelyInstrument::set_slices);
   ClassDB::bind_method(D_METHOD("get_slices"), &BarelyInstrument::get_slices);
@@ -245,7 +245,7 @@ void BarelyInstrument::_on_slice_changed() {
     return;
   }
 
-  std::vector<BarelySlice> sample_data(slices_.size(), BarelySlice{nullptr, 0, 0, 0.0f});
+  std::vector<BarelySlice> sample_data(slices_.size(), BarelySlice{0.0, nullptr, 0, 0});
   slice_buffers_.resize(slices_.size());
 
   for (int i = 0; i < slices_.size(); ++i) {
@@ -272,13 +272,13 @@ void BarelyInstrument::_on_slice_changed() {
       const int count = byte_count / sizeof(int16_t);
       samples.resize(count);
       for (int i = 0; i < count; ++i) {
-        static constexpr float kMaxSample = 32768.0f;
+        static constexpr double kMaxSample = 32768.0;
         samples[i] = pcm_bytes[i] / kMaxSample;
       }
     } else if (format == AudioStreamWAV::FORMAT_8_BITS) {
       samples.resize(byte_count);
       for (int i = 0; i < byte_count; ++i) {
-        static constexpr float kMaxSample = 128.0f;
+        static constexpr double kMaxSample = 128.0;
         samples[i] = (bytes[i] - 128) / kMaxSample;
       }
     } else if (format == AudioStreamWAV::FORMAT_QOA) {
@@ -288,26 +288,26 @@ void BarelyInstrument::_on_slice_changed() {
       }
       playback->start(0.0);
 
-      const float length = stream->get_length();
-      samples.reserve(static_cast<int32_t>(length * static_cast<float>(sample_rate)));
+      const double length = stream->get_length();
+      samples.reserve(static_cast<int32_t>(length * static_cast<double>(sample_rate)));
 
       static constexpr int kQoaFrameCount = 512;
       while (playback->is_playing()) {
-        const auto frames = playback->mix_audio(1.0f, kQoaFrameCount);
+        const auto frames = playback->mix_audio(1.0, kQoaFrameCount);
         if (frames.size() == 0) {
           break;
         }
         for (int i = 0; i < static_cast<int>(frames.size()); ++i) {
           const auto& frame = frames.ptr()[i];
-          samples.push_back(0.5f * (frame.x + frame.y));
+          samples.push_back(0.5 * (frame.x + frame.y));
         }
       }
     } else {
       continue;  // TODO(#181): Support all formats.
     }
 
-    sample_data[i] = {samples.data(), static_cast<int32_t>(samples.size()), sample_rate,
-                      slice->get_root_pitch()};
+    sample_data[i] = {slice->get_root_pitch(), samples.data(), static_cast<int32_t>(samples.size()),
+                      sample_rate};
   }
 
   BarelyInstrument_SetSampleData(BarelyEngine::get_singleton()->get(), instrument_id_,

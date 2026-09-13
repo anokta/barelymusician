@@ -9,9 +9,9 @@
 namespace barely {
 
 // Applies soft-clip distortion effect to the input sample.
-[[nodiscard]] inline float Distortion(float input, float mix, float drive) noexcept {
-  assert(mix >= 0.0f);
-  assert(drive >= 0.0f);
+[[nodiscard]] inline double Distortion(double input, double mix, double drive) noexcept {
+  assert(mix >= 0.0);
+  assert(drive >= 0.0);
   return std::lerp(input, std::tanh(input * drive), mix);
 }
 

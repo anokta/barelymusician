@@ -23,29 +23,29 @@ namespace barely::godot {
 #define BARELY_STR(x) #x
 
 #define BARELY_GODOT_ENGINE_CONTROLS(X)                   \
-  X(Gain, gain, float, 1.0f)                              \
-  X(CompMix, comp_mix, float, 1.0f)                       \
-  X(CompAttack, comp_attack, float, 0.0f)                 \
-  X(CompRelease, comp_release, float, 0.0f)               \
-  X(CompThreshold, comp_threshold, float, 1.0f)           \
-  X(CompRatio, comp_ratio, float, 0.0f)                   \
-  X(DelayMix, delay_mix, float, 1.0f)                     \
-  X(DelayTime, delay_time, float, 0.0f)                   \
-  X(DelayFeedback, delay_feedback, float, 0.0f)           \
-  X(DelayLpfCutoff, delay_lpf_cutoff, float, 1.0f)        \
-  X(DelayHpfCutoff, delay_hpf_cutoff, float, 0.0f)        \
-  X(DelayPingPong, delay_ping_pong, float, 0.0f)          \
-  X(DelayReverbSend, delay_reverb_send, float, 0.0f)      \
-  X(ReverbMix, reverb_mix, float, 1.0f)                   \
-  X(ReverbDamping, reverb_damping, float, 0.0f)           \
-  X(ReverbRoomSize, reverb_room_size, float, 0.0f)        \
-  X(ReverbStereoWidth, reverb_stereo_width, float, 1.0f)  \
+  X(Gain, gain, double, 1.0)                              \
+  X(CompMix, comp_mix, double, 1.0)                       \
+  X(CompAttack, comp_attack, double, 0.0)                 \
+  X(CompRelease, comp_release, double, 0.0)               \
+  X(CompThreshold, comp_threshold, double, 1.0)           \
+  X(CompRatio, comp_ratio, double, 0.0)                   \
+  X(DelayMix, delay_mix, double, 1.0)                     \
+  X(DelayTime, delay_time, double, 0.0)                   \
+  X(DelayFeedback, delay_feedback, double, 0.0)           \
+  X(DelayLpfCutoff, delay_lpf_cutoff, double, 1.0)        \
+  X(DelayHpfCutoff, delay_hpf_cutoff, double, 0.0)        \
+  X(DelayPingPong, delay_ping_pong, double, 0.0)          \
+  X(DelayReverbSend, delay_reverb_send, double, 0.0)      \
+  X(ReverbMix, reverb_mix, double, 1.0)                   \
+  X(ReverbDamping, reverb_damping, double, 0.0)           \
+  X(ReverbRoomSize, reverb_room_size, double, 0.0)        \
+  X(ReverbStereoWidth, reverb_stereo_width, double, 1.0)  \
   X(ReverbFreeze, reverb_freeze, bool, 0)                 \
-  X(SidechainMix, sidechain_mix, float, 1.0f)             \
-  X(SidechainAttack, sidechain_attack, float, 0.0f)       \
-  X(SidechainRelease, sidechain_release, float, 0.0f)     \
-  X(SidechainThreshold, sidechain_threshold, float, 1.0f) \
-  X(SidechainRatio, sidechain_ratio, float, 0.0f)
+  X(SidechainMix, sidechain_mix, double, 1.0)             \
+  X(SidechainAttack, sidechain_attack, double, 0.0)       \
+  X(SidechainRelease, sidechain_release, double, 0.0)     \
+  X(SidechainThreshold, sidechain_threshold, double, 1.0) \
+  X(SidechainRatio, sidechain_ratio, double, 0.0)
 
 #define BARELY_DEFINE_GODOT_ENGINE_CONTROL(Name, name, type, default) \
  private:                                                             \
@@ -56,7 +56,7 @@ namespace barely::godot {
     if (name##_ == name) return;                                      \
     name##_ = name;                                                   \
     BarelyEngine_SetControl(engine_, BarelyEngineControlType_k##Name, \
-                            static_cast<float>(name##_));             \
+                            static_cast<double>(name##_));            \
   }                                                                   \
   type get_##name() const { return name##_; }
 
@@ -129,7 +129,7 @@ class BarelyEngine : public ::godot::Object {
   ::BarelyEngine* engine_ = nullptr;
   ::godot::AudioStreamPlayer* audio_player_ = nullptr;
   std::vector<std::byte> engine_allocation_;
-  std::vector<float> temp_samples_;
+  std::vector<double> temp_samples_;
   double lookahead_ = 0.02;
   double speed_ = 1.0;
   int32_t sample_rate_ = 0;

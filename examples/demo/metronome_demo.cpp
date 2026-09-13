@@ -28,14 +28,14 @@ constexpr int kFrameCount = 1024;
 constexpr double kLookahead = 0.1;
 
 // Metronome settings.
-constexpr float kOscShape = 0.75f;
-constexpr float kGain = 1.0f;
-constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.15f;
+constexpr double kOscShape = 0.75;
+constexpr double kGain = 1.0;
+constexpr double kAttack = 0.0;
+constexpr double kRelease = 0.15;
 constexpr int kVoiceCount = 1;
 
-constexpr float kBarPitch = 1.0f;
-constexpr float kBeatPitch = 0.0f;
+constexpr double kBarPitch = 1.0;
+constexpr double kBeatPitch = 0.0;
 
 constexpr int kBeatCount = 4;
 constexpr double kInitialTempo = 120.0;
@@ -58,7 +58,7 @@ int main() {
   // Create the metronome instrument.
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
-  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
@@ -76,14 +76,14 @@ int main() {
     const int current_beat = (beat % kBeatCount) + 1;
     ++beat;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const float pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
+    const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
     instrument.SetNoteOn(pitch);
     instrument.SetNoteOff(pitch);
   });
 
   // Audio process callback.
   audio_output.SetProcessCallback(
-      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+      [&](double* output_samples, int output_channel_count, int output_frame_count) {
         engine.Process(output_samples, output_channel_count, output_frame_count,
                        audio_clock.GetTimestamp());
         audio_clock.Update(output_frame_count);

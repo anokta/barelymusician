@@ -28,14 +28,14 @@ class EngineProcessor {
   explicit EngineProcessor(EngineState& engine) noexcept
       : engine_(engine), instrument_processor_(engine_) {}
 
-  void Process(float* output_samples, int output_channel_count, int output_frame_count,
+  void Process(double* output_samples, int output_channel_count, int output_frame_count,
                double timestamp) noexcept {
     assert(output_samples != nullptr);
     assert(output_channel_count > 0);
     assert(output_frame_count > 0);
     assert(output_frame_count <= static_cast<int>(engine_.max_frame_count));
 
-    std::fill_n(engine_.temp_samples, kStereoChannelCount * output_frame_count, 0.0f);
+    std::fill_n(engine_.temp_samples, kStereoChannelCount * output_frame_count, 0.0);
 
     const int64_t process_frame = SecondsToFrames(engine_.sample_rate, timestamp);
     const int64_t end_frame = process_frame + output_frame_count;
@@ -65,7 +65,7 @@ class EngineProcessor {
 
     // Fill the output samples.
     if (output_channel_count > 1) {
-      std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
+      std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0);
       for (int frame = 0; frame < output_frame_count; ++frame) {
         output_samples[output_channel_count * frame] =
             engine_.temp_samples[kStereoChannelCount * frame];
@@ -80,7 +80,7 @@ class EngineProcessor {
     }
   }
 
-  void SetControl(BarelyEngineControlType type, float value) noexcept {
+  void SetControl(BarelyEngineControlType type, double value) noexcept {
     switch (type) {
       case BarelyEngineControlType_kGain:
         engine_.target_params.gain = value;
@@ -104,19 +104,18 @@ class EngineProcessor {
         engine_.target_params.delay_params.mix = value;
         break;
       case BarelyEngineControlType_kDelayTime:
-        engine_.target_params.delay_params.frame_count =
-            std::max(value * engine_.sample_rate, 1.0f);
+        engine_.target_params.delay_params.frame_count = std::max(value * engine_.sample_rate, 1.0);
         break;
       case BarelyEngineControlType_kDelayFeedback:
         engine_.target_params.delay_params.feedback = value * kMaxDelayFeedback;
         break;
       case BarelyEngineControlType_kDelayLpfCutoff:
         engine_.target_params.delay_params.lpf_coeff =
-            GetFilterCoeff(engine_.sample_rate, GetFrequency(value, 0.5f * engine_.sample_rate));
+            GetFilterCoeff(engine_.sample_rate, GetFrequency(value, 0.5 * engine_.sample_rate));
         break;
       case BarelyEngineControlType_kDelayHpfCutoff:
         engine_.target_params.delay_params.hpf_coeff =
-            GetFilterCoeff(engine_.sample_rate, GetFrequency(value, 0.5f * engine_.sample_rate));
+            GetFilterCoeff(engine_.sample_rate, GetFrequency(value, 0.5 * engine_.sample_rate));
         break;
       case BarelyEngineControlType_kDelayPingPong:
         engine_.target_params.delay_params.ping_pong = value;
@@ -199,12 +198,12 @@ class EngineProcessor {
         cmd);
   }
 
-  void ProcessSamples(float* output_samples, int output_frame_count) noexcept {
+  void ProcessSamples(double* output_samples, int output_frame_count) noexcept {
     for (int frame = 0; frame < output_frame_count; ++frame) {
-      float delay_frame[kStereoChannelCount] = {};
-      float reverb_frame[kStereoChannelCount] = {};
-      float sidechain_frame[kStereoChannelCount] = {};
-      float* output_frame = &output_samples[kStereoChannelCount * frame];
+      double delay_frame[kStereoChannelCount] = {};
+      double reverb_frame[kStereoChannelCount] = {};
+      double sidechain_frame[kStereoChannelCount] = {};
+      double* output_frame = &output_samples[kStereoChannelCount * frame];
 
       instrument_processor_.ProcessAllVoices<true>(delay_frame, reverb_frame, sidechain_frame,
                                                    output_frame);

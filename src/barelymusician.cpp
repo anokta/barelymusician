@@ -50,13 +50,13 @@ int32_t BarelyEngineConfig_GetRequiredAllocationSize(const BarelyEngineConfig* c
 
 double BarelyQuantization_GetPosition(const BarelyQuantization* quantization, double position) {
   return (quantization != nullptr)
-             ? barely::Quantize(position, std::max(quantization->subdivision, 1),
-                                std::clamp(quantization->amount, 0.0f, 1.0f))
+             ? barely::Quantize(position, std::max<int32_t>(quantization->subdivision, 1),
+                                std::clamp(quantization->amount, 0.0, 1.0))
              : position;
 }
 
-float BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree) {
-  return (scale != nullptr) ? barely::GetPitch(*scale, degree) : 0.0f;
+double BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree) {
+  return (scale != nullptr) ? barely::GetPitch(*scale, degree) : 0.0;
 }
 
 BarelyEngine* BarelyEngine_Create(const BarelyEngineConfig* config, void* allocation,
@@ -111,17 +111,18 @@ double BarelyEngine_GetTimestamp(const BarelyEngine* engine) {
   return (engine != nullptr) ? engine->state.timestamp : 0.0;
 }
 
-void BarelyEngine_Process(BarelyEngine* engine, float* output_samples, int32_t output_channel_count,
-                          int32_t output_frame_count, double timestamp) {
+void BarelyEngine_Process(BarelyEngine* engine, double* output_samples,
+                          int32_t output_channel_count, int32_t output_frame_count,
+                          double timestamp) {
   if (!engine || !output_samples || output_channel_count <= 0 || output_frame_count <= 0) return;
 
   engine->processor.Process(output_samples, output_channel_count, output_frame_count, timestamp);
   for (int32_t i = 0; i < output_channel_count * output_frame_count; ++i) {
-    output_samples[i] = std::tanh(output_samples[i] * 0.5f);  // soft-clip with -6dB headroom
+    output_samples[i] = std::tanh(output_samples[i] * 0.5);  // soft-clip with -6dB headroom
   }
 }
 
-void BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type, float value) {
+void BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type, double value) {
   if (engine != nullptr && type < BarelyEngineControlType_kCount) {
     engine->controller.SetControl(type, value);
   }
@@ -156,7 +157,7 @@ void BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrument_id) {
 }
 
 void BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instrument_id,
-                                 BarelyInstrumentControlType type, float value) {
+                                 BarelyInstrumentControlType type, double value) {
   if (engine != nullptr && engine->IsValidInstrument(instrument_id) &&
       type < BarelyInstrumentControlType_kCount) {
     engine->controller.instrument_controller().SetControl(engine->state.GetIdIndex(instrument_id),
@@ -164,8 +165,8 @@ void BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instrument_id,
   }
 }
 
-void BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_id, float pitch,
-                                     BarelyNoteControlType type, float value) {
+void BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_id, double pitch,
+                                     BarelyNoteControlType type, double value) {
   if (engine != nullptr && engine->IsValidInstrument(instrument_id) &&
       type < BarelyNoteControlType_kCount) {
     engine->controller.instrument_controller().SetNoteControl(
@@ -173,14 +174,14 @@ void BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_i
   }
 }
 
-void BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id, float pitch) {
+void BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id, double pitch) {
   if (engine != nullptr && engine->IsValidInstrument(instrument_id)) {
     engine->controller.instrument_controller().SetNoteOff(engine->state.GetIdIndex(instrument_id),
                                                           pitch);
   }
 }
 
-void BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id, float pitch) {
+void BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id, double pitch) {
   if (engine != nullptr && engine->IsValidInstrument(instrument_id)) {
     engine->controller.instrument_controller().SetNoteOn(engine->state.GetIdIndex(instrument_id),
                                                          pitch);

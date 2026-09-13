@@ -12,7 +12,7 @@ namespace Barely.Examples {
 
     // Note gain.
     [Range(0.0f, 1.0f)]
-    public float noteGain = 1.0f;
+    public double noteGain = 1.0;
 
     // Ordered keys of one octave.
     private KeyCode[] _octaveKeys =
@@ -31,9 +31,9 @@ namespace Barely.Examples {
       }
       // Adjust note gain.
       if (Input.GetKeyDown(KeyCode.C)) {
-        noteGain = Mathf.Max(noteGain - 0.2f, 0.0f);
+        noteGain = System.Math.Max(noteGain - 0.2, 0.0);
       } else if (Input.GetKeyDown(KeyCode.V)) {
-        noteGain = Mathf.Min(noteGain + 0.2f, 1.0f);
+        noteGain = System.Math.Min(noteGain + 0.2, 1.0);
       }
       // Play notes.
       for (int i = 0; i < _octaveKeys.Length; ++i) {
@@ -54,8 +54,8 @@ namespace Barely.Examples {
     }
 
     // Returns the corresponding pitch for the given key index.
-    private float KeyIndexToPitch(int keyIndex) {
-      return (float)octaveOffset + (float)keyIndex / 12.0f;
+    private double KeyIndexToPitch(int keyIndex) {
+      return (double)octaveOffset + (double)keyIndex / 12.0;
     }
   }
 }  // namespace Barely.Examples

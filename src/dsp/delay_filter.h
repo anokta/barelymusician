@@ -16,18 +16,18 @@
 namespace barely {
 
 struct DelayParams {
-  float mix = 1.0f;
+  double mix = 1.0;
 
-  float frame_count = 1.0f;
-  float feedback = 0.0f;
+  double frame_count = 1.0;
+  double feedback = 0.0;
 
-  float lpf_coeff = 0.0f;
-  float hpf_coeff = 1.0f;
+  double lpf_coeff = 0.0;
+  double hpf_coeff = 1.0;
 
-  float ping_pong = 0.0f;
-  float reverb_send = 0.0f;
+  double ping_pong = 0.0;
+  double reverb_send = 0.0;
 
-  void Approach(const DelayParams& params, float coeff) noexcept {
+  void Approach(const DelayParams& params, double coeff) noexcept {
     ApproachValue(mix, params.mix, coeff);
     ApproachValue(frame_count, params.frame_count, coeff);
     ApproachValue(feedback, params.feedback, coeff);
@@ -43,14 +43,14 @@ class DelayFilter {
  public:
   DelayFilter(Arena& arena, uint32_t max_frame_count) noexcept
       : delay_samples_(
-            arena.AllocArray<float>(max_frame_count * static_cast<uint32_t>(kStereoChannelCount))),
+            arena.AllocArray<double>(max_frame_count * static_cast<uint32_t>(kStereoChannelCount))),
         bit_mask_(max_frame_count - 1) {
     assert(max_frame_count > 0);
     assert(std::has_single_bit(max_frame_count));
   }
 
-  void Process(float input_frame[kStereoChannelCount], float reverb_frame[kStereoChannelCount],
-               float output_frame[kStereoChannelCount], const DelayParams& params) noexcept {
+  void Process(double input_frame[kStereoChannelCount], double reverb_frame[kStereoChannelCount],
+               double output_frame[kStereoChannelCount], const DelayParams& params) noexcept {
     assert(params.frame_count > 0);
     assert(static_cast<uint32_t>(params.frame_count) <= bit_mask_ + 1);
 
@@ -59,19 +59,19 @@ class DelayFilter {
         (write_frame_ + bit_mask_ + 1 - delay_frame_count) & bit_mask_;
     const uint32_t read_frame_end = (read_frame_begin + bit_mask_) & bit_mask_;
 
-    float delay_frame[kStereoChannelCount];
+    double delay_frame[kStereoChannelCount];
     for (uint32_t channel = 0; channel < kStereoChannelCount; ++channel) {
       delay_frame[channel] = lpf_[channel].Next<FilterType::kLowPass>(
           hpf_[channel].Next<FilterType::kHighPass>(
               std::lerp(delay_samples_[kStereoChannelCount * read_frame_begin + channel],
                         delay_samples_[kStereoChannelCount * read_frame_end + channel],
-                        params.frame_count - static_cast<float>(delay_frame_count)),
+                        params.frame_count - static_cast<double>(delay_frame_count)),
               params.hpf_coeff),
           params.lpf_coeff);
     }
 
-    const float mono_input = 0.5f * (input_frame[0] + input_frame[1]);
-    const float ping_pong_frame[kStereoChannelCount] = {
+    const double mono_input = 0.5 * (input_frame[0] + input_frame[1]);
+    const double ping_pong_frame[kStereoChannelCount] = {
         mono_input + delay_frame[1] * params.feedback,
         delay_frame[0] * params.feedback,
     };
@@ -81,10 +81,10 @@ class DelayFilter {
           std::lerp(input_frame[channel] + delay_frame[channel] * params.feedback,
                     ping_pong_frame[channel], params.ping_pong);
 
-      const float output_sample = delay_frame[channel] * params.mix;
-      reverb_frame[channel] += std::min(params.reverb_send, 1.0f) * output_sample;
+      const double output_sample = delay_frame[channel] * params.mix;
+      reverb_frame[channel] += std::min(params.reverb_send, 1.0) * output_sample;
       output_frame[channel] +=
-          ((params.reverb_send <= 1.0f) ? 1.0f : (2.0f - params.reverb_send)) * output_sample;
+          ((params.reverb_send <= 1.0) ? 1.0 : (2.0 - params.reverb_send)) * output_sample;
     }
 
     write_frame_ = (write_frame_ + 1) & bit_mask_;
@@ -94,7 +94,7 @@ class DelayFilter {
   std::array<OnePoleFilter, kStereoChannelCount> lpf_ = {};
   std::array<OnePoleFilter, kStereoChannelCount> hpf_ = {};
 
-  float* delay_samples_ = nullptr;  // interleaved
+  double* delay_samples_ = nullptr;  // interleaved
   uint32_t bit_mask_ = 0;
   uint32_t write_frame_ = 0;
 };

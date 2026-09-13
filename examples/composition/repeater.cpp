@@ -46,12 +46,12 @@ void Repeater::Pop() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Push(std::optional<float> pitch_or, int length) noexcept {
+void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Repeater::Start(float pitch_offset) noexcept {
+void Repeater::Start(double pitch_offset) noexcept {
   if (IsPlaying()) {
     return;
   }
@@ -94,7 +94,7 @@ void Repeater::OnBeat() noexcept {
   if (!pitches_[index_].first.has_value()) {
     return;
   }
-  const float pitch = *pitches_[index_].first + pitch_offset_;
+  const double pitch = *pitches_[index_].first + pitch_offset_;
   instrument_.SetNoteOn(pitch);
   if (note_callback_) {
     note_callback_(pitch);

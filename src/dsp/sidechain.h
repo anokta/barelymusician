@@ -14,40 +14,40 @@ namespace barely {
 // Sidechain compressor.
 class Sidechain {
  public:
-  void Process(float sidechain_frame[kStereoChannelCount],
+  void Process(double sidechain_frame[kStereoChannelCount],
                const CompressorParams& params) noexcept {
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-      float sidechain_db = AmplitudeToDecibels(std::abs(sidechain_frame[channel]));
+      double sidechain_db = AmplitudeToDecibels(std::abs(sidechain_frame[channel]));
       if (sidechain_db > params.threshold_db) {
-        const float overshoot_db = sidechain_db - params.threshold_db;
+        const double overshoot_db = sidechain_db - params.threshold_db;
         sidechain_db = overshoot_db / params.ratio - overshoot_db;
       } else {
-        sidechain_db = 0.0f;  // no gain reduction
+        sidechain_db = 0.0;  // no gain reduction
       }
 
-      const float coeff =
+      const double coeff =
           (sidechain_db < sidechain_db_frame_[channel]) ? attack_coeff_ : release_coeff_;
       sidechain_db_frame_[channel] =
           sidechain_db + coeff * (sidechain_db_frame_[channel] - sidechain_db);
 
       sidechain_frame[channel] =
-          std::lerp(1.0f, DecibelsToAmplitude(sidechain_db_frame_[channel]), params.mix);
+          std::lerp(1.0, DecibelsToAmplitude(sidechain_db_frame_[channel]), params.mix);
     }
   }
 
-  void SetAttack(float attack, float sample_rate) noexcept {
+  void SetAttack(double attack, double sample_rate) noexcept {
     attack_coeff_ = GetCoefficient(sample_rate, attack);
   }
 
-  void SetRelease(float release, float sample_rate) noexcept {
+  void SetRelease(double release, double sample_rate) noexcept {
     release_coeff_ = GetCoefficient(sample_rate, release);
   }
 
  private:
-  std::array<float, kStereoChannelCount> sidechain_db_frame_ = {};
+  std::array<double, kStereoChannelCount> sidechain_db_frame_ = {};
 
-  float attack_coeff_ = 0.0f;
-  float release_coeff_ = 0.0f;
+  double attack_coeff_ = 0.0;
+  double release_coeff_ = 0.0;
 };
 
 }  // namespace barely

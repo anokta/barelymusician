@@ -41,25 +41,25 @@ class InstrumentController {
   }
 
   void SetControl(uint32_t instrument_index, BarelyInstrumentControlType type,
-                  float value) noexcept {
+                  double value) noexcept {
     assert(type <= BarelyInstrumentControlType_kCount);
     engine_.ScheduleCmd(
-        InstrumentControlCmd{instrument_index, type, kInstrumentControls[type].Clamp(value)});
+        InstrumentControlCmd{kInstrumentControls[type].Clamp(value), instrument_index, type});
   }
 
-  void SetNoteControl(uint32_t instrument_index, float pitch, BarelyNoteControlType type,
-                      float value) noexcept {
+  void SetNoteControl(uint32_t instrument_index, double pitch, BarelyNoteControlType type,
+                      double value) noexcept {
     assert(type <= BarelyNoteControlType_kCount);
     engine_.ScheduleCmd(
-        NoteControlCmd{instrument_index, pitch, type, kNoteControls[type].Clamp(value)});
+        NoteControlCmd{pitch, kNoteControls[type].Clamp(value), instrument_index, type});
   }
 
-  void SetNoteOff(uint32_t instrument_index, float pitch) noexcept {
-    engine_.ScheduleCmd(NoteOffCmd{instrument_index, pitch});
+  void SetNoteOff(uint32_t instrument_index, double pitch) noexcept {
+    engine_.ScheduleCmd(NoteOffCmd{pitch, instrument_index});
   }
 
-  void SetNoteOn(uint32_t instrument_index, float pitch) noexcept {
-    engine_.ScheduleCmd(NoteOnCmd{instrument_index, pitch});
+  void SetNoteOn(uint32_t instrument_index, double pitch) noexcept {
+    engine_.ScheduleCmd(NoteOnCmd{pitch, instrument_index});
   }
 
   void SetSampleData(uint32_t instrument_index, const BarelySlice* slices,

@@ -68,15 +68,15 @@ constexpr int kSemitoneCount = 12;
 constexpr int kHeptatonicScaleCount = 7;
 
 /// Common musical scale ratios.
-constexpr std::array<float, kSemitoneCount> kSemitones = {
-    0.0f / static_cast<float>(kSemitoneCount),  1.0f / static_cast<float>(kSemitoneCount),
-    2.0f / static_cast<float>(kSemitoneCount),  3.0f / static_cast<float>(kSemitoneCount),
-    4.0f / static_cast<float>(kSemitoneCount),  5.0f / static_cast<float>(kSemitoneCount),
-    6.0f / static_cast<float>(kSemitoneCount),  7.0f / static_cast<float>(kSemitoneCount),
-    8.0f / static_cast<float>(kSemitoneCount),  9.0f / static_cast<float>(kSemitoneCount),
-    10.0f / static_cast<float>(kSemitoneCount), 11.0f / static_cast<float>(kSemitoneCount),
+constexpr std::array<double, kSemitoneCount> kSemitones = {
+    0.0 / static_cast<double>(kSemitoneCount),  1.0 / static_cast<double>(kSemitoneCount),
+    2.0 / static_cast<double>(kSemitoneCount),  3.0 / static_cast<double>(kSemitoneCount),
+    4.0 / static_cast<double>(kSemitoneCount),  5.0 / static_cast<double>(kSemitoneCount),
+    6.0 / static_cast<double>(kSemitoneCount),  7.0 / static_cast<double>(kSemitoneCount),
+    8.0 / static_cast<double>(kSemitoneCount),  9.0 / static_cast<double>(kSemitoneCount),
+    10.0 / static_cast<double>(kSemitoneCount), 11.0 / static_cast<double>(kSemitoneCount),
 };
-constexpr std::array<float, kHeptatonicScaleCount> kDiatonicPitches = {
+constexpr std::array<double, kHeptatonicScaleCount> kDiatonicPitches = {
     kSemitones[0], kSemitones[2], kSemitones[4],  kSemitones[5],
     kSemitones[7], kSemitones[9], kSemitones[11],
 };
@@ -85,12 +85,12 @@ constexpr std::array<float, kHeptatonicScaleCount> kDiatonicPitches = {
 constexpr double kSixteenthNotesPerBeat = 4.0;
 
 // Ensemble settings.
-constexpr float kRootPitch = kSemitones[2];
+constexpr double kRootPitch = kSemitones[2];
 
-constexpr float kPitchKick = 0.0f;
-constexpr float kPitchSnare = 1.0f;
-constexpr float kPitchHihatClosed = 2.0f;
-constexpr float kPitchHihatOpen = 3.0f;
+constexpr double kPitchKick = 0.0;
+constexpr double kPitchSnare = 1.0;
+constexpr double kPitchHihatClosed = 2.0;
+constexpr double kPitchHihatOpen = 3.0;
 
 constexpr char kDrumsDir[] = "data/audio/drums/";
 
@@ -98,20 +98,20 @@ constexpr int kQuantizationSubdivision = 960;
 constexpr Quantization quantization = Quantization(kQuantizationSubdivision);
 
 // Inserts pad data to a given `data` from a given `file_path`.
-void InsertPadData(float pitch, const std::string& file_path, std::vector<float>& samples,
+void InsertPadData(double pitch, const std::string& file_path, std::vector<double>& samples,
                    std::vector<Slice>& slices) {
   WavFile sample_file;
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
 
   samples = sample_file.GetData();
-  slices.emplace_back(samples, sample_file.GetSampleRate(), pitch);
+  slices.emplace_back(pitch, samples, sample_file.GetSampleRate());
 }
 
 // Builds percussion sample data from a given `percussion_map`.
-std::pair<std::vector<Slice>, std::vector<std::vector<float>>> BuildPercussionSampleData(
-    const std::vector<std::pair<float, std::string>>& percussion_map) {
-  std::pair<std::vector<Slice>, std::vector<std::vector<float>>> res;
+std::pair<std::vector<Slice>, std::vector<std::vector<double>>> BuildPercussionSampleData(
+    const std::vector<std::pair<double, std::string>>& percussion_map) {
+  std::pair<std::vector<Slice>, std::vector<std::vector<double>>> res;
   res.first.reserve(percussion_map.size());
   res.second.reserve(percussion_map.size());
   for (const auto& [pitch, file_path] : percussion_map) {
@@ -122,7 +122,7 @@ std::pair<std::vector<Slice>, std::vector<std::vector<float>>> BuildPercussionSa
 }
 
 // Schedules performer to play an instrument note.
-void ScheduleNote(double position, double duration, float pitch, float gain, int index,
+void ScheduleNote(double position, double duration, double pitch, double gain, int index,
                   Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
   tasks.emplace_back(performer.CreateTask(
       quantization.GetPosition(performer.GetPosition() + position),
@@ -138,7 +138,7 @@ void ScheduleNote(double position, double duration, float pitch, float gain, int
       }));
 }
 
-void ComposeChord(float gain, int harmonic, const Scale& scale, int index, Instrument& instrument,
+void ComposeChord(double gain, int harmonic, const Scale& scale, int index, Instrument& instrument,
                   Performer& performer, std::vector<Task>& tasks) {
   const auto add_chord_note = [&](int degree) {
     ScheduleNote(0.0, 1.0, scale.GetPitch(degree), gain, index, instrument, performer, tasks);
@@ -148,7 +148,7 @@ void ComposeChord(float gain, int harmonic, const Scale& scale, int index, Instr
   add_chord_note(harmonic + 4);
 }
 
-void ComposeLine(int octave_offset, float gain, int bar, int beat, int beat_count, int harmonic,
+void ComposeLine(int octave_offset, double gain, int bar, int beat, int beat_count, int harmonic,
                  const Scale& scale, int index, Instrument& instrument, Performer& performer,
                  std::vector<Task>& tasks) {
   const int note_offset = beat;
@@ -178,32 +178,32 @@ void ComposeLine(int octave_offset, float gain, int bar, int beat, int beat_coun
 void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, int index,
                   Instrument& instrument, Performer& performer, std::vector<Task>& tasks) {
   const auto get_beat = [](int step) { return static_cast<double>(step) / kSixteenthNotesPerBeat; };
-  const auto add_note = [&](double begin_position, double end_position, float pitch, float gain) {
+  const auto add_note = [&](double begin_position, double end_position, double pitch, double gain) {
     ScheduleNote(begin_position, end_position - begin_position, pitch, gain, index, instrument,
                  performer, tasks);
   };
 
   // Kick.
   if (beat % 2 == 0) {
-    add_note(get_beat(0), get_beat(2), kPitchKick, 1.0f);
+    add_note(get_beat(0), get_beat(2), kPitchKick, 1.0);
     if (bar % 2 == 1 && beat == 0) {
-      add_note(get_beat(2), get_beat(4), kPitchKick, 1.0f);
+      add_note(get_beat(2), get_beat(4), kPitchKick, 1.0);
     }
   }
   // Snare.
   if (beat % 2 == 1) {
-    add_note(get_beat(0), get_beat(2), kPitchSnare, 1.0f);
+    add_note(get_beat(0), get_beat(2), kPitchSnare, 1.0);
   }
   if (beat + 1 == beat_count) {
-    add_note(get_beat(2), get_beat(4), kPitchSnare, 1.0f);
+    add_note(get_beat(2), get_beat(4), kPitchSnare, 1.0);
     if (bar % 4 == 3) {
-      add_note(get_beat(1), get_beat(2), kPitchSnare, 1.0f);
-      add_note(get_beat(3), get_beat(4), kPitchSnare, 0.9f);
+      add_note(get_beat(1), get_beat(2), kPitchSnare, 1.0);
+      add_note(get_beat(3), get_beat(4), kPitchSnare, 0.9);
     }
   }
   // Hihat Closed.
-  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, engine.GenerateRandomNumber(0.75f, 0.95f));
-  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, engine.GenerateRandomNumber(0.5f, 0.95f));
+  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, engine.GenerateRandomNumber(0.75, 0.95));
+  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, engine.GenerateRandomNumber(0.5, 0.95));
   // Hihat Open.
   if (beat + 1 == beat_count) {
     if (bar % 4 == 3) {
@@ -237,13 +237,13 @@ int main() {
   std::vector<std::tuple<Performer, std::vector<Task>, BeatComposerCallback, size_t>> performers;
   std::vector<Instrument> instruments;
 
-  const auto build_instrument_fn = [&](float shape, float gain, float attack, float release) {
+  const auto build_instrument_fn = [&](double shape, double gain, double attack, double release) {
     instruments.emplace_back(engine.CreateInstrument());
     auto& instrument = instruments.back();
     instrument.SetControl(InstrumentControlType::kGain, gain);
-    instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
-    if (shape < 0.0f) {
-      instrument.SetControl(InstrumentControlType::kOscNoiseMix, 1.0f);
+    instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
+    if (shape < 0.0) {
+      instrument.SetControl(InstrumentControlType::kOscNoiseMix, 1.0);
     } else {
       instrument.SetControl(InstrumentControlType::kOscShape, shape);
     }
@@ -251,7 +251,7 @@ int main() {
     instrument.SetControl(InstrumentControlType::kRelease, release);
   };
 
-  Scale scale = {kDiatonicPitches, kRootPitch};
+  Scale scale = {kRootPitch, kDiatonicPitches};
 
   // Add synth instruments.
   const auto chords_beat_composer_callback = [&](int /*bar*/, int /*beat*/, int /*beat_count*/,
@@ -260,33 +260,33 @@ int main() {
     ComposeChord(1.0, harmonic, scale, index, instrument, performer, tasks);
   };
 
-  build_instrument_fn(0.0f, 0.65f, 0.5f, 0.2f);
+  build_instrument_fn(0.0, 0.65, 0.5, 0.2);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
-  build_instrument_fn(-1.0f, 0.25f, 1.0f, 0.05f);
+  build_instrument_fn(-1.0, 0.25, 1.0, 0.05);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           chords_beat_composer_callback, instruments.size() - 1);
 
   const auto line_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                int index, Instrument& instrument,
                                                Performer& performer, std::vector<Task>& tasks) {
-    ComposeLine(-1, 1.0f, bar, beat, beat_count, harmonic, scale, index, instrument, performer,
+    ComposeLine(-1, 1.0, bar, beat, beat_count, harmonic, scale, index, instrument, performer,
                 tasks);
   };
 
-  build_instrument_fn(1.0f, 0.9f, 0.01f, 0.4f);
+  build_instrument_fn(1.0, 0.9, 0.01, 0.4);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           line_beat_composer_callback, instruments.size() - 1);
 
   const auto line_2_beat_composer_callback = [&](int bar, int beat, int beat_count, int harmonic,
                                                  int index, Instrument& instrument,
                                                  Performer& performer, std::vector<Task>& tasks) {
-    ComposeLine(0, 1.0f, bar, beat, beat_count, harmonic, scale, index, instrument, performer,
+    ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, scale, index, instrument, performer,
                 tasks);
   };
 
-  build_instrument_fn(0.5f, 0.9f, 0.1f, 0.4f);
+  build_instrument_fn(0.5, 0.9, 0.1, 0.4);
   performers.emplace_back(engine.CreatePerformer(), std::vector<Task>{},
                           line_2_beat_composer_callback, instruments.size() - 1);
 
@@ -306,8 +306,8 @@ int main() {
 
   instruments.emplace_back(engine.CreateInstrument());
   auto& percussion = instruments.back();
-  percussion.SetControl(InstrumentControlType::kGain, 1.0f);
-  percussion.SetControl(InstrumentControlType::kAttack, 0.0f);
+  percussion.SetControl(InstrumentControlType::kGain, 1.0);
+  percussion.SetControl(InstrumentControlType::kAttack, 0.0);
   percussion.SetControl(InstrumentControlType::kRetrigger, true);
   percussion.SetControl(InstrumentControlType::kSliceMode, SliceMode::kOnce);
   percussion.SetSampleData(default_percussion_sample_data.first);
@@ -358,7 +358,7 @@ int main() {
 
   // Audio process callback.
   audio_output.SetProcessCallback(
-      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+      [&](double* output_samples, int output_channel_count, int output_frame_count) {
         engine.Process(output_samples, output_channel_count, output_frame_count,
                        audio_clock.GetTimestamp());
         audio_clock.Update(output_frame_count);

@@ -16,8 +16,8 @@ class EngineController {
   explicit EngineController(EngineState& engine) noexcept
       : engine_(engine), instrument_controller_(engine_), performer_controller_(engine_) {}
 
-  void SetControl(BarelyEngineControlType type, float value) noexcept {
-    engine_.ScheduleCmd(EngineControlCmd{type, kEngineControls[type].Clamp(value)});
+  void SetControl(BarelyEngineControlType type, double value) noexcept {
+    engine_.ScheduleCmd(EngineControlCmd{kEngineControls[type].Clamp(value), type});
   }
 
   void Update(double timestamp) noexcept {

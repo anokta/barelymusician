@@ -16,11 +16,11 @@ namespace Barely.Examples {
       instrument.OnNoteOn -= OnNoteOn;
     }
 
-    private void OnNoteOff(float pitch) {
+    private void OnNoteOff(double pitch) {
       Debug.Log(instrument.name + ": NoteOff(" + pitch.ToString("F1") + ")");
     }
 
-    private void OnNoteOn(float pitch) {
+    private void OnNoteOn(double pitch) {
       Debug.Log(instrument.name + ": NoteOn(" + pitch.ToString("F1") + ")");
     }
   }

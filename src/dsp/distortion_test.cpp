@@ -9,19 +9,19 @@ namespace {
 
 // Test input.
 constexpr int kInputLength = 5;
-constexpr float kInput[kInputLength] = {0.2f, -0.4f, 0.6f, -0.8f, 1.0f};
+constexpr double kInput[kInputLength] = {0.2, -0.4, 0.6, -0.8, 1.0};
 
-constexpr float kDrive = 1.0f;
+constexpr double kDrive = 1.0;
 
 TEST(DistortionTest, FullMix) {
-  for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(Distortion(input, 1.0f, kDrive), std::tanh(input));
+  for (const double input : kInput) {
+    EXPECT_DOUBLE_EQ(Distortion(input, 1.0, kDrive), std::tanh(input));
   }
 }
 
 TEST(DistortionTest, Bypass) {
-  for (const float input : kInput) {
-    EXPECT_FLOAT_EQ(Distortion(input, 0.0f, kDrive), input);
+  for (const double input : kInput) {
+    EXPECT_DOUBLE_EQ(Distortion(input, 0.0, kDrive), input);
   }
 }
 

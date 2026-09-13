@@ -33,7 +33,7 @@ class Rng {
   EngineType engine_;
 };
 
-using AudioRng = Rng<std::minstd_rand, float>;
+using AudioRng = Rng<std::minstd_rand, double>;
 using MainRng = Rng<std::mt19937_64, double>;
 
 }  // namespace barely

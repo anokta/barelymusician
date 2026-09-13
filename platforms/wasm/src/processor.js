@@ -30,7 +30,7 @@ class Processor extends AudioWorkletProcessor {
 
       // No need to call `_free` as this will be freed as part of the module teardown.
       this._outputSamplesPtr = this._module._malloc(
-          STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float32Array.BYTES_PER_ELEMENT);
+          STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float64Array.BYTES_PER_ELEMENT);
 
       const configPtr = this._module._malloc(ENGINE_CONFIG_SIZE);
       const configView = new Int32Array(this._module.HEAP32.buffer, configPtr, 8);
@@ -118,7 +118,7 @@ class Processor extends AudioWorkletProcessor {
     if (outputFrameCount > RENDER_QUANTUM_SIZE) return true;
 
     const outputSamples =
-        new Float32Array(this._module.HEAPF32.buffer, this._outputSamplesPtr, outputSampleCount);
+        new Float64Array(this._module.HEAPF64.buffer, this._outputSamplesPtr, outputSampleCount);
 
     this._module._BarelyEngine_Process(
         this._engine, this._outputSamplesPtr, outputChannelCount, outputFrameCount, currentTime);
@@ -345,7 +345,7 @@ class Processor extends AudioWorkletProcessor {
   /**
    * Sets instrument sample data.
    * @param {number} instrumentId
-   * @param {!Array<{rootPitch: number, sampleRate: string, samples: Array<float>}>} slices
+   * @param {!Array<{rootPitch: number, sampleRate: string, samples: Array<double>}>} slices
    * @private
    */
   _setInstrumentSampleData(instrumentId, slices) {
@@ -357,15 +357,16 @@ class Processor extends AudioWorkletProcessor {
       const samples = slices[i].samples;
       const sampleCount = samples.length;
 
-      const samplesPtr = this._module._malloc(sampleCount * Float32Array.BYTES_PER_ELEMENT);
-      this._module.HEAPF32.set(samples, samplesPtr / Float32Array.BYTES_PER_ELEMENT);
+      const samplesPtr = this._module._malloc(sampleCount * Float64Array.BYTES_PER_ELEMENT);
+      this._module.HEAPF64.set(samples, samplesPtr / Float64Array.BYTES_PER_ELEMENT);
       samplePtrs.push(samplesPtr);
 
-      const offset = (slicesPtr + i * SLICE_SIZE) / Uint32Array.BYTES_PER_ELEMENT;
-      this._module.HEAP32[offset] = samplesPtr;
-      this._module.HEAP32[offset + 1] = sampleCount;
-      this._module.HEAP32[offset + 2] = slices[i].sampleRate;
-      this._module.HEAPF32[offset + 3] = slices[i].rootPitch;
+      const slicePtr = slicesPtr + i * SLICE_SIZE;
+      this._module.HEAPF64[slicePtr / Float64Array.BYTES_PER_ELEMENT] = slices[i].rootPitch;
+      const offset = slicePtr / Uint32Array.BYTES_PER_ELEMENT;
+      this._module.HEAP32[offset + 2] = samplesPtr;
+      this._module.HEAP32[offset + 3] = sampleCount;
+      this._module.HEAP32[offset + 4] = slices[i].sampleRate;
     }
 
     this._module._BarelyInstrument_SetSampleData(this._engine, instrumentId, slicesPtr, sliceCount);

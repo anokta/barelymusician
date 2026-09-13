@@ -91,7 +91,7 @@ export class InstrumentUi {
     controlContainer.appendChild(controlLabel);
 
     // Input
-    if (control.valueType !== 'bool' && control.valueType !== 'float' &&
+    if (control.valueType !== 'bool' && control.valueType !== 'double' &&
         control.valueType !== 'int') {  // enum type
       const select = document.createElement('select');
       select.id = `input-${controlTypeIndex}`;
@@ -129,7 +129,7 @@ export class InstrumentUi {
         controlInput.step = 1;
         controlInput.value = control.defaultValue;
         break;
-      case 'float':
+      case 'double':
         controlInput.type = 'range';
         controlInput.min = control.minValue;
         controlInput.max = control.maxValue;

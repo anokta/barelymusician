@@ -47,10 +47,8 @@ class SlicePool {
       const BarelySlice& slice = slices[i];
       const uint32_t next_slice_index =
           (i + 1 < slice_count) ? free_[free_read_index_] : kInvalidIndex;
-      slices_[slice_index] = {
-          slice.samples,    slice.sample_count, static_cast<float>(slice.sample_rate),
-          slice.root_pitch, next_slice_index,
-      };
+      slices_[slice_index] = {slice.root_pitch, static_cast<double>(slice.sample_rate),
+                              slice.samples, slice.sample_count, next_slice_index};
       slice_index = next_slice_index;
     }
 
@@ -78,7 +76,7 @@ class SlicePool {
     return nullptr;
   }
 
-  [[nodiscard]] uint32_t Select(uint32_t first_slice_index, float pitch,
+  [[nodiscard]] uint32_t Select(uint32_t first_slice_index, double pitch,
                                 AudioRng& rng) const noexcept {
     if (first_slice_index == kInvalidIndex) {
       return kInvalidIndex;
@@ -98,7 +96,7 @@ class SlicePool {
         }
       } else {
         const SliceState& slice = slices_[slice_index];
-        const float previous_root_pitch = slices_[selected_slices[0]].root_pitch;
+        const double previous_root_pitch = slices_[selected_slices[0]].root_pitch;
         if (pitch <= slice.root_pitch) {
           if (pitch - previous_root_pitch > slice.root_pitch - pitch) {
             selected_slices[0] = slice_index;

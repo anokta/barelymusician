@@ -46,7 +46,7 @@ set_target_properties(
     -s ASSERTIONS=0 \
     -s ENVIRONMENT=web,worker \
     -s EXPORTED_FUNCTIONS=${BARELY_EXPORTED_FUNCTIONS} \
-    -s EXPORTED_RUNTIME_METHODS=['HEAP32','HEAPF32','addFunction','getValue','removeFunction'] \
+    -s EXPORTED_RUNTIME_METHODS=['HEAP32','HEAPF64','addFunction','removeFunction'] \
     -s EXPORT_ES6=1 \
     -s EXPORT_NAME=barelymusician \
     -s MODULARIZE=1 \

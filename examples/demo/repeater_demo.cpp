@@ -32,10 +32,10 @@ constexpr int kFrameCount = 256;
 constexpr double kLookahead = 0.1;
 
 // Repeater settings.
-constexpr float kGain = 0.9f;
-constexpr float kOscShape = 0.75f;
-constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.1f;
+constexpr double kGain = 0.9;
+constexpr double kOscShape = 0.75;
+constexpr double kAttack = 0.0;
+constexpr double kRelease = 0.1;
 constexpr int kVoiceCount = 16;
 
 constexpr Repeater::Mode kInitialMode = Repeater::Mode::kForward;
@@ -46,7 +46,7 @@ constexpr double kSpeed = 135.0 / 60.0;
 constexpr int kKeyCount = 13;
 constexpr std::array<char, kKeyCount> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                                      'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr float kRootPitch = 0.0f;
+constexpr double kRootPitch = 0.0;
 constexpr int kMaxOctaveShift = 4;
 
 std::optional<int> KeyToIndex(const InputManager::Key& key) {
@@ -57,8 +57,8 @@ std::optional<int> KeyToIndex(const InputManager::Key& key) {
   return static_cast<int>(std::distance(kOctaveKeys.begin(), it));
 }
 
-float IndexToPitch(int octave_shift, int index) {
-  return kRootPitch + static_cast<float>(octave_shift) + static_cast<float>(index) / 12.0f;
+double IndexToPitch(int octave_shift, int index) {
+  return kRootPitch + static_cast<double>(octave_shift) + static_cast<double>(index) / 12.0;
 }
 
 }  // namespace
@@ -75,7 +75,7 @@ int main() {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
-  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
@@ -84,11 +84,11 @@ int main() {
   Repeater repeater(engine, instrument);
   repeater.SetMode(kInitialMode);
   repeater.SetRate(kInitialRate);
-  repeater.SetNoteCallback([&repeater](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
+  repeater.SetNoteCallback([&repeater](double pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   // Audio process callback.
   audio_output.SetProcessCallback(
-      [&](float* output_samples, int output_channel_count, int output_frame_count) {
+      [&](double* output_samples, int output_channel_count, int output_frame_count) {
         engine.Process(output_samples, output_channel_count, output_frame_count,
                        audio_clock.GetTimestamp());
         audio_clock.Update(output_frame_count);
@@ -131,7 +131,7 @@ int main() {
 
     // Play note.
     if (const auto index_or = KeyToIndex(key)) {
-      const float pitch = IndexToPitch(octave_shift, *index_or);
+      const double pitch = IndexToPitch(octave_shift, *index_or);
       if (repeater.IsPlaying()) {
         repeater.Stop();
         repeater.Start(pitch);
@@ -190,7 +190,7 @@ int main() {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto index_or = KeyToIndex(key)) {
-      const float pitch = IndexToPitch(octave_shift, *index_or);
+      const double pitch = IndexToPitch(octave_shift, *index_or);
       instrument.SetNoteOff(pitch);
       keys[*index_or] = false;
     }

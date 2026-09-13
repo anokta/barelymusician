@@ -12,7 +12,7 @@ namespace barely::examples {
 class AudioOutput {
  public:
   using ProcessCallback =
-      std::function<void(float* output_samples, int output_channel_count, int output_frame_count)>;
+      std::function<void(double* output_samples, int output_channel_count, int output_frame_count)>;
 
   AudioOutput(int sample_rate, int channel_count, int frame_count) noexcept;
   ~AudioOutput() noexcept;
@@ -33,6 +33,7 @@ class AudioOutput {
  private:
   ma_device device_;
   ProcessCallback process_callback_ = nullptr;
+  std::vector<double> samples_;
 };
 
 }  // namespace barely::examples

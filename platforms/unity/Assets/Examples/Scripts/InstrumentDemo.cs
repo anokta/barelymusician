@@ -9,18 +9,18 @@ namespace Barely.Examples {
 
     public bool enableModeSwitch = false;
     [Range(0.0f, 1.0f)]
-    public float oscShape = 0.0f;
+    public double oscShape = 0.0;
     public OscMode oscMode = OscMode.CROSSFADE;
     public SliceMode sliceMode = SliceMode.LOOP;
 
     private const int N = 4;
-    private Dictionary<float, Vector2> _activeNotes = null;
+    private Dictionary<double, Vector2> _activeNotes = null;
     private float[,] _alphas = null;
     private float[,] _targetAlphas = null;
 
     private void Awake() {
       if (enableModeSwitch) {
-        controller.instrument.OscMix = 1.0f;
+        controller.instrument.OscMix = 1.0;
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
         controller.instrument.SliceMode = sliceMode;
@@ -28,7 +28,7 @@ namespace Barely.Examples {
     }
 
     private void OnEnable() {
-      _activeNotes = new Dictionary<float, Vector2>();
+      _activeNotes = new Dictionary<double, Vector2>();
       _alphas = new float[N, N];
       _targetAlphas = new float[N, N];
       controller.instrument.OnNoteOff += OnNoteOff;
@@ -61,22 +61,22 @@ namespace Barely.Examples {
         return;
       }
       if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) {
-        controller.instrument.OscMix = 1.0f;
+        controller.instrument.OscMix = 1.0;
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
       } else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) {
-        controller.instrument.OscMix = 0.0f;
+        controller.instrument.OscMix = 0.0;
         controller.instrument.OscMode = oscMode;
         controller.instrument.SliceMode = sliceMode;
       } else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) {
-        controller.instrument.OscMix = 0.5f;
+        controller.instrument.OscMix = 0.5;
         controller.instrument.OscMode = oscMode;
         controller.instrument.OscShape = oscShape;
         controller.instrument.SliceMode = sliceMode;
       }
     }
 
-    private void OnNoteOff(float pitch) {
+    private void OnNoteOff(double pitch) {
       Vector2 value = Vector2.zero;
       if (_activeNotes.TryGetValue(pitch, out value)) {
         _targetAlphas[(int)value.x, (int)value.y] = 0.0f;
@@ -84,8 +84,8 @@ namespace Barely.Examples {
       }
     }
 
-    private void OnNoteOn(float pitch) {
-      int i = (int)(pitch * 12.0f);
+    private void OnNoteOn(double pitch) {
+      int i = (int)(pitch * 12.0);
       int y = i / 4;
       int x = i - 4 * y;
       if (x < 0 || x >= N || y < 0 || y >= N) {

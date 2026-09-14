@@ -1,7 +1,7 @@
 LIBRARY "barelymusicianunity"
 
 EXPORTS
-  BarelyEngineConfig_GetRequiredAllocationSize
+  BarelyEngineConfig_GetRequiredSize
   BarelyScale_GetPitch
   BarelyEngine_Create
   BarelyEngine_CreateInstrument

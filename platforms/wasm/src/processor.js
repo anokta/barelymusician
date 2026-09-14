@@ -43,7 +43,7 @@ class Processor extends AudioWorkletProcessor {
       configView[6] = 128;                  // max_slice_count
       configView[7] = 128;                  // max_voice_count
 
-      const allocationSize = this._module._BarelyEngineConfig_GetRequiredAllocationSize(configPtr);
+      const allocationSize = this._module._BarelyEngineConfig_GetRequiredSize(configPtr);
       this._allocationPtr = this._module._malloc(allocationSize * Uint8Array.BYTES_PER_ELEMENT);
       this._engine =
           this._module._BarelyEngine_Create(configPtr, this._allocationPtr, allocationSize);

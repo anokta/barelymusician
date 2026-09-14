@@ -43,7 +43,7 @@ struct BarelyEngine {
   }
 };
 
-int32_t BarelyEngineConfig_GetRequiredAllocationSize(const BarelyEngineConfig* config) {
+int32_t BarelyEngineConfig_GetRequiredSize(const BarelyEngineConfig* config) {
   return (config != nullptr) ? static_cast<int32_t>(barely::GetAllocSize<BarelyEngine>(*config))
                              : 0;
 }
@@ -103,7 +103,7 @@ void BarelyEngine_Destroy(BarelyEngine* engine) {
   }
 }
 
-double BarelyEngine_GenerateRandomNumber(BarelyEngine* engine) {
+double BarelyEngine_GenerateRandom(BarelyEngine* engine) {
   return (engine != nullptr) ? engine->state.main_rng.Generate() : 0.0;
 }
 
@@ -225,13 +225,6 @@ double BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performe
              : 0.0;
 }
 
-void BarelyPerformer_SetSpeed(BarelyEngine* engine, uint32_t performer_id, double speed) {
-  if (engine != nullptr && engine->IsValidPerformer(performer_id)) {
-    engine->controller.performer_controller().SetSpeed(engine->state.GetIdIndex(performer_id),
-                                                       speed);
-  }
-}
-
 void BarelyPerformer_SetLoopBeginPosition(BarelyEngine* engine, uint32_t performer_id,
                                           double loop_begin_position) {
   if (engine != nullptr && engine->IsValidPerformer(performer_id)) {
@@ -259,6 +252,13 @@ void BarelyPerformer_SetPosition(BarelyEngine* engine, uint32_t performer_id, do
   if (engine != nullptr && engine->IsValidPerformer(performer_id)) {
     engine->controller.performer_controller().SetPosition(engine->state.GetIdIndex(performer_id),
                                                           position);
+  }
+}
+
+void BarelyPerformer_SetSpeed(BarelyEngine* engine, uint32_t performer_id, double speed) {
+  if (engine != nullptr && engine->IsValidPerformer(performer_id)) {
+    engine->controller.performer_controller().SetSpeed(engine->state.GetIdIndex(performer_id),
+                                                       speed);
   }
 }
 

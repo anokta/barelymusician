@@ -18,7 +18,7 @@ TEST(BarelyEngineTest, CreateDestroyEngine) {
 
   // Success.
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
-  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredSize(&config);
   std::vector<std::byte> allocation(allocation_size);
   BarelyEngine* engine = BarelyEngine_Create(&config, allocation.data(), allocation_size);
   EXPECT_TRUE(engine != nullptr);
@@ -28,7 +28,7 @@ TEST(BarelyEngineTest, CreateDestroyEngine) {
 
 TEST(BarelyEngineTest, CreateDestroyInstrument) {
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
-  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredSize(&config);
   std::vector<std::byte> allocation(allocation_size);
   BarelyEngine* engine = BarelyEngine_Create(&config, allocation.data(), allocation_size);
   EXPECT_TRUE(engine != nullptr);
@@ -42,7 +42,7 @@ TEST(BarelyEngineTest, CreateDestroyInstrument) {
 
 TEST(BarelyEngineTest, CreateDestroyPerformer) {
   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
-  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredSize(&config);
   std::vector<std::byte> allocation(allocation_size);
   BarelyEngine* engine = BarelyEngine_Create(&config, allocation.data(), allocation_size);
   EXPECT_TRUE(engine != nullptr);
@@ -71,14 +71,14 @@ TEST(EngineTest, CreateDestroynstrument) {
   engine.CreateInstrument().Destroy();
 }
 
-TEST(EngineTest, GenerateRandomNumber) {
+TEST(EngineTest, GenerateRandom) {
   constexpr int kValueCount = 1000;
   constexpr int kMin = -7;
   constexpr int kMax = 35;
 
   Engine engine(1);
   for (int i = 0; i < kValueCount; ++i) {
-    const int value = engine.GenerateRandomNumber(kMin, kMax);
+    const int value = engine.GenerateRandom(kMin, kMax);
     EXPECT_GE(value, kMin);
     EXPECT_LT(value, kMax);
   }
@@ -94,14 +94,14 @@ TEST(EngineTest, ResetSeed) {
   // Generate some random values.
   std::array<double, kValueCount> values;
   for (int i = 0; i < kValueCount; ++i) {
-    values[i] = engine.GenerateRandomNumber();
+    values[i] = engine.GenerateRandom();
   }
 
   // Reset the seed with the same value.
   engine.ResetSeed(kSeed);
   // Validate that the same numbers are generated for the next `kValueCount`.
   for (int i = 0; i < kValueCount; ++i) {
-    EXPECT_DOUBLE_EQ(engine.GenerateRandomNumber(), values[i]);
+    EXPECT_DOUBLE_EQ(engine.GenerateRandom(), values[i]);
   }
 }
 

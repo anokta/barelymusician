@@ -1,6 +1,6 @@
 VERS_1.0 {
   global:
-    BarelyEngineConfig_GetRequiredAllocationSize;
+    BarelyEngineConfig_GetRequiredSize;
     BarelyScale_GetPitch;
     BarelyEngine_Create;
     BarelyEngine_CreateInstrument;

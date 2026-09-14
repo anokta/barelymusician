@@ -85,7 +85,7 @@
 ///
 ///   // Create a new engine.
 ///   const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(/*sample_rate=*/48000);
-///   const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
+///   const int32_t allocation_size = BarelyEngineConfig_GetRequiredSize(&config);
 ///   void* allocation = malloc(allocation_size);
 ///   BarelyEngine* engine = BarelyEngine_Create(&config, allocation, allocation_size);
 ///
@@ -377,10 +377,10 @@ extern "C" {
 /// @param user_data Pointer to user data.
 typedef void (*BarelyTaskCallback)(BarelyTaskEventType type, void* user_data);
 
-/// Returns the required memory allocation size for an engine configuration.
+/// Returns the required memory allocation size of an engine for a given configuration.
 /// @param config Pointer to engine configuration.
 /// @return Required memory allocation size.
-BARELY_API int32_t BarelyEngineConfig_GetRequiredAllocationSize(const BarelyEngineConfig* config);
+BARELY_API int32_t BarelyEngineConfig_GetRequiredSize(const BarelyEngineConfig* config);
 
 /// Returns the quantized position for a given position.
 /// @param quantization Pointer to quantization.
@@ -417,10 +417,10 @@ BARELY_API uint32_t BarelyEngine_CreatePerformer(BarelyEngine* engine);
 /// @param engine Pointer to engine.
 BARELY_API void BarelyEngine_Destroy(BarelyEngine* engine);
 
-/// Generates a new random number with uniform distribution in the normalized range [0, 1).
+/// Generates a random number with uniform distribution in the normalized range [0, 1).
 /// @param engine Pointer to engine.
 /// @return Random number.
-BARELY_API double BarelyEngine_GenerateRandomNumber(BarelyEngine* engine);
+BARELY_API double BarelyEngine_GenerateRandom(BarelyEngine* engine);
 
 /// Returns the timestamp of an engine.
 /// @param engine Pointer to engine.
@@ -528,12 +528,6 @@ BARELY_API void BarelyPerformer_Destroy(BarelyEngine* engine, uint32_t performer
 /// @return Position in beats.
 BARELY_API double BarelyPerformer_GetPosition(const BarelyEngine* engine, uint32_t performer_id);
 
-/// Sets the playback speed of a performer.
-/// @param engine Pointer to engine.
-/// @param performer_id Performer identifier.
-/// @param speed Playback speed.
-BARELY_API void BarelyPerformer_SetSpeed(BarelyEngine* engine, uint32_t performer_id, double speed);
-
 /// Sets the loop begin position of a performer.
 /// @param engine Pointer to engine.
 /// @param performer_id Performer identifier.
@@ -561,6 +555,12 @@ BARELY_API void BarelyPerformer_SetLooping(BarelyEngine* engine, uint32_t perfor
 /// @param position Position in beats.
 BARELY_API void BarelyPerformer_SetPosition(BarelyEngine* engine, uint32_t performer_id,
                                             double position);
+
+/// Sets the playback speed of a performer.
+/// @param engine Pointer to engine.
+/// @param performer_id Performer identifier.
+/// @param speed Playback speed.
+BARELY_API void BarelyPerformer_SetSpeed(BarelyEngine* engine, uint32_t performer_id, double speed);
 
 /// Starts the playback of a performer.
 /// @param engine Pointer to engine.
@@ -651,8 +651,8 @@ struct EngineConfig : public BarelyEngineConfig {
 
   /// Returns the required memory allocation size.
   /// @return Required memory allocation size.
-  [[nodiscard]] int32_t GetRequiredAllocationSize() const noexcept {
-    return BarelyEngineConfig_GetRequiredAllocationSize(this);
+  [[nodiscard]] int32_t GetRequiredSize() const noexcept {
+    return BarelyEngineConfig_GetRequiredSize(this);
   }
 };
 
@@ -993,10 +993,6 @@ class Performer {
     return BarelyPerformer_GetPosition(engine_, performer_id_);
   }
 
-  /// Sets the playback speed.
-  /// @param speed Playback speed.
-  void SetSpeed(double speed) noexcept { BarelyPerformer_SetSpeed(engine_, performer_id_, speed); }
-
   /// Sets the loop begin position.
   /// @param loop_begin_position Loop begin position in beats.
   void SetLoopBeginPosition(double loop_begin_position) noexcept {
@@ -1020,6 +1016,10 @@ class Performer {
   void SetPosition(double position) noexcept {
     BarelyPerformer_SetPosition(engine_, performer_id_, position);
   }
+
+  /// Sets the playback speed.
+  /// @param speed Playback speed.
+  void SetSpeed(double speed) noexcept { BarelyPerformer_SetSpeed(engine_, performer_id_, speed); }
 
   /// Starts the playback.
   void Start() noexcept { BarelyPerformer_Start(engine_, performer_id_); }
@@ -1059,7 +1059,7 @@ class Engine {
       : task_callbacks_(std::make_unique<Task::Pool<Task::CallbackNode>>(config.max_task_count)),
         first_task_callbacks_(
             std::make_unique<Task::Pool<Task::CallbackNode*>>(config.max_performer_count)),
-        allocation_(config.GetRequiredAllocationSize()) {
+        allocation_(config.GetRequiredSize()) {
     engine_ =
         BarelyEngine_Create(&config, allocation_.data(), static_cast<int32_t>(allocation_.size()));
   }
@@ -1113,18 +1113,16 @@ class Engine {
 
   /// Generates a random number with uniform distribution in the normalized range [0, 1).
   /// @return Random number.
-  [[nodiscard]] double GenerateRandomNumber() noexcept {
-    return BarelyEngine_GenerateRandomNumber(engine_);
-  }
+  [[nodiscard]] double GenerateRandom() noexcept { return BarelyEngine_GenerateRandom(engine_); }
 
   /// Generates a random number with uniform distribution in the range [min, max).
   /// @param min Minimum value (inclusive).
   /// @param max Maximum value (exclusive).
   /// @return Random number.
   template <typename NumberType>
-  [[nodiscard]] NumberType GenerateRandomNumber(NumberType min, NumberType max) noexcept {
+  [[nodiscard]] NumberType GenerateRandom(NumberType min, NumberType max) noexcept {
     static_assert(std::is_arithmetic_v<NumberType>, "NumberType is not supported");
-    return min + static_cast<NumberType>(GenerateRandomNumber() * static_cast<double>(max - min));
+    return min + static_cast<NumberType>(GenerateRandom() * static_cast<double>(max - min));
   }
 
   /// Returns the timestamp.

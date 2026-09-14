@@ -83,7 +83,7 @@ static void TaskCallback(BarelyTaskEventType type, void* user_data) {
 int main(void) {
   // Initialize the engine.
   BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
-  const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
+  const int32_t allocation_size = BarelyEngineConfig_GetRequiredSize(&config);
   printf("Allocating %.2f KB...\n", (double)allocation_size / 1024.0);
   void* allocation = malloc(allocation_size);
 

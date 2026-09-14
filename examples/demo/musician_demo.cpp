@@ -202,8 +202,8 @@ void ComposeDrums(int bar, int beat, int beat_count, Engine& engine, int index,
     }
   }
   // Hihat Closed.
-  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, engine.GenerateRandomNumber(0.75, 0.95));
-  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, engine.GenerateRandomNumber(0.5, 0.95));
+  add_note(get_beat(0), get_beat(2), kPitchHihatClosed, engine.GenerateRandom(0.75, 0.95));
+  add_note(get_beat(2), get_beat(4), kPitchHihatClosed, engine.GenerateRandom(0.5, 0.95));
   // Hihat Open.
   if (beat + 1 == beat_count) {
     if (bar % 4 == 3) {
@@ -391,12 +391,12 @@ int main() {
         is_playing = !is_playing;
         break;
       case '1':
-        speed *= engine.GenerateRandomNumber(0.5, 0.75);
+        speed *= engine.GenerateRandom(0.5, 0.75);
         engine.SetSpeed(speed);
         ConsoleLog() << "Speed changed to " << speed;
         break;
       case '2':
-        speed *= engine.GenerateRandomNumber(1.5, 2.0);
+        speed *= engine.GenerateRandom(1.5, 2.0);
         engine.SetSpeed(speed);
         ConsoleLog() << "Speed changed to " << speed;
         break;

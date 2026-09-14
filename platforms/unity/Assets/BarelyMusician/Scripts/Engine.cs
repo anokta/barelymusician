@@ -772,7 +772,7 @@ namespace Barely {
             maxSliceCount = 512,
             maxVoiceCount = 200,
           };
-          Int32 allocationSize = BarelyEngineConfig_GetRequiredAllocationSize(ref engineConfig);
+          Int32 allocationSize = BarelyEngineConfig_GetRequiredSize(ref engineConfig);
           _allocation = Marshal.AllocHGlobal(allocationSize);
           _handle = BarelyEngine_Create(ref engineConfig, _allocation, allocationSize);
           if (_handle == IntPtr.Zero) {
@@ -841,9 +841,8 @@ namespace Barely {
       private const string _pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
-      [DllImport(_pluginName, EntryPoint = "BarelyEngineConfig_GetRequiredAllocationSize")]
-      private static extern Int32 BarelyEngineConfig_GetRequiredAllocationSize(
-          ref BarelyEngineConfig config);
+      [DllImport(_pluginName, EntryPoint = "BarelyEngineConfig_GetRequiredSize")]
+      private static extern Int32 BarelyEngineConfig_GetRequiredSize(ref BarelyEngineConfig config);
 
       [DllImport(_pluginName, EntryPoint = "BarelyScale_GetPitch")]
       private static extern double BarelyScale_GetPitch([In] ref Scale scale, Int32 degree);

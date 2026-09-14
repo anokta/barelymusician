@@ -78,7 +78,7 @@ void Arpeggiator::Update() noexcept {
       index_ = (index_ == -1) ? size - 1 : (index_ + size - 1) % size;
       break;
     case Mode::kRandom:
-      index_ = engine_.GenerateRandomNumber(0, size);
+      index_ = engine_.GenerateRandom(0, size);
       break;
     default:
       assert(!"Invalid arpeggiator mode");

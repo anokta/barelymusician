@@ -103,7 +103,7 @@ void BarelyEngine::set_speed(double speed) {
   if (engine_ == nullptr) {
     sample_rate_ = static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate());
     const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(sample_rate_);
-    const int32_t allocation_size = BarelyEngineConfig_GetRequiredAllocationSize(&config);
+    const int32_t allocation_size = BarelyEngineConfig_GetRequiredSize(&config);
     engine_allocation_.resize(allocation_size);
     temp_samples_.resize(config.max_frame_count);
     engine_ = BarelyEngine_Create(&config, engine_allocation_.data(), allocation_size);

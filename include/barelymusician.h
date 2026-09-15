@@ -646,7 +646,7 @@ struct EngineConfig : public BarelyEngineConfig {
 
   /// Constructs a new `EngineConfig` from a raw type.
   /// @param config Raw engine configuration.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   constexpr EngineConfig(BarelyEngineConfig config) noexcept : BarelyEngineConfig{config} {}
 
   /// Returns the required memory allocation size.
@@ -665,13 +665,13 @@ struct Quantization : public BarelyQuantization {
   /// Constructs a new `Quantization`.
   /// @param subdivision Subdivision of a beat.
   /// @param amount Amount.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   constexpr Quantization(int32_t subdivision, double amount = 1.0) noexcept
       : Quantization(BarelyQuantization{subdivision, amount}) {}
 
   /// Constructs a new `Quantization` from a raw type.
   /// @param quantization Raw quantization.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   constexpr Quantization(BarelyQuantization quantization) noexcept
       : BarelyQuantization{quantization} {
     assert(subdivision > 0);
@@ -696,14 +696,14 @@ struct Scale : public BarelyScale {
   /// @param root_pitch Root pitch.
   /// @param pitches Span of pitches.
   /// @param mode Mode.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   constexpr Scale(double root_pitch, std::span<const double> pitches, int32_t mode = 0) noexcept
       : Scale(BarelyScale{root_pitch, pitches.data(), static_cast<int32_t>(pitches.size()), mode}) {
   }
 
   /// Constructs a new `Scale` from a raw type.
   /// @param scale Raw scale.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   constexpr Scale(BarelyScale scale) noexcept : BarelyScale{scale} {
     assert(pitches != nullptr);
     assert(pitch_count > 0);
@@ -734,7 +734,7 @@ struct Slice : public BarelySlice {
 
   /// Constructs a new `Slice` from a raw type.
   /// @param slice Raw slice.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   constexpr Slice(BarelySlice slice) noexcept : BarelySlice{slice} {}
 };
 
@@ -755,7 +755,7 @@ class Instrument {
 
   /// Returns the identifier.
   /// @return Identifier.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return instrument_id_; }
 
   /// Sets a control value.
@@ -827,7 +827,7 @@ class Task {
 
   /// Returns the identifier.
   /// @return Identifier.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return task_id_; }
 
   /// Destroys the task.
@@ -940,7 +940,7 @@ class Performer {
 
   /// Returns the identifier.
   /// @return Identifier.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   [[nodiscard]] constexpr operator uint32_t() const noexcept { return performer_id_; }
 
   /// Creates a new task.
@@ -1095,7 +1095,7 @@ class Engine {
 
   /// Returns the pointer to raw engine.
   /// @return Pointer to raw engine.
-  // NOLINTNEXTLINE(google-explicit-constructor)
+  // NOLINTNEXTLINE(misc-explicit-constructor)
   [[nodiscard]] constexpr operator BarelyEngine*() const noexcept { return engine_; }
 
   /// Creates a new instrument.

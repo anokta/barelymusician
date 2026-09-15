@@ -120,7 +120,7 @@ void PerformerController::SetPosition(uint32_t performer_index, double position)
     performer.position = position;
     uint32_t task_index = performer.first_active_task_index;
     while (task_index != kInvalidIndex) {
-      auto& task = engine_.GetTask(task_index);
+      const auto& task = engine_.GetTask(task_index);
       if (task.IsInside(performer.position)) {
         task_index = task.next_task_index;
       } else {

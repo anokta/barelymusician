@@ -51,8 +51,9 @@ constexpr char kSamplePath[] = "data/audio/sample.wav";
 
 // Note settings.
 constexpr int kKeyCount = 13;
-constexpr std::array<char, kKeyCount> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
-                                                     'G', 'Y', 'H', 'U', 'J', 'K'};
+constexpr std::array<char, kKeyCount> kOctaveKeys = {
+    'A', 'W', 'S', 'E', 'D', 'F', 'T', 'G', 'Y', 'H', 'U', 'J', 'K',
+};
 constexpr double kRootPitch = 0.0;
 constexpr int kMaxOctaveShift = 4;
 

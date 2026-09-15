@@ -18,8 +18,12 @@ TEST(ScaleTest, GetPitch) {
   constexpr double kRootPitch = 1.75;
   constexpr int32_t kMode = 1;
 
-  const BarelyScale scale = {kRootPitch, kPitches.data(), static_cast<int32_t>(kPitches.size()),
-                             kMode};
+  const BarelyScale scale = {
+      kRootPitch,
+      kPitches.data(),
+      static_cast<int32_t>(kPitches.size()),
+      kMode,
+  };
 
   constexpr int32_t kOctaveRange = 2;
   for (int32_t octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {

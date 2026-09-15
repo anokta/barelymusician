@@ -29,11 +29,10 @@ TEST(EngineProcessorTest, PlayNote) {
   constexpr int kFrameCount = 5;
   constexpr double kPitch = 1.0;
   constexpr std::array<BarelySlice, 1> kSlices = {
-      BarelySlice{kPitch, kSamples.data(), kSampleCount, kSampleRate},
-  };
+      BarelySlice{kPitch, kSamples.data(), kSampleCount, kSampleRate}};
 
   const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine(arena, EngineConfig(kSampleRate));
 

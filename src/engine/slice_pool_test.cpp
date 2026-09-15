@@ -31,7 +31,7 @@ TEST(SlicePoolTest, Select) {
   constexpr uint32_t kCount = 100;
 
   const auto size = GetAllocSize<SlicePool>(kCount);
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
 
   AudioRng rng;

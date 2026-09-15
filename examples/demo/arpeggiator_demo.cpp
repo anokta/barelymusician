@@ -52,8 +52,9 @@ constexpr double kArpGate = 0.5;
 constexpr double kArpRate = 2.0;
 
 // Note settings.
-constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
-                                              'G', 'Y', 'H', 'U', 'J', 'K'};
+constexpr std::array<char, 13> kOctaveKeys = {
+    'A', 'W', 'S', 'E', 'D', 'F', 'T', 'G', 'Y', 'H', 'U', 'J', 'K',
+};
 constexpr double kRootPitch = 0.0;
 constexpr int kMaxOctaveShift = 4;
 

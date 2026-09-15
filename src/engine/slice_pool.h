@@ -47,8 +47,11 @@ class SlicePool {
       const BarelySlice& slice = slices[i];
       const uint32_t next_slice_index =
           (i + 1 < slice_count) ? free_[free_read_index_] : kInvalidIndex;
-      slices_[slice_index] = {slice.root_pitch, static_cast<double>(slice.sample_rate),
-                              slice.samples, slice.sample_count, next_slice_index};
+      slices_[slice_index] = {
+          slice.root_pitch, static_cast<double>(slice.sample_rate),
+          slice.samples,    slice.sample_count,
+          next_slice_index,
+      };
       slice_index = next_slice_index;
     }
 

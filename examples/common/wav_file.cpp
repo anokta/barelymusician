@@ -1,6 +1,5 @@
 #include "common/wav_file.h"
 
-#include <algorithm>
 #include <string>
 
 #define DR_WAV_IMPLEMENTATION

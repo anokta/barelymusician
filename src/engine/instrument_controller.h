@@ -34,7 +34,7 @@ class InstrumentController {
   void Release(uint32_t instrument_index) noexcept {
     engine_.queued_sample_data_counts[instrument_index].fetch_add(1, std::memory_order_acq_rel);
     while (engine_.process_fence.load(std::memory_order_acquire));  // busy wait until next process.
-    auto& instrument = engine_.GetInstrument(instrument_index);
+    const auto& instrument = engine_.GetInstrument(instrument_index);
     engine_.slice_pool.Release(instrument.first_slice_index);
     engine_.ScheduleCmd(InstrumentDestroyCmd{instrument_index});
     engine_.instrument_pool.Release(instrument_index);

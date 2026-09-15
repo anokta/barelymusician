@@ -21,14 +21,14 @@ constexpr int kSampleRate = 48000;
 
 TEST(PerformerControllerTest, ProcessSingleTask) {
   const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine(arena, EngineConfig(kSampleRate));
   PerformerController controller(engine);
 
   // Create a performer.
   const uint32_t performer_index = controller.Acquire();
-  auto& performer = engine.GetPerformer(performer_index);
+  const auto& performer = engine.GetPerformer(performer_index);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -243,14 +243,14 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
   constexpr int kTaskCount = 4;
 
   const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine(arena, EngineConfig(kSampleRate));
   PerformerController controller(engine);
 
   // Create a performer.
   const uint32_t performer_index = controller.Acquire();
-  auto& performer = engine.GetPerformer(performer_index);
+  const auto& performer = engine.GetPerformer(performer_index);
 
   EXPECT_FALSE(performer.is_playing);
   EXPECT_DOUBLE_EQ(performer.position, 0.0);
@@ -345,13 +345,13 @@ TEST(PerformerControllerTest, ProcessMultipleTasks) {
 
 TEST(PerformerControllerTest, SetSpeed) {
   const size_t size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine(arena, EngineConfig(kSampleRate));
   PerformerController controller(engine);
 
   const uint32_t performer_index = controller.Acquire();
-  auto& performer = engine.GetPerformer(performer_index);
+  const auto& performer = engine.GetPerformer(performer_index);
   [[maybe_unused]] const uint32_t task_index =
       controller.AcquireTask(performer_index, 1.0, 1.0, 0, nullptr, nullptr);
 

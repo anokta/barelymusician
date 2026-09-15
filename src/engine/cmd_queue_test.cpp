@@ -24,7 +24,7 @@ constexpr uint32_t kMaxCmdCount = 512;
 
 TEST(CmdQueueTest, AddSingleCmd) {
   const auto size = GetAllocSize<CmdQueue>(kMaxCmdCount);
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   CmdQueue cmds(arena, kMaxCmdCount);
   EXPECT_THAT(cmds.GetNext(0), IsNull());
@@ -44,7 +44,7 @@ TEST(CmdQueueTest, AddSingleCmd) {
 
 TEST(CmdQueueTest, AddMultipleCmds) {
   const size_t size = GetAllocSize<CmdQueue>(kMaxCmdCount);
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   CmdQueue cmds(arena, kMaxCmdCount);
   EXPECT_THAT(cmds.GetNext(10), IsNull());

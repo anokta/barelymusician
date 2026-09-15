@@ -194,7 +194,8 @@ class EngineProcessor {
             [this](SampleDataCmd& sample_data_cmd) noexcept {
               instrument_processor_.SetSampleData(sample_data_cmd.instrument_index,
                                                   sample_data_cmd.first_slice_index);
-            }},
+            },
+        },
         cmd);
   }
 

@@ -17,7 +17,7 @@ TEST(PoolTest, AcquireMax) {
   struct TestData {};
 
   const auto size = GetAllocSize<Pool<TestData>>(kCount);
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
 
   Pool<TestData> pool(arena, kCount);

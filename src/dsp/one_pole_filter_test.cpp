@@ -51,12 +51,8 @@ TEST(OnePoleFilterTest, GetFilterCoeff) {
   constexpr int kSampleRate = 8000;
 
   constexpr int kCutoffCount = 5;
-  constexpr std::array<double, kCutoffCount> kCutoffs = {
-      0.0, 100.0, 500.0, 1000.0, 8000.0,
-  };
-  constexpr std::array<double, kCutoffCount> kExpectedCoefficients = {
-      1.00, 0.92, 0.68, 0.46, 0.00,
-  };
+  constexpr std::array<double, kCutoffCount> kCutoffs = {0.0, 100.0, 500.0, 1000.0, 8000.0};
+  constexpr std::array<double, kCutoffCount> kExpectedCoefficients = {1.00, 0.92, 0.68, 0.46, 0.00};
 
   for (int i = 0; i < kCutoffCount; ++i) {
     EXPECT_NEAR(GetFilterCoeff(kSampleRate, kCutoffs[i]), kExpectedCoefficients[i], kEpsilon) << i;

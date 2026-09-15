@@ -18,7 +18,7 @@ constexpr int kSampleRate = 48000;
 
 TEST(EngineControllerTest, AcquireReleasePerformer) {
   const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
-  auto data = std::make_unique<std::byte[]>(size);
+  const auto data = std::make_unique<std::byte[]>(size);
   Arena arena(data.get(), size);
   EngineState engine(arena, EngineConfig(kSampleRate));
   EngineController controller(engine);

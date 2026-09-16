@@ -5,6 +5,9 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/godotengine/godot-cpp.git
   GIT_TAG godot-4.5-stable
 )
+if(EMSCRIPTEN)
+  set(GODOTCPP_THREADS OFF CACHE BOOL "" FORCE)
+endif()
 FetchContent_MakeAvailable(godotcpp)
 target_compile_options(
   godot-cpp PUBLIC
@@ -39,6 +42,18 @@ target_link_libraries(
   barelymusician_mt
   godot-cpp
 )
+if(EMSCRIPTEN)
+  set_target_properties(
+    barelymusician_mt PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+  )
+  target_link_options(
+    barelymusiciangodot PRIVATE
+    -sSIDE_MODULE=1
+    -lc++
+    -lc++abi
+  )
+endif()
 
 function(package_barelymusiciangodot)
   set(ADDON_BIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/project/addons/barelymusician/bin)

@@ -113,6 +113,7 @@ void BarelyEngine::set_speed(double speed) {
       if (audio_player_ == nullptr) {  // start audio processing
         audio_player_ = memnew(AudioStreamPlayer);
         audio_player_->set_name("BarelyAudioPlayer");
+        audio_player_->set_playback_type(AudioServer::PLAYBACK_TYPE_STREAM);
         audio_player_->set_stream(memnew(BarelyAudioStream));
         tree->get_root()->call_deferred("add_child", audio_player_);
         audio_player_->set_owner(nullptr);

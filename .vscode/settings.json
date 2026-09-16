@@ -23,6 +23,7 @@
   "cmake.enableAutomaticKitScan": false,
   "csharp.format.enable": false,
   "dotnet.defaultSolution": "platforms/unity/unity.sln",
+  "editor.detectIndentation": false,
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
   "files.exclude": {

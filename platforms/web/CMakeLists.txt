@@ -36,11 +36,11 @@ set(BARELY_EXPORTED_FUNCTIONS "['_malloc','_free',
 )
 
 add_executable(
-  barelymusicianwasm
-  wasm.cpp
+  barelymusicianweb
+  web.cpp
 )
 set_target_properties(
-  barelymusicianwasm PROPERTIES
+  barelymusicianweb PROPERTIES
   LINK_FLAGS " \
     -s ALLOW_TABLE_GROWTH=1 \
     -s ASSERTIONS=0 \
@@ -58,19 +58,19 @@ set_target_properties(
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 target_compile_definitions(
-  barelymusicianwasm PUBLIC
+  barelymusicianweb PUBLIC
   BARELY_EXPORT
 )
 target_link_libraries(
-  barelymusicianwasm PRIVATE
+  barelymusicianweb PRIVATE
   barelymusician
 )
 
-function(package_barelymusicianwasm)
+function(package_barelymusicianweb)
   add_custom_command(
-    TARGET barelymusicianwasm POST_BUILD
+    TARGET barelymusicianweb POST_BUILD
     COMMAND
-    ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusicianwasm> ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusicianweb> ${CMAKE_CURRENT_SOURCE_DIR}/src
   )
 endfunction()
-package_barelymusicianwasm()
+package_barelymusicianweb()

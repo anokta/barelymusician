@@ -30,10 +30,10 @@ if(NOT DEFINED ENABLE_VST)
 endif()
 option(ENABLE_VST "Build VST platform" ${ENABLE_VST})
 
-if(NOT DEFINED ENABLE_WASM)
-  set(ENABLE_WASM OFF CACHE BOOL "Build WebAssembly platform" FORCE)
+if(NOT DEFINED ENABLE_WEB)
+  set(ENABLE_WEB OFF CACHE BOOL "Build Web platform" FORCE)
 endif()
-option(ENABLE_WASM "Build WebAssembly platform" ${ENABLE_WASM})
+option(ENABLE_WEB "Build Web platform" ${ENABLE_WEB})
 
 if(NOT DEFINED ENABLE_BENCHMARKS)
   set(ENABLE_BENCHMARKS OFF CACHE BOOL "Build benchmarks" FORCE)

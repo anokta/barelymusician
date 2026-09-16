@@ -95,7 +95,12 @@ def parse_args():
     parser.add_argument(
         "--wasm",
         action="store_true",
-        help="build the webassembly platform",
+        help="build the webassembly targets for the selected platforms",
+    )
+    parser.add_argument(
+        "--web",
+        action="store_true",
+        help="build the web platform",
     )
     parser.add_argument(
         "--examples",
@@ -168,8 +173,8 @@ def get_cmake_targets(args):
         targets.append("barelymusicianunity")
     if args.vst:
         targets.append("barelymusicianvst")
-    if args.wasm:
-        targets.append("barelymusicianwasm")
+    if args.web and args.wasm:
+        targets.append("barelymusicianweb")
     if args.benchmark:
         targets.append("barelymusician_benchmark")
     if args.test:
@@ -221,12 +226,13 @@ def build(args, source_dir, build_dir):
     if args.godot:
         common_cmake_options.append("-DENABLE_GODOT=ON")
 
-    if args.wasm:
+    if args.wasm or args.web:
+        print("Building the WebAssembly targets...")
         wasm_build_dir = os.path.join(build_dir, "WebAssembly")
-        wasm_cmake_options = common_cmake_options + [
-            "-DENABLE_WASM=ON",
-            f'-DCMAKE_BUILD_TYPE="{config}"',
-        ]
+        wasm_cmake_options = common_cmake_options + [f'-DCMAKE_BUILD_TYPE="{config}"']
+        if args.web:
+            wasm_cmake_options.append("-DENABLE_WEB=ON")
+            args.wasm = True
         build_platform(args, config, source_dir, wasm_build_dir, wasm_cmake_options)
         args.wasm = False
 

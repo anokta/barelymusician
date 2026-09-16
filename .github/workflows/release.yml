@@ -38,14 +38,28 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: nttld/setup-ndk@v1
+        if: matrix.os == 'ubuntu-latest'
         id: setup-ndk
         with:
           ndk-version: r27d
+      - name: setup emsdk
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate latest
       - name: build
         shell: bash
-        run: python build.py --android --godot
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            export ANDROID_NDK_HOME="${{ steps.setup-ndk.outputs.ndk-path }}"
+            source emsdk/emsdk_env.sh
+            python build.py --godot --android --wasm
+          else
+            python build.py --godot
+          fi
       - uses: actions/upload-artifact@v6
         with:
           name: godot-${{ matrix.os }}
@@ -62,14 +76,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: nttld/setup-ndk@v1
+        if: matrix.os == 'ubuntu-latest'
         id: setup-ndk
         with:
           ndk-version: r27d
       - name: build
         shell: bash
-        run: python build.py --android --unity
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            export ANDROID_NDK_HOME="${{ steps.setup-ndk.outputs.ndk-path }}"
+            python build.py --unity --android
+          else
+            python build.py --unity
+          fi
       - uses: actions/upload-artifact@v6
         with:
           name: unity-${{ matrix.os }}

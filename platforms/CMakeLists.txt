@@ -18,6 +18,6 @@ if(ENABLE_VST)
   add_subdirectory(vst)
 endif()
 
-if(ENABLE_WASM)
-  add_subdirectory(wasm)
+if(ENABLE_WEB)
+  add_subdirectory(web)
 endif()

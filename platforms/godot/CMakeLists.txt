@@ -1,9 +1,10 @@
 set(CMAKE_FOLDER external)
 
+set(GODOTCPP_API_VERSION 4.5 CACHE STRING "Godot API version" FORCE)
 FetchContent_Declare(
   godotcpp
   GIT_REPOSITORY https://github.com/godotengine/godot-cpp.git
-  GIT_TAG godot-4.5-stable
+  GIT_TAG 10.0.0-stable
 )
 if(EMSCRIPTEN)
   set(GODOTCPP_THREADS OFF CACHE BOOL "" FORCE)

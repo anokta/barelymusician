@@ -13,6 +13,7 @@ config_version=5
 config/name="BarelyMusician"
 run/main_scene="uid://fm3yw7k5t227"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="uid://csl8ksewkgmf3"
 
 [display]
 
@@ -32,6 +33,7 @@ enabled=PackedStringArray("res://addons/barelymusician/plugin.cfg")
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 
 [run]
 

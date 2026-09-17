@@ -15,6 +15,7 @@
 #include "core/decibels.h"
 #include "dsp/compressor.h"
 #include "dsp/delay_filter.h"
+#include "dsp/distortion.h"
 #include "dsp/one_pole_filter.h"
 #include "dsp/sidechain.h"
 #include "engine/cmd.h"
@@ -218,8 +219,10 @@ class EngineProcessor {
 
       engine_.comp.Process(output_frame, engine_.current_params.comp_params);
 
-      output_frame[0] *= engine_.current_params.gain;
-      output_frame[1] *= engine_.current_params.gain;
+      // Soft-clip with -6dB headroom.
+      const double gain = 0.5 * engine_.current_params.gain;
+      output_frame[0] = SoftClip(output_frame[0], gain);
+      output_frame[1] = SoftClip(output_frame[1], gain);
 
       engine_.Approach();
     }

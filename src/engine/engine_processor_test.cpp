@@ -9,6 +9,7 @@
 
 #include "core/arena.h"
 #include "core/constants.h"
+#include "dsp/distortion.h"
 #include "dsp/envelope.h"
 #include "dsp/tone_filter.h"
 #include "engine/cmd.h"
@@ -76,11 +77,12 @@ TEST(EngineProcessorTest, PlayNote) {
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_NEAR(
           samples[frame * kStereoChannelCount + channel],
-          (envelope_output > 0.0)
-              ? (0.5 * filters[channel].Next(
-                           (frame < kSampleCount) ? (envelope_output * kSamples[frame]) : 0.0,
-                           filter_params))
-              : 0.0,
+          SoftClip((envelope_output > 0.0)
+                       ? 0.5 * filters[channel].Next(
+                                   (frame < kSampleCount) ? envelope_output * kSamples[frame] : 0.0,
+                                   filter_params)
+                       : 0.0,
+                   0.5),
           kEpsilon);
     }
   }
@@ -97,9 +99,10 @@ TEST(EngineProcessorTest, PlayNote) {
       envelope.Next();
     }
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-      EXPECT_NEAR(samples[frame * kStereoChannelCount + channel],
-                  is_envelope_active ? 0.5 * filters[channel].Next(0.0, filter_params) : 0.0,
-                  kEpsilon);
+      EXPECT_NEAR(
+          samples[frame * kStereoChannelCount + channel],
+          SoftClip(is_envelope_active ? 0.5 * filters[channel].Next(0.0, filter_params) : 0.0, 0.5),
+          kEpsilon);
     }
   }
 }

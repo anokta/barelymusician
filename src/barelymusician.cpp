@@ -115,11 +115,7 @@ void BarelyEngine_Process(BarelyEngine* engine, double* output_samples,
                           int32_t output_channel_count, int32_t output_frame_count,
                           double timestamp) {
   if (!engine || !output_samples || output_channel_count <= 0 || output_frame_count <= 0) return;
-
   engine->processor.Process(output_samples, output_channel_count, output_frame_count, timestamp);
-  for (int32_t i = 0; i < output_channel_count * output_frame_count; ++i) {
-    output_samples[i] = std::tanh(output_samples[i] * 0.5);  // soft-clip with -6dB headroom
-  }
 }
 
 void BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type, double value) {

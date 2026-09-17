@@ -766,10 +766,10 @@ namespace Barely {
             sampleRate = config.sampleRate,
             maxInstrumentCount = 100,
             maxPerformerCount = 100,
-            maxTaskCount = 4096,
-            maxCommandCount = 8192,
+            maxTaskCount = 4000,
+            maxCommandCount = 4096,
             maxFrameCount = config.dspBufferSize,
-            maxSliceCount = 512,
+            maxSliceCount = 256,
             maxVoiceCount = 200,
           };
           Int32 allocationSize = BarelyEngineConfig_GetRequiredSize(ref engineConfig);

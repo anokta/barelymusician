@@ -206,10 +206,10 @@
       .sample_##rate = sample_rate,               \
       .max_instrument_count = 100,                \
       .max_performer_count = 100,                 \
-      .max_task_count = 4096,                     \
-      .max_command_count = 8192,                  \
+      .max_task_count = 4000,                     \
+      .max_command_count = 4096,                  \
       .max_frame_count = 2048,                    \
-      .max_slice_count = 512,                     \
+      .max_slice_count = 256,                     \
       .max_voice_count = 200,                     \
   }
 

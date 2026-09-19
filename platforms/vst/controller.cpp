@@ -40,10 +40,10 @@ Steinberg::FUnknown* Controller::Create(void* /*context*/) {
   return static_cast<Steinberg::Vst::IEditController*>(new Controller());
 }
 
-double Controller::ToPlainControlValue(InstrumentControlType type,
-                                       double normalized_value) noexcept {
+float Controller::ToPlainControlValue(InstrumentControlType type,
+                                      double normalized_value) noexcept {
   assert(static_cast<int>(type) < BarelyInstrumentControlType_kCount && "Invalid control type");
-  return static_cast<double>(kParams[static_cast<int>(type)].toPlain(normalized_value));
+  return static_cast<float>(kParams[static_cast<int>(type)].toPlain(normalized_value));
 }
 
 tresult PLUGIN_API Controller::initialize(Steinberg::FUnknown* context) {

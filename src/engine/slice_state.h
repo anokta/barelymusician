@@ -8,12 +8,13 @@
 namespace barely {
 
 struct SliceState {
-  double root_pitch = 0.0;
-
-  double sample_rate = 0.0;
-
-  const double* samples = nullptr;  // mono
+  // Mono samples.
+  const float* samples = nullptr;
   int32_t sample_count = 0;
+
+  float sample_rate = 0.0f;
+
+  float root_pitch = 0.0f;
 
   uint32_t next_slice_index = kInvalidIndex;
 };

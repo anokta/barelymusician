@@ -85,8 +85,8 @@ namespace Barely {
       Repaint();
     }
 
-    private double NoteKeyToPitch(int noteKey) {
-      return (double)noteKey / _semitoneCount;
+    private float NoteKeyToPitch(int noteKey) {
+      return (float)noteKey / _semitoneCount;
     }
 
     private const int _semitoneCount = 12;

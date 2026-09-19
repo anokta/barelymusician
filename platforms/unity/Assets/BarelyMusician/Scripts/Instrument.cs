@@ -43,7 +43,7 @@ namespace Barely {
       public AudioClip Sample = null;
 
       /// Internal data.
-      public double[] Data {
+      public float[] Data {
         get {
           if (_data == null || HasChanged) {
             _rootPitch = RootPitch;
@@ -56,22 +56,22 @@ namespace Barely {
               return _data;
             }
             if (_data == null || _sample.samples != _data.Length) {
-              _data = new double[_sample.samples];
+              _data = new float[_sample.samples];
             }
             // Write the sample data.
             float[] sampleData = new float[_sample.samples * _sample.channels];
             _sample.GetData(sampleData, 0);
             for (int frame = 0; frame < _sample.samples; ++frame) {
-              _data[frame] = 0.0;
+              _data[frame] = 0.0f;
               for (int channel = 0; channel < _sample.channels; ++channel) {
-                _data[frame] += (double)sampleData[frame * _sample.channels + channel];
+                _data[frame] += sampleData[frame * _sample.channels + channel];
               }
             }
           }
           return _data;
         }
       }
-      private double[] _data = null;
+      private float[] _data = null;
 
       /// Denotes whether any changes has occured since the last update.
       public bool HasChanged {
@@ -79,7 +79,7 @@ namespace Barely {
       }
 
       /// Current root pitch.
-      private double _rootPitch = 0.0;
+      private float _rootPitch = 0.0f;
 
       // Current sample.
       private AudioClip _sample = null;
@@ -87,32 +87,32 @@ namespace Barely {
 
     /// Gain in logarithmic scale.
     [Range(0.0f, 1.0f)]
-    public double Gain = 1.0;
+    public float Gain = 1.0f;
 
     /// Pitch shift.
     [Range(-2.0f, 2.0f)]
-    public double PitchShift = 0.0;
+    public float PitchShift = 0.0f;
 
     [Range(-1.0f, 1.0f)]
-    public double StereoPan = 0.0;
+    public float StereoPan = 0.0f;
 
     [Header("Envelope")]
 
     /// Envelope attack in seconds.
     [Range(0.0f, 8.0f)]
-    public double Attack = 0.05;
+    public float Attack = 0.05f;
 
     /// Envelope decay in seconds.
     [Range(0.0f, 8.0f)]
-    public double Decay = 0.0;
+    public float Decay = 0.0f;
 
     /// Envelope sustain.
     [Range(0.0f, 1.0f)]
-    public double Sustain = 1.0;
+    public float Sustain = 1.0f;
 
     /// Envelope release in seconds.
     [Range(0.0f, 8.0f)]
-    public double Release = 0.25;
+    public float Release = 0.25f;
 
     [Header("Slice")]
 
@@ -127,74 +127,74 @@ namespace Barely {
 
     /// Oscillator mix.
     [Range(0.0f, 1.0f)]
-    public double OscMix = 0.5;
+    public float OscMix = 0.5f;
 
     /// Oscillator mode.
     public OscMode OscMode = OscMode.CROSSFADE;
 
     /// Oscillator noise mix.
     [Range(0.0f, 1.0f)]
-    public double OscNoiseMix = 0.0;
+    public float OscNoiseMix = 0.0f;
 
     /// Oscillator pitch shift.
     [Range(-2.0f, 2.0f)]
-    public double OscPitchShift = 0.0;
+    public float OscPitchShift = 0.0f;
 
     /// Oscillator shape.
     [Range(0.0f, 1.0f)]
-    public double OscShape = 0.0;
+    public float OscShape = 0.0f;
 
     /// Oscillator skew.
     [Range(-1.0f, 1.0f)]
-    public double OscSkew = 0.0;
+    public float OscSkew = 0.0f;
 
     [Header("Bit Crusher")]
 
     /// Bit crusher depth.
     [Range(0.0f, 1.0f)]
-    public double CrushDepth = 0.0;
+    public float CrushDepth = 0.0f;
 
     /// Bit crusher rate.
     [Range(0.0f, 1.0f)]
-    public double CrushRate = 0.0;
+    public float CrushRate = 0.0f;
 
     [Header("Distortion")]
 
     /// Distortion mix.
     [Range(0.0f, 1.0f)]
-    public double DistortionMix = 0.0;
+    public float DistortionMix = 0.0f;
 
     /// Distortion drive.
     [Range(0.0f, 1.0f)]
-    public double DistortionDrive = 0.0;
+    public float DistortionDrive = 0.0f;
 
     [Header("Filter")]
 
     /// Filter cutoff.
     [Range(0.0f, 1.0f)]
-    public double FilterCutoff = 1.0;
+    public float FilterCutoff = 1.0f;
 
     /// Filter resonance.
     [Range(0.0f, 1.0f)]
-    public double FilterResonance = 0.5;
+    public float FilterResonance = 0.5f;
 
     /// Filter tone.
     [Range(-1.0f, 1.0f)]
-    public double FilterTone = 0.0;
+    public float FilterTone = 0.0f;
 
     [Header("Send Effects")]
 
     /// Delay send.
     [Range(0.0f, 1.0f)]
-    public double DelaySend = 0.0;
+    public float DelaySend = 0.0f;
 
     /// Reverb send.
     [Range(0.0f, 2.0f)]
-    public double ReverbSend = 0.0;
+    public float ReverbSend = 0.0f;
 
     /// Sidechain send.
     [Range(-1.0f, 1.0f)]
-    public double SidechainSend = 0.0;
+    public float SidechainSend = 0.0f;
 
     [Header("Polyphony")]
 
@@ -207,37 +207,37 @@ namespace Barely {
 
     /// Note off callback.
     /// @param pitch Note pitch.
-    public delegate void NoteOffCallback(double pitch);
+    public delegate void NoteOffCallback(float pitch);
     public event NoteOffCallback OnNoteOff;
 
     [Serializable]
-    public class NoteOffEvent : UnityEngine.Events.UnityEvent<double> {}
+    public class NoteOffEvent : UnityEngine.Events.UnityEvent<float> {}
     public NoteOffEvent OnNoteOffEvent;
 
     /// Note on callback.
     /// @param pitch Note pitch.
-    public delegate void NoteOnCallback(double pitch);
+    public delegate void NoteOnCallback(float pitch);
     public event NoteOnCallback OnNoteOn;
 
     [Serializable]
-    public class NoteOnEvent : UnityEngine.Events.UnityEvent<double> {}
+    public class NoteOnEvent : UnityEngine.Events.UnityEvent<float> {}
     public NoteOnEvent OnNoteOnEvent;
 
     /// Set of active note pitches.
-    public HashSet<double> Pitches { get; private set; } = new HashSet<double>();
+    public HashSet<float> Pitches { get; private set; } = new HashSet<float>();
 
     /// Returns whether a note is on or not.
     /// @param pitch Note pitch
     /// @return True if on, false otherwise.
-    public bool IsNoteOn(double pitch) {
+    public bool IsNoteOn(float pitch) {
       return Pitches.Contains(pitch);
     }
 
     /// Sets all notes off.
     public void SetAllNotesOff() {
-      HashSet<double> pitches = Pitches;
-      Pitches = new HashSet<double>();
-      foreach (double pitch in pitches) {
+      HashSet<float> pitches = Pitches;
+      Pitches = new HashSet<float>();
+      foreach (float pitch in pitches) {
         Engine.Internal.Instrument_SetNoteOff(_id, pitch);
         OnNoteOff?.Invoke(pitch);
         OnNoteOffEvent?.Invoke(pitch);
@@ -247,14 +247,14 @@ namespace Barely {
     /// Sets the gain of a note.
     /// @param pitch Note pitch.
     /// @param gain Note gain.
-    public void SetNoteGain(double pitch, double gain) {
+    public void SetNoteGain(float pitch, float gain) {
       Engine.Internal.Instrument_SetNoteControl(_id, pitch, Engine.Internal.NoteControlType.GAIN,
                                                 gain);
     }
 
     /// Sets a note off.
     /// @param pitch Note pitch.
-    public void SetNoteOff(double pitch) {
+    public void SetNoteOff(float pitch) {
       if (Pitches.Remove(pitch)) {
         Engine.Internal.Instrument_SetNoteOff(_id, pitch);
         OnNoteOff?.Invoke(pitch);
@@ -265,7 +265,7 @@ namespace Barely {
     /// Sets the pitch shift of a note.
     /// @param pitch Note pitch.
     /// @param pitchShift Note pitch shift.
-    public void SetNotePitchShift(double pitch, double pitchShift) {
+    public void SetNotePitchShift(float pitch, float pitchShift) {
       Engine.Internal.Instrument_SetNoteControl(
           _id, pitch, Engine.Internal.NoteControlType.PITCH_SHIFT, pitchShift);
     }
@@ -274,13 +274,13 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param gain Note gain.
     /// @param pitchShift Note pitch shift.
-    public void SetNoteOn(double pitch, double gain = 1.0, double pitchShift = 0.0) {
+    public void SetNoteOn(float pitch, float gain = 1.0f, float pitchShift = 0.0f) {
       if (Pitches.Add(pitch)) {
         Engine.Internal.Instrument_SetNoteOn(_id, pitch);
-        if (gain != 1.0) {
+        if (gain != 1.0f) {
           SetNoteGain(pitch, gain);
         }
-        if (pitchShift != 0.0) {
+        if (pitchShift != 0.0f) {
           SetNotePitchShift(pitch, pitchShift);
         }
         OnNoteOn?.Invoke(pitch);
@@ -289,7 +289,7 @@ namespace Barely {
     }
 
     private void OnEnable() {
-      Array.Fill(_controls, double.NaN);
+      Array.Fill(_controls, float.NaN);
       Engine.Internal.Instrument_Create(this, ref _id);
       Update();
     }
@@ -308,9 +308,9 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.DECAY, Decay);
       SetControl(Engine.Internal.InstrumentControlType.SUSTAIN, Sustain);
       SetControl(Engine.Internal.InstrumentControlType.RELEASE, Release);
-      SetControl(Engine.Internal.InstrumentControlType.SLICE_MODE, (double)SliceMode);
+      SetControl(Engine.Internal.InstrumentControlType.SLICE_MODE, (float)SliceMode);
       SetControl(Engine.Internal.InstrumentControlType.OSC_MIX, OscMix);
-      SetControl(Engine.Internal.InstrumentControlType.OSC_MODE, (double)OscMode);
+      SetControl(Engine.Internal.InstrumentControlType.OSC_MODE, (float)OscMode);
       SetControl(Engine.Internal.InstrumentControlType.OSC_NOISE_MIX, OscNoiseMix);
       SetControl(Engine.Internal.InstrumentControlType.OSC_PITCH_SHIFT, OscPitchShift);
       SetControl(Engine.Internal.InstrumentControlType.OSC_SHAPE, OscShape);
@@ -325,11 +325,11 @@ namespace Barely {
       SetControl(Engine.Internal.InstrumentControlType.DELAY_SEND, DelaySend);
       SetControl(Engine.Internal.InstrumentControlType.REVERB_SEND, ReverbSend);
       SetControl(Engine.Internal.InstrumentControlType.SIDECHAIN_SEND, SidechainSend);
-      SetControl(Engine.Internal.InstrumentControlType.RETRIGGER, Retrigger ? 1.0 : 0.0);
-      SetControl(Engine.Internal.InstrumentControlType.VOICE_COUNT, (double)VoiceCount);
+      SetControl(Engine.Internal.InstrumentControlType.RETRIGGER, Retrigger ? 1.0f : 0.0f);
+      SetControl(Engine.Internal.InstrumentControlType.VOICE_COUNT, (float)VoiceCount);
     }
 
-    private void SetControl(Engine.Internal.InstrumentControlType type, double value) {
+    private void SetControl(Engine.Internal.InstrumentControlType type, float value) {
       if (_controls[(int)type] != value) {
         Engine.Internal.Instrument_SetControl(_id, type, value);
         _controls[(int)type] = value;
@@ -344,7 +344,7 @@ namespace Barely {
       }
     }
 
-    private double[] _controls = new double[(int)Engine.Internal.InstrumentControlType.COUNT];
+    private float[] _controls = new float[(int)Engine.Internal.InstrumentControlType.COUNT];
     private UInt32 _id = 0;
   }
 }  // namespace Barely

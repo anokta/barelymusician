@@ -22,15 +22,16 @@ namespace {
 constexpr uint32_t kInstrumentIndex = 1;
 constexpr int kSampleRate = 1000;
 constexpr int kSampleCount = 4;
-constexpr std::array<double, kSampleCount> kSamples = {1.0, 2.0, 3.0, 4.0};
+constexpr std::array<float, kSampleCount> kSamples = {1.0f, 2.0f, 3.0f, 4.0f};
 
-constexpr double kEpsilon = 1e-5;
+constexpr float kEpsilon = 1e-5f;
 
 TEST(EngineProcessorTest, PlayNote) {
   constexpr int kFrameCount = 5;
-  constexpr double kPitch = 1.0;
+  constexpr float kPitch = 1.0f;
   constexpr std::array<BarelySlice, 1> kSlices = {
-      BarelySlice{kPitch, kSamples.data(), kSampleCount, kSampleRate}};
+      BarelySlice{kSamples.data(), kSampleCount, kSampleRate, kPitch},
+  };
 
   const auto size = GetAllocSize<EngineState>(EngineConfig(kSampleRate));
   const auto data = std::make_unique<std::byte[]>(size);
@@ -46,52 +47,52 @@ TEST(EngineProcessorTest, PlayNote) {
 
   Envelope envelope;
   Envelope::Adsr adsr;
-  adsr.SetRelease(kSampleRate, 0.0);
+  adsr.SetRelease(kSampleRate, 0.0f);
 
   engine.ScheduleCmd(
-      InstrumentControlCmd{0.0, kInstrumentIndex, BarelyInstrumentControlType_kRelease});
+      InstrumentControlCmd{kInstrumentIndex, BarelyInstrumentControlType_kRelease, 0.0f});
 
   ToneFilter filters[kStereoChannelCount];
   ToneFilterParams filter_params;
-  filter_params.SetCutoff(kSampleRate, 1.0);
+  filter_params.SetCutoff(kSampleRate, 1.0f);
 
-  std::array<double, kStereoChannelCount * kFrameCount> samples;
+  std::array<float, kStereoChannelCount * kFrameCount> samples;
 
   // Control is set to its default value.
-  samples.fill(0.0);
+  samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(samples[frame * kStereoChannelCount + channel], 0.0);
+      EXPECT_FLOAT_EQ(samples[frame * kStereoChannelCount + channel], 0.0f);
     }
   }
 
   // Set a note on.
-  engine.ScheduleCmd(NoteOnCmd{kPitch, kInstrumentIndex});
+  engine.ScheduleCmd(NoteOnCmd{kInstrumentIndex, kPitch});
   envelope.Start(adsr);
 
-  samples.fill(0.0);
+  samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
-    const double envelope_output = envelope.Next();
+    const float envelope_output = envelope.Next();
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_NEAR(
           samples[frame * kStereoChannelCount + channel],
-          SoftClip((envelope_output > 0.0)
-                       ? 0.5 * filters[channel].Next(
-                                   (frame < kSampleCount) ? envelope_output * kSamples[frame] : 0.0,
-                                   filter_params)
-                       : 0.0,
-                   0.5),
+          SoftClip((envelope_output > 0.0f)
+                       ? (filters[channel].Next(
+                             (frame < kSampleCount) ? (envelope_output * kSamples[frame]) : 0.0f,
+                             filter_params))
+                       : 0.0f,
+                   0.25f),
           kEpsilon);
     }
   }
 
   // Set the note off.
-  engine.ScheduleCmd(NoteOffCmd{kPitch, kInstrumentIndex});
+  engine.ScheduleCmd(NoteOffCmd{kInstrumentIndex, kPitch});
   envelope.Stop();
 
-  samples.fill(0.0);
+  samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     const bool is_envelope_active = envelope.IsActive();
@@ -101,7 +102,7 @@ TEST(EngineProcessorTest, PlayNote) {
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_NEAR(
           samples[frame * kStereoChannelCount + channel],
-          SoftClip(is_envelope_active ? 0.5 * filters[channel].Next(0.0, filter_params) : 0.0, 0.5),
+          SoftClip(is_envelope_active ? filters[channel].Next(0.0f, filter_params) : 0.0f, 0.25f),
           kEpsilon);
     }
   }

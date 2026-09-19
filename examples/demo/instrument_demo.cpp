@@ -33,18 +33,18 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
 // Engine settings.
-constexpr double kDelayTime = 0.5;
-constexpr double kDelayFeedback = 0.2;
-constexpr double kDelayLpfCutoff = 0.2;
+constexpr float kDelayTime = 0.5f;
+constexpr float kDelayFeedback = 0.2f;
+constexpr float kDelayLpfCutoff = 0.2f;
 
 // Instrument settings.
-constexpr double kGain = 1.0;
-constexpr double kOscShape = 0.75;
-constexpr double kAttack = 0.005;
-constexpr double kRelease = 0.2;
+constexpr float kGain = 1.0f;
+constexpr float kOscShape = 0.75f;
+constexpr float kAttack = 0.005f;
+constexpr float kRelease = 0.2f;
 constexpr int kVoiceCount = 16;
-constexpr double kDelaySend = 0.2;
-constexpr double kReverbSend = 0.5;
+constexpr float kDelaySend = 0.2f;
+constexpr float kReverbSend = 0.5f;
 constexpr bool kLoop = true;
 
 constexpr char kSamplePath[] = "data/audio/sample.wav";
@@ -54,7 +54,7 @@ constexpr int kKeyCount = 13;
 constexpr std::array<char, kKeyCount> kOctaveKeys = {
     'A', 'W', 'S', 'E', 'D', 'F', 'T', 'G', 'Y', 'H', 'U', 'J', 'K',
 };
-constexpr double kRootPitch = 0.0;
+constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
 
 std::vector<Slice> GetSampleData(const std::string& file_path) {
@@ -62,8 +62,8 @@ std::vector<Slice> GetSampleData(const std::string& file_path) {
   [[maybe_unused]] const bool success = sample_file.Load(file_path);
   assert(success);
 
-  const static std::vector<double> samples = sample_file.GetData();
-  return {Slice(kRootPitch, samples, sample_file.GetSampleRate())};
+  const static std::vector<float> samples = sample_file.GetData();
+  return {Slice(samples, sample_file.GetSampleRate(), kRootPitch)};
 }
 
 std::optional<int> KeyToIndex(const InputManager::Key& key) {
@@ -74,8 +74,8 @@ std::optional<int> KeyToIndex(const InputManager::Key& key) {
   return static_cast<int>(std::distance(kOctaveKeys.begin(), it));
 }
 
-double IndexToPitch(int octave_shift, int index) {
-  return kRootPitch + static_cast<double>(octave_shift) + static_cast<double>(index) / 12.0;
+float IndexToPitch(int octave_shift, int index) {
+  return kRootPitch + static_cast<float>(octave_shift) + static_cast<float>(index) / 12.0f;
 }
 
 }  // namespace
@@ -93,7 +93,7 @@ int main() {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
-  instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
   instrument.SetControl(InstrumentControlType::kSliceMode, barely::SliceMode::kLoop);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
@@ -104,13 +104,13 @@ int main() {
 
   // Audio process callback.
   audio_output.SetProcessCallback(
-      [&](double* output_samples, int output_channel_count, int output_frame_count) {
+      [&](float* output_samples, int output_channel_count, int output_frame_count) {
         engine.Process(output_samples, output_channel_count, output_frame_count, /*timestamp=*/0.0);
       });
 
   // Key down callback.
   std::array<bool, kKeyCount> keys = {};
-  double gain = 1.0;
+  float gain = 1.0f;
   int octave_shift = 0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -125,7 +125,7 @@ int main() {
       // Shift octaves.
       for (int i = 0; i < kKeyCount; ++i) {
         if (keys[i]) {
-          const double pitch = IndexToPitch(octave_shift, i);
+          const float pitch = IndexToPitch(octave_shift, i);
           instrument.SetNoteOff(pitch);
           ConsoleLog() << "NoteOff(" << pitch << ")";
           keys[i] = false;
@@ -143,34 +143,34 @@ int main() {
     if (upper_key == 'C' || upper_key == 'V') {
       // Change gain.
       if (upper_key == 'C') {
-        gain -= 0.25;
+        gain -= 0.25f;
       } else {
-        gain += 0.25;
+        gain += 0.25f;
       }
-      gain = std::clamp(gain, 0.0, 1.0);
+      gain = std::clamp(gain, 0.0f, 1.0f);
       ConsoleLog() << "Note gain set to " << gain;
       return;
     }
 
     if (upper_key == '1') {
-      instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
+      instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
       ConsoleLog() << "Switched to oscillator mode";
       return;
     }
     if (upper_key == '2') {
-      instrument.SetControl(InstrumentControlType::kOscMix, 0.0);
+      instrument.SetControl(InstrumentControlType::kOscMix, 0.0f);
       ConsoleLog() << "Switched to sample mode";
       return;
     }
     if (upper_key == '3') {
-      instrument.SetControl(InstrumentControlType::kOscMix, 0.5);
+      instrument.SetControl(InstrumentControlType::kOscMix, 0.5f);
       ConsoleLog() << "Switched to mix mode";
       return;
     }
 
     // Play note.
     if (const auto index_or = KeyToIndex(key)) {
-      const double pitch = IndexToPitch(octave_shift, *index_or);
+      const float pitch = IndexToPitch(octave_shift, *index_or);
       instrument.SetNoteOn(pitch, gain);
       keys[*index_or] = true;
       ConsoleLog() << "NoteOn(" << pitch << ")";
@@ -182,7 +182,7 @@ int main() {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto index_or = KeyToIndex(key)) {
-      const double pitch = IndexToPitch(octave_shift, *index_or);
+      const float pitch = IndexToPitch(octave_shift, *index_or);
       instrument.SetNoteOff(pitch);
       keys[*index_or] = false;
       ConsoleLog() << "NoteOff(" << pitch << ")";

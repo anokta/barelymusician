@@ -5,83 +5,83 @@ namespace Barely {
   public class GlobalSettings : MonoBehaviour {
     [Tooltip("Sets the global tempo in beats per minute.")]
     [Range(30.0f, 960.0f)]
-    public double Bpm = 120.0;
+    public float Bpm = 120.0f;
 
     [Range(0.0f, 1.0f)]
-    public double Gain = 1.0;
+    public float Gain = 1.0f;
 
     [Header("Compressor")]
 
     [Range(0.0f, 1.0f)]
-    public double CompMix = 1.0;
+    public float CompMix = 1.0f;
 
     [Range(0.0f, 8.0f)]
-    public double CompAttack = 0.0;
+    public float CompAttack = 0.0f;
 
     [Range(0.0f, 8.0f)]
-    public double CompRelease = 0.0;
+    public float CompRelease = 0.0f;
 
     [Range(0.0f, 1.0f)]
-    public double CompThreshold = 1.0;
+    public float CompThreshold = 1.0f;
 
     [Range(0.0f, 1.0f)]
-    public double CompRatio = 0.0;
+    public float CompRatio = 0.0f;
 
     [Header("Delay")]
 
     [Range(0.0f, 1.0f)]
-    public double DelayMix = 1.0;
+    public float DelayMix = 1.0f;
 
     [Range(0.0f, 8.0f)]
-    public double DelayTime = 0.0;
+    public float DelayTime = 0.0f;
 
     [Range(0.0f, 1.0f)]
-    public double DelayFeedback = 0.0;
+    public float DelayFeedback = 0.0f;
 
     [Range(0.0f, 1.0f)]
-    public double DelayLpfCutoff = 1.0;
+    public float DelayLpfCutoff = 1.0f;
 
     [Range(0.0f, 1.0f)]
-    public double DelayHpfCutoff = 0.0;
+    public float DelayHpfCutoff = 0.0f;
 
     [Range(0.0f, 1.0f)]
-    public double DelayPingPong = 0.0;
+    public float DelayPingPong = 0.0f;
 
     [Range(0.0f, 2.0f)]
-    public double DelayReverbSend = 0.0;
+    public float DelayReverbSend = 0.0f;
 
     [Header("Reverb")]
 
     [Range(0.0f, 1.0f)]
-    public double ReverbMix = 1.0;
+    public float ReverbMix = 1.0f;
 
     [Range(0.0f, 1.0f)]
-    public double ReverbDamping = 0.0;
+    public float ReverbDamping = 0.0f;
 
     [Range(0.0f, 1.0f)]
-    public double ReverbRoomSize = 0.0;
+    public float ReverbRoomSize = 0.0f;
 
     [Range(0.0f, 1.0f)]
-    public double ReverbStereoWidth = 1.0;
+    public float ReverbStereoWidth = 1.0f;
 
     public bool ReverbFreeze = false;
 
     [Header("Sidechain")]
 
     [Range(0.0f, 1.0f)]
-    public double SidechainMix = 1.0;
+    public float SidechainMix = 1.0f;
 
     [Range(0.0f, 8.0f)]
-    public double SidechainAttack = 0.0;
+    public float SidechainAttack = 0.0f;
 
     [Range(0.0f, 8.0f)]
-    public double SidechainRelease = 0.0;
+    public float SidechainRelease = 0.0f;
 
     [Range(0.0f, 1.0f)]
-    public double SidechainThreshold = 1.0;
+    public float SidechainThreshold = 1.0f;
 
     [Range(0.0f, 1.0f)]
-    public double SidechainRatio = 0.0;
+    public float SidechainRatio = 0.0f;
 
     private void LateUpdate() {
       Engine.Speed = (double)Bpm / 60.0;

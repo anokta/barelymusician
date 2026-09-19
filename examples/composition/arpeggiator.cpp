@@ -29,14 +29,14 @@ Arpeggiator::Arpeggiator(Engine& engine, Instrument instrument) noexcept
 
 void Arpeggiator::SetAllNotesOff() noexcept {
   Stop();
-  for (const double pitch : pitches_) {
+  for (const float pitch : pitches_) {
     instrument_.SetNoteOff(pitch);
   }
   pitches_.clear();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Arpeggiator::SetNoteOff(double pitch) noexcept {
+void Arpeggiator::SetNoteOff(float pitch) noexcept {
   if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch); it != pitches_.end()) {
     pitches_.erase(it);
     if (pitches_.empty() && IsPlaying()) {
@@ -46,7 +46,7 @@ void Arpeggiator::SetNoteOff(double pitch) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Arpeggiator::SetNoteOn(double pitch) noexcept {
+void Arpeggiator::SetNoteOn(float pitch) noexcept {
   if (const auto it = std::lower_bound(pitches_.begin(), pitches_.end(), pitch);
       it == pitches_.end() || *it != pitch) {
     pitches_.insert(it, pitch);

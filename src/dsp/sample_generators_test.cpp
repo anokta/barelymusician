@@ -10,35 +10,35 @@ namespace barely {
 namespace {
 
 TEST(SampleGeneratorsTest, GenerateOscSample) {
-  static constexpr double kShape = 0.0;  // sine
+  static constexpr float kShape = 0.0f;  // sine
 
   for (int i = 0; i < 4; ++i) {
-    EXPECT_DOUBLE_EQ(GenerateOscSample(kShape, 0.25 * i, 0.25),
-                     std::sin(std::numbers::pi_v<double> * 0.5 * i));
+    EXPECT_FLOAT_EQ(GenerateOscSample(kShape, 0.25f * i, 0.25f),
+                    std::sin(std::numbers::pi_v<float> * 0.5f * i));
   }
 }
 
 TEST(SampleGeneratorsTest, GenerateSliceSample) {
   static constexpr uint32_t kDataLength = 5;
-  static constexpr double kData[kDataLength] = {1.0, 2.0, 3.0, 4.0, 5.0};
+  static constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
   for (uint32_t i = 0; i < kDataLength; ++i) {
-    EXPECT_DOUBLE_EQ(
-        GenerateSliceSample(kData, kDataLength, static_cast<double>(i), /*is_looping=*/false),
+    EXPECT_FLOAT_EQ(
+        GenerateSliceSample(kData, kDataLength, static_cast<float>(i), /*is_looping=*/false),
         kData[i]);
     if (i < kDataLength - 1) {
-      EXPECT_DOUBLE_EQ(GenerateSliceSample(kData, kDataLength, static_cast<double>(i) + 0.5,
-                                           /*is_looping=*/false),
-                       0.5 * (kData[i] + kData[i + 1]));
+      EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i) + 0.5f,
+                                          /*is_looping=*/false),
+                      0.5f * (kData[i] + kData[i + 1]));
     } else {
-      EXPECT_DOUBLE_EQ(GenerateSliceSample(kData, kDataLength, static_cast<double>(i) + 0.5,
-                                           /*is_looping=*/true),
-                       0.5 * (kData[i] + kData[0]));
+      EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(i) + 0.5f,
+                                          /*is_looping=*/true),
+                      0.5f * (kData[i] + kData[0]));
     }
   }
-  EXPECT_DOUBLE_EQ(GenerateSliceSample(kData, kDataLength, static_cast<double>(kDataLength),
-                                       /*is_looping=*/false),
-                   0.0);
+  EXPECT_FLOAT_EQ(GenerateSliceSample(kData, kDataLength, static_cast<float>(kDataLength),
+                                      /*is_looping=*/false),
+                  0.0f);
 }
 
 }  // namespace

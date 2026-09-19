@@ -137,7 +137,7 @@ export class Instrument {
       slices.push({
         rootPitch: pitch,
         sampleRate: audioBuffer.sampleRate,
-        samples: new Float64Array(audioBuffer.getChannelData(0)),  // mono only
+        samples: audioBuffer.getChannelData(0),  // mono only
       });
     }
 

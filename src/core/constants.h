@@ -6,19 +6,19 @@
 namespace barely {
 
 // Envelope epsilon error which is set to -60 decibels.
-inline constexpr double kEnvelopeEpsilon = 1e-3;
+inline constexpr float kEnvelopeEpsilon = 1e-3f;
 
 // Invalid pool index.
 inline constexpr uint32_t kInvalidIndex = UINT32_MAX;
 
 // Maximum delay feedback to keep the output stable.
-inline constexpr double kMaxDelayFeedback = 0.9995;
+inline constexpr float kMaxDelayFeedback = 0.9995f;
 
 // Minimum filter frequency in hertz.
-inline constexpr double kMinFilterFreq = 20.0;
+inline constexpr float kMinFilterFreq = 20.0f;
 
 // Reference frequency which is tuned to middle C in hertz.
-inline constexpr double kReferenceFreq = 261.62555;
+inline constexpr float kReferenceFreq = 261.62555f;
 
 // Number of stereo channels.
 inline constexpr int kStereoChannelCount = 2;

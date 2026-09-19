@@ -21,16 +21,16 @@ struct VoiceState {
   VoiceParams params = {};
 
   struct {
-    double gain = 1.0;
-    double osc_increment = 0.0;
-    double slice_increment = 0.0;
+    float gain = 1.0f;
+    float osc_increment = 0.0f;
+    float slice_increment = 0.0f;
   } note_params = {};
 
-  double pitch = 0.0;
-  double pitch_shift = 0.0;
+  float pitch = 0.0f;
+  float pitch_shift = 0.0f;
 
-  double osc_phase = 0.0;
-  double slice_offset = 0.0;
+  float osc_phase = 0.0f;
+  float slice_offset = 0.0f;
 
   uint32_t instrument_index = kInvalidIndex;
   uint32_t slice_index = kInvalidIndex;
@@ -42,7 +42,7 @@ struct VoiceState {
 
   bool stop_on_slice_end = false;
 
-  void Approach(const VoiceParams& new_params, double coeff) noexcept {
+  void Approach(const VoiceParams& new_params, float coeff) noexcept {
     params.filter_params.Approach(new_params.filter_params, coeff);
     ApproachValue(params.gain, note_params.gain * new_params.gain, coeff);
     ApproachValue(params.bit_crusher_increment, new_params.bit_crusher_increment, coeff);
@@ -60,29 +60,28 @@ struct VoiceState {
   }
 
   void Start(const InstrumentParams& instrument_params, const SliceState* slice,
-             double note_pitch) noexcept {
+             float note_pitch) noexcept {
     params = instrument_params.voice_params;
-    note_params = {.gain = 1.0};
+    note_params = {.gain = 1.0f};
     pitch = note_pitch;
-    pitch_shift = 0.0;
+    pitch_shift = 0.0f;
     UpdatePitchIncrements(slice);
     bit_crusher.Reset();
     filter.Reset();
-    osc_phase = 0.0;
-    slice_offset = 0.0;
+    osc_phase = 0.0f;
+    slice_offset = 0.0f;
     stop_on_slice_end = false;
     envelope.Start(instrument_params.adsr);
     timestamp = 0;
   }
 
   void UpdatePitchIncrements(const SliceState* slice) noexcept {
-    const double shifted_pitch = pitch + pitch_shift;
-    note_params.osc_increment = std::pow(2.0, shifted_pitch);
+    const float shifted_pitch = pitch + pitch_shift;
+    note_params.osc_increment = std::pow(2.0f, shifted_pitch);
     note_params.slice_increment =
         (slice != nullptr && slice->sample_count > 0)
-            ? slice->sample_rate *
-                  std::pow(2.0, shifted_pitch - static_cast<double>(slice->root_pitch))
-            : 0.0;
+            ? slice->sample_rate * std::pow(2.0f, shifted_pitch - slice->root_pitch)
+            : 0.0f;
   }
 };
 

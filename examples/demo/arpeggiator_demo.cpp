@@ -33,39 +33,39 @@ constexpr int kFrameCount = 256;
 constexpr double kLookahead = 0.05;
 
 // Engine settings.
-constexpr double kDelayTime = 0.5;
-constexpr double kDelayFeedback = 0.2;
-constexpr double kDelayLpfCutoff = 0.2;
+constexpr float kDelayTime = 0.5f;
+constexpr float kDelayFeedback = 0.2f;
+constexpr float kDelayLpfCutoff = 0.2f;
 constexpr double kSpeed = 140.0 / 60.0;
 
 // Instrument settings.
-constexpr double kGain = 1.0;
-constexpr double kOscShape = 0.75;
-constexpr double kAttack = 0.005;
-constexpr double kRelease = 0.2;
+constexpr float kGain = 1.0f;
+constexpr float kOscShape = 0.75f;
+constexpr float kAttack = 0.005f;
+constexpr float kRelease = 0.2f;
 constexpr int kVoiceCount = 16;
-constexpr double kDelaySend = 0.2;
+constexpr float kDelaySend = 0.2f;
 
 // Arpeggiator settings.
 constexpr Arpeggiator::Mode kArpMode = Arpeggiator::Mode::kUp;
-constexpr double kArpGate = 0.5;
-constexpr double kArpRate = 2.0;
+constexpr float kArpGate = 0.5f;
+constexpr float kArpRate = 2.0f;
 
 // Note settings.
 constexpr std::array<char, 13> kOctaveKeys = {
     'A', 'W', 'S', 'E', 'D', 'F', 'T', 'G', 'Y', 'H', 'U', 'J', 'K',
 };
-constexpr double kRootPitch = 0.0;
+constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
 
 // Returns the pitch for a given `key`.
-std::optional<double> KeyToPitch(int octave_shift, const InputManager::Key& key) {
+std::optional<float> KeyToPitch(int octave_shift, const InputManager::Key& key) {
   const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  return kRootPitch + static_cast<double>(octave_shift) +
-         static_cast<double>(std::distance(kOctaveKeys.begin(), it)) / 12.0;
+  return kRootPitch + static_cast<float>(octave_shift) +
+         static_cast<float>(std::distance(kOctaveKeys.begin(), it)) / 12.0f;
 }
 
 }  // namespace
@@ -85,7 +85,7 @@ int main() {
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
-  instrument.SetControl(InstrumentControlType::kOscMix, 1.0);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kAttack, kAttack);
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
@@ -96,11 +96,11 @@ int main() {
   arp.SetGateRatio(kArpGate);
   arp.SetMode(kArpMode);
   arp.SetRate(kArpRate);
-  arp.SetNoteCallback([](double pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
+  arp.SetNoteCallback([](float pitch) { ConsoleLog() << "Note(" << pitch << ")"; });
 
   // Audio process callback.
   audio_output.SetProcessCallback(
-      [&](double* output_samples, int output_channel_count, int output_frame_count) {
+      [&](float* output_samples, int output_channel_count, int output_frame_count) {
         engine.Process(output_samples, output_channel_count, output_frame_count,
                        audio_clock.GetTimestamp());
         audio_clock.Update(output_frame_count);

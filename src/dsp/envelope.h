@@ -15,83 +15,83 @@ class Envelope {
   // Attack-Decay-Sustain-Release.
   class Adsr {
    public:
-    void SetAttack(double sample_rate, double attack) noexcept {
+    void SetAttack(float sample_rate, float attack) noexcept {
       attack_coeff_ = GetCoefficient(sample_rate, attack);
     }
 
-    void SetDecay(double sample_rate, double decay) noexcept {
+    void SetDecay(float sample_rate, float decay) noexcept {
       decay_coeff_ = GetCoefficient(sample_rate, decay);
     }
 
-    void SetRelease(double sample_rate, double release) noexcept {
-      static constexpr double kMinRelease = 5e-3;  // 5ms
+    void SetRelease(float sample_rate, float release) noexcept {
+      static constexpr float kMinRelease = 5e-3f;  // 5ms
       release_coeff_ = GetCoefficient(sample_rate, std::max(release, kMinRelease));
     }
 
-    void SetSustain(double sustain) noexcept { sustain_ = std::clamp(sustain, 0.0, 1.0); }
+    void SetSustain(float sustain) noexcept { sustain_ = std::clamp(sustain, 0.0f, 1.0f); }
 
    private:
     friend class Envelope;
 
-    double attack_coeff_ = 0.0;
-    double decay_coeff_ = 0.0;
-    double release_coeff_ = 0.0;
-    double sustain_ = 1.0;
+    float attack_coeff_ = 0.0f;
+    float decay_coeff_ = 0.0f;
+    float release_coeff_ = 0.0f;
+    float sustain_ = 1.0f;
   };
 
-  double Next() noexcept {
+  float Next() noexcept {
     assert(adsr_ != nullptr);
 
     switch (state_) {
       case State::kAttack:
-        target_ = (adsr_->decay_coeff_ > 0.0) ? 1.0 : adsr_->sustain_;
-        if (coeff_ == 0.0 || (current_ + kEnvelopeEpsilon) >= target_) {
+        target_ = (adsr_->decay_coeff_ > 0.0f) ? 1.0f : adsr_->sustain_;
+        if (coeff_ == 0.0f || (current_ + kEnvelopeEpsilon) >= target_) {
           current_ = target_;
           target_ = adsr_->sustain_;
-          if (adsr_->decay_coeff_ > 0.0) {
+          if (adsr_->decay_coeff_ > 0.0f) {
             state_ = State::kDecay;
             coeff_ = adsr_->decay_coeff_;
           } else {
             state_ = State::kSustain;
-            coeff_ = 0.0;
+            coeff_ = 0.0f;
           }
         }
         break;
       case State::kDecay:
-        if (coeff_ == 0.0 || current_ <= (target_ + kEnvelopeEpsilon)) {
+        if (coeff_ == 0.0f || current_ <= (target_ + kEnvelopeEpsilon)) {
           current_ = target_;
           state_ = State::kSustain;
-          coeff_ = 0.0;
+          coeff_ = 0.0f;
         }
         break;
       case State::kRelease:
         if (current_ <= kEnvelopeEpsilon) {
-          current_ = 0.0;
+          current_ = 0.0f;
           state_ = State::kIdle;
-          coeff_ = 0.0;
+          coeff_ = 0.0f;
         }
         break;
       case State::kIdle:
-        return 0.0;
+        return 0.0f;
       default:
         break;
     }
 
-    const double output = current_;
+    const float output = current_;
     current_ = target_ + coeff_ * (current_ - target_);
     return output;
   }
 
   void Reset() noexcept {
-    current_ = 0.0;
-    target_ = 0.0;
+    current_ = 0.0f;
+    target_ = 0.0f;
     state_ = State::kIdle;
   }
 
   void Start(const Adsr& adsr) noexcept {
     adsr_ = &adsr;
     state_ = State::kAttack;
-    target_ = (adsr_->decay_coeff_ > 0.0) ? 1.0 : adsr_->sustain_;
+    target_ = (adsr_->decay_coeff_ > 0.0f) ? 1.0f : adsr_->sustain_;
     coeff_ = adsr_->attack_coeff_;
   }
 
@@ -99,11 +99,11 @@ class Envelope {
     if (state_ == State::kIdle || state_ == State::kRelease) {
       return;
     }
-    if (state_ == State::kAttack && coeff_ == 0.0) {
+    if (state_ == State::kAttack && coeff_ == 0.0f) {
       current_ = target_;
     }
     state_ = State::kRelease;
-    target_ = 0.0;
+    target_ = 0.0f;
     coeff_ = adsr_->release_coeff_;
   }
 
@@ -112,7 +112,7 @@ class Envelope {
   [[nodiscard]] constexpr bool IsOn() const noexcept { return state_ < State::kRelease; }
 
   [[nodiscard]] constexpr bool IsStartFrame() const noexcept {
-    return state_ == State::kAttack && current_ == 0.0;
+    return state_ == State::kAttack && current_ == 0.0f;
   }
 
  private:
@@ -120,9 +120,9 @@ class Envelope {
 
   const Adsr* adsr_ = nullptr;
 
-  double current_ = 0.0;
-  double target_ = 0.0;
-  double coeff_ = 0.0;
+  float current_ = 0.0f;
+  float target_ = 0.0f;
+  float coeff_ = 0.0f;
 
   State state_ = State::kIdle;
 };

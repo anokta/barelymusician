@@ -50,13 +50,13 @@ int32_t BarelyEngineConfig_GetRequiredSize(const BarelyEngineConfig* config) {
 
 double BarelyQuantization_GetPosition(const BarelyQuantization* quantization, double position) {
   return (quantization != nullptr)
-             ? barely::Quantize(position, std::max<int32_t>(quantization->subdivision, 1),
-                                std::clamp(quantization->amount, 0.0, 1.0))
+             ? barely::Quantize(position, std::max(quantization->subdivision, 1),
+                                std::clamp(quantization->amount, 0.0f, 1.0f))
              : position;
 }
 
-double BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree) {
-  return (scale != nullptr) ? barely::GetPitch(*scale, degree) : 0.0;
+float BarelyScale_GetPitch(const BarelyScale* scale, int32_t degree) {
+  return (scale != nullptr) ? barely::GetPitch(*scale, degree) : 0.0f;
 }
 
 BarelyEngine* BarelyEngine_Create(const BarelyEngineConfig* config, void* allocation,
@@ -111,14 +111,13 @@ double BarelyEngine_GetTimestamp(const BarelyEngine* engine) {
   return (engine != nullptr) ? engine->state.timestamp : 0.0;
 }
 
-void BarelyEngine_Process(BarelyEngine* engine, double* output_samples,
-                          int32_t output_channel_count, int32_t output_frame_count,
-                          double timestamp) {
+void BarelyEngine_Process(BarelyEngine* engine, float* output_samples, int32_t output_channel_count,
+                          int32_t output_frame_count, double timestamp) {
   if (!engine || !output_samples || output_channel_count <= 0 || output_frame_count <= 0) return;
   engine->processor.Process(output_samples, output_channel_count, output_frame_count, timestamp);
 }
 
-void BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type, double value) {
+void BarelyEngine_SetControl(BarelyEngine* engine, BarelyEngineControlType type, float value) {
   if (engine != nullptr && type < BarelyEngineControlType_kCount) {
     engine->controller.SetControl(type, value);
   }
@@ -153,7 +152,7 @@ void BarelyInstrument_Destroy(BarelyEngine* engine, uint32_t instrument_id) {
 }
 
 void BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instrument_id,
-                                 BarelyInstrumentControlType type, double value) {
+                                 BarelyInstrumentControlType type, float value) {
   if (engine != nullptr && engine->IsValidInstrument(instrument_id) &&
       type < BarelyInstrumentControlType_kCount) {
     engine->controller.instrument_controller().SetControl(engine->state.GetIdIndex(instrument_id),
@@ -161,8 +160,8 @@ void BarelyInstrument_SetControl(BarelyEngine* engine, uint32_t instrument_id,
   }
 }
 
-void BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_id, double pitch,
-                                     BarelyNoteControlType type, double value) {
+void BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_id, float pitch,
+                                     BarelyNoteControlType type, float value) {
   if (engine != nullptr && engine->IsValidInstrument(instrument_id) &&
       type < BarelyNoteControlType_kCount) {
     engine->controller.instrument_controller().SetNoteControl(
@@ -170,14 +169,14 @@ void BarelyInstrument_SetNoteControl(BarelyEngine* engine, uint32_t instrument_i
   }
 }
 
-void BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id, double pitch) {
+void BarelyInstrument_SetNoteOff(BarelyEngine* engine, uint32_t instrument_id, float pitch) {
   if (engine != nullptr && engine->IsValidInstrument(instrument_id)) {
     engine->controller.instrument_controller().SetNoteOff(engine->state.GetIdIndex(instrument_id),
                                                           pitch);
   }
 }
 
-void BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id, double pitch) {
+void BarelyInstrument_SetNoteOn(BarelyEngine* engine, uint32_t instrument_id, float pitch) {
   if (engine != nullptr && engine->IsValidInstrument(instrument_id)) {
     engine->controller.instrument_controller().SetNoteOn(engine->state.GetIdIndex(instrument_id),
                                                          pitch);

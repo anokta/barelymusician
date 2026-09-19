@@ -9,39 +9,39 @@ namespace {
 
 // Test input.
 constexpr int kInputLength = 5;
-constexpr double kInput[kInputLength] = {0.2, -0.4, 0.6, -0.8, 1.0};
+constexpr float kInput[kInputLength] = {0.2f, -0.4f, 0.6f, -0.8f, 1.0f};
 
 TEST(BitCrusherTest, BitDepth) {
-  constexpr double kIncrement = 1.0;
+  constexpr float kIncrement = 1.0f;
 
   BitCrusher bit_crusher;
-  for (const double input : kInput) {
-    EXPECT_DOUBLE_EQ(bit_crusher.Next(input, 0.0, kIncrement), input);              // bypass
-    EXPECT_DOUBLE_EQ(bit_crusher.Next(input, 1.0, kIncrement), std::round(input));  // 1-bit
+  for (const float input : kInput) {
+    EXPECT_FLOAT_EQ(bit_crusher.Next(input, 0.0f, kIncrement), input);              // bypass
+    EXPECT_FLOAT_EQ(bit_crusher.Next(input, 1.0f, kIncrement), std::round(input));  // 1-bit
   }
 }
 
 TEST(BitCrusherTest, SampleRate) {
-  constexpr double kRange = 0.0;
+  constexpr float kRange = 0.0f;
 
   BitCrusher bit_crusher;
 
   // Bypass.
-  for (const double input : kInput) {
-    EXPECT_DOUBLE_EQ(bit_crusher.Next(input, kRange, 1.0), input);
+  for (const float input : kInput) {
+    EXPECT_FLOAT_EQ(bit_crusher.Next(input, kRange, 1.0f), input);
   }
   bit_crusher.Reset();
 
   // Hold every other sample.
   for (int i = 0; i < kInputLength; ++i) {
-    EXPECT_DOUBLE_EQ(bit_crusher.Next(kInput[i], kRange, 0.5),
-                     (i > 0) ? kInput[2 * ((i - 1) / 2) + 1] : 0.0);
+    EXPECT_FLOAT_EQ(bit_crusher.Next(kInput[i], kRange, 0.5f),
+                    (i > 0) ? kInput[2 * ((i - 1) / 2) + 1] : 0.0f);
   }
   bit_crusher.Reset();
 
   // Hold forever.
-  for (const double input : kInput) {
-    EXPECT_DOUBLE_EQ(bit_crusher.Next(input, kRange, 0.0), 0.0);
+  for (const float input : kInput) {
+    EXPECT_FLOAT_EQ(bit_crusher.Next(input, kRange, 0.0f), 0.0f);
   }
 }
 

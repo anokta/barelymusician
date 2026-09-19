@@ -30,15 +30,15 @@ static const double kLookahead = 0.05;
 static const double kSpeed = 0.99;
 
 // Instrument settings.
-static const double kGain = 0.9;
-static const double kOscShape = 0.75;
-static const double kAttack = 0.01;
-static const double kRelease = 0.2;
+static const float kGain = 0.9f;
+static const float kOscShape = 0.75f;
+static const float kAttack = 0.005f;
+static const float kRelease = 0.2f;
 
 enum {
   kMelodyNoteCount = 7,
 };
-static const double kMelodyPitches[kMelodyNoteCount] = {0.0, 0.25, 0.5, 1.0, 0.5, 0.25, 0.0};
+static const float kMelodyPitches[kMelodyNoteCount] = {0.0f, 0.25f, 0.5f, 1.0f, 0.5f, 0.25f, 0.0f};
 static const double kMelodyPositions[kMelodyNoteCount + 1] = {
     0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0,
 };
@@ -46,18 +46,14 @@ static const double kMelodyPositions[kMelodyNoteCount + 1] = {
 static bool g_is_playing = true;
 static uint32_t g_instrument_id = 0;
 static volatile double g_timestamp = 0.0;
-static double* g_output_samples = NULL;
 
 static void AudioProcessCallback(ma_device* device, void* output, const void* input,
                                  ma_uint32 frame_count) {
   (void)input;  // unused
   assert(device != NULL);
   assert(device->pUserData != NULL);
-  BarelyEngine_Process((BarelyEngine*)device->pUserData, g_output_samples,
+  BarelyEngine_Process((BarelyEngine*)device->pUserData, (float*)output,
                        (int32_t)device->playback.channels, (int32_t)frame_count, g_timestamp);
-  for (int i = 0; i < kChannelCount * kFrameCount; ++i) {
-    ((float*)output)[i] = (float)g_output_samples[i];
-  }
   g_timestamp += (double)frame_count / (double)kSampleRate;
 }
 
@@ -65,13 +61,13 @@ static void TaskCallback(BarelyTaskEventType type, void* user_data) {
   static int note_index = 0;
   if (type == BarelyTaskEventType_kBegin) {
     assert(note_index < kMelodyNoteCount);
-    const double pitch = kMelodyPitches[note_index++];
+    const float pitch = kMelodyPitches[note_index++];
     BarelyInstrument_SetNoteOn((BarelyEngine*)user_data, g_instrument_id, pitch);
     printf("NoteOn(%.1f)\n", pitch);
   } else if (type == BarelyTaskEventType_kEnd) {
     assert(note_index > 0);
     assert(note_index <= kMelodyNoteCount);
-    const double pitch = kMelodyPitches[note_index - 1];
+    const float pitch = kMelodyPitches[note_index - 1];
     BarelyInstrument_SetNoteOff((BarelyEngine*)user_data, g_instrument_id, pitch);
     printf("NoteOff(%.1f)\n", pitch);
     if (note_index == kMelodyNoteCount) {
@@ -84,7 +80,7 @@ int main(void) {
   // Initialize the engine.
   BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(kSampleRate);
   const int32_t allocation_size = BarelyEngineConfig_GetRequiredSize(&config);
-  printf("Allocating %.2f KB...\n", (double)allocation_size / 1024.0);
+  printf("Allocating %.2f KB...\n", (float)allocation_size / 1024.0f);
   void* allocation = malloc(allocation_size);
 
   BarelyEngine* engine = BarelyEngine_Create(&config, allocation, allocation_size);
@@ -92,7 +88,7 @@ int main(void) {
 
   g_instrument_id = BarelyEngine_CreateInstrument(engine);
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kGain, kGain);
-  BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kOscMix, 1.0);
+  BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kOscMix, 1.0f);
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kOscShape,
                               kOscShape);
   BarelyInstrument_SetControl(engine, g_instrument_id, BarelyInstrumentControlType_kAttack,
@@ -107,8 +103,6 @@ int main(void) {
                                engine);
   }
 
-  g_output_samples = malloc(kChannelCount * kFrameCount * sizeof(double));
-
   // Initialize the audio device.
   ma_device device;
   ma_device_config device_config = ma_device_config_init(ma_device_type_playback);
@@ -122,8 +116,6 @@ int main(void) {
   const ma_result result = ma_device_init(NULL, &device_config, &device);
   if (result != MA_SUCCESS) {
     printf("Failed to initialize audio device\n");
-    free(allocation);
-    free(g_output_samples);
     return result;
   }
   ma_device_start(&device);
@@ -147,7 +139,6 @@ int main(void) {
   // Shutdown the engine.
   BarelyEngine_Destroy(engine);
   free(allocation);
-  free(g_output_samples);
 
   return 0;
 }

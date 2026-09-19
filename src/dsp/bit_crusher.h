@@ -11,25 +11,25 @@ namespace barely {
 // Bit crusher effect with bit depth and sample rate reduction.
 class BitCrusher {
  public:
-  [[nodiscard]] double Next(double input, double range, double increment) noexcept {
-    assert(range >= 0.0);
-    assert(increment >= 0.0);
+  [[nodiscard]] float Next(float input, float range, float increment) noexcept {
+    assert(range >= 0.0f);
+    assert(increment >= 0.0f);
     phase_ += increment;
-    if (phase_ >= 1.0) {
-      output_ = (range > 0.0) ? (std::round(input * range) / range) : input;
-      phase_ -= 1.0;
+    if (phase_ >= 1.0f) {
+      output_ = (range > 0.0f) ? (std::round(input * range) / range) : input;
+      phase_ -= 1.0f;
     }
     return output_;
   }
 
   void Reset() noexcept {
-    output_ = 0.0;
-    phase_ = 0.0;
+    output_ = 0.0f;
+    phase_ = 0.0f;
   }
 
  private:
-  double output_ = 0.0;
-  double phase_ = 0.0;
+  float output_ = 0.0f;
+  float phase_ = 0.0f;
 };
 
 }  // namespace barely

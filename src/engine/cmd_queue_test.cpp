@@ -2,7 +2,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 
+#include "core/arena.h"
 #include "engine/cmd.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -19,7 +21,10 @@ namespace barely {
 namespace {
 
 TEST(CmdQueueTest, AddSingleCmd) {
-  CmdQueue cmds;
+  const auto size = GetAllocSize<CmdQueue>();
+  const auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  CmdQueue cmds(arena);
   EXPECT_THAT(cmds.GetNext(0), IsNull());
   EXPECT_THAT(cmds.GetNext(1), IsNull());
   EXPECT_THAT(cmds.GetNext(10), IsNull());
@@ -36,7 +41,10 @@ TEST(CmdQueueTest, AddSingleCmd) {
 }
 
 TEST(CmdQueueTest, AddMultipleCmds) {
-  CmdQueue cmds;
+  const auto size = GetAllocSize<CmdQueue>();
+  const auto data = std::make_unique<std::byte[]>(size);
+  Arena arena(data.get(), size);
+  CmdQueue cmds(arena);
   EXPECT_THAT(cmds.GetNext(10), IsNull());
 
   for (uint32_t i = 0; i < 10; ++i) {

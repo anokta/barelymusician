@@ -5,7 +5,7 @@ import {INSTRUMENT_CONTROLS, NoteControlType} from './control.js';
 const RENDER_QUANTUM_SIZE = 128;
 const STEREO_CHANNEL_COUNT = 2;
 
-const ENGINE_CONFIG_SIZE = 28;  // sizeof(BarelyEngineConfig)
+const ENGINE_CONFIG_SIZE = 24;  // sizeof(BarelyEngineConfig)
 const SLICE_SIZE = 24;          // sizeof(BarelySlice)
 
 class Processor extends AudioWorkletProcessor {
@@ -33,14 +33,13 @@ class Processor extends AudioWorkletProcessor {
           STEREO_CHANNEL_COUNT * RENDER_QUANTUM_SIZE * Float32Array.BYTES_PER_ELEMENT);
 
       const configPtr = this._module._malloc(ENGINE_CONFIG_SIZE);
-      const configView = new Int32Array(this._module.HEAP32.buffer, configPtr, 8);
-      configView[0] = sampleRate;           // sample_rate
-      configView[1] = 32;                   // max_instrument_count
-      configView[2] = 32;                   // max_performer_count
-      configView[3] = 512;                  // max_task_count
-      configView[4] = RENDER_QUANTUM_SIZE;  // max_frame_count
-      configView[5] = 128;                  // max_slice_count
-      configView[6] = 128;                  // max_voice_count
+      const configView = new Int32Array(this._module.HEAP32.buffer, configPtr, 6);
+      configView[0] = sampleRate;  // sample_rate
+      configView[1] = 32;          // max_instrument_count
+      configView[2] = 32;          // max_performer_count
+      configView[3] = 512;         // max_task_count
+      configView[4] = 128;         // max_slice_count
+      configView[5] = 128;         // max_voice_count
 
       const allocationSize = this._module._BarelyEngineConfig_GetRequiredSize(configPtr);
       this._allocationPtr = this._module._malloc(allocationSize * Uint8Array.BYTES_PER_ELEMENT);

@@ -45,6 +45,8 @@ struct EngineState {
         voice_pool(arena, config.max_voice_count),
         slice_pool(arena, config.max_slice_count),
 
+        cmd_queue(arena),
+
         instrument_generations(arena.AllocArray<uint32_t>(config.max_instrument_count)),
         performer_generations(arena.AllocArray<uint32_t>(config.max_performer_count)),
         task_generations(arena.AllocArray<uint32_t>(config.max_task_count)),
@@ -52,7 +54,6 @@ struct EngineState {
         instrument_params(arena.AllocArray<InstrumentParams>(config.max_instrument_count)),
         queued_sample_data_counts(
             arena.AllocArray<std::atomic<int32_t>>(config.max_instrument_count)),
-        temp_samples(arena.AllocArray<float>(kStereoChannelCount * config.max_frame_count)),
 
         sample_rate(static_cast<float>(config.sample_rate)),
         smoothing_coeff(GetCoefficient(sample_rate, /*50ms*/ 0.05f)),
@@ -60,14 +61,10 @@ struct EngineState {
         id_index_bit_count(std::bit_width(std::bit_ceil(static_cast<uint32_t>(std::max(
             {config.max_instrument_count, config.max_performer_count, config.max_task_count}))))),
         id_index_mask((1u << id_index_bit_count) - 1u),
-        id_generation_mask((1u << (32u - id_index_bit_count)) - 1u),
-
-        max_frame_count(static_cast<uint32_t>(config.max_frame_count)) {
+        id_generation_mask((1u << (32u - id_index_bit_count)) - 1u) {
     assert(id_index_bit_count < 32);
     assert(sample_rate > 0.0f);
   }
-
-  CmdQueue cmd_queue;
 
   MainRng main_rng;
   AudioRng audio_rng;
@@ -88,6 +85,8 @@ struct EngineState {
 
   SlicePool slice_pool;
 
+  CmdQueue cmd_queue;
+
   uint32_t* instrument_generations = nullptr;
   uint32_t* performer_generations = nullptr;
   uint32_t* task_generations = nullptr;
@@ -95,8 +94,6 @@ struct EngineState {
   InstrumentParams* instrument_params = nullptr;
 
   std::atomic<int32_t>* queued_sample_data_counts = nullptr;  // queued commands per instrument
-
-  float* temp_samples = nullptr;
 
   double speed = 1.0;        // beats per second
   double timestamp = 0.0;    // seconds
@@ -107,8 +104,6 @@ struct EngineState {
   uint32_t id_index_bit_count = 0;
   uint32_t id_index_mask = 0;
   uint32_t id_generation_mask = 0;
-
-  uint32_t max_frame_count = 0;
 
   std::atomic_bool process_fence;
 

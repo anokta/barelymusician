@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <bit>
 #include <cstdint>
 
 #include "godot_cpp/classes/audio_frame.hpp"
@@ -12,6 +13,7 @@
 #include "godot_cpp/classes/audio_stream_player.hpp"
 #include "godot_cpp/classes/engine.hpp"
 #include "godot_cpp/classes/object.hpp"
+#include "godot_cpp/classes/project_settings.hpp"
 #include "godot_cpp/classes/ref.hpp"
 #include "godot_cpp/classes/scene_tree.hpp"
 #include "godot_cpp/classes/window.hpp"
@@ -28,6 +30,7 @@ using ::godot::ClassDB;
 using ::godot::D_METHOD;
 using ::godot::Engine;
 using ::godot::Object;
+using ::godot::ProjectSettings;
 using ::godot::PropertyHint;
 using ::godot::PropertyInfo;
 using ::godot::Ref;
@@ -39,6 +42,8 @@ using ::godot::Variant;
   ClassDB::bind_method(D_METHOD(BARELY_STR(get_##name)), &BarelyEngine::get_##name);
 #define BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL(Name, name, type, default) \
   BarelyEngine_SetControl(engine_, BarelyEngineControlType_k##Name, static_cast<float>(name##_));
+
+static constexpr int32_t kStereoChannelCount = 2;
 
 double BarelyAudioStreamPlayback::get_audio_timestamp() {
   return timestamp_.load(std::memory_order_relaxed);
@@ -101,11 +106,20 @@ void BarelyEngine::set_speed(double speed) {
 
 ::BarelyEngine* BarelyEngine::get() {
   if (engine_ == nullptr) {
-    sample_rate_ = static_cast<int32_t>(AudioServer::get_singleton()->get_mix_rate());
+    const AudioServer* audio_server = AudioServer::get_singleton();
+    if (audio_server == nullptr) {
+      return nullptr;
+    }
+    sample_rate_ = static_cast<int32_t>(audio_server->get_mix_rate());
+    const int32_t max_frame_count = static_cast<int32_t>(std::bit_ceil(static_cast<uint32_t>(
+        std::ceil(audio_server->get_mix_rate() *
+                  static_cast<float>(ProjectSettings::get_singleton()->get_setting_with_override(
+                      "audio/driver/output_latency")) *
+                  0.001f))));
     const BarelyEngineConfig config = BARELY_ENGINE_CONFIG_DEFAULT(sample_rate_);
     const int32_t allocation_size = BarelyEngineConfig_GetRequiredSize(&config);
     engine_allocation_.resize(allocation_size);
-    temp_samples_.resize(config.max_frame_count);
+    temp_samples_.resize(max_frame_count * kStereoChannelCount);
     engine_ = BarelyEngine_Create(&config, engine_allocation_.data(), allocation_size);
     BarelyEngine_SetSpeed(engine_, speed_);
     BARELY_GODOT_ENGINE_CONTROLS(BARELY_SET_DEFAULT_GODOT_ENGINE_CONTROL);
@@ -125,12 +139,11 @@ void BarelyEngine::set_speed(double speed) {
 }
 
 void BarelyEngine::process(AudioFrame* buffer, int32_t frame_count, double timestamp) {
-  static constexpr int32_t kStereoChannelCount = 2;
-  const int32_t process_frame_count =
-      std::min(static_cast<int32_t>(temp_samples_.size()), frame_count);
-  BarelyEngine_Process(engine_, temp_samples_.data(), kStereoChannelCount, process_frame_count,
-                       timestamp);
-  for (int32_t frame = 0; frame < process_frame_count; ++frame) {
+  if (temp_samples_.size() < frame_count) {
+    temp_samples_.resize(frame_count);  // recover gracefully (although this should never happen)
+  }
+  BarelyEngine_Process(engine_, temp_samples_.data(), kStereoChannelCount, frame_count, timestamp);
+  for (int32_t frame = 0; frame < frame_count; ++frame) {
     buffer[frame].left = temp_samples_[frame * kStereoChannelCount];
     buffer[frame].right = temp_samples_[frame * kStereoChannelCount + 1];
   }

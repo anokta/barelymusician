@@ -34,9 +34,8 @@ class EngineProcessor {
     assert(output_samples != nullptr);
     assert(output_channel_count > 0);
     assert(output_frame_count > 0);
-    assert(output_frame_count <= static_cast<int>(engine_.max_frame_count));
 
-    std::fill_n(engine_.temp_samples, kStereoChannelCount * output_frame_count, 0.0f);
+    std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
 
     const int64_t process_frame = SecondsToFrames(engine_.sample_rate, timestamp);
     const int64_t end_frame = process_frame + output_frame_count;
@@ -49,7 +48,7 @@ class EngineProcessor {
          cmd = engine_.cmd_queue.GetNext(end_frame)) {
       if (const int cmd_frame = static_cast<int>(cmd->first - process_frame);
           current_frame < cmd_frame) {
-        ProcessSamples(&engine_.temp_samples[kStereoChannelCount * current_frame],
+        ProcessSamples(&output_samples[current_frame * output_channel_count], output_channel_count,
                        cmd_frame - current_frame);
         current_frame = cmd_frame;
       }
@@ -58,27 +57,11 @@ class EngineProcessor {
 
     // Process the rest of the samples.
     if (current_frame < output_frame_count) {
-      ProcessSamples(&engine_.temp_samples[kStereoChannelCount * current_frame],
+      ProcessSamples(&output_samples[current_frame * output_channel_count], output_channel_count,
                      output_frame_count - current_frame);
     }
 
     engine_.process_fence.store(false, std::memory_order_release);
-
-    // Fill the output samples.
-    if (output_channel_count > 1) {
-      std::fill_n(output_samples, output_channel_count * output_frame_count, 0.0f);
-      for (int frame = 0; frame < output_frame_count; ++frame) {
-        output_samples[output_channel_count * frame] =
-            engine_.temp_samples[kStereoChannelCount * frame];
-        output_samples[output_channel_count * frame + 1] =
-            engine_.temp_samples[kStereoChannelCount * frame + 1];
-      }
-    } else {  // downmix to mono.
-      for (int frame = 0; frame < output_frame_count; ++frame) {
-        output_samples[frame] = engine_.temp_samples[kStereoChannelCount * frame] +
-                                engine_.temp_samples[kStereoChannelCount * frame + 1];
-      }
-    }
   }
 
   void SetControl(BarelyEngineControlType type, float value) noexcept {
@@ -201,31 +184,41 @@ class EngineProcessor {
         cmd);
   }
 
-  void ProcessSamples(float* output_samples, int output_frame_count) noexcept {
-    for (int frame = 0; frame < output_frame_count; ++frame) {
-      float delay_frame[kStereoChannelCount] = {};
-      float reverb_frame[kStereoChannelCount] = {};
-      float sidechain_frame[kStereoChannelCount] = {};
-      float* output_frame = &output_samples[kStereoChannelCount * frame];
+  void ProcessFrame(float output_frame[kStereoChannelCount]) {
+    float delay_frame[kStereoChannelCount] = {};
+    float reverb_frame[kStereoChannelCount] = {};
+    float sidechain_frame[kStereoChannelCount] = {};
 
-      instrument_processor_.ProcessAllVoices<true>(delay_frame, reverb_frame, sidechain_frame,
-                                                   output_frame);
-      engine_.sidechain.Process(sidechain_frame, engine_.current_params.sidechain_params);
-      instrument_processor_.ProcessAllVoices<false>(delay_frame, reverb_frame, sidechain_frame,
-                                                    output_frame);
+    instrument_processor_.ProcessAllVoices<true>(delay_frame, reverb_frame, sidechain_frame,
+                                                 output_frame);
+    engine_.sidechain.Process(sidechain_frame, engine_.current_params.sidechain_params);
+    instrument_processor_.ProcessAllVoices<false>(delay_frame, reverb_frame, sidechain_frame,
+                                                  output_frame);
 
-      engine_.delay_filter.Process(delay_frame, reverb_frame, output_frame,
-                                   engine_.current_params.delay_params);
-      engine_.reverb.Process(reverb_frame, output_frame, engine_.current_params.reverb_params);
+    engine_.delay_filter.Process(delay_frame, reverb_frame, output_frame,
+                                 engine_.current_params.delay_params);
+    engine_.reverb.Process(reverb_frame, output_frame, engine_.current_params.reverb_params);
 
-      engine_.comp.Process(output_frame, engine_.current_params.comp_params);
+    engine_.comp.Process(output_frame, engine_.current_params.comp_params);
 
-      // Soft-clip with -6dB headroom.
-      const float gain = 0.5f * engine_.current_params.gain;
-      output_frame[0] = SoftClip(output_frame[0], gain);
-      output_frame[1] = SoftClip(output_frame[1], gain);
+    // Soft-clip with -6dB headroom.
+    const float gain = engine_.current_params.gain * 0.5f;
+    output_frame[0] = SoftClip(output_frame[0], gain);
+    output_frame[1] = SoftClip(output_frame[1], gain);
 
-      engine_.Approach();
+    engine_.Approach();
+  }
+
+  void ProcessSamples(float* output_samples, int32_t output_channel_count,
+                      int32_t output_frame_count) noexcept {
+    for (int32_t frame = 0; frame < output_frame_count; ++frame) {
+      if (output_channel_count > 1) {
+        ProcessFrame(&output_samples[frame * output_channel_count]);
+      } else {  // downmix to mono
+        float stereo_frame[kStereoChannelCount] = {};
+        ProcessFrame(stereo_frame);
+        output_samples[frame] = stereo_frame[0] + stereo_frame[1];
+      }
     }
   }
 

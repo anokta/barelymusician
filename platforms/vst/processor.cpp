@@ -14,9 +14,9 @@ namespace barely::vst {
 
 namespace {
 
-constexpr int kStereoChannelCount = 2;
+constexpr int32_t kStereoChannelCount = 2;
 
-float MidiNoteToPitch(Steinberg::int16 midi_note) noexcept {
+[[nodiscard]] float MidiNoteToPitch(Steinberg::int16 midi_note) noexcept {
   return static_cast<float>(midi_note - 60) / 12.0f;
 }
 
@@ -130,7 +130,7 @@ Steinberg::tresult PLUGIN_API Processor::setupProcessing(Steinberg::Vst::Process
       BARELY_INSTRUMENT_CONTROL_TYPES(InstrumentControlType, BARELY_FETCH_DEFAULT)
 #undef BARELY_FETCH_DEFAULT
   };
-  output_samples_.resize(kStereoChannelCount * setup.maxSamplesPerBlock);
+  output_samples_.resize(setup.maxSamplesPerBlock * kStereoChannelCount);
   return Steinberg::kResultTrue;
 }
 

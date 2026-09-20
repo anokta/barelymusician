@@ -63,8 +63,7 @@ BarelyEngine* BarelyEngine_Create(const BarelyEngineConfig* config, void* alloca
                                   int32_t allocation_size) {
   if (!config || config->sample_rate <= 0 || config->max_instrument_count <= 0 ||
       config->max_performer_count <= 0 || config->max_task_count <= 0 ||
-      config->max_frame_count <= 0 || config->max_slice_count <= 0 ||
-      config->max_voice_count <= 0) {
+      config->max_slice_count <= 0 || config->max_voice_count <= 0) {
     return nullptr;
   }
 

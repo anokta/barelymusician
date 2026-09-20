@@ -21,7 +21,7 @@ inline constexpr float kMinFilterFreq = 20.0f;
 inline constexpr float kReferenceFreq = 261.62555f;
 
 // Number of stereo channels.
-inline constexpr int kStereoChannelCount = 2;
+inline constexpr int32_t kStereoChannelCount = 2;
 
 }  // namespace barely
 

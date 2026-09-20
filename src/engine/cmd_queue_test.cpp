@@ -2,9 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 
-#include "core/arena.h"
 #include "engine/cmd.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -20,13 +18,8 @@ using ::testing::VariantWith;
 namespace barely {
 namespace {
 
-constexpr uint32_t kMaxCmdCount = 512;
-
 TEST(CmdQueueTest, AddSingleCmd) {
-  const auto size = GetAllocSize<CmdQueue>(kMaxCmdCount);
-  const auto data = std::make_unique<std::byte[]>(size);
-  Arena arena(data.get(), size);
-  CmdQueue cmds(arena, kMaxCmdCount);
+  CmdQueue cmds;
   EXPECT_THAT(cmds.GetNext(0), IsNull());
   EXPECT_THAT(cmds.GetNext(1), IsNull());
   EXPECT_THAT(cmds.GetNext(10), IsNull());
@@ -43,10 +36,7 @@ TEST(CmdQueueTest, AddSingleCmd) {
 }
 
 TEST(CmdQueueTest, AddMultipleCmds) {
-  const size_t size = GetAllocSize<CmdQueue>(kMaxCmdCount);
-  const auto data = std::make_unique<std::byte[]>(size);
-  Arena arena(data.get(), size);
-  CmdQueue cmds(arena, kMaxCmdCount);
+  CmdQueue cmds;
   EXPECT_THAT(cmds.GetNext(10), IsNull());
 
   for (uint32_t i = 0; i < 10; ++i) {

@@ -39,7 +39,6 @@ Engine g_engine{EngineConfig{{
     .max_instrument_count = 1,
     .max_performer_count = 1,
     .max_task_count = 1,
-    .max_command_count = 512,
     .max_frame_count = kFrameCount,
     .max_slice_count = 1,
     .max_voice_count = 32,

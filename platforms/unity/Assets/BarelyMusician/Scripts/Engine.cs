@@ -618,7 +618,6 @@ namespace Barely {
         public Int32 maxInstrumentCount;
         public Int32 maxPerformerCount;
         public Int32 maxTaskCount;
-        public Int32 maxCommandCount;
         public Int32 maxFrameCount;
         public Int32 maxSliceCount;
         public Int32 maxVoiceCount;
@@ -764,7 +763,6 @@ namespace Barely {
             maxInstrumentCount = 100,
             maxPerformerCount = 100,
             maxTaskCount = 4000,
-            maxCommandCount = 4096,
             maxFrameCount = config.dspBufferSize,
             maxSliceCount = 256,
             maxVoiceCount = 200,

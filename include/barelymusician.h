@@ -207,7 +207,6 @@
       .max_instrument_count = 100,                \
       .max_performer_count = 100,                 \
       .max_task_count = 4000,                     \
-      .max_command_count = 4096,                  \
       .max_frame_count = 2048,                    \
       .max_slice_count = 256,                     \
       .max_voice_count = 200,                     \
@@ -315,9 +314,6 @@ typedef struct BarelyEngineConfig {
 
   /// Maximum number of tasks.
   int32_t max_task_count;
-
-  /// Maximum number of commands to process per call.
-  int32_t max_command_count;
 
   /// Maximum number of frames to process per call.
   int32_t max_frame_count;

@@ -16,16 +16,9 @@ namespace barely {
 // Single-consumer single-producer command queue.
 class CmdQueue {
  public:
-  CmdQueue(Arena& arena, uint32_t max_cmd_count) noexcept
-      : cmds_(arena.AllocArray<std::pair<int64_t, Cmd>>(max_cmd_count)),
-        bit_mask_(max_cmd_count - 1) {
-    assert(max_cmd_count > 0);
-    assert(std::has_single_bit(max_cmd_count));
-  }
-
   bool Add(int64_t cmd_frame, Cmd cmd) noexcept {
     const uint32_t index = write_index_.load(std::memory_order_relaxed);
-    const uint32_t next_index = (index + 1) & bit_mask_;
+    const uint32_t next_index = (index + 1) & kBitMask;
     if (next_index == read_index_.load(std::memory_order_acquire)) {
       return false;
     }
@@ -39,18 +32,20 @@ class CmdQueue {
     if (index == write_index_.load(std::memory_order_acquire) || cmds_[index].first >= end_frame) {
       return nullptr;
     }
-    read_index_.store((index + 1) & bit_mask_, std::memory_order_release);
+    read_index_.store((index + 1) & kBitMask, std::memory_order_release);
     return &cmds_[index];
   }
 
  private:
+  inline static constexpr uint32_t kMaxCmdCount = 4096;
+  inline static constexpr uint32_t kBitMask = kMaxCmdCount - 1;
+  static_assert(std::has_single_bit(kMaxCmdCount), "Max command count must be power of two");
+
   // Array of commands with their timestamps in frames.
-  std::pair<int64_t, Cmd>* cmds_ = nullptr;
+  std::array<std::pair<int64_t, Cmd>, kMaxCmdCount> cmds_;
 
   std::atomic<uint32_t> read_index_ = 0;
   std::atomic<uint32_t> write_index_ = 0;
-
-  uint32_t bit_mask_ = 0;
 };
 
 }  // namespace barely

@@ -65,7 +65,7 @@ void InputManager::Update() {
 #if defined(_WIN32) || defined(__CYGWIN__)
   for (int i = 0; i < 128; ++i) {
     const Key key = static_cast<Key>(i);
-    if (GetKeyState(i) >> 1) {
+    if (GetKeyState(i) >> 1) {  // NOLINT(bugprone-signed-bitwise)
       HandleKeyDown(key);
     } else {
       HandleKeyUp(key);

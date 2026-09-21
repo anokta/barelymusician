@@ -11,11 +11,11 @@ namespace barely {
 template <typename EngineType, typename RealType>
 class Rng {
  public:
-  Rng() noexcept : seed_(static_cast<int>(std::time(nullptr) & INT_MAX)), engine_(seed_) {}
+  Rng() noexcept
+      : seed_(static_cast<int32_t>(static_cast<uint32_t>(std::time(nullptr)) & INT_MAX)),
+        engine_(seed_) {}
 
-  [[nodiscard]] int GetSeed() const noexcept { return seed_; }
-
-  void ResetSeed(int seed) noexcept {
+  void ResetSeed(int32_t seed) noexcept {
     assert(seed >= 0);
     seed_ = seed;
     engine_.seed(seed_);
@@ -29,7 +29,7 @@ class Rng {
 
  private:
   std::uniform_real_distribution<RealType> distribution_;
-  int seed_ = 0;
+  int32_t seed_ = 0;
   EngineType engine_;
 };
 

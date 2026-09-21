@@ -8,7 +8,10 @@ Checks: >
 
   clang-analyzer-*,
   concurrency-*,
+
   google-*,
+  -google-explicit-constructor
+
   misc-*,
 
   modernize-*,

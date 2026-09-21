@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -50,7 +49,7 @@ int32_t BarelyEngineConfig_GetRequiredSize(const BarelyEngineConfig* config) {
 
 double BarelyQuantization_GetPosition(const BarelyQuantization* quantization, double position) {
   return (quantization != nullptr)
-             ? barely::Quantize(position, std::max(quantization->subdivision, 1),
+             ? barely::Quantize(position, std::max(quantization->subdivision, int32_t{1}),
                                 std::clamp(quantization->amount, 0.0f, 1.0f))
              : position;
 }

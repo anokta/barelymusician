@@ -16,7 +16,7 @@ namespace barely {
 // Single-consumer single-producer command queue.
 class CmdQueue {
  public:
-  CmdQueue(Arena& arena) noexcept
+  explicit CmdQueue(Arena& arena) noexcept
       : cmds_(arena.AllocArray<std::pair<int64_t, Cmd>>(kMaxCmdCount)) {}
 
   bool Add(int64_t cmd_frame, Cmd cmd) noexcept {
@@ -40,8 +40,8 @@ class CmdQueue {
   }
 
  private:
-  inline static constexpr uint32_t kMaxCmdCount = 4096;
-  inline static constexpr uint32_t kBitMask = kMaxCmdCount - 1;
+  static constexpr uint32_t kMaxCmdCount = 4096;
+  static constexpr uint32_t kBitMask = kMaxCmdCount - 1;
   static_assert(std::has_single_bit(kMaxCmdCount), "Max command count must be power of two");
 
   // Array of commands with their timestamps in frames.

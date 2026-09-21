@@ -39,6 +39,7 @@ void Repeater::Pop() noexcept {
     return;
   }
   if (index_ == static_cast<int>(pitches_.size()) - 1 && IsPlaying()) {
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     instrument_.SetNoteOff(*pitches_.back().first + pitch_offset_);
     remaining_length_ = 0;
   }
@@ -86,6 +87,7 @@ void Repeater::OnBeat() noexcept {
     return;
   }
   if (index_ != -1 && pitches_[index_].first.has_value() && remaining_length_ == 1) {
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     instrument_.SetNoteOff(*pitches_[index_].first + pitch_offset_);
   }
   if (!Update()) {
@@ -94,6 +96,7 @@ void Repeater::OnBeat() noexcept {
   if (!pitches_[index_].first.has_value()) {
     return;
   }
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   const float pitch = *pitches_[index_].first + pitch_offset_;
   instrument_.SetNoteOn(pitch);
   if (note_callback_) {

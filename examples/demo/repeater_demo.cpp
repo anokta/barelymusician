@@ -44,8 +44,9 @@ constexpr double kSpeed = 135.0 / 60.0;
 
 // Note settings.
 constexpr int kKeyCount = 13;
-constexpr std::array<char, kKeyCount> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
-                                                     'G', 'Y', 'H', 'U', 'J', 'K'};
+constexpr std::array<char, kKeyCount> kOctaveKeys = {
+    'A', 'W', 'S', 'E', 'D', 'F', 'T', 'G', 'Y', 'H', 'U', 'J', 'K',
+};
 constexpr float kRootPitch = 0.0f;
 constexpr int kMaxOctaveShift = 4;
 

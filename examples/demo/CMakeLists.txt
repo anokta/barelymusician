@@ -32,15 +32,16 @@ function(add_demo source_file)
       ${ARGN}
     )
   endif()
-  add_custom_command(
-    TARGET ${DEMO_TARGET_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${DEMO_TARGET_NAME}>/data"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/examples/data"
-    "$<TARGET_FILE_DIR:${DEMO_TARGET_NAME}>/data"
-  )
+  add_dependencies(${DEMO_TARGET_NAME} barelymusician_examples_data)
   add_dependencies(barelymusician_examples ${DEMO_TARGET_NAME})
 endfunction()
 add_custom_target(barelymusician_examples)
+add_custom_target(
+  barelymusician_examples_data
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/examples/$<CONFIG>/data"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/examples/data"
+  "${CMAKE_BINARY_DIR}/bin/examples/$<CONFIG>/data"
+)
 add_demo(arpeggiator_demo.cpp)
 add_demo(c_demo.c miniaudio)
 add_demo(instrument_demo.cpp)

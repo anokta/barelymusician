@@ -55,6 +55,6 @@ tasks = Array[BarelyTaskResource]([SubResource("BarelyTaskResource_gg4gh")])
 [node name="Instrument" type="BarelyInstrument" parent="." unique_id=1084526400]
 gain = 0.9
 attack = 0.0
+release = 0.1
 osc_shape = 0.75
-delay_send = 0.1
-reverb_send = 0.5
+reverb_send = 0.02

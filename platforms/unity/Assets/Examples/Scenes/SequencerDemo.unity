@@ -207,10 +207,10 @@ MonoBehaviour:
   Gain: 0.55
   PitchShift: 0
   StereoPan: 0.25
-  Attack: 0.25
+  Attack: 0.15
   Decay: 0
   Sustain: 0.8
-  Release: 1
+  Release: 0.4
   SliceMode: 0
   Slices: []
   OscMix: 1
@@ -229,9 +229,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:
@@ -416,6 +413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 121
+  Gain: 1
   CompMix: 0.25
   CompAttack: 0.1
   CompRelease: 0.2
@@ -704,9 +702,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 1
   VoiceCount: 4
   OnNoteOffEvent:
@@ -894,10 +889,10 @@ MonoBehaviour:
   Gain: 0.75
   PitchShift: 0
   StereoPan: -0.25
-  Attack: 0.5
-  Decay: 0.25
+  Attack: 0.2
+  Decay: 0.15
   Sustain: 0.4
-  Release: 2
+  Release: 0.5
   SliceMode: 0
   Slices: []
   OscMix: 1
@@ -916,9 +911,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:
@@ -1159,7 +1151,7 @@ MonoBehaviour:
   Attack: 0
   Decay: 0
   Sustain: 1
-  Release: 0.15
+  Release: 0.125
   SliceMode: 0
   Slices: []
   OscMix: 1
@@ -1178,9 +1170,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:
@@ -1315,9 +1304,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:

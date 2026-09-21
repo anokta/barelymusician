@@ -272,10 +272,10 @@ MonoBehaviour:
   Gain: 1
   PitchShift: 0
   StereoPan: 0
-  Attack: 0.5
+  Attack: 0.25
   Decay: 0
   Sustain: 1
-  Release: 0.5
+  Release: 0.25
   SliceMode: 0
   Slices: []
   OscMix: 1
@@ -294,11 +294,8 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
-  VoiceCount: 1
+  VoiceCount: 8
   OnNoteOffEvent:
     m_PersistentCalls:
       m_Calls: []

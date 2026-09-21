@@ -27,7 +27,7 @@ constexpr int kFrameCount = 16;
 // Instrument settings.
 constexpr float kGain = 1.0f;
 constexpr float kAttack = 0.05f;
-constexpr float kRelease = 0.125f;
+constexpr float kRelease = 0.1f;
 constexpr float kOscShapeIncrement = 0.1f;
 constexpr int kVoiceCount = 16;
 

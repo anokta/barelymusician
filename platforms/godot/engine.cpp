@@ -170,7 +170,7 @@ void BarelyEngine::_bind_methods() {
   BARELY_GODOT_ENGINE_CONTROLS(BARELY_BIND_GODOT_ENGINE_CONTROL);
 
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "lookahead", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.001"),
+      PropertyInfo(Variant::FLOAT, "lookahead", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_lookahead", "get_lookahead");
 
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed"), "set_speed", "get_speed");
@@ -181,10 +181,10 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "comp_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_mix", "get_comp_mix");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "comp_attack", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
+      PropertyInfo(Variant::FLOAT, "comp_attack", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_attack", "get_comp_attack");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "comp_release", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
+      PropertyInfo(Variant::FLOAT, "comp_release", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_release", "get_comp_release");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "comp_threshold", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
@@ -234,16 +234,16 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "sidechain_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_sidechain_mix", "get_sidechain_mix");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_attack", PropertyHint::PROPERTY_HINT_RANGE,
-                            "0,8,0.001"),
+                            "0,1,0.01"),
                "set_sidechain_attack", "get_sidechain_attack");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_release", PropertyHint::PROPERTY_HINT_RANGE,
-                            "0,8,0.001"),
+                            "0,1,0.01"),
                "set_sidechain_release", "get_sidechain_release");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_threshold",
                             PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
                "set_sidechain_threshold", "get_sidechain_threshold");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_ratio", PropertyHint::PROPERTY_HINT_RANGE,
-                            "0,1,0.001"),
+                            "0,1,0.01"),
                "set_sidechain_ratio", "get_sidechain_ratio");
 }
 

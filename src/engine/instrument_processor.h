@@ -35,7 +35,7 @@ class InstrumentProcessor {
   void Init(uint32_t instrument_index) const noexcept {
     InstrumentParams& instrument_params = engine_.instrument_params[instrument_index];
     instrument_params = {};
-    instrument_params.adsr.SetRelease(engine_.sample_rate, 0.0f);
+    instrument_params.adr.SetRelease(engine_.sample_rate, 0.0f);
     instrument_params.osc_increment = kReferenceFreq / engine_.sample_rate;
     instrument_params.slice_increment = 1.0f / engine_.sample_rate;
     instrument_params.voice_params.filter_params.SetCutoff(engine_.sample_rate, 1.0f);
@@ -43,11 +43,12 @@ class InstrumentProcessor {
 
   void Shutdown(uint32_t instrument_index) const noexcept {
     engine_.queued_sample_data_counts[instrument_index].fetch_sub(1, std::memory_order_acq_rel);
-    uint32_t voice_index = engine_.instrument_params[instrument_index].first_voice_index;
+    const InstrumentParams& params = engine_.instrument_params[instrument_index];
+    uint32_t voice_index = params.first_voice_index;
     while (voice_index != kInvalidIndex) {
       auto& voice = engine_.GetVoice(voice_index);
       voice.slice_index = kInvalidIndex;
-      voice.envelope.Stop();
+      voice.envelope.Stop(params.adr, voice.params.sustain);
       voice_index = voice.next_voice_index;
     }
   }
@@ -111,7 +112,7 @@ class InstrumentProcessor {
 
     if (voice.stop_on_slice_end &&
         (slice == nullptr || instrument_params.slice_mode != BarelySliceMode_kOnce)) {
-      voice.envelope.Stop();
+      voice.envelope.Stop(instrument_params.adr, voice.params.sustain);
     } else if (instrument_params.slice_mode == BarelySliceMode_kOnce && slice != nullptr &&
                static_cast<int32_t>(voice.slice_offset) >= slice->sample_count) {
       voice.envelope.Reset();
@@ -153,7 +154,7 @@ class InstrumentProcessor {
       }
     }
 
-    float output = voice.envelope.Next();
+    float output = voice.envelope.Next(instrument_params.adr, voice.params.sustain);
 
     if (instrument_params.osc_mode == BarelyOscMode_kCrossfade ||
         instrument_params.osc_mode == BarelyOscMode_kMf) {

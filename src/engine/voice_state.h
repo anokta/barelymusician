@@ -45,6 +45,7 @@ struct VoiceState {
   void Approach(const VoiceParams& new_params, float coeff) noexcept {
     params.filter_params.Approach(new_params.filter_params, coeff);
     ApproachValue(params.gain, note_params.gain * new_params.gain, coeff);
+    ApproachValue(params.sustain, new_params.sustain, coeff);
     ApproachValue(params.bit_crusher_increment, new_params.bit_crusher_increment, coeff);
     ApproachValue(params.bit_crusher_range, new_params.bit_crusher_range, coeff);
     ApproachValue(params.distortion_amount, new_params.distortion_amount, coeff);
@@ -71,7 +72,7 @@ struct VoiceState {
     osc_phase = 0.0f;
     slice_offset = 0.0f;
     stop_on_slice_end = false;
-    envelope.Start(instrument_params.adsr);
+    envelope.Start();
     timestamp = 0;
   }
 

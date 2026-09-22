@@ -33,6 +33,7 @@ struct VoiceParams {
   float distortion_drive = 1.0f;
 
   float gain = 1.0f;
+  float sustain = 1.0f;
 
   float osc_mix = 0.0f;
   float osc_noise_mix = 0.0f;
@@ -49,7 +50,7 @@ struct VoiceParams {
 
 struct InstrumentParams {
   VoiceParams voice_params = {};
-  Envelope::Adsr adsr = {};
+  Envelope::Adr adr = {};
 
   BarelyOscMode osc_mode = BarelyOscMode_kCrossfade;
   BarelySliceMode slice_mode = BarelySliceMode_kSustain;

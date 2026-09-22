@@ -46,8 +46,8 @@ TEST(EngineProcessorTest, PlayNote) {
   engine.ScheduleCmd(SampleDataCmd{kInstrumentIndex, slice_index});
 
   Envelope envelope;
-  Envelope::Adsr adsr;
-  adsr.SetRelease(kSampleRate, 0.0f);
+  Envelope::Adr adr;
+  adr.SetRelease(kSampleRate, 0.0f);
 
   engine.ScheduleCmd(
       InstrumentControlCmd{kInstrumentIndex, BarelyInstrumentControlType_kRelease, 0.0f});
@@ -69,12 +69,12 @@ TEST(EngineProcessorTest, PlayNote) {
 
   // Set a note on.
   engine.ScheduleCmd(NoteOnCmd{kInstrumentIndex, kPitch});
-  envelope.Start(adsr);
+  envelope.Start();
 
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
-    const float envelope_output = envelope.Next();
+    const float envelope_output = envelope.Next(adr, 1.0f);
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_NEAR(
           samples[frame * kStereoChannelCount + channel],
@@ -90,14 +90,14 @@ TEST(EngineProcessorTest, PlayNote) {
 
   // Set the note off.
   engine.ScheduleCmd(NoteOffCmd{kInstrumentIndex, kPitch});
-  envelope.Stop();
+  envelope.Stop(adr, 1.0f);
 
   samples.fill(0.0f);
   processor.Process(samples.data(), kStereoChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     const bool is_envelope_active = envelope.IsActive();
     if (is_envelope_active) {
-      envelope.Next();
+      envelope.Next(adr, 1.0f);
     }
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       EXPECT_NEAR(

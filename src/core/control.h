@@ -37,11 +37,6 @@ inline void ApproachValue(float& current_value, float target_value, float coeff)
   return (samples > 0.0f) ? std::exp(kLogEpsilon / samples) : 0.0f;
 }
 
-[[nodiscard]] inline float GetEnvelopeCoefficient(float sample_rate, float value) noexcept {
-  static constexpr float kMaxSeconds = 10.0f;
-  return GetCoefficient(sample_rate, value * value * kMaxSeconds);
-}
-
 [[nodiscard]] inline float GetFrequency(float cutoff, float max_freq) noexcept {
   static constexpr float kMinFreqInverse = 1.0f / kMinFilterFreq;
   return std::min(kMinFilterFreq * std::pow(max_freq * kMinFreqInverse, cutoff), max_freq);

@@ -181,10 +181,10 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "comp_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_mix", "get_comp_mix");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "comp_attack", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      PropertyInfo(Variant::FLOAT, "comp_attack", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
       "set_comp_attack", "get_comp_attack");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "comp_release", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
+      PropertyInfo(Variant::FLOAT, "comp_release", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
       "set_comp_release", "get_comp_release");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "comp_threshold", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
@@ -197,7 +197,7 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "delay_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_delay_mix", "get_delay_mix");
   ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "delay_time", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.001"),
+      PropertyInfo(Variant::FLOAT, "delay_time", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
       "set_delay_time", "get_delay_time");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "delay_feedback", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
@@ -234,10 +234,10 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "sidechain_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_sidechain_mix", "get_sidechain_mix");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_attack", PropertyHint::PROPERTY_HINT_RANGE,
-                            "0,1,0.01"),
+                            "0,8,0.01"),
                "set_sidechain_attack", "get_sidechain_attack");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_release", PropertyHint::PROPERTY_HINT_RANGE,
-                            "0,1,0.01"),
+                            "0,8,0.01"),
                "set_sidechain_release", "get_sidechain_release");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_threshold",
                             PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),

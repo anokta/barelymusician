@@ -46,11 +46,11 @@ class Compressor {
   }
 
   void SetAttack(float attack, float sample_rate) noexcept {
-    attack_coeff_ = GetEnvelopeCoefficient(sample_rate, attack);
+    attack_coeff_ = GetCoefficient(sample_rate, attack);
   }
 
   void SetRelease(float release, float sample_rate) noexcept {
-    release_coeff_ = std::max(GetEnvelopeCoefficient(sample_rate, release), kMinReleaseCoefficient);
+    release_coeff_ = GetCoefficient(sample_rate, release);
   }
 
  private:

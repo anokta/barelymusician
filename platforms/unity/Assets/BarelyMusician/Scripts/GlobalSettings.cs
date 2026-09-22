@@ -15,10 +15,10 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float CompMix = 1.0f;
 
-    [Range(0.0f, 1.0f)]
+    [Range(0.0f, 8.0f)]
     public float CompAttack = 0.0f;
 
-    [Range(0.0f, 1.0f)]
+    [Range(0.0f, 8.0f)]
     public float CompRelease = 0.0f;
 
     [Range(0.0f, 1.0f)]
@@ -71,10 +71,10 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public float SidechainMix = 1.0f;
 
-    [Range(0.0f, 1.0f)]
+    [Range(0.0f, 8.0f)]
     public float SidechainAttack = 0.0f;
 
-    [Range(0.0f, 1.0f)]
+    [Range(0.0f, 8.0f)]
     public float SidechainRelease = 0.0f;
 
     [Range(0.0f, 1.0f)]

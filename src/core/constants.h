@@ -17,9 +17,6 @@ inline constexpr float kMaxDelayFeedback = 0.9995f;
 // Minimum filter frequency in hertz.
 inline constexpr float kMinFilterFreq = 20.0f;
 
-// Minimum release coefficient.
-inline constexpr float kMinReleaseCoefficient = 0.75f;
-
 // Reference frequency which is tuned to middle C in hertz.
 inline constexpr float kReferenceFreq = 261.62555f;
 

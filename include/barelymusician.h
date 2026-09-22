@@ -215,8 +215,8 @@
 #define BARELY_ENGINE_CONTROL_TYPES(EngineControlType, X)                           \
   X(EngineControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                              \
   X(EngineControlType, CompMix, 1.0f, 0.0f, 1.0f, "Compressor Mix")                 \
-  X(EngineControlType, CompAttack, 0.0f, 0.0f, 1.0f, "Compressor Attack")           \
-  X(EngineControlType, CompRelease, 0.0f, 0.0f, 1.0f, "Compressor Release")         \
+  X(EngineControlType, CompAttack, 0.0f, 0.0f, 8.0f, "Compressor Attack")           \
+  X(EngineControlType, CompRelease, 0.0f, 0.0f, 8.0f, "Compressor Release")         \
   X(EngineControlType, CompThreshold, 1.0f, 0.0f, 1.0f, "Compressor Threshold")     \
   X(EngineControlType, CompRatio, 0.0f, 0.0f, 1.0f, "Compressor Ratio")             \
   X(EngineControlType, DelayMix, 1.0f, 0.0f, 1.0f, "Delay Mix")                     \
@@ -232,8 +232,8 @@
   X(EngineControlType, ReverbStereoWidth, 1.0f, 0.0f, 1.0f, "Reverb Stereo Width")  \
   X(EngineControlType, ReverbFreeze, 0, 0, 1, "Reverb Freeze")                      \
   X(EngineControlType, SidechainMix, 1.0f, 0.0f, 1.0f, "Sidechain Mix")             \
-  X(EngineControlType, SidechainAttack, 0.0f, 0.0f, 1.0f, "Sidechain Attack")       \
-  X(EngineControlType, SidechainRelease, 0.0f, 0.0f, 1.0f, "Sidechain Release")     \
+  X(EngineControlType, SidechainAttack, 0.0f, 0.0f, 8.0f, "Sidechain Attack")       \
+  X(EngineControlType, SidechainRelease, 0.0f, 0.0f, 8.0f, "Sidechain Release")     \
   X(EngineControlType, SidechainThreshold, 1.0f, 0.0f, 1.0f, "Sidechain Threshold") \
   X(EngineControlType, SidechainRatio, 0.0f, 0.0f, 1.0f, "Sidechain Ratio")
 BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
@@ -243,10 +243,10 @@ BARELY_ENUM(EngineControlType, BARELY_ENGINE_CONTROL_TYPES)
   X(InstrumentControlType, Gain, 1.0f, 0.0f, 1.0f, "Gain")                             \
   X(InstrumentControlType, PitchShift, 0.0f, -2.0f, 2.0f, "Pitch Shift")               \
   X(InstrumentControlType, StereoPan, 0.0f, -1.0f, 1.0f, "Stereo Pan")                 \
-  X(InstrumentControlType, Attack, 0.0f, 0.0f, 1.0f, "Envelope Attack")                \
-  X(InstrumentControlType, Decay, 0.0f, 0.0f, 1.0f, "Envelope Decay")                  \
+  X(InstrumentControlType, Attack, 0.0f, 0.0f, 8.0f, "Envelope Attack")                \
+  X(InstrumentControlType, Decay, 0.0f, 0.0f, 8.0f, "Envelope Decay")                  \
   X(InstrumentControlType, Sustain, 1.0f, 0.0f, 1.0f, "Envelope Sustain")              \
-  X(InstrumentControlType, Release, 0.0f, 0.0f, 1.0f, "Envelope Release")              \
+  X(InstrumentControlType, Release, 0.0f, 0.0f, 8.0f, "Envelope Release")              \
   X(InstrumentControlType, SliceMode, 0, 0, BarelySliceMode_kCount - 1, "Slice Mode")  \
   X(InstrumentControlType, OscMix, 0.0f, 0.0f, 1.0f, "Oscillator Mix")                 \
   X(InstrumentControlType, OscMode, 0, 0, BarelyOscMode_kCount - 1, "Oscillator Mode") \

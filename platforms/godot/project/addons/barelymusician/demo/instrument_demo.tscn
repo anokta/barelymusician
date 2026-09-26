@@ -45,7 +45,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "ASDFGHJK keys to play the white notes in an octave
+text = "click anywhere to play
+
+ASDFGHJK keys to play the white notes in an octave
 WETYU keys to play the black notes in an octave
 
 ZX keys to shift octave up and down
@@ -65,3 +67,20 @@ osc_shape = 0.2
 delay_send = 0.1
 reverb_send = 0.5
 voice_count = 16
+
+[node name="Link" type="LinkButton" parent="." unique_id=2059586559]
+modulate = Color(1, 0.7137255, 0.7294118, 0.39215687)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -36.5
+offset_top = -23.0
+offset_right = 36.5
+grow_horizontal = 2
+grow_vertical = 0
+text = "[anokta.io]"
+underline = 2
+uri = "https://anokta.io"

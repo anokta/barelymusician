@@ -57,6 +57,8 @@ jobs:
             export ANDROID_NDK_HOME="${{ steps.setup-ndk.outputs.ndk-path }}"
             source emsdk/emsdk_env.sh
             python build.py --godot --android --wasm
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            python build.py --godot --ios
           else
             python build.py --godot
           fi
@@ -86,6 +88,8 @@ jobs:
           if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             export ANDROID_NDK_HOME="${{ steps.setup-ndk.outputs.ndk-path }}"
             python build.py --unity --android
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            python build.py --unity --ios
           else
             python build.py --unity
           fi

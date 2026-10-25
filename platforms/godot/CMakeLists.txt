@@ -19,7 +19,7 @@ include_directories(${godotcpp_SOURCE_DIR}/src)
 set(CMAKE_FOLDER platforms)
 
 add_library(
-  barelymusiciangodot SHARED
+  barelymusiciangodot ${BARELYMUSICIAN_PLUGIN_LIBRARY_TYPE}
   engine.cpp
   engine.h
   instrument.cpp
@@ -58,25 +58,31 @@ endif()
 
 function(package_barelymusiciangodot)
   set(ADDON_BIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/project/addons/barelymusician/bin)
-  if(ANDROID)
-    set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/android/${ANDROID_ABI}/libbarelymusiciangodot.so)
-  elseif(APPLE)
-    set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/macos/libbarelymusiciangodot.dylib)
-  elseif(EMSCRIPTEN)
-    set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/web/barelymusiciangodot.wasm)
-  elseif(WIN32)
-    set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/windows/barelymusiciangodot.dll)
-  elseif(UNIX)
-    set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/linux/libbarelymusiciangodot.so)
+  if(IOS)
+    package_barelymusician_ios_plugin(
+      barelymusiciangodot
+      "${ADDON_BIN_DIR}/ios/libbarelymusiciangodot.xcframework"
+    )
   else()
-    message(FATAL_ERROR "Unsupported Godot platform")
+    if(ANDROID)
+      set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/android/${ANDROID_ABI}/libbarelymusiciangodot.so)
+    elseif(APPLE)
+      set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/macos/libbarelymusiciangodot.dylib)
+    elseif(EMSCRIPTEN)
+      set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/web/barelymusiciangodot.wasm)
+    elseif(WIN32)
+      set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/windows/barelymusiciangodot.dll)
+    elseif(UNIX)
+      set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/linux/libbarelymusiciangodot.so)
+    else()
+      message(FATAL_ERROR "Unsupported Godot platform")
+    endif()
+    add_custom_command(
+      TARGET barelymusiciangodot POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${ADDON_BIN_DIR}
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusiciangodot> ${ADDON_DEST_PATH}
+      COMMENT "Copying BarelyMusician Godot plugin to addon directory"
+    )
   endif()
-
-  add_custom_command(
-    TARGET barelymusiciangodot POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${ADDON_BIN_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusiciangodot> ${ADDON_DEST_PATH}
-    COMMENT "Copying BarelyMusician Godot plugin to addon directory"
-  )
 endfunction()
 package_barelymusiciangodot()

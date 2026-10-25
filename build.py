@@ -68,6 +68,11 @@ def parse_args():
         help="specify the minimum api level for the android targets (defaults to 35)",
     )
     parser.add_argument(
+        "--ios",
+        action="store_true",
+        help="build the ios targets",
+    )
+    parser.add_argument(
         "--daisy",
         action="store_true",
         help="build and run the daisy program (requires daisy_toolchain_prefix to be valid)",
@@ -270,6 +275,22 @@ def build(args, source_dir, build_dir):
                 f'-DCMAKE_BUILD_TYPE="{config}"',
             ]
             build_platform(args, config, source_dir, android_build_dir, android_cmake_options)
+
+    if args.ios:
+        print("Building the iOS targets...")
+        ios_targets = [
+            ("device", "iphoneos", "arm64"),
+            ("simulator", "iphonesimulator", "arm64;x86_64"),
+        ]
+        for ios_variant, ios_sdk, ios_archs in ios_targets:
+            ios_build_dir = os.path.join(build_dir, "iOS", ios_variant)
+            ios_cmake_options = common_cmake_options + [
+                '-G "Xcode"',
+                '-DCMAKE_SYSTEM_NAME="iOS"',
+                f'-DCMAKE_OSX_SYSROOT="{ios_sdk}"',
+                f'-DCMAKE_OSX_ARCHITECTURES="{ios_archs}"',
+            ]
+            build_platform(args, config, source_dir, ios_build_dir, ios_cmake_options)
 
     if args.config == "asan":
         common_cmake_options.append("-DENABLE_ASAN=ON")

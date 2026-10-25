@@ -1,5 +1,5 @@
 add_library(
-  barelymusicianunity SHARED
+  barelymusicianunity ${BARELYMUSICIAN_PLUGIN_LIBRARY_TYPE}
   unity.cpp
 )
 target_compile_definitions(
@@ -28,21 +28,28 @@ endif()
 
 function(package_barelymusicianunity)
   set(PLUGINS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Assets/BarelyMusician/Plugins)
-  if(ANDROID)
-    set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/Android/libs/${ANDROID_ABI}/libbarelymusicianunity.so)
-  elseif(APPLE)
-    set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/x86_64/libbarelymusicianunity.dylib)
-  elseif(WIN32)
-    set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/x86_64/barelymusicianunity.dll)
-  elseif(UNIX)
-    set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/x86_64/libbarelymusicianunity.so)
+  if(IOS)
+    package_barelymusician_ios_plugin(
+      barelymusicianunity
+      "${PLUGINS_DIR}/iOS/libbarelymusicianunity.xcframework"
+    )
   else()
-    message(FATAL_ERROR "Unsupported Unity platform")
+    if(ANDROID)
+      set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/Android/libs/${ANDROID_ABI}/libbarelymusicianunity.so)
+    elseif(APPLE)
+      set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/x86_64/libbarelymusicianunity.dylib)
+    elseif(WIN32)
+      set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/x86_64/barelymusicianunity.dll)
+    elseif(UNIX)
+      set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/x86_64/libbarelymusicianunity.so)
+    else()
+      message(FATAL_ERROR "Unsupported Unity platform")
+    endif()
+    add_custom_command(
+      TARGET barelymusicianunity POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGINS_DIR}
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusicianunity> ${PLUGIN_DEST_PATH}
+    )
   endif()
-
-  add_custom_command(
-    TARGET barelymusicianunity POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusicianunity> ${PLUGIN_DEST_PATH}
-  )
 endfunction()
 package_barelymusicianunity()

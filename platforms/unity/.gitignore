@@ -66,3 +66,4 @@ Assets/BarelyMusician/Plugins/**/*.a
 Assets/BarelyMusician/Plugins/**/*.bundle
 Assets/BarelyMusician/Plugins/**/*.dll
 Assets/BarelyMusician/Plugins/**/*.so
+Assets/BarelyMusician/Plugins/**/*.xcframework

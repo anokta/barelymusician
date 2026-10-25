@@ -9,5 +9,6 @@ macos.x86_64 = "res://addons/barelymusician/bin/macos/libbarelymusiciangodot.dyl
 web.wasm32 = "res://addons/barelymusician/bin/web/barelymusiciangodot.wasm"
 android.x86_64 = "res://addons/barelymusician/bin/android/x86_64/libbarelymusiciangodot.so"
 android.arm64 = "res://addons/barelymusician/bin/android/arm64-v8a/libbarelymusiciangodot.so"
+ios = "res://addons/barelymusician/bin/ios/libbarelymusiciangodot.xcframework"
 
 [dependencies]

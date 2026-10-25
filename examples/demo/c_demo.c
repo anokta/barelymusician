@@ -6,19 +6,6 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#define BarelySleep(seconds) Sleep((DWORD)(seconds * 1000.0))
-#else  // #ifdef _WIN32
-#include <time.h>
-#define BarelySleep(seconds)                                                                \
-  do {                                                                                      \
-    struct timespec ts = {.tv_sec = (time_t)(seconds),                                      \
-                          .tv_nsec = (long)(((seconds) - (double)seconds) * 1000000000.0)}; \
-    nanosleep(&ts, NULL);                                                                   \
-  } while (0)
-#endif  // #ifdef _WIN32
-
 // System audio settings.
 static const int kSampleRate = 48000;
 static const int kChannelCount = 2;
@@ -127,7 +114,7 @@ int main(void) {
 
   while (g_is_playing) {
     BarelyEngine_Update(engine, g_timestamp + kLookahead);
-    BarelySleep(kUpdateInterval);
+    ma_sleep((ma_uint32)(kUpdateInterval * 1000.0));
   }
 
   printf("Playback stopped\n");

@@ -6,7 +6,6 @@
     "cmake.enableAutomaticKitScan": false,
     "csharp.format.enable": false,
     "dotnet.defaultSolution": "unity.slnx",
-    "dotnet.preferCSharpExtension": true,
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
     "files.exclude": {

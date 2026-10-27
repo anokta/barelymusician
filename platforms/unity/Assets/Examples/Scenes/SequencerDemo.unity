@@ -207,6 +207,35 @@ MonoBehaviour:
   Gain: 0.55
   PitchShift: 0
   StereoPan: 0.25
+  SpatialBlend: 0
+  VolumeRolloff: 0
+  VolumeRolloffCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  MinDistance: 1
+  MaxDistance: 500
+  Spread: 0
   Attack: 0.25
   Decay: 0
   Sustain: 0.8
@@ -229,9 +258,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:
@@ -416,6 +442,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Bpm: 121
+  Gain: 1
   CompMix: 0.25
   CompAttack: 0.1
   CompRelease: 0.2
@@ -674,6 +701,35 @@ MonoBehaviour:
   Gain: 0.85
   PitchShift: 0
   StereoPan: 0
+  SpatialBlend: 0
+  VolumeRolloff: 0
+  VolumeRolloffCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  MinDistance: 1
+  MaxDistance: 500
+  Spread: 0
   Attack: 0
   Decay: 0
   Sustain: 1
@@ -704,9 +760,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 1
   VoiceCount: 4
   OnNoteOffEvent:
@@ -891,9 +944,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Gain: 0.75
+  Gain: 0.7
   PitchShift: 0
   StereoPan: -0.25
+  SpatialBlend: 0
+  VolumeRolloff: 0
+  VolumeRolloffCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  MinDistance: 1
+  MaxDistance: 500
+  Spread: 0
   Attack: 0.5
   Decay: 0.25
   Sustain: 0.4
@@ -916,9 +998,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:
@@ -1156,6 +1235,35 @@ MonoBehaviour:
   Gain: 0.6
   PitchShift: 0
   StereoPan: 0
+  SpatialBlend: 0
+  VolumeRolloff: 0
+  VolumeRolloffCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  MinDistance: 1
+  MaxDistance: 500
+  Spread: 0
   Attack: 0
   Decay: 0
   Sustain: 1
@@ -1178,9 +1286,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:
@@ -1291,6 +1396,35 @@ MonoBehaviour:
   Gain: 1
   PitchShift: 0
   StereoPan: 0
+  SpatialBlend: 0
+  VolumeRolloff: 0
+  VolumeRolloffCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  MinDistance: 1
+  MaxDistance: 500
+  Spread: 0
   Attack: 0
   Decay: 0
   Sustain: 1
@@ -1315,9 +1449,6 @@ MonoBehaviour:
   DelaySend: 0
   ReverbSend: 0
   SidechainSend: 0
-  ArpMode: 0
-  ArpGate: 0.5
-  ArpRate: 1
   Retrigger: 0
   VoiceCount: 8
   OnNoteOffEvent:

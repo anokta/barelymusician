@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using UnityEngine;
+using UnityEngine.TextCore;
 
 namespace Barely {
   /// Oscillator modes.
@@ -95,6 +97,31 @@ namespace Barely {
 
     [Range(-1.0f, 1.0f)]
     public float StereoPan = 0.0f;
+
+    [Header("Spatial")]
+
+    /// Blends between 2D and 3D spatialization.
+    [Range(0.0f, 1.0f)]
+    public float SpatialBlend = 0.0f;
+
+    /// Distance-based volume rolloff mode.
+    public AudioRolloffMode VolumeRolloff = AudioRolloffMode.Logarithmic;
+
+    /// Custom distance-based volume rolloff curve.
+    [HideInInspector]
+    public AnimationCurve VolumeRolloffCurve = AnimationCurve.Linear(0.0f, 1.0f, 1.0f, 1.0f);
+
+    /// Distance at which volume rolloff begins.
+    [Min(0.0f)]
+    public float MinDistance = 1.0f;
+
+    /// Distance at which volume rolloff reaches silence.
+    [Min(0.0f)]
+    public float MaxDistance = 500.0f;
+
+    /// Reduces positional stereo panning as the spread widens.
+    [Range(0.0f, 360.0f)]
+    public float Spread = 0.0f;
 
     [Header("Envelope")]
 
@@ -301,9 +328,8 @@ namespace Barely {
 
     private void Update() {
       UpdateSampleData();
-      SetControl(Engine.Internal.InstrumentControlType.GAIN, Gain);
+      SetSpatialControls();
       SetControl(Engine.Internal.InstrumentControlType.PITCH_SHIFT, PitchShift);
-      SetControl(Engine.Internal.InstrumentControlType.STEREO_PAN, StereoPan);
       SetControl(Engine.Internal.InstrumentControlType.ATTACK, Attack);
       SetControl(Engine.Internal.InstrumentControlType.DECAY, Decay);
       SetControl(Engine.Internal.InstrumentControlType.SUSTAIN, Sustain);
@@ -336,6 +362,55 @@ namespace Barely {
       }
     }
 
+    private void SetSpatialControls() {
+      float gain = Gain;
+      float stereoPan = StereoPan;
+      if (SpatialBlend > 0.0f) {
+        float spatialGain = 1.0f;
+        float spatialPan = 0.0f;
+        if (_listener == null || !_listener.isActiveAndEnabled) {
+          _listener = FindAnyObjectByType<AudioListener>();
+        }
+        if (_listener != null) {
+          Vector3 listenerToSource = transform.position - _listener.transform.position;
+          float distance = listenerToSource.magnitude;
+          Vector3 direction = listenerToSource / distance;
+          if (distance > 0.0f) {
+            spatialPan =
+                (1.0f - Spread / 360.0f) * Vector3.Dot(direction, _listener.transform.right);
+            float minDistance = Mathf.Min(MinDistance, MaxDistance);
+            float maxDistance = Mathf.Max(minDistance, MaxDistance);
+            if (minDistance < maxDistance) {
+              switch (VolumeRolloff) {
+                case AudioRolloffMode.Logarithmic:
+                  spatialGain = (minDistance > 0.0f)
+                                    ? Mathf.Clamp01(1.0f - Mathf.Log(distance / minDistance) /
+                                                               Mathf.Log(maxDistance / minDistance))
+                                    : 0.0f;
+                  break;
+                case AudioRolloffMode.Custom:
+                  spatialGain = VolumeRolloffCurve.Evaluate(
+                      Mathf.Clamp01((distance - minDistance) / (maxDistance - minDistance)));
+                  break;
+                default:  // AudioRolloffMode.Linear
+                  spatialGain =
+                      Mathf.Clamp01((maxDistance - distance) / (maxDistance - minDistance));
+                  break;
+              }
+            } else if (VolumeRolloff == AudioRolloffMode.Custom) {
+              spatialGain = VolumeRolloffCurve.Evaluate((distance >= maxDistance) ? 1.0f : 0.0f);
+            } else if (distance >= maxDistance) {
+              spatialGain = 0.0f;
+            }
+          }
+        }
+        gain = Mathf.Lerp(gain, gain * spatialGain, SpatialBlend);
+        stereoPan = Mathf.Lerp(stereoPan, spatialPan, SpatialBlend);
+      }
+      SetControl(Engine.Internal.InstrumentControlType.GAIN, gain);
+      SetControl(Engine.Internal.InstrumentControlType.STEREO_PAN, stereoPan);
+    }
+
     private void UpdateSampleData() {
       if (Slices != null &&
           (Slices.Count != _sliceCount || Slices.Any(slice => slice.HasChanged))) {
@@ -345,6 +420,7 @@ namespace Barely {
     }
 
     private float[] _controls = new float[(int)Engine.Internal.InstrumentControlType.COUNT];
+    private AudioListener _listener = null;
     private UInt32 _id = 0;
   }
 }  // namespace Barely

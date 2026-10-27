@@ -6,7 +6,7 @@ namespace Barely {
   public class InstrumentEditor : Editor {
     public override void OnInspectorGUI() {
       try {
-        base.OnInspectorGUI();
+        DrawInstrumentProperties();
       } catch (System.NullReferenceException) {
         // This is a harmless error caused by a Unity bug.
       }
@@ -20,6 +20,40 @@ namespace Barely {
         (target as Instrument).SetNoteOff(NoteKeyToPitch(_noteKey));
         _noteKey = _invalidKey;
       }
+    }
+
+    private void DrawInstrumentProperties() {
+      serializedObject.Update();
+      SerializedProperty minDistance =
+          serializedObject.FindProperty(nameof(Instrument.MinDistance));
+      SerializedProperty maxDistance =
+          serializedObject.FindProperty(nameof(Instrument.MaxDistance));
+      minDistance.floatValue = Mathf.Min(minDistance.floatValue, maxDistance.floatValue);
+      SerializedProperty property = serializedObject.GetIterator();
+      bool enterChildren = true;
+      while (property.NextVisible(enterChildren)) {
+        enterChildren = false;
+        if (property.propertyPath == nameof(Instrument.MinDistance)) {
+          EditorGUILayout.PropertyField(property, true);
+          minDistance.floatValue = Mathf.Min(minDistance.floatValue, maxDistance.floatValue);
+        } else if (property.propertyPath == nameof(Instrument.MaxDistance)) {
+          EditorGUILayout.PropertyField(property, true);
+          maxDistance.floatValue = Mathf.Max(maxDistance.floatValue, minDistance.floatValue);
+        } else {
+          using (new EditorGUI.DisabledScope(property.propertyPath == "m_Script")) {
+            EditorGUILayout.PropertyField(property, true);
+          }
+        }
+        if (property.propertyPath == nameof(Instrument.VolumeRolloff) &&
+            property.enumValueIndex == (int)AudioRolloffMode.Custom) {
+          SerializedProperty curveProperty =
+              serializedObject.FindProperty(nameof(Instrument.VolumeRolloffCurve));
+          curveProperty.animationCurveValue = EditorGUILayout.CurveField(
+              curveProperty.displayName, curveProperty.animationCurveValue, Color.green,
+              new Rect(0.0f, 0.0f, 1.0f, 1.0f));
+        }
+      }
+      serializedObject.ApplyModifiedProperties();
     }
 
     private void DrawPreviewGui() {

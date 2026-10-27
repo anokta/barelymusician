@@ -77,10 +77,15 @@ function(package_barelymusiciangodot)
     else()
       message(FATAL_ERROR "Unsupported Godot platform")
     endif()
+    # Apple Silicon refuses to load unsigned libraries, an ad-hoc signature is enough.
+    if(APPLE)
+      set(SIGN_COMMAND COMMAND codesign --force --sign - ${ADDON_DEST_PATH})
+    endif()
     add_custom_command(
       TARGET barelymusiciangodot POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E make_directory ${ADDON_BIN_DIR}
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusiciangodot> ${ADDON_DEST_PATH}
+      ${SIGN_COMMAND}
       COMMENT "Copying BarelyMusician Godot plugin to addon directory"
     )
   endif()

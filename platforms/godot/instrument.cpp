@@ -159,6 +159,8 @@ void BarelyInstrument::_bind_methods() {
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "stereo_pan", PropertyHint::PROPERTY_HINT_RANGE, "-1,1,0.01"),
       "set_stereo_pan", "get_stereo_pan");
+
+  ADD_GROUP("Envelope", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "attack", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
       "set_attack", "get_attack");
@@ -171,6 +173,7 @@ void BarelyInstrument::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "release", PropertyHint::PROPERTY_HINT_RANGE, "0,8,0.01"),
       "set_release", "get_release");
 
+  ADD_GROUP("Slice", "");
   ADD_PROPERTY(PropertyInfo(Variant::INT, "slice_mode", PropertyHint::PROPERTY_HINT_ENUM,
                             "Sustain,Loop,Once"),
                "set_slice_mode", "get_slice_mode");
@@ -178,6 +181,7 @@ void BarelyInstrument::_bind_methods() {
                             "BarelySliceResource"),
                "set_slices", "get_slices");
 
+  ADD_GROUP("Oscillator", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "osc_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_osc_mix", "get_osc_mix");
@@ -195,18 +199,24 @@ void BarelyInstrument::_bind_methods() {
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "osc_skew", PropertyHint::PROPERTY_HINT_RANGE, "-1,1,0.01"),
       "set_osc_skew", "get_osc_skew");
+
+  ADD_GROUP("Bit Crusher", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "crush_depth", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_crush_depth", "get_crush_depth");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "crush_rate", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_crush_rate", "get_crush_rate");
+
+  ADD_GROUP("Distortion", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "distortion_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_distortion_mix", "get_distortion_mix");
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "distortion_drive", PropertyHint::PROPERTY_HINT_RANGE,
                             "0,1,0.01"),
                "set_distortion_drive", "get_distortion_drive");
+
+  ADD_GROUP("Filter", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "filter_cutoff", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_filter_cutoff", "get_filter_cutoff");
@@ -216,6 +226,8 @@ void BarelyInstrument::_bind_methods() {
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "filter_tone", PropertyHint::PROPERTY_HINT_RANGE, "-1,1,0.01"),
       "set_filter_tone", "get_filter_tone");
+
+  ADD_GROUP("Send Effects", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "delay_send", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_delay_send", "get_delay_send");
@@ -225,6 +237,8 @@ void BarelyInstrument::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "sidechain_send", PropertyHint::PROPERTY_HINT_RANGE,
                             "-1,1,0.01"),
                "set_sidechain_send", "get_sidechain_send");
+
+  ADD_GROUP("Polyphony", "");
   ADD_PROPERTY(PropertyInfo(Variant::BOOL, "retrigger"), "set_retrigger", "get_retrigger");
   ADD_PROPERTY(PropertyInfo(Variant::INT, "voice_count", PropertyHint::PROPERTY_HINT_RANGE, "1,16"),
                "set_voice_count", "get_voice_count");

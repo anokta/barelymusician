@@ -68,7 +68,6 @@ CV keys to adjust note gain up and down"
 label_settings = SubResource("LabelSettings_8q8q8")
 horizontal_alignment = 1
 vertical_alignment = 1
-autowrap_mode = 2
 
 [node name="Instrument" type="BarelyInstrument" parent="." unique_id=936972578]
 gain = 0.9

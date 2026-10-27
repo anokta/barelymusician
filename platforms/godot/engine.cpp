@@ -177,6 +177,8 @@ void BarelyEngine::_bind_methods() {
 
   ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "gain", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
                "set_gain", "get_gain");
+
+  ADD_GROUP("Compressor", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "comp_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_mix", "get_comp_mix");
@@ -193,6 +195,7 @@ void BarelyEngine::_bind_methods() {
       PropertyInfo(Variant::FLOAT, "comp_ratio", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_comp_ratio", "get_comp_ratio");
 
+  ADD_GROUP("Delay", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "delay_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_delay_mix", "get_delay_mix");
@@ -215,6 +218,7 @@ void BarelyEngine::_bind_methods() {
                             "0,2,0.01"),
                "set_delay_reverb_send", "get_delay_reverb_send");
 
+  ADD_GROUP("Reverb", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "reverb_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_reverb_mix", "get_reverb_mix");
@@ -230,6 +234,7 @@ void BarelyEngine::_bind_methods() {
   ADD_PROPERTY(PropertyInfo(Variant::BOOL, "reverb_freeze"), "set_reverb_freeze",
                "get_reverb_freeze");
 
+  ADD_GROUP("Sidechain", "");
   ADD_PROPERTY(
       PropertyInfo(Variant::FLOAT, "sidechain_mix", PropertyHint::PROPERTY_HINT_RANGE, "0,1,0.01"),
       "set_sidechain_mix", "get_sidechain_mix");

@@ -68,6 +68,7 @@ function(package_barelymusiciangodot)
       set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/android/${ANDROID_ABI}/libbarelymusiciangodot.so)
     elseif(APPLE)
       set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/macos/libbarelymusiciangodot.dylib)
+      set(SIGN_COMMAND COMMAND codesign --force --sign - ${ADDON_DEST_PATH})
     elseif(EMSCRIPTEN)
       set(ADDON_DEST_PATH ${ADDON_BIN_DIR}/web/barelymusiciangodot.wasm)
     elseif(WIN32)
@@ -81,6 +82,7 @@ function(package_barelymusiciangodot)
       TARGET barelymusiciangodot POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E make_directory ${ADDON_BIN_DIR}
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusiciangodot> ${ADDON_DEST_PATH}
+      ${SIGN_COMMAND}
       COMMENT "Copying BarelyMusician Godot plugin to addon directory"
     )
   endif()

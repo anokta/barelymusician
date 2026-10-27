@@ -38,6 +38,7 @@ function(package_barelymusicianunity)
       set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/Android/libs/${ANDROID_ABI}/libbarelymusicianunity.so)
     elseif(APPLE)
       set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/x86_64/libbarelymusicianunity.dylib)
+      set(SIGN_COMMAND COMMAND codesign --force --sign - ${PLUGIN_DEST_PATH})
     elseif(WIN32)
       set(PLUGIN_DEST_PATH ${PLUGINS_DIR}/x86_64/barelymusicianunity.dll)
     elseif(UNIX)
@@ -49,6 +50,7 @@ function(package_barelymusicianunity)
       TARGET barelymusicianunity POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGINS_DIR}
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:barelymusicianunity> ${PLUGIN_DEST_PATH}
+      ${SIGN_COMMAND}
     )
   endif()
 endfunction()

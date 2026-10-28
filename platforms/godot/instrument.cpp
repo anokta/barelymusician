@@ -36,38 +36,6 @@ using ::godot::Variant;
   BarelyInstrument_SetControl(BarelyEngine::get_singleton()->get(), instrument_id_, \
                               BarelyInstrumentControlType_k##Name, static_cast<float>(name##_));
 
-void BarelySliceResource::set_root_pitch(float root_pitch) {
-  if (root_pitch_ != root_pitch) {
-    root_pitch_ = root_pitch;
-    emit_signal("slice_changed");
-  }
-}
-
-void BarelySliceResource::set_stream(const Ref<AudioStreamWAV>& stream) {
-  if (stream_ != stream) {
-    stream_ = stream;
-    emit_signal("slice_changed");
-  }
-}
-
-void BarelySliceResource::_bind_methods() {
-  ClassDB::bind_method(D_METHOD("set_stream", "stream"), &BarelySliceResource::set_stream);
-  ClassDB::bind_method(D_METHOD("get_stream"), &BarelySliceResource::get_stream);
-
-  ClassDB::bind_method(D_METHOD("set_root_pitch", "root_pitch"),
-                       &BarelySliceResource::set_root_pitch);
-  ClassDB::bind_method(D_METHOD("get_root_pitch"), &BarelySliceResource::get_root_pitch);
-
-  ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "stream", PropertyHint::PROPERTY_HINT_RESOURCE_TYPE,
-                            "AudioStreamWAV"),
-               "set_stream", "get_stream");
-  ADD_PROPERTY(
-      PropertyInfo(Variant::FLOAT, "root_pitch", PropertyHint::PROPERTY_HINT_RANGE, "-4,4,0.01"),
-      "set_root_pitch", "get_root_pitch");
-
-  ADD_SIGNAL(MethodInfo("slice_changed"));
-}
-
 BarelyInstrument::BarelyInstrument() {
   ::BarelyEngine* engine = BarelyEngine::get_singleton()->get();
   instrument_id_ = BarelyEngine_CreateInstrument(engine);

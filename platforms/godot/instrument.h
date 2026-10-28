@@ -8,9 +8,8 @@
 #include <vector>
 
 #include "godot/engine.h"
-#include "godot_cpp/classes/audio_stream_wav.hpp"
+#include "godot/resources.h"
 #include "godot_cpp/classes/node.hpp"
-#include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/classes/wrapped.hpp"
 #include "godot_cpp/variant/typed_array.hpp"
 
@@ -56,22 +55,6 @@ namespace barely::godot {
                                 BarelyInstrumentControlType_k##Name, static_cast<float>(name##_)); \
   }                                                                                                \
   type get_##name() const { return name##_; }
-
-class BarelySliceResource : public ::godot::Resource {
- public:
-  void set_stream(const ::godot::Ref<::godot::AudioStreamWAV>& stream);
-  void set_root_pitch(float root_pitch);
-
-  ::godot::Ref<::godot::AudioStreamWAV> get_stream() const { return stream_; }
-  float get_root_pitch() const { return root_pitch_; }
-
- private:
-  GDCLASS(BarelySliceResource, ::godot::Resource);
-  static void _bind_methods();
-
-  ::godot::Ref<::godot::AudioStreamWAV> stream_;
-  float root_pitch_ = 0.0f;
-};
 
 class BarelyInstrument : public ::godot::Node {
  public:

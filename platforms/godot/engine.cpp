@@ -2,7 +2,6 @@
 
 #include <barelymusician.h>
 
-#include <algorithm>
 #include <atomic>
 #include <bit>
 #include <cstdint>

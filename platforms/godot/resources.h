@@ -5,6 +5,7 @@
 
 #include <cstdint>
 
+#include "godot_cpp/classes/audio_stream_wav.hpp"
 #include "godot_cpp/classes/resource.hpp"
 #include "godot_cpp/variant/packed_float32_array.hpp"
 
@@ -44,6 +45,22 @@ class BarelyScaleResource : public ::godot::Resource {
 
   ::godot::PackedFloat32Array pitches_ = {0.0f};
   BarelyScale scale_ = {pitches_.ptr(), static_cast<int32_t>(pitches_.size()), 0.0f, 0};
+};
+
+class BarelySliceResource : public ::godot::Resource {
+ public:
+  void set_stream(const ::godot::Ref<::godot::AudioStreamWAV>& stream);
+  void set_root_pitch(float root_pitch);
+
+  ::godot::Ref<::godot::AudioStreamWAV> get_stream() const { return stream_; }
+  float get_root_pitch() const { return root_pitch_; }
+
+ private:
+  GDCLASS(BarelySliceResource, ::godot::Resource);
+  static void _bind_methods();
+
+  ::godot::Ref<::godot::AudioStreamWAV> stream_;
+  float root_pitch_ = 0.0f;
 };
 
 }  // namespace barely::godot

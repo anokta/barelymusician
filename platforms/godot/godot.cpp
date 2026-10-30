@@ -20,6 +20,8 @@ void initialize_barelymusiciangodot(ModuleInitializationLevel level) {
   ClassDB::register_class<barely::godot::BarelyEngine>();
   ClassDB::register_class<barely::godot::BarelySliceResource>();
   ClassDB::register_class<barely::godot::BarelyInstrument>();
+  ClassDB::register_class<barely::godot::BarelyInstrument2D>();
+  ClassDB::register_class<barely::godot::BarelyInstrument3D>();
   ClassDB::register_class<barely::godot::BarelyTaskResource>();
   ClassDB::register_class<barely::godot::BarelyPerformer>();
   ClassDB::register_class<barely::godot::BarelyQuantizationResource>();

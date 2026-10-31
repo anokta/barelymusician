@@ -6,6 +6,88 @@ Shader "BarelyMusician/Examples/Unlit/Outline Color" {
   }
 
   SubShader {
+    Tags {
+      "RenderPipeline"="UniversalPipeline"
+      "RenderType"="Opaque"
+      "Queue"="Geometry"
+    }
+
+    Pass {
+      Name "Forward"
+      Tags { "LightMode"="UniversalForward" }
+
+      HLSLPROGRAM
+      #include "UnityCG.cginc"
+      #pragma vertex vert
+      #pragma fragment frag
+
+      CBUFFER_START(UnityPerMaterial)
+      float4 _Color;
+      float4 _OutlineColor;
+      float _OutlineWidth;
+      CBUFFER_END
+
+      struct appdata_t {
+        float4 vertex : POSITION;
+      };
+
+      struct v2f {
+        float4 pos : SV_POSITION;
+      };
+
+      v2f vert(appdata_t v) {
+        v2f o;
+        o.pos = UnityObjectToClipPos(v.vertex);
+        return o;
+      }
+
+      half4 frag(v2f i) : SV_Target {
+        return _Color;
+      }
+      ENDHLSL
+    }
+
+    Pass {
+      Name "Outline"
+      Tags { "LightMode"="SRPDefaultUnlit" }
+      Cull Front
+      ZWrite On
+
+      HLSLPROGRAM
+      #include "UnityCG.cginc"
+      #pragma vertex vert
+      #pragma fragment frag
+
+      CBUFFER_START(UnityPerMaterial)
+      float4 _Color;
+      float4 _OutlineColor;
+      float _OutlineWidth;
+      CBUFFER_END
+
+      struct appdata_t {
+        float4 vertex : POSITION;
+        float3 normal : NORMAL;
+      };
+
+      struct v2f {
+        float4 pos : SV_POSITION;
+      };
+
+      v2f vert(appdata_t v) {
+        v2f o;
+        v.vertex.xyz += normalize(v.normal) * _OutlineWidth * 0.01;
+        o.pos = UnityObjectToClipPos(v.vertex);
+        return o;
+      }
+
+      half4 frag(v2f i) : SV_Target {
+        return _OutlineColor;
+      }
+      ENDHLSL
+    }
+  }
+
+  SubShader {
     Tags { "RenderType"="Opaque" }
 
     Lighting Off

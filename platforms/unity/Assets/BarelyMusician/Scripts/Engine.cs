@@ -775,6 +775,7 @@ namespace Barely {
             return;
           }
           BarelyEngine_SetSpeed(_handle, _speed);
+          BarelyEngine_SetControl(_handle, EngineControlType.GAIN, _gain);
           BarelyEngine_SetControl(_handle, EngineControlType.COMP_MIX, _compMix);
           BarelyEngine_SetControl(_handle, EngineControlType.COMP_THRESHOLD, _compThreshold);
           BarelyEngine_SetControl(_handle, EngineControlType.COMP_ATTACK, _compAttack);

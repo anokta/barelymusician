@@ -110,6 +110,7 @@ void BM_BarelyEngine_ProcessMultipleInstruments(State& state) {
 BENCHMARK(BM_BarelyEngine_ProcessMultipleInstruments<5>);
 BENCHMARK(BM_BarelyEngine_ProcessMultipleInstruments<20>);
 BENCHMARK(BM_BarelyEngine_ProcessMultipleInstruments<50>);
+BENCHMARK(BM_BarelyEngine_ProcessMultipleInstruments<100>);
 
 void BM_BarelyInstrument_PlaySingleNoteWithLoopingSample(State& state) {
   constexpr std::array<float, 5> kSamples = {-0.5f, -0.25f, 0.0f, 0.25f, 1.0f};
@@ -132,37 +133,35 @@ void BM_BarelyInstrument_PlaySingleNoteWithLoopingSample(State& state) {
 }
 BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithLoopingSample);
 
-template <float kOscShape>
-void BM_BarelyInstrument_PlaySingleNoteWithOsc(State& state) {
+void BM_BarelyInstrument_PlaySingleNoteWithNoise(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kCrossfade);
-  instrument.SetControl(InstrumentControlType::kOscShape, 0.0f);
-  instrument.SetControl(InstrumentControlType::kFilterCutoff, 0.5f);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
+  instrument.SetControl(InstrumentControlType::kOscNoiseMix, 1.0f);
   instrument.SetNoteOn(0.0);
 
   std::array<float, kChannelCount * kFrameCount> output_samples;
-  engine.Process(output_samples.data(), kChannelCount, kFrameCount, 0.0);  // start voices
+  engine.Process(output_samples.data(), kChannelCount, kFrameCount, 0.0);
 
   for (const auto _ : state) {  // NOLINT(clang-analyzer-deadcode.DeadStores)
     engine.Process(output_samples.data(), kChannelCount, kFrameCount, 0.0);
   }
 }
-BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<0.0f>);
-BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithOsc<1.0f>);
+BENCHMARK(BM_BarelyInstrument_PlaySingleNoteWithNoise);
 
-template <float kOscShape>
+template <int kVoiceCount, float kOscShape>
 void BM_BarelyInstrument_PlayMultipleNotesWithOsc(State& state) {
   Engine engine(kSampleRate);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kOscMode, OscMode::kCrossfade);
+  instrument.SetControl(InstrumentControlType::kOscMix, 1.0f);
   instrument.SetControl(InstrumentControlType::kOscShape, kOscShape);
   instrument.SetControl(InstrumentControlType::kFilterCutoff, 0.5f);
-  const int voice_count =
-      static_cast<int>(kInstrumentControlDefaults[BarelyInstrumentControlType_kVoiceCount]);
-  for (int i = 0; i < voice_count; ++i) {
+  instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
+  for (int i = 0; i < kVoiceCount; ++i) {
     instrument.SetNoteOn(static_cast<float>(i));
   }
 
@@ -173,8 +172,12 @@ void BM_BarelyInstrument_PlayMultipleNotesWithOsc(State& state) {
     engine.Process(output_samples.data(), kChannelCount, kFrameCount, 0.0);
   }
 }
-BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<0.0f>);
-BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<1.0f>);
+BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<1, 0.0f>);
+BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<1, 1.0f>);
+BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<8, 0.0f>);
+BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<8, 1.0f>);
+BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<16, 0.0f>);
+BENCHMARK(BM_BarelyInstrument_PlayMultipleNotesWithOsc<16, 1.0f>);
 
 void BM_BarelyInstrument_SetMultipleControls(State& state) {
   Engine engine(kSampleRate);

@@ -3,9 +3,8 @@
 
 #include <algorithm>
 #include <array>
-#include <bit>
-#include <cassert>
 #include <cmath>
+#include <cstdint>
 
 #include "core/arena.h"
 #include "core/constants.h"
@@ -38,28 +37,14 @@ class Reverb {
  public:
   Reverb(Arena& arena, float sample_rate) noexcept {
     const float sample_rate_scale = sample_rate / kTuningSampleRate;
-    const uint32_t max_delay_frame_count = std::bit_ceil(static_cast<uint32_t>(
-        GetScaledTuning(kCombFilterTunings[kCombFilterCount - 1], 1, sample_rate_scale)));
     for (int channel = 0; channel < kStereoChannelCount; ++channel) {
       for (int i = 0; i < kCombFilterCount; ++i) {
-        comb_filters_[channel][i].Init(arena, max_delay_frame_count);
+        comb_filters_[channel][i].Init(
+            arena, GetScaledTuning(kCombFilterTunings[i], channel, sample_rate_scale));
       }
       for (int i = 0; i < kAllPassFilterCount; ++i) {
-        all_pass_filters_[channel][i].Init(arena, max_delay_frame_count);
-      }
-    }
-    if (arena.is_null()) {
-      return;
-    }
-
-    for (int channel = 0; channel < kStereoChannelCount; ++channel) {
-      for (int i = 0; i < kCombFilterCount; ++i) {
-        comb_filters_[channel][i].SetFrameCount(
-            GetScaledTuning(kCombFilterTunings[i], channel, sample_rate_scale));
-      }
-      for (int i = 0; i < kAllPassFilterCount; ++i) {
-        all_pass_filters_[channel][i].SetFrameCount(
-            GetScaledTuning(kAllPassFilterTunings[i], channel, sample_rate_scale));
+        all_pass_filters_[channel][i].Init(
+            arena, GetScaledTuning(kAllPassFilterTunings[i], channel, sample_rate_scale));
       }
     }
   }
@@ -112,17 +97,19 @@ class Reverb {
   static constexpr float kStereoInputGain = 0.0075f;
   static constexpr int kStereoSpread = 23;
 
-  [[nodiscard]] static int GetScaledTuning(int base_tuning, int channel,
-                                           float sample_rate_scale) noexcept {
-    return std::max(static_cast<int>(static_cast<float>((base_tuning + channel * kStereoSpread)) *
-                                     sample_rate_scale),
-                    1);
+  [[nodiscard]] static uint32_t GetScaledTuning(int base_tuning, int channel,
+                                                float sample_rate_scale) noexcept {
+    return std::max(
+        static_cast<uint32_t>(static_cast<float>((base_tuning + channel * kStereoSpread)) *
+                              sample_rate_scale),
+        1u);
   }
 
   class CombFilter {
    public:
-    void Init(Arena& arena, uint32_t max_delay_frame_count) noexcept {
-      delay_samples_ = arena.AllocArray<float>(max_delay_frame_count);
+    void Init(Arena& arena, uint32_t frame_count) noexcept {
+      delay_samples_ = arena.AllocArray<float>(frame_count);
+      frame_count_ = frame_count;
     }
 
     [[nodiscard]] float Process(float input_sample, float feedback, float damping_ratio) noexcept {
@@ -135,19 +122,18 @@ class Reverb {
       return output_sample;
     }
 
-    void SetFrameCount(int frame_count) noexcept { frame_count_ = frame_count; }
-
    private:
     float* delay_samples_ = nullptr;
     float damped_sample_ = 0.0f;
-    int write_frame_ = 0;
-    int frame_count_ = 1;
+    uint32_t write_frame_ = 0;
+    uint32_t frame_count_ = 1;
   };
 
   class AllPassFilter {
    public:
-    void Init(Arena& arena, uint32_t max_delay_frame_count) noexcept {
-      delay_samples_ = arena.AllocArray<float>(max_delay_frame_count);
+    void Init(Arena& arena, uint32_t frame_count) noexcept {
+      delay_samples_ = arena.AllocArray<float>(frame_count);
+      frame_count_ = frame_count;
     }
 
     [[nodiscard]] float Process(float input_sample) noexcept {
@@ -160,12 +146,10 @@ class Reverb {
       return output_sample;
     }
 
-    void SetFrameCount(int frame_count) noexcept { frame_count_ = frame_count; }
-
    private:
     float* delay_samples_ = nullptr;
-    int write_frame_ = 0;
-    int frame_count_ = 1;
+    uint32_t write_frame_ = 0;
+    uint32_t frame_count_ = 1;
   };
 
   std::array<std::array<CombFilter, kCombFilterCount>, kStereoChannelCount> comb_filters_ = {};

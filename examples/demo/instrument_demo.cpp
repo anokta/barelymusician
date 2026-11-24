@@ -36,6 +36,8 @@ constexpr int kFrameCount = 256;
 constexpr float kDelayTime = 0.5f;
 constexpr float kDelayFeedback = 0.2f;
 constexpr float kDelayLpfCutoff = 0.2f;
+constexpr float kReverbDamping = 0.25f;
+constexpr float kReverbRoomSize = 0.65f;
 
 // Instrument settings.
 constexpr float kGain = 1.0f;
@@ -90,6 +92,8 @@ int main() {
   engine.SetControl(EngineControlType::kDelayTime, kDelayTime);
   engine.SetControl(EngineControlType::kDelayFeedback, kDelayFeedback);
   engine.SetControl(EngineControlType::kDelayLpfCutoff, kDelayLpfCutoff);
+  engine.SetControl(EngineControlType::kReverbDamping, kReverbDamping);
+  engine.SetControl(EngineControlType::kReverbRoomSize, kReverbRoomSize);
 
   auto instrument = engine.CreateInstrument();
   instrument.SetControl(InstrumentControlType::kGain, kGain);
@@ -100,6 +104,7 @@ int main() {
   instrument.SetControl(InstrumentControlType::kRelease, kRelease);
   instrument.SetControl(InstrumentControlType::kVoiceCount, kVoiceCount);
   instrument.SetControl(InstrumentControlType::kDelaySend, kDelaySend);
+  instrument.SetControl(InstrumentControlType::kReverbSend, kReverbSend);
   instrument.SetSampleData(GetSampleData(kSamplePath));
 
   // Audio process callback.
